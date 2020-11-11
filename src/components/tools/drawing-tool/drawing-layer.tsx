@@ -676,8 +676,21 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     this.disposers = [];
 
     this.disposers.push(reaction(
-        () => this.getContent().metadata.selectedButton,
-        selectedButton => this.syncCurrentTool(selectedButton)
+      () => this.getContent().metadata.selectedButton,
+      selectedButton => this.syncCurrentTool(selectedButton)
+    ));
+
+    this.disposers.push(reaction(
+      () => this.getContent().metadata.selection.toJS(),
+      selectedIds => {
+        const selectedObjects = selectedIds.map(id => this.objects[id]).filter(obj => !!obj) as DrawingObject[];
+        this.setState({ selectedObjects });
+      }
+    ));
+
+    this.disposers.push(reaction(
+      () => this.getContent().toolbarSettings,
+      settings => this.setCurrentToolSettings(settings)
     ));
 
     this.disposers.push(autorun(() => {
@@ -691,18 +704,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     this._isMounted = false;
   }
 
-  public componentDidUpdate(prevProps: DrawingLayerViewProps) {
-    const drawingContent = this.props.model.content as DrawingContentModelType;
-
-    const newSettings = this.toolbarSettings(drawingContent);
-    const prevSettings = this.state.toolbarSettings;
-    if (JSON.stringify(newSettings) !== JSON.stringify(prevSettings)) {
-      this.setCurrentToolSettings(newSettings);
-    }
-  }
-
   public syncCurrentTool(selectedButton: string) {
-    const settings = this.toolbarSettings(this.getContent());
+    const settings = this.getContent().toolbarSettings;
     switch (selectedButton) {
       case "select":
         this.setCurrentTool(this.tools.selection);
@@ -761,10 +764,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   }
 
   public setCurrentToolSettings(settings: ToolbarSettings) {
-    if (this.currentTool) {
-      this.currentTool.setSettings(settings);
-      this.setState({ toolbarSettings: settings });
-    }
+    this.currentTool?.setSettings(settings);
   }
 
   public getCurrentStamp() {
@@ -1202,10 +1202,5 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       this.actionsCount = currentChangesLength;
       this.forceUpdate();
     }
-  }
-
-  private toolbarSettings(drawingContent: DrawingContentModelType): ToolbarSettings {
-    const {stroke, fill, strokeDashArray, strokeWidth} = drawingContent;
-    return {stroke, fill, strokeDashArray, strokeWidth};
   }
 }

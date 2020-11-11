@@ -42,5 +42,6 @@ export function getToolbarLocation({
                         Math.min(tileTopOffset + toolBottom + (toolbarTopOffset || 0), maxToolbarTop),
                         minToolbarTop)
                     : undefined;
-  return { left: toolbarLeft, top: toolbarTop };
+  const spaceBelow = toolbarTop ? maxToolbarTop - toolbarTop : undefined;
+  return { left: toolbarLeft, top: toolbarTop, spaceBelow };
 }

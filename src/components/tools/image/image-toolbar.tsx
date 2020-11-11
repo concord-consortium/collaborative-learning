@@ -3,6 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { Tooltip } from "react-tippy";
 import UploadButtonSvg from "../../../assets/icons/upload-image/upload-image-icon.svg";
+import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
 import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
 
 import "react-tippy/dist/tippy.css";
@@ -25,10 +26,12 @@ export const ImageUploadButton: React.FC<IImageUploadButtonProps> = ({ tooltipOf
       onUploadImageFile?.(files[0]);
     }
   };
+  const tooltipOptions = useTooltipOptions({
+                          distance: tooltipOffset?.y || 0,
+                          offset: tooltipOffset?.x || 0
+                        });
   return (
-    <Tooltip title="Upload image" size="small"
-              position="bottom" distance={tooltipOffset?.y || 0} offset={tooltipOffset?.x || 0}
-              animation="fade" animateFill={false} >
+    <Tooltip title="Upload image" {...tooltipOptions}>
       <div className="toolbar-button image-upload">
         <UploadButtonSvg />
         <input
