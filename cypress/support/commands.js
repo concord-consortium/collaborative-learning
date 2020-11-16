@@ -101,7 +101,7 @@ Cypress.Commands.add("deleteWorkspaces",(baseUrl,queryParams)=>{
     dashboard.switchView("Workspace");
     cy.wait(2000);
     rightNav.openRightNavTab("my-work");
-    rightNav.openSection("my-work","workspaces");
+    cy.openSection("my-work","workspaces");
     cy.wait(2000);
     rightNav.getAllSectionCanvasItems("my-work","workspaces").then((document_list)=>{
         let listLength = document_list.length;
@@ -114,4 +114,21 @@ Cypress.Commands.add("deleteWorkspaces",(baseUrl,queryParams)=>{
         }
 
     });
+});
+Cypress.Commands.add("openTab", (tab) => {
+  cy.get('.nav-tab-buttons .tab-'+tab).click();
+} );
+Cypress.Commands.add("openSubTab", (tab, subTab) => {
+  cy.get('.doc-tab.'+tab+'.'+subTab).click();
+} );
+Cypress.Commands.add("openSection", (tab, section) => {
+  cy.get('.doc-tab.'+tab+'.'+section).click();
+});
+Cypress.Commands.add("openDocumentWithTitle", (tab, section, title) => {
+  cy.openSection(tab,section);
+  cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer').contains(title).parent().parent().siblings('.scaled-list-item-container').click({force:true});
+  cy.get('.edit-button').click();
+});
+Cypress.Commands.add('closeTabs', () => {
+  cy.get('.close-button').click();
 });
