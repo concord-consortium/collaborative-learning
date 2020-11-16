@@ -1,8 +1,107 @@
+@import "../../vars.sass";
 @import "../../../models/tools/table-links";
+
+$table-padding: 10px;
+$row-height: 34px;
+$index-column-width: 34px;
+$platform-scrollbar-width: 16px;
+$header-color: $workspace-teal-light-5;
+$border-style: 1px solid $charcoal-light-1;
+$border-radius: 3px;
 
 .table-tool {
   position: relative;
   height: 100%;
+  padding: $table-padding;
+
+  .table-grid-container {
+    position: relative;
+    height: 100%;
+
+    .table-title {
+      position: absolute;
+      left: $index-column-width - 1px;
+      max-width: calc(100% - #{$index-column-width} + #{$table-padding});
+      height: $row-height;
+      background-color: $workspace-teal-light-7;
+      border-left: $border-style;
+      border-top: $border-style;
+      border-right: $border-style;
+      border-radius: $border-radius $border-radius 0 0;
+      font-weight: bold;
+      padding: 8px;
+    }
+  }
+
+  .rdg {
+    --border-color: #{$charcoal-light-1};
+    --header-background-color: #{$workspace-teal-light-7};
+    --header-selected-background-color: #{$highlight-blue-50};
+    --row-selected-background-color: #{$highlight-blue-25};
+
+    position: absolute;
+    top: $row-height;
+    width: calc(var(--row-width) + #{$platform-scrollbar-width});
+    max-width: calc(100% + #{$table-padding});
+    height: calc(100% - #{$row-height});
+    border: none;
+    overflow: auto !important;
+
+    .rdg-header-row {
+      .index-column-header {
+        min-width: $index-column-width;
+        padding: 0;
+        border-left: $border-style;
+        border-top-left-radius: $border-radius;
+        .show-hide-row-labels-button {
+          width: $index-column-width;
+          height: $row-height;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          .show-hide-row-labels-icon {
+            opacity: 35%;
+          }
+          &:hover {
+            .show-hide-row-labels-icon {
+              opacity: 100%;
+            };
+          }
+        }
+      }
+      .rdg-cell {
+        border-top: $border-style;
+      }
+    }
+    .rdg-row {
+      &.rdg-row-selected {
+        background-color: var(--row-selected-background-color);
+        .index-column {
+          background-color: var(--header-selected-background-color);
+        }
+      }
+      .index-column {
+        border-left: $border-style;
+      }
+    }
+    .index-column {
+      width: $index-column-width;
+      min-width: $index-column-width;
+      padding: 0;
+      background-color: var(--header-background-color);
+      font-weight: bold;
+      font-style: italic;
+      .index-cell-contents {
+        width: 100%;
+        height: 100%;
+      }
+    }
+    .rdg-cell {
+      input {
+        text-align: center;
+      }
+    }
+  }
 }
 
 // .link-color-0 > .ag-theme-fresh .ag-row-selected

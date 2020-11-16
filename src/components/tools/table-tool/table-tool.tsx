@@ -1,27 +1,54 @@
-import React from "react";
-// import { DataSet } from "../../../models/data/data-set";
-// import { TableContentModelType } from "../../../models/tools/table/table-content";
+import React, { useRef, useState } from "react";
+import ReactDataGrid from "react-data-grid";
+import { DataSet } from "../../../models/data/data-set";
+import { TableContentModelType } from "../../../models/tools/table/table-content";
 import { IToolTileProps } from "../tool-tile";
+import { useDataSet } from "./use-data-set";
 
+import "react-data-grid/dist/react-data-grid.css";
 import "./table-tool.scss";
 
-// const createDataTable = () => {
-//   const dataSet = DataSet.create();
-//   dataSet.setName("Alan's Pledge Plan");
-//   dataSet.addAttributeWithID({ id: "attr-distance", name: "Distance" });
-//   dataSet.addAttributeWithID({ id: "attr-money", name: "Money Earned" });
-//   dataSet.addCanonicalCasesWithIDs([
-//     { __id__: "case-1", "attr-distance": 1, "attr-money": 3 }
-//   ]);
-//   return dataSet;
-// };
-// const kDebugDataSet = createDataTable();
+const createDebugDataTable = () => {
+  const dataSet = DataSet.create();
+  dataSet.setName("Alan's Pledge Plan");
+  dataSet.addAttributeWithID({ id: "attr-distance", name: "Distance" });
+  dataSet.addAttributeWithID({ id: "attr-money", name: "Money Earned" });
+  dataSet.addAttributeWithID({ id: "attr-y2", name: "y2" });
+  dataSet.addAttributeWithID({ id: "attr-result", name: "result" });
+  dataSet.addCanonicalCasesWithIDs([
+    { __id__: "case-1", "attr-distance": 1, "attr-money": 3, "attr-y2": 0.33, "attr-result": "true" },
+    { __id__: "case-2", "attr-distance": 2, "attr-money": 6.5, "attr-y2": 0.31, "attr-result": "false" },
+    { __id__: "case-3", "attr-distance": 3, "attr-money": 8, "attr-y2": 0.38,
+              "attr-result": "maybe" }
+  ]);
+  return dataSet;
+};
+const kDebugDataSet = createDebugDataTable();
+
+const useContentDataSet = (content: TableContentModelType) => {
+  const tileDataSet = useRef(DataSet.create());
+  const isInitialized = useRef(false);
+  if (!isInitialized.current) {
+    content.applyChangesToDataSet(tileDataSet.current);
+    isInitialized.current = true;
+  }
+  return tileDataSet;
+};
 
 const TableToolComponent: React.FC<IToolTileProps> = ({ model }) => {
-  // const content = model.content as TableContentModelType;
-  // const dataSet = useRef(kDebugDataSet);
+  const content = model.content as TableContentModelType;
+  const tileDataSet = useContentDataSet(content);
+  // For development/debugging purposes, apply fixture data to empty tables
+  const contentChanges = content.changes.length;
+  const dataSet = useRef(contentChanges > 2 ? tileDataSet.current : kDebugDataSet);
+  const [showRowLabels, setShowRowLabels] = useState(false);
+  const { name, titleWidth, ...dataGridProps } = useDataSet(dataSet.current, showRowLabels, setShowRowLabels);
   return (
     <div className="table-tool">
+      <div className="table-grid-container">
+        <div className="table-title" style={{ width: titleWidth }}>{name || "Table Title"}</div>
+        <ReactDataGrid {...dataGridProps} />
+      </div>
     </div>
   );
 };
