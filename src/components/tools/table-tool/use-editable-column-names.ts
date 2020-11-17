@@ -2,13 +2,14 @@ import { IGridContext, kIndexColumnKey, TColumn } from "./grid-types";
 
 interface IUseEditableColumnNames {
   gridContext: IGridContext;
+  readOnly?: boolean;
   columns: TColumn[];
   columnEditingName?: string;
   setColumnEditingName: (column?: TColumn) => void;
   setColumnName: (column: TColumn, name: string) => void;
 }
 export const useEditableColumnNames = ({
-  gridContext, columns, columnEditingName, setColumnEditingName, setColumnName
+  gridContext, readOnly, columns, columnEditingName, setColumnEditingName, setColumnName
 }: IUseEditableColumnNames) => {
 
   columns.forEach((column, i) => {
@@ -17,7 +18,7 @@ export const useEditableColumnNames = ({
       isEditing: column.key === columnEditingName,
       onBeginHeaderCellEdit: (() => {
         gridContext.onClearSelection();
-        setColumnEditingName(column);
+        !readOnly && setColumnEditingName(column);
       }) as any,
       onHeaderCellEditKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => {
         switch (e.key) {
@@ -25,7 +26,7 @@ export const useEditableColumnNames = ({
             const nextColumnToEdit = !e.shiftKey
                     ? (i < columns.length - 1 ? columns[i + 1] : undefined)
                     : (i > 1 ? columns[i - 1] : undefined);
-            nextColumnToEdit &&
+            !readOnly && nextColumnToEdit &&
               setTimeout(() => setColumnEditingName(nextColumnToEdit));
             break;
           }
@@ -34,7 +35,7 @@ export const useEditableColumnNames = ({
         }
       },
       onEndHeaderCellEdit: (value?: string) => {
-        (value != null) && setColumnName(column, value);
+        !readOnly && (value != null) && setColumnName(column, value);
         setColumnEditingName();
       }
     };

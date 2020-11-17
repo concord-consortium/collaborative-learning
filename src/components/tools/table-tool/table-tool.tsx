@@ -36,7 +36,7 @@ const useContentDataSet = (content: TableContentModelType) => {
   return tileDataSet;
 };
 
-const TableToolComponent: React.FC<IToolTileProps> = ({ model }) => {
+const TableToolComponent: React.FC<IToolTileProps> = ({ model, readOnly }) => {
   const content = model.content as TableContentModelType;
   const tileDataSet = useContentDataSet(content);
   // For development/debugging purposes, apply fixture data to empty tables
@@ -45,11 +45,11 @@ const TableToolComponent: React.FC<IToolTileProps> = ({ model }) => {
   const [showRowLabels, setShowRowLabels] = useState(false);
   const {
     tableTitle, setTableTitle, titleWidth, onBeginTitleEdit, onEndTitleEdit, ...dataGridProps
-  } = useDataSet(dataSet.current, showRowLabels, setShowRowLabels);
+  } = useDataSet({ dataSet: dataSet.current, readOnly: !!readOnly, showRowLabels, setShowRowLabels });
   return (
     <div className="table-tool">
       <div className="table-grid-container">
-        <EditableTableTitle className="table-title" titleWidth={titleWidth}
+        <EditableTableTitle className="table-title" titleWidth={titleWidth} readOnly={readOnly}
           title={tableTitle || "Table Title"} setTitle={setTableTitle}
           onBeginEdit={onBeginTitleEdit} onEndEdit={onEndTitleEdit} />
         <ReactDataGrid {...dataGridProps} />

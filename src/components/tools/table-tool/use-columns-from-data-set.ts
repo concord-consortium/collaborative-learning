@@ -14,13 +14,14 @@ function estimateColumnWidthFromName(name: string) {
 interface IUseColumnsFromDataSet {
   gridContext: IGridContext;
   dataSet: IDataSet;
+  readOnly?: boolean;
   columnChanges: number;
   showRowLabels: boolean;
   setShowRowLabels: (show: boolean) => void;
   setColumnName: (column: TColumn, columnName: string) => void;
 }
 export const useColumnsFromDataSet = ({
-  gridContext, dataSet, columnChanges, showRowLabels, setShowRowLabels, setColumnName
+  gridContext, dataSet, readOnly, columnChanges, showRowLabels, setShowRowLabels, setColumnName
 }: IUseColumnsFromDataSet) => {
   const { attributes } = dataSet;
   const { RowLabelsButton, RowLabelsFormatter } = useRowLabelsButton(showRowLabels, setShowRowLabels);
@@ -38,11 +39,11 @@ export const useColumnsFromDataSet = ({
       key: attr.id,
       width: columnWidths.current[attr.id] ||
               (columnWidths.current[attr.id] = estimateColumnWidthFromName(attr.name)),
-      resizable: true,
+      resizable: !readOnly,
       headerRenderer: EditableHeaderCell,
-      editor: TextEditor,
+      editor: !readOnly ? TextEditor : undefined,
       editorOptions: {
-        editOnClick: true
+        editOnClick: !readOnly
       }
     }));
     cols.unshift({
@@ -60,10 +61,11 @@ export const useColumnsFromDataSet = ({
     });
     columnChanges;  // eslint-disable-line no-unused-expressions
     return cols;
-  }, [RowLabelsButton, RowLabelsFormatter, attributes, columnChanges, columnEditingName]);
+  }, [RowLabelsButton, RowLabelsFormatter, attributes, columnChanges, columnEditingName, readOnly]);
 
   useEditableColumnNames({
-    gridContext, columns, columnEditingName, setColumnEditingName: handleSetColumnEditingName, setColumnName });
+    gridContext, readOnly, columns, columnEditingName,
+    setColumnEditingName: handleSetColumnEditingName, setColumnName });
 
   const onColumnResize = useCallback((idx: number, width: number) => {
     columnWidths.current[columns[idx].key] = width;

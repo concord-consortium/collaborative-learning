@@ -5,7 +5,13 @@ import { IGridContext, kRowHeight, TColumn, TRow } from "./grid-types";
 import { useColumnsFromDataSet } from "./use-columns-from-data-set";
 import { useRowsFromDataSet } from "./use-rows-from-data-set";
 
-export const useDataSet = (dataSet: IDataSet, showRowLabels: boolean, setShowRowLabels: (show: boolean) => void) => {
+interface IUseDataSet {
+  dataSet: IDataSet;
+  readOnly: boolean;
+  showRowLabels: boolean;
+  setShowRowLabels: (show: boolean) => void;
+}
+export const useDataSet = ({dataSet, readOnly, showRowLabels, setShowRowLabels}: IUseDataSet) => {
   const gridRef = useRef<DataGridHandle>(null);
   const [selectedRows, setSelectedRows] = useState(() => new Set<React.Key>());
   const selectOneRow = useCallback((row: string) => setSelectedRows(new Set([row])), []);
@@ -28,16 +34,17 @@ export const useDataSet = (dataSet: IDataSet, showRowLabels: boolean, setShowRow
   const incRowChanges = () => setRowChanges(state => ++state);
   const onBeginTitleEdit = () => {
     gridContext.onClearSelection();
+    return !readOnly;
   };
   const onEndTitleEdit = (title?: string) => {
-    (title != null) && dataSet.setName(title);
+    !readOnly && (title != null) && dataSet.setName(title);
   };
   const setColumnName = (column: TColumn, columnName: string) => {
-    dataSet.setAttributeName(column.key, columnName);
+    !readOnly && dataSet.setAttributeName(column.key, columnName);
     incColumnChanges();
   };
   const { columns, onColumnResize } = useColumnsFromDataSet({
-                                        gridContext, dataSet, columnChanges, showRowLabels, setShowRowLabels,
+                                        gridContext, dataSet, readOnly, columnChanges, showRowLabels, setShowRowLabels,
                                         setColumnName });
   const rows = useRowsFromDataSet(dataSet, rowChanges, gridContext);
   const rowKeyGetter = (row: TRow) => row.__id__;
