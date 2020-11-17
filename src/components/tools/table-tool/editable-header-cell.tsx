@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { TColumn, THeaderRendererProps } from "./grid-types";
+import { HeaderCellInput } from "./header-cell-input";
 
 import "./editable-header-cell.scss";
 
@@ -41,33 +42,6 @@ export const EditableHeaderCell: React.FC<IProps> = ({ column: _column }) => {
         ? <HeaderCellInput style={style} value={nameValue}
             onKeyDown={handleKeyDown} onChange={handleChange} onClose={handleClose} />
         : name}
-    </div>
-  );
-};
-
-function autoFocusAndSelect(input: HTMLInputElement | null) {
-  input?.focus();
-  input?.select();
-}
-
-interface IHeaderCellInputProps {
-  style?: React.CSSProperties;
-  value: string;
-  onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
-  onChange: (value: string) => void;
-  onClose: (accept: boolean) => void;
-}
-const HeaderCellInput: React.FC<IHeaderCellInputProps> = ({ style, value, onKeyDown, onChange, onClose }) => {
-  return (
-    <div className="rdg-editor-container clue-editor-container" style={style}>
-      <input
-        className="rdg-text-editor"
-        ref={autoFocusAndSelect}
-        value={value}
-        onKeyDown={onKeyDown}
-        onChange={event => onChange(event.target.value)}
-        onBlur={() => onClose(true)}
-      />
     </div>
   );
 };

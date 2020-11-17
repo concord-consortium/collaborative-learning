@@ -8,6 +8,7 @@ export interface IGridContext {
   onSelectOneRow: (row: string) => void;
   onClearRowSelection: () => void;
   onClearCellSelection: () => void;
+  onClearSelection: () => void;
 }
 
 export interface TRow extends Record<string, any> {

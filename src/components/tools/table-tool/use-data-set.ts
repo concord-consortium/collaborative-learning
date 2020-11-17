@@ -15,13 +15,23 @@ export const useDataSet = (dataSet: IDataSet, showRowLabels: boolean, setShowRow
           showRowLabels,
           onSelectOneRow: selectOneRow,
           onClearRowSelection: clearRowSelection,
-          onClearCellSelection: clearCellSelection
+          onClearCellSelection: clearCellSelection,
+          onClearSelection: () => {
+            clearRowSelection();
+            clearCellSelection();
+          }
         };
-  const { name } = dataSet;
+  const [tableTitle, setTableTitle] = useState(dataSet.name);
   const [columnChanges, setColumnChanges] = useState(0);
   const incColumnChanges = () => setColumnChanges(state => ++state);
   const [rowChanges, setRowChanges] = useState(0);
   const incRowChanges = () => setRowChanges(state => ++state);
+  const onBeginTitleEdit = () => {
+    gridContext.onClearSelection();
+  };
+  const onEndTitleEdit = (title?: string) => {
+    (title != null) && dataSet.setName(title);
+  };
   const setColumnName = (column: TColumn, columnName: string) => {
     dataSet.setAttributeName(column.key, columnName);
     incColumnChanges();
@@ -48,6 +58,7 @@ export const useDataSet = (dataSet: IDataSet, showRowLabels: boolean, setShowRow
   }, [onColumnResize]);
   const kMinWidth = 80;
   const titleWidth = columns.reduce((sum, col, i) => sum + (i ? Math.max(+(col.width || kMinWidth), kMinWidth) : 0), 1);
-  return { ref: gridRef, name, titleWidth, columns, rows, rowKeyGetter, rowHeight, headerRowHeight,
-            selectedRows, onColumnResize: handleColumnResize, onRowsChange, onSelectedRowsChange };
+  return { ref: gridRef, tableTitle, setTableTitle, titleWidth, onBeginTitleEdit, onEndTitleEdit,
+            columns, rows, rowKeyGetter, rowHeight, headerRowHeight, selectedRows,
+            onColumnResize: handleColumnResize, onRowsChange, onSelectedRowsChange };
 };

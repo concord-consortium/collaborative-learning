@@ -1,3 +1,18 @@
+@import "../../vars.sass";
+
 .editable-header-cell {
   height: 100%;
+
+  &.table-title-editing {
+    padding: 0 !important;
+
+    .rdg-text-editor:focus {
+      border-color: $highlight-blue;
+      outline: 0
+    }
+
+    input {
+      text-align: center;
+    }
+  }
 }

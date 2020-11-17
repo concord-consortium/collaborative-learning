@@ -3,6 +3,7 @@ import ReactDataGrid from "react-data-grid";
 import { DataSet } from "../../../models/data/data-set";
 import { TableContentModelType } from "../../../models/tools/table/table-content";
 import { IToolTileProps } from "../tool-tile";
+import { EditableTableTitle } from "./editable-table-title";
 import { useDataSet } from "./use-data-set";
 
 import "react-data-grid/dist/react-data-grid.css";
@@ -42,11 +43,15 @@ const TableToolComponent: React.FC<IToolTileProps> = ({ model }) => {
   const contentChanges = content.changes.length;
   const dataSet = useRef(contentChanges > 2 ? tileDataSet.current : kDebugDataSet);
   const [showRowLabels, setShowRowLabels] = useState(false);
-  const { name, titleWidth, ...dataGridProps } = useDataSet(dataSet.current, showRowLabels, setShowRowLabels);
+  const {
+    tableTitle, setTableTitle, titleWidth, onBeginTitleEdit, onEndTitleEdit, ...dataGridProps
+  } = useDataSet(dataSet.current, showRowLabels, setShowRowLabels);
   return (
     <div className="table-tool">
       <div className="table-grid-container">
-        <div className="table-title" style={{ width: titleWidth }}>{name || "Table Title"}</div>
+        <EditableTableTitle className="table-title" titleWidth={titleWidth}
+          title={tableTitle || "Table Title"} setTitle={setTableTitle}
+          onBeginEdit={onBeginTitleEdit} onEndEdit={onEndTitleEdit} />
         <ReactDataGrid {...dataGridProps} />
       </div>
     </div>

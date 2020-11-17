@@ -16,7 +16,7 @@ export const useEditableColumnNames = ({
       editableName: column.key !== kIndexColumnKey,
       isEditing: column.key === columnEditingName,
       onBeginHeaderCellEdit: (() => {
-        gridContext.onClearCellSelection();
+        gridContext.onClearSelection();
         setColumnEditingName(column);
       }) as any,
       onHeaderCellEditKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => {
