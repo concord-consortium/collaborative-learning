@@ -35,11 +35,11 @@ context('Test the overall workspace', function () {
     });
     it('verify click on Edit button opens document in main workspace', function () {
       cy.get('.edit-button.learning-log').click();
-      cy.get('.primary-workspace [data-test=learning-log-title]').should('contain', "LearningLog: My First Learning Log");
+      cy.get('.primary-workspace [data-test=learning-log-title]').should('contain', "Learning Log: My First Learning Log");
     });
     it('verify close of nav tabs', function () {
       cy.closeTabs();
-      cy.get('.editable-document-content [data-test=canvas]').should('not.be.visible');
+      cy.get('.nav-tab-panel').should('not.have.class', 'shown');
     });
     // TODO: Changes in new document add feature.
     it('will verify canvases do not persist between problems', function () {
