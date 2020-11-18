@@ -7,7 +7,7 @@ import {
 } from "./grid-types";
 import { useControlsColumn } from "./use-controls-column";
 import { useEditableColumnNames } from "./use-editable-column-names";
-import { useRowLabelsButton } from "./use-row-labels-button";
+import { useRowLabelColumn } from "./use-row-label-column";
 
 function estimateColumnWidthFromName(name: string) {
   // values taken from design spec
@@ -31,7 +31,7 @@ export const useColumnsFromDataSet = ({
   setShowRowLabels, setColumnName, onAddColumn, onRemoveRow
 }: IUseColumnsFromDataSet) => {
   const { attributes } = dataSet;
-  const { RowLabelsButton, RowLabelsFormatter } = useRowLabelsButton(inputRowId, showRowLabels, setShowRowLabels);
+  const { RowLabelHeader, RowLabelFormatter } = useRowLabelColumn(inputRowId, showRowLabels, setShowRowLabels);
   const { ControlsHeaderRenderer, ControlsRowFormatter } = useControlsColumn({ readOnly, onAddColumn, onRemoveRow });
   const columnWidths = useRef<Record<string, number>>({});
 
@@ -64,8 +64,8 @@ export const useColumnsFromDataSet = ({
       resizable: false,
       editable: false,
       frozen: true,
-      headerRenderer: RowLabelsButton,
-      formatter: RowLabelsFormatter
+      headerRenderer: RowLabelHeader,
+      formatter: RowLabelFormatter
     });
     if (!readOnly) {
       cols.push({
@@ -84,7 +84,7 @@ export const useColumnsFromDataSet = ({
     }
     columnChanges;  // eslint-disable-line no-unused-expressions
     return cols;
-  }, [ControlsHeaderRenderer, ControlsRowFormatter, RowLabelsButton, RowLabelsFormatter,
+  }, [ControlsHeaderRenderer, ControlsRowFormatter, RowLabelHeader, RowLabelFormatter,
       attributes, columnChanges, columnEditingName, readOnly]);
 
   useEditableColumnNames({

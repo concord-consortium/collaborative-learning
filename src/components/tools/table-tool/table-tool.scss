@@ -27,6 +27,7 @@ $controls-hover-background: #c0dfe7;
       left: $index-column-width - 1px;
       max-width: calc(100% - #{$index-column-width} + #{$table-padding});
       height: $row-height;
+      color: $charcoal-dark-2;
       background-color: $workspace-teal-light-7;
       border-left: $border-style;
       border-top: $border-style;
@@ -38,6 +39,7 @@ $controls-hover-background: #c0dfe7;
   }
 
   .rdg {
+    --color: #{$charcoal-dark-2};
     --border-color: #{$charcoal-light-1};
     --header-background-color: #{$header-color};
     --header-selected-background-color: #{$highlight-blue-50};
@@ -61,16 +63,29 @@ $controls-hover-background: #c0dfe7;
         .show-hide-row-labels-button {
           width: $index-column-width;
           height: $row-height;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          .show-hide-row-labels-icon {
-            opacity: 35%;
+          position: relative;
+          .hide-row-labels-icon, .show-row-labels-icon {
+            position: absolute;
+            left: 4px;
+            top: 4px;
+          }
+          &.shown {
+            .hide-row-labels-icon { opacity: 35% }
+            .show-row-labels-icon { opacity: 0% }
+          }
+          &.hidden {
+            .hide-row-labels-icon { opacity: 0% }
+            .show-row-labels-icon { opacity: 35% }
           }
           &:hover {
-            .show-hide-row-labels-icon {
-              opacity: 100%;
-            };
+            &.shown {
+              .hide-row-labels-icon { opacity: 0% }
+              .show-row-labels-icon { opacity: 100% }
+            }
+            &.hidden {
+              .hide-row-labels-icon { opacity: 100% }
+              .show-row-labels-icon { opacity: 0% }
+            }
           }
         }
       }
