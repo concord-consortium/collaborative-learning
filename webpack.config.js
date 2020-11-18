@@ -69,8 +69,16 @@ module.exports = (env, argv) => {
           loader: 'ts-loader',
           exclude: /node_modules/
         },
+        { // disable svgo optimization for files ending in .nosvgo.svg
+          test: /\.nosvgo\.svg$/i,
+          loader: "@svgr/webpack",
+          options: {
+            svgo: false
+          }
+        },
         {
           test: /\.svg$/i,
+          exclude: /\.nosvgo\.svg$/i,
           oneOf: [
             {
               issuer: /\.[tj]sx?$/i,

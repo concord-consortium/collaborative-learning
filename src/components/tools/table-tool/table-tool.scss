@@ -4,12 +4,14 @@
 $table-padding: 10px;
 $row-height: 34px;
 $index-column-width: 34px;
+$controls-column-width: 36px;
 $platform-scrollbar-width: 16px;
 $header-color: $workspace-teal-light-5;
 $header-input-color: #eef9fb;
 $border-style: 1px solid $charcoal-light-1;
 $border-input-style: 1px solid #dadada;
 $border-radius: 3px;
+$controls-hover-background: #c0dfe7;
 
 .table-tool {
   position: relative;
@@ -78,6 +80,34 @@ $border-radius: 3px;
           background-color: inherit;
         }
       }
+      .controls-column-header {
+        background-color: white;
+        border: none;
+        padding: 0;
+        .add-column-button {
+          width: $controls-column-width;
+          height: $row-height;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          svg {
+            fill: white;
+            stroke: $workspace-teal-light-4;
+          }
+          &:hover {
+            svg {
+              fill: $controls-hover-background;
+              stroke: $workspace-teal-dark-1;
+            }
+          }
+          &:active {
+            svg {
+              fill: $workspace-teal-dark-1;
+              stroke: white;
+            }
+          }
+        }
+      }
     }
     .rdg-row {
       &.rdg-row-selected {
@@ -100,9 +130,41 @@ $border-radius: 3px;
           border-right: $border-input-style;
           border-bottom: $border-input-style;
         }
+        .controls-column {
+          border: none;
+        }
       }
       .index-column {
         border-left: $border-style;
+      }
+      .controls-column {
+        background-color: white;
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        .remove-row-button {
+          width: $controls-column-width;
+          height: $row-height;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          svg {
+            fill: white;
+            stroke: $highlight-blue;
+          }
+          &:hover {
+            svg {
+              fill: $highlight-blue-25;
+              stroke: $highlight-blue;
+            }
+          }
+          &:active {
+            svg {
+              fill: $highlight-blue;
+              stroke: white;
+            }
+          }
+        }
       }
     }
     .index-column {
