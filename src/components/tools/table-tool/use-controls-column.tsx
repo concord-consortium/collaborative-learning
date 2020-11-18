@@ -1,6 +1,8 @@
 import React, { useCallback } from "react";
+import { Tooltip } from "react-tippy";
 import AddColumnSvg from "../../../assets/icons/add/add.nosvgo.svg";
 import RemoveRowSvg from "../../../assets/icons/remove/remove.nosvgo.svg";
+import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
 import { TFormatterProps } from "./grid-types";
 
 interface IUseControlsColumn {
@@ -10,17 +12,24 @@ interface IUseControlsColumn {
 }
 export const useControlsColumn = ({ readOnly, onAddColumn, onRemoveRow }: IUseControlsColumn) => {
 
+  const kTooltipDistance = -35; // required to get tooltip to line up just below the cell
+  const addColumnTooltipOptions = useTooltipOptions({ title: "Add column", distance: kTooltipDistance });
   const ControlsHeaderRenderer: React.FC = useCallback(() => {
     return !readOnly
-            ? <AddColumnButton onAddColumn={onAddColumn} />
+            ? <Tooltip {...addColumnTooltipOptions}>
+                <AddColumnButton onAddColumn={onAddColumn} />
+              </Tooltip>
             : null;
-  }, [onAddColumn, readOnly]);
+  }, [addColumnTooltipOptions, onAddColumn, readOnly]);
 
+  const removeRowTooltipOptions = useTooltipOptions({ title: "Remove row", distance: kTooltipDistance });
   const ControlsRowFormatter: React.FC<TFormatterProps> = useCallback(({ row, isRowSelected }) => {
     return !readOnly && isRowSelected
-            ? <RemoveRowButton rowId={row.__id__} onRemoveRow={onRemoveRow} />
+            ? <Tooltip {...removeRowTooltipOptions}>
+                <RemoveRowButton rowId={row.__id__} onRemoveRow={onRemoveRow} />
+              </Tooltip>
             : null;
-  }, [onRemoveRow, readOnly]);
+  }, [onRemoveRow, readOnly, removeRowTooltipOptions]);
   ControlsRowFormatter.displayName = "ControlsRowFormatter";
 
   return { ControlsHeaderRenderer, ControlsRowFormatter };
