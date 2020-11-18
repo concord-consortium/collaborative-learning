@@ -1,8 +1,8 @@
 import { useCallback, useRef, useState } from "react";
 import { DataGridHandle } from "react-data-grid";
 import { ICase, IDataSet } from "../../../models/data/data-set";
-import { uniqueId } from "../../../utilities/js-utils";
-import { IGridContext, kRowHeight, TColumn, TPosition, TRow } from "./grid-types";
+import { uniqueId, uniqueName } from "../../../utilities/js-utils";
+import { IGridContext, kControlsColumnWidth, kRowHeight, TColumn, TPosition, TRow } from "./grid-types";
 import { useColumnsFromDataSet } from "./use-columns-from-data-set";
 import { useRowsFromDataSet } from "./use-rows-from-data-set";
 
@@ -55,9 +55,20 @@ export const useDataSet = ({
     !readOnly && dataSet.setAttributeName(column.key, columnName);
     incColumnChanges();
   };
+  const onAddColumn = () => {
+    !readOnly && dataSet.addAttributeWithID({
+                          id: uniqueId(),
+                          name: uniqueName("y", (name: string) => !dataSet.attrFromName(name))
+                        });
+    incColumnChanges();
+  };
+  const onRemoveRow = (rowId: string) => {
+    !readOnly && dataSet.removeCases([rowId]);
+    incColumnChanges();
+  };
   const { columns, onColumnResize } = useColumnsFromDataSet({
-                                        gridContext, dataSet, readOnly, inputRowId: inputRowId.current,
-                                        columnChanges, showRowLabels, setShowRowLabels, setColumnName });
+                                        gridContext, dataSet, readOnly, inputRowId: inputRowId.current, columnChanges,
+                                        showRowLabels, setShowRowLabels, setColumnName, onAddColumn, onRemoveRow });
   const { rows, rowKeyGetter, rowClass } = useRowsFromDataSet({
                                             dataSet, readOnly, inputRowId: inputRowId.current,
                                             rowChanges, context: gridContext});
@@ -65,6 +76,9 @@ export const useDataSet = ({
   const headerRowHeight = kRowHeight;
   const onSelectedCellChange = (position: TPosition) => {
     selectedCell.current = position;
+  };
+  const onSelectedRowsChange = (_rows: Set<React.Key>) => {
+    setSelectedRows(_rows);
   };
   const onRowsChange = (_rows: TRow[]) => {
     // for now, assume that all changes are single cell edits
@@ -95,9 +109,14 @@ export const useDataSet = ({
     onColumnResize(idx, width);
     incColumnChanges();
   }, [onColumnResize]);
-  const kMinWidth = 80;
-  const titleWidth = columns.reduce((sum, col, i) => sum + (i ? Math.max(+(col.width || kMinWidth), kMinWidth) : 0), 1);
+  const kDefaultWidth = 80;
+  const columnWidth = (column: TColumn) => {
+    return Math.max(+(column.width || kDefaultWidth), column.maxWidth || kDefaultWidth);
+  };
+  const titleWidth = columns.reduce(
+                              (sum, col, i) => sum + (i ? columnWidth(col) : 0),
+                              1 - kControlsColumnWidth);
   return { ref: gridRef, tableTitle, setTableTitle, titleWidth, onBeginTitleEdit, onEndTitleEdit,
-            columns, rows, rowKeyGetter, rowClass, rowHeight, headerRowHeight, selectedRows, onSelectedCellChange,
-            onColumnResize: handleColumnResize, onRowsChange };
+            columns, rows, rowKeyGetter, rowClass, rowHeight, headerRowHeight, selectedRows,
+            onSelectedRowsChange, onSelectedCellChange, onColumnResize: handleColumnResize, onRowsChange };
 };

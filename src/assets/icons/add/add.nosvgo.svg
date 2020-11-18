@@ -1,0 +1,8 @@
+<!-- apply "fill" to svg or svg.background to set background color -->
+<!-- apply "stroke" to svg or svg.foreground to set foreground color -->
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2">
+    <circle class="background" cx="12" cy="12" r="12" stroke="none"/>
+    <circle class="foreground" cx="12" cy="12" r="9" fill="none"/>
+    <line class="foreground" x1="7" y1="12" x2="17" y2="12"/>
+    <line class="foredground" x1="12" y1="7" x2="12" y2="17"/>
+</svg>
