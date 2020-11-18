@@ -1,18 +1,30 @@
 import { useCallback, useRef, useState } from "react";
 import { DataGridHandle } from "react-data-grid";
-import { IDataSet } from "../../../models/data/data-set";
-import { IGridContext, kRowHeight, TColumn, TRow } from "./grid-types";
+import { ICase, IDataSet } from "../../../models/data/data-set";
+import { uniqueId } from "../../../utilities/js-utils";
+import { IGridContext, kRowHeight, TColumn, TPosition, TRow } from "./grid-types";
 import { useColumnsFromDataSet } from "./use-columns-from-data-set";
 import { useRowsFromDataSet } from "./use-rows-from-data-set";
+
+const optimalTileRowHeight = (rowCount: number) => {
+  const kPadding = 2 * 10;
+  const kBorders = 4;
+  return (rowCount + 2) * kRowHeight + kPadding + kBorders;
+};
 
 interface IUseDataSet {
   dataSet: IDataSet;
   readOnly: boolean;
   showRowLabels: boolean;
   setShowRowLabels: (show: boolean) => void;
+  onRequestRowHeight: (options: { height?: number, deltaHeight?: number }) => void;
 }
-export const useDataSet = ({dataSet, readOnly, showRowLabels, setShowRowLabels}: IUseDataSet) => {
+export const useDataSet = ({
+  dataSet, readOnly, showRowLabels, setShowRowLabels, onRequestRowHeight
+}: IUseDataSet) => {
   const gridRef = useRef<DataGridHandle>(null);
+  const inputRowId = useRef(uniqueId());
+  const selectedCell = useRef<TPosition>();
   const [selectedRows, setSelectedRows] = useState(() => new Set<React.Key>());
   const selectOneRow = useCallback((row: string) => setSelectedRows(new Set([row])), []);
   const clearRowSelection = useCallback(() => setSelectedRows(new Set([])), []);
@@ -44,20 +56,40 @@ export const useDataSet = ({dataSet, readOnly, showRowLabels, setShowRowLabels}:
     incColumnChanges();
   };
   const { columns, onColumnResize } = useColumnsFromDataSet({
-                                        gridContext, dataSet, readOnly, columnChanges, showRowLabels, setShowRowLabels,
-                                        setColumnName });
-  const rows = useRowsFromDataSet(dataSet, rowChanges, gridContext);
-  const rowKeyGetter = (row: TRow) => row.__id__;
+                                        gridContext, dataSet, readOnly, inputRowId: inputRowId.current,
+                                        columnChanges, showRowLabels, setShowRowLabels, setColumnName });
+  const { rows, rowKeyGetter, rowClass } = useRowsFromDataSet({
+                                            dataSet, readOnly, inputRowId: inputRowId.current,
+                                            rowChanges, context: gridContext});
   const rowHeight = kRowHeight;
   const headerRowHeight = kRowHeight;
+  const onSelectedCellChange = (position: TPosition) => {
+    selectedCell.current = position;
+  };
   const onRowsChange = (_rows: TRow[]) => {
-    if (_rows.length) {
-      dataSet.setCanonicalCaseValues(_rows);
+    // for now, assume that all changes are single cell edits
+    const selectedCellRowIndex = selectedCell.current?.rowIdx;
+    const selectedCellColIndex = selectedCell.current?.idx;
+    const updatedRow = (selectedCellRowIndex != null) && (selectedCellRowIndex >= 0)
+                        ? _rows[selectedCellRowIndex] : undefined;
+    const updatedColumn = (selectedCellColIndex != null) && (selectedCellColIndex >= 0)
+                            ? columns[selectedCellColIndex] : undefined;
+    if (updatedRow && updatedColumn) {
+      const updatedCaseValues: ICase[] = [{
+        __id__: updatedRow.__id__,
+        [updatedColumn.key]: updatedRow[updatedColumn.key]
+      }];
+      const inputRowIndex = _rows.findIndex(row => row.__id__ === inputRowId.current);
+      if ((inputRowIndex >= 0) && (selectedCellRowIndex === inputRowIndex)) {
+        dataSet.addCanonicalCasesWithIDs(updatedCaseValues);
+        onRequestRowHeight({ height: optimalTileRowHeight(rows.length + 1) });
+        inputRowId.current = uniqueId();
+      }
+      else {
+        dataSet.setCanonicalCaseValues(updatedCaseValues);
+      }
       incRowChanges();
     }
-  };
-  const onSelectedRowsChange = (_selectedRows: Set<React.Key>) => {
-    setSelectedRows(_selectedRows);
   };
   const handleColumnResize = useCallback((idx: number, width: number) => {
     onColumnResize(idx, width);
@@ -66,6 +98,6 @@ export const useDataSet = ({dataSet, readOnly, showRowLabels, setShowRowLabels}:
   const kMinWidth = 80;
   const titleWidth = columns.reduce((sum, col, i) => sum + (i ? Math.max(+(col.width || kMinWidth), kMinWidth) : 0), 1);
   return { ref: gridRef, tableTitle, setTableTitle, titleWidth, onBeginTitleEdit, onEndTitleEdit,
-            columns, rows, rowKeyGetter, rowHeight, headerRowHeight, selectedRows,
-            onColumnResize: handleColumnResize, onRowsChange, onSelectedRowsChange };
+            columns, rows, rowKeyGetter, rowClass, rowHeight, headerRowHeight, selectedRows, onSelectedCellChange,
+            onColumnResize: handleColumnResize, onRowsChange };
 };
