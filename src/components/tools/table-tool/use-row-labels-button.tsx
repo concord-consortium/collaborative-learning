@@ -3,7 +3,9 @@ import RowLabelsHiddenSvg from "../../../clue/assets/icons/table/row-labels-hidd
 import RowLabelsShownSvg from "../../../clue/assets/icons/table/row-labels-shown-icon.svg";
 import { OnRowSelectionChangeFn, TFormatterProps, TRow } from "./grid-types";
 
-export function useRowLabelsButton(showRowLabels: boolean, setShowRowLabels: (show: boolean) => void) {
+export const useRowLabelsButton = (
+  inputRowId: string, showRowLabels: boolean, setShowRowLabels: (show: boolean) => void) => {
+
   const ShowRowLabelsButton: React.FC = React.memo(() => {
     return (
       <div className="show-hide-row-labels-button" onClick={() => setShowRowLabels(true)}>
@@ -29,6 +31,9 @@ export function useRowLabelsButton(showRowLabels: boolean, setShowRowLabels: (sh
     if ((e.button === 0) && (selected !== isRowSelected)) {
       if (hasModifier) {
         onRowSelectionChange(selected, e.shiftKey);
+      }
+      else if (row.__id__ === inputRowId) {
+        row.__context__.onClearRowSelection();
       }
       else {
         row.__context__.onSelectOneRow(row.__id__);
@@ -63,4 +68,4 @@ export function useRowLabelsButton(showRowLabels: boolean, setShowRowLabels: (sh
           [HiddenFormatter, ShownFormatter, showRowLabels]);
 
   return { RowLabelsButton, RowLabelsFormatter };
-}
+};

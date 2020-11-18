@@ -15,16 +15,17 @@ interface IUseColumnsFromDataSet {
   gridContext: IGridContext;
   dataSet: IDataSet;
   readOnly?: boolean;
+  inputRowId: string;
   columnChanges: number;
   showRowLabels: boolean;
   setShowRowLabels: (show: boolean) => void;
   setColumnName: (column: TColumn, columnName: string) => void;
 }
 export const useColumnsFromDataSet = ({
-  gridContext, dataSet, readOnly, columnChanges, showRowLabels, setShowRowLabels, setColumnName
+  gridContext, dataSet, readOnly, inputRowId, columnChanges, showRowLabels, setShowRowLabels, setColumnName
 }: IUseColumnsFromDataSet) => {
   const { attributes } = dataSet;
-  const { RowLabelsButton, RowLabelsFormatter } = useRowLabelsButton(showRowLabels, setShowRowLabels);
+  const { RowLabelsButton, RowLabelsFormatter } = useRowLabelsButton(inputRowId, showRowLabels, setShowRowLabels);
   const columnWidths = useRef<Record<string, number>>({});
 
   const [columnEditingName, setColumnEditingName] = useState<string>();

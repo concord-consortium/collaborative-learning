@@ -6,7 +6,9 @@ $row-height: 34px;
 $index-column-width: 34px;
 $platform-scrollbar-width: 16px;
 $header-color: $workspace-teal-light-5;
+$header-input-color: #eef9fb;
 $border-style: 1px solid $charcoal-light-1;
+$border-input-style: 1px solid #dadada;
 $border-radius: 3px;
 
 .table-tool {
@@ -35,7 +37,7 @@ $border-radius: 3px;
 
   .rdg {
     --border-color: #{$charcoal-light-1};
-    --header-background-color: #{$workspace-teal-light-7};
+    --header-background-color: #{$header-color};
     --header-selected-background-color: #{$highlight-blue-50};
     --row-selected-background-color: #{$highlight-blue-25};
     --selection-color: #{$highlight-blue};
@@ -82,6 +84,21 @@ $border-radius: 3px;
         background-color: var(--row-selected-background-color);
         .index-column {
           background-color: var(--header-selected-background-color);
+        }
+        &.input-row {
+          .index-column {
+            background-color: $highlight-blue-50-35;
+          }
+        }
+      }
+      &.input-row {
+        .index-column {
+          background-color: $header-input-color;
+          border-left: $border-input-style;
+        }
+        .rdg-cell {
+          border-right: $border-input-style;
+          border-bottom: $border-input-style;
         }
       }
       .index-column {

@@ -36,23 +36,28 @@ const useContentDataSet = (content: TableContentModelType) => {
   return tileDataSet;
 };
 
-const TableToolComponent: React.FC<IToolTileProps> = ({ model, readOnly }) => {
+const TableToolComponent: React.FC<IToolTileProps> = ({ model, readOnly, onRequestRowHeight }) => {
   const content = model.content as TableContentModelType;
   const tileDataSet = useContentDataSet(content);
   // For development/debugging purposes, apply fixture data to empty tables
   const contentChanges = content.changes.length;
   const dataSet = useRef(contentChanges > 2 ? tileDataSet.current : kDebugDataSet);
   const [showRowLabels, setShowRowLabels] = useState(false);
+  const handleRequestRowHeight = (options: { height?: number, delta?: number }) => {
+    onRequestRowHeight(model.id, options.height, options.delta);
+  };
   const {
     tableTitle, setTableTitle, titleWidth, onBeginTitleEdit, onEndTitleEdit, ...dataGridProps
-  } = useDataSet({ dataSet: dataSet.current, readOnly: !!readOnly, showRowLabels, setShowRowLabels });
+  } = useDataSet({
+        dataSet: dataSet.current, readOnly: !!readOnly,
+        showRowLabels, setShowRowLabels, onRequestRowHeight: handleRequestRowHeight });
   return (
     <div className="table-tool">
       <div className="table-grid-container">
         <EditableTableTitle className="table-title" titleWidth={titleWidth} readOnly={readOnly}
           title={tableTitle || "Table Title"} setTitle={setTableTitle}
           onBeginEdit={onBeginTitleEdit} onEndEdit={onEndTitleEdit} />
-        <ReactDataGrid {...dataGridProps} />
+        <ReactDataGrid className="rdg-light" {...dataGridProps} />
       </div>
     </div>
   );
