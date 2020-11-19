@@ -4,7 +4,9 @@ import { DataSet } from "../../../models/data/data-set";
 import { TableContentModelType } from "../../../models/tools/table/table-content";
 import { IToolTileProps } from "../tool-tile";
 import { EditableTableTitle } from "./editable-table-title";
+import { TableToolbar } from "./table-toolbar";
 import { useDataSet } from "./use-data-set";
+import { useToolbarToolApi } from "../hooks/use-toolbar-tool-api";
 
 import "react-data-grid/dist/react-data-grid.css";
 import "./table-tool.scss";
@@ -36,7 +38,9 @@ const useContentDataSet = (content: TableContentModelType) => {
   return tileDataSet;
 };
 
-const TableToolComponent: React.FC<IToolTileProps> = ({ model, readOnly, onRequestRowHeight }) => {
+const TableToolComponent: React.FC<IToolTileProps> = ({
+  documentContent, toolTile, model, readOnly, onRequestRowHeight, onRegisterToolApi, onUnregisterToolApi
+}) => {
   const content = model.content as TableContentModelType;
   const tileDataSet = useContentDataSet(content);
   // For development/debugging purposes, apply fixture data to empty tables
@@ -51,8 +55,16 @@ const TableToolComponent: React.FC<IToolTileProps> = ({ model, readOnly, onReque
   } = useDataSet({
         dataSet: dataSet.current, readOnly: !!readOnly,
         showRowLabels, setShowRowLabels, onRequestRowHeight: handleRequestRowHeight });
+
+  const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
+  const handleSetExpression = () => {
+    console.log("SetExpression button clicked!");
+  };
+
   return (
     <div className="table-tool">
+      <TableToolbar documentContent={documentContent} toolTile={toolTile} {...toolbarProps}
+                    onSetExpression={handleSetExpression} />
       <div className="table-grid-container">
         <EditableTableTitle className="table-title" titleWidth={titleWidth} readOnly={readOnly}
           title={tableTitle || "Table Title"} setTitle={setTableTitle}
@@ -63,6 +75,7 @@ const TableToolComponent: React.FC<IToolTileProps> = ({ model, readOnly, onReque
   );
 };
 export default TableToolComponent;
+(TableToolComponent as any).tileHandlesSelection = true;
 
 // import { observer, inject } from "mobx-react";
 // import { Alert, Intent } from "@blueprintjs/core";

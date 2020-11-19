@@ -1,0 +1,35 @@
+@import "../../vars.sass";
+
+.table-toolbar {
+  position: absolute;
+  border: $toolbar-border;
+  border-radius: 0 0 $toolbar-border-radius $toolbar-border-radius;
+  z-index: $toolbar-z-index;
+
+  &.disabled {
+    display: none;
+  }
+
+  .toolbar-button {
+    position: relative;
+    width: $toolbar-button-width;
+    height: $toolbar-button-height;
+    background-color: $workspace-teal-light-9;
+
+    &:hover {
+      background-color: $workspace-teal-light-6;
+    }
+
+    &:active {
+      background-color: $workspace-teal-light-4;
+    }
+  }
+
+  .toolbar-button:first-child {
+    border-bottom-left-radius: 3px;
+  }
+
+  .toolbar-button:last-child {
+    border-bottom-right-radius: 3px;
+  }
+}
