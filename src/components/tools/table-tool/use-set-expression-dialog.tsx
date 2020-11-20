@@ -58,8 +58,7 @@ export const useSetExpressionDialog = ({ dataSet }: IProps) => {
       { label: "Clear", onClick: () => { /* no-op */} },
       { label: "Cancel", onClick: "cancel" },
       { label: "OK", onClick: () => { /* no-op */} }
-    ],
-    dependencies: [currYAttr]
-  });
+    ]
+  }, [currYAttr]);
   return [showModal, hideModal];
 };

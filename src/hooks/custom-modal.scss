@@ -42,6 +42,9 @@ $modal-footer-height: 45px;
       width: $modal-header-icon-width;
       height: $modal-header-height;
       border-top-left-radius: $modal-header-border-radius;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     .modal-close {
