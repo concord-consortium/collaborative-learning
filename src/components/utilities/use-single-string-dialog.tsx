@@ -37,13 +37,13 @@ export const useSingleStringDialog = ({
   };
 
   return useCustomModal({
-    className: `single-string ${className}`,
+    className: `single-string ${className || ""}`,
     title,
     Icon: TextInputSvg,
     Content,
     focusElement: "#string-input",
     buttons: [
-      { label: "Cancel", onClick: "cancel" },
+      { label: "Cancel", onClick: "close" },
       { label: "OK", isDefault: true,
         onClick: () => onAccept(inputRef.current?.value || valueRef.current || "", context)}
     ],

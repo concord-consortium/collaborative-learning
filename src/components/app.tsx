@@ -2,7 +2,6 @@ import { inject, observer } from "mobx-react";
 import React from "react";
 import Modal from "react-modal";
 import { ModalProvider } from "react-modal-hook";
-import { Alert } from "@blueprintjs/core";
 import { authenticate } from "../lib/auth";
 import { AppContentContainerComponent } from "./app-content";
 import { BaseComponent, IBaseProps } from "./base";
@@ -13,6 +12,8 @@ import { GroupChooserComponent } from "./group/group-chooser";
 import { IStores, setAppMode, setUnitAndProblem } from "../models/stores/stores";
 import { isDifferentUnitAndProblem } from "../models/curriculum/unit";
 import { updateProblem } from "../lib/misc";
+import ErrorAlert from "./utilities/error-alert";
+
 import "./app.sass";
 
 interface IProps extends IBaseProps {}
@@ -199,16 +200,12 @@ export class AppComponent extends BaseComponent<IProps, IState> {
   private renderError(error: string) {
     return (
       <div className="error">
-        <Alert
-          icon="error"
-          canEscapeKeyCancel={false}
-          canOutsideClickCancel={false}
-          className="error"
-          confirmButtonText="Proceed"
-          isOpen={true}
-          onConfirm={this.handlePortalLoginRedirect} >
-          <p>{error.toString()}</p>
-        </Alert>
+        <ErrorAlert
+          content={error}
+          canCancel={false}
+          buttonLabel="Proceed"
+          onClick={this.handlePortalLoginRedirect}
+        />
       </div>
     );
   }
