@@ -1,0 +1,27 @@
+@import "../../components/vars.sass";
+
+.custom-modal.single-string {
+  width: 400px;
+  height: 183px;
+
+  .modal-icon svg {
+    width: 36px * 0.65;
+    height: 34px * 0.65;
+    fill: $charcoal;
+  }
+
+  .input-row {
+    height: 30px;
+    display: flex;
+    align-items: center;
+
+    label {
+      display: inline-block;
+      flex: 0 0 auto;
+    }
+    input {
+      height: 100%;
+      flex: 1 1 auto;
+    }
+  }
+}

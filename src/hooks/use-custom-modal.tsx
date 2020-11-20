@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import React from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import Modal from "react-modal";
 import { useModal } from "react-modal-hook";
 import CloseIconSvg from "../assets/icons/close/close.svg";
@@ -19,22 +19,48 @@ interface IProps {
     onClick: (() => void) | "cancel";
     isDefault?: boolean;
   }>;
-  dependencies?: any[];
+  onClose?: () => void;
 }
 export const useCustomModal = ({
-  className, Icon, title, Content, focusElement, buttons, dependencies
-}: IProps) => {
+  className, Icon, title, Content, focusElement, buttons, onClose
+}: IProps, dependencies?: any[]) => {
+
+  const contentElt = useRef<HTMLDivElement>();
 
   const handleAfterOpen = ({overlayEl, contentEl}: { overlayEl: Element, contentEl: HTMLDivElement }) => {
+    contentElt.current = contentEl;
     if (focusElement) {
       const element = contentEl.querySelector(focusElement);
-      (element as HTMLElement)?.focus();
+      setTimeout(() => (element as HTMLElement)?.focus());
     }
   };
 
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.key === "Enter") {
+      const defaultButton = buttons.find(b => b.isDefault);
+      if (defaultButton && (typeof defaultButton.onClick !== "string")) {
+        defaultButton.onClick();
+        e.stopPropagation();
+        e.preventDefault();
+      }
+    }
+  }, [buttons]);
+
+  const isKeyDownHandlerInstalled = useRef(false);
+  useEffect(() => {
+    if (!isKeyDownHandlerInstalled.current && contentElt.current) {
+      contentElt.current.addEventListener("keydown", handleKeyDown);
+      isKeyDownHandlerInstalled.current = true;
+    }
+    return () => isKeyDownHandlerInstalled.current
+                  ? contentElt.current?.removeEventListener("keydown", handleKeyDown)
+                  : undefined;
+  }, [handleKeyDown]);
+
   const [showModal, hideModal] = useModal(() => (
     <Modal className={`custom-modal ${className}`} isOpen
-            onAfterOpen={handleAfterOpen as any} onRequestClose={hideModal}>
+            onAfterOpen={handleAfterOpen as any}
+            onRequestClose={hideModal} onAfterClose={onClose}>
       <div className="modal-header">
         <div className="modal-icon">
           {Icon && <Icon/>}
