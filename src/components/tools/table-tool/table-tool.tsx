@@ -6,6 +6,7 @@ import { IToolTileProps } from "../tool-tile";
 import { EditableTableTitle } from "./editable-table-title";
 import { TableToolbar } from "./table-toolbar";
 import { useDataSet } from "./use-data-set";
+import { useSetExpressionDialog } from "./use-set-expression-dialog";
 import { useToolbarToolApi } from "../hooks/use-toolbar-tool-api";
 
 import "react-data-grid/dist/react-data-grid.css";
@@ -57,14 +58,12 @@ const TableToolComponent: React.FC<IToolTileProps> = ({
         showRowLabels, setShowRowLabels, onRequestRowHeight: handleRequestRowHeight });
 
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
-  const handleSetExpression = () => {
-    console.log("SetExpression button clicked!");
-  };
+  const [showSetExpressionDialog] = useSetExpressionDialog({ dataSet: dataSet.current });
 
   return (
     <div className="table-tool">
       <TableToolbar documentContent={documentContent} toolTile={toolTile} {...toolbarProps}
-                    onSetExpression={handleSetExpression} />
+                    onSetExpression={showSetExpressionDialog} />
       <div className="table-grid-container">
         <EditableTableTitle className="table-title" titleWidth={titleWidth} readOnly={readOnly}
           title={tableTitle || "Table Title"} setTitle={setTableTitle}
