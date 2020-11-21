@@ -9,6 +9,7 @@ import { DocumentContentModelType, IDropRowInfo } from "../../models/document/do
 import { DocumentTool } from "../../models/document/document";
 import { IDragTiles } from "../../models/tools/tool-tile";
 import { dragTileSrcDocId, IToolApiInterface, kDragTileCreate, kDragTiles } from "../tools/tool-tile";
+import { uniqueTitle } from "../../utilities/js-utils";
 
 import "./document-content.sass";
 
@@ -176,6 +177,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
                                   documentContent={this.domElement}
                                   rowIndex={index} height={rowHeight} tileMap={tileMap}
                                   dropHighlight={dropHighlight}
+                                  onRequestUniqueTitle={this.handleRequestUniqueTitle}
                                   ref={(elt) => this.rowRefs.push(elt)} {...others} />
               : null;
     });
@@ -191,6 +193,16 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const yScroll = this.domElement?.scrollTop || 0;
     this.props.toolApiInterface?.forEach(api => api.handleDocumentScroll?.(xScroll, yScroll));
   }, 50)
+
+  private handleRequestUniqueTitle = (tileId: string) => {
+    const { content, toolApiInterface } = this.props;
+    const tile = content?.getTile(tileId);
+    const tileType = tile?.content.type;
+    if (!content || !tileType || !toolApiInterface) return;
+    const tilesOfType = content.getTilesOfType(tileType);
+    const titles = tilesOfType.map(id => toolApiInterface.getToolApi(id)?.getTitle?.());
+    return uniqueTitle(tileType, proposed => !titles.find(title => title === proposed));
+  }
 
   private handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const { ui } = this.stores;

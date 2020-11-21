@@ -35,6 +35,10 @@ $controls-hover-background: #c0dfe7;
       border-radius: $border-radius $border-radius 0 0;
       font-weight: bold;
       padding: 8px;
+
+      &.table-title-default {
+        font-style: italic;
+      }
     }
   }
 
