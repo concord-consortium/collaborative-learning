@@ -1,10 +1,9 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import ReactDataGrid from "react-data-grid";
-import { DataSet } from "../../../models/data/data-set";
-import { TableContentModelType } from "../../../models/tools/table/table-content";
 import { IToolApi, IToolTileProps } from "../tool-tile";
 import { EditableTableTitle } from "./editable-table-title";
 import { TableToolbar } from "./table-toolbar";
+import { useModelDataSet } from "./use-model-data-set";
 import { useDataSet } from "./use-data-set";
 import { useGridContext } from "./use-grid-context";
 import { useSetExpressionDialog } from "./use-set-expression-dialog";
@@ -14,27 +13,16 @@ import { useToolbarToolApi } from "../hooks/use-toolbar-tool-api";
 import "react-data-grid/dist/react-data-grid.css";
 import "./table-tool.scss";
 
-const useContentDataSet = (content: TableContentModelType) => {
-  const tileDataSet = useRef(DataSet.create());
-  const isInitialized = useRef(false);
-  if (!isInitialized.current) {
-    content.applyChangesToDataSet(tileDataSet.current);
-    isInitialized.current = true;
-  }
-  return tileDataSet;
-};
-
 const TableToolComponent: React.FC<IToolTileProps> = ({
   documentContent, toolTile, model, readOnly,
   onRequestRowHeight, onRequestUniqueTitle, onRegisterToolApi, onUnregisterToolApi
 }) => {
-  const content = model.content as TableContentModelType;
-  const dataSet = useContentDataSet(content);
+  const { dataSet, columnChanges, triggerColumnChange, rowChanges } = useModelDataSet(model);
 
   const [showRowLabels, setShowRowLabels] = useState(false);
   const { selectedCell, gridContext, ...gridProps } = useGridContext(showRowLabels);
   const { getTitle, getTitleWidthFromColumns, onBeginTitleEdit, onEndTitleEdit } = useTableTitle({
-    gridContext, dataSet: dataSet.current, readOnly, onRequestUniqueTitle: () => onRequestUniqueTitle(model.id)
+    gridContext, model, dataSet: dataSet.current, readOnly, onRequestUniqueTitle: () => onRequestUniqueTitle(model.id)
   });
 
   const toolApi: IToolApi = useMemo(() => ({
@@ -49,7 +37,8 @@ const TableToolComponent: React.FC<IToolTileProps> = ({
     onRequestRowHeight(model.id, options.height, options.delta);
   };
   const { getTitleWidth, ...dataGridProps } = useDataSet({
-    gridContext, selectedCell, dataSet: dataSet.current, readOnly: !!readOnly, getTitleWidthFromColumns,
+    gridContext, selectedCell, model, dataSet: dataSet.current, columnChanges, triggerColumnChange,
+    rowChanges, readOnly: !!readOnly, getTitleWidthFromColumns,
     showRowLabels, setShowRowLabels, onRequestRowHeight: handleRequestRowHeight });
 
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });

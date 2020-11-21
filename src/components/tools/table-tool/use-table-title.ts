@@ -1,14 +1,17 @@
 import { useCallback, useEffect } from "react";
 import { IDataSet } from "../../../models/data/data-set";
+import { TableContentModelType } from "../../../models/tools/table/table-content";
+import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { IGridContext, kControlsColumnWidth, TColumn } from "./grid-types";
 
 interface IProps {
   gridContext: IGridContext;
+  model: ToolTileModelType;
   dataSet: IDataSet;
   readOnly?: boolean;
   onRequestUniqueTitle?: () => string | undefined;
 }
-export const useTableTitle = ({ gridContext, dataSet, readOnly, onRequestUniqueTitle }: IProps) => {
+export const useTableTitle = ({ gridContext, model, dataSet, readOnly, onRequestUniqueTitle }: IProps) => {
 
   const getTitle = useCallback(() => dataSet.name, [dataSet.name]);
 
@@ -17,7 +20,8 @@ export const useTableTitle = ({ gridContext, dataSet, readOnly, onRequestUniqueT
     return !readOnly;
   };
   const onEndTitleEdit = (title?: string) => {
-    !readOnly && (title != null) && dataSet.setName(title);
+    const content = model.content as TableContentModelType;
+    !readOnly && (title != null) && content.setTableName(title);
   };
 
   const kDefaultWidth = 80;

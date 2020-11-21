@@ -276,6 +276,14 @@ export const TableContentModel = types
               props: { name }
             });
     },
+    addAttribute(id: string, name: string) {
+      self.appendChange({
+            action: "create",
+            target: "columns",
+            ids: [id],
+            props: { columns: [{ name }] }
+          });
+    },
     setAttributeName(id: string, name: string) {
       self.appendChange({
               action: "update",
@@ -388,10 +396,13 @@ export const TableContentModel = types
   .views(self => ({
     applyCreate(dataSet: IDataSet, change: ITableChange, dataSetOnly = false) {
       switch (change.target) {
-        case "table":
-        case "columns": {
+        case "table": {
           const props = change?.props as ICreateTableProperties;
           (props?.name != null) && dataSet.setName(props.name);
+        }
+        // fallthrough
+        case "columns": {
+          const props = change?.props as ICreateColumnsProperties;
           props?.columns?.forEach((col: any, index: number) => {
             const id = change.ids?.[index] || uniqueId();
             dataSet.addAttributeWithID({ id, ...col });
@@ -502,12 +513,21 @@ export const TableContentModel = types
   }))
   .views(self => ({
     applyChanges(dataSet: IDataSet, start = 0) {
+      let hasColumnChanges = false;
+      let hasRowChanges = false;
       for (let i = start; i < self.changes.length; ++i) {
         const change = safeJsonParse(self.changes[i]);
         if (change) {
+          if ((change.target === "columns") || change.props?.columns) {
+            hasColumnChanges = true;
+          }
+          if ((change.target === "rows") || change.props?.rows) {
+            hasRowChanges = true;
+          }
           self.applyChange(dataSet, change);
         }
       }
+      return [hasColumnChanges, hasRowChanges];
     },
     applyChangesToDataSet(dataSet: IDataSet) {
       self.changes.forEach(jsonChange => {
