@@ -1,9 +1,11 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { CellNavigationMode, DataGridHandle } from "react-data-grid";
+import { uniqueId } from "../../../utilities/js-utils";
 import { IGridContext } from "./grid-types";
 
 export const useGridContext = (showRowLabels: boolean) => {
   const gridRef = useRef<DataGridHandle>(null);
+  const inputRowId = useRef(uniqueId());
   // these are passed into ReactDataGrid as the ultimate source of truth
   const [selectedRows, setSelectedRows] = useState(() => new Set<React.Key>());
   const selectOneRow = useCallback((row: string) => setSelectedRows(new Set([row])), []);
@@ -20,10 +22,11 @@ export const useGridContext = (showRowLabels: boolean) => {
           }
         }), [clearCellSelection, clearRowSelection, selectOneRow, showRowLabels]);
   const onSelectedRowsChange = useCallback((_rows: Set<React.Key>) => {
+    _rows.delete(inputRowId.current);
     setSelectedRows(_rows);
   }, []);
   const cellNavigationMode: CellNavigationMode = "CHANGE_ROW";
   return {
-    ref: gridRef, cellNavigationMode, selectedRows, gridContext, onSelectedRowsChange
+    ref: gridRef, cellNavigationMode, inputRowId, selectedRows, gridContext, onSelectedRowsChange
   };
 };

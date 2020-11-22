@@ -29,15 +29,15 @@ interface IUseDataSet {
   readOnly: boolean;
   getTitleWidthFromColumns: (columns: TColumn[]) => number;
   showRowLabels: boolean;
+  inputRowId: React.MutableRefObject<string>;
   setShowRowLabels: (show: boolean) => void;
   onRequestRowHeight: (options: { height?: number, deltaHeight?: number }) => void;
 }
 export const useDataSet = ({
   gridRef, gridContext, model, dataSet, columnChanges, triggerColumnChange, rowChanges,
-  readOnly, showRowLabels, setShowRowLabels, getTitleWidthFromColumns, onRequestRowHeight
+  readOnly, inputRowId, showRowLabels, setShowRowLabels, getTitleWidthFromColumns, onRequestRowHeight
 }: IUseDataSet) => {
   const selectedCell = useRef<TPosition>({ rowIdx: -1, idx: -1 });
-  const inputRowId = useRef(uniqueId());
   const setColumnName = (column: TColumn, columnName: string) => {
     const content = model.content as TableContentModelType;
     !readOnly && content.setAttributeName(column.key, columnName);

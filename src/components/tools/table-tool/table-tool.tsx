@@ -20,7 +20,7 @@ const TableToolComponent: React.FC<IToolTileProps> = ({
   const { dataSet, columnChanges, triggerColumnChange, rowChanges } = useModelDataSet(model);
 
   const [showRowLabels, setShowRowLabels] = useState(false);
-  const { gridContext, ...gridProps } = useGridContext(showRowLabels);
+  const { gridContext, inputRowId, ...gridProps } = useGridContext(showRowLabels);
   const { getTitle, getTitleWidthFromColumns, onBeginTitleEdit, onEndTitleEdit } = useTableTitle({
     gridContext, model, dataSet: dataSet.current, readOnly, onRequestUniqueTitle: () => onRequestUniqueTitle(model.id)
   });
@@ -39,7 +39,7 @@ const TableToolComponent: React.FC<IToolTileProps> = ({
   const { getTitleWidth, ...dataGridProps } = useDataSet({
     gridRef: gridProps.ref, gridContext, model, dataSet: dataSet.current, columnChanges, triggerColumnChange,
     rowChanges, readOnly: !!readOnly, getTitleWidthFromColumns,
-    showRowLabels, setShowRowLabels, onRequestRowHeight: handleRequestRowHeight });
+    inputRowId, showRowLabels, setShowRowLabels, onRequestRowHeight: handleRequestRowHeight });
 
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
   const [showSetExpressionDialog] = useSetExpressionDialog({ dataSet: dataSet.current });
