@@ -1,11 +1,9 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import { DataGridHandle } from "react-data-grid";
-import { IGridContext, TPosition } from "./grid-types";
+import { CellNavigationMode, DataGridHandle } from "react-data-grid";
+import { IGridContext } from "./grid-types";
 
 export const useGridContext = (showRowLabels: boolean) => {
   const gridRef = useRef<DataGridHandle>(null);
-  // this tracks ReactDataGrid's internal notion of the selected cell
-  const selectedCell = useRef<TPosition>();
   // these are passed into ReactDataGrid as the ultimate source of truth
   const [selectedRows, setSelectedRows] = useState(() => new Set<React.Key>());
   const selectOneRow = useCallback((row: string) => setSelectedRows(new Set([row])), []);
@@ -21,13 +19,11 @@ export const useGridContext = (showRowLabels: boolean) => {
             clearCellSelection();
           }
         }), [clearCellSelection, clearRowSelection, selectOneRow, showRowLabels]);
-  const onSelectedCellChange = useCallback((position: TPosition) => {
-    selectedCell.current = position;
-  }, []);
   const onSelectedRowsChange = useCallback((_rows: Set<React.Key>) => {
     setSelectedRows(_rows);
   }, []);
+  const cellNavigationMode: CellNavigationMode = "CHANGE_ROW";
   return {
-    ref: gridRef, selectedCell, selectedRows, gridContext, onSelectedCellChange, onSelectedRowsChange
+    ref: gridRef, cellNavigationMode, selectedRows, gridContext, onSelectedRowsChange
   };
 };
