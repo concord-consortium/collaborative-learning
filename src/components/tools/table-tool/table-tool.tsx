@@ -20,7 +20,7 @@ const TableToolComponent: React.FC<IToolTileProps> = ({
   const { dataSet, columnChanges, triggerColumnChange, rowChanges } = useModelDataSet(model);
 
   const [showRowLabels, setShowRowLabels] = useState(false);
-  const { selectedCell, gridContext, ...gridProps } = useGridContext(showRowLabels);
+  const { gridContext, ...gridProps } = useGridContext(showRowLabels);
   const { getTitle, getTitleWidthFromColumns, onBeginTitleEdit, onEndTitleEdit } = useTableTitle({
     gridContext, model, dataSet: dataSet.current, readOnly, onRequestUniqueTitle: () => onRequestUniqueTitle(model.id)
   });
@@ -37,7 +37,7 @@ const TableToolComponent: React.FC<IToolTileProps> = ({
     onRequestRowHeight(model.id, options.height, options.delta);
   };
   const { getTitleWidth, ...dataGridProps } = useDataSet({
-    gridContext, selectedCell, model, dataSet: dataSet.current, columnChanges, triggerColumnChange,
+    gridRef: gridProps.ref, gridContext, model, dataSet: dataSet.current, columnChanges, triggerColumnChange,
     rowChanges, readOnly: !!readOnly, getTitleWidthFromColumns,
     showRowLabels, setShowRowLabels, onRequestRowHeight: handleRequestRowHeight });
 

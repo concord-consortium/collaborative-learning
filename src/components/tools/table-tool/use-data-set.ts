@@ -1,4 +1,5 @@
 import { useCallback, useRef } from "react";
+import { DataGridHandle } from "react-data-grid";
 import { ICase, IDataSet } from "../../../models/data/data-set";
 import { TableContentModelType } from "../../../models/tools/table/table-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
@@ -13,9 +14,13 @@ const optimalTileRowHeight = (rowCount: number) => {
   return (rowCount + 2) * kRowHeight + kPadding + kBorders;
 };
 
+const isCellSelectable = (position: TPosition, columns: TColumn[]) => {
+  return (position.idx !== 0) && (position.idx !== columns.length - 1);
+};
+
 interface IUseDataSet {
+  gridRef: React.RefObject<DataGridHandle>;
   gridContext: IGridContext;
-  selectedCell: React.MutableRefObject<TPosition | undefined>;
   model: ToolTileModelType;
   dataSet: IDataSet;
   columnChanges: number;
@@ -28,9 +33,10 @@ interface IUseDataSet {
   onRequestRowHeight: (options: { height?: number, deltaHeight?: number }) => void;
 }
 export const useDataSet = ({
-  gridContext, selectedCell, model, dataSet, columnChanges, triggerColumnChange, rowChanges,
+  gridRef, gridContext, model, dataSet, columnChanges, triggerColumnChange, rowChanges,
   readOnly, showRowLabels, setShowRowLabels, getTitleWidthFromColumns, onRequestRowHeight
 }: IUseDataSet) => {
+  const selectedCell = useRef<TPosition>({ rowIdx: -1, idx: -1 });
   const inputRowId = useRef(uniqueId());
   const setColumnName = (column: TColumn, columnName: string) => {
     const content = model.content as TableContentModelType;
@@ -47,6 +53,48 @@ export const useDataSet = ({
   const { columns, onColumnResize } = useColumnsFromDataSet({
                                         gridContext, dataSet, readOnly, inputRowId: inputRowId.current, columnChanges,
                                         showRowLabels, setShowRowLabels, setColumnName, onAddColumn, onRemoveRow });
+  const onSelectedCellChange = (position: TPosition) => {
+    const forward = (selectedCell.current.rowIdx < position.rowIdx) ||
+                    ((selectedCell.current.rowIdx === position.rowIdx) &&
+                      (selectedCell.current.idx < position.idx));
+    selectedCell.current = position;
+
+    if (!isCellSelectable(position, columns) && (columns.length > 2)) {
+      let newPosition = { ...position };
+      if (forward) {
+        while (!isCellSelectable(newPosition, columns)) {
+          // move from last cell to { -1, -1 }
+          if ((newPosition.rowIdx >= rows.length) ||
+              ((newPosition.rowIdx === rows.length - 1) && (newPosition.idx >= columns.length - 1))) {
+            newPosition = { rowIdx: -1, idx: -1 };
+          }
+          // otherwise advance to next selectable cell
+          else if (++newPosition.idx >= columns.length) {
+            newPosition.idx = 1;
+            ++newPosition.rowIdx;
+          }
+        }
+      }
+      else {  // backward
+        while (!isCellSelectable(newPosition, columns)) {
+          // move from first cell to { -1, -1 }
+          if ((newPosition.rowIdx <= -1) || ((newPosition.rowIdx === 0) && (newPosition.idx < 1))) {
+            newPosition = { rowIdx: -1, idx: -1 };
+          }
+          // otherwise move to previous selectable cell
+          else if (--newPosition.idx < 1) {
+            newPosition.idx = columns.length - 2;
+            --newPosition.rowIdx;
+          }
+        }
+      }
+      if ((newPosition.rowIdx !== position.rowIdx) || (newPosition.idx !== position.idx)) {
+        gridRef.current?.selectCell(newPosition);
+      }
+    }
+  };
+
+
   const { rows, rowKeyGetter, rowClass } = useRowsFromDataSet({
                                             dataSet, readOnly, inputRowId: inputRowId.current,
                                             rowChanges, context: gridContext});
@@ -83,5 +131,5 @@ export const useDataSet = ({
   }, [onColumnResize, triggerColumnChange]);
   const getTitleWidth = () => getTitleWidthFromColumns(columns);
   return { getTitleWidth, columns, rows, rowKeyGetter, rowClass, rowHeight, headerRowHeight,
-            onColumnResize: handleColumnResize, onRowsChange };
+            onColumnResize: handleColumnResize, onRowsChange, onSelectedCellChange};
 };
