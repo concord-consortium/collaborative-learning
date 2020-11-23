@@ -7,7 +7,7 @@ function autoFocusAndSelect(input: HTMLInputElement | null) {
 
 interface IProps {
   style?: React.CSSProperties;
-  value: string;
+  value?: string;
   onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
   onChange: (value: string) => void;
   onClose: (accept: boolean) => void;

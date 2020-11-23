@@ -232,6 +232,19 @@ export const DocumentContentModel = types
       });
       return tiles;
     },
+    getTilesOfType(type: string) {
+      const tiles: string[] = [];
+      self.rowOrder.forEach(rowId => {
+        const row = self.getRow(rowId);
+        each(row?.tiles, tileEntry => {
+          const tile = self.getTile(tileEntry.tileId);
+          if (tile?.content.type === type) {
+            tiles.push(tileEntry.tileId);
+          }
+        });
+      });
+      return tiles;
+    },
     publish() {
       return JSON.stringify(self.snapshotWithUniqueIds());
     }

@@ -57,6 +57,7 @@ interface IProps {
   readOnly?: boolean;
   dropHighlight?: string;
   toolApiInterface?: IToolApiInterface;
+  onRequestUniqueTitle: (tileId: string) => string | undefined;
 }
 
 interface IState {
