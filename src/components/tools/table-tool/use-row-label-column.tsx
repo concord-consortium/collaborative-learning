@@ -3,10 +3,17 @@ import { Tooltip } from "react-tippy";
 import RowLabelsHiddenSvg from "../../../clue/assets/icons/table/row-labels-hidden-icon.svg";
 import RowLabelsShownSvg from "../../../clue/assets/icons/table/row-labels-shown-icon.svg";
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
-import { TFormatterProps } from "./grid-types";
+import { TFormatterProps, TPosition } from "./grid-types";
 
-export const useRowLabelColumn = (
-  inputRowId: string, showRowLabels: boolean, setShowRowLabels: (show: boolean) => void) => {
+interface IProps {
+  inputRowId: string;
+  selectedCell: React.MutableRefObject<TPosition>;
+  showRowLabels: boolean;
+  setShowRowLabels: (show: boolean) => void;
+}
+export const useRowLabelColumn = ({
+  inputRowId, selectedCell, showRowLabels, setShowRowLabels
+}: IProps) => {
 
   const title = showRowLabels ? "Hide labels" : "Show labels";
   const tooltipOptions = useTooltipOptions({ title, distance: -36 });
@@ -36,6 +43,8 @@ export const useRowLabelColumn = (
           onRowSelectionChange(selected, e.shiftKey);
         }
         else if (__id__ === inputRowId) {
+          // clear selection so navigation direction is always forward after click
+          selectedCell.current = { rowIdx: -1, idx: -1 };
           __context__.onClearRowSelection();
         }
         else {
@@ -45,11 +54,11 @@ export const useRowLabelColumn = (
     };
 
     return (
-      <div className="index-cell-contents" onClick={handleClick}>
+      <div className="index-cell-contents" onClick={handleClick} onDoubleClick={handleClick}>
         {showRowLabels ? __index__ : undefined}
       </div>
     );
-  }, [inputRowId, showRowLabels]);
+  }, [inputRowId, selectedCell, showRowLabels]);
 
   return { RowLabelHeader, RowLabelFormatter };
 };

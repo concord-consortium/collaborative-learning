@@ -6,6 +6,7 @@ import { TableToolbar } from "./table-toolbar";
 import { useModelDataSet } from "./use-model-data-set";
 import { useDataSet } from "./use-data-set";
 import { useGridContext } from "./use-grid-context";
+import { useRowLabelColumn } from "./use-row-label-column";
 import { useSetExpressionDialog } from "./use-set-expression-dialog";
 import { useTableTitle } from "./use-table-title";
 import { useToolbarToolApi } from "../hooks/use-toolbar-tool-api";
@@ -20,7 +21,7 @@ const TableToolComponent: React.FC<IToolTileProps> = ({
   const { dataSet, columnChanges, triggerColumnChange, rowChanges } = useModelDataSet(model);
 
   const [showRowLabels, setShowRowLabels] = useState(false);
-  const { gridContext, inputRowId, ...gridProps } = useGridContext(showRowLabels);
+  const { ref: gridRef, gridContext, inputRowId, selectedCell, ...gridProps } = useGridContext(showRowLabels);
   const { getTitle, getTitleWidthFromColumns, onBeginTitleEdit, onEndTitleEdit } = useTableTitle({
     gridContext, model, dataSet: dataSet.current, readOnly, onRequestUniqueTitle: () => onRequestUniqueTitle(model.id)
   });
@@ -33,13 +34,17 @@ const TableToolComponent: React.FC<IToolTileProps> = ({
     return () => onUnregisterToolApi();
   }, [onRegisterToolApi, onUnregisterToolApi, toolApi]);
 
+  const rowLabelProps = useRowLabelColumn({
+    inputRowId: inputRowId.current, selectedCell, showRowLabels, setShowRowLabels
+  });
+
   const handleRequestRowHeight = (options: { height?: number, delta?: number }) => {
     onRequestRowHeight(model.id, options.height, options.delta);
   };
   const { getTitleWidth, ...dataGridProps } = useDataSet({
-    gridRef: gridProps.ref, gridContext, model, dataSet: dataSet.current, columnChanges, triggerColumnChange,
-    rowChanges, readOnly: !!readOnly, getTitleWidthFromColumns,
-    inputRowId, showRowLabels, setShowRowLabels, onRequestRowHeight: handleRequestRowHeight });
+    gridRef, gridContext, model, dataSet: dataSet.current, columnChanges, triggerColumnChange,
+    rowChanges, readOnly: !!readOnly, getTitleWidthFromColumns, selectedCell,
+    inputRowId, ...rowLabelProps, onRequestRowHeight: handleRequestRowHeight });
 
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
   const [showSetExpressionDialog] = useSetExpressionDialog({ dataSet: dataSet.current });
@@ -52,7 +57,7 @@ const TableToolComponent: React.FC<IToolTileProps> = ({
         <EditableTableTitle className="table-title" readOnly={readOnly}
           getTitle={getTitle} getTitleWidth={getTitleWidth}
           onBeginEdit={onBeginTitleEdit} onEndEdit={onEndTitleEdit} />
-        <ReactDataGrid className="rdg-light" {...gridProps} {...dataGridProps} />
+        <ReactDataGrid className="rdg-light" ref={gridRef} {...gridProps} {...dataGridProps} />
       </div>
     </div>
   );
