@@ -124,6 +124,9 @@ Cypress.Commands.add("openSubTab", (tab, subTab) => {
 Cypress.Commands.add("openSection", (tab, section) => {
   cy.get('.doc-tab.'+tab+'.'+section).click();
 });
+Cypress.Commands.add("getCanvasItemTitle", (tab, section) => {
+  cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer');
+});
 Cypress.Commands.add("openDocumentWithTitle", (tab, section, title) => {
   cy.openSection(tab,section);
   cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer').contains(title).parent().parent().siblings('.scaled-list-item-container').click({force:true});
