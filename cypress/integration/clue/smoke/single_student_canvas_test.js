@@ -116,7 +116,7 @@ context('single student functional test',()=>{
                 // //open the my work tab, click a different canvas, verify canvas is shown, open the my work tab, click the introduction canvas, verify intro canvas is showing
 
                 rightNav.openRightNavTab('my-work');
-                rightNav.openSection('my-work', 'investigations');
+                cy.openSection('my-work', 'investigations');
                 rightNav.openCanvasItem('my-work', 'investigations', this.title );
                 textToolTile.getTextTile().should('exist');
                 graphToolTile.getGraphTile().first().should('exist');
@@ -130,7 +130,7 @@ context('single student functional test',()=>{
             it('verify publish canvas thumbnail appears in Class Work Published List',()=>{
                 canvas.publishCanvas();
                 rightNav.openRightNavTab('class-work');
-                rightNav.openSection('class-work','published');
+                cy.openSection('class-work','published');
                 rightNav.getAllSectionCanvasItems('class-work','published').should('have.length',1);
             });
             it('verify student name appears under thumbnail',()=>{

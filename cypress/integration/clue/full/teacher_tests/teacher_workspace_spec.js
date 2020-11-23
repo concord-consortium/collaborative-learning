@@ -59,7 +59,7 @@ context.skip("Teacher Space", () => {
                 clueCanvas.addTile('table');
                 clueCanvas.addTile('drawing');
                 rightNav.openRightNavTab("my-work");
-                rightNav.openSection('my-work', 'workspaces');
+                cy.openSection('my-work', 'workspaces');
                 rightNav.openCanvasItem('my-work', 'workspaces', teacherDoc);
                 clueCanvas.addTile('table');
             });
@@ -88,7 +88,7 @@ context.skip("Teacher Space", () => {
                     tableToolTile.getTableTile().should('exist');
                     drawToolTile.getDrawTile().should('exist');
                     rightNav.openRightNavTab("my-work");
-                    rightNav.openSection('my-work', 'workspaces');
+                    cy.openSection('my-work', 'workspaces');
                     rightNav.getCanvasItemTitle("my-work", "workspaces", teacherDoc).should('exist');
                     rightNav.openCanvasItem("my-work", "workspaces", teacherDoc);
                     cy.wait(2000);
@@ -122,7 +122,7 @@ context.skip("Teacher Space", () => {
                     tableToolTile.getTableTile().should('exist');
                     drawToolTile.getDrawTile().should('exist');
                     rightNav.openRightNavTab("my-work");
-                    rightNav.openSection('my-work', 'workspaces');
+                    cy.openSection('my-work', 'workspaces');
                     rightNav.getCanvasItemTitle("my-work", "workspaces", teacherDoc).should('exist');
                     rightNav.openCanvasItem("my-work", "workspaces", teacherDoc);
                     cy.wait(2000);
@@ -132,7 +132,7 @@ context.skip("Teacher Space", () => {
             after(function () {
                 clueCanvas.deleteTile('table');
                 rightNav.openRightNavTab("my-work");
-                rightNav.openSection('my-work', 'investigations');
+                cy.openSection('my-work', 'investigations');
                 rightNav.openCanvasItem("my-work", "investigations", this.investigationTitle);
                 clueCanvas.deleteTile('table');
                 clueCanvas.deleteTile('drawing');

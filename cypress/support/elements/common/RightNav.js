@@ -84,12 +84,6 @@ class RightNav{
       return cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer');
     }
 
-    openDocumentWithTitle(tab, section, title){
-        this.openSection("my-work","workspaces");
-        this.getCanvasItemTitle(tab,section).contains(title).parent().parent().siblings('.scaled-list-item-container').click({force:true});
-        cy.get('.edit-button').click();
-    }
-
     starCanvasItem(tab,section,title){
         this.getCanvasItemTitle(tab, section).contains(title).parent().siblings('.icon-holder').find('.icon-star').click();
     }

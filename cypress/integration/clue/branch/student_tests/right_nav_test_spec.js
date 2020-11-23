@@ -23,14 +23,14 @@ describe.skip('Test right nav tabs', function(){
             it('verify that opened content is listed in My Work/Investigations section', function(){
                 // cy.wait(1000);
                 rightNav.openRightNavTab('my-work');
-                rightNav.openSection('my-work', 'investigations');
+                cy.openSection('my-work', 'investigations');
                 rightNav.getCanvasItemTitle('my-work','investigations').contains(this.title).should('exist');
                 rightNav.closeRightNavTab('my-work');
             });
             it('verify publish Investigation', function(){
                 canvas.publishCanvas();
                 rightNav.openRightNavTab('class-work');
-                rightNav.openSection('class-work','published');
+                cy.openSection('class-work','published');
                 rightNav.getCanvasItemTitle('class-work','published').should('contain', this.title);
             });
             it('verify make a copy of a canvas',function(){
@@ -43,14 +43,14 @@ describe.skip('Test right nav tabs', function(){
             it('verify publish of personal workspace', function(){
                 canvas.publishPersonalCanvas();
                 rightNav.openRightNavTab('class-work');
-                rightNav.openSection('class-work','personal');
+                cy.openSection('class-work','personal');
                 rightNav.getCanvasItemTitle('class-work','personal').should('contain', copyDocumentTitle);
             });
         });
         describe('Workspaces section', function(){
             it('verify investigation canvas is not listed in My Work', function(){ //still need to verify the titles match the titles from opened canvases
                 rightNav.openRightNavTab('my-work');
-                rightNav.openSection('my-work','workspaces');
+                cy.openSection('my-work','workspaces');
                 rightNav.getCanvasItemTitle('my-work','workspaces').contains(this.title).should('not.exist');
             });
             it('verify copied canvas is in My Work section',function(){
@@ -75,7 +75,7 @@ describe.skip('Test right nav tabs', function(){
                 rightNav.getCanvasStarIcon('my-work','workspaces',copyDocumentTitle).should('have.class','starred');
             });
             it('verify starred document appears in the Starred section',function(){
-                rightNav.openSection('my-work','starred');
+                cy.openSection('my-work','starred');
                 rightNav.getCanvasItemTitle('my-work','starred').contains(copyDocumentTitle).should('exist');
             });
         });
@@ -115,12 +115,12 @@ describe.skip('Test right nav tabs', function(){
     describe('Learning Log Tab', function(){
         it('verify investigation canvas is not listed in Learning Log ', function(){ //still need to verify the titles match the titles from opened canvases
             rightNav.openRightNavTab('learning-log');
-            rightNav.openSection('learning-log','');
+            cy.openSection('learning-log','');
             rightNav.getCanvasItemTitle('learning-log','').contains(this.title).should('not.exist');
         });
         it('verify copied Investigation canvas is not in Learning Log section, and not in other sections',function(){
             rightNav.openRightNavTab('class-work');
-            rightNav.openSection('class-work','learning-log');
+            cy.openSection('class-work','learning-log');
             rightNav.getCanvasItemTitle('class-work','learning-log').should('not.exist');
         });
         it('verify Learning Log copy appears in Learning Log section', function(){
