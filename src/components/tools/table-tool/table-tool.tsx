@@ -1,33 +1,18 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import ReactDataGrid from "react-data-grid";
 import { DataSet } from "../../../models/data/data-set";
 import { TableContentModelType } from "../../../models/tools/table/table-content";
-import { IToolTileProps } from "../tool-tile";
+import { IToolApi, IToolTileProps } from "../tool-tile";
 import { EditableTableTitle } from "./editable-table-title";
 import { TableToolbar } from "./table-toolbar";
 import { useDataSet } from "./use-data-set";
+import { useGridContext } from "./use-grid-context";
 import { useSetExpressionDialog } from "./use-set-expression-dialog";
+import { useTableTitle } from "./use-table-title";
 import { useToolbarToolApi } from "../hooks/use-toolbar-tool-api";
 
 import "react-data-grid/dist/react-data-grid.css";
 import "./table-tool.scss";
-
-const createDebugDataTable = () => {
-  const dataSet = DataSet.create();
-  dataSet.setName("Alan's Pledge Plan");
-  dataSet.addAttributeWithID({ id: "attr-distance", name: "Distance" });
-  dataSet.addAttributeWithID({ id: "attr-money", name: "Money Earned" });
-  dataSet.addAttributeWithID({ id: "attr-y2", name: "y2" });
-  dataSet.addAttributeWithID({ id: "attr-result", name: "result" });
-  dataSet.addCanonicalCasesWithIDs([
-    { __id__: "case-1", "attr-distance": 1, "attr-money": 3, "attr-y2": 0.33, "attr-result": "true" },
-    { __id__: "case-2", "attr-distance": 2, "attr-money": 6.5, "attr-y2": 0.31, "attr-result": "false" },
-    { __id__: "case-3", "attr-distance": 3, "attr-money": 8, "attr-y2": 0.38,
-              "attr-result": "maybe" }
-  ]);
-  return dataSet;
-};
-const kDebugDataSet = createDebugDataTable();
 
 const useContentDataSet = (content: TableContentModelType) => {
   const tileDataSet = useRef(DataSet.create());
@@ -40,22 +25,32 @@ const useContentDataSet = (content: TableContentModelType) => {
 };
 
 const TableToolComponent: React.FC<IToolTileProps> = ({
-  documentContent, toolTile, model, readOnly, onRequestRowHeight, onRegisterToolApi, onUnregisterToolApi
+  documentContent, toolTile, model, readOnly,
+  onRequestRowHeight, onRequestUniqueTitle, onRegisterToolApi, onUnregisterToolApi
 }) => {
   const content = model.content as TableContentModelType;
-  const tileDataSet = useContentDataSet(content);
-  // For development/debugging purposes, apply fixture data to empty tables
-  const contentChanges = content.changes.length;
-  const dataSet = useRef(contentChanges > 2 ? tileDataSet.current : kDebugDataSet);
+  const dataSet = useContentDataSet(content);
+
   const [showRowLabels, setShowRowLabels] = useState(false);
+  const { selectedCell, gridContext, ...gridProps } = useGridContext(showRowLabels);
+  const { getTitle, getTitleWidthFromColumns, onBeginTitleEdit, onEndTitleEdit } = useTableTitle({
+    gridContext, dataSet: dataSet.current, readOnly, onRequestUniqueTitle: () => onRequestUniqueTitle(model.id)
+  });
+
+  const toolApi: IToolApi = useMemo(() => ({
+    getTitle
+  }), [getTitle]);
+  useEffect(() => {
+    onRegisterToolApi(toolApi);
+    return () => onUnregisterToolApi();
+  }, [onRegisterToolApi, onUnregisterToolApi, toolApi]);
+
   const handleRequestRowHeight = (options: { height?: number, delta?: number }) => {
     onRequestRowHeight(model.id, options.height, options.delta);
   };
-  const {
-    tableTitle, setTableTitle, titleWidth, onBeginTitleEdit, onEndTitleEdit, ...dataGridProps
-  } = useDataSet({
-        dataSet: dataSet.current, readOnly: !!readOnly,
-        showRowLabels, setShowRowLabels, onRequestRowHeight: handleRequestRowHeight });
+  const { getTitleWidth, ...dataGridProps } = useDataSet({
+    gridContext, selectedCell, dataSet: dataSet.current, readOnly: !!readOnly, getTitleWidthFromColumns,
+    showRowLabels, setShowRowLabels, onRequestRowHeight: handleRequestRowHeight });
 
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
   const [showSetExpressionDialog] = useSetExpressionDialog({ dataSet: dataSet.current });
@@ -65,10 +60,10 @@ const TableToolComponent: React.FC<IToolTileProps> = ({
       <TableToolbar documentContent={documentContent} toolTile={toolTile} {...toolbarProps}
                     onSetExpression={showSetExpressionDialog} />
       <div className="table-grid-container">
-        <EditableTableTitle className="table-title" titleWidth={titleWidth} readOnly={readOnly}
-          title={tableTitle || "Table Title"} setTitle={setTableTitle}
+        <EditableTableTitle className="table-title" readOnly={readOnly}
+          getTitle={getTitle} getTitleWidth={getTitleWidth}
           onBeginEdit={onBeginTitleEdit} onEndEdit={onEndTitleEdit} />
-        <ReactDataGrid className="rdg-light" {...dataGridProps} />
+        <ReactDataGrid className="rdg-light" {...gridProps} {...dataGridProps} />
       </div>
     </div>
   );

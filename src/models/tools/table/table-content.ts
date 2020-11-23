@@ -59,11 +59,9 @@ export interface IRowLabel {
 }
 
 export interface IColumnProperties {
-  name: string;
-}
-
-export interface IRowProperties {
-  [key: string]: any;
+  name?: string;
+  expression?: string;
+  rawExpression?: string;
 }
 
 export interface ILinkProperties {
@@ -75,20 +73,36 @@ export interface ITableLinkProperties extends ILinkProperties {
   labels?: IRowLabel[];
 }
 
-export interface ITableProperties {
+export interface ICreateColumnsProperties {
   columns?: IColumnProperties[];
-  rows?: IRowProperties[];
-  beforeId?: string | string[];
-  name?: string;
-  expression?: string;
-  rawExpression?: string;
 }
+
+export type IUpdateColumnsProperties = IColumnProperties | IColumnProperties[];
+
+export interface IUpdateTableProperties {
+  name?: string;
+}
+export interface ICreateTableProperties extends IUpdateTableProperties, ICreateColumnsProperties {
+}
+
+export type IRowProperties = Record<string, string | number | null | undefined>;
+
+export interface ICreateRowsProperties {
+  rows: IRowProperties[];
+  beforeId?: string | string[];
+}
+
+export type IUpdateRowsProperties = IRowProperties | IRowProperties[];
+
+export type ITableChangeProperties = ICreateTableProperties | IUpdateTableProperties |
+                                      ICreateColumnsProperties | IUpdateColumnsProperties |
+                                      ICreateRowsProperties | IUpdateRowsProperties;
 
 export interface ITableChange {
   action: "create" | "update" | "delete";
   target: "table" | "rows" | "columns" | "geometryLink";
   ids?: string | string[];
-  props?: ITableProperties;
+  props?: ITableChangeProperties;
   links?: ILinkProperties;
 }
 
@@ -155,11 +169,11 @@ export const TableContentModel = types
   .preProcessSnapshot(snapshot => {
     const s = snapshot as any;
     // handle import format
-    if (s && s.columns) {
+    if (s?.columns) {
       return { isImported: true, changes: convertImportToChanges(s) };
     }
     // handle early change formats
-    if (s && s.changes && s.changes.length) {
+    if (s?.changes?.length) {
       const { changes, ...snapOthers } = s;
       const parsedChanges = changes.map((change: string) => safeJsonParse(change));
       const isConversionRequired = parsedChanges.some((c: any) => {
@@ -250,7 +264,7 @@ export const TableContentModel = types
     appendChange(change: ITableChange) {
       self.changes.push(JSON.stringify(change));
 
-      const toolId = self.metadata && self.metadata.id || "";
+      const toolId = self.metadata?.id || "";
       Logger.logToolChange(LogEventName.TABLE_TOOL_CHANGE, change.action, change, toolId);
     }
   }))
@@ -311,7 +325,7 @@ export const TableContentModel = types
             action: "update",
             target: "rows",
             ids,
-            props: values as ITableProperties,
+            props: values,
             links
       });
     },
@@ -373,26 +387,25 @@ export const TableContentModel = types
   }))
   .views(self => ({
     applyCreate(dataSet: IDataSet, change: ITableChange, dataSetOnly = false) {
-      const tableProps = change && change.props as ITableProperties;
       switch (change.target) {
         case "table":
         case "columns": {
-          (tableProps?.name != null) && dataSet.setName(tableProps.name);
-          const columns = tableProps && tableProps.columns;
-          columns && columns.forEach((col: any, index: number) => {
-            const id = change.ids && change.ids[index] || uniqueId();
+          const props = change?.props as ICreateTableProperties;
+          (props?.name != null) && dataSet.setName(props.name);
+          props?.columns?.forEach((col: any, index: number) => {
+            const id = change.ids?.[index] || uniqueId();
             dataSet.addAttributeWithID({ id, ...col });
           });
           break;
         }
         case "rows": {
-          const rows = tableProps && tableProps.rows &&
-                        tableProps.rows.map((row: any, index: number) => {
-                          const id = change.ids && change.ids[index] || uniqueId();
-                          return { __id__: id, ...row };
-                        });
-          const beforeId = tableProps && tableProps.beforeId;
-          if (rows && rows.length) {
+          const props = change?.props as ICreateRowsProperties;
+          const rows = props?.rows?.map((row: any, index: number) => {
+                        const id = change.ids?.[index] || uniqueId();
+                        return { __id__: id, ...row };
+                      });
+          const beforeId = props?.beforeId;
+          if (rows?.length) {
             dataSet.addCanonicalCasesWithIDs(rows, beforeId);
             self.updateDatasetByExpressions(dataSet);
           }
@@ -410,12 +423,15 @@ export const TableContentModel = types
     applyUpdate(dataSet: IDataSet, change: ITableChange, dataSetOnly = false) {
       const ids = castArray(change.ids);
       switch (change.target) {
-        case "table":
-          (change.props?.name != null) && dataSet.setName(change.props.name);
+        case "table": {
+          const props = change.props as IUpdateTableProperties;
+          (props?.name != null) && dataSet.setName(props.name);
           break;
+        }
         case "columns": {
-          const colProps = change && change.props && castArray(change.props);
-          colProps && colProps.forEach((col: any, colIndex) => {
+          const props = change.props as IUpdateColumnsProperties;
+          const colProps = castArray(props);
+          colProps?.forEach((col: any, colIndex) => {
             each(col, (value, prop) => {
               switch (prop) {
                 case "name": {
@@ -439,7 +455,7 @@ export const TableContentModel = types
           break;
         }
         case "rows": {
-          const rowProps = change && change.props && castArray(change.props);
+          const rowProps = change?.props && castArray(change.props);
           if (rowProps) {
             rowProps.forEach((row: any, rowIndex) => {
               dataSet.setCanonicalCaseValues([{ __id__: ids[rowIndex], ...row }]);
@@ -454,12 +470,12 @@ export const TableContentModel = types
       const ids = change && castArray(change.ids);
       switch (change.target) {
         case "columns":
-          if (ids && ids.length) {
+          if (ids?.length) {
             ids.forEach(id => dataSet.removeAttribute(id));
           }
           break;
         case "rows":
-          if (ids && ids.length) {
+          if (ids?.length) {
             dataSet.removeCases(ids);
           }
           break;
@@ -554,7 +570,7 @@ export function convertImportToChanges(snapshot: any) {
 
   // create rows
   const rowCount = columns.reduce((max, col) => {
-                            const len = col.values && col.values.length || 0;
+                            const len = col.values?.length || 0;
                             return Math.max(max, len);
                           }, 0);
   const rows: any[] = [];
@@ -562,7 +578,7 @@ export function convertImportToChanges(snapshot: any) {
     const row: any = { __id__: uniqueId() };
     columnProps.forEach((col: any, colIndex) => {
       const values = columns[colIndex].values;
-      if (col && col.id && i < values.length) {
+      if (col?.id && i < values.length) {
         row[col.id] = values[i];
       }
     });

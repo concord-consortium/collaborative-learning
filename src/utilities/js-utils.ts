@@ -54,6 +54,19 @@ export function uniqueId(idLength = 16): string {
 }
 
 /*
+ * uniqueTitle()
+ *
+ * returns a unique title from a given base name, adding a unique numeric suffix
+ */
+export function uniqueTitle(base: string, isValid: (name: string) => boolean) {
+  let name: string;
+  for (let i = 1; !isValid(name = `${base} ${i}`); ++i) {
+    // nothing to do
+  }
+  return name;
+}
+
+/*
  * uniqueName()
  *
  * returns a unique name from a given base name, adding a numeric suffix if necessary

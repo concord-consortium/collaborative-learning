@@ -28,6 +28,7 @@ import "../../utilities/dom-utils";
 import "./tool-tile.sass";
 
 export interface IToolApi {
+  getTitle?: () => string | undefined;
   hasSelection?: () => boolean;
   deleteSelection?: () => void;
   getSelectionInfo?: () => string;
@@ -85,6 +86,7 @@ interface IToolTileBaseProps {
   model: ToolTileModelType;
   readOnly?: boolean;
   onSetCanAcceptDrop: (tileId?: string) => void;
+  onRequestUniqueTitle: (tileId: string) => string | undefined;
   onRequestRowHeight: (tileId: string, height?: number, deltaHeight?: number) => void;
 }
 
