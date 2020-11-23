@@ -103,6 +103,10 @@ $modal-footer-height: 45px;
       border-radius: $modal-control-border-radius;
       outline: none;
 
+      &.default {
+        background-color: $charcoal-light-6;
+      }
+
       &:hover, &:focus {
         background-color: $workspace-teal-light-4;
       }

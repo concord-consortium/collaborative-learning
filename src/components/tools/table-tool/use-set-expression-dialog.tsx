@@ -56,8 +56,8 @@ export const useSetExpressionDialog = ({ dataSet }: IProps) => {
     focusElement: "#expression-input",
     buttons: [
       { label: "Clear", onClick: () => { /* no-op */} },
-      { label: "Cancel", onClick: "cancel" },
-      { label: "OK", onClick: () => { /* no-op */} }
+      { label: "Cancel", onClick: "close" },
+      { label: "OK", isDefault: true, onClick: () => { /* no-op */} }
     ]
   }, [currYAttr]);
   return [showModal, hideModal];

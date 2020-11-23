@@ -12,27 +12,26 @@ interface IProps {
   Icon?: React.FC<any>;
   Content: React.FC<any>;
   focusElement?: string;
+  canCancel?: boolean;
   // defined left-to-right, e.g. Extra Button, Cancel, OK
   buttons: Array<{
     className?: string;
     label: string | React.FC<any>;
-    onClick: (() => void) | "cancel";
+    onClick: (() => void) | "close";
     isDefault?: boolean;
   }>;
   onClose?: () => void;
 }
 export const useCustomModal = ({
-  className, Icon, title, Content, focusElement, buttons, onClose
+  className, Icon, title, Content, focusElement, canCancel, buttons, onClose
 }: IProps, dependencies?: any[]) => {
 
   const contentElt = useRef<HTMLDivElement>();
 
   const handleAfterOpen = ({overlayEl, contentEl}: { overlayEl: Element, contentEl: HTMLDivElement }) => {
     contentElt.current = contentEl;
-    if (focusElement) {
-      const element = contentEl.querySelector(focusElement);
-      setTimeout(() => (element as HTMLElement)?.focus());
-    }
+    const element = focusElement && contentEl.querySelector(focusElement) || contentEl;
+    setTimeout(() => (element as HTMLElement)?.focus());
   };
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -58,7 +57,9 @@ export const useCustomModal = ({
   }, [handleKeyDown]);
 
   const [showModal, hideModal] = useModal(() => (
-    <Modal className={`custom-modal ${className}`} isOpen
+    <Modal className={`custom-modal ${className || ""}`} isOpen
+            shouldCloseOnEsc={canCancel}
+            shouldCloseOnOverlayClick={false}
             onAfterOpen={handleAfterOpen as any}
             onRequestClose={hideModal} onAfterClose={onClose}>
       <div className="modal-header">
@@ -66,18 +67,19 @@ export const useCustomModal = ({
           {Icon && <Icon/>}
         </div>
         <div className="modal-title">{title}</div>
-        <button type="button" className="modal-close" onClick={hideModal}>
-          <CloseIconSvg />
-        </button>
+        {canCancel !== false &&
+          <button type="button" className="modal-close" onClick={hideModal}>
+            <CloseIconSvg />
+          </button>}
       </div>
       <div className="modal-content">
         <Content/>
       </div>
       <div className="modal-footer">
         {buttons.map((b, i) => {
-          const classes = classNames("modal-button", b.className);
+          const classes = classNames("modal-button", b.className, { default: b.isDefault });
           const key = `${i}-${b.className}`;
-          const handleClick = b.onClick === "cancel" ? hideModal : b.onClick;
+          const handleClick = b.onClick === "close" ? hideModal : b.onClick;
           return (
             <button type="button" className={classes} key={key} onClick={handleClick}>
               {b.label}

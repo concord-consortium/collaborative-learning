@@ -2,7 +2,6 @@ import React from "react";
 import { inject, observer } from "mobx-react";
 import { SizeMeProps } from "react-sizeme";
 import { BaseComponent } from "../../base";
-import { Alert, Intent } from "@blueprintjs/core";
 import { DocumentContentModelType } from "../../../models/document/document-content";
 import { getLinkedTableIndex, getTableLinkColors } from "../../../models/tools/table-links";
 import { getTableContent } from "../../../models/tools/table/table-content";
@@ -39,6 +38,7 @@ import AxisSettingsDialog from "./axis-settings-dialog";
 import LabelSegmentDialog from "./label-segment-dialog";
 import MovableLineDialog from "./movable-line-dialog";
 import placeholderImage from "../../../assets/image_placeholder.png";
+import ErrorAlert from "../../utilities/error-alert";
 import SingleStringDialog from "../../utilities/single-string-dialog";
 import { autorun } from "mobx";
 
@@ -506,19 +506,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     if (!showInvalidTableDataAlert) return;
 
     return (
-      <Alert
-          confirmButtonText="OK"
-          icon="error"
-          intent={Intent.DANGER}
-          isOpen={true}
-          onClose={this.handleCloseInvalidTableDataAlert}
-          canEscapeKeyCancel={true}
-          key={"invalid-table-alert"}
-      >
-        <p>
-          Linked data must be numeric. Please edit the table values so that all cells contain numbers.
-        </p>
-      </Alert>
+      <ErrorAlert
+        content="Linked data must be numeric. Please edit the table values so that all cells contain numbers."
+        onClose={this.handleCloseInvalidTableDataAlert}
+      />
     );
   }
 
