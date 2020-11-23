@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { useCallback } from "react";
 import { DataGridHandle } from "react-data-grid";
 import { ICase, IDataSet } from "../../../models/data/data-set";
 import { TableContentModelType } from "../../../models/tools/table/table-content";
@@ -27,17 +27,17 @@ interface IUseDataSet {
   triggerColumnChange: () => void;
   rowChanges: number;
   readOnly: boolean;
-  getTitleWidthFromColumns: (columns: TColumn[]) => number;
-  showRowLabels: boolean;
   inputRowId: React.MutableRefObject<string>;
-  setShowRowLabels: (show: boolean) => void;
+  selectedCell: React.MutableRefObject<TPosition>;
+  RowLabelHeader: React.FC<any>;
+  RowLabelFormatter: React.FC<any>;
+  getTitleWidthFromColumns: (columns: TColumn[]) => number;
   onRequestRowHeight: (options: { height?: number, deltaHeight?: number }) => void;
 }
 export const useDataSet = ({
-  gridRef, gridContext, model, dataSet, columnChanges, triggerColumnChange, rowChanges,
-  readOnly, inputRowId, showRowLabels, setShowRowLabels, getTitleWidthFromColumns, onRequestRowHeight
+  gridRef, gridContext, model, dataSet, columnChanges, triggerColumnChange, rowChanges, readOnly,
+  inputRowId, selectedCell, RowLabelHeader, RowLabelFormatter, getTitleWidthFromColumns, onRequestRowHeight
 }: IUseDataSet) => {
-  const selectedCell = useRef<TPosition>({ rowIdx: -1, idx: -1 });
   const setColumnName = (column: TColumn, columnName: string) => {
     const content = model.content as TableContentModelType;
     !readOnly && content.setAttributeName(column.key, columnName);
@@ -51,8 +51,8 @@ export const useDataSet = ({
     !readOnly && content.removeCases([rowId]);
   };
   const { columns, onColumnResize } = useColumnsFromDataSet({
-                                        gridContext, dataSet, readOnly, inputRowId: inputRowId.current, columnChanges,
-                                        showRowLabels, setShowRowLabels, setColumnName, onAddColumn, onRemoveRow });
+    gridContext, dataSet, readOnly, columnChanges, RowLabelHeader, RowLabelFormatter,
+    setColumnName, onAddColumn, onRemoveRow });
   const onSelectedCellChange = (position: TPosition) => {
     const forward = (selectedCell.current.rowIdx < position.rowIdx) ||
                     ((selectedCell.current.rowIdx === position.rowIdx) &&

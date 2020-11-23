@@ -7,7 +7,6 @@ import {
 } from "./grid-types";
 import { useControlsColumn } from "./use-controls-column";
 import { useEditableColumnNames } from "./use-editable-column-names";
-import { useRowLabelColumn } from "./use-row-label-column";
 
 function estimateColumnWidthFromName(name: string) {
   // values taken from design spec
@@ -18,20 +17,18 @@ interface IUseColumnsFromDataSet {
   gridContext: IGridContext;
   dataSet: IDataSet;
   readOnly?: boolean;
-  inputRowId: string;
   columnChanges: number;
-  showRowLabels: boolean;
-  setShowRowLabels: (show: boolean) => void;
+  RowLabelHeader: React.FC<any>;
+  RowLabelFormatter: React.FC<any>;
   setColumnName: (column: TColumn, columnName: string) => void;
   onAddColumn: () => void;
   onRemoveRow: (rowId: string) => void;
 }
 export const useColumnsFromDataSet = ({
-  gridContext, dataSet, readOnly, inputRowId, columnChanges, showRowLabels,
-  setShowRowLabels, setColumnName, onAddColumn, onRemoveRow
+  gridContext, dataSet, readOnly, columnChanges, RowLabelHeader, RowLabelFormatter,
+  setColumnName, onAddColumn, onRemoveRow
 }: IUseColumnsFromDataSet) => {
   const { attributes } = dataSet;
-  const { RowLabelHeader, RowLabelFormatter } = useRowLabelColumn(inputRowId, showRowLabels, setShowRowLabels);
   const { ControlsHeaderRenderer, ControlsRowFormatter } = useControlsColumn({ readOnly, onAddColumn, onRemoveRow });
   const columnWidths = useRef<Record<string, number>>({});
 
