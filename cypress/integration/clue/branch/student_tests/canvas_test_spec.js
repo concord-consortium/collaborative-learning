@@ -405,7 +405,8 @@ context('Test Canvas', function () {
   context('delete elements from canvas', function () {
     before(() => {
       //star a document to verify delete
-      cy.getCanvasItemTitle('my-work', 'workspaces').contains('SAS 2.1 Drawing Wumps').parent().siblings('.icon-holder').find('.icon-star').click();
+      cy.openSection("my-work", "workspaces");
+      cy.get('.list.workspaces [data-test=workspaces-list-items] .footer').contains(renameTitlePencil).parents().siblings('.icon-holder').find('.icon-star').click();
       cy.openDocumentWithTitle('my-work', 'workspaces', 'SAS 2.1 Drawing Wumps');
     });
     it('will delete elements from canvas', function () {
@@ -456,23 +457,6 @@ context('Test Canvas', function () {
     it('verify starred document is no longer in the Starred section after delete', function () {
       cy.openSection('my-work', 'starred');
       cy.getCanvasItemTitle('my-work', 'starred').should('not.exist');
-    });
-    it('verify that published personal workspace', function () {
-      rightNav.openTopTab("my-work");
-      cy.openDocumentWithTitle('class-work', 'workspaces', publishTitle);
-      canvas.deleteDocument();
-      rightNav.shouldHaveDocumentWithTitle('class-work', 'published-personal-documents', publishTitle);
-    });
-    it.skip('verify delete of starred personal workspace', function () {
-      //TODO: should also delete document from Starred section
-    });
-    it('verify delete last document thumbnail', function () {//last document was deleted above
-      cy.openTab("my-work");
-      cy.openDocumentWithTitle('my-work', 'workspaces', renameTitlePencil);
-      canvas.deleteDocument();
-      rightNav.openTopTab("my-work");
-      cy.openSection("workspaces");
-      rightNav.getCanvasItemTitle("my-work","workspaces").should('have.length', 1);
     });
   });
 });

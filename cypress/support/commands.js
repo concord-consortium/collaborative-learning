@@ -115,16 +115,16 @@ Cypress.Commands.add("deleteWorkspaces",(baseUrl,queryParams)=>{
 
     });
 });
-Cypress.Commands.add("openTab", (tab) => {
-  cy.get('.nav-tab-buttons .tab-'+tab).click();
+Cypress.Commands.add("openTopTab", (tab) => {
+  cy.get('.nav-tab-panel .tab-'+tab).click();
 } );
 Cypress.Commands.add("openSubTab", (tab, subTab) => {
-  cy.get('.doc-tab.'+tab+'.'+subTab).click();
+  cy.get('.document-tabs.'+tab+'.'+subTab).click();
 } );
 Cypress.Commands.add("openSection", (tab, section) => {
   cy.get('.doc-tab.'+tab+'.'+section).click();
 });
-Cypress.Commands.add("getCanvasItemTitle", (tab, section) => {
+Cypress.Commands.add("getCanvasItemTitle", (section) => {
   cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer');
 });
 Cypress.Commands.add("openDocumentWithTitle", (tab, section, title) => {
