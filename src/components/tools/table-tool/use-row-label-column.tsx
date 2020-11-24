@@ -38,17 +38,19 @@ export const useRowLabelColumn = ({
     const handleClick = (e: React.MouseEvent) => {
       const hasModifier = e.ctrlKey || e.metaKey || e.shiftKey;
       const selected = hasModifier ? !isRowSelected : true;
-      if ((e.button === 0) && (selected !== isRowSelected)) {
-        if (hasModifier) {
-          onRowSelectionChange(selected, e.shiftKey);
-        }
-        else if (__id__ === inputRowId) {
-          // clear selection so navigation direction is always forward after click
-          selectedCell.current = { rowIdx: -1, idx: -1 };
-          __context__.onClearRowSelection();
-        }
-        else {
-          __context__.onSelectOneRow(__id__);
+      if (e.button === 0) {
+        // clear selection so navigation direction is always forward after click
+        selectedCell.current = { rowIdx: -1, idx: -1 };
+        if (selected !== isRowSelected) {
+          if (hasModifier) {
+            onRowSelectionChange(selected, e.shiftKey);
+          }
+          else if (__id__ === inputRowId) {
+            __context__.onClearRowSelection();
+          }
+          else {
+            __context__.onSelectOneRow(__id__);
+          }
         }
       }
     };
