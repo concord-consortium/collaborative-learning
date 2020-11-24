@@ -115,17 +115,23 @@ Cypress.Commands.add("deleteWorkspaces",(baseUrl,queryParams)=>{
 
     });
 });
+Cypress.Commands.add("openTab", (tab) => {
+  cy.get('.nav-tab-buttons .tab-'+tab).click();
+} );
 Cypress.Commands.add("openTopTab", (tab) => {
   cy.get('.nav-tab-panel .tab-'+tab).click();
 } );
-Cypress.Commands.add("openSubTab", (tab, subTab) => {
-  cy.get('.document-tabs.'+tab+'.'+subTab).click();
-} );
-Cypress.Commands.add("openSection", (tab, section) => {
+// Cypress.Commands.add("openSubTab", (tab, subTab) => {
+//   cy.get('.document-tabs.'+tab+'.'+subTab).click();
+// } );
+Cypress.Commands.add("openSection", (tab, section) => {//doc-tab my-work workspaces problem-documents selected
   cy.get('.doc-tab.'+tab+'.'+section).click();
 });
 Cypress.Commands.add("getCanvasItemTitle", (section) => {
   cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer');
+});
+Cypress.Commands.add("openDocumentThumbnail", (section,title) => { //opens thumbnail into the nav panel
+  cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer').contains(title).parent().parent().siblings('.scaled-list-item-container').click({force:true});
 });
 Cypress.Commands.add("openDocumentWithTitle", (tab, section, title) => {
   cy.openSection(tab,section);

@@ -20,7 +20,7 @@ context('Test the overall workspace', function () {
     });
     it('will verify clicking on subtab opens panel to subtab section', function () {
       const section = "learning-log";
-      cy.openSubTab('my-work', section);
+      cy.openSection('my-work', section);
       cy.get('[data-test=subtab-learning-log]').should('be.visible');
       cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer').should('contain', "My First Learning Log");
     });
