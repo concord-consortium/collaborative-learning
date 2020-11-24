@@ -52,7 +52,7 @@ export const EditableTableTitle: React.FC<IProps> = observer(({
   return (
     <div className={classes} style={style} onClick={handleClick}>
       {isEditing
-        ? <HeaderCellInput style={style} value={editingTitle}
+        ? <HeaderCellInput style={style} value={editingTitle || ""}
             onKeyDown={handleKeyDown} onChange={setEditingTitle} onClose={handleClose} />
         : title}
     </div>

@@ -1,12 +1,12 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import ReactDataGrid from "react-data-grid";
-import { DataSet } from "../../../models/data/data-set";
-import { TableContentModelType } from "../../../models/tools/table/table-content";
 import { IToolApi, IToolTileProps } from "../tool-tile";
 import { EditableTableTitle } from "./editable-table-title";
 import { TableToolbar } from "./table-toolbar";
+import { useModelDataSet } from "./use-model-data-set";
 import { useDataSet } from "./use-data-set";
 import { useGridContext } from "./use-grid-context";
+import { useRowLabelColumn } from "./use-row-label-column";
 import { useSetExpressionDialog } from "./use-set-expression-dialog";
 import { useTableTitle } from "./use-table-title";
 import { useToolbarToolApi } from "../hooks/use-toolbar-tool-api";
@@ -14,27 +14,16 @@ import { useToolbarToolApi } from "../hooks/use-toolbar-tool-api";
 import "react-data-grid/dist/react-data-grid.css";
 import "./table-tool.scss";
 
-const useContentDataSet = (content: TableContentModelType) => {
-  const tileDataSet = useRef(DataSet.create());
-  const isInitialized = useRef(false);
-  if (!isInitialized.current) {
-    content.applyChangesToDataSet(tileDataSet.current);
-    isInitialized.current = true;
-  }
-  return tileDataSet;
-};
-
 const TableToolComponent: React.FC<IToolTileProps> = ({
   documentContent, toolTile, model, readOnly,
   onRequestRowHeight, onRequestUniqueTitle, onRegisterToolApi, onUnregisterToolApi
 }) => {
-  const content = model.content as TableContentModelType;
-  const dataSet = useContentDataSet(content);
+  const { dataSet, columnChanges, triggerColumnChange, rowChanges } = useModelDataSet(model);
 
   const [showRowLabels, setShowRowLabels] = useState(false);
-  const { selectedCell, gridContext, ...gridProps } = useGridContext(showRowLabels);
+  const { ref: gridRef, gridContext, inputRowId, selectedCell, ...gridProps } = useGridContext(showRowLabels);
   const { getTitle, getTitleWidthFromColumns, onBeginTitleEdit, onEndTitleEdit } = useTableTitle({
-    gridContext, dataSet: dataSet.current, readOnly, onRequestUniqueTitle: () => onRequestUniqueTitle(model.id)
+    gridContext, model, dataSet: dataSet.current, readOnly, onRequestUniqueTitle: () => onRequestUniqueTitle(model.id)
   });
 
   const toolApi: IToolApi = useMemo(() => ({
@@ -45,12 +34,17 @@ const TableToolComponent: React.FC<IToolTileProps> = ({
     return () => onUnregisterToolApi();
   }, [onRegisterToolApi, onUnregisterToolApi, toolApi]);
 
+  const rowLabelProps = useRowLabelColumn({
+    inputRowId: inputRowId.current, selectedCell, showRowLabels, setShowRowLabels
+  });
+
   const handleRequestRowHeight = (options: { height?: number, delta?: number }) => {
     onRequestRowHeight(model.id, options.height, options.delta);
   };
   const { getTitleWidth, ...dataGridProps } = useDataSet({
-    gridContext, selectedCell, dataSet: dataSet.current, readOnly: !!readOnly, getTitleWidthFromColumns,
-    showRowLabels, setShowRowLabels, onRequestRowHeight: handleRequestRowHeight });
+    gridRef, gridContext, model, dataSet: dataSet.current, columnChanges, triggerColumnChange,
+    rowChanges, readOnly: !!readOnly, getTitleWidthFromColumns, selectedCell,
+    inputRowId, ...rowLabelProps, onRequestRowHeight: handleRequestRowHeight });
 
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
   const [showSetExpressionDialog] = useSetExpressionDialog({ dataSet: dataSet.current });
@@ -63,7 +57,7 @@ const TableToolComponent: React.FC<IToolTileProps> = ({
         <EditableTableTitle className="table-title" readOnly={readOnly}
           getTitle={getTitle} getTitleWidth={getTitleWidth}
           onBeginEdit={onBeginTitleEdit} onEndEdit={onEndTitleEdit} />
-        <ReactDataGrid className="rdg-light" {...gridProps} {...dataGridProps} />
+        <ReactDataGrid className="rdg-light" ref={gridRef} {...gridProps} {...dataGridProps} />
       </div>
     </div>
   );
