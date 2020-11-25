@@ -18,7 +18,7 @@ class TeacherDashboard {
         return cy.get('[data-test="investigation-title"]');
     }
     getProblemDropdown() {
-        return cy.get('.problem-dropdown[data-test="user-class"] .header');
+        return cy.get('.problem-dropdown[data-test="user-class"] .header .line-clamp');
     }
     getClassDropdown() {
         return cy.get('.class[data-test="user-class"] .header');
@@ -27,7 +27,7 @@ class TeacherDashboard {
         return cy.get('.problem-dropdown .list');
     }
     getClassList() {
-        return cy.get('.class .list');
+        return cy.get('.class[data-test="user-class"] .list');
     }
     getViewToggle(view) { //view=["Dashboard", "Workspace"]
         return cy.get('.toggle-button').contains(view);
