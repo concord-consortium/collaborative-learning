@@ -138,7 +138,7 @@ context('Test Canvas', function () {
         //TODO: not sure how to test this yet
       });
       it('verifies publish of investigation', function () {
-        canvas.publishCanvas();
+        canvas.publishCanvas("investigation");
         rightNav.openTopTab('class-work');
         cy.openSection('class-work', "problem-workspaces");
         rightNav.getCanvasItemTitle('class-work', 'problem-workspaces').should('contain', "Student 5: "+this.title);

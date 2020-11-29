@@ -109,7 +109,7 @@ describe('Test nav panel tabs', function () {
         cy.getCanvasItemTitle('learning-log').contains("Learning Log Copy").should("be.visible");
       });
       it('verify publish learning log', function () {
-        canvas.publishCanvas();
+        canvas.publishCanvas("personal");
         cy.openTopTab("class-work");
         cy.openSection("class-work", "learning-logs");
         cy.getCanvasItemTitle("learning-logs", "Learning Log Copy");
