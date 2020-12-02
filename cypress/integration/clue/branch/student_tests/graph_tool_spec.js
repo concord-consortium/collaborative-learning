@@ -56,15 +56,15 @@ context.skip('Test graph tool functionalities', function(){
     describe('restore points to canvas', function(){
         it('will verify restore of point at origin', function(){
             rightNav.openRightNavTab("my-work");
-            rightNav.openDocumentWithTitle('my-work','workspaces', problemDoc);
+            cy.openDocumentWithTitle('my-work','workspaces', problemDoc);
             graphToolTile.getGraphPointCoordinates().should('contain', '(0, 0)');
         });
         it('will verify restore of multiple points', function(){
-            rightNav.openDocumentWithTitle('my-work','workspaces', ptsDoc);
+            cy.openDocumentWithTitle('my-work','workspaces', ptsDoc);
             graphToolTile.getGraphPoint().should('have.length',3);
         });
         it('will verify restore of polygon', function(){
-            rightNav.openDocumentWithTitle('my-work','workspaces', polyDoc);
+            cy.openDocumentWithTitle('my-work','workspaces', polyDoc);
             graphToolTile.getGraphPolygon().should('exist');
         });
     });
@@ -73,7 +73,7 @@ context.skip('Test graph tool functionalities', function(){
         describe('interact with points and polygons', function(){
             it('will select a point', function(){
                 let point=4;
-                rightNav.openDocumentWithTitle('my-work','workspaces', ptsDoc);
+                cy.openDocumentWithTitle('my-work','workspaces', ptsDoc);
                 rightNav.closeRightNavTabs();
                 graphToolTile.getGraphTile().click({multiple: true});
                 graphToolTile.selectGraphPoint(10,10);
@@ -107,7 +107,7 @@ context.skip('Test graph tool functionalities', function(){
             it('will show and hide angles to a polygon', function(){
                 let numAngles=1;
                 rightNav.openRightNavTab("my-work");
-                rightNav.openDocumentWithTitle('my-work','workspaces', polyDoc);
+                cy.openDocumentWithTitle('my-work','workspaces', polyDoc);
                 rightNav.closeRightNavTabs();
                 graphToolTile.selectGraphPoint(4.2,2);
                 graphToolTile.selectGraphPoint(4.2,2);
@@ -183,7 +183,7 @@ context.skip('Test graph tool functionalities', function(){
             });
             it('will restore changes to a graph', function(){
                 rightNav.openRightNavTab("my-work");
-                rightNav.openDocumentWithTitle('my-work','workspaces', polyDoc);
+                cy.openDocumentWithTitle('my-work','workspaces', polyDoc);
                 graphToolTile.getAngleAdornment().should('exist').and('have.length',6);
             });
         });
@@ -191,7 +191,7 @@ context.skip('Test graph tool functionalities', function(){
         describe('delete points and polygons', function(){
             it('verify delete points with delete tool', function(){ //current behavior of text deletes the entire graph tool tile. Point selection has to be forced
                 let basePointCount = 3; // number of points already in doc2
-                rightNav.openDocumentWithTitle('my-work','workspaces', ptsDoc);
+                cy.openDocumentWithTitle('my-work','workspaces', ptsDoc);
                 graphToolTile.selectGraphPoint(15,2);
                 graphToolTile.deleteGraphElement();
                 graphToolTile.getGraphPoint().should('have.length', basePointCount -1);
@@ -203,7 +203,7 @@ context.skip('Test graph tool functionalities', function(){
                 // graphToolTile.getGraphPoint().should('have.length', basePointCount-3)
             });
             it('verify delete polygon',()=>{
-                rightNav.openDocumentWithTitle('my-work','workspaces', polyDoc);
+                cy.openDocumentWithTitle('my-work','workspaces', polyDoc);
 
                 graphToolTile.getGraphPolygon().last().click({force:true});
                 graphToolTile.deleteGraphElement();

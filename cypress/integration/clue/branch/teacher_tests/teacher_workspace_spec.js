@@ -43,13 +43,13 @@ describe.skip('teacher document functionality',function(){
         clueCanvas.addTile('drawing');
         canvas.copyDocument(teacherDoc);
         rightNav.openRightNavTab("my-work");
-        rightNav.openSection('my-work','workspaces');
+        cy.openSection('my-work','workspaces');
         rightNav.openCanvasItem('my-work','workspaces',teacherDoc);
         clueCanvas.addTile('table');
     });
     it('verify save and restore investigation',function(){
         rightNav.openRightNavTab("my-work");
-        rightNav.openSection("my-work","investigations");
+        cy.openSection("my-work","investigations");
         rightNav.getCanvasItemTitle("my-work","investigations",this.investigationTitle).should('exist');
         rightNav.openCanvasItem("my-work","investigations",this.investigationTitle);
         cy.wait(2000);
@@ -58,7 +58,7 @@ describe.skip('teacher document functionality',function(){
     });
     it('verify save and restore extra workspace',function(){
         rightNav.openRightNavTab("my-work");
-        rightNav.openSection("my-work","workspaces");
+        cy.openSection("my-work","workspaces");
         rightNav.getCanvasItemTitle("my-work","workspaces",teacherDoc).should('exist');
         rightNav.openCanvasItem("my-work","workspaces",teacherDoc);
         cy.wait(2000);

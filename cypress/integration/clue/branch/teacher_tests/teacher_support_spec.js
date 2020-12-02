@@ -33,7 +33,7 @@ import TableToolTile from "../../../../support/elements/clue/TableToolTile";
             clueCanvas.addTile('table');
             clueCanvas.publishSupportDoc();
             rightNav.openRightNavTab('supports');
-            rightNav.openSection('supports','teacher-supports');
+            cy.openSection('supports','teacher-supports');
             rightNav.getCanvasItemTitle('supports','teacher-supports').should('contain',title);
         });
     });
@@ -49,7 +49,7 @@ import TableToolTile from "../../../../support/elements/clue/TableToolTile";
             });
             it('verify teacher support is visible in student rightnav', function() {
                 rightNav.openRightNavTab('supports');
-                rightNav.openSection('supports', 'teacher-supports');
+                cy.openSection('supports', 'teacher-supports');
                 rightNav.getCanvasItemTitle('supports', 'teacher-supports', title).should('be.visible');
             });
             it('verify supports open in 2up view righthand workspace', () => {

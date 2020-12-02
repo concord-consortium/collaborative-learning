@@ -8,6 +8,7 @@ import MovableLineSvg from "../../../clue/assets/icons/geometry/movable-line.svg
 // generic icons
 import CommentSvg from "../../../assets/icons/comment/comment.svg";
 import DeleteSvg from "../../../assets/icons/delete/delete-selection-icon.svg";
+import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
 
 type SvgComponent = React.FC<React.SVGProps<SVGSVGElement>>;
 
@@ -36,27 +37,27 @@ export const GeometryToolButton: React.FC<IGeometryToolButtonProps> = ({
  */
 const kTooltipYDistance = 2;
 export const AngleLabelButton: React.FC<IClientToolButtonProps> = (props) => {
+  const tooltipOptions = useTooltipOptions({ distance: kTooltipYDistance });
   return (
-    <Tooltip title="Angle label" position="bottom" distance={kTooltipYDistance} size="small"
-              animation="fade" animateFill={false}>
+    <Tooltip title="Angle label" {...tooltipOptions}>
       <GeometryToolButton SvgComponent={AngleLabelSvg} className="angle-label" {...props}/>
     </Tooltip>
   );
 };
 
 export const DuplicateButton: React.FC<IClientToolButtonProps> = (props) => {
+  const tooltipOptions = useTooltipOptions({ distance: kTooltipYDistance });
   return (
-    <Tooltip title="Duplicate" position="bottom" distance={kTooltipYDistance} size="small"
-              animation="fade" animateFill={false}>
+    <Tooltip title="Duplicate" {...tooltipOptions}>
       <GeometryToolButton SvgComponent={CopyPolygonSvg} className="duplicate" {...props}/>
     </Tooltip>
   );
 };
 
 export const MovableLineButton: React.FC<IClientToolButtonProps> = (props) => {
+  const tooltipOptions = useTooltipOptions({ distance: kTooltipYDistance });
   return (
-    <Tooltip title="Movable line" position="bottom" distance={kTooltipYDistance} size="small"
-              animation="fade" animateFill={false}>
+    <Tooltip title="Movable line" {...tooltipOptions}>
       <GeometryToolButton SvgComponent={MovableLineSvg} className="movable-line" {...props}/>
     </Tooltip>
   );
@@ -66,18 +67,18 @@ export const MovableLineButton: React.FC<IClientToolButtonProps> = (props) => {
  * Generic buttons
  */
 export const CommentButton: React.FC<IClientToolButtonProps> = (props) => {
+  const tooltipOptions = useTooltipOptions({ distance: kTooltipYDistance });
   return (
-    <Tooltip title="Comment" position="bottom" distance={kTooltipYDistance} size="small"
-              animation="fade" animateFill={false}>
+    <Tooltip title="Comment" {...tooltipOptions}>
       <GeometryToolButton SvgComponent={CommentSvg} className="comment" {...props}/>
     </Tooltip>
   );
 };
 
 export const DeleteButton: React.FC<IClientToolButtonProps> = (props) => {
+  const tooltipOptions = useTooltipOptions({ distance: kTooltipYDistance });
   return (
-    <Tooltip title="Delete" position="bottom" distance={kTooltipYDistance} size="small"
-              animation="fade" animateFill={false}>
+    <Tooltip title="Delete" {...tooltipOptions}>
       <GeometryToolButton SvgComponent={DeleteSvg} className="delete" {...props}/>
     </Tooltip>
   );

@@ -6,33 +6,9 @@ import { Logger, LogEventName } from "../../../lib/logger";
 
 export const kDrawingToolID = "Drawing";
 
-export const kDrawingDefaultHeight = 320;
-export const TOOLBAR_WIDTH = 48;
+export const kDrawingDefaultHeight = 180;
 
 export type ToolbarModalButton = "select" | "line" | "vector" | "rectangle" | "ellipse" | "stamp";
-
-export interface Color {
-  name: string;
-  hex: string;
-}
-
-export const colors: Color[] = [
-  {name: "Aqua",    hex: "#00FFFF"},
-  {name: "Black",   hex: "#000000"},
-  {name: "Blue",    hex: "#0000FF"},
-  {name: "Fuchsia", hex: "#FF00FF"},
-  {name: "Gray",    hex: "#808080"},
-  {name: "Green",   hex: "#008000"},
-  {name: "Lime",    hex: "#00FF00"},
-  {name: "Maroon",  hex: "#800000"},
-  {name: "Navy",    hex: "#000080"},
-  {name: "Olive",   hex: "#808000"},
-  {name: "Purple",  hex: "#800080"},
-  {name: "Red",     hex: "#FF0000"},
-  {name: "Silver",  hex: "#C0C0C0"},
-  {name: "Teal",    hex: "#008080"},
-  {name: "Yellow",  hex: "#FFFF00"}
-];
 
 export interface ToolbarSettings {
   stroke: string;
@@ -48,7 +24,7 @@ export const DefaultToolbarSettings: ToolbarSettings = {
   strokeWidth: 2
 };
 
-export const computeStrokeDashArray = (type: string, strokeWidth: string|number) => {
+export const computeStrokeDashArray = (type?: string, strokeWidth?: string|number) => {
   const dotted = strokeWidth;
   const dashed = (strokeWidth as number) * 3;
   switch (type) {
@@ -109,7 +85,11 @@ export const DrawingToolMetadataModel = types
   })
   .actions(self => ({
     setSelectedButton(button: ToolbarModalButton) {
-      self.selectedButton = button;
+      if (self.selectedButton !== button) {
+        self.selectedButton = button;
+        // clear selection on tool mode change
+        self.selection.clear();
+      }
     },
     setSelection(selection: string[]) {
       self.selection.replace(selection);
@@ -134,10 +114,35 @@ export const DrawingContentModel = types
     strokeDashArray: DefaultToolbarSettings.strokeDashArray,
     strokeWidth: DefaultToolbarSettings.strokeWidth,
     stamps: types.array(StampModel),
+    // is type.maybe to avoid need for migration
     currentStampIndex: types.maybe(types.number)
   })
   .volatile(self => ({
     metadata: undefined as any as DrawingToolMetadataModelType
+  }))
+  .views(self => ({
+    get isUserResizable() {
+      return true;
+    },
+    isSelectedButton(button: ToolbarModalButton) {
+      return button === self.metadata.selectedButton;
+    },
+    get selectedButton() {
+      return self.metadata.selectedButton;
+    },
+    get hasSelectedObjects() {
+      return self.metadata.selection.length > 0;
+    },
+    get currentStamp() {
+      const currentStampIndex = self.currentStampIndex || 0;
+      return currentStampIndex < self.stamps.length
+              ? self.stamps[currentStampIndex]
+              : null;
+    },
+    get toolbarSettings(): ToolbarSettings {
+      const { stroke, fill, strokeDashArray, strokeWidth } = self;
+      return { stroke, fill, strokeDashArray, strokeWidth };
+    }
   }))
   .extend(self => {
 
@@ -189,25 +194,6 @@ export const DrawingContentModel = types
     }
 
     return {
-      views: {
-        get isUserResizable() {
-          return true;
-        },
-        get selectedButton() {
-          return self.metadata.selectedButton;
-        },
-        get hasSelectedObjects() {
-          return self.metadata.selection.length > 0;
-        },
-        get currentStamp() {
-          // is type.maybe to avoid need for migration
-          const currentStampIndex = self.currentStampIndex || 0;
-          if (currentStampIndex < self.stamps.length) {
-            return self.stamps[currentStampIndex];
-          }
-          return null;
-        }
-      },
       actions: {
         doPostCreate(metadata: DrawingToolMetadataModelType) {
           self.metadata = metadata;
