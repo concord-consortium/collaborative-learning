@@ -1,5 +1,18 @@
 # Changelog
 
+## Version 1.5.2 - released December 1, 2020
+
+### Features/Improvements
+- Draw toolbar styling improvements
+- Content updates
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 502,372 bytes | -2.9% |
+| index.js | 4,964,769 bytes | 0.3% |
+
 ## Version 1.5.1 - released November 8, 2020
 
 ### Bugs Fixed
