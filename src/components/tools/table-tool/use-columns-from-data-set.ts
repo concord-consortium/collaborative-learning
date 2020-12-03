@@ -1,14 +1,14 @@
 import classNames from "classnames";
 import { useCallback, useMemo, useRef, useState } from "react";
-import { TextEditor } from "react-data-grid";
 import { IDataSet } from "../../../models/data/data-set";
 import { TableMetadataModelType } from "../../../models/tools/table/table-content";
+import CellTextEditor from "./cell-text-editor";
 import { ColumnHeaderCell } from "./column-header-cell";
 import {
   IGridContext, kControlsColumnKey, kControlsColumnWidth, kIndexColumnKey, kIndexColumnWidth, TColumn, TFormatterProps
 } from "./table-types";
+import { useColumnExtensions } from "./use-column-extensions";
 import { useControlsColumn } from "./use-controls-column";
-import { useEditableColumnHeaders } from "./use-editable-column-headers";
 import { useNumberFormat } from "./use-number-format";
 
 function estimateColumnWidthFromName(name: string) {
@@ -62,7 +62,7 @@ export const useColumnsFromDataSet = ({
       resizable: !readOnly,
       headerRenderer: ColumnHeaderCell,
       formatter: CellFormatter,
-      editor: !readOnly && !metadata.hasExpression(attr.id) ? TextEditor : undefined,
+      editor: !readOnly && !metadata.hasExpression(attr.id) ? CellTextEditor : undefined,
       editorOptions: {
         editOnClick: !readOnly
       }
@@ -100,7 +100,7 @@ export const useColumnsFromDataSet = ({
   }, [ControlsHeaderRenderer, ControlsRowFormatter, RowLabelHeader, RowLabelFormatter,
       attributes, columnChanges, columnEditingName, metadata, readOnly]);
 
-  useEditableColumnHeaders({
+  useColumnExtensions({
     gridContext, metadata, readOnly, columns, columnEditingName,
     setColumnEditingName: handleSetColumnEditingName, setColumnName });
 

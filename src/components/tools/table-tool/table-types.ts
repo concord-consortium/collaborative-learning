@@ -30,6 +30,8 @@ export interface TColumnAppData {
   onBeginHeaderCellEdit?: () => boolean | undefined;
   onHeaderCellEditKeyDown?: (e: React.KeyboardEvent<HTMLDivElement>) => void;
   onEndHeaderCellEdit?: (value?: string) => void;
+  onBeginBodyCellEdit?: () => boolean | undefined;
+  onEndBodyCellEdit?: (value?: string) => void;
 }
 export interface TColumn extends Column<TRow> {
   appData?: TColumnAppData;
