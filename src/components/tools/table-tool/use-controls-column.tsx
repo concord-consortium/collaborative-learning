@@ -23,8 +23,9 @@ export const useControlsColumn = ({ readOnly, onAddColumn, onRemoveRow }: IUseCo
   }, [addColumnTooltipOptions, onAddColumn, readOnly]);
 
   const removeRowTooltipOptions = useTooltipOptions({ title: "Remove row", distance: kTooltipDistance });
-  const ControlsRowFormatter: React.FC<TFormatterProps> = useCallback(({ row, isRowSelected }) => {
-    return !readOnly && isRowSelected
+  const ControlsRowFormatter: React.FC<TFormatterProps> = useCallback(({ rowIdx, row, isRowSelected }) => {
+    const showRemoveButton = !readOnly && (isRowSelected || row.__context__.isSelectedCellInRow(rowIdx));
+    return showRemoveButton
             ? <Tooltip {...removeRowTooltipOptions}>
                 <RemoveRowButton rowId={row.__id__} onRemoveRow={onRemoveRow} />
               </Tooltip>

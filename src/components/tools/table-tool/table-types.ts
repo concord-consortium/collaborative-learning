@@ -6,6 +6,7 @@ export const kControlsColumnWidth = 36;
 
 export interface IGridContext {
   showRowLabels: boolean;
+  isSelectedCellInRow: (rowIdx: number) => boolean;
   onSelectOneRow: (row: string) => void;
   onClearRowSelection: () => void;
   onClearCellSelection: () => void;
