@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useLayoutEffect, useRef, useState } from "react";
 import SetExpressionIconSvg from "../../../clue/assets/icons/table/set-expression-icon.svg";
 import { useCurrent } from "../../../hooks/use-current";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
@@ -18,60 +18,30 @@ export const useSetExpressionDialog = ({ dataSet, rawExpressions, canonicalExpre
   const xName = useCurrent(dataSet.attributes.length > 0
                             ? dataSet.attributes[0].name
                             : "x");
-  const firstYAttr = useCurrent(dataSet.attributes.length > 1 ? dataSet.attributes[1] : undefined);
   const [currYAttrId, setCurrYAttrId] = useState<string>();
-  const [expressions, setExpressions] = useEditableExpressions(rawExpressions, canonicalExpressions, xName.current);
-  const selectElt = useRef<HTMLSelectElement>(null);
-  const inputElt = useRef<HTMLInputElement>(null);
-  const Content: React.FC = useCallback(() => {
-    const currYAttr = currYAttrId ? dataSet.attrFromID(currYAttrId) : firstYAttr.current;
-    const yAttrs = dataSet.attributes.length <= 2
-                    ? <span className="attr-name y">{currYAttr?.name}</span>
-                    : <select ref={selectElt} value={currYAttr?.id}
-                              onChange={e => {
-                                setCurrYAttrId(e.target.value);
-                                setTimeout(() => selectElt.current?.focus());
-                              }}>
-                        {dataSet.attributes
-                          .filter((attr, i) => (i >= 1))
-                          .map(attr => <option key={attr.id} value={attr.id}>{attr.name}</option>)}
-                      </select>;
-    const placeholder = `e.g. 3*${xName.current}+2`;
-    const expression = currYAttr && expressions.get(currYAttr.id) || "";
-    const errorMessage = validateExpression(expression, xName.current);
+  // map of attribute ids to current editable expressions
+  const expressions = useEditableExpressions(rawExpressions, canonicalExpressions, xName.current);
+  // the currently edited expression (controlled input)
+  const [expression, setExpression] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<string>("");
+  const updateExpression = useCallback((expr: string) => {
+    setExpression(expr);
+    setErrorMessage(validateExpression(expr, xName.current) || "");
+  }, [xName]);
+  const contentProps: IContentProps = {
+          dataSet, xName: xName.current, currYAttrId, setCurrYAttrId,
+          expressions, expression, errorMessage, updateExpression
+        };
 
-    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-      const expr = e.target.value;
-      currYAttr && setExpressions(state => new Map(state.set(currYAttr.id, expr)));
-    };
-
-    return (
-      <>
-        <div className="prompt">
-          <span>Enter an expression for</span>
-          {yAttrs}
-          <span>in terms of</span>
-          <span className="attr-name x">{xName.current}</span>
-          <span>:</span>
-        </div>
-        <div className="expression">
-          <label htmlFor="expression-input">
-            <span className="attr-name y">{currYAttr?.name}</span>
-            <span className="equals">=</span>
-          </label>
-          <input ref={inputElt} type="text" id="expression-input" placeholder={placeholder}
-                  defaultValue={expression} onBlur={handleBlur}/>
-        </div>
-        <div className="error">
-          {errorMessage}
-        </div>
-      </>
-    );
-  }, [currYAttrId, dataSet, expressions, firstYAttr, setExpressions, xName]);
+  const handleClear = () => {
+    blurModal();
+    updateExpression("");
+  };
 
   const handleSubmit = () => {
+    blurModal();
     const changedExpressions: Map<string, string> = new Map();
-    expressions.forEach((expr, id) => {
+    expressions.current.forEach((expr, id) => {
       if (expr !== (rawExpressions.get(id) || "")) {
         changedExpressions.set(id, expr);
       }
@@ -80,17 +50,85 @@ export const useSetExpressionDialog = ({ dataSet, rawExpressions, canonicalExpre
     hideModal();
   };
 
-  const [showModal, hideModal] = useCustomModal({
+  const [showModal, hideModal, blurModal] = useCustomModal({
     className: "set-expression",
     title: "Set Expression",
     Icon: SetExpressionIconSvg,
     Content,
+    contentProps,
     focusElement: "#expression-input",
     buttons: [
-      { label: "Clear", onClick: () => (inputElt.current && (inputElt.current.value = "")) },
+      { label: "Clear", onClick: handleClear },
       { label: "Cancel", onClick: "close" },
       { label: "OK", isDefault: true, onClick: handleSubmit }
     ]
-  }, [Content]);
+  }, [currYAttrId, errorMessage, expression]);
   return [showModal, hideModal];
+};
+
+interface IContentProps {
+  dataSet: IDataSet;
+  xName: string;
+  currYAttrId: string | undefined;
+  setCurrYAttrId: React.Dispatch<React.SetStateAction<string | undefined>>;
+  // map of attribute ids to editable expressions
+  expressions: React.MutableRefObject<Map<string, string>>;
+  // the currently edited expression (controlled input)
+  expression: string;
+  errorMessage: string;
+  updateExpression: (expr: string, isInitializing?: boolean) => void;
+}
+const Content: React.FC<IContentProps> = ({
+  dataSet, xName, currYAttrId, setCurrYAttrId, expressions, expression, errorMessage, updateExpression
+}) => {
+  const firstYAttr = useCurrent(dataSet.attributes.length > 1 ? dataSet.attributes[1] : undefined);
+  const currYAttr = currYAttrId ? dataSet.attrFromID(currYAttrId) : firstYAttr.current;
+  const selectElt = useRef<HTMLSelectElement>(null);
+  const inputElt = useRef<HTMLInputElement>(null);
+  const yAttrs = dataSet.attributes.length <= 2
+                  ? <span className="attr-name y">{currYAttr?.name}</span>
+                  : <select ref={selectElt} value={currYAttr?.id}
+                            onChange={e => {
+                              setCurrYAttrId(e.target.value);
+                              setTimeout(() => selectElt.current?.focus());
+                            }}>
+                      {dataSet.attributes
+                        .filter((attr, i) => (i >= 1))
+                        .map(attr => <option key={attr.id} value={attr.id}>{attr.name}</option>)}
+                    </select>;
+  const placeholder = `e.g. 3*${xName}+2`;
+  useLayoutEffect(() => {
+    currYAttr && updateExpression(expressions.current.get(currYAttr.id) || "");
+  }, [currYAttr]);  // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    updateExpression(e.target.value);
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    currYAttr && expressions.current.set(currYAttr.id, e.target.value);
+  };
+
+  return (
+    <>
+      <div className="prompt">
+        <span>Enter an expression for</span>
+        {yAttrs}
+        <span>in terms of</span>
+        <span className="attr-name x">{xName}</span>
+        <span>:</span>
+      </div>
+      <div className="expression">
+        <label htmlFor="expression-input">
+          <span className="attr-name y">{currYAttr?.name}</span>
+          <span className="equals">=</span>
+        </label>
+        <input ref={inputElt} type="text" id="expression-input" placeholder={placeholder} autoComplete="off"
+                value={expression} onChange={handleInputChange} onBlur={handleBlur}/>
+      </div>
+      <div className="error">
+        {errorMessage}
+      </div>
+    </>
+  );
 };

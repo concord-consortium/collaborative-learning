@@ -1,12 +1,11 @@
-import { useRef, useState } from "react";
+import { useLayoutEffect, useRef } from "react";
 import { prettifyExpression } from "./expression-utils";
 
 export const useEditableExpressions = (
   rawExpressions: Map<string, string>, canonicalExpressions: Map<string, string>, xName: string
 ) => {
-  const editExpressions = useRef<Map<string, string>>();
-  if (!editExpressions.current) {
-    editExpressions.current = new Map();
+  const editExpressions = useRef<Map<string, string>>(new Map());
+  useLayoutEffect(() => {
     rawExpressions.forEach((expr, attrId) => {
       // It's not entirely clear what the scenario is for having a canonical expression but not a
       // raw expression, but it's a use case supported by the prior code so we do as well.
@@ -14,6 +13,6 @@ export const useEditableExpressions = (
       const editExpr = expr || prettifyExpression(canonicalExpressions.get(attrId), xName);
       editExpr && editExpressions.current?.set(attrId, editExpr);
     });
-  }
-  return useState(editExpressions.current);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  return editExpressions;
 };

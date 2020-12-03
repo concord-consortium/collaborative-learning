@@ -6,11 +6,12 @@ import CloseIconSvg from "../assets/icons/close/close.svg";
 
 import "./custom-modal.scss";
 
-interface IProps {
+interface IProps<IContentProps> {
   className?: string;
   title: string | React.FC<any>;
   Icon?: React.FC<any>;
-  Content: React.FC<any>;
+  Content: React.FC<IContentProps>;
+  contentProps: IContentProps;
   focusElement?: string;
   canCancel?: boolean;
   // defined left-to-right, e.g. Extra Button, Cancel, OK
@@ -22,11 +23,16 @@ interface IProps {
   }>;
   onClose?: () => void;
 }
-export const useCustomModal = ({
-  className, Icon, title, Content, focusElement, canCancel, buttons, onClose
-}: IProps, dependencies?: any[]) => {
+export const useCustomModal = <IContentProps,>({
+  className, Icon, title, Content, contentProps, focusElement, canCancel, buttons, onClose
+}: IProps<IContentProps>, dependencies?: any[]) => {
 
   const contentElt = useRef<HTMLDivElement>();
+
+  const blurModal = useCallback(() => {
+    // focusing the content element blurs any input control
+    contentElt.current?.focus();
+  }, []);
 
   const handleAfterOpen = ({overlayEl, contentEl}: { overlayEl: Element, contentEl: HTMLDivElement }) => {
     contentElt.current = contentEl;
@@ -38,13 +44,13 @@ export const useCustomModal = ({
     if (e.key === "Enter") {
       const defaultButton = buttons.find(b => b.isDefault);
       if (defaultButton && (typeof defaultButton.onClick !== "string")) {
-        contentElt.current?.focus();
+        blurModal();
         defaultButton.onClick();
         e.stopPropagation();
         e.preventDefault();
       }
     }
-  }, [buttons]);
+  }, [blurModal, buttons]);
 
   const isKeyDownHandlerInstalled = useRef(false);
   useEffect(() => {
@@ -74,7 +80,7 @@ export const useCustomModal = ({
           </button>}
       </div>
       <div className="modal-content">
-        <Content/>
+        <Content {...(contentProps)}/>
       </div>
       <div className="modal-footer">
         {buttons.map((b, i) => {
@@ -90,5 +96,5 @@ export const useCustomModal = ({
       </div>
     </Modal>
   ), dependencies);
-  return [showModal, hideModal];
+  return [showModal, hideModal, blurModal];
 };

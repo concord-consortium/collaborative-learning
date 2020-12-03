@@ -30,6 +30,7 @@ export const useErrorAlert = ({
     title: title || "",
     Icon: ErrorSvg,
     Content,
+    contentProps: {},
     canCancel,
     buttons: [
       { label: buttonLabel || "OK", isDefault: true, onClick: onClick || "close" }
