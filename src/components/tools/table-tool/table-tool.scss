@@ -114,7 +114,7 @@ $controls-hover-background: #c0dfe7;
         .add-column-button {
           width: $controls-column-width;
           height: $row-height;
-          display: flex;
+          display: none;  // overridden when tile is selected
           justify-content: center;
           align-items: center;
           svg {
@@ -172,7 +172,7 @@ $controls-hover-background: #c0dfe7;
         .remove-row-button {
           width: $controls-column-width;
           height: $row-height;
-          display: flex;
+          display: none;  // overridden when tile is selected
           justify-content: center;
           align-items: center;
           svg {
@@ -214,6 +214,15 @@ $controls-hover-background: #c0dfe7;
       &.has-expression {
         background-color: $charcoal-light-5;
       }
+    }
+  }
+}
+
+.tool-tile.selected {
+  .table-tool {
+    .add-column-button, .remove-row-button {
+      // show buttons only when tile is selected
+      display: flex !important;
     }
   }
 }
