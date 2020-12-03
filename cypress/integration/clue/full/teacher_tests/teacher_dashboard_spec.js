@@ -17,7 +17,7 @@ let dashboard = new TeacherDashboard();
 
 // This test launches from portal and tests the master branch rather than the branch under development.
 // Only tests that test the branch under development should run as part of Travis branch tests.
-context.skip("Teacher Space", () => {
+context("Teacher Space", () => {
 
     const clueTeacher = {
         username: "clueteachertest",
@@ -48,25 +48,25 @@ context.skip("Teacher Space", () => {
                     // Check Investigation Name visibility
                     dashboard.getInvestigationTitle().should('be.visible').and('contain', clueData.investigationTitle);
                     // Check problem list  UI and visibility
-                    dashboard.getProblemList().should('not.have.attr','open');
+                    dashboard.getProblemList().should('not.have.class','show');
                     dashboard.getProblemDropdown().should('be.visible').click({ force: true });
-                    dashboard.getProblemList().should('exist').and('have.attr','open');
-                    dashboard.getProblemList().find('.Menuitem').should('have.length', tempClass.problemTotal);
+                    dashboard.getProblemList().should('exist').and('have.class','show');
+                    dashboard.getProblemList().find('.list-item').should('have.length', tempClass.problemTotal);
                     dashboard.getProblemDropdown().click({ force: true });
-                    dashboard.getProblemList().should('not.have.attr','open');
+                    dashboard.getProblemList().should('not.have.class','show');
                     // Check class list UI and visibility
-                    dashboard.getClassList().should('not.have.attr','open');
+                    dashboard.getClassList().should('not.have.class','show');
                     dashboard.getClassDropdown().should('contain',clueData.teacherName).and('contain',tempClass.className);
                     dashboard.getClassDropdown().should('be.visible').click({ force: true });
-                    dashboard.getClassList().should('exist').and('have.attr', 'open');
-                    dashboard.getClassList().find('.Menuitem').should('have.length', clueData.classes.length); // FIX THIS - currently shows all classes including inactive classes. Should only show active classes. Story in PT.
+                    dashboard.getClassList().should('exist').and('have.class', 'show');
+                    dashboard.getClassList().find('.list-item').should('have.length', clueData.classes.length); // FIX THIS - currently shows all classes including inactive classes. Should only show active classes. Story in PT.
                     dashboard.getClassDropdown().click({ force: true });
-                    dashboard.getClassList().should('not.have.attr','open');
+                    dashboard.getClassList().should('not.have.class','show');
                     // //Check Teacher Username visibility and content
                     // header.getUserName().should('be.visible').and('contain', clueData.teacherName)
                 });
             });
-            it.skip('verifies six pack and group names', () => { //check this test again
+            it('verifies six pack and group names', () => { //check this test again
                 cy.get('@clueData').then((clueData) => {
                     let tempGroupIndex = 0;
                     let groups = clueData.classes[0].problems[0].groups;
@@ -92,8 +92,8 @@ context.skip("Teacher Space", () => {
                     dashboard.getProblemDropdown().text().should('not.contain', problems[tempProblemIndex].problemTitle);
                     dashboard.getGroups().should('have.length',6);
                     dashboard.getProblemDropdown().click({ force: true }).then(() => {
-                        dashboard.getProblemList().should('have.attr','open');
-                        dashboard.getProblemList().find('.Menuitem').contains(problems[tempProblemIndex].problemTitle).click({ force: true });
+                        dashboard.getProblemList().should('have.class','show');
+                        dashboard.getProblemList().find('.list-item').contains(problems[tempProblemIndex].problemTitle).click({ force: true });
                         // cy.wait(1000)
                         cy.waitForSpinner();
                         tempProblemIndex += 1;
@@ -103,7 +103,7 @@ context.skip("Teacher Space", () => {
 
                     //switch back to original problem for later test
                     dashboard.getProblemDropdown().click({force:true});
-                    dashboard.getProblemList().find('.Menuitem').contains(problems[initProblemIndex].problemTitle).click({ force: true });
+                    dashboard.getProblemList().find('.list-item').contains(problems[initProblemIndex].problemTitle).click({ force: true });
                     // cy.wait(1000)
                     cy.waitForSpinner();
                 });
@@ -137,7 +137,7 @@ context.skip("Teacher Space", () => {
 
                     //switch back to original problem for later test
                     dashboard.getClassDropdown().click({force:true});
-                    dashboard.getClassList().find('.Menuitem').contains(initClassName).click({ force: true });
+                    dashboard.getClassList().find('.list-item').contains(initClassName).click({ force: true });
                     // cy.wait(1000)
                     cy.waitForSpinner();
                 });

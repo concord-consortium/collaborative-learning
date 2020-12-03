@@ -85,10 +85,10 @@ class RightNav{
     }
 
     starCanvasItem(tab,section,title){
-        this.getCanvasItemTitle(tab, section).contains(title).parent().siblings('.icon-holder').find('.icon-star').click();
+        cy.getCanvasItemTitle(section).contains(title).parent().parent().siblings('.icon-holder').find('.icon-star').click();
     }
     getCanvasStarIcon(tab,section,title){
-        return this.getCanvasItemTitle(tab, section).contains(title).parent().siblings('.icon-holder').find('.icon-star');
+        return this.getCanvasItemTitle(tab, section).contains(title).parent().parent().siblings('.icon-holder').find('.icon-star');
     }
 
     deleteSupport(index) {

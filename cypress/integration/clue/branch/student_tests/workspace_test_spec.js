@@ -1,14 +1,10 @@
-import LeftNav from '../../../../support/elements/clue/LeftNav';
-import RightNav from '../../../../support/elements/common/RightNav';
 import ClueCanvas from '../../../../support/elements/clue/cCanvas';
 import TextToolTile from '../../../../support/elements/clue/TextToolTile';
 
 const baseUrl = `${Cypress.config("baseUrl")}`;
 const queryParams = `${Cypress.config("queryParams")}`;
-let leftNav = new LeftNav,
-  rightNav = new RightNav,
-  clueCanvas = new ClueCanvas,
-  textToolTile = new TextToolTile;
+let clueCanvas = new ClueCanvas,
+    textToolTile = new TextToolTile;
 
 before(function () {
   cy.clearQAData('all');
@@ -24,7 +20,7 @@ context('Test the overall workspace', function () {
     });
     it('will verify clicking on subtab opens panel to subtab section', function () {
       const section = "learning-log";
-      cy.openSubTab('my-work', section);
+      cy.openSection('my-work', section);
       cy.get('[data-test=subtab-learning-log]').should('be.visible');
       cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer').should('contain', "My First Learning Log");
     });

@@ -38,7 +38,7 @@ context('test canvas tools', function(){
 
     describe('Test publish documents', function(){
         it('verify publish button', function(){
-            canvas.publishCanvas();
+            canvas.publishCanvas("investigation");
             canvas.getPublishIcon().should('exist');
             // canvas.getCopyIcon().should('exist');
         });
