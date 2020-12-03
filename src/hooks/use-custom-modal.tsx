@@ -38,6 +38,7 @@ export const useCustomModal = ({
     if (e.key === "Enter") {
       const defaultButton = buttons.find(b => b.isDefault);
       if (defaultButton && (typeof defaultButton.onClick !== "string")) {
+        contentElt.current?.focus();
         defaultButton.onClick();
         e.stopPropagation();
         e.preventDefault();
@@ -48,11 +49,11 @@ export const useCustomModal = ({
   const isKeyDownHandlerInstalled = useRef(false);
   useEffect(() => {
     if (!isKeyDownHandlerInstalled.current && contentElt.current) {
-      contentElt.current.addEventListener("keydown", handleKeyDown);
+      contentElt.current.addEventListener("keydown", handleKeyDown, true);
       isKeyDownHandlerInstalled.current = true;
     }
     return () => isKeyDownHandlerInstalled.current
-                  ? contentElt.current?.removeEventListener("keydown", handleKeyDown)
+                  ? contentElt.current?.removeEventListener("keydown", handleKeyDown, true)
                   : undefined;
   }, [handleKeyDown]);
 

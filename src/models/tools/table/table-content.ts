@@ -1,15 +1,16 @@
+import { Parser } from "expr-eval";
 import { types, Instance, SnapshotOut, IAnyStateTreeNode } from "mobx-state-tree";
 import { registerToolContentInfo } from "../tool-content-info";
 import { addLinkedTable } from "../table-links";
 import { IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
+import { canonicalizeExpression } from "../../../components/tools/table-tool/expression-utils";
+import { kSerializedXKey } from "../../../components/tools/table-tool/table-types";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { castArray, each } from "lodash";
 import { getGeometryContent } from "../geometry/geometry-content";
 import { JXGChange } from "../geometry/jxg-changes";
 import { getTileContentById } from "../../../utilities/mst-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
-import { Parser } from "expr-eval";
-import { kSerializedXKey } from "../../../components/tools/table-tool/update-expression-dialog";
 
 export const kTableToolID = "Table";
 export const kCaseIdName = "__id__";
@@ -119,6 +120,13 @@ export const TableMetadataModel = types
     },
     get linkCount() {
       return self.linkedGeometries.length;
+    },
+    get hasExpressions() {
+      return Array.from(self.expressions.values()).some(expr => !!expr) ||
+              Array.from(self.rawExpressions.values()).some(expr => !!expr);
+    },
+    hasExpression(attrId: string) {
+      return !!self.expressions.get(attrId) || !!self.rawExpressions.get(attrId);
     }
   }))
   .actions(self => ({
@@ -208,6 +216,9 @@ export const TableContentModel = types
     },
     getRowLabel(index: number) {
       return getRowLabel(index);
+    },
+    get hasExpressions() {
+      return self.metadata.hasExpressions;
     }
   }))
   .views(self => ({
@@ -305,6 +316,18 @@ export const TableContentModel = types
         target: "columns",
         ids: id,
         props: { expression, rawExpression }
+      });
+    },
+    setExpressions(rawExpressions: Map<string, string>, xName: string) {
+      self.appendChange({
+        action: "update",
+        target: "columns",
+        ids: Array.from(rawExpressions.keys()),
+        props: Array.from(rawExpressions.values())
+                    .map(rawExpr => ({
+                      expression: canonicalizeExpression(rawExpr, xName),
+                      rawExpression: rawExpr
+                    }))
       });
     },
     addCanonicalCases(cases: ICaseCreation[], beforeID?: string | string[], links?: ILinkProperties) {

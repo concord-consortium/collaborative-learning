@@ -3,8 +3,6 @@ import { observer } from "mobx-react";
 import React, { useState } from "react";
 import { HeaderCellInput } from "./header-cell-input";
 
-import "./editable-header-cell.scss";
-
 interface IProps {
   className?: string;
   readOnly?: boolean;

@@ -2,7 +2,7 @@ import { useCallback, useEffect } from "react";
 import { IDataSet } from "../../../models/data/data-set";
 import { TableContentModelType } from "../../../models/tools/table/table-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
-import { IGridContext, kControlsColumnWidth, TColumn } from "./grid-types";
+import { IGridContext, kControlsColumnWidth, TColumn } from "./table-types";
 
 interface IProps {
   gridContext: IGridContext;

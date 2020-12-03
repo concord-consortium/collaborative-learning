@@ -1,0 +1,49 @@
+@import "../../vars.sass";
+
+.column-header-cell {
+  width: 100%;
+  height: 100%;
+
+  .flex-container {
+    display: flex;
+    flex-direction: column;
+
+    .editable-header-cell {
+      width: 100%;
+      height: var(--row-height);
+      line-height: var(--row-height); // https://tutorialdeep.com/knowhow/align-text-vertically-center-css/
+
+      &.table-title-editing {
+        padding: 0 !important;
+
+        .rdg-text-editor:focus {
+          border-color: $highlight-blue;
+          outline: 0
+        }
+
+        input {
+          text-align: center;
+        }
+      }
+    }
+
+    .expression-cell {
+      width: 100%;
+      height: var(--row-height);
+      line-height: var(--row-height); // https://tutorialdeep.com/knowhow/align-text-vertically-center-css/
+      font-style: italic;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .expression-divider {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: var(--row-height);
+    height: 1px;
+    background-color: white;
+  }
+}

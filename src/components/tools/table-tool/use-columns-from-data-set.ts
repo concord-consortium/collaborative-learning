@@ -1,21 +1,34 @@
+import classNames from "classnames";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { TextEditor } from "react-data-grid";
 import { IDataSet } from "../../../models/data/data-set";
-import { EditableHeaderCell } from "./editable-header-cell";
+import { TableMetadataModelType } from "../../../models/tools/table/table-content";
+import { ColumnHeaderCell } from "./column-header-cell";
 import {
-  IGridContext, kControlsColumnKey, kControlsColumnWidth, kIndexColumnKey, kIndexColumnWidth, TColumn
-} from "./grid-types";
+  IGridContext, kControlsColumnKey, kControlsColumnWidth, kIndexColumnKey, kIndexColumnWidth, TColumn, TFormatterProps
+} from "./table-types";
 import { useControlsColumn } from "./use-controls-column";
-import { useEditableColumnNames } from "./use-editable-column-names";
+import { useEditableColumnHeaders } from "./use-editable-column-headers";
+import { useNumberFormat } from "./use-number-format";
 
 function estimateColumnWidthFromName(name: string) {
   // values taken from design spec
   return 62 + 9 * name.length;
 }
 
+const CellFormatter: React.FC<TFormatterProps> = ({ column, row }) => {
+  const formatter = useNumberFormat();
+  const value = row[column.key];
+  if ((value == null) || (value === "")) return "";
+  const num = Number(value);
+  if (!isFinite(num)) return value;
+  return formatter(num);
+};
+
 interface IUseColumnsFromDataSet {
   gridContext: IGridContext;
   dataSet: IDataSet;
+  metadata: TableMetadataModelType;
   readOnly?: boolean;
   columnChanges: number;
   RowLabelHeader: React.FC<any>;
@@ -25,11 +38,12 @@ interface IUseColumnsFromDataSet {
   onRemoveRow: (rowId: string) => void;
 }
 export const useColumnsFromDataSet = ({
-  gridContext, dataSet, readOnly, columnChanges, RowLabelHeader, RowLabelFormatter,
+  gridContext, dataSet, metadata, readOnly, columnChanges, RowLabelHeader, RowLabelFormatter,
   setColumnName, onAddColumn, onRemoveRow
 }: IUseColumnsFromDataSet) => {
   const { attributes } = dataSet;
   const { ControlsHeaderRenderer, ControlsRowFormatter } = useControlsColumn({ readOnly, onAddColumn, onRemoveRow });
+  // user-modified column widths aren't currently saved
   const columnWidths = useRef<Record<string, number>>({});
 
   const [columnEditingName, setColumnEditingName] = useState<string>();
@@ -39,14 +53,16 @@ export const useColumnsFromDataSet = ({
 
   const columns = useMemo(() => {
     const cols: TColumn[] = attributes.map(attr => ({
+      cellClass: classNames({ "has-expression": metadata.hasExpression(attr.id) }),
       headerCellClass: columnEditingName === attr.id ? "rdg-cell-editing" : undefined,
       name: attr.name,
       key: attr.id,
       width: columnWidths.current[attr.id] ||
               (columnWidths.current[attr.id] = estimateColumnWidthFromName(attr.name)),
       resizable: !readOnly,
-      headerRenderer: EditableHeaderCell,
-      editor: !readOnly ? TextEditor : undefined,
+      headerRenderer: ColumnHeaderCell,
+      formatter: CellFormatter,
+      editor: !readOnly && !metadata.hasExpression(attr.id) ? TextEditor : undefined,
       editorOptions: {
         editOnClick: !readOnly
       }
@@ -82,10 +98,10 @@ export const useColumnsFromDataSet = ({
     columnChanges;  // eslint-disable-line no-unused-expressions
     return cols;
   }, [ControlsHeaderRenderer, ControlsRowFormatter, RowLabelHeader, RowLabelFormatter,
-      attributes, columnChanges, columnEditingName, readOnly]);
+      attributes, columnChanges, columnEditingName, metadata, readOnly]);
 
-  useEditableColumnNames({
-    gridContext, readOnly, columns, columnEditingName,
+  useEditableColumnHeaders({
+    gridContext, metadata, readOnly, columns, columnEditingName,
     setColumnEditingName: handleSetColumnEditingName, setColumnName });
 
   const onColumnResize = useCallback((idx: number, width: number) => {

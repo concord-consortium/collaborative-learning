@@ -3,7 +3,7 @@ import { Tooltip } from "react-tippy";
 import AddColumnSvg from "../../../assets/icons/add/add.nosvgo.svg";
 import RemoveRowSvg from "../../../assets/icons/remove/remove.nosvgo.svg";
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
-import { TFormatterProps } from "./grid-types";
+import { TFormatterProps } from "./table-types";
 
 interface IUseControlsColumn {
   readOnly?: boolean;

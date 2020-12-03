@@ -12,6 +12,8 @@ export interface IGridContext {
   onClearSelection: () => void;
 }
 
+export const kSerializedXKey = "__x__";
+
 export const kIndexColumnKey = "__index__";
 export const kControlsColumnKey = "__controls__";
 export interface TRow extends Record<string, any> {
@@ -23,6 +25,8 @@ export interface TRow extends Record<string, any> {
 export interface TColumnAppData {
   editableName?: boolean;
   isEditing?: boolean;
+  showExpressions?: boolean;
+  expression?: string;
   onBeginHeaderCellEdit?: () => boolean | undefined;
   onHeaderCellEditKeyDown?: (e: React.KeyboardEvent<HTMLDivElement>) => void;
   onEndHeaderCellEdit?: (value?: string) => void;

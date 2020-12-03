@@ -4,7 +4,7 @@ import { ICase, IDataSet } from "../../../models/data/data-set";
 import { TableContentModelType } from "../../../models/tools/table/table-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { uniqueId, uniqueName } from "../../../utilities/js-utils";
-import { IGridContext, kRowHeight, TColumn, TPosition, TRow } from "./grid-types";
+import { IGridContext, kRowHeight, TColumn, TPosition, TRow } from "./table-types";
 import { useColumnsFromDataSet } from "./use-columns-from-data-set";
 import { useRowsFromDataSet } from "./use-rows-from-data-set";
 
@@ -38,6 +38,7 @@ export const useDataSet = ({
   gridRef, gridContext, model, dataSet, columnChanges, triggerColumnChange, rowChanges, readOnly,
   inputRowId, selectedCell, RowLabelHeader, RowLabelFormatter, getTitleWidthFromColumns, onRequestRowHeight
 }: IUseDataSet) => {
+  const metadata = (model.content as TableContentModelType).metadata;
   const setColumnName = (column: TColumn, columnName: string) => {
     const content = model.content as TableContentModelType;
     !readOnly && content.setAttributeName(column.key, columnName);
@@ -51,7 +52,7 @@ export const useDataSet = ({
     !readOnly && content.removeCases([rowId]);
   };
   const { columns, onColumnResize } = useColumnsFromDataSet({
-    gridContext, dataSet, readOnly, columnChanges, RowLabelHeader, RowLabelFormatter,
+    gridContext, dataSet, metadata, readOnly, columnChanges, RowLabelHeader, RowLabelFormatter,
     setColumnName, onAddColumn, onRemoveRow });
   const onSelectedCellChange = (position: TPosition) => {
     const forward = (selectedCell.current.rowIdx < position.rowIdx) ||
@@ -94,12 +95,9 @@ export const useDataSet = ({
     }
   };
 
-
   const { rows, rowKeyGetter, rowClass } = useRowsFromDataSet({
                                             dataSet, readOnly, inputRowId: inputRowId.current,
                                             rowChanges, context: gridContext});
-  const rowHeight = kRowHeight;
-  const headerRowHeight = kRowHeight;
   const onRowsChange = (_rows: TRow[]) => {
     // for now, assume that all changes are single cell edits
     const content = model.content as TableContentModelType;
@@ -130,6 +128,6 @@ export const useDataSet = ({
     triggerColumnChange();
   }, [onColumnResize, triggerColumnChange]);
   const getTitleWidth = () => getTitleWidthFromColumns(columns);
-  return { getTitleWidth, columns, rows, rowKeyGetter, rowClass, rowHeight, headerRowHeight,
+  return { getTitleWidth, columns, rows, rowKeyGetter, rowClass,
             onColumnResize: handleColumnResize, onRowsChange, onSelectedCellChange};
 };

@@ -1,8 +1,10 @@
+import classNames from "classnames";
 import { autorun } from "mobx";
 import { useEffect, useRef, useState } from "react";
 import { DataSet } from "../../../models/data/data-set";
 import { TableContentModelType } from "../../../models/tools/table/table-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
+import { kRowHeight } from "./table-types";
 
 /*
   Table state is stored in content as a sequence of changes/actions.
@@ -16,17 +18,24 @@ export const useModelDataSet = (model: ToolTileModelType) => {
   const triggerColumnChange = () => setColumnChanges(state => ++state);
   const [rowChanges, setRowChanges] = useState(0);
   const triggerRowChange = () => setRowChanges(state => ++state);
+
   useEffect(() => {
-    const content = model.content as TableContentModelType;
+    const _content = model.content as TableContentModelType;
     const disposer = autorun(() => {
-      if (syncedChanges.current < content.changes.length) {
-        const [hasColumnChanges, hasRowChanges] = content.applyChanges(dataSet.current, syncedChanges.current);
+      if (syncedChanges.current < _content.changes.length) {
+        const [hasColumnChanges, hasRowChanges] = _content.applyChanges(dataSet.current, syncedChanges.current);
         hasColumnChanges && triggerColumnChange();
         hasRowChanges && triggerRowChange();
-        syncedChanges.current = content.changes.length;
+        syncedChanges.current = _content.changes.length;
       }
     });
     return () => disposer();
   }, [model.content]);  // eslint-disable-line react-hooks/exhaustive-deps
-  return { dataSet, columnChanges, triggerColumnChange, rowChanges };
+
+  const content = model.content as TableContentModelType;
+  const className = classNames("rdg-light", { "show-expressions": content.hasExpressions });
+  const rowHeight = kRowHeight;
+  const headerRowHeight = content.hasExpressions ? 2 * rowHeight : rowHeight;
+  return { dataSet, columnChanges, triggerColumnChange, rowChanges, triggerRowChange,
+            className, rowHeight, headerRowHeight };
 };

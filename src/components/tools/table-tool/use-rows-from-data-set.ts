@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { IDataSet } from "../../../models/data/data-set";
-import { IGridContext, TRow } from "./grid-types";
+import { IGridContext, TRow } from "./table-types";
 
 interface IUseRowsFromDataSet {
   dataSet: IDataSet;
