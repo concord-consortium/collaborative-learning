@@ -10,7 +10,7 @@ interface IProps {
   setColumnEditingName: (column?: TColumn) => void;
   setColumnName: (column: TColumn, name: string) => void;
 }
-export const useEditableColumnHeaders = ({
+export const useColumnExtensions = ({
   gridContext, metadata, readOnly, columns, columnEditingName, setColumnEditingName, setColumnName
 }: IProps) => {
 
@@ -41,7 +41,10 @@ export const useEditableColumnHeaders = ({
       onEndHeaderCellEdit: (value?: string) => {
         !readOnly && (value != null) && setColumnName(column, value);
         setColumnEditingName();
-      }
+      },
+      onBeginBodyCellEdit: (() => {
+        gridContext.onClearRowSelection();
+      }) as any
     };
   });
 };

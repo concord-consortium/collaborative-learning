@@ -9,11 +9,13 @@ export const useGridContext = (showRowLabels: boolean) => {
   const selectedCell = useRef<TPosition>({ rowIdx: -1, idx: -1 });
   // these are passed into ReactDataGrid as the ultimate source of truth
   const [selectedRows, setSelectedRows] = useState(() => new Set<React.Key>());
+  const isSelectedCellInRow = useCallback((rowIdx: number) => selectedCell.current.rowIdx === rowIdx, []);
   const selectOneRow = useCallback((row: string) => setSelectedRows(new Set([row])), []);
   const clearRowSelection = useCallback(() => setSelectedRows(new Set([])), []);
   const clearCellSelection = useCallback(() => gridRef.current?.selectCell({ idx: -1, rowIdx: -1 }), []);
   const gridContext: IGridContext = useMemo(() => ({
           showRowLabels,
+          isSelectedCellInRow,
           onSelectOneRow: selectOneRow,
           onClearRowSelection: clearRowSelection,
           onClearCellSelection: clearCellSelection,
@@ -21,7 +23,7 @@ export const useGridContext = (showRowLabels: boolean) => {
             clearRowSelection();
             clearCellSelection();
           }
-        }), [clearCellSelection, clearRowSelection, selectOneRow, showRowLabels]);
+        }), [clearCellSelection, clearRowSelection, isSelectedCellInRow, selectOneRow, showRowLabels]);
   const onSelectedRowsChange = useCallback((_rows: Set<React.Key>) => {
     _rows.delete(inputRowId.current);
     setSelectedRows(_rows);
