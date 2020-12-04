@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import ReactDataGrid from "react-data-grid";
+import { TableContentModelType } from "../../../models/tools/table/table-content";
 import { IToolApi, IToolTileProps } from "../tool-tile";
 import { EditableTableTitle } from "./editable-table-title";
 import { TableToolbar } from "./table-toolbar";
@@ -9,6 +10,7 @@ import { useGridContext } from "./use-grid-context";
 import { useRowLabelColumn } from "./use-row-label-column";
 import { useSetExpressionDialog } from "./use-set-expression-dialog";
 import { useTableTitle } from "./use-table-title";
+import { useCurrent } from "../../../hooks/use-current";
 import { useToolbarToolApi } from "../hooks/use-toolbar-tool-api";
 
 import "react-data-grid/dist/react-data-grid.css";
@@ -18,7 +20,9 @@ const TableToolComponent: React.FC<IToolTileProps> = ({
   documentContent, toolTile, model, readOnly,
   onRequestRowHeight, onRequestUniqueTitle, onRegisterToolApi, onUnregisterToolApi
 }) => {
-  const { dataSet, columnChanges, triggerColumnChange, rowChanges } = useModelDataSet(model);
+  const {
+    dataSet, columnChanges, triggerColumnChange, rowChanges, triggerRowChange, ...gridModelProps
+  } = useModelDataSet(model);
 
   const [showRowLabels, setShowRowLabels] = useState(false);
   const { ref: gridRef, gridContext, inputRowId, selectedCell, ...gridProps } = useGridContext(showRowLabels);
@@ -46,9 +50,22 @@ const TableToolComponent: React.FC<IToolTileProps> = ({
     rowChanges, readOnly: !!readOnly, getTitleWidthFromColumns, selectedCell,
     inputRowId, ...rowLabelProps, onRequestRowHeight: handleRequestRowHeight });
 
-  const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
-  const [showSetExpressionDialog] = useSetExpressionDialog({ dataSet: dataSet.current });
+  const content = useCurrent(model.content as TableContentModelType);
+  const metadata = content.current.metadata;
+  const handleSubmit = (expressions: Map<string, string>) => {
+    if (dataSet.current.attributes.length && expressions.size) {
+      content.current.setExpressions(expressions, dataSet.current.attributes[0].name);
+      triggerRowChange();
+    }
+  };
+  const [showSetExpressionDialog] = useSetExpressionDialog({
+                                      dataSet: dataSet.current,
+                                      rawExpressions: metadata.rawExpressions.toJS(),
+                                      canonicalExpressions: metadata.expressions.toJS(),
+                                      onSubmit: handleSubmit
+                                    });
 
+  const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
   return (
     <div className="table-tool">
       <TableToolbar documentContent={documentContent} toolTile={toolTile} {...toolbarProps}
@@ -57,7 +74,7 @@ const TableToolComponent: React.FC<IToolTileProps> = ({
         <EditableTableTitle className="table-title" readOnly={readOnly}
           getTitle={getTitle} getTitleWidth={getTitleWidth}
           onBeginEdit={onBeginTitleEdit} onEndEdit={onEndTitleEdit} />
-        <ReactDataGrid className="rdg-light" ref={gridRef} {...gridProps} {...dataGridProps} />
+        <ReactDataGrid ref={gridRef} {...gridProps} {...gridModelProps} {...dataGridProps} />
       </div>
     </div>
   );

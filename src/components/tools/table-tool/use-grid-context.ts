@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { CellNavigationMode, DataGridHandle } from "react-data-grid";
 import { uniqueId } from "../../../utilities/js-utils";
-import { IGridContext, TPosition } from "./grid-types";
+import { IGridContext, TPosition } from "./table-types";
 
 export const useGridContext = (showRowLabels: boolean) => {
   const gridRef = useRef<DataGridHandle>(null);

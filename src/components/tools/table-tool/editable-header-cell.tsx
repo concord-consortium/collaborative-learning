@@ -1,8 +1,6 @@
 import React, { useState } from "react";
-import { TColumn, THeaderRendererProps } from "./grid-types";
+import { TColumn, THeaderRendererProps } from "./table-types";
 import { HeaderCellInput } from "./header-cell-input";
-
-import "./editable-header-cell.scss";
 
 interface IProps extends THeaderRendererProps {
 }

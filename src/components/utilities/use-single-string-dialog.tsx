@@ -41,6 +41,7 @@ export const useSingleStringDialog = ({
     title,
     Icon: TextInputSvg,
     Content,
+    contentProps: {},
     focusElement: "#string-input",
     buttons: [
       { label: "Cancel", onClick: "close" },

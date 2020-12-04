@@ -3,7 +3,7 @@ import { Tooltip } from "react-tippy";
 import RowLabelsHiddenSvg from "../../../clue/assets/icons/table/row-labels-hidden-icon.svg";
 import RowLabelsShownSvg from "../../../clue/assets/icons/table/row-labels-shown-icon.svg";
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
-import { TFormatterProps, TPosition } from "./grid-types";
+import { TFormatterProps, TPosition } from "./table-types";
 
 interface IProps {
   inputRowId: string;

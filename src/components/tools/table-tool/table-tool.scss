@@ -58,6 +58,14 @@ $controls-hover-background: #c0dfe7;
     border: none;
     overflow: auto !important;
 
+    &.show-expressions {
+      .index-column-header {
+        .show-hide-row-labels-button {
+          top: $row-height;
+        }
+      }
+    }
+
     .rdg-header-row {
       .index-column-header {
         min-width: $index-column-width;
@@ -111,17 +119,17 @@ $controls-hover-background: #c0dfe7;
           align-items: center;
           svg {
             fill: white;
-            stroke: $highlight-blue;
+            stroke: $workspace-teal-light-3;
           }
           &:hover {
             svg {
-              fill: $highlight-blue-25;
-              stroke: $highlight-blue;
+              fill: $workspace-teal-light-4;
+              stroke: $workspace-teal-dark-1;
             }
           }
           &:active {
             svg {
-              fill: $highlight-blue;
+              fill: $workspace-teal-dark-1;
               stroke: white;
             }
           }
@@ -201,6 +209,10 @@ $controls-hover-background: #c0dfe7;
     .rdg-cell {
       input {
         text-align: center;
+      }
+
+      &.has-expression {
+        background-color: $charcoal-light-5;
       }
     }
   }
