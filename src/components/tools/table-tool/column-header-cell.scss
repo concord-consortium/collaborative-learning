@@ -9,6 +9,7 @@
     flex-direction: column;
 
     .editable-header-cell {
+      position: relative;
       width: 100%;
       height: var(--row-height);
       line-height: var(--row-height); // https://tutorialdeep.com/knowhow/align-text-vertically-center-css/
@@ -23,6 +24,33 @@
 
         input {
           text-align: center;
+        }
+      }
+
+      .remove-column-button {
+        position: absolute;
+        left: -10px;
+        top: 0;
+        width: 36px;
+        height: 34px;
+        display: none;  // overridden when tile is selected
+        justify-content: center;
+        align-items: center;
+        svg {
+          fill: var(--header-background-color);
+          stroke: $highlight-blue;
+        }
+        &:hover {
+          svg {
+            fill: $highlight-blue-25;
+            stroke: $highlight-blue;
+          }
+        }
+        &:active {
+          svg {
+            fill: $highlight-blue;
+            stroke: var(--header-background-color);
+          }
         }
       }
     }
@@ -45,5 +73,16 @@
     top: var(--row-height);
     height: 1px;
     background-color: white;
+  }
+}
+
+.tool-tile.selected {
+  .table-tool {
+    .selected-column {
+      .remove-column-button {
+        // show buttons only when tile and column are selected
+        display: flex !important;
+      }
+    }
   }
 }

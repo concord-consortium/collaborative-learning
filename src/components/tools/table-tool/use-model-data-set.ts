@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { autorun } from "mobx";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { DataSet } from "../../../models/data/data-set";
 import { TableContentModelType } from "../../../models/tools/table/table-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
@@ -15,9 +15,9 @@ export const useModelDataSet = (model: ToolTileModelType) => {
   const dataSet = useRef(DataSet.create());
   const syncedChanges = useRef(0);
   const [columnChanges, setColumnChanges] = useState(0);
-  const triggerColumnChange = () => setColumnChanges(state => ++state);
+  const triggerColumnChange = useCallback(() => setColumnChanges(state => ++state), []);
   const [rowChanges, setRowChanges] = useState(0);
-  const triggerRowChange = () => setRowChanges(state => ++state);
+  const triggerRowChange = useCallback(() => setRowChanges(state => ++state), []);
 
   useEffect(() => {
     const _content = model.content as TableContentModelType;

@@ -42,10 +42,17 @@ export const useColumnsFromDataSet = ({
     setColumnEditingName(column?.key);
   };
 
+  const cellClasses = useCallback((attrId: string) => {
+    const selectedColumnClass = { "selected-column": gridContext.isColumnSelected(attrId) };
+    return {
+      cellClass: classNames({ "has-expression": metadata.hasExpression(attrId), ...selectedColumnClass }),
+      headerCellClass: classNames({ "rdg-cell-editing": columnEditingName === attrId, ...selectedColumnClass })
+    };
+  }, [columnEditingName, gridContext, metadata]);
+
   const columns = useMemo(() => {
     const cols: TColumn[] = attributes.map(attr => ({
-      cellClass: classNames({ "has-expression": metadata.hasExpression(attr.id) }),
-      headerCellClass: columnEditingName === attr.id ? "rdg-cell-editing" : undefined,
+      ...cellClasses(attr.id),
       name: attr.name,
       key: attr.id,
       width: columnWidths.current[attr.id] ||
@@ -89,7 +96,7 @@ export const useColumnsFromDataSet = ({
     columnChanges;  // eslint-disable-line no-unused-expressions
     return cols;
   }, [ControlsHeaderRenderer, ControlsRowFormatter, RowLabelHeader, RowLabelFormatter,
-      attributes, columnChanges, columnEditingName, metadata, readOnly]);
+      attributes, cellClasses, columnChanges, metadata, readOnly]);
 
   useColumnExtensions({
     gridContext, metadata, readOnly, columns, columnEditingName,

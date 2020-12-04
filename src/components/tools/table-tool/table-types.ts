@@ -6,11 +6,11 @@ export const kControlsColumnWidth = 36;
 
 export interface IGridContext {
   showRowLabels: boolean;
+  isColumnSelected: (columnId: string) => boolean;
+  onSelectColumn: (columnId: string) => void;
   isSelectedCellInRow: (rowIdx: number) => boolean;
   onSelectOneRow: (row: string) => void;
-  onClearRowSelection: () => void;
-  onClearCellSelection: () => void;
-  onClearSelection: () => void;
+  onClearSelection: (options?: { row?: boolean, column?: boolean, cell?: boolean }) => void;
 }
 
 export const kSerializedXKey = "__x__";
@@ -24,6 +24,7 @@ export interface TRow extends Record<string, any> {
 }
 
 export interface TColumnAppData {
+  gridContext: IGridContext;
   editableName?: boolean;
   isEditing?: boolean;
   showExpressions?: boolean;

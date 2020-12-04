@@ -103,6 +103,9 @@ $controls-hover-background: #c0dfe7;
       }
       .rdg-cell {
         border-top: $border-style;
+        &.selected-column {
+          background-color: var(--header-selected-background-color);
+        }
         input {
           background-color: inherit;
         }
@@ -141,6 +144,9 @@ $controls-hover-background: #c0dfe7;
         background-color: var(--row-selected-background-color);
         .index-column {
           background-color: var(--header-selected-background-color);
+        }
+        .has-expression {
+          background-color: var(--row-selected-background-color);
         }
         &.input-row {
           .index-column {
@@ -213,6 +219,9 @@ $controls-hover-background: #c0dfe7;
 
       &.has-expression {
         background-color: $charcoal-light-5;
+      }
+      &.selected-column {
+        background-color: var(--row-selected-background-color);
       }
     }
   }

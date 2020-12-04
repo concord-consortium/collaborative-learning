@@ -25,7 +25,9 @@ const TableToolComponent: React.FC<IToolTileProps> = ({
   } = useModelDataSet(model);
 
   const [showRowLabels, setShowRowLabels] = useState(false);
-  const { ref: gridRef, gridContext, inputRowId, selectedCell, ...gridProps } = useGridContext(showRowLabels);
+  const {
+    ref: gridRef, gridContext, inputRowId, selectedCell, ...gridProps
+  } = useGridContext(showRowLabels, triggerColumnChange);
   const { getTitle, getTitleWidthFromColumns, onBeginTitleEdit, onEndTitleEdit } = useTableTitle({
     gridContext, model, dataSet: dataSet.current, readOnly, onRequestUniqueTitle: () => onRequestUniqueTitle(model.id)
   });

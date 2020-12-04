@@ -19,6 +19,7 @@ export const useColumnExtensions = ({
 
   columns.forEach((column, i) => {
     column.appData = {
+      gridContext,
       editableName: isDataColumn(column),
       isEditing: column.key === columnEditingName,
       showExpressions: metadata.hasExpressions,
@@ -49,7 +50,7 @@ export const useColumnExtensions = ({
         setColumnEditingName();
       },
       onBeginBodyCellEdit: (() => {
-        gridContext.onClearRowSelection();
+        gridContext.onClearSelection({ cell: false });
       }) as any
     };
   });
