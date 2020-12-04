@@ -2,28 +2,19 @@ import classNames from "classnames";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { IDataSet } from "../../../models/data/data-set";
 import { TableMetadataModelType } from "../../../models/tools/table/table-content";
+import { CellFormatter } from "./cell-formatter";
 import CellTextEditor from "./cell-text-editor";
 import { ColumnHeaderCell } from "./column-header-cell";
 import {
-  IGridContext, kControlsColumnKey, kControlsColumnWidth, kIndexColumnKey, kIndexColumnWidth, TColumn, TFormatterProps
+  IGridContext, kControlsColumnKey, kControlsColumnWidth, kIndexColumnKey, kIndexColumnWidth, TColumn
 } from "./table-types";
 import { useColumnExtensions } from "./use-column-extensions";
 import { useControlsColumn } from "./use-controls-column";
-import { useNumberFormat } from "./use-number-format";
 
 function estimateColumnWidthFromName(name: string) {
   // values taken from design spec
   return 62 + 9 * name.length;
 }
-
-const CellFormatter: React.FC<TFormatterProps> = ({ column, row }) => {
-  const formatter = useNumberFormat();
-  const value = row[column.key];
-  if ((value == null) || (value === "")) return "";
-  const num = Number(value);
-  if (!isFinite(num)) return value;
-  return formatter(num);
-};
 
 interface IUseColumnsFromDataSet {
   gridContext: IGridContext;

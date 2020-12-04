@@ -4,8 +4,10 @@ import { ICase, IDataSet } from "../../../models/data/data-set";
 import { TableContentModelType } from "../../../models/tools/table/table-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { uniqueId, uniqueName } from "../../../utilities/js-utils";
+import { formatValue } from "./cell-formatter";
 import { IGridContext, kRowHeight, TColumn, TPosition, TRow } from "./table-types";
 import { useColumnsFromDataSet } from "./use-columns-from-data-set";
+import { useNumberFormat } from "./use-number-format";
 import { useRowsFromDataSet } from "./use-rows-from-data-set";
 
 const optimalTileRowHeight = (rowCount: number) => {
@@ -98,6 +100,7 @@ export const useDataSet = ({
   const { rows, rowKeyGetter, rowClass } = useRowsFromDataSet({
                                             dataSet, readOnly, inputRowId: inputRowId.current,
                                             rowChanges, context: gridContext});
+  const formatter = useNumberFormat();
   const onRowsChange = (_rows: TRow[]) => {
     // for now, assume that all changes are single cell edits
     const content = model.content as TableContentModelType;
@@ -108,18 +111,23 @@ export const useDataSet = ({
     const updatedColumn = (selectedCellColIndex != null) && (selectedCellColIndex >= 0)
                             ? columns[selectedCellColIndex] : undefined;
     if (!readOnly && updatedRow && updatedColumn) {
-      const updatedCaseValues: ICase[] = [{
-        __id__: updatedRow.__id__,
-        [updatedColumn.key]: updatedRow[updatedColumn.key]
-      }];
-      const inputRowIndex = _rows.findIndex(row => row.__id__ === inputRowId.current);
-      if ((inputRowIndex >= 0) && (selectedCellRowIndex === inputRowIndex)) {
-        content.addCanonicalCases(updatedCaseValues);
-        onRequestRowHeight({ height: optimalTileRowHeight(rows.length + 1) });
-        inputRowId.current = uniqueId();
-      }
-      else {
-        content.setCanonicalCaseValues(updatedCaseValues);
+      const originalValue = dataSet.getValue(updatedRow.__id__, updatedColumn.key);
+      const originalStrValue = formatValue(formatter, originalValue);
+      // only make a change if the value has actually changed
+      if (updatedRow[updatedColumn.key] !== originalStrValue) {
+        const updatedCaseValues: ICase[] = [{
+          __id__: updatedRow.__id__,
+          [updatedColumn.key]: updatedRow[updatedColumn.key]
+        }];
+        const inputRowIndex = _rows.findIndex(row => row.__id__ === inputRowId.current);
+        if ((inputRowIndex >= 0) && (selectedCellRowIndex === inputRowIndex)) {
+          content.addCanonicalCases(updatedCaseValues);
+          onRequestRowHeight({ height: optimalTileRowHeight(rows.length + 1) });
+          inputRowId.current = uniqueId();
+        }
+        else {
+          content.setCanonicalCaseValues(updatedCaseValues);
+        }
       }
     }
   };

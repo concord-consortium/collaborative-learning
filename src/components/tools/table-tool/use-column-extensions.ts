@@ -1,4 +1,5 @@
 import { TableMetadataModelType } from "../../../models/tools/table/table-content";
+import { getEditableExpression } from "./expression-utils";
 import { IGridContext, kControlsColumnKey, kIndexColumnKey, TColumn } from "./table-types";
 
 interface IProps {
@@ -13,13 +14,18 @@ interface IProps {
 export const useColumnExtensions = ({
   gridContext, metadata, readOnly, columns, columnEditingName, setColumnEditingName, setColumnName
 }: IProps) => {
+  const firstDataColumn = columns.find(col => isDataColumn(col));
+  const xName = (firstDataColumn?.name || "") as string;
 
   columns.forEach((column, i) => {
     column.appData = {
-      editableName: (column.key !== kIndexColumnKey) && (column.key !== kControlsColumnKey),
+      editableName: isDataColumn(column),
       isEditing: column.key === columnEditingName,
       showExpressions: metadata.hasExpressions,
-      expression: metadata.rawExpressions.get(column.key),
+      expression: getEditableExpression(
+                    metadata.rawExpressions.get(column.key),
+                    metadata.expressions.get(column.key) || "",
+                    xName),
       onBeginHeaderCellEdit: (() => {
         gridContext.onClearSelection();
         !readOnly && setColumnEditingName(column);
@@ -39,7 +45,7 @@ export const useColumnExtensions = ({
         }
       },
       onEndHeaderCellEdit: (value?: string) => {
-        !readOnly && (value != null) && setColumnName(column, value);
+        !readOnly && !!value && (value !== column.name) && setColumnName(column, value);
         setColumnEditingName();
       },
       onBeginBodyCellEdit: (() => {
@@ -47,4 +53,8 @@ export const useColumnExtensions = ({
       }) as any
     };
   });
+};
+
+const isDataColumn = (column: TColumn) => {
+  return (column.key !== kIndexColumnKey) && (column.key !== kControlsColumnKey);
 };
