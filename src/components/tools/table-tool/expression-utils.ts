@@ -1,6 +1,14 @@
 import { Parser } from "expr-eval";
 import { kSerializedXKey } from "./table-types";
 
+export const getEditableExpression = (
+  rawExpression: string | undefined, canonicalExpression: string, xName: string
+) => {
+  // Raw expressions are cleared when x attribute is renamed, in which case
+  // we regenerate the "raw" expression from the canonical expression.
+  return rawExpression || prettifyExpression(canonicalExpression, xName);
+};
+
 export const canonicalizeExpression = (displayExpression: string, xName: string) => {
   if (xName && displayExpression) {
     const parser = new Parser();

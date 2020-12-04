@@ -122,11 +122,10 @@ export const TableMetadataModel = types
       return self.linkedGeometries.length;
     },
     get hasExpressions() {
-      return Array.from(self.expressions.values()).some(expr => !!expr) ||
-              Array.from(self.rawExpressions.values()).some(expr => !!expr);
+      return Array.from(self.expressions.values()).some(expr => !!expr);
     },
     hasExpression(attrId: string) {
-      return !!self.expressions.get(attrId) || !!self.rawExpressions.get(attrId);
+      return !!self.expressions.get(attrId);
     }
   }))
   .actions(self => ({
