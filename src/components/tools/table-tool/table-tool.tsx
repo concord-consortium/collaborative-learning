@@ -6,9 +6,9 @@ import { EditableTableTitle } from "./editable-table-title";
 import { TableToolbar } from "./table-toolbar";
 import { useModelDataSet } from "./use-model-data-set";
 import { useDataSet } from "./use-data-set";
+import { useExpressionsDialog } from "./use-expressions-dialog";
 import { useGridContext } from "./use-grid-context";
 import { useRowLabelColumn } from "./use-row-label-column";
-import { useSetExpressionDialog } from "./use-set-expression-dialog";
 import { useTableTitle } from "./use-table-title";
 import { useCurrent } from "../../../hooks/use-current";
 import { useToolbarToolApi } from "../hooks/use-toolbar-tool-api";
@@ -52,12 +52,12 @@ const TableToolComponent: React.FC<IToolTileProps> = ({
       triggerRowChange();
     }
   };
-  const [showExpressionsDialog, , setCurrYAttrId] = useSetExpressionDialog({
-                                      dataSet: dataSet.current,
-                                      rawExpressions: metadata.rawExpressions.toJS(),
-                                      canonicalExpressions: metadata.expressions.toJS(),
-                                      onSubmit: handleSubmit
-                                    });
+  const [showExpressionsDialog, , setCurrYAttrId] = useExpressionsDialog({
+    dataSet: dataSet.current,
+    rawExpressions: metadata.rawExpressions.toJS(),
+    canonicalExpressions: metadata.expressions.toJS(),
+    onSubmit: handleSubmit
+  });
 
   const handleRequestRowHeight = (options: { height?: number, delta?: number }) => {
     onRequestRowHeight(model.id, options.height, options.delta);

@@ -6,7 +6,7 @@ import { IDataSet } from "../../../models/data/data-set";
 import { validateExpression } from "./expression-utils";
 import { useEditableExpressions } from "./use-editable-expressions";
 
-import "./set-expression-dialog.scss";
+import "./expressions-dialog.scss";
 
 interface IProps {
   dataSet: IDataSet;
@@ -15,7 +15,7 @@ interface IProps {
   onSubmit: (changedExpressions: Map<string, string>) => void;
 }
 type IResult = [() => void, () => void, React.Dispatch<React.SetStateAction<string | undefined>>];
-export const useSetExpressionDialog = ({
+export const useExpressionsDialog = ({
   dataSet, rawExpressions, canonicalExpressions, onSubmit
 }: IProps): IResult => {
   const xName = useCurrent(dataSet.attributes.length > 0
