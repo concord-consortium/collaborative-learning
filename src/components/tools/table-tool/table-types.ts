@@ -25,13 +25,16 @@ export interface TRow extends Record<string, any> {
 
 export interface TColumnAppData {
   gridContext: IGridContext;
-  editableName?: boolean;
-  isEditing?: boolean;
-  showExpressions?: boolean;
+  editableName: boolean;
+  isEditing: boolean;
+  isRemovable: boolean;
+  showExpressions: boolean;
   expression?: string;
-  onBeginHeaderCellEdit?: () => boolean | undefined;
-  onHeaderCellEditKeyDown?: (e: React.KeyboardEvent<HTMLDivElement>) => void;
-  onEndHeaderCellEdit?: (value?: string) => void;
+  onBeginHeaderCellEdit: () => boolean | undefined;
+  onHeaderCellEditKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
+  onEndHeaderCellEdit: (value?: string) => void;
+  onShowExpressionsDialog?: (attrId?: string) => void;
+  onRemoveColumn?: (attrId: string) => void;
   onBeginBodyCellEdit?: () => boolean | undefined;
   onEndBodyCellEdit?: (value?: string) => void;
 }

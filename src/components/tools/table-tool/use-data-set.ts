@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { DataGridHandle } from "react-data-grid";
+import { useCurrent } from "../../../hooks/use-current";
 import { ICase, IDataSet } from "../../../models/data/data-set";
 import { TableContentModelType } from "../../../models/tools/table/table-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
@@ -35,27 +36,34 @@ interface IUseDataSet {
   RowLabelFormatter: React.FC<any>;
   getTitleWidthFromColumns: (columns: TColumn[]) => number;
   onRequestRowHeight: (options: { height?: number, deltaHeight?: number }) => void;
+  onShowExpressionsDialog?: (attrId?: string) => void;
 }
 export const useDataSet = ({
-  gridRef, gridContext, model, dataSet, columnChanges, triggerColumnChange, rowChanges, readOnly,
-  inputRowId, selectedCell, RowLabelHeader, RowLabelFormatter, getTitleWidthFromColumns, onRequestRowHeight
+  gridRef, gridContext, model, dataSet, columnChanges, triggerColumnChange, rowChanges, readOnly, inputRowId,
+  selectedCell, RowLabelHeader, RowLabelFormatter, getTitleWidthFromColumns, onRequestRowHeight, onShowExpressionsDialog
 }: IUseDataSet) => {
+  const modelRef = useCurrent(model);
   const metadata = (model.content as TableContentModelType).metadata;
-  const setColumnName = (column: TColumn, columnName: string) => {
-    const content = model.content as TableContentModelType;
+  const setColumnName = useCallback((column: TColumn, columnName: string) => {
+    const content = modelRef.current.content as TableContentModelType;
     !readOnly && content.setAttributeName(column.key, columnName);
-  };
-  const onAddColumn = () => {
-    const content = model.content as TableContentModelType;
+  }, [modelRef, readOnly]);
+  const onAddColumn = useCallback(() => {
+    const content = modelRef.current.content as TableContentModelType;
     !readOnly && content.addAttribute(uniqueId(), uniqueName("y", (name: string) => !dataSet.attrFromName(name)));
-  };
-  const onRemoveRow = (rowId: string) => {
-    const content = model.content as TableContentModelType;
+  }, [dataSet, modelRef, readOnly]);
+  const onRemoveColumn = useCallback((colId: string) => {
+    const content = modelRef.current.content as TableContentModelType;
+    !readOnly && content.removeAttributes([colId]);
+    triggerColumnChange();
+  }, [modelRef, readOnly, triggerColumnChange]);
+  const onRemoveRow = useCallback((rowId: string) => {
+    const content = modelRef.current.content as TableContentModelType;
     !readOnly && content.removeCases([rowId]);
-  };
+  }, [modelRef, readOnly]);
   const { columns, onColumnResize } = useColumnsFromDataSet({
     gridContext, dataSet, metadata, readOnly, columnChanges, RowLabelHeader, RowLabelFormatter,
-    setColumnName, onAddColumn, onRemoveRow });
+    setColumnName, onShowExpressionsDialog, onAddColumn, onRemoveColumn, onRemoveRow });
   const onSelectedCellChange = (position: TPosition) => {
     const forward = (selectedCell.current.rowIdx < position.rowIdx) ||
                     ((selectedCell.current.rowIdx === position.rowIdx) &&

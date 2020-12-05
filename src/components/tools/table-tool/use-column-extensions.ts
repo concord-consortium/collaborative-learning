@@ -10,9 +10,12 @@ interface IProps {
   columnEditingName?: string;
   setColumnEditingName: (column?: TColumn) => void;
   setColumnName: (column: TColumn, name: string) => void;
+  onRemoveColumn?: (attrId: string) => void;
+  onShowExpressionsDialog?: (attrId?: string) => void;
 }
 export const useColumnExtensions = ({
-  gridContext, metadata, readOnly, columns, columnEditingName, setColumnEditingName, setColumnName
+  gridContext, metadata, readOnly, columns, columnEditingName,
+  setColumnEditingName, setColumnName, onRemoveColumn, onShowExpressionsDialog
 }: IProps) => {
   const firstDataColumn = columns.find(col => isDataColumn(col));
   const xName = (firstDataColumn?.name || "") as string;
@@ -22,6 +25,7 @@ export const useColumnExtensions = ({
       gridContext,
       editableName: isDataColumn(column),
       isEditing: column.key === columnEditingName,
+      isRemovable: isDataColumn(column) && (column.key !== firstDataColumn?.key),
       showExpressions: metadata.hasExpressions,
       expression: getEditableExpression(
                     metadata.rawExpressions.get(column.key),
@@ -49,6 +53,8 @@ export const useColumnExtensions = ({
         !readOnly && !!value && (value !== column.name) && setColumnName(column, value);
         setColumnEditingName();
       },
+      onRemoveColumn,
+      onShowExpressionsDialog,
       onBeginBodyCellEdit: (() => {
         gridContext.onClearSelection({ cell: false });
       }) as any

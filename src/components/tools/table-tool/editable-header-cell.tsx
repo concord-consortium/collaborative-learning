@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { TColumn, THeaderRendererProps } from "./table-types";
 import { HeaderCellInput } from "./header-cell-input";
-import RemoveColumnSvg from "../../../assets/icons/remove/remove.nosvgo.svg";
 
 interface IProps extends THeaderRendererProps {
 }
@@ -45,20 +44,6 @@ export const EditableHeaderCell: React.FC<IProps> = ({ column: _column }) => {
         ? <HeaderCellInput style={style} value={nameValue}
             onKeyDown={handleKeyDown} onChange={handleChange} onClose={handleClose} />
         : name}
-      {!isEditing && <RemoveColumnButton columnId={column.key} />}
     </div>
   );
 };
-
-interface IRemoveColumnButtonProps {
-  columnId: string;
-  onRemoveColumn?: (columnId: string) => void;
-}
-const RemoveColumnButton: React.FC<IRemoveColumnButtonProps> = ({ columnId, onRemoveColumn }) => {
-  return (
-    <div className="remove-column-button" onClick={() => onRemoveColumn?.(columnId)}>
-      <RemoveColumnSvg className="remove-column-icon"/>
-    </div>
-  );
-};
-RemoveColumnButton.displayName = "RemoveColumnButton";

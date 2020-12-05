@@ -25,12 +25,14 @@ interface IUseColumnsFromDataSet {
   RowLabelHeader: React.FC<any>;
   RowLabelFormatter: React.FC<any>;
   setColumnName: (column: TColumn, columnName: string) => void;
+  onShowExpressionsDialog?: (attrId?: string) => void;
   onAddColumn: () => void;
+  onRemoveColumn?: (attrId: string) => void;
   onRemoveRow: (rowId: string) => void;
 }
 export const useColumnsFromDataSet = ({
   gridContext, dataSet, metadata, readOnly, columnChanges, RowLabelHeader, RowLabelFormatter,
-  setColumnName, onAddColumn, onRemoveRow
+  setColumnName, onShowExpressionsDialog, onAddColumn, onRemoveColumn, onRemoveRow
 }: IUseColumnsFromDataSet) => {
   const { attributes } = dataSet;
   const { ControlsHeaderRenderer, ControlsRowFormatter } = useControlsColumn({ readOnly, onAddColumn, onRemoveRow });
@@ -100,7 +102,8 @@ export const useColumnsFromDataSet = ({
 
   useColumnExtensions({
     gridContext, metadata, readOnly, columns, columnEditingName,
-    setColumnEditingName: handleSetColumnEditingName, setColumnName });
+    setColumnEditingName: handleSetColumnEditingName, setColumnName, onRemoveColumn, onShowExpressionsDialog
+ });
 
   const onColumnResize = useCallback((idx: number, width: number) => {
     columnWidths.current[columns[idx].key] = width;

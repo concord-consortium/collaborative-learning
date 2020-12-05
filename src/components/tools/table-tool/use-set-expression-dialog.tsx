@@ -14,7 +14,10 @@ interface IProps {
   canonicalExpressions: Map<string, string>;  // canonicalized
   onSubmit: (changedExpressions: Map<string, string>) => void;
 }
-export const useSetExpressionDialog = ({ dataSet, rawExpressions, canonicalExpressions, onSubmit }: IProps) => {
+type IResult = [() => void, () => void, React.Dispatch<React.SetStateAction<string | undefined>>];
+export const useSetExpressionDialog = ({
+  dataSet, rawExpressions, canonicalExpressions, onSubmit
+}: IProps): IResult => {
   const xName = useCurrent(dataSet.attributes.length > 0
                             ? dataSet.attributes[0].name
                             : "x");
@@ -63,7 +66,7 @@ export const useSetExpressionDialog = ({ dataSet, rawExpressions, canonicalExpre
       { label: "OK", isDefault: true, onClick: handleSubmit }
     ]
   }, [currYAttrId, errorMessage, expression]);
-  return [showModal, hideModal];
+  return [showModal, hideModal, setCurrYAttrId];
 };
 
 interface IContentProps {

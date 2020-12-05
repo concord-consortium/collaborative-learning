@@ -10,6 +10,6 @@ export const useEditableExpressions = (
       const editExpr = getEditableExpression(rawExpressions.get(attrId), canonical, xName);
       editExpr && editExpressions.current?.set(attrId, editExpr);
     });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [canonicalExpressions, rawExpressions, xName]);
   return editExpressions;
 };
