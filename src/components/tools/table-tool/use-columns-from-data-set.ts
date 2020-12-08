@@ -25,12 +25,14 @@ interface IUseColumnsFromDataSet {
   RowLabelHeader: React.FC<any>;
   RowLabelFormatter: React.FC<any>;
   setColumnName: (column: TColumn, columnName: string) => void;
+  onShowExpressionsDialog?: (attrId?: string) => void;
   onAddColumn: () => void;
+  onRemoveColumn?: (attrId: string) => void;
   onRemoveRow: (rowId: string) => void;
 }
 export const useColumnsFromDataSet = ({
   gridContext, dataSet, metadata, readOnly, columnChanges, RowLabelHeader, RowLabelFormatter,
-  setColumnName, onAddColumn, onRemoveRow
+  setColumnName, onShowExpressionsDialog, onAddColumn, onRemoveColumn, onRemoveRow
 }: IUseColumnsFromDataSet) => {
   const { attributes } = dataSet;
   const { ControlsHeaderRenderer, ControlsRowFormatter } = useControlsColumn({ readOnly, onAddColumn, onRemoveRow });
@@ -42,10 +44,17 @@ export const useColumnsFromDataSet = ({
     setColumnEditingName(column?.key);
   };
 
+  const cellClasses = useCallback((attrId: string) => {
+    const selectedColumnClass = { "selected-column": gridContext.isColumnSelected(attrId) };
+    return {
+      cellClass: classNames({ "has-expression": metadata.hasExpression(attrId), ...selectedColumnClass }),
+      headerCellClass: classNames({ "rdg-cell-editing": columnEditingName === attrId, ...selectedColumnClass })
+    };
+  }, [columnEditingName, gridContext, metadata]);
+
   const columns = useMemo(() => {
     const cols: TColumn[] = attributes.map(attr => ({
-      cellClass: classNames({ "has-expression": metadata.hasExpression(attr.id) }),
-      headerCellClass: columnEditingName === attr.id ? "rdg-cell-editing" : undefined,
+      ...cellClasses(attr.id),
       name: attr.name,
       key: attr.id,
       width: columnWidths.current[attr.id] ||
@@ -89,11 +98,12 @@ export const useColumnsFromDataSet = ({
     columnChanges;  // eslint-disable-line no-unused-expressions
     return cols;
   }, [ControlsHeaderRenderer, ControlsRowFormatter, RowLabelHeader, RowLabelFormatter,
-      attributes, columnChanges, columnEditingName, metadata, readOnly]);
+      attributes, cellClasses, columnChanges, metadata, readOnly]);
 
   useColumnExtensions({
     gridContext, metadata, readOnly, columns, columnEditingName,
-    setColumnEditingName: handleSetColumnEditingName, setColumnName });
+    setColumnEditingName: handleSetColumnEditingName, setColumnName, onRemoveColumn, onShowExpressionsDialog
+ });
 
   const onColumnResize = useCallback((idx: number, width: number) => {
     columnWidths.current[columns[idx].key] = width;

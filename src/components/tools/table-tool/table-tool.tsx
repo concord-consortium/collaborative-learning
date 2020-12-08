@@ -6,9 +6,9 @@ import { EditableTableTitle } from "./editable-table-title";
 import { TableToolbar } from "./table-toolbar";
 import { useModelDataSet } from "./use-model-data-set";
 import { useDataSet } from "./use-data-set";
+import { useExpressionsDialog } from "./use-expressions-dialog";
 import { useGridContext } from "./use-grid-context";
 import { useRowLabelColumn } from "./use-row-label-column";
-import { useSetExpressionDialog } from "./use-set-expression-dialog";
 import { useTableTitle } from "./use-table-title";
 import { useCurrent } from "../../../hooks/use-current";
 import { useToolbarToolApi } from "../hooks/use-toolbar-tool-api";
@@ -25,7 +25,9 @@ const TableToolComponent: React.FC<IToolTileProps> = ({
   } = useModelDataSet(model);
 
   const [showRowLabels, setShowRowLabels] = useState(false);
-  const { ref: gridRef, gridContext, inputRowId, selectedCell, ...gridProps } = useGridContext(showRowLabels);
+  const {
+    ref: gridRef, gridContext, inputRowId, selectedCell, ...gridProps
+  } = useGridContext(showRowLabels, triggerColumnChange);
   const { getTitle, getTitleWidthFromColumns, onBeginTitleEdit, onEndTitleEdit } = useTableTitle({
     gridContext, model, dataSet: dataSet.current, readOnly, onRequestUniqueTitle: () => onRequestUniqueTitle(model.id)
   });
@@ -42,14 +44,6 @@ const TableToolComponent: React.FC<IToolTileProps> = ({
     inputRowId: inputRowId.current, selectedCell, showRowLabels, setShowRowLabels
   });
 
-  const handleRequestRowHeight = (options: { height?: number, delta?: number }) => {
-    onRequestRowHeight(model.id, options.height, options.delta);
-  };
-  const { getTitleWidth, ...dataGridProps } = useDataSet({
-    gridRef, gridContext, model, dataSet: dataSet.current, columnChanges, triggerColumnChange,
-    rowChanges, readOnly: !!readOnly, getTitleWidthFromColumns, selectedCell,
-    inputRowId, ...rowLabelProps, onRequestRowHeight: handleRequestRowHeight });
-
   const content = useCurrent(model.content as TableContentModelType);
   const metadata = content.current.metadata;
   const handleSubmit = (expressions: Map<string, string>) => {
@@ -58,18 +52,31 @@ const TableToolComponent: React.FC<IToolTileProps> = ({
       triggerRowChange();
     }
   };
-  const [showSetExpressionDialog] = useSetExpressionDialog({
-                                      dataSet: dataSet.current,
-                                      rawExpressions: metadata.rawExpressions.toJS(),
-                                      canonicalExpressions: metadata.expressions.toJS(),
-                                      onSubmit: handleSubmit
-                                    });
+  const [showExpressionsDialog, , setCurrYAttrId] = useExpressionsDialog({
+    dataSet: dataSet.current,
+    rawExpressions: metadata.rawExpressions.toJS(),
+    canonicalExpressions: metadata.expressions.toJS(),
+    onSubmit: handleSubmit
+  });
+
+  const handleRequestRowHeight = (options: { height?: number, delta?: number }) => {
+    onRequestRowHeight(model.id, options.height, options.delta);
+  };
+  const handleShowExpressionsDialog = (attrId?: string) => {
+    attrId && setCurrYAttrId(attrId);
+    showExpressionsDialog();
+  };
+  const { getTitleWidth, ...dataGridProps } = useDataSet({
+    gridRef, gridContext, model, dataSet: dataSet.current, columnChanges, triggerColumnChange,
+    rowChanges, readOnly: !!readOnly, getTitleWidthFromColumns, selectedCell,
+    inputRowId, ...rowLabelProps, onRequestRowHeight: handleRequestRowHeight,
+    onShowExpressionsDialog: handleShowExpressionsDialog });
 
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
   return (
     <div className="table-tool">
       <TableToolbar documentContent={documentContent} toolTile={toolTile} {...toolbarProps}
-                    onSetExpression={showSetExpressionDialog} />
+                    onSetExpression={showExpressionsDialog} />
       <div className="table-grid-container">
         <EditableTableTitle className="table-title" readOnly={readOnly}
           getTitle={getTitle} getTitleWidth={getTitleWidth}

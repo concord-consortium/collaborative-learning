@@ -6,11 +6,11 @@ export const kControlsColumnWidth = 36;
 
 export interface IGridContext {
   showRowLabels: boolean;
+  isColumnSelected: (columnId: string) => boolean;
+  onSelectColumn: (columnId: string) => void;
   isSelectedCellInRow: (rowIdx: number) => boolean;
   onSelectOneRow: (row: string) => void;
-  onClearRowSelection: () => void;
-  onClearCellSelection: () => void;
-  onClearSelection: () => void;
+  onClearSelection: (options?: { row?: boolean, column?: boolean, cell?: boolean }) => void;
 }
 
 export const kSerializedXKey = "__x__";
@@ -24,13 +24,17 @@ export interface TRow extends Record<string, any> {
 }
 
 export interface TColumnAppData {
-  editableName?: boolean;
-  isEditing?: boolean;
-  showExpressions?: boolean;
+  gridContext: IGridContext;
+  editableName: boolean;
+  isEditing: boolean;
+  isRemovable: boolean;
+  showExpressions: boolean;
   expression?: string;
-  onBeginHeaderCellEdit?: () => boolean | undefined;
-  onHeaderCellEditKeyDown?: (e: React.KeyboardEvent<HTMLDivElement>) => void;
-  onEndHeaderCellEdit?: (value?: string) => void;
+  onBeginHeaderCellEdit: () => boolean | undefined;
+  onHeaderCellEditKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
+  onEndHeaderCellEdit: (value?: string) => void;
+  onShowExpressionsDialog?: (attrId?: string) => void;
+  onRemoveColumn?: (attrId: string) => void;
   onBeginBodyCellEdit?: () => boolean | undefined;
   onEndBodyCellEdit?: (value?: string) => void;
 }

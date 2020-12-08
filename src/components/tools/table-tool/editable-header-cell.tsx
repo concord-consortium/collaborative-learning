@@ -8,10 +8,14 @@ export const EditableHeaderCell: React.FC<IProps> = ({ column: _column }) => {
   const column = _column as unknown as TColumn;
   const { name, appData } = column;
   const {
-    editableName, isEditing, onBeginHeaderCellEdit, onHeaderCellEditKeyDown, onEndHeaderCellEdit
+    gridContext, editableName, isEditing,
+    onBeginHeaderCellEdit, onHeaderCellEditKeyDown, onEndHeaderCellEdit
   } = appData || {};
   const [nameValue, setNameValue] = useState(editableName ? name as string : "");
   const handleClick = () => {
+    !isEditing && gridContext?.onSelectColumn(column.key);
+  };
+  const handleDoubleClick = () => {
     editableName && !isEditing && onBeginHeaderCellEdit?.();
   };
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -35,7 +39,7 @@ export const EditableHeaderCell: React.FC<IProps> = ({ column: _column }) => {
   };
   const style = { width: column.width };
   return (
-    <div className={"editable-header-cell"} onClick={handleClick}>
+    <div className={"editable-header-cell"} onClick={handleClick} onDoubleClick={handleDoubleClick}>
       {isEditing
         ? <HeaderCellInput style={style} value={nameValue}
             onKeyDown={handleKeyDown} onChange={handleChange} onClose={handleClose} />

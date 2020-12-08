@@ -36,8 +36,11 @@ export const useCustomModal = <IContentProps,>({
 
   const handleAfterOpen = ({overlayEl, contentEl}: { overlayEl: Element, contentEl: HTMLDivElement }) => {
     contentElt.current = contentEl;
-    const element = focusElement && contentEl.querySelector(focusElement) || contentEl;
-    setTimeout(() => (element as HTMLElement)?.focus());
+    const element = focusElement && contentEl.querySelector(focusElement) as HTMLElement|| contentEl;
+    element && setTimeout(() => {
+      element.focus?.();
+      (element as HTMLInputElement).select?.();
+    });
   };
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {

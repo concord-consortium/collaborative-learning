@@ -16,7 +16,7 @@ export const useRowLabelColumn = ({
 }: IProps) => {
 
   const title = showRowLabels ? "Hide labels" : "Show labels";
-  const tooltipOptions = useTooltipOptions({ title, distance: -36 });
+  const tooltipOptions = useTooltipOptions({ title, distance: -2 });
 
   const RowLabelHeader: React.FC = useCallback(() => {
     return (
@@ -46,7 +46,7 @@ export const useRowLabelColumn = ({
             onRowSelectionChange(selected, e.shiftKey);
           }
           else if (__id__ === inputRowId) {
-            __context__.onClearRowSelection();
+            __context__.onClearSelection({ cell: false });
           }
           else {
             __context__.onSelectOneRow(__id__);
