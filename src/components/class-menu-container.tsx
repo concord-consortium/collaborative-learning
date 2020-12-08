@@ -4,7 +4,6 @@ import { inject, observer } from "mobx-react";
 import { BaseComponent, IBaseProps } from "./base";
 import { LogEventName, Logger, LogEventMethod } from "../lib/logger";
 import { IDropdownItem } from "@concord-consortium/react-components";
-import { getProblemOrdinal } from "../models/stores/stores";
 import { IPortalClassOffering } from "../models/stores/user";
 import { CustomSelect } from "../clue/components/custom-select";
 
@@ -25,26 +24,10 @@ export class ClassMenuContainer extends BaseComponent <IProps> {
     );
   }
 
-  private getCurrentProblemOrdinal() {
-    const { appConfig, appMode, user: { offeringId, portalClassOfferings } } = this.stores;
-    if (offeringId) {
-      const currentOffering = portalClassOfferings.find( offering => {
-        return (offering.offeringId === offeringId);
-      });
-      if (currentOffering) {
-        return currentOffering.problemOrdinal;
-      }
-    }
-    if (appMode === "authed") {
-      console.warn(`Warning -- current offering not found. (Maybe in demo mode?)`);
-    }
-    return getProblemOrdinal(this.stores) || appConfig.defaultProblemOrdinal;
-  }
-
   private getPortalClasses() {
     const {user} = this.stores;
     const classNames = uniq(user.portalClassOfferings.map(o => o.className));
-    const currentProblemOrdinal = this.getCurrentProblemOrdinal();
+    const currentProblemPath = this.stores.problemPath;
     const links: IDropdownItem[] = [];
 
     // If, by chance, there are no classes in the offerings, return a link
@@ -54,13 +37,12 @@ export class ClassMenuContainer extends BaseComponent <IProps> {
       return [];
     }
 
-    // For each class (that is, for each item in the class switcher menu) we
-    // try to find a problem/offering with the same ordinal identifier as the
-    // current problem. If we find a match, we add that one to the link array.
-    // If not, we use the first one in the list of offerings for that class.
+    // For each class (that is, for each item in the class switcher menu) we try to find
+    // a problem/offering with the same "problem path" (unit code plus problem ordinal)
+    // as the current problem. If we find a match, we add that one to the link array.
     classNames.forEach( (className) => {
       const classProblems = user.portalClassOfferings.filter(o => o.className === className);
-      const matchingProblems = classProblems.filter(l => l.problemOrdinal === currentProblemOrdinal);
+      const matchingProblems = classProblems.filter(l => l.problemPath === currentProblemPath);
       const handleClick = (name: string, url: string) => {
         const log = {
           event: LogEventName.DASHBOARD_SWITCH_CLASS,
@@ -70,8 +52,12 @@ export class ClassMenuContainer extends BaseComponent <IProps> {
         window.location.replace(url);
       };
 
-      const addMenuItemForOffering = (offering: IPortalClassOffering) => {
-        const text = offering.activityTitle ? `${className}: ${offering.activityTitle}` : className;
+      const addMenuItemForOffering = (offering: IPortalClassOffering, showProblemTitle: boolean) => {
+        // Note that the same problem can be assigned multiple times to the same class
+        // (e.g. as a pre- and post-test), so we optionally include the activity title as well.
+        const text = showProblemTitle && offering.activityTitle
+                      ? `${className} (${offering.activityTitle})`
+                      : className;
         links.push({
           text,
           link: offering.location,
@@ -80,12 +66,9 @@ export class ClassMenuContainer extends BaseComponent <IProps> {
         });
       };
 
+      // only include classes which also assign the same problem
       if (matchingProblems.length) {
-        matchingProblems.forEach(p => addMenuItemForOffering(p));
-      } else if (classProblems.length) {
-        addMenuItemForOffering(classProblems[0]);
-      } else {
-        console.warn(`Warning -- no problems assigned in this class ${className}`);
+        matchingProblems.forEach(p => addMenuItemForOffering(p, matchingProblems.length > 1));
       }
     });
 
