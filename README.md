@@ -31,7 +31,7 @@ Merges into production are deployed to http://collaborative-learning.concord.org
 
 Other branches are deployed to http://collaborative-learning.concord.org/branch/<name>.
 
-You can view the status of all the branch deploys [here](https://travis-ci.org/concord-consortium/collaborative-learning/branches).
+You can view the status of all the branch deploys [here](https://travis-ci.com/concord-consortium/collaborative-learning/branches).
 
 To deploy a production release:
 
