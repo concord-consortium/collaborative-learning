@@ -1,5 +1,4 @@
 import TeacherDashboard from "../../../../support/elements/clue/TeacherDashboard";
-import RightNav from "../../../../support/elements/common/RightNav";
 import ClueCanvas from "../../../../support/elements/clue/cCanvas";
 import TableToolTile from "../../../../support/elements/clue/TableToolTile";
 import DrawToolTile from "../../../../support/elements/clue/DrawToolTile";
@@ -52,7 +51,7 @@ context("Teacher Space", () => {
         cy.fixture("teacher-dash-data.json").as("clueData");
     });
 
-    context('Teacher Workspace', function () {
+    context.skip('Teacher Workspace', function () {
         describe('teacher document functionality', function () {
             before(function () {
                 clueCanvas.addTile('table');
