@@ -1,5 +1,4 @@
 import TeacherDashboard from "../../../../support/elements/clue/TeacherDashboard";
-import RightNav from "../../../../support/elements/common/RightNav";
 import ClueCanvas from "../../../../support/elements/clue/cCanvas";
 import TableToolTile from "../../../../support/elements/clue/TableToolTile";
 import DrawToolTile from "../../../../support/elements/clue/DrawToolTile";
@@ -17,10 +16,9 @@ import DrawToolTile from "../../../../support/elements/clue/DrawToolTile";
  *    all of the students in the dashboard's current view
  */
 
-context.skip("Teacher Space", () => {
+context("Teacher Space", () => {
 
     let dashboard = new TeacherDashboard();
-    let rightNav = new RightNav();
     let clueCanvas = new ClueCanvas;
     let tableToolTile = new TableToolTile;
     let drawToolTile = new DrawToolTile;
@@ -58,9 +56,9 @@ context.skip("Teacher Space", () => {
             before(function () {
                 clueCanvas.addTile('table');
                 clueCanvas.addTile('drawing');
-                rightNav.openRightNavTab("my-work");
+                cy.openTab("my-work");
                 cy.openSection('my-work', 'workspaces');
-                rightNav.openCanvasItem('my-work', 'workspaces', teacherDoc);
+                cy.openDocumentWithTitle('my-work', 'workspaces', teacherDoc);
                 clueCanvas.addTile('table');
             });
             it('verify restore after switching classes', function () {
@@ -82,15 +80,15 @@ context.skip("Teacher Space", () => {
                     drawToolTile.getDrawTile().should('not.exist');
                     //switch back to original problem for later test
                     dashboard.getClassDropdown().click({ force: true });
-                    dashboard.getClassList().find('.Menuitem').contains(initClassName).click({ force: true });
+                    dashboard.getClassList().find('.list-item').contains(initClassName).click({ force: true });
                     cy.waitForSpinner();
                     dashboard.switchView('Workspace');
                     tableToolTile.getTableTile().should('exist');
                     drawToolTile.getDrawTile().should('exist');
-                    rightNav.openRightNavTab("my-work");
+                    cy.openTab("my-work");
                     cy.openSection('my-work', 'workspaces');
-                    rightNav.getCanvasItemTitle("my-work", "workspaces", teacherDoc).should('exist');
-                    rightNav.openCanvasItem("my-work", "workspaces", teacherDoc);
+                    cy.getCanvasItemTitle("workspaces").contains(teacherDoc).should('exist');
+                    cy.openDocumentWithTitle("my-work", "workspaces", teacherDoc);
                     cy.wait(2000);
                     tableToolTile.getTableTile().should('exist');
                 });
@@ -103,8 +101,8 @@ context.skip("Teacher Space", () => {
                     let tempProblemIndex = 1;
 
                     dashboard.getProblemDropdown().click({ force: true }).then(() => {
-                        dashboard.getProblemList().should('have.attr', 'open');
-                        dashboard.getProblemList().find('.Menuitem').contains(problems[tempProblemIndex].problemTitle).click({ force: true });
+                        dashboard.getProblemList().should('have.class', 'show');
+                        dashboard.getProblemList().find('.list-item').contains(problems[tempProblemIndex].problemTitle).click({ force: true });
                         cy.waitForSpinner();
                         tempProblemIndex += 1;
                     });
@@ -115,25 +113,26 @@ context.skip("Teacher Space", () => {
                     drawToolTile.getDrawTile().should('not.exist');
                     //switch back to original problem to verify restore
                     dashboard.getProblemDropdown().click({ force: true });
-                    dashboard.getProblemList().find('.Menuitem').contains(problems[initProblemIndex].problemTitle).click({ force: true });
+                    dashboard.getProblemList().find('.list-item').contains(problems[initProblemIndex].problemTitle).click({ force: true });
                     cy.waitForSpinner();
                     dashboard.switchView('Workspace');
                     clueCanvas.getInvestigationCanvasTitle().should('contain', problems[initProblemIndex].problemTitle);
                     tableToolTile.getTableTile().should('exist');
                     drawToolTile.getDrawTile().should('exist');
-                    rightNav.openRightNavTab("my-work");
+                    cy.openTab("my-work");
                     cy.openSection('my-work', 'workspaces');
-                    rightNav.getCanvasItemTitle("my-work", "workspaces", teacherDoc).should('exist');
-                    rightNav.openCanvasItem("my-work", "workspaces", teacherDoc);
+                    cy.getCanvasItemTitle("workspaces").contains(teacherDoc).should('exist');
+                    cy.openDocumentWithTitle("my-work", "workspaces", teacherDoc);
                     cy.wait(2000);
                     tableToolTile.getTableTile().should('exist');
                 });
             });
             after(function () {
                 clueCanvas.deleteTile('table');
-                rightNav.openRightNavTab("my-work");
-                cy.openSection('my-work', 'investigations');
-                rightNav.openCanvasItem("my-work", "investigations", this.investigationTitle);
+                cy.openTopTab("my-work");
+                cy.openSection('my-work', 'workspaces');
+                cy.log(this.investigationTitle[0]);
+                cy.openDocumentWithTitle("my-work", "workspaces", this.investigationTitle[0]);
                 clueCanvas.deleteTile('table');
                 clueCanvas.deleteTile('drawing');
             });

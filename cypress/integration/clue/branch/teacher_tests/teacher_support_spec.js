@@ -26,7 +26,7 @@ import TableToolTile from "../../../../support/elements/clue/TableToolTile";
         // clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle')
     });
 
-    describe.skip('verify supports functionality', function() {//may need to break down even further between class, group, and student
+    describe('verify supports functionality', function() {//may need to break down even further between class, group, and student
         it('will verify publish of support appears in Support>Teacher Workspace',function(){
             // let title = ((this.investigationTitle).split('2.1')[1]).trim()
 
@@ -38,7 +38,7 @@ import TableToolTile from "../../../../support/elements/clue/TableToolTile";
         });
     });
 
-    describe.skip("test visibility of teacher supports in student's workspace", function() {
+    describe("test visibility of teacher supports in student's workspace", function() {
             // let title = ((this.investigationTitle).split('2.1')[1]).trim()
             it('verify badge on Support Tab',function(){
                 const queryParams = `${Cypress.config("queryParams")}`;
@@ -48,11 +48,12 @@ import TableToolTile from "../../../../support/elements/clue/TableToolTile";
                 clueRightNav.getSupportBadge().should('be.visible');
             });
             it('verify teacher support is visible in student rightnav', function() {
-                rightNav.openRightNavTab('supports');
+                cy.openTab('supports');
+                cy.get('.support-badge').should('be.visible');
                 cy.openSection('supports', 'teacher-supports');
-                rightNav.getCanvasItemTitle('supports', 'teacher-supports', title).should('be.visible');
+                cy.getCanvasItemTitle('teacher-supports', title).should('be.visible');
             });
-            it('verify supports open in 2up view righthand workspace', () => {
+            it.skip('verify supports open in 2up view righthand workspace', () => {
                 rightNav.openCanvasItem('supports', 'teacher-supports', title);
                 cy.wait(1000);
                 clueCanvas.getRightSideInvestigationTitle().should('contain',title);

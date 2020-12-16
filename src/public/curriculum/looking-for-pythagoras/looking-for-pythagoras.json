@@ -61,7 +61,35 @@
           "title": "LFP 1.1 Helicopter or Car",
           "subtitle": "Finding Distances",
           "sections": [
-          ],
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
         {
@@ -70,7 +98,35 @@
           "title": "LFP 1.2 Park Designs",
           "subtitle": "Finding Area",
           "sections": [
-          ],
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
         {
@@ -78,8 +134,37 @@
           "ordinal": 3,
           "title": "LFP 1.3 Using Squares to Find Lengths",
           "subtitle": "",
-          "sections": [
-          ]
+                   "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
+          "supports": []
         }
       ],
       "supports": []
@@ -98,7 +183,35 @@
           "subtitle": "",
           "disabled": [],
           "sections": [
-          ],
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
         {
@@ -107,7 +220,35 @@
           "title": "LFP 2.2 Proving the Pythagorean Theorem",
           "subtitle": "",
           "sections": [
-          ],
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
         {
@@ -116,7 +257,35 @@
           "title": "LFP 2.3 Using the Pythagorean Theorem to Find Distances",
           "subtitle": "",
           "sections": [
-          ],
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
         {
@@ -125,7 +294,36 @@
           "title": "LFP 2.4 Stopping Sneaky Sally",
           "subtitle": "Finding Unknown Side Lengths",
           "sections": [
-          ]
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
+          "supports": []
         }
       ],
       "supports": []
@@ -141,7 +339,35 @@
           "title": "LFP 3.1. Analyzing the Wheel of Theodorus",
           "subtitle": "Square Roots on a Number Line",
           "sections": [
-          ],
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
         {
@@ -150,7 +376,35 @@
           "title": "LFP  3.2. Cube Roots",
           "subtitle": "",
           "sections": [
-          ],
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
         {
@@ -159,7 +413,36 @@
           "title": "LFP 3.3. Representing Fractions as Decimals",
           "subtitle": "",
           "sections": [
-          ]
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
+          "supports": []
         },
         {
           "description": "Problem 3.4",
@@ -167,7 +450,36 @@
           "title": "LFP 3.4. Representing Decimals as Fractions",
           "subtitle": "",
           "sections": [
-          ]
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
+          "supports": []
         }
       ],
       "supports": []
@@ -182,7 +494,36 @@
           "ordinal": 1,
           "title": "LFP 4.1 Measuring the Egyptian Way",
           "subtitle": "Lengths that Form a Right Triangle",
-          "sections": [],
+          "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
         {
@@ -190,7 +531,36 @@
           "ordinal": 2,
           "title": "LFP 4.2 Analyzing Triangles",
           "subtitle": "",
-          "sections": [],
+          "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
         {
@@ -198,7 +568,37 @@
           "ordinal": 3,
           "title": "LFP 4.3 Analyzing Circles",
           "subtitle": "",
-          "sections": []
+          "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
+          "supports": []
         }
       ],
       "supports": []

@@ -94,7 +94,7 @@ context('Test bottom tabs', function(){
             learningLog.closeLearningLogTab(); //close learning log
         });
         it('open Class Work canvas in learning log 2up view', function(){
-            canvas.publishCanvas();
+            canvas.publishCanvas("personal");
             learningLog.openLearningLogTab();//open learning log
             rightNav.openClassWorkTab();
             rightNav.openClassWorkSections();

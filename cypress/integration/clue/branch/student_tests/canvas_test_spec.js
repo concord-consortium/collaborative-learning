@@ -112,10 +112,10 @@ context('Test Canvas', function () {
           clueCanvas.getSectionHeader(headers[i]).find('.title').should('contain', headerTitles[i]);
         }
       });
-      it.skip('verifies section headers are not deletable', function () {
+      it('verifies section headers are not deletable', function () {
         clueCanvas.getRowSectionHeader().each(function ($header, index, $header_list) {
           cy.wrap($header).click({ force: true });
-          clueCanvas.getDeleteTool().click();
+          clueCanvas.getDeleteTool().should('have.class', 'disabled').click();
           expect($header).to.exist;
         });
       });
@@ -138,7 +138,7 @@ context('Test Canvas', function () {
         //TODO: not sure how to test this yet
       });
       it('verifies publish of investigation', function () {
-        canvas.publishCanvas();
+        canvas.publishCanvas("investigation");
         rightNav.openTopTab('class-work');
         cy.openSection('class-work', "problem-workspaces");
         rightNav.getCanvasItemTitle('class-work', 'problem-workspaces').should('contain', "Student 5: "+this.title);
@@ -402,11 +402,12 @@ context('Test Canvas', function () {
 
   });
 
-  // TODO: Unable to get and return the delete methods in Canvas
-  context.skip('delete elements from canvas', function () {
+  context('delete elements from canvas', function () {
     before(() => {
       //star a document to verify delete
-      rightNav.openCanvasItem('my-work', 'workspaces', 'copy of 1.2');
+      cy.openSection("my-work", "workspaces");
+      cy.get('.list.workspaces [data-test=workspaces-list-items] .footer').contains(renameTitlePencil).parents().siblings('.icon-holder').find('.icon-star').click();
+      cy.openDocumentWithTitle('my-work', 'workspaces', 'SAS 2.1 Drawing Wumps');
     });
     it('will delete elements from canvas', function () {
       // //Delete elements in the canvas
@@ -453,26 +454,9 @@ context('Test Canvas', function () {
       cy.openSection("my-work", "workspaces");
       rightNav.getCanvasItemTitle("my-work","workspaces").contains(studentWorkspace).should('not.exist');
     });
-    it.skip('verify starred document is no longer in the Starred section after delete', function () {
+    it('verify starred document is no longer in the Starred section after delete', function () {
       cy.openSection('my-work', 'starred');
-      rightNav.getCanvasItemTitle('my-work', 'starred').should('not.exist');
-    });
-    it.skip('verify that published personal workspace', function () {
-      rightNav.openTopTab("my-work");
-      cy.openDocumentWithTitle('class-work', 'workspaces', publishTitle);
-      canvas.deleteDocument();
-      rightNav.shouldHaveDocumentWithTitle('class-work', 'published-personal-documents', publishTitle);
-    });
-    it.skip('verify delete of starred personal workspace', function () {
-      //TODO: should also delete document from Starred section
-    });
-    it.skip('verify delete last document thumbnail', function () {//last document was deleted above
-      rightNav.openTopTab("my-work");
-      cy.openDocumentWithTitle('my-work', 'workspaces', renameTitlePencil);
-      canvas.deleteDocument();
-      rightNav.openTopTab("my-work");
-      cy.openSection("workspaces");
-      rightNav.getCanvasItemTitle("my-work","workspaces").should('have.length', 1);
+      cy.getCanvasItemTitle('my-work', 'starred').should('not.exist');
     });
   });
 });

@@ -30,7 +30,7 @@ class ClueCanvas {
     }
 
     getSingleWorkspace() {
-        return cy.get('.single-workspace');
+        return cy.get('.primary-workspace');
     }
 
     getRowSectionHeader() {
@@ -106,7 +106,7 @@ class ClueCanvas {
     }
 
     getToolPalette() {
-        return cy.get('.single-workspace > .toolbar');
+        return cy.get('.primary-workspace> .toolbar');
     }
 
     getLeftSideToolPalette() {
@@ -117,18 +117,18 @@ class ClueCanvas {
         return cy.get('.right-workspace > .toolbar');
     }
     getSelectTool() {
-        return cy.get('.single-workspace .tool.select[title=Select]');
+        return cy.get('.primary-workspace .tool.select[title=Select]');
     }
 
     addTile(tile) { //tile=[text,table,geometry,image,drawing,delete]
-        cy.get('.single-workspace .tool.' + tile).click({ force: true });
+        cy.get('.primary-workspace .tool.' + tile).click({ force: true });
     }
     addTileByDrag(tile, dropzone){//tile=[text,table,geometry,image,drawing,delete]
         const dropzoneArray = ['top', 'left', 'right', 'bottom'];
         const dataTransfer = new DataTransfer;
         let nthType = dropzoneArray.indexOf(dropzone)+2;
         cy.log(nthType);
-        cy.get('.single-workspace .tool.' + tile)
+        cy.get('.primary-workspace .tool.' + tile)
             .trigger('dragstart', { dataTransfer });
         cy.get('.drop-feedback:nth-of-type('+nthType+')').eq(1).invoke('attr','class','drop-feedback show '+dropzone)
             .trigger('drop', { dataTransfer, force: true })
