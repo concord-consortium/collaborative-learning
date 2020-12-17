@@ -1,12 +1,10 @@
 import TeacherDashboard from "../../../../support/elements/clue/TeacherDashboard";
-import RightNav from "../../../../support/elements/common/RightNav";
 import ClueCanvas from "../../../../support/elements/clue/cCanvas";
 import Canvas from "../../../../support/elements/common/Canvas";
 import TableToolTile from "../../../../support/elements/clue/TableToolTile";
 import DrawToolTile from "../../../../support/elements/clue/DrawToolTile";
 
     let dashboard = new TeacherDashboard();
-    let rightNav = new RightNav();
     let clueCanvas = new ClueCanvas;
     let canvas = new Canvas;
     let tableToolTile = new TableToolTile;
