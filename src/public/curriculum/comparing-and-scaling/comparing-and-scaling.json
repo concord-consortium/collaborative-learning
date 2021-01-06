@@ -580,8 +580,31 @@
                   },
                   {
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/CS_1_3_WI_Adia_Strategy_450w.png"
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Adia's Strategy.</strong> She used a rate table to find the number of batches of Recipe A to serve 210 campers."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "columns": [
+                        {
+                          "name": "Number of batches of Recipe A",
+                          "type": "number",
+                          "values": [ 1, 2, 3, 4, 5, 10, 20, 40, 41, 42]
+                        },
+                        {
+                          "name": "Number of 1 cup servings of juice",
+                          "type": "number",
+                          "values": [ 5, 10, 15, 20, 25, 50, 100, 200, 205, 210]
+                        }
+                      ]
+                    },
+                    "layout": {
+                      "height": 300
                     }
                   },
                   {
@@ -650,10 +673,24 @@
                       ]
                     }
                   },
-                  {
+                                    {
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/CS_1_4_IN_Adia_Strategy_450w.png"
+                      "type": "Table",
+                      "columns": [
+                        {
+                          "name": "Number of batches of Recipe A",
+                          "type": "number",
+                          "values": [ 1, 2, 3, 4, 5, 10, 20, 40, 41, "x"]
+                        },
+                        {
+                          "name": "Number of 1 cup servings of juice",
+                          "type": "number",
+                          "values": [ 5, 10, 15, 20, 25, 50, 100, 200, 205, 210]
+                        }
+                      ]
+                    },
+                    "layout": {
+                      "height": 300
                     }
                   },
                   {
@@ -975,30 +1012,35 @@
                   {
                     "content": {
                       "type": "Text",
+                      "format": "html",
                       "text": "<blockquote><em>What is being compared in each statement above?\nWhat is the unit of measure for each quantity?</em></blockquote>"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
+                      "format": "html",
                       "text": "Each statement can be written as a ratio, such as <em>5.5 dollars to 1 hour or 355 calories to 6 ounces</em> of meat. Since each ratio is a comparison of two quantities <em>measured in different units</em>, they are called <strong>rates</strong>."
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
+                       "format": "html",
                       "text": "In the <em>Comparing Quantities</em> Unit, you found unit rates. A <em>unit rate</em> is a rate in which one of the two quantities has a measurement of 1 unit. The rates <em>$5.50 per 1 hour and two sandwiches for each person</em> are unit rates because “per hour” or “for each” means one quantity has a measure of one unit."
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
+                       "format": "html",
                       "text": "In the last Problem, Selma and Tony used unit rates to solve the problem. Tony found the number of people per pizza. Selma found the amount of pizza per person.\n\n<blockquote>For the large table, the unit rates are:\n2.5 people per pizza or 0.4 pizza per person\n\nFor the small table, the unit rates are:\n2 2/3 people per pizza or 0.375 pizza per person.</blockquote>"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
+                       "format": "html",
                       "text": "Another way to find missing values in a proportional situation is to build a table of equivalent rates, called a <strong>rate table</strong>. Tony uses a rate table to find the number of pizzas needed for 210 campers."
                     }
                   },
@@ -1019,7 +1061,7 @@
                       ]
                     },
                     "layout": {
-                      "height": 150
+                      "height": 200
                     }
                   },
                   {
@@ -1157,7 +1199,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Amit's Strategy</strong>\n<blockquote>He saw that at Royle, 5 pizzas cost $65. He wanted to compare the prices for 5 pizzas at each restaurant. He scaled down the pizza and price at Howdy's by dividing each quantity by 3.<\blockquote>"
+                        "<strong>Amit's Strategy</strong><blockquote>\nHe saw that at Royle, 5 pizzas cost $65. He wanted to compare the prices for 5 pizzas at each restaurant. He scaled down the pizza and price at Howdy's by dividing each quantity by 3."
                       ]
                     }
                   },
@@ -1172,7 +1214,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Meredith's Strategy</strong>\n<blockquote>She found the unit rate of the cost for one pizza for each company. Then she scaled up to find the total cost for pizzas. However, with Howdy's after finding the cost of the pizzas, she added the $30 delivery charge.<\blockquote>"
+                        "<strong>Meredith's Strategy</strong>\nShe found the unit rate of the cost for one pizza for each company. Then she scaled up to find the total cost for pizzas. However, with Howdy's after finding the cost of the pizzas, she added the $30 delivery charge."
                       ]
                     }
                   },
@@ -1181,7 +1223,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Mary's Strategy</strong>\n<blockquote>She used the unit rate to write equations. <em>C</em> is the total cost of the pizza and <em>n</em> is the number of pizzas.\nFor Royal: <em>C<sub>R</sub></em> = 13<em>n</em>.\nFor Howdy's: <em>C<sub>H</sub></em> = 11<em>n</em> and then added $30 for delivery.<\blockquote>"
+                        "<strong>Mary's Strategy</strong>\nShe used the unit rate to write equations. <em>C</em> is the total cost of the pizza and <em>n</em> is the number of pizzas.\nFor Royal: <em>C<sub>R</sub></em> = 13<em>n</em>.\nFor Howdy's: <em>C<sub>H</sub></em> = 11<em>n</em> and then added $30 for delivery."
                       ]
                     }
                   },
@@ -1233,7 +1275,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "The unit rate for the cost of one pizza at Royal’s is $13. The equation <em>C</em> = 13<em>n</em> relates cost of pizza and number of pizzas. This equation represents a proportional relationship because you multiply one variable by a constant number to get the value of the other variable.\n<blockquote><em>C</em> = <strong>13</strong><em>n</em>\n<strong>13</strong> is the unit rate or <strong>constant of proportionality</strong></blockquote>"
+                        "The unit rate for the cost of one pizza at Royal’s is $13. The equation <em>C</em> = 13<em>n</em> relates cost of pizza and number of pizzas. This equation represents a proportional relationship because you multiply one variable by a constant number to get the value of the other variable.\n\n<blockquote><em>C</em> = <strong>13</strong><em>n</em>\n\n<strong>13</strong> is the unit rate or <strong>constant of proportionality</strong></blockquote>"
                       ]
                     }
                   },
@@ -1242,7 +1284,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Notice that in a proportional relationship the multiplicative relationship between the quantities is always the same. For example, 1:13 = n:39. So, for every pizza the cost is 13 times the amount of pizzas. In a proportional relationship you can scale the ratio of corresponding values to make an equivalent ratio.\n",
+                        "Notice that in a proportional relationship the multiplicative relationship between the quantities is always the same. For example, 1:13 = <em>n</em> :39. So, for every pizza the cost is 13 times the amount of pizzas. In a proportional relationship you can scale the ratio of corresponding values to make an equivalent ratio.\n",
                         "In this Problem you will look at tables, equations, and graphs of proportional relationships."
                       ]
                     }
@@ -1266,8 +1308,22 @@
                   },
                   {
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/CS_2_3_IC_Mias_table_500w.png"
+                      "type": "Table",
+                      "columns": [
+                        {
+                          "name": "Number of Oranges",
+                          "type": "number",
+                          "values": [ 10, 5, 1, 2, 3 ]
+                        },
+                        {
+                          "name": "Total Cost (in Dollars)",
+                          "type": "number",
+                          "values": [ 2, 1, 0.20, 0.40, 0.60 ]
+                        }
+                      ]
+                    },
+                    "layout": {
+                      "height": 160
                     }
                   },
                   {
@@ -1280,15 +1336,191 @@
                     }
                   },
                   {
+                    "layout": {
+                      "height": 320
+                    },
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/CS_2_3_IC_Graph_Oranges_500w.png"
+                      "type":"Geometry",
+                      "board": {
+                        "properties": {
+                          "axisNames": ["Total Cost in Dollars", "Number of Oranges"],
+                          "axisMin": [-0.5, -1],
+                          "axisRange": [2.6, 14]
+                        }
+                      },
+                      "objects": [
+                        {
+                          "type": "point",
+                          "parents": [0.2, 1],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [0.4, 2],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [0.6, 3],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [0.8, 4],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [1, 5],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [1.2, 6],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [1.4, 7],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [1.6, 8],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [1.8, 9],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [2, 10],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [2.2, 11],
+                          "properties": {
+                                "name": ""
+                              }
+                        }
+                      ]
                     }
                   },
                   {
+                    "layout": {
+                      "height": 320
+                    },
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/CS_2_3_IC_Graph_Dollars_500w.png"
+                      "type":"Geometry",
+                      "board": {
+                        "properties": {
+                          "axisNames": ["Number of Oranges", "Total Cost in Dollars"],
+                          "axisMin": [-1, -0.5],
+                          "axisRange": [14, 2.6]
+                        }
+                      },
+                      "objects": [
+                        {
+                          "type": "point",
+                          "parents": [1, 0.2],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [2, 0.4],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [3, 0.6],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [4, 0.8],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [5, 1],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [6, 1.2],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [7, 1.4],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [8, 1.6],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [9, 1.8],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [10, 2],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [11, 2.2],
+                          "properties": {
+                                "name": ""
+                              }
+                        }
+                      ]
                     }
                   },
                   {
@@ -1327,9 +1559,41 @@
                     }
                   },
                   {
+                    "layout": {
+                      "height": 320
+                    },
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/CS_2_3_WI_Noralies_ticket_graph_450w.png"
+                      "type":"Geometry",
+                      "board": {
+                        "properties": {
+                          "axisNames": ["Number of Tickets", "Total Cost of Tickets"],
+                          "axisMin": [-1, -10],
+                          "axisRange": [6, 160]
+                        }
+                      },
+                      "objects": [
+                        {
+                          "type": "point",
+                          "parents": [0, 0],
+                          "properties": {
+                                "name": "(0, 0)"
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [1, 30],
+                          "properties": {
+                                "name": "(1, 30)"
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [2, 60],
+                          "properties": {
+                                "name": "(2, 60)"
+                              }
+                        }
+                      ]
                     }
                   },
                   {
@@ -1447,7 +1711,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Many states have a sales tax. A sales tax of 6% means that for every dollar an item costs, a person needs to pay an additional 6 cents for every 100 cents of an item purchased, or $0.06 for every dollar. This is tax money collected by states. For example, with 6% tax:<blockquote>Item purchased for $1.00\n\nSales tax is 6% of $1.00 or $0.06\n\nTotal cost $1.06</blockquote>\n<strong>Note:</strong> When a percent calculation for sales tax does not come out to a whole number of cents, the standard practice is to round up the tax to the next penny."
+                        "Many states have a sales tax. A sales tax of 6% means that for every dollar an item costs, a person needs to pay an additional 6 cents for every 100 cents of an item purchased, or $0.06 for every dollar. This is tax money collected by states. For example, with 6% tax:<blockquote>Item purchased for $1.00\n\nSales tax is 6% of $1.00 or $0.06\n\nTotal cost $1.06</blockquote>\n\n\n<strong>Note:</strong> When a percent calculation for sales tax does not come out to a whole number of cents, the standard practice is to round up the tax to the next penny."
                       ]
                     }
                   }
@@ -1857,20 +2121,112 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Concetta's Strategy: Graphs</strong>\nConcetta used two graphs to show relationships."
+                        "<strong>Concetta's Strategy: Graphs</strong>\nConcetta used two graphs to show relationships. <ol><li>between the Total amount of food and the amount of protein,</li><li>between the Total amount of food and the amount of fiber</li></ol>"
                       ]
                     }
                   },
                   {
+                    "layout": {
+                      "height": 360
+                    },
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/CS_3_3_WI_Concetta_graph1_300w.png"
+                      "type":"Geometry",
+                      "board": {
+                        "properties": {
+                          "axisNames": ["Total Amount of Food", "Cost of Protein"],
+                          "axisMin": [-1, -0.5],
+                          "axisRange": [10, 3.5]
+                        }
+                      },
+                      "objects": [
+                        {
+                          "type": "point",
+                          "parents": [1, 0.6],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [2, 1.2],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [3, 1.8],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [4, 2.4],
+                          "properties": {
+                                "name": ""
+                              }
+                        }
+                      ]
                     }
                   },
                   {
+                    "layout": {
+                      "height": 360
+                    },
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/CS_3_3_WI_Concetta_graph2_300w.png"
+                      "type":"Geometry",
+                      "board": {
+                        "properties": {
+                          "axisNames": ["Total Amount of Food", "Cost of Fiber"],
+                          "axisMin": [-1, -0.5],
+                          "axisRange": [10, 3.5]
+                        }
+                      },
+                      "objects": [
+                        {
+                          "type": "point",
+                          "parents": [1, 0.4],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [2, 0.8],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [3, 1.2],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [4, 1.6],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [5, 2.0],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [6, 2.4],
+                          "properties": {
+                                "name": ""
+                              }
+                        }
+                      ]
                     }
                   },
                   {
