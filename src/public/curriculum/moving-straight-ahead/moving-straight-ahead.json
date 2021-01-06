@@ -163,6 +163,16 @@
                         "<em>What do you think your walking rate is?</em><ul><li>Make a prediction about your walking rate. </li><li>Use a meter stick and timer to help answer the following following questions about your walking rate. What is your walking rate in meters per second?</li><</ul>"
                       ]
                     }
+                  },
+                  {
+                    "content": {
+                      "solution": true,
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Student answers will vary. It will be easier for students to find their walking rates by seeing how far they walk in, for example, 5 or 10 seconds and then divide the number of meters they walked by the number of seconds for which they walked."
+                      ]
+                    }
                   }
                 ]
               },

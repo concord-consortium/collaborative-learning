@@ -2,13 +2,8 @@
   "code": "cas",
   "abbrevTitle": "CAS",
   "title": "Comparing and Scaling",
-  "subtitle": "Developing Proportional Reasoning in the Context of Number (quantities)",
+  "subtitle": "Developing Proportional Reasoning in the Context of Number (Quantities)",
   "placeholderText": "Enter notes here",
-  "settings": {
-    "table": {
-      "numFormat": ".2~f"
-    }
-  },
   "sections": {
     "introduction": {
       "initials": "IN",
@@ -40,46 +35,400 @@
       "title": "Math Reflection 1",
       "placeholder": "Work area for\nMathematical Reflection 1 section"
     },
-     "MathReflection2": {
+    "MathReflection2": {
       "initials": "R2",
       "title": "Math Reflection 2",
       "placeholder": "Work area for\nMathematical Reflection 2 section"
     },
-     "MathReflection3": {
+    "MathReflection3": {
       "initials": "R3",
       "title": "Math Reflection 3",
       "placeholder": "Work area for\nMathematical Reflection 3 section"
-    },
-     "MathReflection4": {
-      "initials": "R4",
-      "title": "Math Reflection 4",
-      "placeholder": "Work area for\nMathematical Reflection 4 section"
     }
   },
-  "defaultStamps": [
-  ],
+  "lookingAhead": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": "<strong>Looking Ahead</strong>"
+        }
+      },
+      {
+        "content": {
+          "type": "Image",
+          "url": "curriculum/comparing-and-scaling/images/CS_LA_O1_monkey_350w.png"
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "text": "Ming’s job is to take care of chimps at the zoo. She has a mix of 20 scoops of high-fiber food and 30 scoops of high-protein food. How can she adjust this to make the mix contain 60 scoops of high fiber or 40 scoops of high protein?"
+        }
+      },
+      {
+        "content": {
+          "type": "Image",
+          "url": "curriculum/comparing-and-scaling/images/CS_LA_02_orange_juice_350w.png"
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "text": "Which recipe will make juice that is the most “orangey”?  Least “orangey”? Explain your reasoning."
+        }
+      },
+      {
+        "content": {
+          "type": "Image",
+          "url": "curriculum/comparing-and-scaling/images/CS_LA_03_pizza1_350w.png"
+        }
+      },
+      {
+        "content": {
+          "type": "Image",
+          "url": "curriculum/comparing-and-scaling/images/CS_LA_04_pizza2_350w.png"
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "text": "Julia is in charge of ordering pizzas for a camp dinner. There are two pizza companies nearby. Both allow customers to use the same pricing rate for fewer or more pizzas than the listed number. Which company should Julia use? Explain why."
+        }
+      },
+      {
+        "content": {
+          "type": "Image",
+          "url": "curriculum/comparing-and-scaling/images/CS_LA_05_cranberry_bog_400w.png"
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": "Many everyday problems and decisions call for comparisons. <em>Which runner is faster? Which Internet service is cheaper? Which cranberry bog yields the most berries?</em> In some cases, the comparisons involve only counting, measuring, or rating, and then ordering the results from least to greatest or the other way around. In other cases, more complex reasoning is required. All of the questions in <em>Looking Ahead</em> involve comparisons. In the <em>Comparing Quantities</em> Unit, you explored many ways to compare numbers and to analyze comparisons that involved ratios. You continued your exploration of ratios in the <em>Stretching and Shrinking</em> Unit with similar figures or scale drawings. In this Unit you will deepen your understanding of proportional relationships, including ways to represent and use comparison strategies for solving problems and making decisions. "
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "As you work on the Problems in this Unit, ask yourself these questions about situations that involve comparisons.",
+            "<ul><li><strong>What</strong> quantities are being compared?</li>",
+            "<li><strong>Why</strong> does the situation involve a proportional relationship (or not)?</li>",
+            "<li><strong>How</strong> might ratios, rates, or percent be used to solve the proportion?</li></ul>"
+          ]
+        }
+      }
+    ]
+  },
   "investigations": [
     {
       "description": "Investigation 1",
       "ordinal": 1,
       "title": "CAS Investigation 1 Proportional Reasoning Using Ratio Comparisons",
+      "introduction": {
+        "tiles": []
+      },
       "problems": [
         {
           "description": "Problem 1.1",
           "ordinal": 1,
           "title": "CAS 1.1 Surveying Opinions",
           "subtitle": "Analyzing Comparison Statements",
-          "disabled": [],
           "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Surveys are used to determine people’s preferences for many things. You may have seen surveys about food, cars, consumer products, or political candidates. From survey results, it can be easy to determine popular choices. Explaining how much more popular one choice is than another may not be as easy.  More work with surveys and samples are done in a later Unit, Samples and populations. In this Investigation, you will explore strategies for comparing numbers in accurate and useful ways."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Companies that sell soft drinks often report survey results about customers' preferences."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_1_1_IN_Bolda_Cola_400w.png"
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "The Business Club at Neilson Middle School is studying surveys and other marketing strategies. One of the surveys is about people's preferences for two different kinds of cola. Club members have various opinions about ways to report the results from the cola taste test."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Here are four statements about the cola taste-test results. They all say that Bolda Cola is the preferred cola."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Statement #1</strong>\nIn a taste test, people who preferred Bolda Cola outnumbered those who preferred Cola-Nola by a ratio of 17,139 to 11,426."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Statement #2</strong>\nIn a taste test, 5,713 more people preferred Bolda Cola."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Statement #3</strong>\nIn a taste test, 60% of the people perferred Bolda Cola."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Statement #4</strong>\nIn a taste test, people who preferred Bolda Cola outnumbered those who preferred Cola-Nola by a ratio of 3 to 2."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "* Is it possible that all four statements accurately represent the same survey data?",
+                        "* Which statement(s) do you think would be best in an advertisement for Bolda Cola? Why?",
+                        "* Do statements 2 and 3 also represent ratios? Explain why or why not.",
+                        "* Suppose you surveyed 1,000 cola drinkers. What numbers of Bolda Cola and Cola-Nola drinkers would you expect? Explain your reasoning."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation A. Another Survey</strong>",
+                        "<ol><li>Does each statement accurately report the results of the Neilson Middle School survey? Why?</li><li>Which of these statements represent ratios? Explain why or why not.</li><ol>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<blockquote><strong>Statement 1</strong>\nAt Neilson Middle School, 1/3 of the students prefer a concert to an athletic event.</blockquote>\n\n",
+                        "<blockquote><strong>Statement 2</strong>\nFor every 2 students who prefer an athletic event, 1 student prefers a concert.</blockquote>\n\n",
+                        "<blockquote><strong>Statement 3</strong>\nThe unit rate of students who prefer a concert to students who prefer an athletic event is 1 to 2.</blockquote>\n\n",
+                        "<blockquote><strong>Statement 4</strong>\nThe number of students who prefer an athletic event is 50 more than the number who prefer a concert.</blockquote>\n\n",
+                        "<blockquote><strong>Statement 5</strong>\nThe number of students who prefer an athletic event is two times the number who prefer a concert.</blockquote>\n\n",
+                        "<blockquote><strong>Statement 6</strong>\nAt Neilson Middle School, 50% of the students prefer a concert to an athletic event.</blockquote>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation B. Predicting from the Survey Results</strong>",
+                        "Suppose another larger school is interested in conducting a similar survey. How might these survey results be used to predict the survey results at the larger school?"
+                      ]
+                    }
+                  }
+                ],
+                "supports": []
+              }
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "How do we recognize when ratios are being used to compare quantities? How is using survey results at one school to predict survey results at another school related to your work on similarity? "
+                      ]
+                    }
+                  }
+                ],
+                "supports": []
+              }
+            }
           ],
           "supports": []
         },
         {
-          "description": "Problem 1.2",
+          "description": "CAS Problem 1.2",
           "ordinal": 2,
           "title": "CAS 1.2 Mixing Juice",
           "subtitle": "Choosing a Comparing Strategy",
           "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Every year, the Grade 7 students at Langston Hughes School go on an outdoor education camping trip. During the week-long trip, the students study nature and participate in recreational activities. Everyone pitches in to help with the cooking and cleanup."
+                      ]
+                    }
+                  }
+                ],
+                "supports": []
+              }
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "This year, Arvin and Mariah are making orange juice for the campers. They plan to make the juice by mixing water with some concentrated liquid orange juice. To find the recipe that would taste best, they decided to test some recipes."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_1_2_IC_receipes_450w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_1_2_IC_all_mix_mixers_465w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Which recipe will make juice that is the most “orangey”?  Least “orangey”? Make your reasoning and conclusion visible to others.</li></ul>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [
+              ]
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation A. Mr. Zhoa’s Students’ Strategies</strong>",
+                        "Mr. Zhoa’s class had some interesting strategies for answering the questions about the orange juice recipes.",
+                        "<ol><li>Do you agree with students’ thinking in the strategies? Are their strategies accurate? Have the students found ways to answer the questions about the orangey taste of the juice recipes?</li><li>How are the strategies alike? Different?</li></ol>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_1_2_WI_Strategy1_450.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_1_2_WI_Strategy2_450.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_1_2_WI_Strategy3_450.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_1_2_WI_Strategy4_450.png"
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Reflect on the strategies to determine which recipe was the most “orangey.” What strategies are useful when solving comparison problems?"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
           ],
           "supports": []
         },
@@ -89,8 +438,189 @@
           "title": "CAS 1.3 Time to Concentrate",
           "subtitle": "Scaling Ratios",
           "sections": [
-          ],
-          "supports": []
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In Problem 1.2, Sam used scaling ratios as a comparison strategy. He wrote:"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_1_3_IN_ratios_450w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<blockquote><em>How could Sam use these ratios to compare Recipe A and Recipe B?</em></blockquote>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In Problem 1.2, you may have used the ratios below to determine which recipe was the most “orangey.”\n\nBelow are two ratios describing Recipe A."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_1_3_IN_part_to_part_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_1_3_IN_part_to_whole_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_1_3_IN_fraction_form_300w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<blockquote><em>How are these fraction forms of ratios the same as or different from fractions?</em></blockquote>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Arvin and Mariah will use each recipe to consider making juice for the campers."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Consider each camper getting a cup of juice. For <em>each<em> of the four recipes, determine:<ul><li>How many batches are needed to make juice for 210 campers?</li><li>How much concentrate and how much water are needed to make juice for 210 campers?</li><li>For each recipe, how much concentrate is needed to make 1 cup of juice? How much water is needed?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_1_3_IC_ReciepeA.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_1_3_IC_ReciepeB.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_1_3_IC_ReciepeC.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_1_3_IC_ReciepeD.png"
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation A. Table and Equation Strategies</strong>\nStudents in Ms. Chung’s class used different strategies to find the number of recipes needed for 210 campers."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<blockquote>Examine each strategy. How are the two strategies the same? Different?</blockquote>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_1_3_WI_Adia_Strategy_450w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_1_3_WI_Otis_Strategy_450w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation B. Making Lemonade</strong>\nAfter the camp, Cece went home and made lemonade for her family. She uses the ratio of one cup of concentrate to three cups of cold water. She needs 160 ounces of juice.<ol><li>How many cups of concentrate will she need?</li><li>How many cups of water will she need?</li></ol>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Describe how scaling is useful to solve problems involving ratios. Describe how an equation might be useful."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
+          ]
         },
         {
           "description": "Problem 1.4",
@@ -98,22 +628,325 @@
           "title": "CAS 1.4 Keeping Things in Proportion",
           "subtitle": "Using Proportions",
           "sections": [
-          ],
-          "supports": []
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In Problem 1.3, Adia and Otis recognized that the comparisons could be represented with ratios and used scaling to find the number of batches of Recipe A."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Adia used equivalent ratios in a rate table to show how the original ratio was scaled to find the number of batches."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_1_4_IN_Adia_Strategy_450w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Otis used the original ratios and equivalent ratios written in fraction form. He scaled the fractions to find the number of batches."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_1_4_IN_Otis_Strategy_200w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "This kind of equation, where two ratios are equal, is called a <strong>proportion</strong>. When you find equivalent ratios using strategies like Adia’s table or Otis’s equation to answer questions, you are using <strong>proportional reasoning</strong>. Both strategies involve proportions. Adia’s table shows many proportions. Otis’s equation shows one proportion. Recall that a proportion is a statement of equality of two ratios."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In <em>Comparing Quantities</em>, you worked with unit rates to find shares of a chewy fruit worm. In <em>Stretching and Shrinking</em>, you worked with ratios to find missing lengths in similar figures. These examples involved proportional reasoning. There are many other situations in which setting up a proportion can help you solve a problem."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "For each scenario answer the questions. Explain your reasoning."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Scenario 1</strong>\nZane is 12 years old and decides to share a chewy fruit worm with his sister Stella, who is 4 years old. He shares it according to the ratio of their ages. The chewy fruit worm is marked into 4 equal segments. How would they share the worm?"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_1_4_IC_chewy_fruit_worm_400w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Scenario 2</strong>\n<ol><li>Jogging 5 miles burns about 500 calories. How many miles does Tanisha need to jog to burn off the 1,200-calorie lunch she ate?</li><li>Tanisha jogs about 8 miles in 2 hours. How long will it take her to jog 12 miles?</li></ol>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Scenario 3</strong>\nThe triangles in this picture are similar. Find the height of the tallest tree."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_1_4_IC_trees_triangles.png"
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation A. Writing a Proportion</strong>\nNic and Taren wrote the following proportions to solve the first part of Scenario 2. What are other ways they could write the proportions? Is the answer the same?  Explain."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_1_4_WI_Proportion1_and_2_400w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation B. Taren’s Reasoning</strong>\nIn Scenario 3, Taren reasoned as follows: “The scale factor from the small triangle to large triangle is 6, so to find the height of the tallest tree I multiplied the corresponding length, 5ft, by the scale factor. The height of the tree is 30 feet.” Is Taren correct? Explain. "
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_1_4_WI_Tarens_Reasoning_450.png"
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Describe some strategies for using proportional reasoning to solve problems."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
+          ]
         }
-      ]
+      ],
+      "supports": []
     },
     {
       "description": "Investigation 2",
       "ordinal": 2,
-      "title": "CAS Investigation 2 Proportional Reasoning: Using Rate Comparisons",
+      "title": "CAS Investigation 2 Proportional Reasoning Using Rate Comparisons",
+      "introduction": {
+      },
       "problems": [
         {
           "description": "Problem 2.1",
           "ordinal": 1,
           "title": "CAS 2.1 Sharing Pizzas",
           "subtitle": "Comparing Rate Strategies",
+          "disabled": [],
           "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "In Investigation 1, you explored strategies for comparing quantities. You used ratios, fractions, scaling, percents, and differences. Knowing several methods of comparison is not enough. You also need to be able to recognize when a situation is proportional and which method of comparison is appropriate to solve the problem."
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "The dining room at a camp has two sizes of tables. A large table seats ten people, and a small table seats eight people. When the campers come for dinner one night, there are four pizzas on each large table and three pizzas on each small table."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "The campers at each table share the pizzas equally.\n<ul><li>Does a person sitting at a small table get the same amount of pizza as a person sitting at a large table? Make your reasoning and conclusion visible to others.</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_2_1_IC_Large_and_Small_Table.png"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation A. Three Strategies</strong>Selma, Tony, and Terry came up with different ways to solve the problem. Who is correct? Explain."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>1. Selma's Strategy</strong>\n\nFor each table, I found the amount of pizza each person would get.\n\n<blockquote>Large Table\n10 people : 4 pizzas=\n1 person : x pizzas=\n1 person : 4/10 pizza\n\nSmall Table\n8 people : 3 pizzas=\n1 person : x pizzas=\n1 person : 3/8 pizza</blockquote>\n\nThe people at the large table get more pizza."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>2. Tony's Strategy</strong>\n\nFor each table, I found the number of people that would share one pizza.\n\n<blockquote>Large Table\n10 people for every 4 pizzas=\nx people for every 1 pizza=\n2.5 people for every 1 pizza\n\nSmall Table\n8 people for every 3 pizzas=\n2 2/3 people for every 1 pizza</blockquote>\n\nThe people at the small table get more pizza."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>3. Terry's Strategy</strong>\n\nFor the large table, there are 10 people for 4 pizzas. The difference is 6.\n\nFor the small table there are 8 people for 3 pizzas. The difference is 5.\n\n<blockquote>Large Table\n10 people - 4 pizzas=5\n\nSmall Table\n8 people - 3 pizzas=5</blockquote>\n\nSo, the people at the small table get more pizza."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation B. Pizza for all the Campers</strong>\nIf there are 210 campers, how many pizzas are needed<ol><li>If only large tables are used?</li><li>If only small tables are used?</li></ol>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation C. Considering Extra-Large Tables</strong>\nThe camp decides to use only extra-large tables that seat 25 people,<ol><li>How many pizzas should be put on an extra-large table?</li><li>How many pizzas would be used to serve 200 campers if they sit at extra-large tables?</li></ol>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "How are the comparison strategies in this problem the same as those in Investigation 1? How are they different?"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
           ],
           "supports": []
         },
@@ -123,6 +956,265 @@
           "title": "CAS 2.2 Comparing Pizza Prices",
           "subtitle": "Scaling Rates",
           "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Consider the following comparisons:"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_2_2_IN_Comparisons_450w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "<blockquote><em>What is being compared in each statement above?\nWhat is the unit of measure for each quantity?</em></blockquote>"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Each statement can be written as a ratio, such as <em>5.5 dollars to 1 hour or 355 calories to 6 ounces</em> of meat. Since each ratio is a comparison of two quantities <em>measured in different units</em>, they are called <strong>rates</strong>."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "In the <em>Comparing Quantities</em> Unit, you found unit rates. A <em>unit rate</em> is a rate in which one of the two quantities has a measurement of 1 unit. The rates <em>$5.50 per 1 hour and two sandwiches for each person</em> are unit rates because “per hour” or “for each” means one quantity has a measure of one unit."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "In the last Problem, Selma and Tony used unit rates to solve the problem. Tony found the number of people per pizza. Selma found the amount of pizza per person.\n\n<blockquote>For the large table, the unit rates are:\n2.5 people per pizza or 0.4 pizza per person\n\nFor the small table, the unit rates are:\n2 2/3 people per pizza or 0.375 pizza per person.</blockquote>"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Another way to find missing values in a proportional situation is to build a table of equivalent rates, called a <strong>rate table</strong>. Tony uses a rate table to find the number of pizzas needed for 210 campers."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "columns": [
+                        {
+                          "name": "Number of people",
+                          "type": "number",
+                          "values": [ 10, 20, 30, 40, 50, "", 210, "" ]
+                        },
+                        {
+                          "name": "Number of pizzas",
+                          "type": "number",
+                          "values": [ 4, 8, 12, 16, 20, "", 84, "" ]
+                        }
+                      ]
+                    },
+                    "layout": {
+                      "height": 150
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Selma used a proportion to find the number of pizzas P for 210 campers."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_2_2_IN_Slemas_proportion_450w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<blockquote><em>What are the advantages of each method?\nHow are the methods the same? Different?</em></blockquote>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Julia is in charge of ordering pizzas for a camp dinner. There are two pizza companies nearby. Both allow customers to use the same pricing rate for fewer or more pizzas than the listed number."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_2_2_IC_Royle_pizza_450w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_2_2_IC_Howdys_pizza_450w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Julia wonders which company to use. She uses tables to determine the cost of having pizzas delivered. On a copy of the tables, fill in the total costs for each of numbers of pizzas shown."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "name": "Piza Price of Royal Pizza",
+                      "columns": [
+                        {
+                          "name": "Number of Pizzas",
+                          "type": "number",
+                          "values": [ 1, 2, 3, 4, 5, 10, 15, 20, 100, 150, 200 ]
+                        },
+                        {
+                          "name": "Total Cost ($)",
+                          "type": "number",
+                          "values": [ "", "", "", "", 65, "", "", "", "", "","" ]
+                        }
+                      ]
+                    },
+                    "layout": {
+                      "height": 210
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "name": "Pizza Prices For Howdy's Pizza",
+                      "columns": [
+                        {
+                          "name": "Number of Pizzas",
+                          "type": "number",
+                          "values": [ 1, 2, 3, 4, 5, 10, 15, 20, 100, 150, 200 ]
+                        },
+                        {
+                          "name": "Total Cost ($)",
+                          "type": "number",
+                          "values": [ "","","","","","",195,"","","","" ]
+                        }
+                      ]
+                    },
+                    "layout": {
+                      "height": 210
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "• She is using the cost as her deciding factor. How can Julia use the tables to make her choice? Which company should she choose and why?"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation A. Another Three Strategies</strong>\nSome students in Ms. Bennett’s class did not use tables. They used a variety of strategies for determining the price of pizzas. Examine each strategy. Are they correct? Explain why or why not."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Amit's Strategy</strong>\n<blockquote>He saw that at Royle, 5 pizzas cost $65. He wanted to compare the prices for 5 pizzas at each restaurant. He scaled down the pizza and price at Howdy's by dividing each quantity by 3.<\blockquote>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_2_2_WI_Amits_Strategy_tables_500w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Meredith's Strategy</strong>\n<blockquote>She found the unit rate of the cost for one pizza for each company. Then she scaled up to find the total cost for pizzas. However, with Howdy's after finding the cost of the pizzas, she added the $30 delivery charge.<\blockquote>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Mary's Strategy</strong>\n<blockquote>She used the unit rate to write equations. <em>C</em> is the total cost of the pizza and <em>n</em> is the number of pizzas.\nFor Royal: <em>C<sub>R</sub></em> = 13<em>n</em>.\nFor Howdy's: <em>C<sub>H</sub></em> = 11<em>n</em> and then added $30 for delivery.<\blockquote>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation B. Estella's Claim</strong>\nEstella claimed she used proportions to find the cost of pizzas for Royal’s pizzas. But proportions did not work for finding the cost of pizzas for Howdy’s pizza. Is she correct? Why?"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "How can you determine if a situation is proportional?"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
           ],
           "supports": []
         },
@@ -130,17 +1222,206 @@
           "description": "Problem 2.3",
           "ordinal": 3,
           "title": "CAS 2.3 Finding Costs",
-          "subtitle":"Unit rate and Constant of Proportionality",
+          "subtitle": "Unit Rates and the Constant of Proportionality",
           "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "The unit rate for the cost of one pizza at Royal’s is $13. The equation <em>C</em> = 13<em>n</em> relates cost of pizza and number of pizzas. This equation represents a proportional relationship because you multiply one variable by a constant number to get the value of the other variable.\n<blockquote><em>C</em> = <strong>13</strong><em>n</em>\n<strong>13</strong> is the unit rate or <strong>constant of proportionality</strong></blockquote>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Notice that in a proportional relationship the multiplicative relationship between the quantities is always the same. For example, 1:13 = n:39. So, for every pizza the cost is 13 times the amount of pizzas. In a proportional relationship you can scale the ratio of corresponding values to make an equivalent ratio.\n",
+                        "In this Problem you will look at tables, equations, and graphs of proportional relationships."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Foodfresh has oranges on sale at 10 for $2. Mia represents the sale with a table, equations, and graphs."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_2_3_IC_Mias_table_500w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<blockquote><em>N</em> = 5<em>C</em>&nbsp;&nbsp;&nbsp;<em>C</em> = 0.20<em>N</em></blockquote>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_2_3_IC_Graph_Oranges_500w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_2_3_IC_Graph_Dollars_500w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Why does Mia have only one table when she has two equations and two graphs?"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation A. Another Orange Sale</strong>\nMia found oranges on sale at another store. She wrote the equation C = 0.30N.<ol><li>Does the new store have a cheaper price for oranges?</li><li>How would the graphs and tables compare to the graphs and tables for Foodfresh? Explain your reasoning.</li></ol>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation B. Buying Tickets</strong>\nNoralie is buying tickets for a concert online."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_2_3_WI_Noralies_ticket_graph_450w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ol><li>How much is the cost of one ticket?</li><li>Write an equation that represents the total cost <em>P</em> for <em>N</em> tickets as shown on this graph. How is the constant of proportionality represented in the graph? In the equation?</li><li>Which point of the graph would you use to find the cost of buying 2 tickets? How would you use the equation to find the cost?</li><li>Which point would you use to find how many tickets you could buy for $120. How would you use the equation to find the number of tickets?</li></ol>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation C. Ticket Processing Fee</strong>\nSuppose the concert adds a $5 fee for processing the cost of the tickets.<ol><li>How does this fee affect the cost of each ticket</li><li>Write an equation that represents the cost <em>P</em> for <em>N</em> tickets if the processing fee is applied.</li><li>What does the graph of the equation look like?</li><li>Is this relationship proportional? Explain why or why not.</li></ol>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation D. Best Buy for Pasta</strong>\nMia is shopping for pasta. She sees two advertisements:\n<blockquote><strong>Little Giant Store</strong>\n7 boxes of pasta for $6\n\n<strong>Foodfresh Store</strong>\n6 boxes of pasta for $5</blockquote>\n"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "1. Which store has the better price for a box of pasta? Explain."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "2. Stella used the following proportions to find the best price. She wrote:"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_2_3_WI_pasta_deals_400w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "3. Will this method help her decide the best price? Explain."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>In what ways is a unit rate or the constant of proportionality helpful for solving a problem?</li><li>Describe how you can determine a unit rate, or constant of proportionality, in a description, rate table, equation, or graph.</li></ul>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
           ],
           "supports": []
         }
-      ]
+      ],
+      "supports": []
     },
     {
       "description": "Investigation 3",
       "ordinal": 3,
-      "title": "CAS Investigation 3 Pulling it all Together: Ratios, Rates, and Percent",
+      "title": "CAS Investigation 3 Pulling it all Together: Ratios, Rates, and Percents",
       "problems": [
         {
           "description": "Problem 3.1",
@@ -148,6 +1429,196 @@
           "title": "CAS 3.1 Using Percents",
           "subtitle": "What is the Tax?",
           "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "When you buy something in a store, you often pay sales tax on the purchase price. When the store has a sale, the manager posts signs advertising a discount. Discounts and tax rates are commonly expressed as percents. For discounts, you might see percents like 25%, 30%, or 50%. These are rates by which the price is reduced. For the sales tax, you might see percents such as 5%, 6.2%, or 8%. These are the rates by which the sales price is increased. Understanding how to compute and use percents can make you a smarter consumer."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Many states have a sales tax. A sales tax of 6% means that for every dollar an item costs, a person needs to pay an additional 6 cents for every 100 cents of an item purchased, or $0.06 for every dollar. This is tax money collected by states. For example, with 6% tax:<blockquote>Item purchased for $1.00\n\nSales tax is 6% of $1.00 or $0.06\n\nTotal cost $1.06</blockquote>\n<strong>Note:</strong> When a percent calculation for sales tax does not come out to a whole number of cents, the standard practice is to round up the tax to the next penny."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Jason picked up several items he needed for school. He had $25 in cash. As he was nearing the checkout counter he wondered if he had enough cash to pay the bill. The sales tax is 5%. In the basket he has:"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_3_1_IC_Jasons_Items_400w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "columns": [
+                        {
+                          "name": "Jason's Items",
+                          "type": "text",
+                          "values": [ "Notepad", "Markers", "Pensils", "Sticky notes" ]
+                        },
+                        {
+                          "name": "Price ($)",
+                          "type": "text",
+                          "values": [ "$8.95", "$6.75", "$3.80", "$4.25" ]
+                        }
+                      ]
+                    },
+                    "layout": {
+                      "height": 150
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>What is a good estimate for the total cost of the four items?</li><li>What is a good estimate for the total bill with tax?</li><li>Does Jason have enough money? Make your reasoning and conclusion visible to others.</li></ul>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation A. Student Strategies</strong>\nAfter working on the Initial Challenge, students in Mr. Gomez’s class made several claims.\n\nExamine each claim. Which ones are correct? Explain."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_3_1_WI_Claim1.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_3_1_WI_Claim2.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_3_1_WI_Claim3.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_3_1_WI_Claim4_500w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation B. Student Wonderings</strong>\n\n<strong>Nicky and Marta</strong><blockquote>Nicky thinks that you can get two different anwswers when finding the tax on multiple items.</blockquote>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                          "<blockquote>First: Find the cost of each item with the tax. Then add to find the total price. For example:<blockquote>($9 + tax) + ($7 + tax) + ($4 + tax) + ($4 + tax) = one total price</blockquote></blockquote>"
+                        ]
+                      }
+                    },
+                  {
+                    "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<blockquote>Second: Add up the prices of each individual item. Then find the tax and total. She thinks that these two strategies will give you two different results.<blockquote>$9 + $7 + $4 + $4 -> amount for all the items\namount for all the items + tax = a different total price</blockquote></blockquote>"
+                        ]
+                      }
+                  },
+                 {
+                   "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<blockquote>Marta disagrees with Nicky. She claims that answers are the same because of the Distributive Property.\n\nWho is correct? Explain.</blockquote>"
+                        ]
+                      }
+                    },
+                  {
+                   "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<strong>Sam and Will</strong>\n\n<blockquote>Sam says that percents are a lot like fractions.\n\nWill disagrees. He says that percents are more like ratios.\n\nWho is correct? Explain why.</blockquote>"
+                        ]
+                      }
+                    },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation C. Working Backward</strong>\n<blockquote>Funda bought a used gaming system. She does not remember the price before tax. She does know that the 6% sales tax came to $4.80. What was the price of the used gaming system before tax? How do you know?</blockquote>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "How are percent problems like ratio and rate problems?"
+                      ]
+                    }
+                  }
+                ],
+                "supports": []
+              }
+            }
           ],
           "supports": []
         },
@@ -157,6 +1628,117 @@
           "title": "CAS 3.2 Using Percents",
           "subtitle": "What is the Tip?",
           "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "At most restaurants, customers pay their server a tip for providing good service. A typical tip is 15% to 20% of the price of the meal.<blockquote><em>What could be the tip on a restaurant bill of $14?</em></blockquote>"
+                      ]
+                    }
+                  }
+                ],
+                "supports": []
+              }
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Mr. Gomez’s class will stop at Larry’s Lunch Place on their field trip. He gives the class a menu so that they can anticipate the cost of their lunch ahead of the trip."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_3_2_IC_Lunch_Menu_500w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In your group use the menu to make up a lunch order. Write a list of all the items ordered by your group.<ul><li>Find the total bill for food and 6% sales tax for your group.</li><li>How much will you leave as a tip (between 15% and 20% of the total bill)?</li><li>Suppose that your group members decide to share the cost of the meal equally. What is each person’s share of the cost, including tip?</li></ul>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation A. Benchmarks</strong>\nMany people use benchmarks for determining tips. Gil explains his strategy: “I always figure out 10% of the bill, and then I use this information to calculate a 15% or 20% tip.”<ul><li>Explain why Gil’s method works.</li><li>Use his method to compute a 15% tip and a 20% tip if the final bill is:\n\n1. $24.50\n\n2. $17.35</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation B. Working Backward</strong>\nA customer left Jerome $2.50 as a tip for service. That tip is 20% of the total bill for the food. How much is the food bill? Explain your reasoning."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation C. Another Meal at Larry’s</strong>\nSandy has a 10% discount off the total price before tax is added for Larry’s Lunch Place. If the cost of the meal is $18.50,<ol><li>What is the cost of the meal after the discount?</li><li>What is the total cost with a 6% tax and a 15% tip?</li></ol>"
+                      ]
+                    }
+                  },
+
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation D. Discount After Discount</strong>\nAladar has a 20% discount coupon to buy new headphones priced at $95. When he got to the telecom store, he learned that they were having a 30%-off sale.\n\nThe clerk calculated the 30% discount first and then applied the 20%-off coupon to the discounted amount.<ol><li>What should be the final price (without sales tax)?</li><li>Is that final price the same as a 50% discount? Explain.</li></ol>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Describe some strategies you used to solve percent problems."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
           ],
           "supports": []
         },
@@ -166,16 +1748,244 @@
           "title": "CAS 3.3 Free Throws and Feeding Chimps",
           "subtitle": "The Percent Connection",
           "sections": [
-          ],
-          "supports": []
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "So far in your exploration of proportional reasoning over the past two years you have become familiar with deciding which problems represent proportional situations and developing a variety of strategies for solving these problems. In this Investigation you have worked with percents as rates. In this Problem you will explore percent problems that do not involve money."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Ming works at the zoo. She mixes food for the chimpanzees. Ming mixes up large batches of food from sacks of high fiber food and sacks of high protein food. She uses a standard scoop and the following recipes."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_3_3_IC_Monkey_Recipes_500w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Ming asks a group of visiting middle school students to help her figure out the quantities she needs to mix for the baby chimps.<ul><li>The recipe calls for 40% high fiber and 60% high protein. She needs a total of 225 scoops altogether. How many scoops of each should she use?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "After mixing the baby chimp food, Ming only has 30 scoops of high protein food left.<ul><li>•\tShe knows that high protein food has to be 40% of the adult chimp mix total. What is the total amount of food she can prepare for the adult chimps?</li></ul>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation A. Baby Chimp Recipes</strong>\nSome students in Ms. Stewart’s class used unit rates to prepare the recipes for the baby chimp recipe. Examine each strategy and then answer the question."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Ahmed's Strategy: A Table</strong>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_3_3_WI_Ahmeds_table_200w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<blockquote>How will the unit rate in the table help Ming mix up any amount she wants?</blockquote>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Michelle's Strategy: Equations</strong>\n<blockquote>She writes to equations.<ol><li>relating the Total amount of food to the amount of Protein, and</li><li>relating the Total amount of food to the amount of Fiber.</li></ol>\nWhat equations did she write? Ho do these equations use unit rates?</blockquote>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Concetta's Strategy: Graphs</strong>\nConcetta used two graphs to show relationships."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_3_3_WI_Concetta_graph1_300w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_3_3_WI_Concetta_graph2_300w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "How do the graphs show the unit rate? How do they help Ming mix up any amount she needs?"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation B. Adult Chimp Recipes</strong>\nSome students in Ms. Stewart’s class used the following strategies to prepare adult chimp recipes. Examine each strategy. Explain how they make sense."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_3_3_WI_Szes_strategy_500w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_3_3_WI_Emilys_strategy_500w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation C. A New Situation: Free Throws</strong>\nThe following situation also involves percents."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Two basketball teams recently competed in free-throw attempts. One team made 108 out of 126 attempts at free throw shots and another team made 195 out of 257 attempts. Since it is difficult to tell which team was better at free throws that year using raw numbers, Sam thought it would be useful to express the raw numbers as percents.<ol><li>Describe how Sam could use percents to decide which team has the best free throw average.</li><li>Describe another strategy for deciding which team has the best free throw average.</li><li>How is the Free Throw problem like the Chimp Problem?</li></ol>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation D. What is the Question?</strong>\nMake up a situation and question that could be solved with each of the following representations:"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_3_3_WI_SituationD_Proportion_150w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_3_3_WI_SituationD_Graph_250w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_3_3_WI_SituationD_Table_200w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_3_3_WI_SituationD_Equation_150w.png"
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "How are percents useful to solve problems?"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
+          ]
         }
-      ]
+      ],
+      "supports": []
     },
     {
       "description": "Mathematical Reflections",
       "ordinal": 4,
       "title": "CAS MR1 - MR3",
-      "problems": [{
+      "problems": [
+        {
           "description": "Mathematical Reflections",
           "ordinal": 1,
           "title": "Comparing and Scaling Mathematical Reflections",
@@ -190,13 +2000,13 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In this unit and in prior units you have you have been exploring problem situations that require proportional reasoning. At the end of this Investigation, <em>What does it mean to reason proportionally?</em>"
+                        "<strong><em>What does it mean to reason proportionally to solve problems?</em></strong>"
                       ]
                     }
-                  } 
+                  }
                 ]
               },
-              "supports": [ ]
+              "supports": []
             },
             {
               "type": "MathReflection2",
@@ -207,13 +2017,13 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                         "In this unit and in prior units you have you have been exploring problem situations that require proportional reasoning. At the end of this Investigation, <em>What does it mean to reason proportionally?</em>"
+                        "<strong><em>What does it mean to reason proportionally to solve problems?</em></strong>"
                       ]
                     }
-                  } 
+                  }
                 ]
               },
-              "supports": [ ]
+              "supports": []
             },
             {
               "type": "MathReflection3",
@@ -224,13 +2034,13 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                         "In this unit and in prior units you have you have been exploring problem situations that require proportional reasoning. At the end of this Investigation, <em>What does it mean to reason proportionally?</em>"
+                        "<strong><em>What does it mean to reason proportionally to solve problems?</em></strong>"
                       ]
                     }
-                  } 
+                  }
                 ]
               },
-              "supports": [ ]
+              "supports": []
             }
           ]
         }
