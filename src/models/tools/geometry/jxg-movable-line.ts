@@ -1,7 +1,8 @@
-import { getBaseAxisLabels, isBoard } from "./jxg-board";
+import { getBaseAxisLabels } from "./jxg-board";
 import { JXGChangeAgent } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
 import { syncClientColors } from "./jxg-point";
+import { isBoard } from "./jxg-types";
 import { castArray, each, find, uniqWith } from "lodash";
 import { uniqueId } from "../../../utilities/js-utils";
 import { GeometryContentModelType } from "./geometry-content";

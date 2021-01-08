@@ -1,76 +1,92 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useState } from "react";
 import ReactDataGrid from "react-data-grid";
 import { TableContentModelType } from "../../../models/tools/table/table-content";
-import { IToolApi, IToolTileProps } from "../tool-tile";
+import { IToolTileProps } from "../tool-tile";
 import { EditableTableTitle } from "./editable-table-title";
 import { TableToolbar } from "./table-toolbar";
-import { useModelDataSet } from "./use-model-data-set";
+import { useColumnWidths } from "./use-column-widths";
+import { useContentChangeHandlers } from "./use-content-change-handlers";
 import { useDataSet } from "./use-data-set";
 import { useExpressionsDialog } from "./use-expressions-dialog";
+import { useGeometryLinking } from "./use-geometry-linking";
 import { useGridContext } from "./use-grid-context";
+import { useModelDataSet } from "./use-model-data-set";
 import { useRowLabelColumn } from "./use-row-label-column";
 import { useTableTitle } from "./use-table-title";
+import { useToolApi } from "./use-tool-api";
 import { useCurrent } from "../../../hooks/use-current";
+import { useMeasureText } from "../hooks/use-measure-text";
 import { useToolbarToolApi } from "../hooks/use-toolbar-tool-api";
 
 import "react-data-grid/dist/react-data-grid.css";
 import "./table-tool.scss";
 
 const TableToolComponent: React.FC<IToolTileProps> = ({
-  documentContent, toolTile, model, readOnly,
-  onRequestRowHeight, onRequestUniqueTitle, onRegisterToolApi, onUnregisterToolApi
+  documentId, documentContent, toolTile, model, readOnly,
+  onRequestRowHeight, onRequestTilesOfType, onRequestUniqueTitle, onRegisterToolApi, onUnregisterToolApi
 }) => {
+  const modelRef = useCurrent(model);
+  const metadata = (model.content as TableContentModelType).metadata;
+
   const {
     dataSet, columnChanges, triggerColumnChange, rowChanges, triggerRowChange, ...gridModelProps
   } = useModelDataSet(model);
+
+  const handleRequestUniqueTitle = useCallback(() => {
+    return onRequestUniqueTitle(modelRef.current.id);
+  }, [modelRef, onRequestUniqueTitle]);
+
+  const handleRequestRowHeight = useCallback((options: { height?: number, deltaHeight?: number }) => {
+    onRequestRowHeight(modelRef.current.id, options?.height, options?.deltaHeight);
+  }, [modelRef, onRequestRowHeight]);
+
+  const changeHandlers = useContentChangeHandlers({
+    model, dataSet: dataSet.current,
+    onRequestRowHeight: handleRequestRowHeight, triggerColumnChange, triggerRowChange
+  });
+  const { onSetTableTitle, onSetColumnExpressions, onLinkGeometryTile } = changeHandlers;
 
   const [showRowLabels, setShowRowLabels] = useState(false);
   const {
     ref: gridRef, gridContext, inputRowId, selectedCell, ...gridProps
   } = useGridContext(showRowLabels, triggerColumnChange);
-  const { getTitle, getTitleWidthFromColumns, onBeginTitleEdit, onEndTitleEdit } = useTableTitle({
-    gridContext, model, dataSet: dataSet.current, readOnly, onRequestUniqueTitle: () => onRequestUniqueTitle(model.id)
+  const measureHeaderText = useMeasureText("bold 14px Lato, sans-serif");
+  // const measureBodyText = useMeasureText("14px Lato, sans-serif");
+  const { getTitle, onBeginTitleEdit, onEndTitleEdit } = useTableTitle({
+    gridContext, dataSet: dataSet.current, readOnly,
+    onSetTableTitle, onRequestUniqueTitle: handleRequestUniqueTitle
   });
 
-  const toolApi: IToolApi = useMemo(() => ({
-    getTitle
-  }), [getTitle]);
-  useEffect(() => {
-    onRegisterToolApi(toolApi);
-    return () => onUnregisterToolApi();
-  }, [onRegisterToolApi, onUnregisterToolApi, toolApi]);
+  useToolApi({ metadata, getTitle, onRegisterToolApi, onUnregisterToolApi });
 
   const rowLabelProps = useRowLabelColumn({
     inputRowId: inputRowId.current, selectedCell, showRowLabels, setShowRowLabels
   });
 
-  const content = useCurrent(model.content as TableContentModelType);
-  const metadata = content.current.metadata;
-  const handleSubmit = (expressions: Map<string, string>) => {
+  const handleSubmitExpressions = (expressions: Map<string, string>) => {
     if (dataSet.current.attributes.length && expressions.size) {
-      content.current.setExpressions(expressions, dataSet.current.attributes[0].name);
-      triggerRowChange();
+      onSetColumnExpressions(expressions, dataSet.current.attributes[0].name);
     }
   };
   const [showExpressionsDialog, , setCurrYAttrId] = useExpressionsDialog({
-    dataSet: dataSet.current,
-    rawExpressions: metadata.rawExpressions.toJS(),
-    canonicalExpressions: metadata.expressions.toJS(),
-    onSubmit: handleSubmit
+    metadata, dataSet: dataSet.current, onSubmit: handleSubmitExpressions
   });
 
-  const handleRequestRowHeight = (options: { height?: number, delta?: number }) => {
-    onRequestRowHeight(model.id, options.height, options.delta);
-  };
   const handleShowExpressionsDialog = (attrId?: string) => {
     attrId && setCurrYAttrId(attrId);
     showExpressionsDialog();
   };
-  const { getTitleWidth, ...dataGridProps } = useDataSet({
+  const { hasLinkableRows, ...dataGridProps } = useDataSet({
     gridRef, gridContext, model, dataSet: dataSet.current, columnChanges, triggerColumnChange,
-    rowChanges, readOnly: !!readOnly, getTitleWidthFromColumns, selectedCell,
-    inputRowId, ...rowLabelProps, onRequestRowHeight: handleRequestRowHeight,
-    onShowExpressionsDialog: handleShowExpressionsDialog });
+    rowChanges, readOnly: !!readOnly, changeHandlers, measureText: measureHeaderText,
+    selectedCell, inputRowId, ...rowLabelProps, onShowExpressionsDialog: handleShowExpressionsDialog });
+
+  const { isLinkEnabled, showLinkGeometryDialog } = useGeometryLinking({
+    documentId, model, hasLinkableRows, onRequestTilesOfType, onLinkGeometryTile
+  });
+
+  const { titleCellWidth } =
+    useColumnWidths({ getTitle, columns: dataGridProps.columns, measureText: measureHeaderText });
 
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
   return (
@@ -79,7 +95,8 @@ const TableToolComponent: React.FC<IToolTileProps> = ({
                     onSetExpression={showExpressionsDialog} />
       <div className="table-grid-container">
         <EditableTableTitle className="table-title" readOnly={readOnly}
-          getTitle={getTitle} getTitleWidth={getTitleWidth}
+          isLinkEnabled={isLinkEnabled} onLinkGeometryClick={showLinkGeometryDialog}
+          getTitle={getTitle} titleCellWidth={titleCellWidth}
           onBeginEdit={onBeginTitleEdit} onEndEdit={onEndTitleEdit} />
         <ReactDataGrid ref={gridRef} {...gridProps} {...gridModelProps} {...dataGridProps} />
       </div>
@@ -123,7 +140,7 @@ export default TableToolComponent;
 
 // interface IState {
 //   dataSet: IDataSet;
-//   showInvalidPasteAlert?: boolean;
+//   showInvalidPasteAlert?: boolean; [TODO]
 // }
 
 // @inject("stores")
@@ -145,7 +162,7 @@ export default TableToolComponent;
 //   private gridApi?: GridApi;
 
 //   public componentDidMount() {
-//     this.initializeHotKeys();
+//     this.initializeHotKeys();  [TODO]
 //     this.syncedChanges = 0;
 //     this.disposers = [];
 
@@ -153,7 +170,7 @@ export default TableToolComponent;
 //     addTable(this.props.docId, this.modelId);
 
 //     if (this.domRef.current) {
-//       this.domRef.current.addEventListener("mousedown", this.handleMouseDown);
+//       this.domRef.current.addEventListener("mousedown", this.handleMouseDown); [TODO]
 //     }
 
 //     const metadata = this.getContent().metadata;
@@ -169,7 +186,7 @@ export default TableToolComponent;
 //     });
 
 //     const { selection } = this.stores;
-//     this.disposers.push(selection.observe(this.props.model.id, change => {
+//     this.disposers.push(selection.observe(this.props.model.id, change => { [TODO]
 //       const rowId = change.name;
 //       const isSharedRowSelected = change.type === "delete"
 //               ? false
@@ -255,7 +272,7 @@ export default TableToolComponent;
 //     );
 //   }
 
-//   private renderInvalidPasteAlert() {
+//   private renderInvalidPasteAlert() {  [TODO]
 //     return this.state.showInvalidPasteAlert && (
 //       <Alert
 //           confirmButtonText="OK"
@@ -280,7 +297,7 @@ export default TableToolComponent;
 //     return this.props.model.content as TableContentModelType;
 //   }
 
-//   private initializeHotKeys() {
+//   private initializeHotKeys() {  [TODO]
 //     this.hotKeys.register({
 //       "cmd-c": this.handleCopy,
 //       "cmd-v": this.handlePaste
@@ -294,10 +311,10 @@ export default TableToolComponent;
 //   private handleRowSelectionChange = (e: SelectionChangedEvent) => {
 //     const { selection } = this.stores;
 //     const nodes = e.api.getSelectedNodes();
-//     selection.setSelected(this.props.model.id, nodes.map(n => n.id));
+//     selection.setSelected(this.props.model.id, nodes.map(n => n.id));  [TODO] sync row selection back to model
 //   }
 
-//   private handleMouseDown = (e: MouseEvent) => {
+//   private handleMouseDown = (e: MouseEvent) => { [TODO]
 //     const target: HTMLElement = e.target as HTMLElement;
 //     const targetClasses = target && target.className;
 //     // don't mess with focus if this looks like something ag-grid has handled
@@ -307,18 +324,18 @@ export default TableToolComponent;
 //     }
 
 //     // table tile should have keyboard focus -- requires tabIndex
-//     this.domRef.current?.focus();
+//     this.domRef.current?.focus();  [TODO?]
 
-//     // clicking on table background clears selection
+//     // clicking on table background clears selection [TODO]
 //     this.gridApi?.deselectAll();
 //     this.gridApi?.refreshCells();
 //   }
 
-//   private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+//   private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {  [TODO]
 //     this.hotKeys.dispatch(e);
 //   }
 
-//   private handleCopy = () => {
+//   private handleCopy = () => { [TODO]
 //     const { dataSet } = this.state;
 //     if (this.gridApi && dataSet) {
 //       const sortedRowIds = this.gridApi.getSelectedNodes().map(row => row.id).sort();
@@ -335,7 +352,7 @@ export default TableToolComponent;
 //     }
 //   }
 
-//   private handlePaste = () => {
+//   private handlePaste = () => {  [TODO]
 //     const content = this.getContent();
 //     const { readOnly } = this.props;
 //     if (!readOnly && this.gridApi) {
@@ -394,6 +411,7 @@ export default TableToolComponent;
 //     return getGeometryContent(this.getContent(), geometryId);
 //   }
 
+//  => useContentChangeHandlers [getPositionOfPoint]
 //   private getPositionOfPoint(caseId: string): JXGUnsafeCoordPair {
 //     const { dataSet } = this.state;
 //     const attrCount = dataSet.attributes.length;
@@ -405,6 +423,7 @@ export default TableToolComponent;
 //     return [canonicalizeValue(xValue), canonicalizeValue(yValue)];
 //   }
 
+//  => useContentChangeHandlers [getTableActionLinks]
 //   private getTableActionLinks(): ILinkProperties | undefined {
 //     const linkedGeometries = this.getContent().metadata.linkedGeometries;
 //     if (!linkedGeometries || !linkedGeometries.length) return;
@@ -412,15 +431,18 @@ export default TableToolComponent;
 //     return { id: actionId, tileIds: [...linkedGeometries] };
 //   }
 
+//  => useContentChangeHandlers [getGeometryActionLinks]
 //   private getGeometryActionLinks(links?: ILinkProperties, addLabelMap = false): ITableLinkProperties | undefined {
 //     if (!links || !links.id) return;
 //     return this.getContent().getClientLinks(links.id, this.state.dataSet, addLabelMap);
 //   }
 
+//  => useContentChangeHandlers [getGeometryActionLinksWithLabels]
 //   private getGeometryActionLinksWithLabels(links?: ILinkProperties) {
 //     return this.getGeometryActionLinks(links, true);
 //   }
 
+//  => useContentChangeHandlers [setTableName]
 //   private handleSetTableName = (name: string) => {
 //     // const shouldExpandTable = name && !this.state.dataSet?.name;
 //     this.getContent().setTableName(name);
@@ -428,6 +450,7 @@ export default TableToolComponent;
 //     this.props.onRequestRowHeight(this.props.model.id, undefined, kTableNameHeight);
 //   }
 
+//  => useContentChangeHandlers [setColumnName]
 //   private handleSetAttributeName = (attributeId: string, name: string) => {
 //     const tableActionLinks = this.getTableActionLinks();
 //     this.getContent().setAttributeName(attributeId, name);
@@ -440,7 +463,8 @@ export default TableToolComponent;
 //     });
 //   }
 
-//   private handleSetExpression = (attributeId: string, expression: string, rawExpression: string) => {
+//  => useContentChangeHandlers [setColumnExpressions]
+//   private handleSetExpression = (attributeId: string, expression: string, rawExpression: string) => {  [TODO]
 //     this.getContent().setExpression(attributeId, expression, rawExpression);
 //     const dataSet = this.state.dataSet;
 //     const tableActionLinks = this.getTableActionLinks();
@@ -461,6 +485,7 @@ export default TableToolComponent;
 //     });
 //   }
 
+//  => useContentChangeHandlers [addRows]
 //   private handleAddCanonicalCases = (newCases: ICaseCreation[]) => {
 //     const validateCase = (aCase: ICaseCreation) => {
 //       const newCase: ICaseCreation = { __id__: uniqueId() };
@@ -490,6 +515,7 @@ export default TableToolComponent;
 //     });
 //   }
 
+//  => useContentChangeHandlers [updateRow]
 //   private handleSetCanonicalCaseValues = (caseValues: ICase) => {
 //     const caseId = caseValues.__id__;
 //     const tableActionLinks = this.getTableActionLinks();
@@ -505,6 +531,7 @@ export default TableToolComponent;
 //     });
 //   }
 
+//  => useContentChangeHandlers [removeRows]
 //   private handleRemoveCases = (ids: string[]) => {
 //     const tableActionLinks = this.getTableActionLinks();
 //     this.getContent().removeCases(ids, tableActionLinks);
@@ -517,11 +544,11 @@ export default TableToolComponent;
 //     });
 //   }
 
-//   private handleGetLinkedGeometries = () => {
+//   private handleGetLinkedGeometries = () => {  [TODO?]
 //     return this.getContent().metadata.linkedGeometries.toJS();
 //   }
 
-//   private handleUnlinkGeometry = () => {
+//   private handleUnlinkGeometry = () => { [TODO]
 //     const geometryIds = this.getContent().metadata.linkedGeometries.toJS();
 //     const tableActionLinks = this.getTableActionLinks();
 //     this.getContent().removeGeometryLinks(geometryIds, tableActionLinks);

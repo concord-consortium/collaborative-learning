@@ -22,11 +22,13 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
     _column.appData?.onEndBodyCellEdit?.(e.target.value);
   };
 
+  const raw = row[column.key as keyof TRow];
+  const value = raw == null ? "" : raw;
   return (
     <input
       className="rdg-text-editor"
       ref={autoFocusAndSelect}
-      value={row[column.key as keyof TRow] as unknown as string}
+      value={value as unknown as string}
       onChange={event => onRowChange({ ...row, [column.key]: event.target.value })}
       onBlur={handleBlur}
     />

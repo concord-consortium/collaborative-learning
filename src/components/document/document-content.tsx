@@ -15,6 +15,7 @@ import "./document-content.sass";
 
 interface IProps extends IBaseProps {
   context: string;
+  documentId?: string;
   content?: DocumentContentModelType;
   readOnly?: boolean;
   scale?: number;
@@ -177,6 +178,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
                                   documentContent={this.domElement}
                                   rowIndex={index} height={rowHeight} tileMap={tileMap}
                                   dropHighlight={dropHighlight}
+                                  onRequestTilesOfType={this.handleRequestTilesOfType}
                                   onRequestUniqueTitle={this.handleRequestUniqueTitle}
                                   ref={(elt) => this.rowRefs.push(elt)} {...others} />
               : null;
@@ -193,6 +195,13 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const yScroll = this.domElement?.scrollTop || 0;
     this.props.toolApiInterface?.forEach(api => api.handleDocumentScroll?.(xScroll, yScroll));
   }, 50)
+
+  private handleRequestTilesOfType = (tileType: string) => {
+    const { content, toolApiInterface } = this.props;
+    if (!content || !tileType || !toolApiInterface) return [];
+    const tilesOfType = content.getTilesOfType(tileType);
+    return tilesOfType.map(id => ({ id, title: toolApiInterface.getToolApi(id)?.getTitle?.() }));
+  }
 
   private handleRequestUniqueTitle = (tileId: string) => {
     const { content, toolApiInterface } = this.props;

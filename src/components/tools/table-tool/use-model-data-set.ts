@@ -1,6 +1,7 @@
 import classNames from "classnames";
 import { autorun } from "mobx";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useCurrent } from "../../../hooks/use-current";
 import { DataSet } from "../../../models/data/data-set";
 import { TableContentModelType } from "../../../models/tools/table/table-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
@@ -12,6 +13,8 @@ import { kRowHeight } from "./table-types";
   synchronized DataSet model for use by ReactDataGrid and other clients.
  */
 export const useModelDataSet = (model: ToolTileModelType) => {
+  const modelRef = useCurrent(model);
+  const getContent = useCallback(() => modelRef.current.content as TableContentModelType, [modelRef]);
   const dataSet = useRef(DataSet.create());
   const syncedChanges = useRef(0);
   const [columnChanges, setColumnChanges] = useState(0);
@@ -20,6 +23,7 @@ export const useModelDataSet = (model: ToolTileModelType) => {
   const triggerRowChange = useCallback(() => setRowChanges(state => ++state), []);
 
   useEffect(() => {
+    // can't use getContent() here as then content changes don't trigger reinstallation of the autorun
     const _content = model.content as TableContentModelType;
     const disposer = autorun(() => {
       if (syncedChanges.current < _content.changes.length) {
@@ -30,12 +34,17 @@ export const useModelDataSet = (model: ToolTileModelType) => {
       }
     });
     return () => disposer();
-  }, [model.content]);  // eslint-disable-line react-hooks/exhaustive-deps
+  }, [model.content, triggerColumnChange, triggerRowChange]);
 
-  const content = model.content as TableContentModelType;
+  const setTableTitle = useCallback((title: string) => {
+    (title != null) && getContent().setTableName(title);
+    triggerColumnChange();
+  }, [getContent, triggerColumnChange]);
+
+  const content = getContent();
   const className = classNames("rdg-light", { "show-expressions": content.hasExpressions });
   const rowHeight = kRowHeight;
   const headerRowHeight = content.hasExpressions ? 2 * rowHeight : rowHeight;
   return { dataSet, columnChanges, triggerColumnChange, rowChanges, triggerRowChange,
-            className, rowHeight, headerRowHeight };
+            className, rowHeight, headerRowHeight, onSetTableTitle: setTableTitle };
 };

@@ -2,17 +2,20 @@ import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useState } from "react";
 import { HeaderCellInput } from "./header-cell-input";
+import { LinkGeometryButton } from "./link-geometry-button";
 
 interface IProps {
   className?: string;
   readOnly?: boolean;
+  isLinkEnabled?: boolean;
+  titleCellWidth: number;
   getTitle: () => string | undefined;
-  getTitleWidth: () => number | undefined;
   onBeginEdit?: () => void;
   onEndEdit?: (title?: string) => void;
+  onLinkGeometryClick?: () => void;
 }
 export const EditableTableTitle: React.FC<IProps> = observer(({
-  className, readOnly, getTitle, getTitleWidth, onBeginEdit, onEndEdit
+  className, readOnly, isLinkEnabled, titleCellWidth, getTitle, onBeginEdit, onEndEdit, onLinkGeometryClick
 }) => {
   // getTitle() and observer() allow this component to re-render
   // when the title changes without re-rendering the entire TableTool
@@ -46,13 +49,14 @@ export const EditableTableTitle: React.FC<IProps> = observer(({
   const isDefaultTitle = title && /Table\s+(\d+)\s*$/.test(title);
   const classes = classNames("editable-header-cell", className,
                             { "table-title-editing": isEditing, "table-title-default": isDefaultTitle });
-  const style = { width: getTitleWidth() };
+  const style = { width: titleCellWidth };
   return (
     <div className={classes} style={style} onClick={handleClick}>
       {isEditing
         ? <HeaderCellInput style={style} value={editingTitle || ""}
             onKeyDown={handleKeyDown} onChange={setEditingTitle} onClose={handleClose} />
         : title}
+      {!isEditing && <LinkGeometryButton isEnabled={isLinkEnabled} onClick={onLinkGeometryClick} />}
     </div>
   );
 });

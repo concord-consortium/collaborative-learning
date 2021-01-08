@@ -11,15 +11,19 @@ import { GeometryContentModelType, GeometryMetadataModelType, setElementColor, g
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
           isDragTargetOrAncestor } from "../../../models/tools/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
-import { kGeometryDefaultPixelsPerUnit, isAxis, isAxisLabel } from "../../../models/tools/geometry/jxg-board";
+import { kGeometryDefaultPixelsPerUnit } from "../../../models/tools/geometry/jxg-board";
 import { ESegmentLabelOption, ILinkProperties, JXGChange, JXGCoordPair
         } from "../../../models/tools/geometry/jxg-changes";
-import { isPoint, isFreePoint, isVisiblePoint, kSnapUnit } from "../../../models/tools/geometry/jxg-point";
-import { getAssociatedPolygon, getPointsForVertexAngle, getPolygonEdges, isPolygon, isVisibleEdge
-        } from "../../../models/tools/geometry/jxg-polygon";
-import { isComment } from "../../../models/tools/geometry/jxg-types";
-import { getVertexAngle, isVertexAngle, updateVertexAngle, updateVertexAnglesFromObjects
-        } from "../../../models/tools/geometry/jxg-vertex-angle";
+import { kSnapUnit } from "../../../models/tools/geometry/jxg-point";
+import {
+  getAssociatedPolygon, getPointsForVertexAngle, getPolygonEdges
+} from "../../../models/tools/geometry/jxg-polygon";
+import {
+  isAxis, isAxisLabel, isComment, isFreePoint, isPoint, isPolygon, isVertexAngle, isVisibleEdge, isVisiblePoint
+} from "../../../models/tools/geometry/jxg-types";
+import {
+  getVertexAngle, updateVertexAngle, updateVertexAnglesFromObjects
+} from "../../../models/tools/geometry/jxg-vertex-angle";
 import { isFeatureSupported } from "../../../models/stores/stores";
 import { injectGetTableLinkColorsFunction } from "../../../models/tools/geometry/jxg-table-link";
 import { extractDragTileType, kDragTileContent, kDragTileId, dragTileSrcDocId } from "../tool-tile";
@@ -980,7 +984,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           this.handleImageTileDrop(e, parsedContent);
         }
         else if (tileType === "table") {
-          this.handleTableTileDrop(e, parsedContent);
+          this.handleTableTileDrop(e);
         }
         e.preventDefault();
         e.stopPropagation();
@@ -1040,13 +1044,19 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     return { id: links.id, tileIds: [this.props.model.id] };
   }
 
-  private handleTableTileDrop(e: React.DragEvent<HTMLDivElement>, parsedContent: any) {
-    const { board } = this.state;
+  private handleTableTileDrop(e: React.DragEvent<HTMLDivElement>) {
     const dragTileId = e.dataTransfer.getData(kDragTileId);
-    if (this.getContent().isLinkedToTable(dragTileId)) return;
+    if (dragTileId) {
+      this.handleTableTileLinkRequest(dragTileId);
+    }
+  }
 
-    const tableContent = this.getTableContent(dragTileId);
-    if (tableContent && parsedContent && board) {
+  private handleTableTileLinkRequest(tableTileId: string) {
+    const { board } = this.state;
+    if (this.getContent().isLinkedToTable(tableTileId)) return;
+
+    const tableContent = this.getTableContent(tableTileId);
+    if (tableContent && board) {
       if (!tableContent.isValidForGeometryLink()) {
         this.setState({ showInvalidTableDataAlert: true });
         return;
@@ -1054,15 +1064,15 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const dataSet = tableContent.getSharedData();
       this.autoRescaleBoardAndAxes(dataSet);
 
-      const geomActionLinks = tableContent.getClientLinks(uniqueId(), dataSet, true);
+      const geomActionLinks = tableContent.getClientLinks(uniqueId(), dataSet);
       this.applyChange(() => {
-        const pts = this.getContent().addTableLink(board, dragTileId, dataSet, geomActionLinks);
+        const pts = this.getContent().addTableLink(board, tableTileId, dataSet, geomActionLinks);
         pts.forEach((pt: JXG.Point) => {
           this.handleCreatePoint(pt);
         });
       });
 
-      const _tableContent = this.getTableContent(dragTileId);
+      const _tableContent = this.getTableContent(tableTileId);
       const tableActionLinks = this.getTableActionLinks(geomActionLinks);
       _tableContent && _tableContent.addGeometryLink(this.props.model.id, tableActionLinks);
     }

@@ -1,13 +1,9 @@
 import { JXGChangeAgent } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
-import { isPoint } from "./jxg-point";
 import { getPointsForVertexAngle } from "./jxg-polygon";
+import { isPoint, isVertexAngle } from "./jxg-types";
 import { assign, castArray, each, values } from "lodash";
 import { v4 as uuid } from "uuid";
-
-export const isVertexAngle = (v: any) =>
-                (v instanceof JXG.Curve) && (v.elType === "angle") &&
-                (v.getAttribute("clientType") === "vertexAngle");
 
 export const canSupportVertexAngle = (vertex: JXG.Point): boolean => {
   const children = values(vertex.childElements);

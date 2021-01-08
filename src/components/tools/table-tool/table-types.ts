@@ -3,7 +3,8 @@ import { Column, FormatterProps, HeaderRendererProps } from "react-data-grid";
 export const kRowHeight = 34;
 export const kIndexColumnWidth = 34;
 export const kControlsColumnWidth = 36;
-
+export const kHeaderCellPadding = 72; // half on either side of text
+export const kExpressionCellPadding = 20;
 export interface IGridContext {
   showRowLabels: boolean;
   isColumnSelected: (columnId: string) => boolean;
@@ -12,8 +13,6 @@ export interface IGridContext {
   onSelectOneRow: (row: string) => void;
   onClearSelection: (options?: { row?: boolean, column?: boolean, cell?: boolean }) => void;
 }
-
-export const kSerializedXKey = "__x__";
 
 export const kIndexColumnKey = "__index__";
 export const kControlsColumnKey = "__controls__";
@@ -45,3 +44,7 @@ export interface TPosition { idx: number, rowIdx: number }
 export type TFormatterProps = FormatterProps<TRow>;
 export type THeaderRendererProps = HeaderRendererProps<TRow>;
 export type OnRowSelectionChangeFn = (checked: boolean, isShiftClick: boolean) => void;
+
+export const isDataColumn = (column: TColumn) => {
+  return (column.key !== kIndexColumnKey) && (column.key !== kControlsColumnKey);
+};

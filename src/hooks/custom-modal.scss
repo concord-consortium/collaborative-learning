@@ -103,15 +103,19 @@ $modal-footer-height: 45px;
       border-radius: $modal-control-border-radius;
       outline: none;
 
-      &.default {
+      &.disabled {
+        opacity: 35%;
+      }
+
+      &.default:not(.disabled) {
         background-color: $charcoal-light-6;
       }
 
-      &:hover, &:focus {
+      &:hover:not(.disabled), &:focus:not(.disabled) {
         background-color: $workspace-teal-light-4;
       }
 
-      &:active {
+      &:active:not(.disabled) {
         background-color: $workspace-teal-light-3;
       }
     }

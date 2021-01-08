@@ -1,20 +1,19 @@
 import classNames from "classnames";
 import { useCallback, useMemo, useRef, useState } from "react";
+import { IAttribute } from "../../../models/data/attribute";
 import { IDataSet } from "../../../models/data/data-set";
 import { TableMetadataModelType } from "../../../models/tools/table/table-content";
 import { CellFormatter } from "./cell-formatter";
 import CellTextEditor from "./cell-text-editor";
 import { ColumnHeaderCell } from "./column-header-cell";
+import { prettifyExpression } from "./expression-utils";
 import {
-  IGridContext, kControlsColumnKey, kControlsColumnWidth, kIndexColumnKey, kIndexColumnWidth, TColumn
+  IGridContext, kControlsColumnKey, kControlsColumnWidth, kExpressionCellPadding, kHeaderCellPadding,
+  kIndexColumnKey, kIndexColumnWidth, TColumn
 } from "./table-types";
 import { useColumnExtensions } from "./use-column-extensions";
+import { IContentChangeHandlers } from "./use-content-change-handlers";
 import { useControlsColumn } from "./use-controls-column";
-
-function estimateColumnWidthFromName(name: string) {
-  // values taken from design spec
-  return 62 + 9 * name.length;
-}
 
 interface IUseColumnsFromDataSet {
   gridContext: IGridContext;
@@ -24,20 +23,22 @@ interface IUseColumnsFromDataSet {
   columnChanges: number;
   RowLabelHeader: React.FC<any>;
   RowLabelFormatter: React.FC<any>;
-  setColumnName: (column: TColumn, columnName: string) => void;
+  measureText: (text: string) => number;
   onShowExpressionsDialog?: (attrId?: string) => void;
-  onAddColumn: () => void;
-  onRemoveColumn?: (attrId: string) => void;
-  onRemoveRow: (rowId: string) => void;
+  changeHandlers: IContentChangeHandlers;
 }
 export const useColumnsFromDataSet = ({
   gridContext, dataSet, metadata, readOnly, columnChanges, RowLabelHeader, RowLabelFormatter,
-  setColumnName, onShowExpressionsDialog, onAddColumn, onRemoveColumn, onRemoveRow
+  measureText, onShowExpressionsDialog, changeHandlers
 }: IUseColumnsFromDataSet) => {
   const { attributes } = dataSet;
+  const { onAddColumn, onRemoveRows } = changeHandlers;
+  const onRemoveRow = useCallback((rowId: string) => onRemoveRows([rowId]), [onRemoveRows]);
   const { ControlsHeaderRenderer, ControlsRowFormatter } = useControlsColumn({ readOnly, onAddColumn, onRemoveRow });
   // user-modified column widths aren't currently saved
-  const columnWidths = useRef<Record<string, number>>({});
+  const userColumnWidths = useRef<Record<string, number>>({});
+  const nameColumnWidths = useRef<Record<string, number>>({});
+  const exprColumnWidths = useRef<Record<string, number>>({});
 
   const [columnEditingName, setColumnEditingName] = useState<string>();
   const handleSetColumnEditingName = (column?: TColumn) => {
@@ -52,13 +53,28 @@ export const useColumnsFromDataSet = ({
     };
   }, [columnEditingName, gridContext, metadata]);
 
+  const measureColumnWidth = useCallback((attr: IAttribute) => {
+    const nameCellWidth = measureText(attr.name) + kHeaderCellPadding;
+    const xName = dataSet.attributes[0]?.name || "x";
+    const expr = metadata.rawExpressions.get(attr.id) ||
+                  prettifyExpression(metadata.expressions.get(attr.id) || "", xName);
+    const exprCellWidth = (expr ? measureText(`= ${expr}`) : 0) + kExpressionCellPadding;
+    if ((nameCellWidth !== nameColumnWidths.current[attr.id]) ||
+        (exprCellWidth !== exprColumnWidths.current[attr.id])) {
+      // autoWidth changes (e.g. name or formula changes), supercede user-set width
+      delete userColumnWidths.current[attr.id];
+      nameColumnWidths.current[attr.id] = nameCellWidth;
+      exprColumnWidths.current[attr.id] = exprCellWidth;
+    }
+    return userColumnWidths.current[attr.id] || Math.max(nameCellWidth, exprCellWidth);
+  }, [dataSet.attributes, measureText, metadata.expressions, metadata.rawExpressions]);
+
   const columns = useMemo(() => {
     const cols: TColumn[] = attributes.map(attr => ({
       ...cellClasses(attr.id),
       name: attr.name,
       key: attr.id,
-      width: columnWidths.current[attr.id] ||
-              (columnWidths.current[attr.id] = estimateColumnWidthFromName(attr.name)),
+      width: measureColumnWidth(attr),
       resizable: !readOnly,
       headerRenderer: ColumnHeaderCell,
       formatter: CellFormatter,
@@ -97,16 +113,16 @@ export const useColumnsFromDataSet = ({
     }
     columnChanges;  // eslint-disable-line no-unused-expressions
     return cols;
-  }, [ControlsHeaderRenderer, ControlsRowFormatter, RowLabelHeader, RowLabelFormatter,
-      attributes, cellClasses, columnChanges, metadata, readOnly]);
+  }, [attributes, RowLabelHeader, RowLabelFormatter, readOnly, columnChanges,
+      cellClasses, measureColumnWidth, metadata, ControlsHeaderRenderer, ControlsRowFormatter]);
 
   useColumnExtensions({
-    gridContext, metadata, readOnly, columns, columnEditingName,
-    setColumnEditingName: handleSetColumnEditingName, setColumnName, onRemoveColumn, onShowExpressionsDialog
+    gridContext, metadata, readOnly, columns, columnEditingName, changeHandlers,
+    setColumnEditingName: handleSetColumnEditingName, onShowExpressionsDialog
  });
 
   const onColumnResize = useCallback((idx: number, width: number) => {
-    columnWidths.current[columns[idx].key] = width;
+    userColumnWidths.current[columns[idx].key] = width;
   }, [columns]);
 
   return { columns, onColumnResize };

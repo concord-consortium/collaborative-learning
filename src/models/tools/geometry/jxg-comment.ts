@@ -1,9 +1,7 @@
 import { JXGChangeAgent } from "./jxg-changes";
-import { isBoard } from "./jxg-board";
 import { isMovableLine } from "./jxg-movable-line";
 import { objectChangeAgent } from "./jxg-object";
-import { isPoint } from "./jxg-point";
-import { isPolygon, isVisibleEdge } from "./jxg-polygon";
+import { isBoard, isPoint, isPolygon, isVisibleEdge } from "./jxg-types";
 import { values } from "lodash";
 import { uniqueId } from "../../../utilities/js-utils";
 

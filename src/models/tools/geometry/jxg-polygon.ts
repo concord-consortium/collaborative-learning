@@ -1,14 +1,9 @@
 import { ESegmentLabelOption, JXGChange, JXGChangeAgent } from "./jxg-changes";
 import { getElementName, objectChangeAgent } from "./jxg-object";
-import { isPoint } from "./jxg-point";
-import { isVertexAngle } from "./jxg-vertex-angle";
+import { isPoint, isPolygon, isVertexAngle, isVisibleEdge } from "./jxg-types";
 import { wn_PnPoly } from "./soft-surfer-sunday";
 import { assign, each, filter, find, values } from "lodash";
 import { v4 as uuid } from "uuid";
-
-export const isPolygon = (v: any) => v instanceof JXG.Polygon;
-
-export const isVisibleEdge = (v: any) => v instanceof JXG.Line && (v.elType === "segment") && v.visProp.visible;
 
 export function isPointInPolygon(x: number, y: number, polygon: JXG.Polygon) {
   const v = polygon.vertices.map(vertex => {
