@@ -393,19 +393,19 @@
                   {
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/CS_1_2_WI_Strategy2_450.png"
+                      "url": "curriculum/comparing-and-scaling/images/CS_1_2_WI_Strategy2_450w.png"
                     }
                   },
                   {
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/CS_1_2_WI_Strategy3_450.png"
+                      "url": "curriculum/comparing-and-scaling/images/CS_1_2_WI_Strategy3_450w.png"
                     }
                   },
                   {
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/CS_1_2_WI_Strategy4_450.png"
+                      "url": "curriculum/comparing-and-scaling/images/CS_1_2_WI_Strategy4_450w.png"
                     }
                   }
                 ]
@@ -524,7 +524,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Consider each camper getting a cup of juice. For <em>each<em> of the four recipes, determine:<ul><li>How many batches are needed to make juice for 210 campers?</li><li>How much concentrate and how much water are needed to make juice for 210 campers?</li><li>For each recipe, how much concentrate is needed to make 1 cup of juice? How much water is needed?</li></ul>"
+                        "Consider each camper getting a cup of juice. For <em>each</em> of the four recipes, determine:<ul><li>How many batches are needed to make juice for 210 campers?</li><li>How much concentrate and how much water are needed to make juice for 210 campers?</li><li>For each recipe, how much concentrate is needed to make 1 cup of juice? How much water is needed?</li></ul>"
                       ]
                     }
                   },
@@ -705,7 +705,7 @@
                   {
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/CS_1_4_IN_Otis_Strategy_200w.png"
+                      "url": "curriculum/comparing-and-scaling/images/CS_1_4_IN_Otis_Strategy.png"
                     }
                   },
                   {
@@ -1711,7 +1711,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Many states have a sales tax. A sales tax of 6% means that for every dollar an item costs, a person needs to pay an additional 6 cents for every 100 cents of an item purchased, or $0.06 for every dollar. This is tax money collected by states. For example, with 6% tax:<blockquote>Item purchased for $1.00\n\nSales tax is 6% of $1.00 or $0.06\n\nTotal cost $1.06</blockquote>\n\n\n<strong>Note:</strong> When a percent calculation for sales tax does not come out to a whole number of cents, the standard practice is to round up the tax to the next penny."
+                        "Many states have a sales tax. A sales tax of 6% means that for every dollar an item costs, a person needs to pay an additional 6 cents for every 100 cents of an item purchased, or $0.06 for every dollar. This is tax money collected by states. For example, with 6% tax: \n\b<blockquote>Item purchased for $1.00\n\nSales tax is 6% of $1.00 or $0.06\n\nTotal cost $1.06</blockquote>\n\n\n<strong>Note:</strong> When a percent calculation for sales tax does not come out to a whole number of cents, the standard practice is to round up the tax to the next penny."
                       ]
                     }
                   }
@@ -1813,7 +1813,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Situation B. Student Wonderings</strong>\n\n<strong>Nicky and Marta</strong><blockquote>Nicky thinks that you can get two different anwswers when finding the tax on multiple items.</blockquote>"
+                        "<strong>Situation B. Student Wonderings</strong>\n\n<strong>Nicky and Marta</strong>\n\n<blockquote>Nicky thinks that you can get two different anwswers when finding the tax on multiple items.</blockquote>"
                       ]
                     }
                   },
@@ -1822,7 +1822,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                          "<blockquote>First: Find the cost of each item with the tax. Then add to find the total price. For example:<blockquote>($9 + tax) + ($7 + tax) + ($4 + tax) + ($4 + tax) = one total price</blockquote></blockquote>"
+                          "<blockquote>First: Find the cost of each item with the tax. Then add to find the total price. For example:\n<blockquote>($9 + tax) + ($7 + tax) + ($4 + tax) + ($4 + tax) = one total price</blockquote></blockquote>"
                         ]
                       }
                     },
@@ -1831,7 +1831,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<blockquote>Second: Add up the prices of each individual item. Then find the tax and total. She thinks that these two strategies will give you two different results.<blockquote>$9 + $7 + $4 + $4 -> amount for all the items\namount for all the items + tax = a different total price</blockquote></blockquote>"
+                          "<blockquote>Second: Add up the prices of each individual item. Then find the tax and total. She thinks that these two strategies will give you two different results.\n<blockquote>$9 + $7 + $4 + $4 -> amount for all the items\namount for all the items + tax = a different total price</blockquote></blockquote>"
                         ]
                       }
                   },
@@ -1901,7 +1901,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "At most restaurants, customers pay their server a tip for providing good service. A typical tip is 15% to 20% of the price of the meal.<blockquote><em>What could be the tip on a restaurant bill of $14?</em></blockquote>"
+                        "At most restaurants, customers pay their server a tip for providing good service. A typical tip is 15% to 20% of the price of the meal.\n<blockquote><em>What could be the tip on a restaurant bill of $14?</em></blockquote>"
                       ]
                     }
                   }
@@ -2062,7 +2062,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "After mixing the baby chimp food, Ming only has 30 scoops of high protein food left.<ul><li>•\tShe knows that high protein food has to be 40% of the adult chimp mix total. What is the total amount of food she can prepare for the adult chimps?</li></ul>"
+                        "After mixing the baby chimp food, Ming only has 30 scoops of high protein food left.<ul><li>She knows that high protein food has to be 40% of the adult chimp mix total. What is the total amount of food she can prepare for the adult chimps?</li></ul>"
                       ]
                     }
                   }
