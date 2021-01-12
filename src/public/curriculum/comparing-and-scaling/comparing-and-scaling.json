@@ -254,7 +254,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Situation A. Another Survey</strong>",
+                        "<strong>Situation A. Another Survey</strong>\n\nStudents at Neilson Middle School are planning an end-of-year event. Of the 150 students in the school, 100 would like an athletic event and 50 would like a concert.",
                         "<ol><li>Does each statement accurately report the results of the Neilson Middle School survey? Why?</li><li>Which of these statements represent ratios? Explain why or why not.</li><ol>"
                       ]
                     }
@@ -264,11 +264,11 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<blockquote><strong>Statement 1</strong>\nAt Neilson Middle School, 1/3 of the students prefer a concert to an athletic event.</blockquote>\n\n",
-                        "<blockquote><strong>Statement 2</strong>\nFor every 2 students who prefer an athletic event, 1 student prefers a concert.</blockquote>\n\n",
-                        "<blockquote><strong>Statement 3</strong>\nThe unit rate of students who prefer a concert to students who prefer an athletic event is 1 to 2.</blockquote>\n\n",
-                        "<blockquote><strong>Statement 4</strong>\nThe number of students who prefer an athletic event is 50 more than the number who prefer a concert.</blockquote>\n\n",
-                        "<blockquote><strong>Statement 5</strong>\nThe number of students who prefer an athletic event is two times the number who prefer a concert.</blockquote>\n\n",
+                        "<blockquote><strong>Statement 1</strong>\nAt Neilson Middle School, 1/3 of the students prefer a concert to an athletic event.</blockquote>\n",
+                        "<blockquote><strong>Statement 2</strong>\nFor every 2 students who prefer an athletic event, 1 student prefers a concert.</blockquote>\n",
+                        "<blockquote><strong>Statement 3</strong>\nThe unit rate of students who prefer a concert to students who prefer an athletic event is 1 to 2.</blockquote>\n",
+                        "<blockquote><strong>Statement 4</strong>\nThe number of students who prefer an athletic event is 50 more than the number who prefer a concert.</blockquote>\n",
+                        "<blockquote><strong>Statement 5</strong>\nThe number of students who prefer an athletic event is two times the number who prefer a concert.</blockquote>\n",
                         "<blockquote><strong>Statement 6</strong>\nAt Neilson Middle School, 50% of the students prefer a concert to an athletic event.</blockquote>"
                       ]
                     }
@@ -278,7 +278,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Situation B. Predicting from the Survey Results</strong>",
+                        "<strong>Situation B. Predicting from the Survey Results</strong>\n",
                         "Suppose another larger school is interested in conducting a similar survey. How might these survey results be used to predict the survey results at the larger school?"
                       ]
                     }
@@ -763,7 +763,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Scenario 2</strong>\n<ol><li>Mitch reads 480 words in 3 minutes. How will it take him to read a book that has 20,000 words?</li><li>It took Mitch 30minutes to read a chapter in his history book. How many words did he read?</li></ol>"
+                        "<strong>Scenario 2</strong>\n<ol><li>Mitch reads 480 words in 3 minutes. How long will it take him to read a book that has 20,000 words?</li><li>It took Mitch 30 minutes to read a chapter in his history book. How many words did he read?</li></ol>"
                       ]
                     }
                   },
@@ -950,7 +950,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Situation B. Pizza for all the Campers</strong>\nIf there are 210 campers, how many pizzas are needed<ol><li>If only large tables are used?</li><li>If only small tables are used?</li></ol>"
+                        "<strong>Situation B. Pizza for all the Campers</strong>\n\nIf there are 210 campers, how many pizzas are needed<ol><li>If only large tables are used?</li><li>If only small tables are used?</li></ol>"
                       ]
                     }
                   },
@@ -959,7 +959,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Situation C. Considering Extra-Large Tables</strong>\nThe camp decides to use only extra-large tables that seat 25 people,<ol><li>How many pizzas should be put on an extra-large table?</li><li>How many pizzas would be used to serve 200 campers if they sit at extra-large tables?</li></ol>"
+                        "<strong>Situation C. Considering Extra-Large Tables</strong>\n\nThe camp decides to use only extra-large tables that seat 25 people,<ol><li>How many pizzas should be put on an extra-large table?</li><li>How many pizzas would be used to serve 200 campers if they sit at extra-large tables?</li></ol>"
                       ]
                     }
                   }
@@ -1173,7 +1173,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "• She is using the cost as her deciding factor. How can Julia use the tables to make her choice? Which company should she choose and why?"
+                        "<ul><li>She is using the cost as her deciding factor. How can Julia use the tables to make her choice? Which company should she choose and why?</li></ul>"
                       ]
                     }
                   }
@@ -1619,7 +1619,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Situation D. Best Buy for Pasta</strong>\nMia is shopping for pasta. She sees two advertisements:\n<blockquote><strong>Little Giant Store</strong>\n7 boxes of pasta for $6\n\n<strong>Foodfresh Store</strong>\n6 boxes of pasta for $5</blockquote>\n"
+                        "<strong>Situation D. Best Buy for Pasta</strong>\nMia is shopping for pasta. She sees two advertisements:\n\n<blockquote><strong>Little Giant Store</strong>\n7 boxes of pasta for $6\n\n<strong>Foodfresh Store</strong>\n6 boxes of pasta for $5</blockquote>\n"
                       ]
                     }
                   },
@@ -1711,7 +1711,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Many states have a sales tax. A sales tax of 6% means that for every dollar an item costs, a person needs to pay an additional 6 cents for every 100 cents of an item purchased, or $0.06 for every dollar. This is tax money collected by states. For example, with 6% tax: \n\b<blockquote>Item purchased for $1.00\n\nSales tax is 6% of $1.00 or $0.06\n\nTotal cost $1.06</blockquote>\n\n\n<strong>Note:</strong> When a percent calculation for sales tax does not come out to a whole number of cents, the standard practice is to round up the tax to the next penny."
+                        "Many states have a sales tax. A sales tax of 6% means that for every dollar an item costs, a person needs to pay an additional 6 cents for every 100 cents of an item purchased, or $0.06 for every dollar. This is tax money collected by states. For example, with 6% tax: \n\n<blockquote>Item purchased for $1.00\n\nSales tax is 6% of $1.00 or $0.06\n\nTotal cost $1.06</blockquote>\n\n\n<strong>Note:</strong> When a percent calculation for sales tax does not come out to a whole number of cents, the standard practice is to round up the tax to the next penny."
                       ]
                     }
                   }
@@ -1858,7 +1858,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Situation C. Working Backward</strong>\n<blockquote>Funda bought a used gaming system. She does not remember the price before tax. She does know that the 6% sales tax came to $4.80. What was the price of the used gaming system before tax? How do you know?</blockquote>"
+                        "<strong>Situation C. Working Backward</strong>\n\n<blockquote>Funda bought a used gaming system. She does not remember the price before tax. She does know that the 6% sales tax came to $4.80. What was the price of the used gaming system before tax? How do you know?</blockquote>"
                       ]
                     }
                   }
@@ -1901,7 +1901,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "At most restaurants, customers pay their server a tip for providing good service. A typical tip is 15% to 20% of the price of the meal.\n<blockquote><em>What could be the tip on a restaurant bill of $14?</em></blockquote>"
+                        "At most restaurants, customers pay their server a tip for providing good service. A typical tip is 15% to 20% of the price of the meal.\n\n<blockquote><em>What could be the tip on a restaurant bill of $14?</em></blockquote>"
                       ]
                     }
                   }
@@ -2112,7 +2112,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Michelle's Strategy: Equations</strong>\n<blockquote>She writes to equations.<ol><li>relating the Total amount of food to the amount of Protein, and</li><li>relating the Total amount of food to the amount of Fiber.</li></ol>\nWhat equations did she write? Ho do these equations use unit rates?</blockquote>"
+                        "<strong>Michelle's Strategy: Equations</strong>\n\n<blockquote>She writes two equations.<ol><li>relating the Total amount of food to the amount of Protein, and</li><li>relating the Total amount of food to the amount of Fiber.</li></ol>\nWhat equations did she write? Ho do these equations use unit rates?</blockquote>"
                       ]
                     }
                   },
