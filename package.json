@@ -1,6 +1,6 @@
 {
   "name": "collaborative-learning",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "description": "Collaborative Learning environment",
   "main": "index.js",
   "config": {
@@ -148,7 +148,7 @@
     "typescript": "^4.0.2",
     "url-loader": "^4.1.0",
     "utility-types": "^3.10.0",
-    "wait-on": "^5.2.0",
+    "wait-on": "^5.2.1",
     "webpack": "^4.44.1",
     "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^3.11.0",
