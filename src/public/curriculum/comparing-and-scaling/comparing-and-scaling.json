@@ -763,7 +763,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Scenario 2</strong>\n<ol><li>Jogging 5 miles burns about 500 calories. How many miles does Tanisha need to jog to burn off the 1,200-calorie lunch she ate?</li><li>Tanisha jogs about 8 miles in 2 hours. How long will it take her to jog 12 miles?</li></ol>"
+                        "<strong>Scenario 2</strong>\n<ol><li>Mitch reads 480 words in 3 minutes. How will it take him to read a book that has 20,000 words?</li><li>It took Mitch 30minutes to read a chapter in his history book. How many words did he read?</li></ol>"
                       ]
                     }
                   },
@@ -802,7 +802,7 @@
                   {
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/CS_1_4_WI_Proportion1_and_2_400w.png"
+                      "url": "curriculum/comparing-and-scaling/images/CS_1_4_WI_Proportion1_and_2.png"
                     }
                   },
                   {
