@@ -1,5 +1,17 @@
 # Changelog
 
+## Version 1.5.4 - released January 12, 2020
+
+### Features/Improvements
+- Content updates (Comparing and Scaling)
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 502,372 bytes | 0.0% |
+| index.js | 4,964,293 bytes | 0.0% |
+
 ## Version 1.5.3 - released December 16, 2020
 
 ### Features/Improvements
