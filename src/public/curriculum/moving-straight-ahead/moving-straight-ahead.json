@@ -163,16 +163,6 @@
                         "<em>What do you think your walking rate is?</em><ul><li>Make a prediction about your walking rate. </li><li>Use a meter stick and timer to help answer the following following questions about your walking rate. What is your walking rate in meters per second?</li><</ul>"
                       ]
                     }
-                  },
-                  {
-                    "content": {
-                      "solution": true,
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "Student answers will vary. It will be easier for students to find their walking rates by seeing how far they walk in, for example, 5 or 10 seconds and then divide the number of meters they walked by the number of seconds for which they walked."
-                      ]
-                    }
                   }
                 ]
               },
@@ -906,7 +896,7 @@
               ]
               },
               "supports": [
-                {"text": "Are these relationships linear? "}, 
+                {"text": "Are these relationships linear? "},
                 {"text": "Can you explain what the equations mean in your own words?"}
               ]
             },
@@ -2035,7 +2025,7 @@
                     "content": {
                     "type": "Text",
                     "format":"html",
-                    "text": ["<strong>Situation C. Fabian’s Profit Inequality</strong> \nFabian and his sister are looking for other ways to express how to find the number of cakes needed to make a profit. Explain why each representation does or does not make sense.", 
+                    "text": ["<strong>Situation C. Fabian’s Profit Inequality</strong> \nFabian and his sister are looking for other ways to express how to find the number of cakes needed to make a profit. Explain why each representation does or does not make sense.",
                       "\nFabian's representation: Inequality Statement P > 4.95<em>n</em> - 825",
                       "\nHis Sister's representation: Number Line"]
                     }
@@ -2657,7 +2647,7 @@
                         "In this Unit you are continuing to explore patterns of change between two variables using linear situations. You use tables, graphs, expressions, equations, and inequalities to represent these linear patterns and solve problems. At the end of this Investigation, <em>what do you know about linear expressions, equations, inequalities, and relationships?</em>"
                       ]
                     }
-                  } 
+                  }
                 ]
               },
               "supports": [ ]
@@ -2674,7 +2664,7 @@
                         "In this Unit you are continuing to explore patterns of change between two variables using linear situations. You use tables, graphs, expressions, equations, and inequalities to represent these linear patterns and solve problems. At the end of this Investigation, <em>what do you know about linear expressions, equations, inequalities, and relationships?</em>"
                       ]
                     }
-                  } 
+                  }
                 ]
               },
               "supports": [ ]
@@ -2691,7 +2681,7 @@
                         "In this Unit you are continuing to explore patterns of change between two variables using linear situations. You use tables, graphs, expressions, equations, and inequalities to represent these linear patterns and solve problems. At the end of this Investigation, <em>what do you know about linear expressions, equations, inequalities, and relationships?</em>"
                       ]
                     }
-                  } 
+                  }
                 ]
               },
               "supports": [ ]
@@ -2708,7 +2698,7 @@
                         "In this Unit you are continuing to explore patterns of change between two variables using linear situations. You use tables, graphs, expressions, equations, and inequalities to represent these linear patterns and solve problems. At the end of this Investigation, <em>what do you know about linear expressions, equations, inequalities, and relationships?</em>"
                       ]
                     }
-                  } 
+                  }
                 ]
               },
               "supports": [ ]
