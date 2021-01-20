@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import ReactDataGrid from "react-data-grid";
 import { TableContentModelType } from "../../../models/tools/table/table-content";
 import { IToolTileProps } from "../tool-tile";
@@ -94,12 +94,18 @@ const TableToolComponent: React.FC<IToolTileProps> = ({
   const { titleCellWidth } =
     useColumnWidths({ getTitle, columns: dataGridProps.columns, measureText: measureHeaderText });
 
+  const containerRef = useRef(null);
+  const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // clear any selection on background click
+    (e.target === containerRef.current) && gridContext.onClearSelection();
+  };
+
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
   return (
     <div className="table-tool">
       <TableToolbar documentContent={documentContent} toolTile={toolTile} {...toolbarProps}
                     onSetExpression={showExpressionsDialog} />
-      <div className="table-grid-container">
+      <div className="table-grid-container" ref={containerRef} onClick={handleBackgroundClick}>
         <EditableTableTitle className="table-title" readOnly={readOnly}
           isLinkEnabled={isLinkEnabled} onLinkGeometryClick={showLinkGeometryDialog}
           getTitle={getTitle} titleCellWidth={titleCellWidth}
@@ -176,7 +182,7 @@ export default TableToolComponent;
 //     addTable(this.props.docId, this.modelId);
 
 //     if (this.domRef.current) {
-//       this.domRef.current.addEventListener("mousedown", this.handleMouseDown); [TODO]
+//       this.domRef.current.addEventListener("mousedown", this.handleMouseDown);
 //     }
 
 //     const metadata = this.getContent().metadata;
@@ -314,7 +320,7 @@ export default TableToolComponent;
 //     this.gridApi = gridReadyParams.api || undefined;
 //   }
 
-//   private handleRowSelectionChange = (e: SelectionChangedEvent) => {
+//   private handleRowSelectionChange = (e: SelectionChangedEvent) => { [TODO]
 //     const { selection } = this.stores;
 //     const nodes = e.api.getSelectedNodes();
 //     selection.setSelected(this.props.model.id, nodes.map(n => n.id));  [TODO] sync row selection back to model
@@ -470,7 +476,7 @@ export default TableToolComponent;
 //   }
 
 //  => useContentChangeHandlers [setColumnExpressions]
-//   private handleSetExpression = (attributeId: string, expression: string, rawExpression: string) => {  [TODO]
+//   private handleSetExpression = (attributeId: string, expression: string, rawExpression: string) => {
 //     this.getContent().setExpression(attributeId, expression, rawExpression);
 //     const dataSet = this.state.dataSet;
 //     const tableActionLinks = this.getTableActionLinks();
