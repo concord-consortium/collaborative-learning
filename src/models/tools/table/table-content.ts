@@ -137,11 +137,25 @@ export const TableMetadataModel = types
     clearLinkedGeometries() {
       self.linkedGeometries.clear();
     },
-    setExpression(colId: string, expression: string) {
-      self.expressions.set(colId, expression);
+    setExpression(colId: string, expression?: string) {
+      if (expression) {
+        self.expressions.set(colId, expression);
+      }
+      else {
+        self.expressions.delete(colId);
+      }
     },
-    setRawExpression(colId: string, rawExpression: string) {
-      self.rawExpressions.set(colId, rawExpression);
+    setRawExpression(colId: string, rawExpression?: string) {
+      if (rawExpression) {
+        self.rawExpressions.set(colId, rawExpression);
+      }
+      else {
+        self.rawExpressions.delete(colId);
+      }
+    },
+    clearExpression(colId: string) {
+      self.rawExpressions.delete(colId);
+      self.expressions.delete(colId);
     },
     clearRawExpressions(varName: string) {
       const parser = new Parser();
@@ -514,7 +528,11 @@ export const TableContentModel = types
       switch (change.target) {
         case "columns":
           if (ids?.length) {
-            ids.forEach(id => dataSet.removeAttribute(id));
+            ids.forEach(id => {
+              dataSet.removeAttribute(id);
+              // remove expressions from maps
+              self.metadata.clearExpression(id);
+            });
           }
           break;
         case "rows":
