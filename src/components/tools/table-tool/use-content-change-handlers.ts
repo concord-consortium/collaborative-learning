@@ -85,6 +85,10 @@ export const useContentChangeHandlers = ({
     return { ...newCase, ...aCase };
   }, [dataSet.attributes, getContent]);
 
+  const requestRowHeight = useCallback(() => {
+    onRequestRowHeight({ height: optimalTileRowHeight(dataSet.cases.length, getContent().hasExpressions) });
+  }, [dataSet.cases.length, getContent, onRequestRowHeight]);
+
   /*
    * content change functions
    */
@@ -105,8 +109,9 @@ export const useContentChangeHandlers = ({
     if (readOnly) return;
     const tableActionLinks = getTableActionLinks();
     getContent().setExpressions(rawExpressions, xName, tableActionLinks);
+    requestRowHeight();
     syncLinkedClients(tableActionLinks);
-  }, [readOnly, getTableActionLinks, getContent, syncLinkedClients]);
+  }, [readOnly, getTableActionLinks, getContent, requestRowHeight, syncLinkedClients]);
 
   const addColumn = useCallback(() => {
     if (readOnly) return;
@@ -129,10 +134,9 @@ export const useContentChangeHandlers = ({
     const tableActionLinks = getTableActionLinks();
     const cases = newCases.map(aCase => validateCase(aCase));
     getContent().addCanonicalCases(cases, undefined, tableActionLinks);
-    onRequestRowHeight({ height: optimalTileRowHeight(dataSet.cases.length, getContent().hasExpressions) });
+    requestRowHeight();
     syncLinkedClients(tableActionLinks);
-  }, [readOnly, getTableActionLinks, getContent, onRequestRowHeight,
-      dataSet.cases.length, syncLinkedClients, validateCase]);
+  }, [readOnly, getTableActionLinks, getContent, requestRowHeight, syncLinkedClients, validateCase]);
 
   const updateRow = useCallback((caseValues: ICase) => {
     if (readOnly) return;

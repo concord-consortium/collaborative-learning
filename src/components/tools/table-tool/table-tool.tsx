@@ -22,7 +22,7 @@ import "react-data-grid/dist/react-data-grid.css";
 import "./table-tool.scss";
 
 const TableToolComponent: React.FC<IToolTileProps> = ({
-  documentId, documentContent, toolTile, model, readOnly,
+  documentId, documentContent, toolTile, model, readOnly, height,
   onRequestRowHeight, onRequestTilesOfType, onRequestUniqueTitle, onRegisterToolApi, onUnregisterToolApi
 }) => {
   const modelRef = useCurrent(model);
@@ -36,9 +36,15 @@ const TableToolComponent: React.FC<IToolTileProps> = ({
     return onRequestUniqueTitle(modelRef.current.id);
   }, [modelRef, onRequestUniqueTitle]);
 
+  const heightRef = useCurrent(height);
   const handleRequestRowHeight = useCallback((options: { height?: number, deltaHeight?: number }) => {
-    onRequestRowHeight(modelRef.current.id, options?.height, options?.deltaHeight);
-  }, [modelRef, onRequestRowHeight]);
+    // increase row height automatically but require manual shrinking
+    if (!heightRef.current ||
+        (options?.height && (options.height > heightRef.current)) ||
+        (options?.deltaHeight && (options.deltaHeight > 0))) {
+      onRequestRowHeight(modelRef.current.id, options?.height, options?.deltaHeight);
+    }
+  }, [heightRef, modelRef, onRequestRowHeight]);
 
   const changeHandlers = useContentChangeHandlers({
     model, dataSet: dataSet.current,

@@ -489,25 +489,32 @@ export const TableContentModel = types
           const props = change.props as IUpdateColumnsProperties;
           const colProps = castArray(props);
           colProps?.forEach((col: any, colIndex) => {
-            each(col, (value, prop) => {
-              switch (prop) {
-                case "name": {
-                  const colId = ids[colIndex];
-                  dataSet.setAttributeName(colId, value);
-                  if (colIndex === 0) {
-                    self.metadata.clearRawExpressions(kSerializedXKey);
+            const colId = ids[colIndex];
+            if (dataSet.attrFromID(colId)) {
+              each(col, (value, prop) => {
+                switch (prop) {
+                  case "name": {
+                    dataSet.setAttributeName(colId, value);
+                    if (colIndex === 0) {
+                      self.metadata.clearRawExpressions(kSerializedXKey);
+                    }
+                    break;
                   }
-                  break;
+                  case "expression":
+                    self.metadata.setExpression(colId, value);
+                    self.updateDatasetByExpressions(dataSet);
+                    break;
+                  case "rawExpression":
+                    self.metadata.setRawExpression(colId, value);
+                    break;
                 }
-                case "expression":
-                  self.metadata.setExpression(ids[colIndex], value);
-                  self.updateDatasetByExpressions(dataSet);
-                  break;
-                case "rawExpression":
-                  self.metadata.setRawExpression(ids[colIndex], value);
-                  break;
-              }
-            });
+              });
+            }
+            else {
+              // encountered this situation during development, perhaps due to a prior bug
+              console.warn(`TableContent.applyUpdate: skipping attempt to update non-existent column ${colId}:`,
+                            JSON.stringify(col));
+            }
           });
           break;
         }
