@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useCurrent } from "../../../hooks/use-current";
 import { IDataSet } from "../../../models/data/data-set";
 import { IGridContext } from "./table-types";
@@ -29,16 +29,19 @@ export const useTableTitle = ({
   };
 
   // request a default title if we don't already have one
+  const onRequestUniqueTitleRef = useRef(onRequestUniqueTitle);
   useEffect(() => {
     if (!dataSet.name) {
       // wait for all tiles to have registered their callbacks
       setTimeout(() => {
-        const _title = onRequestUniqueTitle?.();
+        const _title = onRequestUniqueTitleRef.current?.();
         if (_title) {
           dataSet.setName(_title);
         }
       }, 100);
     }
+    // don't request a title after we've been unmounted
+    return () => onRequestUniqueTitleRef.current = undefined;
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return { getTitle, onBeginTitleEdit, onEndTitleEdit };
