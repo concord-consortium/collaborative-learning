@@ -1,14 +1,9 @@
+import { each, filter, find, uniqueId, values } from "lodash";
+import { getObjectById } from "./jxg-board";
 import { ESegmentLabelOption, JXGChange, JXGChangeAgent } from "./jxg-changes";
 import { getElementName, objectChangeAgent } from "./jxg-object";
-import { isPoint } from "./jxg-point";
-import { isVertexAngle } from "./jxg-vertex-angle";
+import { isPoint, isPolygon, isVertexAngle, isVisibleEdge } from "./jxg-types";
 import { wn_PnPoly } from "./soft-surfer-sunday";
-import { assign, each, filter, find, values } from "lodash";
-import { v4 as uuid } from "uuid";
-
-export const isPolygon = (v: any) => v instanceof JXG.Polygon;
-
-export const isVisibleEdge = (v: any) => v instanceof JXG.Line && (v.elType === "segment") && v.visProp.visible;
 
 export function isPointInPolygon(x: number, y: number, polygon: JXG.Polygon) {
   const v = polygon.vertices.map(vertex => {
@@ -31,7 +26,7 @@ export function getPolygonEdges(polygon: JXG.Polygon) {
 }
 
 export function getPolygonEdge(board: JXG.Board, polygonId: string, pointIds: string[]) {
-  const point1 = board.objects[pointIds[0]];
+  const point1 = getObjectById(board, pointIds[0]);
   const segment = find(point1.childElements, child => {
                     const seg = isVisibleEdge(child) ? child as JXG.Line : undefined;
                     if (!seg) return false;
@@ -96,7 +91,7 @@ export function prepareToDeleteObjects(board: JXG.Board, ids: string[]) {
   // Identify polygons and angles scheduled for deletion and points that are vertices of polygons
   const polygonVertexMap: { [id: string]: string[] } = {};
   ids.forEach(id => {
-    const elt = board.objects[id];
+    const elt = getObjectById(board, id);
     if (isPoint(elt)) {
       each(elt.childElements, child => {
         if (isPolygon(child)) {
@@ -117,13 +112,13 @@ export function prepareToDeleteObjects(board: JXG.Board, ids: string[]) {
 
   // Consider each polygon with vertices to be deleted
   each(polygonVertexMap, (vertexIds, polygonId) => {
-    const polygon = board.objects[polygonId] as JXG.Polygon;
+    const polygon = getObjectById(board, polygonId) as JXG.Polygon;
     const vertexCount = polygon.vertices.length - 1;
     const deleteCount = vertexIds.length;
     // remove points from polygons if possible
     if (vertexCount - deleteCount >= 2) {
       vertexIds.forEach(id => {
-        const pt = board.objects[id] as JXG.Point;
+        const pt = getObjectById(board, id) as JXG.Point;
         // removing multiple points at one time sometimes gives unexpected results
         polygon.removePoints(pt);
       });
@@ -194,14 +189,15 @@ export const polygonChangeAgent: JXGChangeAgent = {
   create: (board, change) => {
     const _board = board as JXG.Board;
     const parents = (change.parents || [])
-                      .map(id => _board.objects[id as string])
+                      .map(id => getObjectById(_board, id as string))
                       .filter(pt => pt != null);
-    const props = assign({
-      id: uuid(),
+    const props = {
+      id: uniqueId(),
       hasInnerPoints: true,
       clientFillColor: "#00FF00",
-      clientSelectedFillColor: "#00FF00"
-    }, change.properties);
+      clientSelectedFillColor: "#00FF00",
+      ...change.properties
+    };
     const poly = parents.length ? _board.create("polygon", parents, props) : undefined;
     if (poly) {
       const segments = getPolygonEdges(poly);

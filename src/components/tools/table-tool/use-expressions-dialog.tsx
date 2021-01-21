@@ -1,29 +1,28 @@
 import React, { useCallback, useLayoutEffect, useRef, useState } from "react";
 import SetExpressionIconSvg from "../../../clue/assets/icons/table/set-expression-icon.svg";
 import { useCurrent } from "../../../hooks/use-current";
-import { useCustomModal } from "../../../hooks/use-custom-modal";
+import { kLeaveModalOpen, useCustomModal } from "../../../hooks/use-custom-modal";
 import { IDataSet } from "../../../models/data/data-set";
+import { TableMetadataModelType } from "../../../models/tools/table/table-content";
 import { validateExpression } from "./expression-utils";
 import { useEditableExpressions } from "./use-editable-expressions";
 
 import "./expressions-dialog.scss";
 
 interface IProps {
+  metadata: TableMetadataModelType;
   dataSet: IDataSet;
-  rawExpressions: Map<string, string>;        // user-entered
-  canonicalExpressions: Map<string, string>;  // canonicalized
   onSubmit: (changedExpressions: Map<string, string>) => void;
 }
 type IResult = [() => void, () => void, React.Dispatch<React.SetStateAction<string | undefined>>];
-export const useExpressionsDialog = ({
-  dataSet, rawExpressions, canonicalExpressions, onSubmit
-}: IProps): IResult => {
+export const useExpressionsDialog = ({ metadata, dataSet, onSubmit }: IProps): IResult => {
+  const metadataRef = useCurrent(metadata);
   const xName = useCurrent(dataSet.attributes.length > 0
                             ? dataSet.attributes[0].name
                             : "x");
   const [currYAttrId, setCurrYAttrId] = useState<string>();
   // map of attribute ids to current editable expressions
-  const expressions = useEditableExpressions(rawExpressions, canonicalExpressions, xName.current);
+  const expressions = useEditableExpressions(metadata, xName.current);
   // the currently edited expression (controlled input)
   const [expression, setExpression] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
@@ -36,13 +35,17 @@ export const useExpressionsDialog = ({
           expressions, expression, errorMessage, updateExpression
         };
 
-  const handleClear = () => {
-    blurModal();
-    updateExpression("");
-  };
+  const blurModalRef = useRef<() => void>();
 
-  const handleSubmit = () => {
-    blurModal();
+  const handleClear = useCallback(() => {
+    blurModalRef.current?.();
+    updateExpression("");
+    return kLeaveModalOpen;
+  }, [updateExpression]);
+
+  const handleSubmit = useCallback(() => {
+    blurModalRef.current?.();
+    const rawExpressions = metadataRef.current.rawExpressions;
     const changedExpressions: Map<string, string> = new Map();
     expressions.current.forEach((expr, id) => {
       if (expr !== (rawExpressions.get(id) || "")) {
@@ -50,8 +53,7 @@ export const useExpressionsDialog = ({
       }
     });
     onSubmit(changedExpressions);
-    hideModal();
-  };
+  }, [expressions, metadataRef, onSubmit]);
 
   const [showModal, hideModal, blurModal] = useCustomModal({
     className: "set-expression",
@@ -62,10 +64,11 @@ export const useExpressionsDialog = ({
     focusElement: "#expression-input",
     buttons: [
       { label: "Clear", onClick: handleClear },
-      { label: "Cancel", onClick: "close" },
+      { label: "Cancel" },
       { label: "OK", isDefault: true, onClick: handleSubmit }
     ]
   }, [currYAttrId, errorMessage, expression]);
+  blurModalRef.current = blurModal;
   return [showModal, hideModal, setCurrYAttrId];
 };
 

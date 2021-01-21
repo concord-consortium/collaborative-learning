@@ -1,6 +1,7 @@
 import { TableMetadataModelType } from "../../../models/tools/table/table-content";
 import { getEditableExpression } from "./expression-utils";
-import { IGridContext, kControlsColumnKey, kIndexColumnKey, TColumn } from "./table-types";
+import { IGridContext, isDataColumn, TColumn } from "./table-types";
+import { IContentChangeHandlers } from "./use-content-change-handlers";
 
 interface IProps {
   gridContext: IGridContext;
@@ -9,14 +10,14 @@ interface IProps {
   columns: TColumn[];
   columnEditingName?: string;
   setColumnEditingName: (column?: TColumn) => void;
-  setColumnName: (column: TColumn, name: string) => void;
-  onRemoveColumn?: (attrId: string) => void;
   onShowExpressionsDialog?: (attrId?: string) => void;
+  changeHandlers: IContentChangeHandlers;
 }
 export const useColumnExtensions = ({
   gridContext, metadata, readOnly, columns, columnEditingName,
-  setColumnEditingName, setColumnName, onRemoveColumn, onShowExpressionsDialog
+  setColumnEditingName, onShowExpressionsDialog, changeHandlers
 }: IProps) => {
+  const { onSetColumnName, onRemoveColumn } = changeHandlers;
   const firstDataColumn = columns.find(col => isDataColumn(col));
   const xName = (firstDataColumn?.name || "") as string;
 
@@ -50,7 +51,7 @@ export const useColumnExtensions = ({
         }
       },
       onEndHeaderCellEdit: (value?: string) => {
-        !readOnly && !!value && (value !== column.name) && setColumnName(column, value);
+        !readOnly && !!value && (value !== column.name) && onSetColumnName(column, value);
         setColumnEditingName();
       },
       onRemoveColumn,
@@ -60,8 +61,4 @@ export const useColumnExtensions = ({
       }) as any
     };
   });
-};
-
-const isDataColumn = (column: TColumn) => {
-  return (column.key !== kIndexColumnKey) && (column.key !== kControlsColumnKey);
 };

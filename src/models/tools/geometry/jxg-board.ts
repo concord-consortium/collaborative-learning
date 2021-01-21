@@ -1,7 +1,9 @@
-import { JXGChange, JXGChangeAgent, JXGProperties } from "./jxg-changes";
 import "./jxg";
+import { JXGChange, JXGChangeAgent, JXGProperties } from "./jxg-changes";
+import { isAxis, isBoard, isLinkedPoint } from "./jxg-types";
 import { goodTickValue } from "../../../utilities/graph-utils";
-import { assign, find, values } from "lodash";
+import { assign, each, find } from "lodash";
+import { ITableLinkProperties } from "../table/table-content";
 
 const kScalerClasses = ["canvas-scaler", "scaled-list-item"];
 
@@ -11,10 +13,44 @@ export const kGeometryDefaultWidth = 480;
 export const kGeometryDefaultHeight = 320;
 export const kGeometryDefaultPixelsPerUnit = 18.3;  // matches S&S curriculum images
 export const kGeometryDefaultAxisMin = 0;
+
+export function getObjectById(board: JXG.Board, id: string) {
+  let obj: JXG.GeometryElement | undefined = board.objects[id];
+  if (!obj && id?.includes(":")) {
+    // legacy support for early tiles in which points were identified by caseId,
+    // before we added support for multiple columns, i.e. multiple points per row/case
+    // newer code uses `${caseId}:${attrId}` for the id of points
+    const caseId = id.split(":")[0];
+    obj = board.objects[caseId];
+  }
+  return obj;
+}
+
+export function syncLinkedPoints(board: JXG.Board, links: ITableLinkProperties) {
+  if (board && links?.labels) {
+    // build map of points associated with each case
+    const ptsForCaseMap: Record<string, JXG.GeometryElement[]> = {};
+    each(board.objects, (obj, id) => {
+      if (isLinkedPoint(obj)) {
+        const caseId = obj.getAttribute("linkedRowId");
+        if (caseId) {
+          if (!ptsForCaseMap[caseId]) ptsForCaseMap[caseId] = [obj];
+          else ptsForCaseMap[caseId].push(obj);
+        }
+      }
+    });
+    // assign case label to each point associated with a given case
+    links.labels.forEach(item => {
+      const { id, label } = item;
+      const ptsForCase = ptsForCaseMap[id];
+      if (ptsForCase) {
+        ptsForCase.forEach(pt => pt?.setAttribute({ name: label }));
+      }
+    });
+  }
+}
+
 export const kAxisBuffer = 20;
-export const isBoard = (v: any) => v instanceof JXG.Board;
-export const isAxis = (v: any) => (v instanceof JXG.Line) && (v.elType === "axis");
-export const isAxisLabel = (v: any) => v instanceof JXG.Text && !!values(v.ancestors).find(el => isAxis(el));
 export const getAxisType = (v: any) => {
   // stdform encodes orientation of axes
   const [ , stdFormY, stdFormX] = v.stdform;

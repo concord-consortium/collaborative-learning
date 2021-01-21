@@ -1,5 +1,5 @@
 import { Parser } from "expr-eval";
-import { kSerializedXKey } from "./table-types";
+import { kSerializedXKey } from "../../../models/tools/table/table-model-types";
 
 export const getEditableExpression = (
   rawExpression: string | undefined, canonicalExpression: string, xName: string

@@ -33,7 +33,7 @@ export const useErrorAlert = ({
     contentProps: {},
     canCancel,
     buttons: [
-      { label: buttonLabel || "OK", isDefault: true, onClick: onClick || "close" }
+      { label: buttonLabel || "OK", isDefault: true, onClick }
     ],
     onClose
   });

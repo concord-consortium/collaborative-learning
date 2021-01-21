@@ -1,12 +1,12 @@
 import { Parser } from "expr-eval";
+import { castArray, each } from "lodash";
 import { types, Instance, SnapshotOut, IAnyStateTreeNode } from "mobx-state-tree";
+import { getRowLabel, kSerializedXKey, canonicalizeValue, isLinkableValue } from "./table-model-types";
 import { registerToolContentInfo } from "../tool-content-info";
 import { addLinkedTable } from "../table-links";
 import { IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
 import { canonicalizeExpression } from "../../../components/tools/table-tool/expression-utils";
-import { kSerializedXKey } from "../../../components/tools/table-tool/table-types";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
-import { castArray, each } from "lodash";
 import { getGeometryContent } from "../geometry/geometry-content";
 import { JXGChange } from "../geometry/jxg-changes";
 import { getTileContentById } from "../../../utilities/mst-utils";
@@ -26,20 +26,6 @@ export function defaultTableContent() {
                               { name: "y" }
                             ]
                           } as any);
-}
-
-export function isLinkableValue(value: number | string | null | undefined) {
-  return value == null || Number.isNaN(value as any) || isFinite(Number(value));
-}
-
-export function canonicalizeValue(value: number | string | undefined) {
-  if (value == null || value === "") return undefined;
-  const num = Number(value);
-  return isFinite(num) ? num : undefined;
-}
-
-export function getRowLabel(index: number, prefix = "p") {
-  return `${prefix}${index + 1}`;
 }
 
 export function getTableContent(target: IAnyStateTreeNode, tileId: string): TableContentModelType | undefined {
@@ -71,7 +57,14 @@ export interface ILinkProperties {
 }
 
 export interface ITableLinkProperties extends ILinkProperties {
+  // labels should be included when adding/removing rows,
+  // so that clients can synchronize any label changes
   labels?: IRowLabel[];
+}
+
+export function getRowLabelFromLinkProps(links: ITableLinkProperties, rowId: string) {
+  const found = links.labels?.find(entry => entry.id === rowId);
+  return found?.label;
 }
 
 export interface ICreateColumnsProperties {
@@ -144,11 +137,25 @@ export const TableMetadataModel = types
     clearLinkedGeometries() {
       self.linkedGeometries.clear();
     },
-    setExpression(colId: string, expression: string) {
-      self.expressions.set(colId, expression);
+    setExpression(colId: string, expression?: string) {
+      if (expression) {
+        self.expressions.set(colId, expression);
+      }
+      else {
+        self.expressions.delete(colId);
+      }
     },
-    setRawExpression(colId: string, rawExpression: string) {
-      self.rawExpressions.set(colId, rawExpression);
+    setRawExpression(colId: string, rawExpression?: string) {
+      if (rawExpression) {
+        self.rawExpressions.set(colId, rawExpression);
+      }
+      else {
+        self.rawExpressions.delete(colId);
+      }
+    },
+    clearExpression(colId: string) {
+      self.rawExpressions.delete(colId);
+      self.expressions.delete(colId);
     },
     clearRawExpressions(varName: string) {
       const parser = new Parser();
@@ -213,25 +220,37 @@ export const TableContentModel = types
     get isLinked() {
       return self.metadata.linkedGeometries.length > 0;
     },
-    getRowLabel(index: number) {
-      return getRowLabel(index);
-    },
     get hasExpressions() {
       return self.metadata.hasExpressions;
     }
   }))
   .views(self => ({
-    getClientLinks(linkId: string, dataSet: IDataSet, addLabelMap: boolean): ITableLinkProperties {
-      let labels: IRowLabel[] = [];
-      if (addLabelMap && dataSet) {
-        labels = dataSet.cases.map((aCase, i) => ({ id: aCase.__id__, label: self.getRowLabel(i) }));
-      }
-      ["xAxis", "yAxis"].forEach((axis, index) => {
-        const attr = dataSet.attributes.length > index ? dataSet.attributes[index] : undefined;
-        if (attr) {
-          labels.unshift({ id: axis, label: attr.name });
+    /*
+     * Returns link metadata for attaching to client (e.g. geometry) tool actions
+     * that includes label information.
+     */
+    getClientLinks(linkId: string, dataSet: IDataSet): ITableLinkProperties {
+      const labels: IRowLabel[] = [];
+
+      // add label for x axis
+      const xAttr = dataSet.attributes.length > 0 ? dataSet.attributes[0] : undefined;
+      xAttr && labels.push({ id: "xAxis", label: xAttr.name });
+
+      // add label for y axis
+      let yLabel = "";
+      for (let yIndex = 1; yIndex < dataSet.attributes.length; ++yIndex) {
+        // concatenate column names for y axis label
+        const yAttr = dataSet.attributes[yIndex];
+        if (yAttr.name) {
+          if (!yLabel) yLabel = yAttr.name;
+          else yLabel += `, ${yAttr.name}`;
         }
-      });
+      }
+      yLabel && labels.push({ id: "yAxis", label: yLabel });
+
+      // add label for each case, indexed by case ID
+      labels.push(...dataSet.cases.map((aCase, i) => ({ id: aCase.__id__, label: getRowLabel(i) })));
+
       return { id: linkId, tileIds: [self.metadata.id], labels };
     },
     canUndo() {
@@ -267,7 +286,7 @@ export const TableContentModel = types
     willRemoveFromDocument() {
       self.metadata.linkedGeometries.forEach(geometryId => {
         const geometryContent = getGeometryContent(self, geometryId);
-        geometryContent && geometryContent.removeTableLink(undefined, self.metadata.id);
+        geometryContent?.removeTableLink(undefined, self.metadata.id);
       });
       self.metadata.clearLinkedGeometries();
     },
@@ -286,38 +305,42 @@ export const TableContentModel = types
               props: { name }
             });
     },
-    addAttribute(id: string, name: string) {
+    addAttribute(id: string, name: string, links?: ILinkProperties) {
       self.appendChange({
             action: "create",
             target: "columns",
             ids: [id],
-            props: { columns: [{ name }] }
+            props: { columns: [{ name }] },
+            links
           });
     },
-    setAttributeName(id: string, name: string) {
+    setAttributeName(id: string, name: string, links?: ILinkProperties) {
       self.appendChange({
               action: "update",
               target: "columns",
               ids: id,
-              props: { name }
+              props: { name },
+              links
             });
     },
-    removeAttributes(ids: string[]) {
+    removeAttributes(ids: string[], links?: ILinkProperties) {
       self.appendChange({
               action: "delete",
               target: "columns",
-              ids
+              ids,
+              links
             });
     },
-    setExpression(id: string, expression: string, rawExpression: string) {
+    setExpression(id: string, expression: string, rawExpression: string, links?: ILinkProperties) {
       self.appendChange({
         action: "update",
         target: "columns",
         ids: id,
-        props: { expression, rawExpression }
+        props: { expression, rawExpression },
+        links
       });
     },
-    setExpressions(rawExpressions: Map<string, string>, xName: string) {
+    setExpressions(rawExpressions: Map<string, string>, xName: string, links?: ILinkProperties) {
       self.appendChange({
         action: "update",
         target: "columns",
@@ -326,7 +349,8 @@ export const TableContentModel = types
                     .map(rawExpr => ({
                       expression: canonicalizeExpression(rawExpr, xName),
                       rawExpression: rawExpr
-                    }))
+                    })),
+        links
       });
     },
     addCanonicalCases(cases: ICaseCreation[], beforeID?: string | string[], links?: ILinkProperties) {
@@ -465,25 +489,32 @@ export const TableContentModel = types
           const props = change.props as IUpdateColumnsProperties;
           const colProps = castArray(props);
           colProps?.forEach((col: any, colIndex) => {
-            each(col, (value, prop) => {
-              switch (prop) {
-                case "name": {
-                  const colId = ids[colIndex];
-                  dataSet.setAttributeName(colId, value);
-                  if (colIndex === 0) {
-                    self.metadata.clearRawExpressions(kSerializedXKey);
+            const colId = ids[colIndex];
+            if (dataSet.attrFromID(colId)) {
+              each(col, (value, prop) => {
+                switch (prop) {
+                  case "name": {
+                    dataSet.setAttributeName(colId, value);
+                    if (colIndex === 0) {
+                      self.metadata.clearRawExpressions(kSerializedXKey);
+                    }
+                    break;
                   }
-                  break;
+                  case "expression":
+                    self.metadata.setExpression(colId, value);
+                    self.updateDatasetByExpressions(dataSet);
+                    break;
+                  case "rawExpression":
+                    self.metadata.setRawExpression(colId, value);
+                    break;
                 }
-                case "expression":
-                  self.metadata.setExpression(ids[colIndex], value);
-                  self.updateDatasetByExpressions(dataSet);
-                  break;
-                case "rawExpression":
-                  self.metadata.setRawExpression(ids[colIndex], value);
-                  break;
-              }
-            });
+              });
+            }
+            else {
+              // encountered this situation during development, perhaps due to a prior bug
+              console.warn(`TableContent.applyUpdate: skipping attempt to update non-existent column ${colId}:`,
+                            JSON.stringify(col));
+            }
           });
           break;
         }
@@ -504,7 +535,11 @@ export const TableContentModel = types
       switch (change.target) {
         case "columns":
           if (ids?.length) {
-            ids.forEach(id => dataSet.removeAttribute(id));
+            ids.forEach(id => {
+              dataSet.removeAttribute(id);
+              // remove expressions from maps
+              self.metadata.clearExpression(id);
+            });
           }
           break;
         case "rows":
@@ -542,6 +577,8 @@ export const TableContentModel = types
         if (change) {
           if ((change.target === "columns") || change.props?.columns) {
             hasColumnChanges = true;
+            // most column changes (creation, deletion, expression changes) require re-rendering rows as well
+            hasRowChanges = true;
           }
           if ((change.target === "rows") || change.props?.rows) {
             hasRowChanges = true;
@@ -565,12 +602,13 @@ export const TableContentModel = types
       const dataSet = DataSet.create();
       self.applyChangesToDataSet(dataSet);
 
+      // add a __label__ attribute to returned dataSet (used by GeometryContent.addTableLink)
       const attrIds = dataSet.attributes.map(attr => attr.id);
       const kLabelId = uniqueId();
       dataSet.addAttributeWithID({ id: kLabelId, name: kLabelAttrName });
       for (let i = 0; i < dataSet.cases.length; ++i) {
         const caseId = dataSet.cases[i].__id__;
-        const label = self.getRowLabel(i);
+        const label = getRowLabel(i);
         const caseValues: ICase = { __id__: caseId, [kLabelId]: label };
         if (canonicalize) {
           attrIds.forEach(attrId => {
@@ -582,9 +620,8 @@ export const TableContentModel = types
       }
       return dataSet;
     },
-    isValidForGeometryLink() {
-      const dataSet = DataSet.create();
-      self.applyChangesToDataSet(dataSet);
+    isValidDataSetForGeometryLink(dataSet: IDataSet) {
+      if ((dataSet.attributes.length < 2) || (dataSet.cases.length < 1)) return false;
 
       const attrIds = dataSet.attributes.map(attr => attr.id);
       for (const aCase of dataSet.cases) {
@@ -593,6 +630,27 @@ export const TableContentModel = types
         }
       }
       return true;
+    },
+    hasLinkableCases(dataSet: IDataSet) {
+      if ((dataSet.attributes.length < 2) || (dataSet.cases.length < 1)) return false;
+
+      const attrIds = dataSet.attributes.map(attr => attr.id);
+      const isLinkableCaseValue = (value: number | string | null | undefined) =>
+                                    (value != null) && (value !== "") && isFinite(Number(value));
+      for (const aCase of dataSet.cases) {
+        if (attrIds.every(attrId => isLinkableCaseValue(dataSet.getValue(aCase.__id__, attrId)))) {
+          // we have at least one valid linkable case
+          return true;
+        }
+      }
+      return false;
+    }
+  }))
+  .views(self => ({
+    isValidForGeometryLink() {
+      const dataSet = DataSet.create();
+      self.applyChangesToDataSet(dataSet);
+      return self.isValidDataSetForGeometryLink(dataSet);
     }
   }));
 

@@ -47,7 +47,8 @@ export function extractDragResizeDomHeight(dataTransfer: DataTransfer) {
 
 interface IProps {
   context: string;
-  docId: string;
+  documentId?: string;  // permanent id (key) of the containing document
+  docId: string;  // ephemeral contentId for the DocumentContent
   documentContent: HTMLElement | null;
   scale?: number;
   model: TileRowModelType;
@@ -57,6 +58,7 @@ interface IProps {
   readOnly?: boolean;
   dropHighlight?: string;
   toolApiInterface?: IToolApiInterface;
+  onRequestTilesOfType: (tileType: string) => Array<{ id: string, title?: string }>;
   onRequestUniqueTitle: (tileId: string) => string | undefined;
 }
 

@@ -4,18 +4,13 @@ import { useCurrent } from "../../../hooks/use-current";
 import { ICase, IDataSet } from "../../../models/data/data-set";
 import { TableContentModelType } from "../../../models/tools/table/table-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
-import { uniqueId, uniqueName } from "../../../utilities/js-utils";
+import { uniqueId } from "../../../utilities/js-utils";
 import { formatValue } from "./cell-formatter";
-import { IGridContext, kRowHeight, TColumn, TPosition, TRow } from "./table-types";
+import { IGridContext, TColumn, TPosition, TRow } from "./table-types";
 import { useColumnsFromDataSet } from "./use-columns-from-data-set";
+import { IContentChangeHandlers } from "./use-content-change-handlers";
 import { useNumberFormat } from "./use-number-format";
 import { useRowsFromDataSet } from "./use-rows-from-data-set";
-
-const optimalTileRowHeight = (rowCount: number) => {
-  const kPadding = 2 * 10;
-  const kBorders = 4;
-  return (rowCount + 2) * kRowHeight + kPadding + kBorders;
-};
 
 const isCellSelectable = (position: TPosition, columns: TColumn[]) => {
   return (position.idx !== 0) && (position.idx !== columns.length - 1);
@@ -34,36 +29,21 @@ interface IUseDataSet {
   selectedCell: React.MutableRefObject<TPosition>;
   RowLabelHeader: React.FC<any>;
   RowLabelFormatter: React.FC<any>;
-  getTitleWidthFromColumns: (columns: TColumn[]) => number;
-  onRequestRowHeight: (options: { height?: number, deltaHeight?: number }) => void;
+  changeHandlers: IContentChangeHandlers;
+  measureText: (text: string) => number;
   onShowExpressionsDialog?: (attrId?: string) => void;
 }
 export const useDataSet = ({
   gridRef, gridContext, model, dataSet, columnChanges, triggerColumnChange, rowChanges, readOnly, inputRowId,
-  selectedCell, RowLabelHeader, RowLabelFormatter, getTitleWidthFromColumns, onRequestRowHeight, onShowExpressionsDialog
+  selectedCell, RowLabelHeader, RowLabelFormatter, changeHandlers, measureText, onShowExpressionsDialog
 }: IUseDataSet) => {
+  const { onAddRows, onUpdateRow } = changeHandlers;
   const modelRef = useCurrent(model);
-  const metadata = (model.content as TableContentModelType).metadata;
-  const setColumnName = useCallback((column: TColumn, columnName: string) => {
-    const content = modelRef.current.content as TableContentModelType;
-    !readOnly && content.setAttributeName(column.key, columnName);
-  }, [modelRef, readOnly]);
-  const onAddColumn = useCallback(() => {
-    const content = modelRef.current.content as TableContentModelType;
-    !readOnly && content.addAttribute(uniqueId(), uniqueName("y", (name: string) => !dataSet.attrFromName(name)));
-  }, [dataSet, modelRef, readOnly]);
-  const onRemoveColumn = useCallback((colId: string) => {
-    const content = modelRef.current.content as TableContentModelType;
-    !readOnly && content.removeAttributes([colId]);
-    triggerColumnChange();
-  }, [modelRef, readOnly, triggerColumnChange]);
-  const onRemoveRow = useCallback((rowId: string) => {
-    const content = modelRef.current.content as TableContentModelType;
-    !readOnly && content.removeCases([rowId]);
-  }, [modelRef, readOnly]);
+  const getContent = useCallback(() => modelRef.current.content as TableContentModelType, [modelRef]);
+  const metadata = getContent().metadata;
   const { columns, onColumnResize } = useColumnsFromDataSet({
     gridContext, dataSet, metadata, readOnly, columnChanges, RowLabelHeader, RowLabelFormatter,
-    setColumnName, onShowExpressionsDialog, onAddColumn, onRemoveColumn, onRemoveRow });
+    measureText, onShowExpressionsDialog, changeHandlers });
   const onSelectedCellChange = (position: TPosition) => {
     const forward = (selectedCell.current.rowIdx < position.rowIdx) ||
                     ((selectedCell.current.rowIdx === position.rowIdx) &&
@@ -105,13 +85,14 @@ export const useDataSet = ({
     }
   };
 
+  const hasLinkableRows = getContent().hasLinkableCases(dataSet);
+
   const { rows, rowKeyGetter, rowClass } = useRowsFromDataSet({
                                             dataSet, readOnly, inputRowId: inputRowId.current,
                                             rowChanges, context: gridContext});
   const formatter = useNumberFormat();
   const onRowsChange = (_rows: TRow[]) => {
     // for now, assume that all changes are single cell edits
-    const content = model.content as TableContentModelType;
     const selectedCellRowIndex = selectedCell.current?.rowIdx;
     const selectedCellColIndex = selectedCell.current?.idx;
     const updatedRow = (selectedCellRowIndex != null) && (selectedCellRowIndex >= 0)
@@ -123,18 +104,17 @@ export const useDataSet = ({
       const originalStrValue = formatValue(formatter, originalValue);
       // only make a change if the value has actually changed
       if (updatedRow[updatedColumn.key] !== originalStrValue) {
-        const updatedCaseValues: ICase[] = [{
+        const updatedCaseValues: ICase = {
           __id__: updatedRow.__id__,
           [updatedColumn.key]: updatedRow[updatedColumn.key]
-        }];
+        };
         const inputRowIndex = _rows.findIndex(row => row.__id__ === inputRowId.current);
         if ((inputRowIndex >= 0) && (selectedCellRowIndex === inputRowIndex)) {
-          content.addCanonicalCases(updatedCaseValues);
-          onRequestRowHeight({ height: optimalTileRowHeight(rows.length + 1) });
+          onAddRows([updatedCaseValues]);
           inputRowId.current = uniqueId();
         }
         else {
-          content.setCanonicalCaseValues(updatedCaseValues);
+          onUpdateRow(updatedCaseValues);
         }
       }
     }
@@ -143,7 +123,6 @@ export const useDataSet = ({
     onColumnResize(idx, width);
     triggerColumnChange();
   }, [onColumnResize, triggerColumnChange]);
-  const getTitleWidth = () => getTitleWidthFromColumns(columns);
-  return { getTitleWidth, columns, rows, rowKeyGetter, rowClass,
+  return { hasLinkableRows, columns, rows, rowKeyGetter, rowClass,
             onColumnResize: handleColumnResize, onRowsChange, onSelectedCellChange};
 };

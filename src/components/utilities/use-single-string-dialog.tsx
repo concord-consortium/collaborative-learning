@@ -44,7 +44,7 @@ export const useSingleStringDialog = ({
     contentProps: {},
     focusElement: "#string-input",
     buttons: [
-      { label: "Cancel", onClick: "close" },
+      { label: "Cancel" },
       { label: "OK", isDefault: true,
         onClick: () => onAccept(inputRef.current?.value || valueRef.current || "", context)}
     ],

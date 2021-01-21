@@ -32,7 +32,6 @@ export const useCautionAlert = ({
 
   const handleConfirm = () => {
     onConfirm();
-    hideAlert();
   };
 
   const [showAlert, hideAlert] = useCustomModal({
@@ -42,7 +41,7 @@ export const useCautionAlert = ({
     Content,
     contentProps,
     buttons: [
-      { label: cancelLabel || "Cancel", onClick: "close" },
+      { label: cancelLabel || "Cancel" },
       { label: confirmLabel || "OK", isDefault: true, onClick: handleConfirm }
     ],
     onClose

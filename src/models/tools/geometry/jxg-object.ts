@@ -1,5 +1,7 @@
-import { sortByCreation, kReverse } from "./jxg-board";
+import { sortByCreation, kReverse, getObjectById, syncLinkedPoints } from "./jxg-board";
 import { JXGChangeAgent, JXGProperties, JXGCoordPair, JXGUnsafeCoordPair } from "./jxg-changes";
+import { isLinkedPoint } from "./jxg-types";
+import { ITableLinkProperties } from "../table/table-content";
 import { castArrayCopy } from "../../../utilities/js-utils";
 import { castArray, size } from "lodash";
 
@@ -39,8 +41,10 @@ export const objectChangeAgent: JXGChangeAgent = {
     const ids = castArray(change.targetID);
     const props: JXGProperties[] = castArray(change.properties);
     let hasSuspendedTextUpdates = false;
+    let hasLinkedPoints = false;
     ids.forEach((id, index) => {
-      const obj = board.objects[id] as JXG.GeometryElement;
+      const obj = getObjectById(board, id);
+      if (isLinkedPoint(obj)) hasLinkedPoints = true;
       const textObj = isText(obj) ? obj as JXG.Text : undefined;
       const objProps = index < props.length ? props[index] : props[0];
       if (obj && objProps) {
@@ -73,6 +77,7 @@ export const objectChangeAgent: JXGChangeAgent = {
         }
       }
     });
+    if (hasLinkedPoints) syncLinkedPoints(board, change.links as ITableLinkProperties);
     if (hasSuspendedTextUpdates) board.suspendUpdate();
     board.update();
     return undefined;
@@ -84,10 +89,8 @@ export const objectChangeAgent: JXGChangeAgent = {
     sortByCreation(board, ids, kReverse);
     // remove objects in reverse order of creation
     ids.forEach((id) => {
-      const obj = board.objects[id] as JXG.GeometryElement;
-      if (obj) {
-        board.removeObject(obj);
-      }
+      const obj = getObjectById(board, id);
+      obj && board.removeObject(obj);
     });
     board.update();
   }

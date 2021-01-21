@@ -39,6 +39,45 @@ $controls-hover-background: #c0dfe7;
       &.table-title-default {
         font-style: italic;
       }
+
+      &.table-title-editing {
+        padding: 0;
+
+        input {
+          text-align: center;
+          border: solid 1.5px $charcoal-light-1;
+
+          &:focus {
+            border: solid 2px $highlight-blue;
+          }
+        }
+      }
+
+      .link-geometry-button {
+        position: absolute;
+        right: 3.5px;
+        top: 3px;
+        width: 26px;
+        height: 26px;
+        border-radius: 5px;
+        border: solid 1.5px $charcoal-light-1;
+        background-color: $workspace-teal-light-9;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        &.disabled {
+          opacity: 35%;
+        }
+
+        &:hover:not(.disabled) {
+          background-color: $workspace-teal-light-6;
+        }
+
+        &:active:not(.disabled) {
+          background-color: $workspace-teal-light-4;
+        }
+      }
     }
   }
 
