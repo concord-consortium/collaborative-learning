@@ -55,8 +55,9 @@ export const useGridContext = ({ modelId, showRowLabels, triggerColumnChange }: 
   }, [modelId, sharedSelection]);
 
   const selectOneRow = useCallback((rowId: string) => {
+    clearColumnSelection();
     sharedSelection.setSelected(modelId, [rowId]);
-  }, [modelId, sharedSelection]);
+  }, [clearColumnSelection, modelId, sharedSelection]);
 
   // Creating a new gridContext can result in focus change thus disrupting cell edits;
   // therefore, it's important that all inputs to the gridContext be wrapped in useCallback()
