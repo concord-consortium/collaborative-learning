@@ -65,7 +65,7 @@ export const useCustomModal = <IContentProps,>({
 
     contentEl.addEventListener("keydown", handleKeyDown, true);
 
-    const element = focusElement && contentEl.querySelector(focusElement) as HTMLElement|| contentEl;
+    const element = focusElement && contentEl.querySelector(focusElement) as HTMLElement || contentEl;
     element && setTimeout(() => {
       element.focus?.();
       (element as HTMLInputElement).select?.();
