@@ -1,3 +1,4 @@
+import { getObjectById } from "./jxg-board";
 import { JXGChangeAgent } from "./jxg-changes";
 import { isMovableLine } from "./jxg-movable-line";
 import { objectChangeAgent } from "./jxg-object";
@@ -68,14 +69,14 @@ export const commentChangeAgent: JXGChangeAgent = {
     if (isBoard(board)) {
       const _board = board as JXG.Board;
       const centroidCoordinateGetter = (index: number) => () => {
-        const anchor = _board.objects[commentProps.anchor];
+        const anchor = getObjectById(_board, commentProps.anchor);
         const centroid = getCentroid(anchor);
         if (centroid) {
           return centroid[index];
         }
       };
       // Comments on table-linked points will not copy to new documents because the anchor isn't copied
-      if (!_board.objects[commentProps.anchor]) return;
+      if (!getObjectById(_board, commentProps.anchor)) return;
 
       const id = commentProps.id;
       const comment = _board.create("text", [0, -1, commentText], commentProps);

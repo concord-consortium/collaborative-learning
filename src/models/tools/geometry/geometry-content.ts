@@ -9,7 +9,7 @@ import {
   ITableChange, ITableLinkProperties, kLabelAttrName
 } from "../table/table-content";
 import { canonicalizeValue, linkedPointId } from "../table/table-model-types";
-import { getAxisAnnotations, getBaseAxisLabels, guessUserDesiredBoundingBox,
+import { getAxisAnnotations, getBaseAxisLabels, getObjectById, guessUserDesiredBoundingBox,
           kAxisBuffer, kGeometryDefaultAxisMin, kGeometryDefaultHeight, kGeometryDefaultWidth,
           kGeometryDefaultPixelsPerUnit, syncAxisLabels, toObj } from "./jxg-board";
 import { ESegmentLabelOption, forEachNormalizedChange, ILinkProperties, JXGChange, JXGCoordPair,
@@ -212,7 +212,7 @@ export const GeometryMetadataModel = types
 export type GeometryMetadataModelType = Instance<typeof GeometryMetadataModel>;
 
 export function setElementColor(board: JXG.Board, id: string, selected: boolean) {
-  const element = board.objects[id];
+  const element = getObjectById(board, id);
   if (element) {
     const fillColor = element.getAttribute("clientFillColor") || kPointDefaults.fillColor;
     const strokeColor = element.getAttribute("clientStrokeColor") || kPointDefaults.strokeColor;
@@ -303,7 +303,7 @@ export const GeometryContentModel = types
       return self.getDeletableSelectedIds(board).length > 0;
     },
     selectedObjects(board: JXG.Board) {
-      return self.selectedIds.map(id => board.objects[id]);
+      return self.selectedIds.map(id => getObjectById(board, id));
     }
   }))
   .actions(self => ({

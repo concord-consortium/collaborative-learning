@@ -33,8 +33,9 @@ import { getUrlFromImageContent } from "../../../utilities/image-utils";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { assign, castArray, debounce, each, filter, find, keys as _keys, throttle, values } from "lodash";
-import { isVisibleMovableLine, isMovableLine, isMovableLineControlPoint, isMovableLineLabel,
-        handleControlPointClick} from "../../../models/tools/geometry/jxg-movable-line";
+import {
+  isVisibleMovableLine, isMovableLine, isMovableLineControlPoint, isMovableLineLabel,
+} from "../../../models/tools/geometry/jxg-movable-line";
 import { v4 as uuid } from "uuid";
 import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
 import { getDataSetBounds, IDataSet } from "../../../models/data/data-set";
@@ -1418,7 +1419,16 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           }
 
           if (isMovableLineControlPoint(point)) {
-            handleControlPointClick(point, geometryContent);
+            // When a control point is clicked, deselect the rest of the line so the line slope can be changed
+            const line = find(point.descendants, el => isMovableLine(el));
+            if (line) {
+              geometryContent.deselectElement(undefined, line.id);
+              each(line.ancestors, (parentPoint, parentId) => {
+                if (parentId !== point.id) {
+                  geometryContent.deselectElement(undefined, parentId);
+                }
+              });
+            }
           }
         }
         // click on unselected element

@@ -1,9 +1,10 @@
+import { castArray, each, values } from "lodash";
+import { getObjectById } from "./jxg-board";
 import { JXGChangeAgent } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
 import { getPointsForVertexAngle } from "./jxg-polygon";
 import { isPoint, isVertexAngle } from "./jxg-types";
-import { assign, castArray, each, values } from "lodash";
-import { v4 as uuid } from "uuid";
+import { uniqueId } from "../../../utilities/js-utils";
 
 export const canSupportVertexAngle = (vertex: JXG.Point): boolean => {
   const children = values(vertex.childElements);
@@ -68,12 +69,12 @@ export const vertexAngleChangeAgent: JXGChangeAgent = {
   create: (board, change) => {
     const _board = board as JXG.Board;
     const parents = (change.parents || [])
-                      .map(id => _board.objects[id as string])
+                      .map(id => getObjectById(_board, id as string))
                       .filter(pt => pt != null);
     // cf. http://jsxgraph.uni-bayreuth.de/wiki/index.php/Positioning_of_labels
     const overrides: any = { name() { return `${this.Value ? JXG.toFixed(this.Value() * 180 / Math.PI, 0) : ""}°`; },
                               clientType: "vertexAngle" };
-    const props = assign({ id: uuid(), radius: 1 }, change.properties, overrides);
+    const props = { id: uniqueId(), radius: 1, ...change.properties, ...overrides };
     return parents.length === 3 ? _board.create("angle", parents, props) : undefined;
   },
 
@@ -87,7 +88,7 @@ export const vertexAngleChangeAgent: JXGChangeAgent = {
     // get orphaned when deleting the angle.
     const dotIds: string[] = [];
     ids.forEach(id => {
-      const obj = board.objects[id];
+      const obj = getObjectById(board, id);
       if (isVertexAngle(obj)) {
         const angle = obj as JXG.Angle;
         if (angle.dot && isPoint(angle.dot)) {
