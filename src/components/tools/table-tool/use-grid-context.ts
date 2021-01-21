@@ -1,10 +1,16 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { CellNavigationMode, DataGridHandle } from "react-data-grid";
 import { useCurrent } from "../../../hooks/use-current";
+import { useSharedSelectionStore } from "../../../hooks/use-stores";
 import { uniqueId } from "../../../utilities/js-utils";
 import { IGridContext, TPosition } from "./table-types";
 
-export const useGridContext = (showRowLabels: boolean, triggerColumnChange: () => void) => {
+interface IProps {
+  modelId: string;
+  showRowLabels: boolean;
+  triggerColumnChange: () => void;
+}
+export const useGridContext = ({ modelId, showRowLabels, triggerColumnChange }: IProps) => {
   const gridRef = useRef<DataGridHandle>(null);
   const inputRowId = useRef(uniqueId());
 
@@ -18,10 +24,13 @@ export const useGridContext = (showRowLabels: boolean, triggerColumnChange: () =
   // currently the API constrains to a single selected column.
   const isColumnSelected = useCallback((columnId: string) =>
                             selectedColumnsRef.current.has(columnId), [selectedColumnsRef]);
-  // these are passed into ReactDataGrid as the ultimate source of truth
-  const [selectedRows, setSelectedRows] = useState(new Set<React.Key>());
+  const sharedSelection = useSharedSelectionStore();
+  const getSelectedRows = useCallback(() => {
+    // this is suitable for passing into ReactDataGrid
+    return new Set<React.Key>(Array.from(sharedSelection.getSelected(modelId)) as string[]);
+  }, [modelId, sharedSelection]);
 
-  const clearRowSelection = useCallback(() => setSelectedRows(new Set([])), []);
+  const clearRowSelection = useCallback(() => sharedSelection.clear(modelId), [modelId, sharedSelection]);
   const clearColumnSelection = useCallback(() => setSelectedColumns(new Set([])), []);
   const clearCellSelection = useCallback(() => gridRef.current?.selectCell({ idx: -1, rowIdx: -1 }), []);
 
@@ -39,10 +48,15 @@ export const useGridContext = (showRowLabels: boolean, triggerColumnChange: () =
     triggerColumnChange();
   }, [clearSelection, triggerColumnChange]);
 
-  const selectOneRow = useCallback((row: string) => {
-    clearColumnSelection();
-    setSelectedRows(new Set([row]));
-  }, [clearColumnSelection]);
+  const selectRowById = useCallback((rowId: string, select: boolean) => {
+    if (select !== sharedSelection.isSelected(modelId, rowId)) {
+      sharedSelection.select(modelId, rowId, select);
+    }
+  }, [modelId, sharedSelection]);
+
+  const selectOneRow = useCallback((rowId: string) => {
+    sharedSelection.setSelected(modelId, [rowId]);
+  }, [modelId, sharedSelection]);
 
   // Creating a new gridContext can result in focus change thus disrupting cell edits;
   // therefore, it's important that all inputs to the gridContext be wrapped in useCallback()
@@ -52,17 +66,20 @@ export const useGridContext = (showRowLabels: boolean, triggerColumnChange: () =
     isColumnSelected,
     onSelectColumn: selectColumn,
     isSelectedCellInRow,
+    onSelectRowById: selectRowById,
     onSelectOneRow: selectOneRow,
     onClearSelection: clearSelection
-  }), [clearSelection, isColumnSelected, isSelectedCellInRow, selectColumn, selectOneRow, showRowLabels]);
+  }), [clearSelection, isColumnSelected, isSelectedCellInRow, selectColumn, selectOneRow, selectRowById,
+        showRowLabels]);
 
+  // called by ReactDataGrid when selected rows change
   const onSelectedRowsChange = useCallback((_rows: Set<React.Key>) => {
     _rows.delete(inputRowId.current);
-    setSelectedRows(_rows);
-  }, []);
+    sharedSelection.setSelected(modelId, Array.from(_rows) as string[]);
+  }, [modelId, sharedSelection]);
 
   const cellNavigationMode: CellNavigationMode = "CHANGE_ROW";
   return {
-    ref: gridRef, cellNavigationMode, inputRowId, selectedCell, selectedRows, gridContext, onSelectedRowsChange
+    ref: gridRef, cellNavigationMode, inputRowId, selectedCell, getSelectedRows, gridContext, onSelectedRowsChange
   };
 };

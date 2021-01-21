@@ -1,3 +1,4 @@
+import { observer } from "mobx-react";
 import React, { useCallback, useRef, useState } from "react";
 import ReactDataGrid from "react-data-grid";
 import { TableContentModelType } from "../../../models/tools/table/table-content";
@@ -21,7 +22,8 @@ import { useToolbarToolApi } from "../hooks/use-toolbar-tool-api";
 import "react-data-grid/dist/react-data-grid.css";
 import "./table-tool.scss";
 
-const TableToolComponent: React.FC<IToolTileProps> = ({
+// observes row selection from shared selection store
+const TableToolComponent: React.FC<IToolTileProps> = observer(({
   documentId, documentContent, toolTile, model, readOnly, height,
   onRequestRowHeight, onRequestTilesOfType, onRequestUniqueTitle, onRegisterToolApi, onUnregisterToolApi
 }) => {
@@ -54,8 +56,8 @@ const TableToolComponent: React.FC<IToolTileProps> = ({
 
   const [showRowLabels, setShowRowLabels] = useState(false);
   const {
-    ref: gridRef, gridContext, inputRowId, selectedCell, ...gridProps
-  } = useGridContext(showRowLabels, triggerColumnChange);
+    ref: gridRef, gridContext, inputRowId, selectedCell, getSelectedRows, ...gridProps
+  } = useGridContext({ modelId: model.id, showRowLabels, triggerColumnChange });
   const measureHeaderText = useMeasureText("bold 14px Lato, sans-serif");
   // const measureBodyText = useMeasureText("14px Lato, sans-serif");
   const { getTitle, onBeginTitleEdit, onEndTitleEdit } = useTableTitle({
@@ -110,11 +112,12 @@ const TableToolComponent: React.FC<IToolTileProps> = ({
           isLinkEnabled={isLinkEnabled} onLinkGeometryClick={showLinkGeometryDialog}
           getTitle={getTitle} titleCellWidth={titleCellWidth}
           onBeginEdit={onBeginTitleEdit} onEndEdit={onEndTitleEdit} />
-        <ReactDataGrid ref={gridRef} {...gridProps} {...gridModelProps} {...dataGridProps} />
+        <ReactDataGrid ref={gridRef} selectedRows={getSelectedRows()}
+          {...gridProps} {...gridModelProps} {...dataGridProps} />
       </div>
     </div>
   );
-};
+});
 export default TableToolComponent;
 (TableToolComponent as any).tileHandlesSelection = true;
 

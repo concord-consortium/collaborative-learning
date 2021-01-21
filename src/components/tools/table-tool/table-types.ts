@@ -10,6 +10,7 @@ export interface IGridContext {
   isColumnSelected: (columnId: string) => boolean;
   onSelectColumn: (columnId: string) => void;
   isSelectedCellInRow: (rowIdx: number) => boolean;
+  onSelectRowById: (rowId: string, select: boolean) => void;
   onSelectOneRow: (row: string) => void;
   onClearSelection: (options?: { row?: boolean, column?: boolean, cell?: boolean }) => void;
 }

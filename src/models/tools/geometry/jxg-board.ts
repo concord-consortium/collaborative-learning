@@ -1,6 +1,6 @@
 import "./jxg";
 import { JXGChange, JXGChangeAgent, JXGProperties } from "./jxg-changes";
-import { isAxis, isBoard, isLinkedPoint } from "./jxg-types";
+import { isAxis, isBoard, isLinkedPoint, isPoint } from "./jxg-types";
 import { goodTickValue } from "../../../utilities/graph-utils";
 import { assign, each, find } from "lodash";
 import { ITableLinkProperties } from "../table/table-content";
@@ -24,6 +24,11 @@ export function getObjectById(board: JXG.Board, id: string) {
     obj = board.objects[caseId];
   }
   return obj;
+}
+
+export function getPointsByCaseId(board: JXG.Board, caseId: string) {
+  if (!caseId || caseId.includes(":")) return [getObjectById(board, caseId)];
+  return board.objectsList.filter(obj => isPoint(obj) && (obj.id.split(":")[0] === caseId));
 }
 
 export function syncLinkedPoints(board: JXG.Board, links: ITableLinkProperties) {
