@@ -16,7 +16,7 @@ export const kGeometryDefaultAxisMin = 0;
 
 export function getObjectById(board: JXG.Board, id: string) {
   let obj: JXG.GeometryElement | undefined = board.objects[id];
-  if (!obj && id.includes(":")) {
+  if (!obj && id?.includes(":")) {
     // legacy support for early tiles in which points were identified by caseId,
     // before we added support for multiple columns, i.e. multiple points per row/case
     // newer code uses `${caseId}:${attrId}` for the id of points
