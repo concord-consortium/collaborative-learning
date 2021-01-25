@@ -163,6 +163,16 @@
                         "<em>What do you think your walking rate is?</em><ul><li>Make a prediction about your walking rate. </li><li>Use a meter stick and timer to help answer the following following questions about your walking rate. What is your walking rate in meters per second?</li><</ul>"
                       ]
                     }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<code>Student answers will vary. It will be easier for students to find their walking rates by seeing how far they walk in, for example, 5 or 10 seconds and then divide the number of meters they walked by the number of seconds for which they walked.</code>"
+                      ]
+                    }
                   }
                 ]
               },
@@ -188,7 +198,136 @@
                       "format": "html",
                       "text": [
                         "<strong>Situation A. Walking at a Consistent Rate</strong>",
-                        "Assume you continue to walk at the consistent rate determined in the <em>Initial Challenge</em>. <ol><li>How long would it take you to walk 500 meters?</li><li>How far could you walk in 5 seconds, 10 seconds, 30 seconds? In 60 seconds? In 1 hour?</li><li>Write an equation that represents the distance d in meters that you could walk in t seconds. Compare your equation to your classmates’ equations. </li><li>Describe what a graph of your equation would look like. Check your answer by making a graph of your data.</li></ol>"
+                        "Assume you continue to walk at the consistent rate determined in the <em>Initial Challenge</em>."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<code>Answers will vary depending on the student’s walking rate. Sample answers are provided for a walking rate of 2 meters per second, and for a student who walks <em>r</em> meters per second.</code>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "1. How long would it take you to walk 500 meters?"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<code>A student who walks 2 meters per second will walk 500 meters in 250 seconds, or 4 minutes and 10 seconds.</code>",
+                        "<code>A student who walks <em>r</em> meters per second will walk 500 meters in 500/r seconds.</code>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "2. How far could you walk in 5 seconds, 10 seconds, 30 seconds? In 60 seconds? In 1 hour?"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<code>A student who walks 2 meters per second will walk 10 meters in 5 seconds, 20 meters in 10 seconds, 60 meters in 30 seconds, 120 meters in 60 seconds, and 7200 meters in 1 hour.</code>",
+                        "<code>A student who walks r meters per second will walk 5r meters in 5 seconds, 10r meters in 10 seconds, 30r meters in 30 seconds, 60r meters in 60 seconds, and 3600r meters in 1 hour.</code>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "3. Write an equation that represents the distance d in meters that you could walk in t seconds. Compare your equation to your classmates’ equations. Describe what a graph of your equation would look like. Check your answer by making a graph of your data. "
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<code>For a walking rate of 2 meters per second, an equation is d = 2t, where d is the distance in meters and t is the time in seconds.</code>",
+                        "<code>For a walking rate of r meters per second, an equation is d = rt, where d is the distance in meters and t is the time in seconds.</code>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "4. Describe what a graph of your equation would look like. Check your answer by making a graph of your data. "
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<code>Possible answers.\nFor a walking rate of 2 meters per second: The graph would be a line starting at (0,0). For every one second walked, the distance increases by 2.</code>",
+                        "<code>For a walking rate of r meters per second: The graph would be a line starting at (0,0). For every one second walked, the distance increases by r.</code>"
+                      ]
+                    }
+                  },
+                  {
+                    "layout": {
+                      "height": 340
+                    },
+                    "content": {
+                      "display": "teacher",
+                      "type":"Geometry",
+                      "board": {
+                        "properties": {
+                          "axisNames": ["Time (seconds)", "Distance (meters)"],
+                          "axisMin": [-1, -1],
+                          "axisRange": [8, 10]
+                        }
+                      },
+                      "objects": [
+                        {
+                          "type": "point",
+                          "parents": [0, 0],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [1, 2],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [4, 8],
+                          "properties": {
+                                "name": ""
+                              }
+                        }
                       ]
                     }
                   },
@@ -198,7 +337,17 @@
                       "format": "html",
                       "text": [
                         "<strong>Situation B. Liz’s Claim</strong>",
-                        "Liz claimed that walking rates are like ratios and she used proportional reasoning to answer the questions in Situation A. She wrote:\n <blockquote><em>The walking rate is a multiplicative comparison statement. If I walk 1.5 m per sec, then I walk 7.5 m in 5 seconds, 15 m in 10 sec, … or 500 m in about 333 sec, etc.</em></blockquote>\n\nIs she correct? Explain. "
+                        "Liz claimed that walking rates are like ratios and she used proportional reasoning to answer the questions in Situation A. She wrote:\n <em>The walking rate is a multiplicative comparison statement. If I walk 1.5 m per sec, then I walk 7.5 m in 5 seconds, 15 m in 10 sec, … or 500 m in about 333 sec, etc.</em>\n\nIs she correct? Explain. "
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<code>Sample answer: She is correct. The ratio of meters walked to seconds always stays the same, so, for example, 1.5 meters/1 second = 7.5 meters/5 seconds = 15 meters/10 seconds. So you can always predict how long it will take to walk a specific distance based on this constant ratio.</code>"
                       ]
                     }
                   }
@@ -219,7 +368,18 @@
                     "format": "html",
                     "text": ["Assume you continue to walk at the rate determined in the <em>Initial Challenge</em>. Describe in words the distance you could walk in a given number of seconds. Then write an equation to represent this information."]
                   }
-                }]
+                },
+                {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<code>For a walking rate of r meters per second, you can walk a distance in meters that is r times the number of seconds. That is, you can scale the ratio, meters per second, up or down by multiplying both meters and seconds by the same number. d = rt.</code>"
+                      ]
+                    }
+                  }
+                ]
               },
               "supports": [
               ]
@@ -302,7 +462,158 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "They had some questions concerning the different representations (tables, graphs and equations) of their walking data. To help them answer the questions<ol><li>Make a table showing the distance walked by each student for the first ten seconds.</li><li>Graph the times and distances on the same coordinate axes. Label each line with the name of the person. Use a different color for each student.</li><li>Write an equation that represents the relationship between the time <em>t</em> and distance <em>d</em> walked by each student.</li></ol><ul><li>How are the different walking rates represented in the different equations, tables, and graphs? </li><li>Which representation is more useful than another to solve a problem about walking? Explain.</li></ul>"
+                      "text": "They had some questions concerning the different representations (tables, graphs and equations) of their walking data. To help them answer the questions<ul><li>Make a table showing the distance walked by each student for the first ten seconds.</li></ul>"
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Table",
+                      "name": "Walking Rates",
+                      "columns": [
+                        {
+                          "name": "Time (sec)",
+                          "type": "number",
+                          "values": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                        },
+                        {
+                          "name": "Alana's Dist. (m)",
+                          "type": "number",
+                          "values": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                        },
+                        {
+                          "name": "Gilberto's Dist. (m)",
+                          "type": "number",
+                          "values": [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
+                        },
+                        {
+                          "name": "Leanne's Dist. (m)",
+                          "type": "number",
+                          "values": [0, 2.5, 5.0, 7.5, 10, 12.5, 15, 17.5, 20, 22.5, 25]
+                        }
+                      ]
+                    },
+                    "layout": {
+                      "height": 210
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<ul><li>Graph the times and distances on the same coordinate axes. Label each line with the name of the person. Use a different color for each student.</li></ul>"
+                    }
+                  },
+                  {
+                    "layout": {
+                      "height": 300
+                    },
+                    "content": {
+                      "display": "teacher",
+                      "type": "Geometry",
+                      "board": {
+                        "properties": {
+                          "axisNames": ["t, D"],
+                          "axisLabels": ["Time (seconds)", "Distance (meters)"],
+                          "axisMin": [-1, -2],
+                          "axisRange": [10, 25]
+                        }
+                      },
+                      "objects": [
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [0, 0]
+                            },
+                            {
+                              "type": "point",
+                              "parents": [10, 10],
+                              "properties": {
+                                "name": "Alana"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [0, 0]
+                            },
+                            {
+                              "type": "point",
+                              "parents": [9, 18],
+                              "properties": {
+                                "name": "Gilberto"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [0, 0]
+                            },
+                            {
+                              "type": "point",
+                              "parents": [6, 15],
+                              "properties": {
+                                "name": "Leanne"
+                              }
+                            }
+                          ]
+                        }                        
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<ul><li>Write an equation that represents the relationship between the time <em>t</em> and distance <em>d</em> walked by each student.</li></ul>"
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>Alana: d = t or d = 1t; Gilberto: d = 2t; Leanne: d = 2.5t.</code>"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "How are the different walking rates represented in the different equations, tables, and graphs?"
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>In the equation the walking rate is represented as the number that you multiply by the time to get distance. (Note that students will learn later that the multiplier is called the coefficient.) \nIn the table, the walking rate is represented as the difference between values for distance in consecutive rows (1 second apart). So, as the x-values increase by 1, the y values will increase by the walking rate. (Note that students will learn later that this is called the rate of change.)\nIn the graph, the walking rate is represented as the steepness of the graph – the greater the walking rate, the steeper the line on the graph. (Note that students will learn later that this is called the slope.)</code>"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "Which representation is more useful than another to solve a problem about walking? Explain."
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>Answers will vary. Sample answers: The table is the most helpful because I can figure out the pattern, but I can also see many values that would answer questions.\nThe graph is the most important because I can see the pattern for the walking rates. I can also see how the pattern of change for one line is related to the pattern of change for another. I can also find or approximate answers to questions.\nThe equation is the most useful because I can use any amount of time to find the distance, not just small values for time like on a graph or table.</code>"
                     }
                   }
                 ]
@@ -321,10 +632,48 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>Situation A. Yvonne’s Claims</strong> <ol><li>Yvonne claims she can tell from the table that the relationships between time and distance are proportional. What evidence in the table shows they are proportional? Is this the same thing as saying the relationships are linear?</li><li>Yvonne claims that she can use a table or a graph to answer the question:\n\u00a0\u00a0\u00a0<em>For each student, if time t increases by 1 second, by how much \n\u00a0\u00a0\u00a0does the distance d change? </em>\nIs she correct? Explain. </li><li>Yvonne also claimed that the time and distance data represented in part 1 is the Constant of Proportionality. What do you think?</li></ol>"]
+                      "text": ["<strong>Situation A. Yvonne’s Claims</strong> \n\n1. Yvonne claims she can tell from the table that the relationships between time and distance are proportional. What evidence in the table shows they are proportional? Is this the same thing as saying the relationships are linear? "]
                     }
                   },
-                   {
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>The relationships are proportional. On the table, you can take any two coordinate pairs and write a proportion. Also, you can see this because any distance divided by time gives a constant ratio. Since the relationship is proportional, it is also linear because distance divided by time gives a constant rate of change. (Note: Not all linear relationships are proportional.)</code>"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["2. Yvonne claims that she can use a table or a graph to answer the question:\n\u00a0\u00a0\u00a0<em>For each student, if time t increases by 1 second, by how much \n\u00a0\u00a0\u00a0does the distance d change? </em>\nIs she correct? Explain."]
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>She is correct. If time increases by 1 second, she can find the change in distance on a graph by looking at the steepness of the line. If time increases by 1 second, she can find the change in distance on a table by looking at the distance in two consecutive rows (one second apart) and calculating the difference.</code>"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["3. Yvonne also claimed that the time and distance data represented in part 1 is the Constant of Proportionality. What do you think?"]
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>Yvonne is correct. All of the relationships are of the form <em>d = rt</em>. The value of <em>r</em> is the constant of proportionality for each relationship.</code>"
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -474,7 +823,30 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<ol><li>How are their graphs similar? How are they different?</li><li>Which expression could represent their distance?\n\n 5<em>t</em>  \u00a0\u00a0\u00a0\u00a0  2<em>t</em> \u00a0\u00a0\u00a0\u00a0 0.5<em>t</em></li></ol>"]
+                      "text": ["1. How are their graphs similar? How are they different?"]
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>Valentina and Omar’s graphs are similar in that, when the points are connected, the graphs have the same rate of change and y-intercept. Omar graphed his walking rate for 40 seconds, whereas Valentina graphed his walking rate for 4 seconds. Their scales are different as well. Omar uses intervals of 5 seconds and 10 meters, whereas Valentina uses intervals of 1 second and 1 meter. The different scales makes it appear that Valentina has a faster walking rate. However, their walking rates are the same. Because Omar’s vertical scale has twice the value as the horizontal scale, it appears to “pull down” the points as you have less vertical “movement” for every point. Valentina’s scales both have a value of one for every grid line. So, you will have the “same” movement on the horizontal and vertical axes for each coordinate pair.</code>"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["2. Which expression could represent their distance?\n\n 5<em>t</em>  \u00a0\u00a0\u00a0\u00a0  2<em>t</em> \u00a0\u00a0\u00a0\u00a0 0.5<em>t</em>"]
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>The expression 2t could represent their distance. On both graphs, the distance traveled is always twice the time in seconds, so they are traveling 2 meters every second.</code>"
                     }
                   },
                   {
@@ -540,6 +912,14 @@
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_1_2_evos_walkathon_graph.png"
                     }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>Elizabeth and Billie’s relationships are linear. Elizabeth walks at a constant rate of 3 meters every 2 seconds, which you can see in the table. Billie walks at a constant rate of 2.25 m/s, since the equation is in the form of d = rt, similar to the equations for Alana, Gilberto, and Leanne. Both of these relationships are also proportional, since at 0 seconds they have walked 0 meters.\n\n George’s, Evo’s, and Bob’s relationships are not linear. The table for George does not show a constant rate of change. Evo’s graph does not make a straight line, so it does not show a constant rate of change. In the equation for Bob, the rate is a variable, so the walking rate is not constant. (Some students may make graphs and claim the relationships are either linear or not based on whether the data lie on a straight line.)</code>"
+                    }
                   }
                 ]
               },
@@ -551,12 +931,22 @@
             {
               "type": "nowWhatDoYouKnow",
               "content": {
-                "tiles": [{
-                  "content": {
-                    "type": "Text",
-                    "text": "How do you recognize a linear pattern of change in a verbal context, a table, a graph, an expression, or an equation?"
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "How do you recognize a linear pattern of change in a verbal context, a table, a graph, an expression, or an equation?"
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code><ul><li>Main idea: Relationships are linear when there is a constant rate of change.</li><li>Verbal context: key words include <em>constant,</em> [increase/decrease] by the same amount every [year/second/month]</li><li>Table: The values of one variable change at a constant rate when the other variable changes at a constant rate.</li><li>Graph: The graph is a straight line.</li><li>Expression: The independent variable is multiplied by a constant.</li><li>Equation: The independent variable is multiplied by a constant, so the dependent variable will change at a constant rate.</li></ul></code>"
+                    }
                   }
-                }]
+                ]
               },
               "supports": [
              ]
@@ -582,7 +972,7 @@
                     ]
                   }
                   },
-                                    {
+                  {
                   "content": {
                     "type": "Text",
                     "format": "html",
@@ -625,11 +1015,150 @@
                       "height": 160
                     }
                   },
-                   {
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<ul><li>Who will raise the most money? Explain.</li><li>How does the relationship between dollars and kilometers represent a linear relationship? </li><li>How do these relationships compare to those in Problem 1.2? Explain.</li><ul>"]
+                      "text": ["<ul><li>Who will raise the most money? Explain.</li><ul>"]
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>The answer depends on how long the walkathon is. \nLeanne will raise the most money if the walkathon is shorter than 5 kilometers; Gilberto will “catch up” to Leanne when he walks 5 kilometers because he raises $2 per kilometer.\nGilberto will raise the most money if the walkathon is longer than 5 kilometers.\nAlana will never raise the most money because she has a smaller starting donation than Leanne and a smaller per-kilometer-walked donation than Gilberto.</code>"
+                    }
+                  },
+                  {
+                    "layout": {
+                      "height": 330
+                    },
+                    "content": {
+                      "display": "teacher",
+                      "type": "Geometry",
+                      "board": {
+                        "properties": {
+                          "axisNames": ["t, D"],
+                          "axisLabels": ["Time (seconds)", "Distance (meters)"],
+                          "axisMin": [-1, -2],
+                          "axisRange": [12, 15]
+                        }
+                      },
+                      "objects": [
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [0, 10],
+                              "properties": {
+                                "name": "Leanne"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [10, 10],
+                              "properties": {
+                                "name": ""
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [0, 0]
+                            },
+                            {
+                              "type": "point",
+                              "parents": [6, 12],
+                              "properties": {
+                                "name": "Gilberto"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [0, 5]
+                            },
+                            {
+                              "type": "point",
+                              "parents": [16, 10],
+                              "properties": {
+                                "name": "Alana"
+                              }
+                            }
+                          ]
+                        }                        
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Table",
+                      "columns": [
+                          {
+                            "name": "Distance (km)",
+                            "type": "number",
+                            "values": [0, 1, 2, 3, 4, 5, 6]
+                          },
+                          {
+                            "name": "Leanne's Donation ($)",
+                            "type": "number",
+                            "values": [10, 10, 10, 10, 10, 10]
+                          },
+                          {
+                            "name": "Gilbero's Donation ($)",
+                            "type": "number",
+                            "values": [0, 2, 4, 6, 8, 10]
+                          },
+                          {
+                            "name": "Alana's Donation ($)",
+                            "type": "number",
+                            "values": [0, 2, 4, 6, 8, 10]
+                          }
+                        ]
+                    },
+                    "layout": {
+                    "height": 190
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["<ul><li>How does the relationship between dollars and kilometers represent a linear relationship? </li><ul>"]
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>They are linear relationships because the students all raise a constant rate of money for each kilometer walked. Leanne raises $0 per kilometer, Gilberto raises $2 per kilometer, and Alana raises $0.50 per kilometer. This will form a straight line as each increase in 1 km leads to a constant increase in the donation monies.</code>"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["<ul><li>How do these relationships compare to those in Problem 1.2? Explain.</li><ul>"]
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>Gilberto’s relationship is exactly like those in Problem 1.2 because when he has walked 0 km, he will earn $0. But Leanne’s and Alana’s relationships are different from those in Problem 1.2 because they have an extra amount of money added at the start of the walkathon. So, when they have walked 0 km, they will have raised $10 and $5, respectively. After that their plans have a constant rate of change.</code>"
                     }
                   }
                 ]
@@ -731,7 +1260,7 @@
                   "layout": {
                     "height": 190
                   }
-                },
+                  },
                   {
                     "content": {
                       "type": "Text",
