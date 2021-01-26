@@ -127,11 +127,22 @@ export const GeometryMetadataModel = types
     tableLinkDisposers: {} as { [id: string]: Lambda }
   }))
   .views(self => ({
+    isSharedSelected(id: string) {
+      const _id = id?.includes(":") ? id.split(":")[0] : id;
+      let isSelected = false;
+      self.sharedSelection?.sets.forEach(set => {
+        // ignore labels with auto-assigned IDs associated with selected points
+        if (set.isSelected(_id) && !id.endsWith("Label")) isSelected = true;
+      });
+      return isSelected;
+    },
+  }))
+  .views(self => ({
     isDisabled(feature: string) {
       return self.disabled.indexOf(feature) >= 0;
     },
     isSelected(id: string) {
-      return !!self.selection.get(id);
+      return !!self.selection.get(id) || self.isSharedSelected(id);
     },
     hasSelection() {
       return Array.from(self.selection.values()).some(isSelected => isSelected);
@@ -251,13 +262,6 @@ export const GeometryContentModel = types
     hasSelection() {
       return self.metadata.hasSelection();
     },
-    get selectedIds() {
-      const selected: string[] = [];
-      self.metadata.selection.forEach((isSelected, id) => {
-        isSelected && selected.push(id);
-      });
-      return selected;
-    },
     get isLinked() {
       return self.metadata.linkedTables.length > 0;
     },
@@ -266,6 +270,12 @@ export const GeometryContentModel = types
     }
   }))
   .views(self => ({
+    getSelectedIds(board: JXG.Board) {
+      // returns the ids in creation order
+      return board.objectsList
+                  .filter(obj => self.isSelected(obj.id))
+                  .map(obj => obj.id);
+    },
     getDeletableSelectedIds(board: JXG.Board) {
       // returns the ids in creation order
       return board.objectsList
@@ -303,7 +313,7 @@ export const GeometryContentModel = types
       return self.getDeletableSelectedIds(board).length > 0;
     },
     selectedObjects(board: JXG.Board) {
-      return self.selectedIds.map(id => getObjectById(board, id));
+      return board.objectsList.filter(obj => self.isSelected(obj.id));
     }
   }))
   .actions(self => ({

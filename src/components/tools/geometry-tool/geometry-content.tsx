@@ -11,7 +11,7 @@ import { GeometryContentModelType, GeometryMetadataModelType, setElementColor, g
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
           isDragTargetOrAncestor } from "../../../models/tools/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
-import { kGeometryDefaultPixelsPerUnit } from "../../../models/tools/geometry/jxg-board";
+import { getPointsByCaseId, kGeometryDefaultPixelsPerUnit } from "../../../models/tools/geometry/jxg-board";
 import { ESegmentLabelOption, ILinkProperties, JXGChange, JXGCoordPair
         } from "../../../models/tools/geometry/jxg-changes";
 import { kSnapUnit } from "../../../models/tools/geometry/jxg-point";
@@ -272,8 +272,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         }
       },
       getSelectionInfo: () => {
+        const { board } = this.state;
         const geometryContent = this.props.model.content as GeometryContentModelType;
-        const selectedIds = geometryContent ? geometryContent.selectedIds : [];
+        const selectedIds = board && geometryContent?.getSelectedIds(board) || [];
         return JSON.stringify(selectedIds);
       },
       setSelectionHighlight: (selectionInfo: string, isHighlighted: boolean) => {
@@ -1363,8 +1364,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     // synchronize selection changes
     this.disposers.push(content.metadata.selection.observe((change: any) => {
-      if (this.state.board) {
-        setElementColor(this.state.board, change.name, (change as any).newValue.value);
+      const { board: _board } = this.state;
+      if (_board) {
+        // this may be a shared selection change; get all points associated with it
+        const objs = getPointsByCaseId(_board, change.name);
+        objs.forEach(obj => setElementColor(_board, obj.id, change.newValue.value));
       }
     }));
 

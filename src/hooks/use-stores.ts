@@ -3,6 +3,7 @@ import { useContext } from "react";
 import { ProblemModelType } from "../models/curriculum/problem";
 import { AppConfigModelType } from "../models/stores/app-config-model";
 import { GroupsModelType } from "../models/stores/groups";
+import { SelectionStoreModelType } from "../models/stores/selection";
 import { getSettingFromStores, IStores } from "../models/stores/stores";
 import { UserModelType } from "../models/stores/user";
 import { UIModelType } from "../models/stores/ui";
@@ -30,6 +31,10 @@ export function useProblemStore(): ProblemModelType {
 
 export function useSettingFromStores(key: string, group?: string) {
   return getSettingFromStores(useStores(), key, group);
+}
+
+export function useSharedSelectionStore(): SelectionStoreModelType {
+  return useStores().selection;
 }
 
 export function useUIStore(): UIModelType {
