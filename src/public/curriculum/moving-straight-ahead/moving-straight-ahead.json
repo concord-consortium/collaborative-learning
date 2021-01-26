@@ -1181,8 +1181,16 @@
                     "type": "Text",
                     "format": "html",
                     "text":[
-                      "<strong>Situation A. Using the Data</strong><ol><li> In Alana’s plan, how is the fixed $5 donation represented in a table? A graph? An equation? How is the rate of change shown in the table, graph, and equation?</li><li>Suppose each student walks 8 kilometers in the walkathon. How much money does each sponsor donate? Explain how you found your answer.</li><li>Suppose each student raises $10 from a sponsor. How many kilometers does each student walk? Explain.</li><li>On which graph does the point (12, 11) lie? What information does this point represent?</li><li>Yvonne claims that the relationships for Alana, Gilberto, and Leanne pledge plans are linear and proportional. Is she correct?</li></ol>"
+                      "<strong>Situation A. Using the Data</strong>\n1. In Alana’s plan, how is the fixed $5 donation represented in a table? A graph? An equation? How is the rate of change shown in the table, graph, and equation?"
                     ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>The fixed $5 donation represents the amount of money she raises by walking 0 kilometers. In the table, it is the amount of the donation when the distance is 0. (0,5) is the point where Alana’s graph intersects the y-axis; it is the point on the line for her plan with an x-coordinate of 0. In the equation, 5 is the term that is added to 0.50d where d represents the distance walked.\n\nThe rate of change for Alana is $0.50 per kilometer. In the table, this is shown by the amount that the donation increases for every 1 kilometer or the amount each row of the y-variable increases for every increase of 1 km. The graph shows the rate of change as how much the line rises for every kilometer. In the equation, we see the rate of change in the coefficient, or the amount that is multiplied by the x-variable.</code>"
                     }
                   },
                   {
@@ -1190,8 +1198,101 @@
                     "type": "Text",
                     "format": "html",
                     "text":[
-                      "<strong> Situation B. Gilberto Gives T-shirts</strong>\n\nGilberto decides to give a T-shirt to each of his sponsors. Each shirt costs him $4.75. He plans to pay for each shirt with some of the money he raises from each sponsor. <ol><li> Write an expression that represents the amount of money Gilberto raises after paying for the T-shirts.</li><li>How does this additional cost affect the amount of money he has raised reflected in a table, graph, and equation?</li></ol>"
+                      "2. Suppose each student walks 8 kilometers in the walkathon. How much money does each sponsor donate? Explain how you found your answer."
                     ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>Leanne: Each sponsor donates $10 because they donate $10 regardless of how far she walks.\nGilberto: Each sponsor donates $2 • 8 = $16 because they donate $2 per kilometer he walks.\nAlana: Each sponsor donates $5 + $0.50 • 8 = $5 + $4 = $9 because they donate $5 plus $0.50 per kilometer she walks. </code>"
+                    }
+                  },
+                  {
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text":[
+                      "3. Suppose each student raises $10 from a sponsor. How many kilometers does each student walk? Explain."
+                    ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>Leanne: We cannot determine how far she walks since the amount of money she raises does not depend on how many kilometers she walks.\nGilberto: 5 kilometers because $2 x 5 = 10 or 10 ÷ 2 = 5.\nAlana: 10 kilometers because $10 - $5 = $5 so she has to raise $5 by walking; since she raises $0.50 per kilometer walked, she must walk $5 / $0.50 = 10 kilometers.</code>"
+                    }
+                  },
+                  {
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text":[
+                      "4. On which graph does the point (12, 11) lie? What information does this point represent?"
+                    ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>The point (12,11) lies on Alana’s graph since $5 + $0.50 x 12 = $5 + $6 = $11. This point means that if Alana walks 12 kilometers, each sponsor will donate $11.</code>"
+                    }
+                  },
+                  {
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text":[
+                      "5. Yvonne claims that the relationships for Alana, Gilberto, and Leanne pledge plans are linear and proportional. Is she correct?"
+                    ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>Leanne’s, Gilberto’s, and Alana’s plans are linear because they all show a constant rate of money raised per kilometer walked. Only Gilberto’s pledge plan is proportional because his plan doesn’t involve raising any money without walking any kilometers.</code>"
+                    }
+                  },
+                  {
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text":[
+                      "<strong> Situation B. Gilberto Gives T-shirts</strong>\n\nGilberto decides to give a T-shirt to each of his sponsors. Each shirt costs him $4.75. He plans to pay for each shirt with some of the money he raises from each sponsor.\n\n1. Write an expression that represents the amount of money Gilberto raises after paying for the T-shirts."
+                    ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>For each sponsor, Gilberto will earn $2 per kilometer walked and pay $4.75 regardless of how far he walks. The expression that represents the amount of money Gilberto will raise with this plan is 2*d – 4.75, where d represents the distance walked.</code>"
+                    }
+                  },
+                  {
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text":[
+                      "2. How does this additional cost affect the amount of money he has raised reflected in a table, graph, and equation?"
+                    ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>When he has walked 0 km, he will have earned -$4.75, so (0,-4.75) will be a value on the table and will be the spot where Gilberto’s graph intersects the y-axis. After that, for each kilometer he walks, the money he raises will increase by $2. So (1,-2.75) will be a value on the table and the graph. In the equation, we subtract -$4.75 to represent this extra cost, so his profits are always decreased by $4.75, no matter how many kilometers he walks.</code>"
                     }
                   }
               ]
@@ -1201,12 +1302,36 @@
             {
               "type": "nowWhatDoYouKnow",
               "content": {
-                "tiles": [{
+                "tiles": [
+                  {
                   "content": {
                     "type": "Text",
-                    "text": "How can you determine if a relationship is linear from a verbal  context, table, graph, or equation?\n\nIf a relationship is linear, explain how you can tell if it is proportional."
+                    "text": "How can you determine if a relationship is linear from a verbal  context, table, graph, or equation?"
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>You can determine if a relationship is linear if there is a constant rate of change. That is, for every unit change in the independent variable there is a consistent change in the dependent variable. Another way to say this is “as the independent variable changes in equal increments, the dependent variable will change by a consistent amount.\n\nIn a table, as the independent variable increases by one unit the dependent variable will change by a consistent amount. The graph is a straight line. The equation is of the form y = ax + b. If b is 0 then the equation, y = ax is also proportional.</code>"
+                    }
+                  },
+                  {
+                  "content": {
+                    "type": "Text",
+                    "text": "If a relationship is linear, explain how you can tell if it is proportional."
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>Table: Values from the table are proportional. You can use the values to write proportions or “for every” ratio statements. For example, in the table for Gilberto:\n\nEquation: The amount added into the equation is zero. Or the y-intercept is zero. For example, in the equation for Gilberto:\n\nGraph: The graph of a proportional relationship is passes through the point (0,0). For example, in the graph for Gilberto:</code>"
+                    }
                   }
-                }]
+                ]
               },
               "supports": [
               ]
@@ -1396,6 +1521,14 @@
                       "type": "Text",
                       "text": "For each class, what is the pattern of change for the relationship between the variables? Explain how you know. "
                     }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>The pattern of change for Ms. Chang’s class is linear because the amount of money in the account decreases by a consistent amount of $12 each week. The pattern of change for Mr. Mamer’s class is linear because the data points on the graph form a straight line.</code>"
+                    }
                   }
                 ]
               },
@@ -1411,8 +1544,91 @@
                   "content": {
                     "type": "Text",
                     "format": "html",
-                    "text": ["<strong>Situation A. Using the Data to Answer Questions</strong>\nFor each class:<ol><li> How much money is in the account at the start? Explain.</li><li> How much money is withdrawn each week?</li><li> Write an equation that represents the relationship. Explain what information each number and variable represent.</li><li> After 10 weeks, how much money was used to buy items for the children’s ward at the hospital? How much money was left? Explain how you found the answer.</li><li>  When is all the money spent? Where is this point on the graph?</li><li>  How do the graphs of the data compare?</li></ol>"]
+                    "text": ["<strong>Situation A. Using the Data to Answer Questions</strong>\nFor each class: \n1. How much money is in the account at the start? Explain."]
                   }
+                },
+                {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>The pattern of change for Ms. Chang’s class is linear because the amount of money in the account decreases by a consistent amount of $12 each week. The pattern of change for Mr. Mamer’s class is linear because the data points on the graph form a straight line.</code>"
+                    }
+                },
+                {
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": ["2.  How much money is withdrawn each week?"]
+                  }
+                },
+                {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>Ms. Chang: $144 because this is the amount of money in the account for week 0, or the start of keeping track of the money.\nMr. Mamer: $500 because this is the amount of money in the account for week 0, or the start of keeping track of the money.</code>"
+                    }
+                },
+                {
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": ["3. Write an equation that represents the relationship. Explain what information each number and variable represent."]
+                  }
+                },
+                {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>Ms. Chang: A = 144 + –12n or 144 – 12n, where n represents the number of weeks and A represents the amount of money in the account after n weeks. The rate at which the amount of money in the account is changing is –$12 per week, and the starting amount of money in the club’s account is $144.\nMr. Mamer: A = 500 + –10n or 500 – 10n, where n represents the number of weeks and A represents the amount of money in the account after n weeks. The rate at which the amount of money in the account is changing is –$10 per week, and the starting amount of money in the club’s account is $500. </code>"
+                    }
+                },
+                {
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": ["4. After 10 weeks, how much money was used to buy items for the children’s ward at the hospital? How much money was left? Explain how you found the answer."]
+                  }
+                },
+                 {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>Ms. Chang: The rate at which the amount of money in the account is changing is -$12 per week, so after 10 weeks the club has donated $12(10) = $120. Since they started with $144, they now have $144-$120=$24 left in the account.\nMr. Mamer: The rate at which the amount of money in the account is changing is -$10 per week, so after 10 weeks the club has donated $10(10) = $100. Since they started with $500, they now have $500-$100=$400 left in the account.</code>"
+                    }
+                },
+                {
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": ["5. When is all the money spent? Where is this point on the graph?"]
+                  }
+                },
+                 {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>Ms. Chang: If they spent $12 per week and they had $144 at the beginning, then all the money would be spent after 144/12 = 12 weeks.\nMr. Mamer: If they spent $10 per week and they had $500 at the beginning, then all the money would be spent after 500/10 = 50 weeks. This is the point where the graph crosses the horizontal axis, since that represents A=0.</code>"
+                    }
+                },
+                                {
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": ["6. How do the graphs of the data compare?"]
+                  }
+                },
+                {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>Both of the relationships in this Problem have decreasing rates of change, though the graph of Ms. Chang’s club’s account has a larger decreasing rate of change. Mr. Mamer’s club started with a larger amount of money in their account, so the y-intercept is larger.</code>"
+                    }
                 },
                 {
                   "content": {
@@ -1421,6 +1637,14 @@
                     "text": ["<strong>Situation B. What’s the Question?</strong>\nOne of Mr. Mamer’s students wrote the following two statements to help her answer questions about their account\n<code>\u00a0\u00a0\u00a0 500 - 10t = 100 \n\u00a0\u00a0\u00a0 500 - 10t < 100 </code>\n\nWhat questions was she trying to answer?"]
                   }
 
+                },
+                {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>The first equation is setting the expression for how much money is left in the account after t weeks equal to 100, so she is trying to find how many weeks it will take for there to be $100 left in the account. The second equation is trying to find how many weeks it will take for there to be less than $100 left in the account.</code>"
+                    }
                 }
               ]
               },
