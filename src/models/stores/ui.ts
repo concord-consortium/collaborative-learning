@@ -120,6 +120,9 @@ export const UIModel = types
       toggleNavTabContent(show: boolean) {
         self.navTabContentShown = show;
       },
+      toggleShowTeacherContent(show: boolean) {
+        self.showTeacherContent = show;
+      },
       setError(error: string|null) {
         self.error = error ? error.toString() : error;
       },
