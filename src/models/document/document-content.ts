@@ -348,8 +348,8 @@ export const DocumentContentModel = types
     addTileSnapshotInNewRow(snapshot: ToolTileSnapshotInType, options?: INewTileOptions): INewRowTile {
       return self.addTileInNewRow(ToolTileModel.create(snapshot), options);
     },
-    addTileInExistingRow(content: ToolContentUnionType, options: INewTileOptions): INewRowTile | undefined {
-      const tile = ToolTileModel.create({ content });
+    addTileSnapshotInExistingRow(snapshot: ToolTileSnapshotInType, options: INewTileOptions): INewRowTile | undefined {
+      const tile = ToolTileModel.create(snapshot);
       const o = options || {};
       if (o.rowIndex === undefined) {
         // by default, insert new tiles after last visible on screen
@@ -438,7 +438,7 @@ export const DocumentContentModel = types
             if (tile.rowHeight) {
               rowOptions.rowHeight = tile.rowHeight;
             }
-            result = self.addTileInExistingRow(content, rowOptions);
+            result = self.addTileSnapshotInExistingRow({ content }, rowOptions);
           }
           results.push(result);
         });
@@ -468,7 +468,7 @@ export const DocumentContentModel = types
               lastRowIndex = tile.rowIndex;
             }
             else {
-              result = self.addTileInExistingRow(content, rowOptions);
+              result = self.addTileSnapshotInExistingRow({ content }, rowOptions);
             }
           }
           results.push(result);
@@ -784,32 +784,59 @@ export interface IAuthoredTile {
 }
 
 export interface IAuthoredDocumentContent {
-  tiles: IAuthoredTile[];
+  tiles: Array<IAuthoredTile | IAuthoredTile[]>;
+}
+
+interface OriginalTileLayoutModel {
+  height?: number;
+}
+
+interface OriginalToolTileModel {
+  display?: DisplayUserType;
+  layout?: OriginalTileLayoutModel;
+  content: any;
+}
+type OriginalTilesSnapshot = Array<OriginalToolTileModel | OriginalToolTileModel[]>;
+
+function migrateTile(content: DocumentContentModelType, tile: OriginalToolTileModel) {
+  const { layout, ...newTile } = cloneDeep(tile);
+  const tileHeight = layout?.height;
+  const { isSectionHeader, sectionId } = newTile.content;
+  if (isSectionHeader && sectionId) {
+    content.addSectionHeaderRow(sectionId);
+  }
+  else {
+    const options = { rowIndex: content.rowCount, rowHeight: tileHeight };
+    content.addTileSnapshotInNewRow(newTile, options);
+  }
+}
+
+function migrateRow(content: DocumentContentModelType, tiles: OriginalToolTileModel[]) {
+  let insertRowIndex = content.rowCount;
+  tiles.forEach((tile, tileIndex) => {
+    const { layout, ...newTile } = cloneDeep(tile);
+    const tileHeight = layout?.height;
+    const options = { rowIndex: insertRowIndex, rowHeight: tileHeight };
+    if (tileIndex === 0) {
+      const newRowInfo = content.addTileSnapshotInNewRow(newTile, options);
+      const newRowIndex = content.getRowIndex(newRowInfo.rowId);
+      (newRowIndex >= 0) && (insertRowIndex = newRowIndex);
+    }
+    else {
+      content.addTileSnapshotInExistingRow(newTile, options);
+    }
+  });
 }
 
 function migrateSnapshot(snapshot: any): any {
-  interface OriginalTileLayoutModel {
-    height?: number;
-  }
-
-  interface OriginalToolTileModel {
-    display?: DisplayUserType;
-    layout?: OriginalTileLayoutModel;
-    content: any;
-  }
-
   const docContent = DocumentContentModel.create();
-  const tiles: OriginalToolTileModel[] = snapshot.tiles;
-  tiles.forEach(tile => {
-    const { layout, ...newTile } = cloneDeep(tile);
-    const tileHeight = layout?.height;
-    const { isSectionHeader, sectionId } = newTile.content;
-    if (isSectionHeader && sectionId) {
-      docContent.addSectionHeaderRow(sectionId);
+  const tilesOrRows: OriginalTilesSnapshot = snapshot.tiles;
+  tilesOrRows.forEach(tileOrRow => {
+    if (Array.isArray(tileOrRow)) {
+      migrateRow(docContent, tileOrRow);
     }
     else {
-      const options = { rowIndex: docContent.rowCount, rowHeight: tileHeight };
-      docContent.addTileSnapshotInNewRow(newTile, options);
+      migrateTile(docContent, tileOrRow);
     }
   });
   return getSnapshot(docContent);
