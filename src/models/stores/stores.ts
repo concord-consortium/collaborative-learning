@@ -113,6 +113,11 @@ export const setUnitAndProblem = async (stores: IStores, unitId: string | undefi
   }
 };
 
+export function isShowingTeacherContent(stores: IStores) {
+  const { ui: { showTeacherContent }, user: { isTeacher } } = stores;
+  return isTeacher && showTeacherContent;
+}
+
 export function isFeatureSupported(stores: IStores, feature: string, sectionId?: string) {
   const { unit, investigation, problem } = stores;
   const section = sectionId && problem.getSectionById(sectionId);

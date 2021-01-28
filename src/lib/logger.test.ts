@@ -8,7 +8,7 @@ import { InvestigationModel } from "../models/curriculum/investigation";
 import { IStores, createStores } from "../models/stores/stores";
 import { WorkspaceModel, ProblemWorkspace, WorkspaceModelType } from "../models/stores/workspace";
 import { defaultTextContent } from "../models/tools/text/text-content";
-import { createToolTileModelFromContent, IDragTileItem } from "../models/tools/tool-tile";
+import { IDragTileItem, ToolTileModel } from "../models/tools/tool-tile";
 import { createSingleTileContent } from "../utilities/test-utils";
 import { UserModel } from "../models/stores/user";
 
@@ -63,7 +63,7 @@ describe("logger", () => {
     });
 
     it("can log tile creation", async (done) => {
-      const tile = createToolTileModelFromContent(defaultTextContent());
+      const tile = ToolTileModel.create({ content: defaultTextContent() });
 
       mock.post(/.*/, (req, res) => {
         const request = JSON.parse(req.body());

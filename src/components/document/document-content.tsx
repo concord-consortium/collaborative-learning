@@ -126,7 +126,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       if (ref) {
         // eslint-disable-next-line react/no-find-dom-node
         const rowNode = findDOMNode(ref);
-        if (isElementInViewport(rowNode as Element)) {
+        if (rowNode && isElementInViewport(rowNode as Element)) {
           visibleRowIds.push(ref.props.model.id);
         }
       }

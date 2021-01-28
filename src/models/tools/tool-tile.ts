@@ -1,9 +1,9 @@
-import { types, getSnapshot, Instance, SnapshotOut } from "mobx-state-tree";
-import { kPlaceholderToolID } from "./placeholder/placeholder-content";
-import { findMetadata, ToolContentUnion, ToolContentUnionType } from "./tool-types";
-import { v4 as uuid } from "uuid";
 import { cloneDeep } from "lodash";
-import { Optional } from "utility-types";
+import { getSnapshot, Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree";
+import { kPlaceholderToolID } from "./placeholder/placeholder-content";
+import { findMetadata, ToolContentUnion } from "./tool-types";
+import { DisplayUserTypeEnum } from "../stores/user-types";
+import { uniqueId } from "../../utilities/js-utils";
 
 // generally negotiated with app, e.g. single column width for table
 export const kDefaultMinWidth = 60;
@@ -22,20 +22,17 @@ export interface IDragTiles {
   items: IDragTileItem[];
 }
 
-export function createToolTileModelFromContent(content: ToolContentUnionType) {
-  return ToolTileModel.create({ content });
-}
-
 export function cloneTileSnapshotWithoutId(tile: ToolTileModelType) {
-  const copy: Optional<ToolTileSnapshotOutType, "id"> = cloneDeep(getSnapshot(tile));
-  delete copy.id;
+  const { id, display, ...copy } = cloneDeep(getSnapshot(tile));
   return copy;
 }
 
 export const ToolTileModel = types
   .model("ToolTile", {
     // if not provided, will be generated
-    id: types.optional(types.identifier, () => uuid()),
+    id: types.optional(types.identifier, () => uniqueId()),
+    // whether to restrict display to certain users
+    display: DisplayUserTypeEnum,
     // e.g. "GeometryContentModel", "ImageContentModel", "TableContentModel", "TextContentModel"
     content: ToolContentUnion
   })
@@ -79,4 +76,5 @@ export const ToolTileModel = types
   }));
 
 export type ToolTileModelType = Instance<typeof ToolTileModel>;
+export type ToolTileSnapshotInType = SnapshotIn<typeof ToolTileModel>;
 export type ToolTileSnapshotOutType = SnapshotOut<typeof ToolTileModel>;
