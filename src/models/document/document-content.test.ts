@@ -244,7 +244,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
 
   it("will remove placeholder tiles when adding a new tile in an interior section", () => {
     // [Header:A, Placeholder, Header:B, Text]
-    content.addTileInNewRow(defaultTextContent("foo"), { rowIndex: 1 });
+    content.addTileContentInNewRow(defaultTextContent("foo"), { rowIndex: 1 });
     // [Header:A, Text, Header:B, Text]
     expect(content.rowCount).toBe(4);
     expect(isContentSection("A")).toBe(true);

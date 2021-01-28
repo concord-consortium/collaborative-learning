@@ -53,10 +53,6 @@ export const TileRowModel = types
     },
     indexOfTile(tileId: string) {
       return self.tiles.findIndex(tileRef => tileRef.tileId === tileId);
-    },
-    renderWidth(tileId: string) {
-      // for now, tiles divide row evenly
-      return 100 / (self.tiles.length || 1);
     }
   }))
   .actions(self => ({

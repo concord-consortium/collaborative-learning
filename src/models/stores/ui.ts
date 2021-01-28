@@ -36,6 +36,7 @@ export const UIModel = types
     selectedTileIds: types.array(types.string),
     showDemo: false,
     showDemoCreator: false,
+    showTeacherContent: true,
     dialog: types.maybe(UIDialogModel),
     problemWorkspace: WorkspaceModel,
     learningLogWorkspace: WorkspaceModel,
