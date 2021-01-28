@@ -95,7 +95,7 @@ describe('Test nav panel tabs', function () {
         cy.getCanvasItemTitle('learning-log').contains(this.title).should('not.exist');
         cy.getCanvasItemTitle('learning-log').should('have.length', 1);
       });
-      it('verify user starter learning log canvas exists', function () { 
+      it('verify user starter learning log canvas exists', function () {
         cy.getCanvasItemTitle('learning-log').contains("My First Learning Log").should('be.visible');
       });
       it('verify open of learning log canvas into main workspace', function () {
@@ -134,7 +134,7 @@ describe('Test nav panel tabs', function () {
         cy.openDocumentThumbnail('problem-workspaces', this.title);
       });
       it('will verify that published canvas does not have Edit button', function () {
-        cy.get('.edit-button').should("not.be.visible");
+        cy.get('.edit-button').should("not.exist");
       });
     });
   });
