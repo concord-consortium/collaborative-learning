@@ -1190,7 +1190,135 @@
                       "display": "teacher",
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>The fixed $5 donation represents the amount of money she raises by walking 0 kilometers. In the table, it is the amount of the donation when the distance is 0. (0,5) is the point where Alana’s graph intersects the y-axis; it is the point on the line for her plan with an x-coordinate of 0. In the equation, 5 is the term that is added to 0.50d where d represents the distance walked.\n\nThe rate of change for Alana is $0.50 per kilometer. In the table, this is shown by the amount that the donation increases for every 1 kilometer or the amount each row of the y-variable increases for every increase of 1 km. The graph shows the rate of change as how much the line rises for every kilometer. In the equation, we see the rate of change in the coefficient, or the amount that is multiplied by the x-variable.</code>"
+                      "text": "<code>The fixed $5 donation represents the amount of money she raises by walking 0 kilometers. In the table, it is the amount of the donation when the distance is 0. (0,5) is the point where Alana’s graph intersects the y-axis; it is the point on the line for her plan with an x-coordinate of 0. In the equation, 5 is the term that is added to 0.50d where d represents the distance walked.</code>"
+                    }
+                  },
+                  {
+                    "layout": {
+                      "height": 330
+                    },
+                    "content": {
+                      "display": "teacher",
+                      "type": "Geometry",
+                      "board": {
+                        "properties": {
+                          "axisNames": ["t, D"],
+                          "axisLabels": ["Time (seconds)", "Distance (meters)"],
+                          "axisMin": [-1, -2],
+                          "axisRange": [12, 15]
+                        }
+                      },
+                      "objects": [
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [0, 10],
+                              "properties": {
+                                "name": "Leanne's fixed donation = y-intercept"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [10, 10],
+                              "properties": {
+                                "name": ""
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [0, 0]
+                            },
+                            {
+                              "type": "point",
+                              "parents": [6, 12],
+                              "properties": {
+                                "name": "Gilberto"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [0, 5]
+                            },
+                            {
+                              "type": "point",
+                              "parents": [16, 10],
+                              "properties": {
+                                "name": "Alana"
+                              }
+                            }
+                          ]
+                        }                        
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Table",
+                      "columns": [
+                          {
+                            "name": "Distance (km)",
+                            "type": "string",
+                            "values": ["0*", 1, 2, 3, 4, 5, 6]
+                          },
+                          {
+                            "name": "Alana's Donation ($)",
+                            "type": "number",
+                            "values": ["5*", 5.50, 6, 6.50, 7, 7.50, 8]
+                          }
+                        ]
+                    },
+                    "layout": {
+                    "height": 210
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>\u00a0\u00a0\u00a0 <em>m = 5 + 0.50 d</em>, where 5 is the fixed donation that is the 'amount added into' the equation. \n\nThe rate of change for Alana is $0.50 per kilometer. In the table, this is shown by the amount that the donation increases for every 1 kilometer or the amount each row of the y-variable increases for every increase of 1 km. The graph shows the rate of change as how much the line rises for every kilometer. In the equation, we see the rate of change in the coefficient, or the amount that is multiplied by the x-variable.</code>"
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Table",
+                      "columns": [
+                          {
+                            "name": "Distance (km)",
+                            "type": "string",
+                            "values": ["0*", 1, 2, 3, 4, 5, 6]
+                          },
+                          {
+                            "name": "Alana's Donation ($)",
+                            "type": "number",
+                            "values": [5, 5.50, 6, 6.50, 7, 7.50, 8]
+                          }
+                        ]
+                    },
+                    "layout": {
+                    "height": 210
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>\u00a0\u00a0\u00a0 <em>m = 5 + 0.50 d</em>, where 0.50 is the rate of change which is the multiplier or coefficient of the variable d. \n\nThe rate of change for Alana is $0.50 per kilometer. In the table, this is shown by the amount that the donation increases for every 1 kilometer or the amount each row of the y-variable increases for every increase of 1 km. The graph shows the rate of change as how much the line rises for every kilometer. In the equation, we see the rate of change in the coefficient, or the amount that is multiplied by the x-variable.</code>"
                     }
                   },
                   {
@@ -1328,7 +1456,109 @@
                       "display": "teacher",
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>Table: Values from the table are proportional. You can use the values to write proportions or “for every” ratio statements. For example, in the table for Gilberto:\n\nEquation: The amount added into the equation is zero. Or the y-intercept is zero. For example, in the equation for Gilberto:\n\nGraph: The graph of a proportional relationship is passes through the point (0,0). For example, in the graph for Gilberto:</code>"
+                      "text": "<code>Table: Values from the table are proportional. You can use the values to write proportions or “for every” ratio statements. For example, in the table for Gilberto:</code>"
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Table",
+                      "columns": [
+                          {
+                            "name": "Distance (km)",
+                            "type": "number",
+                            "values": [0, 1, 2, 3, 4, 5, 6]
+                          },
+                          {
+                            "name": "Gilberto's Donation ($)",
+                            "type": "number",
+                            "values": [0, 2, 4, 6, 8, 10, 12]
+                          }
+                        ]
+                    },
+                    "layout": {
+                    "height": 210
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>Equation: The amount added into the equation is zero. Or the y-intercept is zero. For example, in the equation for Gilberto:\n\n \u00a0\u00a0\u00a0<em>m = 2d</em> or <em>m = 2d + 0</em>\n\nGraph: The graph of a proportional relationship is passes through the point (0,0). For example, in the graph for Gilberto:</code>"
+                    }
+                  },
+                                    {
+                    "layout": {
+                      "height": 330
+                    },
+                    "content": {
+                      "display": "teacher",
+                      "type": "Geometry",
+                      "board": {
+                        "properties": {
+                          "axisNames": ["t, D"],
+                          "axisLabels": ["Time (seconds)", "Distance (meters)"],
+                          "axisMin": [-1, -2],
+                          "axisRange": [12, 15]
+                        }
+                      },
+                      "objects": [
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [0, 10],
+                              "properties": {
+                                "name": "Leanne"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [10, 10],
+                              "properties": {
+                                "name": ""
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [0, 0],
+                              "properties": {
+                                "name": "proportional line passes through (0, 0)"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [6, 12],
+                              "properties": {
+                                "name": "Gilberto"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [0, 5]
+                            },
+                            {
+                              "type": "point",
+                              "parents": [16, 10],
+                              "properties": {
+                                "name": "Alana"
+                              }
+                            }
+                          ]
+                        }                        
+                      ]
                     }
                   }
                 ]
@@ -1656,12 +1886,22 @@
             {
               "type": "nowWhatDoYouKnow",
               "content": {
-                "tiles": [{
-                  "content": {
-                    "type": "Text",
-                    "text": "Compare the patterns of change for the linear relationships in this Problem to those in previous Problems in this Investigation. Do any of these represent proportional situations? Explain."
-                  }
-                }]
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Compare the patterns of change for the linear relationships in this Problem to those in previous Problems in this Investigation. Do any of these represent proportional situations? Explain."
+                    }
+                  },
+                  {
+                        "content": {
+                          "display": "teacher",
+                          "type": "Text",
+                          "format": "html",
+                          "text": "<code> Both of the relationships in this Problem have decreasing rates of changes. As the independent variable increases, the dependent variable decreases. This results in the graph of a line that decreases from left to right and an equation for which the independent variable has a negative coefficient. Neither situation is proportional since their graphs do not go through the origin nor can the equation that represents them be written in the form y = ax. And the values from the relationship cannot be written as a “for every” statement or to form proportions.</code>"
+                        }
+                    }
+                  ]
               },
               "supports": []
             }
