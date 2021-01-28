@@ -1,8 +1,16 @@
-import { DocumentContentModel, DocumentContentModelType, cloneContentWithUniqueIds, DocumentContentSnapshotType
-        } from "./document-content";
+import {
+  DocumentContentModel, DocumentContentModelType, cloneContentWithUniqueIds, DocumentContentSnapshotType
+} from "./document-content";
 import { IDropRowInfo } from "../../models/document/document-content";
 import { cloneTileSnapshotWithoutId, IDragTileItem } from "../../models/tools/tool-tile";
 import { defaultTextContent } from "../tools/text/text-content";
+
+// mock uniqueId so we can recognize auto-generated IDs
+const { uniqueId, safeJsonParse } = jest.requireActual("../../utilities/js-utils");
+jest.mock("../../utilities/js-utils", () => ({
+  uniqueId: () => `testid-${uniqueId()}`,
+  safeJsonParse: (json: string) => safeJsonParse(json)
+}));
 
 describe("DocumentContentModel", () => {
   let documentContent: DocumentContentModelType;
@@ -695,7 +703,7 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
     const rowLayout: any = {};
     documentContent.rowOrder.forEach(rowId => {
       const row = documentContent.getRow(rowId);
-      const key = rowId.indexOf("-") !== -1 ? "NEW_ROW" : rowId;
+      const key = rowId.indexOf("testid-") !== -1 ? "NEW_ROW" : rowId;
       rowLayout[key] = [];
       row?.tiles.forEach((rowTile, index) => {
         const tileType = documentContent.getTile(rowTile.tileId)!.content.type.toUpperCase();
