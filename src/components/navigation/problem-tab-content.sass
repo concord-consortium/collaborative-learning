@@ -28,29 +28,35 @@
       &:active, &.selected
         background-color: $problem-orange-light-3
         font-weight: bold
-  .solutions-separator
-    width: 1px
-    height: 24px
-    margin: 0 3px
-    background-color: $problem-orange-light-2
-    border: 0.5px solid $problem-orange-light-2
-  .solutions-button.toggle-control
-    flex: 0 0 auto
-    margin: 0 4px
-    .track
-      &.toggle-on
-        background-color: $problem-orange
-    .ball
-      background-color: $problem-orange-light-6
-      &:hover
-        background-color: $problem-orange-light-4
-      &:active
-        background-color: $problem-orange
-      &.toggle-on
-        background-color: $problem-orange
-      &:hover.toggle-on
-        background-color: $problem-orange-light-4
-      &:active.toggle-on
+  .solutions-switch
+    display: flex
+    align-items: center
+    width: 116px
+    height: 100%
+    border-top: 2px solid white
+    .solutions-separator
+      width: 1px
+      height: 24px
+      margin: 0 3px
+      background-color: $problem-orange-light-2
+      border: 0.5px solid $problem-orange-light-2
+    .solutions-button.toggle-control
+      flex: 0 0 auto
+      margin: 0 4px
+      .track
+        &.toggle-on
+          background-color: $problem-orange
+      .ball
         background-color: $problem-orange-light-6
-  .solutions-label
-    margin: 0 7px 0 3px
+        &:hover
+          background-color: $problem-orange-light-4
+        &:active
+          background-color: $problem-orange
+        &.toggle-on
+          background-color: $problem-orange
+        &:hover.toggle-on
+          background-color: $problem-orange-light-4
+        &:active.toggle-on
+          background-color: $problem-orange-light-6
+    .solutions-label
+      margin: 0 7px 0 3px

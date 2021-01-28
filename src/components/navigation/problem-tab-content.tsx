@@ -61,7 +61,7 @@ export const ProblemTabContent: React.FC<IProps> = observer((props) => {
 const SolutionsButton = ({ onClick, isToggled }: { onClick: () => void, isToggled: boolean }) => {
   const classes = classNames("solutions-button", { toggled: isToggled });
   return (
-    <>
+    <div className="solutions-switch">
       {<div className="solutions-separator" />}
       <ToggleControl className={classes} dataTest="solutions-button"
                       initialValue={isToggled} onChange={onClick}
@@ -69,6 +69,6 @@ const SolutionsButton = ({ onClick, isToggled }: { onClick: () => void, isToggle
                                   ? "Showing solutions: click to hide"
                                   : "Hiding solutions: click to show"} />
       <div className="solutions-label">Solutions</div>
-    </>
+    </div>
   );
 };
