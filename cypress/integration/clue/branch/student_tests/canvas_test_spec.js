@@ -69,6 +69,7 @@ context('Test Canvas', function () {
         clueCanvas.addTile('table');
         clueCanvas.addTile('text');
         textToolTile.enterText('this is ' + studentWorkspace);
+        textToolTile.getTextTile().should('be.visible').and('contain', studentWorkspace);
       });
       it('verify copy of personal workspace', function () {
         canvas.copyDocument(copyTitle);
@@ -162,7 +163,7 @@ context('Test Canvas', function () {
         //1-up view has 4-up button visible and 1-up canvas
         clueCanvas.getFourUpViewToggle().should('be.visible');
         canvas.getSingleCanvas().should('be.visible');
-        clueCanvas.getFourUpView().should('not.be.visible');
+        clueCanvas.getFourUpView().should('not.exist');
         clueCanvas.openFourUpView();
         //4-up view is visible and 1-up button is visible
         clueCanvas.getFourToOneUpViewToggle().should('be.visible');
@@ -176,7 +177,7 @@ context('Test Canvas', function () {
         clueCanvas.openOneUpViewFromFourUp();
         canvas.getSingleCanvas().should('be.visible');
         clueCanvas.getFourUpViewToggle().should('be.visible');
-        clueCanvas.getFourUpView().should('not.be.visible');
+        clueCanvas.getFourUpView().should('not.exist');
       });
 
       it('verify share button', function () {

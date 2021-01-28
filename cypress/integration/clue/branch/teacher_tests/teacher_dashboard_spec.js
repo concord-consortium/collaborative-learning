@@ -40,7 +40,7 @@ const baseUrl = `${Cypress.config("baseUrl")}`;
                     dashboard.getProblemDropdown().click({ force: true });
                     dashboard.getProblemList().should('not.have.class','show');
                     // Check class list UI and visibility
-                    dashboard.getClassList().should('not.have.class','show');
+                    dashboard.getClassList().should('not.exist');
                     dashboard.getClassDropdown().should('contain',clueData.teacherName);
                     // dashboard.getClassDropdown().should('contain',tempClass.className);
                     dashboard.getClassDropdown().should('be.visible').click({ force: true });
@@ -93,7 +93,7 @@ const baseUrl = `${Cypress.config("baseUrl")}`;
         describe('Header element functionality', () => {
             it('verify dashboard/workspace switch changes workspace view', () => {
                 dashboard.getViewToggle('Dashboard').should('be.visible').and('have.class', 'selected');
-                clueCanvas.getSingleWorkspace().should('not.be.visible');
+                clueCanvas.getSingleWorkspace().should('not.exist');
                 dashboard.getViewToggle('Workspace').should('be.visible').and('not.have.class', 'selected');
                 dashboard.getViewToggle('Workspace').click({ force: true });
                 dashboard.getViewToggle("Workspace").should('have.class', 'selected');
