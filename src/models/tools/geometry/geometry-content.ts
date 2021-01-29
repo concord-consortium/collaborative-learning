@@ -1162,9 +1162,9 @@ export const GeometryContentModel = types
       const pointIds: string[] = [];
       const positions: JXGUnsafeCoordPair[] = [];
       const caseIds = castArray(change.ids);
-      const propsArray = castArray(change.action === "create"
-                                    ? (change.props as ICreateRowsProperties)?.rows
-                                    : change.props);
+      const propsArray: IRowProperties[] = change.action === "create"
+                                            ? (change.props as ICreateRowsProperties)?.rows
+                                            : castArray(change.props as any);
       const xAttrId = dataSet.attributes.length > 0 ? dataSet.attributes[0].id : undefined;
       caseIds.forEach((caseId, caseIndex) => {
         const tableProps = (propsArray[caseIndex] || propsArray[0]) as IRowProperties;
@@ -1212,7 +1212,7 @@ export const GeometryContentModel = types
         case "update": {
           const ids = castArray(change.ids);
           const attrIdsWithExpr: string[] = [];
-          const changeProps = castArray(change.props) as IColumnProperties[];
+          const changeProps: IColumnProperties[] = castArray(change.props as any);
           ids.forEach((attrId, index) => {
             const props = changeProps[index] || changeProps[0];
             // update column name => update axis labels

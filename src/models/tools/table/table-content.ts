@@ -1,6 +1,6 @@
 import { Parser } from "expr-eval";
 import { castArray, each } from "lodash";
-import { types, Instance, SnapshotOut, IAnyStateTreeNode } from "mobx-state-tree";
+import { types, IAnyStateTreeNode, Instance, SnapshotIn, SnapshotOut } from "mobx-state-tree";
 import { getRowLabel, kSerializedXKey, canonicalizeValue, isLinkableValue } from "./table-model-types";
 import { registerToolContentInfo } from "../tool-content-info";
 import { addLinkedTable } from "../table-links";
@@ -25,7 +25,7 @@ export function defaultTableContent() {
                               { name: "x" },
                               { name: "y" }
                             ]
-                          } as any);
+                          } as SnapshotIn<typeof TableContentModel>);
 }
 
 export function getTableContent(target: IAnyStateTreeNode, tileId: string): TableContentModelType | undefined {
@@ -51,6 +51,10 @@ export interface IColumnProperties {
   rawExpression?: string;
 }
 
+export interface IColumnCreationProperties extends IColumnProperties{
+  name: string;
+}
+
 export interface ILinkProperties {
   id: string;
   tileIds: string[];
@@ -68,7 +72,7 @@ export function getRowLabelFromLinkProps(links: ITableLinkProperties, rowId: str
 }
 
 export interface ICreateColumnsProperties {
-  columns?: IColumnProperties[];
+  columns?: IColumnCreationProperties[];
 }
 
 export type IUpdateColumnsProperties = IColumnProperties | IColumnProperties[];
@@ -449,7 +453,7 @@ export const TableContentModel = types
         // fallthrough
         case "columns": {
           const props = change?.props as ICreateColumnsProperties;
-          props?.columns?.forEach((col: any, index: number) => {
+          props?.columns?.forEach((col, index) => {
             const id = change.ids?.[index] || uniqueId();
             dataSet.addAttributeWithID({ id, ...col });
           });
@@ -488,24 +492,25 @@ export const TableContentModel = types
         case "columns": {
           const props = change.props as IUpdateColumnsProperties;
           const colProps = castArray(props);
-          colProps?.forEach((col: any, colIndex) => {
+          colProps?.forEach((col, colIndex) => {
             const colId = ids[colIndex];
             if (dataSet.attrFromID(colId)) {
               each(col, (value, prop) => {
+                const _value = value as string;
                 switch (prop) {
                   case "name": {
-                    dataSet.setAttributeName(colId, value);
+                    dataSet.setAttributeName(colId, _value);
                     if (colIndex === 0) {
                       self.metadata.clearRawExpressions(kSerializedXKey);
                     }
                     break;
                   }
                   case "expression":
-                    self.metadata.setExpression(colId, value);
+                    self.metadata.setExpression(colId, _value);
                     self.updateDatasetByExpressions(dataSet);
                     break;
                   case "rawExpression":
-                    self.metadata.setRawExpression(colId, value);
+                    self.metadata.setRawExpression(colId, _value);
                     break;
                 }
               });
@@ -519,9 +524,9 @@ export const TableContentModel = types
           break;
         }
         case "rows": {
-          const rowProps = change?.props && castArray(change.props);
+          const rowProps: IRowProperties[] | undefined = change?.props && castArray(change.props as any);
           if (rowProps) {
-            rowProps.forEach((row: any, rowIndex) => {
+            rowProps.forEach((row, rowIndex) => {
               dataSet.setCanonicalCaseValues([{ __id__: ids[rowIndex], ...row }]);
             });
             self.updateDatasetByExpressions(dataSet);
