@@ -33,6 +33,24 @@ export function getTableContent(target: IAnyStateTreeNode, tileId: string): Tabl
   return content && content as TableContentModelType;
 }
 
+export function getAxisLabelsFromDataSet(dataSet: IDataSet): [string | undefined, string | undefined] {
+  // label for x axis
+  const xAttr = dataSet.attributes.length > 0 ? dataSet.attributes[0] : undefined;
+  const xLabel = xAttr?.name;
+
+  // label for y axis
+  let yLabel = undefined;
+  for (let yIndex = 1; yIndex < dataSet.attributes.length; ++yIndex) {
+    // concatenate column names for y axis label
+    const yAttr = dataSet.attributes[yIndex];
+    if (yAttr.name && (yAttr.name !== kLabelAttrName)) {
+      if (!yLabel) yLabel = yAttr.name;
+      else yLabel += `, ${yAttr.name}`;
+    }
+  }
+  return [xLabel, yLabel];
+}
+
 export interface ITransferCase {
   id: string;
   label?: string;
@@ -236,21 +254,10 @@ export const TableContentModel = types
     getClientLinks(linkId: string, dataSet: IDataSet): ITableLinkProperties {
       const labels: IRowLabel[] = [];
 
-      // add label for x axis
-      const xAttr = dataSet.attributes.length > 0 ? dataSet.attributes[0] : undefined;
-      xAttr && labels.push({ id: "xAxis", label: xAttr.name });
-
-      // add label for y axis
-      let yLabel = "";
-      for (let yIndex = 1; yIndex < dataSet.attributes.length; ++yIndex) {
-        // concatenate column names for y axis label
-        const yAttr = dataSet.attributes[yIndex];
-        if (yAttr.name) {
-          if (!yLabel) yLabel = yAttr.name;
-          else yLabel += `, ${yAttr.name}`;
-        }
-      }
-      yLabel && labels.push({ id: "yAxis", label: yLabel });
+      // add axis labels
+      const [xAxisLabel, yAxisLabel] = getAxisLabelsFromDataSet(dataSet);
+      xAxisLabel && labels.push({ id: "xAxis", label: xAxisLabel });
+      yAxisLabel && labels.push({ id: "yAxis", label: yAxisLabel });
 
       // add label for each case, indexed by case ID
       labels.push(...dataSet.cases.map((aCase, i) => ({ id: aCase.__id__, label: getRowLabel(i) })));
