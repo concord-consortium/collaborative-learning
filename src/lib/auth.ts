@@ -1,15 +1,16 @@
+import initials from "initials";
 import jwt from "jsonwebtoken";
 import superagent from "superagent";
 import { AppMode } from "../models/stores/stores";
 import { QueryParams, DefaultUrlParams } from "../utilities/url-params";
 import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
 import { AppConfigModelType } from "../models/stores/app-config-model";
-import { IPortalClassOffering, UserType } from "../models/stores/user";
+import { IPortalClassOffering } from "../models/stores/user";
+import { UserType } from "../models/stores/user-types";
 import { getErrorMessage } from "../utilities/super-agent-helpers";
 import { getPortalOfferings, getPortalClassOfferings,  getProblemIdForAuthenticatedUser } from "./portal-api";
 import { PortalJWT, PortalFirebaseJWT } from "./portal-types";
 import { Logger, LogEventName } from "../lib/logger";
-import initials from "initials";
 
 export const PORTAL_JWT_URL_SUFFIX = "api/v1/jwt/portal";
 export const FIREBASE_JWT_URL_SUFFIX = "api/v1/jwt/firebase";

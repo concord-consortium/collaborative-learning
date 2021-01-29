@@ -194,7 +194,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     const ToolComponent = kToolComponentMap[model.content.type];
     const isPlaceholderTile = ToolComponent === PlaceholderToolComponent;
     const isTileSelected = ui.isSelectedTile(model);
-    const classes = classNames("tool-tile", {
+    const classes = classNames("tool-tile", model.display, {
                       placeholder: isPlaceholderTile,
                       readonly: readOnly,
                       hovered: this.state.hoverTile,

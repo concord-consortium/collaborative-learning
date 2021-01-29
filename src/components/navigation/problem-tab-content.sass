@@ -4,11 +4,16 @@
   border-color: $problem-orange-light-3
   border-width: 0 $tab-section-border-width $tab-section-border-width 0
   border-style: solid
-  .tab-list
+  .tab-header-row
+    display: flex
+    flex-direction: row
+    align-items: center
     background-color: $problem-orange-light-7
+    height: $nav-tab-height
+  .tab-list
+    flex: 1 1 auto
     margin: 0
     padding: 0
-    height: $nav-tab-height
     display: flex
     .prob-tab
       flex-grow: 1
@@ -23,3 +28,35 @@
       &:active, &.selected
         background-color: $problem-orange-light-3
         font-weight: bold
+  .solutions-switch
+    display: flex
+    align-items: center
+    width: 116px
+    height: 100%
+    border-top: 2px solid white
+    .solutions-separator
+      width: 1px
+      height: 24px
+      margin: 0 3px
+      background-color: $problem-orange-light-2
+      border: 0.5px solid $problem-orange-light-2
+    .solutions-button.toggle-control
+      flex: 0 0 auto
+      margin: 0 4px
+      .track
+        &.toggle-on
+          background-color: $problem-orange
+      .ball
+        background-color: $problem-orange-light-6
+        &:hover
+          background-color: $problem-orange-light-4
+        &:active
+          background-color: $problem-orange
+        &.toggle-on
+          background-color: $problem-orange
+        &:hover.toggle-on
+          background-color: $problem-orange-light-4
+        &:active.toggle-on
+          background-color: $problem-orange-light-6
+    .solutions-label
+      margin: 0 7px 0 3px
