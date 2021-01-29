@@ -12,10 +12,10 @@ import "./problem-tab-content.sass";
 
 interface IProps {
   sections: SectionModelType[];
+  showSolutionsSwitch: boolean;
 }
 
-export const ProblemTabContent: React.FC<IProps> = observer((props) => {
-  const { sections } = props;
+export const ProblemTabContent: React.FC<IProps> = observer(({ sections, showSolutionsSwitch}: IProps) => {
   const { isTeacher } = useUserStore();
   const { showTeacherContent, toggleShowTeacherContent } = useUIStore();
 
@@ -44,7 +44,7 @@ export const ProblemTabContent: React.FC<IProps> = observer((props) => {
             );
           })}
         </TabList>
-        {isTeacher &&
+        {isTeacher && showSolutionsSwitch &&
           <SolutionsButton onClick={handleToggleSolutions} isToggled={showTeacherContent} />}
       </div>
       {sections.map((section) => {

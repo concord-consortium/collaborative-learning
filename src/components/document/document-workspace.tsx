@@ -36,10 +36,10 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   public render() {
-    const { appConfig : { navTabs: { tabSpecs } }, user } = this.stores;
+    const { appConfig : { navTabs: { tabSpecs } }, teacherGuide, user: { isTeacher } } = this.stores;
     const studentTabs = tabSpecs.filter((t) => !t.teacherOnly);
-    const isTeacher = user.isTeacher;
-    const tabsToDisplay = isTeacher ? tabSpecs : studentTabs;
+    const teacherTabs = tabSpecs.filter(t => (t.tab !== "teacher-guide") || teacherGuide);
+    const tabsToDisplay = isTeacher ? teacherTabs : studentTabs;
     // NOTE: the drag handlers are in three different divs because we cannot overlay
     // the renderDocuments() div otherwise the Cypress tests will fail because none
     // of the html elements in the documents will be visible to it.  The first div acts
