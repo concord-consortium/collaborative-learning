@@ -79,7 +79,7 @@ export function getUnitJson(unitId: string | undefined, appConfig: AppConfigMode
           });
 }
 
-export function getGuideJson(unitId: string | undefined, appConfig: AppConfigModelType ) {
+export function getGuideJson(unitId: string | undefined, appConfig: AppConfigModelType) {
   const unitSpec = getUnitSpec(unitId, appConfig);
   const guideUrl = unitSpec?.guide;
   if (!guideUrl) return;
