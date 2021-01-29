@@ -5,6 +5,12 @@ import { ToolButtonModel } from "../tools/tool-types";
 import { ENavTab, NavTabModel, NavTabSpec } from "../view/nav-tabs";
 import { SettingsMstType } from "./settings";
 
+const UnitSpecModel = types
+  .model("UnitSpec", {
+    content: types.string,
+    guide: ""
+  });
+
 const DocumentSpecModel = types
   .model("DocumentSpec", {
     documentType: types.string,
@@ -46,7 +52,7 @@ export const AppConfigModel = types
     appName: "",
     pageTitle: "",
     demoProblemTitle: "",
-    units: types.map(types.string),
+    units: types.map(UnitSpecModel),
     unitCodeMap: types.map(types.string),
     defaultProblemOrdinal: "",
     defaultUnit: "",
@@ -75,6 +81,10 @@ export const AppConfigModel = types
     settings: types.maybe(SettingsMstType)
   })
   .views(self => ({
+    getUnit(unitId: string) {
+      const unitCode = self.unitCodeMap.get(unitId) || unitId;
+      return self.units.get(unitCode);
+    },
     get defaultDocumentContent(): DocumentContentModelType | undefined {
       return cloneContentWithUniqueIds(self.defaultDocumentTemplate);
     },
