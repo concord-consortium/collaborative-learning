@@ -11,7 +11,7 @@ import "./drawing-tool.sass";
 type IProps = IToolTileProps;
 
 const DrawingToolComponent: React.FC<IProps> = (props) => {
-  const { documentContent, toolTile, model, readOnly, onRegisterToolApi, onUnregisterToolApi } = props;
+  const { documentContent, toolTile, model, readOnly, scale, onRegisterToolApi, onUnregisterToolApi } = props;
 
   useEffect(() => {
     if (!readOnly) {
@@ -26,6 +26,7 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
       <ToolbarView model={model}
                   documentContent={documentContent}
                   toolTile={toolTile}
+                  scale={scale}
                   {...toolbarProps} />
       <DrawingLayerView {...props} />
     </div>

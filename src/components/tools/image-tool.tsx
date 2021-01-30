@@ -131,7 +131,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { documentContent, toolTile, readOnly } = this.props;
+    const { documentContent, toolTile, readOnly, scale } = this.props;
     const { isLoading, imageEntry } = this.state;
     const showEmptyImagePrompt = !this.getContent().hasValidImage;
 
@@ -157,6 +157,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
             onUnregisterToolApi={() => this.toolbarToolApi = undefined}
             documentContent={documentContent}
             toolTile={toolTile}
+            scale={scale}
             onIsEnabled={this.handleIsEnabled}
             onUploadImageFile={this.handleUploadImageFile}
           />

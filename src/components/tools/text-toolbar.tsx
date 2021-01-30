@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { useFloatingToolbarLocation } from "./hooks/use-floating-toolbar-location";
+import { IFloatingToolbarProps, useFloatingToolbarLocation } from "./hooks/use-floating-toolbar-location";
 import { TextToolbarButton } from "./text-toolbar-button";
 import { IRegisterToolApiProps } from "./tool-tile";
 import { isMac } from "../../utilities/browser";
@@ -12,13 +12,10 @@ interface IButtonDef {
   toolTip: string;   // Text for the button's tool-tip.
 }
 
-interface IProps extends IRegisterToolApiProps {
-  documentContent?: HTMLElement | null;
-  toolTile?: HTMLElement | null;
+interface IProps extends IFloatingToolbarProps, IRegisterToolApiProps {
   selectedButtons: string[];
   onButtonClick: (buttonName: string, editor: any, event: React.MouseEvent) => void;
   editor: any;
-  enabled: boolean;
 }
 
 const kShortcutPrefix = isMac() ? "Cmd-" : "Ctrl-";
@@ -38,7 +35,8 @@ const handleMouseDown = (event: React.MouseEvent) => {
 };
 
 export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
-  const { documentContent, enabled, editor, selectedButtons, onButtonClick, ...others } = props;
+  const { documentContent, editor, selectedButtons, onIsEnabled, onButtonClick, ...others } = props;
+  const enabled = onIsEnabled();
   const toolbarLocation = useFloatingToolbarLocation({
                             documentContent,
                             toolbarHeight: 29,

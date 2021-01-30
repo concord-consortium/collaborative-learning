@@ -58,6 +58,9 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
         this.mutationObserver = new MutationObserver(this.handleRowElementsChanged);
         this.mutationObserver.observe(this.domElement, { childList: true });
       }
+      // We pass the domElement to our children, but it's undefined during the first render,
+      // so we force an update to make sure we draw at least once after we have our domElement.
+      this.forceUpdate();
     }
   }
 
