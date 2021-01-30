@@ -24,6 +24,7 @@ export interface TRow extends Record<string, any> {
 }
 
 export interface TColumnAppData {
+  readOnly?: boolean;
   gridContext: IGridContext;
   editableName: boolean;
   isEditing: boolean;
