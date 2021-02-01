@@ -264,6 +264,16 @@ export const TableContentModel = types
 
       return { id: linkId, tileIds: [self.metadata.id], labels };
     },
+    getLinkedChange(linkId: string) {
+      let parsedChange: ITableChange | undefined;
+      const foundIndex = self.changes.findIndex(changeJson => {
+        const change = safeJsonParse(changeJson) as ITableChange | undefined;
+        const isFound = change?.links?.id === linkId;
+        isFound && (parsedChange = change);
+        return isFound;
+      });
+      return foundIndex >= 0 ? parsedChange : undefined;
+    },
     canUndo() {
       return false;
       // const hasUndoableChanges = self.changes.length > 1;
@@ -706,8 +716,10 @@ export function mapTileIdsInTableSnapshot(snapshot: SnapshotOut<TableContentMode
                                           idMap: { [id: string]: string }) {
   snapshot.changes = snapshot.changes.map(changeJson => {
     const change: ITableChange = safeJsonParse(changeJson);
-    if ((change.action === "create") && (change.target === "geometryLink")) {
-      change.ids = idMap[change.ids as string];
+    if ((change.target === "geometryLink") && change.ids) {
+      change.ids = Array.isArray(change.ids)
+                    ? change.ids.map(id => idMap[id])
+                    : idMap[change.ids];
     }
     if (change.links) {
       change.links.tileIds = change.links.tileIds.map(id => idMap[id]);

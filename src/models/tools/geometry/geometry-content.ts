@@ -380,7 +380,7 @@ export const GeometryContentModel = types
       const target = change.target.toLowerCase();
       if (target === "tablelink") {
         const tableId = (change.targetID as string) ||
-                          (change.parents && change.parents[0] as string);
+                          (change.parents && change.parents[0] as string);  // not clear when this case would occur
         if (tableId) {
           const links = change.links as ITableLinkProperties;
           const xLabel = links?.labels?.find(entry => entry.id === "xAxis")?.label;
@@ -402,6 +402,14 @@ export const GeometryContentModel = types
           }
         }
       }
+    }
+
+    function getLinkedTableChange(change: JXGChange) {
+      const links = change.links as ITableLinkProperties | undefined;
+      const linkId = links?.id;
+      const tableId = links?.tileIds[0];
+      const tableContent = tableId ? getTableContent(self, tableId) : undefined;
+      return linkId ? tableContent?.getLinkedChange(linkId) : undefined;
     }
 
     function handleDidApplyChange(board: JXG.Board | undefined, change: JXGChange) {
@@ -1040,6 +1048,7 @@ export const GeometryContentModel = types
         get batchChangeCount() {
           return batchChanges.length;
         },
+        getLinkedTableChange,
         copySelection,
         findObjects,
         getOneSelectedPoint,
@@ -1458,8 +1467,10 @@ export function mapTileIdsInGeometrySnapshot(snapshot: SnapshotOut<GeometryConte
                                              idMap: { [id: string]: string }) {
   snapshot.changes = snapshot.changes.map((changeJson: any) => {
     const change: JXGChange = safeJsonParse(changeJson);
-    if ((change.operation === "create") && (change.target === "tableLink")) {
-      change.targetID = idMap[change.targetID as string];
+    if ((change.target === "tableLink") && change.targetID) {
+      change.targetID = Array.isArray(change.targetID)
+                          ? change.targetID.map(id => idMap[id])
+                          : idMap[change.targetID];
     }
     if (change.links) {
       change.links.tileIds = change.links.tileIds.map(id => idMap[id]);
