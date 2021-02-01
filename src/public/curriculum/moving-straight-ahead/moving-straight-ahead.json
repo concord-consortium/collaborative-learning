@@ -440,29 +440,38 @@
                       "text": "Alana, Gilberto, and Leanne were students in Ms. Chang’s class. They each did the walking experiment to find their walking rates."
                     }
                   },
-                  {
-                    "content": {
-                      "type": "Table",
-                      "columns": [
-                        { "name": "Name",
-                          "type": "string",
-                          "values": ["Alana", "Gilberto", "Leanne"]
-                        },
-                        { "name": "Walking Rate",
-                          "type": "string",
-                          "values": ["1 meter per second", "2 meters per second", "2.5 meters per second"]
-                        }
-                      ]
+                  [
+                    {
+                      "content": {
+                        "type": "Table",
+                        "columns": [
+                          { "name": "Name",
+                            "type": "string",
+                            "values": ["Alana", "Gilberto", "Leanne"]
+                          },
+                          { "name": "Walking Rate",
+                            "type": "string",
+                            "values": ["1 meter per second", "2 meters per second", "2.5 meters per second"]
+                          }
+                        ]
+                      },
+                      "layout": {
+                        "height": 110
+                      }
                     },
-                    "layout": {
-                      "height": 110
+                    {
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": "They had some questions concerning the different representations (tables, graphs and equations) of their walking data. To help them answer the questions:"
                     }
-                  },
+                  }
+                  ],
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "They had some questions concerning the different representations (tables, graphs and equations) of their walking data. To help them answer the questions<ul><li>Make a table showing the distance walked by each student for the first ten seconds.</li></ul>"
+                      "text": "\u0089\u2022\u0009Make a table showing the distance walked by each student for the first ten seconds."
                     }
                   },
                   {
@@ -494,14 +503,14 @@
                       ]
                     },
                     "layout": {
-                      "height": 210
+                      "height": 320
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<ul><li>Graph the times and distances on the same coordinate axes. Label each line with the name of the person. Use a different color for each student.</li></ul>"
+                      "text": "\u0089\u2022\u0009Graph the times and distances on the same coordinate axes. Label each line with the name of the person. Use a different color for each student."
                     }
                   },
                   {
@@ -571,21 +580,23 @@
                       ]
                     }
                   },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "<ul><li>Write an equation that represents the relationship between the time <em>t</em> and distance <em>d</em> walked by each student.</li></ul>"
+                  [
+                    {
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": "\u0089\u2022\u0009Write an equation that represents the relationship between the time <em>t</em> and distance <em>d</em> walked by each student."
+                      }
+                    },
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": "<code>Alana: d = t or d = 1t; Gilberto: d = 2t; Leanne: d = 2.5t.</code>"
+                      }
                     }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "<code>Alana: d = t or d = 1t; Gilberto: d = 2t; Leanne: d = 2.5t.</code>"
-                    }
-                  },
+                  ],
                   {
                     "content": {
                       "type": "Text",
@@ -1974,7 +1985,109 @@
                       "format": "html",
                       "text": ["• How long should the race be so that Henri will win in a close race? Give evidence to support your answer. "]
                     }
-                  }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>With a 45-meter head start, Emile will catch up to Henri after 30 seconds at the 75-meter mark. The race should be less than 30 seconds or 75 meters, depending on how they determine the length of the race.\nPossible student answers may include tables, graphs, words, and diagrams. Some examples include the following.  </code>"
+                    }
+                  },
+                  [
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Table",
+                        "name": "Meters and Brother's Distances",
+                        "columns": [
+                            {
+                              "name": "Meters",
+                              "type": "number",
+                              "values": [0, 10, 20, 30, 40, 50]
+                            },
+                            {
+                              "name": "Henri",
+                              "type": "number",
+                              "values": [45, 55, 65, 75, 85]
+                            },
+                            {
+                              "name": "Emile",
+                              "type": "number",
+                              "values": [0, 25, 50, 75, 100]
+                            }
+                          ]
+                      },
+                      "layout": {
+                        "height": 220
+                      }
+                    },
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": "<code>Guess and Check\n\n10 meters \u0089 Henri 10 + 45 = 55\n \u0089\u0089\u0089Emile 2.5*10 = 25</code>"
+                      }
+                    }
+                  ],
+                  {
+                    "layout": {
+                        "height": 330
+                      },
+                    "display": "teacher",
+                    "content": {
+                        "type": "Geometry",
+                        "board": {
+                          "properties": {
+                            "axisNames": ["t, D"],
+                            "axisLabels": ["Meters", "Distance"],
+                            "axisMin": [-10, -10],
+                            "axisRange": [50, 100]
+                          }
+                        },
+                        "objects": [
+                          {
+                            "type": "movableLine",
+                            "parents": [
+                              {
+                                "type": "point",
+                                "parents": [0, 0],
+                                "properties": {
+                                  "name": ""
+                                }
+                              },
+                              {
+                                "type": "point",
+                                "parents": [30, 80],
+                                "properties": {
+                                  "name": "Emile"
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "type": "movableLine",
+                            "parents": [
+                              {
+                                "type": "point",
+                                "parents": [10, 55],
+                                "properties": {
+                                  "name": "Henri"
+                                }
+                              },
+                              {
+                                "type": "point",
+                                "parents": [40, 100],
+                                "properties": {
+                                  "name": ""
+                                }
+                              }
+                            ]
+                          }                       
+                        ]
+                      }
+                    }
                 ]
               },
               "supports": [
@@ -3640,6 +3753,14 @@
                         "In this Unit you are continuing to explore patterns of change between two variables using linear situations. You use tables, graphs, expressions, equations, and inequalities to represent these linear patterns and solve problems. At the end of this Investigation, <em>what do you know about linear expressions, equations, inequalities, and relationships?</em>"
                       ]
                     }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<code>Main idea: In a linear relationship, as the independent variable increases in equal increments, the corresponding dependent variable increases (or decreases) by a consistent amount.  Students might describe this as the rate of change. They should realize that this could be zero (as with Leanne) or negative (as with Ms. Chang and Mr. Mamer). They may realize that the rate of change can be measured anywhere on the graph or table. A linear relationship can be represented by the equation y = ax + b. The point where the line crosses the y-axis is b, the y-intercept. The rate of change is represented by a. If b is 0, then the relationship is also proportional. In a linear and proportional relationship, the rate of change is also a unit rate that is the constant of proportionality. Inequalities appeared briefly as a contrast to equality in Problem 1.4. </code>"
+                        }
                   }
                 ]
               },
