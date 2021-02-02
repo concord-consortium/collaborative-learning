@@ -3,7 +3,7 @@ import { useCurrent } from "../../../hooks/use-current";
 import { ICase, ICaseCreation, IDataSet } from "../../../models/data/data-set";
 import { getGeometryContent } from "../../../models/tools/geometry/geometry-content";
 import {
-  ILinkProperties, ITableLinkProperties, TableContentModelType
+  ILinkProperties, ITableChange, TableContentModelType
 } from "../../../models/tools/table/table-content";
 import { isLinkableValue, ITileLinkMetadata } from "../../../models/tools/table/table-model-types";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
@@ -51,26 +51,22 @@ export const useContentChangeHandlers = ({
     return { id: actionId, tileIds: [...linkedClients, ...newClientIds] };
   }, [getContent]);
 
-  // link information attached to individual client changes/actions
-  // labels should be included when adding/removing rows
-  const getClientActionLinks = useCallback(
-    (links?: ILinkProperties): ITableLinkProperties | undefined => {
-    if (!links || !links.id) return;
-    return getContent().getClientLinks(links.id, dataSet);
+  const syncChangeToLinkedClient = useCallback((clientTileId: string, linkId: string) => {
+    const tableContent = getContent();
+    const lastChange: ITableChange | undefined = safeJsonParse(tableContent.changes[tableContent.changes.length - 1]);
+    // eventually we'll presumably need to support other clients
+    const clientContent = getGeometryContent(getContent(), clientTileId);
+    // link information attached to individual client changes/actions
+    const clientActionLinks = getContent().getClientLinks(linkId, dataSet);
+    // synchronize the table change to the linked client
+    lastChange && clientContent?.syncLinkedChange(dataSet, lastChange, clientActionLinks);
   }, [dataSet, getContent]);
 
   const syncLinkedClients = useCallback((tableActionLinks?: ILinkProperties) => {
-    const tableContent = getContent();
-    const lastChange = safeJsonParse(tableContent.changes[tableContent.changes.length - 1]);
-    const clientLinks = getClientActionLinks(tableActionLinks);
-    if (lastChange && clientLinks) {
-      tableActionLinks?.tileIds.forEach(tileId => {
-        // eventually we'll presumably need to support other clients
-        const clientContent = getGeometryContent(tableContent, tileId);
-        clientContent?.syncLinkedChange(dataSet, lastChange, clientLinks);
-      });
-    }
-  }, [dataSet, getClientActionLinks, getContent]);
+    tableActionLinks?.tileIds.forEach(tileId => {
+      syncChangeToLinkedClient(tileId, tableActionLinks.id);
+    });
+  }, [syncChangeToLinkedClient]);
 
   const validateCase = useCallback((aCase: ICaseCreation) => {
     const newCase: ICaseCreation = { __id__: uniqueId() };
@@ -159,8 +155,9 @@ export const useContentChangeHandlers = ({
     const tableActionLinks = getTableActionLinks(geomTileInfo.id);
     if (!tableActionLinks) return;
     getContent().addGeometryLink(geomTileInfo.id, tableActionLinks);
-    syncLinkedClients(tableActionLinks);
-  }, [getContent, getTableActionLinks, syncLinkedClients]);
+    // sync change to the newly linked client - not all linked clients
+    syncChangeToLinkedClient(geomTileInfo.id, tableActionLinks.id);
+  }, [getContent, getTableActionLinks, syncChangeToLinkedClient]);
 
   const unlinkGeometryTiles = useCallback(() => {
     const geometryIds = getContent().metadata.linkedGeometries.toJS();

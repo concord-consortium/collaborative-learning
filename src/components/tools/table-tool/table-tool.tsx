@@ -24,7 +24,7 @@ import "./table-tool.scss";
 
 // observes row selection from shared selection store
 const TableToolComponent: React.FC<IToolTileProps> = observer(({
-  documentId, documentContent, toolTile, model, readOnly, height,
+  documentId, documentContent, toolTile, model, readOnly, height, scale,
   onRequestRowHeight, onRequestTilesOfType, onRequestUniqueTitle, onRegisterToolApi, onUnregisterToolApi
 }) => {
   const modelRef = useCurrent(model);
@@ -106,7 +106,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   return (
     <div className="table-tool">
       <TableToolbar documentContent={documentContent} toolTile={toolTile} {...toolbarProps}
-                    onSetExpression={showExpressionsDialog} />
+                    onSetExpression={showExpressionsDialog} scale={scale}/>
       <div className="table-grid-container" ref={containerRef} onClick={handleBackgroundClick}>
         <EditableTableTitle className="table-title" readOnly={readOnly}
           isLinkEnabled={isLinkEnabled} onLinkGeometryClick={showLinkGeometryDialog}

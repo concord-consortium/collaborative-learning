@@ -1,6 +1,6 @@
 import { Parser } from "expr-eval";
 import { castArray, each } from "lodash";
-import { types, Instance, SnapshotOut, IAnyStateTreeNode } from "mobx-state-tree";
+import { types, IAnyStateTreeNode, Instance, SnapshotIn, SnapshotOut } from "mobx-state-tree";
 import { getRowLabel, kSerializedXKey, canonicalizeValue, isLinkableValue } from "./table-model-types";
 import { registerToolContentInfo } from "../tool-content-info";
 import { addLinkedTable } from "../table-links";
@@ -25,12 +25,30 @@ export function defaultTableContent() {
                               { name: "x" },
                               { name: "y" }
                             ]
-                          } as any);
+                          } as SnapshotIn<typeof TableContentModel>);
 }
 
 export function getTableContent(target: IAnyStateTreeNode, tileId: string): TableContentModelType | undefined {
   const content = getTileContentById(target, tileId);
   return content && content as TableContentModelType;
+}
+
+export function getAxisLabelsFromDataSet(dataSet: IDataSet): [string | undefined, string | undefined] {
+  // label for x axis
+  const xAttr = dataSet.attributes.length > 0 ? dataSet.attributes[0] : undefined;
+  const xLabel = xAttr?.name;
+
+  // label for y axis
+  let yLabel = undefined;
+  for (let yIndex = 1; yIndex < dataSet.attributes.length; ++yIndex) {
+    // concatenate column names for y axis label
+    const yAttr = dataSet.attributes[yIndex];
+    if (yAttr.name && (yAttr.name !== kLabelAttrName)) {
+      if (!yLabel) yLabel = yAttr.name;
+      else yLabel += `, ${yAttr.name}`;
+    }
+  }
+  return [xLabel, yLabel];
 }
 
 export interface ITransferCase {
@@ -51,6 +69,10 @@ export interface IColumnProperties {
   rawExpression?: string;
 }
 
+export interface IColumnCreationProperties extends IColumnProperties{
+  name: string;
+}
+
 export interface ILinkProperties {
   id: string;
   tileIds: string[];
@@ -68,7 +90,7 @@ export function getRowLabelFromLinkProps(links: ITableLinkProperties, rowId: str
 }
 
 export interface ICreateColumnsProperties {
-  columns?: IColumnProperties[];
+  columns?: IColumnCreationProperties[];
 }
 
 export type IUpdateColumnsProperties = IColumnProperties | IColumnProperties[];
@@ -232,26 +254,25 @@ export const TableContentModel = types
     getClientLinks(linkId: string, dataSet: IDataSet): ITableLinkProperties {
       const labels: IRowLabel[] = [];
 
-      // add label for x axis
-      const xAttr = dataSet.attributes.length > 0 ? dataSet.attributes[0] : undefined;
-      xAttr && labels.push({ id: "xAxis", label: xAttr.name });
-
-      // add label for y axis
-      let yLabel = "";
-      for (let yIndex = 1; yIndex < dataSet.attributes.length; ++yIndex) {
-        // concatenate column names for y axis label
-        const yAttr = dataSet.attributes[yIndex];
-        if (yAttr.name) {
-          if (!yLabel) yLabel = yAttr.name;
-          else yLabel += `, ${yAttr.name}`;
-        }
-      }
-      yLabel && labels.push({ id: "yAxis", label: yLabel });
+      // add axis labels
+      const [xAxisLabel, yAxisLabel] = getAxisLabelsFromDataSet(dataSet);
+      xAxisLabel && labels.push({ id: "xAxis", label: xAxisLabel });
+      yAxisLabel && labels.push({ id: "yAxis", label: yAxisLabel });
 
       // add label for each case, indexed by case ID
       labels.push(...dataSet.cases.map((aCase, i) => ({ id: aCase.__id__, label: getRowLabel(i) })));
 
       return { id: linkId, tileIds: [self.metadata.id], labels };
+    },
+    getLinkedChange(linkId: string) {
+      let parsedChange: ITableChange | undefined;
+      const foundIndex = self.changes.findIndex(changeJson => {
+        const change = safeJsonParse(changeJson) as ITableChange | undefined;
+        const isFound = change?.links?.id === linkId;
+        isFound && (parsedChange = change);
+        return isFound;
+      });
+      return foundIndex >= 0 ? parsedChange : undefined;
     },
     canUndo() {
       return false;
@@ -449,7 +470,7 @@ export const TableContentModel = types
         // fallthrough
         case "columns": {
           const props = change?.props as ICreateColumnsProperties;
-          props?.columns?.forEach((col: any, index: number) => {
+          props?.columns?.forEach((col, index) => {
             const id = change.ids?.[index] || uniqueId();
             dataSet.addAttributeWithID({ id, ...col });
           });
@@ -488,24 +509,25 @@ export const TableContentModel = types
         case "columns": {
           const props = change.props as IUpdateColumnsProperties;
           const colProps = castArray(props);
-          colProps?.forEach((col: any, colIndex) => {
+          colProps?.forEach((col, colIndex) => {
             const colId = ids[colIndex];
             if (dataSet.attrFromID(colId)) {
               each(col, (value, prop) => {
+                const _value = value as string;
                 switch (prop) {
                   case "name": {
-                    dataSet.setAttributeName(colId, value);
+                    dataSet.setAttributeName(colId, _value);
                     if (colIndex === 0) {
                       self.metadata.clearRawExpressions(kSerializedXKey);
                     }
                     break;
                   }
                   case "expression":
-                    self.metadata.setExpression(colId, value);
+                    self.metadata.setExpression(colId, _value);
                     self.updateDatasetByExpressions(dataSet);
                     break;
                   case "rawExpression":
-                    self.metadata.setRawExpression(colId, value);
+                    self.metadata.setRawExpression(colId, _value);
                     break;
                 }
               });
@@ -519,9 +541,9 @@ export const TableContentModel = types
           break;
         }
         case "rows": {
-          const rowProps = change?.props && castArray(change.props);
+          const rowProps: IRowProperties[] | undefined = change?.props && castArray(change.props as any);
           if (rowProps) {
-            rowProps.forEach((row: any, rowIndex) => {
+            rowProps.forEach((row, rowIndex) => {
               dataSet.setCanonicalCaseValues([{ __id__: ids[rowIndex], ...row }]);
             });
             self.updateDatasetByExpressions(dataSet);
@@ -694,8 +716,10 @@ export function mapTileIdsInTableSnapshot(snapshot: SnapshotOut<TableContentMode
                                           idMap: { [id: string]: string }) {
   snapshot.changes = snapshot.changes.map(changeJson => {
     const change: ITableChange = safeJsonParse(changeJson);
-    if ((change.action === "create") && (change.target === "geometryLink")) {
-      change.ids = idMap[change.ids as string];
+    if ((change.target === "geometryLink") && change.ids) {
+      change.ids = Array.isArray(change.ids)
+                    ? change.ids.map(id => idMap[id])
+                    : idMap[change.ids];
     }
     if (change.links) {
       change.links.tileIds = change.links.tileIds.map(id => idMap[id]);

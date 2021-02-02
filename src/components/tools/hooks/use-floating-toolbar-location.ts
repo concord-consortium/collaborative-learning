@@ -7,6 +7,7 @@ import { useForceUpdate } from "./use-force-update";
 export interface IFloatingToolbarProps extends IRegisterToolApiProps {
   documentContent?: HTMLElement | null;
   toolTile?: HTMLElement | null;
+  scale?: number;
   onIsEnabled: () => boolean;
 }
 

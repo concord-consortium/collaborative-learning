@@ -6,16 +6,14 @@ import { GeometryContentComponent, IGeometryContentProps } from "./geometry-cont
 interface IProps extends IGeometryContentProps{
   readOnly?: boolean;
 }
-export const GeometryContentWrapper: React.FC<IProps> = ({
-  readOnly, ...others
-}) => {
+export const GeometryContentWrapper: React.FC<IProps> = (props) => {
   return (
-    <div className={classNames("geometry-wrapper", { "read-only": readOnly })}>
+    <div className={classNames("geometry-wrapper", { "read-only": props.readOnly })}>
       <SizeMe monitorHeight={true}>
         {({ size }: SizeMeProps) => {
           return (
             <div className="geometry-size-me">
-              <GeometryContentComponent size={size} {...others} />
+              <GeometryContentComponent size={size} {...props} />
             </div>
           );
         }}

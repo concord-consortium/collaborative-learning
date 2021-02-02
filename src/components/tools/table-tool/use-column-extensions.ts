@@ -23,10 +23,11 @@ export const useColumnExtensions = ({
 
   columns.forEach((column, i) => {
     column.appData = {
+      readOnly,
       gridContext,
-      editableName: isDataColumn(column),
+      editableName: !readOnly && isDataColumn(column),
       isEditing: column.key === columnEditingName,
-      isRemovable: isDataColumn(column) && (column.key !== firstDataColumn?.key),
+      isRemovable: !readOnly && isDataColumn(column) && (column.key !== firstDataColumn?.key),
       showExpressions: metadata.hasExpressions,
       expression: getEditableExpression(
                     metadata.rawExpressions.get(column.key),

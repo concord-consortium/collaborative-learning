@@ -11,14 +11,14 @@ interface IProps extends THeaderRendererProps {
 }
 export const ColumnHeaderCell: React.FC<IProps> = (props: IProps) => {
   const column = props.column as unknown as TColumn;
-  const { isEditing, isRemovable, showExpressions, expression, onRemoveColumn } = column.appData || {};
+  const { readOnly, isEditing, isRemovable, showExpressions, expression, onRemoveColumn } = column.appData || {};
   const hasExpression = showExpressions && !!expression;
   const classes = classNames("column-header-cell", { "show-expression": showExpressions });
   return (
     <div className={classes}>
       <div className="flex-container">
         <EditableHeaderCell {...props} />
-        {showExpressions && <ExpressionCell column={column} />}
+        {showExpressions && <ExpressionCell readOnly={readOnly} column={column} />}
       </div>
       {!isEditing && isRemovable &&
         <RemoveColumnButton colId={column.key} colName={column.name as string} onRemoveColumn={onRemoveColumn}/>}
@@ -51,13 +51,14 @@ const RemoveColumnButton: React.FC<IRemoveColumnButtonProps> = ({ colId, colName
 RemoveColumnButton.displayName = "RemoveColumnButton";
 
 interface IExpressionCellProps {
+  readOnly?: boolean;
   column: TColumn;
 }
-export const ExpressionCell: React.FC<IExpressionCellProps> = ({ column }) => {
+export const ExpressionCell: React.FC<IExpressionCellProps> = ({ readOnly, column }) => {
   const { expression, onShowExpressionsDialog } = column?.appData || {};
   const expressionStr = expression ? `= ${expression}` : "";
   const classes = classNames("expression-cell", { "has-expression": !!expression });
-  const handleClick = () => expression && onShowExpressionsDialog?.(column.key);
+  const handleClick = () => !readOnly && expression && onShowExpressionsDialog?.(column.key);
   return (
     <div className={classes} onClick={handleClick}>
       {expressionStr}

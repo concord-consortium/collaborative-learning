@@ -24,31 +24,35 @@ export const useExpressionsDialog = ({ metadata, dataSet, onSubmit }: IProps): I
   // map of attribute ids to current editable expressions
   const expressions = useEditableExpressions(metadata, xName.current);
   // the currently edited expression (controlled input)
-  const [expression, setExpression] = useState<string>("");
+  const [currentExpression, setCurrentExpression] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
-  const updateExpression = useCallback((expr: string) => {
-    setExpression(expr);
+  const updateCurrentExpression = useCallback((expr: string) => {
+    setCurrentExpression(expr);
     setErrorMessage(validateExpression(expr, xName.current) || "");
   }, [xName]);
+  const acceptExpression = useCallback((yAttrId: string, expr: string) => {
+    expressions.current.set(yAttrId, expr);
+  }, [expressions]);
   const contentProps: IContentProps = {
           dataSet, xName: xName.current, currYAttrId, setCurrYAttrId,
-          expressions, expression, errorMessage, updateExpression
+          expressions, currentExpression, errorMessage, updateCurrentExpression, acceptExpression
         };
 
   const blurModalRef = useRef<() => void>();
 
   const handleClear = useCallback(() => {
     blurModalRef.current?.();
-    updateExpression("");
+    updateCurrentExpression("");
+    currYAttrId && acceptExpression(currYAttrId, "");
     return kLeaveModalOpen;
-  }, [updateExpression]);
+  }, [acceptExpression, currYAttrId, updateCurrentExpression]);
 
   const handleSubmit = useCallback(() => {
     blurModalRef.current?.();
     const rawExpressions = metadataRef.current.rawExpressions;
     const changedExpressions: Map<string, string> = new Map();
     expressions.current.forEach((expr, id) => {
-      if (expr !== (rawExpressions.get(id) || "")) {
+      if ((expr != null) && (expr !== rawExpressions.get(id))) {
         changedExpressions.set(id, expr);
       }
     });
@@ -67,7 +71,7 @@ export const useExpressionsDialog = ({ metadata, dataSet, onSubmit }: IProps): I
       { label: "Cancel" },
       { label: "OK", isDefault: true, onClick: handleSubmit }
     ]
-  }, [currYAttrId, errorMessage, expression]);
+  }, [currYAttrId, errorMessage, currentExpression]);
   blurModalRef.current = blurModal;
   return [showModal, hideModal, setCurrYAttrId];
 };
@@ -80,12 +84,14 @@ interface IContentProps {
   // map of attribute ids to editable expressions
   expressions: React.MutableRefObject<Map<string, string>>;
   // the currently edited expression (controlled input)
-  expression: string;
+  currentExpression: string;
   errorMessage: string;
-  updateExpression: (expr: string, isInitializing?: boolean) => void;
+  updateCurrentExpression: (expr: string, isInitializing?: boolean) => void;
+  acceptExpression: (yAttrId: string, expr: string) => void;
 }
 const Content: React.FC<IContentProps> = ({
-  dataSet, xName, currYAttrId, setCurrYAttrId, expressions, expression, errorMessage, updateExpression
+  dataSet, xName, currYAttrId, setCurrYAttrId, expressions,
+  currentExpression, errorMessage, updateCurrentExpression, acceptExpression
 }) => {
   const firstYAttr = useCurrent(dataSet.attributes.length > 1 ? dataSet.attributes[1] : undefined);
   const currYAttr = currYAttrId ? dataSet.attrFromID(currYAttrId) : firstYAttr.current;
@@ -104,15 +110,15 @@ const Content: React.FC<IContentProps> = ({
                     </select>;
   const placeholder = `e.g. 3*${xName}+2`;
   useLayoutEffect(() => {
-    currYAttr && updateExpression(expressions.current.get(currYAttr.id) || "");
+    currYAttr && updateCurrentExpression(expressions.current.get(currYAttr.id) || "");
   }, [currYAttr]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    updateExpression(e.target.value);
+    updateCurrentExpression(e.target.value);
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    currYAttr && expressions.current.set(currYAttr.id, e.target.value);
+    currYAttr && acceptExpression(currYAttr.id, e.target.value);
   };
 
   return (
@@ -130,7 +136,7 @@ const Content: React.FC<IContentProps> = ({
           <span className="equals">=</span>
         </label>
         <input ref={inputElt} type="text" id="expression-input" placeholder={placeholder} autoComplete="off"
-                value={expression} onChange={handleInputChange} onBlur={handleBlur}/>
+                value={currentExpression} onChange={handleInputChange} onBlur={handleBlur}/>
       </div>
       <div className="error">
         {errorMessage}

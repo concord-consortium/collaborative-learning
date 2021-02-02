@@ -5,8 +5,8 @@ import { SelectionStoreModelType } from "../../stores/selection";
 import { addLinkedTable } from "../table-links";
 import { registerToolContentInfo } from "../tool-content-info";
 import {
-  getRowLabelFromLinkProps, getTableContent, IColumnProperties, ICreateRowsProperties, IRowProperties,
-  ITableChange, ITableLinkProperties, kLabelAttrName
+  getAxisLabelsFromDataSet, getRowLabelFromLinkProps, getTableContent, IColumnProperties,
+  ICreateRowsProperties, IRowProperties, ITableChange, ITableLinkProperties, kLabelAttrName
 } from "../table/table-content";
 import { canonicalizeValue, linkedPointId } from "../table/table-model-types";
 import { getAxisAnnotations, getBaseAxisLabels, getObjectById, guessUserDesiredBoundingBox,
@@ -380,16 +380,15 @@ export const GeometryContentModel = types
       const target = change.target.toLowerCase();
       if (target === "tablelink") {
         const tableId = (change.targetID as string) ||
-                          (change.parents && change.parents[0] as string);
+                          (change.parents && change.parents[0] as string);  // not clear when this case would occur
         if (tableId) {
           const links = change.links as ITableLinkProperties;
-          const labels = links && links.labels;
-          const xEntry = labels && labels.find(entry => entry.id === "xAxis");
-          const yEntry = labels && labels.find(entry => entry.id === "yAxis");
+          const xLabel = links?.labels?.find(entry => entry.id === "xAxis")?.label;
+          const yLabel = links?.labels?.find(entry => entry.id === "yAxis")?.label;
           if (op === "create") {
             const tableContent = getTableContent(self, tableId);
             if (tableContent) {
-              const axes: IAxisLabels = { x: xEntry && xEntry.label, y: yEntry && yEntry.label };
+              const axes: IAxisLabels = { x: xLabel, y: yLabel };
               self.metadata.addTableLink(tableId, axes);
             }
           }
@@ -397,12 +396,20 @@ export const GeometryContentModel = types
             self.metadata.removeTableLink(tableId);
           }
           else if (op === "update") {
-            if (xEntry || yEntry) {
-              self.metadata.setTableLinkNames(tableId, xEntry && xEntry.label, yEntry && yEntry.label);
+            if (xLabel || yLabel) {
+              self.metadata.setTableLinkNames(tableId, xLabel, yLabel);
             }
           }
         }
       }
+    }
+
+    function getLinkedTableChange(change: JXGChange) {
+      const links = change.links as ITableLinkProperties | undefined;
+      const linkId = links?.id;
+      const tableId = links?.tileIds[0];
+      const tableContent = tableId ? getTableContent(self, tableId) : undefined;
+      return linkId ? tableContent?.getLinkedChange(linkId) : undefined;
     }
 
     function handleDidApplyChange(board: JXG.Board | undefined, change: JXGChange) {
@@ -675,23 +682,18 @@ export const GeometryContentModel = types
 
     function addTableLink(
               board: JXG.Board | undefined, tableId: string, dataSet: IDataSet, links: ITableLinkProperties) {
-      const xAttr = dataSet.attributes.length >= 1 ? dataSet.attributes[0] : undefined;
       const axes = {
-                    x: xAttr ? xAttr.name : undefined,
-                    y: ""
+                    x: links.labels?.find(entry => entry.id === "xAxis")?.label,
+                    y: links.labels?.find(entry => entry.id === "yAxis")?.label
                   };
-        for (let attrIndex = 1; attrIndex < dataSet.attributes.length; ++attrIndex) {
-          const yAttr = dataSet.attributes[attrIndex];
-          if (yAttr) {
-            if (!axes.y) {
-              axes.y = yAttr.name;
-            }
-            else {
-              axes.y += `, ${yAttr.name}`;
-            }
-          }
-        }
+      if (!axes.x || !axes.y) {
+        const [xAxisLabel, yAxisLabel] = getAxisLabelsFromDataSet(dataSet);
+        !axes.x && xAxisLabel && (axes.x = xAxisLabel);
+        !axes.y && yAxisLabel && (axes.y = yAxisLabel);
+      }
+
       // takes labels from dataSet (added by TableContent.getSharedData) if not in links.labels
+      const xAttr = dataSet.attributes.length >= 1 ? dataSet.attributes[0] : undefined;
       const labelAttr = dataSet.attrFromName(kLabelAttrName);
       const caseCount = dataSet.cases.length;
       const ids: string[] = [];
@@ -1046,6 +1048,7 @@ export const GeometryContentModel = types
         get batchChangeCount() {
           return batchChanges.length;
         },
+        getLinkedTableChange,
         copySelection,
         findObjects,
         getOneSelectedPoint,
@@ -1162,9 +1165,9 @@ export const GeometryContentModel = types
       const pointIds: string[] = [];
       const positions: JXGUnsafeCoordPair[] = [];
       const caseIds = castArray(change.ids);
-      const propsArray = castArray(change.action === "create"
-                                    ? (change.props as ICreateRowsProperties)?.rows
-                                    : change.props);
+      const propsArray: IRowProperties[] = change.action === "create"
+                                            ? (change.props as ICreateRowsProperties)?.rows
+                                            : castArray(change.props as any);
       const xAttrId = dataSet.attributes.length > 0 ? dataSet.attributes[0].id : undefined;
       caseIds.forEach((caseId, caseIndex) => {
         const tableProps = (propsArray[caseIndex] || propsArray[0]) as IRowProperties;
@@ -1212,7 +1215,7 @@ export const GeometryContentModel = types
         case "update": {
           const ids = castArray(change.ids);
           const attrIdsWithExpr: string[] = [];
-          const changeProps = castArray(change.props) as IColumnProperties[];
+          const changeProps: IColumnProperties[] = castArray(change.props as any);
           ids.forEach((attrId, index) => {
             const props = changeProps[index] || changeProps[0];
             // update column name => update axis labels
@@ -1464,8 +1467,10 @@ export function mapTileIdsInGeometrySnapshot(snapshot: SnapshotOut<GeometryConte
                                              idMap: { [id: string]: string }) {
   snapshot.changes = snapshot.changes.map((changeJson: any) => {
     const change: JXGChange = safeJsonParse(changeJson);
-    if ((change.operation === "create") && (change.target === "tableLink")) {
-      change.targetID = idMap[change.targetID as string];
+    if ((change.target === "tableLink") && change.targetID) {
+      change.targetID = Array.isArray(change.targetID)
+                          ? change.targetID.map(id => idMap[id])
+                          : idMap[change.targetID];
     }
     if (change.links) {
       change.links.tileIds = change.links.tileIds.map(id => idMap[id]);
