@@ -11,13 +11,12 @@ import { createToolTileModelFromContent, ToolTileModel, ToolTileModelType, ToolT
         } from "../tools/tool-tile";
 import { TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType } from "../document/tile-row";
 import { cloneDeep, each } from "lodash";
-import { v4 as uuid } from "uuid";
 import { Logger, LogEventName } from "../../lib/logger";
 import { IDragTileItem } from "../../models/tools/tool-tile";
 import { DocumentsModelType } from "../stores/documents";
 import { getParentWithTypeName } from "../../utilities/mst-utils";
 import { DocumentTool, IDocumentAddTileOptions } from "./document";
-import { safeJsonParse } from "../../utilities/js-utils";
+import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
 
 export interface INewTileOptions {
   rowHeight?: number;
@@ -75,7 +74,7 @@ export const DocumentContentModel = types
   }))
   .views(self => {
     // used for drag/drop self-drop detection, for instance
-    const contentId = uuid();
+    const contentId = uniqueId();
 
     function rowContainsTile(rowId: string, tileId: string) {
       const row = self.rowMap.get(rowId);
@@ -168,7 +167,7 @@ export const DocumentContentModel = types
         snapshot.tileMap = (tileMap => {
           const _tileMap: { [id: string]: ToolTileSnapshotOutType } = {};
           each(tileMap, (tile, id) => {
-            idMap[id] = tile.id = uuid();
+            idMap[id] = tile.id = uniqueId();
             _tileMap[tile.id] = tile;
           });
           return _tileMap;
@@ -182,7 +181,7 @@ export const DocumentContentModel = types
         snapshot.rowMap = (rowMap => {
           const _rowMap: { [id: string]: TileRowSnapshotOutType } = {};
           each(rowMap, (row, id) => {
-            idMap[id] = row.id = uuid();
+            idMap[id] = row.id = uniqueId();
             row.tiles = row.tiles.map(tileLayout => {
               tileLayout.tileId = idMap[tileLayout.tileId];
               return tileLayout;
