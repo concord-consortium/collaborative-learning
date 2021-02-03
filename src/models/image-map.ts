@@ -112,11 +112,11 @@ export const ImageMapModel = types
 
         getImageDimensions(entry && entry.displayUrl || url)
           .then(dimensions => {
-            const _entry = self.images.get(url);
-            if (_entry) {
+            const imageEntry = self.images.get(url);
+            if (imageEntry) {
               self.setDimensions(url, dimensions.width, dimensions.height);
-              self.syncContentUrl(url, _entry);
-              resolve(self.images.get(url));
+              self.syncContentUrl(url, imageEntry);
+              resolve(imageEntry);
             }
           });
       });
@@ -171,8 +171,9 @@ export const ImageMapModel = types
             resolve(clone(self.images.get(placeholderImage)!));
           }
 
-          if (self.images.has(url)) {
-            return resolve(self.images.get(url));
+          const imageEntry = self.images.get(url);
+          if (imageEntry) {
+            return resolve(imageEntry);
           }
 
           const handler = self.getHandler(url);
