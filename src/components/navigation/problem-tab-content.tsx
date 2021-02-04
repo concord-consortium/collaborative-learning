@@ -28,6 +28,7 @@ export const ProblemTabContent: React.FC<IProps> = observer(({ sections, showSol
 
   const handleToggleSolutions = () => {
     toggleShowTeacherContent(!showTeacherContent);
+    Logger.log(showTeacherContent ? LogEventName.HIDE_SOLUTIONS : LogEventName.SHOW_SOLUTIONS);
   };
 
   return (
