@@ -18,6 +18,7 @@ import { applyChange, applyChanges, IDispatcherChangeContext } from "./jxg-dispa
 import { isMovableLine } from "./jxg-movable-line";
 import {  kPointDefaults, kSnapUnit } from "./jxg-point";
 import { prepareToDeleteObjects } from "./jxg-polygon";
+import { getTableIdFromLinkChange } from "./jxg-table-link";
 import {
   isBoard, isComment, isFreePoint, isLinkedPoint, isPoint, isPolygon, isVertexAngle, isVisibleEdge
 } from "./jxg-types";
@@ -91,9 +92,15 @@ function defaultGeometryBoardChange(overrides?: JXGProperties) {
 }
 
 export function defaultGeometryContent(overrides?: JXGProperties): GeometryContentModelType {
-  const change = defaultGeometryBoardChange(overrides);
-  const changeJson = JSON.stringify(change);
-  return GeometryContentModel.create({ changes: [changeJson] });
+  const { title, ...boardProps } = overrides || {};
+  const changes: string[] = [];
+  if (title) {
+    const titleChange: JXGChange = { operation: "update", target: "metadata", properties: { title } };
+    changes.push(JSON.stringify(titleChange));
+  }
+  const boardChange = defaultGeometryBoardChange(boardProps);
+  changes.push(JSON.stringify(boardChange));
+  return GeometryContentModel.create({ changes });
 }
 
 export function getGeometryContent(target: IAnyStateTreeNode, tileId: string): GeometryContentModelType | undefined {
@@ -118,6 +125,7 @@ const LinkedTableEntryModel = types
 export const GeometryMetadataModel = types
   .model("GeometryMetadata", {
     id: types.string,
+    title: types.maybe(types.string),
     disabled: types.array(types.string),
     selection: types.map(types.boolean),
     linkedTables: types.array(LinkedTableEntryModel)
@@ -172,6 +180,9 @@ export const GeometryMetadataModel = types
     }
   }))
   .actions(self => ({
+    setTitle(title: string) {
+      self.title = title;
+    },
     setSharedSelection(sharedSelection: SelectionStoreModelType) {
       self.sharedSelection = sharedSelection;
     },
@@ -256,6 +267,9 @@ export const GeometryContentModel = types
   }))
   .preProcessSnapshot(snapshot => preprocessImportFormat(snapshot))
   .views(self => ({
+    get title() {
+      return self.metadata.title;
+    },
     isSelected(id: string) {
       return self.metadata.isSelected(id);
     },
@@ -378,27 +392,32 @@ export const GeometryContentModel = types
     function handleWillApplyChange(board: JXG.Board | string, change: JXGChange) {
       const op = change.operation.toLowerCase();
       const target = change.target.toLowerCase();
-      if (target === "tablelink") {
-        const tableId = (change.targetID as string) ||
-                          (change.parents && change.parents[0] as string);  // not clear when this case would occur
-        if (tableId) {
-          const links = change.links as ITableLinkProperties;
-          const xLabel = links?.labels?.find(entry => entry.id === "xAxis")?.label;
-          const yLabel = links?.labels?.find(entry => entry.id === "yAxis")?.label;
-          if (op === "create") {
-            const tableContent = getTableContent(self, tableId);
-            if (tableContent) {
-              const axes: IAxisLabels = { x: xLabel, y: yLabel };
-              self.metadata.addTableLink(tableId, axes);
-            }
+
+      if ((op === "update") && (target === "metadata")) {
+        const props = change?.properties as JXGProperties | undefined;
+        if (props?.title) {
+          self.metadata.setTitle(props.title);
+        }
+      }
+
+      const tableId = getTableIdFromLinkChange(change);
+      if (tableId) {
+        const links = change.links as ITableLinkProperties;
+        const xLabel = links?.labels?.find(entry => entry.id === "xAxis")?.label;
+        const yLabel = links?.labels?.find(entry => entry.id === "yAxis")?.label;
+        if (op === "create") {
+          const tableContent = getTableContent(self, tableId);
+          if (tableContent) {
+            const axes: IAxisLabels = { x: xLabel, y: yLabel };
+            self.metadata.addTableLink(tableId, axes);
           }
-          else if (op === "delete") {
-            self.metadata.removeTableLink(tableId);
-          }
-          else if (op === "update") {
-            if (xLabel || yLabel) {
-              self.metadata.setTableLinkNames(tableId, xLabel, yLabel);
-            }
+        }
+        else if (op === "delete") {
+          self.metadata.removeTableLink(tableId);
+        }
+        else if (op === "update") {
+          if (xLabel || yLabel) {
+            self.metadata.setTableLinkNames(tableId, xLabel, yLabel);
           }
         }
       }
@@ -632,6 +651,15 @@ export const GeometryContentModel = types
         targetID: ids,
         links
       };
+      return _applyChange(board, change);
+    }
+
+    function updateTitle(board: JXG.Board | undefined, title: string) {
+      const change: JXGChange = {
+              operation: "update",
+              target: "metadata",
+              properties: { title }
+            };
       return _applyChange(board, change);
     }
 
@@ -1081,6 +1109,7 @@ export const GeometryContentModel = types
         addPoints,
         addMovableLine,
         removeObjects,
+        updateTitle,
         updateObjects,
         createPolygonFromFreePoints,
         addVertexAngle,
@@ -1357,10 +1386,21 @@ interface IMovableLineImportSpec {
 
 type IObjectImportSpec = IPointImportSpec | IPolygonImportSpec | IImageImportSpec | IMovableLineImportSpec;
 
+interface IImportSpec {
+  title?: string;
+  board: IBoardImportSpec;
+  objects: IObjectImportSpec[];
+}
+
 function preprocessImportFormat(snapshot: any) {
-  const boardSpecs = snapshot.board as IBoardImportSpec;
-  const objectSpecs = snapshot.objects as IObjectImportSpec[];
-  if (!objectSpecs) return snapshot;
+  if (!snapshot.objects) return snapshot;
+
+  const { title, board: boardSpecs, objects: objectSpecs } = snapshot as IImportSpec;
+  const changes: JXGChange[] = [];
+
+  if (title) {
+    changes.push({ operation: "update", target: "metadata", properties: { title } });
+  }
 
   function addBoard(boardSpec: IBoardImportSpec) {
     const { properties } = boardSpec || {} as IBoardImportSpec;
@@ -1374,7 +1414,6 @@ function preprocessImportFormat(snapshot: any) {
                   boundingBox, ...others }));
   }
 
-  const changes: JXGChange[] = [];
   addBoard(boardSpecs);
 
   function addComment(props: Record<string, unknown>) {
@@ -1493,6 +1532,7 @@ export function getImageUrl(change?: JXGChange) {
 registerToolContentInfo({
   id: kGeometryToolID,
   tool: "geometry",
+  titleBase: "Graph",
   modelClass: GeometryContentModel,
   metadataClass: GeometryMetadataModel,
   addSidecarNotes: true,

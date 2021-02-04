@@ -12,6 +12,7 @@ import { IDocumentProperties } from "../../lib/db-types";
 import { getLocalTimeStamp } from "../../utilities/time";
 
 export interface IDocumentAddTileOptions {
+  title?: string;
   addSidecarNotes?: boolean;
   url?: string;
 }
@@ -113,8 +114,10 @@ export const DocumentModel = types
       if (!docDisplayIdPropertyName) return undefined;
       if (docDisplayIdPropertyName === "key") return self.key;
       return self.getProperty(docDisplayIdPropertyName);
+    },
+    getUniqueTitle(tileType: string, titleBase: string, getTileTitle: (tileId: string) => string | undefined) {
+      return self.content.getUniqueTitle(tileType, titleBase, getTileTitle);
     }
-
   }))
   .views(self => ({
     isMatchingSpec(type: DocumentType, properties: string[]) {

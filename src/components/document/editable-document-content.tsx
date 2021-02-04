@@ -19,11 +19,11 @@ interface IToolbarProps {
   toolbar?: ToolbarConfig;
   toolApiMap: IToolApiMap;
 }
-const DocumentToolbar: React.FC<IToolbarProps> = ({ document, toolbar, toolApiMap }) => {
+const DocumentToolbar: React.FC<IToolbarProps> = ({ toolbar, ...others }) => {
   const appConfig = useContext(AppConfigContext);
   const toolbarConfig = toolbar?.map(tool => ({ icon: appConfig.appIcons?.[tool.iconId], ...tool }));
   return toolbarConfig
-          ? <ToolbarComponent key="toolbar" document={document} config={toolbarConfig} toolApiMap={toolApiMap} />
+          ? <ToolbarComponent key="toolbar" config={toolbarConfig} {...others} />
           : null;
 };
 
@@ -32,9 +32,9 @@ interface IOneUpCanvasProps {
   readOnly: boolean;
   toolApiInterface: IToolApiInterface;
 }
-const OneUpCanvas: React.FC<IOneUpCanvasProps> = ({ document, readOnly, toolApiInterface}) => {
+const OneUpCanvas: React.FC<IOneUpCanvasProps> = props => {
   return (
-    <CanvasComponent context="1-up" document={document} readOnly={readOnly} toolApiInterface={toolApiInterface} />
+    <CanvasComponent context="1-up" {...props} />
   );
 };
 
@@ -42,11 +42,11 @@ interface IEditableFourUpCanvasProps {
   userId: string;
   toolApiInterface: IToolApiInterface;
 }
-const EditableFourUpCanvas: React.FC<IEditableFourUpCanvasProps> = ({ userId, toolApiInterface}) => {
+const EditableFourUpCanvas: React.FC<IEditableFourUpCanvasProps> = props => {
   const groups = useGroupsStore();
-  const group = groups.groupForUser(userId);
+  const group = groups.groupForUser(props.userId);
   return (
-    <FourUpComponent userId={userId} groupId={group?.id} toolApiInterface={toolApiInterface} />
+    <FourUpComponent groupId={group?.id} {...props} />
   );
 };
 

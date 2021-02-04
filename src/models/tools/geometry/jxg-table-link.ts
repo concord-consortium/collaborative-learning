@@ -1,9 +1,16 @@
 import { syncLinkedPoints } from "./jxg-board";
-import { JXGChangeAgent, JXGCoordPair, ILinkProperties } from "./jxg-changes";
+import { ILinkProperties, JXGChange, JXGChangeAgent, JXGCoordPair } from "./jxg-changes";
 import { createPoint, pointChangeAgent } from "./jxg-point";
 import { isPoint } from "./jxg-types";
 import { ITableLinkProperties } from "../table/table-content";
 import { splitLinkedPointId } from "../table/table-model-types";
+
+export function getTableIdFromLinkChange(change: JXGChange) {
+  return change.target.toLowerCase() === "tablelink"
+          // during development id was initially stored in parents
+          ? (change.targetID || change.parents?.[0]) as string
+          : undefined;
+}
 
 export interface ITableLinkColors {
   fill: string;
@@ -89,8 +96,7 @@ export const tableLinkChangeAgent: JXGChangeAgent = {
 
   delete: (board, change) => {
     if (board) {
-      // during development id was initially stored in parents
-      const tableId = change.targetID || (change.parents && change.parents[0]);
+      const tableId = getTableIdFromLinkChange(change);
       const pts = board.objectsList.filter(elt => {
                     return isPoint(elt) && tableId && (elt.getAttribute("linkedTableId") === tableId);
                   });
