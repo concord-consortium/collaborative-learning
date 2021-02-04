@@ -170,7 +170,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<code>Student answers will vary. It will be easier for students to find their walking rates by seeing how far they walk in, for example, 5 or 10 seconds and then divide the number of meters they walked by the number of seconds for which they walked.</code>"
+                        "Student answers will vary. It will be easier for students to find their walking rates by seeing how far they walk in, for example, 5 or 10 seconds and then divide the number of meters they walked by the number of seconds for which they walked."
                       ]
                     }
                   }
@@ -208,7 +208,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<code>Answers will vary depending on the student’s walking rate. Sample answers are provided for a walking rate of 2 meters per second, and for a student who walks <em>r</em> meters per second.</code>"
+                        "Answers will vary depending on the student’s walking rate. Sample answers are provided for a walking rate of 2 meters per second, and for a student who walks <em>r</em> meters per second."
                       ]
                     }
                   },
@@ -227,8 +227,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<code>A student who walks 2 meters per second will walk 500 meters in 250 seconds, or 4 minutes and 10 seconds.</code>",
-                        "<code>A student who walks <em>r</em> meters per second will walk 500 meters in 500/r seconds.</code>"
+                        "A student who walks 2 meters per second will walk 500 meters in 250 seconds, or 4 minutes and 10 seconds.",
+                        "A student who walks <em>r</em> meters per second will walk 500 meters in 500/r seconds."
                       ]
                     }
                   },
@@ -247,8 +247,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<code>A student who walks 2 meters per second will walk 10 meters in 5 seconds, 20 meters in 10 seconds, 60 meters in 30 seconds, 120 meters in 60 seconds, and 7200 meters in 1 hour.</code>",
-                        "<code>A student who walks r meters per second will walk 5r meters in 5 seconds, 10r meters in 10 seconds, 30r meters in 30 seconds, 60r meters in 60 seconds, and 3600r meters in 1 hour.</code>"
+                        "A student who walks 2 meters per second will walk 10 meters in 5 seconds, 20 meters in 10 seconds, 60 meters in 30 seconds, 120 meters in 60 seconds, and 7200 meters in 1 hour.",
+                        "A student who walks r meters per second will walk 5r meters in 5 seconds, 10r meters in 10 seconds, 30r meters in 30 seconds, 60r meters in 60 seconds, and 3600r meters in 1 hour."
                       ]
                     }
                   },
@@ -267,8 +267,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<code>For a walking rate of 2 meters per second, an equation is d = 2t, where d is the distance in meters and t is the time in seconds.</code>",
-                        "<code>For a walking rate of r meters per second, an equation is d = rt, where d is the distance in meters and t is the time in seconds.</code>"
+                        "For a walking rate of 2 meters per second, an equation is d = 2t, where d is the distance in meters and t is the time in seconds.",
+                        "For a walking rate of r meters per second, an equation is d = rt, where d is the distance in meters and t is the time in seconds."
                       ]
                     }
                   },
@@ -287,8 +287,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<code>Possible answers.\nFor a walking rate of 2 meters per second: The graph would be a line starting at (0,0). For every one second walked, the distance increases by 2.</code>",
-                        "<code>For a walking rate of r meters per second: The graph would be a line starting at (0,0). For every one second walked, the distance increases by r.</code>"
+                        "Possible answers.\nFor a walking rate of 2 meters per second: The graph would be a line starting at (0,0). For every one second walked, the distance increases by 2.",
+                        "For a walking rate of r meters per second: The graph would be a line starting at (0,0). For every one second walked, the distance increases by r."
                       ]
                     }
                   },
@@ -347,7 +347,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<code>Sample answer: She is correct. The ratio of meters walked to seconds always stays the same, so, for example, 1.5 meters/1 second = 7.5 meters/5 seconds = 15 meters/10 seconds. So you can always predict how long it will take to walk a specific distance based on this constant ratio.</code>"
+                        "Sample answer: She is correct. The ratio of meters walked to seconds always stays the same, so, for example, 1.5 meters/1 second = 7.5 meters/5 seconds = 15 meters/10 seconds. So you can always predict how long it will take to walk a specific distance based on this constant ratio."
                       ]
                     }
                   }
@@ -375,7 +375,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<code>For a walking rate of r meters per second, you can walk a distance in meters that is r times the number of seconds. That is, you can scale the ratio, meters per second, up or down by multiplying both meters and seconds by the same number. d = rt.</code>"
+                        "For a walking rate of r meters per second, you can walk a distance in meters that is r times the number of seconds. That is, you can scale the ratio, meters per second, up or down by multiplying both meters and seconds by the same number. d = rt."
                       ]
                     }
                   }
@@ -593,7 +593,7 @@
                       "content": {
                         "type": "Text",
                         "format": "html",
-                        "text": "<code>Alana: d = t or d = 1t; Gilberto: d = 2t; Leanne: d = 2.5t.</code>"
+                        "text": "Alana: d = t or d = 1t; Gilberto: d = 2t; Leanne: d = 2.5t."
                       }
                     }
                   ],
@@ -609,7 +609,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>In the equation the walking rate is represented as the number that you multiply by the time to get distance. (Note that students will learn later that the multiplier is called the coefficient.) \nIn the table, the walking rate is represented as the difference between values for distance in consecutive rows (1 second apart). So, as the x-values increase by 1, the y values will increase by the walking rate. (Note that students will learn later that this is called the rate of change.)\nIn the graph, the walking rate is represented as the steepness of the graph – the greater the walking rate, the steeper the line on the graph. (Note that students will learn later that this is called the slope.)</code>"
+                      "text": "In the equation the walking rate is represented as the number that you multiply by the time to get distance. (Note that students will learn later that the multiplier is called the coefficient.) \nIn the table, the walking rate is represented as the difference between values for distance in consecutive rows (1 second apart). So, as the x-values increase by 1, the y values will increase by the walking rate. (Note that students will learn later that this is called the rate of change.)\nIn the graph, the walking rate is represented as the steepness of the graph – the greater the walking rate, the steeper the line on the graph. (Note that students will learn later that this is called the slope.)"
                     }
                   },
                   {
@@ -624,7 +624,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>Answers will vary. Sample answers: The table is the most helpful because I can figure out the pattern, but I can also see many values that would answer questions.\nThe graph is the most important because I can see the pattern for the walking rates. I can also see how the pattern of change for one line is related to the pattern of change for another. I can also find or approximate answers to questions.\nThe equation is the most useful because I can use any amount of time to find the distance, not just small values for time like on a graph or table.</code>"
+                      "text": "Answers will vary. Sample answers: The table is the most helpful because I can figure out the pattern, but I can also see many values that would answer questions.\nThe graph is the most important because I can see the pattern for the walking rates. I can also see how the pattern of change for one line is related to the pattern of change for another. I can also find or approximate answers to questions.\nThe equation is the most useful because I can use any amount of time to find the distance, not just small values for time like on a graph or table."
                     }
                   }
                 ]
@@ -651,7 +651,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>The relationships are proportional. On the table, you can take any two coordinate pairs and write a proportion. Also, you can see this because any distance divided by time gives a constant ratio. Since the relationship is proportional, it is also linear because distance divided by time gives a constant rate of change. (Note: Not all linear relationships are proportional.)</code>"
+                      "text": "The relationships are proportional. On the table, you can take any two coordinate pairs and write a proportion. Also, you can see this because any distance divided by time gives a constant ratio. Since the relationship is proportional, it is also linear because distance divided by time gives a constant rate of change. (Note: Not all linear relationships are proportional.)"
                     }
                   },
                   {
@@ -666,7 +666,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>She is correct. If time increases by 1 second, she can find the change in distance on a graph by looking at the steepness of the line. If time increases by 1 second, she can find the change in distance on a table by looking at the distance in two consecutive rows (one second apart) and calculating the difference.</code>"
+                      "text": "She is correct. If time increases by 1 second, she can find the change in distance on a graph by looking at the steepness of the line. If time increases by 1 second, she can find the change in distance on a table by looking at the distance in two consecutive rows (one second apart) and calculating the difference."
                     }
                   },
                   {
@@ -681,7 +681,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>Yvonne is correct. All of the relationships are of the form <em>d = rt</em>. The value of <em>r</em> is the constant of proportionality for each relationship.</code>"
+                      "text": "Yvonne is correct. All of the relationships are of the form <em>d = rt</em>. The value of <em>r</em> is the constant of proportionality for each relationship."
                     }
                   },
                   {
@@ -842,7 +842,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>Valentina and Omar’s graphs are similar in that, when the points are connected, the graphs have the same rate of change and y-intercept. Omar graphed his walking rate for 40 seconds, whereas Valentina graphed his walking rate for 4 seconds. Their scales are different as well. Omar uses intervals of 5 seconds and 10 meters, whereas Valentina uses intervals of 1 second and 1 meter. The different scales makes it appear that Valentina has a faster walking rate. However, their walking rates are the same. Because Omar’s vertical scale has twice the value as the horizontal scale, it appears to “pull down” the points as you have less vertical “movement” for every point. Valentina’s scales both have a value of one for every grid line. So, you will have the “same” movement on the horizontal and vertical axes for each coordinate pair.</code>"
+                      "text": "Valentina and Omar’s graphs are similar in that, when the points are connected, the graphs have the same rate of change and y-intercept. Omar graphed his walking rate for 40 seconds, whereas Valentina graphed his walking rate for 4 seconds. Their scales are different as well. Omar uses intervals of 5 seconds and 10 meters, whereas Valentina uses intervals of 1 second and 1 meter. The different scales makes it appear that Valentina has a faster walking rate. However, their walking rates are the same. Because Omar’s vertical scale has twice the value as the horizontal scale, it appears to “pull down” the points as you have less vertical “movement” for every point. Valentina’s scales both have a value of one for every grid line. So, you will have the “same” movement on the horizontal and vertical axes for each coordinate pair."
                     }
                   },
                   {
@@ -857,7 +857,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>The expression 2t could represent their distance. On both graphs, the distance traveled is always twice the time in seconds, so they are traveling 2 meters every second.</code>"
+                      "text": "The expression 2t could represent their distance. On both graphs, the distance traveled is always twice the time in seconds, so they are traveling 2 meters every second."
                     }
                   },
                   {
@@ -929,7 +929,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>Elizabeth and Billie’s relationships are linear. Elizabeth walks at a constant rate of 3 meters every 2 seconds, which you can see in the table. Billie walks at a constant rate of 2.25 m/s, since the equation is in the form of d = rt, similar to the equations for Alana, Gilberto, and Leanne. Both of these relationships are also proportional, since at 0 seconds they have walked 0 meters.\n\n George’s, Evo’s, and Bob’s relationships are not linear. The table for George does not show a constant rate of change. Evo’s graph does not make a straight line, so it does not show a constant rate of change. In the equation for Bob, the rate is a variable, so the walking rate is not constant. (Some students may make graphs and claim the relationships are either linear or not based on whether the data lie on a straight line.)</code>"
+                      "text": "Elizabeth and Billie’s relationships are linear. Elizabeth walks at a constant rate of 3 meters every 2 seconds, which you can see in the table. Billie walks at a constant rate of 2.25 m/s, since the equation is in the form of d = rt, similar to the equations for Alana, Gilberto, and Leanne. Both of these relationships are also proportional, since at 0 seconds they have walked 0 meters.\n\n George’s, Evo’s, and Bob’s relationships are not linear. The table for George does not show a constant rate of change. Evo’s graph does not make a straight line, so it does not show a constant rate of change. In the equation for Bob, the rate is a variable, so the walking rate is not constant. (Some students may make graphs and claim the relationships are either linear or not based on whether the data lie on a straight line.)"
                     }
                   }
                 ]
@@ -954,7 +954,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code><ul><li>Main idea: Relationships are linear when there is a constant rate of change.</li><li>Verbal context: key words include <em>constant,</em> [increase/decrease] by the same amount every [year/second/month]</li><li>Table: The values of one variable change at a constant rate when the other variable changes at a constant rate.</li><li>Graph: The graph is a straight line.</li><li>Expression: The independent variable is multiplied by a constant.</li><li>Equation: The independent variable is multiplied by a constant, so the dependent variable will change at a constant rate.</li></ul></code>"
+                      "text": "<ul><li>Main idea: Relationships are linear when there is a constant rate of change.</li><li>Verbal context: key words include <em>constant,</em> [increase/decrease] by the same amount every [year/second/month]</li><li>Table: The values of one variable change at a constant rate when the other variable changes at a constant rate.</li><li>Graph: The graph is a straight line.</li><li>Expression: The independent variable is multiplied by a constant.</li><li>Equation: The independent variable is multiplied by a constant, so the dependent variable will change at a constant rate.</li></ul>"
                     }
                   }
                 ]
@@ -1038,7 +1038,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>The answer depends on how long the walkathon is. \nLeanne will raise the most money if the walkathon is shorter than 5 kilometers; Gilberto will “catch up” to Leanne when he walks 5 kilometers because he raises $2 per kilometer.\nGilberto will raise the most money if the walkathon is longer than 5 kilometers.\nAlana will never raise the most money because she has a smaller starting donation than Leanne and a smaller per-kilometer-walked donation than Gilberto.</code>"
+                      "text": "The answer depends on how long the walkathon is. \nLeanne will raise the most money if the walkathon is shorter than 5 kilometers; Gilberto will “catch up” to Leanne when he walks 5 kilometers because he raises $2 per kilometer.\nGilberto will raise the most money if the walkathon is longer than 5 kilometers.\nAlana will never raise the most money because she has a smaller starting donation than Leanne and a smaller per-kilometer-walked donation than Gilberto."
                     }
                   },
                   {
@@ -1154,7 +1154,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>They are linear relationships because the students all raise a constant rate of money for each kilometer walked. Leanne raises $0 per kilometer, Gilberto raises $2 per kilometer, and Alana raises $0.50 per kilometer. This will form a straight line as each increase in 1 km leads to a constant increase in the donation monies.</code>"
+                      "text": "They are linear relationships because the students all raise a constant rate of money for each kilometer walked. Leanne raises $0 per kilometer, Gilberto raises $2 per kilometer, and Alana raises $0.50 per kilometer. This will form a straight line as each increase in 1 km leads to a constant increase in the donation monies."
                     }
                   },
                   {
@@ -1169,7 +1169,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>Gilberto’s relationship is exactly like those in Problem 1.2 because when he has walked 0 km, he will earn $0. But Leanne’s and Alana’s relationships are different from those in Problem 1.2 because they have an extra amount of money added at the start of the walkathon. So, when they have walked 0 km, they will have raised $10 and $5, respectively. After that their plans have a constant rate of change.</code>"
+                      "text": "Gilberto’s relationship is exactly like those in Problem 1.2 because when he has walked 0 km, he will earn $0. But Leanne’s and Alana’s relationships are different from those in Problem 1.2 because they have an extra amount of money added at the start of the walkathon. So, when they have walked 0 km, they will have raised $10 and $5, respectively. After that their plans have a constant rate of change."
                     }
                   }
                 ]
@@ -1201,7 +1201,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>The fixed $5 donation represents the amount of money she raises by walking 0 kilometers. In the table, it is the amount of the donation when the distance is 0. (0,5) is the point where Alana’s graph intersects the y-axis; it is the point on the line for her plan with an x-coordinate of 0. In the equation, 5 is the term that is added to 0.50d where d represents the distance walked.</code>"
+                      "text": "The fixed $5 donation represents the amount of money she raises by walking 0 kilometers. In the table, it is the amount of the donation when the distance is 0. (0,5) is the point where Alana’s graph intersects the y-axis; it is the point on the line for her plan with an x-coordinate of 0. In the equation, 5 is the term that is added to 0.50d where d represents the distance walked."
                     }
                   },
                   {
@@ -1300,7 +1300,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>\u00a0\u00a0\u00a0 <em>m = 5 + 0.50 d</em>, where 5 is the fixed donation that is the 'amount added into' the equation. \n\nThe rate of change for Alana is $0.50 per kilometer. In the table, this is shown by the amount that the donation increases for every 1 kilometer or the amount each row of the y-variable increases for every increase of 1 km. The graph shows the rate of change as how much the line rises for every kilometer. In the equation, we see the rate of change in the coefficient, or the amount that is multiplied by the x-variable.</code>"
+                      "text": "\u00a0\u00a0\u00a0 <em>m = 5 + 0.50 d</em>, where 5 is the fixed donation that is the 'amount added into' the equation. \n\nThe rate of change for Alana is $0.50 per kilometer. In the table, this is shown by the amount that the donation increases for every 1 kilometer or the amount each row of the y-variable increases for every increase of 1 km. The graph shows the rate of change as how much the line rises for every kilometer. In the equation, we see the rate of change in the coefficient, or the amount that is multiplied by the x-variable."
                     }
                   },
                   {
@@ -1329,7 +1329,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>\u00a0\u00a0\u00a0 <em>m = 5 + 0.50 d</em>, where 0.50 is the rate of change which is the multiplier or coefficient of the variable d. \n\nThe rate of change for Alana is $0.50 per kilometer. In the table, this is shown by the amount that the donation increases for every 1 kilometer or the amount each row of the y-variable increases for every increase of 1 km. The graph shows the rate of change as how much the line rises for every kilometer. In the equation, we see the rate of change in the coefficient, or the amount that is multiplied by the x-variable.</code>"
+                      "text": "\u00a0\u00a0\u00a0 <em>m = 5 + 0.50 d</em>, where 0.50 is the rate of change which is the multiplier or coefficient of the variable d. \n\nThe rate of change for Alana is $0.50 per kilometer. In the table, this is shown by the amount that the donation increases for every 1 kilometer or the amount each row of the y-variable increases for every increase of 1 km. The graph shows the rate of change as how much the line rises for every kilometer. In the equation, we see the rate of change in the coefficient, or the amount that is multiplied by the x-variable."
                     }
                   },
                   {
@@ -1346,7 +1346,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>Leanne: Each sponsor donates $10 because they donate $10 regardless of how far she walks.\nGilberto: Each sponsor donates $2 • 8 = $16 because they donate $2 per kilometer he walks.\nAlana: Each sponsor donates $5 + $0.50 • 8 = $5 + $4 = $9 because they donate $5 plus $0.50 per kilometer she walks. </code>"
+                      "text": "Leanne: Each sponsor donates $10 because they donate $10 regardless of how far she walks.\nGilberto: Each sponsor donates $2 • 8 = $16 because they donate $2 per kilometer he walks.\nAlana: Each sponsor donates $5 + $0.50 • 8 = $5 + $4 = $9 because they donate $5 plus $0.50 per kilometer she walks. "
                     }
                   },
                   {
@@ -1363,7 +1363,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>Leanne: We cannot determine how far she walks since the amount of money she raises does not depend on how many kilometers she walks.\nGilberto: 5 kilometers because $2 x 5 = 10 or 10 ÷ 2 = 5.\nAlana: 10 kilometers because $10 - $5 = $5 so she has to raise $5 by walking; since she raises $0.50 per kilometer walked, she must walk $5 / $0.50 = 10 kilometers.</code>"
+                      "text": "Leanne: We cannot determine how far she walks since the amount of money she raises does not depend on how many kilometers she walks.\nGilberto: 5 kilometers because $2 x 5 = 10 or 10 ÷ 2 = 5.\nAlana: 10 kilometers because $10 - $5 = $5 so she has to raise $5 by walking; since she raises $0.50 per kilometer walked, she must walk $5 / $0.50 = 10 kilometers."
                     }
                   },
                   {
@@ -1380,7 +1380,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>The point (12,11) lies on Alana’s graph since $5 + $0.50 x 12 = $5 + $6 = $11. This point means that if Alana walks 12 kilometers, each sponsor will donate $11.</code>"
+                      "text": "The point (12,11) lies on Alana’s graph since $5 + $0.50 x 12 = $5 + $6 = $11. This point means that if Alana walks 12 kilometers, each sponsor will donate $11."
                     }
                   },
                   {
@@ -1397,7 +1397,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>Leanne’s, Gilberto’s, and Alana’s plans are linear because they all show a constant rate of money raised per kilometer walked. Only Gilberto’s pledge plan is proportional because his plan doesn’t involve raising any money without walking any kilometers.</code>"
+                      "text": "Leanne’s, Gilberto’s, and Alana’s plans are linear because they all show a constant rate of money raised per kilometer walked. Only Gilberto’s pledge plan is proportional because his plan doesn’t involve raising any money without walking any kilometers."
                     }
                   },
                   {
@@ -1414,7 +1414,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>For each sponsor, Gilberto will earn $2 per kilometer walked and pay $4.75 regardless of how far he walks. The expression that represents the amount of money Gilberto will raise with this plan is 2*d – 4.75, where d represents the distance walked.</code>"
+                      "text": "For each sponsor, Gilberto will earn $2 per kilometer walked and pay $4.75 regardless of how far he walks. The expression that represents the amount of money Gilberto will raise with this plan is 2*d – 4.75, where d represents the distance walked."
                     }
                   },
                   {
@@ -1431,7 +1431,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>When he has walked 0 km, he will have earned -$4.75, so (0,-4.75) will be a value on the table and will be the spot where Gilberto’s graph intersects the y-axis. After that, for each kilometer he walks, the money he raises will increase by $2. So (1,-2.75) will be a value on the table and the graph. In the equation, we subtract -$4.75 to represent this extra cost, so his profits are always decreased by $4.75, no matter how many kilometers he walks.</code>"
+                      "text": "When he has walked 0 km, he will have earned -$4.75, so (0,-4.75) will be a value on the table and will be the spot where Gilberto’s graph intersects the y-axis. After that, for each kilometer he walks, the money he raises will increase by $2. So (1,-2.75) will be a value on the table and the graph. In the equation, we subtract -$4.75 to represent this extra cost, so his profits are always decreased by $4.75, no matter how many kilometers he walks."
                     }
                   }
               ]
@@ -1453,7 +1453,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>You can determine if a relationship is linear if there is a constant rate of change. That is, for every unit change in the independent variable there is a consistent change in the dependent variable. Another way to say this is “as the independent variable changes in equal increments, the dependent variable will change by a consistent amount.\n\nIn a table, as the independent variable increases by one unit the dependent variable will change by a consistent amount. The graph is a straight line. The equation is of the form y = ax + b. If b is 0 then the equation, y = ax is also proportional.</code>"
+                      "text": "You can determine if a relationship is linear if there is a constant rate of change. That is, for every unit change in the independent variable there is a consistent change in the dependent variable. Another way to say this is “as the independent variable changes in equal increments, the dependent variable will change by a consistent amount.\n\nIn a table, as the independent variable increases by one unit the dependent variable will change by a consistent amount. The graph is a straight line. The equation is of the form y = ax + b. If b is 0 then the equation, y = ax is also proportional."
                     }
                   },
                   {
@@ -1467,7 +1467,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>Table: Values from the table are proportional. You can use the values to write proportions or “for every” ratio statements. For example, in the table for Gilberto:</code>"
+                      "text": "Table: Values from the table are proportional. You can use the values to write proportions or “for every” ratio statements. For example, in the table for Gilberto:"
                     }
                   },
                   {
@@ -1496,7 +1496,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>Equation: The amount added into the equation is zero. Or the y-intercept is zero. For example, in the equation for Gilberto:\n\n \u00a0\u00a0\u00a0<em>m = 2d</em> or <em>m = 2d + 0</em>\n\nGraph: The graph of a proportional relationship is passes through the point (0,0). For example, in the graph for Gilberto:</code>"
+                      "text": "Equation: The amount added into the equation is zero. Or the y-intercept is zero. For example, in the equation for Gilberto:\n\n \u00a0\u00a0\u00a0<em>m = 2d</em> or <em>m = 2d + 0</em>\n\nGraph: The graph of a proportional relationship is passes through the point (0,0). For example, in the graph for Gilberto:"
                     }
                   },
                                     {
@@ -1768,7 +1768,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>The pattern of change for Ms. Chang’s class is linear because the amount of money in the account decreases by a consistent amount of $12 each week. The pattern of change for Mr. Mamer’s class is linear because the data points on the graph form a straight line.</code>"
+                      "text": "The pattern of change for Ms. Chang’s class is linear because the amount of money in the account decreases by a consistent amount of $12 each week. The pattern of change for Mr. Mamer’s class is linear because the data points on the graph form a straight line."
                     }
                   }
                 ]
@@ -1793,7 +1793,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>The pattern of change for Ms. Chang’s class is linear because the amount of money in the account decreases by a consistent amount of $12 each week. The pattern of change for Mr. Mamer’s class is linear because the data points on the graph form a straight line.</code>"
+                      "text": "The pattern of change for Ms. Chang’s class is linear because the amount of money in the account decreases by a consistent amount of $12 each week. The pattern of change for Mr. Mamer’s class is linear because the data points on the graph form a straight line."
                     }
                 },
                 {
@@ -1808,7 +1808,7 @@
                   "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>Ms. Chang: $144 because this is the amount of money in the account for week 0, or the start of keeping track of the money.\nMr. Mamer: $500 because this is the amount of money in the account for week 0, or the start of keeping track of the money.</code>"
+                      "text": "Ms. Chang: $144 because this is the amount of money in the account for week 0, or the start of keeping track of the money.\nMr. Mamer: $500 because this is the amount of money in the account for week 0, or the start of keeping track of the money."
                     }
                 },
                 {
@@ -1823,7 +1823,7 @@
                   "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>Ms. Chang: A = 144 + –12n or 144 – 12n, where n represents the number of weeks and A represents the amount of money in the account after n weeks. The rate at which the amount of money in the account is changing is –$12 per week, and the starting amount of money in the club’s account is $144.\nMr. Mamer: A = 500 + –10n or 500 – 10n, where n represents the number of weeks and A represents the amount of money in the account after n weeks. The rate at which the amount of money in the account is changing is –$10 per week, and the starting amount of money in the club’s account is $500. </code>"
+                      "text": "Ms. Chang: A = 144 + –12n or 144 – 12n, where n represents the number of weeks and A represents the amount of money in the account after n weeks. The rate at which the amount of money in the account is changing is –$12 per week, and the starting amount of money in the club’s account is $144.\nMr. Mamer: A = 500 + –10n or 500 – 10n, where n represents the number of weeks and A represents the amount of money in the account after n weeks. The rate at which the amount of money in the account is changing is –$10 per week, and the starting amount of money in the club’s account is $500. "
                     }
                 },
                 {
@@ -1838,7 +1838,7 @@
                   "content": {
                     "type": "Text",
                     "format": "html",
-                    "text": "<code>Ms. Chang: The rate at which the amount of money in the account is changing is -$12 per week, so after 10 weeks the club has donated $12(10) = $120. Since they started with $144, they now have $144-$120=$24 left in the account.\nMr. Mamer: The rate at which the amount of money in the account is changing is -$10 per week, so after 10 weeks the club has donated $10(10) = $100. Since they started with $500, they now have $500-$100=$400 left in the account.</code>"
+                    "text": "Ms. Chang: The rate at which the amount of money in the account is changing is -$12 per week, so after 10 weeks the club has donated $12(10) = $120. Since they started with $144, they now have $144-$120=$24 left in the account.\nMr. Mamer: The rate at which the amount of money in the account is changing is -$10 per week, so after 10 weeks the club has donated $10(10) = $100. Since they started with $500, they now have $500-$100=$400 left in the account."
                     }
                 },
                 {
@@ -1853,7 +1853,7 @@
                   "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>Ms. Chang: If they spent $12 per week and they had $144 at the beginning, then all the money would be spent after 144/12 = 12 weeks.\nMr. Mamer: If they spent $10 per week and they had $500 at the beginning, then all the money would be spent after 500/10 = 50 weeks. This is the point where the graph crosses the horizontal axis, since that represents A=0.</code>"
+                      "text": "Ms. Chang: If they spent $12 per week and they had $144 at the beginning, then all the money would be spent after 144/12 = 12 weeks.\nMr. Mamer: If they spent $10 per week and they had $500 at the beginning, then all the money would be spent after 500/10 = 50 weeks. This is the point where the graph crosses the horizontal axis, since that represents A=0."
                     }
                 },
                 {
@@ -1868,14 +1868,14 @@
                   "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>Both of the relationships in this Problem have decreasing rates of change, though the graph of Ms. Chang’s club’s account has a larger decreasing rate of change. Mr. Mamer’s club started with a larger amount of money in their account, so the y-intercept is larger.</code>"
+                      "text": "Both of the relationships in this Problem have decreasing rates of change, though the graph of Ms. Chang’s club’s account has a larger decreasing rate of change. Mr. Mamer’s club started with a larger amount of money in their account, so the y-intercept is larger."
                     }
                 },
                 {
                   "content": {
                     "type": "Text",
                     "format": "html",
-                    "text": ["<strong>Situation B. What’s the Question?</strong>\nOne of Mr. Mamer’s students wrote the following two statements to help her answer questions about their account\n<code>\u00a0\u00a0\u00a0 500 - 10t = 100 \n\u00a0\u00a0\u00a0 500 - 10t < 100 </code>\n\nWhat questions was she trying to answer?"]
+                    "text": ["<strong>Situation B. What’s the Question?</strong>\nOne of Mr. Mamer’s students wrote the following two statements to help her answer questions about their account\n\u00a0\u00a0\u00a0 500 - 10t = 100 \n\u00a0\u00a0\u00a0 500 - 10t < 100 \n\nWhat questions was she trying to answer?"]
                   }
 
                 },
@@ -1884,7 +1884,7 @@
                   "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>The first equation is setting the expression for how much money is left in the account after t weeks equal to 100, so she is trying to find how many weeks it will take for there to be $100 left in the account. The second equation is trying to find how many weeks it will take for there to be less than $100 left in the account.</code>"
+                      "text": "The first equation is setting the expression for how much money is left in the account after t weeks equal to 100, so she is trying to find how many weeks it will take for there to be $100 left in the account. The second equation is trying to find how many weeks it will take for there to be less than $100 left in the account."
                     }
                 }
               ]
@@ -1909,7 +1909,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code> Both of the relationships in this Problem have decreasing rates of changes. As the independent variable increases, the dependent variable decreases. This results in the graph of a line that decreases from left to right and an equation for which the independent variable has a negative coefficient. Neither situation is proportional since their graphs do not go through the origin nor can the equation that represents them be written in the form y = ax. And the values from the relationship cannot be written as a “for every” statement or to form proportions.</code>"
+                      "text": " Both of the relationships in this Problem have decreasing rates of changes. As the independent variable increases, the dependent variable decreases. This results in the graph of a line that decreases from left to right and an equation for which the independent variable has a negative coefficient. Neither situation is proportional since their graphs do not go through the origin nor can the equation that represents them be written in the form y = ax. And the values from the relationship cannot be written as a “for every” statement or to form proportions."
                         }
                     }
                   ]
@@ -3126,7 +3126,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": 
-                        "<code>Student answers will vary. Interesting situations to think about include: spiral staircases, school stairs, large steps (like at a museum), etc.\nExample: 7.25 in. to 11.25 inches for the rise to the run, or approximately 0.70 for the ratio of rise to run. This is the same for every step in the staircase. The ratio of rise to run is not within the carpenter’s guidelines.</code>"
+                        "Student answers will vary. Interesting situations to think about include: spiral staircases, school stairs, large steps (like at a museum), etc.\nExample: 7.25 in. to 11.25 inches for the rise to the run, or approximately 0.70 for the ratio of rise to run. This is the same for every step in the staircase. The ratio of rise to run is not within the carpenter’s guidelines."
                     }
                   }
                 ]
@@ -3151,7 +3151,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": 
-                        "<code>2(rise) + run = 2(7) + 11 = 14 + 11 = 25, which is between 24 and 26 inches. \nRise + run = 7 + 11 = 18, which is between 17 and 19 inches.\nYes, these stairs meet the carpenters’ guidelines. Note that a scaled-up equivalent ratio of 14 to 22 would not meet the guidelines. </code>"
+                        "2(rise) + run = 2(7) + 11 = 14 + 11 = 25, which is between 24 and 26 inches. \nRise + run = 7 + 11 = 18, which is between 17 and 19 inches.\nYes, these stairs meet the carpenters’ guidelines. Note that a scaled-up equivalent ratio of 14 to 22 would not meet the guidelines. "
                     }
                   },
                   {
@@ -3166,7 +3166,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": 
-                        "<code>Student answers will vary.\nExample: a set of stairs with a height of 3.5 inches and a depth of 5.5 inches.</code>"
+                        "Student answers will vary.\nExample: a set of stairs with a height of 3.5 inches and a depth of 5.5 inches."
                     }
                   },
                   {
@@ -3181,7 +3181,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": 
-                        "<code>Not everyone in the class will have the same sketch because even the same ratio can be represented by different numbers.</code>"
+                        "Not everyone in the class will have the same sketch because even the same ratio can be represented by different numbers."
                     }
                   },
                   {
@@ -3196,7 +3196,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": 
-                        "<code>Student answers will vary based on their stairs.\nExample answer using the stairs at Arch Middle School, rise = (7/11)run.</code>"
+                        "Student answers will vary based on their stairs.\nExample answer using the stairs at Arch Middle School, rise = (7/11)run."
                     }
                   },
                   {
@@ -3211,7 +3211,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": 
-                        "<code>The ratio of rise to run is represented in the graph by the steepness of the line and in the equation by the coefficient of x.</code>"
+                        "The ratio of rise to run is represented in the graph by the steepness of the line and in the equation by the coefficient of x."
                     }
                   },
                   {
@@ -3226,7 +3226,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": 
-                        "<code>The graph does represent a proportional relationship because it passes through the origin.</code>"
+                        "The graph does represent a proportional relationship because it passes through the origin."
                     }
                   },
                   {
@@ -3241,7 +3241,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": 
-                        "<code>Yes, she is correct. The ratio of rise to run describes how much one variable changes if you change the other variable by a specific amount. If the variables are always related in this way, then they have a constant rate of change, which gives a linear relationship.</code>"
+                        "Yes, she is correct. The ratio of rise to run describes how much one variable changes if you change the other variable by a specific amount. If the variables are always related in this way, then they have a constant rate of change, which gives a linear relationship."
                     }
                   },
                   {
@@ -3256,7 +3256,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": 
-                        "<code>Yes, because each step on the staircase will have the same height (or rise) and depth (or run).</code>"
+                        "Yes, because each step on the staircase will have the same height (or rise) and depth (or run)."
                     }
                   },
                   {
@@ -3271,7 +3271,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": 
-                        "<code>No, because we’re rising twice as high and running twice as far.  So, the ratio will stay the same.</code>"
+                        "No, because we’re rising twice as high and running twice as far.  So, the ratio will stay the same."
                     }
                   }
                 ]
@@ -3297,7 +3297,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": 
-                        "<code>The steepness of stairs is represented by the slope of a straight-line graph. In a linear equation that represents the graph, the steepness of the stairs is represented by the coefficient of x.</code>"
+                        "The steepness of stairs is represented by the slope of a straight-line graph. In a linear equation that represents the graph, the steepness of the stairs is represented by the coefficient of x."
                     }
                   }
                 ]
@@ -3573,7 +3573,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": 
-                        "<code>Representation 1: The constant of proportionality is -3, which is the same as the rate of change (-3/1).\nRepresentation 2: The constant of proportionality is 1/2, which is the same as the rate of change (1/2).\nRepresentation 3: The constant of proportionality is 0.5, which is the same as the rate of change (0.5/1).\nStudent answers will vary. Possible situation for representation 2: You place a bucket under a leaking faucet, which collects 1 cup of water every 2 hours.</code>"
+                        "Representation 1: The constant of proportionality is -3, which is the same as the rate of change (-3/1).\nRepresentation 2: The constant of proportionality is 1/2, which is the same as the rate of change (1/2).\nRepresentation 3: The constant of proportionality is 0.5, which is the same as the rate of change (0.5/1).\nStudent answers will vary. Possible situation for representation 2: You place a bucket under a leaking faucet, which collects 1 cup of water every 2 hours."
                     }
                   }
                 ]
@@ -3613,7 +3613,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": 
-                        "<code>Graph 1: slope: -3, y-intercept: 6\nGraph 2: slope: 3, y-intercept: 6\nTable 1 : slope :1.5, y-intercept : -1\nTable 2 : slope : -0.5, y-intercept : 5\nquation 1 : slope : 2.5, y-intercept : 5\nEquation 2 : slope : -3, y-intercept : 0</code>"
+                        "Graph 1: slope: -3, y-intercept: 6\nGraph 2: slope: 3, y-intercept: 6\nTable 1 : slope :1.5, y-intercept : -1\nTable 2 : slope : -0.5, y-intercept : 5\nquation 1 : slope : 2.5, y-intercept : 5\nEquation 2 : slope : -3, y-intercept : 0"
                     }
                   },
                   {
@@ -3629,7 +3629,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": 
-                        "<code>The relationship shown by Equation 2 is proportional with a constant of proportionality of -3.</code>"
+                        "The relationship shown by Equation 2 is proportional with a constant of proportionality of -3."
                     }
                   },
                   {
@@ -3645,7 +3645,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": 
-                        "<code>He is correct because the line runs through the origin and, for every point on the line, the ratio of the x- and y-coordinates is always a.</code>"
+                        "He is correct because the line runs through the origin and, for every point on the line, the ratio of the x- and y-coordinates is always a."
                     }
                   },
                   {
@@ -3661,7 +3661,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": 
-                        "<code>He is correct. The constant of proportionality a for this line means that each time the x-variable increases by 1, the y-variable increases by a. So, the ratio is a to 1, which is also a unit rate.</code>"
+                        "He is correct. The constant of proportionality a for this line means that each time the x-variable increases by 1, the y-variable increases by a. So, the ratio is a to 1, which is also a unit rate."
                     }
                   },
                   {
@@ -3677,7 +3677,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": 
-                          "<code>The rate of change of the line is (10 – 5)/(-2 - 3) = 5/-5 = -1</code>"
+                          "The rate of change of the line is (10 – 5)/(-2 - 3) = 5/-5 = -1"
                     }
                   },
                   {
@@ -3693,7 +3693,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": 
-                          "<code>Student answers will vary. \nFor example, (-1,9) is on the line because you can increase the x-coordinate of (-2,10) by 1 and decrease the y-coordinate of (-2,10) by 1.</code>"
+                          "Student answers will vary. \nFor example, (-1,9) is on the line because you can increase the x-coordinate of (-2,10) by 1 and decrease the y-coordinate of (-2,10) by 1."
                     }
                   },
                   {
@@ -3709,7 +3709,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": 
-                          "<code>This line does not represent a proportional situation because it does not pass through the origin.</code>"
+                          "This line does not represent a proportional situation because it does not pass through the origin."
                     }
                   },
                   {
@@ -3725,7 +3725,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": 
-                          "<code>The rate of change of a horizontal line is 0 because there is no “rise” no matter how far you “run.” The rate of change of a vertical line is undefined because there is no “run” no matter how far you “rise.”</code>"
+                          "The rate of change of a horizontal line is 0 because there is no “rise” no matter how far you “run.” The rate of change of a vertical line is undefined because there is no “run” no matter how far you “rise.”"
                     }
                   }
                 ]
@@ -3751,7 +3751,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": 
-                          "<code>Some linear relationships are proportional and some are not. The rate of change represents how one variable changes compared to the other. For a given relationship, the rate of change is constant for any x- and y-values you choose.\nWhen a linear situation is also proportional, the unit rate, constant of proportionality, and the rate of change are all the same.</code>"
+                          "Some linear relationships are proportional and some are not. The rate of change represents how one variable changes compared to the other. For a given relationship, the rate of change is constant for any x- and y-values you choose.\nWhen a linear situation is also proportional, the unit rate, constant of proportionality, and the rate of change are all the same."
                     }
                   }
                 ]
@@ -3784,7 +3784,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": 
-                          "<code>The movie company will “break even” if there are 40 students in attendance.\nStudent answers will vary. \n\nSample response finding when Expenses equal Income:\nWe can find when the expenses and incomes are equal.\n\u00894.50n = 130 + 1.25n\n\u00893.25n = 130\n\u0089n = 40\n\nSample response using the Profit equation:\nWe can write equations for the movie company’s income I, expenses E, and model profit P as income – expenses. For some number of students n.\n\u0089P = I – E \n\u0089P = 4.50n – (130 + 1.25n)\n\u0089P = 3.25n – 130\nThe point at which the movie company will “break even” is the point at which their profit equals zero, so we can solve for which value of n makes P=0.\n\u00890 = 3.25n – 130\n\u0089130 = 3.25n\n\u008940 = n</code>"
+                          "The movie company will “break even” if there are 40 students in attendance.\nStudent answers will vary. \n\nSample response finding when Expenses equal Income:\nWe can find when the expenses and incomes are equal.\n\u00894.50n = 130 + 1.25n\n\u00893.25n = 130\n\u0089n = 40\n\nSample response using the Profit equation:\nWe can write equations for the movie company’s income I, expenses E, and model profit P as income – expenses. For some number of students n.\n\u0089P = I – E \n\u0089P = 4.50n – (130 + 1.25n)\n\u0089P = 3.25n – 130\nThe point at which the movie company will “break even” is the point at which their profit equals zero, so we can solve for which value of n makes P=0.\n\u00890 = 3.25n – 130\n\u0089130 = 3.25n\n\u008940 = n"
                     }
                   }
                 ]
@@ -3858,7 +3858,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": 
-                          "<code>Geraldo’s strategy could be used by filling out the table and looking for the number of students when the income is the same as the expenses. \n\nAnna’s strategy could be used by graphing the line for income and the line for operating expenses and looking for the intersection point. \n\nSze’s strategy could be used by making his expression into an equation equal to a profit of 0.</code>"
+                          "Geraldo’s strategy could be used by filling out the table and looking for the number of students when the income is the same as the expenses. \n\nAnna’s strategy could be used by graphing the line for income and the line for operating expenses and looking for the intersection point. \n\nSze’s strategy could be used by making his expression into an equation equal to a profit of 0."
                     }
                   },
                   {
@@ -3874,7 +3874,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": 
-                          "<code>To find the number of students that will make expenses less than $255, we need to solve the associated equality. So 1.25n+130=255\n\u0089 1.25n = 125 \n\u0089 n = 100. So to make the inequality statement for expenses true, there need to be less than 100 students.\n\nTo find the number of students that will make the income greater than $675, we need to solve the associated equality. So 4.50n = 675 \n\u0089 n = 150. \nSo to make the inequality statement for income true, there need to be more than 150 students.</code>"
+                          "To find the number of students that will make expenses less than $255, we need to solve the associated equality. So 1.25n+130=255\n\u0089 1.25n = 125 \n\u0089 n = 100. So to make the inequality statement for expenses true, there need to be less than 100 students.\n\nTo find the number of students that will make the income greater than $675, we need to solve the associated equality. So 4.50n = 675 \n\u0089 n = 150. \nSo to make the inequality statement for income true, there need to be more than 150 students."
                     }
                   },
                   {
@@ -3890,7 +3890,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": 
-                          "<code>Student answers will vary. Sample answer: If you only have a fixed amount of money to spend on showing the movie, then the expenses inequality can keep you from going into debt. If you need to raise a certain amount of money from showing the movie, then the income inequality can help you calculate how many tickets to sell.</code>"
+                          "Student answers will vary. Sample answer: If you only have a fixed amount of money to spend on showing the movie, then the expenses inequality can keep you from going into debt. If you need to raise a certain amount of money from showing the movie, then the income inequality can help you calculate how many tickets to sell."
                     }
                   },
                   {
@@ -3906,7 +3906,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": 
-                          "<code>The number 3 tells you how much the theater’s profit will increase for each extra student who attends the theater. The number -115 tells you some expense or initial fee for using the theatre.</code>"
+                          "The number 3 tells you how much the theater’s profit will increase for each extra student who attends the theater. The number -115 tells you some expense or initial fee for using the theatre."
                     }
                   },
                   {
@@ -3922,7 +3922,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": 
-                          "<code>The number 3 tells you how much pattern of change. For every additional student, there is an increase of $3 between consecutive profit entries on the table. The number -115 tells you the profit entry that corresponds with zero students.</code>"
+                          "The number 3 tells you how much pattern of change. For every additional student, there is an increase of $3 between consecutive profit entries on the table. The number -115 tells you the profit entry that corresponds with zero students."
                     }
                   },
                   {
@@ -3938,7 +3938,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": 
-                          "<code>The number 3 tells you the rate of change, or slope, of the line (because profit increases by 3 every time the number of students increases by 1). The number -115 tells you the y-intercept of the line.</code>"
+                          "The number 3 tells you the rate of change, or slope, of the line (because profit increases by 3 every time the number of students increases by 1). The number -115 tells you the y-intercept of the line."
                     }
                   },
                   {
@@ -3954,7 +3954,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": 
-                          "<code>The equation for profit for the theater in the initial challenge was P1 = I – E = 4.50n – (130 + 1.25n) = 3.25n – 130. The equation for profit for the theater in this problem is P2 = 3n – 115.  If they make the same profit, then we can set the expressions equal and solve for the number of students.\n\u00893.25n – 130 = 3n – 115\n\u0089 0.25n = 15\n\u0089 n = 60\nThis means that these two theaters will make the same profit for 60 students.</code>"
+                          "The equation for profit for the theater in the initial challenge was P1 = I – E = 4.50n – (130 + 1.25n) = 3.25n – 130. The equation for profit for the theater in this problem is P2 = 3n – 115.  If they make the same profit, then we can set the expressions equal and solve for the number of students.\n\u00893.25n – 130 = 3n – 115\n\u0089 0.25n = 15\n\u0089 n = 60\nThis means that these two theaters will make the same profit for 60 students."
                     }
                   }
                 ]
@@ -3980,7 +3980,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": 
-                          "<code>Student answers will vary. Sample answer: The movie theater situations in this Problem have positive rates of change (like the staircases). Some of the other problems showed decreasing/negative rates of changes. The movie theater problems don’t make sense for fractions of students, but the staircase problems make sense for fraction or decimal measurements. None of the movie theater problems are proportional situations, because none of them would pass through the origin if graphed.\nTables are useful for solving problems because they show several numerical values for a given pattern. Graphs are useful because they give you a sense of the pattern’s behavior over a wide range of values, which is helpful for estimating. Equations are useful because you can use them to calculate any specific value and the coefficients give you information about the problem situation. Inequalities are useful if you are looking for a range of possible answers.</code>"
+                          "Student answers will vary. Sample answer: The movie theater situations in this Problem have positive rates of change (like the staircases). Some of the other problems showed decreasing/negative rates of changes. The movie theater problems don’t make sense for fractions of students, but the staircase problems make sense for fraction or decimal measurements. None of the movie theater problems are proportional situations, because none of them would pass through the origin if graphed.\nTables are useful for solving problems because they show several numerical values for a given pattern. Graphs are useful because they give you a sense of the pattern’s behavior over a wide range of values, which is helpful for estimating. Equations are useful because you can use them to calculate any specific value and the coefficients give you information about the problem situation. Inequalities are useful if you are looking for a range of possible answers."
                     }
                   }
                 ]
@@ -4037,7 +4037,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<code>The coefficient a in the equation y = ax + b that represents a linear relationship is the rate of change between the independent variable and the dependent variable. It controls the slant of the line that represents the relationship. Greater absolute values of a mean there is a greater rate of change in the situation, so the lines are steeper. Positive values of a give lines that slant up. Negative values of a give lines that slant down. The value of b gives the y-intercept of the line. It is represented as the point (0, b) on the line or the pair of values in a table. In a table, the y-intercept is the value where the x-value is 0, and the rate of change is the difference in consecutive values of the dependent variable for constant increments in the independent variable.\nAny ordered pair (point) that lies on the graph of a linear relationship can be used to find the solution to a problem. The ordered pair (x, y) represents specific values of the variables. If the value of one of the variables is known, then the graph can be traced to find the corresponding value of the other variable. Similarly, any ordered pair in a table for a linear relationship can be used to find the solution to a problem.\nTo find solutions to inequalities, we can consider the solution to the corresponding equality. Then consider the values that would make sense. Often the situation indicates the values to solve an inequality. For example, we often look at “When is one company less expensive than another company?” or “How many items do we need to sell to make a profit?”</code>"
+                      "text": "The coefficient a in the equation y = ax + b that represents a linear relationship is the rate of change between the independent variable and the dependent variable. It controls the slant of the line that represents the relationship. Greater absolute values of a mean there is a greater rate of change in the situation, so the lines are steeper. Positive values of a give lines that slant up. Negative values of a give lines that slant down. The value of b gives the y-intercept of the line. It is represented as the point (0, b) on the line or the pair of values in a table. In a table, the y-intercept is the value where the x-value is 0, and the rate of change is the difference in consecutive values of the dependent variable for constant increments in the independent variable.\nAny ordered pair (point) that lies on the graph of a linear relationship can be used to find the solution to a problem. The ordered pair (x, y) represents specific values of the variables. If the value of one of the variables is known, then the graph can be traced to find the corresponding value of the other variable. Similarly, any ordered pair in a table for a linear relationship can be used to find the solution to a problem.\nTo find solutions to inequalities, we can consider the solution to the corresponding equality. Then consider the values that would make sense. Often the situation indicates the values to solve an inequality. For example, we often look at “When is one company less expensive than another company?” or “How many items do we need to sell to make a profit?”"
                         }
                   }
                 ]
@@ -4063,7 +4063,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": 
-                          "<code>If you have an equation of the form y = ax + b and you know the value of x or y, you can substitute the value of the variable into the equation. Then, use the properties of equality to solve for the other variable. For example, if y = 3x + 4 and you want to find x when y = 10, then you substitute 10 in place of y: 10 = 3x + 4. Next, you can subtract 4 from both sides to get 6 = 3x. Now, divide both sides by 3 to get x = 2.\nFor the equation y = 3x + 4, to find the value of x when y = 10, you can graph the equation. Trace along the line to find the point whose y-coordinate is 10 and then read the corresponding x-value, which is 2. To use a table, construct a table of values for the equation either by hand or with graphing technology. Next, locate the pair of values in which y = 10 and find the corresponding x-value, which is 2.\nTo find the values that satisfy an inequality such as 3x + 4 < 10, you can solve the corresponding equation 3x + 4 = 10. The solution of this equation is x = 2. Then, test values less than and greater than 2 to determine the solution. In this case, x-values less than 2 make the inequality 3x + 4 < 10 true, so the solution is x < 2.\nTo find the values that satisfy an inequality such as 3x + 4 < 10, you can graph the corresponding linear relationship y = 3x + 4. Then, find the points on the line whose y-values are less than 10. You can also locate the x-values of these points on the x-axis or on a number line.\nIn Problem 3.2, Equation 1 two equivalent expressions for the number of pouches on the left side of the equation are 4x + 2 and 2(2x + 1). You can use the properties of operations to show that they are equivalent. Applying the Distributive Property to one of the expressions yields the other: 4x + 2 = 2(2x + 1). You can also argue that both of the expressions represent the number of pouches and coins in the picture.\nIn Problem 3.3, Set 3(a), two equivalent ways of writing the expression on the left side of the equation are 3(x + 1) and 3x + 3. You can tell they are equivalent because the equations 3(x + 1) = 21 and 3x + 3 = 21 have the same solution, even though you would take different steps when solving them. (To solve the first equation, you would divide each side by 3 and then subtract 1 from each side. To solve the second equation, you would subtract 3 from each side and then divide each side by 3. The solution for both equations is x = 6.)</code>"
+                          "If you have an equation of the form y = ax + b and you know the value of x or y, you can substitute the value of the variable into the equation. Then, use the properties of equality to solve for the other variable. For example, if y = 3x + 4 and you want to find x when y = 10, then you substitute 10 in place of y: 10 = 3x + 4. Next, you can subtract 4 from both sides to get 6 = 3x. Now, divide both sides by 3 to get x = 2.\nFor the equation y = 3x + 4, to find the value of x when y = 10, you can graph the equation. Trace along the line to find the point whose y-coordinate is 10 and then read the corresponding x-value, which is 2. To use a table, construct a table of values for the equation either by hand or with graphing technology. Next, locate the pair of values in which y = 10 and find the corresponding x-value, which is 2.\nTo find the values that satisfy an inequality such as 3x + 4 < 10, you can solve the corresponding equation 3x + 4 = 10. The solution of this equation is x = 2. Then, test values less than and greater than 2 to determine the solution. In this case, x-values less than 2 make the inequality 3x + 4 < 10 true, so the solution is x < 2.\nTo find the values that satisfy an inequality such as 3x + 4 < 10, you can graph the corresponding linear relationship y = 3x + 4. Then, find the points on the line whose y-values are less than 10. You can also locate the x-values of these points on the x-axis or on a number line.\nIn Problem 3.2, Equation 1 two equivalent expressions for the number of pouches on the left side of the equation are 4x + 2 and 2(2x + 1). You can use the properties of operations to show that they are equivalent. Applying the Distributive Property to one of the expressions yields the other: 4x + 2 = 2(2x + 1). You can also argue that both of the expressions represent the number of pouches and coins in the picture.\nIn Problem 3.3, Set 3(a), two equivalent ways of writing the expression on the left side of the equation are 3(x + 1) and 3x + 3. You can tell they are equivalent because the equations 3(x + 1) = 21 and 3x + 3 = 21 have the same solution, even though you would take different steps when solving them. (To solve the first equation, you would divide each side by 3 and then subtract 1 from each side. To solve the second equation, you would subtract 3 from each side and then divide each side by 3. The solution for both equations is x = 6.)"
                     }
                   }
                 ]
@@ -4089,7 +4089,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": 
-                          "<code>Slope describes the steepness of a line. It is the ratio of vertical change to horizontal change. If it is positive, then the line is increasing from left to right. If it is negative, then it is decreasing from left to right. If the slope is zero, the line is horizontal. This is like walking on a flat surface as opposed to up or down a hill.\nFinding the slope is the same as finding the rate of change between two variables in a linear relationship. The horizontal distance change between two points is the same as the difference between two corresponding x-values of points in a table. The vertical change in distance is the same as the difference between two corresponding y-values of points in a table.</code>"
+                          "Slope describes the steepness of a line. It is the ratio of vertical change to horizontal change. If it is positive, then the line is increasing from left to right. If it is negative, then it is decreasing from left to right. If the slope is zero, the line is horizontal. This is like walking on a flat surface as opposed to up or down a hill.\nFinding the slope is the same as finding the rate of change between two variables in a linear relationship. The horizontal distance change between two points is the same as the difference between two corresponding x-values of points in a table. The vertical change in distance is the same as the difference between two corresponding y-values of points in a table."
                     }
                   }
                 ]

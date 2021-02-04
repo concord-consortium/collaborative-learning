@@ -85,29 +85,31 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In the <em>Variables and Patterns</em> Unit, you investigated a bicycle touring business. You used contextual situations, tables, graphs, and equations to represent patterns relating variables such as cost, income, and profit. You looked at some linear relationships, like the relationship between cost and number of rental bikes represented in this graph:"
+                        "This Problem introduces patterns of change between two variables in the context of a walkathon. Students determine their walking rates in meters per second as a ratio of distance to time. This Problem connects back to the rate work done in Comparing and Scaling while laying the foundation for using rate to look at patterns of change. Students answer questions about time and distance using their constant walking rates and write an equation that models the distance walked over time at their constant walking rates. "
                       ]
                     }
                   },
                   {
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_1_In_walking_rates_350w.png"
+                      "type": "Text",
+                      "text": "1.1  Walking Marathons: Using Rates\nAoL:  Introduce & Introduce/Explore\nCCSSM: 7.RP.A.2, 7.RP.A.2a, 7.RP.A.2b, 7.RP.A.2c, 7.EE.B.4:"
                     }
                   },
                   {
+                    "display": "teacher",
                     "content": {
                       "type": "Text",
-                      "text": "A relationship between two variables for which all points lie on a straight line is called a linear relationship. From the graph, you can see that the relationship between the number of bikes rented and the total rental cost is a linear relationship. In this Unit, consider these questions:"
+                      "format": "html",
+                      "text": [
+                        "<strong>NWDYK</strong>\nAssume you continue to walk at the rate determined in the Initial Challenge. Describe in words the distance you could walk in a given number of seconds. Then write an equation to represent this information. "
+                      ]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": [
-                        "<ul><li><em>How can you determine whether a relationship is linear by examining a table of data? A graph? An equation? A verbal context?</em></li><li><em>If the relationship is linear, how can you determine if it is a proportional relationship?</em></li><li><em>How do changes in one variable affect changes in a related variable? How are these changes represented in a table, a graph, or an equation?</em></li><li><em>If I know the value of one variable, how can I find the value of the other variable? </em></li></ul>"
-                      ]
+                      "text": "<strong>Emerging Mathematical Ideas</strong>\nBegin making sense of a problem context that involves a proportional relationship between two variables (time, distance) described initially in words and connecting it to an equation and a graph of the relationship. \nBegin to notice/recognize:  <ul><li> rate is a way to describe how far you can travel in a fixed interval of time – e.g., in two seconds I can move 20 feet, and use phrases like “consistent rate” and “constant rate” to describe relationships like this one,</li><li> proportional relationships,</li><li> an understanding of rates can be connected to prior experiences with ratios and proportional reasoning (multiplicative reasoning), </li><li> the relationship between the length of time traveled and the distance covered at a particular rate can be described in words, e.g., if I walk at a rate of 5 meters per second, then I can find the distance I travel by multiplying the number of seconds I travel by 5 m/sec. (the unit rate),</li><li> the distance traveled (d) at a constant rate (r) for a period of time (t) can be described by the equation d = r x t, </li><li> the equation needed to describe the distance traveled for two different people will be the same except that the value for the rate will vary, and</li><li> when points for several different values of time and distance traveled (at a given rate) are graphed, the points will form a straight line.</li></ul>"
                     }
                   }
                 ]
@@ -121,13 +123,8 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Ms. Chang’s class decides to participate in a walkathon. Each participant must find sponsors to pledge a certain amount of money for each kilometer the participant walks. Leanne suggests that they determine their walking rates in meters per second, so they can make predictions about the number of meters walked and the amount of money raised. She collects some meter sticks and her cell phone to use as a timer for her walking experiment."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_1_1_phone.png"
+                      "format": "html",
+                      "text": "<strong>Launch (Getting Started)</strong> Connecting to Prior Knowledge\n\nThe introduction to the Investigation revisits Adrian’s Bike Rental from Grade 6 Variables and Patterns. In that Unit, students used contextual situations, tables, graphs, and equations to represent patterns relating variables such as cost, income, and profit. They looked at both consistent relationships (such as linear patterns) and non-consistent relationships to explain the pattern of change between two variables.\n\nThe four questions in the introduction to the Investigation offer overarching questions that the students should explore throughout the unit. You may want to display these questions in the classroom in some way to help keep students focused on the big ideas in the Unit.<ul><li> How can you determine whether a relationship is linear by examining a table of data? A graph? An equation? A verbal context?</li><li> If the relationship is linear, how can you determine if it is a proportional relationship?</li><li> How do changes in one variable affect changes in a related variable? How are these changes represented in a table, graph, or equation?</li><li> If I know the value of one variable, how can I find the value of the other variable? </li></ul>After setting the scene for the Unit with the four questions, begin to introduce students to the context of the Problem."
                     }
                   },
                   {
@@ -135,32 +132,44 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<em>What do you think your walking rate is?</em><ul><li>Make a prediction about your walking rate. </li><li>Use a meter stick and timer to help answer the following following questions about your walking rate. What is your walking rate in meters per second?</li><</ul>"
+                        "Ask students to describe if they are fast or slow walkers and to describe their evidence.",
+                        "<strong>Suggested Questions</strong>",
+                        "<ol><li> Who is the slowest walker you know? Who is the fastest walker you know? (Various answers.)</li><li> Do you walk fast or slow? How do you know? (Various answers. Students should offer some reasoning for saying that they are fast or slow, such as, Teri always passes me in the hall because I walk slowly.)</li><li> What do you think your walking rate is in miles per hour? In meters per second? (Various answers. Students’ conjectures will help set up the Problem.)</li></ul>",
+                        "Student predictions will likely be much higher than their actual walking rates. They may have some knowledge about walking rates if they have used a treadmill. On a treadmill, a person might set the walking speed at 4 miles per hour. One interesting thing about treadmills is that the rate of 4 miles per hour may also be reported as 15 minutes per mile. You might discuss why both these rates are reported or why treadmills do not report the rate in miles per minute or meters per hour. "
                       ]
                     }
                   },
                   {
-                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<strong>Presenting the Challenge</strong>\n\nTell a story about walkathons. Students may have some experience with other “–athons.” The Launch Video animation depicts two characters discussing an upcoming walkathon and helping each other figure out their walking rates. You can use this animation to help students understand the context of the walkathon. You can also use it as a demonstration of the steps needed for students to find their walking rates. \n\nNow tell students that they will have a chance to check their guesses about their walking rates. Describe the experiment. \n\nGive each group access to meter sticks (or a pre-set measurement of 10 meters) and a timer or a clock with seconds. Students should do the experiment twice to get a more accurate walking rate. They can choose either the rate they want or the average of the two. Make sure there is a person checking the time in each group. As the groups finish collecting their data, they can work on the questions in the What If…? questions. "
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<code>Student answers will vary. It will be easier for students to find their walking rates by seeing how far they walk in, for example, 5 or 10 seconds and then divide the number of meters they walked by the number of seconds for which they walked.</code>"
+                        "Ask students to describe if they are fast or slow walkers and to describe their evidence.",
+                        "<strong>Suggested Questions</strong>",
+                        "<ul><li> What does meters per second mean? (A rate where we know how many meters in one second.)</li><li> How might meter sticks and a timer help? (Like the video explains, we can line-up 10 sticks and find how long it takes to walk 10 meters.)</li><li> What are the variables? (meters and seconds) What is the relationship between the variables? (The more distance I walk, the more time it will take.)</li></ul>You could extend this Problem by asking some groups to record their data on a display such as a graph. Students may also record their graphs on transparent or electronic grids so that they can be used in the Summarize."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text":[
+                        "You could extend this Problem by asking some groups to record their data on a display such as a graph. Students may also record their graphs on transparent or electronic grids so that they can be used in the Summarize.",
+                        "<ul><li> You could extend this Problem by asking some groups to record their data on a display such as a graph. Students may also record their graphs on transparent or electronic grids so that they can be used in the Summarize. \n\nThe following optional suggestions are designed to enrich the experiment: <ul><li> Let the groups decide whether they want to calculate meters per second or seconds per meter.  </li><li> Ask one group to change their walking rate—maybe walk, jog, sprint, and so on.  </li><li> Ask some students to walk for 10 seconds rather than 10 meters. Be sure to discuss these suggestions in the Summarize if you assign them.  </li></ul>"
                       ]
                     }
                   }
                 ]
               },
               "supports": [
-                {
-                  "text": "What does meters per second mean?"
-                },
-                {
-                  "text": "What are the variables? What is the relationship between the variables?"
-                },
-                {
-                  "text": "How might meter sticks and a stopwatch help you measure your walking rate?"
-                }
               ]
             },
             {
@@ -171,20 +180,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": [
-                        "<strong>Situation A. Walking at a Consistent Rate</strong>",
-                        "Assume you continue to walk at the consistent rate determined in the <em>Initial Challenge</em>."
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<code>Answers will vary depending on the student’s walking rate. Sample answers are provided for a walking rate of 2 meters per second, and for a student who walks <em>r</em> meters per second.</code>"
-                      ]
+                      "text": "<strong>Explore (Digging In)</strong>  Providing for Individual Needs\n\nAllow students to problem solve how to find their walking rates. For groups that do not know how to begin, you can ask them questions to help them decide how to conduct the experiment.\n\n<strong>Suggested Questions</strong><ul><li> What are the variables that we need to collect data on? (meters and seconds)</li><li> How can we measure those? (meters using a meter stick and seconds with a timer)</li><li> So, if someone is walking, what do we need to measure to find the walking rate? (the distance in meters and the time that it takes to walk that distance)</li><li> How long would you need to walk for someone to get an idea of how fast or slow you walk? (Answers will vary, but students might say a general distance such as walking down the hallway.)</li><li> What is a convenient distance to use? (Answers will vary. You may want to push for a distance like 10 meters.)</li></ul>"
                     }
                   },
                   {
@@ -193,136 +189,6 @@
                       "format": "html",
                       "text": [
                         "1. How long would it take you to walk 500 meters?"
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<code>A student who walks 2 meters per second will walk 500 meters in 250 seconds, or 4 minutes and 10 seconds.</code>",
-                        "<code>A student who walks <em>r</em> meters per second will walk 500 meters in 500/r seconds.</code>"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "2. How far could you walk in 5 seconds, 10 seconds, 30 seconds? In 60 seconds? In 1 hour?"
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<code>A student who walks 2 meters per second will walk 10 meters in 5 seconds, 20 meters in 10 seconds, 60 meters in 30 seconds, 120 meters in 60 seconds, and 7200 meters in 1 hour.</code>",
-                        "<code>A student who walks r meters per second will walk 5r meters in 5 seconds, 10r meters in 10 seconds, 30r meters in 30 seconds, 60r meters in 60 seconds, and 3600r meters in 1 hour.</code>"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "3. Write an equation that represents the distance d in meters that you could walk in t seconds. Compare your equation to your classmates’ equations. Describe what a graph of your equation would look like. Check your answer by making a graph of your data. "
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<code>For a walking rate of 2 meters per second, an equation is d = 2t, where d is the distance in meters and t is the time in seconds.</code>",
-                        "<code>For a walking rate of r meters per second, an equation is d = rt, where d is the distance in meters and t is the time in seconds.</code>"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "4. Describe what a graph of your equation would look like. Check your answer by making a graph of your data. "
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<code>Possible answers.\nFor a walking rate of 2 meters per second: The graph would be a line starting at (0,0). For every one second walked, the distance increases by 2.</code>",
-                        "<code>For a walking rate of r meters per second: The graph would be a line starting at (0,0). For every one second walked, the distance increases by r.</code>"
-                      ]
-                    }
-                  },
-                  {
-                    "layout": {
-                      "height": 340
-                    },
-                    "display": "teacher",
-                    "content": {
-                      "type":"Geometry",
-                      "board": {
-                        "properties": {
-                          "axisNames": ["Time (seconds)", "Distance (meters)"],
-                          "axisMin": [-1, -1],
-                          "axisRange": [8, 10]
-                        }
-                      },
-                      "objects": [
-                        {
-                          "type": "point",
-                          "parents": [0, 0],
-                          "properties": {
-                                "name": ""
-                              }
-                        },
-                        {
-                          "type": "point",
-                          "parents": [1, 2],
-                          "properties": {
-                                "name": ""
-                              }
-                        },
-                        {
-                          "type": "point",
-                          "parents": [4, 8],
-                          "properties": {
-                                "name": ""
-                              }
-                        }
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<strong>Situation B. Liz’s Claim</strong>",
-                        "Liz claimed that walking rates are like ratios and she used proportional reasoning to answer the questions in Situation A. She wrote:\n <em>The walking rate is a multiplicative comparison statement. If I walk 1.5 m per sec, then I walk 7.5 m in 5 seconds, 15 m in 10 sec, … or 500 m in about 333 sec, etc.</em>\n\nIs she correct? Explain. "
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<code>Sample answer: She is correct. The ratio of meters walked to seconds always stays the same, so, for example, 1.5 meters/1 second = 7.5 meters/5 seconds = 15 meters/10 seconds. So you can always predict how long it will take to walk a specific distance based on this constant ratio.</code>"
                       ]
                     }
                   }
