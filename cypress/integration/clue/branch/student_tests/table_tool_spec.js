@@ -105,7 +105,7 @@ context.skip('Table Tool Tile',function(){
     });
     describe('publish table', function(){
         it('will publish canvas', function(){
-            canvas.publishCanvas();
+            canvas.publishCanvas("investigation");
             // rightNav.openClassWorkTab();
             // rightNav.getClassWorkAreaCanvasItem()
             //              .should('have.length',1)

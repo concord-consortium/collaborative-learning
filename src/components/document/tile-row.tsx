@@ -1,10 +1,13 @@
+import classNames from "classnames";
 import React from "react";
 import { observer, inject } from "mobx-react";
-import { TileRowModelType } from "../../models/document/tile-row";
 import { BaseComponent } from "../base";
-import { ToolTileComponent, dragTileSrcDocId, IToolApiInterface } from "../tools/tool-tile";
+import { TileLayoutModelType, TileRowModelType } from "../../models/document/tile-row";
+import { isShowingTeacherContent } from "../../models/stores/stores";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { SectionHeader } from "../tools/section-header";
+import { ToolTileComponent, dragTileSrcDocId, IToolApiInterface } from "../tools/tool-tile";
+
 import "./tile-row.sass";
 
 export const kDragResizeRowId = "org.concord.clue.row-resize.id";
@@ -76,32 +79,48 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
 
   public render() {
     const { model } = this.props;
-    const { isSectionHeader, sectionId } = model;
+    const { isSectionHeader, sectionId, tiles } = model;
     // ignore height setting for section header rows
     const height = !isSectionHeader
                       ? this.props.height || model.height
                       : undefined;
     const style = height ? { height } : undefined;
+    const renderableTiles = tiles?.filter(tile => this.isTileRenderable(tile.tileId));
+    const hasTeacherTiles = tiles.some(tile => this.getTile(tile.tileId)?.display === "teacher");
+    const classes = classNames("tile-row", { "has-teacher-tiles": hasTeacherTiles });
+    if (!isSectionHeader && !renderableTiles.length) return null;
     return (
-      <div className={`tile-row`} data-row-id={model.id}
+      <div className={classes} data-row-id={model.id}
           style={style} ref={elt => this.tileRowDiv = elt}>
         { isSectionHeader && sectionId
           ? <SectionHeader type={sectionId}/>
-          : this.renderTiles(height)
+          : this.renderTiles(renderableTiles, height)
         }
         {!this.props.readOnly && this.renderDragDropHandles()}
       </div>
     );
   }
 
-  private renderTiles(rowHeight?: number) {
+  private getTile(tileId: string) {
+    return this.props.tileMap.get(tileId) as ToolTileModelType | undefined;
+  }
+
+  private isTileRenderable(tileId: string) {
+    const tile = this.getTile(tileId);
+    return !!tile && (!tile.display || isShowingTeacherContent(this.stores));
+  }
+
+  private getTileWidth(tileId: string, tiles: TileLayoutModelType[]) {
+    // for now, distribute tiles evenly
+    return 100 / (tiles.length || 1);
+  }
+
+  private renderTiles(tiles: TileLayoutModelType[], rowHeight?: number) {
     const { model, tileMap, ...others } = this.props;
-    const { tiles } = model;
-    if (!tiles) { return null; }
 
     return tiles.map((tileRef, index) => {
-      const tileModel: ToolTileModelType = tileMap.get(tileRef.tileId);
-      const tileWidthPct = model.renderWidth(tileRef.tileId);
+      const tileModel = this.getTile(tileRef.tileId);
+      const tileWidthPct = this.getTileWidth(tileRef.tileId, tiles);
       return tileModel
               ? <ToolTileComponent key={tileModel.id} model={tileModel}
                                     widthPct={tileWidthPct} height={rowHeight}

@@ -317,7 +317,7 @@ context.skip('Save and restore keeps the connection between table and graph', fu
     before(function(){
         let title = '2.3 Mouthing Off and Nosing Around';
         rightNav.openRightNavTab('my-work');
-        rightNav.openSection('my-work','investigations');
+        cy.openSection('my-work','investigations');
         rightNav.openCanvasItem('my-work','investigations',title);
     });
     it('verify connection of table and graph on restored canvas', function(){

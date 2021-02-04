@@ -105,13 +105,17 @@ interface IProps extends IToolTileBaseProps {
   toolApiInterface?: IToolApiInterface;
 }
 
-const kToolComponentMap: any = {
-        [kPlaceholderToolID]: PlaceholderToolComponent,
-        [kDrawingToolID]: DrawingToolComponent,
-        [kGeometryToolID]: GeometryToolComponent,
-        [kImageToolID]: ImageToolComponent,
-        [kTableToolID]: TableToolComponent,
-        [kTextToolID]: TextToolComponent
+interface ToolComponentInfo {
+  ToolComponent: any;
+  toolTileClass: string;
+}
+const kToolComponentMap: Record<string, ToolComponentInfo> = {
+        [kPlaceholderToolID]: { ToolComponent: PlaceholderToolComponent, toolTileClass: "placeholder-tile" },
+        [kDrawingToolID]: { ToolComponent: DrawingToolComponent, toolTileClass: "drawing-tool-tile" },
+        [kGeometryToolID]: { ToolComponent: GeometryToolComponent, toolTileClass: "geometry-tool-tile" },
+        [kImageToolID]: { ToolComponent: ImageToolComponent, toolTileClass: "image-tool-tile" },
+        [kTableToolID]: { ToolComponent: TableToolComponent, toolTileClass: "table-tool-tile" },
+        [kTextToolID]: { ToolComponent: TextToolComponent, toolTileClass: "text-tool-tile" }
       };
 
 interface IDragTileButtonProps {
@@ -195,10 +199,10 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     const { model, readOnly, widthPct } = this.props;
     const { hoverTile } = this.state;
     const { appConfig, ui } = this.stores;
-    const ToolComponent = kToolComponentMap[model.content.type];
+    const { ToolComponent, toolTileClass } = kToolComponentMap[model.content.type];
     const isPlaceholderTile = ToolComponent === PlaceholderToolComponent;
     const isTileSelected = ui.isSelectedTile(model);
-    const classes = classNames("tool-tile", {
+    const classes = classNames("tool-tile", model.display, toolTileClass, {
                       placeholder: isPlaceholderTile,
                       readonly: readOnly,
                       hovered: this.state.hoverTile,
@@ -310,7 +314,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
       return;
     }
 
-    const ToolComponent = kToolComponentMap[model.content.type];
+    const ToolComponent = kToolComponentMap[model.content.type].ToolComponent;
     if (ToolComponent?.tileHandlesSelection) {
       ui.setSelectedTile(model, {append: hasSelectionModifier(e)});
     }
@@ -348,7 +352,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     }
     // set the drag data
     const { model, docId, height, scale } = this.props;
-    const ToolComponent = kToolComponentMap[model.content.type];
+    const ToolComponent = kToolComponentMap[model.content.type].ToolComponent;
     // can't drag placeholder tiles
     if (ToolComponent === PlaceholderToolComponent) {
       e.preventDefault();

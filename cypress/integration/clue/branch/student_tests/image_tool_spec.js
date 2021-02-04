@@ -82,8 +82,8 @@ context('Test image functionalities', function(){
     describe.skip('restore of images', function(){
         before(()=>{ //reopen the first canvas
             rightNav.openRightNavTab('my-work');
-            rightNav.openSection('my-work','workspaces');
-            rightNav.openDocumentWithTitle('my-work','workspaces', '2.1 Drawing Wumps');
+            cy.openSection('my-work','workspaces');
+            cy.openDocumentWithTitle('my-work','workspaces', '2.1 Drawing Wumps');
             cy.wait(5000);
             rightNav.closeRightNavTabs();
         });
@@ -99,8 +99,8 @@ context('Test image functionalities', function(){
         });
         it('verify restore of all  images that were added by upload', function(){
             rightNav.openRightNavTab('my-work');
-            rightNav.openSection('my-work','workspaces');
-            rightNav.openDocumentWithTitle('my-work','workspaces', userCanvas);
+            cy.openSection('my-work','workspaces');
+            cy.openDocumentWithTitle('my-work','workspaces', userCanvas);
             cy.wait(3000);
             // TODO: Need to figure out how to check that correct images were reloaded. For now just checking for 3 image tools are reloaded
             // const imageFilePath=['image.png','case_image.jpg',/*'model_image.gif'*/];

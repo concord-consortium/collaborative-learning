@@ -1,5 +1,45 @@
 # Changelog
 
+## Version 1.5.4 - released January 12, 2020
+
+### Features/Improvements
+- Content updates (Comparing and Scaling)
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 502,372 bytes | 0.0% |
+| index.js | 4,964,293 bytes | 0.0% |
+
+## Version 1.5.3 - released December 16, 2020
+
+### Features/Improvements
+- Content updates
+
+### Bugs Fixed
+- Fixed teacher class switcher menu
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 502,372 bytes | 0.0% |
+| index.js | 4,964,293 bytes | 0.0% |
+
+## Version 1.5.2 - released December 1, 2020
+
+### Features/Improvements
+- Draw toolbar styling improvements
+- Content updates
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 502,372 bytes | -2.9% |
+| index.js | 4,964,769 bytes | 0.3% |
+
 ## Version 1.5.1 - released November 8, 2020
 
 ### Bugs Fixed

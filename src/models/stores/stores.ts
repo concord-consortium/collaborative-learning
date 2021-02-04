@@ -1,5 +1,5 @@
 import { AppConfigModelType, AppConfigModel } from "./app-config-model";
-import { getUnitJson, UnitModel, UnitModelType } from "../curriculum/unit";
+import { getGuideJson, getUnitJson, UnitModel, UnitModelType } from "../curriculum/unit";
 import { InvestigationModelType, InvestigationModel } from "../curriculum/investigation";
 import { ProblemModel, ProblemModelType } from "../curriculum/problem";
 import { UIModel, UIModelType } from "./ui";
@@ -24,6 +24,7 @@ export interface IBaseStores {
   unit: UnitModelType;
   investigation: InvestigationModelType;
   problem: ProblemModelType;
+  teacherGuide?: ProblemModelType;
   user: UserModelType;
   ui: UIModelType;
   groups: GroupsModelType;
@@ -102,16 +103,26 @@ export const setUnitAndProblem = async (stores: IStores, unitId: string | undefi
   const unit = UnitModel.create(unitJson);
   const {investigation, problem} = unit.getProblem(problemOrdinal || stores.appConfig.defaultProblemOrdinal);
 
-  if (unit) {
-    stores.unit = unit;
-    stores.documents.setUnit(stores.unit);
-    if (investigation && problem) {
-      stores.investigation = investigation;
-      stores.problem = problem;
-    }
-    stores.problemPath = getProblemPath(stores);
+  stores.unit = unit;
+  stores.documents.setUnit(stores.unit);
+  if (investigation && problem) {
+    stores.investigation = investigation;
+    stores.problem = problem;
+  }
+  stores.problemPath = getProblemPath(stores);
+
+  const guideJson = await getGuideJson(unitId, stores.appConfig);
+  const unitGuide = guideJson && UnitModel.create(guideJson);
+  const teacherGuide = unitGuide?.getProblem(problemOrdinal || stores.appConfig.defaultProblemOrdinal)?.problem;
+  if (teacherGuide) {
+    stores.teacherGuide = teacherGuide;
   }
 };
+
+export function isShowingTeacherContent(stores: IStores) {
+  const { ui: { showTeacherContent }, user: { isTeacher } } = stores;
+  return isTeacher && showTeacherContent;
+}
 
 export function isFeatureSupported(stores: IStores, feature: string, sectionId?: string) {
   const { unit, investigation, problem } = stores;

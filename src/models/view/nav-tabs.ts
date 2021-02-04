@@ -1,8 +1,10 @@
 import { types, SnapshotIn, Instance } from "mobx-state-tree";
-import { UserModelType, UserTypeEnum } from "../stores/user";
+import { UserModelType } from "../stores/user";
+import { UserTypeEnum } from "../stores/user-types";
 
 export enum ENavTab {
   kProblems = "problems",
+  kTeacherGuide = "teacher-guide",
   kStudentWork = "student-work",
   kMyWork = "my-work",
   kClassWork = "class-work",

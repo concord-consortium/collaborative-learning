@@ -31,15 +31,15 @@ Merges into production are deployed to http://collaborative-learning.concord.org
 
 Other branches are deployed to http://collaborative-learning.concord.org/branch/<name>.
 
-You can view the status of all the branch deploys [here](https://travis-ci.org/concord-consortium/collaborative-learning/branches).
+You can view the status of all the branch deploys [here](https://travis-ci.com/concord-consortium/collaborative-learning/branches).
 
 To deploy a production release:
 
-1. Increment version number in package.json
-1. Run `npm install` to make sure dependencies are up to date and commit version to `package-lock.json`.
-1. Create new entry in CHANGELOG.md
-1. Run `git log --pretty=oneline --reverse <last release tag>...HEAD | grep '#' | grep -v Merge` and add contents (after edits if needed to CHANGELOG.md)
-1. Run `npm run build`
+1. Update the version number in `package.json` and `package-lock.json`
+    - `npm version --no-git-tag-version [patch|minor|major]`
+1. Update the `CHANGELOG.md` with a description of the new version
+1. Verify that everything builds correctly
+    - `npm run lint && npm run test && npm run build`
 1. Copy asset size markdown table from previous release and change sizes to match new sizes in `dist`
 1. Create `release-<version>` branch and commit changes, push to GitHub, create PR and merge
 1. Checkout master and pull
