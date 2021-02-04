@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import React from "react";
 import { observer, inject } from "mobx-react";
 import { BaseComponent } from "../base";
@@ -82,9 +83,11 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
                       : undefined;
     const style = height ? { height } : undefined;
     const renderableTiles = tiles?.filter(tile => this.isTileRenderable(tile.tileId));
+    const hasTeacherTiles = tiles.some(tile => this.getTile(tile.tileId)?.display === "teacher");
+    const classes = classNames("tile-row", { "has-teacher-tiles": hasTeacherTiles });
     if (!isSectionHeader && !renderableTiles.length) return null;
     return (
-      <div className={`tile-row`} data-row-id={model.id}
+      <div className={classes} data-row-id={model.id}
           style={style} ref={elt => this.tileRowDiv = elt}>
         { isSectionHeader && sectionId
           ? <SectionHeader type={sectionId}/>
@@ -95,8 +98,12 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
     );
   }
 
+  private getTile(tileId: string) {
+    return this.props.tileMap.get(tileId) as ToolTileModelType | undefined;
+  }
+
   private isTileRenderable(tileId: string) {
-    const tile = this.props.tileMap.get(tileId);
+    const tile = this.getTile(tileId);
     return !!tile && (!tile.display || isShowingTeacherContent(this.stores));
   }
 
@@ -109,7 +116,7 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
     const { model, tileMap, ...others } = this.props;
 
     return tiles.map((tileRef, index) => {
-      const tileModel: ToolTileModelType = tileMap.get(tileRef.tileId);
+      const tileModel = this.getTile(tileRef.tileId);
       const tileWidthPct = this.getTileWidth(tileRef.tileId, tiles);
       return tileModel
               ? <ToolTileComponent key={tileModel.id} model={tileModel}
