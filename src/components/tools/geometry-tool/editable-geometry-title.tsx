@@ -20,8 +20,14 @@ export const EditableGeometryTitle: React.FC<IProps> = observer(({
   // getTitle() and observer() allow this component to re-render
   // when the title changes without re-rendering the entire Geometry
   const title = getTitle() || "Graph";
-  const width = Math.ceil(measureText(title)) + 30;
-  const left = contentSize.width ? (contentSize.width - width) / 2 - 11 : 400;
+  const kTitlePadding = 30;
+  const kCenteringCorrection = 11;  // so it's centered w.r.t. the document title
+  // There can be one render before we know our container size, which will then be
+  // immediately replaced by a subsequent render with a known container size.
+  // Place it roughly in the middle of the screen until we have a proper position.
+  const kContainerlessPosition = 450;
+  const width = Math.ceil(measureText(title)) + kTitlePadding;
+  const left = contentSize.width ? (contentSize.width - width) / 2 - kCenteringCorrection : kContainerlessPosition;
   const [isEditing, setIsEditing] = useState(false);
   const [editingTitle, setEditingTitle] = useState(title);
   const handleClick = () => {
