@@ -1,0 +1,24 @@
+@import "../../vars.sass";
+
+.geometry-title {
+  position: absolute;
+  top: 6px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $charcoal-dark-2;
+  background-color: white;
+  border: 1.5px solid $charcoal-light-1;
+  border-radius: 5px;
+  text-align: center;
+  z-index: 10;  // has to be higher than JSXGraph entities that should be below it
+
+  input {
+    text-align: center;
+  }
+
+  .geometry-title-text {
+    font-style: italic;
+  }
+}

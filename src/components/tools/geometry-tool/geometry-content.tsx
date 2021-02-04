@@ -36,10 +36,10 @@ import { assign, castArray, debounce, each, filter, find, keys as _keys, throttl
 import {
   isVisibleMovableLine, isMovableLine, isMovableLineControlPoint, isMovableLineLabel,
 } from "../../../models/tools/geometry/jxg-movable-line";
-import { v4 as uuid } from "uuid";
 import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
 import { getDataSetBounds, IDataSet } from "../../../models/data/data-set";
 import AxisSettingsDialog from "./axis-settings-dialog";
+import { EditableGeometryTitle } from "./editable-geometry-title";
 import LabelSegmentDialog from "./label-segment-dialog";
 import MovableLineDialog from "./movable-line-dialog";
 import placeholderImage from "../../../assets/image_placeholder.png";
@@ -54,7 +54,9 @@ export interface IGeometryContentProps extends IGeometryProps {
   onSetActionHandlers: (handlers: IActionHandlers) => void;
   onContentChange: () => void;
 }
-export type IProps = IGeometryContentProps & SizeMeProps;
+export interface IProps extends IGeometryContentProps, SizeMeProps {
+  measureText: (text: string) => number;
+}
 
 // cf. https://mariusschulz.com/blog/mapped-type-modifiers-in-typescript#removing-the-readonly-mapped-type-modifier
 type Mutable<T> = {
@@ -254,6 +256,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     const metadata = this.getContent().metadata;
     this.props.onRegisterToolApi({
+      getTitle: () => metadata.title,
       hasSelection: () => {
         const geometryContent = this.props.model.content as GeometryContentModelType;
         // Note: hasSelection() returns true when there is a selection whether or not
@@ -410,6 +413,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           onDragLeave={this.handleDragLeave}
           onDrop={this.handleDrop} />,
       this.renderRotateHandle(),
+      this.renderTitle(),
       this.renderInvalidTableDataAlert()
     ]);
   }
@@ -507,6 +511,19 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     );
   }
 
+  private handleTitleChange = (title?: string) => {
+    title && this.getContent().updateTitle(this.state.board, title);
+  }
+
+  private renderTitle() {
+    const getTitle = () => this.getContent().title || "";
+    const { measureText, size } = this.props;
+    return (
+      <EditableGeometryTitle key="geometry-title" size={size} getTitle={getTitle} measureText={measureText}
+                              onEndEdit={this.handleTitleChange} />
+    );
+  }
+
   private renderInvalidTableDataAlert() {
     const { showInvalidTableDataAlert } = this.state;
     if (!showInvalidTableDataAlert) return;
@@ -548,6 +565,13 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         this.setState({ board });
       }
       this.syncedChanges = content.changes.length;
+    }
+    // if we haven't been assigned a title already, request one now
+    // we set the title without updating the content, so the title is ephemeral
+    if (!content.metadata.title) {
+      const { model: { id }, onRequestUniqueTitle } = this.props;
+      const title = onRequestUniqueTitle(id);
+      title && content.metadata.setTitle(title);
     }
   }
 
@@ -890,7 +914,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
               case "create":
                 // map ids of newly create object
                 if (change.properties && change.properties.id) {
-                  idMap[change.properties.id] = uuid();
+                  idMap[change.properties.id] = uniqueId();
                   change.properties.id = idMap[change.properties.id];
                 }
                 // after the first paste, names/labels are auto-generated

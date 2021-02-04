@@ -18,9 +18,10 @@ export const kLabelAttrName = "__label__";
 
 export const kTableDefaultHeight = 160;
 
-export function defaultTableContent() {
+export function defaultTableContent(props?: { title?: string }) {
   return TableContentModel.create({
                             type: "Table",
+                            name: props?.title,
                             columns: [
                               { name: "x" },
                               { name: "y" }
@@ -732,6 +733,7 @@ export function mapTileIdsInTableSnapshot(snapshot: SnapshotOut<TableContentMode
 registerToolContentInfo({
   id: kTableToolID,
   tool: "table",
+  titleBase: "Table",
   modelClass: TableContentModel,
   metadataClass: TableMetadataModel,
   defaultHeight: kTableDefaultHeight,

@@ -1,3 +1,4 @@
+import { cloneDeep, each } from "lodash";
 import { types, getSnapshot, Instance, SnapshotIn } from "mobx-state-tree";
 import { kDrawingToolID, StampModelType } from "../tools/drawing/drawing-content";
 import { kGeometryToolID } from "../tools/geometry/geometry-content";
@@ -7,10 +8,10 @@ import { kTableToolID } from "../tools/table/table-content";
 import { kTextToolID } from "../tools/text/text-content";
 import { getToolContentInfoById } from "../tools/tool-content-info";
 import { ToolContentUnionType } from "../tools/tool-types";
-import { createToolTileModelFromContent, ToolTileModel, ToolTileModelType, ToolTileSnapshotOutType
-        } from "../tools/tool-tile";
+import {
+  createToolTileModelFromContent, ToolTileModel, ToolTileModelType, ToolTileSnapshotOutType
+} from "../tools/tool-tile";
 import { TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType } from "../document/tile-row";
-import { cloneDeep, each } from "lodash";
 import { Logger, LogEventName } from "../../lib/logger";
 import { IDragTileItem } from "../../models/tools/tool-tile";
 import { DocumentsModelType } from "../stores/documents";
@@ -23,7 +24,11 @@ export interface INewTileOptions {
   rowIndex?: number;
 }
 
-export interface INewGeometryTileOptions extends INewTileOptions {
+export interface INewTitledTileOptions extends INewTileOptions {
+  title?: string;
+}
+
+export interface INewGeometryTileOptions extends INewTitledTileOptions {
   addSidecarNotes?: boolean;
 }
 
@@ -51,6 +56,11 @@ export interface IDropRowInfo {
 
 export interface IDocumentContentAddTileOptions extends IDocumentAddTileOptions {
   insertRowInfo?: IDropRowInfo;
+}
+
+export interface IDragToolCreateInfo {
+  tool: DocumentTool;
+  title?: string;
 }
 
 export interface ITileCountsPerSection {
@@ -249,6 +259,17 @@ export const DocumentContentModel = types
     }
   }))
   .views(self => ({
+    getUniqueTitle(tileType: string, titleBase: string, getTileTitle: (tileId: string) => string | undefined) {
+      const tiles = self.getTilesOfType(tileType);
+      const maxDefaultTitleIndex = tiles.reduce((maxIndex: number, tileId: string) => {
+        const title = getTileTitle(tileId);
+        const match = title?.match(new RegExp(`${titleBase} (\\d+)`));
+        return match?.[1]
+                ? Math.max(maxIndex, +match[1])
+                : maxIndex;
+      }, 0);
+      return `${titleBase} ${maxDefaultTitleIndex + 1}`;
+    },
     getTileCountsPerSection(sectionIds: string[]): ITileCountsPerSection {
       const counts: ITileCountsPerSection = {};
       sectionIds.forEach(sectionId => {
@@ -388,7 +409,7 @@ export const DocumentContentModel = types
     addGeometryTile(options?: INewGeometryTileOptions) {
       const geometryContentInfo = getToolContentInfoById(kGeometryToolID);
       const result = self.addTileInNewRow(
-                            geometryContentInfo?.defaultContent(),
+                            geometryContentInfo?.defaultContent({ title: options?.title }),
                             { rowHeight: geometryContentInfo?.defaultHeight, ...options });
       if (options?.addSidecarNotes) {
         const { rowId } = result;
@@ -402,10 +423,10 @@ export const DocumentContentModel = types
       }
       return result;
     },
-    addTableTile(options?: INewTileOptions) {
+    addTableTile(options?: INewTitledTileOptions) {
       const tableContentInfo = getToolContentInfoById(kTableToolID);
       return self.addTileInNewRow(
-                    tableContentInfo?.defaultContent(),
+                    tableContentInfo?.defaultContent({ title: options?.title }),
                     { rowHeight: tableContentInfo?.defaultHeight, ...options });
     },
     addTextTile(options?: INewTextTileOptions) {
@@ -601,7 +622,7 @@ export const DocumentContentModel = types
         }
       },
       addTile(tool: DocumentTool, options?: IDocumentContentAddTileOptions) {
-        const {addSidecarNotes, url, insertRowInfo} = options || {};
+        const { title, addSidecarNotes, url, insertRowInfo } = options || {};
         // for historical reasons, this function initially places new rows at
         // the end of the content and then moves them to the desired location.
         const addTileOptions = { rowIndex: self.rowCount };
@@ -611,10 +632,10 @@ export const DocumentContentModel = types
             tileInfo = self.addTextTile(addTileOptions);
             break;
           case "table":
-            tileInfo = self.addTableTile(addTileOptions);
+            tileInfo = self.addTableTile({ title, ...addTileOptions });
             break;
           case "geometry":
-            tileInfo = self.addGeometryTile({ addSidecarNotes, ...addTileOptions });
+            tileInfo = self.addGeometryTile({ title, addSidecarNotes, ...addTileOptions });
             break;
           case "image":
             tileInfo = self.addImageTile({ url, ...addTileOptions });

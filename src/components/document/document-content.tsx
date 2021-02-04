@@ -5,11 +5,11 @@ import { throttle } from "lodash";
 import { BaseComponent, IBaseProps } from "../base";
 import { TileRowComponent, kDragResizeRowId, extractDragResizeRowId, extractDragResizeY,
         extractDragResizeModelHeight, extractDragResizeDomHeight } from "../document/tile-row";
-import { DocumentContentModelType, IDropRowInfo } from "../../models/document/document-content";
-import { DocumentTool } from "../../models/document/document";
+import { DocumentContentModelType, IDragToolCreateInfo, IDropRowInfo } from "../../models/document/document-content";
+import { getToolContentInfoById } from "../../models/tools/tool-content-info";
 import { IDragTiles } from "../../models/tools/tool-tile";
 import { dragTileSrcDocId, IToolApiInterface, kDragTileCreate, kDragTiles } from "../tools/tool-tile";
-import { uniqueTitle } from "../../utilities/js-utils";
+import { safeJsonParse } from "../../utilities/js-utils";
 
 import "./document-content.sass";
 
@@ -208,12 +208,10 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
   private handleRequestUniqueTitle = (tileId: string) => {
     const { content, toolApiInterface } = this.props;
-    const tile = content?.getTile(tileId);
-    const tileType = tile?.content.type;
-    if (!content || !tileType || !toolApiInterface) return;
-    const tilesOfType = content.getTilesOfType(tileType);
-    const titles = tilesOfType.map(id => toolApiInterface.getToolApi(id)?.getTitle?.());
-    return uniqueTitle(tileType, proposed => !titles.find(title => title === proposed));
+    const tileType = content?.getTile(tileId)?.content.type;
+    const titleBase = tileType && getToolContentInfoById(tileType)?.titleBase;
+    const getTileTitle = (_tileId: string) => toolApiInterface?.getToolApi?.(_tileId)?.getTitle?.();
+    return tileType && titleBase && content?.getUniqueTitle(tileType, titleBase, getTileTitle);
   }
 
   private handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -398,17 +396,20 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const { content } = this.props;
     const { ui } = this.stores;
 
-    const createTileType = e.dataTransfer.getData(kDragTileCreate) as DocumentTool;
-    if (!content || !createTileType) return;
+    const createTileInfoStr = e.dataTransfer.getData(kDragTileCreate);
+    const createTileInfo = createTileInfoStr
+                            ? safeJsonParse(createTileInfoStr) as IDragToolCreateInfo
+                            : undefined;
+    if (!content || !createTileInfo) return;
 
+    const { tool, title } = createTileInfo;
     const insertRowInfo = this.getDropRowInfo(e);
-
-    const isInsertingInExistingRow = insertRowInfo && insertRowInfo.rowDropLocation &&
+    const isInsertingInExistingRow = insertRowInfo?.rowDropLocation &&
                                       (["left", "right"].indexOf(insertRowInfo.rowDropLocation) >= 0);
-    const addSidecarNotes = (createTileType === "geometry") && !isInsertingInExistingRow;
-    const rowTile = content.userAddTile(createTileType, {addSidecarNotes, insertRowInfo});
+    const addSidecarNotes = (tool === "geometry") && !isInsertingInExistingRow;
+    const rowTile = content.userAddTile(tool, {title, addSidecarNotes, insertRowInfo});
 
-    if (rowTile && rowTile.tileId) {
+    if (rowTile?.tileId) {
       ui.setSelectedTileId(rowTile.tileId);
     }
   }

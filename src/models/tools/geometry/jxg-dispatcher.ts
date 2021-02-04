@@ -62,9 +62,7 @@ export function applyChange(board: JXG.Board|string, change: JXGChange,
   const target = change.target.toLowerCase();
 
   // give clients a chance to intercede before the change is applied
-  if (context && context.onWillApplyChange) {
-    context.onWillApplyChange(board, change);
-  }
+  context?.onWillApplyChange?.(board, change);
 
   // special case for update/object, where we dispatch by object type
   if ((change.operation === "update") && (target === "object")) {
@@ -79,7 +77,7 @@ export function applyChange(board: JXG.Board|string, change: JXGChange,
   const result = dispatchChange(board, change, context);
 
   // give clients a chance to intercede after the change has been applied
-  if (context && context.onDidApplyChange) {
+  if (context?.onDidApplyChange) {
     if (isBoard(result)) _board = result as JXG.Board;
     else if (Array.isArray(result) && isBoard(result?.[0])) _board = result[0] as JXG.Board;
     context.onDidApplyChange(_board, change);
