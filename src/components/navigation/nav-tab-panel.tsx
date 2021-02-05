@@ -104,7 +104,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
     const { user: { isTeacher }, teacherGuide } = this.stores;
     const sections = teacherGuide?.sections;
     return isTeacher && sections && (
-      <ProblemTabContent sections={sections} showSolutionsSwitch={false}/>
+      <ProblemTabContent context={ENavTab.kTeacherGuide} sections={sections} showSolutionsSwitch={false}/>
     );
   }
 
