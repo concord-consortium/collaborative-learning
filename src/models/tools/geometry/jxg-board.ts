@@ -14,7 +14,7 @@ export const kGeometryDefaultHeight = 320;
 export const kGeometryDefaultPixelsPerUnit = 18.3;  // matches S&S curriculum images
 export const kGeometryDefaultAxisMin = 0;
 
-export function getObjectById(board: JXG.Board, id: string) {
+export function getObjectById(board: JXG.Board, id: string): JXG.GeometryElement | undefined {
   let obj: JXG.GeometryElement | undefined = board.objects[id];
   if (!obj && id?.includes(":")) {
     // legacy support for early tiles in which points were identified by caseId,
@@ -27,7 +27,10 @@ export function getObjectById(board: JXG.Board, id: string) {
 }
 
 export function getPointsByCaseId(board: JXG.Board, caseId: string) {
-  if (!caseId || caseId.includes(":")) return [getObjectById(board, caseId)];
+  if (!caseId || caseId.includes(":")) {
+    const obj = getObjectById(board, caseId);
+    return obj ? [obj] : [];
+  }
   return board.objectsList.filter(obj => isPoint(obj) && (obj.id.split(":")[0] === caseId));
 }
 

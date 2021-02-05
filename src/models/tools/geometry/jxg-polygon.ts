@@ -92,7 +92,7 @@ export function prepareToDeleteObjects(board: JXG.Board, ids: string[]) {
   const polygonVertexMap: { [id: string]: string[] } = {};
   ids.forEach(id => {
     const elt = getObjectById(board, id);
-    if (isPoint(elt)) {
+    if (elt && isPoint(elt)) {
       each(elt.childElements, child => {
         if (isPolygon(child)) {
           if (!polygonVertexMap[child.id]) {
@@ -105,7 +105,7 @@ export function prepareToDeleteObjects(board: JXG.Board, ids: string[]) {
     else if (isPolygon(elt)) {
       polygonsToDelete[id] = elt as JXG.Polygon;
     }
-    else if (isVertexAngle(elt)) {
+    else if (elt && isVertexAngle(elt)) {
       anglesToDelete[id] = elt;
     }
   });
