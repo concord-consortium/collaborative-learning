@@ -27,7 +27,8 @@
       "content": "curriculum/looking-for-pythagoras/looking-for-pythagoras.json"
     },
     "msa": {
-      "content": "curriculum/moving-straight-ahead/moving-straight-ahead.json"
+      "content": "curriculum/moving-straight-ahead/moving-straight-ahead.json",
+      "guide": "curriculum/moving-straight-ahead/msa-teacher-guide.json"
     },
     "sad": {
       "content": "curriculum/shapes-and-designs/shapes-and-designs.json"
