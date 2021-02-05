@@ -57,7 +57,7 @@ export const kDragTileId = "org.concord.clue.tile.id";
 export const kDragTileContent = "org.concord.clue.tile.content";
 export const kDragTileCreate = "org.concord.clue.tile.create";
 // allows source compatibility to be checked in dragOver
-export const dragTileSrcDocId = (id: string) => `org.concord.clue.src.${id}`;
+export const dragTileSrcDocId = (id: string) => `org.concord.clue.src.${id.toLowerCase()}`;
 export const dragTileType = (type: string) => `org.concord.clue.tile.type.${type}`;
 
 export function extractDragTileSrcDocId(dataTransfer: DataTransfer) {
