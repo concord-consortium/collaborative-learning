@@ -11,11 +11,12 @@ import ToggleControl from "../utilities/toggle-control";
 import "./problem-tab-content.sass";
 
 interface IProps {
+  context?: string;
   sections: SectionModelType[];
   showSolutionsSwitch: boolean;
 }
 
-export const ProblemTabContent: React.FC<IProps> = observer(({ sections, showSolutionsSwitch}: IProps) => {
+export const ProblemTabContent: React.FC<IProps> = observer(({ context, sections, showSolutionsSwitch}: IProps) => {
   const { isTeacher } = useUserStore();
   const { showTeacherContent, toggleShowTeacherContent } = useUIStore();
 
@@ -32,13 +33,13 @@ export const ProblemTabContent: React.FC<IProps> = observer(({ sections, showSol
   };
 
   return (
-    <Tabs className="problem-tabs" selectedTabClassName="selected">
+    <Tabs className={classNames("problem-tabs", context)} selectedTabClassName="selected">
       <div className="tab-header-row">
         <TabList className="tab-list">
           {sections.map((section) => {
             const sectionTitle = getSectionTitle(section.type);
             return (
-              <Tab className="prob-tab" key={`section-${section.type}`}
+              <Tab className={classNames("prob-tab", context)} key={`section-${section.type}`}
                   onClick={() => handleTabClick(section.type, sectionTitle)} >
                 {sectionTitle}
               </Tab>
