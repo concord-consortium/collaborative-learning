@@ -252,14 +252,11 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     const { model, toolApiInterface } = this.props;
     const toolApi = toolApiInterface?.getToolApi(model.id);
     const clientTableLinks = toolApi?.getLinkedTables?.();
-    const tableLinkIndex = toolApi?.getLinkIndex?.();
     return clientTableLinks
             ? clientTableLinks.map((id, index) => {
                 return <LinkIndicatorComponent key={id} id={id} index={index} />;
               })
-            : (tableLinkIndex != null) && (tableLinkIndex >= 0)
-                ? <LinkIndicatorComponent id={model.id} />
-                : null;
+            : null; // tables don't use the original link indicator any more
   }
 
   private renderTileComments() {
