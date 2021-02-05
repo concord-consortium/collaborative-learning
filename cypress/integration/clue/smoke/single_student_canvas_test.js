@@ -166,7 +166,7 @@ context('single student functional test',()=>{
                 cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.geometry-content').should('exist');
                 cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.drawing-tool').should('exist');
                 cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.image-tool').should('exist');
-                cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.neo-codap-case-table').should('exist');
+                // cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.neo-codap-case-table').should('exist');
             });
         });
     });

@@ -9,7 +9,7 @@ import { kTextToolID } from "../tools/text/text-content";
 import { getToolContentInfoById } from "../tools/tool-content-info";
 import { ToolContentUnionType } from "../tools/tool-types";
 import {
-  createToolTileModelFromContent, ToolTileModel, ToolTileModelType, ToolTileSnapshotOutType
+  ToolTileModel, ToolTileModelType, ToolTileSnapshotInType, ToolTileSnapshotOutType
 } from "../tools/tool-tile";
 import { TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType } from "../document/tile-row";
 import { Logger, LogEventName } from "../../lib/logger";
@@ -19,7 +19,6 @@ import { DisplayUserType } from "../stores/user-types";
 import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
 import { getParentWithTypeName } from "../../utilities/mst-utils";
 import { DocumentTool, IDocumentAddTileOptions } from "./document";
-import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
 
 export interface INewTileOptions {
   rowHeight?: number;
