@@ -1,4 +1,7 @@
+import { useMemo } from "react";
 import { TooltipProps } from "react-tippy";
+
+import "react-tippy/dist/tippy.css";
 
 const kDefaultTooltipOptions: TooltipProps = {
   position: "bottom",
@@ -11,5 +14,5 @@ const kDefaultTooltipOptions: TooltipProps = {
 };
 
 export const useTooltipOptions = (options?: TooltipProps) => {
-  return { ...kDefaultTooltipOptions, ...options };
+  return useMemo(() => ({ ...kDefaultTooltipOptions, ...options }), [options]);
 };

@@ -1,0 +1,12 @@
+@import "../../components/vars.sass";
+
+.custom-modal.error-alert {
+  width: 400px;
+  height: 160px;
+  outline: none;
+
+  .modal-icon svg {
+    width: 36px * 0.7;
+    height: 34px * 0.7;
+  }
+}

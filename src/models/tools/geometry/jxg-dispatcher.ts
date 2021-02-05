@@ -1,6 +1,6 @@
 import { JXGChange, JXGChangeAgent, JXGChangeResult, JXGCreateHandler, JXGObjectType, IChangeContext
         } from "./jxg-changes";
-import { boardChangeAgent, isBoard, kReverse, sortByCreation } from "./jxg-board";
+import { boardChangeAgent, getObjectById, kReverse, sortByCreation } from "./jxg-board";
 import { commentChangeAgent } from "./jxg-comment";
 import { imageChangeAgent } from "./jxg-image";
 import { movableLineChangeAgent } from "./jxg-movable-line";
@@ -8,6 +8,7 @@ import { objectChangeAgent } from "./jxg-object";
 import { pointChangeAgent } from "./jxg-point";
 import { polygonChangeAgent } from "./jxg-polygon";
 import { linkedPointChangeAgent, tableLinkChangeAgent } from "./jxg-table-link";
+import { isBoard } from "./jxg-types";
 import { vertexAngleChangeAgent } from "./jxg-vertex-angle";
 import { castArrayCopy } from "../../../utilities/js-utils";
 import { castArray } from "lodash";
@@ -61,9 +62,7 @@ export function applyChange(board: JXG.Board|string, change: JXGChange,
   const target = change.target.toLowerCase();
 
   // give clients a chance to intercede before the change is applied
-  if (context && context.onWillApplyChange) {
-    context.onWillApplyChange(board, change);
-  }
+  context?.onWillApplyChange?.(board, change);
 
   // special case for update/object, where we dispatch by object type
   if ((change.operation === "update") && (target === "object")) {
@@ -78,7 +77,7 @@ export function applyChange(board: JXG.Board|string, change: JXGChange,
   const result = dispatchChange(board, change, context);
 
   // give clients a chance to intercede after the change has been applied
-  if (context && context.onDidApplyChange) {
+  if (context?.onDidApplyChange) {
     if (isBoard(result)) _board = result as JXG.Board;
     else if (Array.isArray(result) && isBoard(result?.[0])) _board = result[0] as JXG.Board;
     context.onDidApplyChange(_board, change);
@@ -90,7 +89,7 @@ export function applyChange(board: JXG.Board|string, change: JXGChange,
 function applyUpdateObjects(board: JXG.Board, change: JXGChange, context?: IChangeContext) {
   const ids = castArray(change.targetID);
   ids.forEach((id, index) => {
-    const obj = id && board.objects[id];
+    const obj = id && getObjectById(board, id);
     const target = obj
             ? obj.getAttribute("clientType") || obj.elType as JXGObjectType
             : "object";
@@ -112,7 +111,7 @@ function applyDeleteObjects(board: JXG.Board, change: JXGChange, context?: IChan
   const ids = castArrayCopy(change.targetID);
   sortByCreation(board, ids, kReverse);
   ids.forEach(id => {
-    const obj = id && board.objects[id];
+    const obj = id && getObjectById(board, id);
     const target = obj
             ? obj.getAttribute("clientType") || obj.elType as JXGObjectType
             : "object";

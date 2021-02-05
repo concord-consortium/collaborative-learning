@@ -5,8 +5,8 @@ import classNames from "classnames";
 import { IconComponent } from "../app-config-context";
 import { BaseComponent, IBaseProps } from "./base";
 import { DocumentModelType, DocumentTool } from "../models/document/document";
-import { IDocumentContentAddTileOptions } from "../models/document/document-content";
-import { getToolContentInfoByTool } from "../models/tools/tool-content-info";
+import { IDocumentContentAddTileOptions, IDragToolCreateInfo } from "../models/document/document-content";
+import { getToolContentInfoByTool, IToolContentInfo } from "../models/tools/tool-content-info";
 import { ToolButtonSnapshot } from "../models/tools/tool-types";
 import { IToolApiMap, kDragTileCreate  } from "./tools/tool-tile";
 
@@ -157,11 +157,19 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     document.content.showPendingInsertHighlight(false);
   }
 
+  private getUniqueTitle(toolContentInfo: IToolContentInfo) {
+    const { document, toolApiMap } = this.props;
+    const { id, titleBase } = toolContentInfo;
+    const getTileTitle = (tileId: string) => toolApiMap[tileId]?.getTitle?.();
+    return titleBase && document.getUniqueTitle(id, titleBase, getTileTitle);
+  }
+
   private handleAddToolTile(tool: DocumentTool) {
     const { document } = this.props;
     const { ui } = this.stores;
     const toolContentInfo = getToolContentInfoByTool(tool);
     const newTileOptions: IDocumentContentAddTileOptions = {
+            title: this.getUniqueTitle(toolContentInfo),
             addSidecarNotes: !!toolContentInfo?.addSidecarNotes,
             insertRowInfo: { rowInsertIndex: document.content.defaultInsertRow }
           };
@@ -196,6 +204,9 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   private handleDragNewToolTile = (tool: DocumentTool, e: React.DragEvent<HTMLDivElement>) => {
     // remove hover-insert highlight when we start a tile drag
     this.removeDropRowHighlight();
-    e.dataTransfer.setData(kDragTileCreate, tool);
+
+    const toolContentInfo = getToolContentInfoByTool(tool);
+    const dragInfo: IDragToolCreateInfo = { tool, title: this.getUniqueTitle(toolContentInfo) };
+    e.dataTransfer.setData(kDragTileCreate, JSON.stringify(dragInfo));
   }
 }

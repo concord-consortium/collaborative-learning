@@ -1,4 +1,4 @@
-.neo-codap-case-table {
+/* .neo-codap-case-table {
   width: 100%;
   height: 100%;
   box-sizing: border-box;
@@ -22,7 +22,7 @@
 }
 
 .ag-theme-fresh .cdp-case-index-cell,
-.ag-theme-fresh .cdp-case-index-cell.ag-cell-data-changed {  /* .cdp-case-index-cell.ag-cell-data-changed is to prevent flashing during sort */
+.ag-theme-fresh .cdp-case-index-cell.ag-cell-data-changed {  /* .cdp-case-index-cell.ag-cell-data-changed is to prevent flashing during sort
   background-color: #EEE !important;
 }
 
@@ -45,4 +45,4 @@
 
 .cdp-row-data-cell.has-expression {
   background-color: #DDD;
-}
+} */

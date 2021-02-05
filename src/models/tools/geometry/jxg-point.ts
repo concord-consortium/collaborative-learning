@@ -1,21 +1,8 @@
 import { JXGChangeAgent, JXGCoordPair, JXGUnsafeCoordPair } from "./jxg-changes";
 import { objectChangeAgent, isPositionGraphable, getGraphablePosition } from "./jxg-object";
 import { prepareToDeleteObjects } from "./jxg-polygon";
-import { isCommentType } from "./jxg-types";
-import { castArray, values } from "lodash";
+import { castArray } from "lodash";
 import { v4 as uuid } from "uuid";
-
-export const isPoint = (v: any) => v instanceof JXG.Point;
-
-export const isVisiblePoint = (v: any) => isPoint(v) && v.visProp.visible;
-
-export const isFreePoint = (v: any) => {
-  if (isVisiblePoint(v)) {
-    const point = v as JXG.Point;
-    return values(point.childElements).filter(el => !isCommentType(el)).length <= 1 &&
-           values(point.descendants).filter(el => !isCommentType(el)).length <= 1;
-  }
-};
 
 // For snap to grid
 const kPrevSnapUnit = 0.2;

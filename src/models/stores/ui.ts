@@ -11,8 +11,8 @@ export type ToggleElement = "leftNavExpanded";
 export const UIDialogTypeEnum = types.enumeration("dialogType", ["alert", "confirm", "prompt"]);
 export type UIDialogType = typeof UIDialogTypeEnum.Type;
 
-type BooleanDialogResolver = (value?: boolean | PromiseLike<boolean> | undefined) => void;
-type StringDialogResolver = (value?: string | PromiseLike<string> | undefined) => void;
+type BooleanDialogResolver = (value: boolean | PromiseLike<boolean>) => void;
+type StringDialogResolver = (value: string | PromiseLike<string>) => void;
 let dialogResolver: BooleanDialogResolver | StringDialogResolver | undefined;
 
 export const UIDialogModel = types

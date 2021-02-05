@@ -7,6 +7,7 @@ export type ToolTileModelContentSnapshotPostProcessor =
 export interface IToolContentInfo {
   id: string;
   tool: string;
+  titleBase?: string;
   modelClass: any;
   metadataClass?: any;
   addSidecarNotes?: boolean;

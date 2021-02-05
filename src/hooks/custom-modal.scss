@@ -1,0 +1,123 @@
+@import "../components/vars.sass";
+
+$modal-header-height: 34px;
+$modal-header-icon-width: 36px;
+$modal-header-border-radius: 6px;
+$modal-padding: 0 20px;
+$modal-control-height: 30px;
+$modal-control-border: solid 1.5px $charcoal-light-1;
+$modal-control-border-radius: 5px;
+$modal-button-min-width: 62px;
+$modal-button-spacing: 10px;
+$modal-footer-height: 45px;
+
+.custom-modal {
+  position: absolute;
+  color: $charcoal-dark-2;
+  background-color: white;
+  border: solid 2px $workspace-teal;
+  border-radius: 8px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  outline: none;
+
+  .modal-header {
+    width: 100%;
+    height: $modal-header-height;
+    flex: 0 0 auto;
+    background-color: $charcoal-light-6;
+    border-top-left-radius: $modal-header-border-radius;
+    border-top-right-radius: $modal-header-border-radius;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .modal-icon {
+      position: absolute;
+      left: 0;
+      width: $modal-header-icon-width;
+      height: $modal-header-height;
+      border-top-left-radius: $modal-header-border-radius;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-close {
+      position: absolute;
+      right: 0;
+      width: $modal-header-icon-width;
+      height: $modal-header-height;
+      border: none;
+      border-top-right-radius: $modal-header-border-radius;
+      outline: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      &:hover, &:focus {
+        background-color: $charcoal-light-4;
+      }
+
+      &:active {
+        background-color: $charcoal-light-2;
+      }
+    }
+  }
+
+  .modal-content {
+    width: 100%;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    padding: $modal-padding;
+
+    input {
+      height: $modal-control-height;
+      border: $modal-control-border;
+      border-radius: $modal-control-border-radius;
+    }
+  }
+
+  .modal-footer {
+    width: 100%;
+    height: $modal-footer-height;
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    padding: $modal-padding;
+
+    .modal-button {
+      height: $modal-control-height;
+      min-width: $modal-button-min-width;
+      margin-left: $modal-button-spacing;
+      color: $charcoal-dark-2;
+      background-color: white;
+      border: $modal-control-border;
+      border-radius: $modal-control-border-radius;
+      outline: none;
+
+      &.disabled {
+        opacity: 35%;
+      }
+
+      &.default:not(.disabled) {
+        background-color: $charcoal-light-6;
+      }
+
+      &:hover:not(.disabled), &:focus:not(.disabled) {
+        background-color: $workspace-teal-light-4;
+      }
+
+      &:active:not(.disabled) {
+        background-color: $workspace-teal-light-3;
+      }
+    }
+  }
+}

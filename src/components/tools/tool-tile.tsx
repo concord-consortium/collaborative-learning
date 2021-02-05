@@ -28,6 +28,7 @@ import "../../utilities/dom-utils";
 import "./tool-tile.sass";
 
 export interface IToolApi {
+  getTitle?: () => string | undefined;
   hasSelection?: () => boolean;
   deleteSelection?: () => void;
   getSelectionInfo?: () => string;
@@ -77,7 +78,8 @@ export function extractDragTileType(dataTransfer: DataTransfer) {
 
 interface IToolTileBaseProps {
   context: string;
-  docId: string;
+  documentId?: string;  // permanent id (key) of the containing document
+  docId: string;  // ephemeral contentId for the DocumentContent
   documentContent: HTMLElement | null;
   scale?: number;
   widthPct?: number;
@@ -85,6 +87,8 @@ interface IToolTileBaseProps {
   model: ToolTileModelType;
   readOnly?: boolean;
   onSetCanAcceptDrop: (tileId?: string) => void;
+  onRequestTilesOfType: (tileType: string) => Array<{ id: string, title?: string }>;
+  onRequestUniqueTitle: (tileId: string) => string | undefined;
   onRequestRowHeight: (tileId: string, height?: number, deltaHeight?: number) => void;
 }
 

@@ -1,10 +1,9 @@
 import { GeometryContentModel, GeometryContentModelType,
           kGeometryToolID, defaultGeometryContent, GeometryMetadataModel } from "./geometry-content";
 import { JXGChange } from "./jxg-changes";
-import { isBoard } from "./jxg-board";
-import { isPoint, isFreePoint } from "./jxg-point";
-import { isPointInPolygon, isPolygon, getPointsForVertexAngle } from "./jxg-polygon";
+import { isPointInPolygon, getPointsForVertexAngle } from "./jxg-polygon";
 import { canSupportVertexAngle, getVertexAngle, updateVertexAnglesFromObjects } from "./jxg-vertex-angle";
+import { isBoard, isFreePoint, isPoint, isPolygon } from "./jxg-types";
 import { isUuid } from "../../../utilities/test-utils";
 import { clone } from "lodash";
 import { destroy } from "mobx-state-tree";

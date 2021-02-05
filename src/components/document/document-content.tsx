@@ -5,15 +5,17 @@ import { throttle } from "lodash";
 import { BaseComponent, IBaseProps } from "../base";
 import { TileRowComponent, kDragResizeRowId, extractDragResizeRowId, extractDragResizeY,
         extractDragResizeModelHeight, extractDragResizeDomHeight } from "../document/tile-row";
-import { DocumentContentModelType, IDropRowInfo } from "../../models/document/document-content";
-import { DocumentTool } from "../../models/document/document";
+import { DocumentContentModelType, IDragToolCreateInfo, IDropRowInfo } from "../../models/document/document-content";
+import { getToolContentInfoById } from "../../models/tools/tool-content-info";
 import { IDragTiles } from "../../models/tools/tool-tile";
 import { dragTileSrcDocId, IToolApiInterface, kDragTileCreate, kDragTiles } from "../tools/tool-tile";
+import { safeJsonParse } from "../../utilities/js-utils";
 
 import "./document-content.sass";
 
 interface IProps extends IBaseProps {
   context: string;
+  documentId?: string;
   content?: DocumentContentModelType;
   readOnly?: boolean;
   scale?: number;
@@ -56,6 +58,9 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
         this.mutationObserver = new MutationObserver(this.handleRowElementsChanged);
         this.mutationObserver.observe(this.domElement, { childList: true });
       }
+      // We pass the domElement to our children, but it's undefined during the first render,
+      // so we force an update to make sure we draw at least once after we have our domElement.
+      this.forceUpdate();
     }
   }
 
@@ -176,6 +181,8 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
                                   documentContent={this.domElement}
                                   rowIndex={index} height={rowHeight} tileMap={tileMap}
                                   dropHighlight={dropHighlight}
+                                  onRequestTilesOfType={this.handleRequestTilesOfType}
+                                  onRequestUniqueTitle={this.handleRequestUniqueTitle}
                                   ref={(elt) => this.rowRefs.push(elt)} {...others} />
               : null;
     });
@@ -191,6 +198,21 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const yScroll = this.domElement?.scrollTop || 0;
     this.props.toolApiInterface?.forEach(api => api.handleDocumentScroll?.(xScroll, yScroll));
   }, 50)
+
+  private handleRequestTilesOfType = (tileType: string) => {
+    const { content, toolApiInterface } = this.props;
+    if (!content || !tileType || !toolApiInterface) return [];
+    const tilesOfType = content.getTilesOfType(tileType);
+    return tilesOfType.map(id => ({ id, title: toolApiInterface.getToolApi(id)?.getTitle?.() }));
+  }
+
+  private handleRequestUniqueTitle = (tileId: string) => {
+    const { content, toolApiInterface } = this.props;
+    const tileType = content?.getTile(tileId)?.content.type;
+    const titleBase = tileType && getToolContentInfoById(tileType)?.titleBase;
+    const getTileTitle = (_tileId: string) => toolApiInterface?.getToolApi?.(_tileId)?.getTitle?.();
+    return tileType && titleBase && content?.getUniqueTitle(tileType, titleBase, getTileTitle);
+  }
 
   private handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const { ui } = this.stores;
@@ -374,17 +396,20 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const { content } = this.props;
     const { ui } = this.stores;
 
-    const createTileType = e.dataTransfer.getData(kDragTileCreate) as DocumentTool;
-    if (!content || !createTileType) return;
+    const createTileInfoStr = e.dataTransfer.getData(kDragTileCreate);
+    const createTileInfo = createTileInfoStr
+                            ? safeJsonParse(createTileInfoStr) as IDragToolCreateInfo
+                            : undefined;
+    if (!content || !createTileInfo) return;
 
+    const { tool, title } = createTileInfo;
     const insertRowInfo = this.getDropRowInfo(e);
-
-    const isInsertingInExistingRow = insertRowInfo && insertRowInfo.rowDropLocation &&
+    const isInsertingInExistingRow = insertRowInfo?.rowDropLocation &&
                                       (["left", "right"].indexOf(insertRowInfo.rowDropLocation) >= 0);
-    const addSidecarNotes = (createTileType === "geometry") && !isInsertingInExistingRow;
-    const rowTile = content.userAddTile(createTileType, {addSidecarNotes, insertRowInfo});
+    const addSidecarNotes = (tool === "geometry") && !isInsertingInExistingRow;
+    const rowTile = content.userAddTile(tool, {title, addSidecarNotes, insertRowInfo});
 
-    if (rowTile && rowTile.tileId) {
+    if (rowTile?.tileId) {
       ui.setSelectedTileId(rowTile.tileId);
     }
   }

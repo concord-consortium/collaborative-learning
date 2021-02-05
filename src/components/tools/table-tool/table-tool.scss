@@ -1,0 +1,294 @@
+@import "../../vars.sass";
+@import "../../../models/tools/table-links";
+
+$table-padding: 10px;
+$row-height: 34px;
+$index-column-width: 34px;
+$controls-column-width: 36px;
+$platform-scrollbar-width: 16px;
+$header-color: $workspace-teal-light-5;
+$header-input-color: #eef9fb;
+$border-style: 1px solid $charcoal-light-1;
+$border-input-style: 1px solid #dadada;
+$border-radius: 3px;
+$controls-hover-background: #c0dfe7;
+
+.table-tool {
+  position: relative;
+  height: 100%;
+  padding: $table-padding;
+
+  .table-grid-container {
+    position: relative;
+    height: 100%;
+
+    .table-title {
+      position: absolute;
+      left: $index-column-width - 1px;
+      max-width: calc(100% - #{$index-column-width} + #{$table-padding});
+      height: $row-height;
+      color: $charcoal-dark-2;
+      background-color: $workspace-teal-light-7;
+      border-left: $border-style;
+      border-top: $border-style;
+      border-right: $border-style;
+      border-radius: $border-radius $border-radius 0 0;
+      font-weight: bold;
+      padding: 8px;
+
+      &.table-title-default {
+        font-style: italic;
+      }
+
+      &.table-title-editing {
+        padding: 0;
+
+        input {
+          text-align: center;
+          border: solid 1.5px $charcoal-light-1;
+
+          &:focus {
+            border: solid 2px $highlight-blue;
+          }
+        }
+      }
+
+      .link-geometry-button {
+        position: absolute;
+        right: 3.5px;
+        top: 3px;
+        width: 26px;
+        height: 26px;
+        border-radius: 5px;
+        border: solid 1.5px $charcoal-light-1;
+        background-color: $workspace-teal-light-9;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        &.disabled {
+          opacity: 35%;
+        }
+
+        &:hover:not(.disabled) {
+          background-color: $workspace-teal-light-6;
+        }
+
+        &:active:not(.disabled) {
+          background-color: $workspace-teal-light-4;
+        }
+      }
+    }
+  }
+
+  .rdg {
+    --color: #{$charcoal-dark-2};
+    --border-color: #{$charcoal-light-1};
+    --header-background-color: #{$header-color};
+    --header-selected-background-color: #{$highlight-blue-50};
+    --row-selected-background-color: #{$highlight-blue-25};
+    --selection-color: #{$highlight-blue};
+
+    position: absolute;
+    top: $row-height;
+    width: calc(var(--row-width) + #{$platform-scrollbar-width});
+    max-width: calc(100% + #{$table-padding});
+    height: calc(100% - #{$row-height});
+    border: none;
+    overflow: auto !important;
+
+    &.show-expressions {
+      .index-column-header {
+        .show-hide-row-labels-button {
+          top: $row-height;
+        }
+      }
+    }
+
+    .rdg-header-row {
+      .index-column-header {
+        min-width: $index-column-width;
+        padding: 0;
+        border-left: $border-style;
+        border-top-left-radius: $border-radius;
+        .show-hide-row-labels-button {
+          width: $index-column-width;
+          height: $row-height;
+          position: relative;
+          .hide-row-labels-icon, .show-row-labels-icon {
+            position: absolute;
+            left: 4px;
+            top: 4px;
+          }
+          &.shown {
+            .hide-row-labels-icon { opacity: 35% }
+            .show-row-labels-icon { opacity: 0% }
+          }
+          &.hidden {
+            .hide-row-labels-icon { opacity: 0% }
+            .show-row-labels-icon { opacity: 35% }
+          }
+          &:hover {
+            &.shown {
+              .hide-row-labels-icon { opacity: 0% }
+              .show-row-labels-icon { opacity: 100% }
+            }
+            &.hidden {
+              .hide-row-labels-icon { opacity: 100% }
+              .show-row-labels-icon { opacity: 0% }
+            }
+          }
+        }
+      }
+      .rdg-cell {
+        border-top: $border-style;
+        &.selected-column {
+          background-color: var(--header-selected-background-color);
+        }
+        input {
+          background-color: inherit;
+        }
+      }
+      .controls-column-header {
+        background-color: white;
+        border: none;
+        padding: 0;
+        .add-column-button {
+          width: $controls-column-width;
+          height: $row-height;
+          display: none;  // overridden when tile is selected
+          justify-content: center;
+          align-items: center;
+          svg {
+            fill: white;
+            stroke: $workspace-teal-light-3;
+          }
+          &:hover {
+            svg {
+              fill: $workspace-teal-light-4;
+              stroke: $workspace-teal-dark-1;
+            }
+          }
+          &:active {
+            svg {
+              fill: $workspace-teal-dark-1;
+              stroke: white;
+            }
+          }
+        }
+      }
+    }
+    .rdg-row {
+      &.rdg-row-selected {
+        background-color: var(--row-selected-background-color);
+        .index-column {
+          background-color: var(--header-selected-background-color);
+        }
+        .has-expression {
+          background-color: var(--row-selected-background-color);
+        }
+        &.input-row {
+          .index-column {
+            background-color: $highlight-blue-50-35;
+          }
+        }
+      }
+      &.input-row {
+        .index-column {
+          background-color: $header-input-color;
+          border-left: $border-input-style;
+        }
+        .rdg-cell {
+          border-right: $border-input-style;
+          border-bottom: $border-input-style;
+        }
+        .controls-column {
+          border: none;
+        }
+      }
+      .index-column {
+        border-left: $border-style;
+      }
+      .controls-column {
+        background-color: white;
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        .remove-row-button {
+          width: $controls-column-width;
+          height: $row-height;
+          display: none;  // overridden when tile is selected
+          justify-content: center;
+          align-items: center;
+          svg {
+            fill: white;
+            stroke: $highlight-blue;
+          }
+          &:hover {
+            svg {
+              fill: $highlight-blue-25;
+              stroke: $highlight-blue;
+            }
+          }
+          &:active {
+            svg {
+              fill: $highlight-blue;
+              stroke: white;
+            }
+          }
+        }
+      }
+    }
+    .index-column {
+      width: $index-column-width;
+      min-width: $index-column-width;
+      padding: 0;
+      background-color: var(--header-background-color);
+      font-weight: bold;
+      font-style: italic;
+      .index-cell-contents {
+        width: 100%;
+        height: 100%;
+      }
+    }
+    .rdg-cell {
+      input {
+        text-align: center;
+      }
+
+      &.has-expression {
+        background-color: $charcoal-light-5;
+      }
+      &.selected-column {
+        background-color: var(--row-selected-background-color);
+      }
+    }
+  }
+}
+
+.tool-tile.selected {
+  .table-tool {
+    .add-column-button, .remove-row-button {
+      // show buttons only when tile is selected
+      display: flex !important;
+    }
+  }
+}
+
+// .link-color-0 > .ag-theme-fresh .ag-row-selected
+//   background-color: $link-color-0-light
+
+// .link-color-1 > .ag-theme-fresh .ag-row-selected
+//   background-color: $link-color-1-light
+
+// .link-color-2 > .ag-theme-fresh .ag-row-selected
+//   background-color: $link-color-2-light
+
+// .link-color-3 > .ag-theme-fresh .ag-row-selected
+//   background-color: $link-color-3-light
+
+// .link-color-4 > .ag-theme-fresh .ag-row-selected
+//   background-color: $link-color-4-light
+
+// .link-color-5 > .ag-theme-fresh .ag-row-selected
+//   background-color: $link-color-5-light

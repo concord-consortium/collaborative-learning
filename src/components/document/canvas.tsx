@@ -54,10 +54,11 @@ export class CanvasComponent extends React.Component<IProps> {
   private renderContent() {
     const {content, document, ...others} = this.props;
     const documentContent = document ? document.content : content;
+    const documentId = document?.key;
 
     if (documentContent) {
       return (
-        <DocumentContentComponent content={documentContent} {...others} />
+        <DocumentContentComponent content={documentContent} documentId={documentId} {...others} />
       );
     }
     else {

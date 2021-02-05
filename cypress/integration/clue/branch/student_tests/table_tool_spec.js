@@ -15,7 +15,7 @@ let canvas = new Canvas,
         cy.waitForSpinner();
     });
 
-context('Table Tool Tile',function(){
+context.skip('Table Tool Tile',function(){
     describe('test menu functions of table', function(){
         it('will add a table to canvas', function(){
             clueCanvas.addTile('table');
