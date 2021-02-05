@@ -89,7 +89,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
     rowChanges, readOnly: !!readOnly, changeHandlers, measureText: measureHeaderText,
     selectedCell, inputRowId, ...rowLabelProps, onShowExpressionsDialog: handleShowExpressionsDialog });
 
-  const { isLinkEnabled, showLinkGeometryDialog } = useGeometryLinking({
+  const { isLinkEnabled, linkIndex, showLinkGeometryDialog } = useGeometryLinking({
     documentId, model, hasLinkableRows, onRequestTilesOfType, onLinkGeometryTile
   });
 
@@ -109,7 +109,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
                     onSetExpression={showExpressionsDialog} scale={scale}/>
       <div className="table-grid-container" ref={containerRef} onClick={handleBackgroundClick}>
         <EditableTableTitle className="table-title" readOnly={readOnly}
-          isLinkEnabled={isLinkEnabled} onLinkGeometryClick={showLinkGeometryDialog}
+          isLinkEnabled={isLinkEnabled} linkIndex={linkIndex} onLinkGeometryClick={showLinkGeometryDialog}
           getTitle={getTitle} titleCellWidth={titleCellWidth}
           onBeginEdit={onBeginTitleEdit} onEndEdit={onEndTitleEdit} />
         <ReactDataGrid ref={gridRef} selectedRows={getSelectedRows()}

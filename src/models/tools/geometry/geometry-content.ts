@@ -24,7 +24,6 @@ import {
 } from "./jxg-types";
 import { IDataSet } from "../../data/data-set";
 import { assign, castArray, each, keys, omit, size as _size } from "lodash";
-import { v4 as uuid } from "uuid";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { getTileContentById } from "../../../utilities/mst-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
@@ -588,7 +587,7 @@ export const GeometryContentModel = types
         operation: "create",
         target: "image",
         parents: [url, coords, size],
-        properties: assign({ id: uuid() }, properties)
+        properties: assign({ id: uniqueId() }, properties)
       };
       const image = _applyChange(board, change);
       return image ? image as JXG.Image : undefined;
@@ -601,7 +600,7 @@ export const GeometryContentModel = types
         operation: "create",
         target: "point",
         parents,
-        properties: assign({ id: uuid() }, properties)
+        properties: assign({ id: uniqueId() }, properties)
       };
       const point = _applyChange(board, change);
       return point ? point as JXG.Point : undefined;
@@ -616,7 +615,7 @@ export const GeometryContentModel = types
         operation: "create",
         target: links ? "linkedPoint" : "point",
         parents,
-        properties: parents.map((p, i) => ({ id: uuid(), ...(props && props[i] || props[0]) })),
+        properties: parents.map((p, i) => ({ id: uniqueId(), ...(props && props[i] || props[0]) })),
         links
       };
       const points = _applyChange(board, change);
@@ -628,7 +627,7 @@ export const GeometryContentModel = types
         operation: "create",
         target: "movableLine",
         parents,
-        properties: {id: uuid(), ...properties}
+        properties: {id: uniqueId(), ...properties}
       };
       const elems = _applyChange(board, change);
       return elems ? elems as JXG.GeometryElement[] : undefined;
@@ -638,7 +637,7 @@ export const GeometryContentModel = types
       const change: JXGChange = {
         operation: "create",
         target: "comment",
-        properties: {id: uuid(), anchor: anchorId }
+        properties: {id: uniqueId(), anchor: anchorId }
       };
       const elems = _applyChange(board, change);
       return elems ? elems as JXG.GeometryElement[] : undefined;
@@ -678,17 +677,19 @@ export const GeometryContentModel = types
     }
 
     function createPolygonFromFreePoints(
-              board: JXG.Board, linkedTableId?: string, properties?: JXGProperties): JXG.Polygon | undefined {
+              board: JXG.Board, linkedTableId?: string, linkedColumnId?: string, properties?: JXGProperties
+            ): JXG.Polygon | undefined {
       const freePtIds = board.objectsList
                           .filter(elt => isFreePoint(elt) &&
-                                          (linkedTableId === elt?.getAttribute("linkedTableId")))
+                                          (linkedTableId === elt?.getAttribute("linkedTableId")) &&
+                                          (linkedColumnId === elt?.getAttribute("linkedColId")))
                           .map(pt => pt.id);
       if (freePtIds && freePtIds.length > 1) {
         const change: JXGChange = {
                 operation: "create",
                 target: "polygon",
                 parents: freePtIds,
-                properties: assign({ id: uuid() }, properties)
+                properties: assign({ id: uniqueId() }, properties)
               };
         const polygon = _applyChange(board, change);
         return polygon ? polygon as any as JXG.Polygon : undefined;
@@ -702,7 +703,7 @@ export const GeometryContentModel = types
               operation: "create",
               target: "vertexAngle",
               parents,
-              properties: assign({ id: uuid(), radius: 1 }, properties)
+              properties: assign({ id: uniqueId(), radius: 1 }, properties)
             };
       const angle = _applyChange(board, change);
       return angle ? angle as any as JXG.Angle : undefined;
@@ -950,7 +951,7 @@ export const GeometryContentModel = types
       // map old ids to new ones
       const newIds: { [oldId: string]: string } = {};
       selectedIds.forEach(id => {
-        newIds[id] = uuid();
+        newIds[id] = uniqueId();
       });
 
       // create change objects for each object to be copied
@@ -1417,7 +1418,7 @@ function preprocessImportFormat(snapshot: any) {
   addBoard(boardSpecs);
 
   function addComment(props: Record<string, unknown>) {
-    const id = uuid();
+    const id = uniqueId();
     changes.push({ operation: "create", target: "comment", properties: {id, ...props }});
     return id;
   }

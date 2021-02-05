@@ -71,11 +71,11 @@ $controls-hover-background: #c0dfe7;
         }
 
         &:hover:not(.disabled) {
-          background-color: $workspace-teal-light-6;
+          background-color: $workspace-teal-light-4;
         }
 
         &:active:not(.disabled) {
-          background-color: $workspace-teal-light-4;
+          background-color: $workspace-teal-light-2;
         }
       }
     }

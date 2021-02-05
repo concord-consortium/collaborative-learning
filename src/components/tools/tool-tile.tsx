@@ -57,7 +57,7 @@ export const kDragTileId = "org.concord.clue.tile.id";
 export const kDragTileContent = "org.concord.clue.tile.content";
 export const kDragTileCreate = "org.concord.clue.tile.create";
 // allows source compatibility to be checked in dragOver
-export const dragTileSrcDocId = (id: string) => `org.concord.clue.src.${id}`;
+export const dragTileSrcDocId = (id: string) => `org.concord.clue.src.${id.toLowerCase()}`;
 export const dragTileType = (type: string) => `org.concord.clue.tile.type.${type}`;
 
 export function extractDragTileSrcDocId(dataTransfer: DataTransfer) {
@@ -252,14 +252,11 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     const { model, toolApiInterface } = this.props;
     const toolApi = toolApiInterface?.getToolApi(model.id);
     const clientTableLinks = toolApi?.getLinkedTables?.();
-    const tableLinkIndex = toolApi?.getLinkIndex?.();
     return clientTableLinks
             ? clientTableLinks.map((id, index) => {
                 return <LinkIndicatorComponent key={id} id={id} index={index} />;
               })
-            : (tableLinkIndex != null) && (tableLinkIndex >= 0)
-                ? <LinkIndicatorComponent id={model.id} />
-                : null;
+            : null; // tables don't use the original link indicator any more
   }
 
   private renderTileComments() {

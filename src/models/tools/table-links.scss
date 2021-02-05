@@ -13,6 +13,48 @@ $link-color-4-dark: $terra-dark-5;
 $link-color-5-light: $rust-light-1;
 $link-color-5-dark: $rust-dark-5;
 
+.link-color-0 {
+  background-color: $link-color-0-light !important;
+  &:active:not(.disabled) {
+    background-color: $link-color-0-dark !important;
+  }
+}
+
+.link-color-1 {
+  background-color: $link-color-1-light !important;
+  &:active:not(.disabled) {
+    background-color: $link-color-1-dark !important;
+  }
+}
+
+.link-color-2 {
+  background-color: $link-color-2-light !important;
+  &:active:not(.disabled) {
+    background-color: $link-color-2-dark !important;
+  }
+}
+
+.link-color-3 {
+  background-color: $link-color-3-light !important;
+  &:active:not(.disabled) {
+    background-color: $link-color-3-dark !important;
+  }
+}
+
+.link-color-4 {
+  background-color: $link-color-4-light !important;
+  &:active:not(.disabled) {
+    background-color: $link-color-4-dark !important;
+  }
+}
+
+.link-color-5 {
+  background-color: $link-color-5-light !important;
+  &:active:not(.disabled) {
+    background-color: $link-color-5-dark !important;
+  }
+}
+
 :export {
   linkColor0Light: $link-color-0-light;
   linkColor0Dark: $link-color-0-dark;
