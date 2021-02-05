@@ -73,8 +73,8 @@ describe("db", () => {
       return;
     }
 
-    expect(docContent.tileMap!.size).toBe(1);
-    docContent.tileMap!.forEach((tile: ToolTileModelType) => {
+    expect(docContent.tileMap.size).toBe(1);
+    docContent.tileMap.forEach((tile: ToolTileModelType) => {
       const tileContent = tile.content as TextContentModelType;
       expect(tileContent.type).toBe("Text");
       expect(tileContent.format).toBeUndefined();

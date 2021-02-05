@@ -322,7 +322,7 @@ function getCurricularSupportCaption(support: CurricularSupportModelType, index:
   const investigationPart = investigation ? `${investigation.ordinal}` : "*";
   const problemPart = problem ? `${problem.ordinal}` : "*";
   const { sectionId } = support;
-  const sectionPart = sectionId ? " " + getSectionTitle(sectionId as SectionType) : "";
+  const sectionPart = sectionId ? " " + getSectionTitle(sectionId) : "";
   return `${investigationPart}.${problemPart}${sectionPart} Support ${index}`;
 }
 
@@ -356,10 +356,10 @@ export function addSupportDocumentsToStore(params: ICreateFromUnitParams) {
     }
     const supportCaption = getSupportCaption(support, index, investigation, problem);
     const supportKey = support.supportType === SupportType.teacher
-                        ? (support as TeacherSupportModelType).key || supportCaption
+                        ? support.key || supportCaption
                         : supportCaption;
     const originDoc = support.supportType === SupportType.teacher
-                        ? (support as TeacherSupportModelType).originDoc
+                        ? support.originDoc
                         : supportKey; // unique origin for curricular supports
     let properties: IDocumentProperties;
     if (support.supportType === SupportType.curricular) {

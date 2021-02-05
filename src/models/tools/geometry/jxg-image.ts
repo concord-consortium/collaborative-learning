@@ -1,10 +1,9 @@
 import { getObjectById } from "./jxg-board";
 import { JXGChangeAgent } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
+import { isImage } from "./jxg-types";
 import { gImageMap } from "../../image-map";
 import { uniqueId } from "../../../utilities/js-utils";
-
-export const isImage = (v: any) => v instanceof JXG.Image;
 
 export const imageChangeAgent: JXGChangeAgent = {
   create: (board, change) => {
@@ -26,7 +25,7 @@ export const imageChangeAgent: JXGChangeAgent = {
     const props = Array.isArray(change.properties) ? change.properties : [change.properties];
     ids.forEach((id, index) => {
       const obj = getObjectById(board, id);
-      const image = isImage(obj) ? obj as JXG.Image : undefined;
+      const image = isImage(obj) ? obj : undefined;
       const objProps = index < props.length ? props[index] : props[0];
       if (image && objProps) {
         const { url, size } = objProps;

@@ -27,7 +27,7 @@ export const useGridContext = ({ modelId, showRowLabels, triggerColumnChange }: 
   const sharedSelection = useSharedSelectionStore();
   const getSelectedRows = useCallback(() => {
     // this is suitable for passing into ReactDataGrid
-    return new Set<React.Key>(Array.from(sharedSelection.getSelected(modelId)) as string[]);
+    return new Set<React.Key>(Array.from(sharedSelection.getSelected(modelId)));
   }, [modelId, sharedSelection]);
 
   const clearRowSelection = useCallback(() => sharedSelection.clear(modelId), [modelId, sharedSelection]);

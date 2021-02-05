@@ -34,7 +34,7 @@ interface IRemoveColumnButtonProps {
 }
 const RemoveColumnButton: React.FC<IRemoveColumnButtonProps> = ({ colId, colName, onRemoveColumn }) => {
   const AlertContent = () => {
-    return <p>Remove column <b>{colName as string}</b> and its contents from the table?</p>;
+    return <p>Remove column <b>{colName}</b> and its contents from the table?</p>;
   };
   const [showAlert] = useCautionAlert({
     title: "Remove Column",

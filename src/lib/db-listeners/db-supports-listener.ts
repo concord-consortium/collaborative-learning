@@ -3,7 +3,6 @@ import { SupportTarget, TeacherSupportModel, TeacherSupportModelType, ClassAudie
         AudienceModelType, GroupAudienceModel, UserAudienceModel, addSupportDocumentsToStore
       } from "../../models/stores/supports";
 import { DBSupport } from "../db-types";
-import { SectionType } from "../../models/curriculum/section";
 import { ESupportType, SupportModel } from "../../models/curriculum/support";
 import { BaseListener } from "./base-listener";
 import { isAlive } from "mobx-state-tree";
@@ -123,7 +122,7 @@ export class DBSupportsListener extends BaseListener {
                              audience: AudienceModelType) {
     if (!dbSupport || !dbSupport.content) return;
     const { type, ...others } = dbSupport;
-    const supportContentType: ESupportType = (type as ESupportType) || ESupportType.text;
+    const supportContentType: ESupportType = type || ESupportType.text;
     const supportModel = SupportModel.create({ type: supportContentType, ...others });
     if (!supportModel) return;
     return TeacherSupportModel.create({
@@ -131,7 +130,7 @@ export class DBSupportsListener extends BaseListener {
       key: dbSupport.self.key,
       support: supportModel,
       type: !sectionTarget || sectionTarget === "all" ? SupportTarget.problem : SupportTarget.section,
-      sectionId: !sectionTarget || sectionTarget === "all" ? undefined : sectionTarget as SectionType,
+      sectionId: !sectionTarget || sectionTarget === "all" ? undefined : sectionTarget,
       audience,
       authoredTime: dbSupport.timestamp,
       originDoc: dbSupport.type === ESupportType.publication ? dbSupport.originDoc : undefined,

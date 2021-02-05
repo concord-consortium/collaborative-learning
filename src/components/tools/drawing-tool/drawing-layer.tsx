@@ -850,7 +850,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       if (moved) {
         if (objectsToInteract.length > 0) {
           const moves: DrawingToolMove = objectsToInteract.map((object) => ({
-            id: object!.model.id || "",
+            id: object.model.id || "",
             destination: {x: object.model.x, y: object.model.y}
           }));
           this.sendChange({action: "move", data: moves});

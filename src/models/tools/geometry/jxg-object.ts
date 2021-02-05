@@ -1,11 +1,9 @@
 import { sortByCreation, kReverse, getObjectById, syncLinkedPoints } from "./jxg-board";
 import { JXGChangeAgent, JXGProperties, JXGCoordPair, JXGUnsafeCoordPair } from "./jxg-changes";
-import { isLinkedPoint } from "./jxg-types";
+import { isLinkedPoint, isText } from "./jxg-types";
 import { ITableLinkProperties } from "../table/table-content";
 import { castArrayCopy } from "../../../utilities/js-utils";
 import { castArray, size } from "lodash";
-
-export const isText = (v: any) => v instanceof JXG.Text;
 
 // Inexplicably, we occasionally encounter JSXGraph objects with null
 // transformations which cause JSXGraph to crash. Until we figure out
@@ -45,7 +43,7 @@ export const objectChangeAgent: JXGChangeAgent = {
     ids.forEach((id, index) => {
       const obj = getObjectById(board, id);
       if (isLinkedPoint(obj)) hasLinkedPoints = true;
-      const textObj = isText(obj) ? obj as JXG.Text : undefined;
+      const textObj = isText(obj) ? obj : undefined;
       const objProps = index < props.length ? props[index] : props[0];
       if (obj && objProps) {
         const { position, text, ...others } = objProps;
