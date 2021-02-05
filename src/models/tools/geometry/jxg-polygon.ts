@@ -27,7 +27,7 @@ export function getPolygonEdges(polygon: JXG.Polygon) {
 
 export function getPolygonEdge(board: JXG.Board, polygonId: string, pointIds: string[]) {
   const point1 = getObjectById(board, pointIds[0]);
-  const segment = find(point1.childElements, child => {
+  const segment = find(point1?.childElements, child => {
                     const seg = isVisibleEdge(child) ? child as JXG.Line : undefined;
                     if (!seg) return false;
                     const isEdgeOfPolygon = seg.parentPolygon?.id === polygonId;
@@ -92,7 +92,7 @@ export function prepareToDeleteObjects(board: JXG.Board, ids: string[]) {
   const polygonVertexMap: { [id: string]: string[] } = {};
   ids.forEach(id => {
     const elt = getObjectById(board, id);
-    if (isPoint(elt)) {
+    if (elt && isPoint(elt)) {
       each(elt.childElements, child => {
         if (isPolygon(child)) {
           if (!polygonVertexMap[child.id]) {
@@ -105,7 +105,7 @@ export function prepareToDeleteObjects(board: JXG.Board, ids: string[]) {
     else if (isPolygon(elt)) {
       polygonsToDelete[id] = elt as JXG.Polygon;
     }
-    else if (isVertexAngle(elt)) {
+    else if (elt && isVertexAngle(elt)) {
       anglesToDelete[id] = elt;
     }
   });

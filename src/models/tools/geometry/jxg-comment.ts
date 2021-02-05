@@ -70,7 +70,7 @@ export const commentChangeAgent: JXGChangeAgent = {
       const _board = board as JXG.Board;
       const centroidCoordinateGetter = (index: number) => () => {
         const anchor = getObjectById(_board, commentProps.anchor);
-        const centroid = getCentroid(anchor);
+        const centroid = anchor && getCentroid(anchor);
         if (centroid) {
           return centroid[index];
         }
