@@ -1,24 +1,23 @@
+import { each } from "lodash";
 import { observer } from "mobx-react";
 import React from "react";
-import { IBaseProps } from "../base";
 import { DocumentContentComponent } from "./document-content";
 import { DocumentModelType } from "../../models/document/document";
 import { DocumentContentModelType } from "../../models/document/document-content";
-import { IToolApiInterface } from "../tools/tool-tile";
+import { IToolApiMap, IToolApiInterface, IToolApi, ToolApiInterfaceContext } from "../tools/tool-api";
 import { DEBUG_CANVAS } from "../../lib/debug";
 
 import "./canvas.sass";
 
 export type EditabilityLocation = "north east" | "north west" | "south east" | "south west";
 
-interface IProps extends IBaseProps {
+interface IProps {
   context: string;
   scale?: number;
   readOnly?: boolean;
   document?: DocumentModelType;
   content?: DocumentContentModelType;
   editabilityLocation?: EditabilityLocation;
-  toolApiInterface?: IToolApiInterface;
   overlayMessage?: string;
   selectedSectionId?: string | null;
   viaTeacherDashboard?: boolean;
@@ -27,14 +26,38 @@ interface IProps extends IBaseProps {
 @observer
 export class CanvasComponent extends React.Component<IProps> {
 
+  private toolApiMap: IToolApiMap = {};
+  private toolApiInterface: IToolApiInterface;
+
+  constructor(props: IProps) {
+    super(props);
+
+    this.toolApiInterface = {
+      register: (id: string, toolApi: IToolApi) => {
+        this.toolApiMap[id] = toolApi;
+      },
+      unregister: (id: string) => {
+        delete this.toolApiMap[id];
+      },
+      getToolApi: (id: string) => {
+        return this.toolApiMap[id];
+      },
+      forEach: (callback: (api: IToolApi) => void) => {
+        each(this.toolApiMap, api => callback(api));
+      }
+    };
+  }
+
   public render() {
     return (
-      <div key="canvas" className="canvas" data-test="canvas">
-        {this.renderContent()}
-        {this.renderEditability()}
-        {this.renderDebugInfo()}
-        {this.renderOverlayMessage()}
-      </div>
+      <ToolApiInterfaceContext.Provider value={this.toolApiInterface}>
+        <div key="canvas" className="canvas" data-test="canvas">
+          {this.renderContent()}
+          {this.renderEditability()}
+          {this.renderDebugInfo()}
+          {this.renderOverlayMessage()}
+        </div>
+      </ToolApiInterfaceContext.Provider>
     );
   }
 

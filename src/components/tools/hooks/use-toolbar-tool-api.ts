@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useCurrent } from "../../../hooks/use-current";
 import { useUIStore } from "../../../hooks/use-stores";
-import { IToolApi } from "../tool-tile";
+import { IToolApi } from "../tool-api";
 
 export interface IUseToolbarToolApi {
   id: string;

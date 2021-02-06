@@ -8,7 +8,8 @@ import { TileRowComponent, kDragResizeRowId, extractDragResizeRowId, extractDrag
 import { DocumentContentModelType, IDragToolCreateInfo, IDropRowInfo } from "../../models/document/document-content";
 import { getToolContentInfoById } from "../../models/tools/tool-content-info";
 import { IDragTiles } from "../../models/tools/tool-tile";
-import { dragTileSrcDocId, IToolApiInterface, kDragTileCreate, kDragTiles } from "../tools/tool-tile";
+import { ToolApiInterfaceContext } from "../tools/tool-api";
+import { dragTileSrcDocId, kDragTileCreate, kDragTiles } from "../tools/tool-tile";
 import { safeJsonParse } from "../../utilities/js-utils";
 
 import "./document-content.sass";
@@ -19,7 +20,6 @@ interface IProps extends IBaseProps {
   content?: DocumentContentModelType;
   readOnly?: boolean;
   scale?: number;
-  toolApiInterface?: IToolApiInterface;
   selectedSectionId?: string | null;
   viaTeacherDashboard?: boolean;
 }
@@ -41,6 +41,9 @@ const kDragUpdateInterval = 50;
 @inject("stores")
 @observer
 export class DocumentContentComponent extends BaseComponent<IProps, IState> {
+
+  static contextType = ToolApiInterfaceContext;
+  declare context: React.ContextType<typeof ToolApiInterfaceContext>;
 
   public state: IState = {};
 
@@ -145,9 +148,8 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const { rowMap } = content;
     const row = rowMap.get(rowId);
     const { dragResizeRow } = this.state;
-    const dragResizeRowId = dragResizeRow && dragResizeRow.id;
-    if (rowId !== dragResizeRowId) {
-      return row && row.height;
+    if (rowId !== dragResizeRow?.id) {
+      return row?.height;
     }
     const rowHeight = dragResizeRow && (dragResizeRow.domHeight || dragResizeRow.modelHeight);
     if (!dragResizeRow || !rowHeight) return;
@@ -194,20 +196,23 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleScroll = throttle((e: React.UIEvent<HTMLDivElement>) => {
+    const toolApiInterface = this.context;
     const xScroll = this.domElement?.scrollLeft || 0;
     const yScroll = this.domElement?.scrollTop || 0;
-    this.props.toolApiInterface?.forEach(api => api.handleDocumentScroll?.(xScroll, yScroll));
+    toolApiInterface?.forEach(api => api.handleDocumentScroll?.(xScroll, yScroll));
   }, 50)
 
   private handleRequestTilesOfType = (tileType: string) => {
-    const { content, toolApiInterface } = this.props;
+    const { content } = this.props;
+    const toolApiInterface = this.context;
     if (!content || !tileType || !toolApiInterface) return [];
     const tilesOfType = content.getTilesOfType(tileType);
     return tilesOfType.map(id => ({ id, title: toolApiInterface.getToolApi(id)?.getTitle?.() }));
   }
 
   private handleRequestUniqueTitle = (tileId: string) => {
-    const { content, toolApiInterface } = this.props;
+    const { content } = this.props;
+    const toolApiInterface = this.context;
     const tileType = content?.getTile(tileId)?.content.type;
     const titleBase = tileType && getToolContentInfoById(tileType)?.titleBase;
     const getTileTitle = (_tileId: string) => toolApiInterface?.getToolApi?.(_tileId)?.getTitle?.();

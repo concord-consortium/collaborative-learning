@@ -1,11 +1,12 @@
 import { isDataColumn, kControlsColumnWidth, kHeaderCellPadding, TColumn } from "./table-types";
 
 interface IProps {
+  readOnly?: boolean;
   getTitle: () => string | undefined;
   columns: TColumn[];
   measureText: (text: string) => number;
 }
-export const useColumnWidths = ({ getTitle, columns, measureText }: IProps) => {
+export const useColumnWidths = ({ readOnly, getTitle, columns, measureText }: IProps) => {
 
   const desiredTitleCellWidth = measureText(getTitle() || "Table 8") + kHeaderCellPadding;
 
@@ -16,7 +17,7 @@ export const useColumnWidths = ({ getTitle, columns, measureText }: IProps) => {
   const getTitleCellWidthFromColumns = () => {
     return columns.reduce(
                     (sum, col, i) => sum + (i ? columnWidth(col) : 0),
-                    1 - kControlsColumnWidth);
+                    1 - (readOnly ? 0 : kControlsColumnWidth));
   };
 
   const titleCellWidthFromColumns = getTitleCellWidthFromColumns();

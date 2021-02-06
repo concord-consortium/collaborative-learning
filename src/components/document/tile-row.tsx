@@ -6,7 +6,8 @@ import { TileLayoutModelType, TileRowModelType } from "../../models/document/til
 import { isShowingTeacherContent } from "../../models/stores/stores";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { SectionHeader } from "../tools/section-header";
-import { ToolTileComponent, dragTileSrcDocId, IToolApiInterface } from "../tools/tool-tile";
+import { ToolApiInterfaceContext } from "../tools/tool-api";
+import { ToolTileComponent, dragTileSrcDocId } from "../tools/tool-tile";
 
 import "./tile-row.sass";
 
@@ -60,7 +61,6 @@ interface IProps {
   tileMap: any;
   readOnly?: boolean;
   dropHighlight?: string;
-  toolApiInterface?: IToolApiInterface;
   onRequestTilesOfType: (tileType: string) => Array<{ id: string, title?: string }>;
   onRequestUniqueTitle: (tileId: string) => string | undefined;
 }
@@ -73,6 +73,9 @@ interface IState {
 @observer
 export class TileRowComponent extends BaseComponent<IProps, IState> {
 
+  static contextType = ToolApiInterfaceContext;
+  declare context: React.ContextType<typeof ToolApiInterfaceContext>;
+
   public state: IState = {};
 
   private tileRowDiv: HTMLElement | null;
@@ -82,7 +85,7 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
     const { isSectionHeader, sectionId, tiles } = model;
     // ignore height setting for section header rows
     const height = !isSectionHeader
-                      ? this.props.height || model.height
+                      ? this.props.height || model.height || this.getContentHeight()
                       : undefined;
     const style = height ? { height } : undefined;
     const renderableTiles = tiles?.filter(tile => this.isTileRenderable(tile.tileId));
@@ -113,6 +116,18 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
   private getTileWidth(tileId: string, tiles: TileLayoutModelType[]) {
     // for now, distribute tiles evenly
     return 100 / (tiles.length || 1);
+  }
+
+  private getContentHeight() {
+    const { model: { tiles } } = this.props;
+    const toolApiInterface = this.context;
+    let rowHeight: number | undefined;
+    tiles.forEach(tile => {
+      const toolApi = toolApiInterface?.getToolApi(tile.tileId);
+      const tileHeight = toolApi?.getContentHeight?.();
+      tileHeight && (rowHeight = Math.max(tileHeight, rowHeight || 0));
+    });
+    return rowHeight;
   }
 
   private renderTiles(tiles: TileLayoutModelType[], rowHeight?: number) {

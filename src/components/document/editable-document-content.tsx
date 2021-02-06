@@ -5,9 +5,7 @@ import { DocumentContextReact } from "./document-context";
 import { FourUpComponent } from "../four-up";
 import { useDocumentContext } from "../../hooks/use-document-context";
 import { useGroupsStore } from "../../hooks/use-stores";
-import { useToolApiInterface } from "../../hooks/use-tool-api-interface";
 import { ToolbarComponent, ToolbarConfig } from "../toolbar";
-import { IToolApiInterface, IToolApiMap } from "../tools/tool-tile";
 import { DocumentModelType } from "../../models/document/document";
 import { ProblemDocument } from "../../models/document/document-types";
 import { WorkspaceMode } from "../../models/stores/workspace";
@@ -17,7 +15,6 @@ import "./editable-document-content.scss";
 interface IToolbarProps {
   document: DocumentModelType;
   toolbar?: ToolbarConfig;
-  toolApiMap: IToolApiMap;
 }
 const DocumentToolbar: React.FC<IToolbarProps> = ({ toolbar, ...others }) => {
   const appConfig = useContext(AppConfigContext);
@@ -30,7 +27,6 @@ const DocumentToolbar: React.FC<IToolbarProps> = ({ toolbar, ...others }) => {
 interface IOneUpCanvasProps {
   document: DocumentModelType;
   readOnly: boolean;
-  toolApiInterface: IToolApiInterface;
 }
 const OneUpCanvas: React.FC<IOneUpCanvasProps> = props => {
   return (
@@ -40,7 +36,6 @@ const OneUpCanvas: React.FC<IOneUpCanvasProps> = props => {
 
 interface IEditableFourUpCanvasProps {
   userId: string;
-  toolApiInterface: IToolApiInterface;
 }
 const EditableFourUpCanvas: React.FC<IEditableFourUpCanvasProps> = props => {
   const groups = useGroupsStore();
@@ -55,16 +50,15 @@ interface IDocumentCanvasProps {
   isPrimary: boolean;
   document: DocumentModelType;
   readOnly: boolean;
-  toolApiInterface: IToolApiInterface;
 }
 const DocumentCanvas: React.FC<IDocumentCanvasProps> = props => {
-  const { mode, isPrimary, document, readOnly, toolApiInterface } = props;
+  const { mode, isPrimary, document, readOnly } = props;
   const isFourUp = (document.type === ProblemDocument) && (isPrimary && (mode === "4-up"));
   return (
     <div className="canvas-area">
       {isFourUp
-        ? <EditableFourUpCanvas userId={document.uid} toolApiInterface={toolApiInterface} />
-        : <OneUpCanvas document={document} readOnly={readOnly} toolApiInterface={toolApiInterface} />}
+        ? <EditableFourUpCanvas userId={document.uid} />
+        : <OneUpCanvas document={document} readOnly={readOnly} />}
     </div>
   );
 
@@ -81,7 +75,6 @@ export const EditableDocumentContent: React.FC<IProps> = props => {
   const { mode, isPrimary, document, toolbar, readOnly } = props;
 
   const documentContext = useDocumentContext(document);
-  const [toolApiMap, toolApiInterface] = useToolApiInterface();
 
   const isReadOnly = !isPrimary || readOnly || document.isPublished;
   const isShowingToolbar = !!toolbar && !isReadOnly;
@@ -89,10 +82,9 @@ export const EditableDocumentContent: React.FC<IProps> = props => {
   return (
     <DocumentContextReact.Provider value={documentContext}>
       <div key="editable-document" className={`editable-document-content ${showToolbarClass}`} >
-        {isShowingToolbar && <DocumentToolbar document={document} toolbar={toolbar} toolApiMap={toolApiMap} />}
+        {isShowingToolbar && <DocumentToolbar document={document} toolbar={toolbar} />}
         {isShowingToolbar && <div className="canvas-separator"/>}
-        <DocumentCanvas mode={mode} isPrimary={isPrimary} document={document} readOnly={isReadOnly}
-                        toolApiInterface={toolApiInterface} />
+        <DocumentCanvas mode={mode} isPrimary={isPrimary} document={document} readOnly={isReadOnly} />
       </div>
     </DocumentContextReact.Provider>
   );
