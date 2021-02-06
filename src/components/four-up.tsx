@@ -9,7 +9,6 @@ import { DocumentModelType } from "../models/document/document";
 import { GroupUserModelType } from "../models/stores/groups";
 import { CellPositions, FourUpGridCellModelType, FourUpGridModel, FourUpGridModelType
       } from "../models/view/four-up-grid";
-import { IToolApiInterface } from "./tools/tool-tile";
 import { FourUpOverlayComponent } from "./four-up-overlay";
 import { Logger, LogEventName } from "../lib/logger";
 
@@ -19,7 +18,6 @@ interface IProps extends IBaseProps {
   userId?: string;
   groupId?: string;
   isGhostUser?: boolean;
-  toolApiInterface?: IToolApiInterface;
   toggleable?: boolean;
   documentViewMode?: DocumentViewMode;
   selectedSectionId?: string | null;

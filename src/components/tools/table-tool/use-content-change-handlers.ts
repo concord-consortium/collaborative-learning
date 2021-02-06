@@ -3,12 +3,12 @@ import { useCurrent } from "../../../hooks/use-current";
 import { ICase, ICaseCreation, IDataSet } from "../../../models/data/data-set";
 import { getGeometryContent } from "../../../models/tools/geometry/geometry-content";
 import {
-  ILinkProperties, ITableChange, TableContentModelType
+  getTableContentHeight, ILinkProperties, ITableChange, TableContentModelType
 } from "../../../models/tools/table/table-content";
 import { isLinkableValue, ITileLinkMetadata } from "../../../models/tools/table/table-model-types";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { safeJsonParse, uniqueId, uniqueName } from "../../../utilities/js-utils";
-import { kRowHeight, TColumn } from "./table-types";
+import { TColumn } from "./table-types";
 
 export interface IContentChangeHandlers {
   onSetTableTitle: (title: string) => void;
@@ -32,7 +32,7 @@ interface IProps {
   triggerRowChange: () => void;
 }
 export const useContentChangeHandlers = ({
-  model, dataSet, readOnly, onRequestRowHeight, triggerColumnChange, triggerRowChange
+  model, dataSet, readOnly, onRequestRowHeight, triggerColumnChange
 }: IProps): IContentChangeHandlers => {
   const modelRef = useCurrent(model);
   const getContent = useCallback(() => modelRef.current.content as TableContentModelType, [modelRef]);
@@ -82,8 +82,11 @@ export const useContentChangeHandlers = ({
   }, [dataSet.attributes, getContent]);
 
   const requestRowHeight = useCallback(() => {
-    onRequestRowHeight({ height: optimalTileRowHeight(dataSet.cases.length, getContent().hasExpressions) });
-  }, [dataSet.cases.length, getContent, onRequestRowHeight]);
+    const height = getTableContentHeight({
+                    dataRows: dataSet.cases.length, readOnly, hasExpressions: getContent().hasExpressions
+                  });
+    onRequestRowHeight({ height });
+  }, [dataSet.cases.length, getContent, onRequestRowHeight, readOnly]);
 
   /*
    * content change functions
@@ -169,12 +172,4 @@ export const useContentChangeHandlers = ({
           onAddColumn: addColumn, onRemoveColumn: removeColumn,
           onAddRows: addRows, onUpdateRow: updateRow, onRemoveRows: removeRows,
           onLinkGeometryTile: linkGeometryTile, onUnlinkGeometryTiles: unlinkGeometryTiles };
-};
-
-const optimalTileRowHeight = (dataRowCount: number, hasExpressions: boolean) => {
-  const kHeaderRows = 2 + (hasExpressions ? 1 : 0);
-  const kInputRows = 1;
-  const kBorders = 2 * 2;
-  const kPadding = 2 * 10;
-  return (kHeaderRows + dataRowCount + kInputRows) * kRowHeight + kBorders + kPadding;
 };

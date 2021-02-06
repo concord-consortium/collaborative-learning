@@ -8,7 +8,8 @@ import { DocumentModelType, DocumentTool } from "../models/document/document";
 import { IDocumentContentAddTileOptions, IDragToolCreateInfo } from "../models/document/document-content";
 import { getToolContentInfoByTool, IToolContentInfo } from "../models/tools/tool-content-info";
 import { ToolButtonSnapshot } from "../models/tools/tool-types";
-import { IToolApiMap, kDragTileCreate  } from "./tools/tool-tile";
+import { ToolApiInterfaceContext } from "./tools/tool-api";
+import { kDragTileCreate  } from "./tools/tool-tile";
 
 import "./toolbar.sass";
 
@@ -21,7 +22,6 @@ export type ToolbarConfig = IToolButtonConfig[];
 interface IProps extends IBaseProps {
   document: DocumentModelType;
   config: ToolbarConfig;
-  toolApiMap: IToolApiMap;
 }
 
 interface IState {
@@ -89,6 +89,9 @@ const ToolButtonComponent: React.FC<IButtonProps> =
 @inject("stores")
 @observer
 export class ToolbarComponent extends BaseComponent<IProps, IState> {
+
+  static contextType = ToolApiInterfaceContext;
+  declare context: React.ContextType<typeof ToolApiInterfaceContext>;
 
   state = {
     defaultTool: "",
@@ -158,9 +161,10 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   }
 
   private getUniqueTitle(toolContentInfo: IToolContentInfo) {
-    const { document, toolApiMap } = this.props;
+    const toolApiInterface = this.context;
+    const { document } = this.props;
     const { id, titleBase } = toolContentInfo;
-    const getTileTitle = (tileId: string) => toolApiMap[tileId]?.getTitle?.();
+    const getTileTitle = (tileId: string) => toolApiInterface?.getToolApi(tileId)?.getTitle?.();
     return titleBase && document.getUniqueTitle(id, titleBase, getTileTitle);
   }
 
@@ -185,10 +189,11 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleDelete() {
+    const toolApiInterface = this.context;
     const { document } = this.props;
     const { ui } = this.stores;
     ui.selectedTileIds.forEach(tileId => {
-      const toolApi = this.props.toolApiMap[tileId];
+      const toolApi = toolApiInterface?.getToolApi(tileId);
       // if there is selected content inside the selected tile, delete it first
       if (toolApi?.hasSelection?.()) {
         toolApi.deleteSelection?.();

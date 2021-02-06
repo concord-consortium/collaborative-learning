@@ -17,6 +17,7 @@ import TextToolComponent from "./text-tool";
 import ImageToolComponent from "./image-tool";
 import DrawingToolComponent from "./drawing-tool/drawing-tool";
 import PlaceholderToolComponent from "./placeholder-tool/placeholder-tool";
+import { IToolApi, ToolApiInterfaceContext } from "./tool-api";
 import { HotKeys } from "../../utilities/hot-keys";
 import { TileCommentsComponent } from "./tile-comments";
 import { LinkIndicatorComponent } from "./link-indicator";
@@ -26,28 +27,6 @@ import TileDragHandle from "../../assets/icons/drag-tile/move.svg";
 import "../../utilities/dom-utils";
 
 import "./tool-tile.sass";
-
-export interface IToolApi {
-  getTitle?: () => string | undefined;
-  hasSelection?: () => boolean;
-  deleteSelection?: () => void;
-  getSelectionInfo?: () => string;
-  setSelectionHighlight?: (selectionInfo: string, isHighlighted: boolean) => void;
-  isLinked?: () => boolean;
-  getLinkIndex?: (index?: number) => number;
-  getLinkedTables?: () => string[] | undefined;
-  handleDocumentScroll?: (x: number, y: number) => void;
-  handleTileResize?: (entry: ResizeObserverEntry) => void;
-}
-
-export interface IToolApiInterface {
-  register: (id: string, toolApi: IToolApi) => void;
-  unregister: (id: string) => void;
-  getToolApi: (id: string) => IToolApi;
-  forEach: (callback: (api: IToolApi) => void) => void;
-}
-
-export type IToolApiMap = Record<string, IToolApi>;
 
 export const kDragTiles = "org.concord.clue.drag-tiles";
 
@@ -102,7 +81,6 @@ export interface IToolTileProps extends IToolTileBaseProps, IRegisterToolApiProp
 }
 
 interface IProps extends IToolTileBaseProps {
-  toolApiInterface?: IToolApiInterface;
 }
 
 interface ToolComponentInfo {
@@ -140,6 +118,9 @@ interface IState {
 @inject("stores")
 @observer
 export class ToolTileComponent extends BaseComponent<IProps, IState> {
+
+  static contextType = ToolApiInterfaceContext;
+  declare context: React.ContextType<typeof ToolApiInterfaceContext>;
 
   private modelId: string;
   private domElement: HTMLDivElement | null;
@@ -239,17 +220,17 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
 
   private renderTile(ToolComponent: any) {
     const tileId = this.props.model.id;
-    const { toolApiInterface, ...otherProps } = this.props;
     return ToolComponent != null
             ? <ToolComponent
-                key={tileId} toolTile={this.domElement} {...otherProps}
+                key={tileId} toolTile={this.domElement} {...this.props}
                 onRegisterToolApi={this.handleRegisterToolApi}
                 onUnregisterToolApi={this.handleUnregisterToolApi} />
             : null;
   }
 
   private renderLinkIndicators() {
-    const { model, toolApiInterface } = this.props;
+    const { model } = this.props;
+    const toolApiInterface = this.context;
     const toolApi = toolApiInterface?.getToolApi(model.id);
     const clientTableLinks = toolApi?.getLinkedTables?.();
     return clientTableLinks
@@ -261,37 +242,35 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
 
   private renderTileComments() {
     const tileId = this.props.model.id;
-    const { toolApiInterface } = this.props;
     const { documents } = this.stores;
     const documentContent = documents.findDocumentOfTile(tileId);
     if (documentContent) {
       const commentsModel = documentContent.comments.get(tileId);
       if (commentsModel) {
-        return <TileCommentsComponent
-                  model={commentsModel}
-                  toolApiInterface={toolApiInterface}
-                  docKey={documentContent.key}
-                />;
+        return <TileCommentsComponent model={commentsModel} docKey={documentContent.key} />;
       }
     }
   }
 
   private getToolResizeHandler = () => {
-    const { model, toolApiInterface } = this.props;
+    const { model } = this.props;
+    const toolApiInterface = this.context;
     return toolApiInterface?.getToolApi(`${model.id}[layout]`)?.handleTileResize ||
             toolApiInterface?.getToolApi(model.id)?.handleTileResize;
   }
 
   private handleRegisterToolApi = (toolApi: IToolApi, facet?: string) => {
     const id = facet ? `${this.modelId}[${facet}]` : this.modelId;
-    this.props.toolApiInterface?.register(id, toolApi);
+    const toolApiInterface = this.context;
+    toolApiInterface?.register(id, toolApi);
     // trigger initial render
     this.forceUpdate();
   }
 
   private handleUnregisterToolApi = (facet?: string) => {
     const id = facet ? `${this.modelId}[${facet}]` : this.modelId;
-    this.props.toolApiInterface?.unregister(id);
+    const toolApiInterface = this.context;
+    toolApiInterface?.unregister(id);
   }
 
   private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {

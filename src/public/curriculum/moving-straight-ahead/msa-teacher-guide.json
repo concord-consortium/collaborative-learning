@@ -85,7 +85,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "This Problem introduces patterns of change between two variables in the context of a walkathon. Students determine their walking rates in meters per second as a ratio of distance to time. This Problem connects back to the rate work done in Comparing and Scaling while laying the foundation for using rate to look at patterns of change. Students answer questions about time and distance using their constant walking rates and write an equation that models the distance walked over time at their constant walking rates. "
+                        "This Problem introduces patterns of change between two variables in the context of a walkathon. Students determine their walking rates in meters per second as a ratio of distance to time. This Problem connects back to the rate work done in Comparing and Scaling while laying the foundation for using rate to look at patterns of change. Students answer questions about time and distance using their constant walking rates and write an equation that models the distance walked over time at their constant walking rates."
                       ]
                     }
                   },
@@ -135,7 +135,7 @@
                         "Ask students to describe if they are fast or slow walkers and to describe their evidence.",
                         "<strong>Suggested Questions</strong>",
                         "<ol><li> Who is the slowest walker you know? Who is the fastest walker you know? (Various answers.)</li><li> Do you walk fast or slow? How do you know? (Various answers. Students should offer some reasoning for saying that they are fast or slow, such as, Teri always passes me in the hall because I walk slowly.)</li><li> What do you think your walking rate is in miles per hour? In meters per second? (Various answers. Students’ conjectures will help set up the Problem.)</li></ul>",
-                        "Student predictions will likely be much higher than their actual walking rates. They may have some knowledge about walking rates if they have used a treadmill. On a treadmill, a person might set the walking speed at 4 miles per hour. One interesting thing about treadmills is that the rate of 4 miles per hour may also be reported as 15 minutes per mile. You might discuss why both these rates are reported or why treadmills do not report the rate in miles per minute or meters per hour. "
+                        "Student predictions will likely be much higher than their actual walking rates. They may have some knowledge about walking rates if they have used a treadmill. On a treadmill, a person might set the walking speed at 4 miles per hour. One interesting thing about treadmills is that the rate of 4 miles per hour may also be reported as 15 minutes per mile. You might discuss why both these rates are reported or why treadmills do not report the rate in miles per minute or meters per hour."
                       ]
                     }
                   },
@@ -163,7 +163,7 @@
                       "type": "Text",
                       "format": "html",
                       "text":[
-                        "You could extend this Problem by asking some groups to record their data on a display such as a graph. Students may also record their graphs on transparent or electronic grids so that they can be used in the Summarize. \n\nThe following optional suggestions are designed to enrich the experiment: <ul><li> Let the groups decide whether they want to calculate meters per second or seconds per meter.  </li><li> Ask one group to change their walking rate—maybe walk, jog, sprint, and so on.  </li><li> Ask some students to walk for 10 seconds rather than 10 meters. Be sure to discuss these suggestions in the Summarize if you assign them.  </li></ul>"
+                        "You could extend this Problem by asking some groups to record their data on a display such as a graph. Students may also record their graphs on transparent or electronic grids so that they can be used in the Summarize. \n\nThe following optional suggestions are designed to enrich the experiment: <ul><li> Let the groups decide whether they want to calculate meters per second or seconds per meter. </li><li> Ask one group to change their walking rate—maybe walk, jog, sprint, and so on. </li><li> Ask some students to walk for 10 seconds rather than 10 meters. Be sure to discuss these suggestions in the Summarize if you assign them. </li></ul>"
                       ]
                     }
                   }
@@ -267,7 +267,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong> Situation A Suggested Questions</strong> <ul><li> How do you find how long it takes to walk a given distance, like #1 asking about 500 meters? (Note that this is informally solving for T when D is given. Students will have informal ways to find the value, using numerical reasoning or proportional reasoning. Later in the Unit, students will work more on solving the equations symbolically.)</li><li> How do you find how far you can walk in a given time, like #2 asking about various times? (Note that this is informally solving for D when T is given. Students will have informal ways to find the values, using numerical reasoning or proportional reasoning. Later in the Unit, students will work more on solving the equations symbolically.)</li><li> How does the equation show the relationship between the two variables? (The equation shows that the distance is the product of the walking rate and the time, or d = rt. The walking rate is the coefficient of the independent variable.)  </li><li> Explain what information the numbers and variables in your equation represent. (Take this opportunity to see how students interpret the expression 2t. They should say something like “If my walking rate is 2 meters per second, this is the distance that I walked after t seconds.” Emphasize that 2t means 2 times the value of t.) </li><li> Which variable in your equation is the independent variable, and which is the dependent variable? (Time is the independent variable, and distance is the dependent variable.)  </li><li>[If some students made graphs during the Explore, display them for the class. ] How is the walking rate represented in these graphs? (The walking rate affects the steepness of the line. The person who walks fastest has the greatest walking rate and, therefore, the steepest line.)  </li><li> [Pick a typical equation from the class and ask students to use this equation to make a table.  ] How does the walking rate show up in the table? (In the table, as the time increases by 1 second, the distance increases by a constant amount equal to the walking rate.)  </li></ul>"
+                      "text": "<strong> Situation A Suggested Questions</strong> <ul><li> How do you find how long it takes to walk a given distance, like #1 asking about 500 meters? (Note that this is informally solving for T when D is given. Students will have informal ways to find the value, using numerical reasoning or proportional reasoning. Later in the Unit, students will work more on solving the equations symbolically.)</li><li> How do you find how far you can walk in a given time, like #2 asking about various times? (Note that this is informally solving for D when T is given. Students will have informal ways to find the values, using numerical reasoning or proportional reasoning. Later in the Unit, students will work more on solving the equations symbolically.)</li><li> How does the equation show the relationship between the two variables? (The equation shows that the distance is the product of the walkingrate and the time, or d = rt. The walking rate is the coefficient of the independent variable.) </li><li> Explain what information the numbers and variables in your equation represent. (Take this opportunity to see how students interpret the expression 2t. They should say something like “If my walking rate is 2 meters per second, this is the distance that I walked after t seconds.” Emphasize that 2t means 2 times the value of t.) </li><li> Which variable in your equation is the independent variable, and which is the dependent variable? (Time is the independent variable, and distance is the dependent variable.) </li><li>[If some students made graphs during the Explore, display them for the class.] How is the walking rate represented in these graphs? (The walking rate affects the steepness of the line. The person who walks fastest has the greatest walking rate and, therefore, the steepest line.) </li><li> [Pick a typical equation from the class and ask students to use this equation to make a table.] How does the walking rate show up in the table? (In the table, as the time increases by 1 second, the distance increases by a constant amount equal to the walking rate.) </li></ul>"
                     }
                   },
                   {
@@ -278,9 +278,6 @@
                     }
                   },
                   {
-                    "layout": {
-                        "height": 220
-                      },
                     "content": {
                       "type": "Table",
                       "columns": [
@@ -394,14 +391,14 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong>Suggested Questions</strong><ul><li>Have students compare their equations. How do the equations compare? (Students should see that the equations are the same except for the walking rates.)</li><li> What information does the walking rate provide? (It gives the unit rate, or how far you can walk for every 1 second.)</li><li> What does it mean to walk at a constant rate? (It means that you always walk the same distance for a set amount of time.)  </li><li> Suppose you do not walk at a constant rate for the walkathon. Which of the questions in Problem 1.1 can you still answer? Why? (It would be difficult to answer any of the questions since they all assume a constant walking rate. For Question A, you can find the total time it took to walk 10 meters and then compute the average rate.) If some students made graphs during the Explore, display them for the class. </li><li> How is the walking rate represented in these graphs? (The walking rate affects the steepness of the line. The person who walks fastest has the greatest walking rate and, therefore, the steepest line.) Pick a typical equation from the class and ask students to use this equation to make a table.</li></ui>  The above questions on graphs and tables can be used to launch the next Problem. "
+                      "text": "<strong>Suggested Questions</strong><ul><li>Have students compare their equations. How do the equations compare? (Students should see that the equations are the same except for the walking rates.)</li><li> What information does the walking rate provide? (It gives the unit rate, or how far you can walk for every 1 second.)</li><li> What does it mean to walk at a constant rate? (It means that you always walk the same distance for a set amount of time.) </li><li> Suppose you do not walk at a constant rate for the walkathon. Which of the questions in Problem 1.1 can you still answer? Why? (It would be difficult to answer any of the questions since they all assume a constant walking rate. For Question A, you can find the total time it took to walk 10 meters and then compute the average rate.) If some students made graphs during the Explore, display them for the class. </li><li> How is the walking rate represented in these graphs? (The walking rate affects the steepness of the line. The person who walks fastest has the greatest walking rate and, therefore, the steepest line.) Pick a typical equation from the class and ask students to use this equation to make a table.</li></ui> The above questions on graphs and tables can be used to launch the next Problem. "
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong>Reflecting on Student Learning  </strong>\nUse the following questions to assess student understanding at the end of the lesson.  <ul><li> What evidence do I have that students understand the Now What Do You Know question?</li><li> Where did my students get stuck?</li><li> What strategies did they use?</li><li> What breakthroughs did my students have today?</li><li> How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li> Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?  "
+                      "text": "<strong>Reflecting on Student Learning </strong>\nUse the following questions to assess student understanding at the end of the lesson. <ul><li> What evidence do I have that students understand the Now What Do You Know question?</li><li> Where did my students get stuck?</li><li> What strategies did they use?</li><li> What breakthroughs did my students have today?</li><li> How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li> Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?"
                     }
                   }
                 ]
@@ -645,9 +642,6 @@
                               "values": [0, 25, 50, 75, 100]
                             }
                           ]
-                      },
-                      "layout": {
-                        "height": 220
                       }
                     },
                     {
@@ -712,7 +706,7 @@
                                 }
                               }
                             ]
-                          }                       
+                          }
                         ]
                       }
                     }
@@ -953,9 +947,6 @@
                             "values": [34, 41.5, 46.5, 54, 59]
                           }
                         ]
-                    },
-                    "layout": {
-                      "height": 160
                     }
                   }
                 ]
@@ -1166,9 +1157,6 @@
                           "values": [5, 5.5, 6, 6.5, 7, 15, 17.5, 20]
                         }
                       ]
-                    },
-                    "layout": {
-                      "height": 240
                     }
                   },
                   {
@@ -1796,7 +1784,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": 
+                      "text":
                         "<code>Student answers will vary. Interesting situations to think about include: spiral staircases, school stairs, large steps (like at a museum), etc.\nExample: 7.25 in. to 11.25 inches for the rise to the run, or approximately 0.70 for the ratio of rise to run. This is the same for every step in the staircase. The ratio of rise to run is not within the carpenter’s guidelines.</code>"
                     }
                   }
@@ -1821,7 +1809,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": 
+                      "text":
                         "<code>2(rise) + run = 2(7) + 11 = 14 + 11 = 25, which is between 24 and 26 inches. \nRise + run = 7 + 11 = 18, which is between 17 and 19 inches.\nYes, these stairs meet the carpenters’ guidelines. Note that a scaled-up equivalent ratio of 14 to 22 would not meet the guidelines. </code>"
                     }
                   },
@@ -1836,7 +1824,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": 
+                      "text":
                         "<code>Student answers will vary.\nExample: a set of stairs with a height of 3.5 inches and a depth of 5.5 inches.</code>"
                     }
                   },
@@ -1851,7 +1839,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": 
+                      "text":
                         "<code>Not everyone in the class will have the same sketch because even the same ratio can be represented by different numbers.</code>"
                     }
                   },
@@ -1866,7 +1854,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": 
+                      "text":
                         "<code>Student answers will vary based on their stairs.\nExample answer using the stairs at Arch Middle School, rise = (7/11)run.</code>"
                     }
                   },
@@ -1881,7 +1869,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": 
+                      "text":
                         "<code>The ratio of rise to run is represented in the graph by the steepness of the line and in the equation by the coefficient of x.</code>"
                     }
                   },
@@ -1896,7 +1884,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": 
+                      "text":
                         "<code>The graph does represent a proportional relationship because it passes through the origin.</code>"
                     }
                   },
@@ -1911,7 +1899,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": 
+                      "text":
                         "<code>Yes, she is correct. The ratio of rise to run describes how much one variable changes if you change the other variable by a specific amount. If the variables are always related in this way, then they have a constant rate of change, which gives a linear relationship.</code>"
                     }
                   },
@@ -1926,7 +1914,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": 
+                      "text":
                         "<code>Yes, because each step on the staircase will have the same height (or rise) and depth (or run).</code>"
                     }
                   },
@@ -1941,7 +1929,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": 
+                      "text":
                         "<code>No, because we’re rising twice as high and running twice as far.  So, the ratio will stay the same.</code>"
                     }
                   }
@@ -1967,7 +1955,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": 
+                      "text":
                         "<code>The steepness of stairs is represented by the slope of a straight-line graph. In a linear equation that represents the graph, the steepness of the stairs is represented by the coefficient of x.</code>"
                     }
                   }
@@ -2044,9 +2032,6 @@
                           "values": [6, 3, 0, -3, -6]
                         }
                       ]
-                    },
-                    "layout": {
-                      "height": 160
                     }
                   },
                   {
@@ -2093,9 +2078,6 @@
                           "values": [-1, -0.5, 0, 0.5, 1]
                         }
                       ]
-                    },
-                    "layout": {
-                      "height": 160
                     }
                   },
                   {
@@ -2233,9 +2215,6 @@
                           "values": [-1, -0.5, 0, 0.5, 1]
                         }
                       ]
-                    },
-                    "layout": {
-                      "height": 160
                     }
                   },
                   {
@@ -2243,7 +2222,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": 
+                      "text":
                         "<code>Representation 1: The constant of proportionality is -3, which is the same as the rate of change (-3/1).\nRepresentation 2: The constant of proportionality is 1/2, which is the same as the rate of change (1/2).\nRepresentation 3: The constant of proportionality is 0.5, which is the same as the rate of change (0.5/1).\nStudent answers will vary. Possible situation for representation 2: You place a bucket under a leaking faucet, which collects 1 cup of water every 2 hours.</code>"
                     }
                   }
@@ -2283,7 +2262,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": 
+                      "text":
                         "<code>Graph 1: slope: -3, y-intercept: 6\nGraph 2: slope: 3, y-intercept: 6\nTable 1 : slope :1.5, y-intercept : -1\nTable 2 : slope : -0.5, y-intercept : 5\nquation 1 : slope : 2.5, y-intercept : 5\nEquation 2 : slope : -3, y-intercept : 0</code>"
                     }
                   },
@@ -2299,7 +2278,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": 
+                      "text":
                         "<code>The relationship shown by Equation 2 is proportional with a constant of proportionality of -3.</code>"
                     }
                   },
@@ -2315,7 +2294,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": 
+                      "text":
                         "<code>He is correct because the line runs through the origin and, for every point on the line, the ratio of the x- and y-coordinates is always a.</code>"
                     }
                   },
@@ -2331,7 +2310,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": 
+                      "text":
                         "<code>He is correct. The constant of proportionality a for this line means that each time the x-variable increases by 1, the y-variable increases by a. So, the ratio is a to 1, which is also a unit rate.</code>"
                     }
                   },
@@ -2347,7 +2326,7 @@
                       "content": {
                         "type": "Text",
                         "format": "html",
-                        "text": 
+                        "text":
                           "<code>The rate of change of the line is (10 – 5)/(-2 - 3) = 5/-5 = -1</code>"
                     }
                   },
@@ -2363,7 +2342,7 @@
                       "content": {
                         "type": "Text",
                         "format": "html",
-                        "text": 
+                        "text":
                           "<code>Student answers will vary. \nFor example, (-1,9) is on the line because you can increase the x-coordinate of (-2,10) by 1 and decrease the y-coordinate of (-2,10) by 1.</code>"
                     }
                   },
@@ -2379,7 +2358,7 @@
                       "content": {
                         "type": "Text",
                         "format": "html",
-                        "text": 
+                        "text":
                           "<code>This line does not represent a proportional situation because it does not pass through the origin.</code>"
                     }
                   },
@@ -2395,7 +2374,7 @@
                       "content": {
                         "type": "Text",
                         "format": "html",
-                        "text": 
+                        "text":
                           "<code>The rate of change of a horizontal line is 0 because there is no “rise” no matter how far you “run.” The rate of change of a vertical line is undefined because there is no “run” no matter how far you “rise.”</code>"
                     }
                   }
@@ -2421,7 +2400,7 @@
                       "content": {
                         "type": "Text",
                         "format": "html",
-                        "text": 
+                        "text":
                           "<code>Some linear relationships are proportional and some are not. The rate of change represents how one variable changes compared to the other. For a given relationship, the rate of change is constant for any x- and y-values you choose.\nWhen a linear situation is also proportional, the unit rate, constant of proportionality, and the rate of change are all the same.</code>"
                     }
                   }
@@ -2454,7 +2433,7 @@
                       "content": {
                         "type": "Text",
                         "format": "html",
-                        "text": 
+                        "text":
                           "<code>The movie company will “break even” if there are 40 students in attendance.\nStudent answers will vary. \n\nSample response finding when Expenses equal Income:\nWe can find when the expenses and incomes are equal.\n\u00894.50n = 130 + 1.25n\n\u00893.25n = 130\n\u0089n = 40\n\nSample response using the Profit equation:\nWe can write equations for the movie company’s income I, expenses E, and model profit P as income – expenses. For some number of students n.\n\u0089P = I – E \n\u0089P = 4.50n – (130 + 1.25n)\n\u0089P = 3.25n – 130\nThe point at which the movie company will “break even” is the point at which their profit equals zero, so we can solve for which value of n makes P=0.\n\u00890 = 3.25n – 130\n\u0089130 = 3.25n\n\u008940 = n</code>"
                     }
                   }
@@ -2504,16 +2483,13 @@
                           "values": [ ]
                         }
                       ]
-                    },
-                    "layout": {
-                      "height": 220
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["Anna’s Strategy: On the same set of axes, I graphed the theater’s income and operating expenses for any number of students from 0 to 100. "]
+                      "text": ["Anna’s Strategy: On the same set of axes, I graphed the theater’s income and operating expenses for any number of students from 0 to 100."]
                     }
                   },
                   {
@@ -2528,7 +2504,7 @@
                       "content": {
                         "type": "Text",
                         "format": "html",
-                        "text": 
+                        "text":
                           "<code>Geraldo’s strategy could be used by filling out the table and looking for the number of students when the income is the same as the expenses. \n\nAnna’s strategy could be used by graphing the line for income and the line for operating expenses and looking for the intersection point. \n\nSze’s strategy could be used by making his expression into an equation equal to a profit of 0.</code>"
                     }
                   },
@@ -2544,7 +2520,7 @@
                       "content": {
                         "type": "Text",
                         "format": "html",
-                        "text": 
+                        "text":
                           "<code>To find the number of students that will make expenses less than $255, we need to solve the associated equality. So 1.25n+130=255\n\u0089 1.25n = 125 \n\u0089 n = 100. So to make the inequality statement for expenses true, there need to be less than 100 students.\n\nTo find the number of students that will make the income greater than $675, we need to solve the associated equality. So 4.50n = 675 \n\u0089 n = 150. \nSo to make the inequality statement for income true, there need to be more than 150 students.</code>"
                     }
                   },
@@ -2560,7 +2536,7 @@
                       "content": {
                         "type": "Text",
                         "format": "html",
-                        "text": 
+                        "text":
                           "<code>Student answers will vary. Sample answer: If you only have a fixed amount of money to spend on showing the movie, then the expenses inequality can keep you from going into debt. If you need to raise a certain amount of money from showing the movie, then the income inequality can help you calculate how many tickets to sell.</code>"
                     }
                   },
@@ -2576,7 +2552,7 @@
                       "content": {
                         "type": "Text",
                         "format": "html",
-                        "text": 
+                        "text":
                           "<code>The number 3 tells you how much the theater’s profit will increase for each extra student who attends the theater. The number -115 tells you some expense or initial fee for using the theatre.</code>"
                     }
                   },
@@ -2592,7 +2568,7 @@
                       "content": {
                         "type": "Text",
                         "format": "html",
-                        "text": 
+                        "text":
                           "<code>The number 3 tells you how much pattern of change. For every additional student, there is an increase of $3 between consecutive profit entries on the table. The number -115 tells you the profit entry that corresponds with zero students.</code>"
                     }
                   },
@@ -2608,7 +2584,7 @@
                       "content": {
                         "type": "Text",
                         "format": "html",
-                        "text": 
+                        "text":
                           "<code>The number 3 tells you the rate of change, or slope, of the line (because profit increases by 3 every time the number of students increases by 1). The number -115 tells you the y-intercept of the line.</code>"
                     }
                   },
@@ -2624,7 +2600,7 @@
                       "content": {
                         "type": "Text",
                         "format": "html",
-                        "text": 
+                        "text":
                           "<code>The equation for profit for the theater in the initial challenge was P1 = I – E = 4.50n – (130 + 1.25n) = 3.25n – 130. The equation for profit for the theater in this problem is P2 = 3n – 115.  If they make the same profit, then we can set the expressions equal and solve for the number of students.\n\u00893.25n – 130 = 3n – 115\n\u0089 0.25n = 15\n\u0089 n = 60\nThis means that these two theaters will make the same profit for 60 students.</code>"
                     }
                   }
@@ -2650,7 +2626,7 @@
                       "content": {
                         "type": "Text",
                         "format": "html",
-                        "text": 
+                        "text":
                           "<code>Student answers will vary. Sample answer: The movie theater situations in this Problem have positive rates of change (like the staircases). Some of the other problems showed decreasing/negative rates of changes. The movie theater problems don’t make sense for fractions of students, but the staircase problems make sense for fraction or decimal measurements. None of the movie theater problems are proportional situations, because none of them would pass through the origin if graphed.\nTables are useful for solving problems because they show several numerical values for a given pattern. Graphs are useful because they give you a sense of the pattern’s behavior over a wide range of values, which is helpful for estimating. Equations are useful because you can use them to calculate any specific value and the coefficients give you information about the problem situation. Inequalities are useful if you are looking for a range of possible answers.</code>"
                     }
                   }
@@ -2741,7 +2717,7 @@
                       "content": {
                         "type": "Text",
                         "format": "html",
-                        "text": 
+                        "text":
                           "<code>If you have an equation of the form y = ax + b and you know the value of x or y, you can substitute the value of the variable into the equation. Then, use the properties of equality to solve for the other variable. For example, if y = 3x + 4 and you want to find x when y = 10, then you substitute 10 in place of y: 10 = 3x + 4. Next, you can subtract 4 from both sides to get 6 = 3x. Now, divide both sides by 3 to get x = 2.\nFor the equation y = 3x + 4, to find the value of x when y = 10, you can graph the equation. Trace along the line to find the point whose y-coordinate is 10 and then read the corresponding x-value, which is 2. To use a table, construct a table of values for the equation either by hand or with graphing technology. Next, locate the pair of values in which y = 10 and find the corresponding x-value, which is 2.\nTo find the values that satisfy an inequality such as 3x + 4 < 10, you can solve the corresponding equation 3x + 4 = 10. The solution of this equation is x = 2. Then, test values less than and greater than 2 to determine the solution. In this case, x-values less than 2 make the inequality 3x + 4 < 10 true, so the solution is x < 2.\nTo find the values that satisfy an inequality such as 3x + 4 < 10, you can graph the corresponding linear relationship y = 3x + 4. Then, find the points on the line whose y-values are less than 10. You can also locate the x-values of these points on the x-axis or on a number line.\nIn Problem 3.2, Equation 1 two equivalent expressions for the number of pouches on the left side of the equation are 4x + 2 and 2(2x + 1). You can use the properties of operations to show that they are equivalent. Applying the Distributive Property to one of the expressions yields the other: 4x + 2 = 2(2x + 1). You can also argue that both of the expressions represent the number of pouches and coins in the picture.\nIn Problem 3.3, Set 3(a), two equivalent ways of writing the expression on the left side of the equation are 3(x + 1) and 3x + 3. You can tell they are equivalent because the equations 3(x + 1) = 21 and 3x + 3 = 21 have the same solution, even though you would take different steps when solving them. (To solve the first equation, you would divide each side by 3 and then subtract 1 from each side. To solve the second equation, you would subtract 3 from each side and then divide each side by 3. The solution for both equations is x = 6.)</code>"
                     }
                   }
@@ -2767,7 +2743,7 @@
                       "content": {
                         "type": "Text",
                         "format": "html",
-                        "text": 
+                        "text":
                           "<code>Slope describes the steepness of a line. It is the ratio of vertical change to horizontal change. If it is positive, then the line is increasing from left to right. If it is negative, then it is decreasing from left to right. If the slope is zero, the line is horizontal. This is like walking on a flat surface as opposed to up or down a hill.\nFinding the slope is the same as finding the rate of change between two variables in a linear relationship. The horizontal distance change between two points is the same as the difference between two corresponding x-values of points in a table. The vertical change in distance is the same as the difference between two corresponding y-values of points in a table.</code>"
                     }
                   }

@@ -1,7 +1,7 @@
 import { observer } from "mobx-react";
 import React, { useCallback, useRef, useState } from "react";
 import ReactDataGrid from "react-data-grid";
-import { TableContentModelType } from "../../../models/tools/table/table-content";
+import { getTableContentHeight, TableContentModelType } from "../../../models/tools/table/table-content";
 import { IToolTileProps } from "../tool-tile";
 import { EditableTableTitle } from "./editable-table-title";
 import { TableToolbar } from "./table-toolbar";
@@ -28,7 +28,8 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   onRequestRowHeight, onRequestTilesOfType, onRequestUniqueTitle, onRegisterToolApi, onUnregisterToolApi
 }) => {
   const modelRef = useCurrent(model);
-  const metadata = (model.content as TableContentModelType).metadata;
+  const getContent = useCallback(() => modelRef.current.content as TableContentModelType, [modelRef]);
+  const metadata = getContent().metadata;
 
   const {
     dataSet, columnChanges, triggerColumnChange, rowChanges, triggerRowChange, ...gridModelProps
@@ -37,6 +38,15 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   const handleRequestUniqueTitle = useCallback(() => {
     return onRequestUniqueTitle(modelRef.current.id);
   }, [modelRef, onRequestUniqueTitle]);
+
+  const getContentHeight = useCallback(() => {
+    return getTableContentHeight({
+      readOnly,
+      dataRows: dataSet.current.cases.length,
+      hasExpressions: getContent().hasExpressions,
+      padding: 10 + (modelRef.current.display === "teacher" ? 20 : 0)
+    });
+  }, [dataSet, getContent, modelRef, readOnly]);
 
   const heightRef = useCurrent(height);
   const handleRequestRowHeight = useCallback((options: { height?: number, deltaHeight?: number }) => {
@@ -65,7 +75,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
     onSetTableTitle, onRequestUniqueTitle: handleRequestUniqueTitle
   });
 
-  useToolApi({ metadata, getTitle, onRegisterToolApi, onUnregisterToolApi });
+  useToolApi({ metadata, getTitle, getContentHeight, onRegisterToolApi, onUnregisterToolApi });
 
   const rowLabelProps = useRowLabelColumn({
     inputRowId: inputRowId.current, selectedCell, showRowLabels, setShowRowLabels
@@ -94,7 +104,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   });
 
   const { titleCellWidth } =
-    useColumnWidths({ getTitle, columns: dataGridProps.columns, measureText: measureHeaderText });
+    useColumnWidths({ readOnly, getTitle, columns: dataGridProps.columns, measureText: measureHeaderText });
 
   const containerRef = useRef(null);
   const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {

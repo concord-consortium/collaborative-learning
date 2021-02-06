@@ -75,7 +75,7 @@ export const useColumnsFromDataSet = ({
       name: attr.name,
       key: attr.id,
       width: measureColumnWidth(attr),
-      resizable: !readOnly,
+      resizable: true,
       headerRenderer: ColumnHeaderCell,
       formatter: CellFormatter,
       editor: !readOnly && !metadata.hasExpression(attr.id) ? CellTextEditor : undefined,
