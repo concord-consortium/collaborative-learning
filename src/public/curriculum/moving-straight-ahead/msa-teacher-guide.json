@@ -587,7 +587,126 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong>Using a Graph to Find the Rate of Change</strong>\nIt should be fairly easy for students to recognize the effect of changing the rate of walking when they use a graph—it changes the “steepness” of the line. Some students say that the line “goes up faster” or “has a larger angle from the x-axis.” These intuitive ideas are the goal at this time. <ul><li> What do you notice about the graphs when the walking rate increases? (“The graph gets steeper,” “it goes up faster”, or “it has a larger angle from the x-axis.”) </li><li> If I choose two points on the graph, how can I find the walking rate? (Find the change for an increase of 1 on the x-axis.)\n\n(PORTRAYAL) Pick two points on one of the graphs and ask students how the time and the distance change from one point to the next. This is an opportunity to connect the Problem to the unit rates in Comparing and Scaling. For example, for Leanne, two points are (3, 7.5) and (6, 15).  \n\n\u0089  (3, 7.5) At 3 seconds she travels 7.5 meters\n\u0089 (6, 15) At 6 seconds she travels 15 meters\n\u0089  So, as the time increases by 3 seconds and distance increases by 7.5 meters\n\u0089  This means that every  1 second she increases her distance by 2.5 meters. \nShow the vertical and horizontal changes on the graph by drawing in dotted lines. "
+                      "text": "<strong>Using a Graph to Find the Rate of Change</strong>\nIt should be fairly easy for students to recognize the effect of changing the rate of walking when they use a graph—it changes the “steepness” of the line. Some students say that the line “goes up faster” or “has a larger angle from the x-axis.” These intuitive ideas are the goal at this time. <ul><li> What do you notice about the graphs when the walking rate increases? (“The graph gets steeper,” “it goes up faster”, or “it has a larger angle from the x-axis.”) </li><li> If I choose two points on the graph, how can I find the walking rate? (Find the change for an increase of 1 on the x-axis.)\n\n(PORTRAYAL) Pick two points on one of the graphs and ask students how the time and the distance change from one point to the next. This is an opportunity to connect the Problem to the unit rates in Comparing and Scaling. For example, for Leanne, two points are (3, 7.5) and (6, 15). \n\n\u0089 (3, 7.5) At 3 seconds she travels 7.5 meters\n\u0089 (6, 15) At 6 seconds she travels 15 meters\n\u0089  So, as the time increases by <em> 3 seconds and distance increases by 7.5 meters</em>\n\u0089 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  \u2925 \u00F7 3\n\u0089 This means that every <em>1 second she increases her distance by 2.5 meters.</em> \nShow the vertical and horizontal changes on the graph by drawing in dotted lines. "
+                    }
+                  },
+                  {
+                    "layout": {
+                      "height": 320
+                    },
+                    "content": {
+                      "type":"Geometry",
+                      "title": "Demonstrating Rate of Change",
+                      "board": {
+                        "properties": {
+                          "axisNames": ["Time (seconds)", "Distance (meters)"],
+                          "axisMin": [-0.5, -1],
+                          "axisRange": [10, 20]
+                        }
+                      },
+                      "objects": [
+                        {
+                          "type": "point",
+                          "parents": [0, 0],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [1, 2.5],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [2, 5],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [3, 7.5],
+                          "properties": {
+                                "name": "+ 3"
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [4, 10],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [5, 12.5],
+                          "properties": {
+                                "name": ""
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [6, 15],
+                          "properties": {
+                                "name": "+ 7.5"
+                              }
+                        },
+                        {
+                          "type": "point",
+                          "parents": [7, 17.5],
+                          "properties": {
+                                "name": ""
+                              }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "Then look at what the dividing by 3 looks like on the graph. (Note that as teachers, we know the idea of slope and tend to display the move from one point to the next by going up then over. For students who are not yet introduced to slope, it is more intuitive to go over then up. This comes from thinking of the independent variable first, then the dependent. At this time, it is important to be flexible with the way students display the change from one point to the next.) "
+                    }
+                  },
+                  {
+                    "layout": {
+                      "height": 180
+                    },
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_2_CountingSquares.png"
+                      }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "Students may want to see the graphs of these equations on a graphing calculator or some other graphing technology. If you do this, then ask students to use the technology to answer questions similar to those above.\n\n<strong>Using an Equation or Expression to Find the Rate of Change</strong>\nStudents may be able to recognize the effect of changing the rate of walking when they use the equation d = rt, or distance = rate • time. The rate r is the coefficient of t, the number by which time is multiplied. The word coefficient is defined in the next Investigation. At this point, students will say it is the rate at which people walk, which is “the number that time is multiplied by to get the distance.” This is a good opportunity to discuss Situation A, #3 Yvonne’s Claim about proportionality. In the equation d = rt, r is the rate of change and the unit rate/constant of proportionality. "
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<strong>Situation C</strong>\nPick one or two of the representations and ask: <ul><li> What are the variables? (The variables for George, Elizabeth, and Billie are time and distance. The variables for Evo are not labeled. The variables for Bob are time t in seconds and walking rate r in meters per second.)  </li><li> Describe the patterns of change between the two variables. How did you find the pattern? (For Elizabeth, for every increase of 2 seconds, the distance increases by 3 meters. Each row of the table increases by the same number of seconds. For Billie, for every 1 second, the distance increases by 2.25 meters. The equation is in the form d = rt, so the walking rate is the same as the value of r. For George, distance increases with time, but there does not seem to be a pattern. For Bob, as rate increases, time decreases.)  </li><li> Describe what is happening in each situation. (According to the table, George is not walking at a constant rate. Elizabeth is walking at a constant rate and is using an interval of 2 seconds. If Evo’s represents time and distance, she walked at a consistent rate, stopped for some time, then walked again at a consistent rate. Billie is also walking at a constant rate because the equation is similar to those for Alana, Gilberto, and Leanne. Bob is walking 100 meters, but the rate and time are not known. His walking rate may or may not be constant because the variables are time and rate, not time and distance.)  </li><li> After 5 seconds, who is ahead? (According to the table, George walks 25 meters in 5 seconds. In that time, Elizabeth walks 7.5 meters, and Billie walks 11.25 meters. (Note: Using the equation for Bob, a time of 5 seconds results in a rate of 20 m/s, which is not a realistic walking rate.) </li></ul>The table of Elizabeth’s time and distance represents a linear relationship, but students need to note that time is not increasing by an interval of 1 second. Go back to the idea of writing the rate as a unit rate, as discussed earlier in this section. <ul><li> For those that are linear, compare the walking rates to those of the original three students. Who is the fastest? Who is the slowest? (Elizabeth walks 3 meters for every 2 seconds, or 1.5 meters per second. This is faster than Alana but slower than Gilberto. Billie walks 2.25 meters per second, which is faster than Alana and Gilberto but slower than Leanne. Since Leanne is still the fastest, her graph is the steepest.)</li></ul> Conclude by discussing the ideas of being linear and proportional.<ul><li> Was every relationship in this problem linear? Explain. (No. The data for George, Bob, and Evo were not linear.)</li><li> Were the linear relationships in this problem proportional? (Yes. If we used values from the table or points from the graph, we could write proportions.)</li><li> How can you tell if a graph does not represent a linear relationship? (A graph represents a linear relationship if it is one straight line. Therefore, if the graph is not a straight line, the relationship it models is not linear.)  </li><li> How can you tell if a table does not represent a linear relationship? (A table does not represent a linear relationship if for each unit change in the independent variable, there is not a constant change in the dependent variable.)  </li><li> How can you tell if an equation represents a linear relationship? (Various answers. At this time, students’ experiences are limited. Students may identify that there is a number multiplied by one variable to get values for the other variable.)  </li></ul>"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<strong>Now What Do Students Know</strong>\nAsk students to reflect on the discussion and answer the Now What Do You Know questions.\n\n<strong>How do you recognize a linear pattern of change in a verbal context, table, graph, expression, or equation? </strong> \nSee answers to the problem for more information about the strategies and embedded mathematics. "
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<strong>Reflecting on Student Learning  </strong>\nUse the following questions to assess student understanding at the end of the lesson.  <ul><li> What evidence do I have that students understand the Now What Do You Know question?</li><li> Where did my students get stuck?</li><li>What strategies did they use?</li><li> What breakthroughs did my students have today?</li><li> How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li> Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?  </li></ul> "
                     }
                   }
                 ]
