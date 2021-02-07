@@ -100,9 +100,8 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
     rowChanges, readOnly: !!readOnly, changeHandlers, measureText: measureHeaderText,
     selectedCell, inputRowId, ...rowLabelProps, onShowExpressionsDialog: handleShowExpressionsDialog });
 
-  const { isLinkEnabled, linkIndex, linkColors, showLinkGeometryDialog } = useGeometryLinking({
-    documentId, model, hasLinkableRows, onRequestTilesOfType, onLinkGeometryTile
-  });
+  const { showLinkButton, isLinkEnabled, linkIndex, linkColors, showLinkGeometryDialog } =
+    useGeometryLinking({ documentId, model, hasLinkableRows, onRequestTilesOfType, onLinkGeometryTile });
 
   const { titleCellWidth } =
     useColumnWidths({ readOnly, getTitle, columns: dataGridProps.columns, measureText: measureHeaderText });
@@ -128,7 +127,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
       <TableToolbar documentContent={documentContent} toolTile={toolTile} {...toolbarProps}
                     onSetExpression={showExpressionsDialog} scale={scale}/>
       <div className="table-grid-container" ref={containerRef} onClick={handleBackgroundClick}>
-        <EditableTableTitle className="table-title" readOnly={readOnly}
+        <EditableTableTitle className="table-title" readOnly={readOnly} showLinkButton={showLinkButton}
           isLinkEnabled={isLinkEnabled} linkIndex={linkIndex} onLinkGeometryClick={showLinkGeometryDialog}
           getTitle={getTitle} titleCellWidth={titleCellWidth}
           onBeginEdit={onBeginTitleEdit} onEndEdit={onEndTitleEdit} />

@@ -4,7 +4,7 @@ import { ProblemModelType } from "../models/curriculum/problem";
 import { AppConfigModelType } from "../models/stores/app-config-model";
 import { GroupsModelType } from "../models/stores/groups";
 import { SelectionStoreModelType } from "../models/stores/selection";
-import { getSettingFromStores, IStores } from "../models/stores/stores";
+import { getSettingFromStores, isFeatureSupported, IStores } from "../models/stores/stores";
 import { UserModelType } from "../models/stores/user";
 import { UIModelType } from "../models/stores/ui";
 
@@ -39,4 +39,8 @@ export function useSharedSelectionStore(): SelectionStoreModelType {
 
 export function useUIStore(): UIModelType {
   return useStores().ui;
+}
+
+export function useFeatureFlag(feature: string) {
+  return isFeatureSupported(useStores(), feature);
 }
