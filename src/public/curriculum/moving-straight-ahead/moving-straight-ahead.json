@@ -444,6 +444,7 @@
                     {
                       "content": {
                         "type": "Table",
+                        "name": "Walking Rates",
                         "columns": [
                           { "name": "Name",
                             "type": "string",
@@ -475,7 +476,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Table",
-                      "name": "Walking Rates",
+                      "name": "Walking Rates (Distance / Time)",
                       "columns": [
                         {
                           "name": "Time (sec)",
@@ -483,17 +484,17 @@
                           "values": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
                         },
                         {
-                          "name": "Alana's Dist. (m)",
+                          "name": "Alana's D (m)",
                           "type": "number",
                           "values": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
                         },
                         {
-                          "name": "Gilberto's Dist. (m)",
+                          "name": "Gilberto's D(m)",
                           "type": "number",
                           "values": [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
                         },
                         {
-                          "name": "Leanne's Dist. (m)",
+                          "name": "Leanne's D(m)",
                           "type": "number",
                           "values": [0, 2.5, 5.0, 7.5, 10, 12.5, 15, 17.5, 20, 22.5, 25]
                         }
@@ -513,6 +514,7 @@
                     },
                     "display": "teacher",
                     "content": {
+                      "title": "Walking Rates",
                       "type": "Geometry",
                       "board": {
                         "properties": {
@@ -697,6 +699,7 @@
                       "height": 320
                     },
                     "content": {
+                      "title": "Omar's Walking Rate",
                       "type":"Geometry",
                       "board": {
                         "properties": {
@@ -784,6 +787,7 @@
                       "height": 300
                     },
                     "content": {
+                      "title": "Valentina’s Walking Rate",
                       "type":"Geometry",
                       "board": {
                         "properties": {
@@ -1032,6 +1036,7 @@
                     },
                     "display": "teacher",
                     "content": {
+                      "title": "Comparing Walking Rates",
                       "type": "Geometry",
                       "board": {
                         "properties": {
@@ -1100,6 +1105,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Table",
+                      "name": "Donations",
                       "columns": [
                           {
                             "name": "Distance (km)",
@@ -1107,17 +1113,17 @@
                             "values": [0, 1, 2, 3, 4, 5, 6]
                           },
                           {
-                            "name": "Leanne's Donation ($)",
+                            "name": "Leanne's ($)",
                             "type": "number",
                             "values": [10, 10, 10, 10, 10, 10]
                           },
                           {
-                            "name": "Gilbero's Donation ($)",
+                            "name": "Gilbero's ($)",
                             "type": "number",
                             "values": [0, 2, 4, 6, 8, 10]
                           },
                           {
-                            "name": "Alana's Donation ($)",
+                            "name": "Alana's ($)",
                             "type": "number",
                             "values": [0, 2, 4, 6, 8, 10]
                           }
@@ -1192,6 +1198,7 @@
                     },
                     "display": "teacher",
                     "content": {
+                      "title": "Comparing Walking Rates",
                       "type": "Geometry",
                       "board": {
                         "properties": {
@@ -1260,6 +1267,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Table",
+                      "name": "Donation Table",
                       "columns": [
                           {
                             "name": "Distance (km)",
@@ -1286,6 +1294,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Table",
+                      "name": "Donation Table",
                       "columns": [
                           {
                             "name": "Distance (km)",
@@ -1450,6 +1459,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Table",
+                      "name": "Donation Table",
                       "columns": [
                           {
                             "name": "Distance (km)",
@@ -1479,6 +1489,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Geometry",
+                      "title": "Comparing Walking Rates",
                       "board": {
                         "properties": {
                           "axisNames": ["t, D"],
@@ -1583,6 +1594,7 @@
                   {
                     "content": {
                       "type": "Table",
+                      "name": "Donations",
                       "columns": [
                         {
                           "name": "week",
@@ -1617,6 +1629,7 @@
                     },
                     "content": {
                       "type": "Geometry",
+                      "title": "Money in Account",
                       "board": {
                         "properties": {
                           "axisNames": ["week", "$"],

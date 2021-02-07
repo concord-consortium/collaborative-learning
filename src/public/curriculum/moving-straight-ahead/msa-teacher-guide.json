@@ -280,6 +280,7 @@
                   {
                     "content": {
                       "type": "Table",
+                      "name": "Rate Table",
                       "columns": [
                         { "name": "Distance (meters)",
                           "type": "number",
@@ -319,6 +320,7 @@
                     },
                     "content": {
                       "type":"Geometry",
+                      "title": "Liz's Graph",
                       "board": {
                         "properties": {
                           "axisNames": ["Time (seconds)", "Distance (meters)"],
@@ -419,6 +421,35 @@
               "type": "overview",
               "content": {
                 "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "Students explore the walking rates of three students. They look at the walking rate and its effect on various representations of the relationship between distance and time. This Problem introduces ways to represent proportional linear relationships between two variables using tables, graphs, and equations. It is also the first time that students are asked to explain why a relationship is linear or to recognize a linear relationship from a table or an equation."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<strong>1.2  Walking Rates and Linear Relationships: Tables, Graphs and Equations\nAoL: Introduce & Explore\nCCSSM: 7.RP.A.2, 7.RP.A.2a, 7.RP.A.2b, 7.RP.A.2c, 7.RP.A.2d, 7.EE.B.4</strong>"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<strong>NWDYK</strong>\nHow do you recognize a linear pattern of change in a verbal context, table, a graph, expression, or an equation? "
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<strong>Emerging Mathematical Ideas</strong>\nBegin to make sense of linear patterns of change such as distance, and time (for given rates) including how to identify them and how to represent them in words, in a table, in a graph, as equivalent expressions, and as an equation connecting to prior experiences with proportional relationships.\n\nBegin to notice: <ul><li> the connection between equivalent expressions and an equation, that is, an equation equates two or more equivalent expressions, </li><li> how a constant rate of change is represented in a verbal context, table, graph, and equation, </li><li> the ways different representations of linear patterns (tables, graphs, or equations) are more or less useful in easily answering questions depending on the nature of the question (e.g., you can quickly see the rate of change from an equation, but the graph of a relationship is a quick way to see if the relationship is linear), </li><li> the characteristics in a table, graph and equation that can be used to identify a proportional relationship and the constant of proportionality (unit rate), and  </li><li> how variations in the way axes of a coordinate graph are partitioned can make the graph of a relationship look very different e.g., steeper or flatter lines. </li></ul>"
+                    }
+                  }
                 ]
               },
               "supports": []
@@ -427,6 +458,42 @@
               "type": "launch",
               "content": {
                 "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<strong>Launch (Getting Started)</strong>  Connecting to Prior Knowledge\n\nStudents first learned of expressions and equations in the Grade 6 Unit Variables and Patterns. The introduction to this Problem offers a chance to revisit the vocabulary while also introducing “equivalent expressions” and “rate of change.” Teaching Aid 1.2 can provide an example for the conversation. (PORTRAY)"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<strong>Suggested Questions</strong>  <ul><li> What were the variables that we used in the last Problem? (distance in meters and time in seconds)</li><li> Can you recall another time that you studied the relationship between distance and time? (We studied rates of cars in Variables and Patterns. We used 50 mph, 55 mph, and 60 mph rates to examine the patterns between distance and time in tables, graphs, and equations.)</li><li> If we looked at your data on a graph, how could you describe the pattern of change for your walking rate? (Possible answer with a walking rate of 1.5: For every 1 second that I walked, I traveled 1.5 meters.)</li><li> Here is an example [show Teaching Aid 1.2 or an example of a student’s data] of a table and graph for someone who walked 1.5 meters per second. What do you notice about the data on the graph? (The data lines up because the pattern is consistent.)</li><li> How does this show up in the table? (Every increase of 1 second adds 1.5 meters to the distance.)</li><li> Because this pattern of change describes how your data consistently increases over time, we call this the rate of change. What was your rate of change in your walking experiment? (Possible answer with a walking rate of 1.5 meters per second: 1.5.)</li></ul>"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "Note that the rate of change describes the change in a linear relationship. If the linear relationship is proportional, the rate of change is the same as the unit rate or constant of proportionality. This conversation started for students in Comparing and Scaling and will continue throughout this Unit. <ul><li> What equation can we use to represent the pattern in this data? (Distance is equal to 1.5 times the number of seconds walked, or d = 1.5t.)</li><li> The equation is made up of two expressions. The equal sign shows that the expressions are equivalent. What are the two expressions? (d and 1.5t)</li></ul>"
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<strong>Presenting the Challenge</strong>\nIntroduce the three students and their walking rates. Let students know that they will be analyzing the progress of the three students. Encourage students to use different colors to represent each student. For example, put Alana’s data in red, Gilberto’s data in green, and Leanne’s data in blue."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<strong>Suggested Questions</strong>\n\nIf you have graphs and tables from Problem 1.1 display them, or use the Teaching Aid 1.1, and ask:<ul><li>Make a conjecture. If you increased your walking rate, how would it change your equation, graph, and table? (Students may not be able to answer at this time. Possible answer includes: If you increase the rate at which you walk, you can cover more distance in a given time. The distance in the table would increase for each second walked, and the graph would be steeper. Similarly, if you walk faster, it takes less time to cover a certain distance. The equation would have a larger number that multiplies by the variable.)\n\nNote that students are introduced to the word “coefficient” in the Grade 6 Unit Variables and Patterns. Since they may not have used the vocabulary term often in 6th grade, they are reintroduced to the term in Problem 2.2. While you may want to use that vocabulary earlier than Problem 2.2, the vocabulary term now might be too early for students. It helps students to have more experiences with the idea before the formal vocabulary is introduced. </li></ul>Look for students to make conjectures at this time. Tell students that they will investigate the effect of the walking rate on the relationship between distance and time by looking at the walking rates of three students. They will be asked to make a table, graph, and write an equation for each of the walkers. Students will examine these representations to see how changing the walking rate affects each representation of the data. They will relate the walking rate to the rate of change, linearity, and proportionality.\nTo maximize class time, you may want to provide each student with Labsheet 1.2."
+                    }
+                  }
                 ]
               },
               "supports": [
@@ -436,6 +503,28 @@
               "type": "explore",
               "content": {
                 "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<strong>Explore (Digging In)</strong> Providing for Individual Needs\n\nStudents should each make their own tables and graphs, but they can discuss the questions in pairs. This will give you an opportunity to examine students’ abilities to make tables and graphs. If a student is having trouble getting started, you can pair the student temporarily with another student who seems to be on target to get started. Some students may need to see the tables separately rather than collapsed into one table. Seeing the table collapsed helps some students to see the variable time as independent. \n\nNote that students first learned the terms independent variable and dependent variable in Grade 6 Variables and Patterns. Students are given informal experiences identifying the variables in this unit. Students are reintroduced to the vocabulary of independent variable and dependent variable in the Introduction of Problem 1.3.\n\n<strong>Suggested Questions </strong><ul><li> What are the two variables in the relationship? (time, distance)</li><li> Why do you think that there are four columns in the table? (Because all of the information is on one table.)</li></ui>\nStudents may need to see the tables separately to understand that the time column is the same for all three students."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<ul><li>  Which axis should represent time? Which should represent distance? Explain. (The horizontal axis usually represents time [the independent variable], and the vertical axis represents distance.) </li></ul>Students may not see how the walking rate is represented in the table or graph. This conversation may be something that you leave students thinking about until the Summary.\n\nCheck to see if students are able to determine if a relationship is proportional (Situation A). Students should use the ideas from Comparing and Scaling (unit rate/constant of proportionality, proportions, scaling on rate tables) to determine if the relationships are proportional.\n\nCheck to see if students are noticing when the x-variable (time) is not increasing by 1. This occurs in both Situation B (Omar’s graph) and Situation C (Elizabeth Walkathon). Both are linear and proportional, but the rate of change is not obvious because the time is not increasing by 1 second."
+                    }
+                  },
+                  {
+                    "content": {
+                      "display": "teacher",
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<strong>Planning for the Summary</strong>\nWhat evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know question? What will you do if you do not have evidence? \n\n<strong>Now What Do You Know?</stromg>\nHow do you recognize a linear pattern of change in a verbal context, table, graph, expression, or equation?"
+                    }
+                  }
                 ]
               },
               "supports": [
@@ -445,6 +534,62 @@
               "type": "summarize",
               "content": {
                 "tiles": [
+                   {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<strong>Summarize (Orchestrating the Discussion)</strong> Solutions and Strategies \n\n<strong>Suggested Questions </strong><ul><li> Who walks the fastest? (Leanne) Who walks the slowest? (Alana) How can you tell? (Graph: Leanne’s line is the highest or steepest or has the largest angle from the x-axis. Alana’s line is the lowest or least steep or has the smallest angle from the x-axis. Table: For any number of seconds, other than zero seconds, Leanne has traveled the greatest distance and Alana has traveled the least distance. For example, at 5 seconds Leanne has walked 12.5 meters when Alana has only walked 5 seconds. Equation: The number multiplied by the time is the larger for Leanne who is faster and smaller for Alana who walks slower.)</li><li> If my walking rate was 2.3 meters per second, where would the line of my data be on the graph? (Between Leanne’s and Gilberto’s, because for every one second that you walk, you would travel 2.3 meters, 2 seconds would be 4.6 meters, etc.)</li><li> What is the equation for Alana? (d = 1t) Gilberto? (d = 2t) Leanne? (d = 2.5t) How did you find it? (Various answers. For example, to find the distance we multiply by the walking rate.)</li><li> If you increased your walking rate, what effect would that have on your table or graph? (If you increase the rate at which you walk, you can cover more distance in a given time. The distance in each row of the table would increase, and the graph would be steeper. Similarly, if you walk faster, it takes less time to cover a certain distance.)</li><li> As you change your walking rate to a faster rate, what effect does this have on the original equation? (The number multiplying [the coefficient] by the time t will increase.)</li></ul>"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<strong>Making the Mathematics Explicit </strong> \n\nDuring this portion of the Summary, you will want to focus on using the representations (verbal context, table, graph, expression, equation) to help students understand how to answer these questions:\n\u0089Is the relationship linear? \n\u0089If so, what is the rate of change? \n\u0089Is the relationship the proportional? \n\u0089If so, what is the constant of proportionality? \n\u0089Will the rate of change and the constant of proportionality always be the same?\nYou may want to make anchor charts that can be used to display the representations. These can be marked up to display the big ideas in the problem. (PORTRAYAL) The following are examples of anchor charts generated in a classroom during the Summary conversation. "
+                    }
+                  },
+                  [
+                    {
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_2_Anchor.png"
+                      }
+                    },
+                    {
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_2_Anchor2.png"
+                      }
+                    }
+                  ],
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<strong>Suggested Questions</strong><ul><li>Is the relationship between the variables (time walked and distance) linear? (Yes. They are walking at a consistent rate, so the points line up to make a straight line on the graph.)</li><li> How does the walking rate/rate of change show up in the different representations? (In the word description, it is the walking rate. In the graph, it affects the steepness of the line. In the equation or expression, it is the number multiplied by t in the equation. In the table, it is the consistent change in distance as time changes by 1 second.) </li></ul>Recognizing the rate of change in tables is a bit more complex. See the following discussion as a model of how to help students see the patterns in a table. "
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<strong>Using a Table to Find the Rate of Change</strong>For each unit change in time, there is a constant change in distance for a linear relationship. This rate of change should be explored in the different representations. It may be difficult for students to recognize the effect of changing the rate of walking when they use a table. Students can draw on what they learned in the Unit Comparing and Scaling. <ul><li> Gilberto walks at a rate of 2 meters per second. As the number of seconds he walks increases from 1 second to 2 seconds then 2 seconds to 3 seconds, how does his distance change? (The distance increases by 2 meters from for every second that he walks.) \n\nShow students this thinking on a table.(LANGUAGE) </li></li> "
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "To find the rate of change, students may instead use proportional reasoning to determine that, if the time triples, then the distance should also triple.\n\n 1 sec / 2 m  = x3 => 3 sec / 6 m\n\nSimilarly, if the distance value is twice the time value after 1 second, the distance should continue to be twice the time value. There is a multiplicative 2 to 1 relationship between distance and time. \n\n 2 m / 1 sec = 10 m / 5 sec\n\nIn this Problem, the relationship between the variables is both linear and proportional. So, the latter thinking using proportions works. However, students will be confronted with a non-proportional relationship in Problem 1.3. There, students will need to rely on finding the rate of change by looking at the change in the dependent variable as the independent variable increases by 1. \n\n<strong>Note:</strong> Students tend to set up their tables using an interval of 1 second because that is what makes most sense to them. This means that they need to produce many pairs of data to get a sense of what is happening over a reasonable span of time. You may want to discuss the advantages and disadvantages of using other intervals, such as 2 seconds or 5 seconds. Situation B with Omar’s Walking Rate Graph and Situation C with Elizabeth’s Walkathon Table provide this opportunity."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<strong>Using a Graph to Find the Rate of Change</strong>\nIt should be fairly easy for students to recognize the effect of changing the rate of walking when they use a graph—it changes the “steepness” of the line. Some students say that the line “goes up faster” or “has a larger angle from the x-axis.” These intuitive ideas are the goal at this time. <ul><li> What do you notice about the graphs when the walking rate increases? (“The graph gets steeper,” “it goes up faster”, or “it has a larger angle from the x-axis.”) </li><li> If I choose two points on the graph, how can I find the walking rate? (Find the change for an increase of 1 on the x-axis.)\n\n(PORTRAYAL) Pick two points on one of the graphs and ask students how the time and the distance change from one point to the next. This is an opportunity to connect the Problem to the unit rates in Comparing and Scaling. For example, for Leanne, two points are (3, 7.5) and (6, 15).  \n\n\u0089  (3, 7.5) At 3 seconds she travels 7.5 meters\n\u0089 (6, 15) At 6 seconds she travels 15 meters\n\u0089  So, as the time increases by 3 seconds and distance increases by 7.5 meters\n\u0089  This means that every  1 second she increases her distance by 2.5 meters. \nShow the vertical and horizontal changes on the graph by drawing in dotted lines. "
+                    }
+                  }
                 ]
               },
               "supports": [
