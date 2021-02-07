@@ -726,6 +726,35 @@
               "type": "overview",
               "content": {
                 "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "A new situation involving collecting money from sponsors for the walkathon helps student compare and contrast proportional to non-proportional relationships. The Problem furthers students’ understanding of rate of change between the two variables in a linear relationship. Students will compare the amount of money donated and the distance walked for a walkathon. Students see linear relationships in a new context and interpret information using verbal descriptions, tables, graphs, and equations. They also informally explore the y-intercept."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<strong>1.3 Raising Money: Using Linear Relationships to Solve Equations\nAoL: Explore & Analysis\nCCSSM: 7.RP.A.2, 7.RP.A.2a, 7.RP.A.2b, 7.RP.A.2c, 7.RP.A.2d, 7.EE.B.4.</strong>"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<strong>NWDYK</strong>\nHow can you determine if a relationship is linear from a context, table, graph, or equation?\nIf a relationship is linear, explain how you can tell if it is proportional?"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<strong>Emerging Mathematical Ideas</strong>\nExpand understanding of linear and proportional relationships exploring a new context (miles walked, dollars raised) while using multiple representations to answer a variety of relevant questions.\n\nExplore the Walkathon Fundraising context working to:<ul><li> identify independent and dependent variables in a real-world situation, </li><li> represent linear relationships in tables, graphs, and equations give descriptions in words,</li><li>  make sense of an initial value in a linear relationship (a fixed donation) compared to a constant rate of change (dollars for each mile walked) and how each are represented in tables, graphs, equations and in the words describing the relationship, </li><li> distinguish between linear and proportional relationships described in words, tables, graphs and equations (e.g., proportional relationships have a constant rate of change and must contain the point (0,0), where-as linear relationships have a constant rate of change, but may or may not contain the point (0,0)),</li><li> interpret meaning of data points on graphs, in tables, and satisfying equations, and </li><li> use and compare multiple linear relationships to answer relevant questions.</li></ul>"
+                    }
+                  }
                 ]
               },
               "supports": []
@@ -734,22 +763,59 @@
               "type": "launch",
               "content": {
                 "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<strong>Launch (Getting Started)</strong> Connecting to Prior Knowledge\n\nIn the last two Problems, students looked at proportional, linear relationships that involved time as the independent variable and distance as the dependent variable. In this Problem, students will look at a relationship in which distance is the independent variable.\n\nStudents first learned the terms independent variable and dependent variable in Grade 6 Variables and Patterns. If you have not used the terms in this unit, reintroduce students to the vocabulary of independent variable and dependent variable in the introduction of Problem 1.3.\n\nPick one of the previous examples to review dependent variables and independent variables.\n\n<strong>Presenting the Challenge</strong>\nMany schools have walkathons or something similar to raise funds for charity. Ask students how they determined what to charge their patrons."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<strong>Suggested Questions</strong>\n\n• What variables can affect the amount of money that a student raises? (The variables are the pledge amount for each sponsor, the distance a student walks, and the number of sponsors.) \n\n• How can you use these variables to estimate the amount of money each student will collect? (If you know how much a sponsor pledges to donate and how far the student plans to walk, you can figure out how much each student might collect from each sponsor. For example, if the sponsor pledges to donate $4 for each kilometer walked, and the student plans to walk 5 kilometers, then you can estimate that the student will collect 4 * 5 = $20 from each sponsor.)\n\n  • Will the amount of money raised be the same for each walker? Explain. (No. The amount of money raised might depend on the distance that each student walks, as well as his or her pledge plan, so the amount of money raised may not be the same for each walker.)  \n\n• Which variable is the independent variable? Which is the dependent variable? (Distance walked is the independent variable, and the amount of money raised from each sponsor is the dependent variable.)  \n\nDisplay the three pledge plans of Leanne, Alana, and Gilberto.\n\n• How might you decide who is going to raise the most money? (Various answers. Do not have students go into detail. Asking the question is just to get a formative assessment of whether students may have solution strategies in mind.)\n\nIf students hesitate, offer a solution strategy by asking questions.\n\n• How might a table, graph, or equation help you decide who will raise the most money? (Various answers. No exact answer is needed at this time.)"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<strong>Labsheet 1.3</strong> is available to maximize students’ time in making the representations. \n\nAn alternative approach to making the representations would be to provide students with Teaching Aid 1.3. The Teaching Aid has tables, graphs, and equations that can be sorted and matched to each of the Pledge Plans. Students can cut apart and sort the representations to match the pledge plans."
+                    }
+                  }
                 ]
               },
               "supports": [
-                {
-                  "text": "What are the variables for each plan?"
-                },
-                {
-                  "text": "How might a table, graph, or equation help?"
-                }
               ]
             },
             {
               "type": "explore",
               "content": {
                 "tiles": [
-              ]
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<strong>Explore (Digging In) </strong> Providing for Individual Needs\n\nAs you circulate, ask students for explanations. Look for students who have interesting ways to explain their thinking. Be sure to discuss these in the Summarize.  \n\nStudents may or may not start by representing the pledge plans with tables and graphs. Without the representations, it may be difficult to answer the questions with specific values. Students may make broad statements, such as saying that Leanne starts out making the most. Push students to find a value for when others might make more.\n\n<strong>Suggested Questions</strong>\n• Who starts out making the most? (Leanne)\n• Will she always make the most? How much would each person raise if they walked 20 kilometers? (Leanne - $10, Gilberto - $20, Alana - $15)\n• When did it change? At what distance does Leanne raise less than Gilberto? Less than Alana? (Leave students to think about these detailed questions. Be sure to revisit them in the Summary.)\n\nBy this time in the unit, most students should have few problems making tables and graphs. Writing the equations may be difficult for some students. Encourage those students to write out the relationship in words. (LANGUAGE) Being able to write a verbal description of the relationship in each pledge plan is the first step to being able to write the same relationship algebraically. For example, use a plan to ask questions like the following. "
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<strong>Suggested Questions</strong> \n• How does Gilberto’s plan work? (A sponsor will donate $2 for each kilometer Gilberto walks.)\n• What are the variables and what letter name can we give them? (Amount of money, A, and number of kilometers he walks, d.)\n• Which is the independent variable? (Number of kilometers he walks.)\n• What happens with the independent variable in Gilberto’s plan? What happens for every kilometer that he walks? (He will make $2.)\n• How could we write that as an expression? ($2 times every kilometer walked or 2 * d.)\n• How can we write this an equation? (The amount a sponsor donates is found by finding $2 times every kilometer walked or A = 2 • d.)\n\nRemind students that 2 * d is often written 2d, so the equation becomes A = 2d, where A is the amount the sponsor donates and d is the number of kilometers walked.  "
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<strong>Planning for the Summary</strong> \nWhat evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know question? What will you do if you do not have evidence? <strong>Now What Do You Know?\nHow can you determine if a relationship is linear from a context, table, graph, or equation? If a relationship is linear, explain how you can tell if it is proportional.</strong>"
+                    }
+                  }
+                ]
               },
               "supports": []
             },
@@ -757,6 +823,65 @@
               "type": "summarize",
               "content": {
                 "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<strong>Summarize (Orchestrating the Discussion)</strong> Solutions and Strategies \n\nBegin by asking students: What “What If...?” questions do you have? (Students may or may not have any What If’s at this time.)\n\nYou may want to make anchor charts that can be used to display the representations. You can work with students to make the charts. Then, these can be marked up to display the big ideas in the problem, such as showing the rate of change in the table, graph, and equation. (PROBLEM SOLVING) The following are examples of anchors charts generated in a classroom during the Summary conversation. "
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_3_Anchor.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "Discuss Initial Challenge. If you did not ask students to identify the dependent and independent variables in the Launch, ask them now.\n\n Look at the points of intersection and raise questions about what those points tell us about who will raise the most money.\n\n<strong>Suggested Questions </strong>\n\n• Who makes the most money at the beginning of the walking? (Leanne. She is getting $10 for any distance. So, she makes $10 for 0, 1, 2, etc. kilometers. Gilberto and Alana get less than that for the first few kilometers.)\n\n• Point to the intersection of Leanne’s and Gilberto’s lines. What point is this? (5, 10) "
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_3_Intersection.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "•  What does that tell us about the pledges? (Both Leanne and Gilberto walk 5 kilometers and will get $10 in pledges.) \n\n• What information does each intersection point represent in the situation? (Each intersection point is where two of the plans raise an equal amount of money for the same distance. The coordinates represent equal distances and equal amounts donated.) \n\nDirect students to the intersection of Alana’s and Gilberto’s lines. Pick two points to the left of the point of intersection, one on each line, with the same x-value. \n\n• How are the two points similar? How are they different? How can you show the difference in money raised? (The two points represent the same distance walked, but they represent different amounts of money raised. For distances to the left of the point of intersection, Alana’s graph is above Gilberto’s, so Alana raises more money than Gilberto. You can show the difference in money collected by drawing a vertical line between Alana’s and Gilberto’s lines and measuring the distance. You can also find the difference in the y-coordinates to find the difference in the amount of money raised for that distance.) \n\nThen, repeat the process for two points to the right of the point of intersection. (Now Gilberto’s graph is above Alana’s, so he raises more money for a given distance.) \n\n• In Situation A #2, you found the money raised for each pledge plan if the student walked 8 kilometers. How is this information represented on the graph? (The amount of money raised for each student is the vertical distance between the x-axis and the point on the student’s line with an x-coordinate of 8.) \n\n"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_3_Height.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "You may want to let students know that when you are given the value of one variable and have to find the value of the other variable, they are finding solutions. In Investigation 3, students will learn to find solutions using equations. In Investigations 1 and 2, students use primarily tables and graphs to find solutions.\n\n• In Situation A #4, you located the point (12, 11) on Alana’s graph. Write a question that could be answered by locating this point. (Sample answers: What is the amount of money Alana raises from each sponsor if she walks 12 kilometers? How many kilometers does Alana need to walk if she wants each sponsor to donate $11?) \n\nThe preceding questions are designed to prepare students to solve equations symbolically. Later in this Unit, they will continue to relate coordinates of an ordered pair to specific information about the values of variables. \n\n<strong>Making the Mathematics Explicit </strong>In Comparing and Scaling, students observed that the rate tables relating cost of pizza to number of pizzas worked differently if a constant delivery charge was added. They noticed that there is a constant of proportionality (unit rate) when there is no delivery charge, but not a constant of proportionality (no unit rate) when there is a delivery charge. Here, students are learning about the specific details of linear relationships, in particular when are they proportional or not proportional and the role of the y-intercept. \n\n<strong>Suggested Questions </strong>\n• How are the tables, graphs, and equations for the pledge plans different from the walking rate representations? (Various answers. Students will probably mention the y-intercepts without knowing the term. They will discuss the “starting point” on the graph, the “beginning of the table or the (0,y)”, and the “amount added on in the equation.” It is typical for students to say that Leanne’s is a straight line and the others are not. Students need a way to express the horizontal line.)\n• Are the relationships between the distance walked and the money earned in pledges all linear? (Yes.) How do you know? (At this time, students are likely to say that the graphs are straight lines or that the data is consistent.)\n\nTo help students focus on determining the linearity and proportionality of the relationships, ask about the rate of change.\n\n<strong>Suggested Questions </strong>\n• How is the rate of change represented in a context? (At this time, students are likely to say it is the amount of money for every meter walked or the “per” or “per kilometer” amount.)"
+                    }
+                  },
+                   {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_3_Table.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "•  How can we tell by looking at the context if the relationship is proportional? (At this time, students might not be able to tell from the context if the relationship is proportional. Some students might say that there is some other amount other than the “per kilometer” amount. The other amount is added in [additive] and the “per kilometer” amount is multiplied [multiplicative].)\n\nThe multiplicative and additive ideas and vocabulary were introduced in Grade 6.\n\n• How is the rate of change represented in a Table? (How much the dependent variable changes for every increase of 1 in the independent variable. For Leanne the rate of change is 0; for every increase of 1 kilometer she will collect no more dollars. For Gilberto the rate of changes is 2, and for Alana the rate of is 0.50.)"
+                    }
+                  }
                 ]
               },
               "supports": [
