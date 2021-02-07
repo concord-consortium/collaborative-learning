@@ -7,6 +7,7 @@ import { LinkGeometryButton } from "./link-geometry-button";
 interface IProps {
   className?: string;
   readOnly?: boolean;
+  showLinkButton: boolean;
   linkIndex: number;
   isLinkEnabled?: boolean;
   titleCellWidth: number;
@@ -16,7 +17,8 @@ interface IProps {
   onLinkGeometryClick?: () => void;
 }
 export const EditableTableTitle: React.FC<IProps> = observer(({
-  className, readOnly, linkIndex, isLinkEnabled, titleCellWidth, getTitle, onBeginEdit, onEndEdit, onLinkGeometryClick
+  className, readOnly, showLinkButton, linkIndex, isLinkEnabled, titleCellWidth,
+  getTitle, onBeginEdit, onEndEdit, onLinkGeometryClick
 }) => {
   // getTitle() and observer() allow this component to re-render
   // when the title changes without re-rendering the entire TableTool
@@ -57,8 +59,9 @@ export const EditableTableTitle: React.FC<IProps> = observer(({
         ? <HeaderCellInput style={style} value={editingTitle || ""}
             onKeyDown={handleKeyDown} onChange={setEditingTitle} onClose={handleClose} />
         : title}
-      {!isEditing && <LinkGeometryButton isEnabled={!readOnly && isLinkEnabled} linkIndex={linkIndex}
-                                          onClick={onLinkGeometryClick} />}
+      {showLinkButton && !isEditing &&
+        <LinkGeometryButton isEnabled={!readOnly && isLinkEnabled} linkIndex={linkIndex}
+                            onClick={onLinkGeometryClick} />}
     </div>
   );
 });
