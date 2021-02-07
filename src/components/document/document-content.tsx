@@ -148,7 +148,8 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const { rowMap } = content;
     const row = rowMap.get(rowId);
     const { dragResizeRow } = this.state;
-    if (rowId !== dragResizeRow?.id) {
+    // must match lower-case for ids stored in DataTransfer key
+    if (rowId.toLowerCase() !== dragResizeRow?.id) {
       return row?.height;
     }
     const rowHeight = dragResizeRow && (dragResizeRow.domHeight || dragResizeRow.modelHeight);
@@ -300,7 +301,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     }
     else if (withinDocument && this.hasDragType(e.dataTransfer, kDragResizeRowId)) {
       const dragResizeRow = this.getDragResizeRowInfo(e);
-      if (dragResizeRow && dragResizeRow.id && dragResizeRow.newHeight != null) {
+      if (dragResizeRow?.id && dragResizeRow.newHeight != null) {
         this.setState({ dragResizeRow });
       }
       // indicate we'll accept the drop
@@ -382,9 +383,9 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   private handleRowResizeDrop = (e: React.DragEvent<HTMLDivElement>) => {
     const { content } = this.props;
     const dragResizeRow = this.getDragResizeRowInfo(e);
-    if (content && dragResizeRow && dragResizeRow.id && dragResizeRow.newHeight != null) {
+    if (content && dragResizeRow?.id && dragResizeRow.newHeight != null) {
       const row = content.rowMap.get(dragResizeRow.id);
-      row && row.setRowHeight(dragResizeRow.newHeight);
+      row?.setRowHeight(dragResizeRow.newHeight);
       this.setState({ dragResizeRow: undefined });
     }
   }
