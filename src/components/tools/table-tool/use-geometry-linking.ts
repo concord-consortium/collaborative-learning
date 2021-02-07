@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useCurrent } from "../../../hooks/use-current";
 import { kGeometryToolID } from "../../../models/tools/geometry/geometry-content";
 import {
-  addTableToDocumentMap, getLinkedTableIndex, removeTableFromDocumentMap
+  addTableToDocumentMap, getLinkedTableIndex, getTableLinkColors, removeTableFromDocumentMap
 } from "../../../models/tools/table-links";
 import { TableContentModelType } from "../../../models/tools/table/table-content";
 import { ITileLinkMetadata } from "../../../models/tools/table/table-model-types";
@@ -23,6 +23,7 @@ export const useGeometryLinking = ({
   const linkIndex = getLinkedTableIndex(modelId);
   const geometryTiles = useLinkableGeometryTiles({ model, onRequestTilesOfType });
   const isLinkEnabled = hasLinkableRows && (geometryTiles.length > 0);
+  const linkColors = getTableLinkColors(modelId);
 
   const [showLinkGeometryDialog] = useLinkGeometryDialog({ geometryTiles, onLinkGeometryTile });
 
@@ -31,7 +32,7 @@ export const useGeometryLinking = ({
     return () => removeTableFromDocumentMap(modelId);
   }, [documentId, modelId]);
 
-  return { isLinkEnabled, linkIndex, showLinkGeometryDialog };
+  return { isLinkEnabled, linkIndex, linkColors, showLinkGeometryDialog };
 };
 
 interface IUseLinkableGeometryTilesProps {

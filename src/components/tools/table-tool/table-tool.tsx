@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactDataGrid from "react-data-grid";
 import { getTableContentHeight, TableContentModelType } from "../../../models/tools/table/table-content";
 import { IToolTileProps } from "../tool-tile";
@@ -18,6 +18,7 @@ import { useToolApi } from "./use-tool-api";
 import { useCurrent } from "../../../hooks/use-current";
 import { useMeasureText } from "../hooks/use-measure-text";
 import { useToolbarToolApi } from "../hooks/use-toolbar-tool-api";
+import { lightenColor } from "../../../utilities/color-utils";
 
 import "react-data-grid/dist/react-data-grid.css";
 import "./table-tool.scss";
@@ -99,18 +100,27 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
     rowChanges, readOnly: !!readOnly, changeHandlers, measureText: measureHeaderText,
     selectedCell, inputRowId, ...rowLabelProps, onShowExpressionsDialog: handleShowExpressionsDialog });
 
-  const { isLinkEnabled, linkIndex, showLinkGeometryDialog } = useGeometryLinking({
+  const { isLinkEnabled, linkIndex, linkColors, showLinkGeometryDialog } = useGeometryLinking({
     documentId, model, hasLinkableRows, onRequestTilesOfType, onLinkGeometryTile
   });
 
   const { titleCellWidth } =
     useColumnWidths({ readOnly, getTitle, columns: dataGridProps.columns, measureText: measureHeaderText });
 
-  const containerRef = useRef(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // clear any selection on background click
     (e.target === containerRef.current) && gridContext.onClearSelection();
   };
+
+  useEffect(() => {
+    if (containerRef.current && linkColors) {
+      // override the CSS variables controlling selection color for linked tables
+      const dataGrid = containerRef.current.getElementsByClassName("rdg")[0] as HTMLDivElement | undefined;
+      dataGrid?.style.setProperty("--header-selected-background-color", lightenColor(linkColors.stroke));
+      dataGrid?.style.setProperty("--row-selected-background-color", lightenColor(linkColors.fill));
+    }
+  });
 
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
   return (
