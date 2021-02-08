@@ -22,6 +22,11 @@ export const dragResizeRowDomHeight =
               (domHeight: number) => `org.concord.clue.row-resize.dom-height.${domHeight}`;
 
 export function extractDragResizeRowId(dataTransfer: DataTransfer) {
+  // get the actual rowId from contents if possible (e.g. on drop)
+  const dragRowId = dataTransfer.getData(kDragResizeRowId);
+  if (dragRowId) return dragRowId;
+
+  // if not, extract the toLowerCase() version from the key (e.g. on over)
   for (const type of dataTransfer.types) {
     const result = /org\.concord\.clue\.row-resize\.id\.(.*)$/.exec(type);
     if (result) return result[1];
