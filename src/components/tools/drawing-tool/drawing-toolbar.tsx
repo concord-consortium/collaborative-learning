@@ -7,7 +7,7 @@ import {
 import { StampsPalette } from "./stamps-palette";
 import { StrokeColorPalette } from "./stroke-color-palette";
 import { FillColorPalette } from "./fill-color-palette";
-import { useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
+import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
 import { useForceUpdate } from "../hooks/use-force-update";
 import { useMobXOnChange } from "../hooks/use-mobx-on-change";
 import { IRegisterToolApiProps } from "../tool-tile";
@@ -24,11 +24,8 @@ interface IPaletteState {
 type PaletteKey = keyof IPaletteState;
 const kClosedPalettesState = { showStamps: false, showStroke: false, showFill: false };
 
-interface IProps extends IRegisterToolApiProps {
-  documentContent?: HTMLElement | null;
-  toolTile?: HTMLElement | null;
+interface IProps extends IFloatingToolbarProps, IRegisterToolApiProps {
   model: ToolTileModelType;
-  onIsEnabled: () => boolean;
 }
 export const ToolbarView: React.FC<IProps> = (
               { documentContent, model, onIsEnabled, ...others }: IProps) => {

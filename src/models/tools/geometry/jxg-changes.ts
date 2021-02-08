@@ -1,8 +1,8 @@
 import { castArray } from "lodash";
 
 export type JXGOperation = "create" | "update" | "delete";
-export type JXGObjectType = "board" |"comment" |  "image" | "linkedPoint" | "movableLine" | "object" |
-                              "point" | "polygon" | "tableLink" | "vertexAngle";
+export type JXGObjectType = "board" | "comment" | "image" | "linkedPoint" | "metadata" | "movableLine" |
+                              "object" | "point" | "polygon" | "tableLink" | "vertexAngle";
 
 export type JXGCoordPair = [number, number];
 export type JXGUnsafeCoordPair = [number?, number?];
@@ -20,6 +20,7 @@ export interface JXGProperties {
   id?: string;
   labelOption?: ESegmentLabelOption;
   position?: JXGUnsafeCoordPair;
+  title?: string; // metadata property
   url?: string;
   xMin?: number;
   yMin?: number;

@@ -15,7 +15,7 @@ import "./geometry-tool.sass";
 const GeometryToolComponent: React.FC<IGeometryProps> = ({
   model, readOnly, ...others
 }) => {
-  const { documentContent, toolTile, onRegisterToolApi, onUnregisterToolApi } = others;
+  const { documentContent, toolTile, scale, onRegisterToolApi, onUnregisterToolApi } = others;
   const modelRef = useCurrent(model);
   const domElement = useRef<HTMLDivElement>(null);
   const content = model.content as GeometryContentModelType;
@@ -63,7 +63,7 @@ const GeometryToolComponent: React.FC<IGeometryProps> = ({
           onMouseUpCapture={handlePointerUp}
           onKeyDown={e => hotKeys.current.dispatch(e)} >
 
-      <GeometryToolbar documentContent={documentContent} toolTile={toolTile}
+      <GeometryToolbar documentContent={documentContent} toolTile={toolTile} scale={scale}
         board={board} content={content} handlers={actionHandlers} {...toolbarProps} />
       <GeometryContentWrapper model={model} readOnly={readOnly} {...others}
         onSetBoard={setBoard} onSetActionHandlers={handleSetHandlers} onContentChange={forceUpdate}/>

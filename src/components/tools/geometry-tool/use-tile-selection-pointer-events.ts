@@ -8,6 +8,12 @@ export const useTileSelectionPointerEvents = (
   const didLastMouseDownSelectTile = useRef(false);
 
   const handlePointerDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+
+    // if the clicked element is focusable, let it handle the event
+    const target = e.target as HTMLElement;
+    const classList = target.classList;
+    if (classList?.contains("focusable")) return;
+
     // clicked tile gets keyboard focus
     if (focusableElement.current) {
       // requires non-empty tabIndex

@@ -8,7 +8,8 @@ import { BaseComponent } from "../base";
 import { EmptyImagePrompt } from "./image/empty-image-prompt";
 import { ImageToolbar } from "./image/image-toolbar";
 import { ImageComponent } from "./image-component";
-import { IToolApi, IToolTileProps } from "./tool-tile";
+import { IToolApi } from "./tool-api";
+import { IToolTileProps } from "./tool-tile";
 import { IDocumentContext } from "../../models/document/document-types";
 import { debouncedSelectTile } from "../../models/stores/ui";
 import { gImageMap, IImageContext, ImageMapEntryType } from "../../models/image-map";
@@ -131,7 +132,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { documentContent, toolTile, readOnly } = this.props;
+    const { documentContent, toolTile, readOnly, scale } = this.props;
     const { isLoading, imageEntry } = this.state;
     const showEmptyImagePrompt = !this.getContent().hasValidImage;
 
@@ -157,6 +158,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
             onUnregisterToolApi={() => this.toolbarToolApi = undefined}
             documentContent={documentContent}
             toolTile={toolTile}
+            scale={scale}
             onIsEnabled={this.handleIsEnabled}
             onUploadImageFile={this.handleUploadImageFile}
           />

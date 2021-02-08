@@ -1,15 +1,21 @@
 import { GeometryContentModel, GeometryContentModelType,
           kGeometryToolID, defaultGeometryContent, GeometryMetadataModel } from "./geometry-content";
 import { JXGChange } from "./jxg-changes";
-import { isBoard } from "./jxg-board";
-import { isPoint, isFreePoint } from "./jxg-point";
-import { isPointInPolygon, isPolygon, getPointsForVertexAngle } from "./jxg-polygon";
+import { isPointInPolygon, getPointsForVertexAngle } from "./jxg-polygon";
 import { canSupportVertexAngle, getVertexAngle, updateVertexAnglesFromObjects } from "./jxg-vertex-angle";
-import { isUuid } from "../../../utilities/test-utils";
+import { isBoard, isFreePoint, isPoint, isPolygon } from "./jxg-types";
 import { clone } from "lodash";
 import { destroy } from "mobx-state-tree";
 
 import placeholderImage from "../../../assets/image_placeholder.png";
+
+// mock uniqueId so we can recognize auto-generated IDs
+const { uniqueId, castArrayCopy, safeJsonParse } = jest.requireActual("../../../utilities/js-utils");
+jest.mock("../../../utilities/js-utils", () => ({
+  uniqueId: () => `testid-${uniqueId()}`,
+  castArrayCopy: (itemOrArray: any) => castArrayCopy(itemOrArray),
+  safeJsonParse: (json: string) => safeJsonParse(json)
+}));
 
 describe("GeometryContent", () => {
 
@@ -142,7 +148,7 @@ describe("GeometryContent", () => {
     content.removeObjects(board, p1Id);
     expect(board.objects[p1Id]).toBeUndefined();
     const p3: JXG.Point = content.addPoint(board, [2, 2]) as JXG.Point;
-    expect(isUuid(p3.id)).toBe(true);
+    expect(p3.id.startsWith("testid-")).toBe(true);
     // requests to remove points with invalid IDs are ignored
     content.removeObjects(board, ["foo"]);
     content.applyChange(board, { operation: "delete", target: "point" });
@@ -159,7 +165,7 @@ describe("GeometryContent", () => {
     let polygon: JXG.Polygon | undefined = content.createPolygonFromFreePoints(board) as JXG.Polygon;
     expect(isPolygon(polygon)).toBe(true);
     const polygonId = polygon.id;
-    expect(isUuid(polygonId)).toBe(true);
+    expect(polygonId.startsWith("testid-")).toBe(true);
 
     const ptInPolyCoords = new JXG.Coords(JXG.COORDS_BY_USER, [3, 2], board);
     const [, ptInScrX, ptInScrY] = ptInPolyCoords.scrCoords;

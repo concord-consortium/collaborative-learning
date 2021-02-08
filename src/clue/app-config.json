@@ -2,22 +2,49 @@
   "appName": "CLUE",
   "pageTitle": "CLUE: %problemTitle%",
   "units": {
-    "cr": "curriculum/completely-rational/completely-rational.json",
-    "cas": "curriculum/comparing-and-scaling/comparing-and-scaling.json",
-    "faw": "curriculum/filling-and-wrapping/filling-and-wrapping.json",
-    "ffpc": "curriculum/frogs-fleas-and-painted-cubes/frogs-fleas-and-painted-cubes.json",
-    "ggg": "curriculum/growing-growing-growing/growing-growing-growing.json",
-    "hlit": "curriculum/how-likely-is-it/how-likely-is-it.json",
-    "help": "curriculum/help/help.json",
-    "lfp": "curriculum/looking-for-pythagoras/looking-for-pythagoras.json",
-    "msa": "curriculum/moving-straight-ahead/moving-straight-ahead.json",
-    "sad": "curriculum/shapes-and-designs/shapes-and-designs.json",
-    "sap": "curriculum/samples-and-populations/samples-and-populations.json",
-    "sas": "curriculum/stretching-and-shrinking/stretching-and-shrinking.json",
-    "s+s": "curriculum/stretching-and-shrinking/stretching-and-shrinking.json",
-    "s s": "curriculum/stretching-and-shrinking/stretching-and-shrinking.json",
-    "sws": "curriculum/say-it-with-symbols/say-it-with-symbols.json",
-    "twmm": "curriculum/thinking-with-math-models/thinking-with-math-models.json"
+    "cr": {
+      "content": "curriculum/completely-rational/completely-rational.json"
+    },
+    "cas": {
+      "content": "curriculum/comparing-and-scaling/comparing-and-scaling.json"
+    },
+    "faw": {
+      "content": "curriculum/filling-and-wrapping/filling-and-wrapping.json"
+    },
+    "ffpc": {
+      "content": "curriculum/frogs-fleas-and-painted-cubes/frogs-fleas-and-painted-cubes.json"
+    },
+    "ggg": {
+      "content": "curriculum/growing-growing-growing/growing-growing-growing.json"
+    },
+    "hlit": {
+      "content": "curriculum/how-likely-is-it/how-likely-is-it.json"
+    },
+    "help": {
+      "content": "curriculum/help/help.json"
+    },
+    "lfp": {
+      "content": "curriculum/looking-for-pythagoras/looking-for-pythagoras.json"
+    },
+    "msa": {
+      "content": "curriculum/moving-straight-ahead/moving-straight-ahead.json",
+      "guide": "curriculum/moving-straight-ahead/msa-teacher-guide.json"
+    },
+    "sad": {
+      "content": "curriculum/shapes-and-designs/shapes-and-designs.json"
+    },
+    "sap": {
+      "content": "curriculum/samples-and-populations/samples-and-populations.json"
+    },
+    "sas": {
+      "content": "curriculum/stretching-and-shrinking/stretching-and-shrinking.json"
+    },
+    "sws": {
+      "content": "curriculum/say-it-with-symbols/say-it-with-symbols.json"
+    },
+    "twmm": {
+      "content": "curriculum/thinking-with-math-models/thinking-with-math-models.json"
+    }
   },
   "unitCodeMap": {
     "s s": "sas",
@@ -58,6 +85,12 @@
       {
         "tab": "problems",
         "label": "Problem",
+        "sections": []
+      },
+      {
+        "tab": "teacher-guide",
+        "label": "Teacher Guide",
+        "teacherOnly": true,
         "sections": []
       },
       {

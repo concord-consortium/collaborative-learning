@@ -11,8 +11,8 @@ export type ToggleElement = "leftNavExpanded";
 export const UIDialogTypeEnum = types.enumeration("dialogType", ["alert", "confirm", "prompt"]);
 export type UIDialogType = typeof UIDialogTypeEnum.Type;
 
-type BooleanDialogResolver = (value?: boolean | PromiseLike<boolean> | undefined) => void;
-type StringDialogResolver = (value?: string | PromiseLike<string> | undefined) => void;
+type BooleanDialogResolver = (value: boolean | PromiseLike<boolean>) => void;
+type StringDialogResolver = (value: string | PromiseLike<string>) => void;
 let dialogResolver: BooleanDialogResolver | StringDialogResolver | undefined;
 
 export const UIDialogModel = types
@@ -36,6 +36,7 @@ export const UIModel = types
     selectedTileIds: types.array(types.string),
     showDemo: false,
     showDemoCreator: false,
+    showTeacherContent: true,
     dialog: types.maybe(UIDialogModel),
     problemWorkspace: WorkspaceModel,
     learningLogWorkspace: WorkspaceModel,
@@ -118,6 +119,9 @@ export const UIModel = types
 
       toggleNavTabContent(show: boolean) {
         self.navTabContentShown = show;
+      },
+      toggleShowTeacherContent(show: boolean) {
+        self.showTeacherContent = show;
       },
       setError(error: string|null) {
         self.error = error ? error.toString() : error;

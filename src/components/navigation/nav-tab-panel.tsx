@@ -72,7 +72,9 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
   private renderTabContent = (tabSpec: NavTabSpec) => {
     switch (tabSpec.tab) {
       case ENavTab.kProblems:
-        return this.renderProblems();
+        return this.renderProblem();
+      case ENavTab.kTeacherGuide:
+        return this.renderTeacherGuide();
       case ENavTab.kStudentWork:
         return <StudentGroupView groupId={this.stores.ui.activeGroupId} setGroupId={this.selectStudentGroup} />;
       case ENavTab.kClassWork:
@@ -91,11 +93,18 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
     );
   }
 
-  private renderProblems = () => {
-    const { problem } = this.stores;
-    const { sections } = problem;
+  private renderProblem = () => {
+    const { user: { isTeacher }, problem: { sections } } = this.stores;
     return (
-      <ProblemTabContent sections={sections} />
+      <ProblemTabContent sections={sections} showSolutionsSwitch={isTeacher}/>
+    );
+  }
+
+  private renderTeacherGuide = () => {
+    const { user: { isTeacher }, teacherGuide } = this.stores;
+    const sections = teacherGuide?.sections;
+    return isTeacher && sections && (
+      <ProblemTabContent context={ENavTab.kTeacherGuide} sections={sections} showSolutionsSwitch={false}/>
     );
   }
 

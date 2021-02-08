@@ -1,5 +1,5 @@
-import React from "react";
-import { Button, Dialog } from "@blueprintjs/core";
+import React, { useEffect } from "react";
+import { useSingleStringDialog } from "./use-single-string-dialog";
 
 interface IProps {
   parentId?: string;
@@ -12,73 +12,27 @@ interface IProps {
   maxLength?: number;
 }
 
-interface IState {
-  content: string;
-}
+// Component wrapper for useSingleStringDialog() for use by class components.
+const SingleStringDialog: React.FC<IProps> = ({
+  parentId, title, prompt, placeholder, content, maxLength, onAccept, onClose
+}) => {
 
-export default
-class SingleStringDialog extends React.Component<IProps, IState> {
+  const [showDialog, hideDialog] = useSingleStringDialog({
+    title: title || "",
+    prompt,
+    placeholder,
+    value: content,
+    maxLength,
+    context: parentId,
+    onAccept,
+    onClose
+  });
 
-  public state = {
-            content: this.props.content || ""
-          };
+  useEffect(() => {
+    showDialog();
+    return () => hideDialog();
+  }, [hideDialog, showDialog]);
 
-  public render() {
-    const { title, prompt, placeholder, maxLength } = this.props;
-    return (
-      <Dialog
-        icon="text-highlight"
-        isOpen={true}
-        onClose={this.props.onClose}
-        title={title}
-        canOutsideClickClose={false}
-      >
-        <div className="nc-attribute-name-prompt">{prompt}:</div>
-        <input
-          className="nc-attribute-name-input pt-input"
-          type="text"
-          maxLength={maxLength ? maxLength : 100}
-          placeholder={placeholder}
-          value={this.state.content}
-          onChange={this.handleChange}
-          onKeyDown={this.handleKeyDown}
-          dir="auto"
-          ref={input => input && input.focus()}
-        />
-        <div className="nc-dialog-buttons">
-          <Button
-            className="nc-dialog-button pt-intent-primary"
-            text="OK"
-            onClick={this.handleAccept}
-          />
-          <Button className="nc-dialog-button" text="Cancel"  onClick={this.handleCancel}/>
-        </div>
-      </Dialog>
-    );
-  }
-
-  private handleChange = (evt: React.FormEvent<HTMLInputElement>) => {
-    this.setState({ content: (evt.target as HTMLInputElement).value });
-  }
-
-  private handleAccept = () => {
-    const { onAccept, parentId } = this.props;
-    const { content } = this.state;
-    onAccept && onAccept(content, parentId);
-  }
-
-  private handleCancel = () => {
-    const { onClose } = this.props;
-    onClose && onClose();
-  }
-
-  private handleKeyDown = (evt: React.KeyboardEvent<HTMLInputElement>) => {
-    evt.stopPropagation();
-    if (evt.keyCode === 13) {
-      this.handleAccept();
-    } else if (evt.keyCode === 27) {
-      this.handleCancel();
-    }
-  }
-
-}
+  return null;
+};
+export default SingleStringDialog;

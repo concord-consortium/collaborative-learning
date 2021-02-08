@@ -30,6 +30,21 @@ module.exports = (env, argv) => {
     module: {
       rules: [
         {
+          test: /bundle\.js$/,
+          loader: require.resolve('string-replace-loader'),
+          options: {
+            multiple: [
+              { // react-data-grid doesn't currently provide a means of clearing cell selection
+                search: /if \(!isCellWithinBounds\(position\)\) return;/g,
+                replace:
+                  "// [CC] (string-replace-loader) allow clearing the selection\n" +
+                  "    if (!(position.idx === -1 && position.rowIdx === -1) && !isCellWithinBounds(position)) return;",
+                strict: true  // fail build if replacement not performed
+              }
+            ]
+          }
+        },
+        {
           test: /popper\.js$/,
           loader: require.resolve('string-replace-loader'),
           options: {
@@ -54,8 +69,16 @@ module.exports = (env, argv) => {
           loader: 'ts-loader',
           exclude: /node_modules/
         },
+        { // disable svgo optimization for files ending in .nosvgo.svg
+          test: /\.nosvgo\.svg$/i,
+          loader: "@svgr/webpack",
+          options: {
+            svgo: false
+          }
+        },
         {
           test: /\.svg$/i,
+          exclude: /\.nosvgo\.svg$/i,
           oneOf: [
             {
               issuer: /\.[tj]sx?$/i,

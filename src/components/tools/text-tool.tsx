@@ -11,7 +11,8 @@ import { debouncedSelectTile } from "../../models/stores/ui";
 import { TextContentModelType } from "../../models/tools/text/text-content";
 import { hasSelectionModifier } from "../../utilities/event-utils";
 import { TextToolbarComponent } from "./text-toolbar";
-import { IToolApi, IToolTileProps } from "./tool-tile";
+import { IToolApi } from "./tool-api";
+import { IToolTileProps } from "./tool-tile";
 import { renderSlateMark, renderSlateBlock } from "./slate-renderers";
 
 import "./text-tool.sass";
@@ -232,9 +233,8 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
   }
 
   public render() {
-    const { documentContent, toolTile, model, readOnly } = this.props;
+    const { documentContent, toolTile, model, readOnly, scale } = this.props;
     const { value: editorValue, selectedButtons } = this.state;
-    const isFocused = !!editorValue?.selection.isFocused;
     const { unit: { placeholderText } } = this.stores;
     const editableClass = readOnly ? "read-only" : "editable";
     // Ideally this would just be 'text-tool-editor', but 'text-tool' has been
@@ -274,10 +274,11 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
         <TextToolbarComponent
           documentContent={documentContent}
           toolTile={toolTile}
+          scale={scale}
           selectedButtons={selectedButtons || []}
           onButtonClick={handleToolBarButtonClick}
           editor={this.editor}
-          enabled={isFocused}
+          onIsEnabled={this.handleIsEnabled}
           onRegisterToolApi={this.handleRegisterToolApi}
           onUnregisterToolApi={this.handleUnregisterToolApi}
         />
@@ -308,6 +309,11 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
 
   private handleUnregisterToolApi = () => {
     this.toolbarToolApi = undefined;
+  }
+
+  private handleIsEnabled = () => {
+    // text toolbar is based on editor focus rather than tile selection
+    return !!this.state.value?.selection.isFocused;
   }
 
   private handleChange = (change: SlateChange) => {

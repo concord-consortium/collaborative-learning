@@ -1,17 +1,24 @@
+import classNames from "classnames";
+import { observer } from "mobx-react";
 import React from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
+import { useUIStore, useUserStore } from "../../hooks/use-stores";
 import { getSectionTitle, SectionModelType } from "../../models/curriculum/section";
 import { ProblemPanelComponent } from "./problem-panel";
 import { Logger, LogEventName } from "../../lib/logger";
+import ToggleControl from "../utilities/toggle-control";
 
 import "./problem-tab-content.sass";
 
 interface IProps {
+  context?: string;
   sections: SectionModelType[];
+  showSolutionsSwitch: boolean;
 }
 
-export const ProblemTabContent: React.FC<IProps> = (props) => {
-  const { sections } = props;
+export const ProblemTabContent: React.FC<IProps> = observer(({ context, sections, showSolutionsSwitch}: IProps) => {
+  const { isTeacher } = useUserStore();
+  const { showTeacherContent, toggleShowTeacherContent } = useUIStore();
 
   const handleTabClick = (title: string, type: string) => {
     Logger.log(LogEventName.SHOW_TAB_SECTION, {
@@ -20,20 +27,28 @@ export const ProblemTabContent: React.FC<IProps> = (props) => {
     });
   };
 
+  const handleToggleSolutions = () => {
+    toggleShowTeacherContent(!showTeacherContent);
+    Logger.log(showTeacherContent ? LogEventName.HIDE_SOLUTIONS : LogEventName.SHOW_SOLUTIONS);
+  };
+
   return (
-    <Tabs className="problem-tabs" selectedTabClassName="selected">
-      <TabList className="tab-list">
-        {sections.map((section) => {
-          const sectionTitle = getSectionTitle(section.type);
-          return (
-            <Tab className="prob-tab" key={`section-${section.type}`}
-                 onClick={() => handleTabClick(section.type, sectionTitle)}
-            >
-              {sectionTitle}
-            </Tab>
-          );
-        })}
-      </TabList>
+    <Tabs className={classNames("problem-tabs", context)} selectedTabClassName="selected">
+      <div className="tab-header-row">
+        <TabList className="tab-list">
+          {sections.map((section) => {
+            const sectionTitle = getSectionTitle(section.type);
+            return (
+              <Tab className={classNames("prob-tab", context)} key={`section-${section.type}`}
+                  onClick={() => handleTabClick(section.type, sectionTitle)} >
+                {sectionTitle}
+              </Tab>
+            );
+          })}
+        </TabList>
+        {isTeacher && showSolutionsSwitch &&
+          <SolutionsButton onClick={handleToggleSolutions} isToggled={showTeacherContent} />}
+      </div>
       {sections.map((section) => {
         return (
           <TabPanel key={`section-${section.type}`}>
@@ -42,5 +57,20 @@ export const ProblemTabContent: React.FC<IProps> = (props) => {
         );
       })}
     </Tabs>
+  );
+});
+
+const SolutionsButton = ({ onClick, isToggled }: { onClick: () => void, isToggled: boolean }) => {
+  const classes = classNames("solutions-button", { toggled: isToggled });
+  return (
+    <div className="solutions-switch">
+      {<div className="solutions-separator" />}
+      <ToggleControl className={classes} dataTest="solutions-button"
+                      initialValue={isToggled} onChange={onClick}
+                      title={isToggled
+                                  ? "Showing solutions: click to hide"
+                                  : "Hiding solutions: click to show"} />
+      <div className="solutions-label">Solutions</div>
+    </div>
   );
 };

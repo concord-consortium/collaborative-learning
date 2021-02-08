@@ -3,7 +3,7 @@ import { observer } from "mobx-react";
 import React from "react";
 import ReactDOM from "react-dom";
 import { GeometryContentModelType } from "../../../models/tools/geometry/geometry-content";
-import { isPoint } from "../../../models/tools/geometry/jxg-point";
+import { isPoint } from "../../../models/tools/geometry/jxg-types";
 import { canSupportVertexAngle, getVertexAngle } from "../../../models/tools/geometry/jxg-vertex-angle";
 import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
 import { IToolbarActionHandlers } from "./geometry-shared";

@@ -11,8 +11,12 @@ export function getTableDocument(tableId: string) {
   return sTableDocumentMap.get(tableId);
 }
 
-export function addTable(documentId: string, tableId: string) {
+export function addTableToDocumentMap(documentId: string, tableId: string) {
   sTableDocumentMap.set(tableId, documentId);
+}
+
+export function removeTableFromDocumentMap(tableId: string) {
+  sTableDocumentMap.delete(tableId);
 }
 
 export function getLinkedTables(documentId: string) {

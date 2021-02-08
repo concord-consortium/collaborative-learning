@@ -2,7 +2,6 @@ import React from "react";
 import { inject, observer } from "mobx-react";
 import { SizeMeProps } from "react-sizeme";
 import { BaseComponent } from "../../base";
-import { Alert, Intent } from "@blueprintjs/core";
 import { DocumentContentModelType } from "../../../models/document/document-content";
 import { getLinkedTableIndex, getTableLinkColors } from "../../../models/tools/table-links";
 import { getTableContent } from "../../../models/tools/table/table-content";
@@ -12,15 +11,19 @@ import { GeometryContentModelType, GeometryMetadataModelType, setElementColor, g
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
           isDragTargetOrAncestor } from "../../../models/tools/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
-import { kGeometryDefaultPixelsPerUnit, isAxis, isAxisLabel } from "../../../models/tools/geometry/jxg-board";
+import { getPointsByCaseId, kGeometryDefaultPixelsPerUnit } from "../../../models/tools/geometry/jxg-board";
 import { ESegmentLabelOption, ILinkProperties, JXGChange, JXGCoordPair
         } from "../../../models/tools/geometry/jxg-changes";
-import { isPoint, isFreePoint, isVisiblePoint, kSnapUnit } from "../../../models/tools/geometry/jxg-point";
-import { getAssociatedPolygon, getPointsForVertexAngle, getPolygonEdges, isPolygon, isVisibleEdge
-        } from "../../../models/tools/geometry/jxg-polygon";
-import { isComment } from "../../../models/tools/geometry/jxg-types";
-import { getVertexAngle, isVertexAngle, updateVertexAngle, updateVertexAnglesFromObjects
-        } from "../../../models/tools/geometry/jxg-vertex-angle";
+import { kSnapUnit } from "../../../models/tools/geometry/jxg-point";
+import {
+  getAssociatedPolygon, getPointsForVertexAngle, getPolygonEdges
+} from "../../../models/tools/geometry/jxg-polygon";
+import {
+  isAxis, isAxisLabel, isComment, isFreePoint, isPoint, isPolygon, isVertexAngle, isVisibleEdge, isVisiblePoint
+} from "../../../models/tools/geometry/jxg-types";
+import {
+  getVertexAngle, updateVertexAngle, updateVertexAnglesFromObjects
+} from "../../../models/tools/geometry/jxg-vertex-angle";
 import { isFeatureSupported } from "../../../models/stores/stores";
 import { injectGetTableLinkColorsFunction } from "../../../models/tools/geometry/jxg-table-link";
 import { extractDragTileType, kDragTileContent, kDragTileId, dragTileSrcDocId } from "../tool-tile";
@@ -30,15 +33,17 @@ import { getUrlFromImageContent } from "../../../utilities/image-utils";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { assign, castArray, debounce, each, filter, find, keys as _keys, throttle, values } from "lodash";
-import { isVisibleMovableLine, isMovableLine, isMovableLineControlPoint, isMovableLineLabel,
-        handleControlPointClick} from "../../../models/tools/geometry/jxg-movable-line";
-import { v4 as uuid } from "uuid";
+import {
+  isVisibleMovableLine, isMovableLine, isMovableLineControlPoint, isMovableLineLabel,
+} from "../../../models/tools/geometry/jxg-movable-line";
 import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
 import { getDataSetBounds, IDataSet } from "../../../models/data/data-set";
 import AxisSettingsDialog from "./axis-settings-dialog";
+import { EditableGeometryTitle } from "./editable-geometry-title";
 import LabelSegmentDialog from "./label-segment-dialog";
 import MovableLineDialog from "./movable-line-dialog";
 import placeholderImage from "../../../assets/image_placeholder.png";
+import ErrorAlert from "../../utilities/error-alert";
 import SingleStringDialog from "../../utilities/single-string-dialog";
 import { autorun } from "mobx";
 
@@ -49,7 +54,9 @@ export interface IGeometryContentProps extends IGeometryProps {
   onSetActionHandlers: (handlers: IActionHandlers) => void;
   onContentChange: () => void;
 }
-export type IProps = IGeometryContentProps & SizeMeProps;
+export interface IProps extends IGeometryContentProps, SizeMeProps {
+  measureText: (text: string) => number;
+}
 
 // cf. https://mariusschulz.com/blog/mapped-type-modifiers-in-typescript#removing-the-readonly-mapped-type-modifier
 type Mutable<T> = {
@@ -249,6 +256,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     const metadata = this.getContent().metadata;
     this.props.onRegisterToolApi({
+      getTitle: () => metadata.title,
       hasSelection: () => {
         const geometryContent = this.props.model.content as GeometryContentModelType;
         // Note: hasSelection() returns true when there is a selection whether or not
@@ -267,8 +275,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         }
       },
       getSelectionInfo: () => {
+        const { board } = this.state;
         const geometryContent = this.props.model.content as GeometryContentModelType;
-        const selectedIds = geometryContent ? geometryContent.selectedIds : [];
+        const selectedIds = board && geometryContent?.getSelectedIds(board) || [];
         return JSON.stringify(selectedIds);
       },
       setSelectionHighlight: (selectionInfo: string, isHighlighted: boolean) => {
@@ -404,6 +413,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           onDragLeave={this.handleDragLeave}
           onDrop={this.handleDrop} />,
       this.renderRotateHandle(),
+      this.renderTitle(),
       this.renderInvalidTableDataAlert()
     ]);
   }
@@ -501,24 +511,28 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     );
   }
 
+  private handleTitleChange = (title?: string) => {
+    title && this.getContent().updateTitle(this.state.board, title);
+  }
+
+  private renderTitle() {
+    const getTitle = () => this.getContent().title || "";
+    const { measureText, size } = this.props;
+    return (
+      <EditableGeometryTitle key="geometry-title" size={size} getTitle={getTitle} measureText={measureText}
+                              onEndEdit={this.handleTitleChange} />
+    );
+  }
+
   private renderInvalidTableDataAlert() {
     const { showInvalidTableDataAlert } = this.state;
     if (!showInvalidTableDataAlert) return;
 
     return (
-      <Alert
-          confirmButtonText="OK"
-          icon="error"
-          intent={Intent.DANGER}
-          isOpen={true}
-          onClose={this.handleCloseInvalidTableDataAlert}
-          canEscapeKeyCancel={true}
-          key={"invalid-table-alert"}
-      >
-        <p>
-          Linked data must be numeric. Please edit the table values so that all cells contain numbers.
-        </p>
-      </Alert>
+      <ErrorAlert
+        content="Linked data must be numeric. Please edit the table values so that all cells contain numbers."
+        onClose={this.handleCloseInvalidTableDataAlert}
+      />
     );
   }
 
@@ -551,6 +565,13 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         this.setState({ board });
       }
       this.syncedChanges = content.changes.length;
+    }
+    // if we haven't been assigned a title already, request one now
+    // we set the title without updating the content, so the title is ephemeral
+    if (!content.metadata.title) {
+      const { model: { id }, onRequestUniqueTitle } = this.props;
+      const title = onRequestUniqueTitle(id);
+      title && content.metadata.setTitle(title);
     }
   }
 
@@ -893,7 +914,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
               case "create":
                 // map ids of newly create object
                 if (change.properties && change.properties.id) {
-                  idMap[change.properties.id] = uuid();
+                  idMap[change.properties.id] = uniqueId();
                   change.properties.id = idMap[change.properties.id];
                 }
                 // after the first paste, names/labels are auto-generated
@@ -989,7 +1010,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           this.handleImageTileDrop(e, parsedContent);
         }
         else if (tileType === "table") {
-          this.handleTableTileDrop(e, parsedContent);
+          this.handleTableTileDrop(e);
         }
         e.preventDefault();
         e.stopPropagation();
@@ -1049,13 +1070,19 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     return { id: links.id, tileIds: [this.props.model.id] };
   }
 
-  private handleTableTileDrop(e: React.DragEvent<HTMLDivElement>, parsedContent: any) {
-    const { board } = this.state;
+  private handleTableTileDrop(e: React.DragEvent<HTMLDivElement>) {
     const dragTileId = e.dataTransfer.getData(kDragTileId);
-    if (this.getContent().isLinkedToTable(dragTileId)) return;
+    if (dragTileId) {
+      this.handleTableTileLinkRequest(dragTileId);
+    }
+  }
 
-    const tableContent = this.getTableContent(dragTileId);
-    if (tableContent && parsedContent && board) {
+  private handleTableTileLinkRequest(tableTileId: string) {
+    const { board } = this.state;
+    if (this.getContent().isLinkedToTable(tableTileId)) return;
+
+    const tableContent = this.getTableContent(tableTileId);
+    if (tableContent && board) {
       if (!tableContent.isValidForGeometryLink()) {
         this.setState({ showInvalidTableDataAlert: true });
         return;
@@ -1063,15 +1090,15 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const dataSet = tableContent.getSharedData();
       this.autoRescaleBoardAndAxes(dataSet);
 
-      const geomActionLinks = tableContent.getClientLinks(uniqueId(), dataSet, true);
+      const geomActionLinks = tableContent.getClientLinks(uniqueId(), dataSet);
       this.applyChange(() => {
-        const pts = this.getContent().addTableLink(board, dragTileId, dataSet, geomActionLinks);
+        const pts = this.getContent().addTableLink(board, tableTileId, dataSet, geomActionLinks);
         pts.forEach((pt: JXG.Point) => {
           this.handleCreatePoint(pt);
         });
       });
 
-      const _tableContent = this.getTableContent(dragTileId);
+      const _tableContent = this.getTableContent(tableTileId);
       const tableActionLinks = this.getTableActionLinks(geomActionLinks);
       _tableContent && _tableContent.addGeometryLink(this.props.model.id, tableActionLinks);
     }
@@ -1361,8 +1388,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     // synchronize selection changes
     this.disposers.push(content.metadata.selection.observe((change: any) => {
-      if (this.state.board) {
-        setElementColor(this.state.board, change.name, (change as any).newValue.value);
+      const { board: _board } = this.state;
+      if (_board) {
+        // this may be a shared selection change; get all points associated with it
+        const objs = getPointsByCaseId(_board, change.name);
+        objs.forEach(obj => setElementColor(_board, obj.id, change.newValue.value));
       }
     }));
 
@@ -1392,12 +1422,13 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       if (!board) return;
       const id = point.id;
       const coords = copyCoords(point.coords);
-      const linkedTableId = point.getAttribute("linkedTableId");
+      const tableId = point.getAttribute("linkedTableId");
+      const columnId = point.getAttribute("linkedColId");
       const isPointDraggable = !this.props.readOnly && !point.getAttribute("fixed");
       if (isFreePoint(point) && this.isDoubleClick(this.lastPointDown, { evt, coords })) {
         if (board) {
           this.applyChange(() => {
-            const polygon = geometryContent.createPolygonFromFreePoints(board, linkedTableId) as JXG.Polygon;
+            const polygon = geometryContent.createPolygonFromFreePoints(board, tableId, columnId) as JXG.Polygon;
             if (polygon) {
               this.handleCreatePolygon(polygon);
               this.props.onContentChange();
@@ -1417,7 +1448,16 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           }
 
           if (isMovableLineControlPoint(point)) {
-            handleControlPointClick(point, geometryContent);
+            // When a control point is clicked, deselect the rest of the line so the line slope can be changed
+            const line = find(point.descendants, el => isMovableLine(el));
+            if (line) {
+              geometryContent.deselectElement(undefined, line.id);
+              each(line.ancestors, (parentPoint, parentId) => {
+                if (parentId !== point.id) {
+                  geometryContent.deselectElement(undefined, parentId);
+                }
+              });
+            }
           }
         }
         // click on unselected element

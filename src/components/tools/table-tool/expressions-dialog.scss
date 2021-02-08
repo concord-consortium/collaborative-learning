@@ -1,0 +1,57 @@
+@import "../../../components/vars.sass";
+
+.custom-modal.set-expression {
+  width: 512px;
+  height: 237px;
+  outline: none;
+
+  .modal-content {
+    justify-content: flex-start;
+
+    .prompt {
+      margin-top: 15px;
+
+      select {
+        margin: 0 3px;
+        padding: 0 3px;
+        font-weight: bold;
+      }
+
+      .attr-name {
+        font-weight: bold;
+
+        &.y {
+          margin: 0 3px;
+        }
+
+        &.x {
+          margin-left: 3px;
+        }
+      }
+    }
+
+    .expression {
+      margin-top: 20px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+
+      label {
+        display: inline-block;
+        flex: 0 0 auto;
+
+        .equals {
+          margin: 0 6px 0 3px;
+        }
+      }
+      input {
+        height: 100%;
+        flex: 1 1 auto;
+      }
+    }
+
+    .error {
+      margin-top: 15px;
+    }
+  }
+}

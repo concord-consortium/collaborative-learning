@@ -1,7 +1,7 @@
 import { types } from "mobx-state-tree";
 import { DocumentContentModel } from "../document/document-content";
 import { SupportModel } from "./support";
-import { cloneDeep } from "lodash";
+import { each } from "lodash";
 
 export type SectionType = string;
 
@@ -21,11 +21,20 @@ export const kUnknownSectionType = "unknown";
 export const kDefaultPlaceholder = "Create or drag tiles here";
 const kUnknownSectionInfo = { initials: "?", title: "Unknown", placeholder: kDefaultPlaceholder };
 
-let gSectionInfoMap: ISectionInfoMap = { [kAllSectionType]: kAllSectionInfo };
+const gSectionInfoMap: ISectionInfoMap = { [kAllSectionType]: kAllSectionInfo };
 
 export function setSectionInfoMap(sectionInfoMap?: ISectionInfoMap) {
-  gSectionInfoMap = cloneDeep(sectionInfoMap) || {};
-  gSectionInfoMap[kAllSectionType] = kAllSectionInfo;
+  // regular content and teacher guide are two separate units, so we merge them into a single map
+  // teacher guide section types should be unique from regular content; we don't replace existing entries
+  each(sectionInfoMap, (sectionInfo, sectionType) => {
+    if (!gSectionInfoMap[sectionType]) {
+      gSectionInfoMap[sectionType] = sectionInfo;
+    }
+    else {
+      console.warn("setSectionInfoMap skipping redundant assignment of section type:",
+                  `${sectionType} "${sectionInfo.title}"`);
+    }
+  });
 }
 
 function getSectionInfo(type: SectionType) {

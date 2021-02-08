@@ -1,6 +1,6 @@
 import { types, Instance, SnapshotIn, SnapshotOut } from "mobx-state-tree";
-import { v4 as uuid } from "uuid";
 import { ToolTileModelType } from "../tools/tool-tile";
+import { uniqueId } from "../../utilities/js-utils";
 
 export const TileLayoutModel = types
   .model("TileLayout", {
@@ -22,7 +22,7 @@ export type TileLayoutModelType = Instance<typeof TileLayoutModel>;
 
 export const TileRowModel = types
   .model("TileRow", {
-    id: types.optional(types.identifier, () => uuid()),
+    id: types.optional(types.identifier, () => uniqueId()),
     height: types.maybe(types.number),
     isSectionHeader: false,
     sectionId: types.maybe(types.string),
@@ -53,10 +53,6 @@ export const TileRowModel = types
     },
     indexOfTile(tileId: string) {
       return self.tiles.findIndex(tileRef => tileRef.tileId === tileId);
-    },
-    renderWidth(tileId: string) {
-      // for now, tiles divide row evenly
-      return 100 / (self.tiles.length || 1);
     }
   }))
   .actions(self => ({

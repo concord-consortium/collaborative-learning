@@ -59,7 +59,7 @@ context('single student functional test',()=>{
             //1-up view has 4-up button visible and 1-up canvas
             clueCanvas.getFourUpViewToggle().should('be.visible');
             canvas.getSingleCanvas().should('be.visible');
-            clueCanvas.getFourUpView().should('not.be.visible');
+            clueCanvas.getFourUpView().should('not.exist');
             clueCanvas.openFourUpView();
             //4-up view is visible and 1-up button is visible
             clueCanvas.getFourToOneUpViewToggle().should('be.visible');
@@ -73,7 +73,7 @@ context('single student functional test',()=>{
             clueCanvas.openOneUpViewFromFourUp();
             canvas.getSingleCanvas().should('be.visible');
             clueCanvas.getFourUpViewToggle().should('be.visible');
-            clueCanvas.getFourUpView().should('not.be.visible');
+            clueCanvas.getFourUpView().should('not.exist');
         });
 
         it('verify share button', function(){
@@ -119,11 +119,12 @@ context('single student functional test',()=>{
         });
     });
     context('save and restore of canvas', function(){
-        let canvas1='Document 1';
+        // let canvas1='Document 1';
         let canvas2='Document 2';
         before(function(){ //Open a different document to see if original document is restored
-            canvas.copyDocument(canvas1);
+            // canvas.copyDocument(canvas1);
             canvas.createNewExtraDocumentFromFileMenu(canvas2, "my-work");
+            canvas.getPersonalDocTitle().should('contain', canvas2);
             textToolTile.getTextTile().should('not.exist');
         });
         describe('verify that canvas is saved from various locations', function(){
@@ -165,7 +166,7 @@ context('single student functional test',()=>{
                 cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.geometry-content').should('exist');
                 cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.drawing-tool').should('exist');
                 cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.image-tool').should('exist');
-                cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.neo-codap-case-table').should('exist');
+                // cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.neo-codap-case-table').should('exist');
             });
         });
     });

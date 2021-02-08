@@ -1,6 +1,7 @@
 export interface IGetToolbarLocationBaseArgs {
   documentContent?: HTMLElement | null;
   toolTile?: HTMLElement | null;
+  scale?: number;
   toolbarHeight: number;
   minToolContent?: number;
   toolbarLeftOffset?: number;
@@ -13,8 +14,9 @@ interface IGetToolbarLocationArgs extends IGetToolbarLocationBaseArgs {
 }
 
 export function getToolbarLocation({
-    documentContent, toolTile, toolbarHeight, minToolContent, toolLeft, toolBottom, toolbarLeftOffset, toolbarTopOffset
-  }: IGetToolbarLocationArgs) {
+  documentContent, toolTile, scale,
+  toolbarHeight, minToolContent, toolLeft, toolBottom, toolbarLeftOffset, toolbarTopOffset
+}: IGetToolbarLocationArgs) {
   const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
   let minToolbarTop = minToolContent || 30;
   let maxToolbarTop = viewportHeight - toolbarHeight;
@@ -22,13 +24,14 @@ export function getToolbarLocation({
   let tileTopOffset = 0;
 
   if (documentContent && toolTile) {
+    const _scale = scale || 1;
     const docBounds = documentContent.getBoundingClientRect();
     const tileBounds = toolTile.getBoundingClientRect();
     const topOffset = tileBounds.top - docBounds.top;
     const leftOffset = tileBounds.left - docBounds.left;
     if ((topOffset != null) && (leftOffset != null)) {
-      tileTopOffset = topOffset;
-      tileLeftOffset = leftOffset;
+      tileTopOffset = topOffset / _scale;
+      tileLeftOffset = leftOffset / _scale;
     }
     minToolbarTop += topOffset;
     maxToolbarTop -= docBounds.top;

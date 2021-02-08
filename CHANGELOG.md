@@ -1,6 +1,22 @@
 # Changelog
 
-## Version 1.5.4 - released January 12, 2020
+## Version 1.6.0 - released February 7, 2021
+
+### Features/Improvements
+- New Table design supports multiple columns
+- Graph tile supports linking multi-column tables
+- Teacher-only curriculum content (solutions)
+- Support for separate teacher guide content
+- Smaller bundle size
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 389,427 bytes | -22.5% |
+| index.js | 4,148,062 bytes | -16.4% |
+
+## Version 1.5.4 - released January 12, 2021
 
 ### Features/Improvements
 - Content updates (Comparing and Scaling)

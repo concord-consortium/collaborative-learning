@@ -1,8 +1,16 @@
-import { JXGChangeAgent, JXGCoordPair, ILinkProperties } from "./jxg-changes";
-import { createPoint, isPoint, pointChangeAgent } from "./jxg-point";
+import { syncLinkedPoints } from "./jxg-board";
+import { ILinkProperties, JXGChange, JXGChangeAgent, JXGCoordPair } from "./jxg-changes";
+import { createPoint, pointChangeAgent } from "./jxg-point";
+import { isPoint } from "./jxg-types";
 import { ITableLinkProperties } from "../table/table-content";
+import { splitLinkedPointId } from "../table/table-model-types";
 
-export const isLinkedPoint = (v: any) => isPoint(v) && (v.getAttribute("clientType") === "linkedPoint");
+export function getTableIdFromLinkChange(change: JXGChange) {
+  return change.target.toLowerCase() === "tablelink"
+          // during development id was initially stored in parents
+          ? (change.targetID || change.parents?.[0]) as string
+          : undefined;
+}
 
 export interface ITableLinkColors {
   fill: string;
@@ -18,6 +26,7 @@ export function injectGetTableLinkColorsFunction(getTableLinkColors: GetTableLin
 
 function createLinkedPoint(board: JXG.Board, parents: JXGCoordPair, props: any, links?: ILinkProperties) {
   const tableId = links?.tileIds?.[0];
+  const [linkedRowId, linkedColId] = splitLinkedPointId(props?.id);
   const linkColors = sGetTableLinkColors(tableId);
   if (!linkColors) return;
   const linkedProps = {
@@ -30,20 +39,11 @@ function createLinkedPoint(board: JXG.Board, parents: JXGCoordPair, props: any, 
           clientSelectedFillColor: linkColors.stroke,
           clientSelectedStrokeColor: linkColors.stroke,
           linkedTableId: tableId,
-          linkedRowId: props && props.id
+          linkedRowId,
+          linkedColId
         };
   const _props = { ...props, ...linkedProps };
   return createPoint(board as JXG.Board, parents, _props);
-}
-
-function syncLinkedPoints(board: JXG.Board, links: ITableLinkProperties) {
-  if (board && links && links.labels) {
-    links.labels.forEach(item => {
-      const { id, label } = item;
-      const elt = board.objects[id];
-      elt && elt.setAttribute({ name: label });
-    });
-  }
 }
 
 export const linkedPointChangeAgent: JXGChangeAgent = {
@@ -96,8 +96,7 @@ export const tableLinkChangeAgent: JXGChangeAgent = {
 
   delete: (board, change) => {
     if (board) {
-      // during development id was initially stored in parents
-      const tableId = change.targetID || (change.parents && change.parents[0]);
+      const tableId = getTableIdFromLinkChange(change);
       const pts = board.objectsList.filter(elt => {
                     return isPoint(elt) && tableId && (elt.getAttribute("linkedTableId") === tableId);
                   });

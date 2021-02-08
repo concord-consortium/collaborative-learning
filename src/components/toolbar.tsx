@@ -5,10 +5,11 @@ import classNames from "classnames";
 import { IconComponent } from "../app-config-context";
 import { BaseComponent, IBaseProps } from "./base";
 import { DocumentModelType, DocumentTool } from "../models/document/document";
-import { IDocumentContentAddTileOptions } from "../models/document/document-content";
-import { getToolContentInfoByTool } from "../models/tools/tool-content-info";
+import { IDocumentContentAddTileOptions, IDragToolCreateInfo } from "../models/document/document-content";
+import { getToolContentInfoByTool, IToolContentInfo } from "../models/tools/tool-content-info";
 import { ToolButtonSnapshot } from "../models/tools/tool-types";
-import { IToolApiMap, kDragTileCreate  } from "./tools/tool-tile";
+import { ToolApiInterfaceContext } from "./tools/tool-api";
+import { kDragTileCreate  } from "./tools/tool-tile";
 
 import "./toolbar.sass";
 
@@ -21,7 +22,6 @@ export type ToolbarConfig = IToolButtonConfig[];
 interface IProps extends IBaseProps {
   document: DocumentModelType;
   config: ToolbarConfig;
-  toolApiMap: IToolApiMap;
 }
 
 interface IState {
@@ -90,6 +90,9 @@ const ToolButtonComponent: React.FC<IButtonProps> =
 @observer
 export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
+  static contextType = ToolApiInterfaceContext;
+  declare context: React.ContextType<typeof ToolApiInterfaceContext>;
+
   state = {
     defaultTool: "",
     activeTool: ""
@@ -157,11 +160,20 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     document.content.showPendingInsertHighlight(false);
   }
 
+  private getUniqueTitle(toolContentInfo: IToolContentInfo) {
+    const toolApiInterface = this.context;
+    const { document } = this.props;
+    const { id, titleBase } = toolContentInfo;
+    const getTileTitle = (tileId: string) => toolApiInterface?.getToolApi(tileId)?.getTitle?.();
+    return titleBase && document.getUniqueTitle(id, titleBase, getTileTitle);
+  }
+
   private handleAddToolTile(tool: DocumentTool) {
     const { document } = this.props;
     const { ui } = this.stores;
     const toolContentInfo = getToolContentInfoByTool(tool);
     const newTileOptions: IDocumentContentAddTileOptions = {
+            title: this.getUniqueTitle(toolContentInfo),
             addSidecarNotes: !!toolContentInfo?.addSidecarNotes,
             insertRowInfo: { rowInsertIndex: document.content.defaultInsertRow }
           };
@@ -177,10 +189,11 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleDelete() {
+    const toolApiInterface = this.context;
     const { document } = this.props;
     const { ui } = this.stores;
     ui.selectedTileIds.forEach(tileId => {
-      const toolApi = this.props.toolApiMap[tileId];
+      const toolApi = toolApiInterface?.getToolApi(tileId);
       // if there is selected content inside the selected tile, delete it first
       if (toolApi?.hasSelection?.()) {
         toolApi.deleteSelection?.();
@@ -196,6 +209,9 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   private handleDragNewToolTile = (tool: DocumentTool, e: React.DragEvent<HTMLDivElement>) => {
     // remove hover-insert highlight when we start a tile drag
     this.removeDropRowHighlight();
-    e.dataTransfer.setData(kDragTileCreate, tool);
+
+    const toolContentInfo = getToolContentInfoByTool(tool);
+    const dragInfo: IDragToolCreateInfo = { tool, title: this.getUniqueTitle(toolContentInfo) };
+    e.dataTransfer.setData(kDragTileCreate, JSON.stringify(dragInfo));
   }
 }

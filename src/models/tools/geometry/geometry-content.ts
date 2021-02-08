@@ -4,22 +4,26 @@ import { Optional } from "utility-types";
 import { SelectionStoreModelType } from "../../stores/selection";
 import { addLinkedTable } from "../table-links";
 import { registerToolContentInfo } from "../tool-content-info";
-import { getTableContent, ITableChange, ITableLinkProperties, kLabelAttrName } from "../table/table-content";
-import { getAxisAnnotations, getBaseAxisLabels, guessUserDesiredBoundingBox, isBoard,
+import {
+  getAxisLabelsFromDataSet, getRowLabelFromLinkProps, getTableContent, IColumnProperties,
+  ICreateRowsProperties, IRowProperties, ITableChange, ITableLinkProperties, kLabelAttrName
+} from "../table/table-content";
+import { canonicalizeValue, linkedPointId } from "../table/table-model-types";
+import { getAxisAnnotations, getBaseAxisLabels, getObjectById, guessUserDesiredBoundingBox,
           kAxisBuffer, kGeometryDefaultAxisMin, kGeometryDefaultHeight, kGeometryDefaultWidth,
           kGeometryDefaultPixelsPerUnit, syncAxisLabels, toObj } from "./jxg-board";
 import { ESegmentLabelOption, forEachNormalizedChange, ILinkProperties, JXGChange, JXGCoordPair,
           JXGProperties, JXGParentType, JXGUnsafeCoordPair, JXGStringPair } from "./jxg-changes";
 import { applyChange, applyChanges, IDispatcherChangeContext } from "./jxg-dispatcher";
 import { isMovableLine } from "./jxg-movable-line";
-import { isFreePoint, isPoint, kPointDefaults, kSnapUnit } from "./jxg-point";
-import { isPolygon, isVisibleEdge, prepareToDeleteObjects } from "./jxg-polygon";
-import { isLinkedPoint } from "./jxg-table-link";
-import { isComment } from "./jxg-types";
-import { isVertexAngle } from "./jxg-vertex-angle";
+import {  kPointDefaults, kSnapUnit } from "./jxg-point";
+import { prepareToDeleteObjects } from "./jxg-polygon";
+import { getTableIdFromLinkChange } from "./jxg-table-link";
+import {
+  isBoard, isComment, isFreePoint, isLinkedPoint, isPoint, isPolygon, isVertexAngle, isVisibleEdge
+} from "./jxg-types";
 import { IDataSet } from "../../data/data-set";
 import { assign, castArray, each, keys, omit, size as _size } from "lodash";
-import { v4 as uuid } from "uuid";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { getTileContentById } from "../../../utilities/mst-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
@@ -87,9 +91,15 @@ function defaultGeometryBoardChange(overrides?: JXGProperties) {
 }
 
 export function defaultGeometryContent(overrides?: JXGProperties): GeometryContentModelType {
-  const change = defaultGeometryBoardChange(overrides);
-  const changeJson = JSON.stringify(change);
-  return GeometryContentModel.create({ changes: [changeJson] });
+  const { title, ...boardProps } = overrides || {};
+  const changes: string[] = [];
+  if (title) {
+    const titleChange: JXGChange = { operation: "update", target: "metadata", properties: { title } };
+    changes.push(JSON.stringify(titleChange));
+  }
+  const boardChange = defaultGeometryBoardChange(boardProps);
+  changes.push(JSON.stringify(boardChange));
+  return GeometryContentModel.create({ changes });
 }
 
 export function getGeometryContent(target: IAnyStateTreeNode, tileId: string): GeometryContentModelType | undefined {
@@ -114,6 +124,7 @@ const LinkedTableEntryModel = types
 export const GeometryMetadataModel = types
   .model("GeometryMetadata", {
     id: types.string,
+    title: types.maybe(types.string),
     disabled: types.array(types.string),
     selection: types.map(types.boolean),
     linkedTables: types.array(LinkedTableEntryModel)
@@ -123,11 +134,22 @@ export const GeometryMetadataModel = types
     tableLinkDisposers: {} as { [id: string]: Lambda }
   }))
   .views(self => ({
+    isSharedSelected(id: string) {
+      const _id = id?.includes(":") ? id.split(":")[0] : id;
+      let isSelected = false;
+      self.sharedSelection?.sets.forEach(set => {
+        // ignore labels with auto-assigned IDs associated with selected points
+        if (set.isSelected(_id) && !id.endsWith("Label")) isSelected = true;
+      });
+      return isSelected;
+    },
+  }))
+  .views(self => ({
     isDisabled(feature: string) {
       return self.disabled.indexOf(feature) >= 0;
     },
     isSelected(id: string) {
-      return !!self.selection.get(id);
+      return !!self.selection.get(id) || self.isSharedSelected(id);
     },
     hasSelection() {
       return Array.from(self.selection.values()).some(isSelected => isSelected);
@@ -157,6 +179,9 @@ export const GeometryMetadataModel = types
     }
   }))
   .actions(self => ({
+    setTitle(title: string) {
+      self.title = title;
+    },
     setSharedSelection(sharedSelection: SelectionStoreModelType) {
       self.sharedSelection = sharedSelection;
     },
@@ -208,7 +233,7 @@ export const GeometryMetadataModel = types
 export type GeometryMetadataModelType = Instance<typeof GeometryMetadataModel>;
 
 export function setElementColor(board: JXG.Board, id: string, selected: boolean) {
-  const element = board.objects[id];
+  const element = getObjectById(board, id);
   if (element) {
     const fillColor = element.getAttribute("clientFillColor") || kPointDefaults.fillColor;
     const strokeColor = element.getAttribute("clientStrokeColor") || kPointDefaults.strokeColor;
@@ -241,18 +266,14 @@ export const GeometryContentModel = types
   }))
   .preProcessSnapshot(snapshot => preprocessImportFormat(snapshot))
   .views(self => ({
+    get title() {
+      return self.metadata.title;
+    },
     isSelected(id: string) {
       return self.metadata.isSelected(id);
     },
     hasSelection() {
       return self.metadata.hasSelection();
-    },
-    get selectedIds() {
-      const selected: string[] = [];
-      self.metadata.selection.forEach((isSelected, id) => {
-        isSelected && selected.push(id);
-      });
-      return selected;
     },
     get isLinked() {
       return self.metadata.linkedTables.length > 0;
@@ -262,6 +283,12 @@ export const GeometryContentModel = types
     }
   }))
   .views(self => ({
+    getSelectedIds(board: JXG.Board) {
+      // returns the ids in creation order
+      return board.objectsList
+                  .filter(obj => self.isSelected(obj.id))
+                  .map(obj => obj.id);
+    },
     getDeletableSelectedIds(board: JXG.Board) {
       // returns the ids in creation order
       return board.objectsList
@@ -299,7 +326,7 @@ export const GeometryContentModel = types
       return self.getDeletableSelectedIds(board).length > 0;
     },
     selectedObjects(board: JXG.Board) {
-      return self.selectedIds.map(id => board.objects[id]);
+      return board.objectsList.filter(obj => self.isSelected(obj.id));
     }
   }))
   .actions(self => ({
@@ -364,31 +391,43 @@ export const GeometryContentModel = types
     function handleWillApplyChange(board: JXG.Board | string, change: JXGChange) {
       const op = change.operation.toLowerCase();
       const target = change.target.toLowerCase();
-      if (target === "tablelink") {
-        const tableId = (change.targetID as string) ||
-                          (change.parents && change.parents[0] as string);
-        if (tableId) {
-          const links = change.links as ITableLinkProperties;
-          const labels = links && links.labels;
-          const xEntry = labels && labels.find(entry => entry.id === "xAxis");
-          const yEntry = labels && labels.find(entry => entry.id === "yAxis");
-          if (op === "create") {
-            const tableContent = getTableContent(self, tableId);
-            if (tableContent) {
-              const axes: IAxisLabels = { x: xEntry && xEntry.label, y: yEntry && yEntry.label };
-              self.metadata.addTableLink(tableId, axes);
-            }
+
+      if ((op === "update") && (target === "metadata")) {
+        const props = change?.properties as JXGProperties | undefined;
+        if (props?.title) {
+          self.metadata.setTitle(props.title);
+        }
+      }
+
+      const tableId = getTableIdFromLinkChange(change);
+      if (tableId) {
+        const links = change.links as ITableLinkProperties;
+        const xLabel = links?.labels?.find(entry => entry.id === "xAxis")?.label;
+        const yLabel = links?.labels?.find(entry => entry.id === "yAxis")?.label;
+        if (op === "create") {
+          const tableContent = getTableContent(self, tableId);
+          if (tableContent) {
+            const axes: IAxisLabels = { x: xLabel, y: yLabel };
+            self.metadata.addTableLink(tableId, axes);
           }
-          else if (op === "delete") {
-            self.metadata.removeTableLink(tableId);
-          }
-          else if (op === "update") {
-            if (xEntry || yEntry) {
-              self.metadata.setTableLinkNames(tableId, xEntry && xEntry.label, yEntry && yEntry.label);
-            }
+        }
+        else if (op === "delete") {
+          self.metadata.removeTableLink(tableId);
+        }
+        else if (op === "update") {
+          if (xLabel || yLabel) {
+            self.metadata.setTableLinkNames(tableId, xLabel, yLabel);
           }
         }
       }
+    }
+
+    function getLinkedTableChange(change: JXGChange) {
+      const links = change.links as ITableLinkProperties | undefined;
+      const linkId = links?.id;
+      const tableId = links?.tileIds[0];
+      const tableContent = tableId ? getTableContent(self, tableId) : undefined;
+      return linkId ? tableContent?.getLinkedChange(linkId) : undefined;
     }
 
     function handleDidApplyChange(board: JXG.Board | undefined, change: JXGChange) {
@@ -548,7 +587,7 @@ export const GeometryContentModel = types
         operation: "create",
         target: "image",
         parents: [url, coords, size],
-        properties: assign({ id: uuid() }, properties)
+        properties: assign({ id: uniqueId() }, properties)
       };
       const image = _applyChange(board, change);
       return image ? image as JXG.Image : undefined;
@@ -561,7 +600,7 @@ export const GeometryContentModel = types
         operation: "create",
         target: "point",
         parents,
-        properties: assign({ id: uuid() }, properties)
+        properties: assign({ id: uniqueId() }, properties)
       };
       const point = _applyChange(board, change);
       return point ? point as JXG.Point : undefined;
@@ -576,7 +615,7 @@ export const GeometryContentModel = types
         operation: "create",
         target: links ? "linkedPoint" : "point",
         parents,
-        properties: parents.map((p, i) => ({ id: uuid(), ...(props && props[i] || props[0]) })),
+        properties: parents.map((p, i) => ({ id: uniqueId(), ...(props && props[i] || props[0]) })),
         links
       };
       const points = _applyChange(board, change);
@@ -588,7 +627,7 @@ export const GeometryContentModel = types
         operation: "create",
         target: "movableLine",
         parents,
-        properties: {id: uuid(), ...properties}
+        properties: {id: uniqueId(), ...properties}
       };
       const elems = _applyChange(board, change);
       return elems ? elems as JXG.GeometryElement[] : undefined;
@@ -598,7 +637,7 @@ export const GeometryContentModel = types
       const change: JXGChange = {
         operation: "create",
         target: "comment",
-        properties: {id: uuid(), anchor: anchorId }
+        properties: {id: uniqueId(), anchor: anchorId }
       };
       const elems = _applyChange(board, change);
       return elems ? elems as JXG.GeometryElement[] : undefined;
@@ -611,6 +650,15 @@ export const GeometryContentModel = types
         targetID: ids,
         links
       };
+      return _applyChange(board, change);
+    }
+
+    function updateTitle(board: JXG.Board | undefined, title: string) {
+      const change: JXGChange = {
+              operation: "update",
+              target: "metadata",
+              properties: { title }
+            };
       return _applyChange(board, change);
     }
 
@@ -629,17 +677,19 @@ export const GeometryContentModel = types
     }
 
     function createPolygonFromFreePoints(
-              board: JXG.Board, linkedTableId?: string, properties?: JXGProperties): JXG.Polygon | undefined {
+              board: JXG.Board, linkedTableId?: string, linkedColumnId?: string, properties?: JXGProperties
+            ): JXG.Polygon | undefined {
       const freePtIds = board.objectsList
                           .filter(elt => isFreePoint(elt) &&
-                                          (linkedTableId === elt?.getAttribute("linkedTableId")))
+                                          (linkedTableId === elt?.getAttribute("linkedTableId")) &&
+                                          (linkedColumnId === elt?.getAttribute("linkedColId")))
                           .map(pt => pt.id);
       if (freePtIds && freePtIds.length > 1) {
         const change: JXGChange = {
                 operation: "create",
                 target: "polygon",
                 parents: freePtIds,
-                properties: assign({ id: uuid() }, properties)
+                properties: assign({ id: uniqueId() }, properties)
               };
         const polygon = _applyChange(board, change);
         return polygon ? polygon as any as JXG.Polygon : undefined;
@@ -653,31 +703,43 @@ export const GeometryContentModel = types
               operation: "create",
               target: "vertexAngle",
               parents,
-              properties: assign({ id: uuid(), radius: 1 }, properties)
+              properties: assign({ id: uniqueId(), radius: 1 }, properties)
             };
       const angle = _applyChange(board, change);
       return angle ? angle as any as JXG.Angle : undefined;
     }
 
-    function addTableLink(board: JXG.Board, tableId: string, dataSet: IDataSet, links: ILinkProperties) {
-      const xAttr = dataSet.attributes.length >= 1 ? dataSet.attributes[0] : undefined;
-      const yAttr = dataSet.attributes.length >= 2 ? dataSet.attributes[1] : undefined;
+    function addTableLink(
+              board: JXG.Board | undefined, tableId: string, dataSet: IDataSet, links: ITableLinkProperties) {
       const axes = {
-                    x: xAttr ? xAttr.name : undefined,
-                    y: yAttr ? yAttr.name : undefined
+                    x: links.labels?.find(entry => entry.id === "xAxis")?.label,
+                    y: links.labels?.find(entry => entry.id === "yAxis")?.label
                   };
+      if (!axes.x || !axes.y) {
+        const [xAxisLabel, yAxisLabel] = getAxisLabelsFromDataSet(dataSet);
+        !axes.x && xAxisLabel && (axes.x = xAxisLabel);
+        !axes.y && yAxisLabel && (axes.y = yAxisLabel);
+      }
+
+      // takes labels from dataSet (added by TableContent.getSharedData) if not in links.labels
+      const xAttr = dataSet.attributes.length >= 1 ? dataSet.attributes[0] : undefined;
       const labelAttr = dataSet.attrFromName(kLabelAttrName);
       const caseCount = dataSet.cases.length;
       const ids: string[] = [];
       const points: Array<{ label?: string, coords: JXGUnsafeCoordPair }> = [];
       for (let i = 0; i < caseCount; ++i) {
-        const id = dataSet.cases[i].__id__;
-        const label = labelAttr ? String(dataSet.getValue(id, labelAttr.id)) : undefined;
-        const x = xAttr ? Number(dataSet.getValue(id, xAttr.id)) : undefined;
-        const y = yAttr ? Number(dataSet.getValue(id, yAttr.id)) : undefined;
-        if (id) {
-          ids.push(id);
-          points.push({ label, coords: [x, y] });
+        const caseId = dataSet.cases[i].__id__;
+        const labelFromLinks = getRowLabelFromLinkProps(links, caseId);
+        const label = labelFromLinks ||
+                        (labelAttr ? String(dataSet.getValue(caseId, labelAttr.id)) : undefined);
+        const x = xAttr ? Number(dataSet.getValue(caseId, xAttr.id)) : undefined;
+        for (let attrIndex = 1; attrIndex < dataSet.attributes.length; ++attrIndex) {
+          const yAttr = dataSet.attributes[attrIndex];
+          if (caseId && yAttr) {
+            const y = yAttr ? Number(dataSet.getValue(caseId, yAttr.id)) : undefined;
+            ids.push(`${caseId}:${yAttr.id}`);
+            points.push({ label, coords: [x, y] });
+          }
         }
       }
       self.metadata.addTableLink(tableId, axes);
@@ -889,7 +951,7 @@ export const GeometryContentModel = types
       // map old ids to new ones
       const newIds: { [oldId: string]: string } = {};
       selectedIds.forEach(id => {
-        newIds[id] = uuid();
+        newIds[id] = uniqueId();
       });
 
       // create change objects for each object to be copied
@@ -1015,6 +1077,7 @@ export const GeometryContentModel = types
         get batchChangeCount() {
           return batchChanges.length;
         },
+        getLinkedTableChange,
         copySelection,
         findObjects,
         getOneSelectedPoint,
@@ -1047,6 +1110,7 @@ export const GeometryContentModel = types
         addPoints,
         addMovableLine,
         removeObjects,
+        updateTitle,
         updateObjects,
         createPolygonFromFreePoints,
         addVertexAngle,
@@ -1103,7 +1167,177 @@ export const GeometryContentModel = types
         }
       }
     };
-  });
+  })
+  .views(self => ({
+    getPositionOfPoint(dataSet: IDataSet, caseId: string, attrId: string): JXGUnsafeCoordPair {
+      const attrCount = dataSet.attributes.length;
+      const xAttr = attrCount > 0 ? dataSet.attributes[0] : undefined;
+      const yAttr = dataSet.attrFromID(attrId);
+      const xValue = xAttr ? dataSet.getValue(caseId, xAttr.id) : undefined;
+      const yValue = yAttr ? dataSet.getValue(caseId, yAttr.id) : undefined;
+      return [canonicalizeValue(xValue), canonicalizeValue(yValue)];
+    }
+  }))
+  .views(self => ({
+    getPointPositionsForColumns(dataSet: IDataSet, attrIds: string[]): [string[], JXGUnsafeCoordPair[]] {
+      const pointIds: string[] = [];
+      const positions: JXGUnsafeCoordPair[] = [];
+      dataSet.cases.forEach(aCase => {
+        const caseId = aCase.__id__;
+        attrIds.forEach(attrId => {
+          pointIds.push(linkedPointId(caseId, attrId));
+          positions.push(self.getPositionOfPoint(dataSet, caseId, attrId));
+        });
+      });
+      return [pointIds, positions];
+    },
+    getPointPositionsForRowsChange(dataSet: IDataSet, change: ITableChange): [string[], JXGUnsafeCoordPair[]] {
+      const pointIds: string[] = [];
+      const positions: JXGUnsafeCoordPair[] = [];
+      const caseIds = castArray(change.ids);
+      const propsArray: IRowProperties[] = change.action === "create"
+                                            ? (change.props as ICreateRowsProperties)?.rows
+                                            : castArray(change.props as any);
+      const xAttrId = dataSet.attributes.length > 0 ? dataSet.attributes[0].id : undefined;
+      caseIds.forEach((caseId, caseIndex) => {
+        const tableProps = (propsArray[caseIndex] || propsArray[0]) as IRowProperties;
+        // if x value changes, all points in row are affected
+        if (xAttrId && tableProps[xAttrId] != null) {
+          for (let attrIndex = 1; attrIndex < dataSet.attributes.length; ++attrIndex) {
+            const attrId = dataSet.attributes[attrIndex].id;
+            const pointId = linkedPointId(caseId, attrId);
+            const position = self.getPositionOfPoint(dataSet, caseId, attrId);
+            if (pointId && position) {
+              pointIds.push(pointId);
+              positions.push(position);
+            }
+          }
+        }
+        // otherwise, only points with y-value changes are affected
+        else {
+          each(tableProps, (value, attrId) => {
+            const pointId = linkedPointId(caseId, attrId);
+            const position = self.getPositionOfPoint(dataSet, caseId, attrId);
+            if (pointId && position) {
+              pointIds.push(pointId);
+              positions.push(position);
+            }
+          });
+        }
+      });
+      return [pointIds, positions];
+    }
+  }))
+  .actions(self => ({
+    syncColumnsChange(dataSet: IDataSet, change: ITableChange, links: ITableLinkProperties) {
+      const tableId = links.tileIds[0];
+      let shouldUpdateAxisLabels = false;
+      switch (change.action) {
+        case "create": {
+          // new column => new point for each case
+          const attrIds = castArray(change.ids);
+          const [pointIds, positions] = self.getPointPositionsForColumns(dataSet, attrIds);
+          const props = pointIds.map(id => ({ id }));
+          pointIds && pointIds.length && self.addPoints(undefined, positions, props, links);
+          shouldUpdateAxisLabels = true;
+          break;
+        }
+        case "update": {
+          const ids = castArray(change.ids);
+          const attrIdsWithExpr: string[] = [];
+          const changeProps: IColumnProperties[] = castArray(change.props as any);
+          ids.forEach((attrId, index) => {
+            const props = changeProps[index] || changeProps[0];
+            // update column name => update axis labels
+            if (props.name != null) {
+              shouldUpdateAxisLabels = true;
+            }
+            // update column expression => update points associated with column
+            if (props.expression != null) {
+              attrIdsWithExpr.push(attrId);
+            }
+          });
+          if (attrIdsWithExpr.length) {
+            const [pointIds, positions] = self.getPointPositionsForColumns(dataSet, attrIdsWithExpr);
+            const props = positions.map(position => ({ position }));
+            pointIds && pointIds.length && self.updateObjects(undefined, pointIds, props, links);
+          }
+          break;
+        }
+        case "delete": {
+          // delete column => remove points associated with column
+          const pointIds: string[] = [];
+          const ids = castArray(change.ids);
+          ids.forEach(attrId => {
+            dataSet.cases.forEach(aCase => {
+              const caseId = aCase.__id__;
+              pointIds.push(linkedPointId(caseId, attrId));
+            });
+            shouldUpdateAxisLabels = true;
+          });
+          pointIds && pointIds.length && self.removeObjects(undefined, pointIds, links);
+          break;
+        }
+      }
+      shouldUpdateAxisLabels && self.updateAxisLabels(undefined, tableId, links);
+    },
+    syncRowsChange(dataSet: IDataSet, change: ITableChange, links: ITableLinkProperties) {
+      switch (change.action) {
+        case "create": {
+          // new table row => new points for each attribute in row
+          const [pointIds, positions] = self.getPointPositionsForRowsChange(dataSet, change);
+          const props = pointIds.map(id => ({ id }));
+          pointIds && pointIds.length && self.addPoints(undefined, positions, props, links);
+          break;
+        }
+        case "update": {
+          // update table row => update points associated with row
+          const [pointIds, positions] = self.getPointPositionsForRowsChange(dataSet, change);
+          const props = positions.map(position => ({ position }));
+          pointIds && pointIds.length && self.updateObjects(undefined, pointIds, props, links);
+          break;
+        }
+        case "delete": {
+          // delete table row => remove points associated with row
+          const pointIds: string[] = [];
+          const caseIds = castArray(change.ids);
+          caseIds.forEach(caseId => {
+            for (let attrIndex = 1; attrIndex < dataSet.attributes.length; ++attrIndex) {
+              pointIds.push(linkedPointId(caseId, dataSet.attributes[attrIndex].id));
+            }
+          });
+          change.ids && self.removeObjects(undefined, pointIds, links);
+          break;
+        }
+      }
+    },
+    syncTableLinkChange(dataSet: IDataSet, change: ITableChange, links: ITableLinkProperties) {
+      const tableId = links.tileIds[0];
+      switch (change.action) {
+        case "create":
+          self.addTableLink(undefined, tableId, dataSet, links);
+          break;
+        case "delete":
+          self.removeTableLink(undefined, tableId, links);
+          break;
+      }
+    }
+  }))
+  .actions(self => ({
+    syncLinkedChange(dataSet: IDataSet, change: ITableChange, links: ITableLinkProperties) {
+      switch (change.target) {
+        case "columns":
+          self.syncColumnsChange(dataSet, change, links);
+          break;
+        case "rows":
+          self.syncRowsChange(dataSet, change, links);
+          break;
+        case "geometryLink":
+          self.syncTableLinkChange(dataSet, change, links);
+          break;
+      }
+    }
+  }));
 
 export type GeometryContentModelType = Instance<typeof GeometryContentModel>;
 
@@ -1153,10 +1387,21 @@ interface IMovableLineImportSpec {
 
 type IObjectImportSpec = IPointImportSpec | IPolygonImportSpec | IImageImportSpec | IMovableLineImportSpec;
 
+interface IImportSpec {
+  title?: string;
+  board: IBoardImportSpec;
+  objects: IObjectImportSpec[];
+}
+
 function preprocessImportFormat(snapshot: any) {
-  const boardSpecs = snapshot.board as IBoardImportSpec;
-  const objectSpecs = snapshot.objects as IObjectImportSpec[];
-  if (!objectSpecs) return snapshot;
+  if (!snapshot.objects) return snapshot;
+
+  const { title, board: boardSpecs, objects: objectSpecs } = snapshot as IImportSpec;
+  const changes: JXGChange[] = [];
+
+  if (title) {
+    changes.push({ operation: "update", target: "metadata", properties: { title } });
+  }
 
   function addBoard(boardSpec: IBoardImportSpec) {
     const { properties } = boardSpec || {} as IBoardImportSpec;
@@ -1170,11 +1415,10 @@ function preprocessImportFormat(snapshot: any) {
                   boundingBox, ...others }));
   }
 
-  const changes: JXGChange[] = [];
   addBoard(boardSpecs);
 
   function addComment(props: Record<string, unknown>) {
-    const id = uuid();
+    const id = uniqueId();
     changes.push({ operation: "create", target: "comment", properties: {id, ...props }});
     return id;
   }
@@ -1263,8 +1507,10 @@ export function mapTileIdsInGeometrySnapshot(snapshot: SnapshotOut<GeometryConte
                                              idMap: { [id: string]: string }) {
   snapshot.changes = snapshot.changes.map((changeJson: any) => {
     const change: JXGChange = safeJsonParse(changeJson);
-    if ((change.operation === "create") && (change.target === "tableLink")) {
-      change.targetID = idMap[change.targetID as string];
+    if ((change.target === "tableLink") && change.targetID) {
+      change.targetID = Array.isArray(change.targetID)
+                          ? change.targetID.map(id => idMap[id])
+                          : idMap[change.targetID];
     }
     if (change.links) {
       change.links.tileIds = change.links.tileIds.map(id => idMap[id]);
@@ -1287,6 +1533,7 @@ export function getImageUrl(change?: JXGChange) {
 registerToolContentInfo({
   id: kGeometryToolID,
   tool: "geometry",
+  titleBase: "Graph",
   modelClass: GeometryContentModel,
   metadataClass: GeometryMetadataModel,
   addSidecarNotes: true,

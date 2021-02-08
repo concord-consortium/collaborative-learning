@@ -1,4 +1,4 @@
-import { types } from "mobx-state-tree";
+import { Instance, types } from "mobx-state-tree";
 import { DocumentContentModel } from "../document/document-content";
 import { InvestigationModel } from "./investigation";
 import { ISectionInfoMap, setSectionInfoMap } from "./section";
@@ -48,20 +48,42 @@ export const UnitModel = types
       const investigation = self.getInvestigation(investigationOrdinal);
       return {
         investigation,
-        problem:  investigation && investigation.getProblem(problemOrdinal)
+        problem: investigation?.getProblem(problemOrdinal)
       };
     }
   }));
+export type UnitModelType = Instance<typeof UnitModel>;
 
-export type UnitModelType = typeof UnitModel.Type;
-
-export function getUnitJson(unitId: string | undefined, appConfig: AppConfigModelType ) {
-  const unitUrlParam = unitId && appConfig.units.get(unitId);
-  if (!unitUrlParam){
+function getUnitSpec(unitId: string | undefined, appConfig: AppConfigModelType) {
+  const requestedUnit = unitId ? appConfig.getUnit(unitId) : undefined;
+  if (unitId && !requestedUnit) {
     console.warn(`unitId "${unitId}" not found in appConfig.units`);
   }
-  const urlParam = unitUrlParam || appConfig.defaultUnit && appConfig.units.get(appConfig.defaultUnit);
-  return fetch(urlParam!)
+  return requestedUnit || (appConfig.defaultUnit ? appConfig.getUnit(appConfig.defaultUnit) : undefined);
+}
+
+export function getUnitJson(unitId: string | undefined, appConfig: AppConfigModelType) {
+  const unitSpec = getUnitSpec(unitId, appConfig);
+  const unitUrl = unitSpec?.content;
+  return fetch(unitUrl!)
+          .then(response => {
+            if (response.ok) {
+              return response.json();
+            }
+            else {
+              throw Error(`Request rejected with status ${response.status}`);
+            }
+          })
+          .catch(error => {
+            throw Error(`Request rejected with exception`);
+          });
+}
+
+export function getGuideJson(unitId: string | undefined, appConfig: AppConfigModelType) {
+  const unitSpec = getUnitSpec(unitId, appConfig);
+  const guideUrl = unitSpec?.guide;
+  if (!guideUrl) return;
+  return fetch(guideUrl)
           .then(response => {
             if (response.ok) {
               return response.json();
