@@ -65,7 +65,7 @@ test("DataSet basic functionality", () => {
   expect(dataset.attributes.length).toBe(2);
 
   // move first attribute to the end
-  dataset.moveAttribute(strAttrID as string);
+  dataset.moveAttribute(strAttrID);
   expect(dataset.attributes[0].name).toBe("num");
   expect(dataset.attributes[1].name).toBe("str");
   // move second attribute before the first

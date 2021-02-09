@@ -89,7 +89,7 @@ export function storeImage(db: DB, userId: string, url: string,
   return new Promise((resolve, reject) => {
     if (!url) reject(img);
 
-    resizeImage(url!, ImageConstants.maxWidth, ImageConstants.maxHeight, cors)
+    resizeImage(url, ImageConstants.maxWidth, ImageConstants.maxHeight, cors)
       .then(imageData => {
         const _name = name || url;
         const image: ImageModelType = ImageModel.create({

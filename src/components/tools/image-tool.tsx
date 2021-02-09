@@ -46,7 +46,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   private resizeObserver: ResizeObserver;
   private imageElt: HTMLDivElement | null;
   private disposers: IReactionDisposer[];
-  private debouncedUpdateImage = debounce(async (url: string) => {
+  private debouncedUpdateImage = debounce((url: string) => {
     const { documentContext } = this.state;
     const imageContext: IImageContext | undefined = documentContext
                                                       ? { type: documentContext?.type, key: documentContext?.key }
@@ -137,14 +137,14 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     const showEmptyImagePrompt = !this.getContent().hasValidImage;
 
     // Include states for selected and editing separately to clean up UI a little
-    const imageToUseForDisplay = imageEntry?.displayUrl || (isLoading ? "" : placeholderImage);
+    const imageToUseForDisplay = imageEntry?.displayUrl || (isLoading ? "" : placeholderImage as string);
     // Set image display properties for the div, since this won't resize automatically when the image changes
     const imageDisplayStyle: React.CSSProperties = {
       backgroundImage: "url(" + imageToUseForDisplay + ")"
     };
     if (!imageEntry) {
-      imageDisplayStyle.width = defaultImagePlaceholderSize.width + "px";
-      imageDisplayStyle.height = defaultImagePlaceholderSize.height + "px";
+      imageDisplayStyle.width = `${defaultImagePlaceholderSize.width}px`;
+      imageDisplayStyle.height = `${defaultImagePlaceholderSize.height}px`;
     }
     return (
       <>

@@ -277,7 +277,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   private handleNewDocument = (type: string) => {
-    const { appConfig, user } = this.stores;
+    const { appConfig, documents, ui, user } = this.stores;
     const isLearningLog = type === LearningLogDocument;
     const docType = isLearningLog ? LearningLogDocument : PersonalDocument;
     const defaultDocTitle = isLearningLog
@@ -285,8 +285,8 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
                             : appConfig.defaultDocumentTitle;
     const docTypeString = appConfig.getDocumentLabel(docType, 1);
     const docTypeStringL = appConfig.getDocumentLabel(docType, 1, true);
-    const nextTitle = this.stores.documents.getNextOtherDocumentTitle(user, docType, defaultDocTitle);
-    this.stores.ui.prompt({
+    const nextTitle = documents.getNextOtherDocumentTitle(user, docType, defaultDocTitle);
+    ui.prompt({
         className: `create-${type}`,
         title: `Create ${docTypeString}`,
         text: `Name your new ${docTypeStringL}:`,
@@ -294,7 +294,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
       })
       .then((title: string) => {
         this.handleNewDocumentOpen(docType, title)
-        .catch(this.stores.ui.setError);
+        .catch(error => ui.setError(error));
       });
   }
 
@@ -309,18 +309,18 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   private handleCopyDocument = (document: DocumentModelType) => {
-    const { appConfig } = this.stores;
+    const { appConfig, ui } = this.stores;
     const docTypeString = document.getLabel(appConfig, 1);
     const docTypeStringL = document.getLabel(appConfig, 1, true);
     const originTitle = document?.properties?.get("originTitle");
     const baseTitle = appConfig.copyPreferOriginTitle && originTitle
                         ? originTitle
                         : document.title || this.stores.problem.title;
-    this.stores.ui.prompt(`Give your ${docTypeStringL} copy a new name:`,
-                          `Copy of ${baseTitle}`, `Copy ${docTypeString}`)
+    ui.prompt(`Give your ${docTypeStringL} copy a new name:`,
+              `Copy of ${baseTitle}`, `Copy ${docTypeString}`)
       .then((title: string) => {
         this.handleCopyDocumentOpen(document, title)
-        .catch(this.stores.ui.setError);
+        .catch(error => ui.setError(error));
       });
   }
 
@@ -365,7 +365,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
             : document.title;
   }
 
-  private handlePublishSupport = async (document: DocumentModelType) => {
+  private handlePublishSupport = (document: DocumentModelType) => {
     const { db, problemPath, ui, user } = this.stores;
     const caption = this.getSupportDocumentBaseCaption(document) || "Untitled";
     // TODO: Disable publish button while publishing
@@ -386,9 +386,9 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
       .then((confirm: boolean) => {
         if (confirm) {
           const dbPublishDocumentFunc = document.type === ProblemDocument
-                                          ? db.publishProblemDocument
-                                          : db.publishOtherDocument;
-          dbPublishDocumentFunc.call(db, document)
+                                          ? () => db.publishProblemDocument(document)
+                                          : () => db.publishOtherDocument(document);
+          dbPublishDocumentFunc()
             .then(() => ui.alert(`Your ${docTypeStringL} was published.`, `${docTypeString} Published`));
         }
       });

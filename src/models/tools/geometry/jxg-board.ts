@@ -153,7 +153,7 @@ function scaleBoundingBoxToElement(domElementID: string, changeProps: any) {
   const eltBounds = elt?.getBoundingClientRect();
   const eltWidth = eltBounds?.width || kGeometryDefaultWidth;
   const eltHeight = eltBounds?.height || kGeometryDefaultHeight;
-  const { boundingBox } = changeProps;
+  const { boundingBox }: { boundingBox: JXG.BoundingBox } = changeProps;
   const [unitX, unitY] = getAxisUnitsFromProps(changeProps, getCanvasScale(elt));
   // eslint-disable-next-line no-sparse-arrays
   const [xMin, , , yMin] = boundingBox || [kGeometryDefaultAxisMin, , , kGeometryDefaultAxisMin];
@@ -197,7 +197,7 @@ function createBoard(domElementId: string, properties?: JXGProperties) {
           showNavigation: false,
           minimizeReflow: "none"
         };
-  const changeProps = properties && properties as JXGProperties;
+  const changeProps = properties;
   const [unitX, unitY] = getAxisUnitsFromProps(changeProps);
   // cf. https://www.intmath.com/cg3/jsxgraph-axes-ticks-grids.php
   const overrides = { axis: false, keepaspectratio: unitX === unitY };
@@ -265,8 +265,8 @@ export const boardChangeAgent: JXGChangeAgent = {
   create: (boardDomId: JXG.Board|string, change: JXGChange) => {
     const props = change.properties;
     const board = isBoard(boardDomId)
-                    ? boardDomId as JXG.Board
-                    : createBoard(boardDomId as string, props);
+                    ? boardDomId
+                    : createBoard(boardDomId, props);
     // If we created the board from a DOM element ID, then we need to add the axes.
     // If we are undoing an action, then the board already exists but its axes have
     // been removed, so we have to add the axes in that case as well.
@@ -295,7 +295,7 @@ export const boardChangeAgent: JXGChangeAgent = {
         const xName = xPropName ?? xClientName;
         const yName = yPropName ?? yClientName;
         const [xClientAnnotation, yClientAnnotation] = getClientAxisAnnotations(board);
-        const [xPropAnnotation, yPropAnnotation] = getAxisAnnotationsFromProps(props as JXGProperties);
+        const [xPropAnnotation, yPropAnnotation] = getAxisAnnotationsFromProps(props);
         const xAnnotation = xPropAnnotation ?? xClientAnnotation;
         const yAnnotation = yPropAnnotation ?? yClientAnnotation;
         const width = board.canvasWidth;

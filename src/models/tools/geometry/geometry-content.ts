@@ -15,12 +15,12 @@ import { getAxisAnnotations, getBaseAxisLabels, getObjectById, guessUserDesiredB
 import { ESegmentLabelOption, forEachNormalizedChange, ILinkProperties, JXGChange, JXGCoordPair,
           JXGProperties, JXGParentType, JXGUnsafeCoordPair, JXGStringPair } from "./jxg-changes";
 import { applyChange, applyChanges, IDispatcherChangeContext } from "./jxg-dispatcher";
-import { isMovableLine } from "./jxg-movable-line";
 import {  kPointDefaults, kSnapUnit } from "./jxg-point";
 import { prepareToDeleteObjects } from "./jxg-polygon";
 import { getTableIdFromLinkChange } from "./jxg-table-link";
 import {
-  isBoard, isComment, isFreePoint, isLinkedPoint, isPoint, isPolygon, isVertexAngle, isVisibleEdge
+  isAxisArray, isBoard, isComment, isFreePoint, isImage, isLinkedPoint, isMovableLine, isPoint,
+  isPointArray, isPolygon, isVertexAngle, isVisibleEdge
 } from "./jxg-types";
 import { IDataSet } from "../../data/data-set";
 import { assign, castArray, each, keys, omit, size as _size } from "lodash";
@@ -466,11 +466,11 @@ export const GeometryContentModel = types
           const changeElems = castArray(changeResult);
           changeElems.forEach(changeElem => {
             if (isBoard(changeElem)) {
-              board = changeElem as JXG.Board;
+              board = changeElem;
               board.suspendUpdate();
             }
             else if (onCreate) {
-              onCreate(changeElem as JXG.GeometryElement);
+              onCreate(changeElem);
             }
           });
         });
@@ -528,7 +528,7 @@ export const GeometryContentModel = types
                       } }
       };
       const axes = _applyChange(undefined, change);
-      return axes ? axes as any as JXG.Line[] : undefined;
+      return isAxisArray(axes) ? axes : undefined;
     }
 
     function updateScale(board: JXG.Board, scale: number) {
@@ -593,7 +593,7 @@ export const GeometryContentModel = types
         properties: assign({ id: uniqueId() }, properties)
       };
       const image = _applyChange(board, change);
-      return image ? image as JXG.Image : undefined;
+      return isImage(image) ? image : undefined;
     }
 
     function addPoint(board: JXG.Board | undefined,
@@ -606,7 +606,7 @@ export const GeometryContentModel = types
         properties: assign({ id: uniqueId() }, properties)
       };
       const point = _applyChange(board, change);
-      return point ? point as JXG.Point : undefined;
+      return isPoint(point) ? point : undefined;
     }
 
     function addPoints(board: JXG.Board | undefined,
@@ -622,7 +622,7 @@ export const GeometryContentModel = types
         links
       };
       const points = _applyChange(board, change);
-      return points ? points as JXG.Point[] : [];
+      return isPointArray(points) ? points : [];
     }
 
     function addMovableLine(board: JXG.Board, parents: any, properties?: JXGProperties) {
@@ -684,8 +684,8 @@ export const GeometryContentModel = types
             ): JXG.Polygon | undefined {
       const freePtIds = board.objectsList
                           .filter(elt => isFreePoint(elt) &&
-                                          (linkedTableId === elt?.getAttribute("linkedTableId")) &&
-                                          (linkedColumnId === elt?.getAttribute("linkedColId")))
+                                          (linkedTableId === elt.getAttribute("linkedTableId")) &&
+                                          (linkedColumnId === elt.getAttribute("linkedColId")))
                           .map(pt => pt.id);
       if (freePtIds && freePtIds.length > 1) {
         const change: JXGChange = {
@@ -695,7 +695,7 @@ export const GeometryContentModel = types
                 properties: assign({ id: uniqueId() }, properties)
               };
         const polygon = _applyChange(board, change);
-        return polygon ? polygon as any as JXG.Polygon : undefined;
+        return isPolygon(polygon) ? polygon : undefined;
       }
     }
 
@@ -709,7 +709,7 @@ export const GeometryContentModel = types
               properties: assign({ id: uniqueId(), radius: 1 }, properties)
             };
       const angle = _applyChange(board, change);
-      return angle ? angle as any as JXG.Angle : undefined;
+      return isVertexAngle(angle) ? angle : undefined;
     }
 
     function addTableLink(
@@ -842,8 +842,8 @@ export const GeometryContentModel = types
     }
 
     function getOneSelectedComment(board: JXG.Board) {
-      const comments = self.selectedObjects(board).filter(el => isComment(el));
-      return comments.length === 1 ? comments[0] as JXG.Text : undefined;
+      const comments = self.selectedObjects(board).filter(isComment);
+      return comments.length === 1 ? comments[0] : undefined;
     }
 
     function getOneSelectedPoint(board: JXG.Board) {
@@ -855,7 +855,7 @@ export const GeometryContentModel = types
       // all vertices of polygon must be selected to show rotate handle
       const polygonSelection: { [id: string]: { any: boolean, all: boolean } } = {};
       const polygons = board.objectsList
-                            .filter(el => el.elType === "polygon")
+                            .filter(isPolygon)
                             .filter(polygon => {
                               const selected = { any: false, all: true };
                               each(polygon.ancestors, vertex => {
@@ -871,7 +871,7 @@ export const GeometryContentModel = types
                             });
       const selectedPolygonId = (polygons.length === 1) && polygons[0].id;
       const selectedPolygon = selectedPolygonId && polygonSelection[selectedPolygonId].all
-                                ? polygons[0] as JXG.Polygon : undefined;
+                                ? polygons[0] : undefined;
       // must not have any selected points other than the polygon vertices
       if (selectedPolygon) {
         type IEntry = [string, boolean];
@@ -906,7 +906,7 @@ export const GeometryContentModel = types
 
     function getOneSelectedSegment(board: JXG.Board) {
       const selectedObjects = self.selectedObjects(board);
-      const selectedSegments = selectedObjects.filter(isVisibleEdge) as JXG.Line[];
+      const selectedSegments = selectedObjects.filter(isVisibleEdge);
       if (selectedSegments.length === 1) {
         return selectedSegments[0];
       }
@@ -928,7 +928,7 @@ export const GeometryContentModel = types
         return selectedLines[0];
       }
 
-      const selectedSegments = selectedObjects.filter(isVisibleEdge) as JXG.Line[];
+      const selectedSegments = selectedObjects.filter(isVisibleEdge);
       if (selectedSegments.length === 1) {
         // Labeling polygon edges is not supported due to unpredictable IDs. However, if the polygon has only two sides,
         // then labeling an edge is equivalent to labeling the whole polygon.
@@ -975,7 +975,7 @@ export const GeometryContentModel = types
           switch (obj.elType) {
             case "angle":
               if (isVertexAngle(obj)) {
-                const va = obj as JXG.Angle;
+                const va = obj;
                 // parents must be in correct order
                 const parents = [va.point2, va.point1, va.point3];
                 assign(change, {
@@ -986,7 +986,7 @@ export const GeometryContentModel = types
               break;
             case "line":
               if (isMovableLine(obj)) {
-                const movableLine = obj as JXG.Line;
+                const movableLine = obj;
                 const [ , x1, y1] = movableLine.point1.coords.usrCoords;
                 const [ , x2, y2] = movableLine.point2.coords.usrCoords;
                 assign(change, {
@@ -1203,7 +1203,7 @@ export const GeometryContentModel = types
                                             : castArray(change.props as any);
       const xAttrId = dataSet.attributes.length > 0 ? dataSet.attributes[0].id : undefined;
       caseIds.forEach((caseId, caseIndex) => {
-        const tableProps = (propsArray[caseIndex] || propsArray[0]) as IRowProperties;
+        const tableProps = propsArray[caseIndex] || propsArray[0];
         // if x value changes, all points in row are affected
         if (xAttrId && tableProps[xAttrId] != null) {
           for (let attrIndex = 1; attrIndex < dataSet.attributes.length; ++attrIndex) {

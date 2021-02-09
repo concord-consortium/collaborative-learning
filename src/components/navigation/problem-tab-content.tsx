@@ -18,7 +18,8 @@ interface IProps {
 
 export const ProblemTabContent: React.FC<IProps> = observer(({ context, sections, showSolutionsSwitch}: IProps) => {
   const { isTeacher } = useUserStore();
-  const { showTeacherContent, toggleShowTeacherContent } = useUIStore();
+  const ui = useUIStore();
+  const { showTeacherContent } = ui;
 
   const handleTabClick = (title: string, type: string) => {
     Logger.log(LogEventName.SHOW_TAB_SECTION, {
@@ -28,7 +29,7 @@ export const ProblemTabContent: React.FC<IProps> = observer(({ context, sections
   };
 
   const handleToggleSolutions = () => {
-    toggleShowTeacherContent(!showTeacherContent);
+    ui.toggleShowTeacherContent(!showTeacherContent);
     Logger.log(showTeacherContent ? LogEventName.HIDE_SOLUTIONS : LogEventName.SHOW_SOLUTIONS);
   };
 

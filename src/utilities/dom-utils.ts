@@ -1,7 +1,7 @@
 // cf. https://developer.mozilla.org/en-US/docs/Web/API/Element/matches#Polyfill
 if (!Element.prototype.matches) {
   Element.prototype.matches = (Element.prototype as any).msMatchesSelector ||
-                              Element.prototype.webkitMatchesSelector;
+                              (Element.prototype as any).webkitMatchesSelector;
 }
 
 // cf. https://developer.mozilla.org/en-US/docs/Web/API/Element/closest#Polyfill

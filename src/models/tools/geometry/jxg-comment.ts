@@ -1,8 +1,7 @@
 import { getObjectById } from "./jxg-board";
 import { JXGChangeAgent } from "./jxg-changes";
-import { isMovableLine } from "./jxg-movable-line";
 import { objectChangeAgent } from "./jxg-object";
-import { isBoard, isPoint, isPolygon, isVisibleEdge } from "./jxg-types";
+import { isBoard, isMovableLine, isPoint, isPolygon, isVisibleEdge } from "./jxg-types";
 import { values } from "lodash";
 import { uniqueId } from "../../../utilities/js-utils";
 
@@ -32,7 +31,7 @@ const lineProps = {
 
 function getCentroid(anchor: JXG.GeometryElement) {
   if (isPoint(anchor)) {
-    const coords = (anchor as JXG.Point).coords.usrCoords;
+    const coords = anchor.coords.usrCoords;
     return [coords[1], coords[2]];
   } else if (isPolygon(anchor) || isMovableLine(anchor) || isVisibleEdge(anchor)) {
     const points = values(anchor.ancestors) as JXG.Point[];
@@ -67,7 +66,7 @@ export const commentChangeAgent: JXGChangeAgent = {
       ...changeProps,
     };
     if (isBoard(board)) {
-      const _board = board as JXG.Board;
+      const _board = board;
       const centroidCoordinateGetter = (index: number) => () => {
         const anchor = getObjectById(_board, commentProps.anchor);
         const centroid = anchor && getCentroid(anchor);

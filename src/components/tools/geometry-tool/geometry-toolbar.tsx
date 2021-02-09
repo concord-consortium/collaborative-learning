@@ -38,7 +38,7 @@ export const GeometryToolbar: React.FC<IProps> = observer(({
                   });
   const selectedObjects = board && content.selectedObjects(board);
   const selectedPoints = selectedObjects?.filter(isPoint);
-  const selectedPoint = selectedPoints?.length === 1 ? selectedPoints[0] as JXG.Point : undefined;
+  const selectedPoint = selectedPoints?.length === 1 ? selectedPoints[0] : undefined;
   const disableVertexAngle = !(selectedPoint && canSupportVertexAngle(selectedPoint));
   const hasVertexAngle = !!selectedPoint && !!getVertexAngle(selectedPoint);
   const disableDelete = board && !content.getDeletableSelectedIds(board).length;
