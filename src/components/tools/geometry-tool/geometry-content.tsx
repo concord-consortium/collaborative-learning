@@ -517,10 +517,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private renderTitle() {
     const getTitle = () => this.getContent().title || "";
-    const { measureText, size } = this.props;
+    const { measureText, size, scale } = this.props;
     return (
-      <EditableGeometryTitle key="geometry-title" size={size} getTitle={getTitle} measureText={measureText}
-                              onEndEdit={this.handleTitleChange} />
+      <EditableGeometryTitle key="geometry-title" size={size} scale={scale} getTitle={getTitle}
+                              measureText={measureText} onEndEdit={this.handleTitleChange} />
     );
   }
 
