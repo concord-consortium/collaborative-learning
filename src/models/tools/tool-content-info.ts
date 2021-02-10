@@ -27,10 +27,12 @@ export function registerToolContentInfo(toolContentInfo: IToolContentInfo) {
   gToolContentInfoMapByTool[toolContentInfo.tool] = toolContentInfo;
 }
 
+// ToolContent id, e.g. kDrawingToolID, kGeometryToolID, etc.
 export function getToolContentInfoById(id: string) {
   return gToolContentInfoMapById[id];
 }
 
+// tool name used in a few places, e.g. "drawing", "geometry", etc.
 export function getToolContentInfoByTool(tool: string) {
   return gToolContentInfoMapByTool[tool];
 }

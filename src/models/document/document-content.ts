@@ -463,15 +463,15 @@ export const DocumentContentModel = types
       if (tiles.length > 0) {
         tiles.forEach(tile => {
           let result: INewRowTile | undefined;
-          const content = safeJsonParse(tile.tileContent).content;
-          if (content) {
+          const parsedContent = safeJsonParse(tile.tileContent);
+          if (parsedContent?.content) {
             const rowOptions: INewTileOptions = {
               rowIndex: rowInfo.rowDropIndex
             };
             if (tile.rowHeight) {
               rowOptions.rowHeight = tile.rowHeight;
             }
-            result = self.addTileSnapshotInExistingRow({ content }, rowOptions);
+            result = self.addTileSnapshotInExistingRow(parsedContent, rowOptions);
           }
           results.push(result);
         });
@@ -788,8 +788,8 @@ export const DocumentContentModel = types
       self.moveTiles(tiles, rowInfo);
     },
     userCopyTiles(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
-      const dropRow = (rowInfo.rowDropIndex != null) && self.getRowByIndex(rowInfo.rowDropIndex);
-      const results = dropRow && dropRow.acceptsTileDrops
+      const dropRow = (rowInfo.rowDropIndex != null) ? self.getRowByIndex(rowInfo.rowDropIndex) : undefined;
+      const results = dropRow?.acceptsTileDrops
                         ? self.copyTilesIntoExistingRow(tiles, rowInfo)
                         : self.copyTilesIntoNewRows(tiles, rowInfo.rowInsertIndex);
       results.forEach((result, i) => {
