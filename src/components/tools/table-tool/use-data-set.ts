@@ -24,6 +24,7 @@ interface IUseDataSet {
   columnChanges: number;
   triggerColumnChange: () => void;
   rowChanges: number;
+  triggerRowChange: () => void;
   readOnly: boolean;
   inputRowId: React.MutableRefObject<string>;
   selectedCell: React.MutableRefObject<TPosition>;
@@ -34,8 +35,8 @@ interface IUseDataSet {
   onShowExpressionsDialog?: (attrId?: string) => void;
 }
 export const useDataSet = ({
-  gridRef, gridContext, model, dataSet, columnChanges, triggerColumnChange, rowChanges, readOnly, inputRowId,
-  selectedCell, RowLabelHeader, RowLabelFormatter, changeHandlers, measureText, onShowExpressionsDialog
+  gridRef, gridContext, model, dataSet, columnChanges, triggerColumnChange, rowChanges, triggerRowChange, readOnly,
+  inputRowId, selectedCell, RowLabelHeader, RowLabelFormatter, changeHandlers, measureText, onShowExpressionsDialog
 }: IUseDataSet) => {
   const { onAddRows, onUpdateRow } = changeHandlers;
   const modelRef = useCurrent(model);
@@ -48,7 +49,10 @@ export const useDataSet = ({
     const forward = (selectedCell.current.rowIdx < position.rowIdx) ||
                     ((selectedCell.current.rowIdx === position.rowIdx) &&
                       (selectedCell.current.idx < position.idx));
-    selectedCell.current = position;
+    if ((position.rowIdx !== selectedCell.current.rowIdx) || (position.idx !== selectedCell.current.idx)) {
+      selectedCell.current = position;
+      triggerRowChange();
+    }
 
     if (!isCellSelectable(position, columns) && (columns.length > 2)) {
       let newPosition = { ...position };
