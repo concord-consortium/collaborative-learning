@@ -23,6 +23,7 @@ import { DocumentTool, IDocumentAddTileOptions } from "./document";
 export interface INewTileOptions {
   rowHeight?: number;
   rowIndex?: number;
+  locationInRow?: string;
 }
 
 export interface INewTitledTileOptions extends INewTileOptions {
@@ -390,7 +391,8 @@ export const DocumentContentModel = types
       }
       const row = self.getRowByIndex(o.rowIndex);
       if (row) {
-        self.insertNewTileInRow(tile, row);
+        const indexInRow = o.locationInRow === "left" ? 0 : undefined;
+        self.insertNewTileInRow(tile, row, indexInRow);
         self.removePlaceholderTilesFromRow(o.rowIndex);
         self.removeNeighboringPlaceholderRows(o.rowIndex);
         if (o.rowHeight) {
@@ -466,7 +468,8 @@ export const DocumentContentModel = types
           const parsedContent = safeJsonParse(tile.tileContent);
           if (parsedContent?.content) {
             const rowOptions: INewTileOptions = {
-              rowIndex: rowInfo.rowDropIndex
+              rowIndex: rowInfo.rowDropIndex,
+              locationInRow: rowInfo.rowDropLocation
             };
             if (tile.rowHeight) {
               rowOptions.rowHeight = tile.rowHeight;
