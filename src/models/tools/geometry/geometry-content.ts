@@ -410,6 +410,9 @@ export const GeometryContentModel = types
             const axes: IAxisLabels = { x: xLabel, y: yLabel };
             self.metadata.addTableLink(tableId, axes);
           }
+          else {
+            return false; // table is no longer present; ignore the change
+          }
         }
         else if (op === "delete") {
           self.metadata.removeTableLink(tableId);

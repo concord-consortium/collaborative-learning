@@ -13,7 +13,7 @@ import { vertexAngleChangeAgent } from "./jxg-vertex-angle";
 import { castArrayCopy } from "../../../utilities/js-utils";
 import { castArray } from "lodash";
 
-type OnWillApplyChange = (board: JXG.Board | string, change: JXGChange) => void;
+type OnWillApplyChange = (board: JXG.Board | string, change: JXGChange) => false | undefined;
 type OnDidApplyChange = (board: JXG.Board | undefined, change: JXGChange) => void;
 
 interface JXGChangeAgents {
@@ -62,7 +62,7 @@ export function applyChange(board: JXG.Board|string, change: JXGChange,
   const target = change.target.toLowerCase();
 
   // give clients a chance to intercede before the change is applied
-  context?.onWillApplyChange?.(board, change);
+  if (context?.onWillApplyChange?.(board, change) === false) return;
 
   // special case for update/object, where we dispatch by object type
   if ((change.operation === "update") && (target === "object")) {
