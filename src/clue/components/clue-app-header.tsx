@@ -72,7 +72,7 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
   }
 
   private renderTeacherHeader(userTitle: string | undefined) {
-    const { investigation, unit } = this.stores;
+    const { appVersion, investigation, unit } = this.stores;
     return (
       <div className="app-header">
         <div className="left">
@@ -93,6 +93,7 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
           {this.renderPanelButtons()}
         </div>
         <div className="right">
+          <div className="version">Version {appVersion}</div>
           <div className="user teacher">
             <div className="class" data-test="user-class">
               <ClassMenuContainer />
