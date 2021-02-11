@@ -1071,6 +1071,7 @@
                     }
                   },
                   {
+                    "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -2246,102 +2247,29 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["All of the linear relationships you have studied so far can be written in the form <em>y = ax + b</em>, or <em>y = b + ax</em>. In this equation, <em>y</em> depends on <em>x</em>."]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_2_2_In_y=ax+b_350w.png"
+                      "text": ["Students explore constant rate and y-intercept in a new context. They find solutions to equations. Students solve problems and make decisions about linear relationships and inequalities using information given in tables, graphs, and equations. This Problem formally introduces the words coefficient and solutions of an equation. The constant rate of change is emphasized as the coefficient of the independent variable. Students learn to recognize a linear relationship within a contextual situation, from an equation, table, or graph. "]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["The point at which a graph crosses the y-axis is called the <em>y-intercept</em>. The coordinates of the y-intercept for the graph shown above are (0, <em>b</em>). To save time, we sometimes refer to the number <em>b</em>, rather than the coordinates of the point (0, b), as the <em>y</em>-intercept. \n\nA <strong>coefficient</strong> is the number that multiplies a variable in an equation. The <em>a</em> in <em>y = ax + b</em> is the coefficient of <em>x</em>, so <em>ax</em> means <em>a</em> times <em>x</em>.\n\nThe equation of distance <em>d<sub>Emile</sub></em> that Emile walks after t seconds is <em>d<sb>Emile</sub>  =</em> 2.5<em>t</em>.\n\n<strong>Emile</strong>"]
+                      "text": ["2.2 Comparing Cost Relationships: Using Tables and Graphs to Find Solutions to Equations\nAoL: Analysis & Analysis\nCCSSM: 7.RP.A.2, 7.RP.A.2a, 7.EE.A.1, 7.EE.A.2, 7.EE.B.3, 7.EE.B.4, 7.EE.B.4a, 7.EE.B.4b"]
                     }
                   },
                   {
-                    "layout": {
-                      "height": 300
-                    },
+                    "display": "teacher",
                     "content": {
-                      "type": "Geometry",
-                      "board": {
-                        "properties": {
-                          "axisNames": ["t", "dEmile"],
-                          "axisLabels": ["time", "distance"],
-                          "axisMin": [-20, -40],
-                          "axisRange": [56, 130]
-                        }
-                      },
-                      "objects": [
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [0, 0],
-                              "properties": {
-                                "name": "y-intercept (0, 0)"
-                              }
-                            },
-                            {
-                              "type": "point",
-                              "parents": [5, 12.5]
-                            }
-                          ]
-                        }
-                      ]
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["<strong>NWDYK</strong>\nHow do you know if the ordered pair of numbers for a point on a graph is a solution to an equation? How can you use a table or graph to find a solution for an equation?"]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["The equation of distance <em>d<sub>Henri</sub></em> that Henri walks after t seconds is <em>d<sub>Henri</sub></em> = 45 + <em>t</em>.\n\n<strong>Henri</strong>"]
-                    }
-                  },
-                  {
-                    "layout": {
-                      "height": 300
-                    },
-                    "content": {
-                      "type": "Geometry",
-                      "board": {
-                        "properties": {
-                          "axisNames": ["t", "m"],
-                          "axisLabels": ["time", "distance"],
-                          "axisMin": [-20, -40],
-                          "axisRange": [56, 130]
-                        }
-                      },
-                      "objects": [
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [0, 45],
-                              "properties": {
-                                "name": "y-intercept (0, 45)"
-                              }
-                            },
-                            {
-                              "type": "point",
-                              "parents": [5, 50]
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text":["A <strong>solution of an equation</strong> is an ordered pair that makes the equation true and lies on the graph of the line. For example, in the equation that represents the distance Henri walks <em>d<sub>Henri</sub> =</em> 45 + <em>t</em>, (0,45) is a solution to the equation. When the coordinate values are substituted into the equation it is a true statement; 45 = 45 + 0.\n \u00a0<em>What does the point (0,45) represent in the context of the race?</em>.\n\nIn the graphs for Emile and Henri:\n \u00a0<em>What would t be if (t, 48) are the coordinates of a point on the graph? Explain. \n  \u00a0What would d be if (10, d) are the coordinates of a point on the graph? Explain. </em>"]
+                      "text":["<strong>Emerging Mathematical Ideas</strong>\nContinue examining ways tables, graphs, equations, and inequalities can be used to find solutions, using a new problem context presented in the form of two contrasting linear equations.\n\nLook for patterns that can be used to find solutions to linear relationships including:<ul><li>using a completed table, look for the value of the dependent variable (<em>y</em>) that corresponds to the needed value of the independent variable (<em>x</em>),</li><li>using a table that is incomplete, substitute the value for the independent value (<em>n</em>) into the given equation and perform the indicated operations to find the corresponding value for the dependent variable (C<sub>M</sub>) (solution) (e.g., for C<sub>M</sub> = 49 + n, to find n = 100, the solution, C<sub>M</sub>, is equal to 49 + 100 = 149),</li><li>in a graph, the coordinates of the points (<em>a,b</em>) on the line represent all of the solutions to the equation of the line; to find the solution for a given value of the independent variable (first coordinate a), find the point on the line with the first coordinate and read the corresponding <em>b<em> value in the ordered pair, and</li><li>in an equation or inequality, the value of the dependent variable (<em>y</em>) can be found for any value of the independent variable (<em>x</em>) by substituting the needed value of <em>x</em> into the equation and performing the indicated operations in the equation to find the solution (<em>y</em>).</li></ul>Identify and represent proportional relationships as tables, graphs, and equations and distinguish from non-proportional linear relationships."]
                     }
                   }
                 ]
@@ -2356,7 +2284,28 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["Ms. Chang’s class decides to give T-shirts to each person who participates in the walkathon. They obtain the cost of the T-shirts from two different companies. Mighty Tee charges $49 plus $1 per T-shirt. No-Shrink Tee charges $4.50 per T-shirt. Ms. Chang writes the following equations to represent the relationships relating cost to the number of T-shirts:\n\n <em>C<sub>Mighty</sub> = </em> 49 + <em>n</em>\n <em>C<sub>No-Shrink</sub> = </em> 4.5<em>n</em>\n\nThe number of T-shirts is <em>n</em>. \n<em>C<sub>Mighty</sub></em> is the cost in dollars for Mighty Tee. \n<em>C<sub>No-Shrink</sub></em> is the cost in dollars for No-Shrink Tee. \n\n • Which company should they choose? Give evidence for your answer. "]
+                      "text": ["<strong>Launch (Getting Started)\nConnecting to Prior Knowledge</strong>\nUse the introduction information to formalize and portray (PROTRAYAL) the types of equations for linear relationships that students have been using to answer questions. If you did not introduce the vocabulary word “coefficient” in the Summary of the previous Problem, introduce the word now. Discuss with students that they have been finding solutions of an equation when they were given one variable and found another or that a coordinate pair of a point on a graph will substitute into the equation. Using tables, graphs, and numerical relationships, they have found many solutions to an equation to answer questions in this and in previous Units.\n\nYou can show the equations, graphs, and tables from Problem 2.1 to connect the ideas. (LANGUAGE) This might be a good time to create an anchor chart. <strong>Teaching Aid 2.2A</strong> provides a possible example.\n\n\u0009\u0009<em>d</em><sub>Henri</sub> = 45 + <em>t</em> and <em>d</em><sub>Emile</sub> = 2.5<em>t</em>"]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["<strong>Suggested Questions</strong>\n<ul><li>What information do the variables and numbers represent in each equation? (The variable <em>t</em> represents time, and the variable <em>d</em> represents each brother’s distance from the starting line. The number 45 represents Henri’s head start, and the number 2.5 represents how many meters Emile walks per second. Henri’s rate of 1 m/s is the assumed coefficient of <em>t</em>.)</li></ul>\nDisplay a graph and a table for each of the two questions.\n<ul><li>Where do the lines cross the y-axis? (The line for Henri crosses the y-axis at the point (0, 45), and the line for Emile crosses the y-axis at the point (0, 0).)</li><li>Why is the name <strong>y-intercept</strong> a good name for these points? (This is the point where each line intersects, or intercepts, the <em>y</em>-axis.)</li><ul>\nGo over the definition of <strong>coefficient</strong> with students. Then ask:<ul><li>How does the walking rate show up in the equations? (The walking rate of each brother is the coefficient of t in the equation for each relationship. In Henri’s equation, the coefficient is 1, which is not written, but assumed.)</li></ul>"]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["Define the <strong>solution of an equation</strong> using the explanation in the student book. Tell students that a solution of the equation d = 45 + t is a pair of values that makes the equation true, or an ordered pair that lies on the graph of the line.\n<ul><li>Is (0, 45) a solution of this equation? Explain. (Yes. If <em>t</em> = 0 and <em>d</em> = 45, 45 = 45 + 0 is a true equation.)</li><li>What would the value of d be if (48, <em>d</em>) is a solution? Explain. (93 meters. If (48, <em>d</em>) is a solution, then <em>d</em> = 45 + 48, or <em>d</em> = 93; 93 = 45 + 48 is a true equation.)</li><li>What would the value of <em>t</em> be if (<em>t</em>, 50) is a solution? Explain. (5 seconds. If (<em>t</em>, 50) is a solution, then 50 = 45 + <em>t</em>, or <em>t</em> = 5; 50 = 45 + 5 is a true equation.)</li><li>What is the <em>y</em>-intercept of this equation? Are the coordinates of the <em>y</em>-intercept a solution of the equation? Explain. (The graph of the equation has a <em>y</em>-intercept of (0, 45), which is a solution of the equation.)</li></ul>"]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["Presenting the Challenge\n\nOnce the class is comfortable with how to read these equations, tell the story of the cost plans offered by two T-shirt companies. Challenge students to pick a company and justify their answer. After answering the Initial Challenge, students may continue working on the What If...? questions. These questions may encourage students to refine their justifications"]
                     }
                   }
                 ]
@@ -2375,21 +2324,21 @@
                   "content": {
                     "type": "Text",
                     "format": "html",
-                    "text": ["<strong>Situation A. Using Tables and Graphs to Find a Solution</strong>\nSome students in Ms. Chang’s class used graphs to decide which company to use. Others used tables. <ol><li>Explain how a graph or a table could be helpful.</li><li>What if the class only had $120 to spend, how would this affect your answer?</li></ol>"]
+                    "text": ["<strong>Explore (Digging In)</strong>\nProviding for Individual Needs\n\nAs you circulate and listen to students, ask questions to prompt their thinking. Do not elicit answers at this time. Use the Summarize to bring out the answers."]
                     }
                   },
                   {
                   "content": {
                     "type": "Text",
                     "format": "html",
-                    "text": ["<strong>Situation B. Using Tables, Graphs, and Equations</strong>\nExplain how you could use a table, graph, or equation to answer each question: <ol><li>For each company, find the costs of 20 T-shirts.</li><li>For each company find the number of T-shirts you can buy for $135. How many T-shirts can you buy for less than $135? Greater than $135?</li><li>Find the number of T-shirts where the cost of buying shirts from the two companies is equal. What is the cost? </li><li>Find the number of T-shirts when <em>C<sub>Mighty</sub> < C<sub>No-Shrink</sub></em>.</li></ol>"]
+                    "text": ["<strong>Suggested Questions</strong><ul><li>How might a table help? (Various answers) How might a graph help? (Various answers)</li><li>Can you use the equations to help answer the question? (Put in one value and find the other using fact families. Or use the equation to check the values from the table and/or graph.)</li><li>What is the cost of one shirt from each plan? (Mighty: $50 and No-Shrink: $4.50) 10 shirts? (Mighty: $59 and No-Shrink: $45) 20 shirts? (Mighty: $69 and No-Shrink: $90)</li><li>What is the coefficient in each equation? (Mighty: 1 and No-Shrink: 4.5)</li><li>What does this tell you about the T-shirt costs? (The cost per t-shirt)</li></ul>"]
                     }
                   },
                   {
                   "content": {
                     "type": "Text",
                     "format": "html",
-                    "text": ["<strong>Situation C. More Competition</strong>\nThe following table represents the costs from another company, The Big Tee. <ol><li>Compare the cost for this company to the costs for the other two companies. </li><li>Is this company a better deal? Explain why. </li><li>Are any of the relationships represented by the three companies linear? Proportional? Explain.</li></ol>"]
+                    "text": ["Look for interesting strategies. Call on these students in the Summary to share their strategies. Be sure to have a representative sample of the strategies presented. Students may choose to use numerical reasoning, tables, graphs, or equations. Be sure to look at what methods students are using to find when the two cost plans are equal.\n\nFor the What If...?, to maximize class time, you may use <strong>Teaching Aid 2.2B</strong> for students to see the equation, table, and graph for each T-shirt company. Make sure students explain how they found their answers.<ul><li>How do the solutions to the questions show up in the graph? In the table? In the equation?  (The ordered pairs are the coordinates of a point on each graph and are also entries in the table of data for each equation.)</li></ul>"]
                     }
                   },
                   {
@@ -2408,6 +2357,10 @@
                             "values": [34, 41.5, 46.5, 54, 59]
                           }
                         ]
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": ["Planning for the Summary\n\nWhat evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know questions? What will you do if you do not have evidence?\n\n<strong>Now What Do You Know?\nHow do you know if the ordered pair of numbers for a point on a graph is a solution to an equation? How can you use a table or graph to find a solution for an equation?</strong>"]
                     }
                   }
                 ]
@@ -2422,12 +2375,43 @@
             {
               "type": "summarize",
               "content": {
-                "tiles": [{
-                  "content": {
-                    "type": "Text",
-                    "text": "How do you know if the ordered pair of numbers for a point on a graph is a solution to an equation? How can you use a table or graph to find a solution for an equation?"
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["<strong>Summarize (Orchestrating the Discussion)</strong>\n\nSolutions and Strategies\n\nBegin by having students share their thinking about the Problem.\n\n<strong>Suggested Questions</strong><ul><li>Do you have What If...questions?"]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["Call on students to share their strategies. Be sure to have a representative sample of the strategies presented. Students may choose to use numerical reasoning, tables, graphs, or equations. Question students to explain their methods used to find when the two cost plans are equal. You may want to orchestrate the Summary so that at least one student presents Situation B #1 and #2 with table, another student with graph, and a third student with equation to reinforce how to use each representation.\n\nYou can use student reasoning, the representations, and the What If...? questions to clarify points that students do not discuss.\n\n<strong>Suggested Questions</strong><ul><li>What is the cost per T-shirt under each plan? (The cost per T-shirt is $1 for Mighty Tee and $4.50 for No-Shrink Tee.)</li><li>How would this rate show up in a table? In a graph? (As the value in the column for the number of T-shirts increases by 1, the value for cost increases by $1 for Mighty Tee and $4.50 for No-Shrink Tee. The graph of the line for No-Shrink Tee is much steeper than the graph of the line for Mighty Tee.)</li><li>What information does the y-intercept represent in each equation? (The y-intercept represents the cost of 0 T-shirts. It is the starting cost for each company.)</li><li>For what number of T‐shirts are the two costs equal? How did you find that number? (14 T‐shirts; students may have made a table and found the row for which the two costs are equal, constructed a graph and identified the intersection point, or used a method involving guess and check.)</li><li>Why is it important to know when the costs are equal? (You can tell when the companies charge the same amount for the same number of t-shirts. Before or beyond that point, the one company is cheaper than the other.)</li><li>In Situation C, what do the numbers 0 and 34 mean in the table? (That must be a set-up fee or shipping cost or some other fee just to order from them. It is the y-intercept.)</li><li>Is the relationship in Situation C linear? (Yes.) What is the coefficient in the equation? (The rate of change for the shirts is as you add 3 shirts is costs $7.50 more or as you add 2 shirts is costs $5.00 more. This would mean that the cost for 1 each new t-shirt is $2.50. So, the coefficient is 2.5.)</li><li>How could we write the equation for The Big Tee company? (Cost = y-intercept + coefficient times n or CBig Tee = 34 + 2.5n.)</li></ul>"]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["Making the Mathematics Explicit\n\n<strong>Suggested Questions</strong>\n<ul<li>How did The Big Tee company in Situation C compare to Mighty and No-Shrink? (Various answers. Students might say that that cost is not linear which makes it more difficult to compare.)</li><li>Which representation seems most convenient for solving this Problem? (Answers will vary. Students may give reasons for each representation. At this stage in their development, they might say that equations are most convenient because the row you need to answer a question might not be in the table, or the point on the line you need might not be shown on a graph. They may also explain that graphs can be easily traced to find the missing value of an ordered pair. Finally, they may point out that tables usually require no calculations to find pairs of values.)</li><li>How can you compare which company is a better deal when they all have different ways of charging for the shirts? (Consider different the cost for different numbers of shirts. It is important to know when the costs are the same for either company. This tells you the point where one company will begin to cost more than the other.)</li><li>In Situation B #4, what question do you think someone was trying to answer by writing the inequality C<sub>Mighty</sub> < C<sub>No-Shrink</sub>? (How many t-shirts can I buy and pay less with the Mighty Tee company.) Note that students will solve inequalities symbolically later in the unit.</li><li>If I know how much money I have to spend, how can I find how many t-shirts I can buy from the different companies?</li><li>In a linear situation, describe how you can find a value of a variable if the value of the other variable is known. (Answers will vary. Sample answer: For an equation, if the independent variable is known, you can substitute its value into the equation and then evaluate the resulting expression. If the dependent variable is known, you can substitute its value into the equation and then solve the equation to find the corresponding value of the independent variable. With a graph, follow the vertical line on the grid if the independent variable is known, or the horizontal line if the dependent variable is known, until it hits the line. Then, follow the other direction to find the other quantity.)</li><li>What does it mean for relationships to be proportional? The equation is of the form <em>y = mx</em>, like the cost at No-Shrink. The relationship is proportional to the number of T-shirts. So, if you double the number of T-shirts, you also double the cost. You cannot do this with Mighty, because is it not proportional.)</li><li>How can you tell if relationships are linear? (Various answers. Table representation: as the x variable increases by a consistent amount, the y variable also increases by a consistent amount. Graph: A straight line is formed. Equation: The equation fits the form of <em>y = ax</em>, <em>y = ax + b</em>, or <em>y = b + ax</em>.)</li></ul>"]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["Now What Do Students Know\n\nAsk students to reflect on the discussion and answer the Now What Do You Know questions.\n\n<strong>How do you know if the ordered pair of numbers for a point on a graph is a solution to an equation? How can you use a table or graph to find a solution for an equation?</strong>\n\nSee answers to the problem for more information about the strategies and embedded mathematics."]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["<strong>Reflecting on Student Learning</strong>\n\nUse the following questions to assess student understanding at the end of the lesson.<ul><li>What evidence do I have that students understand the Now What Do You Know Question?<li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></li><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li><ul>"]
+                    }
                   }
-                }]
+                ]
               },
               "supports": [
                 { "text": "Would it help to look at examples where you used a table, graph, or equation to answer a question?" }
