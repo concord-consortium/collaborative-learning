@@ -1114,95 +1114,8 @@
                       "text": ["<strong>Suggested Questions</strong>\n<ul><li> What do we know about the race at the beginning? (Possible answer: The younger brother, Henri, has a head start. The brothers are not starting in the same spot.)</li><li> If you were watching this race, what would you see happening with the brothers? (Possible answer: The two brothers would start walking at the same time. The older brother, Emile, would be walking faster and would be catching up with each step. Some students may want to model what would happen with some physical movement.)</li></ul>Encourage students to think about how the race can be represented mathematically. Do not look for answers to these questions at this time. During the Explore and Summarize, listen and watch to see how students make sense of the situation.\n<ul><li> What data would you collect to document what happens in the race?</li><li> What are the variables that you would keep track of?</li><li> How could you represent the data to show what happens as they race?</li></ul>"]
                     }
                   },
-                  [
-                    {
-                      "display": "teacher",
-                      "content": {
-                        "type": "Table",
-                        "name": "Meters and Brother's Distances",
-                        "columns": [
-                            {
-                              "name": "Meters",
-                              "type": "number",
-                              "values": [0, 10, 20, 30, 40, 50]
-                            },
-                            {
-                              "name": "Henri",
-                              "type": "number",
-                              "values": [45, 55, 65, 75, 85]
-                            },
-                            {
-                              "name": "Emile",
-                              "type": "number",
-                              "values": [0, 25, 50, 75, 100]
-                            }
-                          ]
-                      }
-                    },
-                    {
-                      "display": "teacher",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": "<code>Guess and Check\n\n10 meters \u0089 Henri 10 + 45 = 55\n \u0089\u0089\u0089Emile 2.5*10 = 25</code>"
-                      }
-                    }
-                  ],
                   {
-                    "layout": {
-                        "height": 330
-                      },
-                    "display": "teacher",
                     "content": {
-                        "type": "Geometry",
-                        "board": {
-                          "properties": {
-                            "axisNames": ["t, D"],
-                            "axisLabels": ["Meters", "Distance"],
-                            "axisMin": [-10, -10],
-                            "axisRange": [50, 100]
-                          }
-                        },
-                        "objects": [
-                          {
-                            "type": "movableLine",
-                            "parents": [
-                              {
-                                "type": "point",
-                                "parents": [0, 0],
-                                "properties": {
-                                  "name": ""
-                                }
-                              },
-                              {
-                                "type": "point",
-                                "parents": [30, 80],
-                                "properties": {
-                                  "name": "Emile"
-                                }
-                              }
-                            ]
-                          },
-                          {
-                            "type": "movableLine",
-                            "parents": [
-                              {
-                                "type": "point",
-                                "parents": [10, 55],
-                                "properties": {
-                                  "name": "Henri"
-                                }
-                              },
-                              {
-                                "type": "point",
-                                "parents": [40, 100],
-                                "properties": {
-                                  "name": ""
-                                }
-                              }
-                            ]
-                          }
-                        ]
                       "type": "Text",
                       "format": "html",
                       "text": ["Encourage students to think about how the race can be represented mathematically. Do not look for answers to these questions at this time. During the Explore and Summarize, listen and watch to see how students make sense of the situation.\n<ul><li> What data would you collect to document what happens in the race?</li><li> What are the variables that you would keep track of?</li><li> How could you represent the data to show what happens as they race?</li></ul>"]
@@ -2342,21 +2255,6 @@
                     }
                   },
                   {
-                    "content": {
-                      "type": "Table",
-                      "name": "T-Shirt Costs",
-                      "columns": [
-                          {
-                            "name": "n",
-                            "type": "number",
-                            "values": [0, 3, 5, 8, 10]
-                          },
-                          {
-                            "name": "C",
-                            "type": "number",
-                            "values": [34, 41.5, 46.5, 54, 59]
-                          }
-                        ]
                   "content": {
                     "type": "Text",
                     "format": "html",
