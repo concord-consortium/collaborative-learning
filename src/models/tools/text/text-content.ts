@@ -2,17 +2,15 @@ import { types, Instance } from "mobx-state-tree";
 import { Value, ValueJSON } from "slate";
 import Plain from "slate-plain-serializer";
 import Markdown from "slate-md-serializer";
-import SlateHtmlSerializer from "./slate-html-serializer";
 import { registerToolContentInfo } from "../tool-content-info";
 import { safeJsonParse } from "../../../utilities/js-utils";
+import { htmlToSlate } from "@concord-consortium/slate-editor";
 
 export const kTextToolID = "Text";
 
 export function defaultTextContent(initialText?: string) {
   return TextContentModel.create({ text: initialText || "" });
 }
-
-const HtmlSerializer = new SlateHtmlSerializer();
 
 const MarkdownSerializer = new Markdown();
 
@@ -56,7 +54,7 @@ export const TextContentModel = types
         case "slate":
           return self.getSlate();
         case "html":
-          return HtmlSerializer.deserialize(self.joinText);
+          return htmlToSlate(self.joinText);
         case "markdown":
           return MarkdownSerializer.deserialize(self.joinText);
         default:

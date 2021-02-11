@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import { Editor } from "@concord-consortium/slate-editor";
 import { IFloatingToolbarProps, useFloatingToolbarLocation } from "./hooks/use-floating-toolbar-location";
 import { TextToolbarButton } from "./text-toolbar-button";
 import { IRegisterToolApiProps } from "./tool-tile";
@@ -14,8 +15,8 @@ interface IButtonDef {
 
 interface IProps extends IFloatingToolbarProps, IRegisterToolApiProps {
   selectedButtons: string[];
-  onButtonClick: (buttonName: string, editor: any, event: React.MouseEvent) => void;
-  editor: any;
+  onButtonClick: (buttonName: string, editor: Editor, event: React.MouseEvent) => void;
+  editor?: Editor;
 }
 
 const kShortcutPrefix = isMac() ? "Cmd-" : "Ctrl-";
@@ -53,7 +54,7 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
             const { iconName, toolTip } = button;
             const isSelected = !!selectedButtons.find(b => b === iconName);
             const handleClick = (event: React.MouseEvent) => {
-              if (enabled) {
+              if (editor && enabled) {
                 onButtonClick(iconName, editor, event);
               }
             };
