@@ -2433,53 +2433,29 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["Look again at Alana’s pledge plan from Problem 1.3. Suppose A represents the amount raised in dollars and d represents the distance walked in kilometers. You can express this plan with the equation <em>A</em> = 5 + 0.5<em>d</em>. "]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_2_4_In_alanas_plan_350w.png"
-                    }
-                  },
-                  {
-                    "layout": {
-                      "height": 300
-                    },
-                    "content": {
-                      "type": "Geometry",
-                      "board": {
-                        "properties": {
-                          "axisNames": ["d", "A"],
-                          "axisMin": [-1, -2],
-                          "axisRange": [20, 22]
-                        }
-                      },
-                      "objects": [
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [0, 5]
-                            },
-                            {
-                              "type": "point",
-                              "parents": [14, 12],
-                              "properties": {
-                                "name": ""
-                              }
-                            }
-                          ]
-                        }
-                      ]
+                      "text": ["Students investigate various pledge plans from sponsors of the walkathon. The plans are represented by equations. In this Problem, students identify the constant rate of change from various representations. They decide whether the graph of a linear relationship is decreasing, increasing, or staying the same from different representations of the relationship. They decide if the relationships are proportional. They also begin to make the connections among the points on a line, the pairs of data in a row of a table, and a solution of an equation of the form <em>y = b + ax</em>. This latter goal provides a transition to solving equations using algebraic methods. "]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>Kilometers Walked</strong>\n <em>Explain why the point (14, 12) is on the graph of Alana’s pledge plan. \n Write a question you could answer by locating this point. \n How can you use the equation for Alana’s pledge plan to check the answer to the question you made up?\n How can you use a graph to find the number of kilometers that Alana walks if a sponsor donates $17? How could you use an equation to answer this question?</em>\n\n  In this Problem, you will investigate similar questions relating to pledge plans for a walkathon."]
+                      "text": ["<strong>2.3 Connecting Tables, Graphs, and Equations to Solutions\nAoL: Analysis & Analysis\nCCSSM: 7.RP.A.2, 7.RP.A.2a, 7.EE.A.1, 7.EE.A.2, 7.EE.B.3, 7.EE.B.4, 7.EE.B.4a, 7.EE.B.4b</strong>"]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["<strong>NWDYK</strong>\nDescribe the advantages and disadvantages of using tables, graphs, and symbolic methods to solve equations."]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["<strong>Emerging Mathematical Ideas</strong>\nContinue working to develop strategies for finding solutions for linear relationships using multiple representations including: graphs, tables, equations, and inequalities. The focus of Problem 2.3 is to make connections between solutions found using one representation (e.g., graphs) to each of the other representations (e.g., tables and equations) where they are also visible.\n\nLook for patterns connecting solutions for a linear relationship found on a graph, table, equation, or inequality to solutions found using other representations including:<ul><li>the coordinates of a point (<em>a,b</em>) on the graph of a line is a solution for the linear relationship. The ordered pair (<em>a,b</em>) can also be found as a corresponding pair of values on a table representing solutions for the line, and when the equation is evaluated at <em>x = a</em>, the value found for <em>y</em> will be equal to <em>b</em>.</li></ul>\nNotice that answering some questions about a linear relationship can be easier or harder depending on the representation. For example,<ul><li>it can be harder to find rate of change for a linear relationship on a graph or table than it is to find it using an equation, or</li><li>it can be easier to find the solution (y value) for a linear relationship for a given value of the independent variable using a table or a graph</li></ul>\nIdentify and represent proportional relationships as tables, graphs, and equations and distinguish from non-proportional linear relationships."]
                     }
                   }
                 ]
@@ -2494,14 +2470,14 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["Consider the following pledge plans. In each equation, <em>y</em> is the amount pledged in dollars by each sponsor and <em>x</em> is the distance walked in kilometers.\n\n<strong>Plan 1</strong> <em>y</em> = 5<em>x</em> - 3\n<strong>Plan 2</strong> <em>y</em> = - <em>x</em> + 6\n<strong>Plan 3</strong> <em>y</em> = 2"]
+                      "text": ["<strong>Launch (Getting Started) Connecting Prior Knowledge</strong>\n\nRemind students about the three students and their pledge plans from Investigation 1. Display <strong>Teaching Aid 2.3A: Alana’s Pledge Plan</strong>.\n\n<strong>Suggested Questions</strong><ul><li>Write a question that could be answered using the point (14, 12). (Sample answers: How far did Alana walk if a sponsor donates 12 dollars? How much money would Alana raise from each sponsor if she walked 14 kilometers?)</li><li>How can you use the equation for Alana’s plan to check the answer to the question you wrote? (The equation for Alana’s plan is <em>A</em> = 5 + 0.5<em>d</em>. For the first question, if you substitute 12 for A in the equation and solve for d, you will find the number of kilometers. For the second question, if you substitute 14 for <em>d</em> in the equation and solve for <em>A</em>, you will find how much each sponsor pledges.)</li><li>How can you use a graph to find the number of kilometers that Alana walked if each sponsor donated $17? (You can find 17 on the <em>y</em>-axis and move horizontally until you reach a point on the line. Then, you move vertically down until you hit the <em>x</em>-axis. The value on the <em>x</em>-axis is the number of kilometers walked.)</li></ul>\nAsk the class to show how the questions relate to solving the equation A = 5 + 0.5d when the value of one variable is known. Students are substituting one value into the equation and solving for the other.\n\n\u0009<em>A</em> = 5 + 0.5(14) to solve for A if <em>d</em> = 14\n\u000912 = 5 + 0.5<em>d</em> to solve for <em>d</em> if <em>A</em> = 12.\n\nDiscuss how a graph or a table could be used to find solutions of these two equations.\n\nPick two or three other points on the line and repeat the preceding questions. Students should begin to see that there are an infinite number of coordinate pairs that are solutions of A = 5 + 0.5d. When they are solving a linear equation in one “unknown,” they are looking for the missing coordinate of an ordered pair that is a solution of the linear equation."]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<ul><li>What information does the equation give about the pledge plan? Does the plan make sense? Explain your reasoning.</li><li>How might a table or graph of the equation help answer questions about the pledge plans?</li></ul>"]
+                      "text": ["Presenting the Challenge\n\nNow pose the challenge in the Problem. Tell students they need to decide whether an equation represents a reasonable pledge plan for the walkathon if the idea is to raise money for charity. They will decide which points are solutions of the equation and whether the <em>y</em>-values increase, decrease, or stay the same as the <em>x</em>-values increase.\n\nYou might have students use a graphing calculator or <strong>Coordinate Grapher</strong> or <strong>Teaching Aid 2.3B</strong>.\n\nAsk questions to help students start thinking about the plans. Do not look for students to answer the questions yet. Let them explore the questions and return to them in the Summarize.\n\n<strong>Suggested Questions</strong><ul><li>What do you notice and what do you wonder about the three plans?</li><li>Consider how much you would raise if you walked one kilometer. Two kilometers? Three kilometers?</li></ul>\nOptional Launch\nUse <strong>Teaching Aid 2.3B</strong>, mix up the representations, and have students match the tables and graphs to the plans."]
                     }
                   }
                 ]
@@ -2520,28 +2496,14 @@
                   "content": {
                     "type": "Text",
                     "format": "html",
-                    "text": ["<strong>Situation A. Connecting Equations and Graphs</strong><ol><li>Which plan has a graph that contains the point (2,4)? What question could you answer by locating this point?</li><li>Which plan has a graph that you can use to find the solution for 8 = 5x – 3?  What would the coordinates of the point that represents the solution tell you about the situation? </li></ol>"]
+                    "text": ["<strong>Explore (Digging In)</strong>\nProviding for Individual Needs\n\nAs you move from group to group, listen as students discuss strategies. Look for interesting explanations of what information each equation represents and discuss these in the Summarize.\n\nStudents may need help with the negative coefficient in the equation for Plan 2. You can ask students to explain why the line slants down or why the relationship is decreasing.\n<ul><li>Does the table help you decide whether the graph of the relationship is increasing or decreasing? (Yes. You can use the table to see how the dependent variable changes as the independent variable increases. If the dependent variable decreases, then the line will slant down. If the dependent variable increases, then the relationship is increasing and the line will slant up.)</li><li>Pick a point on this line. Can you find this point in the table? Explain. (Answers will vary. Sample answers: Yes, the point (2, 4) is also an entry in the table where the value of <em>x</em> is 2 and the value of <em>y</em> is 4. No, the point (6, 0) is not a row in the table that I made, but if I extended the table, it would be there.)</li><li>How do you know the ordered pair you picked is a solution to the equation? (It makes the equation <em>y</em> = -<em>x</em> + 6 true, because, for the point (2, 4), 4 = -2 + 6.)</li></ul>\n\nFor Situation A #4, some students may discard Plan 3 because the equation does not have a solution with a <em>y</em>-value of 8. Students may mistakenly reject Plan 2 for the same reason if they are only looking in the first quadrant. If they look in the second quadrant, they will find that the equation has a solution with a <em>y</em>-value of 8: (-2, 8). Although the equation for Plan 2 has the solution (-2, 8), remind students that the solution corresponds to walking -2 kilometers, which may not make sense in this real-world situation. Some students might find some interesting ways to interpret <em>y</em> = -<em>x</em> + 6 in this context. However, this equation can represent many situations, and (-2, 8) might well make sense for a different situation. It is a solution for this equation, but does not make sense within the context."]
                   }
                 },
                 {
                   "content": {
                     "type": "Text",
                     "format": "html",
-                    "text": ["<strong>Situation B. Connecting Equations and Tables</strong>\nAll of the following coordinates are in the table of one plan. Two of coordinates have a missing value: \n(4, 2)    (1.2, ?)    (?, -4)<ol><li>Find the missing value. Explain how you found it.</li><li>Write a question you could answer by finding the missing value.</li></ol>"]
-                  }
-                },
-                {
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": ["<strong>Situation C. Finding Solutions</strong>\nFor Plan 1, <em>y</em> = 5<em>x</em> - 3 <ol><li>Find the value of <em>y</em> when <em>x</em> = 7</li><li>Find the value of <em>x</em> when <em>y</em> = 32.</li></ol>"]
-                  }
-                },
-                {
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": ["<strong>Situation D. Linear or Non Linear</strong><ol><li>Sally is trying to figure out if the relationships represented by the three plans are linear. How can you help her decide by looking at the equations?</li><li>Yvonne claims that only Plan 3 is proportional. Do you agree? Explain why.</li></ol>"]
+                    "text": ["Planning for the Summary\n\nWhat evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence?\n\n<strong>Now What Do You Know?\nDescribe the advantages and disadvantages of using tables, graphs, and symbolic methods to solve equations.</strong>"]
                   }
                 }
               ]
@@ -2551,12 +2513,85 @@
             {
               "type": "summarize",
               "content": {
-                "tiles": [{
-                  "content": {
-                    "type": "Text",
-                    "text": "Describe the advantages and disadvantages of using tables, graphs, aand symbolic methods to solve equations."
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<strong>Summarize (Orchestrating the Discussion)</strong>\nSolutions and Strategies\n\nRevisit constant rate of change in the context of equations and connect the rate to tables and graphs of linear relationships.\n\n<strong>Suggested Questions</strong><ul><li>What is the amount raised per kilometer under each plan? (Plan 1: +5 dollars per kilometer; Plan 2: -1 dollar per kilometer; Plan 3: +0 dollars per kilometer)</li>How does each rate appear in a table? In a graph? In an equation? (In a table, the rate is the constant change in the amount of money raised when the number of kilometers increases by 1. In a graph, the rate is the steepness of the line. In an equation, the rate is the coefficient of <em>x</em>.)</li><li>What information does the <em>y</em>-intercept represent in each plan? (The <em>y</em>-intercept represents the amount of money a sponsor donates for 0 kilometers walked. If the person did not walk at all, he or she would still raise an amount of money equal to the <em>y</em>-intercept.)</li><li>Do the plans make sense? Explain. (Answers may vary. Sample answers: Plan 1 makes sense because the walker is asking each sponsor to donate $5 per kilometer and then gives the sponsor something that costs $3, such as a T-shirt. Plan 2 does not make sense because the amount of money raised should not decrease as the number of kilometers walked increases. Plan 3 makes sense because the walker raises $2 from each sponsor regardless of the distance walked, which is similar to Leanne’s plan in Problem 1.3.)</li></ul>"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "Let students share their ideas with the main focus on the rate, intercepts of the graphs, and solutions of the equations. Most students will say that the negative rate does not make sense. It means you give money back. However, students are very creative and may suggest something plausible. Another suggestion could be that the walker for Plan 2 collects $6 and promises to walk 15 kilometers. If she does not walk the 15 km, then she will pay back $1 for each kilometer she does not walk. In this case, it is necessary to change what the variable <em>x</em> represents to the number of kilometers <em>not</em> walked.\n\nPlan 2 is linear, decreasing, and not proportional. Can a linear relationship be decreasing and still be proportional? (Yes. It would not make sense for a pledge plan because we would lose money the more we walked. An example graph could contain the points: (0,0), (1,-2), (2,-4), (3,-6), (4, -8), etc.)"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "Making the Mathematics Explicit\n\nBe sure to go over the answers to Situations A, B, and C. Check to make sure students understand the relationship between the points on a line, values in a table, and the solutions of the equation for that line. Have students share their solutions and their strategies for each part of the Problem. Ask for explanations.\n\nStudents should be making the connection between a specific solution of an equation and the more general relationship between two variables for the related equation. They should see the relationship between equations, such as <em>y</em> = 5<em>x</em> - 3 and the following equations: 12 = 5<em>x</em> - 3, -8 = 5<em>x</em> - 3, and 27 = 5<em>x</em> - 3.\n<ul><li>How are the equations 12 = 5x - 3, -8 = 5x - 3, and 27 = 5x - 3 related to y = 5x - 3? (In each equation, you are given the value of y and are looking for the corresponding value of x for that solution.)</li><li>How can you find the missing value of x? (You can use a table or a graph to find the y-value of that row of the table or the y-coordinate of that point on the line.)\n\nIf needed, you can repeat some of the questions from the Explore that help students sort out the solutions of an equation."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "You may want to draw the line and then label several points with their coordinates. Make a table of values. Display <strong>Teaching Aid 2.3C</strong>. Put the corresponding equation next to the coordinates to show that it is a true statement for these particular values of x and y. (LANGUAGE) This will help students see the connection between finding solutions using a graph, table, and equation."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/MSA_TG_2_3_graph_to_table_comp.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "Using another example from Situation A #3:\n<ul><li>For which equation is (2, 4) a solution? Explain your answer. (Plan 2. If you substitute 2 for <em>x</em> and 4 for <em>y</em> in the equation for Plan 2, it makes the equation true.)</li><li>How is the solution (2, 4) related to a table and a graph of Plan 3? (The values <em>x</em> = 2 and <em>y</em> = 4 are a solution of the equation. The ordered pair (2, 4) represents the coordinates of a point on the graph of the equation and an entry in the table.)</li></ul>"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<strong>Check for Understanding</strong>\n\n0Display <strong>Teaching Aid 2.3D</strong>. Troy is working with the equation <em>y</em> = 100 - 3<em>x</em>. He is trying to find a value of <em>x</em> that corresponds to <em>y</em> = 22. He writes the following question: “What is <em>x</em> if 100 - 3<em>x</em> = 22?”</li><li>Explain how Troy can use the following table or graph to answer this question.</li>"
+                    }
+                  },
+                  [
+                    {
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/moving-straight-ahead/images/MSA_TG_2_3_graphing_calc.png"
+                      }
+                    },
+                    {
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": "(He can trace the graph to find where it intersects the graph of <em>y</em> = 22. The corresponding <em>x</em>-value of the intersection point is the answer to his question. He can identify 22 in the <em>y</em>-column and see that the corresponding <em>x</em>-value is 26.)"
+                      }
+                    }
+                  ],
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "Now What do Students Know\n\nAsk students to reflect on the discussion and answer the Now What Do You Know.\n\n<strong>Describe the advantages and disadvantages of using tables, graphs, and symbolic methods to solve equations.</strong>See answers to the Problem for more information about the strategies and embedded mathematics."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<strong>Reflecting on Student Learning </strong>\n\nUse the following questions to assess student understanding at the end of the lesson.<ul><li>What evidence do I have that students understand the Now What Do You Know question?<ul><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
+                    }
                   }
-                }]
+                ]
               },
               "supports": []
             }
