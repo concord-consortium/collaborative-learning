@@ -1,7 +1,8 @@
-import React from "react";
 import classNames from "classnames";
-import ResizeObserver from "resize-observer-polyfill";
+import copyTextToClipboard from "copy-text-to-clipboard";
 import { observer, inject } from "mobx-react";
+import React from "react";
+import ResizeObserver from "resize-observer-polyfill";
 import { getDisabledFeaturesOfTile } from "../../models/stores/stores";
 import { cloneTileSnapshotWithNewId, IDragTileItem, IDragTiles, ToolTileModelType } from "../../models/tools/tool-tile";
 import { kGeometryToolID } from "../../models/tools/geometry/geometry-content";
@@ -145,7 +146,8 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     const { appMode } = this.stores;
     if (appMode !== "authed") {
       this.hotKeys.register({
-        "cmd-shift-c": this.handleCopyJson
+        "cmd-option-c": this.handleCopyImportJson,
+        "cmd-shift-c": this.handleCopyModelJson
       });
     }
   }
@@ -298,7 +300,15 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private handleCopyJson = () => {
+  private handleCopyImportJson = () => {
+    const toolApiInterface = this.context;
+    const toolApi = toolApiInterface?.getToolApi(this.modelId);
+    const importJson = toolApi?.exportContentAsTileJson?.();
+    importJson && copyTextToClipboard(importJson);
+    return true;
+  }
+
+  private handleCopyModelJson = () => {
     const { content } = this.props.model;
     const { clipboard } = this.stores;
     clipboard.clear();
