@@ -2,7 +2,7 @@ import React from "react";
 import { autorun, IReactionDisposer, reaction } from "mobx";
 import { observer, inject } from "mobx-react";
 import {
-  Editor, EditorRange, EditorValue, EFormat, handleToggleSuperSubscript, SlateEditor
+  Editor, EditorRange, EditorValue, EFormat, handleToggleSuperSubscript, SlateEditor, slateToHtml
 } from "@concord-consortium/slate-editor";
 
 import { BaseComponent } from "../base";
@@ -140,6 +140,20 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
     ));
 
     this.props.onRegisterToolApi({
+      exportContentAsTileJson: () => {
+        const { value } = this.state;
+        const html = value ? slateToHtml(value) : "";
+        const exportHtml = html.split("\n").map((line, i, arr) => `    "${line}"${i < arr.length - 1 ? "," : ""}`);
+        return [
+          `{`,
+          `  "type": "Text",`,
+          `  "format": "html",`,
+          `  "text": [`,
+          ...exportHtml,
+          `  ]`,
+          `}`
+        ].join("\n");
+      },
       handleDocumentScroll: (x: number, y: number) => {
         this.toolbarToolApi?.handleDocumentScroll?.(x, y);
       },
