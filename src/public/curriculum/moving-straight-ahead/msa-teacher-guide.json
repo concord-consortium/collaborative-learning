@@ -1627,74 +1627,14 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["Throughout this Unit, you have been solving equations with two variables. Sometimes the value of one variable is known, and you want to find the value of the other variable. In this Investigation, you will continue to find the value of a variable without using a table or a graph or numeric reasoning. You will also learn to use <em>symbolic</em> methods to solve a linear equation. In the last Investigation, you examined the patterns in the table, graph, and equation for the relationship relating Alana’s distance <em>d</em> and money earned <em>A</em> in the walkathon.\n\n<strong>Alana's Walkathon Table</strong>"]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Table",
-                      "columns": [
-                        {
-                          "name": "d",
-                          "type": "number",
-                          "values": [0, 1, 2, 3, 4, 20, 25, 30]
-                        },
-                        {
-                          "name": "A",
-                          "type": "number",
-                          "values": [5, 5.5, 6, 6.5, 7, 15, 17.5, 20]
-                        }
-                      ]
+                      "text": ["This Problem introduces students to symbolic ways of solving linear equations with one unknown. Equations are represented pictorially as coins (constant term) and pouches that hold an unknown number of coins (variables). Students explore the properties of equality pictorially as they find the number of coins in a pouch. This provides a transition into solving equations symbolically.\n\nStudents use the fact that the number of coins on both sides of the equation is equal to find the number of coins in a pouch. In the process, they find that there is more than one way to represent the number of coins on one side of the equation. This provides an opportunity to use equivalent expressions as part of a strategy for solving equations."]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>Alana's Walkathon Earning Graphs</strong>"]
-                    }
-                  },
-                  {
-                    "layout": {
-                      "height": 320
-                    },
-                    "content": {
-                      "type": "Geometry",
-                      "board": {
-                        "properties": {
-                          "axisNames": ["d", "A"],
-                          "axisMin": [-4, -4],
-                          "axisRange": [55, 60]
-                        }
-                      },
-                      "objects": [
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [3, 6.5],
-                              "properties": {
-                                "name": "(3, 6.5)"
-                              }
-                            },
-                            {
-                              "type": "point",
-                              "parents": [30, 20],
-                              "properties": {
-                                "name": "(30, 20)"
-                              }
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["\n<strong>Alana's Walkathon Earning Equation:</strong> <em>A</em> \u00a0 = 5 + 0.5<em>d</em> \n\nThe graph of the relationship is a line that contains infinitely many points. The coordinates of each point can be substituted into the equation to make a true statement. The corresponding entries in the table are the coordinates of points on the line representing the equation, <em>A</em> = 5 + 0.5<em>d</em>. The coordinates of these points are <strong>solutions to the equation</strong>."]
+                      "text": ["<strong>3.1 Mystery Pouches:  Exploring Equality\nAoL:  Explore & Explore\nCCSSM: 7.NS.A.2c, 7.EE.A, 7.EE.A.1, 7.EE.A.2, 7.EE.B, 7.EE.B.4, 7.EE.B.4a</strong>"]
                     }
                   },
                   {
@@ -1702,7 +1642,10 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In a relationship between two variables, if you know the value of one variable, you can use a table or a graph to find the value of the other variable. For example, \n\nSuppose Alana raises $20 from a sponsor, how many kilometers did she walk? <ul><li>Using numeric reasoning: Subtract $5 from $20 to get $15. This is the amount earned for walking d kilometers. So 15 = 0.5<em>d</em> \u00a0 or 15/0.5 = 30 = <em>d</em>.</li><li>Using the graph: Locate the point with the value $20, which is (30,20). So she walked 30 kilometers.</li><li>Using the table: Find the coordinate that corresponds to $20 for the amount earned, which is 30 km. So she walked 30 kilometers. </li><li>Using the equation: This question can also be represented by the equation as 20 = 5 + 0.5<em>d</em> and then the properties of equality can be used to solve the equation, which is similar to numeric reasoning. </li></ul><em>How could you use an equation to find the distance that Alana walks if she earns $20?</em>\n\nIn this Investigation you will develop strategies for solving equations of the form <em>y = ax + b</em>\u00a0 symbolically."
+                        "<p><strong>Emerging Mathematical Ideas</strong></p>",
+                        "<p>Begin to make sense of algebraic equations presented as coins (numbers) and pouches (variables) and explore approaches to solving them.</p>",
+                        "<p>Begin exploring algebraic strategies to solve equations modeled with pouches and coins by:</p>",
+                        "<ul><li>making sense of equations modeled with pouches and coins as variables and numbers, </li><li>translating between algebraic representations of equations and models, </li><li>noticing that there may be multiple equivalent forms for an expression or equation, and </li><li>using prior experiences with the Distributive Property, fact families, and numeric reasoning to make sense of steps needed to solve equations represented by models.</li></ul>"
                       ]
                     }
                   }
@@ -1718,104 +1661,97 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["To raise more money, Ms. Chang’s class decides to hold a raffle. They put some gold coins into a pouch, and people will guess the amount of coins in the pouch. At the end of the walkathon the class will give the pouch to the person who guessed the exact number of gold coins. \n\nTo make the contest interesting, they decide to add a code for the amount of money in the pouch. The code consists of an equation using gold coins and pouches. Each pouch has the same number of gold coins.  "]
+                      "text": [
+                          "<p><strong>Launch (Getting Started)</strong></p>",
+                          "<p>Connecting to Prior Knowledge</p>",
+                          "<p>Display <strong>Teaching Aid 3.1</strong>. Tell students that the graph and table are for Alana’s pledge plan, which is represented by the equation <em>A</em> = 5 + 0.5<em>d</em>, where <em>A</em> is the amount of money Alana collects from each sponsor for walking <em>d</em> kilometers</p>"
+                        ]
                     }
                   },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_3_1_coin_and_pouch_350w.png"
+                  [
+                    {
+                      "content": {
+                        "type": "Table",
+                        "name": "",
+                        "columns": [
+                          {
+                              "name": "d",
+                              "type": "number",
+                              "values": [0, 1, 2, 3, 4, 20, 25, 30]
+                            },
+                            {
+                              "name": "A",
+                              "type": "number",
+                              "values": [5, 5.5, 6, 6.5, 7, 15, 17.5, 20]
+                            }
+                        ]
+                      }
+                    },
+                    {
+                      "layout": {
+                        "height": 365
+                      },
+                      "content": {
+                        "type":"Geometry",
+                        "board": {
+                          "properties": {
+                            "axisLabels": ["d", "$"],
+                            "axisNames": ["Distance (km)", "Amount Earned"],
+                            "axisMin": [-0.2, -1],
+                            "axisRange": [50, 50]
+                          }
+                        },
+                        "objects": [
+                          {
+                            "type": "movableLine",
+                            "parents": [
+                              {
+                                "type": "point",
+                                "parents": [3, 6.5]
+                              },
+                              {
+                                "type": "point",
+                                "parents": [30,20]
+                              }
+                            ]
+                          }
+                        ]
+                      }
                     }
-                  },
+                  ],
                   {
-                    "content": {
-                      "type": "Text",
-                      "text": "The code below indicates that there are $11 in gold coins in the pouches and in loose coins as shown on the left side of the equation."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_3_1_eleven_350w.png"
-                    }
-                  },
-                  {
-                    "content": {
+                    "content":
+                    {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<em>How much money was in each pouch?\nHow much money did the winner receive?</em>\nThe class made up several other codes. For each code the total number of coins on each side of the equation is the same and each pouch contains the same number of coins.<ul><li>What is the number of gold coins in each pouch? </li><li>How can you check your answer?</li></ul>Write down your steps so that someone else could follow your steps to find the number of coins in a pouch. "]
+                      "text": [
+                        "<p>Take one or two of the points suggested by students and ask:</p>",
+                        "<ul><li>How can you locate this point on the line? (Draw the vertical and horizontal lines corresponding to the coordinates of the point.)</li><li>Find a pair of corresponding values in the table that are solutions to the equation. (Students may have to extend the table.) </li><li>Write two questions about Alana’s pledge plan that could be answered by the coordinates of the point (14, 12). (Students can say either “How far did Alana walk if a sponsor donates +12?” or “How much money would a sponsor donate if Alana walked 14 kilometers?”) </li><li>How can you use the equation for Alana’s plan to check the answer to the question you made up? (You can substitute <em>d </em>= 14 and <em>A</em> = 12 into the equation <em>A</em> = 5 + 0.5<em>d</em>. If the resulting equation is true, then (14, 12) is a solution.)</li><li>How can you use a graph to find the number of kilometers that Alana walked if a sponsor donated $17? (You go to 17 on the vertical axis and move straight across horizontally until you intersect the line. Then, move directly down until you intersect the horizontal axis. The value you hit on the horizontal axis is the number of kilometers walked.) </li><li>How can you use a graph to solve 20 = 5 + 0.5<em>d</em>? What would the answer mean? (Go to 20 on the vertical axis and move horizontally until you intersect the line. Read the “<em>d</em>” value at that point. This gives the distance Alana must walk in order to raise $20 from each sponsor.)</li><li>What happens if you choose a point that is not visible on this section of the graph, such as (70, 40)? Does this point lie on the line? Explain. (Students might suggest extending the line. Some might suggest checking to see if the coordinates of the point make the equation a true statement.)</li></ul>"
+                      ]
                     }
                   },
                   {
-                    "content": {
+                    "content":
+                    {
                       "type": "Text",
-                      "text": "1."
+                      "format": "html",
+                      "text": [
+                        "<p>Presenting the Challenge</p>",
+                        "<p>Display <strong>Graphic Organizer 3.1: Pouches and Coins</strong>. Tell the class about the pouches and gold coins used in the Kingdom of Montarek. </p>",
+                        "<ul><li>The number of gold coins on each side of the equal sign is the same, but some coins are hidden in the pouches. </li><li>In each situation, each pouch contains the same number of one-dollar gold coins.</li><li>The challenge is to find the number of coins in each pouch</li></ul>"
+                      ]
                     }
                   },
                   {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_3_1_IC_coins_pouches_1_350w.png"
-                    }
-                  },
-                  {
-                    "content": {
+                    "content":
+                    {
                       "type": "Text",
-                      "text": "\n2."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_3_1_IC_coins_pouches_2_350w.png"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "\n3."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_3_1_IC_coins_pouches_3_350w.png"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "\n4."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_3_1_IC_coins_pouches_4_350w.png"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "\n5."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_3_1_IC_coins_pouches_5_350w.png"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "\n6."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_3_1_IC_coins_pouches_6_350w.png"
+                      "format": "html",
+                      "text": [
+                        "<p>PYou can also show the Launch Video at this point. (LANGUAGE)</p>",
+                        "<p>Launch Video: This animation depicts a messenger bringing the King of Montarek 11 gold coins, in the form of 5 coins and 2 sealed pouches that each contain the same number of coins. You can show this animation after introducing the students to the context of the gold coins in the Student Edition. This animation can help spark a discussion about strategies for finding the number of gold coins in each pouch.</p>",
+                        "<p>Tell students that, in this Problem, they will use money from the Kingdom of Montarek to explore equality.</p>"
+                      ]
                     }
                   }
                 ]
@@ -1830,36 +1766,31 @@
               "content": {
                 "tiles": [
                   {
-                    "content": {
+                    "content":{
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>Situation A. Nicole’s Strategy</strong>\nIn Code 2, Nicole thought of the left-hand side of the equation as having two groups. Each group contained one pouch and two coins. She visualized the following steps to help her find the number of coins in a pouch. \n1.  What is Nicole’s strategy? Can her strategy be used for other coin and pouch situations?"]
+                      "text": [
+                        "<p><strong>Explore (Digging In)</strong></p>",
+                        "<p>Providing for Individual Needs</p>",
+                        "<p>Encourage students to record their strategies.</p>",
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<ul><li>What does equality mean? What does the equal sign tell us? (It means that two quantities are equal.)</li><li> How can we maintain equality? (A few students may be able to say that equality can be maintained by adding, subtracting, multiplying, or dividing each side of an equation by the same number (for multiplication and division, the number must be nonzero), but most will not be able to answer this question fully yet. At this time, you might look for students to describe adding or removing one coin from each of the equal quantities or dividing the coins and pouches on each side into two equal groups.)</li><li>How do you know if your answer is correct? (You can substitute the value of the unknown into the equation and check that the resulting values on each side are equal.)</li></ul>",
+                        "<p>This is an opportunity to see how students handle parentheses. See the answers for some suggestions. </p>",
+                        "<p>Look for interesting strategies to share during the Summarize.</p>"
+                      ]
                     }
                   },
                   {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_3_1_WI_coins_pouches_350w.png"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "2. Noah looked at Nicole’s strategy and claimed that she was applying the Distributive Property. Is Noah’s claim correct? Explain.\n\n3. Yvonne thought that Nicole was just dividing both sides of the original equation by 2. Is she correct? Explain. "
-                    }
-                  },
-                  {
-                    "content": {
+                    "content":
+                    {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>Situation B. Aman’s Code</strong> \nAman made up another code, but then he forgot the number of coins he put in the pouches. But he did remember that there were 5 pouches and 10 coins with a total of 35 dollars.<ol><li>What might the pouches and coin picture look like? </li><li>How many dollars are in a pouch?</li></ol>"]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["<strong>Situation C. Another Donor</strong>\nA local merchant donates $200 for the Walkathon. <ol><li>They suggested the following code:\n6P + $20 = $200. P represents a pouch. How much money is in each pouch?</li><li>Mateo wrote two different expressions that could be codes to represent the $200. For each expression how much money is in each pouch?\n2P + $45  \u00a0\u00a0    4P + $20</li><li>Design another code that the merchant could use. Give it to a classmate to solve. </li></ol>"]
+                      "text": [
+                        "<p><strong>Planning for the Summary</strong></p>",
+                        "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know question? What will you do if you do not have evidence? </p>",
+                        "<p><strong>Now What Do You Know?</strong></p>",
+                        "<p><strong>Pouches with an unknown number of coins and coins are represented with an equation. What strategies can you use to find the number of coins in each pouch? How do you know if your answer is correct?</strong></p>"
+                      ]
                     }
                   }
                 ]
@@ -1872,12 +1803,167 @@
             {
               "type": "summarize",
               "content": {
-                "tiles": [{
-                  "content": {
-                    "type": "Text",
-                    "text": "Pouches with an unknown number of coins and coins are represented with an equation. What strategies can you use to find the number of coins in each pouch? How do you know if your answer is correct?"
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Summarize (Orchestrating the Discussion)</strong></p>",
+                        "<p><strong>Solutions and Strategies </strong></p>",
+                        "<p>Initial Challenge</p>",
+                        "<p>If your students recorded their work on poster paper, display the posters and give the class time to examine the various strategies. The following are examples of how two groups of students solved Code 1. </p>",
+                        "<ul><li>First, we noted that there are 10 coins on the left and there are 4 coins and 3 bags on the right. So the 3 bags must have a total of 6 coins in order to make the total number of coins on the right equal to 10. So each bag must have 2 coins.</li><li>We started by removing 4 coins from each side. Then we had 6 coins on the left and 3 pouches on the right. So each pouch must have 2 coins. To check our answer, we found the total number of coins in the pouches, which is 6, and added it to the 4 coins to get a total of 10 coins on the right. This is equal to the 10 coins on the left.</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Have students share all of the correct strategies they used (and some incorrect strategies if discussing them would be helpful in deepening students’ understanding of equality). The strategies above are just two of the many informative ways that students might solve these problems. See the answers for more possible strategies.</p>",
+                        "<p> After discussing each of the equations in the Initial Challenge, ask if there were other strategies that students used. If there were, they are likely to already be on posters. However, during the discussion, some students may have thought of additional ways to solve each equation. Some students may have used the Distributive Property before the What If...?.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>What If...?</p>",
+                        "<p>After students have had a few minutes to try the What If...? questions, display <strong>Teaching Aid 3.1B: Nichole’s Strategy</strong> and make sure students understand how the Distributive Property is being used.</p>",
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<ul><li>Can you use the Distributive Property on any of the other equations? (Yes. In Code 4 and Situation B. In Code 4, you can write the left side of the equation as 3 times 1 pouch and 1 coin and the right side of the equation as 3 sets of 10 coins. So 1 pouch and 1 coin will equal 10 coins. By removing 1 coin from each side, you can see that 1 pouch equals 9 coins. In Situation B, you can write the left side of the equation as 5 times 1 pouch and 2 coins and the right side of the equation as 3 sets of 7 coins. By removing 2 coins from each side, you can see that 1 pouch equals 5 coins.)</li><li>Could you use the Distributive Property for Aman’s Code in Situation B? (Yes. Some students may have used the Distributive Property when working with Aman’s Code. Other students may not have used the Distributive Property.)</li></ul>",
+                        "<p>Using the Distributive Property, students may see the 5 pouches and 10 coins = 35 dollars as 5 groups of 1 pouch and 2 coins = 5 groups of coins.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content":
+                      {
+                        "type": "Image",
+                        "url": "curriculum/moving-straight-ahead/images/MSA_TG_3_1_coin_pouches.png"
+                      }
+                  },
+                  {
+                    "content":{
+                      "type": "Text",
+                      "format": "html",
+                      "text": "Other students may see the 5 pouches and 10 coins with a total of 35 dollars without grouping. "
+                    }
+                  },
+                  {
+                    "content":
+                      {
+                        "type": "Image",
+                        "url": "curriculum/moving-straight-ahead/images/MSA_TG_3_1_pouch_coin.png"
+                      }
+                  },
+                  {
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Could you use the Distributive Property for the Code in Situation C? (No. 20 and 200 are not multiples of 6, so the coins do not easily break into groups with the number of pouches.)</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "content":
+                      {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Making the Mathematics Explicit</p>",
+                          "<p>After all of the Situations have been discussed, ask:</p>",
+                          "<ul><li>Did everyone use the same first step in each equation? (There is often more than one way to make the first step in solving an equation, so it is likely that different groups took different steps.)</li><li>What are some common strategies that we can use to maintain equality? (As a student describes a strategy, ask him or her to refer to a step in the solution to an equation that illustrates the strategy.)</li><li>How is designing a code, like you did in Situation C, different from figuring out a code, like you did in the other questions? (Students will have various answers. Some students may think about maintaining equality. Other students may use a guess and check approach.)</li></ul>",
+                          "<p>The conditions under which the equality relation is maintained are called the properties of equality. Note that this is not essential vocabulary, and that it is not introduced in the Student Edition until Problem 3.3. However, it might help in the discussion as students begin transitioning to symbolic methods of solving equations. You could display properties of equality on poster paper at this time.Situation C makes the transition from pictures to variables. After discussing the situation, revisit some of the Codes in the Initial Challenge.Use Code 4 to make the transition from pouches to variables.</p>"
+                        ]
+                      }
+                  },
+                  {
+                    "content":
+                      {
+                        "type": "Image",
+                        "url": "curriculum/moving-straight-ahead/images/MSA_TG_3_1_pouch_coin_equality.png"
+                      }
+                  },
+                  {
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Suppose we let <em>x</em> represent the number of coins in a pouch and 1 represent one coin. Rewrite the equality using <em>x</em>’s and numbers. (3<em>x</em> + 3 = 30)</li><li> Write the steps for solving this equation for <em>x</em>. (Some students may subtract 3 from both sides. Some may start by dividing both sides by 3. Some may use a fact-family idea and rewrite 3<em>x</em> + 3 = 30 as 3<em>x</em> = 30 - 3. Continue with each method to show that they are equivalent. Then have students check their solutions.)</li><li>Find the number of coins in a pouch for the following situation. (Each pouch contains one coin.)</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "content":
+                      {
+                        "type": "Image",
+                        "url": "curriculum/moving-straight-ahead/images/MSA_TG_3_1_how_many_coins.png"
+                      }
+                  },
+                  {
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Ask the class to solve the problem visually and then by using properties of equality. As you go along, record each step in a table like the one below. You could add a fourth column and write in the property. Follow it through to the end. When you are done, ask if there was a different first step that could have been taken. For example, in the second row, students may have subtracted pouches instead of coins. So the second row could be “Subtract 2 pouches from each side, 1<em>x</em> + 3 = 4”."
+                      ]
+                    }
+                  },
+                  {
+                    "content":
+                      {
+                        "type": "Image",
+                        "url": "curriculum/moving-straight-ahead/images/MSA_TG_3_1_pouch_coin_problem.png"
+                      }
+                  },
+                  {
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Emphasize that, in a given equation, the value of x (or the number of coins in each pouch) is the same. Checking the answer provides an opportunity for students to practice work with parentheses and review the order of operations. In the preceding example, to check the answers, students could write 3(1) + 3 = 2(1) + 4 or 6 = 6. They could also write 1 + 1 + 1 + 3 = 1 + 1 + 4. Review the use of parentheses if necessary. </p>",
+                        "<p>This context provides an opportunity to discuss a common misunderstanding. Ask students to consider the equality 3x = 12. Suppose a student proposes that subtracting 3 from both sides will produce x = 9. Ask students to use the idea of gold coins in pouches to investigate this strategy. Moving back to the visual makes it clear that dividing, not subtracting, is the logical operation.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Now What Do Students Know</p>",
+                        "<p>Ask students to reflect on the discussion and answer the Now What Do You Know questions.</p>",
+                        "<p><strong>Pouches with an unknown number of coins and coins are represented with an equation. What strategies can you use to find the number of coins in each pouch? How do you know if your answer is correct?</strong></p>",
+                        "<p>See answers to the problem for more information about the strategies and embedded mathematics.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Reflecting on Student Learning</strong> </p>",
+                        "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
+                        "<ul><li>What evidence do I have that students understand the Now What Do You Know questions?</li><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
+                      ]
+                    }
                   }
-                }]
+                ]
               },
               "supports": []
             }
