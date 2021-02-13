@@ -1983,40 +1983,34 @@
                   {
                     "content": {
                       "type": "Text",
-                      "text": "In the last Problem, you used pictures of pouches and gold coins to solve equations. Your solutions maintained the equality of coins on both sides of the equal sign. For example, you might have removed (or subtracted) the same number of coins on both sides of the equation. To better understand how to maintain equality, let’s look first at numerical statements."
+                      "format": "html",
+                      "text": [
+                        "<p>Students translate the pictorial form of linear equations into symbolic linear equations in one variable. They begin to use the properties of equality to solve the equations symbolically. They explore equivalent expressions that can represent a given situation involving pouches and coins. They begin to relate inequalities and finding solutions of the inequalities to the work they are doing with linear equations.</p>",
+                        "<p><strong>Implementation Note:</strong> You may want to have a conversation after the Initial Challenge before moving on to the What If...?. This will allow you to discuss and compare students’ equations. You can also highlight your students’ strategies for solving the equations. This may help student transition to the What If...? where they will have to solve equations without being given pictures of pouches and coins. </p>",
+                        "<p>Have students work on the Initial Challenge. As a class, discuss the strategies and solutions for writing and solving the equations. After the discussion, have student work on the What If...? questions. For Situation C, you may need to remind students what an inequality is. Students used inequalities in Problem 2.1: Henri and Emile and in the Grade 6 unit <em>The Point of Being Rational.</em></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>NWDYK</strong></p>",
+                        "<p>Describe a strategy for solving equations using what you know about equality. How do you know if your answer is correct?"
+                      ]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["The equation 85 = 70 + 15 states that the quantities 85 and 70 + 15 are equal. \n<em>What do you have to do to maintain equality if you:\n  • subtract 15 from the left-hand side of the original equation?\n  • add 10 to the right-hand side of the original equation?\n  • divide the left-hand side of the original equation by 5?\n  • multiply the right-hand side of the original equation by 4?</em>"]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "The picture below shows a situation from Problem 3.1."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_3_2_In_coins_pouches_350w.png"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["Because the number of gold coins in each pouch is unknown, you can let x represent the number of coins in one pouch. You can let 1 represent the value of one gold coin. Then this situation can be represented with one of the following equations:\n\n      2<em>x</em> + 4 = 12      or       2(<em>x</em> + 2) = 12       or       <em>x</em> + 2 + <em>x</em> + 2 = 12\n\nThe expressions 2<em>x</em> + 4, 2(<em>x</em> + 2), and <em>x</em> + 2 + <em>x</em> + 2 are equivalent expressions.  Note that you can apply the Distributive Property to the expression 2<em>x</em> + 4 to write 2(<em>x</em> + 2). So, \n\n \u00a0\u00a0\u00a0 2<em>x</em> + 4 = 2(<em>x</em> + 2)\n\n<em>What properties of operations could you use to show that \n\n \u00a0\u00a0\u00a0 x + 2 + x + 2 = 2(x + 2)?</em>"]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["Two or more expressions are equivalent if they have the same value, regardless of what number is substituted for the variable. Recall that you have been solving linear equations of the form <em>y = ax</em>\u00a0 and <em>y = x + b</em>\u00a0 using fact families and numeric reasoning.  In this Problem, you will revisit problems that involve linear situations with pouches and coins, but you will use symbolic equations to represent your solution process to equations of the form <strong>y = ax + b where the value of y is given or ax + b = cx + d.</strong>"]
+                      "text": [
+                        "<p><strong>Emerging Mathematical Ideas</strong></p>",
+                        "<p>Explore algebraic approaches to solving equations based on prior experiences with pouches and coins using the Distributive Property, fact families, and properties of operations and equality.Build on experiences with pouches and coins to explore algebraic strategies for solving equations including:</p>",
+                        "<ul><li>noticing that the Distributive Property allows you to create multiple equivalent forms for an expression or equation, </li><li>applying the Distributive Property and fact families (composing/decomposing numbers) to justify steps needed to solve equations (find </li><li>applying the properties of operations and equality (subtract or divide both sides of an equation by the same number) and fact families to justify steps needed to solve equations.</li></ul>",
+                        "<p>Notice that you can check to see if you have found the correct number of coins in a pouch (variable) by replacing each pouch (variable) in the original clue/equation with your answer and simplifying to see if the two sides are equal.</p>"]
                     }
                   }
                 ]
@@ -2031,43 +2025,37 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["Suppose <em>x</em> \u00a0 represents the number of coins in one pouch and 1 represents the value of one coin in the following situations. <ul><li>Write an equation to represent each situation. </li><li>Are there other possibilities for the equations that you could write? Explain.</li><li>Use your equation to find the number of gold coins in each pouch. Check your answers.</li></ul>"]
+                      "text": [
+                        "<p><strong>Launch (Getting Started)</strong></p>",
+                        "<p>Connecting to Prior Knowledge</p>",
+                        "<p>Start by presenting the example at the beginning of the Introduction. Write the equation 85 = 70 + 15 on the board. Then, pose each of the questions one at a time, always using the original equation. For example, for the first question, you could record the following:</p>",
+                        "<p>  85 = 70 + 15                            85 = 70 + 15</p>",
+                        "<p><u>-15       -15</u>             or        <u>85 - 15 = 70 + 15 - 15</u></p>",
+                        "<p>  70 = 70                                       70 = 70</p>"
+                      ]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "\nEquation 1"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_3_2_IC_coins_pouches_1_350w.png"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "Equation 2"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_3_2_IC_coins_pouches_2_350w.png"
+                      "format": "html",
+                      "text": [
+                        "<p>After subtracting 15 from the left side of the equation, you could ask:</p>",
+                        "<ul><li>What should you do to keep the two sides equal? (Subtract 15 from the right side.)</li></ul>",
+                        "<p>Repeat this method for each of the questions in the Introduction. Then have students try their methods on another example of equality.</p>",
+                        "<ul><li>What should you do to keep the two sides equal? (Equality is maintained by adding, subtracting, multiplying, or dividing each side by the same number. For multiplication and division, the number must be nonzero.) </li></ul>"
+                      ]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "Equation 3"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_3_2_IC_coins_pouches_3_350w.png"
+                      "format": "html",
+                      "text": [
+                        "<p>Presenting the Challenge</p>",
+                        "<p>If you did not make the transition from pouches and coins to variables and numbers at the end of the Summarize for Problem 3.1, do so now. Be sure students have a general idea of the procedures. You might want to revisit one of the situations from Problem 3.2. As a part of the discussion, discuss how the pouches and coins can be represented by various equivalent expressions.</p>",
+                        "<p>You might want to add to the instructions of the Initial Challenge by having students write their steps for solving, showing what is happening with the pouches and coins. Then next to each step write the equation symbolically.</p>"
+                      ]
                     }
                   }
                 ]
@@ -2079,22 +2067,42 @@
               "content": {
                 "tiles": [
                   {
-                    "content": {
+                    "content":  {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>Situation A. More Pouches</strong>\nA messenger has 6 pouches and 27 coins. There is a total of $105. <ol><li>Write an equation to represent the situation. Then solve the equation to find the number of dollars in each pouch.</li><li>AJ claims that there is more than one way to write the equation. Is he correct? Explain. </li><li>Will the solution for each equation be the same? Explain.</li></ol>"]}
+                      "text": [
+                        "<p><strong>Explore (Digging In)</strong></p>",
+                        "<p>Providing for Individual Needs</p>",
+                        "<p>As you move from group to group, watch and listen to how students are discussing equivalent expressions. It will be important for them to be flexible with equivalent expressions.</p>",
+                        "<p>For example, if <em>ax + b = cx + d</em> and <em>y1 = ax + b</em> and <em>y2 = cx + d</em>, then <em>y1 = y2</em>.</p>",
+                        "<p>Be sure students are recording their methods and checking their answers. See how students are translating the pouches and coins in Equation 2. Students can write the left side as (<em>x</em> + 2) + (<em>x</em> + 2) + (<em>x</em> + 2) or as 3(<em>x</em> + 2) and the right side as 12. (PORTAYAL) Return to this in the Summary and ask if the two expressions are equivalent and why. This will review the Distributive Property, which was developed in earlier Units.</p>",
+                        "<p>Some students may struggle with writing the solutions to the equations.</p>"
+                      ]
+                    }
                   },
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>Situation B. Applying Your Strategies</strong>\nUse your strategies to solve each equation. Check your answer. <ol><li> 30 = 6 + 4<em>x</em></li><li> 7<em>x</em> = 6 + 5<em>x</em></li><li> 7<em>x</em> + 2 = 12 + 5<em>x</em> </li><li> 2(<em>x</em> + 4) = 16</li></ol>"]}
+                      "text": [
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<p>For Equation 1, ask:</p>",
+                        "<ul><li>What is your equation? (4x + 2 = 18 or 2(2x + 1) = 18)</li><li>What was the first thing you did with the pictorial equation to begin solving it? (Using the first method above, the first step would be to take away 2 coins from each side.)</li><li>How can you show this with your equation? (Subtract 2 from each side. This results in 4x + 2 - 2 = 18 - 2 or 4x = 16.)</li><li>What did you do next? (Split the coins into four equal sets.)</li><li>How can you show this with your equation? (4x = 4(4))  </li><li>What was your next step? (Set each of the 4 pouches equal to one of the 4 sets of coins.)</li><li>How can you show this with your equation? (Divide by 4 on each side. So, x = 4.) </li><li>How can you check your answer? (Using the coins and pouches, you can add up all the coins inside and outside the pouches on the left side and then check to make sure your result equals the number of coins on the right side. On the left side, there are 4 pouches, each of which we think contains 4 coins. If we are correct, there are 16 coins in the pouches. If you add those 16 coins to the 2 coins outside the pouches, the result is 18 coins on the left side. There are also 18 coins on the right side, so the answer is correct.Or, you can substitute 4 into the equation for x. The result shows that 4 is correct.</li>",
+                        "<p>     4(4) + 2 = 18\n16 + 2 = 18\n18 = 18)<p>"
+                      ]
+                    }
                   },
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>Situation C. More or Less</strong>\nA messenger has 6 pouches and 30 coins. The total must be less than 102 coins. How would you <strong>write</strong> this inequality? What are some solutions?"]}
+                      "text": [
+                        "<p>Planning for the Summary</p>",
+                        "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know question? What will you do if you do not have evidence?</p>",
+                        "<p><strong>Now What Do You Know?</strong></p>",
+                        "<p><strong>Describe a strategy for solving equations using what you know about equality. How do you know if your answer is correct?</strong></p>"
+                      ]
+                    }
                   }
                 ]
               },
@@ -2106,12 +2114,196 @@
             {
               "type": "summarize",
               "content": {
-                "tiles": [{
-                  "content": {
+                "tiles": [
+                  {
+                    "content":
+                      {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>Summarize (Orchestrating the Discussion)</strong></p>",
+                          "<p>Solutions and Strategies</p>",
+                          "<p>Post the solutions around the room. Call on different students to describe how they solved the equations. (AGENCY, IDENTITY, OWNERSHIP) Make sure you highlight equations in which students may have done something different for the first step. Some may begin by combining pouches (like terms), while others may start by removing coins.</p>"
+                        ]
+                      }
+                  },
+                {
+                  "content":
+                  {
                     "type": "Text",
-                    "text": "Describe a strategy for solving equations using what you know about equality. How do you know if your answer is correct?"
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Suggested Questions</strong></p>",
+                      "<ul><li>What did you do at each step to maintain equality? (Answers will vary. Some may divide first, some may add first, etc.)</li>",
+                      "<li> Is there another way to make the first step in the solution? Explain.(In Question B, part (3), some students may start by subtracting either 2 or 12 from both sides of the equation. Others may start by subtracting either 5 pouches or 7 pouches (5<em>x</em> or 7<em>x</em>) from both sides. Note that some of these strategies will have students working with negative numbers. This is an opportunity to check on their understanding and use of integers.)</li>",
+                      "<li> Are there other equations in which a different first step could be taken? (Answers will vary. Most equations can be solved in many different ways.) </li>",
+                      "<li>Look back over your work for each equation. What general rules were you using to solve the equations? (Students should say something about maintaining equality by removing the same quantity from each side of the equation.)</li></ul>"
+                    ]
                   }
-                }]
+                },
+                {
+                  "content":
+                  {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Making the Mathematics Explicit</p>",
+                      "<p>To move from pouches and coins to solving equations symbolically, discuss the What If...? Situations.</p>",
+                      "<ul><li>In Situation A, what equation can we write to represent the pouches and coins code? (Various answers. The most common might be: 6x + 27 = 105.)</li><li>Using the thinking that you were using with the visual equations, how do we find the value of x. (The first step is to take away 27 coins from each side. That leaves 6 pouches on the left side and 78 coins on the right side. The second step is to divide the  coins and pouches into 6 equal groups. So, the number of coins in each pouch is 13.)</li><li>Next to your work, write down a similar method using the equation that represents this situation. (LANGUAGE)</li></ul>",
+                      "<pre>                    Step 1: Subtract 27 from each side of the equation:\n                                   6<em>x</em> + 27 -27 = 205 -27\n                                                       6<em>x</em> = 78\n</pre>",
+                      "<pre>                    Step 2: Divide by 6 on each side:\n                                                   6<em>x</em> = 78\n                                                      6    6\n                                                      <em>x</em> = 13",
+                      "<p>As students move away from the pouches and toward symbolic statements, they may find that their experience with pouches and coins is useful for recalling strategies.</p>"
+                    ]
+                  }
+                },
+                {
+                  "content":
+                  {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>In Situation B, did you draw visual equations to help you solve any of them? (Answers will vary. Some students need to think about or see the visual equations when the pouches are on both sides of the equal sign, like in #2 and #3. Other students will need to think about or see the visual equations when there is a grouping symbol [parentheses].)</p>",
+                      "<p><strong>Suggested Questions</strong></p>",
+                      "<ul><li>Describe a general method for solving equations. (Generally, you want to isolate the variable [pouch] on one side of the equation and a number [coins] on the other side. To do this, you can use properties of equality or “undo” the operations until you have the variable alone on one side of the equality and a number on the other side. You use the number that the variable equals to check your solution. You substitute the number  for the value of the variable in the original equation to see if you have a true statement.)</li></ul>",
+                      "<p>Students should be able to generalize that adding, subtracting, multiplying, and dividing by the same number maintains equality. Be sure to stress that they cannot multiply or divide by 0. Dividing by 0 has no meaning and multiplying by 0 would make any statement always true, so it is not a helpful strategy in finding a specific solution. For example, suppose we start with 3b = 27, which we know is true only when b = 9. Multiplying each side by 0 gives 3b * 0 = 9 * 0, or 0 * 0. This statement is true for all values of the variable, not just 9. So multiplying both sides by 0 gives an equality that is not equivalent to the original equation because it has different solutions. If you have not already addressed the common error of subtracting when dividing is needed, do so now.</p>",
+                      "<p>Review that, in a given equation, the value of <em>x</em> (or the number of coins in each pouch) is the same. Checking the answer provides an opportunity for students to practice work with parentheses and review the order of operations.</p>"
+                    ]
+                  }
+                },
+                {
+                  "content":
+                  {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Situation C</strong></p>",
+                      "<p>Discuss that when solving an inequality, students can use what they know about solving equations to make sense of the solutions.</p>",
+                      "<ul><li>In Situation C, we know that 6 pouches and 30 coins must be less than 102 coins. What if it were equal to 102 coins? How would we write that in symbols? (6<em>x</em> + 30 = 102)</li><li>What would be the solution to the equation? (12 coins in a pouch.)</li><li>So, if 6 pouches and 30 coins must be less than 102 coins, or 6x + 30 &lt; 102, what are possible answers for how many coins could be in each pouch? (11, 10, 9, etc.)</li><li>If it were possible to have partial coins, would 11 ½ coins be a solution? (Yes.)</li><li>So, could there be more solutions than the ones you listed? (Yes. It would be any amount less than 12.)We can show the possible solutions with an expression and on a number line. (LANGUAGE)</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "content":
+                  {
+                    "type": "Image",
+                    "url": "curriculum/moving-straight-ahead/images/MSA_TG_3_2_sit_c_number_line.png"
+                  }
+                },
+                {
+                  "content":
+                  {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<ul><li>How is solving an inequality, like the one in Situation C, like solving an equation? (You do the same thing you would do for solving an equation. But the answer has more than one solution. The answer is a range of numbers. You can also think about the solutions on a graph, in a table, or using guess and check.)</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "content":
+                  {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Going Further</p>",
+                      "<ul><li>Can you use the Distributive Property on any of the equations in the Initial Challenge? (Yes. Equations 1 and 2 can easily be grouped. Because students are introduced to the equations visually, they often use the Distributive Property in creative ways. See some examples below. Students may need help with notation, especially using parentheses as grouping symbols.)</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "content":
+                  {
+                    "type": "Image",
+                    "url": "curriculum/moving-straight-ahead/images/MSA_TG_3_2_groups_of_4_and_2.png"
+                  }
+                },
+                {
+                  "content":
+                  {
+                    "type": "Image",
+                    "url": "curriculum/moving-straight-ahead/images/MSA_TG_3_2_groups_of_3.png"
+                  }
+                },
+                {
+                  "content":
+                  {
+                    "type": "Text",
+                    "format": "html",
+                    "text":[
+                      "<ul><li>Can you use the Distributive Property on Equation 3? (You can, but it does not divide into whole size pouches. So this isn’t friendly to use. See example below.)</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "content":
+                  {
+                    "type": "Image",
+                    "url": "curriculum/moving-straight-ahead/images/MSA_TG_3_2_groups_of_3_circled.png"
+                  }
+                },
+                {
+                  "content":
+                  {
+                    "type": "Text",
+                    "format": "html",
+                    "text":[
+                      "<ul><li>What are different first steps that you could use to solve Equation 2? (Various answers. Students are likely to begin by either subtracting coins or pouches. Examples are shown below.</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "content":
+                  {
+                    "type": "Image",
+                    "url": "curriculum/moving-straight-ahead/images/MSA_TG_3_2_eq_2.png"
+                  }
+                },
+                {
+                  "content":
+                  {
+                    "type": "Text",
+                    "format": "html",
+                    "text":[
+                      "<ul><li>What are different first steps that you could use to solve Equation 3? (Various answers. Students are likely to begin by either subtracting coins or pouches. Examples are shown below.</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "content":
+                  {
+                    "type": "Image",
+                    "url": "curriculum/moving-straight-ahead/images/MSA_TG_3_2_eq_3.png"
+                  }
+                },
+                {
+                  "content":
+                  {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Now What Do Students Know</p>",
+                      "<p>Ask students to reflect on the discussion and answer the Now What Do You Know question.</p>",
+                      "<p><strong>Describe a strategy for solving equations using what you know about equality. How do you know if your answer is correct?</strong></p>",
+                      "<p>See answers to the problem for more information about the strategies and embedded mathematics. </p>",
+                      "<p>Students should discuss applying the principles of equality repeatedly to the equation until you have isolated the variable on one side and a number on the other side. Then check the solution by substituting the value of the variable into the original equation to see if the equation is true.</p>"
+                    ]
+                  }
+                },
+                {
+                  "content":
+                  {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Reflecting on Student Learning</strong></p>",
+                      "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
+                      "<ul><li>What evidence do I have that students understand the Now What Do You Know question?</li>",
+                      "<ul><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ul>",
+                      "<li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
+                    ]
+                  }
+                }
+              ]
               },
               "supports": []
             }
