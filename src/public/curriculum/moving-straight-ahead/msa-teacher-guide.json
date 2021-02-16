@@ -3473,37 +3473,54 @@
               "content": {
                 "tiles": [
                   {
-                    "content": {
+                    "content":
+                    {
                       "type": "Text",
                       "format": "html",
-                      "text": ["In Problem 2.2, you used graphs and tables to find when the costs of two different plans for buying T-shirts were equal. The graphs of the two cost plans are shown below. C<sub>n</sub> represents the costs of the No-Shrink Tee. C<sub>m</sub> represents the costs of the Mighty Tee. The point of intersection of the two lines tells us when the costs for the two T-shirt plans are equal."]
+                      "text": [
+                        "<p>In this Problem, students explore a symbolic method for finding the point of intersection of two lines. Students connect this method to other methods of finding the point of intersection, such as using a graph or table of data that represents each relationship.</p>",
+                        "<p>Students find the point of intersection of two lines by setting the expressions for <em>y</em> equal to each other and then solving for <em>x</em>. They use the <em>x</em>-value to find the <em>y</em>-value for the coordinates of the intersection point. If the two relationships are represented by <em>y</em><sub><em>1</em></sub><em> = mx + b</em> and <em>y</em><sub><em>2</em></sub><em> = kx + c</em>, then the point of intersection of the lines representing each equation occurs when <em>y</em><sub><em>1</em></sub><sub> </sub>= <em>y</em><sub><em>2</em></sub>, or<em> mx + b = kx + c</em>.</p>",
+                        "<p>Students find the values of x that satisfy the inequalities <em>y</em><sub><em>1</em></sub> &lt;<em>y</em><sub><em>2</em></sub> and <em>y</em><sub><em>1</em></sub> &gt; <em>y</em><sub><em>2</em></sub>. They also write and interpret equivalent expressions and solve inequalities using graphs and equations.</p>",
+                        "<p>Note that by finding the point of intersection of two lines they are also  solving a system of two linear equations which is studied more formally in the 8th grade unit, It’s in the System.</p>"
+                      ]
                     }
                   },
                   {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_3_4_In_two_plans_350w.png"
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>3.4 The Point of Intersection:  Using Equations and Inequalities</strong></p>",
+                        "<p><strong>AoL: Analysis &amp; Analysis</strong></p>",
+                        "<p><strong>CCSSM: 7.NS.A.2c, 7.EE.A, 7.EE.A.1, 7.EE.A.2, 7.EE.B, 7.EE.B.4, 7.EE.B.4a, 7.EE.B.4b</strong></p>"
+                      ]
                     }
                   },
                   {
-                    "content": {
+                    "display": "teacher",
+                    "content":
+                    {
                       "type": "Text",
                       "format": "html",
-                      "text": ["What information do the coordinates of the point of intersection of the two lines give you about this situation? \n\nHow could you use the two equations to find the coordinates of the point of intersection of the two lines? That is, for what number of T-shirts n is <em>C<sub>m</sub> = C<sub>n</sub></em>\u00a0 or 49+<em>n</em>\u00a0 = 4.5<em>n</em>\u00a0? How could you use the equation or its graph or table to find the number of T-shirts where the cost is less than $60? That is, for values of n, is \n \u00a0 \u00a0 <em>C<sub>mighty</sub></em>\u00a0 < 60?   Or \u00a0 \u00a0 49 + <em>n</em>\u00a0 < $60"]
+                      "text": [
+                        "<p><strong>NWDYK</strong></p>",
+                        "<p><strong></strong>Describe how you can solve an equation of the form <em>ax + b = y</em>?</p>",
+                        "<p>Describe how you can solve an inequality of the form <em>ax + b &lt; c</em> or <em>ax + b &gt; c</em><strong>?</strong></p>"
+                      ]
                     }
                   },
                   {
-                    "content": {
+                    "content":
+                    {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<em>When either the value of x or y is known, what strategies do you have for solving  \n •  equations of the form y = ax+ b? \n • inequalities of the form  ax +b < y  or ax +b > y?</em>"]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["A local bakery, Fabulous Fabian’s Bakery, wants to set up a snack booth at the Walkathon. They will donate their profits to the school. To make a profit the business has to consider the expenses that might occur. For a T-shirt company, the expenses may include the cost of buying the shirts, costs for printing, costs to advertise, and labor charges. For a bakery the cost might include cost of ingredients, labor charges, advertising, etc."]
+                      "text": [
+                        "<p><strong>Emerging Mathematical Ideas</strong></p>",
+                        "<p>Extend and apply strategies for solving equations using symbols and graphs to solve two related equations and to answer questions about the relationships.</p>",
+                        "<p>Use symbolic and graphical strategies to answer questions about two linear relationships with the same independent variable including:</p>",
+                        "<ul><li>using symbolic methods to find the value for <em>x</em> where the two equations are equal (that is have the same <em>y</em> value),</li><li>understanding the meaning of the point where the graphs of the two equations intersect for a given context, and</li><li>using graphs and equations to answer questions about the two related equations such as when one equation is greater or less than the other.</li></ul>"
+                      ]
                     }
                   }
                 ]
@@ -3518,7 +3535,42 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["At Fabulous Fabian’s Bakery, the expenses <em>E</em>\u00a0 to make n cakes per month is given by the equation: \n\n \u00a0\u00a0\u00a0 <em>E</em>\u00a0 = 825 + 3.25<em>n</em>\n\nThe income <em>Inc</em>\u00a0 for selling <em>n</em> cakes is given by the equation: \n\n  \u00a0\u00a0\u00a0 <em>Inc</em>\u00a0 = 8.20 <em>n</em><ul><li>What information do the numbers in each equation represent?</li><li>How many cakes does Fabian need to sell in order to start making a profit?</li></ul>"]
+                      "text": [
+                        "<p><strong>Launch (Getting Started)</strong></p>",
+                        "<p>Connecting to Prior Knowledge</p>",
+                        "<p>You may want to summarize after Question B to be sure that students are comfortable finding the profit numerically and recognizing how this solution is represented on a graph. This will set the scene for representing the answers to the inequalities on graphs in Question E. </p>",
+                        "<p>Display <strong>Teaching Aid 3.4: Two T-Shirt Plans</strong> and use it to review how to interpret the information that the point of intersection provides in this situation. Explain that the point of intersection lies on both lines, so its coordinates must be a solution to the equation of each line. Revisit how inequalities represent multiples solutions. (LANGUAGE)</p>",
+                        "<p>Choose a point, such as (10, 45).</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<ul><li>Does it lie on both lines? (No, it only lies on the line representing <em>C</em><sub><em>n</em></sub> = 4.5<em>n</em>.) </li><li>What information does it represent? (10 T-shirts cost $45. Because the point lies below the line representing <em>C</em><sub><em>m</em></sub> = 49 + n, the cost of 10 T-shirts from No-Shrink is cheaper than the cost of 10 T-shirts from Mighty Tee.) </li></ul>",
+                        "<p>Choose a point that does not lie on either line, such as (6, 40). </p>",
+                        "<ul><li>Does this point lie on either line? (No, it falls below the line for <em>C</em><sub><em>m</em></sub> and above the line for <em>C</em><sub><em>n</em></sub>.)</li></ul>",
+                        "<p>Draw students’ attention to the point of intersection on the graph. </p>",
+                        "<ul><li>What information do the coordinates of the point of intersection of the two lines give you about this situation? (They tell you the number of T-shirts required for the cost of the two plans to be equal.) </li><li>Show how you could use the two equations to find the coordinates of the point of intersection of the two lines. That is, for what number of T-shirts <em>n</em> is <em>C</em><sub><em>mighty</em></sub> = <em>C</em><sub><em>No-Shrink</em></sub>? (You can solve the equation 4.5<em>n</em> = 49 + <em>n</em>. <em>n</em> = 14. You substitute this value into one of the equations to find the value of <em>C</em>, which is 63.) </li><li>For what number(s) of T-shirts is plan <em>C</em><sub><em>mighty</em></sub> less than plan <em>C</em><sub><em>No-Shrink</em></sub>? That is, when is <em>C</em><sub><em>mighty</em></sub><em> &lt; C</em><sub><em>No-Shrink</em></sub>? (Once you know for what value of n the two plans are equal, you can choose a value either greater or less than this value of <em>n</em>. You can substitute this value into the equality to determine which cost is greater for that value of <em>n</em>.)</li><li>How could you use the equation or its graph or table to find the number of T-shirts where the cost is less than $60? That is, for values of <em>n</em> is <em>C</em><sub><em>mighty</em></sub> &lt; 60?   Or 49 + <em>n</em> &lt; $60? (Students could change the inequality to 49 + <em>n</em> = $60 and solve for <em>n</em>. Then use the value of the n to reason about the solutions to the inequality. Another way to find solutions to the inequality is to look at the graph. Students will see that when <em>n</em> = 18, the graph of <em>C</em><sub><em>mighty</em></sub> is below the graph of <em>C</em><sub><em>No-Shrink</em></sub>. In fact, for all values of <em>n</em> that are greater than 14, the graph of <em>C</em><sub><em>mighty</em></sub> is below the graph of <em>C</em><sub><em>No-Shrink</em></sub>. This means that all numbers greater than 14 are solutions to the inequality <em>C</em><sub><em>mighty</em></sub> &lt; <em>C</em><sub><em>No-Shrink</em></sub>. Be sure students are comfortable using the graph to answer these questions.)</li></ul>",
+                        "<p>You may want to review inequality statements that were explored in earlier Units, such as <em>x</em> &lt; 6, <em>x</em> &gt; 5, or –3 &lt; <em>x</em>. Ask students to show the solution to each on a number line.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Presenting the Challenge</p>",
+                        "<p>Tell the story of the bakery or show the Launch Video. If needed, review the concepts of income, expense, and profit with the students.</p>",
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<ul><li>In the equations for income and expenses, what information do the <em>y</em>-intercepts give? (In the equation for income, the <em>y</em>-intercept tells you the income the bakery makes for selling 0 cakes in a month. In the equation for expenses, the y-intercept tells you the expenses the bakery has each month before it sells any cakes.)</li><li>What information do the coefficients of <em>n</em> represent? (In the equation for income, the coefficient of <em>n</em> represents the income the bakery earns for each cake sold. In the equation for expenses, the coefficient of <em>n</em> represents the cost to make each cake.)</li></ul>"
+                      ]
                     }
                   }
                 ]
@@ -3534,38 +3586,106 @@
               "content": {
                 "tiles": [
                   {
-                    "content": {
-                    "type": "Image",
-                    "url": "curriculum/moving-straight-ahead/images/MSA_3_4_WI_bakery_350w.png"
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Explore (Digging In)</p>",
+                        "<p>Providing for Individual Needs</p>",
+                        "<p>As you move around, make a note of how students are solving the problems. Some may use tables, some may use graphs, and some may use symbolic methods. Make sure that each of these strategies comes out in the Summarize.</p>",
+                        "<p>You can encourage students to make a table, a graph, or an explanation of a symbolic method. These can be used during the Summarize to make connections among the representations—verbal description, table, graph, and equation.</p>",
+                        "<p>Encourage students to write both equations and inequalities.</p>"
+                      ]
                     }
                   },
                   {
-                    "content": {
-                    "type": "Text",
-                    "format":"html",
-                    "text": ["<strong>Situation A. Kevin’s Graph</strong>\nKevin drew the graph above to help him find the number of cakes sold to make a profit. <ol><li>Explain how Kevin could use his graph to determine Fabian’s profit.</li><li>Kevin highlighted the vertical distance 330 between the two lines on the graphs. What does the 330 represent on the graph? What does it represent in the real world?</li><li>Adia claims she can find the coordinates of the point of intersection by solving the equation 8.20<em>n</em> = 825 + 3.25<em>n</em>. Is this possible? Explain. How does it help?</li></ol>"]
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>In the What If…? Situation A, when students determine whether there is a profit for making and selling 100 cakes, they can just compute the expenses and income and then subtract the expenses from the income. Be sure students see the connection between this numerical strategy and how it is represented on the graph. The profit is the vertical distance between the two points (100, I) and (100, E) on the graphs. Point out that, in this case, the expenses are greater than the income, so the vertical distance actually represents a loss.</p>"
+                      ]
                     }
                   },
                   {
-                    "content": {
-                    "type": "Text",
-                    "format":"html",
-                    "text": ["<strong>Situation B. Fabian’s Profit Equation</strong><ol><li>Fabian uses the equation P = Income – Expenses to predict the profit. He wrote P = 8.20<em>n</em> – (825 + 3.25). Does this make sense? Explain. </li><li>Adia rewrites Fabian’s profit equation as P = 4.95<em>n</em> – 825. Is she correct? Explain.</li></ol>"]
+                    "layout": {
+                      "height": 350
+                    },
+                    "content":
+                    {
+                      "type":"Geometry",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-30, -175],
+                          "axisRange": [500, 2500]
+                        }
+                      },
+                      "objects": [
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [0, 0]
+                            },
+                            {
+                              "type": "point",
+                              "parents": [400,3280]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [0, 825]
+                            },
+                            {
+                              "type": "point",
+                              "parents": [400,2125]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "polygon",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [100, 1150]
+                            },
+                            {
+                              "type": "point",
+                              "parents": [100,820]
+                            }
+                          ]
+                        }
+                      ]
                     }
                   },
                   {
-                    "content": {
-                    "type": "Text",
-                    "format":"html",
-                    "text": ["<strong>Situation C. Fabian’s Profit Inequality</strong> \nFabian and his sister are looking for other ways to express how to find the number of cakes needed to make a profit. Explain why each representation does or does not make sense.",
-                      "\nFabian's representation: Inequality Statement P > 4.95<em>n</em> - 825",
-                      "\nHis Sister's representation: Number Line"]
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Encourage students to check their answers as they continue to answer questions.</p>"
+                      ]
                     }
                   },
                   {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_Fabian_Numberline.png"
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Planning for the Summary</p>",
+                        "<p>What evidence will you use in the Summary to clarify and deepen the understanding of the Now What Do You Know? What will you do if you do not have evidence?</p>",
+                        "<p>Now What Do You Know?</p>",
+                        "<p><em>Describe the strategies you can use to solve linear equations using the properties of operations and equality</em></p>"
+                      ]
                     }
                   }
               ]
@@ -3578,13 +3698,166 @@
             {
               "type": "summarize",
               "content": {
-                "tiles": [{
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": ["Describe how you can solve an equation of the form ax + b  = y? \nDescribe how you can solve an inequality of the form <em>ax + b < c</em> or <em>ax + b > c</em>? "]
+                "tiles": [
+                  {
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Summarize (Orchestrating the Discussion)</strong></p>",
+                        "<p>Solutions and Strategies </p>",
+                        "<p>Go over each part of the Problem. Call on different students to discuss their methods. (AGENCY, IDENTITY, OWNERSHIP) After a group has presented their solutions, ask the class if they have any questions they want to ask the group. For example, encourage them to ask questions like the following: </p>",
+                        "<p>For What If…? Situation A, use the graph of the two equations to determine whether Fabian made a profit.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "layout": {
+                      "height": 350
+                    },
+                    "content":
+                    {
+                      "type":"Geometry",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-30, -175],
+                          "axisRange": [500, 2500]
+                        }
+                      },
+                      "objects": [
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [0, 0]
+                            },
+                            {
+                              "type": "point",
+                              "parents": [400,3280]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [0, 825]
+                            },
+                            {
+                              "type": "point",
+                              "parents": [400,2125]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "polygon",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [100, 1150]
+                            },
+                            {
+                              "type": "point",
+                              "parents": [100,820]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Profit occurs when expenses are less than income, or when income is greater than expenses. Use the graph to show that the expenses exceed the income if Fabian makes and sells 100 cakes. Mark the difference with a vertical line segment between the point (100, 1150) on the graph of E and the point (100, 820) on the graph of I. Some students may be ready to interpret the vertical distance symbolically.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Suggested Questions </strong></p>",
+                        "<ul><li>How can the vertical distance be interpreted as a symbolic expression? What would this expression mean? (Instead of thinking of 825 + 3.25<em>x</em> = 8.2<em>x</em>, we think of Income - Expenses, or 8.2<em>x</em> - (825 + 3.25<em>x</em>), and note when this expression is positive. When it is positive, Income is greater than Expenses, and there is a profit.)</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Making the Mathematics Explicit</p>",
+                        "<p>Use the What If…? Situations A and B to check on students’ understanding of linear equations. They should make the connection between solving equations symbolically and with a graph (or table). Ask students to tell you what the symbols and numbers mean in the equation and where this information is displayed in the graph. This will help them interpret the questions about equality and inequality. </p>",
+                        "<p>Discuss all the methods for finding the solutions.</p>",
+                        "<p>In the Initial Challenge, students used their knowledge of the context, equalities, inequalities, and their understanding of graphical representations of linear relationships to determine when there is a profit by using the graph. </p>",
+                        "<p>For What If…? Situations C, show graphically how the profit is illustrated. Note that most students may just find the intersection point and then find the location on the graph where that can satisfy the inequality <em>P </em>&gt; 4.95<em>n</em> – 825. Some students may write and graph the equation for Profit, <em>P</em> = 4.95<em>n</em> - 825. Then, look for solutions.</p>",
+                        "<p>To pull the ideas together, ask students to relate this Problem to prior work.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<ul><li>How is this similar to the equations in Problem 3.3? (You are setting the expressions for income and expenses equal to each other and then solving this equation to find the number of cakes.) </li><li>How is this Problem similar to the walking rate between the two brothers in Problem 2.1? (Both Problems involve finding the point of intersection of two lines. In Problem 2.1, students used tables and graphs to find the intersection point. In this Problem, students have learned a new strategy: solving an equation symbolically. Also, both Problems can be solved using inequalities. In the walking race situation, the goal was for Henri’s distance to be slightly greater than Emile’s distance when the race ended. In the bakery situation, Fabian’s goal is for his income to be greater than his expenses, so that he makes a profit.)</li></ul>",
+                        "<p>Tell students that this Problem is an example of finding the point of intersection of two lines by applying the principles of equality to an equation. </p>",
+                        "<p>If it is needed for your program, you can introduce the language of “systems of linear equations.” In a later Unit, It’s In the System, students will develop other strategies for finding the solution to a 2‐by‐2 system of equations.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Check for Understanding </strong></p>",
+                        "<p>End by giving two more equations. Ask students to find the point of intersection and solve an inequality. </p>",
+                        "<ul><li>Is the point (10, 40) the point of intersection of the lines of the following equations: <em>y</em><sub><em>1</em></sub> = 70 - 3<em>x</em> and <em>y</em><sub><em>2</em></sub> = 44 + 10x? (No. The point lies on the line that represents <em>y</em><sub><em>1</em></sub> because 40 = 70 - 3(10), but it does not lie on the line that represents <em>y</em><sub><em>2</em></sub> because 40 ≠ 44 + 10(10).) </li><li>Find the point of intersection symbolically. (If 70 - 3<em>x</em> = 44 + 10<em>x</em>, then <em>x</em> = 2 and <em>y</em><sub><em>1</em></sub> = <em>y</em><sub><em>2</em></sub> = 64.) </li><li>When is <em>y</em><sub><em>1</em></sub> &gt; 60? Explain your method. (<em>y</em><sub><em>1</em></sub> &gt; 60 when <em>x</em> = 3.3. If you test out a value for <em>x</em> that is less than 3.3, the value of <em>y</em><sub><em>1</em></sub> will be greater than 60. So, <em>y</em><sub><em>1</em></sub> &gt; 60 when <em>x</em> &lt; 3.3.)</li><li>When is<em> y</em><sub><em>1</em></sub> &lt; <em>y</em><sub><em>2</em></sub>? Explain your method. (<em>y1</em> = <em>y2</em> when <em>x</em> = 2. If you test out a value for <em>x</em> that is greater than 2, the value of <em>y1</em> will be less than the value of <em>y2</em>. So, <em>y1</em> &lt; <em>y2</em> when <em>x</em> &gt; 2.)</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Now What Do Students Know</p>",
+                        "<p>Ask students to reflect on the discussion and answer the Now What Do You Know?</p>",
+                        "<p><strong>Describe how you can solve an equation of the form a</strong><em><strong>x</strong></em><strong> + b = </strong><em><strong>y</strong></em><strong>?</strong></p>",
+                        "<p><strong>Describe how you can solve an inequality of the form a</strong><em><strong>x</strong></em><strong> + b &lt; c or a</strong><em><strong>x</strong></em><strong> + b &gt; c?</strong></p>",
+                        "<p>For equations, students should mention ideas showing that they are using the properties of equality. Students might also mention finding the solutions on tables and graphs.</p>",
+                        "<p>For the inequalities, students can solve the related equation to find the solutions for the inequality. Students might also mention finding the solutions on tables and graphs.</p>",
+                        "<p>See answers to the Problem for more information about the strategies and embedded mathematics. <strong></strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Reflecting on Student Learning </strong></p>",
+                        "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
+                        "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li><ul><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ul<li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit?The next Unit?<strong></strong></li></ul>"
+                      ]
+                    }
                   }
-                }]
+                ]
               },
               "supports": []
             }
