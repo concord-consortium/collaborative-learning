@@ -4391,7 +4391,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Students investigate the “steepness” of a set of stairs by measuring the rise and run of the stairs and comparing their data to carpenters’ guidelines. The ratio of “rise‐to‐run” informally introduces the concept of slope of a line.</p>"
+                        "<p>This Problem pulls together the main ideas in the Unit.  Students will look for a rate of change and a y-intercept from context cues and write equations for linear relationships. They will look at representing linear relationships with graphs, tables, and equations. Students will informally encounter systems of linear equations and  linear inequalities. They deepen their understanding of what it means for a relationship to be linear, and they see the connection between a constant rate of change and the slope of a line.  </p>"
                       ]
                     }
                   },
@@ -4401,18 +4401,19 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>4.1 Climbing Stairs: Using the Ratio of Rise to Run</strong></p>",
-                        "<p><strong>4AoL:  Analysis & Analysis</strong></p>",
-                        "<p><strong>CCSSM: 7.RP.A, 7.RP.A.2a, 7.RP.A.2b, 7.RP.A.2c</strong></p>"
+                        "<p><strong>4.3 Putting It All Together</strong></p>",
+                        "<p><strong>4AoL: Synthesis & Synthesis</strong></p>",
+                        "<p><strong>CCSSM: 7.RP.A, 7.RP.A.1, 7.RP.A.2a, 7.RP.A.2b, 7.RP.A.2c, 7.RP.A.2d</strong></p>"
                       ]
                     }
                   },
                   {
+                    "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>NWDYK</strong>How is the rate of change of a linear relationship related to the constant of proportionality?</p>"
+                        "<p><strong>NWDYK</strong></p><p>How do the situations in this problem compare to other problems in this unit? Do any of these represent proportional situations? Why?In what ways are the tables, graphs, equations, and inequalities useful for solving problems?</p>"
                       ]
                     }
                   },
@@ -4423,8 +4424,9 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Emerging Mathematical Ideas</strong></p>",
-                        "<p>Begin to analyze linear relationships (proportional and non-proportional) to understand how the constant rate of change can be understood and represented as a ratio.Notice that the:  </p>",
-                        "<ul><li>ratio of the rise (height of each step) to the run (the depth of each step) is the same for each step along a staircase,</li><li>the steeper the staircase the bigger the ratio of rise to run for each step and vise-versa, and</li><li>the constant rate of change in every linear relationship (represented as graphs or equations) can be described as the ratio of the vertical change to the horizontal change for any section of the graph.</li></ul>"
+                        "<p>Work to consolidate and refine emerging key mathematical concepts associated with linear relationships, both proportional and non-proportional, into a coherent constellation of ideas.</p>",
+                        "<p>Recognize that:</p>",
+                        "<ul><li>linear relationships are identified by their constant rate of change that can be found using a problem context, table of values, graph, or equation, </li><li>some linear relationships are proportional, and others are not,</li><li>proportional relationships will always include the value (0,0), and will be of the form <em>y = ax</em> where a is the constant of proportionality, and</li><li>when given the value of one variable for a linear relationship you can find the value of the other variable strategically using a variety of representations including graphs, tables, and equations.</li></ul>"
                       ]
                     }
                   }
@@ -4436,7 +4438,38 @@
               "type": "launch",
               "content": {
                 "tiles": [
-
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Launch (Getting Started)</strong></p>",
+                        "<p>Connecting to Prior Knowledge</p>",
+                        "<p>Students have been working with linear situations. They have used tables, graphs, and equations to represent a linear situation.  </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Presenting the Challenge</p>",
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<ul><li>Describe some situations from this Unit that we have explored. (Answers will vary. Students may mention walking rates, money raised for charity during a walkathon, the income and expenses of Fabulous Fabian’s Bakery, etc.) </li><li>Are there any clues in the situation that might help us determine that it is linear? If so, what clues indicate the slope or <em>y</em>‐intercept? (Again, answers will vary, but students should mention that the constant rate of change [walking rate in meters per second, money raised in dollars per kilometer, income earned in dollars per cake sold, etc.] tells you the slope. They should also be able to say that the y‐intercept is the value of the independent variable at the beginning of the situation (a head start of 40 meters in a walking race, a donor who pledges $5 even if you walk 0 kilometers, an income of $0 for selling 0 cakes, etc.).)  </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Describe the situation of the field trip to watch a movie that is in the Initial Challenge. Have students begin this Problem individually and then work with a partner.   </p>"
+                      ]
+                    }
+                  }
                 ]
               },
               "supports": [
@@ -4448,7 +4481,32 @@
               "type": "explore",
               "content": {
                 "tiles": [
-
+                  {
+                    "content":{
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Explore (Digging In)</strong></p>",
+                        "<p>Providing for Individual Needs</p>",
+                        "<p>As students are working on the Initial Challenge they may use the strategies in What If...? Situation A. If so, push them to looking at the strategies in What If...? Situation A that they didn’t use and compare their thinking to the other strategies. (Agency, Identity, Ownership)</p>",
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<ul><li>What are the variables in this situation?  (students, profit)</li><li>How do you find profit?  (Income – Expenses)</li><li>What information do you have?  ($4.50 per student and costs of $130 and $1.25 per student for film rental)</li><liIs there a constant rate of change in this situation? If so what is it? (Yes. $4.50 per student and $1.25 per student for film rental.)</li><li>Is there a “starting point”? (0 and $130)</li><li>Which information is about income for the movie company?  ($4.50 per student)</li><li>Which information is about expenses for the movie company?  ($130 and $1.25 per student for film rental)</li><li>Would a graph be helpful? (Answers will vary.)</li><li>Would a table be helpful? (Answers will vary.)</li><li>What do we know about linear situations? (constant rate of change, straight line, <em>y= mx+b</em>)</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Planning for the Summary</strong></p>",
+                        "<p>WWhat evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know questions? What will you do if you do not have evidence? </p>",
+                        "<p><strong>Now What Do You Know?</strong></p>",
+                        "<p><strong>How do the situations in this Problem compare to other Problems in this Unit? Do any of these represent proportional situations? Why? In what ways are tables, graphs, equations, and inequalities useful for solving problems?</strong></p>"
+                      ]
+                    }
+                  }
                 ]
               },
               "supports": [
@@ -4468,7 +4526,9 @@
                       "text": [
                         "<p><strong>Summarize (Orchestrating the Discussion)</strong></p>",
                         "<p>Solutions and Strategies </p>",
-                        "<p>Let each group report on stairs they have investigated. Make a class record of the stairs and measures of the stairs that are reported. Compare the ratios for various sets of stairs. </p>"
+                        "<p><strong>Suggested question</strong></p>",
+                        "<ul><li>Do you have any What If...? questions? (Answers will vary. This gives students the chance to bring out any lingering questions they have about linear relationships.)</li></ul>",
+                        "<p>Have students share their strategies for solving the situations in this Problem. </p>"
                       ]
                     }
                   },
@@ -4480,7 +4540,7 @@
                       "text": [
                         "<p>Making the Mathematics Explicit</p>",
                         "<p><strong>Suggested Questions </strong></p>",
-                        "<ul><li>Are some stairs steeper than others? If so, how can you tell? (Yes. When climbing stairs, you can tell that some sets are steeper than others because some are easier to climb than others. Mathematically, you can tell that some stairs are steeper than others if their rise-to-run ratios are different.) </li><li>What is the steepest set of stairs in our list? The least steep set of stairs? How do you know? (Answers will vary based on student measurements. Students should be able to justify their answers, though, by comparing the ratios of rise to run. The stairs with the greatest ratio are the steepest, and the stairs with the least ratio are the least steep.)</li><li>Can you order the entire list of stairs from least to greatest in terms of steepness? (Yes. You can do this by ordering their ratios from least to greatest.) </li></ul>"
+                        "<ul><li>How was the rate of change helpful?  (Answers will vary. Example: In the Initial Challenge students can discuss the $4.50 per student and the $1.25 per student for film rental and how those influenced the table, graph, equation, and ultimate solution.)</li><li>How does Geraldo’s Strategy (or if someone in the class made a similar table, use that instead) help to solve the problem? (Finding when the Income and Expenses are the same and knowing that this is where the movie company would break even.)</li><li>How does Anna’s Strategy (or if someone in the class made a similar graph, use that instead) help to solve the problem? (Finding where the two lines intersect is where the movie company would break even.)</li><li>How does Sze’s Strategy (or if someone in the class wrote a Profit equation, use that instead) help to solve the problem? (By making one equation you can solve it for the number of students when the profit is 0 to find where the movie company would break even.)</li><li>How did you solve What If...? Situation B? (Answers will vary. Look for students who used graphs, tables, and symbolic manipulation. Share the different strategies and help students see connections.) (Agency, Identity, Ownership)</li></ul>"
                       ]
                     }
                   },
@@ -4490,9 +4550,44 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>These questions focus attention on uses of the ratio as a way of characterizing steepness in a mathematical sense. Steer the discussion to measures of rise and run. Make the connection to the Unit Comparing and Scaling, in which the students learned to form ratios as a way to compare situations. </p>",
-                        "<p>If you have not done so already, talk about the carpenters’ guidelines with your students. </p>",
-                        "<ul><li>How do the ratios of the stairs we measured compare to the carpenters’ guidelines? Which ones meet the standards and which ones do not? (Answers will vary, but they should be reasonably close. If not, discuss possible reasons for large deviations.) </li><li>What do you think influences a builder’s decision on the run of a set of steps? (Answers will vary. Students may suggest that handicap requirements, wider run to accommodate items such as planters, and aesthetics may influence a builder’s design.)</li><li>What do you think influences a builder’s decision on the rise of a set of steps? (A builder may consider how high a person of average height can comfortably step when deciding on the rise of a set of stairs. In these questions, students should be making comparisons using the ratio of the rise to the run.) </li><li>Now let’s think about another common object that you have climbed—a ladder. How can you use what you have learned so far to help make sense of steepness as it applies to ladders? What would make a ladder feel steep and what would make the same ladder feel less steep? (The angle of the ladder against the house will affect the rise, so it will affect how easy or difficult the ladder is to climb.) </li><li>Looking at the Initial Challenge, is the steepness the same between any two consecutive steps?  (Yes. Illustrate the point by superimposing a graph on stairs showing points on the front edges.) Use <strong>Teaching Aid 4.1: Stairs on a Graph</strong>.</li><ul><li>Do these steps fit the carpenter guidelines? (2<em>R</em> + <em>r</em> = 24 and <em>R</em> + <em>r</em> = 18. So they do fit the carpenter guidelines.)</li><li>Are the points on the steps in a straight line?  (The points do lie on a straight line.)</li><li>Is the relationship between the rise and run a linear relationship? (The points do lie on a straight line. The relationship is <em>r</em> = 2<em>R</em>, which is linear. There would be a constant rate of change if we created a table.)</li><li>How is finding points on this line related to sketching a staircase with a rise-to-run ratio of 3 to 5? (Going from one point to another on the line is similar to moving 3 units vertically and then moving 5 units horizontally.)</li><li>Sketch a line that does not meet the carpenters’ guidelines. (Finding a line that does not meet the carpenters’ guidelines is an opportunity for students to test their understanding of the ratio of rise to run.)</li></ul><li>Is Anna correct in What If...? Situation B?  (Yes)</li><li>Does the ratio change if we take two steps at a time? Explain why? (No. It is the essence of proportionality. For every 1 step…, for every 2 steps…)</li></ul>"
+                        "<p>Below is a conversation that took place in one classroom:</p>",
+                        "<p><em>Teacher:</em>  How did you find the number of students that made $125<em>n</em> +$130 < $255 true? </p>",
+                        "<p><em>Jordan:</em>   Our group looked on the graph we made for the problem. We drew a horizontal line when <em>y</em> = 255 to help us see where the expenses were $255. This showed us that anything below that was less than the $255.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type":"Image",
+                      "url":"curriculum/moving-straight-ahead/images/MSA_TG_4_3_less_than.png"
+                    }
+                  },
+                  {
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Teacher:</em>  Do others agree or disagree with this strategy?</p>",
+                        "<p><em>Rachael:</em>  I think that works. We used the table and just looked when the profits were going to be below $255. It was exactly $255 at 100 students so anything less than 100 students makes it true.  </p>",
+                        "<p><em>Jordan:</em> Yeah. If you draw a line straight down on our graph you see that at 100 students it is exactly $255 so anything below it makes it true.  </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type":"Image",
+                      "url":"curriculum/moving-straight-ahead/images/MSA_TG_4_3_intersection.png"
+                    }
+                  },
+                  {
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Teacher:</em>  Do others agree or disagree with these ideas?</p>",
+                        "<p><em>Bekah:</em> In our group we used Sze’s Strategy and got what Jordan and Rachael did for the number of students to make it true. We took the inequality and solved it for <em>n</em>. $1.25<em>n</em> + $130 < $255.  So we first subtracted away the $130 for the staff which made the inequality now $1.25<em>n</em> < $125. Then we divided 125 by 1.25 = 100. So 100 students make it true.</p>"
                       ]
                     }
                   },
