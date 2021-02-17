@@ -1959,14 +1959,144 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["In Ms. Chang’s class, Emile found out that his walking rate is 2.5 meters per second. That is, Emile walks 2.5 meters every 1 second. When he gets home from school, he helps his little brother Henri determine his walking rate. They find that Henri’s walking rate is 1 meter per second. \n\nHenri challenges Emile to a walking race. Because Emile’s walking rate is faster, Emile gives Henri a 45-meter head start. Emile knows his brother would enjoy winning the race, but he does not want to make the race so short that it is obvious his brother will win. "]
+                      "text": [ "In Ms. Chang’s class, Emile found out that his walking rate is 2.5 meters per second. That is, Emile walks 2.5 meters every 1 second. When he gets home from school, he helps his little brother Henri determine his walking rate. They find that Henri’s walking rate is 1 meter per second. \n\nHenri challenges Emile to a walking race. Because Emile’s walking rate is faster, Emile gives Henri a 45-meter head start. Emile knows his brother would enjoy winning the race, but he does not want to make the race so short that it is obvious his brother will win. " ]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["• How long should the race be so that Henri will win in a close race? Give evidence to support your answer. "]
+                      "text": [ "Henri challenges Emile to a walking race. Because Emile’s walking rate is faster, Emile gives Henri a 45-meter head start. Emile knows his brother would enjoy winning the race, but he does not want to make the race so short that it is obvious his brother will win." ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "• How long should the race be so that Henri will win in a close race? Give evidence to support your answer. " ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "With a 45-meter head start, Emile will catch up to Henri after 30 seconds at the 75-meter mark. The race should be less than 30 seconds or 75 meters, depending on how they determine the length of the race.",
+                        "Possible student answers may include tables, graphs, words, and diagrams. Some examples include the following."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/HenriEmile-table-solution-teacher_350w.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Table",
+                      "name": "Table: Meters and Brothers' Distances",
+                      "columns": [
+                        {
+                          "name": "Meters",
+                          "type": "number",
+                          "values": [ 0, 10, 20, 30, 40, 50 ]
+                        },
+                        {
+                          "name": "Henri",
+                          "type": "number",
+                          "values": [ 45, 55, 65, 75, 85, "" ]
+                        },
+                        {
+                          "name": "Emile",
+                          "type": "number",
+                          "values": [ 0, 25, 50, 75, 100, "" ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/HenriEmile-guess-check-solution-teacher_350w.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Guess and Check</strong>",
+                        "<strong>10 meters</strong><ul><li>Henri: 10 + 45 = 55</li><li>Emile: 2.5 * 10 = 25</li></ul>\n",
+                        "<strong>25 meters</strong><ul><li>Henri: 25 + 45 = 70</li><li>Emile: 2.5 * 25 = 62.5</li></ul>\n",
+                        "<strong>27 meters</strong><ul><li>Henri: 27 + 45 = 72</li><li>Emile: 2.5 * 27 = 67.5</li></ul>\n",
+                        "<strong>28 meters</strong><ul><li>Henri: 28 + 45 = 73</li><li>Emile: 2.5 * 28 = 70</li></ul>\n",
+                        "<strong>30 meters</strong><ul><li>Henri: 30 + 45 = 75</li><li>Emile: 2.5 * 30 = 75</li></ul>\n"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/HenriEmile-graph-solution-teacher_350w.png"
+                    }
+                  },
+                  {
+                    "layout": {
+                      "height": 300
+                    },
+                    "display": "teacher",
+                    "content": {
+                      "type": "Geometry",
+                      "title": "Graph: Meters and Brothers' Distances",
+                      "board": {
+                        "properties": {
+                          "axisNames": [ "seconds", "meters" ],
+                          "axisLabels": [ "time", "distance" ],
+                          "axisMin": [ -5, -10 ],
+                          "axisRange": [ 55, 110 ]
+                        }
+                      },
+                      "objects": [
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [ 0, 0 ],
+                              "properties": {
+                                "name": "y-intercept (0, 0)"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [ 30, 75 ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [ 0, 45 ],
+                              "properties": {
+                                "name": "y-intercept (0, 0)"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [ 30, 75 ]
+                            }
+                          ]
+                        }
+                      ]
                     }
                   }
                 ]
@@ -1988,24 +2118,154 @@
               "content": {
                 "tiles": [
                   {
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text":["<strong>Situation A. Using Tables and Graphs</strong>\nIn Ms. Kreuger’s class some students used tables and graphs to find the length of the race and other information about the race. <ol><li>How can a table or graph be used to find the length of the race?</li><li>How does the walking rate of each brother show up in the table and graph?</li><li>After 20 seconds, how far apart are the brothers? How is this distance represented in the table and on the graph?</li><li>What information does the y-intercept of each graph represent in terms of the race?</li><li>Is the point (26, 70) on the graph or table of one of the brothers? Explain.</li><li>Mary wrote the inequality: 45 + <em>t</em>\u00a0 < 2.5<em>t</em>. What information was she looking for?</li></ol>"]
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "<strong>Situation A. Using Tables and Graphs</strong>\nIn Ms. Kreuger’s class some students used tables and graphs to find the length of the race and other information about the race." ]
                     }
                   },
                   {
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text":["<strong>Situation B. Using Equations</strong>\nAmit wrote equations to represent the relationships between time and distance. He wrote: \n\n<em>d<sub>Emile<M</sub></em> = 2.5<em>t</em> \u00a0 for Emile \n<em>d<sub>Henri</sub> = 45 + 1<em>t</em> \u00a0for Henri \n\nHe makes five claims. Are they correct? Explain."]
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "1. How can a table or graph be used to find the length of the race?" ]
                     }
                   },
                   {
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text":["<strong>Claim #1</strong> You can tell the walking rate and <em>y</em>-intercept from the equation. \n<strong>Claim #2</strong> You can determine which of the two lines will be steeper from the equation. \n<strong>Claim #3</strong> Both equations represent linear relationships. But neither of them is proportional. \n<strong>Claim #4</strong> You can find the time when Emile catches Henri by setting the expressions for distance equal.\n \u00a0\u00a0\u00a0 <em>d<sub>Emile</sub>   =   d<sub>Henri</sub></em> \u00a0\u00a0 or  \u00a0\u00a0 2.5t  = 45 +1t. \nThen find the value for <em>t</em> that makes the equation true.\n<strong>Claim #5</strong> You can use the expression (45 – 1.5<em>t</em>) – 2.5<em>t</em>\u00a0 to find the distance the brothers are apart for any given second <em>t</em>. "]
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "You can make a table for how far both brothers will walk in a given amount of time and see when they will be in the same place at the same time. By graphing the distance both brothers will walk in a given amount of time, you can see when they will be in the same place at the same time by seeing when the lines intersect." ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "2. How does the walking rate of each brother show up in the table and graph?" ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "The walking rate shows up in the graph as the steepness of the line. In the table, it is the constant change in distance for each second of time." ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "3. After 20 seconds, how far apart are the brothers? How is this distance represented in the table and on the graph?" ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "After 20 seconds, the brothers are 15 meters apart. At 20 seconds, Emile has walked 2.5(20) = 50 meters and Henri has walked 1(20) = 20 meters, which is 65 meters from the starting line (because he had a 45-meter head start). So, 65 meters – 50 meters = 15 meters. The distance is represented in the table by subtracting the positions of the brothers at 20 seconds, and the distance is represented in the graph by the vertical distance between the brothers’ graphs." ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "4. What information does the y-intercept of each graph represent in terms of the race?" ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "The y-intercept of each graph represents where the brothers start the race. At 0 seconds, Emile is at the starting line; at 0 seconds, Henri is already 45 meters past the starting line." ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "5. Is the point (26, 70) on the graph or table of one of the brothers? Explain." ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "No. After 26 seconds, Henri is at the 45m + 1(26m) = 71-meter mark and Emile is at the 2.5(26) = 65-meter mark." ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "6. Mary wrote the inequality: 45 + <em>t</em>\u00a0 < 2.5<em>t</em>. What information was she looking for?" ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "The left side of the inequality shows Henri’s distance after t seconds and the right side of the inequality shows Emile’s distance after t seconds. So Mary is looking for when Henri’s distance from the starting line is less than Emile’s distance from the starting line." ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "<strong>Situation B. Using Equations</strong>\nAmit wrote equations to represent the relationships between time and distance. He wrote: \n\n<em>d<sub>Emile<M</sub></em> = 2.5<em>t</em> \u00a0 for Emile \n<em>d<sub>Henri</sub> = 45 + 1<em>t</em> \u00a0for Henri \n\nHe makes five claims. Are they correct? Explain." ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "<strong>Claim #1</strong> You can tell the walking rate and <em>y</em>-intercept from the equation. \n<strong>Claim #2</strong> You can determine which of the two lines will be steeper from the equation. \n<strong>Claim #3</strong> Both equations represent linear relationships. But neither of them is proportional. \n<strong>Claim #4</strong> You can find the time when Emile catches Henri by setting the expressions for distance equal.\n \u00a0\u00a0\u00a0 <em>d<sub>Emile</sub>   =   d<sub>Henri</sub></em> \u00a0\u00a0 or  \u00a0\u00a0 2.5t  = 45 +1t. \nThen find the value for <em>t</em> that makes the equation true.\n<strong>Claim #5</strong> You can use the expression (45 – 1.5<em>t</em>) – 2.5<em>t</em>\u00a0 to find the distance the brothers are apart for any given second <em>t</em>. " ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "<strong>Claim 1 is true.</strong> The walking rate is the number that is multiplied by t in each equation and the y-intercept is the number that is added. So, Emile’s walking rate is 2.5 meters per second and Henri’s walking rate is 1 meter per second. Emile’s y-intercept is 0 m (because no extra amount gets added) and Henri’s y-intercept is 45 m." ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "<strong>Claim 2 is true.</strong> Since you can see their walking rates in the equation, the larger walking rate will result in a steeper line when graphed. So Emile’s graph will be steeper." ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "<strong>Claim 3 is false.</strong> Both equations do represent linear relationships, but Emile’s relationship is also proportional because at 0 seconds he has traveled 0 meters." ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "<strong>Claim 4 is true.</strong> By setting the expressions equal, we are finding the time when they are both the same distance from the starting line." ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "<strong>Claim 5 is true.</strong> That expression subtracts Emile’s distance past the starting line from Henri’s distance past the starting line, which will tell you how far apart they are." ]
                     }
                   }
                 ]
@@ -2018,12 +2278,47 @@
             {
               "type": "nowWhatDoYouKnow",
               "content": {
-                "tiles": [{
-                  "content": {
-                    "type": "Text",
-                    "text": "How can a table, graph, and an equation that represents a linear relationship be used to answer questions about the linear relationship? What other strategies could you use?"
-                  }
-                }]
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "How can a table, graph, and an equation that represents a linear relationship be used to answer questions about the linear relationship? What other strategies could you use?"
+                    }
+                  },
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": "<strong>Table:</strong> If you are given the value of one variable you can find the corresponding value of the other variable."
+                      }
+                    },
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [ "<strong>Graph:</strong> Find the known value on the axis. Then, follow that value up or over until you intercept the line. Look over to the other axis to find the corresponding value. You will get the coordinate pair (x,y). One value of the pair is the known value, the other is the solution." ]
+                      }
+                    },
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [ "<strong>Equation:</strong> You can find values for the y variable by substituting values for the x variable. Note that students will solve equations such as, 100 = 2x +45, symbolically in the next Investigation. Some students may use guess and check, numerical reasoning, fact families, tables, or graphs to solve equations at this time." ]
+                      }
+                    },
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [ "<strong>Numeric Reasoning:</strong> You can guess and check or use fact families to find values." ]
+                      }
+                    }
+                ]
               },
               "supports": []
             }
@@ -2057,7 +2352,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["The point at which a graph crosses the y-axis is called the <em>y-intercept</em>. The coordinates of the y-intercept for the graph shown above are (0, <em>b</em>). To save time, we sometimes refer to the number <em>b</em>, rather than the coordinates of the point (0, b), as the <em>y</em>-intercept. \n\nA <strong>coefficient</strong> is the number that multiplies a variable in an equation. The <em>a</em> in <em>y = ax + b</em> is the coefficient of <em>x</em>, so <em>ax</em> means <em>a</em> times <em>x</em>.\n\nThe equation of distance <em>d<sub>Emile</sub></em> that Emile walks after t seconds is <em>d<sb>Emile</sub>  =</em> 2.5<em>t</em>.\n\n<strong>Emile</strong>"]
+                      "text": ["The point at which a graph crosses the y-axis is called the <em>y-intercept</em>. The coordinates of the y-intercept for the graph shown above are (0, <em>b</em>). To save time, we sometimes refer to the number <em>b</em>, rather than the coordinates of the point (0, b), as the <em>y</em>-intercept. \n\nA <strong>coefficient</strong> is the number that multiplies a variable in an equation. The <em>a</em> in <em>y = ax + b</em> is the coefficient of <em>x</em>, so <em>ax</em> means <em>a</em> times <em>x</em>.\n\nThe equation of distance <em>d<sub>Emile</sub></em> that Emile walks after t seconds is <em>d<sb>Emile</sub>  =</em> 2.5<em>t</em>."]
                     }
                   },
                   {
@@ -2066,12 +2361,13 @@
                     },
                     "content": {
                       "type": "Geometry",
+                      "title": "Emile",
                       "board": {
                         "properties": {
-                          "axisNames": ["t", "dEmile"],
-                          "axisLabels": ["time", "distance"],
-                          "axisMin": [-20, -40],
-                          "axisRange": [56, 130]
+                          "axisNames": [ "t", "d" ],
+                          "axisLabels": [ "time", "distance" ],
+                          "axisMin": [ -20, -40 ],
+                          "axisRange": [ 56, 130 ]
                         }
                       },
                       "objects": [
@@ -2080,14 +2376,14 @@
                           "parents": [
                             {
                               "type": "point",
-                              "parents": [0, 0],
+                              "parents": [ 0, 0 ],
                               "properties": {
                                 "name": "y-intercept (0, 0)"
                               }
                             },
                             {
                               "type": "point",
-                              "parents": [5, 12.5]
+                              "parents": [ 5, 12.5 ]
                             }
                           ]
                         }
@@ -2098,7 +2394,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["The equation of distance <em>d<sub>Henri</sub></em> that Henri walks after t seconds is <em>d<sub>Henri</sub></em> = 45 + <em>t</em>.\n\n<strong>Henri</strong>"]
+                      "text": ["The equation of distance <em>d<sub>Henri</sub></em> that Henri walks after t seconds is <em>d<sub>Henri</sub></em> = 45 + <em>t</em>."]
                     }
                   },
                   {
@@ -2107,12 +2403,13 @@
                     },
                     "content": {
                       "type": "Geometry",
+                      "title": "Henri",
                       "board": {
                         "properties": {
-                          "axisNames": ["t", "dHenri"],
-                          "axisLabels": ["time", "distance"],
-                          "axisMin": [-20, -40],
-                          "axisRange": [56, 130]
+                          "axisNames": [ "t", "d" ],
+                          "axisLabels": [ "time", "distance" ],
+                          "axisMin": [ -20, -40 ],
+                          "axisRange": [ 56, 130 ]
                         }
                       },
                       "objects": [
@@ -2121,14 +2418,14 @@
                           "parents": [
                             {
                               "type": "point",
-                              "parents": [0, 45],
+                              "parents": [ 0, 45 ],
                               "properties": {
                                 "name": "y-intercept (0, 45)"
                               }
                             },
                             {
                               "type": "point",
-                              "parents": [5, 50]
+                              "parents": [ 5, 50 ]
                             }
                           ]
                         }
@@ -2154,7 +2451,91 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["Ms. Chang’s class decides to give T-shirts to each person who participates in the walkathon. They obtain the cost of the T-shirts from two different companies. Mighty Tee charges $49 plus $1 per T-shirt. No-Shrink Tee charges $4.50 per T-shirt. Ms. Chang writes the following equations to represent the relationships relating cost to the number of T-shirts:\n\n <em>C<sub>Mighty</sub> = </em> 49 + <em>n</em>\n <em>C<sub>No-Shrink</sub> = </em> 4.5<em>n</em>\n\nThe number of T-shirts is <em>n</em>. \n<em>C<sub>Mighty</sub></em> is the cost in dollars for Mighty Tee. \n<em>C<sub>No-Shrink</sub></em> is the cost in dollars for No-Shrink Tee. \n\n • Which company should they choose? Give evidence for your answer. "]
+                      "text": [ "Ms. Chang’s class decides to give T-shirts to each person who participates in the walkathon. They obtain the cost of the T-shirts from two different companies. Mighty Tee charges $49 plus $1 per T-shirt. No-Shrink Tee charges $4.50 per T-shirt. Ms. Chang writes the following equations to represent the relationships relating cost to the number of T-shirts:\n\n <em>C<sub>Mighty</sub> = </em> 49 + <em>n</em>\n <em>C<sub>No-Shrink</sub> = </em> 4.5<em>n</em>\n\nThe number of T-shirts is <em>n</em>. \n<em>C<sub>Mighty</sub></em> is the cost in dollars for Mighty Tee. \n<em>C<sub>No-Shrink</sub></em> is the cost in dollars for No-Shrink Tee. \n\n • Which company should they choose? Give evidence for your answer. " ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "The amount spent on t-shirts will be the same if the class buys 14 t-shirts. If they want to buy fewer than 14 t-shirts, they should choose No-Shrink Tee; if they want to buy more than 14 t-shirts, they should choose Mighty Tee." ]
+                    }
+                  },
+                  {
+                    "layout": {
+                      "height": 300
+                    },
+                    "display": "teacher",
+                    "content": {
+                      "type": "Geometry",
+                      "title": "Mighty vs. No-Shrink",
+                      "board": {
+                        "properties": {
+                          "axisNames": [ "t", "d" ],
+                          "axisLabels": [ "time", "distance" ],
+                          "axisMin": [ -20, -40 ],
+                          "axisRange": [ 56, 130 ]
+                        }
+                      },
+                      "objects": [
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [ 0, 0 ],
+                              "properties": {
+                                "name": "No-Shrink"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [ 14, 63 ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [ 0, 49 ],
+                              "properties": {
+                                "name": "Mighty"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [ 14, 63 ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Table",
+                      "name": "Table: Mighty vs. No-Shrink",
+                      "columns": [
+                        {
+                          "name": "x",
+                          "type": "number",
+                          "values": [ 0, 2, 4, 6, 8, 10, 12, 14, 16 ]
+                        },
+                        {
+                          "name": "49 + x",
+                          "type": "number",
+                          "values": [ 49, 51, 53, 55, 57, 59, 61, 63, 65 ]
+                        },
+                        {
+                          "name": "4.5 * x",
+                          "type": "number",
+                          "values": [ 0, 9, 18, 27, 36, 45, 54, 63, 72 ]
+                        }
+                      ]
                     }
                   }
                 ]
@@ -2170,24 +2551,114 @@
               "content": {
                 "tiles": [
                   {
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": ["<strong>Situation A. Using Tables and Graphs to Find a Solution</strong>\nSome students in Ms. Chang’s class used graphs to decide which company to use. Others used tables. <ol><li>Explain how a graph or a table could be helpful.</li><li>What if the class only had $120 to spend, how would this affect your answer?</li></ol>"]
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "<strong>Situation A. Using Tables and Graphs to Find a Solution</strong>\nSome students in Ms. Chang’s class used graphs to decide which company to use. Others used tables. " ]
                     }
                   },
                   {
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": ["<strong>Situation B. Using Tables, Graphs, and Equations</strong>\nExplain how you could use a table, graph, or equation to answer each question: <ol><li>For each company, find the costs of 20 T-shirts.</li><li>For each company find the number of T-shirts you can buy for $135. How many T-shirts can you buy for less than $135? Greater than $135?</li><li>Find the number of T-shirts where the cost of buying shirts from the two companies is equal. What is the cost? </li><li>Find the number of T-shirts when <em>C<sub>Mighty</sub> < C<sub>No-Shrink</sub></em>.</li></ol>"]
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "1. Explain how a graph or a table could be helpful." ]
                     }
                   },
                   {
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": ["<strong>Situation C. More Competition</strong>\nThe following table represents the costs from another company, The Big Tee. <ol><li>Compare the cost for this company to the costs for the other two companies. </li><li>Is this company a better deal? Explain why. </li><li>Are any of the relationships represented by the three companies linear? Proportional? Explain.</li></ol>"]
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "A graph or table would tell you how much you would spend on n t-shirts from each company. A graph would give a visual of the inequality that No-Shrink is cheaper until 14 shirts. Then after more than 14 shirts, Mighty would be cheaper with a line below the other company’s. On a table, you can see how the money amounts change for equal increments of change in the number of shirts. No-Shrink is cheaper until you get to 14 shirts, when the companies both would charge $63. For more than 14 shirts, Mighty would have a cheaper cost." ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "2. What if the class only had $120 to spend, how would this affect your answer?" ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "If the class only had $120 to spend, they should try to maximize the number of shirts they can buy.\n\nWe know that 14 t-shirts costs $63. And, after that amount, Mighty would be cheaper. So, they might go with Mighty for the whole order. 26 shirts for $4.50 each is $117.\n\nOr, they could order 14 t-shirts from No-Shrink and pay $63. Then order 12 from Mighty for $54. This would give them 26 shirts for $117.\n\nOr, to get the most shirts for their money, they could order 17 t-shirts from No-Shrink and pay $66. Then order 12 from Mighty for $54. This would give them 29 shirts for $120." ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "<strong>Situation B. Using Tables, Graphs, and Equations</strong>\nExplain how you could use a table, graph, or equation to answer each question: " ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "1. For each company, find the costs of 20 T-shirts?" ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "<strong>Table:</strong> Find 20 shirts on the table; the cost will be in the other column.\n\n<strong>Graph:</strong> Trace the lines to find out which y-coordinate corresponds with an x-coordinate of 20.\n\n<strong>Equation:</strong> Evaluate the equation for an independent value of 20 t-shirts.\n\n\nFor Mighty, 20 shirts cost $69.\n\nFor No-Shrink, 20 shirts cost $90." ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "2. For each company find the number of T-shirts you can buy for $135. How many T-shirts can you buy for less than $135? Greater than $135?" ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "<strong>Table:</strong> The cost closest to $135 without exceeding $135 will show how many t-shirts you can buy. Then all table entries with smaller numbers of t-shirts will cost less than $135, and all table entries with larger numbers of t-shirts will cost more than $135.\n\n<strong>Graph:</strong> Trace the lines to find out which x-coordinate corresponds with a y-coordinate of $135. Then all x-coordinates to the left of that point will be numbers of t-shirts that you could buy for less than $135, and all x-coordinates to the right of that point will be numbers of t-shirts that you could buy for more than $135.\n\n<strong>Equation:</strong> For a dependent value of $135, evaluate the number of t-shirts needed. Then all numbers of t-shirts less than that value would cost less than $135, and all numbers of t-shirts greater than that value would cost more than $135." ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "3. Find the number of T-shirts where the cost of buying shirts from the two companies is equal. What is the cost? " ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "We can accomplish this by setting the expressions for both companies’ cost equal to each other.\n\nMighty Tee: Cost = $49 + $<em>n</em>\nNo-Shrink Tee: Cost = $4.50<em>n</em>\n$49 + $<em>n</em> = $4.50<em>n</em> 🡪 $49 = $3.5<em>n</em> 🡪 <em>n</em> = $49 / $3.5 = 14\nThe cost is $4.50 * 14 = $63" ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "4. Find the number of T-shirts when <em>C<sub>Mighty</sub> < C<sub>No-Shrink</sub></em>." ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "We can accomplish this by putting each expression in the inequality shown and solving for n.\n\n$49 + $<em>n</em> < $4.50<em>n</em>\n$49 < $3.5<em>n</em>\n49 / 3.5 < <em>n</em>\n14 < <em>n</em>" ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "<strong>Situation C. More Competition</strong>\nThe following table represents the costs from another company, The Big Tee." ]
                     }
                   },
                   {
@@ -2195,19 +2666,133 @@
                       "type": "Table",
                       "name": "T-Shirt Costs",
                       "columns": [
-                          {
-                            "name": "n",
-                            "type": "number",
-                            "values": [0, 3, 5, 8, 10]
-                          },
-                          {
-                            "name": "C",
-                            "type": "number",
-                            "values": [34, 41.5, 46.5, 54, 59]
-                          }
-                        ]
+                        {
+                          "name": "n",
+                          "type": "number",
+                          "values": [ 0, 3, 5, 8, 10 ]
+                        },
+                        {
+                          "name": "C",
+                          "type": "number",
+                          "values": [ 34, 41.5, 46.5, 54, 59 ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "1. Compare the cost for this company to the costs for the other two companies." ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "The cost for <em>n</em> t-shirts for The Big T is $34 + $2.5<em>n</em>. The cost per t-shirt for this company is $2.50 and the down payment (or cost for no t-shirts) is $34. The cost per t-shirt is less than No-Shrink Tee and greater than Mighty Tee." ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "2. Is this company a better deal? Explain why." ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "This company will not be a better deal. Because it has an initial fee of $34, it starts out more expensive than No-Shrink. After 14 t-shirts, Mighty is cheaper than No-Shrink. After 14 t-shirts, Big Tee will never be cheaper because the rate of change is larger than Mighty.\n\nWe can see this relationship on the graph because the line for Big Tee is never lower than the either of the other two lines." ]
+                    }
+                  },
+                  {
+                    "layout": {
+                      "height": 300
+                    },
+                    "display": "teacher",
+                    "content": {
+                      "type": "Geometry",
+                      "title": "T-Shirt Costs",
+                      "board": {
+                        "properties": {
+                          "axisNames": [ "n", "dollars" ],
+                          "axisLabels": [ "Number", "Cost ($)" ],
+                          "axisMin": [ -5, -10 ],
+                          "axisRange": [ 55, 120 ]
+                        }
+                      },
+                      "objects": [
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [ 0, 0 ],
+                              "properties": {
+                                "name": "No-Shrink"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [ 14, 63 ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [ 0, 34 ],
+                              "properties": {
+                                "name": "Big Tee"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [ 10, 59 ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [ 0, 49 ],
+                              "properties": {
+                                "name": "Mighty"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [ 14, 63 ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "3. Are any of the relationships represented by the three companies linear? Proportional?  Explain." ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "The relationships represented by the three companies are all linear because they involve constant rates of change. Only the No-Shrink Tee’s cost relationship is proportional because there is no down payment." ]
                     }
                   }
+
                 ]
               },
               "supports": [
@@ -2220,12 +2805,22 @@
             {
               "type": "nowWhatDoYouKnow",
               "content": {
-                "tiles": [{
-                  "content": {
-                    "type": "Text",
-                    "text": "How do you know if the ordered pair of numbers for a point on a graph is a solution to an equation? How can you use a table or graph to find a solution for an equation?"
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "How do you know if the ordered pair of numbers for a point on a graph is a solution to an equation? How can you use a table or graph to find a solution for an equation?"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "An ordered pair is a solution to an equation if evaluating the equation for the first coordinate results in the second coordinate. For example, you try the x-value of the coordinate pair in the equation and see if you get the y-value.\n\nYou can use a graph to find a solution for an equation by selecting a point that lies on the line. You can check the solution by using the coordinate pair in the equation.\n\nYou can use a table to find a solution for an equation by choosing a row of the table.\n\nIf the equations are of the form y = ax or y = a + x then students can use what they learned in 6th grade to solve these using fact families, graphs, tables, or other numerical reasoning." ]
+                    }
                   }
-                }]
+                ]
               },
               "supports": [
                 { "text": "Would it help to look at examples where you used a table, graph, or equation to answer a question?" }
@@ -2257,39 +2852,6 @@
                     }
                   },
                   {
-                    "layout": {
-                      "height": 300
-                    },
-                    "content": {
-                      "type": "Geometry",
-                      "board": {
-                        "properties": {
-                          "axisNames": ["d", "A"],
-                          "axisMin": [-1, -2],
-                          "axisRange": [20, 22]
-                        }
-                      },
-                      "objects": [
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [0, 5]
-                            },
-                            {
-                              "type": "point",
-                              "parents": [14, 12],
-                              "properties": {
-                                "name": ""
-                              }
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  },
-                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -2308,14 +2870,218 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["Consider the following pledge plans. In each equation, <em>y</em> is the amount pledged in dollars by each sponsor and <em>x</em> is the distance walked in kilometers.\n\n<strong>Plan 1</strong> <em>y</em> = 5<em>x</em> - 3\n<strong>Plan 2</strong> <em>y</em> = - <em>x</em> + 6\n<strong>Plan 3</strong> <em>y</em> = 2"]
+                      "text": [ "Consider the following pledge plans. In each equation, <em>y</em> is the amount pledged in dollars by each sponsor and <em>x</em> is the distance walked in kilometers.\n\n<strong>Plan 1</strong> <em>y</em> = 5<em>x</em> - 3\n<strong>Plan 2</strong> <em>y</em> = - <em>x</em> + 6\n<strong>Plan 3</strong> <em>y</em> = 2" ]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<ul><li>What information does the equation give about the pledge plan? Does the plan make sense? Explain your reasoning.</li><li>How might a table or graph of the equation help answer questions about the pledge plans?</li></ul>"]
+                      "text": [ "1. What information does the equation give about the pledge plan? Does the plan make sense? Explain why." ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "<strong>Plan 1:</strong> A sponsor pays $5 for every kilometer walked, but you pay the sponsor $3 (or give the sponsor a t-shirt that costs $3). This makes sense because the sponsor is paying money for each kilometer walked, but you are only giving them one donation/t-shirt." ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "<strong>Plan 2:</strong> A sponsor pays $6 and then you give the sponsor $1 for every kilometer you walk. Students will say that the negative rate does not make sense because you give back money. But some may suggest that the walker in Plan 2 collects $6 and promises to walk 15 kilometers. If she does not walk the 15 kilometers, then she pays back $1 for each kilometer not walked. In this case, it is necessary to change what x represents to the number of kilometers not walked." ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "<strong>Plan 3:</strong> A sponsor donates a fixed amount of $2 no matter how far you walk. This makes sense because it’s like a one-time donation" ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "2. How might a table or graph of the equation help answer questions about the pledge plans." ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "A table or graph of the equation could help answer questions about the pledge plans by giving you a visual of how much money students raise after walking various numbers of kilometers." ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Table",
+                      "name": "Plan 1",
+                      "columns": [
+                        {
+                          "name": "x",
+                          "type": "number",
+                          "values": [ 0, 1, 2, 3, 4, 5, 6 ]
+                        },
+                        {
+                          "name": "y",
+                          "type": "number",
+                          "values": [ -3, 2, 7, 12, 17, 22, 27 ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "layout": {
+                      "height": 300
+                    },
+                    "display": "teacher",
+                    "content": {
+                      "type": "Geometry",
+                      "title": "Plan 1",
+                      "board": {
+                        "properties": {
+                          "axisNames": [ "d", "A" ],
+                          "axisLabels": [ "Distance Walked (km)", "Amount Pledged ($)" ],
+                          "axisMin": [ -3, -4 ],
+                          "axisRange": [ 10, 12 ]
+                        }
+                      },
+                      "objects": [
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [ 0, -3 ]
+                            },
+                            {
+                              "type": "point",
+                              "parents": [ 1, 2 ],
+                              "properties": {
+                                "name": ""
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Table",
+                      "name": "Plan 2",
+                      "columns": [
+                        {
+                          "name": "x",
+                          "type": "number",
+                          "values": [ 0, 1, 2, 3, 4, 5, 6 ]
+                        },
+                        {
+                          "name": "y",
+                          "type": "number",
+                          "values": [ 6, 5, 4, 3, 2, 1, 0 ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "layout": {
+                      "height": 300
+                    },
+                    "display": "teacher",
+                    "content": {
+                      "type": "Geometry",
+                      "title": "Plan 2",
+                      "board": {
+                        "properties": {
+                          "axisNames": [ "d", "A" ],
+                          "axisLabels": [ "Distance Walked (km)", "Amount Pledged ($)" ],
+                          "axisMin": [ -2, -2 ],
+                          "axisRange": [ 9, 9 ]
+                        }
+                      },
+                      "objects": [
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [ 0, -3 ]
+                            },
+                            {
+                              "type": "point",
+                              "parents": [ 5, 0 ],
+                              "properties": {
+                                "name": ""
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Table",
+                      "name": "Plan 3",
+                      "columns": [
+                        {
+                          "name": "x",
+                          "type": "number",
+                          "values": [ 0, 1, 2, 3, 4, 5, 6 ]
+                        },
+                        {
+                          "name": "y",
+                          "type": "number",
+                          "values": [ 2, 2, 2, 2, 2, 2, 2 ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "layout": {
+                      "height": 300
+                    },
+                    "display": "teacher",
+                    "content": {
+                      "type": "Geometry",
+                      "title": "Plan 3",
+                      "board": {
+                        "properties": {
+                          "axisNames": [ "d", "A" ],
+                          "axisLabels": [ "Distance Walked (km)", "Amount Pledged ($)" ],
+                          "axisMin": [ -2, -2 ],
+                          "axisRange": [ 9, 9 ]
+                        }
+                      },
+                      "objects": [
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [ 0, 2 ]
+                            },
+                            {
+                              "type": "point",
+                              "parents": [ 6, 2 ],
+                              "properties": {
+                                "name": ""
+                              }
+                            }
+                          ]
+                        }
+                      ]
                     }
                   }
                 ]
@@ -2331,46 +3097,184 @@
               "content": {
                 "tiles": [
                   {
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": ["<strong>Situation A. Connecting Equations and Graphs</strong><ol><li>Which plan has a graph that contains the point (2,4)? What question could you answer by locating this point?</li><li>Which plan has a graph that you can use to find the solution for 8 = 5x – 3?  What would the coordinates of the point that represents the solution tell you about the situation? </li></ol>"]
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "<strong>Situation A. Connecting Equations and Graphs</strong>" ,
+                      "1. Which plan has a graph that contains the point (2,4)?\nWhat question could you answer by locating this point?" ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "Plan 2 includes the point (2,4). Sample question: For Plan 2, how much money would you get if you walked 2 kilometers?" ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "2. Which plan has a graph that you can use to find the solution for 8 = 5x – 3?\nWhat would the coordinates of the point that represents the solution tell you about the situation?" ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "Plan 1. The coordinates of the point that represents the solution (2.2, 8) shows that the student raises $8 by walking 2.2 kilometers." ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "<strong>Situation B. Connecting Equations and Tables</strong>\nAll of the following coordinates are in the table of one plan. Two of coordinates have a missing value: \n(4, 2)    (1.2, ?)    (?, -4)" ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "1. Find the missing value. Explain how you found it." 
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Table",
+                      "columns": [
+                        {
+                          "name": "Points",
+                          "type": "string",
+                          "values": [ "(4, 2)", "(1.2, ?)", "(?, -4)" ]
+                        },
+                        {
+                          "name": "Plan 1: y = 5x - 3",
+                          "type": "string",
+                          "values": [ "2 ≠ 5(4) + 3 no", "3 = 5(1.2) – 3 √", "–4 = 5(–0.2) – 3 √" ]
+                        },
+                        {
+                          "name": "Plan 2: y = -x + 6",
+                          "type": "string",
+                          "values": [ "2 = –4 + 6 √", "4.8 = –1.2 + 6 √", "–4 = –10 + 6 √" ]
+                        },
+                        {
+                          "name": "Plan 3: y = 2",
+                          "type": "string",
+                          "values": [ "2 = 2 √", "2 = 2 √", "– 4 ≠ 2  no" ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "The ordered pair (?,-4) could not possibly satisfy the equation for Plan 3 (which would give y-values of 2 for every x-value). So, Plan 2 is the only plan that can have all three coordinate pairs." ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "2. Write a question you could answer by finding the missing value."
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "Possible answer: For Plan 2, how much money does each sponsor pledge if you walk 1.2 kilometers? For Plan 2, how many kilometers does the walker need to walk to owe each sponsor $4?" ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "<strong>Situation C. Finding Solutions</strong>\nFor Plan 1, <em>y</em> = 5<em>x</em> - 3\n\n1. Find the value of <em>y</em> when <em>x</em> = 7" ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "y = 5(<strong>7</strong>) – 3\ny = 35 – 3\n<strong>y = 32</strong>" ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "2. Find the value of <em>x</em> when <em>y</em> = 32." ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "<strong>32</strong> = 5x – 3\n35 = 5x\n<strong>7 = x</strong>\nNote: Some students will just say that x = 7, because of question #1." ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "<strong>Situation D. Linear or Non Linear</strong>\n1. Sally is trying to figure out if the relationships represented by the three plans are linear. How can you help her decide by looking at the equations?" ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "All the relationships are linear because the y-values change by a constant amount when the x-values increase by 1. Even though the y-values increase, decrease, or stay the same depending on which plan you look at, the rate of change is always constant." ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "2. Yvonne claims that only Plan 3 is proportional. Do you agree? Explain why." ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "She is incorrect. None of the plans are proportional, because they all have non-zero y-intercepts. Also, you could not write a proportion from the table values." ]
+                    }
                   }
-                },
-                {
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": ["<strong>Situation B. Connecting Equations and Tables</strong>\nAll of the following coordinates are in the table of one plan. Two of coordinates have a missing value: \n(4, 2)    (1.2, ?)    (?, -4)<ol><li>Find the missing value. Explain how you found it.</li><li>Write a question you could answer by finding the missing value.</li></ol>"]
-                  }
-                },
-                {
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": ["<strong>Situation C. Finding Solutions</strong>\nFor Plan 1, <em>y</em> = 5<em>x</em> - 3 <ol><li>Find the value of <em>y</em> when <em>x</em> = 7</li><li>Find the value of <em>x</em> when <em>y</em> = 32.</li></ol>"]
-                  }
-                },
-                {
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": ["<strong>Situation D. Linear or Non Linear</strong><ol><li>Sally is trying to figure out if the relationships represented by the three plans are linear. How can you help her decide by looking at the equations?</li><li>Yvonne claims that only Plan 3 is proportional. Do you agree? Explain why.</li></ol>"]
-                  }
-                }
-              ]
+                ]
               },
               "supports": [{"text": "Can you explain the meaning of (2, 4) in terms of dollars and distance?"}]
             },
             {
               "type": "nowWhatDoYouKnow",
               "content": {
-                "tiles": [{
-                  "content": {
-                    "type": "Text",
-                    "text": "Describe the advantages and disadvantages of using tables, graphs, aand symbolic methods to solve equations."
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Describe the advantages and disadvantages of using tables, graphs, aand symbolic methods to solve equations."
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ "A point on a graph represents a solution to an equation and a possible table entry.\n\nGraphs show all possible values that solve the equation to give you a visual way of looking at the pattern, but they often require you to estimate in order to find the solution.\n\n,Tables give you many values that solve the equation. And it is clear how the independent and dependent variables are paired in each solution. However, tables cannot show all of the solutions. Sometimes you have to extend the tables a long way or search to find a solution in-between values on your table.\n\nSymbolic methods can help you solve the equation for any value, but the calculations can be more time consuming." ]
+                    }
                   }
-                }]
+                ]
               },
               "supports": []
             }
