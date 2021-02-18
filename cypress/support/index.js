@@ -22,12 +22,7 @@ import './commands';
 Cypress.config('defaultCommandTimeout', 10000);
 
 before(function(){
-    // const baseUrl = `${Cypress.config("baseUrl")}`;
-    // const queryParams = `${Cypress.config("queryParams")}`;
-
-    // cy.clearQAData('all');
-    // cy.visit(baseUrl+queryParams);
-    // cy.wait(4000);
+    cy.clearQAData('all');
 });
 
 Cypress.on('uncaught:exception', (err, runnable) => {
@@ -36,6 +31,6 @@ Cypress.on('uncaught:exception', (err, runnable) => {
     return false;
 });
 
-// after(function(){
-//   cy.clearQAData('all');
-// });
+after(function(){
+  cy.clearQAData('all');
+});
