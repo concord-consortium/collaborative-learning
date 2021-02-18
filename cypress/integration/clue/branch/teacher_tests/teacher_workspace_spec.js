@@ -11,21 +11,47 @@ import DrawToolTile from "../../../../support/elements/clue/DrawToolTile";
     let drawToolTile = new DrawToolTile;
 
     let teacherDoc = "Teacher Investigation Copy";
-
-    const baseUrl = `${Cypress.config("baseUrl")}`;
     const queryParams = `${Cypress.config("teacherQueryParams")}`;
 
 before(function() {
-    cy.clearQAData('all');
+  cy.fixture("teacher-dash-data-CLUE-test.json").as("clueData");
 
-    cy.visit(baseUrl+queryParams);
-    cy.waitForSpinner();
-    dashboard.switchView("Workspace");
-    cy.wait(2000);
-    clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
+  cy.visit(queryParams+`&unit=msa`);
+  cy.waitForSpinner();
+  dashboard.switchView("Workspace");
+  cy.wait(2000);
+  clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
 });
 
-describe('teacher document functionality',function(){
+describe('teacher specific navigation tabs', function() {
+    it('verify problem tab solution switch', function() {
+      cy.get('.nav-tab.tab-problems').should('exist').click();
+      cy.get('.prob-tab').contains('What If...?').click();
+      cy.get('[data-test=solutions-button]').should('have.class',"toggled");
+      cy.get('.has-teacher-tiles').should("exist");
+      cy.get('[data-test=solutions-button]').click();
+      cy.get('[data-test=solutions-button]').should('have.not.class',"toggled");
+      cy.get('.has-teacher-tiles').should("not.exist");
+
+      cy.get('.close-button').click();
+    });
+    it('verify teacher guide', function() {
+      cy.get('.nav-tab.tab-teacher-guide').should('exist').click();
+      cy.get('.prob-tab.teacher-guide').should('exist').and('have.length', 4).each(function(subTab, index, subTabList) {
+        const teacherGuideSubTabs = ["Overview", "Launch", "Explore", "Summerize"];
+        cy.wrap(subTab).text().should('contain',teacherGuideSubTabs[index]);
+      });
+
+      cy.get('.close-button').click();
+    });
+    it('verify student workspace tab', function() {
+      cy.get('.nav-tab.tab-student-work').should('exist').click();
+
+    });
+});
+
+
+describe.skip('teacher document functionality',function(){
      before(function(){
         clueCanvas.addTile('table');
         clueCanvas.addTile('drawing');
@@ -53,12 +79,4 @@ describe('teacher document functionality',function(){
         drawToolTile.getDrawTile().should('exist');
     });
 });
-after(function(){
-    // rightNav.openRightNavTab("my-work");
-    // rightNav.openSection('my-work','investigations');
-    // rightNav.openCanvasItem("my-work","investigations",this.investigationTitle);
-    // clueCanvas.deleteTile('table');
-    // clueCanvas.deleteTile('draw');
-    // cy.deleteWorkspaces(baseUrl,queryParams);
-    cy.clearQAData('all');
-});
+

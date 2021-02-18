@@ -1,7 +1,5 @@
 class TeacherWorkspace {
-    getGroupNumberButton(){
-        return cy.get('.icon.group-number');
-    }
+
     selectSection(level, section) {
         const sectionValue = { "All": "all", "Introduction": "introduction", "Initial Challenge": "initialChallenge", "What if...?": "whatIf", "Now What": "nowWhat", "Extra Workspace": "extraWorkspace" };
         cy.log('in selectSection. level: ' + level + ' section: ' + section);
