@@ -1,0 +1,194 @@
+{
+    "teacherName": "Teacher 6",
+    "investigationTitle": "Similar Figures",
+    "classes": [
+        {
+            "classIndex": 0,
+            "className": "Class Menu",
+            "problemTotal": 14,
+            "problems": [
+                {
+                    "problem": 2.1,
+                    "problemTitle": "2.1 Drawing Wumps (N/A)",
+                    "pageCount": 1,
+                    "groups": [
+                        {
+                            "groupIndex": 0,
+                            "groupName": "1",
+                            "students": [
+                                {
+                                    "studentID": "S1",
+                                    "fullName": "Student 1",
+                                    "quadrant": ".north-west",
+                                    "published" : 1,
+                                    "tools": {
+                                        "textTool": 1,
+                                        "tableTool": 1,
+                                        "geometryTool": 0,
+                                        "drawingTool": 0,
+                                        "imageTool": 2
+                                    }
+                                },
+                                {
+                                    "studentID": "S2",
+                                    "fullName": "Student 2",
+                                    "quadrant": ".north-east",
+                                    "published" : 1,
+                                    "tools": {
+                                        "textTool": 1,
+                                        "tableTool": 1,
+                                        "geometryTool": 1,
+                                        "drawingTool": 0,
+                                        "imageTool": 2
+                                    }
+                                },
+                                {
+                                    "studentID": "S3",
+                                    "fullName": "Student 3",
+                                    "quadrant": ".south-east",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 3,
+                                        "tableTool": 0,
+                                        "geometryTool": 1,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                },
+                                {
+                                    "studentID": "S4",
+                                    "fullName": "Student 4",
+                                    "quadrant": ".south-west",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 2,
+                                        "tableTool": 1,
+                                        "geometryTool": 1,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "groupIndex": 1,
+                            "groupName": "2",
+                            "students": [
+                                {
+                                    "studentID": "S5",
+                                    "fullName": "Student 5",
+                                    "quadrant": ".north-west",
+                                    "published" : 1,
+                                    "tools": {
+                                        "textTool": 1,
+                                        "tableTool": 0,
+                                        "geometryTool": 1,
+                                        "drawingTool": 0,
+                                        "imageTool": 1
+                                    }
+                                },
+                                {
+                                    "studentID": "S6",
+                                    "fullName": "Student 6",
+                                    "quadrant": ".north-east",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 1,
+                                        "tableTool": 2,
+                                        "geometryTool": 1,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                },
+                                {
+                                    "studentID": "S7",
+                                    "fullName": "Student 7",
+                                    "quadrant": ".south-east",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 3,
+                                        "tableTool": 0,
+                                        "geometryTool": 2,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                },
+                                {
+                                    "studentID": "S8",
+                                    "fullName": "Student 8",
+                                    "quadrant": ".south-west",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 1,
+                                        "tableTool": 1,
+                                        "geometryTool": 1,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "groupIndex": 3,
+                            "groupName": "4",
+                            "students": [
+                                {
+                                    "studentID": "S9",
+                                    "fullName": "Student 9",
+                                    "quadrant": ".north-west",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 3,
+                                        "tableTool": 0,
+                                        "geometryTool": 1,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                },
+                                {
+                                    "studentID": "S10",
+                                    "fullName": "Student 10",
+                                    "quadrant": ".north-east",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 0,
+                                        "tableTool": 1,
+                                        "geometryTool": 0,
+                                        "drawingTool": 1,
+                                        "imageTool": 0
+                                    }
+                                },
+                                {
+                                    "studentID": "S11",
+                                    "fullName": "Student 11",
+                                    "quadrant": ".south-east",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 0,
+                                        "tableTool": 2,
+                                        "geometryTool": 0,
+                                        "drawingTool": 1,
+                                        "imageTool": 0
+                                    }
+                                },
+                                {
+                                    "studentID": "S12",
+                                    "fullName": "Student 12",
+                                    "quadrant": ".south-west",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 3,
+                                        "tableTool": 0,
+                                        "geometryTool": 2,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
