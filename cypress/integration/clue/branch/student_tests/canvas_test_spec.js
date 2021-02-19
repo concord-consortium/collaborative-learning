@@ -34,7 +34,6 @@ context('Test Canvas', function () {
   before(function () {
     const baseUrl = `${Cypress.config("baseUrl")}`;
     const queryParams = `${Cypress.config("queryParams")}`;
-    cy.clearQAData('all');
 
     cy.visit(baseUrl + queryParams);
     cy.waitForSpinner();
@@ -143,7 +142,6 @@ context('Test Canvas', function () {
         rightNav.openTopTab('class-work');
         cy.openSection('class-work', "problem-workspaces");
         rightNav.getCanvasItemTitle('class-work', 'problem-workspaces').should('contain', "Student 5: "+this.title);
-        // rightNav.shouldHaveDocumentWithTitle('class-work', 'published-problem-documents', this.title);
       });
       it('verifies copy of investigation', function () {
         let investigationTitle = 'Investigation Copy';
@@ -152,7 +150,6 @@ context('Test Canvas', function () {
         rightNav.openTopTab("my-work");
         cy.openSection('my-work', "workspaces");
         rightNav.getCanvasItemTitle('my-work', 'workspaces').should('contain', investigationTitle);
-        // rightNav.shouldHaveDocumentWithTitle('my-work', 'personal-documents', investigationTitle);
       });
     });
     describe('Test 4up view', function () {
@@ -171,7 +168,6 @@ context('Test Canvas', function () {
         clueCanvas.getNorthWestCanvas().should('be.visible');
         clueCanvas.getSouthEastCanvas().should('be.visible');
         clueCanvas.getSouthEastCanvas().should('be.visible');
-        // canvas.getSingleCanvas().should('not.be.visible');
 
         //can get back to 1 up view from 4 up
         clueCanvas.openOneUpViewFromFourUp();
@@ -367,10 +363,6 @@ context('Test Canvas', function () {
         //from https://www.pivotaltracker.com/story/show/160826065
       });
     });
-    //TODO: removed to accomodate new UI design
-    // after(()=>{
-    //     clueCanvas.openOneUpViewFromTwoUp();
-    // })
   });
 
   context('Drag and drop clue canvas tiles', () => {
@@ -421,7 +413,7 @@ context('Test Canvas', function () {
       textToolTile.getTextTile().should('not.exist');
       graphToolTile.getGraphTile().should('not.exist');
       drawToolTile.getDrawTile().should('not.exist');
-      // imageToolTile.getImageTile().should('not.exist');
+      imageToolTile.getImageTile().should('not.exist');
       tableToolTile.getTableTile().should('not.exist');
     });
   });

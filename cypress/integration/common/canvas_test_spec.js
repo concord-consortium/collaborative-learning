@@ -40,7 +40,6 @@ context('test canvas tools', function(){
         it('verify publish button', function(){
             canvas.publishCanvas("investigation");
             canvas.getPublishIcon().should('exist');
-            // canvas.getCopyIcon().should('exist');
         });
     });
 });
