@@ -224,6 +224,11 @@ context('Teacher Dashboard View', () => {
       cy.get('.sticky-note-popup').should('exist');
       cy.get('.sticky-note-popup-item-content').should('contain', textToStudent);
     });
+    it("verify student support note is not in another student's view", function () {
+      cy.visit('/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=student:3&qaGroup=1');
+      cy.wait(3000);
+      cy.get('#icon-sticky-note').should('not.exist');
+    });
     it('verify group support note appears in student view', function () {
       cy.visit('/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=student:10&qaGroup=3');
       cy.wait(5000);
@@ -231,6 +236,11 @@ context('Teacher Dashboard View', () => {
       cy.get('#icon-sticky-note').click({force:true});
       cy.get('.sticky-note-popup').should('exist');
       cy.get('.sticky-note-popup-item-content').should('contain', textToGroup);
+    });
+    it('verify group support note appears in student view', function () {
+      cy.visit('/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=student:10&qaGroup=2');
+      cy.wait(3000);
+      cy.get('#icon-sticky-note').should('not.exist');
     });
   });
 });
