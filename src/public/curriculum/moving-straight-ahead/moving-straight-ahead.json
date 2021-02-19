@@ -3434,6 +3434,19 @@
                     }
                   },
                   {
+                    "display": "teacher",
+                    "content": { 
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                         "Possible Student Answer:",
+                         "Original Code: <em>$10 = $4 + 3P</em>",
+                         "Crossed off 4 coins from each side: <em>$6 = 3P</em>",
+                         "Split the bags and coins equally and got 2 coin in a bag: <em>$2 = P</em>"
+                       ]
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
                       "text": "\n2."
@@ -3446,6 +3459,20 @@
                     }
                   },
                   {
+                    "display": "teacher",
+                    "content": 
+                      {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Possible Student Answer:</p>",
+                          "<p>Original Code: <em>2(P + $2) = $12</em></p>",
+                          "<p>Split the amounts in 2: <em>P + $2 = $6</em></p>",
+                          "<p>Crossed off 2 coins from each side: <em>P = $4</em></p>"
+                        ]
+                      }
+                  },
+                  {
                     "content": {
                       "type": "Text",
                       "text": "\n3."
@@ -3455,6 +3482,19 @@
                     "content": {
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_3_1_IC_coins_pouches_3_350w.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Possible Student Answer:</p>",
+                        "<p>Original Code: <em>3P = 2P + $12</em></p>",
+                        "<p>Crossed off 12 coins from each side and got 12 coins in a bag: <em>P = $12</em></p>"
+                      ]
                     }
                   },
                   {
@@ -3470,6 +3510,19 @@
                     }
                   },
                   {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Possible Student Answer:</p>",
+                        "<p>Original Code: <em>3P + $3 = $30</em></p>",
+                        "<p>Crossed off 3 coins from each side: <em>3P = $27</em></p>",
+                        "<p>Split the bags and coins equally and got 9 coin in a bag<em> P = $9</em></p>"
+                      ]
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
                       "text": "\n5."
@@ -3482,6 +3535,19 @@
                     }
                   },
                   {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Possible Student Answer:</p>",
+                        "<p>Original Code: <em>3P + $3 = 2P + $12</em></p>",
+                        "<p>Crossed off 2 bags from each side: <em>P + $3 = $12</em></p>",
+                        "<p>Crossed off 3 coins from each side: <em>P = $9</em></p>"
+                      ]
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
                       "text": "\n6."
@@ -3491,6 +3557,21 @@
                     "content": {
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_3_1_IC_coins_pouches_6_350w.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Possible Student Answer:</p>",
+                        "<p>Original Code: 2P + $22 = 5P + $4</p>",
+                        "<p>Crossed off 2 bags from each side: <em>$22 = 3P + $4</em></p>",
+                        "<p>Crossed off 4 coins from each side: <em>$18 = 3P</em></p>",
+                        "<p>Split the amounts on each side equally and got 6 coins in a bag:<em> $6 = P</em></p>"
+                      ]
                     }
                   }
                 ]
@@ -3518,9 +3599,48 @@
                     }
                   },
                   {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Her strategy involves removing equivalent amounts from both sides of the equation until she is left with “pouch = 4 gold coins.” Nicole’s method could work in other situations in which each side can be evenly divided into the same number of groups."
+                      ]
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
-                      "text": "2. Noah looked at Nicole’s strategy and claimed that she was applying the Distributive Property. Is Noah’s claim correct? Explain.\n\n3. Yvonne thought that Nicole was just dividing both sides of the original equation by 2. Is she correct? Explain. "
+                      "text": "2. Noah looked at Nicole’s strategy and claimed that she was applying the Distributive Property. Is Noah’s claim correct? Explain."
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Yes, Noah is correct that Nicole is applying the Distributive Property. The left side of the equation can be thought of as 2(x+2), or two times a group of 1 pouch plus 2 coins. This situation can also be thought of as 2 pouches and 2 sets of 2 coins, or <em>2x + 2(2)</em>. The Distributive Property states that these two expressions are equivalent."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "3. Yvonne thought that Nicole was just dividing both sides of the original equation by 2. Is she correct? Explain. "
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Yvonne is also correct because in order to solve the problem, Nicole did have to divide both sides by 2."
+                      ]
                     }
                   },
                   {
@@ -3531,10 +3651,99 @@
                     }
                   },
                   {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Answers will vary but should represent 5 pouches + 10 coins on one side of the equation and 35 coins on the other side. Such as the following."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/MSA_3_1_WIcoinsSolution.png"
+                    }
+                  },
+                  { 
+                    "display": "teacher",
+                    "content": 
+                      {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>There are $5 in coins in a pouch.</p>",
+                          "<p>5P + $10 = $35</p>",
+                          "<p>5P = $25</p>",
+                          "<p>P = $5</p>",
+                          "<p></p>"
+                        ]
+                      }
+                  },
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>Situation C. Another Donor</strong>\nA local merchant donates $200 for the Walkathon. <ol><li>They suggested the following code:\n6P + $20 = $200. P represents a pouch. How much money is in each pouch?</li><li>Mateo wrote two different expressions that could be codes to represent the $200. For each expression how much money is in each pouch?\n2P + $45  \u00a0\u00a0    4P + $20</li><li>Design another code that the merchant could use. Give it to a classmate to solve. </li></ol>"]
+                      "text": ["<strong>Situation C. Another Donor</strong>\nA local merchant donates $200 for the Walkathon. 1. They suggested the following code:\n6P + $20 = $200. P represents a pouch. How much money is in each pouch?"]
+                    }
+                  },
+                  { 
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>$30</p>",
+                        "<p>6P + 20 = 200</p>",
+                        "<p>6P = 180</p>",
+                        "<p>P = 30</p>"
+                      ]
+                    }   
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["2. Mateo wrote two different expressions that could be codes to represent the $200. For each expression how much money is in each pouch?\n2P + $45  \u00a0\u00a0    4P + $20"]
+                    }
+                  },
+                  { 
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>For the first expression: $77.50</p>",
+                        "<p>2P + 45 = 200</p>",
+                        "<p>2P = 155</p>",
+                        "<p>P = 77.5</p>",
+                        "<p>For the second expression: $45</p>",
+                        "<p>4P + 20 = 200</p>",
+                        "<p>4P = 180</p>",
+                        "<p>P = 45</p>"
+                      ]
+                    }
+                  },
+                   {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["3. Design another code that the merchant could use. Give it to a classmate to solve. "]
+                    }
+                  },
+                  { 
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Student answers will vary. Example: For a clue with the expression, <em>9P + 20</em>. The equation would be 9P + 20 = 200. The solution would be <em>P = $20</em>. "
+                      ]
                     }
                   }
                 ]
@@ -3547,12 +3756,25 @@
             {
               "type": "nowWhatDoYouKnow",
               "content": {
-                "tiles": [{
+                "tiles": [
+                  {
                   "content": {
                     "type": "Text",
                     "text": "Pouches with an unknown number of coins and coins are represented with an equation. What strategies can you use to find the number of coins in each pouch? How do you know if your answer is correct?"
+                    }
+                  },
+                  { 
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "You can do the same thing to both sides of the equation to find the number of coins in each pouch. You can check your answer by substituting the value you found back into your equation."
+                      ]
+                    }
                   }
-                }]
+              ]
               },
               "supports": []
             }
