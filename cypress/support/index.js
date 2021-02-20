@@ -21,9 +21,9 @@ import './commands';
 
 Cypress.config('defaultCommandTimeout', 10000);
 
-before(function(){
-    cy.clearQAData('all');
-});
+// before(function(){ //Can't run this because full tests will not run due to website switching
+//     cy.clearQAData('all');
+// });
 
 Cypress.on('uncaught:exception', (err, runnable) => {
     // returning false here prevents Cypress from
@@ -31,6 +31,6 @@ Cypress.on('uncaught:exception', (err, runnable) => {
     return false;
 });
 
-after(function(){
-  cy.clearQAData('all');
-});
+// after(function(){
+//   cy.clearQAData('all');
+// });

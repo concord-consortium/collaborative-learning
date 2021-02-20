@@ -34,6 +34,7 @@ context('Test Canvas', function () {
   before(function () {
     const baseUrl = `${Cypress.config("baseUrl")}`;
     const queryParams = `${Cypress.config("queryParams")}`;
+    cy.clearQAData('all');
 
     cy.visit(baseUrl + queryParams);
     cy.waitForSpinner();

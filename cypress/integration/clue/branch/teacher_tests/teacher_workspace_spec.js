@@ -14,6 +14,8 @@ import DrawToolTile from "../../../../support/elements/clue/DrawToolTile";
     const queryParams = "/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:6&unit=msa";
 
 before(() => {
+  cy.clearQAData('all');
+
   cy.visit(queryParams);
   cy.waitForSpinner();
   dashboard.switchView("Workspace");

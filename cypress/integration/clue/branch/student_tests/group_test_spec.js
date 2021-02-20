@@ -5,6 +5,9 @@ const clueCanvas = new ClueCanvas;
 const textToolTile = new TextToolTile;
 
 const baseUrl = `${Cypress.config("baseUrl")}`;
+before(()=>{
+  cy.clearQAData('all');
+});
 
 context('Test group functionalities', function(){
     let qaClass = 10,

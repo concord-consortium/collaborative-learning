@@ -1,10 +1,13 @@
 import Header from '../../../../support/elements/common/Header';
 import ClueHeader from '../../../../support/elements/clue/cHeader';
 
-
 const header = new Header;
 const clueHeader = new ClueHeader;
 const baseUrl = `${Cypress.config("baseUrl")}`;
+
+before(() => {
+      cy.clearQAData('all');
+});
 
 describe('Test student join a group', function(){
     let student1 = '20',

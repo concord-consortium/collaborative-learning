@@ -43,7 +43,7 @@ context("Teacher Space", () => {
         cy.visit('https://learn.concord.org/portal/offerings/' + offeringId + '/external_report/25');
         cy.waitForSpinner();
         dashboard.switchView("Workspace");
-        cy.wait(2000);
+        cy.wait(4000);
         clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
     });
 
@@ -51,17 +51,18 @@ context("Teacher Space", () => {
         cy.fixture("teacher-dash-data.json").as("clueData");
     });
 
-    context.skip('Teacher Workspace', function () {
+    context('Teacher Workspace', function () {
         describe('teacher document functionality', function () {
             before(function () {
-                clueCanvas.addTile('table');
+                clueCanvas.getSectionHeader('IN').click();
                 clueCanvas.addTile('drawing');
+                clueCanvas.addTile('table');
                 cy.openTab("my-work");
                 cy.openSection('my-work', 'workspaces');
                 cy.openDocumentWithTitle('my-work', 'workspaces', teacherDoc);
                 clueCanvas.addTile('table');
             });
-            it('verify restore after switching classes', function () {
+            it.only('verify restore after switching classes', function () {
                 cy.get('@clueData').then((clueData) => {
                     const initClassIndex = 0;
                     const tempClassIndex = 1;
@@ -116,7 +117,11 @@ context("Teacher Space", () => {
                     dashboard.getProblemList().find('.list-item').contains(problems[initProblemIndex].problemTitle).click({ force: true });
                     cy.waitForSpinner();
                     dashboard.switchView('Workspace');
+                    cy.openTab("my-work");
+                    cy.openSection('my-work', 'workspaces');
                     clueCanvas.getInvestigationCanvasTitle().should('contain', problems[initProblemIndex].problemTitle);
+                    cy.openDocumentWithTitle("my-work", "workspaces", teacherDoc);
+                    cy.wait(2000);
                     tableToolTile.getTableTile().should('exist');
                     drawToolTile.getDrawTile().should('exist');
                     cy.openTab("my-work");
@@ -133,8 +138,8 @@ context("Teacher Space", () => {
                 cy.openSection('my-work', 'workspaces');
                 cy.log(this.investigationTitle[0]);
                 cy.openDocumentWithTitle("my-work", "workspaces", this.investigationTitle[0]);
+                clueCanvas.deleteTile('draw');
                 clueCanvas.deleteTile('table');
-                clueCanvas.deleteTile('drawing');
             });
         });
     });
