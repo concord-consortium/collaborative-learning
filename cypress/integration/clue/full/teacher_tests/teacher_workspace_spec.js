@@ -136,7 +136,6 @@ context("Teacher Space", () => {
                 clueCanvas.deleteTile('table');
                 cy.openTopTab("my-work");
                 cy.openSection('my-work', 'workspaces');
-                cy.log(this.investigationTitle[0]);
                 cy.openDocumentWithTitle("my-work", "workspaces", this.investigationTitle[0]);
                 clueCanvas.deleteTile('draw');
                 clueCanvas.deleteTile('table');

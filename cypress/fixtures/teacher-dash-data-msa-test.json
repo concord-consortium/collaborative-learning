@@ -185,6 +185,25 @@
                                     }
                                 }
                             ]
+                        },
+                        {
+                            "groupIndex": 4,
+                            "groupName": "4",
+                            "students": [
+                                {
+                                    "studentID": "S16",
+                                    "fullName": "Student 9",
+                                    "quadrant": ".north-west",
+                                    "published" : 0,
+                                    "tools": {
+                                        "textTool": 0,
+                                        "tableTool": 0,
+                                        "geometryTool": 0,
+                                        "drawingTool": 0,
+                                        "imageTool": 0
+                                    }
+                                }
+                            ]
                         }
                     ]
                 }
