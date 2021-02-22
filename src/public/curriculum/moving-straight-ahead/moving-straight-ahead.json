@@ -3858,6 +3858,20 @@
                     }
                   },
                   {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>4<em>x</em> +2 = 18    OR   2(2<em>x</em> + 1) =18</p>",
+                        "<p>4<em>x</em> +2 = 18                  2<em>x</em> + 1 = 9</p>",
+                        "<p>    4<em>x</em> = 16                         2<em>x</em> = 8</p>",
+                        "<p>       <em>x</em> = 4                              <em>x</em> = 4</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
                       "text": "Equation 2"
@@ -3870,6 +3884,18 @@
                     }
                   },
                   {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>3(<em>x</em> + 2) = 12     OR    3<em>x</em> + 6 = 12</p>",
+                        "<p>    <em>x</em> + 2 = 4                              3x = 6</p>",
+                        "<p>            <em>x</em> = 2                                <em>x</em> = 2</p>"
+                      ]
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
                       "text": "Equation 3"
@@ -3879,6 +3905,19 @@
                     "content": {
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_3_2_IC_coins_pouches_3_350w.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>3<em>x</em> + 3 = 2<em>x </em>+ 9        OR       3(<em>x </em>+ 1) = 2<em>x</em> + 9</p>",
+                        "<p>   <em>x</em> + 3 = 9                                    3<em>x</em> + 3 = 2<em>x</em> + 9        </p>",
+                        "<p>           <em>x</em> = 6                                             3<em>x</em> = 2<em>x</em> + 6</p>",
+                        "<p>                                                                    <em> x</em> = 6</p>"
+                      ]
                     }
                   }
                 ]
@@ -3893,7 +3932,51 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>Situation A. More Pouches</strong>\nA messenger has 6 pouches and 27 coins. There is a total of $105. <ol><li>Write an equation to represent the situation. Then solve the equation to find the number of dollars in each pouch.</li><li>AJ claims that there is more than one way to write the equation. Is he correct? Explain. </li><li>Will the solution for each equation be the same? Explain.</li></ol>"]}
+                      "text": ["<strong>Situation A. More Pouches</strong>\nA messenger has 6 pouches and 27 coins. There is a total of $105. \n\n1. Write an equation to represent the situation. Then solve the equation to find the number of dollars in each pouch."]}
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>6<em>P</em> + $27 = $105</p>",
+                        "<p>            6<em>P</em> = $78</p>",
+                        "<p>              <em>P </em>= $13</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["2. AJ claims that there is more than one way to write the equation. Is he correct? Explain. "]}
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "He is correct. For example, he could write 27 + 6</em>P</em> = 105."
+                        ]
+                      }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["3. Will the solution for each equation be the same? Explain."]}
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Yes. For the example above, the Commutative Property of Addition tells you that the answer will be the same."
+                      ]
+                    }
                   },
                   {
                     "content": {
@@ -3902,10 +3985,63 @@
                       "text": ["<strong>Situation B. Applying Your Strategies</strong>\nUse your strategies to solve each equation. Check your answer. <ol><li> 30 = 6 + 4<em>x</em></li><li> 7<em>x</em> = 6 + 5<em>x</em></li><li> 7<em>x</em> + 2 = 12 + 5<em>x</em> </li><li> 2(<em>x</em> + 4) = 16</li></ol>"]}
                   },
                   {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>1.   30 = 6 + 4<em>x</em></p>",
+                        "<p>       24 = 4<em>x</em></p>",
+                        "<p>          6 = <em>x</em></p>",
+                        "<p>Check: 30 = 6 + 4(6)</p>",
+                        "<p>    30 = 6 + 24</p>",
+                        "<p>    30 = 30</p>",
+                        "<p>2.  7<em>x</em> = 6 + 5<em>x</em></p>",
+                        "<p>      2<em>x</em> = 6</p>",
+                        "<p>      x = 3</p>",
+                        "<p>Check: 7(3) = 6 + 5(3)</p>",
+                        "<p>    21 = 6 + 15</p>",
+                        "<p>    21 = 21</p>",
+                        "<p>3.  7<em>x</em> + 2 = 12 + 5x</p>",
+                        "<p>      2<em>x</em> + 2 = 12</p>",
+                        "<p>              2x = 10</p>",
+                        "<p>                  <em>x </em>= 5</p>",
+                        "<p>Check: 7(5)+2 = 12 + 5(5)</p>",
+                        "<p>    35 + 2 = 12 + 25</p>",
+                        "<p>    37 = 37</p>",
+                        "<p>4.  2(<em>x</em> + 4) = 16</p>",
+                        "<p>         2<em>x </em>+ 8 = 16</p>",
+                        "<p>                 2<em>x</em> = 8</p>",
+                        "<p>                    <em>x</em> = 4</p>",
+                        "<p>Check: 2(4 + 4) = 16</p>",
+                        "<p>             2(8) = 16</p>",
+                        "<p>                16 = 16</p>"
+                      ]
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": ["<strong>Situation C. More or Less</strong>\nA messenger has 6 pouches and 30 coins. The total must be less than 102 coins. How would you <strong>write</strong> this inequality? What are some solutions?"]}
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The inequality is written 6<em>P</em> + 30 &lt; 102. </p>",
+                        "<p>We can solve the inequality by thinking of it as an equation:</p>",
+                        "<p>  6<em>P</em> + 30 = 102</p>",
+                        "<p>        6<em>P</em> = 72</p>",
+                        "<p>     <em>P</em> = 12</p>",
+                        "<p>Then, we can consider the solutions to <em>P</em> &lt; 12. So, there could be 1 coin in each pouch, 2 coins in each pouch, 3 coins in each pouch, or up to 11 coins in each pouch to make this inequality true.</p>",
+                        "<p>We can check to make sure that this is correct by entering a value into the inequality </p>",
+                        "<p>6(11) + 30 &lt; 102, then</p>",
+                        "<p>66 + 30 &lt; 102 is true so the solutions are correct.</p>"
+                      ]
+                    }
                   }
                 ]
               },
@@ -3917,12 +4053,21 @@
             {
               "type": "nowWhatDoYouKnow",
               "content": {
-                "tiles": [{
-                  "content": {
+                "tiles": [
+                  {
+                    "content": {
                     "type": "Text",
                     "text": "Describe a strategy for solving equations using what you know about equality. How do you know if your answer is correct?"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "text": "You can apply the principles of equality repeatedly to the equation until you have isolated the variable on one side and a number on the other side. Then you can check the solution by substituting the value of the variable into the original equation to see if the equation is true."
+                    }
                   }
-                }]
+                ]
               },
               "supports": []
             }
@@ -3958,7 +4103,21 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["For each equation:\n  • Find a solution.\n  • Record each step you take to find a solution.\n  • Then, check your answer.\n\nSet 1.\n a. 5<em>x</em>\u00a0 + 10 = 20 \u00a0\u00a0\u00a0 b. 5<em>x</em>\u00a0 – 10 = 20 \u00a0\u00a0\u00a0 c. 5<em>x</em>\u00a0 + 10 = -20\n d. 5<em>x</em>\u00a0 – 10 = -20 \u00a0\u00a0\u00a0 e. 10 - 5<em>x</em>\u00a0 = 20 \u00a0\u00a0\u00a0 f. 10 – 5<em>x</em>\u00a0 = -20"]
+                      "text": ["For each equation:\n  • Find a solution.\n  • Record each step you take to find a solution.\n  • Then, check your answer.\n\nSet 1.\n a. 5<em>x</em>\u00a0 + 10 = 20 \u00a0\u00a0\u00a0\u00a0 b. 5<em>x</em>\u00a0 – 10 = 20 \u00a0\u00a0\u00a0 c. 5<em>x</em>\u00a0 + 10 = -20\n d. 5<em>x</em>\u00a0 – 10 = -20 \u00a0\u00a0\u00a0 e. 10 - 5<em>x</em>\u00a0 = 20 \u00a0\u00a0\u00a0 f. 10 – 5<em>x</em>\u00a0 = -20"]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>a.  5<em>x</em> = 10          b.  5<em>x</em> = 30        c.   5x = -30</p>",
+                        "<p>         <em>x</em> = 2                      <em>x</em> = 6                    <em>x </em>= -6</p>",
+                        "<p> </p>",
+                        "<p>d.  5<em>x</em> = -10         e. -5x = 10     f.   -5x= -30</p>",
+                        "<p><em>         x</em> = -2                     <em>x</em> = -2                 <em>x</em> = 6</p>"
+                      ]
                     }
                   },
                   {
@@ -3969,10 +4128,35 @@
                     }
                   },
                   {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>a.  5<em>x</em> = 10          b.  5<em>x</em> = 30        c.   5x = -30</p>",
+                        "<p>         <em>x</em> = 2                      <em>x</em> = 6                    <em>x </em>= -6</p>",
+                        "<p> </p>",
+                        "<p>d.  5<em>x</em> = -10         e. -5x = 10     f.   -5x= -30</p>",
+                        "<p><em>         x</em> = -2                     <em>x</em> = -2                 <em>x</em> = 6</p>"
+                      ]
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": ["Set 3.  \n a. 3(<em>x</em>\u00a0 + 1) = 21  \u00a0\u00a0\u00a0   b. 2+3(<em>x</em>\u00a0 + 1) = 6x   \u00a0\u00a0\u00a0  c. -2(2<em>x</em>\u00a0 – 3) = -2"]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>a.  ¼<em> x</em> = 6                 b.  -2/5 = -<em>x</em>           c.  -6.5<em>x</em> = 130</p>",
+                        "<p><em>         x</em> = 24                             <em>x</em> = 2/5                      x = -20</p>"
+                      ]
                     }
                   }
                 ]
