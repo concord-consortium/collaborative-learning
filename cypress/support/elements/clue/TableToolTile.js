@@ -12,7 +12,7 @@ class TableToolTile{
       return cy.get('.remove-column-button');
     }
     getIndexNumberToggle(){
-      cy.get('.show-hide-row-labels-button');
+      return cy.get('.show-hide-row-labels-button');
     }
     getRemoveRowButton(){
         return cy.get('[data-test=remove-row-button]');
@@ -23,7 +23,6 @@ class TableToolTile{
     renameColumn(column, title){
         this.getColumnHeader().contains(column).dblclick().type(title+'{enter}');
     }
-
     removeRow(i){
       this.getTableRow().eq(i).click();
       this.getRemoveRowButton().click();
@@ -54,7 +53,7 @@ class TableToolTile{
       });
     }
     getTableToolbarButton(button){// ['set-expression']
-      return cy.get(`.table-toolbar .toolbar-button.${button}`);
+      return cy.get(`.primary-workspace .table-toolbar .toolbar-button.${button}`);
     }
     // unlinkTable(){ //the only way to unlink is to delete either the graph or the table
     //     cy.get('.bp3-menu-item div').contains('Unlink Geometry').click();
