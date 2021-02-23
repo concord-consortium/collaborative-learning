@@ -42,7 +42,7 @@ context('Table Tool Tile', function () {
       let header = 'pluto';
       cy.get(".primary-workspace").within((workspace) => {
         tableToolTile.renameColumn('x', header);
-        tableToolTile.getColumnHeaderText().then((text)=>{
+        tableToolTile.getColumnHeaderText().then((text) => {
           expect(text[0]).to.be.eq(header);
         });
       });
@@ -51,8 +51,31 @@ context('Table Tool Tile', function () {
       let header = 'mars';
       cy.get(".primary-workspace").within((workspace) => {
         tableToolTile.renameColumn('y', header);
-        tableToolTile.getColumnHeaderText().then((text)=>{
+        tableToolTile.getColumnHeaderText().then((text) => {
           expect(text[1]).to.be.eq(header);
+        });
+      });
+    });
+    it('will add a column', function () {
+      tableToolTile.getAddColumnButton().click();
+      cy.get('.primary-workspace').within(function () {
+        tableToolTile.getColumnHeader().should('have.length', 3);
+      });
+    });
+    it('verify first column cannot be deleted', function () {
+      cy.get('.primary-workspace').within(function () {
+        tableToolTile.getColumnHeader().eq(0).click();
+        tableToolTile.getRemoveColumnButton().should('not.be.visible');
+      });
+    });
+    it('will remove a column', function () {
+      cy.get('.primary-workspace').within(function () {
+        tableToolTile.getColumnHeader().contains('mars').click();
+        tableToolTile.getRemoveColumnButton().eq(1).should('be.visible').click();
+        tableToolTile.getColumnHeader().should('have.length', 2);
+        tableToolTile.getColumnHeaderText().then((text) => {
+          expect(text[0]).to.be.eq('pluto');
+          expect(text[1]).to.be.eq('y2');
         });
       });
     });
@@ -64,7 +87,7 @@ context('Table Tool Tile', function () {
       tableToolTile.getTableCell().eq(2).click();
       // cy.wait(100);
       tableToolTile.getTableCell().eq(1).should('contain', '3');
-      tableToolTile.getTableCell().eq(2).click().type('2{enter}');
+      tableToolTile.getTableCell().eq(2).type('2{enter}');
       tableToolTile.getTableCell().eq(5).click();
       // cy.wait(100);
       tableToolTile.getTableCell().eq(2).should('contain', '2');

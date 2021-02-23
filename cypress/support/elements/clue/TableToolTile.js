@@ -8,6 +8,9 @@ class TableToolTile{
     getAddColumnButton(){
       return cy.get('.add-column-button');
     }
+    getRemoveColumnButton(){
+      return cy.get('.remove-column-button');
+    }
     getIndexNumberToggle(){
       cy.get('.show-hide-row-labels-button');
     }
@@ -20,8 +23,10 @@ class TableToolTile{
     renameColumn(column, title){
         this.getColumnHeader().contains(column).dblclick().type(title+'{enter}');
     }
+
     removeRow(i){
-      this.getRemoveRowButton().eq(i).click();
+      this.getTableRow().eq(i).click();
+      this.getRemoveRowButton().click();
     }
     getTableRow(){
         return cy.get('.canvas-area .rdg-row');
