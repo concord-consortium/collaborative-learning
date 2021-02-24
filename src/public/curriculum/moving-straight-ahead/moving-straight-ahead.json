@@ -4174,6 +4174,21 @@
                       "text": ["<strong>Situation A. The Two Variable Connection</strong><ol><li>If 3<em>x</em>\u00a0 – 7 = <em>y</em>\u00a0, find y when <em>x</em>\u00a0 = -2/3.  </li><li>If 3<em>x</em>\u00a0 – 7 = <em>y</em>\u00a0, find <em>x</em>\u00a0 when <em>y</em>\u00a0 = -5.</li><li>Mary thinks you could solve these equations with a graph or table. Is she correct? Explain why?</li><li>Could you solve the equations in the Initial Challenge with a graph or table? Explain why?</li></ol>"]}
                   },
                   {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>1. Using substitution, y = 3(–2/3) – 7 = –9.</p>",
+                        "<p>2. Using substitution, –5 = 3x – 7 </p>",
+                        "<p>                                                    2 = 3x </p>",
+                        "<p>                                                    x = 2/3.</p>",
+                        "<p>3. Yes, if you had a graph of these equations, you would find the point on the line with the x-value that you are looking for (by looking at the <em>x</em>-axis), and then get the corresponding <em>y</em>-value by looking at the<em> y</em>-axis. If you had a table of these equations, you would find the entry with the <em>x</em>-value that you are looking for, and then get the corresponding <em>y</em>-value by looking at the other column of the table. You could also start either of these methods with a <em>y</em>-value and get the corresponding <em>x</em>-value.</p>",
+                        "<p>4. You could solve these equations by using tables or graphs if you consider the expression on each side of the equation to be its own equation. So, you’d set <em>y1</em> equal to the left side of the equation and y2 equal to the right side of the equation. Then to find the solution, you’d need to find the point where <em>y1 = y2</em>. You could do this by making tables for each equation and looking for the points where <em>y1=y2</em>, or by graphing lines for each equation and looking for the points of intersection. For most cases in the Initial Challenge, <em>y2 </em> is equal to a constant value, but this method would also work when both <em>y1</em> and <em>y2</em> are equal to expressions involving <em>x</em>.</p>"
+                      ]
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -4197,6 +4212,16 @@
                       "format": "html",
                       "text": ["<ol><li>Think of a question you could answer using this data. Explain how you would find the answer. </li><li>Do any of these equations represent linear relationships? </li><li>What does the solution to the equality 61.412 + 2.317F = 150 tell you? </li><li>What does the solution to the inequality 61.412 + 2.317F < 150 tell you?</li></ol>"]
                     }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ol><li>Student answers will vary. For example: If a person is 1.8 meters tall, about how long will their tibia be? You could set the height to be 180 cm and then solve for T.</li><li>All of these represent linear relationships.</li><li>The solution to this equation will be the femur length for a female who is 150 cm tall.</li><li>The solutions to this inequality will be all possible femur lengths for a female who is less than 150 cm tall.</li></ol>"
+                      ]
+                    }
                   }
                 ]
               },
@@ -4209,12 +4234,25 @@
             {
               "type": "nowWhatDoYouKnow",
               "content": {
-                "tiles": [{
-                  "content": {
-                    "type": "Text",
-                    "text": "Describe the strategies you can use to solve linear equations using the properties of operations and equality. "
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "text": "Describe the strategies you can use to solve linear equations using the properties of operations and equality. "
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>For symbolic methods,  students’ explanations should include  keeping expressions equivalent on both sides  of the equal sign (e.g., adding 2 to each side, dividing each side by 3, etc.). Students should also include something about using order of operations correctly, although there are some exceptions (e.g., factoring as a first step). Students should also notice that if  applying the Distributive Property is possible, then it may simplify the process.</p>",
+                        "<p>Tables and graphs can also be used to solve  linear equations. For example, the equation <em> 2x – 5 = x + 7</em> can be solved by finding  the point of intersection of <em>y1 = 2x – 5</em>  and <em>y2 = x + 7</em> on a graphing calculator. Sometimes it is quicker to use symbolic methods. However, if  students are experienced with using technology to create tables and graphs, and if  several questions of this type are being asked, then tables or graphs might be more efficient.</p>"
+                      ]
+                    }
                   }
-                }]
+                ]
               },
               "supports": []
             }
@@ -4239,9 +4277,51 @@
                     }
                   },
                   {
+                    "layout": {
+                      "height": 360
+                    },
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_3_4_In_two_plans_350w.png"
+                      "type":"Geometry",
+                      "title": "Two T-Shirt Plans",
+                      "board": {
+                        "properties": {
+                          "axisNames": ["n", "Cn"],
+                          "axisLabels": ["Number of T-Shirts", "Total Cost"],
+                          "axisMin": [-2, -10],
+                          "axisRange": [20, 100]
+                        }
+                      },
+                      "objects": [
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [0, 0]
+                            },
+                            {
+                              "type": "point",
+                              "parents": [14, 63]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "movableLine",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [0, 49]
+                            },
+                            {
+                              "type": "point",
+                              "parents": [14, 63],
+                              "properties": {
+                                "name": "(14, 63)"
+                              }
+                            }
+                          ]
+                        }
+                      ]
                     }
                   },
                   {
@@ -4277,7 +4357,39 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["At Fabulous Fabian’s Bakery, the expenses <em>E</em>\u00a0 to make n cakes per month is given by the equation: \n\n \u00a0\u00a0\u00a0 <em>E</em>\u00a0 = 825 + 3.25<em>n</em>\n\nThe income <em>Inc</em>\u00a0 for selling <em>n</em> cakes is given by the equation: \n\n  \u00a0\u00a0\u00a0 <em>Inc</em>\u00a0 = 8.20 <em>n</em><ul><li>What information do the numbers in each equation represent?</li><li>How many cakes does Fabian need to sell in order to start making a profit?</li></ul>"]
+                      "text": ["At Fabulous Fabian’s Bakery, the expenses <em>E</em>\u00a0 to make n cakes per month is given by the equation: \n\n \u00a0\u00a0\u00a0 <em>E</em>\u00a0 = 825 + 3.25<em>n</em>\n\nThe income <em>Inc</em>\u00a0 for selling <em>n</em> cakes is given by the equation: \n\n  \u00a0\u00a0\u00a0 <em>Inc</em>\u00a0 = 8.20 <em>n</em>\n\n \u0089\u00B7 What information do the numbers in each equation represent?"]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "The first equation tells us about Fabian’s expenses, which are $825 each month (regardless of how many cakes he makes) plus an additional $3.25 for each cake he makes. The second equation tells us about Fabian’s income, which is $8.20 for each cake he sells."
+
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [" \u0089\u00B7 How many cakes does Fabian need to sell in order to start making a profit?"]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The profit is represented by I – E:</p>",
+                        "<p>  8.20n – (825 + 3.25n) ≤ 0</p>",
+                        "<p>  8.20n – 3.25n – 825 ≤ 0</p>",
+                        "<p>  4.95n – 825 ≤ 0</p>",
+                        "<p>  4.95n ≤ 825</p>",
+                        "<p>  n ≤ 166 2/3 </p>",
+                        "<p>Fabian needs to sell 167 cakes in order to start making a profit.</p>"
+                      ]
                     }
                   }
                 ]
@@ -4302,14 +4414,70 @@
                     "content": {
                     "type": "Text",
                     "format":"html",
-                    "text": ["<strong>Situation A. Kevin’s Graph</strong>\nKevin drew the graph above to help him find the number of cakes sold to make a profit. <ol><li>Explain how Kevin could use his graph to determine Fabian’s profit.</li><li>Kevin highlighted the vertical distance 330 between the two lines on the graphs. What does the 330 represent on the graph? What does it represent in the real world?</li><li>Adia claims she can find the coordinates of the point of intersection by solving the equation 8.20<em>n</em> = 825 + 3.25<em>n</em>. Is this possible? Explain. How does it help?</li></ol>"]
+                    "text": ["<strong>Situation A. Kevin’s Graph</strong>\nKevin drew the graph above to help him find the number of cakes sold to make a profit. \n\n \u00891. Explain how Kevin could use his graph to determine Fabian’s profit. "]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "text": "Kevin can find when Fabian’s expenses and income are approximately equal. Where the lines intersect, we know that Fabian will make $0. After that, he will begin to make a profit."
                     }
                   },
                   {
                     "content": {
                     "type": "Text",
                     "format":"html",
-                    "text": ["<strong>Situation B. Fabian’s Profit Equation</strong><ol><li>Fabian uses the equation P = Income – Expenses to predict the profit. He wrote P = 8.20<em>n</em> – (825 + 3.25). Does this make sense? Explain. </li><li>Adia rewrites Fabian’s profit equation as P = 4.95<em>n</em> – 825. Is she correct? Explain.</li></ol>"]
+                    "text": [" \u00892. Kevin highlighted the vertical distance 330 between the two lines on the graphs. What does the 330 represent on the graph? What does it represent in the real world?"]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "text": "The 330 shows that the value of E is higher than I. In the real world, this shows that Fabian will spend $330 more in expenses than he will earn when he sells 100 cakes."
+                    }
+                  },
+                  {
+                    "content": {
+                    "type": "Text",
+                    "format":"html",
+                    "text": [" \u00893. Adia claims she can find the coordinates of the point of intersection by solving the equation 8.20<em>n</em> = 825 + 3.25<em>n</em>. Is this possible? Explain. How does it help?</li></ol>"]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "text": "This is possible because (8.20n) represents the income and (825 + 3.25n) represents the expenses. So, by solving this equation, you are finding the point when income and expenses are equal, or where the two lines intersect."
+                    }
+                  },
+                  {
+                    "content": {
+                    "type": "Text",
+                    "format":"html",
+                    "text": ["<strong>Situation B. Fabian’s Profit Equation</strong>\n\n 5. Fabian uses the equation P = Income – Expenses to predict the profit. He wrote P = 8.20<em>n</em> – (825 + 3.25). Does this make sense? Explain. "]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "text": "Yes, since he wants to subtract expenses from income for a given number of cakes, he can subtract the expenses expression from the income expression to give an expression for overall profit."
+                    }
+                  },
+                  {
+                    "content": {
+                    "type": "Text",
+                    "format":"html",
+                    "text": ["6. Adia rewrites Fabian’s profit equation as P = 4.95<em>n</em> – 825. Is she correct? Explain."]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "text": "Yes, this equation will give the same result as Fabian’s. Her equation gives the profit for each cake and subtracts the fixed, monthly expenses."
                     }
                   },
                   {
@@ -4326,8 +4494,15 @@
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_Fabian_Numberline.png"
                     }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "text": "The inequality statement does make sense, because it says that they want their profit to be greater than their income – expenses. The number line does make sense because it shows all possible values of n for which they have a profit."
+                    }
                   }
-              ]
+                ]
               },
               "supports": [
                 {"text": "What are his expenses and his income for the month?"},
@@ -4337,13 +4512,22 @@
             {
               "type": "nowWhatDoYouKnow",
               "content": {
-                "tiles": [{
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": ["Describe how you can solve an equation of the form ax + b  = y? \nDescribe how you can solve an inequality of the form <em>ax + b < c</em> or <em>ax + b > c</em>? "]
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["Describe how you can solve an equation of the form ax + b  = y? \nDescribe how you can solve an inequality of the form <em>ax + b < c</em> or <em>ax + b > c</em>? "]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "text": "If you have an equation of the form y = ax+b and you know what the value of y is, you can find the solution using a table, graph, or equation. \nOn a table, you can find the needed value of y and look at the value of x. This is the same as finding the coordinate pair on the graph. \nUsing a graph, you can find the point of intersection of y1 = ax + b and y2 = y to solve the equation. \nYou can use the equation: subtract b from y and divide by a to solve for x. If you have an equation of the form y = ax+b and you know what the value of x is, you can substitute the value of x into the equation and compute the value of y. \nIf you have an inequality of that form, then you can use algebraic methods to solve the associated equation as before. Then check a few values greater or less than the equation’s solution in the original inequality to determine if the solutions to the inequality should be greater than or less than the solution to the associated equation."
+                    }
                   }
-                }]
+                ]
               },
               "supports": []
             }
