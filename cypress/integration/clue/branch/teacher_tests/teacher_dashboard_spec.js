@@ -194,10 +194,10 @@ const baseUrl = `${Cypress.config("baseUrl")}`;
             });
             it('verifies section tool progress', () => { //currently hard coded since we are using a static test class
                 // total = 30, IN = 30, IC = 9, WI = 10, NW = 7
-                let progress = {"total":"30",
-                                 "IN":"30",
+                let progress = {"total":"29",
+                                 "IN":"29",
                                  "IC":"9",
-                                 "WI":"10",
+                                 "WI":"9",
                                  "NW":"7"
                                 };
                 dashboard.getTotalProgressNumber("IN").should('contain',progress.total);

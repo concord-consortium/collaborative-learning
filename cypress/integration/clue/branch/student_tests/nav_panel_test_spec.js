@@ -65,6 +65,12 @@ describe('Test nav panel tabs', function () {
         cy.openDocumentWithTitle('my-work', 'workspaces', this.title);
         clueCanvas.getInvestigationCanvasTitle().should('contain', this.title);
       });
+      it('verify clicking on section tab shows document list from document content', function () {
+        cy.openSection('my-work', 'workspaces');
+        cy.getCanvasItemTitle('workspaces').should('have.length', 2);
+        cy.getCanvasItemTitle('workspaces').eq(0).should('contain', 'SAS 2.1');
+        cy.getCanvasItemTitle('workspaces').eq(1).should('contain', 'copy');
+      });
       it('verify open the correct canvas selected from Extra Workspace section', function () {
         cy.openTopTab("my-work");
         cy.openDocumentWithTitle('my-work', 'workspaces', copyDocumentTitle);
