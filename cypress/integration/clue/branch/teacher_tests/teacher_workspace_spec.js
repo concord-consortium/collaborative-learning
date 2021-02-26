@@ -20,7 +20,7 @@ before(() => {
   cy.waitForSpinner();
   dashboard.switchView("Workspace");
   cy.wait(2000);
-  clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
+  clueCanvas.getInvestigationCanvasTitle().eq(0).text().as('investigationTitle');
 });
 
 beforeEach(() => {
@@ -83,8 +83,8 @@ describe('teacher document functionality', function () {
   });
   it('verify save and restore investigation', function () {
     cy.openSection("my-work", "workspaces");
-    cy.getCanvasItemTitle("workspaces").contains(this.investigationTitle[0]).should('exist');
-    cy.openDocumentWithTitle("my-work", "workspaces", this.investigationTitle[0]);
+    cy.getCanvasItemTitle("workspaces").contains(this.investigationTitle).should('exist');
+    cy.openDocumentWithTitle("my-work", "workspaces", this.investigationTitle);
     cy.wait(2000);
     tableToolTile.getTableTile().should('exist');
     drawToolTile.getDrawTile().should('exist');
@@ -103,7 +103,7 @@ describe('teacher document functionality', function () {
     clueCanvas.deleteTile('draw');
     cy.openTopTab("my-work");
     cy.openSection('my-work', 'workspaces');
-    cy.openDocumentWithTitle("my-work", "workspaces", this.investigationTitle[0]);
+    cy.openDocumentWithTitle("my-work", "workspaces", this.investigationTitle);
     clueCanvas.deleteTile('draw');
     clueCanvas.deleteTile('table');
   });

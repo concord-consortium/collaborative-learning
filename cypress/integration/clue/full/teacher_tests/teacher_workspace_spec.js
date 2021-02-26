@@ -62,7 +62,7 @@ context("Teacher Space", () => {
                 cy.openDocumentWithTitle('my-work', 'workspaces', teacherDoc);
                 clueCanvas.addTile('table');
             });
-            it.only('verify restore after switching classes', function () {
+            it('verify restore after switching classes', function () {
                 cy.get('@clueData').then((clueData) => {
                     const initClassIndex = 0;
                     const tempClassIndex = 1;
@@ -120,11 +120,9 @@ context("Teacher Space", () => {
                     cy.openTab("my-work");
                     cy.openSection('my-work', 'workspaces');
                     clueCanvas.getInvestigationCanvasTitle().should('contain', problems[initProblemIndex].problemTitle);
-                    cy.openDocumentWithTitle("my-work", "workspaces", teacherDoc);
-                    cy.wait(2000);
                     tableToolTile.getTableTile().should('exist');
                     drawToolTile.getDrawTile().should('exist');
-                    cy.openTab("my-work");
+                    cy.openTopTab("my-work");
                     cy.openSection('my-work', 'workspaces');
                     cy.getCanvasItemTitle("workspaces").contains(teacherDoc).should('exist');
                     cy.openDocumentWithTitle("my-work", "workspaces", teacherDoc);

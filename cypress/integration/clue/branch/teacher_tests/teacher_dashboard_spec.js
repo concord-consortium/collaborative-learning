@@ -238,8 +238,8 @@ context('Teacher Dashboard View', () => {
       cy.get('.sticky-note-popup').should('exist');
       cy.get('.sticky-note-popup-item-content').should('contain', textToGroup);
     });
-    it('verify group support note appears in student view', function () {
-      cy.visit('/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=student:10&qaGroup=2');
+    it('verify group support note not in student view in different group', function () {
+      cy.visit('/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=student:7&qaGroup=2');
       cy.wait(3000);
       cy.get('#icon-sticky-note').should('not.exist');
     });
