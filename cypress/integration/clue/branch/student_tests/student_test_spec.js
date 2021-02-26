@@ -31,30 +31,6 @@ describe('Check header area for correctness', function(){
         header.getUserName().should('contain','Student '+student);
     });
 });
-// TODO: Need to be written
-// describe.skip('Students, class, group, problem combinations', function(){
-//     it('will test new student assigned to new class new group new problem', function(){
-
-//     });
-//     it('will test previous student assigned to a new class, new group, new problem', function(){
-
-//     });
-//     it('will test previous student assigned to previous class, previous group, new problem', function(){
-
-//     });
-//     it('will test previous student assigned to previous class, previous group, previous problem', function(){
-
-//     });
-//     it('will test previous student assigned to previous class, new group, new problem', function(){
-
-//     });
-//     it('will test previous student assigned to previous class, new group, old problem', function(){
-
-//     });
-//     it('will test previously logged in student assigned to new class, new group, previous problem', function(){
-
-//     });
-// })
 
 after(function(){
   cy.clearQAData('all');

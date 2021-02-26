@@ -75,8 +75,7 @@ Cypress.Commands.add("uploadFile",(selector, filename, type="")=>{
 Cypress.Commands.add("clearQAData", (data)=>{ //clears data from Firebase (currently data='all' is the only one supported)
     const baseUrl = `${Cypress.config("baseUrl")}`;
     if (data==='all') {
-        cy.visit(baseUrl + '?appMode=qa&qaClear=' + data + '&fakeClass=1&fakeUser=student:1');
-        // cy.wait(3000)
+        cy.visit(baseUrl + '?appMode=qa&qaClear=' + data + '&fakeClass=5&fakeUser=student:5');
         cy.waitForSpinner();
         cy.get('span').should('contain','QA Cleared: OK');
     }

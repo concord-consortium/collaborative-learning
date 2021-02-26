@@ -11,6 +11,7 @@ import ClueCanvas from "../../../../support/elements/clue/cCanvas";
 
     before(function() {
         const queryParams = "?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:6";
+        cy.clearQAData('all');
 
         cy.visit(baseUrl+queryParams);
         cy.waitForSpinner();

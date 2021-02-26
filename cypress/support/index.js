@@ -21,14 +21,9 @@ import './commands';
 
 Cypress.config('defaultCommandTimeout', 10000);
 
-before(function(){
-    // const baseUrl = `${Cypress.config("baseUrl")}`;
-    // const queryParams = `${Cypress.config("queryParams")}`;
-
-    // cy.clearQAData('all');
-    // cy.visit(baseUrl+queryParams);
-    // cy.wait(4000);
-});
+// before(function(){ //Can't run this because full tests will not run due to website switching
+//     cy.clearQAData('all');
+// });
 
 Cypress.on('uncaught:exception', (err, runnable) => {
     // returning false here prevents Cypress from
