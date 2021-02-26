@@ -1,10 +1,11 @@
 import { types, Instance } from "mobx-state-tree";
-import { Value, ValueJSON } from "slate";
+import { Value } from "slate";
 import Plain from "slate-plain-serializer";
 import Markdown from "slate-md-serializer";
 import { registerToolContentInfo } from "../tool-content-info";
-import { safeJsonParse } from "../../../utilities/js-utils";
-import { htmlToSlate } from "@concord-consortium/slate-editor";
+import {
+  deserializeValueFromLegacy, htmlToSlate, serializeValueToLegacy, textToSlate
+} from "@concord-consortium/slate-editor";
 
 export const kTextToolID = "Text";
 
@@ -13,19 +14,6 @@ export function defaultTextContent(initialText?: string) {
 }
 
 const MarkdownSerializer = new Markdown();
-
-export const emptyJson: ValueJSON = {
-              document: {
-                nodes: [{
-                  object: "block",
-                  type: "paragraph",
-                  nodes: [{
-                    object: "text",
-                    text: ""
-                  }]
-                }]
-              }
-            };
 
 export const TextContentModel = types
   .model("TextTool", {
@@ -42,10 +30,9 @@ export const TextContentModel = types
 
     },
     getSlate() {
-      const parsed = Array.isArray(self.text)
-                      ? emptyJson
-                      : safeJsonParse(self.text as string) || emptyJson;
-      return Value.fromJSON(parsed);
+      return !self.text || Array.isArray(self.text)
+              ? textToSlate("")
+              : deserializeValueFromLegacy(self.text);
     }
   }))
   .views(self => ({
@@ -77,7 +64,7 @@ export const TextContentModel = types
     },
     setSlate(value: Value) {
       self.format = "slate";
-      self.text = JSON.stringify(value.toJSON());
+      self.text = serializeValueToLegacy(value);
     }
   }));
 

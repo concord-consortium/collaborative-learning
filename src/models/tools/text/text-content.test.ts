@@ -1,6 +1,19 @@
-import { TextContentModel, kTextToolID, emptyJson } from "./text-content";
+import { TextContentModel, kTextToolID } from "./text-content";
 import { Value, ValueJSON } from "slate";
 import Plain from "slate-plain-serializer";
+
+const emptyJson: ValueJSON = {
+        document: {
+          nodes: [{
+            object: "block",
+            type: "paragraph",
+            nodes: [{
+              object: "text",
+              text: ""
+            }]
+          }]
+        }
+      };
 
 describe("TextContentModel", () => {
 

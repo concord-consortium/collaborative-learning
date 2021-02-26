@@ -161,7 +161,7 @@
     "@blueprintjs/core": "^3.38.2",
     "@concord-consortium/jsxgraph": "^0.99.8-cc.1",
     "@concord-consortium/react-components": "^0.1.14",
-    "@concord-consortium/slate-editor": "^0.7.1",
+    "@concord-consortium/slate-editor": "^0.7.2",
     "classnames": "^2.2.6",
     "color-string": "^1.5.4",
     "copy-text-to-clipboard": "^2.2.0",
