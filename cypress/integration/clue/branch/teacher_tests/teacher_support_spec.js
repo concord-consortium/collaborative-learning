@@ -2,8 +2,6 @@ import TeacherDashboard from "../../../../support/elements/clue/TeacherDashboard
 import RightNav from "../../../../support/elements/common/RightNav";
 import ClueCanvas from "../../../../support/elements/clue/cCanvas";
 import ClueRightNav from "../../../../support/elements/clue/cRightNav";
-import TableToolTile from "../../../../support/elements/clue/TableToolTile";
-
 
     let dashboard = new TeacherDashboard();
     let rightNav = new RightNav();

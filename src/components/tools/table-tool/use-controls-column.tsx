@@ -54,7 +54,7 @@ interface IRemoveRowButtonProps {
 }
 const RemoveRowButton: React.FC<IRemoveRowButtonProps> = ({ rowId, onRemoveRow }) => {
   return (
-    <div className="remove-row-button" onClick={() => onRemoveRow?.(rowId)}>
+    <div className="remove-row-button" onClick={() => onRemoveRow?.(rowId)}  data-test="remove-row-button">
       <RemoveRowSvg className="remove-row-icon"/>
     </div>
   );

@@ -1,76 +1,62 @@
 class TableToolTile{
-    tableToolTile(workspaceClass){
-        return `${workspaceClass || ".primary-workspace"} .canvas-area .neo-codap-case-table`;
-    }
-    tableTool(){//to use when looking for in right side workspace
-        return '.table-tool';
-    }
-    getTableTile(workspaceClass){
+    getTableTile(workspaceClass) {
         return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .table-tool`);
     }
-    getTable(){
-        return cy.get(this.tableToolTile());
+    getTableTitle(workspaceClass){
+      return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .table-title`);
     }
-
-    getRemoveRowMenuItem(){
-        return cy.get('[data-test=remove-row-menu-item]');
+    getAddColumnButton(){
+      return cy.get('.add-column-button');
     }
-
-    openTableMenu(){
-        cy.get('.canvas-area .neo-codap-case-table .cdp-case-index-header .bp3-popover-target' ).click();
+    getRemoveColumnButton(){
+      return cy.get('.remove-column-button');
     }
-    addNewRow(){
-        this.openTableMenu();
-        cy.get('.bp3-menu-item div').contains('New Row').click();
-        // cy.get('[data-test=new-row-menu-item]').click();
+    getIndexNumberToggle(){
+      return cy.get('.show-hide-row-labels-button');
+    }
+    getRemoveRowButton(){
+        return cy.get('[data-test=remove-row-button]');
+    }
+    getColumnHeader(){
+      return cy.get('.column-header-cell .editable-header-cell');
     }
     renameColumn(column, title){
-        this.openRenameColumnDialog(column);
-        // cy.get('[data-test=rename-column-menu-item]').click().click();
-        // cy.get('[data-test=attr-menu-item]').contains(column).click();
-        this.renameColumnDialog(title);
+        this.getColumnHeader().contains(column).dblclick().type(title+'{enter}');
     }
-    removeRows(i){
-        cy.get('[row-index='+i+']').first().click({force:true});
-        this.openTableMenu();
-        cy.get('.bp3-menu-item div').contains('Remove Rows').click();
-        // cy.get('[data-test=remove-row-menu-item]').click()
+    removeRow(i){
+      this.getTableRow().eq(i).click();
+      this.getRemoveRowButton().click();
     }
     getTableRow(){
-        return cy.get('.canvas-area .ag-center-cols-container .ag-row');
+        return cy.get('.canvas-area .rdg-row');
     }
-    renameColumnDialog(title){
-        cy.get('.bp3-heading').should('contain', 'Rename Column');
-        cy.get('.nc-attribute-name-input').clear();
-        cy.get('.nc-attribute-name-input').type(title);
-        this.getRenameColumnDialogButton('OK').click();
-    }
-    openRenameColumnDialog(column){ //used for testing cancel of dialog
-        this.openTableMenu();
-        cy.get('.bp3-menu-item div').contains('Rename Column').click().click();//.siblings('span.bp3-icon-caret-right').click().click()
-        cy.wait(500);
-        cy.get('.bp3-menu-item div').contains(column).click();
-        // cy.get('[data-test=rename-column-menu-item]').click().click();
-        // cy.get('[data-test=attr-menu-item]').contains(column).click();
-    }
-    getRenameColumnDialogButton(button){
-        return cy.get('.nc-dialog-buttons span').contains(button);
-    }
-    getColumnHeaderText(){
-        return cy.get('.ag-header-cell-text');
+    getColumnHeaderText(i){
+        return this.getColumnHeader().text();
     }
     getTableCell(){
-        return cy.get('.cdp-row-data-cell');
+        return cy.get('.rdg-row .rdg-cell');
     }
     enterData(cell, num){
         this.getTableCell().eq(cell).type(num+'{enter}');
     }
     getTableIndexColumnCell(){
-        return cy.get('.canvas-area .neo-codap-case-table .cdp-case-index-cell');
+        return cy.get('.canvas-area .rdg-cell .index-column');
     }
-    unlinkTable(){
-        this.openTableMenu();
-        cy.get('.bp3-menu-item div').contains('Unlink Geometry').click();
+    getLinkGraphButton(){
+      return cy.get('.link-geometry-button');
     }
+    linkTable(table, graph) {
+      cy.get('.table-title').text().contains(table).within((tableTile)=>{
+        this.getLinkGraphButton().eq(table).click();
+        cy.get('select').select(graph);
+        cy.get('.modal-button').contains("Link Table").click();
+      });
+    }
+    getTableToolbarButton(button){// ['set-expression']
+      return cy.get(`.primary-workspace .table-toolbar .toolbar-button.${button}`);
+    }
+    // unlinkTable(){ //the only way to unlink is to delete either the graph or the table
+    //     cy.get('.bp3-menu-item div').contains('Unlink Geometry').click();
+    // }
 }
 export default TableToolTile;
