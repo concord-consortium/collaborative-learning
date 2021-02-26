@@ -3138,7 +3138,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "1. Find the missing value. Explain how you found it." 
+                      "text": "1. Find the missing value. Explain how you found it."
                     }
                   },
                   {
@@ -3435,7 +3435,7 @@
                   },
                   {
                     "display": "teacher",
-                    "content": { 
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
@@ -3460,7 +3460,7 @@
                   },
                   {
                     "display": "teacher",
-                    "content": 
+                    "content":
                       {
                         "type": "Text",
                         "format": "html",
@@ -3486,7 +3486,7 @@
                   },
                   {
                     "display": "teacher",
-                    "content": 
+                    "content":
                     {
                       "type": "Text",
                       "format": "html",
@@ -3561,7 +3561,7 @@
                   },
                   {
                     "display": "teacher",
-                    "content": 
+                    "content":
                     {
                       "type": "Text",
                       "format": "html",
@@ -3600,7 +3600,7 @@
                   },
                   {
                     "display": "teacher",
-                    "content": 
+                    "content":
                     {
                       "type": "Text",
                       "format": "html",
@@ -3617,7 +3617,7 @@
                   },
                   {
                     "display": "teacher",
-                    "content": 
+                    "content":
                     {
                       "type": "Text",
                       "format": "html",
@@ -3634,7 +3634,7 @@
                   },
                   {
                     "display": "teacher",
-                    "content": 
+                    "content":
                     {
                       "type": "Text",
                       "format": "html",
@@ -3652,7 +3652,7 @@
                   },
                   {
                     "display": "teacher",
-                    "content": 
+                    "content":
                     {
                       "type": "Text",
                       "format": "html",
@@ -3668,9 +3668,9 @@
                       "url": "curriculum/moving-straight-ahead/images/MSA_3_1_WIcoinsSolution.png"
                     }
                   },
-                  { 
+                  {
                     "display": "teacher",
-                    "content": 
+                    "content":
                       {
                         "type": "Text",
                         "format": "html",
@@ -3690,7 +3690,7 @@
                       "text": ["<strong>Situation C. Another Donor</strong>\nA local merchant donates $200 for the Walkathon. 1. They suggested the following code:\n6P + $20 = $200. P represents a pouch. How much money is in each pouch?"]
                     }
                   },
-                  { 
+                  {
                     "display": "teacher",
                     "content": {
                       "type": "Text",
@@ -3701,7 +3701,7 @@
                         "<p>6P = 180</p>",
                         "<p>P = 30</p>"
                       ]
-                    }   
+                    }
                   },
                   {
                     "content": {
@@ -3710,9 +3710,9 @@
                       "text": ["2. Mateo wrote two different expressions that could be codes to represent the $200. For each expression how much money is in each pouch?\n2P + $45  \u00a0\u00a0    4P + $20"]
                     }
                   },
-                  { 
+                  {
                     "display": "teacher",
-                    "content": 
+                    "content":
                     {
                       "type": "Text",
                       "format": "html",
@@ -3735,9 +3735,9 @@
                       "text": ["3. Design another code that the merchant could use. Give it to a classmate to solve. "]
                     }
                   },
-                  { 
+                  {
                     "display": "teacher",
-                    "content": 
+                    "content":
                     {
                       "type": "Text",
                       "format": "html",
@@ -3763,9 +3763,9 @@
                     "text": "Pouches with an unknown number of coins and coins are represented with an equation. What strategies can you use to find the number of coins in each pouch? How do you know if your answer is correct?"
                     }
                   },
-                  { 
+                  {
                     "display": "teacher",
-                    "content": 
+                    "content":
                     {
                       "type": "Text",
                       "format": "html",
@@ -4247,8 +4247,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>For symbolic methods,  students’ explanations should include  keeping expressions equivalent on both sides  of the equal sign (e.g., adding 2 to each side, dividing each side by 3, etc.). Students should also include something about using order of operations correctly, although there are some exceptions (e.g., factoring as a first step). Students should also notice that if  applying the Distributive Property is possible, then it may simplify the process.</p>",
-                        "<p>Tables and graphs can also be used to solve  linear equations. For example, the equation <em> 2x – 5 = x + 7</em> can be solved by finding  the point of intersection of <em>y1 = 2x – 5</em>  and <em>y2 = x + 7</em> on a graphing calculator. Sometimes it is quicker to use symbolic methods. However, if  students are experienced with using technology to create tables and graphs, and if  several questions of this type are being asked, then tables or graphs might be more efficient.</p>"
+                        "<p>For symbolic methods, students’ explanations should include keeping expressions equivalent on both sides of the equal sign (e.g., adding 2 to each side, dividing each side by 3, etc.). Students should also include something about using order of operations correctly, although there are some exceptions (e.g., factoring as a first step). Students should also notice that if applying the Distributive Property is possible, then it may simplify the process.</p>",
+                        "<p>Tables and graphs can also be used to solve linear equations. For example, the equation <em>2x – 5 = x + 7</em> can be solved by finding the point of intersection of <em>y1 = 2x – 5</em> and <em>y2 = x + 7</em> on a graphing calculator. Sometimes it is quicker to use symbolic methods. However, if students are experienced with using technology to create tables and graphs, and if several questions of this type are being asked, then tables or graphs might be more efficient.</p>"
                       ]
                     }
                   }
