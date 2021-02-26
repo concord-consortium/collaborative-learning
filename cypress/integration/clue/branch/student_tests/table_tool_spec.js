@@ -1,9 +1,7 @@
-import Canvas from '../../../../support/elements/common/Canvas';
 import TableToolTile from '../../../../support/elements/clue/TableToolTile';
 import ClueCanvas from '../../../../support/elements/clue/cCanvas';
 
-let canvas = new Canvas,
-  clueCanvas = new ClueCanvas,
+let clueCanvas = new ClueCanvas,
   tableToolTile = new TableToolTile;
 
 let headerX = 'pluto';
