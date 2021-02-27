@@ -1,5 +1,19 @@
 # Changelog
 
+## Version 1.7.0 - released February 26, 2021
+
+### Features/Improvements
+- Additional Moving Straight Ahead Teacher Content
+- Uses @concord-consortium/slate-editor library
+- Update `browserslist` configuration
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 389,494 bytes | 0.0% |
+| index.js | 4,574,452 bytes | 10.3% |
+
 ## Version 1.6.0 - released February 7, 2021
 
 ### Features/Improvements
