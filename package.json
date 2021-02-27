@@ -1,6 +1,6 @@
 {
   "name": "collaborative-learning",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "Collaborative Learning environment",
   "main": "index.js",
   "config": {
@@ -10,6 +10,7 @@
     "masterBranchRegEx": "/collaborative-learning\\.concord\\.org\\/branch\\/master(\\/|$)/i",
     "rollbarAccessToken": "fb9dd070b7344cc7a5e529d8fa25e765"
   },
+  "browserslist": "> 0.2%, last 5 versions, Firefox ESR, not dead",
   "jest": {
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
