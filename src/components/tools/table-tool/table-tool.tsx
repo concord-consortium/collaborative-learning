@@ -63,7 +63,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
     model, dataSet: dataSet.current,
     onRequestRowHeight: handleRequestRowHeight, triggerColumnChange, triggerRowChange
   });
-  const { onSetTableTitle, onSetColumnExpressions, onLinkGeometryTile } = changeHandlers;
+  const { onSetTableTitle, onSetColumnExpressions, onLinkGeometryTile, onUnlinkGeometryTile } = changeHandlers;
 
   const [showRowLabels, setShowRowLabels] = useState(false);
   const {
@@ -101,7 +101,8 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
     selectedCell, inputRowId, ...rowLabelProps, onShowExpressionsDialog: handleShowExpressionsDialog });
 
   const { showLinkButton, isLinkEnabled, linkIndex, linkColors, showLinkGeometryDialog } =
-    useGeometryLinking({ documentId, model, hasLinkableRows, onRequestTilesOfType, onLinkGeometryTile });
+    useGeometryLinking({ documentId, model, hasLinkableRows,
+                          onRequestTilesOfType, onLinkGeometryTile, onUnlinkGeometryTile });
 
   const { titleCellWidth } =
     useColumnWidths({ readOnly, getTitle, columns: dataGridProps.columns, measureText: measureHeaderText });

@@ -16,9 +16,10 @@ interface IProps {
   hasLinkableRows: boolean;
   onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
   onLinkGeometryTile: (geomTileInfo: ITileLinkMetadata) => void;
+  onUnlinkGeometryTile: (geomTileInfo: ITileLinkMetadata) => void;
 }
 export const useGeometryLinking = ({
-  documentId, model, hasLinkableRows, onRequestTilesOfType, onLinkGeometryTile
+  documentId, model, hasLinkableRows, onRequestTilesOfType, onLinkGeometryTile, onUnlinkGeometryTile
 }: IProps) => {
   const modelId = model.id;
   const showLinkButton = useFeatureFlag("GeometryLinkedTables");
@@ -27,7 +28,8 @@ export const useGeometryLinking = ({
   const isLinkEnabled = hasLinkableRows && (geometryTiles.length > 0);
   const linkColors = getTableLinkColors(modelId);
 
-  const [showLinkGeometryDialog] = useLinkGeometryDialog({ geometryTiles, onLinkGeometryTile });
+  const [showLinkGeometryDialog] =
+          useLinkGeometryDialog({ geometryTiles, model, onLinkGeometryTile, onUnlinkGeometryTile });
 
   useEffect(() => {
     documentId && addTableToDocumentMap(documentId, modelId);
@@ -43,9 +45,7 @@ interface IUseLinkableGeometryTilesProps {
 }
 const useLinkableGeometryTiles = ({ model, onRequestTilesOfType }: IUseLinkableGeometryTilesProps) => {
   const geometryTiles = useCurrent(onRequestTilesOfType(kGeometryToolID));
-  const content = model.content as TableContentModelType;
-  // add default title if there isn't a title; filter out tiles we're already linked to
+
   return geometryTiles.current
-          .map((tileInfo, i) => ({ id: tileInfo.id, title: tileInfo.title || `Graph ${i + 1}` }))
-          .filter(tileInfo => content.metadata.linkedGeometries.indexOf(tileInfo.id) < 0);
+          .map((tileInfo, i) => ({ id: tileInfo.id, title: tileInfo.title || `Graph ${i + 1}` }));
 };

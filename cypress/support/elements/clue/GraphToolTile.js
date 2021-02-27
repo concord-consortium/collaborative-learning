@@ -24,6 +24,9 @@ class GraphToolTile{
     getGraph(workspaceClass){
         return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .geometry-content`);
     }
+    getGraphTitle(workspaceClass){
+      return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .geometry-tool .geometry-title`);
+    }
     getGraphAxisLabelId(axis){
         return this.getGraphAxisLabel(axis)
             .then(($label)=>{
