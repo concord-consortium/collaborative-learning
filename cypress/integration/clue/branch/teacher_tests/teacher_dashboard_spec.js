@@ -124,7 +124,7 @@ context('Teacher Dashboard View', () => {
         cy.wait(1000);
       });
     });
-    it('verifies section tool progress', () => { //currently hard coded since we are using a static test class
+    it.skip('verifies section tool progress', () => { //currently hard coded since we are using a static test class
       // total = 30, IN = 29, IC = 9, WI = 10, NW = 7
       let progress = {
         "total": "29",
