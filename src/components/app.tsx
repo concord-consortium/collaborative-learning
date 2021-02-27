@@ -49,7 +49,7 @@ function resolveAppMode(
   const { appMode, db, ui} = stores;
   if (appMode === "authed")  {
     if (rawFirebaseJWT) {
-      db.connect({appMode, stores, rawFirebaseJWT}).catch(ui.setError);
+      db.connect({appMode, stores, rawFirebaseJWT}).catch(error => ui.setError(error));
     }
     else {
       ui.setError("No firebase token available to connect to db!");
@@ -75,7 +75,7 @@ function resolveAppMode(
           }
         }
       })
-      .catch(ui.setError);
+      .catch(error => ui.setError(error));
   }
 }
 
@@ -210,7 +210,7 @@ export class AppComponent extends BaseComponent<IProps, IState> {
     );
   }
 
-  private handlePortalLoginRedirect() {
+  private handlePortalLoginRedirect = () => {
     window.location.href = urlParams.domain || "https://learn.concord.org";
   }
 }

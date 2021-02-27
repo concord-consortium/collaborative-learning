@@ -110,10 +110,9 @@ class TeacherDashboard {
         dialog.getDialogOKButton().click();
     }
     sendStudentNote(group, student, quadrant, text){
-        this.getGroup(group).within(() => {
-            this.getStudentOverlay(quadrant).click({force:true});
-            this.getStickyNoteIcon().click();
-        });
+      const quadrants = ["north-west", "north-east", "south-east", "south-west"];
+        cy.get('.four-up-overlay').eq(quadrants.indexOf(quadrant)).click();
+        this.getStickyNoteIcon().eq(group-1).click();
         dialog.getDialogTitle().should('contain','Message '+ student);
         dialog.getDialogTextInput().type(text);
         dialog.getDialogOKButton().click();

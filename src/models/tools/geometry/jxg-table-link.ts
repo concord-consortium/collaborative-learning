@@ -28,7 +28,7 @@ function createLinkedPoint(board: JXG.Board, parents: JXGCoordPair, props: any, 
   const tableId = links?.tileIds?.[0];
   const [linkedRowId, linkedColId] = splitLinkedPointId(props?.id);
   const linkColors = sGetTableLinkColors(tableId);
-  if (!linkColors) return;
+  if (!board || !linkColors) return;
   const linkedProps = {
           clientType: "linkedPoint",
           fixed: true,
@@ -43,7 +43,7 @@ function createLinkedPoint(board: JXG.Board, parents: JXGCoordPair, props: any, 
           linkedColId
         };
   const _props = { ...props, ...linkedProps };
-  return createPoint(board as JXG.Board, parents, _props);
+  return createPoint(board, parents, _props);
 }
 
 export const linkedPointChangeAgent: JXGChangeAgent = {
@@ -70,7 +70,7 @@ export const linkedPointChangeAgent: JXGChangeAgent = {
   delete: (board, change) => {
     pointChangeAgent.delete(board, change);
 
-    syncLinkedPoints(board as JXG.Board, change.links as ITableLinkProperties);
+    syncLinkedPoints(board, change.links as ITableLinkProperties);
   }
 };
 

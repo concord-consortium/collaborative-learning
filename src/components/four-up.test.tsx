@@ -49,7 +49,7 @@ describe("Four Up Component", () => {
     });
 
     const stores = createStores({ groups, documents });
-    const comp = mount(<FourUpComponent userId={document.uid} groupId={document.groupId!} stores={stores}/>);
+    const comp = mount(<FourUpComponent userId={document.uid} groupId={document.groupId} stores={stores}/>);
     expect(comp.find(CanvasComponent)).toHaveLength(4);
     expect(comp.find(".member")).toHaveLength(1);
   });

@@ -3,13 +3,13 @@ import { getObjectById } from "./jxg-board";
 import { JXGChangeAgent } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
 import { getPointsForVertexAngle } from "./jxg-polygon";
-import { isPoint, isVertexAngle } from "./jxg-types";
+import { isPoint, isPolygon, isVertexAngle } from "./jxg-types";
 import { uniqueId } from "../../../utilities/js-utils";
 
 export const canSupportVertexAngle = (vertex: JXG.Point): boolean => {
   const children = values(vertex.childElements);
-  const polygons = children.filter(child => child.elType === "polygon");
-  const polygon = polygons.length === 1 ? polygons[0] as JXG.Polygon : undefined;
+  const polygons = children.filter(isPolygon);
+  const polygon = polygons.length === 1 ? polygons[0] : undefined;
   return !!polygon && (polygon.vertices.length > 3);
 };
 
@@ -17,7 +17,7 @@ export const getVertexAngle = (vertex: JXG.Point): JXG.Angle | undefined => {
   let vertexAngle: JXG.Angle | undefined;
   each(vertex.childElements, child => {
     if (isVertexAngle(child)) {
-      const childAngle = child as JXG.Angle;
+      const childAngle = child;
       if (childAngle.point1.id === vertex.id) {
         vertexAngle = childAngle;
       }
@@ -28,7 +28,7 @@ export const getVertexAngle = (vertex: JXG.Point): JXG.Angle | undefined => {
 
 export const updateVertexAngle = (angle: JXG.Angle) => {
   const centerPt = angle.point1;
-  const parents = centerPt && getPointsForVertexAngle(centerPt as JXG.Point);
+  const parents = isPoint(centerPt) && getPointsForVertexAngle(centerPt);
   // reverse the order of parents if necessary to guarantee that we
   // mark the correct side of the angle.
   if (parents && (parents[0].id === angle.point3.id) && (parents[2].id === angle.point2.id)) {
@@ -43,7 +43,7 @@ export const updateVertexAngle = (angle: JXG.Angle) => {
 };
 
 export function updateVertexAnglesFromObjects(objects: JXG.GeometryElement[]) {
-  const affectedAngles: { [id: string]: JXG.GeometryElement } = {};
+  const affectedAngles: { [id: string]: JXG.Angle } = {};
 
   // identify affected angles
   each(objects, (obj, id) => {
@@ -60,7 +60,7 @@ export function updateVertexAnglesFromObjects(objects: JXG.GeometryElement[]) {
   let board: JXG.Board | undefined;
   each(affectedAngles, angle => {
     board = angle.board;
-    updateVertexAngle(angle as JXG.Angle);
+    updateVertexAngle(angle);
   });
   board && board.update();
 }
@@ -90,8 +90,8 @@ export const vertexAngleChangeAgent: JXGChangeAgent = {
     ids.forEach(id => {
       const obj = getObjectById(board, id);
       if (isVertexAngle(obj)) {
-        const angle = obj as JXG.Angle;
-        if (angle.dot && isPoint(angle.dot)) {
+        const angle = obj;
+        if (isPoint(angle.dot)) {
           dotIds.push(angle.dot.id);
         }
       }

@@ -10,6 +10,7 @@ export interface IToolApi {
   getLinkIndex?: (index?: number) => number;
   getLinkedTables?: () => string[] | undefined;
   getContentHeight?: () => number | undefined;
+  exportContentAsTileJson?: () => string;
   handleDocumentScroll?: (x: number, y: number) => void;
   handleTileResize?: (entry: ResizeObserverEntry) => void;
 }

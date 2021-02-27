@@ -1,6 +1,6 @@
 {
   "name": "collaborative-learning",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "Collaborative Learning environment",
   "main": "index.js",
   "config": {
@@ -10,6 +10,7 @@
     "masterBranchRegEx": "/collaborative-learning\\.concord\\.org\\/branch\\/master(\\/|$)/i",
     "rollbarAccessToken": "fb9dd070b7344cc7a5e529d8fa25e765"
   },
+  "browserslist": "> 0.2%, last 5 versions, Firefox ESR, not dead",
   "jest": {
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
@@ -48,6 +49,7 @@
     "lint": "eslint \"./src/**/*.{js,json,jsx,ts,tsx}\" \"./cypress/**/*.{js,json,jsx,ts,tsx}\"",
     "lint:build": "eslint -c \".eslintrc.build.js\" \"./src/**/*.{js,json,jsx,ts,tsx}\"",
     "lint:fix": "eslint --fix \"./src/**/*.{js,json,jsx,ts,tsx}\" \"./cypress/**/*.{js,json,jsx,ts,tsx}\"",
+    "lint:types": "eslint -c \".eslintrc.types.js\" \"./src/**/*.{js,jsx,ts,tsx}\"",
     "lint:unused": "tsc --noUnusedLocals --project .",
     "migrate": "node ./migrations/migrate",
     "migrate:debug": "node --inspect-brk ./migrations/migrate",
@@ -114,9 +116,9 @@
     "copy-webpack-plugin": "^6.4.1",
     "cross-env": "^7.0.3",
     "css-loader": "^4.3.0",
-    "cypress": "^6.3.0",
+    "cypress": "^6.5.0",
     "cypress-commands": "^1.1.0",
-    "cypress-file-upload": "^4.1.1",
+    "cypress-file-upload": "^5.0.2",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.6",
     "eslint": "^7.19.0",
@@ -160,8 +162,10 @@
     "@blueprintjs/core": "^3.38.2",
     "@concord-consortium/jsxgraph": "^0.99.8-cc.1",
     "@concord-consortium/react-components": "^0.1.14",
+    "@concord-consortium/slate-editor": "^0.7.2",
     "classnames": "^2.2.6",
     "color-string": "^1.5.4",
+    "copy-text-to-clipboard": "^2.2.0",
     "d3-format": "^2.0.0",
     "expr-eval": "^2.0.2",
     "file-saver": "^2.0.5",
@@ -187,7 +191,6 @@
     "resize-observer-polyfill": "^1.5.1",
     "rollbar": "^2.20.0",
     "slate": "^0.47.9",
-    "slate-html-serializer": "^0.8.13",
     "slate-md-serializer": "^5.5.4",
     "slate-plain-serializer": "^0.7.13",
     "slate-react": "^0.22.10",

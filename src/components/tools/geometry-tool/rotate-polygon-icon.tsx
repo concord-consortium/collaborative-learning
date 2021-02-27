@@ -29,7 +29,7 @@ export class RotatePolygonIcon extends React.Component<IProps, IState> {
   public state: IState = {};
 
   private polygonCenter: JXG.Coords;
-  private initialIconAnchor: JXG.Coords;
+  private initialIconAnchor?: JXG.Coords;
   private initialVertexCoords: { [id: string]: JXG.Coords } = {};
   private initialDragAngle: number;
   private lastDragUpdate: number;
@@ -109,7 +109,7 @@ export class RotatePolygonIcon extends React.Component<IProps, IState> {
     this.polygonCenter = new JXG.Coords(JXG.COORDS_BY_USER, centerCoords, board);
     this.initialIconAnchor = this.state.iconAnchor
                               ? copyCoords(this.state.iconAnchor)
-                              : this.getDefaultIconCoords() as JXG.Coords;
+                              : this.getDefaultIconCoords();
     polygon.vertices.forEach(vertex => {
       this.initialVertexCoords[vertex.id] = copyCoords(vertex.coords);
     });
@@ -132,7 +132,7 @@ export class RotatePolygonIcon extends React.Component<IProps, IState> {
 
     const dragAngle = this.computeAngle(this.polygonCenter, e);
     const deltaAngle = dragAngle - this.initialDragAngle;
-    const iconAnchor = rotateCoords(this.initialIconAnchor, this.polygonCenter, deltaAngle);
+    const iconAnchor = this.initialIconAnchor && rotateCoords(this.initialIconAnchor, this.polygonCenter, deltaAngle);
     this.setState({ iconAnchor });
 
     this.rotateVertices(polygon, deltaAngle, false);

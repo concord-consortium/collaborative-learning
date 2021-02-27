@@ -7,6 +7,9 @@ const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 const problemSubTabTitles = ['Introduction', 'Initial Challenge', 'What If', 'Now What'];
 
+before(()=>{
+      cy.clearQAData('all');
+});
 
 describe('Test nav panel tabs', function () {
   let copyDocumentTitle = 'copy Investigation';

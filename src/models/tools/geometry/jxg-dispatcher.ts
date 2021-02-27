@@ -13,7 +13,7 @@ import { vertexAngleChangeAgent } from "./jxg-vertex-angle";
 import { castArrayCopy } from "../../../utilities/js-utils";
 import { castArray } from "lodash";
 
-type OnWillApplyChange = (board: JXG.Board | string, change: JXGChange) => void;
+type OnWillApplyChange = (board: JXG.Board | string, change: JXGChange) => false | undefined;
 type OnDidApplyChange = (board: JXG.Board | undefined, change: JXGChange) => void;
 
 interface JXGChangeAgents {
@@ -43,7 +43,7 @@ export function applyChanges(board: JXG.Board|string, changes: JXGChange[],
   let _board: JXG.Board | undefined;
   const results = changes.map(change => {
                     const result = applyChange(_board || board, change, context);
-                    const resultBoard = castArray(result).find(isBoard) as JXG.Board;
+                    const resultBoard = castArray(result).find(isBoard);
                     if ((typeof board === "string") && resultBoard) {
                       _board = resultBoard;
                       _board.suspendUpdate();
@@ -62,7 +62,7 @@ export function applyChange(board: JXG.Board|string, change: JXGChange,
   const target = change.target.toLowerCase();
 
   // give clients a chance to intercede before the change is applied
-  context?.onWillApplyChange?.(board, change);
+  if (context?.onWillApplyChange?.(board, change) === false) return;
 
   // special case for update/object, where we dispatch by object type
   if ((change.operation === "update") && (target === "object")) {
@@ -78,8 +78,8 @@ export function applyChange(board: JXG.Board|string, change: JXGChange,
 
   // give clients a chance to intercede after the change has been applied
   if (context?.onDidApplyChange) {
-    if (isBoard(result)) _board = result as JXG.Board;
-    else if (Array.isArray(result) && isBoard(result?.[0])) _board = result[0] as JXG.Board;
+    if (isBoard(result)) _board = result;
+    else if (Array.isArray(result) && isBoard(result?.[0])) _board = result[0];
     context.onDidApplyChange(_board, change);
   }
 

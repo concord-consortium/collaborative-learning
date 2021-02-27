@@ -3,22 +3,8 @@ import { getBaseAxisLabels, getObjectById } from "./jxg-board";
 import { JXGChangeAgent } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
 import { syncClientColors } from "./jxg-point";
-import { isBoard } from "./jxg-types";
+import { isBoard, isMovableLine, isMovableLineControlPoint, isMovableLineLabel, kMovableLineType } from "./jxg-types";
 import { uniqueId } from "../../../utilities/js-utils";
-
-export const isMovableLine = (v: any) => {
-  return v && (v.elType === "line") && (v.getAttribute("clientType") === kMovableLineType);
-};
-
-export const isVisibleMovableLine = (v: any) => isMovableLine(v) && v.visProp.visible;
-
-export const isMovableLineControlPoint = (v: any) => {
-  return v instanceof JXG.Point && v.getAttribute("clientType") === kMovableLineType;
-};
-
-export const isMovableLineLabel = (v: any) => {
-  return v instanceof JXG.Text && v.getAttribute("clientType") === kMovableLineType;
-};
 
 // Returns the two points where the given line intersects the given board, sorted from left to right
 export const getBoundingBoxIntersections = (slope: number, intercept: number, board: JXG.Board) => {
@@ -45,7 +31,7 @@ export const getBoundingBoxIntersections = (slope: number, intercept: number, bo
     .filter(pt => {
       return pt[0] >= leftX && pt[0] <= rightX && pt[1] >= bottomY && pt[1] <= topY;
     })
-    .sort((a, b) => a[0] - b[0]) as number[][];
+    .sort((a, b) => a[0] - b[0]);
 };
 
 export const solveForY = (slope: number, intercept: number, x: number) => {
@@ -55,8 +41,6 @@ export const solveForY = (slope: number, intercept: number, x: number) => {
 export const solveForX = (slope: number, intercept: number, y: number) => {
   return (y - intercept) / slope;
 };
-
-export const kMovableLineType = "movableLine";
 
 const gray = "#CCCCCC";
 const blue = "#009CDC";
@@ -95,12 +79,12 @@ const pointSpecificProps = {
 
 // given a movable line or its label or one of its control points, return the line itself
 export function findMovableLineRelative(obj: JXG.GeometryElement): JXG.Line | undefined {
-  if (isMovableLine(obj)) return obj as JXG.Line;
+  if (isMovableLine(obj)) return obj;
   if (isMovableLineControlPoint(obj)) {
-    return find(obj.childElements, child => isMovableLine(child)) as JXG.Line | undefined;
+    return find(obj.childElements, isMovableLine);
   }
   if (isMovableLineLabel(obj)) {
-    return find(obj.ancestors, ancestor => isMovableLine(ancestor)) as JXG.Line | undefined;
+    return find(obj.ancestors, isMovableLine);
   }
 }
 
@@ -135,7 +119,7 @@ export const movableLineChangeAgent: JXGChangeAgent = {
         name() {
           const disableEquation = context && context.isFeatureDisabled &&
                                     context.isFeatureDisabled("GeometryMovableLineEquation");
-          const [xName, yName] = isBoard(board) ? getBaseAxisLabels(board as JXG.Board) : ["x", "y"];
+          const [xName, yName] = isBoard(board) ? getBaseAxisLabels(board) : ["x", "y"];
           return !disableEquation && this.getSlope && this.getRise && isFinite(this.getSlope())
             ? this.getRise() >= 0
               ? `${yName} = ${JXG.toFixed(this.getSlope(), 1)}${xName} + ${JXG.toFixed(this.getRise(), 1)}`
@@ -177,7 +161,7 @@ export const movableLineChangeAgent: JXGChangeAgent = {
     ids.forEach((id) => {
       const obj = getObjectById(board, id);
       if (isMovableLine(obj)) {
-        const line = obj as JXG.Line;
+        const line = obj;
         board.removeObject(line);
         board.removeObject(line.point1);
         board.removeObject(line.point2);

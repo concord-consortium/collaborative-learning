@@ -56,8 +56,8 @@ export interface IChangeContext {
   isFeatureDisabled?: (feature: string) => boolean;
 }
 
-export type JXGElement = JXG.Board | JXG.Line | JXG.Point | JXG.Text;
-export type JXGChangeResult = JXGElement | JXGElement[] | undefined;
+export type JXGChangeElement = JXG.Board | JXG.GeometryElement;
+export type JXGChangeResult = JXGChangeElement | JXGChangeElement[] | undefined;
 
 // for create/board the board parameter is the ID of the DOM element
 // for all other changes it should be the board

@@ -2,7 +2,7 @@ import { each, filter, find, uniqueId, values } from "lodash";
 import { getObjectById } from "./jxg-board";
 import { ESegmentLabelOption, JXGChange, JXGChangeAgent } from "./jxg-changes";
 import { getElementName, objectChangeAgent } from "./jxg-object";
-import { isPoint, isPolygon, isVertexAngle, isVisibleEdge } from "./jxg-types";
+import { isLine, isPoint, isPolygon, isVertexAngle, isVisibleEdge } from "./jxg-types";
 import { wn_PnPoly } from "./soft-surfer-sunday";
 
 export function isPointInPolygon(x: number, y: number, polygon: JXG.Polygon) {
@@ -28,35 +28,35 @@ export function getPolygonEdges(polygon: JXG.Polygon) {
 export function getPolygonEdge(board: JXG.Board, polygonId: string, pointIds: string[]) {
   const point1 = getObjectById(board, pointIds[0]);
   const segment = find(point1?.childElements, child => {
-                    const seg = isVisibleEdge(child) ? child as JXG.Line : undefined;
+                    const seg = isVisibleEdge(child) ? child : undefined;
                     if (!seg) return false;
                     const isEdgeOfPolygon = seg.parentPolygon?.id === polygonId;
                     const hasPoint1 = pointIds.findIndex(id => id === seg.point1.id) >= 0;
                     const hasPoint2 = pointIds.findIndex(id => id === seg.point2.id) >= 0;
                     return isEdgeOfPolygon && hasPoint1 && hasPoint2;
                   });
-  return segment ? segment as JXG.Line : undefined;
+  return isLine(segment) ? segment : undefined;
 }
 
 export function getAssociatedPolygon(elt: JXG.GeometryElement): JXG.Polygon | undefined{
-  if (isPolygon(elt)) return elt as JXG.Polygon;
+  if (isPolygon(elt)) return elt;
   if (isPoint(elt)) {
-    return find(elt.childElements, child => isPolygon(child)) as JXG.Polygon | undefined;
+    return find(elt.childElements, isPolygon);
   }
   if (elt.elType === "segment") {
-    const vertices = filter(elt.ancestors, ancestor => isPoint(ancestor)) as JXG.Point[];
+    const vertices = filter(elt.ancestors, isPoint);
     for (const vertex of vertices) {
-      const polygon = find(vertex.childElements, child => isPolygon(child));
-      if (polygon) return polygon as JXG.Polygon;
+      const polygon = find(vertex.childElements, isPolygon);
+      if (polygon) return polygon;
     }
   }
 }
 
 export function getPointsForVertexAngle(vertex: JXG.Point) {
   const children = values(vertex.childElements);
-  const polygons = children.filter(child => child.elType === "polygon");
-  const polygon = polygons.length === 1 ? polygons[0] as JXG.Polygon : undefined;
-  const vertexCount = polygon ? polygon.vertices.length : 0;
+  const polygons = children.filter(isPolygon);
+  const polygon = polygons.length === 1 ? polygons[0] : undefined;
+  const vertexCount = polygon?.vertices.length || 0;
   if (!polygon || (vertexCount <= 3)) return;
   const vertexIndex = polygon.findPoint(vertex);
   if (vertexIndex < 0) return;
@@ -92,7 +92,7 @@ export function prepareToDeleteObjects(board: JXG.Board, ids: string[]) {
   const polygonVertexMap: { [id: string]: string[] } = {};
   ids.forEach(id => {
     const elt = getObjectById(board, id);
-    if (elt && isPoint(elt)) {
+    if (isPoint(elt)) {
       each(elt.childElements, child => {
         if (isPolygon(child)) {
           if (!polygonVertexMap[child.id]) {
@@ -103,7 +103,7 @@ export function prepareToDeleteObjects(board: JXG.Board, ids: string[]) {
       });
     }
     else if (isPolygon(elt)) {
-      polygonsToDelete[id] = elt as JXG.Polygon;
+      polygonsToDelete[id] = elt;
     }
     else if (elt && isVertexAngle(elt)) {
       anglesToDelete[id] = elt;

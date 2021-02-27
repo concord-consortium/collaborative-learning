@@ -1,10 +1,11 @@
 import { types, Instance } from "mobx-state-tree";
-import { Value, ValueJSON } from "slate";
+import { Value } from "slate";
 import Plain from "slate-plain-serializer";
 import Markdown from "slate-md-serializer";
-import SlateHtmlSerializer from "./slate-html-serializer";
 import { registerToolContentInfo } from "../tool-content-info";
-import { safeJsonParse } from "../../../utilities/js-utils";
+import {
+  deserializeValueFromLegacy, htmlToSlate, serializeValueToLegacy, textToSlate
+} from "@concord-consortium/slate-editor";
 
 export const kTextToolID = "Text";
 
@@ -12,22 +13,7 @@ export function defaultTextContent(initialText?: string) {
   return TextContentModel.create({ text: initialText || "" });
 }
 
-const HtmlSerializer = new SlateHtmlSerializer();
-
 const MarkdownSerializer = new Markdown();
-
-export const emptyJson: ValueJSON = {
-              document: {
-                nodes: [{
-                  object: "block",
-                  type: "paragraph",
-                  nodes: [{
-                    object: "text",
-                    text: ""
-                  }]
-                }]
-              }
-            };
 
 export const TextContentModel = types
   .model("TextTool", {
@@ -44,10 +30,9 @@ export const TextContentModel = types
 
     },
     getSlate() {
-      const parsed = Array.isArray(self.text)
-                      ? emptyJson
-                      : safeJsonParse(self.text as string) || emptyJson;
-      return Value.fromJSON(parsed);
+      return !self.text || Array.isArray(self.text)
+              ? textToSlate("")
+              : deserializeValueFromLegacy(self.text);
     }
   }))
   .views(self => ({
@@ -56,7 +41,7 @@ export const TextContentModel = types
         case "slate":
           return self.getSlate();
         case "html":
-          return HtmlSerializer.deserialize(self.joinText);
+          return htmlToSlate(self.joinText);
         case "markdown":
           return MarkdownSerializer.deserialize(self.joinText);
         default:
@@ -79,7 +64,7 @@ export const TextContentModel = types
     },
     setSlate(value: Value) {
       self.format = "slate";
-      self.text = JSON.stringify(value.toJSON());
+      self.text = serializeValueToLegacy(value);
     }
   }));
 

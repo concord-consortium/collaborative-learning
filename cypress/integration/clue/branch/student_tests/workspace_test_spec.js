@@ -39,16 +39,15 @@ context('Test the overall workspace', function () {
     });
     // TODO: Changes in new document add feature.
     it('will verify canvases do not persist between problems', function () {
-      let problem1 = '1.1',
+      let problem1 = '1',
         problem2 = '2.1';
       let tab1 = 'Introduction';
 
       cy.visit(baseUrl + '?appMode=qa&fakeClass=5&fakeUser=student:1&qaGroup=1&problem=' + problem1);
       cy.waitForSpinner();
-      // cy.wait(3000);
 
       clueCanvas.addTile('text');
-      textToolTile.enterText('This is the ' + tab1 + ' in Problem ' + problem1);
+      textToolTile.enterText('This is the ' + tab1 + ' in Problem ' + problem1 + '{enter}');
       textToolTile.getTextTile().last().should('contain', 'Problem ' + problem1);
 
       cy.visit(baseUrl + '?appMode=qa&fakeClass=5&fakeUser=student:1&qaGroup=1&problem=' + problem2);

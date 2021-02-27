@@ -6,5 +6,7 @@ npm-error.log
 serviceAccountKey.json
 .idea
 .vscode
+.yalc
+yalc.lock
 cypress/screenshots
 *debug.log

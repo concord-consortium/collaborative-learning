@@ -1,28 +1,59 @@
 import { values } from "lodash";
 
-export const isBoard = (v: any) => v instanceof JXG.Board;
-export const isAxis = (v: any) => (v instanceof JXG.Line) && (v.elType === "axis");
-export const isAxisLabel = (v: any) => v instanceof JXG.Text && !!values(v.ancestors).find(el => isAxis(el));
+export const isBoard = (v: any): v is JXG.Board => v instanceof JXG.Board;
+export const isAxis = (v: any): v is JXG.Line => (v instanceof JXG.Line) && (v.elType === "axis");
+export const isAxisArray = (v: any): v is JXG.Line[] => Array.isArray(v) && v.every(isAxis);
+export const isAxisLabel = (v: any): v is JXG.Text => {
+  return v instanceof JXG.Text && values(v.ancestors).some(isAxis);
+};
 
-export const isPoint = (v: any) => v instanceof JXG.Point;
-export const isVisiblePoint = (v: any) => isPoint(v) && v.visProp.visible;
+export const isGeometryElement = (v: any): v is JXG.GeometryElement => v instanceof JXG.GeometryElement;
 
-export const isLinkedPoint = (v: any) => isPoint(v) && (v.getAttribute("clientType") === "linkedPoint");
+export const isPoint = (v: any): v is JXG.Point => v instanceof JXG.Point;
+export const isPointArray = (v: any): v is JXG.Point[] => Array.isArray(v) && v.every(isPoint);
+export const isVisiblePoint = (v: any): v is JXG.Point => isPoint(v) && v.visProp.visible;
+
+export const isLinkedPoint = (v: any): v is JXG.Point => {
+  return isPoint(v) && (v.getAttribute("clientType") === "linkedPoint");
+};
 
 export const isCommentType = (v: any) => v && v.getAttribute("clientType") === "comment";
-export const isComment = (v: any) => isCommentType(v) && (v instanceof JXG.Text) && (v.elType === "text");
+export const isComment = (v: any): v is JXG.Text => {
+  return v instanceof JXG.Text && isCommentType(v) && (v.elType === "text");
+};
 
-export const isFreePoint = (v: any) => {
+export const isFreePoint = (v: any): v is JXG.Point => {
   if (isVisiblePoint(v)) {
-    const point = v as JXG.Point;
+    const point = v;
     return values(point.childElements).filter(el => !isCommentType(el)).length <= 1 &&
            values(point.descendants).filter(el => !isCommentType(el)).length <= 1;
   }
+  return false;
 };
 
-export const isPolygon = (v: any) => v instanceof JXG.Polygon;
-export const isVisibleEdge = (v: any) => v instanceof JXG.Line && (v.elType === "segment") && v.visProp.visible;
+export const isImage = (v: any): v is JXG.Image => v instanceof JXG.Image;
 
-export const isVertexAngle = (v: any) =>
-                (v instanceof JXG.Curve) && (v.elType === "angle") &&
-                (v.getAttribute("clientType") === "vertexAngle");
+export const isLine = (v: any): v is JXG.Line => v instanceof JXG.Line;
+
+export const isPolygon = (v: any): v is JXG.Polygon => v instanceof JXG.Polygon;
+export const isVisibleEdge = (v: any): v is JXG.Line => {
+  return v instanceof JXG.Line && (v.elType === "segment") && v.visProp.visible;
+};
+
+export const isText = (v: any): v is JXG.Text => v instanceof JXG.Text;
+
+export const isVertexAngle = (v: any): v is JXG.Angle => {
+  return (v instanceof JXG.Curve) && (v.elType === "angle") && (v.getAttribute("clientType") === "vertexAngle");
+};
+
+export const kMovableLineType = "movableLine";
+export const isMovableLine = (v: any): v is JXG.Line => {
+  return v && (v.elType === "line") && (v.getAttribute("clientType") === kMovableLineType);
+};
+export const isVisibleMovableLine = (v: any): v is JXG.Line => isMovableLine(v) && v.visProp.visible;
+export const isMovableLineControlPoint = (v: any): v is JXG.Point => {
+  return isPoint(v) && v.getAttribute("clientType") === kMovableLineType;
+};
+export const isMovableLineLabel = (v: any): v is JXG.Text => {
+  return v instanceof JXG.Text && v.getAttribute("clientType") === kMovableLineType;
+};

@@ -12,8 +12,8 @@ export interface IDragTileItem {
   rowIndex: number;
   rowHeight?: number;
   tileIndex: number;
-  tileId: string;
-  tileContent: string;
+  tileId: string;       // original tile id
+  tileContent: string;  // modified tile contents
   tileType: string;
 }
 
@@ -25,6 +25,11 @@ export interface IDragTiles {
 export function cloneTileSnapshotWithoutId(tile: ToolTileModelType) {
   const { id, display, ...copy } = cloneDeep(getSnapshot(tile));
   return copy;
+}
+
+export function cloneTileSnapshotWithNewId(tile: ToolTileModelType, newId?: string) {
+  const { id, display, ...copy } = cloneDeep(getSnapshot(tile));
+  return { id: newId || uniqueId(), ...copy };
 }
 
 export const ToolTileModel = types

@@ -1,15 +1,17 @@
-import React from "react";
 import classNames from "classnames";
-import ResizeObserver from "resize-observer-polyfill";
+import copyTextToClipboard from "copy-text-to-clipboard";
 import { observer, inject } from "mobx-react";
+import React from "react";
+import ResizeObserver from "resize-observer-polyfill";
 import { getDisabledFeaturesOfTile } from "../../models/stores/stores";
-import { cloneTileSnapshotWithoutId, IDragTiles, ToolTileModelType } from "../../models/tools/tool-tile";
+import { cloneTileSnapshotWithNewId, IDragTileItem, IDragTiles, ToolTileModelType } from "../../models/tools/tool-tile";
 import { kGeometryToolID } from "../../models/tools/geometry/geometry-content";
 import { kTableToolID } from "../../models/tools/table/table-content";
 import { kTextToolID } from "../../models/tools/text/text-content";
 import { kImageToolID } from "../../models/tools/image/image-content";
 import { kDrawingToolID } from "../../models/tools/drawing/drawing-content";
 import { kPlaceholderToolID } from "../../models/tools/placeholder/placeholder-content";
+import { getToolContentInfoById } from "../../models/tools/tool-content-info";
 import { BaseComponent } from "../base";
 import GeometryToolComponent from "./geometry-tool/geometry-tool";
 import TableToolComponent from "./table-tool/table-tool";
@@ -22,6 +24,7 @@ import { HotKeys } from "../../utilities/hot-keys";
 import { TileCommentsComponent } from "./tile-comments";
 import { LinkIndicatorComponent } from "./link-indicator";
 import { hasSelectionModifier } from "../../utilities/event-utils";
+import { uniqueId } from "../../utilities/js-utils";
 import { getContentIdFromNode, getDocumentContentFromNode } from "../../utilities/mst-utils";
 import TileDragHandle from "../../assets/icons/drag-tile/move.svg";
 import "../../utilities/dom-utils";
@@ -143,7 +146,8 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     const { appMode } = this.stores;
     if (appMode !== "authed") {
       this.hotKeys.register({
-        "cmd-shift-c": this.handleCopyJson
+        "cmd-option-c": this.handleCopyImportJson,
+        "cmd-shift-c": this.handleCopyModelJson
       });
     }
   }
@@ -296,7 +300,15 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private handleCopyJson = () => {
+  private handleCopyImportJson = () => {
+    const toolApiInterface = this.context;
+    const toolApi = toolApiInterface?.getToolApi(this.modelId);
+    const importJson = toolApi?.exportContentAsTileJson?.();
+    importJson && copyTextToClipboard(importJson);
+    return true;
+  }
+
+  private handleCopyModelJson = () => {
     const { content } = this.props.model;
     const { clipboard } = this.stores;
     clipboard.clear();
@@ -327,7 +339,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
       }
     }
     // set the drag data
-    const { model, docId, height, scale } = this.props;
+    const { model, docId, scale } = this.props;
     const ToolComponent = kToolComponentMap[model.content.type].ToolComponent;
     // can't drag placeholder tiles
     if (ToolComponent === PlaceholderToolComponent) {
@@ -339,54 +351,19 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     // TODO: should this be moved to document-content.tsx since it is more than just the current tile?
     //       and also the drop handler is there
 
-    const dragTiles: IDragTiles = {
-      sourceDocId: docId,
-      items: []
-    };
     const { ui } = this.stores;
     const dragSrcContentId = getContentIdFromNode(model);
+    if (!dragSrcContentId) return;
 
-    const getTileInfo = (tileId: string) => {
-      // get tile from loaded document or from curriculum
-      const content = getDocumentContentFromNode(model);
-      const tile = content?.getTile(tileId) || (tileId === model.id ? model : undefined);
-      if (tile) {
-        const tileContentId = getContentIdFromNode(tile);
-        if (!tileContentId || (tileContentId !== dragSrcContentId)) return;
-        const rowId = content?.findRowContainingTile(tile.id);
-        const rowIndex = rowId && content?.getRowIndex(rowId);
-        const row = rowId && content?.getRow(rowId);
-        const rowHeight = row ? row.height : height;
-        const tileIndex = row && row.tiles.findIndex(t => t.tileId === tileId);
-        const tileContent = cloneTileSnapshotWithoutId(tile);
-        return {
-          tile,
-          tileContent: JSON.stringify(tileContent),
-          rowIndex,
-          rowHeight,
-          tileIndex
-        };
-      }
+    const dragTiles: IDragTiles = {
+      sourceDocId: docId,
+      items: this.getDragTileItems(dragSrcContentId, ui.selectedTileIds)
     };
 
     // dragging a tile selects it first
     ui.setSelectedTile(model, { append: hasSelectionModifier(e) });
 
     // create a sorted array of selected tiles
-    ui.selectedTileIds.forEach(selectedTileId => {
-      const tileInfo = getTileInfo(selectedTileId);
-      if (tileInfo) {
-        const {tile, rowIndex, rowHeight, tileIndex, tileContent} = tileInfo;
-        dragTiles.items.push({
-          rowIndex: rowIndex || 0,
-          rowHeight,
-          tileIndex: tileIndex || 0,
-          tileId: tile.id,
-          tileContent,
-          tileType: tile.content.type
-        });
-      }
-    });
     dragTiles.items.sort((a, b) => {
       if (a.rowIndex < b.rowIndex) return -1;
       if (a.rowIndex > b.rowIndex) return 1;
@@ -399,16 +376,13 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     // we have to set this as a transfer type because the kDragTiles contents are not available in drag over events
     e.dataTransfer.setData(dragTileSrcDocId(docId), docId);
 
-    // and to support existing geometry and drawing layer drop logic set the single tile drag fields
+    // to support existing geometry and drawing layer drop logic set the single tile drag fields
     // if only 1 tile is selected
-    if (ui.selectedTileIds.length === 1) {
-      const tileInfo = getTileInfo(ui.selectedTileIds[0]);
-      if (tileInfo) {
-        const {tile, tileContent} = tileInfo;
-        e.dataTransfer.setData(kDragTileId, tile.id);
-        e.dataTransfer.setData(kDragTileContent, tileContent);
-        e.dataTransfer.setData(dragTileType(model.content.type), tile.content.type);
-      }
+    if (dragTiles.items.length === 1) {
+      const dragTile = dragTiles.items[0];
+      e.dataTransfer.setData(kDragTileId, dragTile.tileId);
+      e.dataTransfer.setData(kDragTileContent, dragTile.tileContent);
+      e.dataTransfer.setData(dragTileType(model.content.type), dragTile.tileType);
     }
 
     // TODO: should we create an array of drag images here?
@@ -423,6 +397,38 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     const offsetX = (e.clientX - clientRect.left) / (scale || 1);
     const offsetY = (e.clientY - clientRect.top) / (scale || 1);
     e.dataTransfer.setDragImage(dragImage, offsetX, offsetY);
+  }
+
+  private getDragTileItems(dragSrcContentId: string, tileIds: string[]) {
+    const { model } = this.props;
+    const dragTileItems: IDragTileItem[] = [];
+
+    const idMap: { [id: string]: string } = {};
+    tileIds.forEach(tileId => idMap[tileId] = uniqueId());
+
+    const content = getDocumentContentFromNode(model);
+    tileIds.forEach(tileId => {
+      const srcTile = content?.getTile(tileId) || (tileId === model.id ? model : undefined);
+      if (srcTile) {
+        const tileContentId = getContentIdFromNode(srcTile);
+        if (!tileContentId || (tileContentId !== dragSrcContentId)) return;
+        const rowId = content?.findRowContainingTile(srcTile.id);
+        const rowIndex = rowId && content?.getRowIndex(rowId) || 0;
+        const row = rowId ? content?.getRow(rowId) : undefined;
+        const rowHeight = row?.height;
+        const tileIndex = row?.tiles.findIndex(t => t.tileId === tileId) || 0;
+        const clonedTile = cloneTileSnapshotWithNewId(srcTile, idMap[srcTile.id]);
+        getToolContentInfoById(clonedTile.content.type)?.snapshotPostProcessor?.(clonedTile.content, idMap);
+        dragTileItems.push({
+          rowIndex, rowHeight, tileIndex,
+          tileId: srcTile.id,
+          tileContent: JSON.stringify(clonedTile),
+          tileType: srcTile.content.type
+        });
+      }
+    });
+
+    return dragTileItems;
   }
 
   private triggerResizeHandler = () => {
