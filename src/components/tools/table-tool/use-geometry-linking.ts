@@ -5,7 +5,6 @@ import { kGeometryToolID } from "../../../models/tools/geometry/geometry-content
 import {
   addTableToDocumentMap, getLinkedTableIndex, getTableLinkColors, removeTableFromDocumentMap
 } from "../../../models/tools/table-links";
-import { TableContentModelType } from "../../../models/tools/table/table-content";
 import { ITileLinkMetadata } from "../../../models/tools/table/table-model-types";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { useLinkGeometryDialog } from "./use-link-geometry-dialog";
