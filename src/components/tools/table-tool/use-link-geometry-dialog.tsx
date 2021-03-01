@@ -20,7 +20,8 @@ const Content: React.FC<IContentProps>
     return (
       <>
         <div className="prompt">
-          To link this table to a graph, drag the table to a graph or select a graph from this list.
+          To link this table to a graph, drag the table to a graph or select a graph from the link list.
+          To unlink this table from a graph, select a graph from the unlink list.
         </div>
         <select ref={selectElt} value={selectValue} data-test="link-graph-select"
                                 onChange={e => {
