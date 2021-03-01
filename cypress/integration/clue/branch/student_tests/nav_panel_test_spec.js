@@ -61,6 +61,17 @@ describe('Test nav panel tabs', function () {
         cy.openSection('class-work', 'extra-workspaces');
         cy.getCanvasItemTitle('extra-workspaces').should('contain', copyDocumentTitle);
       });
+      it('verify delete document reverts nav-tab panel to show thumbnails', function () {
+        const deleteDocument = "Delete me";
+        canvas.copyDocument(deleteDocument);
+        cy.openTopTab('my-work');
+        cy.wait(1000);
+        cy.getCanvasItemTitle('workspaces').should('contain', deleteDocument);
+        cy.openDocumentWithTitle('my-work', 'workspaces', copyDocumentTitle);
+        cy.openDocumentWithTitle('my-work', 'workspaces', deleteDocument);
+        canvas.deleteDocument();
+        cy.getCanvasItemTitle('workspaces').should('not.contain', deleteDocument);
+      });
     });
     describe('Workspaces section', function () {
       it('verify open the correct canvas selected from Investigations section', function () {

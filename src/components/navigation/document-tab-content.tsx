@@ -41,24 +41,25 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
       : isProblemType(type) ? problem.title : document.getDisplayTitle(appConfig);
   };
 
-  function handleEditClick (document: DocumentModelType) {
+  function handleEditClick(document: DocumentModelType) {
     uiStore.problemWorkspace.setPrimaryDocument(document);
   }
 
-  const editButton = (type: string, sClass: string, document: DocumentModelType ) => {
+  const editButton = (type: string, sClass: string, document: DocumentModelType) => {
     return (
-      (type === "my-work") || (type === "learningLog") ?
-        <div className={`edit-button ${sClass}`} onClick={()=>handleEditClick(document)}>
-          <EditIcon className={`edit-icon ${sClass}`} />
-          <div>Edit</div>
-        </div>
-      : null
+      (type === "my-work") || (type === "learningLog")
+        ?
+          <div className={`edit-button ${sClass}`} onClick={() => handleEditClick(document)}>
+            <EditIcon className={`edit-icon ${sClass}`} />
+            <div>Edit</div>
+          </div>
+        : null
     );
   };
 
   const sectionClass = referenceDocument?.type === "learningLog" ? "learning-log" : "";
-  const selectedSection = tabSpec.tab==="supports" ? ENavTabSectionType.kTeacherSupports : undefined;
-  const documentView = referenceDocument &&
+  const selectedSection = tabSpec.tab === "supports" ? ENavTabSectionType.kTeacherSupports : undefined;
+  const documentView = referenceDocument && !referenceDocument?.getProperty("isDeleted") &&
     <div>
       <div className={`document-header ${tabSpec.tab} ${sectionClass}`}>
         <div className={`document-title`}>
