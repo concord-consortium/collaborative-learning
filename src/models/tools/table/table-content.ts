@@ -441,7 +441,7 @@ export const TableContentModel = types
             links
       });
     },
-    removeGeometryLink(geometryId: string | string[], links?: ILinkProperties) {
+    removeGeometryLink(geometryId: string, links?: ILinkProperties) {
       self.appendChange({
             action: "delete",
             target: "geometryLink",
