@@ -230,7 +230,7 @@ context('Teacher Dashboard View', () => {
       cy.wait(3000);
       cy.get('#icon-sticky-note').should('not.exist');
     });
-    it('verify group support note appears in student view', function () {
+    it.skip('verify group support note appears in student view', function () {
       cy.visit('/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=student:10&qaGroup=3');
       cy.wait(5000);
       cy.get('#icon-sticky-note').should('exist').click({force:true});
