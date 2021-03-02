@@ -159,12 +159,12 @@ export class Firebase {
     return `${this.getClassPath(user)}/images`;
   }
 
-  public getOfferingPath(user: UserModelType) {
-    return `${this.getClassPath(user)}/offerings/${user.offeringId}`;
-  }
-
   public getOfferingsPath(user: UserModelType) {
     return `${this.getClassPath(user)}/offerings`;
+  }
+
+  public getOfferingPath(user: UserModelType) {
+    return `${this.getClassPath(user)}/offerings/${user.offeringId}`;
   }
 
   public getOfferingUsersPath(user: UserModelType) {

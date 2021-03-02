@@ -5,14 +5,28 @@ import { each } from "lodash";
 
 import "./teacher-class-info-button.sass";
 
+/**
+ * This component was developed to generate a CSV-formatted report for teachers of
+ * the student groupings for each problem (offering) in a class. This was required
+ * at the time because early versions of CLUE did not log group information and so
+ * there was no easy way to determine student groupings from the existing logs.
+ * A student's groupId was added to the existing logs for CLUE 0.8.0 in PR #451
+ * (https://github.com/concord-consortium/collaborative-learning/pull/451),
+ * obviating the need for this particular report component and its button.
+ * This component is left in the code base as an exemplar in case future need for
+ * CSV export of CLUE data arises.
+ */
+
 interface IProps extends IBaseProps {}
 
 @inject("stores")
-export class ClassInfoButton extends BaseComponent <IProps, {}> {
+export class ClassInfoButton extends BaseComponent <IProps> {
   public render() {
     return (
       <div className="class-info-button-container">
-        <button className="class-info-button export" onClick={this.handleExportClick}>Export Class Groups (csv)</button>
+        <button className="class-info-button export" onClick={this.handleExportClick}>
+          Export Class Groups (csv)
+        </button>
       </div>
     );
   }
@@ -56,7 +70,7 @@ export class ClassInfoButton extends BaseComponent <IProps, {}> {
                   row.push(groupId);
                   const classUser = this.stores.class.getUserById(uId);
                   row.push(uId);
-                  classUser ? row.push(classUser.initials) : row.push("");
+                  row.push(classUser?.initials || "");
                   csv.push(row.join(","));
                 }
               });
