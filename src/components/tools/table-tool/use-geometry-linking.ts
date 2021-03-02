@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { useCurrent } from "../../../hooks/use-current";
 import { useFeatureFlag } from "../../../hooks/use-stores";
 import { kGeometryToolID } from "../../../models/tools/geometry/geometry-content";
@@ -22,7 +22,6 @@ export const useGeometryLinking = ({
 }: IProps) => {
   const modelId = model.id;
   const showLinkButton = useFeatureFlag("GeometryLinkedTables");
-  const linkIndex = showLinkButton ? getLinkedTableIndex(modelId) : -1;
   const geometryTiles = useLinkableGeometryTiles({ model, onRequestTilesOfType });
   const isLinkEnabled = hasLinkableRows && (geometryTiles.length > 0);
   const linkColors = getTableLinkColors(modelId);
@@ -35,7 +34,11 @@ export const useGeometryLinking = ({
     return () => removeTableFromDocumentMap(modelId);
   }, [documentId, modelId]);
 
-  return { showLinkButton, isLinkEnabled, linkIndex, linkColors, showLinkGeometryDialog };
+  const getLinkIndex = useCallback(() => {
+    return showLinkButton ? getLinkedTableIndex(modelId) : -1;
+  }, [modelId, showLinkButton]);
+
+  return { showLinkButton, isLinkEnabled, linkColors, getLinkIndex, showLinkGeometryDialog };
 };
 
 interface IUseLinkableGeometryTilesProps {
@@ -44,7 +47,7 @@ interface IUseLinkableGeometryTilesProps {
 }
 const useLinkableGeometryTiles = ({ model, onRequestTilesOfType }: IUseLinkableGeometryTilesProps) => {
   const geometryTiles = useCurrent(onRequestTilesOfType(kGeometryToolID));
-
+  // add default title if there isn't a title
   return geometryTiles.current
           .map((tileInfo, i) => ({ id: tileInfo.id, title: tileInfo.title || `Graph ${i + 1}` }));
 };

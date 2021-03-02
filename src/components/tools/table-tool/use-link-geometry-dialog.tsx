@@ -1,20 +1,20 @@
 import React, { useRef, useState } from "react";
 import LinkGraphIcon from "../../../clue/assets/icons/table/link-graph-icon.svg";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
+import { TableContentModelType } from "../../../models/tools/table/table-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { ITileLinkMetadata } from "../../../models/tools/table/table-model-types";
 
 import "./link-geometry-dialog.scss";
-import { TableContentModelType } from "../../../models/tools/table/table-content";
 
 interface IContentProps {
-  unlinkedGeometryTiles: ITileLinkMetadata[];
-  linkedGeometryTiles: ITileLinkMetadata[];
+  unlinkedTiles: ITileLinkMetadata[];
+  linkedTiles: ITileLinkMetadata[];
   selectValue: string;
   setSelectValue: React.Dispatch<React.SetStateAction<string>>;
 }
 const Content: React.FC<IContentProps>
-              = ({ unlinkedGeometryTiles, linkedGeometryTiles, selectValue, setSelectValue })=> {
+              = ({ unlinkedTiles, linkedTiles, selectValue, setSelectValue })=> {
   const selectElt = useRef<HTMLSelectElement>(null);
 
     return (
@@ -29,20 +29,19 @@ const Content: React.FC<IContentProps>
                                   setTimeout(() => selectElt.current?.focus());
                                 }}>
           <option key="prompt" value={""}>Select a graph</option>
-            {(unlinkedGeometryTiles.length > 0) &&
+            {unlinkedTiles.length > 0 &&
               <optgroup label="Link Graphs">
-                {unlinkedGeometryTiles
+                {unlinkedTiles
                   .map(tileInfo => <option key={tileInfo.id} value={tileInfo.id}>{tileInfo.title}</option>)}
               </optgroup>
             }
-            {(linkedGeometryTiles.length > 0) &&
-              <React.Fragment>
-                <option disabled>──────────────────────────────</option>
+            {(unlinkedTiles.length > 0) && (linkedTiles.length > 0) &&
+              <option disabled>──────────────────────────────</option> }
+            {linkedTiles.length > 0 &&
                 <optgroup label="Unlink Graphs">
-                  {linkedGeometryTiles
+                  {linkedTiles
                     .map(tileInfo => <option key={tileInfo.id} value={tileInfo.id}>{tileInfo.title}</option>)}
                 </optgroup>
-              </React.Fragment>
             }
         </select>
       </>
@@ -68,19 +67,23 @@ export const useLinkGeometryDialog = ({ geometryTiles, model, onLinkGeometryTile
     }
   };
   const content = model.content as TableContentModelType;
-  const unlinkedGeometryTiles = geometryTiles
+  const unlinkedTiles = geometryTiles
                                   .filter(tileInfo => content.metadata.linkedGeometries.indexOf(tileInfo.id) < 0);
-  const linkedGeometryTiles = geometryTiles
+  const linkedTiles = geometryTiles
                                   .filter(tileInfo => content.metadata.linkedGeometries.indexOf(tileInfo.id) >= 0);
   const [showModal, hideModal] = useCustomModal({
     className: "link-geometry",
     Icon: LinkGraphIcon,
     title: "Link or Unlink Table to a Graph",
     Content,
-    contentProps: { unlinkedGeometryTiles, linkedGeometryTiles, selectValue, setSelectValue },
+    contentProps: { unlinkedTiles, linkedTiles, selectValue, setSelectValue },
     buttons: [
       { label: "Cancel" },
-      { label: "OK", isDefault: true, isDisabled: !selectValue, onClick: handleClick }
+      { label: content.metadata.linkedGeometries.indexOf(selectValue) < 0 ? "Link" : "Unlink",
+        isDefault: true,
+        isDisabled: !selectValue,
+        onClick: handleClick
+      }
     ]
   }, [geometryTiles]);
 

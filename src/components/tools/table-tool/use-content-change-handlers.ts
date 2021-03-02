@@ -165,7 +165,7 @@ export const useContentChangeHandlers = ({
   const unlinkGeometryTile = useCallback((geomTileInfo: ITileLinkMetadata) => {
     const tableActionLinks = getTableActionLinks(geomTileInfo.id);
     if (!tableActionLinks) return;
-    getContent().removeGeometryLinks(geomTileInfo.id, tableActionLinks);
+    getContent().removeGeometryLink(geomTileInfo.id, tableActionLinks);
     syncChangeToLinkedClient(geomTileInfo.id, tableActionLinks.id);
   }, [getContent, getTableActionLinks, syncChangeToLinkedClient]);
 
