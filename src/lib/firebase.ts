@@ -94,6 +94,10 @@ export class Firebase {
     return this.getFullPath(this.getClassPath(user));
   }
 
+  public getUsersPath(user: UserModelType) {
+    return `${this.getClassPath(user)}/users`;
+  }
+
   public getUserPath(user: UserModelType, userId?: string) {
     return `${this.getClassPath(user)}/users/${userId || user.id}`;
   }
@@ -153,6 +157,10 @@ export class Firebase {
 
   public getImagesPath(user: UserModelType) {
     return `${this.getClassPath(user)}/images`;
+  }
+
+  public getOfferingsPath(user: UserModelType) {
+    return `${this.getClassPath(user)}/offerings`;
   }
 
   public getOfferingPath(user: UserModelType) {
