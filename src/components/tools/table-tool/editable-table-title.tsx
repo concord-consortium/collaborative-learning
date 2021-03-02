@@ -10,7 +10,7 @@ interface IProps {
   showLinkButton: boolean;
   isLinkEnabled?: boolean;
   titleCellWidth: number;
-  getLinkIndex: () => void;
+  getLinkIndex: () => number;
   getTitle: () => string | undefined;
   onBeginEdit?: () => void;
   onEndEdit?: (title?: string) => void;

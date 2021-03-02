@@ -4,7 +4,7 @@ import LinkGraphIcon from "../../../clue/assets/icons/table/link-graph-icon.svg"
 
 interface IProps {
   isEnabled?: boolean;
-  getLinkIndex: () => void;
+  getLinkIndex: () => number;
   onClick?: () => void;
 }
 export const LinkGeometryButton: React.FC<IProps> = ({ isEnabled, getLinkIndex, onClick }) => {

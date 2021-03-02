@@ -48,7 +48,7 @@ export function removeLinkedTable(tableId: string) {
   const linkedTables = getLinkedTables(documentId);
   if (!linkedTables) return;
   const index = linkedTables.indexOf(tableId);
-  index > -1 && linkedTables.splice(index, 1);
+  (index >= 0) && linkedTables.splice(index, 1);
 }
 
 export function getTableLinkColors(tableId?: string) {
