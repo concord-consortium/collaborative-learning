@@ -195,7 +195,7 @@ context('Delete connected table', function () {
     clueCanvas.deleteTile('table');
     graphToolTile.getGraphPointLabel().contains('p1').should('not.exist');
   });
-  it('will verify graph is still functional after connected table is deleted', function () {
+  it.skip('will verify graph is still functional after connected table is deleted', function () {
     graphToolTile.getGraphTile().click();
     graphToolTile.addPointToGraph(2, 6);
     graphToolTile.getGraphPoint().should('exist').and('have.length', 2);

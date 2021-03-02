@@ -146,7 +146,7 @@ Cypress.Commands.add('linkTableToGraph', (table, graph) => {
   });
   cy.get('.ReactModalPortal').within(() => {
     cy.get('[data-test=link-graph-select]').select(graph);
-    cy.get('button').contains('OK').click();
+    cy.get('button').contains('Link').click();
   });
 });
 Cypress.Commands.add('unlinkTableToGraph', (table, graph) => {
@@ -155,6 +155,6 @@ Cypress.Commands.add('unlinkTableToGraph', (table, graph) => {
   });
   cy.get('.ReactModalPortal').within(() => {
     cy.get('[data-test=link-graph-select]').select(graph);
-    cy.get('button').contains('OK').click();
+    cy.get('button').contains('Unlink').click();
   });
 });
