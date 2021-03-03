@@ -27,6 +27,7 @@ import { hasSelectionModifier } from "../../utilities/event-utils";
 import { uniqueId } from "../../utilities/js-utils";
 import { getContentIdFromNode, getDocumentContentFromNode } from "../../utilities/mst-utils";
 import TileDragHandle from "../../assets/icons/drag-tile/move.svg";
+import TileResizeHandle from "../../assets/icons/resize-tile/expand-handle.svg";
 import "../../utilities/dom-utils";
 
 import "./tool-tile.sass";
@@ -114,6 +115,20 @@ const DragTileButton = ({ divRef, hovered, selected, onClick }: IDragTileButtonP
   );
 };
 
+interface IResizeTileButtonProps {
+  hovered: boolean;
+  selected: boolean;
+}
+
+const ResizeTileButton = ({ hovered, selected }: IResizeTileButtonProps) => {
+  const classes = classNames("tool-tile-resize-handle", { hovered, selected });
+  return (
+    <div>
+      <TileResizeHandle className={classes}/>
+    </div>
+  );
+};
+
 interface IState {
   hoverTile: boolean;
 }
@@ -197,6 +212,8 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
                             <DragTileButton divRef={elt => this.dragElement = elt}
                               hovered={hoverTile} selected={isTileSelected}
                               onClick={e => ui.setSelectedTile(model, {append: hasSelectionModifier(e)})} />;
+    const resizeTileButton = <ResizeTileButton hovered={hoverTile} selected={isTileSelected} />;
+
     const style: React.CSSProperties = {};
     if (widthPct) {
       style.width = `${Math.round(100 * widthPct / 100)}%`;
@@ -216,6 +233,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
       >
         {this.renderLinkIndicators()}
         {dragTileButton}
+        {resizeTileButton}
         {this.renderTile(ToolComponent)}
         {this.renderTileComments()}
       </div>

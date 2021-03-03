@@ -42,6 +42,30 @@
     &:focus
       outline: none
 
+  .tool-tile-resize-handle
+    position: absolute
+    right: -2px
+    bottom: -2px
+    box-sizing: border-box
+    width: 24px
+    height: 24px
+    z-index: 1
+    opacity: 0
+    transition: 0.3s
+    
+    &.hovered
+      opacity: 0.5
+
+    &:hover
+      cursor: grab
+      opacity: 1
+
+    &.selected
+      opacity: 1
+
+    &:focus
+      outline: none
+
   &:focus
     outline: none
 
