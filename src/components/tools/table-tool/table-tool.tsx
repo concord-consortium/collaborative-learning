@@ -11,6 +11,7 @@ import { useDataSet } from "./use-data-set";
 import { useExpressionsDialog } from "./use-expressions-dialog";
 import { useGeometryLinking } from "./use-geometry-linking";
 import { useGridContext } from "./use-grid-context";
+import { useJsonExport } from "./use-json-export";
 import { useModelDataSet } from "./use-model-data-set";
 import { useRowLabelColumn } from "./use-row-label-column";
 import { useTableTitle } from "./use-table-title";
@@ -76,7 +77,9 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
     onSetTableTitle, onRequestUniqueTitle: handleRequestUniqueTitle
   });
 
-  useToolApi({ metadata, getTitle, getContentHeight, onRegisterToolApi, onUnregisterToolApi });
+  const exportContentAsTileJson = useJsonExport(() => getContent().metadata, dataSet);
+  useToolApi({ metadata, getTitle, getContentHeight, exportContentAsTileJson,
+                onRegisterToolApi, onUnregisterToolApi });
 
   const rowLabelProps = useRowLabelColumn({
     inputRowId: inputRowId.current, selectedCell, showRowLabels, setShowRowLabels
