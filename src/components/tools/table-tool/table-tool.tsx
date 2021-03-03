@@ -63,7 +63,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
     model, dataSet: dataSet.current,
     onRequestRowHeight: handleRequestRowHeight, triggerColumnChange, triggerRowChange
   });
-  const { onSetTableTitle, onSetColumnExpressions, onLinkGeometryTile } = changeHandlers;
+  const { onSetTableTitle, onSetColumnExpressions, onLinkGeometryTile, onUnlinkGeometryTile } = changeHandlers;
 
   const [showRowLabels, setShowRowLabels] = useState(false);
   const {
@@ -100,8 +100,9 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
     rowChanges, triggerRowChange, readOnly: !!readOnly, changeHandlers, measureText: measureHeaderText,
     selectedCell, inputRowId, ...rowLabelProps, onShowExpressionsDialog: handleShowExpressionsDialog });
 
-  const { showLinkButton, isLinkEnabled, linkIndex, linkColors, showLinkGeometryDialog } =
-    useGeometryLinking({ documentId, model, hasLinkableRows, onRequestTilesOfType, onLinkGeometryTile });
+  const { showLinkButton, isLinkEnabled, linkColors, getLinkIndex, showLinkGeometryDialog } =
+    useGeometryLinking({ documentId, model, hasLinkableRows,
+                          onRequestTilesOfType, onLinkGeometryTile, onUnlinkGeometryTile });
 
   const { titleCellWidth } =
     useColumnWidths({ readOnly, getTitle, columns: dataGridProps.columns, measureText: measureHeaderText });
@@ -128,7 +129,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
                     onSetExpression={showExpressionsDialog} scale={scale}/>
       <div className="table-grid-container" ref={containerRef} onClick={handleBackgroundClick}>
         <EditableTableTitle className="table-title" readOnly={readOnly} showLinkButton={showLinkButton}
-          isLinkEnabled={isLinkEnabled} linkIndex={linkIndex} onLinkGeometryClick={showLinkGeometryDialog}
+          isLinkEnabled={isLinkEnabled} getLinkIndex={getLinkIndex} onLinkGeometryClick={showLinkGeometryDialog}
           getTitle={getTitle} titleCellWidth={titleCellWidth}
           onBeginEdit={onBeginTitleEdit} onEndEdit={onEndTitleEdit} />
         <ReactDataGrid ref={gridRef} selectedRows={getSelectedRows()}

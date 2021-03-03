@@ -102,8 +102,8 @@ describe('edit table entries', function () {
     tableToolTile.getTableRow().should('have.length', 2);
   });
   it('will toggle index numbers', function () {
+    tableToolTile.getIndexNumberToggle().click();
     cy.get(".primary-workspace").within(() => {
-      tableToolTile.getIndexNumberToggle().click();
       cy.get(".index-cell-contents").eq(0).should('contain', 1);
       cy.get(".index-cell-contents").eq(1).should('contain', "");
     });

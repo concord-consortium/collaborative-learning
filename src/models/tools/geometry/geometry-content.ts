@@ -2,7 +2,7 @@ import { types, Instance, SnapshotOut, IAnyStateTreeNode } from "mobx-state-tree
 import { Lambda } from "mobx";
 import { Optional } from "utility-types";
 import { SelectionStoreModelType } from "../../stores/selection";
-import { addLinkedTable } from "../table-links";
+import { addLinkedTable, removeLinkedTable } from "../table-links";
 import { registerToolContentInfo } from "../tool-content-info";
 import {
   getAxisLabelsFromDataSet, getRowLabelFromLinkProps, getTableContent, IColumnProperties,
@@ -216,6 +216,7 @@ export const GeometryMetadataModel = types
         delete self.tableLinkDisposers[tableId];
         self.linkedTables.splice(index, 1);
       }
+      removeLinkedTable(tableId);
     },
     setTableLinkNames(tableId: string, x: string | undefined, y: string | undefined) {
       const found = self.linkedTables.find(entry => entry.id === tableId);
@@ -361,7 +362,7 @@ export const GeometryContentModel = types
     willRemoveFromDocument() {
       self.metadata.linkedTables.forEach(({ id: tableId }) => {
         const tableContent = getTableContent(self, tableId);
-        tableContent && tableContent.removeGeometryLinks(self.metadata.id);
+        tableContent && tableContent.removeGeometryLink(self.metadata.id);
       });
       self.metadata.clearLinkedTables();
     },

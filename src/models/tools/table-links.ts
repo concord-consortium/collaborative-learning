@@ -42,6 +42,15 @@ export function addLinkedTable(tableId: string) {
   }
 }
 
+export function removeLinkedTable(tableId: string) {
+  const documentId = getTableDocument(tableId);
+  if (!documentId) return;
+  const linkedTables = getLinkedTables(documentId);
+  if (!linkedTables) return;
+  const index = linkedTables.indexOf(tableId);
+  (index >= 0) && linkedTables.splice(index, 1);
+}
+
 export function getTableLinkColors(tableId?: string) {
   const colors = [
           { fill: styles.linkColor0Light, stroke: styles.linkColor0Dark },

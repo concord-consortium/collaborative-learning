@@ -148,11 +148,11 @@ interface IAddGeometryLink {
 }
 ```
 
-### removeGeometryLinks(geometryIds: string | string[], links?: ILinkProperties)
+### removeGeometryLink(geometryId: string, links?: ILinkProperties)
 ```typescript
   action: "delete";
   target: "geometryLink";
-  ids: string | string[]; // id or array of ids of affected geometry tiles
+  ids: string; // id of affected geometry tiles
   links?: { // ILinkProperties
     id: string;
     tileIds: string[];  // ids of connected geometry tiles

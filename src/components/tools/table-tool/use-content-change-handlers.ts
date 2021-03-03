@@ -20,7 +20,7 @@ export interface IContentChangeHandlers {
   onUpdateRow: (caseValues: ICase) => void;
   onRemoveRows: (rowIds: string[]) => void;
   onLinkGeometryTile: (geomTileInfo: ITileLinkMetadata) => void;
-  onUnlinkGeometryTiles: () => void;
+  onUnlinkGeometryTile: (geomTileInfo: ITileLinkMetadata) => void;
 }
 
 interface IProps {
@@ -162,14 +162,15 @@ export const useContentChangeHandlers = ({
     syncChangeToLinkedClient(geomTileInfo.id, tableActionLinks.id);
   }, [getContent, getTableActionLinks, syncChangeToLinkedClient]);
 
-  const unlinkGeometryTiles = useCallback(() => {
-    const geometryIds = getContent().metadata.linkedGeometries.toJS();
-    const tableActionLinks = getTableActionLinks();
-    getContent().removeGeometryLinks(geometryIds, tableActionLinks);
-  }, [getContent, getTableActionLinks]);
+  const unlinkGeometryTile = useCallback((geomTileInfo: ITileLinkMetadata) => {
+    const tableActionLinks = getTableActionLinks(geomTileInfo.id);
+    if (!tableActionLinks) return;
+    getContent().removeGeometryLink(geomTileInfo.id, tableActionLinks);
+    syncChangeToLinkedClient(geomTileInfo.id, tableActionLinks.id);
+  }, [getContent, getTableActionLinks, syncChangeToLinkedClient]);
 
   return { onSetTableTitle: setTableTitle, onSetColumnName: setColumnName, onSetColumnExpressions: setColumnExpressions,
           onAddColumn: addColumn, onRemoveColumn: removeColumn,
           onAddRows: addRows, onUpdateRow: updateRow, onRemoveRows: removeRows,
-          onLinkGeometryTile: linkGeometryTile, onUnlinkGeometryTiles: unlinkGeometryTiles };
+          onLinkGeometryTile: linkGeometryTile, onUnlinkGeometryTile: unlinkGeometryTile };
 };

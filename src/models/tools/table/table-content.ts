@@ -3,7 +3,7 @@ import { castArray, each } from "lodash";
 import { types, IAnyStateTreeNode, Instance, SnapshotIn, SnapshotOut } from "mobx-state-tree";
 import { getRowLabel, kSerializedXKey, canonicalizeValue, isLinkableValue } from "./table-model-types";
 import { registerToolContentInfo } from "../tool-content-info";
-import { addLinkedTable } from "../table-links";
+import { addLinkedTable, removeLinkedTable } from "../table-links";
 import { IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
 import { canonicalizeExpression } from "../../../components/tools/table-tool/expression-utils";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
@@ -175,6 +175,7 @@ export const TableMetadataModel = types
       if (index >= 0) {
         self.linkedGeometries.splice(index, 1);
       }
+      removeLinkedTable(self.id);
     },
     clearLinkedGeometries() {
       self.linkedGeometries.clear();
@@ -440,11 +441,11 @@ export const TableContentModel = types
             links
       });
     },
-    removeGeometryLinks(geometryIds: string | string[], links?: ILinkProperties) {
+    removeGeometryLink(geometryId: string, links?: ILinkProperties) {
       self.appendChange({
             action: "delete",
             target: "geometryLink",
-            ids: geometryIds,
+            ids: geometryId,
             links
       });
     }

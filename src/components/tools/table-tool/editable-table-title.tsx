@@ -8,17 +8,17 @@ interface IProps {
   className?: string;
   readOnly?: boolean;
   showLinkButton: boolean;
-  linkIndex: number;
   isLinkEnabled?: boolean;
   titleCellWidth: number;
+  getLinkIndex: () => number;
   getTitle: () => string | undefined;
   onBeginEdit?: () => void;
   onEndEdit?: (title?: string) => void;
   onLinkGeometryClick?: () => void;
 }
 export const EditableTableTitle: React.FC<IProps> = observer(({
-  className, readOnly, showLinkButton, linkIndex, isLinkEnabled, titleCellWidth,
-  getTitle, onBeginEdit, onEndEdit, onLinkGeometryClick
+  className, readOnly, showLinkButton, isLinkEnabled, titleCellWidth,
+  getLinkIndex, getTitle, onBeginEdit, onEndEdit, onLinkGeometryClick
 }) => {
   // getTitle() and observer() allow this component to re-render
   // when the title changes without re-rendering the entire TableTool
@@ -60,7 +60,7 @@ export const EditableTableTitle: React.FC<IProps> = observer(({
             onKeyDown={handleKeyDown} onChange={setEditingTitle} onClose={handleClose} />
         : title}
       {showLinkButton && !isEditing &&
-        <LinkGeometryButton isEnabled={!readOnly && isLinkEnabled} linkIndex={linkIndex}
+        <LinkGeometryButton isEnabled={!readOnly && isLinkEnabled} getLinkIndex={getLinkIndex}
                             onClick={onLinkGeometryClick} />}
     </div>
   );
