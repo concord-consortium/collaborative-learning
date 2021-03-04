@@ -12,7 +12,8 @@ export function useImageContentUrl(content: ImageContentModelType, onUrlChange: 
   useEffect(() => {
     const dispose = autorun(() => {
       if (content.changeCount > syncedChanges.current) {
-        onUrlChange(content.url, context);
+        const url = content.url;
+        url && onUrlChange(url, context);
         syncedChanges.current = content.changeCount;
       }
     });

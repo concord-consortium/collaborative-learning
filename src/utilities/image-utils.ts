@@ -1,6 +1,6 @@
 import { DB } from "../lib/db";
 import { ImageModelType, ImageModel } from "../models/image";
-import { ImageContentSnapshotOutType } from "../models/tools/image/image-content";
+import { ImageContentSnapshotOutType, ImageToolChange } from "../models/tools/image/image-content";
 import { safeJsonParse } from "./js-utils";
 import placeholderImage from "../assets/image_placeholder.png";
 import orgPlaceholderImage from "../assets/image_placeholder_org.png";
@@ -37,8 +37,8 @@ export function isPlaceholderImage(url?: string) {
 export function getUrlFromImageContent(content: ImageContentSnapshotOutType) {
   const changes = content.changes;
   for (let i = changes.length - 1; i >= 0; --i) {
-    const change = safeJsonParse(changes[i]);
-    const url = change && change.url ? change.url as string : undefined;
+    const change = safeJsonParse<ImageToolChange>(changes[i]);
+    const url = change?.url;
     if (url) return url;
   }
 }

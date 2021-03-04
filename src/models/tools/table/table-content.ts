@@ -232,7 +232,7 @@ export const TableContentModel = types
     // handle early change formats
     if (s?.changes?.length) {
       const { changes, ...snapOthers } = s;
-      const parsedChanges = changes.map((change: string) => safeJsonParse(change));
+      const parsedChanges = changes.map((change: string) => safeJsonParse<ITableChange>(change));
       const isConversionRequired = parsedChanges.some((c: any) => {
               return c &&
                     ((c.action === "create") && (c.target === "columns") && !c.props.columns) ||
@@ -288,7 +288,7 @@ export const TableContentModel = types
     getLinkedChange(linkId: string) {
       let parsedChange: ITableChange | undefined;
       const foundIndex = self.changes.findIndex(changeJson => {
-        const change = safeJsonParse(changeJson) as ITableChange | undefined;
+        const change = safeJsonParse<ITableChange>(changeJson);
         const isFound = change?.links?.id === linkId;
         isFound && (parsedChange = change);
         return isFound;
@@ -616,14 +616,14 @@ export const TableContentModel = types
       let hasColumnChanges = false;
       let hasRowChanges = false;
       for (let i = start; i < self.changes.length; ++i) {
-        const change = safeJsonParse(self.changes[i]);
+        const change = safeJsonParse<ITableChange>(self.changes[i]);
         if (change) {
-          if ((change.target === "columns") || change.props?.columns) {
+          if ((change.target === "columns") || (change.props as ICreateColumnsProperties)?.columns) {
             hasColumnChanges = true;
             // most column changes (creation, deletion, expression changes) require re-rendering rows as well
             hasRowChanges = true;
           }
-          if ((change.target === "rows") || change.props?.rows) {
+          if ((change.target === "rows") || (change.props as ICreateRowsProperties)?.rows) {
             hasRowChanges = true;
           }
           self.applyChange(dataSet, change);
@@ -633,7 +633,7 @@ export const TableContentModel = types
     },
     applyChangesToDataSet(dataSet: IDataSet) {
       self.changes.forEach(jsonChange => {
-        const change = safeJsonParse(jsonChange);
+        const change = safeJsonParse<ITableChange>(jsonChange);
         if (change) {
           self.applyChange(dataSet, change, true);
         }
@@ -736,13 +736,13 @@ export function convertImportToChanges(snapshot: any) {
 export function mapTileIdsInTableSnapshot(snapshot: SnapshotOut<TableContentModelType>,
                                           idMap: { [id: string]: string }) {
   snapshot.changes = snapshot.changes.map(changeJson => {
-    const change: ITableChange = safeJsonParse(changeJson);
-    if ((change.target === "geometryLink") && change.ids) {
+    const change = safeJsonParse<ITableChange>(changeJson);
+    if ((change?.target === "geometryLink") && change.ids) {
       change.ids = Array.isArray(change.ids)
                     ? change.ids.map(id => idMap[id])
                     : idMap[change.ids];
     }
-    if (change.links) {
+    if (change?.links) {
       change.links.tileIds = change.links.tileIds.map(id => idMap[id]);
     }
     return JSON.stringify(change);
