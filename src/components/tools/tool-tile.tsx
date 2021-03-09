@@ -25,7 +25,7 @@ import { TileCommentsComponent } from "./tile-comments";
 import { LinkIndicatorComponent } from "./link-indicator";
 import { hasSelectionModifier } from "../../utilities/event-utils";
 import { uniqueId } from "../../utilities/js-utils";
-import { getContentIdFromNode, getDocumentContentFromNode, getTileContentById } from "../../utilities/mst-utils";
+import { getContentIdFromNode, getDocumentContentFromNode } from "../../utilities/mst-utils";
 import TileDragHandle from "../../assets/icons/drag-tile/move.svg";
 import TileResizeHandle from "../../assets/icons/resize-tile/expand-handle.svg";
 import "../../utilities/dom-utils";
@@ -64,11 +64,13 @@ interface IToolTileBaseProps {
   documentId?: string;  // permanent id (key) of the containing document
   docId: string;  // ephemeral contentId for the DocumentContent
   documentContent: HTMLElement | null;
+  isUserResizable: boolean;
   scale?: number;
   widthPct?: number;
   height?: number;
   model: ToolTileModelType;
   readOnly?: boolean;
+  onResizeRow: (e: React.DragEvent<HTMLDivElement>) => void;
   onSetCanAcceptDrop: (tileId?: string) => void;
   onRequestTilesOfType: (tileType: string) => Array<{ id: string, title?: string }>;
   onRequestUniqueTitle: (tileId: string) => string | undefined;
@@ -92,13 +94,13 @@ interface ToolComponentInfo {
   toolTileClass: string;
 }
 const kToolComponentMap: Record<string, ToolComponentInfo> = {
-  [kPlaceholderToolID]: { ToolComponent: PlaceholderToolComponent, toolTileClass: "placeholder-tile" },
-  [kDrawingToolID]: { ToolComponent: DrawingToolComponent, toolTileClass: "drawing-tool-tile" },
-  [kGeometryToolID]: { ToolComponent: GeometryToolComponent, toolTileClass: "geometry-tool-tile" },
-  [kImageToolID]: { ToolComponent: ImageToolComponent, toolTileClass: "image-tool-tile" },
-  [kTableToolID]: { ToolComponent: TableToolComponent, toolTileClass: "table-tool-tile" },
-  [kTextToolID]: { ToolComponent: TextToolComponent, toolTileClass: "text-tool-tile" }
-};
+        [kPlaceholderToolID]: { ToolComponent: PlaceholderToolComponent, toolTileClass: "placeholder-tile" },
+        [kDrawingToolID]: { ToolComponent: DrawingToolComponent, toolTileClass: "drawing-tool-tile" },
+        [kGeometryToolID]: { ToolComponent: GeometryToolComponent, toolTileClass: "geometry-tool-tile" },
+        [kImageToolID]: { ToolComponent: ImageToolComponent, toolTileClass: "image-tool-tile" },
+        [kTableToolID]: { ToolComponent: TableToolComponent, toolTileClass: "table-tool-tile" },
+        [kTextToolID]: { ToolComponent: TextToolComponent, toolTileClass: "text-tool-tile" }
+      };
 
 interface IDragTileButtonProps {
   divRef: (instance: HTMLDivElement | null) => void;
@@ -119,14 +121,14 @@ interface IResizeTileButtonProps {
   divRef: (instance: HTMLDivElement | null) => void;
   hovered: boolean;
   selected: boolean;
-  onMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void;
+  onDragStart: (e: React.DragEvent<HTMLDivElement>) => void;
 }
 
 const ResizeTileButton =
-  ({ divRef, hovered, selected, onMouseDown }: IResizeTileButtonProps) => {
+  ({ divRef, hovered, selected, onDragStart }: IResizeTileButtonProps) => {
   const classes = classNames("tool-tile-resize-handle", { hovered, selected });
   return (
-    <div className={`tool-tile-resize-handle-wrapper`} ref={divRef} onMouseDown={onMouseDown}>
+    <div className={`tool-tile-resize-handle-wrapper`} ref={divRef} onDragStart={onDragStart}>
       <TileResizeHandle className={classes} />
     </div>
   );
@@ -200,28 +202,26 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { model, readOnly, widthPct } = this.props;
+    const { model, isUserResizable, readOnly, widthPct } = this.props;
     const { hoverTile } = this.state;
     const { appConfig, ui } = this.stores;
     const { ToolComponent, toolTileClass } = kToolComponentMap[model.content.type];
     const isPlaceholderTile = ToolComponent === PlaceholderToolComponent;
     const isTileSelected = ui.isSelectedTile(model);
     const classes = classNames("tool-tile", model.display, toolTileClass, {
-      placeholder: isPlaceholderTile,
-      readonly: readOnly,
-      hovered: this.state.hoverTile,
-      selected: isTileSelected
-    });
+                      placeholder: isPlaceholderTile,
+                      readonly: readOnly,
+                      hovered: this.state.hoverTile,
+                      selected: isTileSelected });
     const isDraggable = !isPlaceholderTile && !appConfig.disableTileDrags;
     const dragTileButton = isDraggable &&
-      <DragTileButton divRef={elt => this.dragElement = elt}
-        hovered={hoverTile} selected={isTileSelected}
-        onClick={e => ui.setSelectedTile(model, { append: hasSelectionModifier(e) })} />;
+                            <DragTileButton divRef={elt => this.dragElement = elt}
+                              hovered={hoverTile} selected={isTileSelected}
+                              onClick={e => ui.setSelectedTile(model, {append: hasSelectionModifier(e)})} />;
     const resizeTileButton = <ResizeTileButton divRef={elt => this.resizeElement = elt}
-      hovered={hoverTile}
-      selected={isTileSelected}
-      onMouseDown={e => this.handleUserStartResizeTile(e)}
-     />;
+                              hovered={hoverTile}
+                              selected={isTileSelected}
+                              onDragStart={e => this.props.onResizeRow(e)} />;
 
     const style: React.CSSProperties = {};
     if (widthPct) {
@@ -229,20 +229,20 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     }
     return (
       <div className={classes}
-        ref={elt => this.domElement = elt}
-        data-tool-id={model.id}
-        style={style}
-        tabIndex={-1}
-        onMouseEnter={isDraggable ? e => this.setState({ hoverTile: true }) : undefined}
-        onMouseLeave={isDraggable ? e => this.setState({ hoverTile: false }) : undefined}
-        onKeyDown={this.handleKeyDown}
-        onDragStart={this.handleToolDragStart}
-        onDragEnd={this.triggerResizeHandler}
-        draggable={true}
+          ref={elt => this.domElement = elt}
+          data-tool-id={model.id}
+          style={style}
+          tabIndex={-1}
+          onMouseEnter={isDraggable ? e => this.setState({ hoverTile: true }) : undefined}
+          onMouseLeave={isDraggable ? e => this.setState({ hoverTile: false }) : undefined}
+          onKeyDown={this.handleKeyDown}
+          onDragStart={this.handleToolDragStart}
+          onDragEnd={this.triggerResizeHandler}
+          draggable={true}
       >
         {this.renderLinkIndicators()}
         {dragTileButton}
-        {resizeTileButton}
+        {isUserResizable && resizeTileButton}
         {this.renderTile(ToolComponent)}
         {this.renderTileComments()}
       </div>
@@ -252,11 +252,11 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
   private renderTile(ToolComponent: any) {
     const tileId = this.props.model.id;
     return ToolComponent != null
-      ? <ToolComponent
-        key={tileId} toolTile={this.domElement} {...this.props}
-        onRegisterToolApi={this.handleRegisterToolApi}
-        onUnregisterToolApi={this.handleUnregisterToolApi} />
-      : null;
+            ? <ToolComponent
+                key={tileId} toolTile={this.domElement} {...this.props}
+                onRegisterToolApi={this.handleRegisterToolApi}
+                onUnregisterToolApi={this.handleUnregisterToolApi} />
+            : null;
   }
 
   private renderLinkIndicators() {
@@ -265,10 +265,10 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     const toolApi = toolApiInterface?.getToolApi(model.id);
     const clientTableLinks = toolApi?.getLinkedTables?.();
     return clientTableLinks
-      ? clientTableLinks.map((id, index) => {
-        return <LinkIndicatorComponent key={id} id={id} index={index} />;
-      })
-      : null; // tables don't use the original link indicator any more
+            ? clientTableLinks.map((id, index) => {
+                return <LinkIndicatorComponent key={id} id={id} index={index} />;
+              })
+            : null; // tables don't use the original link indicator any more
   }
 
   private renderTileComments() {
@@ -287,7 +287,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     const { model } = this.props;
     const toolApiInterface = this.context;
     return toolApiInterface?.getToolApi(`${model.id}[layout]`)?.handleTileResize ||
-      toolApiInterface?.getToolApi(model.id)?.handleTileResize;
+            toolApiInterface?.getToolApi(model.id)?.handleTileResize;
   }
 
   private handleRegisterToolApi = (toolApi: IToolApi, facet?: string) => {
@@ -323,7 +323,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
 
     const ToolComponent = kToolComponentMap[model.content.type].ToolComponent;
     if (ToolComponent?.tileHandlesSelection) {
-      ui.setSelectedTile(model, { append: hasSelectionModifier(e) });
+      ui.setSelectedTile(model, {append: hasSelectionModifier(e)});
     }
   }
 
@@ -418,8 +418,8 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     const dragElt = e.target as HTMLElement;
     // tool components can provide alternate dom node for drag image
     const dragImage = ToolComponent && ToolComponent.getDragImageNode
-      ? ToolComponent.getDragImageNode(dragElt)
-      : dragElt;
+                        ? ToolComponent.getDragImageNode(dragElt)
+                        : dragElt;
     const clientRect = dragElt.getBoundingClientRect();
     const offsetX = (e.clientX - clientRect.left) / (scale || 1);
     const offsetY = (e.clientY - clientRect.top) / (scale || 1);
@@ -456,53 +456,6 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     });
 
     return dragTileItems;
-  }
-
-  private handleUserStartResizeTile = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    let initHeight = 0, initWidth = 0;
-    let mouseX = 0, mouseY = 0;
-    let width = 0, height = 0;
-
-    const getMousePositions = () =>{
-      e.persist();
-      mouseX = e.pageX;
-      mouseY = e.pageY;
-    };
-
-    if (this.domElement) {
-      const tile = this.domElement;
-      const bounds = tile.getBoundingClientRect();
-      const getElementDimensions = () => {
-        initHeight = bounds.height;
-        initWidth = bounds.width;
-      };
-
-      const scale = (evt: { pageX: any; pageY: any; }) => {
-        console.log("user moving mouse");
-        console.log("In scale, e.clientX: ", evt.pageX, " e.clientY: ", evt.pageY);
-        console.log("In scale, mouseX: ", mouseX, " mouseY: ", mouseY);
-
-        width = initWidth + (evt.pageX - mouseX);
-        height = initHeight + (evt.pageY - mouseY);
-
-        tile.style.width = width + 'px';
-        tile.style.height = height + 'px';
-        console.log("width: ", width, " height: ", height);
-        this.triggerResizeHandler();
-      };
-
-      const removeListener = () => {
-        tile.removeEventListener('mousemove', scale);
-      };
-
-      //Sets the width and height bases on how the mouse moves to scale the elemen
-      getMousePositions();
-      getElementDimensions();
-      tile.addEventListener("mousemove", scale);
-      tile.addEventListener("mouseup", removeListener);
-    }
   }
 
   private triggerResizeHandler = () => {
