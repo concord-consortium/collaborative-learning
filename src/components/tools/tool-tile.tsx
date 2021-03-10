@@ -202,7 +202,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { model, readOnly, widthPct } = this.props;
+    const { model, readOnly, isUserResizable, widthPct } = this.props;
     const { hoverTile } = this.state;
     const { appConfig, ui } = this.stores;
     const { ToolComponent, toolTileClass } = kToolComponentMap[model.content.type];
@@ -218,7 +218,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
                             <DragTileButton divRef={elt => this.dragElement = elt}
                               hovered={hoverTile} selected={isTileSelected}
                               onClick={e => ui.setSelectedTile(model, {append: hasSelectionModifier(e)})} />;
-    const resizeTileButton = isDraggable &&
+    const resizeTileButton = isUserResizable &&
                               <ResizeTileButton divRef={elt => this.resizeElement = elt}
                                 hovered={hoverTile}
                                 selected={isTileSelected}
