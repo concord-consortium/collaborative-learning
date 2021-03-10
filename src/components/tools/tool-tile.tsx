@@ -202,7 +202,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { model, isUserResizable, readOnly, widthPct } = this.props;
+    const { model, readOnly, widthPct } = this.props;
     const { hoverTile } = this.state;
     const { appConfig, ui } = this.stores;
     const { ToolComponent, toolTileClass } = kToolComponentMap[model.content.type];
@@ -218,10 +218,11 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
                             <DragTileButton divRef={elt => this.dragElement = elt}
                               hovered={hoverTile} selected={isTileSelected}
                               onClick={e => ui.setSelectedTile(model, {append: hasSelectionModifier(e)})} />;
-    const resizeTileButton = <ResizeTileButton divRef={elt => this.resizeElement = elt}
-                              hovered={hoverTile}
-                              selected={isTileSelected}
-                              onDragStart={e => this.props.onResizeRow(e)} />;
+    const resizeTileButton = isDraggable &&
+                              <ResizeTileButton divRef={elt => this.resizeElement = elt}
+                                hovered={hoverTile}
+                                selected={isTileSelected}
+                                onDragStart={e => this.props.onResizeRow(e)} />;
 
     const style: React.CSSProperties = {};
     if (widthPct) {
@@ -242,7 +243,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
       >
         {this.renderLinkIndicators()}
         {dragTileButton}
-        {isUserResizable && resizeTileButton}
+        {resizeTileButton}
         {this.renderTile(ToolComponent)}
         {this.renderTileComments()}
       </div>
