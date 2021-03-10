@@ -1,8 +1,16 @@
-import { defaultTableContent, kTableToolID, TableContentModel, convertImportToChanges,
-  TableMetadataModel } from "./table-content";
+import { values } from "lodash";
+import {
+  convertImportToChanges, defaultTableContent, kTableToolID,
+  TableContentModel, TableContentTableImport, TableMetadataModel
+} from "./table-content";
 import { DataSet } from "../../data/data-set";
 import { safeJsonParse } from "../../../utilities/js-utils";
-import { values } from "lodash";
+import omitDeep from "../../../utilities/omit-deep";
+
+const changeRowValues = (change: any, row: number) => {
+  // return only values (keys are unique ids); ignore case id
+  return values(change.props.rows[row]).slice(1);
+};
 
 describe("TableContent", () => {
 
@@ -18,11 +26,43 @@ describe("TableContent", () => {
     expect(defaultTable.isImported).toBe(true);
     expect(defaultTable.changes.length).toBe(1);
     expect(emptyTable.isUserResizable).toBe(true);
+
+    expect(convertImportToChanges(undefined as any)).toEqual([]);
+    expect(convertImportToChanges({} as any)).toEqual([]);
   });
 
-  it("can import authored data", () => {
+  it("can import an authored table without data", () => {
     const kTableTitle = "Table Title";
-    const importData: any = {
+    const importData: TableContentTableImport = {
+            type: "Table",
+            name: kTableTitle,
+            columns: [
+              { name: "xCol" },
+              { name: "yCol" }
+            ]
+          };
+    const table = TableContentModel.create(importData);
+    expect(table.type).toBe(kTableToolID);
+    expect(table.isImported).toBe(true);
+    expect(table.changes.length).toBe(1);
+
+    const change1 = safeJsonParse(table.changes[0]);
+    expect(omitDeep(change1, ["id"])).toEqual({
+      action: "create",
+      target: "table",
+      props: {
+        name: kTableTitle,
+        columns: [
+          { name: "xCol" },
+          { name: "yCol" }
+        ]
+      }
+    });
+  });
+
+  it("can import an authored table with data", () => {
+    const kTableTitle = "Table Title";
+    const importData: TableContentTableImport = {
             type: "Table",
             name: kTableTitle,
             columns: [
@@ -36,34 +76,66 @@ describe("TableContent", () => {
     expect(table.changes.length).toBe(2);
 
     const change1 = safeJsonParse(table.changes[0]);
-    expect(change1).toBeDefined();
-    expect(change1.action).toBe("create");
-    expect(change1.target).toBe("table");
-    expect(change1.props).toBeDefined();
-    expect(change1.props.name).toBeDefined();
-    expect(change1.props.name).toBe(kTableTitle);
-    expect(change1.props.columns).toBeDefined();
-    expect(change1.props.columns.length).toBe(2);
-    expect(change1.props.columns[0].name).toBe("xCol");
-    expect(change1.props.columns[1].name).toBe("yCol");
+    expect(omitDeep(change1, ["id"])).toEqual({
+      action: "create",
+      target: "table",
+      props: {
+        name: kTableTitle,
+        columns: [
+          { name: "xCol" },
+          { name: "yCol" }
+        ]
+      }
+    });
+
+    const change2 = safeJsonParse(table.changes[1]);
+    expect(change2.action).toBe("create");
+    expect(change2.target).toBe("rows");
+    expect(change2.props.rows.length).toBe(3);
+    expect(change2.props.rows[0].__id__).toBeDefined();
+    expect(changeRowValues(change2, 0)).toEqual(["x1", "y1"]);
+    expect(changeRowValues(change2, 1)).toEqual(["x2", "y2"]);
+    expect(changeRowValues(change2, 2)).toEqual(["y3"]);
+  });
+
+  it("can import multi-column authored data with expressions", () => {
+    const kTableTitle = "Table Title";
+    const importData: TableContentTableImport = {
+            type: "Table",
+            name: kTableTitle,
+            columns: [
+              { name: "xCol", values: [1, 2, 3] },
+              { name: "y1", values: ["y-1", "y-2", "y-3"] },
+              { name: "y2", expression: "xCol + 1" }
+            ]
+          };
+    const table = TableContentModel.create(importData);
+    expect(table.type).toBe(kTableToolID);
+    expect(table.isImported).toBe(true);
+    expect(table.changes.length).toBe(2);
+
+    const change1 = safeJsonParse(table.changes[0]);
+    expect(omitDeep(change1, ["id"])).toEqual({
+      action: "create",
+      target: "table",
+      props: {
+        name: kTableTitle,
+        columns: [
+          { name: "xCol" },
+          { name: "y1" },
+          { name: "y2", expression: "(__x__ + 1)", rawExpression: "xCol + 1" }
+        ]
+      }
+    });
 
     const change2 = safeJsonParse(table.changes[1]);
     expect(change2).toBeDefined();
     expect(change2.action).toBe("create");
     expect(change2.target).toBe("rows");
-    expect(change2.props).toBeDefined();
-    expect(change2.props.rows).toBeDefined();
     expect(change2.props.rows.length).toBe(3);
-    expect(change2.props.rows[0].__id__).toBeDefined();
-    expect(values(change2.props.rows[0]).indexOf("x1") >= 0).toBe(true);
-    expect(values(change2.props.rows[0]).indexOf("y1") >= 0).toBe(true);
-    expect(values(change2.props.rows[1]).indexOf("x2") >= 0).toBe(true);
-    expect(values(change2.props.rows[1]).indexOf("y2") >= 0).toBe(true);
-    expect(values(change2.props.rows[2]).indexOf("x3") >= 0).toBe(false);
-    expect(values(change2.props.rows[2]).indexOf("y3") >= 0).toBe(true);
-
-    expect(convertImportToChanges(undefined as any)).toEqual([]);
-    expect(convertImportToChanges({})).toEqual([]);
+    expect(changeRowValues(change2, 0)).toEqual([1, "y-1"]);
+    expect(changeRowValues(change2, 1)).toEqual([2, "y-2"]);
+    expect(changeRowValues(change2, 2)).toEqual([3, "y-3"]);
   });
 
   it("can convert original change format", () => {

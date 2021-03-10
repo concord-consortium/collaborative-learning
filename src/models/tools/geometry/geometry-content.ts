@@ -5,9 +5,10 @@ import { SelectionStoreModelType } from "../../stores/selection";
 import { addLinkedTable, removeLinkedTable } from "../table-links";
 import { registerToolContentInfo } from "../tool-content-info";
 import {
-  getAxisLabelsFromDataSet, getRowLabelFromLinkProps, getTableContent, IColumnProperties,
-  ICreateRowsProperties, IRowProperties, ITableChange, ITableLinkProperties, kLabelAttrName
-} from "../table/table-content";
+  getRowLabelFromLinkProps, IColumnProperties, ICreateRowsProperties, IRowProperties,
+  ITableChange, ITableLinkProperties
+} from "../table/table-change";
+import { getAxisLabelsFromDataSet, getTableContent, kLabelAttrName } from "../table/table-content";
 import { canonicalizeValue, linkedPointId } from "../table/table-model-types";
 import { getAxisAnnotations, getBaseAxisLabels, getObjectById, guessUserDesiredBoundingBox,
           kAxisBuffer, kGeometryDefaultAxisMin, kGeometryDefaultHeight, kGeometryDefaultWidth,
@@ -308,7 +309,7 @@ export const GeometryContentModel = types
       const linkedTiles = lastChangeLinks ? lastChangeLinks.tileIds : undefined;
       const linkedTile = linkedTiles && linkedTiles[0];
       const tableContent = linkedTile ? getTableContent(self, linkedTile) : undefined;
-      return tableContent ? tableContent.canUndoLinkedChange(lastChangeParsed) : false;
+      return tableContent ? tableContent.canUndoLinkedChange(/*lastChangeParsed*/) : false;
     },
     canUndoLinkedChange(change: ITableChange) {
       const hasUndoableChanges = self.changes.length > 1;
