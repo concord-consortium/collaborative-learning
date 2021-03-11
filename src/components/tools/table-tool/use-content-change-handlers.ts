@@ -52,7 +52,7 @@ export const useContentChangeHandlers = ({
 
   const syncChangeToLinkedClient = useCallback((clientTileId: string, linkId: string) => {
     const tableContent = getContent();
-    const lastChange: ITableChange | undefined = safeJsonParse(tableContent.changes[tableContent.changes.length - 1]);
+    const lastChange = safeJsonParse<ITableChange>(tableContent.changes[tableContent.changes.length - 1]);
     // eventually we'll presumably need to support other clients
     const clientContent = getGeometryContent(getContent(), clientTileId);
     // link information attached to individual client changes/actions

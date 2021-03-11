@@ -49,7 +49,7 @@ export const ImageContentModel = types
     get url() {
       if (!self.changes.length) return;
       const lastChangeJson = self.changes[self.changes.length - 1];
-      const lastChange = safeJsonParse(lastChangeJson);
+      const lastChange = safeJsonParse<ImageToolChange>(lastChangeJson);
       return lastChange?.url;
     }
   }))
@@ -67,8 +67,8 @@ export const ImageContentModel = types
       // identify change entries to be modified
       const updates: Array<{ index: number, change: string }> = [];
       self.changes.forEach((changeJson, index) => {
-        const change: ImageToolChange = safeJsonParse(changeJson);
-        switch (change && change.operation) {
+        const change = safeJsonParse<ImageToolChange>(changeJson);
+        switch (change?.operation) {
           case "update":
             if (change.url && (change.url === oldUrl)) {
               change.url = newUrl;

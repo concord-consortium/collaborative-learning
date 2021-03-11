@@ -38,6 +38,8 @@ export interface JXGChange {
   parents?: JXGParentType[];
   properties?: JXGProperties | JXGProperties[];
   links?: ILinkProperties;
+  startBatch?: boolean;
+  endBatch?: boolean;
 }
 
 export interface JXGNormalizedChange {
