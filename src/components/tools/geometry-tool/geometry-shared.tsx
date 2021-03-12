@@ -6,6 +6,7 @@ export interface IToolbarActionHandlers {
   handleDelete: () => void;
   handleToggleVertexAngle: () => void;
   handleCreateMovableLine: () => void;
+  handleCreateLineLabel: () => void;
   handleCreateComment: () => void;
   handleUploadImageFile: (file: File) => void;
 }
