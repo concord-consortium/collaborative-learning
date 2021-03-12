@@ -205,7 +205,7 @@ context('Teacher Dashboard View', () => {
        */
     });
   });
-  describe('support message appears in student view', () => {
+  describe.skip('support message appears in student view', () => {
     const textToStudent = "This is a note to clue testing1";
     const textToGroup = "This is a note to Group 3";
 
