@@ -4,7 +4,9 @@ import React from "react";
 import { DocumentContentComponent } from "./document-content";
 import { DocumentModelType } from "../../models/document/document";
 import { DocumentContentModelType } from "../../models/document/document-content";
-import { IToolApiMap, IToolApiInterface, IToolApi, ToolApiInterfaceContext } from "../tools/tool-api";
+import {
+  IToolApi, IToolApiInterface, IToolApiMap, ToolApiInterfaceContext, EditableToolApiInterfaceRefContext
+} from "../tools/tool-api";
 import { DEBUG_CANVAS } from "../../lib/debug";
 
 import "./canvas.sass";
@@ -29,6 +31,9 @@ export class CanvasComponent extends React.Component<IProps> {
   private toolApiMap: IToolApiMap = {};
   private toolApiInterface: IToolApiInterface;
 
+  static contextType = EditableToolApiInterfaceRefContext;
+  declare context: React.ContextType<typeof EditableToolApiInterfaceRefContext>;
+
   constructor(props: IProps) {
     super(props);
 
@@ -49,6 +54,10 @@ export class CanvasComponent extends React.Component<IProps> {
   }
 
   public render() {
+    if (this.context && !this.props.readOnly) {
+      // update the editable api interface used by the toolbar
+      this.context.current = this.toolApiInterface;
+    }
     return (
       <ToolApiInterfaceContext.Provider value={this.toolApiInterface}>
         <div key="canvas" className="canvas" data-test="canvas">
