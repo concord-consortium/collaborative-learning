@@ -40,6 +40,14 @@ module.exports = (env, argv) => {
                   "// [CC] (string-replace-loader) allow clearing the selection\n" +
                   "    if (!(position.idx === -1 && position.rowIdx === -1) && !isCellWithinBounds(position)) return;",
                 strict: true  // fail build if replacement not performed
+              },
+              { // react-data-grid doesn't currently provide a means of navigating to the next row on Enter
+                // search: /case 'ArrowDown':\s+return \{ idx, rowIdx: rowIdx \+ 1 \};/g,
+                search: /case 'ArrowDown':/g,
+                replace:
+                  "case 'ArrowDown':\n" +
+                  "case 'Enter': // [CC]\n",
+                strict: true  // fail build if replacement not performed
               }
             ]
           }

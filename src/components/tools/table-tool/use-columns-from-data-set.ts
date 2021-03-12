@@ -69,6 +69,15 @@ export const useColumnsFromDataSet = ({
     return userColumnWidths.current[attr.id] || Math.max(nameCellWidth, exprCellWidth);
   }, [dataSet.attributes, measureText, metadata.expressions, metadata.rawExpressions]);
 
+  const handleEditorNavigation = ({ key, target }: React.KeyboardEvent<HTMLDivElement>): boolean => {
+    if ((key === 'Tab' || key === 'Enter')
+      && (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement
+        || target instanceof HTMLSelectElement)) {
+      return true;
+    }
+    return false;
+  };
+
   const columns = useMemo(() => {
     const cols: TColumn[] = attributes.map(attr => ({
       ...cellClasses(attr.id),
@@ -80,7 +89,8 @@ export const useColumnsFromDataSet = ({
       formatter: CellFormatter,
       editor: !readOnly && !metadata.hasExpression(attr.id) ? CellTextEditor : undefined,
       editorOptions: {
-        editOnClick: !readOnly
+        editOnClick: !readOnly,
+        onNavigation: handleEditorNavigation
       }
     }));
     cols.unshift({
