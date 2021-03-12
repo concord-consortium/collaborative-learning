@@ -84,7 +84,7 @@ context('Teacher Dashboard View', () => {
       dashboard.getNextPageButton().should('be.visible').and('not.have.class', 'disabled');
     });
   });
-  describe('Header element functionality', () => {
+  describe.skip('Header element functionality', () => {
     it('verify dashboard/workspace switch changes workspace view', () => {
       dashboard.getViewToggle('Dashboard').should('be.visible').and('have.class', 'selected');
       clueCanvas.getSingleWorkspace().should('not.exist');
@@ -161,7 +161,7 @@ context('Teacher Dashboard View', () => {
       dashboard.getNextPageButton().should('not.have.class', 'disabled');
     });
   });
-  describe('6-pack view functionality - Published Work', () => {
+  describe.skip('6-pack view functionality - Published Work', () => {
     it('switches to published work tab and checks UI options', () => {
       // not working - nocan't get to the right canvas
       let classIndex = 0;
