@@ -27,6 +27,7 @@ import { hasSelectionModifier } from "../../utilities/event-utils";
 import { uniqueId } from "../../utilities/js-utils";
 import { getContentIdFromNode, getDocumentContentFromNode } from "../../utilities/mst-utils";
 import TileDragHandle from "../../assets/icons/drag-tile/move.svg";
+import TileResizeHandle from "../../assets/icons/resize-tile/expand-handle.svg";
 import "../../utilities/dom-utils";
 
 import "./tool-tile.sass";
@@ -63,11 +64,13 @@ interface IToolTileBaseProps {
   documentId?: string;  // permanent id (key) of the containing document
   docId: string;  // ephemeral contentId for the DocumentContent
   documentContent: HTMLElement | null;
+  isUserResizable: boolean;
   scale?: number;
   widthPct?: number;
   height?: number;
   model: ToolTileModelType;
   readOnly?: boolean;
+  onResizeRow: (e: React.DragEvent<HTMLDivElement>) => void;
   onSetCanAcceptDrop: (tileId?: string) => void;
   onRequestTilesOfType: (tileType: string) => Array<{ id: string, title?: string }>;
   onRequestUniqueTitle: (tileId: string) => string | undefined;
@@ -114,6 +117,23 @@ const DragTileButton = ({ divRef, hovered, selected, onClick }: IDragTileButtonP
   );
 };
 
+interface IResizeTileButtonProps {
+  divRef: (instance: HTMLDivElement | null) => void;
+  hovered: boolean;
+  selected: boolean;
+  onDragStart: (e: React.DragEvent<HTMLDivElement>) => void;
+}
+
+const ResizeTileButton =
+  ({ divRef, hovered, selected, onDragStart }: IResizeTileButtonProps) => {
+  const classes = classNames("tool-tile-resize-handle", { hovered, selected });
+  return (
+    <div className={`tool-tile-resize-handle-wrapper`} ref={divRef} onDragStart={onDragStart}>
+      <TileResizeHandle className={classes} />
+    </div>
+  );
+};
+
 interface IState {
   hoverTile: boolean;
 }
@@ -130,6 +150,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
   private resizeObserver: ResizeObserver;
   private hotKeys: HotKeys = new HotKeys();
   private dragElement: HTMLDivElement | null;
+  private resizeElement: HTMLDivElement | null;
 
   state = {
     hoverTile: false
@@ -181,7 +202,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { model, readOnly, widthPct } = this.props;
+    const { model, readOnly, isUserResizable, widthPct } = this.props;
     const { hoverTile } = this.state;
     const { appConfig, ui } = this.stores;
     const { ToolComponent, toolTileClass } = kToolComponentMap[model.content.type];
@@ -197,6 +218,12 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
                             <DragTileButton divRef={elt => this.dragElement = elt}
                               hovered={hoverTile} selected={isTileSelected}
                               onClick={e => ui.setSelectedTile(model, {append: hasSelectionModifier(e)})} />;
+    const resizeTileButton = isUserResizable &&
+                              <ResizeTileButton divRef={elt => this.resizeElement = elt}
+                                hovered={hoverTile}
+                                selected={isTileSelected}
+                                onDragStart={e => this.props.onResizeRow(e)} />;
+
     const style: React.CSSProperties = {};
     if (widthPct) {
       style.width = `${Math.round(100 * widthPct / 100)}%`;
@@ -216,6 +243,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
       >
         {this.renderLinkIndicators()}
         {dragTileButton}
+        {resizeTileButton}
         {this.renderTile(ToolComponent)}
         {this.renderTileComments()}
       </div>
