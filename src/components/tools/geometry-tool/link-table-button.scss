@@ -1,0 +1,27 @@
+@import "../../vars.sass";
+
+.link-table-button {
+  position: relative;
+  margin-left: 10px;
+  width: 32px;
+  height: 26px;
+  border-radius: 5px;
+  border: solid 1.5px $charcoal-light-1;
+  background-color: $workspace-teal-light-9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+
+  &.disabled {
+    opacity: 35%;
+  }
+
+  &:hover:not(.disabled) {
+    background-color: $workspace-teal-light-4;
+  }
+
+  &:active:not(.disabled) {
+    background-color: $workspace-teal-light-2;
+  }
+}

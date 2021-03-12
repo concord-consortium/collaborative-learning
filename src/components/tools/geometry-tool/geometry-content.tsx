@@ -42,6 +42,7 @@ import { EditableGeometryTitle } from "./editable-geometry-title";
 import LabelSegmentDialog from "./label-segment-dialog";
 import MovableLineDialog from "./movable-line-dialog";
 import placeholderImage from "../../../assets/image_placeholder.png";
+import { LinkTableButton } from "./link-table-button";
 import ErrorAlert from "../../utilities/error-alert";
 import SingleStringDialog from "../../utilities/single-string-dialog";
 import { autorun } from "mobx";
@@ -412,7 +413,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           onDragLeave={this.handleDragLeave}
           onDrop={this.handleDrop} />,
       this.renderRotateHandle(),
-      this.renderTitle(),
+      this.renderTitleArea(),
       this.renderInvalidTableDataAlert()
     ]);
   }
@@ -514,12 +515,33 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     title && this.getContent().updateTitle(this.state.board, title);
   }
 
+  private renderTitleArea() {
+    return (
+      <div className={"title-area"}>
+        {this.renderTitle()}
+        {this.renderTableLinkButton()}
+      </div>
+    );
+  }
+
   private renderTitle() {
     const getTitle = () => this.getContent().title || "";
     const { measureText, size, scale } = this.props;
     return (
       <EditableGeometryTitle key="geometry-title" size={size} scale={scale} getTitle={getTitle}
                               measureText={measureText} onEndEdit={this.handleTitleChange} />
+    );
+  }
+
+  private renderTableLinkButton() {
+    // const getLinkIndex = () =>this.getContent().getLinkIndex;
+    const onLinkTableClick = () => {
+      console.log("link table button clicked");
+    };
+    return (
+      <LinkTableButton key={`graph_${this.elementId}`} isEnabled={true}
+      // getLinkIndex={1}
+      onClick={onLinkTableClick} />
     );
   }
 
