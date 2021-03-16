@@ -53,6 +53,7 @@ export interface IGeometryContentProps extends IGeometryProps {
   onSetBoard: (board: JXG.Board) => void;
   onSetActionHandlers: (handlers: IActionHandlers) => void;
   onContentChange: () => void;
+  onLinkTableClick?: () => void;
 }
 export interface IProps extends IGeometryContentProps, SizeMeProps {
   measureText: (text: string) => number;
@@ -401,6 +402,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const metadata = this.getContent().metadata;
     const isLinkedClass = metadata.linkedTableCount ? "is-linked" : "";
     const classes = `geometry-content ${editableClass} ${isLinkedClass}`;
+
     return ([
       this.renderCommentEditor(),
       this.renderLineEditor(),
@@ -534,14 +536,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderTableLinkButton() {
-    // const getLinkIndex = () =>this.getContent().getLinkIndex;
-    const onLinkTableClick = () => {
-      console.log("link table button clicked");
-    };
+    const { onLinkTableClick } = this.props;
     return (
-      <LinkTableButton key={`graph_${this.elementId}`} isEnabled={true}
-      // getLinkIndex={1}
-      onClick={onLinkTableClick} />
+      <LinkTableButton key={`graph_${this.elementId}`} isEnabled={true} onClick={onLinkTableClick} />
     );
   }
 

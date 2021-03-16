@@ -1,4 +1,4 @@
-import classNames from "classnames";
+// import classNames from "classnames";
 import React from "react";
 import LinkTableIcon from "../../../clue/assets/icons/geometry/link-table-icon.svg";
 
@@ -11,16 +11,15 @@ interface IProps {
 }
 export const LinkTableButton: React.FC<IProps> = ({ isEnabled, getLinkIndex, onClick }) => {
   // const linkIndex = getLinkIndex();
-  const linkIndex = 1;
   // const classes = classNames("link-table-button", `link-color-${linkIndex}`, { disabled: !isEnabled });
-  const classes = classNames("link-table-button", `link-color-${linkIndex}`);
+  // const classes = classNames("link-table-button", `link-color-${linkIndex}`);
 
   const handleClick = (e: React.MouseEvent) => {
     isEnabled && onClick?.();
     e.stopPropagation();
   };
   return (
-    <div className={classes} onClick={handleClick}>
+    <div className={"link-table-button"} onClick={handleClick}>
       <LinkTableIcon />
     </div>
   );

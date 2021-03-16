@@ -8,6 +8,8 @@ import { useUIStore } from "../../../hooks/use-stores";
 import { useCurrent } from "../../../hooks/use-current";
 import { useForceUpdate } from "../hooks/use-force-update";
 import { useToolbarToolApi } from "../hooks/use-toolbar-tool-api";
+import { useContentChangeHandlers } from "./use-content-change-handlers";
+import { useTableLinking } from "./use-table-linking";
 import { HotKeys } from "../../../utilities/hot-keys";
 
 import "./geometry-tool.sass";
@@ -15,7 +17,8 @@ import "./geometry-tool.sass";
 const GeometryToolComponent: React.FC<IGeometryProps> = ({
   model, readOnly, ...others
 }) => {
-  const { documentContent, toolTile, scale, onRegisterToolApi, onUnregisterToolApi } = others;
+  const { documentId, documentContent, toolTile, scale, onRequestTilesOfType,
+    onRegisterToolApi, onUnregisterToolApi } = others;
   const modelRef = useCurrent(model);
   const domElement = useRef<HTMLDivElement>(null);
   const content = model.content as GeometryContentModelType;
@@ -48,8 +51,15 @@ const GeometryToolComponent: React.FC<IGeometryProps> = ({
     domElement
   );
 
+  const changeHandlers = useContentChangeHandlers({
+    model });
+  const { onLinkTableTile, onUnlinkTableTile } = changeHandlers;
+
   const enabled = !readOnly && !!board && !!actionHandlers;
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled, onRegisterToolApi, onUnregisterToolApi });
+  const { showLinkButton, isLinkEnabled, linkColors, getLinkIndex, showLinkTableDialog } =
+    useTableLinking({ documentId, model,
+                        onRequestTilesOfType, onLinkTableTile, onUnlinkTableTile });
 
   // We must listen for pointer events because we want to get the events before
   // JSXGraph, which appears to listen to pointer events on browsers that support them.
@@ -66,7 +76,8 @@ const GeometryToolComponent: React.FC<IGeometryProps> = ({
       <GeometryToolbar documentContent={documentContent} toolTile={toolTile} scale={scale}
         board={board} content={content} handlers={actionHandlers} {...toolbarProps} />
       <GeometryContentWrapper model={model} readOnly={readOnly} {...others}
-        onSetBoard={setBoard} onSetActionHandlers={handleSetHandlers} onContentChange={forceUpdate}/>
+        onSetBoard={setBoard} onSetActionHandlers={handleSetHandlers}
+        onContentChange={forceUpdate} onLinkTableClick={showLinkTableDialog}/>
     </div>
   );
 };
