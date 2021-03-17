@@ -76,7 +76,7 @@ function defaultGeometryBoardChange(overrides?: JXGProperties) {
   const unitY = kGeometryDefaultPixelsPerUnit;
   const xBufferRange = kAxisBuffer / unitX;
   const yBufferRange = kAxisBuffer / unitY;
-  const boundingBox = [xMin - xBufferRange, yMax + yBufferRange, xMax + xBufferRange, yMin - yBufferRange];
+  const boundingBox = [xMin - (xBufferRange * 2), yMax + yBufferRange, xMax + xBufferRange, yMin - yBufferRange];
   const change: JXGChange = {
     operation: "create",
     target: "board",
