@@ -25,3 +25,7 @@ export interface IToolApiInterface {
 export type IToolApiMap = Record<string, IToolApi>;
 
 export const ToolApiInterfaceContext = createContext<IToolApiInterface | null>(null);
+
+// set by the canvas and used by the toolbar
+export type EditableToolApiInterfaceRef = React.MutableRefObject<IToolApiInterface | null>;
+export const EditableToolApiInterfaceRefContext = createContext<EditableToolApiInterfaceRef | null>(null);

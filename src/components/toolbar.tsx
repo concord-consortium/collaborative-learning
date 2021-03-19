@@ -8,7 +8,7 @@ import { DocumentModelType, DocumentTool } from "../models/document/document";
 import { IDocumentContentAddTileOptions, IDragToolCreateInfo } from "../models/document/document-content";
 import { getToolContentInfoByTool, IToolContentInfo } from "../models/tools/tool-content-info";
 import { ToolButtonSnapshot } from "../models/tools/tool-types";
-import { ToolApiInterfaceContext } from "./tools/tool-api";
+import { EditableToolApiInterfaceRefContext } from "./tools/tool-api";
 import { kDragTileCreate  } from "./tools/tool-tile";
 
 import "./toolbar.sass";
@@ -90,8 +90,8 @@ const ToolButtonComponent: React.FC<IButtonProps> =
 @observer
 export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
-  static contextType = ToolApiInterfaceContext;
-  declare context: React.ContextType<typeof ToolApiInterfaceContext>;
+  static contextType = EditableToolApiInterfaceRefContext;
+  declare context: React.ContextType<typeof EditableToolApiInterfaceRefContext>;
 
   state = {
     defaultTool: "",
@@ -161,7 +161,8 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   }
 
   private getUniqueTitle(toolContentInfo: IToolContentInfo) {
-    const toolApiInterface = this.context;
+    const toolApiInterface = this.context?.current;
+    if (!toolApiInterface) return;
     const { document } = this.props;
     const { id, titleBase } = toolContentInfo;
     const getTileTitle = (tileId: string) => toolApiInterface?.getToolApi(tileId)?.getTitle?.();
@@ -189,7 +190,8 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleDelete() {
-    const toolApiInterface = this.context;
+    const toolApiInterface = this.context?.current;
+    if (!toolApiInterface) return;
     const { document } = this.props;
     const { ui } = this.stores;
     ui.selectedTileIds.forEach(tileId => {
