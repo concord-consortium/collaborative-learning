@@ -1,8 +1,7 @@
 import { syncLinkedPoints } from "./jxg-board";
-import { ILinkProperties, JXGChange, JXGChangeAgent, JXGCoordPair } from "./jxg-changes";
+import { ILinkProperties, ITableLinkProperties, JXGChange, JXGChangeAgent, JXGCoordPair } from "./jxg-changes";
 import { createPoint, pointChangeAgent } from "./jxg-point";
 import { isPoint } from "./jxg-types";
-import { ITableLinkProperties } from "../table/table-content";
 import { splitLinkedPointId } from "../table/table-model-types";
 
 export function getTableIdFromLinkChange(change: JXGChange) {

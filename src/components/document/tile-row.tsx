@@ -144,6 +144,8 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
       return tileModel
               ? <ToolTileComponent key={tileModel.id} model={tileModel}
                                     widthPct={tileWidthPct} height={rowHeight}
+                                    isUserResizable={model.isUserResizable}
+                                    onResizeRow={this.handleStartResizeRow}
                                     onSetCanAcceptDrop={this.handleSetCanAcceptDrop}
                                     onRequestRowHeight={this.handleRequestRowHeight}
                                     {...others} />

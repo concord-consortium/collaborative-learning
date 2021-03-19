@@ -1,4 +1,6 @@
 import { castArray } from "lodash";
+import { ILinkProperties, ITableLinkProperties } from "../table-links";
+export { ILinkProperties, ITableLinkProperties };
 
 export type JXGOperation = "create" | "update" | "delete";
 export type JXGObjectType = "board" | "comment" | "image" | "linkedPoint" | "metadata" | "movableLine" |
@@ -29,11 +31,6 @@ export interface JXGProperties {
   [key: string]: any;
 }
 
-export interface ILinkProperties {
-  id: string;
-  tileIds: string[];
-}
-
 export interface JXGChange {
   operation: JXGOperation;
   target: JXGObjectType;
@@ -41,6 +38,8 @@ export interface JXGChange {
   parents?: JXGParentType[];
   properties?: JXGProperties | JXGProperties[];
   links?: ILinkProperties;
+  startBatch?: boolean;
+  endBatch?: boolean;
 }
 
 export interface JXGNormalizedChange {

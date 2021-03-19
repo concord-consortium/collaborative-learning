@@ -723,8 +723,8 @@ export class DB {
     });
   }
 
-  public parseDocumentContent(document: DBDocument): DocumentContentSnapshotType|undefined {
-    return safeJsonParse(document.content);
+  public parseDocumentContent(document: DBDocument) {
+    return safeJsonParse<DocumentContentSnapshotType>(document.content);
   }
 
   public addImage(imageModel: ImageModelType) {

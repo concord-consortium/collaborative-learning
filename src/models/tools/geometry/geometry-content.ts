@@ -5,9 +5,10 @@ import { SelectionStoreModelType } from "../../stores/selection";
 import { addLinkedTable, removeLinkedTable } from "../table-links";
 import { registerToolContentInfo } from "../tool-content-info";
 import {
-  getAxisLabelsFromDataSet, getRowLabelFromLinkProps, getTableContent, IColumnProperties,
-  ICreateRowsProperties, IRowProperties, ITableChange, ITableLinkProperties, kLabelAttrName
-} from "../table/table-content";
+  getRowLabelFromLinkProps, IColumnProperties, ICreateRowsProperties, IRowProperties,
+  ITableChange, ITableLinkProperties
+} from "../table/table-change";
+import { getAxisLabelsFromDataSet, getTableContent, kLabelAttrName } from "../table/table-content";
 import { canonicalizeValue, linkedPointId } from "../table/table-model-types";
 import { getAxisAnnotations, getBaseAxisLabels, getObjectById, guessUserDesiredBoundingBox,
           kAxisBuffer, kGeometryDefaultAxisMin, kGeometryDefaultHeight, kGeometryDefaultWidth,
@@ -301,24 +302,24 @@ export const GeometryContentModel = types
       const hasUndoableChanges = self.changes.length > 1;
       if (!hasUndoableChanges) return false;
       const lastChange = hasUndoableChanges ? self.changes[self.changes.length - 1] : undefined;
-      const lastChangeParsed: JXGChange = lastChange && safeJsonParse(lastChange);
-      if (!isUndoableChange(lastChangeParsed)) return false;
-      const lastChangeLinks = lastChangeParsed && lastChangeParsed.links;
+      const lastChangeParsed = safeJsonParse<JXGChange>(lastChange);
+      if (!lastChangeParsed || !isUndoableChange(lastChangeParsed)) return false;
+      const lastChangeLinks = lastChangeParsed.links;
       if (!lastChangeLinks) return true;
-      const linkedTiles = lastChangeLinks ? lastChangeLinks.tileIds : undefined;
-      const linkedTile = linkedTiles && linkedTiles[0];
+      const linkedTiles = lastChangeLinks.tileIds;
+      const linkedTile = linkedTiles?.[0];
       const tableContent = linkedTile ? getTableContent(self, linkedTile) : undefined;
-      return tableContent ? tableContent.canUndoLinkedChange(lastChangeParsed) : false;
+      return tableContent ? tableContent.canUndoLinkedChange(/*lastChangeParsed*/) : false;
     },
     canUndoLinkedChange(change: ITableChange) {
       const hasUndoableChanges = self.changes.length > 1;
       if (!hasUndoableChanges) return false;
       const lastChange = hasUndoableChanges ? self.changes[self.changes.length - 1] : undefined;
-      const lastChangeParsed = lastChange && safeJsonParse(lastChange);
-      const lastChangeLinks = lastChangeParsed && lastChangeParsed.links;
+      const lastChangeParsed = safeJsonParse<JXGChange>(lastChange);
+      const lastChangeLinks = lastChangeParsed?.links;
       if (!lastChangeLinks) return false;
-      const geometryActionLinkId = lastChangeLinks && lastChangeLinks.id;
-      const tableActionLinkId = change.links && change.links.id;
+      const geometryActionLinkId = lastChangeLinks.id;
+      const tableActionLinkId = change.links?.id;
       return geometryActionLinkId && tableActionLinkId && (geometryActionLinkId === tableActionLinkId);
     }
   }))
@@ -561,14 +562,14 @@ export const GeometryContentModel = types
           // earlier changes go earlier in the array to maintain order
           changes.unshift(changeStr);
 
-          let change = safeJsonParse(changeStr);
-          if (change.endBatch) {
+          let change = safeJsonParse<JXGChange>(changeStr);
+          if (change?.endBatch) {
             while (change && !change.startBatch) {
               changeStr = self.changes.pop();
               if (changeStr) {
                 changes.unshift(changeStr);
               }
-              change = safeJsonParse(changeStr);
+              change = safeJsonParse<JXGChange>(changeStr);
             }
           }
         }
@@ -894,13 +895,15 @@ export const GeometryContentModel = types
       selectedIds.forEach(id => { properties[id] = {}; });
 
       self.changes.forEach(chg => {
-        const parsedChange: JXGChange = safeJsonParse(chg);
-        forEachNormalizedChange(parsedChange, change => {
-          const id = change.targetID as string;
-          if (id && properties[id]) {
-            assign(properties[id], omit(change.properties, ["position"]));
-          }
-        });
+        const parsedChange = safeJsonParse<JXGChange>(chg);
+        if (parsedChange) {
+          forEachNormalizedChange(parsedChange, change => {
+            const id = change.targetID;
+            if (id && properties[id]) {
+              assign(properties[id], omit(change.properties, ["position"]));
+            }
+          });
+        }
       });
       return properties;
     }
@@ -1092,7 +1095,7 @@ export const GeometryContentModel = types
         getLastImageUrl(): string | undefined{
           for (let i = self.changes.length - 1; i >= 0; --i) {
             const jsonChange = self.changes[i];
-            const change: JXGChange = safeJsonParse(jsonChange);
+            const change = safeJsonParse<JXGChange>(jsonChange);
             const imageUrl = getImageUrl(change);
             if (imageUrl) {
               return imageUrl;
@@ -1141,8 +1144,8 @@ export const GeometryContentModel = types
           // identify change entries to be modified
           const updates: Array<{ index: number, change: string }> = [];
           self.changes.forEach((changeJson, index) => {
-            const change: JXGChange = safeJsonParse(changeJson);
-            switch (change && change.operation) {
+            const change = safeJsonParse<JXGChange>(changeJson);
+            switch (change?.operation) {
               case "create":
                 if (change.parents) {
                   const createUrl = change.parents[0];
@@ -1510,13 +1513,13 @@ function preprocessImportFormat(snapshot: any) {
 export function mapTileIdsInGeometrySnapshot(snapshot: SnapshotOut<GeometryContentModelType>,
                                              idMap: { [id: string]: string }) {
   snapshot.changes = snapshot.changes.map((changeJson: any) => {
-    const change: JXGChange = safeJsonParse(changeJson);
-    if ((change.target === "tableLink") && change.targetID) {
+    const change = safeJsonParse<JXGChange>(changeJson);
+    if ((change?.target === "tableLink") && change.targetID) {
       change.targetID = Array.isArray(change.targetID)
                           ? change.targetID.map(id => idMap[id])
                           : idMap[change.targetID];
     }
-    if (change.links) {
+    if (change?.links) {
       change.links.tileIds = change.links.tileIds.map(id => idMap[id]);
     }
     return JSON.stringify(change);

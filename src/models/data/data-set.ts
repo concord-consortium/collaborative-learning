@@ -209,6 +209,9 @@ export const DataSet = types.model("DataSet", {
       caseIndexFromID(id: string) {
         return caseIDMap[id];
       },
+      caseIDFromIndex(index: number) {
+        return getCaseAtIndex(index)?.__id__;
+      },
       nextCaseID(id: string) {
         const index = caseIDMap[id],
               nextCase = (index != null) && (index < self.cases.length - 1)
@@ -218,6 +221,10 @@ export const DataSet = types.model("DataSet", {
       getValue(caseID: string, attributeID: string) {
         const attr = attrIDMap[attributeID],
               index = caseIDMap[caseID];
+        return attr && (index != null) ? attr.value(index) : undefined;
+      },
+      getValueAtIndex(index: number, attributeID: string) {
+        const attr = attrIDMap[attributeID];
         return attr && (index != null) ? attr.value(index) : undefined;
       },
       getCase(caseID: string): ICase | undefined {

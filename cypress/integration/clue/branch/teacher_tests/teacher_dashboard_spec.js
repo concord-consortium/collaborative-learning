@@ -218,7 +218,7 @@ context('Teacher Dashboard View', () => {
       dashboard.sendStudentNote(group, studentName, quadrant, textToStudent);
     });
 
-    it('verify student support note appears in student view', function () {
+    it.skip('verify student support note appears in student view', function () {
       cy.visit('/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=student:1&qaGroup=1');
       cy.wait(5000);
       cy.get('#icon-sticky-note').should('exist').click({force:true});

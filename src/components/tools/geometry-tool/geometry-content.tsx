@@ -332,7 +332,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         let lastUrl;
         for (let i = this.syncedChanges; i < geometryContent.changes.length; ++i) {
           const jsonChange = geometryContent.changes[i];
-          const change = jsonChange && safeJsonParse(jsonChange);
+          const change = safeJsonParse<JXGChange>(jsonChange);
           const url = getImageUrl(change);
           if (url) lastUrl = url;
         }
@@ -817,10 +817,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
         // Reverse the changes so they're logged in the order they're undone
         [...changeset].reverse().forEach(changeString => {
-          const change = safeJsonParse(changeString);
-          Logger.logToolChange(LogEventName.GRAPH_TOOL_CHANGE, change.operation, change,
-            content.metadata ? content.metadata.id : "",
-            LogEventMethod.UNDO);
+          const change = safeJsonParse<JXGChange>(changeString);
+          if (change) {
+            Logger.logToolChange(LogEventName.GRAPH_TOOL_CHANGE, change.operation, change,
+                                  content.metadata?.id || "", LogEventMethod.UNDO);
+          }
         });
       }
     }
@@ -841,10 +842,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         });
 
         changeset.forEach(changeString => {
-          const change = safeJsonParse(changeString);
-          Logger.logToolChange(LogEventName.GRAPH_TOOL_CHANGE, change.operation, change,
-            content.metadata ? content.metadata.id : "",
-            LogEventMethod.REDO);
+          const change = safeJsonParse<JXGChange>(changeString);
+          if (change) {
+            Logger.logToolChange(LogEventName.GRAPH_TOOL_CHANGE, change.operation, change,
+                                  content.metadata?.id || "", LogEventMethod.REDO);
+          }
         });
       }
     }
@@ -878,8 +880,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       let changes: string[] = clipboard.getTileContent(content.type);
       if (changes && changes.length) {
         // Mark the first and last changes to create a batch
-        changes[0] = JSON.stringify({...safeJsonParse(changes[0]), startBatch: true});
-        changes[changes.length - 1] = JSON.stringify({...safeJsonParse(changes[changes.length - 1]), endBatch: true});
+        changes[0] = JSON.stringify({...safeJsonParse<JXGChange>(changes[0]), startBatch: true});
+        const lastChange = JSON.stringify({...safeJsonParse<JXGChange>(changes[changes.length - 1]), endBatch: true});
+        changes[changes.length - 1] = lastChange;
 
         const pasteId = clipboard.getTileContentId(content.type);
         const isSameTile = clipboard.isSourceTile(content.type, content.metadata.id);
@@ -1154,7 +1157,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         const content = this.getContent();
         const { board } = this.state;
         if (board) {
-          const parsedChange = safeJsonParse(change);
+          const parsedChange = safeJsonParse<JXGChange>(change);
           if (parsedChange) {
             const result = content.applyChange(board, parsedChange);
             if (result) {
