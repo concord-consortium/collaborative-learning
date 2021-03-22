@@ -10,6 +10,7 @@ before(() => {
   cy.visit(queryParams);
   cy.waitForSpinner();
   dashboard.switchWorkView('Published');
+  cy.wait(8000);
   dashboard.clearAllStarsFromPublishedWork();
   dashboard.switchWorkView('Current');
 });
@@ -84,8 +85,8 @@ context('Teacher Dashboard View', () => {
       dashboard.getNextPageButton().should('be.visible').and('not.have.class', 'disabled');
     });
   });
-  describe('Header element functionality', () => {
-    it.skip('verify dashboard/workspace switch changes workspace view', () => {
+  describe.skip('Header element functionality', () => {
+    it('verify dashboard/workspace switch changes workspace view', () => {
       dashboard.getViewToggle('Dashboard').should('be.visible').and('have.class', 'selected');
       clueCanvas.getSingleWorkspace().should('not.exist');
       dashboard.getViewToggle('Workspace').should('be.visible').and('not.have.class', 'selected');
@@ -204,7 +205,7 @@ context('Teacher Dashboard View', () => {
        */
     });
   });
-  describe('support message appears in student view', () => {
+  describe.skip('support message appears in student view', () => {
     const textToStudent = "This is a note to clue testing1";
     const textToGroup = "This is a note to Group 3";
 
