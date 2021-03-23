@@ -2,6 +2,7 @@ sudo: false
 dist: trusty
 language: node_js
 node_js: lts/*
+python: 3.6
 cache:
   bundler: true
   pip: true
