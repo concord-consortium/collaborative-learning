@@ -4,6 +4,7 @@ import { Tooltip } from "react-tippy";
 // geometry icons
 import AngleLabelSvg from "../../../clue/assets/icons/geometry/angle-label.svg";
 import CopyPolygonSvg from "../../../clue/assets/icons/geometry/copy-polygon.svg";
+import LineLabelSvg from "../../../clue/assets/icons/geometry/line-label.svg";
 import MovableLineSvg from "../../../clue/assets/icons/geometry/movable-line.svg";
 // generic icons
 import CommentSvg from "../../../assets/icons/comment/comment.svg";
@@ -50,6 +51,15 @@ export const DuplicateButton: React.FC<IClientToolButtonProps> = (props) => {
   return (
     <Tooltip title="Duplicate" {...tooltipOptions}>
       <GeometryToolButton SvgComponent={CopyPolygonSvg} className="duplicate" {...props}/>
+    </Tooltip>
+  );
+};
+
+export const LineLabelButton: React.FC<IClientToolButtonProps> = (props) => {
+  const tooltipOptions = useTooltipOptions({ distance: kTooltipYDistance });
+  return (
+    <Tooltip title="Line label" {...tooltipOptions}>
+      <GeometryToolButton SvgComponent={LineLabelSvg} className="line-label" {...props}/>
     </Tooltip>
   );
 };

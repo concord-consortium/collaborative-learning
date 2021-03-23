@@ -169,7 +169,7 @@ context('Tests for graph and table integration', function () {
       graphToolTile.getAngleAdornment().should('exist');
     });
   });
-  describe('test non-numeric entries in table', function () {
+  describe.skip('test non-numeric entries in table', function () {
     it('will enter non-numeric number in the table', function () {
       tableToolTile.getTableCell().eq(5).type('g{enter}');
       tableToolTile.getTableCell().eq(5).should('contain', x[1]);

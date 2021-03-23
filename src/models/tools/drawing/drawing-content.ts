@@ -240,8 +240,8 @@ export const DrawingContentModel = types
           // identify change entries to be modified
           const updates: Array<{ index: number, change: string }> = [];
           self.changes.forEach((changeJson, index) => {
-            const change: DrawingToolChange = safeJsonParse(changeJson);
-            switch (change && change.action) {
+            const change = safeJsonParse<DrawingToolChange>(changeJson);
+            switch (change?.action) {
               case "create": {
                 const createData = change.data as DrawingObjectDataType;
                 if ((createData.type === "image") && (createData.url === oldUrl)) {
