@@ -52,9 +52,9 @@ interface IProps {
   tableTiles: ITileLinkMetadata[];
   model: ToolTileModelType;
   handleRequestTableLink: ((tableId: string) => void) | undefined;
-  onUnlinkTableTile: (tableileInfo: ITileLinkMetadata) => void;
+  handleRequestTableUnlink: ((tableId: string) => void) | undefined;
 }
-export const useLinkTableDialog = ({ tableTiles, model, handleRequestTableLink, onUnlinkTableTile }: IProps) => {
+export const useLinkTableDialog = ({ tableTiles, model, handleRequestTableLink, handleRequestTableUnlink }: IProps) => {
   const [selectValue, setSelectValue] = useState("");
   const handleClick = () => {
     const tileInfo = tableTiles.find(tile => tile.id === selectValue);
@@ -62,7 +62,7 @@ export const useLinkTableDialog = ({ tableTiles, model, handleRequestTableLink, 
       if (content.metadata.linkedTableIds.indexOf(tileInfo.id) < 0) {
         handleRequestTableLink && handleRequestTableLink(tileInfo.id);
       } else {
-        onUnlinkTableTile(tileInfo);
+        handleRequestTableUnlink && handleRequestTableUnlink(tileInfo.id);
       }
     }
   };

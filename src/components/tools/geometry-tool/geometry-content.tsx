@@ -243,7 +243,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         handleCreateMovableLine: this.handleCreateMovableLine,
         handleCreateComment: this.handleCreateCommentOrLabel,
         handleUploadImageFile: this.handleUploadBackgroundImage,
-        handleRequestTableLink: this.handleTableTileLinkRequest
+        handleRequestTableLink: this.handleTableTileLinkRequest,
+        handleRequestTableUnlink: this.handleTableTileUnlinkRequest
       };
       onSetActionHandlers(handlers);
     }
@@ -1119,6 +1120,24 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const _tableContent = this.getTableContent(tableTileId);
       const tableActionLinks = this.getTableActionLinks(geomActionLinks);
       _tableContent && _tableContent.addGeometryLink(this.props.model.id, tableActionLinks);
+    }
+  }
+
+  private handleTableTileUnlinkRequest = (tableTileId: string) => {
+    const { board } = this.state;
+
+    const tableContent = this.getTableContent(tableTileId);
+    if (tableContent && board) {
+
+      const dataSet = tableContent.getSharedData();
+
+      const geomActionLinks = tableContent.getClientLinks(uniqueId(), dataSet);
+
+      this.getContent().removeTableLink(board, tableTileId, geomActionLinks);
+
+      const _tableContent = this.getTableContent(tableTileId);
+      const tableActionLinks = this.getTableActionLinks(geomActionLinks);
+      _tableContent && _tableContent.removeGeometryLink(this.props.model.id, tableActionLinks);
     }
   }
 

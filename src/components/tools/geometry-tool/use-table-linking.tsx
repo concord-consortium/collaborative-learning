@@ -22,7 +22,7 @@ export const useTableLinking = ({
   documentId, model, onRequestTilesOfType, actionHandlers, onUnlinkTableTile
 }: IProps) => {
   const {
-    handleRequestTableLink
+    handleRequestTableLink, handleRequestTableUnlink
   } = actionHandlers || {};
   const modelId = model.id;
   const showLinkButton = useFeatureFlag("GeometryLinkedTables");
@@ -32,7 +32,7 @@ export const useTableLinking = ({
   const linkColors = getTableLinkColors(modelId);
 
   const [showLinkTableDialog] =
-          useLinkTableDialog({ tableTiles, model, handleRequestTableLink, onUnlinkTableTile });
+          useLinkTableDialog({ tableTiles, model, handleRequestTableLink, handleRequestTableUnlink });
 
   useEffect(() => {
     documentId && addTableToDocumentMap(documentId, modelId);
