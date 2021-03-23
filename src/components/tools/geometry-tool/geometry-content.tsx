@@ -406,7 +406,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const metadata = this.getContent().metadata;
     const isLinkedClass = metadata.linkedTableCount ? "is-linked" : "";
     const classes = `geometry-content ${editableClass} ${isLinkedClass}`;
-
     return ([
       this.renderCommentEditor(),
       this.renderLineEditor(),
@@ -1126,16 +1125,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private handleTableTileUnlinkRequest = (tableTileId: string) => {
     const { board } = this.state;
-
     const tableContent = this.getTableContent(tableTileId);
     if (tableContent && board) {
-
       const dataSet = tableContent.getSharedData();
-
       const geomActionLinks = tableContent.getClientLinks(uniqueId(), dataSet);
-
       this.getContent().removeTableLink(board, tableTileId, geomActionLinks);
-
       const _tableContent = this.getTableContent(tableTileId);
       const tableActionLinks = this.getTableActionLinks(geomActionLinks);
       _tableContent && _tableContent.removeGeometryLink(this.props.model.id, tableActionLinks);

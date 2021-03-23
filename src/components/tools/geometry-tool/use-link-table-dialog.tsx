@@ -67,10 +67,8 @@ export const useLinkTableDialog = ({ tableTiles, model, handleRequestTableLink, 
     }
   };
   const content = model.content as GeometryContentModelType;
-  const unlinkedTiles = tableTiles
-                                  .filter(tileInfo => content.metadata.linkedTableIds.indexOf(tileInfo.id) < 0);
-  const linkedTiles = tableTiles
-                                  .filter(tileInfo => content.metadata.linkedTableIds.indexOf(tileInfo.id) >= 0);
+  const unlinkedTiles = tableTiles.filter(tileInfo => content.metadata.linkedTableIds.indexOf(tileInfo.id) < 0);
+  const linkedTiles = tableTiles.filter(tileInfo => content.metadata.linkedTableIds.indexOf(tileInfo.id) >= 0);
   const [showModal, hideModal] = useCustomModal({
     className: "link-table",
     Icon: LinkGraphIcon,

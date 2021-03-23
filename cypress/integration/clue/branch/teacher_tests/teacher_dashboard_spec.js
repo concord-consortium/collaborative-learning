@@ -92,7 +92,6 @@ context('Teacher Dashboard View', () => {
       dashboard.getViewToggle('Workspace').should('be.visible').and('not.have.class', 'selected');
       dashboard.getViewToggle('Workspace').click({ force: true });
       dashboard.getViewToggle("Workspace").should('have.class', 'selected');
-      cy.wait(5000);
       clueCanvas.getSingleWorkspace().should('be.visible');
       dashboard.getViewToggle("Dashboard").click({ force: true });
       dashboard.getViewToggle('Dashboard').should('be.visible').and('have.class', 'selected');
