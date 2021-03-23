@@ -108,7 +108,7 @@ context('Tests for graph and table integration', function () {
       tableToolTile.getTableTile().click();
       tableToolTile.getTableCell().eq(10).click();
       tableToolTile.getTableCell().eq(10).type(new_y + '{enter}');
-      graphToolTile.getGraphPointCoordinates(2).should('contain', '(6, ' + new_y + ')');
+      graphToolTile.getGraphPointCoordinates(2).should('contain', '(8, ' + new_y + ')');
     });
     it.skip('will delete a point in the table', function () {
       let point = 0; //the 4th point in the graph
