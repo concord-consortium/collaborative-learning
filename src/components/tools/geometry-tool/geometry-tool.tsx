@@ -49,16 +49,10 @@ const GeometryToolComponent: React.FC<IGeometryProps> = ({
     useCallback((append: boolean) => ui.setSelectedTile(modelRef.current, { append }), [modelRef, ui]),
     domElement
   );
-
-  const onUnlinkTableTile = useCallback(() => {
-    console.log("unlink table");
-  },[]);
   const enabled = !readOnly && !!board && !!actionHandlers;
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled, onRegisterToolApi, onUnregisterToolApi });
-  const { showLinkTableDialog } =
-    useTableLinking({ documentId, model,
-                        onRequestTilesOfType, actionHandlers, onUnlinkTableTile });
-
+  const { isLinkEnabled, showLinkTableDialog } =
+    useTableLinking({ documentId, model, onRequestTilesOfType, actionHandlers });
   // We must listen for pointer events because we want to get the events before
   // JSXGraph, which appears to listen to pointer events on browsers that support them.
   // We must listen for mouse events because some browsers (notably Safari) don't
@@ -75,7 +69,7 @@ const GeometryToolComponent: React.FC<IGeometryProps> = ({
         board={board} content={content} handlers={actionHandlers} {...toolbarProps} />
       <GeometryContentWrapper model={model} readOnly={readOnly} {...others}
         onSetBoard={setBoard} onSetActionHandlers={handleSetHandlers}
-        onContentChange={forceUpdate} onLinkTableButtonClick={showLinkTableDialog}/>
+        onContentChange={forceUpdate} isLinkButtonEnabled={isLinkEnabled} onLinkTableButtonClick={showLinkTableDialog}/>
     </div>
   );
 };

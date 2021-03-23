@@ -56,6 +56,7 @@ export interface IGeometryContentProps extends IGeometryProps {
   onLinkTableButtonClick?: () => void;
 }
 export interface IProps extends IGeometryContentProps, SizeMeProps {
+  isLinkButtonEnabled: boolean;
   measureText: (text: string) => number;
 }
 
@@ -521,7 +522,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private renderTitleArea() {
     return (
-      <div className={"title-area"}>
+      <div className={"title-area"} key="title-area">
         {this.renderTitle()}
         {this.renderTableLinkButton()}
       </div>
@@ -538,9 +539,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderTableLinkButton() {
-    const { onLinkTableButtonClick } = this.props;
+    const { isLinkButtonEnabled, onLinkTableButtonClick } = this.props;
     return (
-      <LinkTableButton key={`graph_${this.elementId}`} isEnabled={true} onClick={onLinkTableButtonClick} />
+      <LinkTableButton key="link-button" isEnabled={isLinkButtonEnabled} onClick={onLinkTableButtonClick}/>
     );
   }
 

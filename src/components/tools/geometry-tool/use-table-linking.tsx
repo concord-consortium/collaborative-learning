@@ -15,20 +15,13 @@ interface IProps {
   model: ToolTileModelType;
   onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
   actionHandlers?: IToolbarActionHandlers;
-  onUnlinkTableTile: (tableTileInfo: ITileLinkMetadata) => void;
 }
-export const useTableLinking = ({
-
-  documentId, model, onRequestTilesOfType, actionHandlers, onUnlinkTableTile
-}: IProps) => {
-  const {
-    handleRequestTableLink, handleRequestTableUnlink
-  } = actionHandlers || {};
+export const useTableLinking = ({documentId, model, onRequestTilesOfType, actionHandlers}: IProps) => {
+  const {handleRequestTableLink, handleRequestTableUnlink} = actionHandlers || {};
   const modelId = model.id;
   const showLinkButton = useFeatureFlag("GeometryLinkedTables");
   const tableTiles = useLinkableTableTiles({ model, onRequestTilesOfType });
   const isLinkEnabled = (tableTiles.length > 0);
-
   const linkColors = getTableLinkColors(modelId);
 
   const [showLinkTableDialog] =
@@ -50,7 +43,7 @@ interface IUseLinkableTableTilesProps {
   model: ToolTileModelType;
   onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
 }
-const useLinkableTableTiles = ({ model, onRequestTilesOfType }: IUseLinkableTableTilesProps) => {
+const useLinkableTableTiles = ({ onRequestTilesOfType }: IUseLinkableTableTilesProps) => {
   const tableTiles = useCurrent(onRequestTilesOfType(kTableToolID));
   // add default title if there isn't a title
   return tableTiles.current
