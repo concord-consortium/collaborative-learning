@@ -243,7 +243,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         handleToggleVertexAngle: this.handleToggleVertexAngle,
         handleCreateLineLabel: this.handleCreateLineLabel,
         handleCreateMovableLine: this.handleCreateMovableLine,
-        handleCreateComment: this.handleCreateCommentOrLabel,
+        handleCreateComment: this.handleCreateComment,
         handleUploadImageFile: this.handleUploadBackgroundImage,
         handleRequestTableLink: this.handleTableTileLinkRequest,
         handleRequestTableUnlink: this.handleTableTileUnlinkRequest
