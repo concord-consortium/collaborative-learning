@@ -51,16 +51,16 @@ const Content: React.FC<IContentProps>
 interface IProps {
   tableTiles: ITileLinkMetadata[];
   model: ToolTileModelType;
-  onLinkTableTile: (tableTileInfo: ITileLinkMetadata) => void;
+  handleRequestTableLink: ((tableId: string) => void) | undefined;
   onUnlinkTableTile: (tableileInfo: ITileLinkMetadata) => void;
 }
-export const useLinkTableDialog = ({ tableTiles, model, onLinkTableTile, onUnlinkTableTile }: IProps) => {
+export const useLinkTableDialog = ({ tableTiles, model, handleRequestTableLink, onUnlinkTableTile }: IProps) => {
   const [selectValue, setSelectValue] = useState("");
   const handleClick = () => {
     const tileInfo = tableTiles.find(tile => tile.id === selectValue);
     if (tileInfo) {
       if (content.metadata.linkedTableIds.indexOf(tileInfo.id) < 0) {
-        onLinkTableTile(tileInfo);
+        handleRequestTableLink && handleRequestTableLink(tileInfo.id);
       } else {
         onUnlinkTableTile(tileInfo);
       }

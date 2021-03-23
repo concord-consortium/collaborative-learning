@@ -8,7 +8,6 @@ import { useUIStore } from "../../../hooks/use-stores";
 import { useCurrent } from "../../../hooks/use-current";
 import { useForceUpdate } from "../hooks/use-force-update";
 import { useToolbarToolApi } from "../hooks/use-toolbar-tool-api";
-import { useContentChangeHandlers } from "./use-content-change-handlers";
 import { useTableLinking } from "./use-table-linking";
 import { HotKeys } from "../../../utilities/hot-keys";
 
@@ -51,15 +50,14 @@ const GeometryToolComponent: React.FC<IGeometryProps> = ({
     domElement
   );
 
-  const changeHandlers = useContentChangeHandlers({
-    model });
-  const { onLinkTableTile, onUnlinkTableTile } = changeHandlers;
-
+  const onUnlinkTableTile = useCallback(() => {
+    console.log("unlink table");
+  },[]);
   const enabled = !readOnly && !!board && !!actionHandlers;
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled, onRegisterToolApi, onUnregisterToolApi });
-  const { showLinkButton, isLinkEnabled, linkColors, getLinkIndex, showLinkTableDialog } =
+  const { showLinkTableDialog } =
     useTableLinking({ documentId, model,
-                        onRequestTilesOfType, onLinkTableTile, onUnlinkTableTile });
+                        onRequestTilesOfType, actionHandlers, onUnlinkTableTile });
 
   // We must listen for pointer events because we want to get the events before
   // JSXGraph, which appears to listen to pointer events on browsers that support them.
@@ -77,7 +75,7 @@ const GeometryToolComponent: React.FC<IGeometryProps> = ({
         board={board} content={content} handlers={actionHandlers} {...toolbarProps} />
       <GeometryContentWrapper model={model} readOnly={readOnly} {...others}
         onSetBoard={setBoard} onSetActionHandlers={handleSetHandlers}
-        onContentChange={forceUpdate} onLinkTableClick={showLinkTableDialog}/>
+        onContentChange={forceUpdate} onLinkTableButtonClick={showLinkTableDialog}/>
     </div>
   );
 };

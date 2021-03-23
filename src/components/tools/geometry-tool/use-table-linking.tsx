@@ -8,30 +8,31 @@ import {
 import { ITileLinkMetadata } from "../../../models/tools/table/table-model-types";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { useLinkTableDialog } from "./use-link-table-dialog";
+import { IToolbarActionHandlers } from "./geometry-shared";
 
 interface IProps {
   documentId?: string;
   model: ToolTileModelType;
-  hasLinkableRows?: boolean;
   onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
-  onLinkTableTile: (tableTileInfo: ITileLinkMetadata) => void;
+  actionHandlers?: IToolbarActionHandlers;
   onUnlinkTableTile: (tableTileInfo: ITileLinkMetadata) => void;
 }
 export const useTableLinking = ({
-  // documentId, model, hasLinkableRows, onRequestTilesOfType, onLinkTableTile, onUnlinkTableTile
-  documentId, model, onRequestTilesOfType, onLinkTableTile, onUnlinkTableTile
 
+  documentId, model, onRequestTilesOfType, actionHandlers, onUnlinkTableTile
 }: IProps) => {
+  const {
+    handleRequestTableLink
+  } = actionHandlers || {};
   const modelId = model.id;
   const showLinkButton = useFeatureFlag("GeometryLinkedTables");
   const tableTiles = useLinkableTableTiles({ model, onRequestTilesOfType });
-  // const isLinkEnabled = hasLinkableRows && (tableTiles.length > 0);
   const isLinkEnabled = (tableTiles.length > 0);
 
   const linkColors = getTableLinkColors(modelId);
 
   const [showLinkTableDialog] =
-          useLinkTableDialog({ tableTiles, model, onLinkTableTile, onUnlinkTableTile });
+          useLinkTableDialog({ tableTiles, model, handleRequestTableLink, onUnlinkTableTile });
 
   useEffect(() => {
     documentId && addTableToDocumentMap(documentId, modelId);

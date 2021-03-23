@@ -53,7 +53,7 @@ export interface IGeometryContentProps extends IGeometryProps {
   onSetBoard: (board: JXG.Board) => void;
   onSetActionHandlers: (handlers: IActionHandlers) => void;
   onContentChange: () => void;
-  onLinkTableClick?: () => void;
+  onLinkTableButtonClick?: () => void;
 }
 export interface IProps extends IGeometryContentProps, SizeMeProps {
   measureText: (text: string) => number;
@@ -242,7 +242,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         handleToggleVertexAngle: this.handleToggleVertexAngle,
         handleCreateMovableLine: this.handleCreateMovableLine,
         handleCreateComment: this.handleCreateCommentOrLabel,
-        handleUploadImageFile: this.handleUploadBackgroundImage
+        handleUploadImageFile: this.handleUploadBackgroundImage,
+        handleRequestTableLink: this.handleTableTileLinkRequest
       };
       onSetActionHandlers(handlers);
     }
@@ -536,9 +537,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderTableLinkButton() {
-    const { onLinkTableClick } = this.props;
+    const { onLinkTableButtonClick } = this.props;
     return (
-      <LinkTableButton key={`graph_${this.elementId}`} isEnabled={true} onClick={onLinkTableClick} />
+      <LinkTableButton key={`graph_${this.elementId}`} isEnabled={true} onClick={onLinkTableButtonClick} />
     );
   }
 
@@ -1094,7 +1095,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private handleTableTileLinkRequest(tableTileId: string) {
+  private handleTableTileLinkRequest = (tableTileId: string) => {
     const { board } = this.state;
     if (this.getContent().isLinkedToTable(tableTileId)) return;
 
