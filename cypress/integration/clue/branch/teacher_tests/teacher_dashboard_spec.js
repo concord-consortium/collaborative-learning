@@ -85,7 +85,7 @@ context('Teacher Dashboard View', () => {
     });
   });
   describe('Header element functionality', () => {
-    it('verify dashboard/workspace switch changes workspace view', () => {
+    it.skip('verify dashboard/workspace switch changes workspace view', () => {
       dashboard.getViewToggle('Dashboard').should('be.visible').and('have.class', 'selected');
       clueCanvas.getSingleWorkspace().should('not.exist');
       dashboard.getViewToggle('Workspace').should('be.visible').and('not.have.class', 'selected');
