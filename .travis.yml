@@ -2,7 +2,6 @@ sudo: false
 dist: trusty
 language: node_js
 node_js: lts/*
-python: 3.6
 cache:
   bundler: true
   pip: true
@@ -12,7 +11,7 @@ cache:
 # cf. https://stackoverflow.com/a/52387639
 install:
 - travis_retry gem install s3_website -v 3.4.0
-- travis_retry pip install awscli --upgrade --user
+# - travis_retry pip install awscli --upgrade --user
 - travis_retry npm ci
 script:
 - npm run build
