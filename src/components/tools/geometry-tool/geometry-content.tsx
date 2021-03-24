@@ -42,6 +42,7 @@ import { EditableGeometryTitle } from "./editable-geometry-title";
 import LabelSegmentDialog from "./label-segment-dialog";
 import MovableLineDialog from "./movable-line-dialog";
 import placeholderImage from "../../../assets/image_placeholder.png";
+import { LinkTableButton } from "./link-table-button";
 import ErrorAlert from "../../utilities/error-alert";
 import SingleStringDialog from "../../utilities/single-string-dialog";
 import { autorun } from "mobx";
@@ -52,8 +53,10 @@ export interface IGeometryContentProps extends IGeometryProps {
   onSetBoard: (board: JXG.Board) => void;
   onSetActionHandlers: (handlers: IActionHandlers) => void;
   onContentChange: () => void;
+  onLinkTableButtonClick?: () => void;
 }
 export interface IProps extends IGeometryContentProps, SizeMeProps {
+  isLinkButtonEnabled: boolean;
   measureText: (text: string) => number;
 }
 
@@ -68,6 +71,7 @@ interface IState extends Mutable<SizeMeProps> {
   content?: GeometryContentModelType;
   newElements?: JXG.GeometryElement[];
   isLoading?: boolean;
+  isEditingTitle?: boolean;
   imageContentUrl?: string;
   imageEntry?: ImageMapEntryType;
   disableRotate: boolean;
@@ -241,7 +245,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         handleCreateLineLabel: this.handleCreateLineLabel,
         handleCreateMovableLine: this.handleCreateMovableLine,
         handleCreateComment: this.handleCreateComment,
-        handleUploadImageFile: this.handleUploadBackgroundImage
+        handleUploadImageFile: this.handleUploadBackgroundImage,
+        handleRequestTableLink: this.handleTableTileLinkRequest,
+        handleRequestTableUnlink: this.handleTableTileUnlinkRequest
       };
       onSetActionHandlers(handlers);
     }
@@ -413,7 +419,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           onDragLeave={this.handleDragLeave}
           onDrop={this.handleDrop} />,
       this.renderRotateHandle(),
-      this.renderTitle(),
+      this.renderTitleArea(),
       this.renderInvalidTableDataAlert()
     ]);
   }
@@ -511,8 +517,22 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     );
   }
 
+  private handleBeginEditTitle = () => {
+    this.setState({ isEditingTitle: true });
+  }
+
   private handleTitleChange = (title?: string) => {
     title && this.getContent().updateTitle(this.state.board, title);
+    this.setState({ isEditingTitle: false });
+  }
+
+  private renderTitleArea() {
+    return (
+      <div className={"title-area"} key="title-area">
+        {this.renderTitle()}
+        {this.renderTableLinkButton()}
+      </div>
+    );
   }
 
   private renderTitle() {
@@ -520,7 +540,15 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const { measureText, size, scale } = this.props;
     return (
       <EditableGeometryTitle key="geometry-title" size={size} scale={scale} getTitle={getTitle}
-                              measureText={measureText} onEndEdit={this.handleTitleChange} />
+                              measureText={measureText}
+                              onBeginEdit={this.handleBeginEditTitle} onEndEdit={this.handleTitleChange} />
+    );
+  }
+
+  private renderTableLinkButton() {
+    const { isLinkButtonEnabled, onLinkTableButtonClick } = this.props;
+    return (!this.state.isEditingTitle &&
+      <LinkTableButton key="link-button" isEnabled={isLinkButtonEnabled} onClick={onLinkTableButtonClick}/>
     );
   }
 
@@ -1075,7 +1103,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private handleTableTileLinkRequest(tableTileId: string) {
+  private handleTableTileLinkRequest = (tableTileId: string) => {
     const { board } = this.state;
     if (this.getContent().isLinkedToTable(tableTileId)) return;
 
@@ -1099,6 +1127,19 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const _tableContent = this.getTableContent(tableTileId);
       const tableActionLinks = this.getTableActionLinks(geomActionLinks);
       _tableContent && _tableContent.addGeometryLink(this.props.model.id, tableActionLinks);
+    }
+  }
+
+  private handleTableTileUnlinkRequest = (tableTileId: string) => {
+    const { board } = this.state;
+    const tableContent = this.getTableContent(tableTileId);
+    if (tableContent && board) {
+      const dataSet = tableContent.getSharedData();
+      const geomActionLinks = tableContent.getClientLinks(uniqueId(), dataSet);
+      this.getContent().removeTableLink(board, tableTileId, geomActionLinks);
+      const _tableContent = this.getTableContent(tableTileId);
+      const tableActionLinks = this.getTableActionLinks(geomActionLinks);
+      _tableContent && _tableContent.removeGeometryLink(this.props.model.id, tableActionLinks);
     }
   }
 

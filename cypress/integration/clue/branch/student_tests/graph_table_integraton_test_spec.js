@@ -65,7 +65,7 @@ context('Tests for graph and table integration', function () {
       cy.get(clueCanvas.linkIconEl()).should('not.exist');
       cy.linkTableToGraph('Table 1', "Graph 1");
       tableToolTile.getTableTile().scrollIntoView();
-      graphToolTile.getGraphTile().siblings(clueCanvas.linkIconEl()).should('be.visible');
+      graphToolTile.getGraphTile().siblings(clueCanvas.linkIconEl()).should('exist');
       // verifies that values exported from .scss file were successfully imported
       graphToolTile.getGraphTile().siblings(clueCanvas.linkIconEl()).children('svg').attribute('data-indicator-width').should('exist');
       graphToolTile.getGraph().should('have.class', 'is-linked');

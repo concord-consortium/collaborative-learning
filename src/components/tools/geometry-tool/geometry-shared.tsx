@@ -9,6 +9,8 @@ export interface IToolbarActionHandlers {
   handleCreateLineLabel: () => void;
   handleCreateComment: () => void;
   handleUploadImageFile: (file: File) => void;
+  handleRequestTableLink: (tableId: string) => void;
+  handleRequestTableUnlink: (tableId: string) => void;
 }
 export interface IActionHandlers extends IToolbarActionHandlers {
   handleArrows: HotKeyHandler;
