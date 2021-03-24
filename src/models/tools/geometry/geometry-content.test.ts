@@ -68,6 +68,7 @@ describe("GeometryContent", () => {
 
   it("can create with authored properties", () => {
     const authored = {
+            type: "Geometry" as const,
             board: {
               properties: {
                 axisNames: ["authorX", "authorY"]
@@ -302,7 +303,7 @@ describe("GeometryContent", () => {
     expect(JSON.parse(content.changes[1])).toEqual(change1);
   });
 
-  it("can pop a batch of change", () => {
+  it("can pop a batch of changes", () => {
     const change1 = { operation: "create", target: "foo" } as any as JXGChange;
     const change2 = { operation: "create", target: "bar", startBatch: true } as any as JXGChange;
     const change3 = { operation: "create", target: "baz" } as any as JXGChange;

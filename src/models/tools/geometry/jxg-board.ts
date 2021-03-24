@@ -1,18 +1,14 @@
 import { assign, each, find } from "lodash";
 import "./jxg";
 import { JXGChange, JXGChangeAgent, JXGProperties } from "./jxg-changes";
-import { isAxis, isBoard, isLinkedPoint, isPoint } from "./jxg-types";
+import {
+  isAxis, isBoard, isLinkedPoint, isPoint,
+  kGeometryDefaultAxisMin, kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj
+} from "./jxg-types";
 import { goodTickValue } from "../../../utilities/graph-utils";
 import { ITableLinkProperties } from "../table/table-change";
 
 const kScalerClasses = ["canvas-scaler", "scaled-list-item"];
-
-export const toObj = (p: string, v: any) => v != null ? { [p]: v } : undefined;
-
-export const kGeometryDefaultWidth = 480;
-export const kGeometryDefaultHeight = 320;
-export const kGeometryDefaultPixelsPerUnit = 18.3;  // matches S&S curriculum images
-export const kGeometryDefaultAxisMin = 0;
 
 export function getObjectById(board: JXG.Board, id: string): JXG.GeometryElement | undefined {
   let obj: JXG.GeometryElement | undefined = board.objects[id];

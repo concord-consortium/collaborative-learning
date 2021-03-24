@@ -11,7 +11,7 @@ import { GeometryContentModelType, GeometryMetadataModelType, setElementColor, g
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
           isDragTargetOrAncestor } from "../../../models/tools/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
-import { getPointsByCaseId, kGeometryDefaultPixelsPerUnit } from "../../../models/tools/geometry/jxg-board";
+import { getPointsByCaseId } from "../../../models/tools/geometry/jxg-board";
 import { ESegmentLabelOption, ILinkProperties, JXGChange, JXGCoordPair
         } from "../../../models/tools/geometry/jxg-changes";
 import { kSnapUnit } from "../../../models/tools/geometry/jxg-point";
@@ -21,7 +21,7 @@ import {
 import {
   isAxis, isAxisLabel, isComment, isFreePoint, isGeometryElement, isImage, isLine, isMovableLine,
   isMovableLineControlPoint, isMovableLineLabel, isPoint, isPolygon, isVertexAngle, isVisibleEdge,
-  isVisibleMovableLine, isVisiblePoint
+  isVisibleMovableLine, isVisiblePoint, kGeometryDefaultPixelsPerUnit
 } from "../../../models/tools/geometry/jxg-types";
 import {
   getVertexAngle, updateVertexAngle, updateVertexAnglesFromObjects
