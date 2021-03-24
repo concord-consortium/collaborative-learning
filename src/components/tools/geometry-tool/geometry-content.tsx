@@ -71,6 +71,7 @@ interface IState extends Mutable<SizeMeProps> {
   content?: GeometryContentModelType;
   newElements?: JXG.GeometryElement[];
   isLoading?: boolean;
+  isEditingTitle?: boolean;
   imageContentUrl?: string;
   imageEntry?: ImageMapEntryType;
   disableRotate: boolean;
@@ -516,8 +517,13 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     );
   }
 
+  private handleBeginEditTitle = () => {
+    this.setState({ isEditingTitle: true });
+  }
+
   private handleTitleChange = (title?: string) => {
     title && this.getContent().updateTitle(this.state.board, title);
+    this.setState({ isEditingTitle: false });
   }
 
   private renderTitleArea() {
@@ -534,13 +540,14 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const { measureText, size, scale } = this.props;
     return (
       <EditableGeometryTitle key="geometry-title" size={size} scale={scale} getTitle={getTitle}
-                              measureText={measureText} onEndEdit={this.handleTitleChange} />
+                              measureText={measureText}
+                              onBeginEdit={this.handleBeginEditTitle} onEndEdit={this.handleTitleChange} />
     );
   }
 
   private renderTableLinkButton() {
     const { isLinkButtonEnabled, onLinkTableButtonClick } = this.props;
-    return (
+    return (!this.state.isEditingTitle &&
       <LinkTableButton key="link-button" isEnabled={isLinkButtonEnabled} onClick={onLinkTableButtonClick}/>
     );
   }
