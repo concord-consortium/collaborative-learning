@@ -667,6 +667,15 @@ export const GeometryContentModel = types
       return _applyChange(board, change);
     }
 
+    function updateXAxisLabel(board: JXG.Board | undefined, axisLabel: string) {
+      const change: JXGChange = {
+              operation: "update",
+              target: "metadata",
+              properties: { axisLabel }
+            };
+      return _applyChange(board, change);
+    }
+
     function updateObjects(board: JXG.Board | undefined,
                            ids: string | string[],
                            properties: JXGProperties | JXGProperties[],
@@ -1124,6 +1133,7 @@ export const GeometryContentModel = types
         addTableLink,
         removeTableLink,
         updateAxisLabels,
+        updateXAxisLabel,
         updatePolygonSegmentLabel,
         deleteSelection,
         applyChange: _applyChange,

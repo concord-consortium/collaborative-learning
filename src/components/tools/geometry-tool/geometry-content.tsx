@@ -48,6 +48,8 @@ import SingleStringDialog from "../../utilities/single-string-dialog";
 import { autorun } from "mobx";
 
 import "./geometry-tool.sass";
+import { EditableGeometryAxisLabel } from "./editable-axis-label";
+import { LABEL } from "@blueprintjs/core/lib/esm/common/classes";
 
 export interface IGeometryContentProps extends IGeometryProps {
   onSetBoard: (board: JXG.Board) => void;
@@ -419,8 +421,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           onDragLeave={this.handleDragLeave}
           onDrop={this.handleDrop} />,
       this.renderRotateHandle(),
-      this.renderTitleArea(),
-      this.renderInvalidTableDataAlert()
+      this.renderTitle(),
+      this.renderInvalidTableDataAlert(),
+      this.renderAxisLabel()
     ]);
   }
 
@@ -549,6 +552,20 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const { isLinkButtonEnabled, onLinkTableButtonClick } = this.props;
     return (!this.state.isEditingTitle &&
       <LinkTableButton key="link-button" isEnabled={isLinkButtonEnabled} onClick={onLinkTableButtonClick}/>
+    );
+  }
+
+  private handleAxisLabelChange = (axis?: string, label?: string) => {
+    axis && this.getContent().updateXAxisLabel(this.state.board, axis);
+    // console.log("update axis label to: ", axis, label);
+  }
+
+  private renderAxisLabel() {
+    const axisName = "x";
+    const { measureText, size, scale } = this.props;
+    return (
+      <EditableGeometryAxisLabel key="geometry-axis-label" size={size} scale={scale} getAxisName={axisName}
+      measureText={measureText} onEndEdit={this.handleAxisLabelChange}/>
     );
   }
 

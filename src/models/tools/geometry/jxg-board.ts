@@ -58,7 +58,7 @@ export function syncLinkedPoints(board: JXG.Board, links: ITableLinkProperties) 
   }
 }
 
-export const kAxisBuffer = 20;
+export const kAxisBuffer = 60;
 export const getAxisType = (v: any) => {
   // stdform encodes orientation of axes
   const [ , stdFormY, stdFormX] = v.stdform;
