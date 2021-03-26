@@ -10,8 +10,7 @@ interface IProps extends SizeMeProps {
   className?: string;
   readOnly?: boolean;
   scale?: number;
-  // getTitle: () => string | undefined;
-  getAxisName: string | undefined;
+  getAxisName: () => string | undefined;
   measureText: (text: string) => number;
   onBeginEdit?: () => void;
   onEndEdit?: (axis?: string, label?: string) => void;
@@ -19,9 +18,9 @@ interface IProps extends SizeMeProps {
 export const EditableGeometryAxisLabel: React.FC<IProps> = observer(({
   className, readOnly, size: contentSize, scale, getAxisName, measureText, onBeginEdit, onEndEdit
 }) => {
-  // getTitle() and observer() allow this component to re-render
-  // when the title changes without re-rendering the entire Geometry
-  const axisLabelX = getAxisName || "Axis";
+  // getAxisName() and observer() allow this component to re-render
+  // when the axis name changes without re-rendering the entire Geometry
+  const axisLabelX = getAxisName() || "Axis";
   const kTitlePadding = 30;
   // There can be one render before we know our container size, which will then be
   // immediately replaced by a subsequent render with a known container size.

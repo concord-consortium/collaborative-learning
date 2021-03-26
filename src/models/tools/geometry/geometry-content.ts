@@ -126,6 +126,8 @@ export const GeometryMetadataModel = types
   .model("GeometryMetadata", {
     id: types.string,
     title: types.maybe(types.string),
+    xAxisName: types.maybe(types.string),
+    yAxisName: types.maybe(types.string),
     disabled: types.array(types.string),
     selection: types.map(types.boolean),
     linkedTables: types.array(LinkedTableEntryModel)
@@ -182,6 +184,9 @@ export const GeometryMetadataModel = types
   .actions(self => ({
     setTitle(title: string) {
       self.title = title;
+    },
+    setXAxisName(xAxisName: string) {
+      self.xAxisName = xAxisName;
     },
     setSharedSelection(sharedSelection: SelectionStoreModelType) {
       self.sharedSelection = sharedSelection;
@@ -270,6 +275,9 @@ export const GeometryContentModel = types
   .views(self => ({
     get title() {
       return self.metadata.title;
+    },
+    get xAxisName() {
+      return self.metadata.xAxisName;
     },
     isSelected(id: string) {
       return self.metadata.isSelected(id);
@@ -393,11 +401,12 @@ export const GeometryContentModel = types
     function handleWillApplyChange(board: JXG.Board | string, change: JXGChange) {
       const op = change.operation.toLowerCase();
       const target = change.target.toLowerCase();
-
       if ((op === "update") && (target === "metadata")) {
         const props = change?.properties as JXGProperties | undefined;
         if (props?.title) {
           self.metadata.setTitle(props.title);
+        } else if (props?.xAxisName) {
+          self.metadata.setXAxisName(props.xAxisName);
         }
       }
 
@@ -667,11 +676,11 @@ export const GeometryContentModel = types
       return _applyChange(board, change);
     }
 
-    function updateXAxisLabel(board: JXG.Board | undefined, axisLabel: string) {
+    function updateXAxisName(board: JXG.Board | undefined, xAxisName: string) {
       const change: JXGChange = {
               operation: "update",
               target: "metadata",
-              properties: { axisLabel }
+              properties: { xAxisName }
             };
       return _applyChange(board, change);
     }
@@ -1133,7 +1142,7 @@ export const GeometryContentModel = types
         addTableLink,
         removeTableLink,
         updateAxisLabels,
-        updateXAxisLabel,
+        updateXAxisName,
         updatePolygonSegmentLabel,
         deleteSelection,
         applyChange: _applyChange,

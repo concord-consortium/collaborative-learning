@@ -39,6 +39,7 @@ import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
 import { getDataSetBounds, IDataSet } from "../../../models/data/data-set";
 import AxisSettingsDialog from "./axis-settings-dialog";
 import { EditableGeometryTitle } from "./editable-geometry-title";
+import { EditableGeometryAxisLabel } from "./editable-axis-label";
 import LabelSegmentDialog from "./label-segment-dialog";
 import MovableLineDialog from "./movable-line-dialog";
 import placeholderImage from "../../../assets/image_placeholder.png";
@@ -48,8 +49,6 @@ import SingleStringDialog from "../../utilities/single-string-dialog";
 import { autorun } from "mobx";
 
 import "./geometry-tool.sass";
-import { EditableGeometryAxisLabel } from "./editable-axis-label";
-import { LABEL } from "@blueprintjs/core/lib/esm/common/classes";
 
 export interface IGeometryContentProps extends IGeometryProps {
   onSetBoard: (board: JXG.Board) => void;
@@ -421,7 +420,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           onDragLeave={this.handleDragLeave}
           onDrop={this.handleDrop} />,
       this.renderRotateHandle(),
-      this.renderTitle(),
+      this.renderTitleArea(),
       this.renderInvalidTableDataAlert(),
       this.renderAxisLabel()
     ]);
@@ -555,16 +554,15 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     );
   }
 
-  private handleAxisLabelChange = (axis?: string, label?: string) => {
-    axis && this.getContent().updateXAxisLabel(this.state.board, axis);
-    // console.log("update axis label to: ", axis, label);
+  private handleAxisLabelChange = (xName?: string, axis?: string, ) => {
+    xName && this.getContent().updateXAxisName(this.state.board, xName);
   }
 
   private renderAxisLabel() {
-    const axisName = "x";
+    const getAxisName = () => this.getContent().xAxisName || "x";
     const { measureText, size, scale } = this.props;
     return (
-      <EditableGeometryAxisLabel key="geometry-axis-label" size={size} scale={scale} getAxisName={axisName}
+      <EditableGeometryAxisLabel key="geometry-axis-label" size={size} scale={scale} getAxisName={getAxisName}
       measureText={measureText} onEndEdit={this.handleAxisLabelChange}/>
     );
   }
