@@ -185,8 +185,15 @@ export const GeometryMetadataModel = types
     setTitle(title: string) {
       self.title = title;
     },
-    setXAxisName(xAxisName: string) {
-      self.xAxisName = xAxisName;
+    setXAxisName(xAxisName: string, annotation = "") {
+      const baseName = xAxisName;
+      const links = self.linkedTables
+                        .map(entry => entry.x)
+                        .filter(name => name && (name !== "x") && (name !== baseName));
+      console.log("links: ", links);
+      annotation && links.unshift(annotation);
+      // return links.length ? `${baseName} (${links.join(", ")})` : baseName;
+      self.xAxisName = links.length ? `${baseName} (${links.join(", ")})` : baseName;
     },
     setSharedSelection(sharedSelection: SelectionStoreModelType) {
       self.sharedSelection = sharedSelection;
