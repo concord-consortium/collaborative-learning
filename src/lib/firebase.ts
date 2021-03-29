@@ -326,7 +326,7 @@ export class Firebase {
         userRef.child("connectedTimestamp").set(firebase.database.ServerValue.TIMESTAMP);
       }
       else {
-        // since the Logger currenly had no retry this won't be logged on a general network
+        // since the Logger currently has no retry this won't be logged on a general network
         // disconnect but might be helpful to know if only Firebase disconnected
         Logger.log(LogEventName.INTERNAL_FIREBASE_DISCONNECTED);
       }
