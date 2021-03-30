@@ -1,5 +1,28 @@
 # Changelog
 
+## Version 1.8.0 - released March 29, 2021
+
+### Features/Improvements
+- Geometry: link/unlink table using dialog [#174765829](https://www.pivotaltracker.com/story/show/174765829) (#942)
+- Geometry: add label line tool to toolbar [#175618736](https://www.pivotaltracker.com/story/show/175618736) (#940)
+- Geometry: default axes accommodate larger Y values [#177087799](https://www.pivotaltracker.com/story/show/177087799) (#941)
+- Table: unlink graph using link/unlink dialog [#176834983](https://www.pivotaltracker.com/story/show/176834983) (#933)
+- Table: import/export improvements [#176874316](https://www.pivotaltracker.com/story/show/176874316) (#936)
+- Can resize tile heights from corner of tile [#175081175](https://www.pivotaltracker.com/story/show/175081175) (#938)
+
+### Bugs Fixed
+- Fix table/graph title incrementing [#177273772](https://www.pivotaltracker.com/story/show/177273772) (#939)
+- Support for images copied from multi-class supports [#175500575](https://www.pivotaltracker.com/story/show/175500575) (#944)
+- Deleted workspace is removed from navigation [#176756250](https://www.pivotaltracker.com/story/show/176756250) (#934)
+- Add logging of monitoring/unmonitoring user documents (#943)
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 390,726 bytes | 0.3% |
+| index.js | 4,585,489 bytes | 0.2% |
+
 ## Version 1.7.0 - released February 26, 2021
 
 ### Features/Improvements
