@@ -38,6 +38,11 @@
       "node"
     ]
   },
+  "nyc": {
+    "extends": "@istanbuljs/nyc-config-typescript",
+    "all": true,
+    "report-dir": "coverage-cypress"
+  },
   "scripts": {
     "start": "webpack-dev-server --inline --hot --content-base dist/",
     "build": "npm-run-all lint:build clean build:webpack",
@@ -83,8 +88,10 @@
   "homepage": "https://github.com/concord-consortium/collaborative-learning#readme",
   "devDependencies": {
     "@babel/preset-env": "^7.12.11",
+    "@cypress/code-coverage": "^3.9.4",
     "@cypress/webpack-preprocessor": "^5.5.0",
     "@firebase/app-types": "^0.6.1",
+    "@istanbuljs/nyc-config-typescript": "^1.0.1",
     "@svgr/webpack": "^5.5.0",
     "@testing-library/react": "^11.2.5",
     "@types/classnames": "^2.2.11",
@@ -116,7 +123,7 @@
     "copy-webpack-plugin": "^6.4.1",
     "cross-env": "^7.0.3",
     "css-loader": "^4.3.0",
-    "cypress": "^6.5.0",
+    "cypress": "^6.8.0",
     "cypress-commands": "^1.1.0",
     "cypress-file-upload": "^5.0.2",
     "enzyme": "^3.11.0",
@@ -134,6 +141,8 @@
     "firebase-admin": "^9.4.2",
     "html-webpack-plugin": "^4.5.1",
     "is-hotkey": "^0.1.8",
+    "istanbul-instrumenter-loader": "^3.0.1",
+    "istanbul-lib-coverage": "^3.0.0",
     "jest": "^26.6.3",
     "mini-css-extract-plugin": "^0.11.3",
     "nock": "^13.0.7",
