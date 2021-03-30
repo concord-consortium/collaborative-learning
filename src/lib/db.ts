@@ -773,7 +773,10 @@ export class DB {
 
   public getImageBlob(imageKey: string) {
     return this.getImage(imageKey)
-            .then(image => fetch(image.imageData))
+            .then(image => {
+              if (!image) throw new Error("Error: getImageBlob received invalid image!");
+              return fetch(image.imageData);
+            })
             .then(response => response.blob())
             .then(blob => URL.createObjectURL(blob));
   }
