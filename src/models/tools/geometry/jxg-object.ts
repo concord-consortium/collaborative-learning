@@ -1,7 +1,6 @@
 import { sortByCreation, kReverse, getObjectById, syncLinkedPoints } from "./jxg-board";
-import { JXGChangeAgent, JXGProperties, JXGCoordPair, JXGUnsafeCoordPair } from "./jxg-changes";
+import { ITableLinkProperties, JXGChangeAgent, JXGProperties, JXGCoordPair, JXGUnsafeCoordPair } from "./jxg-changes";
 import { isLinkedPoint, isText } from "./jxg-types";
-import { ITableLinkProperties } from "../table/table-content";
 import { castArrayCopy } from "../../../utilities/js-utils";
 import { castArray, size } from "lodash";
 

@@ -69,6 +69,15 @@ module.exports = (env, argv) => {
           loader: 'ts-loader',
           exclude: /node_modules/
         },
+        // This code coverage instrumentation should only be added when needed. It makes
+        // the code larger and slower
+        process.env.CODE_COVERAGE ? {
+          test: /\.[tj]sx?$/,
+          loader: 'istanbul-instrumenter-loader',
+          options: { esModules: true },
+          enforce: 'post',
+          exclude: path.join(__dirname, 'node_modules'),
+        } : {},
         { // disable svgo optimization for files ending in .nosvgo.svg
           test: /\.nosvgo\.svg$/i,
           loader: "@svgr/webpack",

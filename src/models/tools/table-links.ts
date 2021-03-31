@@ -3,8 +3,31 @@ import { IObservableArray, observable } from "mobx";
 // cf. https://mattferderer.com/use-sass-variables-in-typescript-and-javascript
 import styles from "./table-links.scss";
 
+export interface ILinkProperties {
+  id: string;
+  tileIds: string[];
+}
+
+export interface IRowLabel {
+  id: string;
+  label: string;
+}
+
+export interface ITableLinkProperties extends ILinkProperties {
+  // labels should be included when adding/removing rows,
+  // so that clients can synchronize any label changes
+  labels?: IRowLabel[];
+}
+
+export function getRowLabelFromLinkProps(links: ITableLinkProperties, rowId: string) {
+  const found = links.labels?.find(entry => entry.id === rowId);
+  return found?.label;
+}
+
+// map from tableId to documentId
 const sTableDocumentMap: Map<string, string> = new Map();
 type LinkedTableIds = IObservableArray<string>;
+// map from documentId to array of linked tableIds
 const sDocumentLinkedTables: Map<string, LinkedTableIds> = new Map();
 
 export function getTableDocument(tableId: string) {
@@ -40,6 +63,15 @@ export function addLinkedTable(tableId: string) {
   else if (linkedTables.indexOf(tableId) < 0) {
     linkedTables.push(tableId);
   }
+}
+
+export function removeLinkedTable(tableId: string) {
+  const documentId = getTableDocument(tableId);
+  if (!documentId) return;
+  const linkedTables = getLinkedTables(documentId);
+  if (!linkedTables) return;
+  const index = linkedTables.indexOf(tableId);
+  (index >= 0) && linkedTables.splice(index, 1);
 }
 
 export function getTableLinkColors(tableId?: string) {

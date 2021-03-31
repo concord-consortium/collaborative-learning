@@ -11,8 +11,8 @@ class TableToolTile{
     getRemoveColumnButton(){
       return cy.get('.remove-column-button');
     }
-    getIndexNumberToggle(){
-      return cy.get('.show-hide-row-labels-button');
+    getIndexNumberToggle(workspaceClass){
+      return cy.get(`${workspaceClass || ".primary-workspace"} .show-hide-row-labels-button`);
     }
     getRemoveRowButton(){
         return cy.get('[data-test=remove-row-button]');
@@ -40,7 +40,7 @@ class TableToolTile{
         this.getTableCell().eq(cell).type(num+'{enter}');
     }
     getTableIndexColumnCell(){
-        return cy.get('.canvas-area .rdg-cell .index-column');
+        return cy.get('.canvas-area .rdg-cell.index-column');
     }
     getLinkGraphButton(){
       return cy.get('.link-geometry-button');
@@ -55,8 +55,5 @@ class TableToolTile{
     getTableToolbarButton(button){// ['set-expression']
       return cy.get(`.primary-workspace .table-toolbar .toolbar-button.${button}`);
     }
-    // unlinkTable(){ //the only way to unlink is to delete either the graph or the table
-    //     cy.get('.bp3-menu-item div').contains('Unlink Geometry').click();
-    // }
 }
 export default TableToolTile;

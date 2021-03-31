@@ -1,4 +1,6 @@
 {
+  "baseUrl": "http://localhost:8080",
+  "video": false,
   "viewportWidth": 1400,
   "viewportHeight": 1000,
   "projectId": "3pbqac"

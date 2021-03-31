@@ -403,9 +403,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const { ui } = this.stores;
 
     const createTileInfoStr = e.dataTransfer.getData(kDragTileCreate);
-    const createTileInfo = createTileInfoStr
-                            ? safeJsonParse(createTileInfoStr) as IDragToolCreateInfo
-                            : undefined;
+    const createTileInfo = safeJsonParse<IDragToolCreateInfo>(createTileInfoStr);
     if (!content || !createTileInfo) return;
 
     const { tool, title } = createTileInfo;

@@ -8,7 +8,7 @@ import { ProblemModelType } from "../models/curriculum/problem";
 import { DocumentModelType } from "../models/document/document";
 import { JXGChange } from "../models/tools/geometry/jxg-changes";
 import { DrawingToolChange } from "../models/tools/drawing/drawing-content";
-import { ITableChange } from "../models/tools/table/table-content";
+import { ITableChange } from "../models/tools/table/table-change";
 import { ENavTab } from "../models/view/nav-tabs";
 import { DEBUG_LOGGER } from "../lib/debug";
 
@@ -89,6 +89,8 @@ export enum LogEventName {
   // the following are for potential debugging purposes and are all marked "internal"
   INTERNAL_AUTHENTICATED,
   INTERNAL_FIREBASE_DISCONNECTED,
+  INTERNAL_MONITOR_DOCUMENT,
+  INTERNAL_UNMONITOR_DOCUMENT,
 
   DASHBOARD_SWITCH_CLASS,
   DASHBOARD_SWITCH_PROBLEM,
@@ -108,6 +110,7 @@ interface IDocumentInfo {
   uid?: string;
   title?: string;
   properties?: { [prop: string]: string };
+  changeCount?: number;
 }
 
 export class Logger {
@@ -145,7 +148,8 @@ export class Logger {
         objectType: tile.content.type,
         serializedObject: getSnapshot(tile).content,
         documentKey: document.key,
-        documentType: document.type
+        documentType: document.type,
+        documentChanges: document.changeCount
       };
 
       if (event === LogEventName.COPY_TILE && metaData && metaData.originalTileId) {
@@ -172,7 +176,8 @@ export class Logger {
       documentType: document.type,
       documentTitle: document.title || "",
       documentProperties: document.properties?.toJSON() || {},
-      documentVisibility: document.visibility
+      documentVisibility: document.visibility,
+      documentChanges: document.changeCount
     };
     Logger.log(event, parameters);
   }
@@ -260,8 +265,8 @@ export class Logger {
   private getDocumentForTile(tileId: string): IDocumentInfo {
     const document = this.stores.documents.findDocumentOfTile(tileId);
     if (document) {
-      const { type, key, uid, title, properties } = document;
-      return { type, key, uid, title, properties: properties && properties.toJSON() || {} };
+      const { type, key, uid, title, changeCount, properties } = document;
+      return { type, key, uid, title, changeCount, properties: properties && properties.toJSON() || {} };
     } else {
       return {
         type: "Instructions"        // eventually we will need to include copying from supports

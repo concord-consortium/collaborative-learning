@@ -1,9 +1,9 @@
+import { assign, each, find } from "lodash";
 import "./jxg";
 import { JXGChange, JXGChangeAgent, JXGProperties } from "./jxg-changes";
 import { isAxis, isBoard, isLinkedPoint, isPoint } from "./jxg-types";
 import { goodTickValue } from "../../../utilities/graph-utils";
-import { assign, each, find } from "lodash";
-import { ITableLinkProperties } from "../table/table-content";
+import { ITableLinkProperties } from "../table/table-change";
 
 const kScalerClasses = ["canvas-scaler", "scaled-list-item"];
 

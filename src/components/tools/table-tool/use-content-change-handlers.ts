@@ -2,9 +2,8 @@ import { useCallback } from "react";
 import { useCurrent } from "../../../hooks/use-current";
 import { ICase, ICaseCreation, IDataSet } from "../../../models/data/data-set";
 import { getGeometryContent } from "../../../models/tools/geometry/geometry-content";
-import {
-  getTableContentHeight, ILinkProperties, ITableChange, TableContentModelType
-} from "../../../models/tools/table/table-content";
+import { ILinkProperties, ITableChange } from "../../../models/tools/table/table-change";
+import { getTableContentHeight, TableContentModelType } from "../../../models/tools/table/table-content";
 import { isLinkableValue, ITileLinkMetadata } from "../../../models/tools/table/table-model-types";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { safeJsonParse, uniqueId, uniqueName } from "../../../utilities/js-utils";
@@ -20,7 +19,7 @@ export interface IContentChangeHandlers {
   onUpdateRow: (caseValues: ICase) => void;
   onRemoveRows: (rowIds: string[]) => void;
   onLinkGeometryTile: (geomTileInfo: ITileLinkMetadata) => void;
-  onUnlinkGeometryTiles: () => void;
+  onUnlinkGeometryTile: (geomTileInfo: ITileLinkMetadata) => void;
 }
 
 interface IProps {
@@ -53,7 +52,7 @@ export const useContentChangeHandlers = ({
 
   const syncChangeToLinkedClient = useCallback((clientTileId: string, linkId: string) => {
     const tableContent = getContent();
-    const lastChange: ITableChange | undefined = safeJsonParse(tableContent.changes[tableContent.changes.length - 1]);
+    const lastChange = safeJsonParse<ITableChange>(tableContent.changes[tableContent.changes.length - 1]);
     // eventually we'll presumably need to support other clients
     const clientContent = getGeometryContent(getContent(), clientTileId);
     // link information attached to individual client changes/actions
@@ -162,14 +161,15 @@ export const useContentChangeHandlers = ({
     syncChangeToLinkedClient(geomTileInfo.id, tableActionLinks.id);
   }, [getContent, getTableActionLinks, syncChangeToLinkedClient]);
 
-  const unlinkGeometryTiles = useCallback(() => {
-    const geometryIds = getContent().metadata.linkedGeometries.toJS();
-    const tableActionLinks = getTableActionLinks();
-    getContent().removeGeometryLinks(geometryIds, tableActionLinks);
-  }, [getContent, getTableActionLinks]);
+  const unlinkGeometryTile = useCallback((geomTileInfo: ITileLinkMetadata) => {
+    const tableActionLinks = getTableActionLinks(geomTileInfo.id);
+    if (!tableActionLinks) return;
+    getContent().removeGeometryLink(geomTileInfo.id, tableActionLinks);
+    syncChangeToLinkedClient(geomTileInfo.id, tableActionLinks.id);
+  }, [getContent, getTableActionLinks, syncChangeToLinkedClient]);
 
   return { onSetTableTitle: setTableTitle, onSetColumnName: setColumnName, onSetColumnExpressions: setColumnExpressions,
           onAddColumn: addColumn, onRemoveColumn: removeColumn,
           onAddRows: addRows, onUpdateRow: updateRow, onRemoveRows: removeRows,
-          onLinkGeometryTile: linkGeometryTile, onUnlinkGeometryTiles: unlinkGeometryTiles };
+          onLinkGeometryTile: linkGeometryTile, onUnlinkGeometryTile: unlinkGeometryTile };
 };

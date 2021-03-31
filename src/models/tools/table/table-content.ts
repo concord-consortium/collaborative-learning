@@ -3,12 +3,15 @@ import { castArray, each } from "lodash";
 import { types, IAnyStateTreeNode, Instance, SnapshotIn, SnapshotOut } from "mobx-state-tree";
 import { getRowLabel, kSerializedXKey, canonicalizeValue, isLinkableValue } from "./table-model-types";
 import { registerToolContentInfo } from "../tool-content-info";
-import { addLinkedTable } from "../table-links";
+import { addLinkedTable, removeLinkedTable } from "../table-links";
 import { IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
 import { canonicalizeExpression } from "../../../components/tools/table-tool/expression-utils";
+import {
+  ICreateColumnsProperties, ICreateRowsProperties, ICreateTableProperties, ILinkProperties, IRowLabel, IRowProperties,
+  ITableChange, ITableLinkProperties, IUpdateColumnsProperties, IUpdateTableProperties
+} from "../../../models/tools/table/table-change";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { getGeometryContent } from "../geometry/geometry-content";
-import { JXGChange } from "../geometry/jxg-changes";
 import { getTileContentById } from "../../../utilities/mst-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
 
@@ -71,75 +74,17 @@ export function getAxisLabelsFromDataSet(dataSet: IDataSet): [string | undefined
   return [xLabel, yLabel];
 }
 
-export interface ITransferCase {
-  id: string;
-  label?: string;
-  x: number;
-  y: number;
-}
-
-export interface IRowLabel {
-  id: string;
-  label: string;
-}
-
-export interface IColumnProperties {
-  name?: string;
-  expression?: string;
-  rawExpression?: string;
-}
-
-export interface IColumnCreationProperties extends IColumnProperties{
+export interface TableContentColumnImport {
   name: string;
+  // user-editable expression for y variable in terms of x variable by name
+  // corresponds to rawExpression in the internal model
+  expression?: string;
+  values?: Array<number | string>;
 }
-
-export interface ILinkProperties {
-  id: string;
-  tileIds: string[];
-}
-
-export interface ITableLinkProperties extends ILinkProperties {
-  // labels should be included when adding/removing rows,
-  // so that clients can synchronize any label changes
-  labels?: IRowLabel[];
-}
-
-export function getRowLabelFromLinkProps(links: ITableLinkProperties, rowId: string) {
-  const found = links.labels?.find(entry => entry.id === rowId);
-  return found?.label;
-}
-
-export interface ICreateColumnsProperties {
-  columns?: IColumnCreationProperties[];
-}
-
-export type IUpdateColumnsProperties = IColumnProperties | IColumnProperties[];
-
-export interface IUpdateTableProperties {
-  name?: string;
-}
-export interface ICreateTableProperties extends IUpdateTableProperties, ICreateColumnsProperties {
-}
-
-export type IRowProperties = Record<string, string | number | null | undefined>;
-
-export interface ICreateRowsProperties {
-  rows: IRowProperties[];
-  beforeId?: string | string[];
-}
-
-export type IUpdateRowsProperties = IRowProperties | IRowProperties[];
-
-export type ITableChangeProperties = ICreateTableProperties | IUpdateTableProperties |
-                                      ICreateColumnsProperties | IUpdateColumnsProperties |
-                                      ICreateRowsProperties | IUpdateRowsProperties;
-
-export interface ITableChange {
-  action: "create" | "update" | "delete";
-  target: "table" | "rows" | "columns" | "geometryLink";
-  ids?: string | string[];
-  props?: ITableChangeProperties;
-  links?: ILinkProperties;
+export interface TableContentTableImport {
+  type: "Table";
+  name: string;
+  columns?:TableContentColumnImport[];
 }
 
 export const TableMetadataModel = types
@@ -175,6 +120,7 @@ export const TableMetadataModel = types
       if (index >= 0) {
         self.linkedGeometries.splice(index, 1);
       }
+      removeLinkedTable(self.id);
     },
     clearLinkedGeometries() {
       self.linkedGeometries.clear();
@@ -231,7 +177,7 @@ export const TableContentModel = types
     // handle early change formats
     if (s?.changes?.length) {
       const { changes, ...snapOthers } = s;
-      const parsedChanges = changes.map((change: string) => safeJsonParse(change));
+      const parsedChanges = changes.map((change: string) => safeJsonParse<ITableChange>(change));
       const isConversionRequired = parsedChanges.some((c: any) => {
               return c &&
                     ((c.action === "create") && (c.target === "columns") && !c.props.columns) ||
@@ -287,7 +233,7 @@ export const TableContentModel = types
     getLinkedChange(linkId: string) {
       let parsedChange: ITableChange | undefined;
       const foundIndex = self.changes.findIndex(changeJson => {
-        const change = safeJsonParse(changeJson) as ITableChange | undefined;
+        const change = safeJsonParse<ITableChange>(changeJson);
         const isFound = change?.links?.id === linkId;
         isFound && (parsedChange = change);
         return isFound;
@@ -307,7 +253,7 @@ export const TableContentModel = types
       // const tableContent = linkedTile ? self.getGeometryContent(linkedTile) : undefined;
       // return tableContent ? tableContent.canUndoLinkedChange(lastChangeParsed) : false;
     },
-    canUndoLinkedChange(change: JXGChange) {
+    canUndoLinkedChange(/*change: JXGChange*/) {
       return false;
       // const hasUndoableChanges = self.changes.length > 1;
       // if (!hasUndoableChanges) return false;
@@ -440,11 +386,11 @@ export const TableContentModel = types
             links
       });
     },
-    removeGeometryLinks(geometryIds: string | string[], links?: ILinkProperties) {
+    removeGeometryLink(geometryId: string, links?: ILinkProperties) {
       self.appendChange({
             action: "delete",
             target: "geometryLink",
-            ids: geometryIds,
+            ids: geometryId,
             links
       });
     }
@@ -489,11 +435,17 @@ export const TableContentModel = types
         }
         // fallthrough
         case "columns": {
+          let hasExpressions = false;
           const props = change?.props as ICreateColumnsProperties;
           props?.columns?.forEach((col, index) => {
-            const id = change.ids?.[index] || uniqueId();
-            dataSet.addAttributeWithID({ id, ...col });
+            const id = col.id || change.ids?.[index] || uniqueId();
+            const { expression, rawExpression, ...otherCol } = col;
+            hasExpressions ||= !!expression || !!rawExpression;
+            dataSet.addAttributeWithID({ id, ...otherCol });
+            rawExpression && self.metadata.setRawExpression(id, rawExpression);
+            expression && self.metadata.setExpression(id, expression);
           });
+          hasExpressions && self.updateDatasetByExpressions(dataSet);
           break;
         }
         case "rows": {
@@ -615,14 +567,14 @@ export const TableContentModel = types
       let hasColumnChanges = false;
       let hasRowChanges = false;
       for (let i = start; i < self.changes.length; ++i) {
-        const change = safeJsonParse(self.changes[i]);
+        const change = safeJsonParse<ITableChange>(self.changes[i]);
         if (change) {
-          if ((change.target === "columns") || change.props?.columns) {
+          if ((change.target === "columns") || (change.props as ICreateColumnsProperties)?.columns) {
             hasColumnChanges = true;
             // most column changes (creation, deletion, expression changes) require re-rendering rows as well
             hasRowChanges = true;
           }
-          if ((change.target === "rows") || change.props?.rows) {
+          if ((change.target === "rows") || (change.props as ICreateRowsProperties)?.rows) {
             hasRowChanges = true;
           }
           self.applyChange(dataSet, change);
@@ -632,7 +584,7 @@ export const TableContentModel = types
     },
     applyChangesToDataSet(dataSet: IDataSet) {
       self.changes.forEach(jsonChange => {
-        const change = safeJsonParse(jsonChange);
+        const change = safeJsonParse<ITableChange>(jsonChange);
         if (change) {
           self.applyChange(dataSet, change, true);
         }
@@ -698,14 +650,22 @@ export const TableContentModel = types
 
 export type TableContentModelType = Instance<typeof TableContentModel>;
 
-export function convertImportToChanges(snapshot: any) {
-  const columns = snapshot?.columns as any[];
+export function convertImportToChanges(snapshot: TableContentTableImport) {
+  const columns = snapshot?.columns;
   if (!columns) return [] as string[];
 
   // create columns
   const changes: ITableChange[] = [];
   const tableName = snapshot?.name != null ? { name: snapshot.name } : undefined;
-  const columnProps = columns.map((col: any) => ({ id: uniqueId(), name: col.name }));
+  let xName: string;
+  const columnProps = columns.map((col, index) => {
+                        const { name, expression: rawExpression } = col;
+                        (index === 0) && (xName = name);
+                        const expression = (index > 0) && xName && rawExpression
+                                            ? canonicalizeExpression(rawExpression, xName)
+                                            : undefined;
+                        return { id: uniqueId(), name, rawExpression, expression };
+                      });
   if (columnProps.length) {
     changes.push({ action: "create", target: "table", props: { columns: columnProps, ...tableName } });
   }
@@ -715,12 +675,13 @@ export function convertImportToChanges(snapshot: any) {
                             const len = col.values?.length || 0;
                             return Math.max(max, len);
                           }, 0);
-  const rows: any[] = [];
+  const rows: Record<string, number | string>[] = [];
   for (let i = 0; i < rowCount; ++i) {
-    const row: any = { __id__: uniqueId() };
+    const row: Record<string, number | string> = { __id__: uniqueId() };
     columnProps.forEach((col: any, colIndex) => {
-      const values = columns[colIndex].values;
-      if (col?.id && i < values.length) {
+      const hasExpression = col.expression;
+      const values = hasExpression ? undefined : columns[colIndex].values;
+      if (col?.id && values && (i < values?.length)) {
         row[col.id] = values[i];
       }
     });
@@ -729,19 +690,20 @@ export function convertImportToChanges(snapshot: any) {
   if (rows.length) {
     changes.push({ action: "create", target: "rows", props: { rows } });
   }
+
   return changes.map(change => JSON.stringify(change));
 }
 
 export function mapTileIdsInTableSnapshot(snapshot: SnapshotOut<TableContentModelType>,
                                           idMap: { [id: string]: string }) {
   snapshot.changes = snapshot.changes.map(changeJson => {
-    const change: ITableChange = safeJsonParse(changeJson);
-    if ((change.target === "geometryLink") && change.ids) {
+    const change = safeJsonParse<ITableChange>(changeJson);
+    if ((change?.target === "geometryLink") && change.ids) {
       change.ids = Array.isArray(change.ids)
                     ? change.ids.map(id => idMap[id])
                     : idMap[change.ids];
     }
-    if (change.links) {
+    if (change?.links) {
       change.links.tileIds = change.links.tileIds.map(id => idMap[id]);
     }
     return JSON.stringify(change);

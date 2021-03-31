@@ -11,6 +11,7 @@ import { useDataSet } from "./use-data-set";
 import { useExpressionsDialog } from "./use-expressions-dialog";
 import { useGeometryLinking } from "./use-geometry-linking";
 import { useGridContext } from "./use-grid-context";
+import { useJsonExport } from "./use-json-export";
 import { useModelDataSet } from "./use-model-data-set";
 import { useRowLabelColumn } from "./use-row-label-column";
 import { useTableTitle } from "./use-table-title";
@@ -63,7 +64,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
     model, dataSet: dataSet.current,
     onRequestRowHeight: handleRequestRowHeight, triggerColumnChange, triggerRowChange
   });
-  const { onSetTableTitle, onSetColumnExpressions, onLinkGeometryTile } = changeHandlers;
+  const { onSetTableTitle, onSetColumnExpressions, onLinkGeometryTile, onUnlinkGeometryTile } = changeHandlers;
 
   const [showRowLabels, setShowRowLabels] = useState(false);
   const {
@@ -76,7 +77,9 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
     onSetTableTitle, onRequestUniqueTitle: handleRequestUniqueTitle
   });
 
-  useToolApi({ metadata, getTitle, getContentHeight, onRegisterToolApi, onUnregisterToolApi });
+  const exportContentAsTileJson = useJsonExport(() => getContent().metadata, dataSet);
+  useToolApi({ metadata, getTitle, getContentHeight, exportContentAsTileJson,
+                onRegisterToolApi, onUnregisterToolApi });
 
   const rowLabelProps = useRowLabelColumn({
     inputRowId: inputRowId.current, selectedCell, showRowLabels, setShowRowLabels
@@ -100,8 +103,9 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
     rowChanges, triggerRowChange, readOnly: !!readOnly, changeHandlers, measureText: measureHeaderText,
     selectedCell, inputRowId, ...rowLabelProps, onShowExpressionsDialog: handleShowExpressionsDialog });
 
-  const { showLinkButton, isLinkEnabled, linkIndex, linkColors, showLinkGeometryDialog } =
-    useGeometryLinking({ documentId, model, hasLinkableRows, onRequestTilesOfType, onLinkGeometryTile });
+  const { showLinkButton, isLinkEnabled, linkColors, getLinkIndex, showLinkGeometryDialog } =
+    useGeometryLinking({ documentId, model, hasLinkableRows,
+                          onRequestTilesOfType, onLinkGeometryTile, onUnlinkGeometryTile });
 
   const { titleCellWidth } =
     useColumnWidths({ readOnly, getTitle, columns: dataGridProps.columns, measureText: measureHeaderText });
@@ -128,7 +132,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
                     onSetExpression={showExpressionsDialog} scale={scale}/>
       <div className="table-grid-container" ref={containerRef} onClick={handleBackgroundClick}>
         <EditableTableTitle className="table-title" readOnly={readOnly} showLinkButton={showLinkButton}
-          isLinkEnabled={isLinkEnabled} linkIndex={linkIndex} onLinkGeometryClick={showLinkGeometryDialog}
+          isLinkEnabled={isLinkEnabled} getLinkIndex={getLinkIndex} onLinkGeometryClick={showLinkGeometryDialog}
           getTitle={getTitle} titleCellWidth={titleCellWidth}
           onBeginEdit={onBeginTitleEdit} onEndEdit={onEndTitleEdit} />
         <ReactDataGrid ref={gridRef} selectedRows={getSelectedRows()}

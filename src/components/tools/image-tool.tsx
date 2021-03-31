@@ -1,7 +1,6 @@
 import classNames from "classnames";
 import React from "react";
 import ResizeObserver from "resize-observer-polyfill";
-import { IReactionDisposer } from "mobx";
 import { observer, inject } from "mobx-react";
 import { debounce } from "lodash";
 import { BaseComponent } from "../base";
@@ -35,22 +34,40 @@ interface IState {
 
 const defaultImagePlaceholderSize = { width: 100, height: 100 };
 
+let nextImageToolId = 0;
+
 @inject("stores")
 @observer
 export default class ImageToolComponent extends BaseComponent<IProps, IState> {
-
   public state: IState = { isLoading: true };
 
+  // give each component instance a unique id
+  private imageToolId = ++nextImageToolId;
   private _isMounted = false;
   private toolbarToolApi: IToolApi | undefined;
   private resizeObserver: ResizeObserver;
   private imageElt: HTMLDivElement | null;
-  private disposers: IReactionDisposer[];
+  private listenerDisposer: (() => void) | undefined;
   private debouncedUpdateImage = debounce((url: string) => {
     const { documentContext } = this.state;
     const imageContext: IImageContext | undefined = documentContext
                                                       ? { type: documentContext?.type, key: documentContext?.key }
                                                       : undefined;
+
+    // Under some circumstances, notably when the image being requested has been copied from a multi-class support,
+    // the call to getImage() below will fail initially, but the url being requested will later be cached by the
+    // gImageMap once the multi-class support is loaded. To account for this, we register a listener which will be
+    // called when the requested image is loaded into the cache. If we succeed in retrieving the image directly,
+    // then we remove the listener ourselves.
+    this.listenerDisposer?.();
+    this.listenerDisposer = gImageMap.registerListener(
+                              url, `${this.imageToolId}`, () => {
+                                if (this._isMounted) {
+                                  this.forceUpdate();
+                                  this.listenerDisposer?.();
+                                  this.listenerDisposer = undefined;
+                                }
+                              });
     gImageMap.getImage(url, imageContext)
       .then(image => {
         if (!this._isMounted) return;
@@ -64,6 +81,9 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
         if (image.contentUrl && (url !== image.contentUrl)) {
           this.getContent().updateImageUrl(url, image.contentUrl);
         }
+        // We've successfully loaded the image. No need to continue listening.
+        this.listenerDisposer?.();
+        this.listenerDisposer = undefined;
       })
       .catch(() => {
         this.setState({
@@ -85,7 +105,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
 
   public componentDidMount() {
     this._isMounted = true;
-    this.disposers = [];
     if (this.state.imageContentUrl) {
       this.updateImageUrl(this.state.imageContentUrl);
     }
@@ -114,9 +133,9 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   }
 
   public componentWillUnmount() {
-    this._isMounted = false;
-    this.disposers.forEach(disposer => disposer());
+    this.listenerDisposer?.();
     this.resizeObserver.disconnect();
+    this._isMounted = false;
   }
 
   public componentDidUpdate(prevProps: IProps, prevState: IState) {
@@ -149,6 +168,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     return (
       <>
         <div className={classNames("image-tool", readOnly ? "read-only" : "editable")}
+          data-image-tool-id={this.imageToolId}
           onMouseDown={this.handleMouseDown}
           onDragOver={this.handleDragOver}
           onDrop={this.handleDrop} >

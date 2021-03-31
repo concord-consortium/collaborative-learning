@@ -32,10 +32,10 @@ export function safeDecodeURI(uriOrComponent: string) {
  *
  * returns undefined on error rather than throwing an exception
  */
-export function safeJsonParse(json?: string) {
+export function safeJsonParse<T = any>(json?: string) {
   let parsed;
   try {
-    parsed = json ? JSON.parse(json) : undefined;
+    parsed = json ? JSON.parse(json) as T: undefined;
   }
   catch (e) {
     // swallow errors

@@ -11,7 +11,7 @@ let tableToolTile = new TableToolTile;
 let drawToolTile = new DrawToolTile;
 
 let teacherDoc = "Teacher Investigation Copy";
-const queryParams = "/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:6&unit=msa";
+const queryParams = "/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=msa";
 
 before(() => {
   cy.clearQAData('all');

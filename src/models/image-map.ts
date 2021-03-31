@@ -31,13 +31,16 @@ export interface IImageHandler {
   match: (url: string) => boolean;
   store: (url: string, db?: DB, userId?: string, context?: IImageContext) => Promise<ImageMapEntrySnapshot>;
 }
+// map from image url => component id => listener function
+export type ImageListenerMap = Record<string, Record<string, () => void>>;
 
 export const ImageMapModel = types
   .model("ImageMap", {
     images: types.map(ImageMapEntry)
   })
   .volatile(self => ({
-    handlers: [] as IImageHandler[]
+    handlers: [] as IImageHandler[],
+    listeners: {} as ImageListenerMap
   }))
   .views(self => ({
     hasImage(url: string) {
@@ -86,6 +89,16 @@ export const ImageMapModel = types
       self.handlers.sort((a, b) => {
         return (b.priority || 0) - (a.priority || 0);
       });
+    },
+
+    // listeners are called when a requested url is cached
+    registerListener(url: string, id: string, listener: () => void) {
+      if (!self.listeners[url]) {
+        self.listeners[url] = {};
+      }
+      self.listeners[url][id] = listener;
+      // return disposer function
+      return () => delete self.listeners[url][id];
     }
   }))
   .actions(self => ({
@@ -107,6 +120,12 @@ export const ImageMapModel = types
         else {
           entry = ImageMapEntry.create(snapshot);
           self.images.set(url, entry);
+          // notify any listeners that the url is now available
+          if (self.listeners[url]) {
+            for (const id in self.listeners[url]) {
+              self.listeners[url][id]();
+            }
+          }
         }
         self.syncContentUrl(url, entry!);
 

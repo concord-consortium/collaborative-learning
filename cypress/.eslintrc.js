@@ -11,5 +11,14 @@ module.exports = {
       "cypress/no-unnecessary-waiting": "off",
       "max-len": "off",
       "prefer-const": "off"
-    }
+    },
+    overrides: [
+      {
+        files: ["plugins/index.js"],
+        rules: {
+          "@typescript-eslint/no-var-requires": "off",
+          "@typescript-eslint/no-require-imports": "off"
+        }
+      },
+    ]
 };

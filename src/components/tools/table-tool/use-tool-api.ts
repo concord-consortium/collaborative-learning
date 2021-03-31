@@ -8,16 +8,18 @@ interface IProps {
   metadata: TableMetadataModelType;
   getTitle: () => string | undefined;
   getContentHeight: () => number | undefined;
+  exportContentAsTileJson: () => string;
   onRegisterToolApi: (toolApi: IToolApi, facet?: string | undefined) => void;
   onUnregisterToolApi: (facet?: string | undefined) => void;
 }
 export const useToolApi = ({
-  metadata, getTitle, getContentHeight, onRegisterToolApi, onUnregisterToolApi
+  metadata, getTitle, getContentHeight, exportContentAsTileJson, onRegisterToolApi, onUnregisterToolApi
 }: IProps) => {
   const metadataRef = useCurrent(metadata);
   const toolApi: IToolApi = useMemo(() => ({
     getTitle,
     getContentHeight,
+    exportContentAsTileJson,
     isLinked: () => {
       return metadataRef.current.isLinked;
     },
@@ -26,7 +28,7 @@ export const useToolApi = ({
               ? getLinkedTableIndex(metadataRef.current.id)
               : -1;
     }
-  }), [getContentHeight, getTitle, metadataRef]);
+  }), [exportContentAsTileJson, getContentHeight, getTitle, metadataRef]);
 
   useEffect(() => {
     onRegisterToolApi(toolApi);
