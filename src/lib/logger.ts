@@ -110,6 +110,7 @@ interface IDocumentInfo {
   uid?: string;
   title?: string;
   properties?: { [prop: string]: string };
+  changeCount?: number;
 }
 
 export class Logger {
@@ -147,7 +148,8 @@ export class Logger {
         objectType: tile.content.type,
         serializedObject: getSnapshot(tile).content,
         documentKey: document.key,
-        documentType: document.type
+        documentType: document.type,
+        documentChanges: document.changeCount
       };
 
       if (event === LogEventName.COPY_TILE && metaData && metaData.originalTileId) {
@@ -174,7 +176,8 @@ export class Logger {
       documentType: document.type,
       documentTitle: document.title || "",
       documentProperties: document.properties?.toJSON() || {},
-      documentVisibility: document.visibility
+      documentVisibility: document.visibility,
+      documentChanges: document.changeCount
     };
     Logger.log(event, parameters);
   }
@@ -262,8 +265,8 @@ export class Logger {
   private getDocumentForTile(tileId: string): IDocumentInfo {
     const document = this.stores.documents.findDocumentOfTile(tileId);
     if (document) {
-      const { type, key, uid, title, properties } = document;
-      return { type, key, uid, title, properties: properties && properties.toJSON() || {} };
+      const { type, key, uid, title, changeCount, properties } = document;
+      return { type, key, uid, title, changeCount, properties: properties && properties.toJSON() || {} };
     } else {
       return {
         type: "Instructions"        // eventually we will need to include copying from supports
