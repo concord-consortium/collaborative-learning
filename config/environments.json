@@ -15,7 +15,9 @@
     "teacherQueryParams":"?appMode=qa&fakeClass=5&fakeUser=teacher:6&demoOffering=5&problem=2.1"
   },
   "dev": {
-    "baseUrl": "dev baseUrl needs to be set in config/user-config.json (see config/user-config.sample.json)"
+    "baseUrl": "http://localhost:8080/",
+    "queryParams":"?appMode=qa&fakeClass=5&fakeUser=student:5&demoOffering=5&problem=2.1&qaGroup=5",
+    "teacherQueryParams":"?appMode=qa&fakeClass=5&fakeUser=teacher:6&demoOffering=5&problem=2.1"
   },
   "local":{
     "baseUrl": "http://localhost:8080/",
