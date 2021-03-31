@@ -528,9 +528,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private renderTitleArea() {
     return (
-      <div className={"title-area"} key="title-area">
-        {this.renderTitle()}
-        {this.renderTableLinkButton()}
+      <div className="title-area-wrapper">
+        <div className="title-area" key="title-area">
+          {this.renderTitle()}
+          {this.renderTableLinkButton()}
+        </div>
       </div>
     );
   }
