@@ -1,5 +1,21 @@
 # Changelog
 
+## Version 1.8.1 - released March 31, 2021
+
+### Features/Improvements
+- Additional logging improvements (#951)
+
+### Bugs Fixed
+- Geometry: Fix click on Y axis label (#950)
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 390,895 bytes | 0.0% |
+| index.js | 4,586,117 bytes | 0.0% |
+
+
 ## Version 1.8.0 - released March 30, 2021
 
 ### Features/Improvements
