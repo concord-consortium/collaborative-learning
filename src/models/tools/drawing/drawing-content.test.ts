@@ -1,5 +1,15 @@
 import { DrawingContentModel, kDrawingToolID, DrawingToolMetadataModel } from "./drawing-content";
 
+// mock Logger calls
+jest.mock("../../../lib/logger", () => {
+  return {
+    ...(jest.requireActual("../../../lib/logger") as any),
+    Logger: {
+      logToolChange: jest.fn()
+    }
+  };
+});
+
 describe("DrawingContentModel", () => {
 
   function createDrawingContent(options?: any) {

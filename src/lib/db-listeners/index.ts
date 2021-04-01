@@ -262,12 +262,13 @@ export class DBListeners extends BaseListener {
   private unmonitorDocumentModel = (document: DocumentModelType) => {
     // This is currently only called for unmonitoring remote documents as a result of group changes, but
     // if it were to be called for a user's own document the result would be not saving the user's work.
-    Logger.log(LogEventName.INTERNAL_UNMONITOR_DOCUMENT,
-              { type: document.type, key: document.key, uid: document.uid, groupId: document.groupId });
-    const docListener = this.modelListeners[`document:${document.key}`];
-    if (docListener && docListener.modelDisposer) {
-      docListener.modelDisposer();
+    const { user } = this.db.stores;
+    if (user.id === document.uid) {
+      Logger.log(LogEventName.INTERNAL_UNMONITOR_DOCUMENT,
+                { type: document.type, key: document.key, uid: document.uid, groupId: document.groupId });
     }
+    const docListener = this.modelListeners[`document:${document.key}`];
+    docListener?.modelDisposer?.();
   }
 
   private stopModelListeners() {

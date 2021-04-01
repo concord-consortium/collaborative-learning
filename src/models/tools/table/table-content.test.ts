@@ -12,6 +12,16 @@ const changeRowValues = (change: any, row: number) => {
   return values(change.props.rows[row]).slice(1);
 };
 
+// mock Logger calls
+jest.mock("../../../lib/logger", () => {
+  return {
+    ...(jest.requireActual("../../../lib/logger") as any),
+    Logger: {
+      logToolChange: jest.fn()
+    }
+  };
+});
+
 describe("TableContent", () => {
 
   it("can create empty/default TableContentModels", () => {
