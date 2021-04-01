@@ -147,6 +147,7 @@ export class Logger {
         objectId: tile.id,
         objectType: tile.content.type,
         serializedObject: getSnapshot(tile).content,
+        documentUid: document.uid,
         documentKey: document.key,
         documentType: document.type,
         documentChanges: document.changeCount
@@ -189,10 +190,15 @@ export class Logger {
     toolId: string,
     method?: LogEventMethod)
   {
+    const document = Logger.Instance.getDocumentForTile(toolId);
     const parameters: {[k: string]: any} = {
       toolId,
       operation,
-      ...change
+      ...change,
+      documentUid: document.uid,
+      documentKey: document.key,
+      documentType: document.type,
+      documentChanges: document.changeCount
     };
 
     Logger.log(eventName, parameters, method);
