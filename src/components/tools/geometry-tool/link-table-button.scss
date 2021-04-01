@@ -14,7 +14,10 @@
   z-index: 10;
 
   &.disabled {
-    opacity: 35%;
+    svg {
+      opacity: 35%;
+    }
+    border-color: $charcoal-light-4;
   }
 
   &:hover:not(.disabled) {
