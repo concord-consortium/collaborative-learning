@@ -6,11 +6,13 @@ import { AppConfigModel } from "../models/stores/app-config-model";
 import { DocumentContentModel } from "../models/document/document-content";
 import { InvestigationModel } from "../models/curriculum/investigation";
 import { IStores, createStores } from "../models/stores/stores";
+import { UserModel } from "../models/stores/user";
 import { WorkspaceModel, ProblemWorkspace, WorkspaceModelType } from "../models/stores/workspace";
+import { defaultGeometryContent } from "../models/tools/geometry/geometry-content";
+import { JXGChange } from "../models/tools/geometry/jxg-changes";
 import { defaultTextContent } from "../models/tools/text/text-content";
 import { IDragTileItem, ToolTileModel } from "../models/tools/tool-tile";
 import { createSingleTileContent } from "../utilities/test-utils";
-import { UserModel } from "../models/stores/user";
 
 const investigation = InvestigationModel.create({
   ordinal: 1,
@@ -18,6 +20,17 @@ const investigation = InvestigationModel.create({
   problems: [ { ordinal: 1, title: "Problem 1.1" } ]
 });
 const problem = investigation.getProblem(1);
+
+// can be useful for debugging tests
+// jest.mock("../lib/debug", () => ({
+//   DEBUG_LOGGER: true
+// }));
+
+describe("uninitialized logger", () => {
+  it("throws exception if not initialized", () => {
+    expect(() => Logger.Instance).toThrow();
+  });
+});
 
 describe("logger", () => {
   let stores: IStores;
@@ -174,6 +187,28 @@ describe("logger", () => {
       destinationDocument.content.userCopyTiles([copyTileInfo], { rowInsertIndex: 0 });
     });
 
+  });
+
+  describe("Tile changes", () => {
+    it("can log tile change events", async (done) => {
+      const tile = ToolTileModel.create({ content: defaultGeometryContent() });
+      const change: JXGChange = { operation: "create", target: "point" };
+
+      mock.post(/.*/, (req, res) => {
+        const request = JSON.parse(req.body());
+
+        expect(request.event).toBe("GRAPH_TOOL_CHANGE");
+        expect(request.parameters.toolId).toBe(tile.id);
+        expect(request.parameters.operation).toBe("create");
+        expect(request.parameters.target).toBe("point");
+        expect(request.parameters.documentKey).toBe(undefined);
+
+        done();
+        return res.status(201);
+      });
+
+      Logger.logToolChange(LogEventName.GRAPH_TOOL_CHANGE, "create", change, tile.id);
+    });
   });
 
   describe("workspace events", () => {

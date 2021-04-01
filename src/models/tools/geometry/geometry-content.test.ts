@@ -9,6 +9,15 @@ import { destroy } from "mobx-state-tree";
 
 import placeholderImage from "../../../assets/image_placeholder.png";
 
+// mock Logger calls
+jest.mock("../../../lib/logger", () => {
+  return {
+    ...(jest.requireActual("../../../lib/logger") as any),
+    Logger: {
+      logToolChange: jest.fn()
+    }
+  };
+});
 // mock uniqueId so we can recognize auto-generated IDs
 const { uniqueId, castArrayCopy, safeJsonParse } = jest.requireActual("../../../utilities/js-utils");
 jest.mock("../../../utilities/js-utils", () => ({
