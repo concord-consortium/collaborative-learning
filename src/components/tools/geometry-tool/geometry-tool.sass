@@ -37,14 +37,17 @@ $toolbar-width: 44px
           &.selected
             background-color: red
 
-      .title-area
-        position: absolute
-        top: 10px
-        width: 100%
+      .title-area-wrapper
         display: flex
-        align-items: center
         justify-content: center
-        z-index: 10  // has to be higher than JSXGraph entities that should be below it
+
+        .title-area
+          position: absolute
+          top: 10px
+          display: flex
+          align-items: center
+          justify-content: center
+          z-index: 10  // has to be higher than JSXGraph entities that should be below it
 
 .rotate-polygon-icon
   background-image: url("../../../assets/rotate.png")
