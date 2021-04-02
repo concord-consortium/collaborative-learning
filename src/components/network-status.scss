@@ -1,0 +1,29 @@
+.network-status {
+  height: 100%;
+  margin-right: 15px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+
+  .status {
+    width: 70px;
+    height: 40px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #D50103;
+    color: white;
+    font-weight: bold;
+
+    &.connected {
+      background-color: #00d700;
+      color: black;
+      font-weight: normal;
+    }
+  }
+}
+
+.custom-modal.error-alert.network-error {
+  height: 190px;
+}

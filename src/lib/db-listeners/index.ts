@@ -255,6 +255,15 @@ export class DBListeners extends BaseListener {
                                   updateRef.update({
                                     content: JSON.stringify(newContent),
                                     changeCount: document.changeCount
+                                  })
+                                  .then(() => {
+                                    // console.log("Successful save", "document:", document.key,
+                                    //             "changeCount:", document.changeCount);
+                                  })
+                                  .catch(() => {
+                                    user.setIsFirebaseConnected(false);
+                                    // console.warn("Failed save!", "document:", document.key,
+                                    //             "changeCount:", document.changeCount);
                                   });
                                 });
   }
