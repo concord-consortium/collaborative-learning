@@ -3,6 +3,7 @@ import React from "react";
 import { EPanelId, IPanelGroupSpec } from "../../components/app-header";
 import { BaseComponent, IBaseProps } from "../../components/base";
 import { ClassMenuContainer } from "../../components/class-menu-container";
+import { NetworkStatus } from "../../components/network-status";
 import { ProblemMenuContainer } from "../../components/problem-menu-container";
 import { ToggleGroup } from "@concord-consortium/react-components";
 import { GroupModelType, GroupUserModelType } from "../../models/stores/groups";
@@ -55,6 +56,7 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
           {this.renderPanelButtons()}
         </div>
         <div className="right">
+          <NetworkStatus user={user}/>
           <div className="version">Version {appVersion}</div>
           {myGroup ? this.renderGroup(myGroup) : null}
           <div className="user">

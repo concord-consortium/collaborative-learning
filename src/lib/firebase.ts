@@ -321,7 +321,7 @@ export class Firebase {
 
   private handleConnectedRef = (userRef: firebase.database.Reference, snapshot?: firebase.database.DataSnapshot, ) => {
     if (snapshot) {
-      const connected = snapshot.val();
+      const connected: boolean = snapshot.val();
       if (connected) {
         userRef.child("connectedTimestamp").set(firebase.database.ServerValue.TIMESTAMP);
       }
@@ -330,6 +330,7 @@ export class Firebase {
         // disconnect but might be helpful to know if only Firebase disconnected
         Logger.log(LogEventName.INTERNAL_FIREBASE_DISCONNECTED);
       }
+      this.db.stores.user.setIsFirebaseConnected(connected);
     }
   }
 

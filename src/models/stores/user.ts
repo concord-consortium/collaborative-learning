@@ -41,6 +41,10 @@ export const UserModel = types
     lastSupportViewTimestamp: types.maybe(types.number),
     lastStickyNoteViewTimestamp: types.maybe(types.number)
   })
+  .volatile(self => ({
+    isFirebaseConnected: false,
+    isLoggingConnected: false
+  }))
   .actions((self) => ({
     setName(name: string) {
       self.name = name;
@@ -76,6 +80,12 @@ export const UserModel = types
       if (user.demoClassHashes?.length) {
         self.demoClassHashes.replace(user.demoClassHashes);
       }
+    },
+    setIsFirebaseConnected(connected: boolean) {
+      self.isFirebaseConnected = connected;
+    },
+    setIsLoggingConnected(connected: boolean) {
+      self.isLoggingConnected = connected;
     },
     setLastSupportViewTimestamp(timestamp: number) {
       self.lastSupportViewTimestamp = timestamp;
