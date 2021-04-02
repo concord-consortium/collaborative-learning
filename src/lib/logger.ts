@@ -3,6 +3,7 @@ import { getSnapshot } from "mobx-state-tree";
 import { Optional } from "utility-types";
 import { ToolTileModelType } from "../models/tools/tool-tile";
 import { IStores } from "../models/stores/stores";
+import { UserModelType } from "../models/stores/user";
 import { InvestigationModelType } from "../models/curriculum/investigation";
 import { ProblemModelType } from "../models/curriculum/problem";
 import { DocumentModelType } from "../models/document/document";
@@ -132,7 +133,7 @@ export class Logger {
 
     const eventString = LogEventName[event];
     const logMessage = Logger.Instance.createLogMessage(eventString, parameters, method);
-    sendToLoggingService(logMessage);
+    sendToLoggingService(logMessage, this._instance.stores.user);
   }
 
   public static logTileEvent(event: LogEventName, tile?: ToolTileModelType, metaData?: TileLoggingMetadata) {
@@ -281,12 +282,17 @@ export class Logger {
   }
 }
 
-function sendToLoggingService(data: LogMessage) {
+function sendToLoggingService(data: LogMessage, user: UserModelType) {
   if (DEBUG_LOGGER) {
     // eslint-disable-next-line no-console
     console.log("Logger#sendToLoggingService sending", JSON.stringify(data), "to", logManagerUrl);
   }
   const request = new XMLHttpRequest();
+
+  request.upload.addEventListener("load", () => user.setIsLoggingConnected(true));
+  request.upload.addEventListener("error", () => user.setIsLoggingConnected(false));
+  request.upload.addEventListener("abort", () => user.setIsLoggingConnected(false));
+
   request.open("POST", logManagerUrl, true);
   request.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
   request.send(JSON.stringify(data));
