@@ -2,7 +2,7 @@ import { cloneDeep, each } from "lodash";
 import { types, getSnapshot, Instance, SnapshotIn } from "mobx-state-tree";
 import { kDrawingToolID, StampModelType } from "../tools/drawing/drawing-content";
 import { kGeometryToolID } from "../tools/geometry/geometry-content";
-import { kImageToolID } from "../tools/image/image-content";
+import { ImageContentModelType, kImageToolID } from "../tools/image/image-content";
 import { kPlaceholderToolID } from "../tools/placeholder/placeholder-content";
 import { kTableToolID } from "../tools/table/table-content";
 import { kTextToolID } from "../tools/text/text-content";
@@ -278,6 +278,14 @@ export const DocumentContentModel = types
         counts[sectionId] = self.getTilesInSection(sectionId).length;
       });
       return counts;
+    },
+    getImageUrls() {
+      return self.getTilesOfType("Image").map(tileId => {
+        const tile = self.getTile(tileId);
+        const content = tile?.content as ImageContentModelType;
+        return content?.url;
+      })
+      .filter(url => !!url);
     }
   }))
   .actions(self => ({

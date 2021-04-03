@@ -18,6 +18,7 @@ import {
 } from "../models/document/document-types";
 import { SupportModelType } from "../models/curriculum/support";
 import { ImageModelType } from "../models/image";
+import { firebaseRealTimeDBImagesHandler } from "../models/image-map";
 import { DocumentContentSnapshotType, DocumentContentModelType, cloneContentWithUniqueIds
        } from "../models/document/document-content";
 import { Firebase } from "./firebase";
@@ -479,6 +480,11 @@ export class DB {
 
   public publishDocumentAsSupport(documentModel: DocumentModelType, caption: string) {
     const { appMode, demo: { name: demoName }, user, problemPath } = this.stores;
+    const classPath = this.firebase.getFullClassPath(user);
+    const classHashes = user.classHashesForProblemPath(problemPath);
+    // images stored in firebase need special handling
+    const imageUrls = documentModel.content.getImageUrls()
+                        .filter(url => url && firebaseRealTimeDBImagesHandler.match(url));
     const content = documentModel.content.publish();
     const fs = this.firestore;
     return fs.batch(batch => {
@@ -488,13 +494,13 @@ export class DB {
       batch.set(docRef, {
         appMode,
         demoName,
-        classPath: this.firebase.getFullClassPath(user),
+        classPath,
         uid: user.id,
         type: "supportPublication",
         createdAt: fs.timestamp(),
         properties: { teacherSupport: "true", caption, ...documentModel.copyProperties() },
         problem: problemPath,
-        classes: user.classHashesForProblemPath(problemPath),
+        classes: classHashes,
         originDoc: documentModel.key,
         content,
         // LTI fields
@@ -502,6 +508,26 @@ export class DB {
         context_id: user.classHash,
         resource_link_id: user.offeringId,
         resource_url: user.activityUrl || ""
+      });
+      // for each firebase image in the support, create a new cross-class image document in firestore
+      imageUrls.forEach(url => {
+        const imageRef = fs.newDocumentRef(fs.getMulticlassImagesPath());
+        batch.set(imageRef, {
+          appMode,
+          demoName,
+          classPath,
+          uid: user.id,
+          createdAt: fs.timestamp(),
+          problem: problemPath,
+          classes: classHashes,
+          supportKey: docRef.id,
+          url,
+          // LTI fields
+          platform_id: user.portal,
+          context_id: user.classHash,
+          resource_link_id: user.offeringId,
+          resource_url: user.activityUrl || ""
+        });
       });
     });
   }

@@ -67,6 +67,10 @@ export class Firestore {
     return this.documentRef(this.getMulticlassSupportDocumentPath(docId));
   }
 
+  public getMulticlassImagesPath() {
+    return this.getFullPath("mcimages");
+  }
+
   public collectionRef(path: string) {
     return firebase.firestore().collection(path);
   }
