@@ -1,5 +1,6 @@
+import escapeStringRegexp from 'escape-string-regexp';
 import { Parser } from "expr-eval";
-import { kSerializedXKey } from "../../../models/tools/table/table-model-types";
+import { kSerializedXKey, kSerializedXKeyRegEx } from "../../../models/tools/table/table-model-types";
 
 export const getEditableExpression = (
   rawExpression: string | undefined, canonicalExpression: string, xName: string
@@ -10,26 +11,23 @@ export const getEditableExpression = (
 };
 
 export const canonicalizeExpression = (displayExpression: string, xName: string) => {
-  if (xName && displayExpression) {
+  if (!displayExpression || !xName) return displayExpression;
+  let result: string;
+  try {
     const parser = new Parser();
-    const canonicalExpression = parser.parse(displayExpression).substitute(xName, kSerializedXKey);
-    return canonicalExpression.toString();
-  } else {
-    return displayExpression;
+    const expression = displayExpression.replace(new RegExp(escapeStringRegexp(xName), "g"), kSerializedXKey);
+    result = parser.parse(expression).toString();
   }
+  catch(e) {
+    result = displayExpression;
+  }
+  return result;
 };
 
 export const prettifyExpression = (canonicalExpression: string | undefined, xName: string) => {
-  if (xName && canonicalExpression) {
-    const parser = new Parser();
-    let expression = parser.parse(canonicalExpression).substitute(kSerializedXKey, xName).toString();
-    if (expression.charAt(0) === "(" && expression.charAt(expression.length - 1) === ")") {
-      expression = expression.substring(1, expression.length - 1);
-    }
-    return expression;
-  } else {
-    return canonicalExpression;
-  }
+  return canonicalExpression && xName
+          ? canonicalExpression.replace(kSerializedXKeyRegEx, xName)
+          : canonicalExpression;
 };
 
 export const validateExpression = (expressionStr: string, xName: string) => {
