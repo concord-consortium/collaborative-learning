@@ -30,18 +30,19 @@ export const prettifyExpression = (canonicalExpression: string | undefined, xNam
           : canonicalExpression;
 };
 
-export const validateExpression = (expressionStr: string, xName: string) => {
-  if (!expressionStr || !xName) return;
+export const validateDisplayExpression = (displayExpression: string, xName: string) => {
+  if (!displayExpression || !xName) return;
+  const canonicalExpression = canonicalizeExpression(displayExpression, xName);
   const parser = new Parser();
   try {
-    const expression = parser.parse(expressionStr);
-    const unknownVar = expression.variables().find(variable => variable !== xName);
+    const parsed = parser.parse(canonicalExpression);
+    const unknownVar = parsed.variables().find(variable => variable !== kSerializedXKey);
     if (unknownVar) {
       return `Unrecognized variable "${unknownVar}" in expression.`;
     }
     if (xName) {
       // Attempt an evaluation to check for errors e.g. invalid function names
-      expression.evaluate({[xName]: 1});
+      parsed.evaluate({[kSerializedXKey]: 1});
     }
   } catch {
     return "Could not understand expression. Make sure you supply all operands " +

@@ -4,7 +4,7 @@ import { useCurrent } from "../../../hooks/use-current";
 import { kLeaveModalOpen, useCustomModal } from "../../../hooks/use-custom-modal";
 import { IDataSet } from "../../../models/data/data-set";
 import { TableMetadataModelType } from "../../../models/tools/table/table-content";
-import { validateExpression } from "./expression-utils";
+import { validateDisplayExpression } from "./expression-utils";
 import { useEditableExpressions } from "./use-editable-expressions";
 
 import "./expressions-dialog.scss";
@@ -28,7 +28,7 @@ export const useExpressionsDialog = ({ metadata, dataSet, onSubmit }: IProps): I
   const [errorMessage, setErrorMessage] = useState<string>("");
   const updateCurrentExpression = useCallback((expr: string) => {
     setCurrentExpression(expr);
-    setErrorMessage(validateExpression(expr, xName.current) || "");
+    setErrorMessage(validateDisplayExpression(expr, xName.current) || "");
   }, [xName]);
   const acceptExpression = useCallback((yAttrId: string, expr: string) => {
     expressions.current.set(yAttrId, expr);

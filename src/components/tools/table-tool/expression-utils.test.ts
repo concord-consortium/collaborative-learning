@@ -1,4 +1,4 @@
-import { canonicalizeExpression, prettifyExpression, validateExpression } from "./expression-utils";
+import { canonicalizeExpression, prettifyExpression, validateDisplayExpression } from "./expression-utils";
 
 describe("Expression Utilities", () => {
   it("canonicalizeExpression() works as expected", () => {
@@ -24,13 +24,13 @@ describe("Expression Utilities", () => {
   });
 
   it("validateExpression() returns error message for invalid expressions, undefined for valid expressions", () => {
-    expect(validateExpression("", "")).toBe(undefined);
-    expect(validateExpression("2", "")).toBe(undefined);
-    expect(validateExpression("2", "")).toBe(undefined);
-    expect(validateExpression("", "foo")).toBe(undefined);
-    expect(validateExpression("2", "foo")).toBe(undefined);
-    expect(validateExpression("2 *", "foo")).toContain("Could not");
-    expect(validateExpression("2 * foo", "foo")).toBe(undefined);
-    expect(validateExpression("foo", "bar")).toContain("Unrecognized");
+    expect(validateDisplayExpression("", "")).toBe(undefined);
+    expect(validateDisplayExpression("2", "")).toBe(undefined);
+    expect(validateDisplayExpression("2", "")).toBe(undefined);
+    expect(validateDisplayExpression("", "foo")).toBe(undefined);
+    expect(validateDisplayExpression("2", "foo")).toBe(undefined);
+    expect(validateDisplayExpression("2 *", "foo")).toContain("Could not");
+    expect(validateDisplayExpression("2 * foo", "foo")).toBe(undefined);
+    expect(validateDisplayExpression("foo", "bar")).toContain("Unrecognized");
   });
 });
