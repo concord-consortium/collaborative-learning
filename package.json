@@ -176,6 +176,7 @@
     "color-string": "^1.5.4",
     "copy-text-to-clipboard": "^2.2.0",
     "d3-format": "^2.0.0",
+    "escape-string-regexp": "^4.0.0",
     "expr-eval": "^2.0.2",
     "file-saver": "^2.0.5",
     "firebase": "^7.24.0",
