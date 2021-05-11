@@ -1,10 +1,19 @@
-import { canonicalizeExpression, prettifyExpression, validateDisplayExpression } from "./expression-utils";
+import {
+  canonicalizeExpression, getEditableExpression, prettifyExpression, validateDisplayExpression
+} from "./expression-utils";
 
 describe("Expression Utilities", () => {
+  it("getEditableExpression() works as expected", () => {
+    expect(getEditableExpression("", "", "")).toBe("");
+    expect(getEditableExpression("foo", "__x__", "foo")).toBe("foo");
+    expect(getEditableExpression(undefined, "__x__", "foo")).toBe("foo");
+  });
+
   it("canonicalizeExpression() works as expected", () => {
     expect(canonicalizeExpression("2 * 2", "")).toBe("2 * 2");
     expect(canonicalizeExpression("2 * 2", "foo")).toBe("(2 * 2)");
     expect(canonicalizeExpression("2 *", "foo")).toBe("2 *");
+    expect(canonicalizeExpression("* foo", "foo")).toBe("* __x__");
     expect(canonicalizeExpression("2 * foo", "foo")).toBe("(2 * __x__)");
     expect(canonicalizeExpression("2 * foo + foo", "foo")).toBe("((2 * __x__) + __x__)");
     expect(canonicalizeExpression("2 * foo bar", "foo bar")).toBe("(2 * __x__)");
