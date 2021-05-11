@@ -1,5 +1,6 @@
 
 export const kSerializedXKey = "__x__";
+export const kSerializedXKeyRegEx = /__x__/g;
 
 export interface ITileLinkMetadata {
   id: string;

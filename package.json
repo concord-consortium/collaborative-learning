@@ -1,6 +1,6 @@
 {
   "name": "collaborative-learning",
-  "version": "1.8.2",
+  "version": "1.8.3",
   "description": "Collaborative Learning environment",
   "main": "index.js",
   "config": {
@@ -176,13 +176,14 @@
     "color-string": "^1.5.4",
     "copy-text-to-clipboard": "^2.2.0",
     "d3-format": "^2.0.0",
+    "escape-string-regexp": "^4.0.0",
     "expr-eval": "^2.0.2",
     "file-saver": "^2.0.5",
     "firebase": "^7.24.0",
     "immutable": "^3.8.2",
     "initials": "^3.1.1",
     "jsonwebtoken": "^8.5.0",
-    "lodash": "^4.17.20",
+    "lodash": "^4.17.21",
     "mobx": "^5.15.7",
     "mobx-react": "^6.3.1",
     "mobx-state-tree": "^3.17.3",
