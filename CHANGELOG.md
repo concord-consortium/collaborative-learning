@@ -1,5 +1,17 @@
 # Changelog
 
+## Version 1.8.3 - released May 10, 2021
+
+### Features/Improvements
+- Fix handling of table formulas referencing column names with spaces [#178097891](#959)
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 391,321 bytes | 0.0% |
+| index.js | 4,587,947 bytes | 0.0% |
+
 ## Version 1.8.2 - released April 1, 2021
 
 ### Features/Improvements
