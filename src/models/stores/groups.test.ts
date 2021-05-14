@@ -7,7 +7,11 @@ describe("Groups model", () => {
   it("has default values", () => {
     const groups = GroupsModel.create({});
     expect(groups.allGroups).toEqual([]);
-    expect(groups.groupForUser("1")).toBe(undefined);
+    expect(groups.getGroupById("1")).toBeUndefined();
+    expect(groups.groupForUser("1")).toBeUndefined();
+    expect(groups.userInGroup("1")).toBe(false);
+    expect(groups.userInGroup("1", "1")).toBe(false);
+    expect(groups.virtualDocumentForGroup("1")).toBeUndefined();
   });
 
   it("uses override values", () => {
@@ -39,12 +43,21 @@ describe("Groups model", () => {
     const groups = GroupsModel.create({
       allGroups: [group]
     });
+    expect(group.getUserById("1")).toBeDefined();
+    expect(group.getUserById("2")).toBeDefined();
+    expect(group.getUserById("3")).toBeDefined();
+    expect(group.getUserById("4")).toBeUndefined();
     expect(groups.allGroups).toEqual([group]);
     expect(groups.allGroups[0].users).toEqual(group.users);
     expect(groups.allGroups[0].users[0].connected).toEqual(true);
     expect(groups.allGroups[0].users[1].connected).toEqual(false);
     expect(groups.allGroups[0].users[2].connected).toEqual(true);
     expect(groups.groupForUser("1")).toBe(group);
+    expect(groups.userInGroup("1", "1")).toBe(true);
+    expect(groups.userInGroup("2", "1")).toBe(true);
+    expect(groups.userInGroup("3", "1")).toBe(true);
+    expect(groups.userInGroup("4", "1")).toBeFalsy();
+    expect(groups.virtualDocumentForGroup("group-1")).toBeDefined();
   });
 
   it("updates from db", () => {
@@ -88,7 +101,12 @@ describe("Groups model", () => {
             },
             connectedTimestamp: 1,
             disconnectedTimestamp: 2
-          }
+          },
+          3: {  // user without self
+            version: "1.0",
+            connectedTimestamp: 1,
+            disconnectedTimestamp: 2
+          } as any
         }
       }
     };
@@ -115,7 +133,7 @@ describe("Groups model", () => {
 
     groups.updateFromDB("1", dbGroupsWithUsers, clazz);
     expect(groups.allGroups.length).toEqual(1);
-    expect(groups.allGroups[0].users.length).toEqual(2);
+    expect(groups.allGroups[0].users.length).toEqual(1);
     expect(groups.allGroups[0].users[0].id).toEqual("1");
   });
 });
