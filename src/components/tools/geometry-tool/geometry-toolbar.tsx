@@ -36,6 +36,8 @@ export const GeometryToolbar: React.FC<IProps> = observer(({
                     enabled,
                     ...others
                   });
+  // reference the entire selection map so selection changes trigger observable render
+  content.metadata.selection.toJS();
   const selectedObjects = board && content.selectedObjects(board);
   const selectedPoints = selectedObjects?.filter(isPoint);
   const selectedPoint = selectedPoints?.length === 1 ? selectedPoints[0] : undefined;
@@ -50,7 +52,7 @@ export const GeometryToolbar: React.FC<IProps> = observer(({
   return documentContent
     ? ReactDOM.createPortal(
         <div className={classNames("geometry-toolbar", { disabled: !enabled || !location })}
-              data-test="geometry-toolbar" style={location}
+              data-testid="geometry-toolbar" style={location}
               onMouseDown={e => e.stopPropagation()}>
           <div className="toolbar-buttons">
             <DuplicateButton disabled={disableDuplicate} onClick={handleDuplicate}/>
