@@ -6,10 +6,21 @@ import { cloneTileSnapshotWithoutId, IDragTileItem } from "../../models/tools/to
 import { defaultTextContent } from "../tools/text/text-content";
 
 // mock uniqueId so we can recognize auto-generated IDs
-const { uniqueId, safeJsonParse } = jest.requireActual("../../utilities/js-utils");
-jest.mock("../../utilities/js-utils", () => ({
-  uniqueId: () => `testid-${uniqueId()}`,
-  safeJsonParse: (json: string) => safeJsonParse(json)
+jest.mock("../../utilities/js-utils", () => {
+  const { uniqueId, ...others } = jest.requireActual("../../utilities/js-utils");
+  return {
+    uniqueId: () => `testid-${uniqueId()}`,
+    ...others
+  };
+});
+
+// mock Logger calls
+const logTileEvent = jest.fn();
+jest.mock("../../lib/logger", () => ({
+  ...(jest.requireActual("../../lib/logger") as any),
+  Logger: {
+    logTileEvent: (...args: any) => logTileEvent(...args)
+  }
 }));
 
 describe("DocumentContentModel", () => {
@@ -1147,5 +1158,24 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
         });
       });
     });
+  });
+});
+
+describe("DocumentContentModel -- user-logging actions", () => {
+  const documentContent = DocumentContentModel.create({});
+  logTileEvent.mockReset();
+
+  it("logs user adding/removing tiles", () => {
+    const newTile = documentContent.userAddTile("text");
+    const newTileId = newTile?.tileId;
+    expect(newTileId).toBeDefined();
+    expect(logTileEvent).toHaveBeenCalledTimes(1);
+
+    documentContent.userDeleteTile(newTileId!);
+    expect(logTileEvent).toHaveBeenCalledTimes(2);
+
+    // deleting it again has no effect
+    documentContent.userDeleteTile(newTileId!);
+    expect(logTileEvent).toHaveBeenCalledTimes(2);
   });
 });
