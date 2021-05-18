@@ -1,5 +1,22 @@
 # Changelog
 
+## Version 1.8.4 - released May 17, 2021
+
+### Features/Improvements
+- Log presentation of network status alerts [#178163876](#967)
+
+### Bugs Fixed
+- Validate students in teacher dashboard [#178165267](#964)
+- Don't log DELETE_TILE when specified tile doesn't exist [#178162887](#965)
+- Geometry: Update toolbar on selection change [#178148390] [#178166203](#966)
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 391,321 bytes | 0.0% |
+| index.js | 4,588,222 bytes | 0.0% |
+
 ## Version 1.8.3 - released May 10, 2021
 
 ### Features/Improvements
