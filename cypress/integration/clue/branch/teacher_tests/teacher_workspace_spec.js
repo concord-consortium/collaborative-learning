@@ -27,7 +27,7 @@ beforeEach(() => {
   cy.fixture("teacher-dash-data-msa-test.json").as("clueData");
 });
 
-describe('teacher specific navigation tabs', () => {
+describe.skip('teacher specific navigation tabs', () => {
 
   it('verify problem tab solution switch', () => {
     cy.get('.nav-tab.tab-problems').should('exist').click();
@@ -71,7 +71,7 @@ describe('teacher specific navigation tabs', () => {
 });
 
 
-describe('teacher document functionality', function () {
+describe.skip('teacher document functionality', function () {
   before(function () {
     clueCanvas.addTile('table');
     clueCanvas.addTile('drawing');
@@ -108,4 +108,3 @@ describe('teacher document functionality', function () {
     clueCanvas.deleteTile('table');
   });
 });
-
