@@ -1,6 +1,6 @@
 {
   "name": "collaborative-learning",
-  "version": "1.8.3",
+  "version": "1.8.4",
   "description": "Collaborative Learning environment",
   "main": "index.js",
   "config": {
@@ -12,6 +12,9 @@
   },
   "browserslist": "> 0.2%, last 5 versions, Firefox ESR, not dead",
   "jest": {
+    "setupFilesAfterEnv": [
+      "<rootDir>/src/setupTests.ts"
+    ],
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
     },
@@ -93,7 +96,8 @@
     "@firebase/app-types": "^0.6.1",
     "@istanbuljs/nyc-config-typescript": "^1.0.1",
     "@svgr/webpack": "^5.5.0",
-    "@testing-library/react": "^11.2.5",
+    "@testing-library/jest-dom": "^5.12.0",
+    "@testing-library/react": "^11.2.7",
     "@types/classnames": "^2.2.11",
     "@types/color-string": "^1.5.0",
     "@types/d3-format": "^1.4.1",

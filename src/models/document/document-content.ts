@@ -783,8 +783,10 @@ export const DocumentContentModel = types
       return result;
     },
     userDeleteTile(tileId: string) {
-      Logger.logTileEvent(LogEventName.DELETE_TILE, self.getTile(tileId));
-      self.deleteTile(tileId);
+      if (self.getTile(tileId)) {
+        Logger.logTileEvent(LogEventName.DELETE_TILE, self.getTile(tileId));
+        self.deleteTile(tileId);
+      }
     },
     userMoveTiles(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
       tiles.forEach(tile => Logger.logTileEvent(LogEventName.MOVE_TILE, self.getTile(tile.tileId)));
