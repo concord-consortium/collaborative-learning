@@ -34,7 +34,7 @@ class ClueCanvas {
     }
 
     getRowSectionHeader() {
-        return cy.get('.row-section-header');
+        return cy.get('.primary-workspace .row-section-header');
     }
 
     getSectionHeader(header) {
@@ -44,7 +44,7 @@ class ClueCanvas {
     }
 
     getPlaceHolder() {
-        return cy.get('.placeholder-tool');
+        return cy.get('.primary-workspace .placeholder-tool');
     }
 
     getFourUpViewToggle() {
@@ -205,6 +205,7 @@ class ClueCanvas {
                 break;
         }
         this.getDeleteTool().click({ force: true });
+        cy.get('.ReactModalPortal .modal-footer .modal-button.default').click();
     }
 
     getSupportList() {
