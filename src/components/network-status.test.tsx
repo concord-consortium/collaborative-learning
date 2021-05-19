@@ -1,5 +1,6 @@
 import React from "react";
 import { act, render, screen } from "@testing-library/react";
+import Modal from "react-modal";
 import { ModalProvider } from "react-modal-hook";
 import { NetworkStatus } from "./network-status";
 import { UserModel } from "../models/stores/user";
@@ -28,9 +29,12 @@ describe("NetworkStatus", () => {
     const user = UserModel.create();
 
     const jsx = (
-            <ModalProvider>
-              <NetworkStatus user={user} />
-            </ModalProvider>
+            <>
+              <div className="app"/>
+              <ModalProvider>
+                <NetworkStatus user={user} />
+              </ModalProvider>
+            </>
           );
 
     const { rerender } = render(jsx);
@@ -38,6 +42,7 @@ describe("NetworkStatus", () => {
     expect(log).not.toHaveBeenCalled();
 
     act(() => {
+      Modal.setAppElement(".app");
       user.setIsFirebaseConnected(true);
     });
     rerender(jsx);
