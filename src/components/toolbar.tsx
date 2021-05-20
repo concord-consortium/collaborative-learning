@@ -1,21 +1,16 @@
 import { inject, observer } from "mobx-react";
 import React from "react";
-import classNames from "classnames";
 
-import { IconComponent } from "../app-config-context";
 import { BaseComponent, IBaseProps } from "./base";
 import { DocumentModelType, DocumentTool } from "../models/document/document";
 import { IDocumentContentAddTileOptions, IDragToolCreateInfo } from "../models/document/document-content";
 import { getToolContentInfoByTool, IToolContentInfo } from "../models/tools/tool-content-info";
-import { ToolButtonSnapshot } from "../models/tools/tool-types";
+import { DeleteButton } from "./delete-button";
+import { IToolButtonConfig, IToolButtonProps, ToolButtonComponent } from "./tool-button";
 import { EditableToolApiInterfaceRefContext } from "./tools/tool-api";
 import { kDragTileCreate  } from "./tools/tool-tile";
 
 import "./toolbar.sass";
-
-export interface IToolButtonConfig extends ToolButtonSnapshot {
-  icon?: IconComponent;
-}
 
 export type ToolbarConfig = IToolButtonConfig[];
 
@@ -29,69 +24,14 @@ interface IState {
   activeTool: string;
 }
 
-interface IButtonProps {
-  config: IToolButtonConfig;
-  ToolIcon?: IconComponent;
-  isActive: boolean;
-  isDisabled: boolean;
-  onSetToolActive: (tool: DocumentTool, isActive: boolean) => void;
-  onClick: (e: React.MouseEvent<HTMLDivElement>, tool: DocumentTool) => void;
-  onDragStart: (e: React.DragEvent<HTMLDivElement>, tool: DocumentTool) => void;
-  onShowDropHighlight: () => void;
-  onHideDropHighlight: () => void;
-}
-
-const ToolButtonComponent: React.FC<IButtonProps> =
-  ({ config, ToolIcon, isActive, isDisabled, onSetToolActive, onClick, onDragStart,
-      onShowDropHighlight, onHideDropHighlight }) => {
-
-  const { name, title, isTileTool } = config;
-  const toolName = name as DocumentTool;
-
-  const handleMouseDown = () => {
-    if (isDisabled) return;
-
-    onSetToolActive(toolName, true);
-
-    const endActiveHandler = () => {
-      onSetToolActive(toolName, false);
-      document.removeEventListener("mouseup", endActiveHandler, true);
-      document.removeEventListener("dragend", endActiveHandler, true);
-    };
-
-    document.addEventListener("mouseup", endActiveHandler, true);
-    document.addEventListener("dragend", endActiveHandler, true);
-  };
-
-  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    onClick(e, toolName);
-  };
-
-  const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
-    onDragStart(e, toolName);
-  };
-
-  return (
-    <div className={classNames("tool", toolName, { active: isActive }, isDisabled ? "disabled" : "enabled")}
-        key={name}
-        title={title || ""}
-        onMouseDown={handleMouseDown}
-        onClick={handleClick}
-        onDragStart={isTileTool ? handleDrag : undefined}
-        draggable={isTileTool || false}
-        onMouseEnter={isTileTool ? onShowDropHighlight : undefined}
-        onMouseLeave={isTileTool ? onHideDropHighlight : undefined}>
-      {ToolIcon && <ToolIcon />}
-    </div>
-  );
-};
-
 @inject("stores")
 @observer
 export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
   static contextType = EditableToolApiInterfaceRefContext;
   declare context: React.ContextType<typeof EditableToolApiInterfaceRefContext>;
+
+  private showDeleteTilesConfirmationAlert?: () => void;
 
   state = {
     defaultTool: "",
@@ -129,7 +69,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const renderToolButtons = (toolbarConfig: ToolbarConfig) => {
       const { ui: { selectedTileIds } } = this.stores;
       return toolbarConfig.map(config => {
-        const buttonProps: IButtonProps = {
+        const buttonProps: IToolButtonProps = {
           config,
           ToolIcon: config.icon,
           isActive: config.name === this.state.activeTool,
@@ -140,11 +80,16 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
           onShowDropHighlight: this.showDropRowHighlight,
           onHideDropHighlight: this.removeDropRowHighlight
         };
-        return <ToolButtonComponent key={config.name} {...buttonProps} />;
+        return config.name !== "delete"
+                ? <ToolButtonComponent key={config.name} {...buttonProps} />
+                : <DeleteButton key={config.name}
+                                onSetShowDeleteTilesConfirmationAlert={this.setShowDeleteTilesConfirmationAlert}
+                                onDeleteSelectedTiles={this.handleDeleteSelectedTiles}
+                                {...buttonProps} />;
       });
     };
     return (
-      <div className="toolbar">
+      <div className="toolbar" data-testid="toolbar">
         {renderToolButtons(this.props.config)}
       </div>
     );
@@ -192,20 +137,33 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   private handleDelete() {
     const toolApiInterface = this.context?.current;
     if (!toolApiInterface) return;
-    const { document } = this.props;
+    let didDeleteInteriorSelection = false;
     const { ui } = this.stores;
     ui.selectedTileIds.forEach(tileId => {
       const toolApi = toolApiInterface?.getToolApi(tileId);
       // if there is selected content inside the selected tile, delete it first
       if (toolApi?.hasSelection?.()) {
         toolApi.deleteSelection?.();
-      }
-      else {
-        ui.removeTileIdFromSelection(tileId);
-        document.deleteTile(tileId);
+        didDeleteInteriorSelection = true;
       }
     });
+    if (!didDeleteInteriorSelection) {
+      this.showDeleteTilesConfirmationAlert?.();
+    }
     this.setState(state => ({ activeTool: state.defaultTool }));
+  }
+
+  private setShowDeleteTilesConfirmationAlert = (showAlert: () => void) => {
+    this.showDeleteTilesConfirmationAlert = showAlert;
+  }
+
+  private handleDeleteSelectedTiles = () => {
+    const { ui } = this.stores;
+    const { document } = this.props;
+    ui.selectedTileIds.forEach(tileId => {
+      ui.removeTileIdFromSelection(tileId);
+      document.deleteTile(tileId);
+    });
   }
 
   private handleDragNewToolTile = (tool: DocumentTool, e: React.DragEvent<HTMLDivElement>) => {
