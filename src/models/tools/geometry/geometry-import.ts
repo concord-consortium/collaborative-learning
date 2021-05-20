@@ -145,18 +145,18 @@ export function preprocessImportFormat(snapshot: any) {
   }
 
   function addPoint(pointSpec: IPointImportSpec) {
-    const { type, properties: _properties, ...others } = pointSpec;
+    const { type, properties: _properties, comment, ...others } = pointSpec;
     const id = uniqueId();
     const properties = { id, ..._properties };
     changes.push({ operation: "create", target: "point", properties, ...others });
-    if (pointSpec.comment) {
-      addComment({ anchor: id, ...pointSpec.comment });
+    if (comment) {
+      addComment({ anchor: id, ...comment });
     }
     return id;
   }
 
   function addPolygon(polygonSpec: IPolygonImportSpec) {
-    const { parents: parentSpecs, properties: _properties } = polygonSpec;
+    const { parents: parentSpecs, properties: _properties, comment } = polygonSpec;
     const id = uniqueId();
     const vertices: Array<{ id: string, angleLabel?: boolean }> = [];
     const parents = parentSpecs.map(spec => {
@@ -177,14 +177,14 @@ export function preprocessImportFormat(snapshot: any) {
         changes.push({ operation: "create", target: "vertexAngle", parents: angleParents });
       }
     });
-    if (polygonSpec.comment) {
-      addComment({ anchor: id, ...polygonSpec.comment });
+    if (comment) {
+      addComment({ anchor: id, ...comment });
     }
     return id;
   }
 
   function addImage(imageSpec: IImageImportSpec) {
-    const { type, parents: _parents, properties: _properties, ...others } = imageSpec;
+    const { type, parents: _parents, properties: _properties, comment, ...others } = imageSpec;
     const { url, coords, size: pxSize } = _parents;
     const size = pxSize.map(s => s / kGeometryDefaultPixelsPerUnit) as JXGCoordPair;
     const parents = [url, coords, size];
@@ -192,21 +192,21 @@ export function preprocessImportFormat(snapshot: any) {
     const properties = { id, ..._properties };
     gImageMap.getImage(url);  // register with image map
     changes.push({ operation: "create", target: "image", parents, properties, ...others });
-    if (imageSpec.comment) {
-      addComment({ anchor: id, ...imageSpec.comment });
+    if (comment) {
+      addComment({ anchor: id, ...comment });
     }
     return id;
   }
 
   function addMovableLine(movableLineSpec: IMovableLineImportSpec) {
-    const { type, parents: _parents, properties: _properties, ...others } = movableLineSpec;
+    const { type, parents: _parents, properties: _properties, comment, ...others } = movableLineSpec;
     const id = uniqueId();
     const [pt1Spec, pt2Spec] = _parents;
     const parents = _parents.map(ptSpec => ptSpec.parents);
     const properties = { id, pt1: pt1Spec.properties, pt2: pt2Spec.properties, ..._properties };
     changes.push({ operation: "create", target: "movableLine", parents, properties, ...others });
-    if (movableLineSpec.comment) {
-      addComment({ anchor: id, ...movableLineSpec.comment });
+    if (comment) {
+      addComment({ anchor: id, ...comment });
     }
     return id;
   }
