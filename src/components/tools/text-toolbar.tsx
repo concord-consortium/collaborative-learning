@@ -25,8 +25,8 @@ const buttonDefs: IButtonDef[] = [
   { iconName: "bold",        toolTip: `Bold (${kShortcutPrefix}b)`},
   { iconName: "italic",      toolTip: `Italic (${kShortcutPrefix}i)`},
   { iconName: "underline",   toolTip: `Underline (${kShortcutPrefix}u)`},
-  { iconName: "subscript",   toolTip: `Subscript (${kShortcutPrefix},)`},
-  { iconName: "superscript", toolTip: `Superscript (${kShortcutPrefix}Shift-,)`},
+  { iconName: "subscript",   toolTip: `Subscript`},
+  { iconName: "superscript", toolTip: `Superscript`},
   { iconName: "list-ol",     toolTip: `Numbered List`},
   { iconName: "list-ul",     toolTip: `Bulleted List`}
 ];
