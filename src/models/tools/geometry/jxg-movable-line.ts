@@ -3,7 +3,9 @@ import { getBaseAxisLabels, getObjectById } from "./jxg-board";
 import { JXGChangeAgent } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
 import { syncClientColors } from "./jxg-point";
-import { isBoard, isMovableLine, isMovableLineControlPoint, isMovableLineLabel, kMovableLineType } from "./jxg-types";
+import {
+  getMovableLinePointIds, isBoard, isMovableLine, isMovableLineControlPoint, isMovableLineLabel, kMovableLineType
+} from "./jxg-types";
 import { uniqueId } from "../../../utilities/js-utils";
 
 // Returns the two points where the given line intersects the given board, sorted from left to right
@@ -95,13 +97,14 @@ export const movableLineChangeAgent: JXGChangeAgent = {
     const props = syncClientColors({...sharedProps, ...shared });
     const lineProps = {...props, ...lineSpecificProps, ...line };
     const pointProps = {...props, ...pointSpecificProps};
+    const pointIds = getMovableLinePointIds(lineId);
 
     if (change.parents && change.parents.length === 2) {
       const interceptPoint = (board as JXG.Board).create(
         "point",
         change.parents[0],
         {
-          id: `${lineId}-point1`,
+          id: pointIds[0],
           ...pointProps,
           ...pt1,
         }
@@ -110,7 +113,7 @@ export const movableLineChangeAgent: JXGChangeAgent = {
         "point",
         change.parents[1],
         {
-          id: `${lineId}-point2`,
+          id: pointIds[1],
           ...pointProps,
           ...pt2,
         }

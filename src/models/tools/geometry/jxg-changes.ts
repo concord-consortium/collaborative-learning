@@ -10,12 +10,27 @@ export type JXGCoordPair = [number, number];
 export type JXGUnsafeCoordPair = [number?, number?];
 export type JXGStringPair = [string?, string?];
 
+export type JXGImageParents = [string, JXGCoordPair, JXGCoordPair];
+
 export type JXGParentType = string | number | JXGCoordPair | JXGUnsafeCoordPair;
 
 export enum ESegmentLabelOption {
   kNone = "none",
   kLabel = "label", // parents
   kLength = "length"
+}
+
+export interface IBoardScale {
+  xMin: number;
+  yMin: number;
+  unitX: number;
+  unitY: number;
+  canvasWidth: number;
+  canvasHeight: number;
+  xName?: string;
+  yName?: string;
+  xAnnotation?: string;
+  yAnnotation?: string;
 }
 
 export interface JXGProperties {
@@ -28,6 +43,7 @@ export interface JXGProperties {
   yMin?: number;
   unitX?: number;
   unitY?: number;
+  boardScale?: IBoardScale;
   [key: string]: any;
 }
 

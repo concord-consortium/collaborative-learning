@@ -65,3 +65,6 @@ export const isMovableLineControlPoint = (v: any): v is JXG.Point => {
 export const isMovableLineLabel = (v: any): v is JXG.Text => {
   return v instanceof JXG.Text && v.getAttribute("clientType") === kMovableLineType;
 };
+export const getMovableLinePointIds = (lineId: string) => {
+  return [`${lineId}-point1`, `${lineId}-point2`] as [string, string];
+};
