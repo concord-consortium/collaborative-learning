@@ -35,6 +35,7 @@ export interface IBoardScale {
 
 export interface JXGProperties {
   id?: string;
+  ids?: string[]; // ids of linked points in tabeLink change
   labelOption?: ESegmentLabelOption;
   position?: JXGUnsafeCoordPair;
   title?: string; // metadata property

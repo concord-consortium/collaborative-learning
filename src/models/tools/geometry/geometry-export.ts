@@ -32,9 +32,13 @@ const specialTargets = ["board", "metadata"];
 
 function getTargetIdsFromChange(change: JXGChange) {
   if (specialTargets.includes(change.target)) return [change.target];
+  if ((change.operation === "create") && (change.target === "tableLink")) {
+    // returns the ids of the created linkedPoints
+    return (change.properties as JXGProperties)?.ids || [];
+  }
   if (change.targetID) return castArray(change.targetID);
   if (!change.properties) return [];
-  return castArray(change.properties).map(props => props.id);
+  return castArray(change.properties).map(props => props.id).filter(id => !!id);
 }
 
 function getDependenciesFromChange(change: JXGChange, objectInfoMap: Record<string, IGeomObjectInfo>): string[] {
@@ -44,7 +48,7 @@ function getDependenciesFromChange(change: JXGChange, objectInfoMap: Record<stri
   }
   // vertex angle dependencies are the vertices and the polygon
   if ((change.operation === "create") && (change.target === "vertexAngle")) {
-    const vertices = change.parents as string[];
+    const vertices = (change.parents || []) as string[];
     let polygonId = "";
     const dependentCount: Record<string, number> = {};
     vertices.forEach(vId => {
@@ -129,8 +133,13 @@ export const exportGeometryJson = (changes: string[]) => {
       const minParents = minParentsMap[objInfo.type];
       const parents = validParentIds(id);
       if (minParents && (parents.length < minParents)) return false;
-      if (objInfo.type !== "polygon") {
-        return objInfo.dependencies.every(isValidId);
+      // all dependencies must be exportable (except movable line control points)
+      if ((objInfo.type !== "movableLine") && !objInfo.dependencies.every(_id => !objectInfoMap[_id]?.noExport)) {
+        return false;
+      }
+      // all dependencies must be valid (except for a subset of polygon vertices)
+      if ((objInfo.type !== "polygon") && !objInfo.dependencies.every(isValidId)) {
+        return false;
       }
     }
     return true;
@@ -299,11 +308,15 @@ export const exportGeometryJson = (changes: string[]) => {
   changes.forEach(changeJson => {
     const change = safeJsonParse<JXGChange>(changeJson);
     if (change) {
+      // objects created by a tableLink are the linkedPoints
+      const target = change.target === "tableLink"
+                      ? "linkedPoint"
+                      : change.target;
       const ids = getTargetIdsFromChange(change);
       const dependencies = getDependenciesFromChange(change, objectInfoMap);
       ids.forEach(id => {
         // track movable line control points so we can track changes to them
-        if ((change.operation === "create") && (change.target === "movableLine")) {
+        if ((change.operation === "create") && (target === "movableLine")) {
           getMovableLinePointIds(id).forEach(ptId => {
             objectInfoMap[ptId] = {
               id: ptId,
@@ -319,14 +332,15 @@ export const exportGeometryJson = (changes: string[]) => {
         if (!objectInfoMap[id]) {
           objectInfoMap[id] = {
             id,
-            type: change.target,
+            type: target,
             changes: [change],
             dependents: [],
-            dependencies
+            dependencies,
+            noExport: target === "linkedPoint"
           };
           dependencies.forEach(independentId => {
             const objectInfo = objectInfoMap[independentId];
-            objectInfo.dependents.push(id);
+            objectInfo?.dependents.push(id);
           });
           if (!specialTargets.includes(id)) {
             orderedIds.push(id);

@@ -327,11 +327,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         return metadata.linkedTableIds;
       },
       exportContentAsTileJson: () => {
-        const { board } = this.state;
-        if (!board) return "";
         const changes = this.getContent().changes;
-        const json = exportGeometryJson(changes);
-        return json;
+        return exportGeometryJson(changes);
       }
     });
 
