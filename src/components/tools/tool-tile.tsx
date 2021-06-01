@@ -167,7 +167,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     const { appMode } = this.stores;
     if (appMode !== "authed") {
       this.hotKeys.register({
-        "cmd-option-c": this.handleCopyImportJson,
+        "cmd-option-e": this.handleCopyImportJson,
         "cmd-shift-c": this.handleCopyModelJson
       });
     }

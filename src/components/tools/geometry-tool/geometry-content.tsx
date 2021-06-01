@@ -8,6 +8,7 @@ import { getTableContent } from "../../../models/tools/table/table-content";
 import { IGeometryProps, IActionHandlers } from "./geometry-shared";
 import { GeometryContentModelType, GeometryMetadataModelType, setElementColor, getImageUrl, IAxesParams
         } from "../../../models/tools/geometry/geometry-content";
+import { exportGeometryJson } from "../../../models/tools/geometry/geometry-export";
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
           isDragTargetOrAncestor } from "../../../models/tools/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
@@ -324,6 +325,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       },
       getLinkedTables: () => {
         return metadata.linkedTableIds;
+      },
+      exportContentAsTileJson: () => {
+        const changes = this.getContent().changes;
+        return exportGeometryJson(changes);
       }
     });
 
