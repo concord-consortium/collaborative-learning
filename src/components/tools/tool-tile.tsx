@@ -1,5 +1,4 @@
 import classNames from "classnames";
-import copyTextToClipboard from "copy-text-to-clipboard";
 import { observer, inject } from "mobx-react";
 import React from "react";
 import ResizeObserver from "resize-observer-polyfill";
@@ -332,7 +331,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     const toolApiInterface = this.context;
     const toolApi = toolApiInterface?.getToolApi(this.modelId);
     const importJson = toolApi?.exportContentAsTileJson?.();
-    importJson && copyTextToClipboard(importJson);
+    importJson && navigator.clipboard.writeText(importJson);
     return true;
   }
 

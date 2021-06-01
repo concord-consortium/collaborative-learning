@@ -13,6 +13,7 @@ import { IDocumentContext } from "../../models/document/document-types";
 import { debouncedSelectTile } from "../../models/stores/ui";
 import { gImageMap, IImageContext, ImageMapEntryType } from "../../models/image-map";
 import { ImageContentModelType } from "../../models/tools/image/image-content";
+import { exportImageTileSpec } from "../../models/tools/image/image-import-export";
 import { hasSelectionModifier } from "../../utilities/event-utils";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { isPlaceholderImage } from "../../utilities/image-utils";
@@ -25,6 +26,7 @@ type IProps = IToolTileProps;
 interface IState {
   isLoading?: boolean;
   imageContentUrl?: string;
+  imageFilename?: string;
   documentContext?: IDocumentContext;
   imageEntry?: ImageMapEntryType;
   imageEltWidth?: number;
@@ -48,7 +50,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   private resizeObserver: ResizeObserver;
   private imageElt: HTMLDivElement | null;
   private listenerDisposer: (() => void) | undefined;
-  private debouncedUpdateImage = debounce((url: string) => {
+  private debouncedUpdateImage = debounce((url: string, filename?: string) => {
     const { documentContext } = this.state;
     const imageContext: IImageContext | undefined = documentContext
                                                       ? { type: documentContext?.type, key: documentContext?.key }
@@ -68,13 +70,14 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
                                   this.listenerDisposer = undefined;
                                 }
                               });
-    gImageMap.getImage(url, imageContext)
+    gImageMap.getImage(url, { filename, context: imageContext })
       .then(image => {
         if (!this._isMounted) return;
         // update react state
         this.setState({
           isLoading: false,
           imageContentUrl: undefined,
+          imageFilename: undefined,
           imageEntry: image
         });
         // update mst content if conversion occurred
@@ -89,6 +92,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
         this.setState({
           isLoading: false,
           imageContentUrl: undefined,
+          imageFilename: undefined,
           imageEntry: undefined
         });
       });
@@ -106,7 +110,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   public componentDidMount() {
     this._isMounted = true;
     if (this.state.imageContentUrl) {
-      this.updateImageUrl(this.state.imageContentUrl);
+      this.updateImageUrl(this.state.imageContentUrl, this.state.imageFilename);
     }
 
     this.resizeObserver = new ResizeObserver(entries => {
@@ -123,6 +127,19 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     this.imageElt && this.resizeObserver.observe(this.imageElt);
 
     this.props.onRegisterToolApi({
+      exportContentAsTileJson: () => {
+        const changes = this.getContent().changes;
+        // for authoring, convert to curriculum-relative URL on export
+        const transformUrl = (url: string) => {
+          const { appConfig, unit } = this.stores;
+          const basePath = appConfig.getUnitBasePath(unit.code);
+          const filename = this.state.imageEntry?.filename;
+          return basePath && filename
+                  ? `${basePath}/images/${filename}`
+                  : url;
+        };
+        return exportImageTileSpec(changes, { transformUrl });
+      },
       handleDocumentScroll: (x: number, y: number) => {
         this.toolbarToolApi?.handleDocumentScroll?.(x, y);
       },
@@ -140,9 +157,9 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
 
   public componentDidUpdate(prevProps: IProps, prevState: IState) {
     if (this.state.imageContentUrl) {
-      this.updateImageUrl(this.state.imageContentUrl);
+      this.updateImageUrl(this.state.imageContentUrl, this.state.imageFilename);
     }
-    // if we have a new image, or the image height has changed, reqest an explicit height
+    // if we have a new image, or the image height has changed, request an explicit height
     const desiredHeight = this.getDesiredHeight();
     if (desiredHeight && (desiredHeight !== this.state.requestedHeight)) {
       this.props.onRequestRowHeight(this.props.model.id, desiredHeight);
@@ -218,11 +235,11 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     return this.props.model.content as ImageContentModelType;
   }
 
-  private updateImageUrl(url: string) {
+  private updateImageUrl(url: string, filename?: string) {
     if (!this.state.isLoading) {
       this.setState({ isLoading: true });
     }
-    this.debouncedUpdateImage(url);
+    this.debouncedUpdateImage(url, filename);
   }
 
   private handleUploadImageFile = (file: File) => {
@@ -233,17 +250,18 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
             const content = this.getContent();
             this.setState({ isLoading: false, imageEntry: image });
             if (image.contentUrl && (image.contentUrl !== content.url)) {
-              content.setUrl(image.contentUrl);
+              content.setUrl(image.contentUrl, file.name);
             }
           }
         });
     });
   }
 
-  private handleUrlChange = (url: string, context?: IDocumentContext) => {
+  private handleUrlChange = (url: string, filename?: string, context?: IDocumentContext) => {
     this.setState({
       isLoading: true,
       imageContentUrl: url,
+      imageFilename: filename,
       documentContext: context
     });
   }

@@ -95,6 +95,17 @@ export const AppConfigModel = types
     getNavTabSpec(tabId: ENavTab): NavTabSpec | undefined {
       return self.navTabs.tabSpecs.find(tab => tabId === tab.tab);
     }
+  }))
+  .views(self => ({
+    getUnitBasePath(unitId: string) {
+      const unitSpec = self.getUnit(unitId);
+      if (!unitSpec) return "";
+      const parts = unitSpec.content.split("/");
+      if (parts.length > 0) {
+        parts.splice(parts.length - 1, 1);
+      }
+      return parts.join("/");
+    }
   }));
 export type AppConfigModelType = Instance<typeof AppConfigModel>;
 export type AppConfigSpec = SnapshotIn<typeof AppConfigModel>;

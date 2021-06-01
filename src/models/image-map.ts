@@ -13,6 +13,7 @@ export const kFirebaseRealTimeDBHandlerName = "firebaseRealTimeDB";
 
 export const ImageMapEntry = types
   .model("ImageEntry", {
+    filename: types.maybe(types.string),
     contentUrl: types.maybe(types.string),
     displayUrl: types.maybe(types.string),
     width: types.maybe(types.number),
@@ -25,11 +26,19 @@ export interface IImageContext {
   type?: string;
   key?: string;
 }
+export interface IImageBaseOptions {
+  filename?: string;
+  context?: IImageContext;
+}
+export interface IImageHandlerStoreOptions extends IImageBaseOptions{
+  db?: DB;
+  userId?: string;
+}
 export interface IImageHandler {
   name: string;
   priority: number;
   match: (url: string) => boolean;
-  store: (url: string, db?: DB, userId?: string, context?: IImageContext) => Promise<ImageMapEntrySnapshot>;
+  store: (url: string, options?: IImageHandlerStoreOptions) => Promise<ImageMapEntrySnapshot>;
 }
 // map from image url => component id => listener function
 export type ImageListenerMap = Record<string, Record<string, () => void>>;
@@ -57,9 +66,6 @@ export const ImageMapModel = types
       const index = self.handlers.findIndex(handler => handler.match(url));
       return (index >= 0) &&
               (self.handlers[index].name === kExternalUrlHandlerName);
-    },
-    isDataImageUrl(url: string) {
-      return /data:image\//.test(url);
     },
     isPlaceholder(url: string) {
       return isPlaceholderImage(url);
@@ -176,6 +182,7 @@ export const ImageMapModel = types
             .then(simpleImage => {
               const { normalized } = parseFauxFirebaseRTDBUrl(simpleImage.imageUrl);
               const entry: ImageMapEntrySnapshot = {
+                      filename: file.name,
                       contentUrl: normalized,
                       displayUrl: simpleImage.imageData
                     };
@@ -184,7 +191,7 @@ export const ImageMapModel = types
         });
       },
 
-      getImage(url: string, context?: IImageContext): Promise<ImageMapEntryType> {
+      getImage(url: string, options?: IImageBaseOptions): Promise<ImageMapEntryType> {
         return new Promise((resolve, reject) => {
           if (!url) {
             resolve(clone(self.images.get(placeholderImage)!));
@@ -197,7 +204,7 @@ export const ImageMapModel = types
 
           const handler = self.getHandler(url);
           if (handler) {
-            const promise = handler.store(url, _db, _userId, context);
+            const promise = handler.store(url, { db: _db, userId: _userId, ...options });
             resolve(self.addPromise(url, promise));
           }
           else {
@@ -221,7 +228,8 @@ export const externalUrlImagesHandler: IImageHandler = {
     return url ? /^(https?:\/\/|data:image\/)/.test(url) : false;
   },
 
-  store(url: string, db?: DB, userId?: string) {
+  store(url: string, options?: IImageHandlerStoreOptions) {
+    const { db, userId } = options || {};
     // upload images from external urls to our own firebase if possible
     // this may fail depending on CORS settings on target image.
     return new Promise((resolve, reject) => {
@@ -243,12 +251,12 @@ export const externalUrlImagesHandler: IImageHandler = {
             // If the silent upload has failed, do we retain the full url or
             // encourage the user to download a copy and re-upload?
             // For now, return the original image url.
-            resolve({});
+            resolve({ contentUrl: url, displayUrl: url });
           });
       }
       else {
         // For now, return the original image url.
-        resolve({});
+        resolve({ contentUrl: url, displayUrl: url });
       }
     });
   }
@@ -290,8 +298,9 @@ export const firebaseStorageImagesHandler: IImageHandler = {
                           /^\/.+\/portals\/.+$/.test(url);
   },
 
-  store(url: string, db?: DB, userId?: string) {
+  store(url: string, options?: IImageHandlerStoreOptions) {
     return new Promise((resolve, reject) => {
+      const { db, userId } = options || {};
       // All images from firebase storage must be migrated to realtime database
       const isStorageUrl = url.startsWith(kFirebaseStorageUrlPrefix);
       const storageUrl = url.startsWith(kFirebaseStorageUrlPrefix) ? url : undefined;
@@ -357,8 +366,9 @@ export const firebaseRealTimeDBImagesHandler: IImageHandler = {
           (url.startsWith(`${kCCImageScheme}://`) && (url.indexOf("concord.org") < 0));
   },
 
-  store(url: string, db?: DB, userID?: string, context?: IImageContext) {
+  store(url: string, options?: IImageHandlerStoreOptions) {
     return new Promise((resolve, reject) => {
+      const { context, db } = options || {};
       const { path, normalized } = parseFauxFirebaseRTDBUrl(url);
 
       if (db && path && normalized) {
@@ -369,7 +379,9 @@ export const firebaseRealTimeDBImagesHandler: IImageHandler = {
                               ? db.getCloudImageBlob(path, context?.type, context?.key)
                               : db.getImageBlob(path);
         blobPromise.then(blobUrl => {
-          resolve(blobUrl ? { contentUrl: normalized, displayUrl: blobUrl } : {});
+          resolve(blobUrl
+                    ? { filename: options?.filename, contentUrl: normalized, displayUrl: blobUrl }
+                    : {});
         });
       }
       else {
