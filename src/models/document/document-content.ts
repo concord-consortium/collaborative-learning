@@ -1,6 +1,7 @@
 import { cloneDeep, each } from "lodash";
 import { types, getSnapshot, Instance, SnapshotIn } from "mobx-state-tree";
-import { kDrawingToolID, StampModelType } from "../tools/drawing/drawing-content";
+import { StampModelType } from "../tools/drawing/drawing-content";
+import { kDrawingToolID } from "../tools/drawing/drawing-types";
 import { kGeometryToolID } from "../tools/geometry/geometry-content";
 import { kImageToolID } from "../tools/image/image-content";
 import { kPlaceholderToolID } from "../tools/placeholder/placeholder-content";

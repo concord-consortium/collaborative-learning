@@ -1,6 +1,13 @@
 import { nanoid } from "nanoid";
 
 /*
+ * comma(condition: boolean)
+ *
+ * utility function for building JSON strings; returns "," or "" depending on its argument
+ */
+export const comma = (condition: boolean) => condition ? "," : "";
+
+/*
  * castArrayCopy()
  *
  * returns an array for simple items, and a copy of the array for arrays

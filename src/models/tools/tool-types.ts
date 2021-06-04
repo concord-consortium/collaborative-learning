@@ -8,8 +8,9 @@ import { kTableToolID, TableContentModel, TableContentModelType,
           TableMetadataModel, TableMetadataModelType } from "./table/table-content";
 import { kTextToolID, TextContentModel, TextContentModelType } from "./text/text-content";
 import { kUnknownToolID, UnknownContentModel, UnknownContentModelType } from "./unknown-content";
-import { DrawingContentModelType, DrawingContentModel, kDrawingToolID,
+import { DrawingContentModelType, DrawingContentModel,
           DrawingToolMetadataModel, DrawingToolMetadataModelType } from "./drawing/drawing-content";
+import { kDrawingToolID } from "./drawing/drawing-types";
 
 export const ToolTypeEnum = types.enumeration(
                               "ToolTypes",

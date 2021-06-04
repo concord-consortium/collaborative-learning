@@ -1,32 +1,16 @@
 import { types, Instance } from "mobx-state-tree";
-import { Point, DrawingObjectDataType } from "./drawing-objects";
+import { DrawingObjectDataType } from "./drawing-objects";
 import { registerToolContentInfo } from "../tool-content-info";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
-
-export const kDrawingToolID = "Drawing";
-
-export const kDrawingDefaultHeight = 180;
-
-export type ToolbarModalButton = "select" | "line" | "vector" | "rectangle" | "ellipse" | "stamp";
-
-export interface ToolbarSettings {
-  stroke: string;
-  fill: string;
-  strokeDashArray: string;
-  strokeWidth: number;
-}
-
-export const DefaultToolbarSettings: ToolbarSettings = {
-  stroke: "#000000",
-  fill: "none",
-  strokeDashArray: "",
-  strokeWidth: 2
-};
+import {
+  DefaultToolbarSettings, DrawingToolChange, DrawingToolUpdate, kDrawingDefaultHeight, kDrawingToolID,
+  ToolbarModalButton, ToolbarSettings
+} from "./drawing-types";
 
 export const computeStrokeDashArray = (type?: string, strokeWidth?: string|number) => {
-  const dotted = strokeWidth;
-  const dashed = (strokeWidth as number) * 3;
+  const dotted = isFinite(Number(strokeWidth)) ? Number(strokeWidth) : 0;
+  const dashed = dotted * 3;
   switch (type) {
     case "dotted":
       return `${dotted},${dotted}`;
@@ -37,22 +21,6 @@ export const computeStrokeDashArray = (type?: string, strokeWidth?: string|numbe
   }
 };
 
-export type DrawingToolChangeAction = "create" | "move" | "update" | "delete" ;
-
-export type DrawingToolMove = Array<{id: string, destination: Point}>;
-export interface DrawingToolUpdate {
-  ids: string[];
-  update: {
-    prop: string;
-    newValue: string|number;
-  };
-}
-export type DrawingToolDeletion = string[];
-
-export interface DrawingToolChange {
-  action: DrawingToolChangeAction;
-  data: DrawingObjectDataType | DrawingToolMove | DrawingToolUpdate | DrawingToolDeletion;
-}
 interface DrawingToolChangeLoggedEvent extends Partial<DrawingToolChange> {
   properties?: string[];
 }
@@ -100,7 +68,7 @@ export type DrawingToolMetadataModelType = Instance<typeof DrawingToolMetadataMo
 export function defaultDrawingContent(options?: {stamps: StampModelType[]}) {
   return DrawingContentModel.create({
     type: kDrawingToolID,
-    stamps: options && options.stamps || [],
+    stamps: options?.stamps || [],
     changes: []
   });
 }
@@ -163,7 +131,7 @@ export const DrawingContentModel = types
       }
       delete loggedChangeProps.action;
       Logger.logToolChange(LogEventName.DRAWING_TOOL_CHANGE, change.action,
-        loggedChangeProps, self.metadata ? self.metadata.id : "");
+        loggedChangeProps, self.metadata?.id ?? "");
     }
 
     function deleteSelectedObjects() {
@@ -224,8 +192,8 @@ export const DrawingContentModel = types
           self.metadata.setSelection(ids);
         },
 
-        setSelectedStamp(stampIdex: number) {
-          self.currentStampIndex = stampIdex;
+        setSelectedStamp(stampIndex: number) {
+          self.currentStampIndex = stampIndex;
         },
 
         applyChange,

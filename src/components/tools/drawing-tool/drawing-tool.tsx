@@ -17,6 +17,21 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
     if (!readOnly) {
       (model.content as DrawingContentModelType).reset();
     }
+
+    onRegisterToolApi({
+      exportContentAsTileJson: () => {
+        const exportedObjects: string[] = [];
+        return [
+          `{`,
+          `  "type": "Drawing",`,
+          `  "objects": [`,
+          ...exportedObjects,
+          `  ]`,
+          `}\n`
+        ].join("\n");
+      }
+    });
+
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
