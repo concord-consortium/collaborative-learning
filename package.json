@@ -179,7 +179,6 @@
     "@concord-consortium/slate-editor": "^0.7.2",
     "classnames": "^2.2.6",
     "color-string": "^1.5.4",
-    "copy-text-to-clipboard": "^2.2.0",
     "d3-format": "^2.0.0",
     "escape-string-regexp": "^4.0.0",
     "expr-eval": "^2.0.2",

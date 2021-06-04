@@ -8,5 +8,7 @@ serviceAccountKey.json
 .vscode
 .yalc
 yalc.lock
+.nyc_output
+coverage-cypress
 cypress/screenshots
 *debug.log

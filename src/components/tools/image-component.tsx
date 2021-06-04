@@ -7,7 +7,7 @@ interface IProps {
   content: ImageContentModelType;
   style: React.CSSProperties;
   onMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void;
-  onUrlChange: (url: string, context?: IDocumentContext) => void;
+  onUrlChange: (url: string, filename?: string, context?: IDocumentContext) => void;
 }
 
 export const ImageComponent =

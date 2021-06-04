@@ -1,6 +1,7 @@
 import { DB } from "../lib/db";
 import { ImageModelType, ImageModel } from "../models/image";
-import { ImageContentSnapshotOutType, ImageToolChange } from "../models/tools/image/image-content";
+import { ImageToolChange } from "../models/tools/image/image-change";
+import { ImageContentSnapshotOutType } from "../models/tools/image/image-content";
 import { safeJsonParse } from "./js-utils";
 import placeholderImage from "../assets/image_placeholder.png";
 import orgPlaceholderImage from "../assets/image_placeholder_org.png";
