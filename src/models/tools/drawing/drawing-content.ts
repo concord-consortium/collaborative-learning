@@ -4,8 +4,8 @@ import { registerToolContentInfo } from "../tool-content-info";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
 import {
-  DefaultToolbarSettings, DrawingToolChange, DrawingToolUpdate, kDrawingDefaultHeight, kDrawingToolID,
-  ToolbarModalButton, ToolbarSettings
+  DefaultToolbarSettings, DrawingToolChange, DrawingToolCreateChange, DrawingToolDeleteChange, DrawingToolMoveChange,
+  DrawingToolUpdate, DrawingToolUpdateChange, kDrawingDefaultHeight, kDrawingToolID, ToolbarModalButton, ToolbarSettings
 } from "./drawing-types";
 
 export const computeStrokeDashArray = (type?: string, strokeWidth?: string|number) => {
@@ -21,9 +21,19 @@ export const computeStrokeDashArray = (type?: string, strokeWidth?: string|numbe
   }
 };
 
-interface DrawingToolChangeLoggedEvent extends Partial<DrawingToolChange> {
+interface LoggedEventProperties {
   properties?: string[];
 }
+interface DrawingToolLoggedCreateEvent extends Partial<DrawingToolCreateChange>, LoggedEventProperties {
+}
+interface DrawingToolLoggedMoveEvent extends Partial<DrawingToolMoveChange>, LoggedEventProperties {
+}
+interface DrawingToolLoggedUpdateEvent extends Partial<DrawingToolUpdateChange>, LoggedEventProperties {
+}
+interface DrawingToolLoggedDeleteEvent extends Partial<DrawingToolDeleteChange>, LoggedEventProperties {
+}
+type DrawingToolChangeLoggedEvent = DrawingToolLoggedCreateEvent | DrawingToolLoggedMoveEvent |
+                                      DrawingToolLoggedUpdateEvent | DrawingToolLoggedDeleteEvent;
 
 export const StampModel = types
   .model("Stamp", {
@@ -35,9 +45,9 @@ export const StampModel = types
     // The set of available stamps is saved with each drawing tool instance (why?).
     // Thus, we have to convert from pre-webpack/assets reform paths to curriculum
     // paths on loading documents.
-    const newUrl = snapshot?.url?.replace("assets/tools/drawing-tool/stamps",
-                                          "curriculum/moving-straight-ahead/stamps");
-    return newUrl && (newUrl !== snapshot?.url)
+    const newUrl = snapshot.url.replace("assets/tools/drawing-tool/stamps",
+                                        "curriculum/moving-straight-ahead/stamps");
+    return newUrl && (newUrl !== snapshot.url)
             ? { ...snapshot, ...{ url: newUrl } }
             : snapshot;
   });

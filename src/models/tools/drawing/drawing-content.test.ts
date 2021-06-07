@@ -28,6 +28,8 @@ describe("computeStrokeDashArray", () => {
 
 describe("StampModel", () => {
   it("should migrate urls", () => {
+    // handles empty urls
+    expect(StampModel.create({ url: "", width: 10, height: 10 }).url).toBe("");
     // most urls are unchanged
     expect(StampModel.create({ url: "curriculum/foo/stamps", width: 10, height: 10 }).url)
       .toBe("curriculum/foo/stamps");
@@ -186,5 +188,10 @@ describe("DrawingContentModel", () => {
     expect(JSON.parse(model.changes[0]).data.url).toBe("my/image/newUrl");
     model.updateImageUrl("my/image/url2", "my/image/newUrl");
     expect(JSON.parse(model.changes[1]).data.update.newValue).toBe("my/image/newUrl");
+
+    // ignores invalid changes
+    const bogusModel = createDrawingContent({ changes: [...model.changes, "{ INVALID }"] });
+    bogusModel.updateImageUrl("my/image/url", "my/image/newUrl");
+    expect(JSON.parse(bogusModel.changes[0]).data.url).toBe("my/image/newUrl");
   });
 });

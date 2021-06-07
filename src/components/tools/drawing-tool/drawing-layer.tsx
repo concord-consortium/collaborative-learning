@@ -1077,16 +1077,16 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   private executeChange(change: DrawingToolChange) {
     switch (change.action) {
       case "create":
-        this.createDrawingObject(change.data as DrawingObjectDataType);
+        this.createDrawingObject(change.data);
         break;
       case "move":
-        this.moveDrawingObjects(change.data as DrawingToolMove);
+        this.moveDrawingObjects(change.data);
         break;
       case "update":
-        this.updateDrawingObjects(change.data as DrawingToolUpdate);
+        this.updateDrawingObjects(change.data);
         break;
       case "delete":
-        this.deleteDrawingObjects(change.data as DrawingToolDeletion);
+        this.deleteDrawingObjects(change.data);
         break;
     }
   }

@@ -20,8 +20,6 @@ export const DefaultToolbarSettings: ToolbarSettings = {
   strokeWidth: 2
 };
 
-export type DrawingToolChangeAction = "create" | "move" | "update" | "delete" ;
-
 export type DrawingToolMove = Array<{id: string, destination: Point}>;
 export interface DrawingToolUpdate {
   ids: string[];
@@ -32,7 +30,21 @@ export interface DrawingToolUpdate {
 }
 export type DrawingToolDeletion = string[];
 
-export interface DrawingToolChange {
-  action: DrawingToolChangeAction;
-  data: DrawingObjectDataType | DrawingToolMove | DrawingToolUpdate | DrawingToolDeletion;
+export interface DrawingToolCreateChange {
+  action: "create";
+  data: DrawingObjectDataType;
 }
+export interface DrawingToolMoveChange {
+  action: "move";
+  data: DrawingToolMove;
+}
+export interface DrawingToolUpdateChange {
+  action: "update";
+  data: DrawingToolUpdate;
+}
+export interface DrawingToolDeleteChange {
+  action: "delete";
+  data: DrawingToolDeletion;
+}
+export type DrawingToolChange = DrawingToolCreateChange | DrawingToolMoveChange |
+                                  DrawingToolUpdateChange | DrawingToolDeleteChange;
