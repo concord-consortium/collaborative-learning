@@ -15,7 +15,7 @@ const exportImageToolJson = (changes: ImageToolChange[] | string[], options?: IE
   // console.log("exportJson:", exportJson);
   const exportJs = safeJsonParse(exportJson);
   // log the JSON on error for debugging
-  !exportJs && console.log("JSON PARSE ERROR\n----------------\n", exportJson);
+  // !exportJs && console.log("JSON PARSE ERROR\n----------------\n", exportJson);
   return exportJs;
 };
 

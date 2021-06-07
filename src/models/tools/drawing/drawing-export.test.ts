@@ -19,7 +19,7 @@ function exportDrawing(changes: DrawingToolChange[]) {
   }
   else {
     // log the JSON on error for debugging
-    !exportJs && console.log("JSON PARSE ERROR\n----------------\n", exportJson);
+    // !exportJs && console.log("JSON PARSE ERROR\n----------------\n", exportJson);
   }
   return exportJs;
 }
