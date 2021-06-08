@@ -135,16 +135,36 @@ describe("Geometry import", () => {
     expect(received).toEqual(expected);
   });
 
-  it("imports points with comments", () => {
+  it("imports points with comments at default location", () => {
     const input = {
       type: "Geometry",
       objects: [
-        { type: "point", parents: [0, 0], comment: { text: "Point Comment"} }
+        { type: "point", parents: [0, 0], comment: { text: "Point Comment" } }
       ]
     };
     const result = preprocessImportFormat(input);
     expect(result.changes.length).toBe(3);
     expect(JSON.parse(result.changes[2]).properties.text).toBe("Point Comment");
+
+    const [expected, received] = testRoundTrip(input);
+    expect(received).toEqual(expected);
+  });
+
+  it("imports points with comments at authored location", () => {
+    const input = {
+      type: "Geometry",
+      objects: [
+        { type: "point", parents: [0, 0], comment: { text: "Point Comment", parents: [5, 5] } }
+      ]
+    };
+    const result = preprocessImportFormat(input);
+    expect(result.changes.length).toBe(3);
+    expect(JSON.parse(result.changes[2])).toEqual({
+      operation: "create",
+      target: "comment",
+      parents: [5, 5],
+      properties: { id: "testid-2", anchor: "testid-1", text: "Point Comment" }
+    });
 
     const [expected, received] = testRoundTrip(input);
     expect(received).toEqual(expected);

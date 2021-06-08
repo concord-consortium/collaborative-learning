@@ -62,12 +62,23 @@ interface IBoardImportSpec {
 
 interface ICommentProps {
   text?: string;
+  parents?: JXGCoordPair;
   [prop: string]: any;
+}
+
+interface ICommentImportSpec {
+  type: "comment";
+  parents?: JXGCoordPair;
+  properties: {
+    text?: string;
+    anchor: string;
+    [prop: string]: any;
+  }
 }
 
 interface IPointImportSpec {
   type: "point";
-  parents: [number, number];
+  parents: JXGCoordPair;
   properties?: Record<string, unknown>;
   comment?: ICommentProps;
 }
@@ -85,9 +96,8 @@ interface IPolygonImportSpec {
 
 interface IVertexAngleImportSpec {
   type: "vertexAngle",
-  parents: string[];
+  parents: [string, string, string];
   properties?: Record<string, unknown>;
-  comment?: ICommentProps;
 }
 
 interface IImageImportSpec {
@@ -109,7 +119,7 @@ interface IMovableLineImportSpec {
 }
 
 type IObjectImportSpec = IPointImportSpec | IPolygonImportSpec | IVertexAngleImportSpec |
-                          IImageImportSpec | IMovableLineImportSpec;
+                          ICommentImportSpec | IImageImportSpec | IMovableLineImportSpec;
 
 interface IImportSpec {
   title?: string;
@@ -188,10 +198,16 @@ export function preprocessImportFormat(snapshot: any) {
 
   addBoard(boardSpecs);
 
-  function addComment(props: Record<string, unknown>) {
+  function addCommentFromProps(props: ICommentProps) {
+    const { parents, ...others } = props;
     const id = uniqueId();
-    changes.push({ operation: "create", target: "comment", properties: {id, ...props }});
+    changes.push({ operation: "create", target: "comment", parents, properties: { id, ...others } });
     return id;
+  }
+
+  function addCommentFromSpec(spec: ICommentImportSpec) {
+    const { parents, properties } = spec;
+    return addCommentFromProps({ ...properties, parents });
   }
 
   function addPoint(pointSpec: IPointImportSpec) {
@@ -200,7 +216,7 @@ export function preprocessImportFormat(snapshot: any) {
     const properties = { id, ..._properties };
     changes.push({ operation: "create", target: "point", properties, ...others });
     if (comment) {
-      addComment({ anchor: id, ...comment });
+      addCommentFromProps({ anchor: id, ...comment });
     }
     return id;
   }
@@ -219,7 +235,7 @@ export function preprocessImportFormat(snapshot: any) {
     changes.push({ operation: "create", target: "polygon", parents, properties });
     const lastIndex = vertices.length - 1;
     vertices.forEach((pt, i) => {
-      let angleParents;
+      let angleParents: [string, string, string];
       if (pt.angleLabel) {
         const prev = i === 0 ? vertices[lastIndex].id : vertices[i - 1].id;
         const self = vertices[i].id;
@@ -229,13 +245,13 @@ export function preprocessImportFormat(snapshot: any) {
       }
     });
     if (comment) {
-      addComment({ anchor: id, ...comment });
+      addCommentFromProps({ anchor: id, ...comment });
     }
     return id;
   }
 
   function addVertexAngle(angleSpec: IVertexAngleImportSpec) {
-    const { type, parents, properties: _properties, comment, ...others } = angleSpec;
+    const { type, parents, properties: _properties, ...others } = angleSpec;
     const id = uniqueId();
     const properties = { id, ..._properties };
     changes.push({ operation: "create", target: "vertexAngle", parents, properties, ...others });
@@ -251,7 +267,7 @@ export function preprocessImportFormat(snapshot: any) {
     gImageMap.getImage(url);  // register with image map
     changes.push({ operation: "create", target: "image", parents, properties, ...others });
     if (comment) {
-      addComment({ anchor: id, ...comment });
+      addCommentFromProps({ anchor: id, ...comment });
     }
     return id;
   }
@@ -264,13 +280,16 @@ export function preprocessImportFormat(snapshot: any) {
     const properties = { id, pt1: pt1Spec.properties, pt2: pt2Spec.properties, ..._properties };
     changes.push({ operation: "create", target: "movableLine", parents, properties, ...others });
     if (comment) {
-      addComment({ anchor: id, ...comment });
+      addCommentFromProps({ anchor: id, ...comment });
     }
     return id;
   }
 
   objectSpecs.forEach(spec => {
     switch (spec.type) {
+      case "comment":
+        addCommentFromSpec(spec);
+        break;
       case "point":
         addPoint(spec);
         break;
