@@ -1,6 +1,5 @@
 import { uniqueId } from "../../../utilities/js-utils";
 import { DrawingObjectDataType } from "./drawing-objects";
-import { kDrawingToolID } from "./drawing-types";
 
 export interface IDrawingTileImportSpec {
   type: "Drawing";
@@ -15,5 +14,5 @@ export const importDrawingTileSpec = (snapshot: IDrawingTileImportSpec) => {
     // assign unique id if one is not provided
     return JSON.stringify({ action: "create", data: { id: uniqueId(), ...data } });
   });
-  return { type: kDrawingToolID, changes };
+  return { type: "Drawing" as const, changes };
 };

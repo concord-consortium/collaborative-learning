@@ -1119,6 +1119,9 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     }
     if (drawingObject?.model.id) {
       const objectId = drawingObject.model.id;
+      if (this.objects[objectId]) {
+        console.warn(`DrawingLayer.createDrawingObject detectected duplicate ${data.type} with id ${objectId}`);
+      }
       this.objects[objectId] = drawingObject;
       this.forceUpdate();
     }

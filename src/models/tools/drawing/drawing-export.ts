@@ -79,8 +79,13 @@ export const exportDrawingTileSpec = (changes: string[]) => {
         case "create": {
           const { id, type  } = change.data;
           if (id) {
-            objectInfoMap[id] = { id, type, changes: [change] };
-            orderedIds.push(id);
+            if (!objectInfoMap[id]) {
+              objectInfoMap[id] = { id, type, changes: [change] };
+              orderedIds.push(id);
+            }
+            else {
+              console.warn(`exportDrawingTileSpec ignoring creation of duplicate ${type} with id ${id}`);
+            }
           }
           break;
         }

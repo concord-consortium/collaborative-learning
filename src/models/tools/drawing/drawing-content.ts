@@ -1,4 +1,5 @@
 import { types, Instance } from "mobx-state-tree";
+import { importDrawingTileSpec, isDrawingTileImportSpec } from "./drawing-import";
 import { DrawingObjectDataType } from "./drawing-objects";
 import { registerToolContentInfo } from "../tool-content-info";
 import { safeJsonParse } from "../../../utilities/js-utils";
@@ -98,6 +99,11 @@ export const DrawingContentModel = types
   .volatile(self => ({
     metadata: undefined as any as DrawingToolMetadataModelType
   }))
+  .preProcessSnapshot(snapshot => {
+    return isDrawingTileImportSpec(snapshot)
+            ? importDrawingTileSpec(snapshot)
+            : snapshot;
+  })
   .views(self => ({
     get isUserResizable() {
       return true;

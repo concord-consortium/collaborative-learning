@@ -26,6 +26,13 @@ function exportDrawing(changes: DrawingToolChange[]) {
 
 describe("exportDrawingTileSpec", () => {
 
+  const mockConsoleWarn = jest.fn();
+  global.console.warn = mockConsoleWarn;
+
+  beforeEach(() => {
+    mockConsoleWarn.mockReset();
+  });
+
   it("should export empty changes", () => {
     expect(exportDrawing([])).toEqual({ type: "Drawing", objects: [] });
     // ignores invalid changes
@@ -51,9 +58,11 @@ describe("exportDrawingTileSpec", () => {
     const v2Data: VectorDrawingObjectData = { ...vectorData, id: "v2" };
     const changesWithId: DrawingToolChange[] = [
       { action: "create", data: v1Data },
-      { action: "create", data: v2Data }
+      { action: "create", data: v2Data },
+      { action: "create", data: v2Data }  // ignores objects with duplicate ids
     ];
     expect(exportDrawing(changesWithId)).toEqual({ type: "Drawing", objects: [v1Data, v2Data] });
+    expect(mockConsoleWarn).toHaveBeenCalledTimes(1); // for duplicate id
 
     const changesWithUpdates: DrawingToolChange[] = [
       { action: "create", data: v1Data },

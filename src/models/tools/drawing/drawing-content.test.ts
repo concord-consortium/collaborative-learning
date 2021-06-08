@@ -2,6 +2,7 @@ import { SnapshotIn } from "mobx-state-tree";
 import {
   computeStrokeDashArray, defaultDrawingContent, DrawingContentModel, DrawingToolMetadataModel, StampModel
 } from "./drawing-content";
+import { IDrawingTileImportSpec } from "./drawing-import";
 import { DefaultToolbarSettings, DrawingToolChange, kDrawingToolID } from "./drawing-types";
 
 // mock Logger calls
@@ -71,6 +72,16 @@ describe("DrawingContentModel", () => {
     expect(model.isUserResizable).toBe(true);
     expect(model.selectedButton).toBe("select");
     expect(model.isSelectedButton("select")).toBe(true);
+  });
+
+  it("imports the drawing tool import format", () => {
+    const model = createDrawingContent({
+      type: "Drawing", objects: [ { type: "rectangle", x: 10, y: 10, width: 100, height: 100 }]
+    } as IDrawingTileImportSpec);
+    expect(model.type).toBe(kDrawingToolID);
+    expect(model.changes.length).toBe(1);
+    expect(JSON.parse(model.changes[0]).action).toBe("create");
+    expect(JSON.parse(model.changes[0]).data.type).toBe("rectangle");
   });
 
   it("can reset the tool button", () => {
