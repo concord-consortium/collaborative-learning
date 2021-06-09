@@ -7,18 +7,21 @@ import { kImageToolID } from "../tools/image/image-content";
 import { kPlaceholderToolID } from "../tools/placeholder/placeholder-content";
 import { kTableToolID } from "../tools/table/table-content";
 import { kTextToolID } from "../tools/text/text-content";
-import { getToolContentInfoById } from "../tools/tool-content-info";
+import { getToolContentInfoById, IDocumentExportOptions } from "../tools/tool-content-info";
 import { ToolContentUnionType } from "../tools/tool-types";
 import {
   ToolTileModel, ToolTileModelType, ToolTileSnapshotInType, ToolTileSnapshotOutType
 } from "../tools/tool-tile";
-import { TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType } from "../document/tile-row";
+import {
+  TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType, TileLayoutModelType
+} from "../document/tile-row";
 import { Logger, LogEventName } from "../../lib/logger";
 import { IDragTileItem } from "../../models/tools/tool-tile";
 import { DocumentsModelType } from "../stores/documents";
 import { DisplayUserType } from "../stores/user-types";
 import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
 import { getParentWithTypeName } from "../../utilities/mst-utils";
+import { comma, StringBuilder } from "../../utilities/string-builder";
 import { DocumentTool, IDocumentAddTileOptions } from "./document";
 
 export interface INewTileOptions {
@@ -121,10 +124,10 @@ export const DocumentContentModel = types
       get rowCount() {
         return self.rowOrder.length;
       },
-      getRow(rowId: string) {
+      getRow(rowId: string): TileRowModelType | undefined {
         return self.rowMap.get(rowId);
       },
-      getRowByIndex(index: number) {
+      getRowByIndex(index: number): TileRowModelType | undefined {
         return self.rowMap.get(self.rowOrder[index]);
       },
       getRowIndex(rowId: string) {
@@ -259,6 +262,21 @@ export const DocumentContentModel = types
     },
     publish() {
       return JSON.stringify(self.snapshotWithUniqueIds());
+    },
+    exportTileAsJson(tileInfo: TileLayoutModelType, options?: IDocumentExportOptions) {
+      const { includeTileIds, ...otherOptions } = options || {};
+      const tile = self.getTile(tileInfo.tileId);
+      const json = tile?.exportJson(otherOptions);
+      if (!json) return;
+
+      const builder = new StringBuilder();
+      builder.pushLine("{");
+      if (options?.includeTileIds) {
+        builder.pushLine(`"id": "${tileInfo.tileId}",`, 2);
+      }
+      builder.pushBlock(`"content": ${json}`, 2);
+      builder.pushLine(`}${comma(!!options?.appendComma)}`);
+      return builder.build();
     }
   }))
   .views(self => ({
@@ -279,6 +297,46 @@ export const DocumentContentModel = types
         counts[sectionId] = self.getTilesInSection(sectionId).length;
       });
       return counts;
+    },
+    exportAsJson(options?: IDocumentExportOptions) {
+      const builder = new StringBuilder();
+      builder.pushLine("{");
+      builder.pushLine(`"tiles": [`, 2);
+
+      // identify rows with exportable tiles
+      const rowsToExport = self.rowOrder.map(rowId => {
+        const row = self.getRow(rowId);
+        return row && !row.isSectionHeader && !row.isEmpty && !self.isPlaceholderRow(row) ? row : undefined;
+      }).filter(row => !!row);
+
+      const exportRowCount = rowsToExport.length;
+      rowsToExport.forEach((row, rowIndex) => {
+        const isLastRow = rowIndex === exportRowCount - 1;
+        // export each exportable tile
+        const tileExports = row?.tiles.map((tileInfo, tileIndex) => {
+          const isLastTile = tileIndex === row.tiles.length - 1;
+          const showComma = row.tiles.length > 1 ? !isLastTile : !isLastRow;
+          return self.exportTileAsJson(tileInfo, { ...options, appendComma: showComma });
+        }).filter(json => !!json);
+        if (tileExports?.length) {
+          // multiple tiles in a row are exported in an array
+          if (tileExports.length > 1) {
+            builder.pushLine("[", 4);
+            tileExports.forEach(tileExport => {
+              tileExport && builder.pushBlock(tileExport, 6);
+            });
+            builder.pushLine(`]${comma(!isLastRow)}`, 4);
+          }
+          // single tile rows are exported directly
+          else if (tileExports[0]) {
+            builder.pushBlock(tileExports[0], 4);
+          }
+        }
+      });
+
+      builder.pushLine("]", 2);
+      builder.pushLine("}");
+      return builder.build();
     }
   }))
   .actions(self => ({

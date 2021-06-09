@@ -1,7 +1,8 @@
 import { types, Instance } from "mobx-state-tree";
+import { exportDrawingTileSpec } from "./drawing-export";
 import { importDrawingTileSpec, isDrawingTileImportSpec } from "./drawing-import";
 import { DrawingObjectDataType } from "./drawing-objects";
-import { registerToolContentInfo } from "../tool-content-info";
+import { ITileExportOptions, registerToolContentInfo } from "../tool-content-info";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
 import {
@@ -126,6 +127,9 @@ export const DrawingContentModel = types
     get toolbarSettings(): ToolbarSettings {
       const { stroke, fill, strokeDashArray, strokeWidth } = self;
       return { stroke, fill, strokeDashArray, strokeWidth };
+    },
+    exportJson(options?: ITileExportOptions) {
+      return exportDrawingTileSpec(self.changes);
     }
   }))
   .extend(self => {

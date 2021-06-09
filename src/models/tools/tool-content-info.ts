@@ -36,3 +36,11 @@ export function getToolContentInfoById(id: string) {
 export function getToolContentInfoByTool(tool: string) {
   return gToolContentInfoMapByTool[tool];
 }
+
+export interface ITileExportOptions {
+}
+
+export interface IDocumentExportOptions extends ITileExportOptions {
+  includeTileIds?: boolean;
+  appendComma?: boolean;
+}

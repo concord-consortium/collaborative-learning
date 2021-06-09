@@ -7,6 +7,7 @@ import { DocumentContentModelType } from "../../models/document/document-content
 import {
   IToolApi, IToolApiInterface, IToolApiMap, ToolApiInterfaceContext, EditableToolApiInterfaceRefContext
 } from "../tools/tool-api";
+import { HotKeys } from "../../utilities/hot-keys";
 import { DEBUG_CANVAS } from "../../lib/debug";
 
 import "./canvas.sass";
@@ -30,6 +31,7 @@ export class CanvasComponent extends React.Component<IProps> {
 
   private toolApiMap: IToolApiMap = {};
   private toolApiInterface: IToolApiInterface;
+  private hotKeys: HotKeys = new HotKeys();
 
   static contextType = EditableToolApiInterfaceRefContext;
   declare context: React.ContextType<typeof EditableToolApiInterfaceRefContext>;
@@ -51,6 +53,10 @@ export class CanvasComponent extends React.Component<IProps> {
         each(this.toolApiMap, api => callback(api));
       }
     };
+
+    this.hotKeys.register({
+      "cmd-option-s": this.handleCopyDocumentJson
+    });
   }
 
   public render() {
@@ -60,7 +66,7 @@ export class CanvasComponent extends React.Component<IProps> {
     }
     return (
       <ToolApiInterfaceContext.Provider value={this.toolApiInterface}>
-        <div key="canvas" className="canvas" data-test="canvas">
+        <div key="canvas" className="canvas" data-test="canvas" onKeyDown={this.handleKeyDown}>
           {this.renderContent()}
           {this.renderEditability()}
           {this.renderDebugInfo()}
@@ -118,5 +124,16 @@ export class CanvasComponent extends React.Component<IProps> {
         </div>
       );
     }
+  }
+
+  private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    this.hotKeys.dispatch(e);
+  }
+
+  private handleCopyDocumentJson = () => {
+    const {content, document } = this.props;
+    const documentContent = document?.content ?? content;
+    const json = documentContent?.exportAsJson({ includeTileIds: true });
+    json && navigator.clipboard.writeText(json);
   }
 }

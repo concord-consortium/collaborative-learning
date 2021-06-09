@@ -1,4 +1,5 @@
-import { comma, safeJsonParse } from "../../../utilities/js-utils";
+import { safeJsonParse } from "../../../utilities/js-utils";
+import { comma, StringBuilder } from "../../../utilities/string-builder";
 import { DrawingObjectDataType } from "./drawing-objects";
 import { DrawingToolChange } from "./drawing-types";
 
@@ -12,17 +13,11 @@ export interface IDrawingObjectInfo {
 export const exportDrawingTileSpec = (changes: string[]) => {
   const objectInfoMap: Record<string, IDrawingObjectInfo> = {};
   const orderedIds: string[] = [];
-  const lines: string[] = [];
+  const builder = new StringBuilder();
 
   const isExportable = (id: string) => {
     const objInfo = objectInfoMap[id];
     return !!objInfo && !objInfo.isDeleted;
-  };
-
-  const pushLine = (line: string, indent: number) => {
-    let space = "";
-    for (; space.length < indent; space += " ");
-    lines.push(space + line);
   };
 
   const exportObject = (id: string, isLast: boolean) => {
@@ -52,11 +47,11 @@ export const exportDrawingTileSpec = (changes: string[]) => {
     const { id: idData, type, ...others } = data;
     const othersJson = JSON.stringify(others);
     const othersStr = othersJson.slice(1, othersJson.length - 1);
-    pushLine(`{ "type": "${objInfo.type}", "id": "${id}", ${othersStr} }${comma(!isLast)}`, 4);
+    builder.pushLine(`{ "type": "${objInfo.type}", "id": "${id}", ${othersStr} }${comma(!isLast)}`, 4);
   };
 
   const exportObjects = () => {
-    pushLine(`"objects": [`, 2);
+    builder.pushLine(`"objects": [`, 2);
     let lastExportedId: string;
     orderedIds.forEach(id => {
       if (isExportable(id)) {
@@ -68,7 +63,7 @@ export const exportDrawingTileSpec = (changes: string[]) => {
         exportObject(id, id === lastExportedId);
       }
     });
-    pushLine(`]`, 2);
+    builder.pushLine(`]`, 2);
   };
 
   // loop through each change, adding it to the set of changes that affect each object
@@ -118,11 +113,9 @@ export const exportDrawingTileSpec = (changes: string[]) => {
     }
   });
 
-  pushLine(`"type": "Drawing",`, 2);
+  builder.pushLine("{");
+  builder.pushLine(`"type": "Drawing",`, 2);
   exportObjects();
-  return [
-    `{`,
-    ...lines,
-    `}`
-  ].join("\n");
+  builder.pushLine("}");
+  return builder.build();
 };

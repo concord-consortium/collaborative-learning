@@ -1,7 +1,7 @@
 import { types, Instance, SnapshotOut } from "mobx-state-tree";
 import { createChange, ImageToolChange } from "./image-change";
-import { importImageTileSpec, isImageTileImportSpec } from "./image-import-export";
-import { registerToolContentInfo } from "../tool-content-info";
+import { exportImageTileSpec, importImageTileSpec, isImageTileImportSpec } from "./image-import-export";
+import { ITileExportOptions, registerToolContentInfo } from "../tool-content-info";
 import { isPlaceholderImage } from "../../../utilities/image-utils";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import placeholderImage from "../../../assets/image_placeholder.png";
@@ -50,6 +50,9 @@ export const ImageContentModel = types
     get hasValidImage() {
       const url = self.url;
       return !!url && !isPlaceholderImage(url);
+    },
+    exportJson(options?: ITileExportOptions) {
+      return exportImageTileSpec(self.changes);
     }
   }))
   .actions(self => ({

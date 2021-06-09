@@ -61,20 +61,6 @@ context('Test image functionalities', function(){
             // imageToolTile.getImageToolControl().last().click();
             cy.uploadFile(imageToolTile.imageChooseFileButton(), imageFilePath, 'image/png');
             cy.wait(2000);
-
-            let clipSpy;
-            cy.window().then((win) => {
-                // https://github.com/cypress-io/cypress-example-recipes/tree/master/examples/stubbing-spying__window
-                clipSpy = cy.spy(win.navigator.clipboard, "writeText");
-            });
-            // platform test from hot-keys library
-            const isMac = navigator.platform.indexOf("Mac") === 0;
-            const cmdKey = isMac ? "meta" : "ctrl";
-            cy.get('.primary-workspace .tool-tile.image-tool-tile')
-                .type(`{${cmdKey}+option+e}`)
-                .then(() => {
-                    expect(clipSpy).to.have.been.called;
-                });
         });
 
         it('will upload jpg file from user computer', function(){

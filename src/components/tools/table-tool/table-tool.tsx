@@ -2,6 +2,7 @@ import { observer } from "mobx-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactDataGrid from "react-data-grid";
 import { getTableContentHeight, TableContentModelType } from "../../../models/tools/table/table-content";
+import { exportTableContentAsJson } from "../../../models/tools/table/table-export";
 import { IToolTileProps } from "../tool-tile";
 import { EditableTableTitle } from "./editable-table-title";
 import { TableToolbar } from "./table-toolbar";
@@ -11,7 +12,6 @@ import { useDataSet } from "./use-data-set";
 import { useExpressionsDialog } from "./use-expressions-dialog";
 import { useGeometryLinking } from "./use-geometry-linking";
 import { useGridContext } from "./use-grid-context";
-import { useJsonExport } from "./use-json-export";
 import { useModelDataSet } from "./use-model-data-set";
 import { useRowLabelColumn } from "./use-row-label-column";
 import { useTableTitle } from "./use-table-title";
@@ -77,7 +77,9 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
     onSetTableTitle, onRequestUniqueTitle: handleRequestUniqueTitle
   });
 
-  const exportContentAsTileJson = useJsonExport(() => getContent().metadata, dataSet);
+  const exportContentAsTileJson = useCallback(() => {
+    return exportTableContentAsJson(getContent().metadata, dataSet.current);
+  }, [dataSet, getContent]);
   useToolApi({ metadata, getTitle, getContentHeight, exportContentAsTileJson,
                 onRegisterToolApi, onUnregisterToolApi });
 

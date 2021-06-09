@@ -45,7 +45,7 @@ export const TileRowModel = types
       return self.tiles.map(tile => tile.tileId).join(", ");
     },
     getTileIdAtIndex(index: number) {
-      const layout = self.tiles[index];
+      const layout = (index >= 0) && (index < self.tiles.length) ? self.tiles[index] : undefined;
       return layout && layout.tileId;
     },
     hasTile(tileId: string) {

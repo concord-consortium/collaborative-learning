@@ -185,7 +185,7 @@ class ClueCanvas {
         }
     }
 
-    exportTile(tileClass) {
+    exportTileAndDocument(tileClass) {
         let clipSpy;
         cy.window().then((win) => {
             // https://github.com/cypress-io/cypress-example-recipes/tree/master/examples/stubbing-spying__window
@@ -197,7 +197,11 @@ class ClueCanvas {
         cy.get(`.primary-workspace .tool-tile.${tileClass}`)
             .type(`{${cmdKey}+option+e}`)
             .then(() => {
-                expect(clipSpy).to.have.been.called;
+                expect(clipSpy.callCount).to.be.eq(1);
+            })
+            .type(`{${cmdKey}+option+s}`)
+            .then(() => {
+                expect(clipSpy.callCount).to.be.eq(2);
             });
     }
 

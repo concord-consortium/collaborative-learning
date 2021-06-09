@@ -163,13 +163,10 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     this.modelId = model.id;
     model.setDisabledFeatures(getDisabledFeaturesOfTile(this.stores, type));
 
-    const { appMode } = this.stores;
-    if (appMode !== "authed") {
-      this.hotKeys.register({
-        "cmd-option-e": this.handleCopyImportJson,
-        "cmd-shift-c": this.handleCopyModelJson
-      });
-    }
+    this.hotKeys.register({
+      "cmd-option-e": this.handleCopyImportJson,
+      "cmd-shift-c": this.handleCopyModelJson
+    });
   }
 
   public componentDidMount() {
