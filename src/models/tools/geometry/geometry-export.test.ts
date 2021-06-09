@@ -237,6 +237,82 @@ describe("Geometry Export", () => {
     expect(received).toEqual(expected);
   });
 
+  it("should export point with comment at default location", () => {
+    const changes: JXGChange[] = [
+      {
+        operation: "create",
+        target: "board",
+        properties: { axis: true, boundingBox: [-2, 15, 22, -1], unitX: 20, unitY: 20 }
+      },
+      { operation: "create", target: "point", parents: [0, 0], properties: { id: "p1" } },
+      { operation: "create", target: "point", parents: [5, 5], properties: { id: "p2" } },
+      { operation: "create", target: "comment", properties: { id: "c1", anchor: "p1" } }
+    ];
+    expect(exportGeometry(changes)).toEqual({
+      type: "Geometry",
+      board: { properties: { axisMin: [-2, -1], axisRange: [24, 16] } },
+      objects: [
+        { type: "point", parents: [0, 0], properties: { id: "p1" } },
+        { type: "point", parents: [5, 5], properties: { id: "p2" } },
+        { type: "comment", properties: { id: "c1", anchor: "p1" } }
+      ]
+    });
+    const [received, expected] = testRoundTrip(changes);
+    expect(received).toEqual(expected);
+  });
+
+  it("should export point with comment at authored location", () => {
+    const changes: JXGChange[] = [
+      {
+        operation: "create",
+        target: "board",
+        properties: { axis: true, boundingBox: [-2, 15, 22, -1], unitX: 20, unitY: 20 }
+      },
+      { operation: "create", target: "point", parents: [0, 0], properties: { id: "p1" } },
+      { operation: "create", target: "point", parents: [5, 5], properties: { id: "p2" } },
+      { operation: "create", target: "comment", parents: [5, 5], properties: { id: "c1", anchor: "p1" } }
+    ];
+    expect(exportGeometry(changes)).toEqual({
+      type: "Geometry",
+      board: { properties: { axisMin: [-2, -1], axisRange: [24, 16] } },
+      objects: [
+        { type: "point", parents: [0, 0], properties: { id: "p1" } },
+        { type: "point", parents: [5, 5], properties: { id: "p2" } },
+        { type: "comment", parents: [5, 5], properties: { id: "c1", anchor: "p1" } }
+      ]
+    });
+    const [received, expected] = testRoundTrip(changes);
+    expect(received).toEqual(expected);
+  });
+
+  it("should export points with comments at updated locations", () => {
+    const changes: JXGChange[] = [
+      {
+        operation: "create",
+        target: "board",
+        properties: { axis: true, boundingBox: [-2, 15, 22, -1], unitX: 20, unitY: 20 }
+      },
+      { operation: "create", target: "point", parents: [0, 0], properties: { id: "p1" } },
+      { operation: "create", target: "point", parents: [5, 5], properties: { id: "p2" } },
+      { operation: "create", target: "comment", parents: [5, 5], properties: { id: "c1", anchor: "p1" } },
+      { operation: "update", target: "object", targetID: "c1", properties: { position: [2, 2] } },
+      { operation: "create", target: "comment", properties: { id: "c2", anchor: "p2" } },
+      { operation: "update", target: "object", targetID: "c2", properties: { position: [8, 8] } }
+    ];
+    expect(exportGeometry(changes)).toEqual({
+      type: "Geometry",
+      board: { properties: { axisMin: [-2, -1], axisRange: [24, 16] } },
+      objects: [
+        { type: "point", parents: [0, 0], properties: { id: "p1" } },
+        { type: "point", parents: [5, 5], properties: { id: "p2" } },
+        { type: "comment", parents: [2, 2], properties: { id: "c1", anchor: "p1" } },
+        { type: "comment", parents: [3, 3], properties: { id: "c2", anchor: "p2" } }
+      ]
+    });
+    const [received, expected] = testRoundTrip(changes);
+    expect(received).toEqual(expected);
+  });
+
   it("should export points with additional properties", () => {
     const changes: JXGChange[] = [
       {
@@ -446,6 +522,97 @@ describe("Geometry Export", () => {
       board: { properties: { axisMin: [-2, -1], axisRange: [24, 16] } },
       objects: [
         { type: "point", parents: [0, 0], properties: { id: "v1" } }
+      ]
+    });
+    const [received, expected] = testRoundTrip(changes);
+    expect(received).toEqual(expected);
+  });
+
+  it("should export polygons with comments at default locations", () => {
+    const changes: JXGChange[] = [
+      {
+        operation: "create",
+        target: "board",
+        properties: { axis: true, boundingBox: [-2, 15, 22, -1], unitX: 20, unitY: 20 }
+      },
+      { operation: "create", target: "point", parents: [0, 6], properties: { id: "v1" } },
+      { operation: "create", target: "point", parents: [6, 6], properties: { id: "v2" } },
+      { operation: "create", target: "point", parents: [6, 0], properties: { id: "v3" } },
+      { operation: "create", target: "point", parents: [0, 0], properties: { id: "v4" } },
+      { operation: "create", target: "polygon", parents: ["v1", "v2", "v3", "v4"], properties: { id: "p1" } },
+      { operation: "create", target: "comment", properties: { id: "c1", anchor: "p1" } }
+    ];
+    expect(exportGeometry(changes)).toEqual({
+      type: "Geometry",
+      board: { properties: { axisMin: [-2, -1], axisRange: [24, 16] } },
+      objects: [
+        { type: "point", parents: [0, 6], properties: { id: "v1" } },
+        { type: "point", parents: [6, 6], properties: { id: "v2" } },
+        { type: "point", parents: [6, 0], properties: { id: "v3" } },
+        { type: "point", parents: [0, 0], properties: { id: "v4" } },
+        { type: "polygon", parents: ["v1", "v2", "v3", "v4"], properties: { id: "p1" } },
+        { type: "comment", properties: { id: "c1", anchor: "p1" } }
+      ]
+    });
+    const [received, expected] = testRoundTrip(changes);
+    expect(received).toEqual(expected);
+  });
+
+  it("should export polygons with comments at authored locations", () => {
+    const changes: JXGChange[] = [
+      {
+        operation: "create",
+        target: "board",
+        properties: { axis: true, boundingBox: [-2, 15, 22, -1], unitX: 20, unitY: 20 }
+      },
+      { operation: "create", target: "point", parents: [0, 6], properties: { id: "v1" } },
+      { operation: "create", target: "point", parents: [6, 6], properties: { id: "v2" } },
+      { operation: "create", target: "point", parents: [6, 0], properties: { id: "v3" } },
+      { operation: "create", target: "point", parents: [0, 0], properties: { id: "v4" } },
+      { operation: "create", target: "polygon", parents: ["v1", "v2", "v3", "v4"], properties: { id: "p1" } },
+      { operation: "create", target: "comment", parents: [3, 3], properties: { id: "c1", anchor: "p1" } }
+    ];
+    expect(exportGeometry(changes)).toEqual({
+      type: "Geometry",
+      board: { properties: { axisMin: [-2, -1], axisRange: [24, 16] } },
+      objects: [
+        { type: "point", parents: [0, 6], properties: { id: "v1" } },
+        { type: "point", parents: [6, 6], properties: { id: "v2" } },
+        { type: "point", parents: [6, 0], properties: { id: "v3" } },
+        { type: "point", parents: [0, 0], properties: { id: "v4" } },
+        { type: "polygon", parents: ["v1", "v2", "v3", "v4"], properties: { id: "p1" } },
+        { type: "comment", parents: [3, 3], properties: { id: "c1", anchor: "p1" } }
+      ]
+    });
+    const [received, expected] = testRoundTrip(changes);
+    expect(received).toEqual(expected);
+  });
+
+  it("should export polygons with comments at updated locations", () => {
+    const changes: JXGChange[] = [
+      {
+        operation: "create",
+        target: "board",
+        properties: { axis: true, boundingBox: [-2, 15, 22, -1], unitX: 20, unitY: 20 }
+      },
+      { operation: "create", target: "point", parents: [0, 6], properties: { id: "v1" } },
+      { operation: "create", target: "point", parents: [6, 6], properties: { id: "v2" } },
+      { operation: "create", target: "point", parents: [6, 0], properties: { id: "v3" } },
+      { operation: "create", target: "point", parents: [0, 0], properties: { id: "v4" } },
+      { operation: "create", target: "polygon", parents: ["v1", "v2", "v3", "v4"], properties: { id: "p1" } },
+      { operation: "create", target: "comment", properties: { id: "c1", anchor: "p1" } },
+      { operation: "update", target: "object", targetID: "c1", properties: { position: [5, 5] } }
+    ];
+    expect(exportGeometry(changes)).toEqual({
+      type: "Geometry",
+      board: { properties: { axisMin: [-2, -1], axisRange: [24, 16] } },
+      objects: [
+        { type: "point", parents: [0, 6], properties: { id: "v1" } },
+        { type: "point", parents: [6, 6], properties: { id: "v2" } },
+        { type: "point", parents: [6, 0], properties: { id: "v3" } },
+        { type: "point", parents: [0, 0], properties: { id: "v4" } },
+        { type: "polygon", parents: ["v1", "v2", "v3", "v4"], properties: { id: "p1" } },
+        { type: "comment", parents: [2, 2], properties: { id: "c1", anchor: "p1" } }
       ]
     });
     const [received, expected] = testRoundTrip(changes);

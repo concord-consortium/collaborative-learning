@@ -42,6 +42,10 @@ function getTargetIdsFromChange(change: JXGChange) {
 }
 
 function getDependenciesFromChange(change: JXGChange, objectInfoMap: Record<string, IGeomObjectInfo>): string[] {
+  // comment dependency is the anchor
+  if ((change.operation === "create") && (change.target === "comment")) {
+    return [(change.properties as JXGProperties)?.anchor];
+  }
   // polygon dependencies are the vertices
   if ((change.operation === "create") && (change.target === "polygon")) {
     return change.parents as string[];
@@ -128,8 +132,9 @@ export const exportGeometryJson = (changes: string[]) => {
     if (objInfo.noExport) return false;
 
     // must have valid/sufficient dependencies
-    if (["movableLine", "polygon", "vertexAngle"].includes(objInfo.type)) {
-      const minParentsMap: { [K in JXGObjectType]?: number } = { movableLine: 2, polygon: 2, vertexAngle: 3 };
+    if (["comment", "movableLine", "polygon", "vertexAngle"].includes(objInfo.type)) {
+      const minParentsMap: { [K in JXGObjectType]?: number } =
+              { comment: 1, movableLine: 2, polygon: 2, vertexAngle: 3 };
       const minParents = minParentsMap[objInfo.type];
       const parents = validParentIds(id);
       if (minParents && (parents.length < minParents)) return false;
@@ -157,6 +162,29 @@ export const exportGeometryJson = (changes: string[]) => {
       if (/.+-point1/.test(id)) return change.parents?.[0] as [number, number];
       if (/.+-point2/.test(id)) return change.parents?.[1] as [number, number];
     }
+  };
+
+  const exportComment = (id: string, isLast: boolean) => {
+    const _changes = objectInfoMap[id].changes;
+    let inParents = _changes[0].parents as JXGCoordPair | undefined;
+    let props: any = {};
+    _changes.forEach(change => {
+      props = {...props, ...change.properties };
+    });
+    const { position, ...others } = props;
+    if (others.id !== id) others.id = id;
+    if ((position?.length >= 2) && props.anchor) {
+      const anchorCentroid = getObjectCentroid(props.anchor);
+      if (anchorCentroid) {
+        // determine the relative offset from centroid
+        inParents = [position[0] - anchorCentroid[0], position[1] - anchorCentroid[1]];
+      }
+    }
+    const parents = inParents ? `, "parents": [${inParents[0]}, ${inParents[1]}]` : "";
+    const otherProps = Object.keys(others).length > 0
+                        ? ` "properties": ${JSON.stringify(others)}`
+                        : "";
+    return `{ "type": "comment"${parents}${comma(!!otherProps)}${otherProps} }${comma(!isLast)}`;
   };
 
   const exportImage = (id: string, isLast: boolean) => {
@@ -202,6 +230,33 @@ export const exportGeometryJson = (changes: string[]) => {
     return { parents, others };
   };
 
+  const getObjectCentroid = (id: string) => {
+    const objInfo = objectInfoMap[id];
+    if (!objInfo) return;
+
+    switch (objInfo.type) {
+      case "point": {
+        const { parents } = getPointExportables(id);
+        return parents;
+      }
+      case "movableLine":
+      case "polygon": {
+        let xSum = 0;
+        let ySum = 0;
+        let count = 0;
+        objInfo.dependencies.forEach(depId => {
+          const { parents } = getPointExportables(depId);
+          if (parents?.length >= 2) {
+            xSum += parents[0];
+            ySum += parents[1];
+            ++count;
+          }
+        });
+        return count > 0 ? [xSum / count, ySum / count] : undefined;
+      }
+    }
+  };
+
   const exportPoint = (id: string, isLast: boolean) => {
     const { parents: _parents, others } = getPointExportables(id);
     const parents = `"parents": [${_parents[0]}, ${_parents[1]}]`;
@@ -214,12 +269,14 @@ export const exportGeometryJson = (changes: string[]) => {
   const validParentIds = (id: string) => {
     const objInfo = objectInfoMap[id];
     const _changes = objInfo.changes;
-    const parents = objInfo.type === "movableLine"
-                      ? getMovableLinePointIds(id)
-                      : _changes[0].parents;
-    return parents?.map(vId => {
-      const vertexId = vId as string;
-      return isValidId(vertexId) ? `"${vertexId}"` : undefined;
+    const parents = objInfo.type === "comment"
+                      ? [(_changes[0].properties as JXGProperties)?.anchor]
+                      : objInfo.type === "movableLine"
+                          ? getMovableLinePointIds(id)
+                          : _changes[0].parents;
+    return parents?.map(pId => {
+      const parentId = pId as string;
+      return isValidId(parentId) ? `"${parentId}"` : undefined;
     }).filter(vId => !!vId) || [];
   };
 
@@ -275,6 +332,7 @@ export const exportGeometryJson = (changes: string[]) => {
   };
 
   const exportFnMap: Partial<Record<JXGObjectType, (id: string, isLast: boolean) => string>> = {
+    comment: exportComment,
     image: exportImage,
     movableLine: exportMovableLine,
     point: exportPoint,
