@@ -185,6 +185,22 @@ class ClueCanvas {
         }
     }
 
+    exportTile(tileClass) {
+        let clipSpy;
+        cy.window().then((win) => {
+            // https://github.com/cypress-io/cypress-example-recipes/tree/master/examples/stubbing-spying__window
+            clipSpy = cy.spy(win.navigator.clipboard, "writeText");
+        });
+        // platform test from hot-keys library
+        const isMac = navigator.platform.indexOf("Mac") === 0;
+        const cmdKey = isMac ? "meta" : "ctrl";
+        cy.get(`.primary-workspace .tool-tile.${tileClass}`)
+            .type(`{${cmdKey}+option+e}`)
+            .then(() => {
+                expect(clipSpy).to.have.been.called;
+            });
+    }
+
     deleteTile(tile) {
         switch (tile) {
             case 'text':
