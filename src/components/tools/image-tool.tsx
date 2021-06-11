@@ -7,7 +7,7 @@ import { BaseComponent } from "../base";
 import { EmptyImagePrompt } from "./image/empty-image-prompt";
 import { ImageToolbar } from "./image/image-toolbar";
 import { ImageComponent } from "./image-component";
-import { IToolApi } from "./tool-api";
+import { IToolApi, TileResizeEntry } from "./tool-api";
 import { IToolTileProps } from "./tool-tile";
 import { IDocumentContext } from "../../models/document/document-types";
 import { debouncedSelectTile } from "../../models/stores/ui";
@@ -143,7 +143,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
       handleDocumentScroll: (x: number, y: number) => {
         this.toolbarToolApi?.handleDocumentScroll?.(x, y);
       },
-      handleTileResize: (entry: ResizeObserverEntry) => {
+      handleTileResize: (entry: TileResizeEntry) => {
         this.toolbarToolApi?.handleTileResize?.(entry);
       }
     });

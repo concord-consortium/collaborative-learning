@@ -77,7 +77,7 @@ class LabelSegmentDialog extends React.Component<IProps, IState> {
   private handleAccept = () => {
     const { polygon, points, onAccept } = this.props;
     const { initialLabelOption, labelOption } = this.state;
-    if (polygon && points && onAccept && (initialLabelOption !== labelOption)) {
+    if (polygon && points && (initialLabelOption !== labelOption)) {
       onAccept(polygon, points, labelOption);
     } else {
       this.handleCancel();

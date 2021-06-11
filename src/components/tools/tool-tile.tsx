@@ -10,6 +10,7 @@ import { kTableToolID } from "../../models/tools/table/table-content";
 import { kTextToolID } from "../../models/tools/text/text-content";
 import { kImageToolID } from "../../models/tools/image/image-content";
 import { kPlaceholderToolID } from "../../models/tools/placeholder/placeholder-content";
+import { kUnknownToolID } from "../../models/tools/unknown-content";
 import { getToolContentInfoById } from "../../models/tools/tool-content-info";
 import { BaseComponent } from "../base";
 import GeometryToolComponent from "./geometry-tool/geometry-tool";
@@ -18,7 +19,7 @@ import TextToolComponent from "./text-tool";
 import ImageToolComponent from "./image-tool";
 import DrawingToolComponent from "./drawing-tool/drawing-tool";
 import PlaceholderToolComponent from "./placeholder-tool/placeholder-tool";
-import { IToolApi, ToolApiInterfaceContext } from "./tool-api";
+import { IToolApi, TileResizeEntry, ToolApiInterfaceContext } from "./tool-api";
 import { HotKeys } from "../../utilities/hot-keys";
 import { TileCommentsComponent } from "./tile-comments";
 import { LinkIndicatorComponent } from "./link-indicator";
@@ -98,7 +99,9 @@ const kToolComponentMap: Record<string, ToolComponentInfo> = {
         [kGeometryToolID]: { ToolComponent: GeometryToolComponent, toolTileClass: "geometry-tool-tile" },
         [kImageToolID]: { ToolComponent: ImageToolComponent, toolTileClass: "image-tool-tile" },
         [kTableToolID]: { ToolComponent: TableToolComponent, toolTileClass: "table-tool-tile" },
-        [kTextToolID]: { ToolComponent: TextToolComponent, toolTileClass: "text-tool-tile" }
+        [kTextToolID]: { ToolComponent: TextToolComponent, toolTileClass: "text-tool-tile" },
+        // TODO: should really have a separate unknown tool that shows an "unknown tile" message
+        [kUnknownToolID]: { ToolComponent: PlaceholderToolComponent, toolTileClass: "placeholder-tile" }
       };
 
 interface IDragTileButtonProps {
@@ -176,7 +179,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
 
   public componentDidUpdate() {
     if (this.domElement && !this.resizeObserver) {
-      this.resizeObserver = new ResizeObserver(entries => {
+      this.resizeObserver = new ResizeObserver((entries: ResizeObserverEntry[]) => {
         const handler = this.getToolResizeHandler();
         if (handler) {
           for (const entry of entries) {
@@ -225,7 +228,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
       style.width = `${Math.round(100 * widthPct / 100)}%`;
     }
     return (
-      <div className={classes}
+      <div className={classes} data-testid="tool-tile"
           ref={elt => this.domElement = elt}
           data-tool-id={model.id}
           style={style}
@@ -460,7 +463,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     if (this.domElement && handler) {
       const bounds = this.domElement.getBoundingClientRect();
       const kBorderSize = 4;
-      const entry: ResizeObserverEntry = {
+      const entry: TileResizeEntry = {
         target: this.domElement,
         contentRect: {
           x: 0,
@@ -470,7 +473,8 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
           top: 0,
           right: bounds.width - kBorderSize,
           bottom: bounds.height - kBorderSize,
-          left: 0
+          left: 0,
+          toJSON: () => ""
         }
       };
       // calling the resize handler triggers a re-render
