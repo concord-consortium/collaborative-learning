@@ -1,15 +1,17 @@
+import { assign, castArray, each, keys, omit, size as _size } from "lodash";
 import { types, Instance, SnapshotOut, IAnyStateTreeNode } from "mobx-state-tree";
 import { Lambda } from "mobx";
 import { Optional } from "utility-types";
 import { SelectionStoreModelType } from "../../stores/selection";
 import { addLinkedTable, removeLinkedTable } from "../table-links";
-import { registerToolContentInfo } from "../tool-content-info";
+import { ITileExportOptions, registerToolContentInfo } from "../tool-content-info";
 import {
   getRowLabelFromLinkProps, IColumnProperties, ICreateRowsProperties, IRowProperties,
   ITableChange, ITableLinkProperties
 } from "../table/table-change";
 import { getAxisLabelsFromDataSet, getTableContent, kLabelAttrName } from "../table/table-content";
 import { canonicalizeValue, linkedPointId } from "../table/table-model-types";
+import { exportGeometryJson } from "./geometry-export";
 import { defaultGeometryBoardChange, preprocessImportFormat } from "./geometry-import";
 import { getAxisAnnotations, getBaseAxisLabels, getObjectById, guessUserDesiredBoundingBox,
           kAxisBuffer, syncAxisLabels } from "./jxg-board";
@@ -24,7 +26,6 @@ import {
   isPolygon, isVertexAngle, isVisibleEdge, kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, toObj
 } from "./jxg-types";
 import { IDataSet } from "../../data/data-set";
-import { assign, castArray, each, keys, omit, size as _size } from "lodash";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { getTileContentById } from "../../../utilities/mst-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
@@ -282,6 +283,9 @@ export const GeometryContentModel = types
     },
     selectedObjects(board: JXG.Board) {
       return board.objectsList.filter(obj => self.isSelected(obj.id));
+    },
+    exportJson(options?: ITileExportOptions) {
+      return exportGeometryJson(self.changes);
     }
   }))
   .actions(self => ({

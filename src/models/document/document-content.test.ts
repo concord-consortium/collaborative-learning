@@ -4,6 +4,9 @@ import {
 import { IDropRowInfo } from "../../models/document/document-content";
 import { cloneTileSnapshotWithoutId, IDragTileItem } from "../../models/tools/tool-tile";
 import { defaultTextContent } from "../tools/text/text-content";
+import { IDocumentExportOptions } from "../tools/tool-content-info";
+import { safeJsonParse } from "../../utilities/js-utils";
+import placeholderImage from "../../assets/image_placeholder.png";
 
 // mock uniqueId so we can recognize auto-generated IDs
 jest.mock("../../utilities/js-utils", () => {
@@ -11,6 +14,12 @@ jest.mock("../../utilities/js-utils", () => {
   return {
     uniqueId: () => `testid-${uniqueId()}`,
     ...others
+  };
+});
+
+jest.mock("../../utilities/mst-utils", () => {
+  return {
+    getParentWithTypeName: () => null
   };
 });
 
@@ -23,6 +32,39 @@ jest.mock("../../lib/logger", () => ({
   }
 }));
 
+function parsedExport(content: DocumentContentModelType, options?: IDocumentExportOptions) {
+  const json = content.exportAsJson(options);
+  const parsed = safeJsonParse(json);
+  if (parsed) {
+    // console.log("Parsed Content\n--------------\n", json);
+    const prepareTileForMatch = (tile: any) => {
+      if (tile?.content?.type === "Geometry") {
+        // eliminate board properties to make matching more robust for tests
+        delete tile.content.board;
+      }
+      if (tile?.content?.type === "Image") {
+        if (tile.content.url !== placeholderImage) {
+          tile.content.url = "image/url";
+        }
+      }
+    };
+    parsed.tiles.forEach((tileOrRow: any) => {
+      if (Array.isArray(tileOrRow)) {
+        tileOrRow.forEach(tile => {
+          prepareTileForMatch(tile);
+        });
+      }
+      else {
+        prepareTileForMatch(tileOrRow);
+      }
+    });
+  }
+  else {
+    console.warn("PARSE ERROR\n-----------\n", json);
+  }
+  return parsed;
+}
+
 describe("DocumentContentModel", () => {
   let documentContent: DocumentContentModelType;
 
@@ -30,10 +72,17 @@ describe("DocumentContentModel", () => {
     documentContent = DocumentContentModel.create({});
   });
 
+  function parsedContentExport(options?: IDocumentExportOptions) {
+    return parsedExport(documentContent, options);
+  }
+
   it("behaves like empty content when empty", () => {
+    expect(documentContent.isEmpty).toBe(true);
+    expect(documentContent.firstTile).toBeUndefined();
     expect(documentContent.rowCount).toBe(0);
     expect(documentContent.indexOfLastVisibleRow).toBe(-1);
     expect(documentContent.defaultInsertRow).toBe(0);
+    expect(parsedContentExport()).toEqual({ tiles: [] });
   });
 
   it("allows the tool tiles to be added", () => {
@@ -41,11 +90,24 @@ describe("DocumentContentModel", () => {
     documentContent.addTile("text");
     expect(documentContent.tileMap.size).toBe(1);
     // adding geometry tool adds sidecar text tool
-    documentContent.addTile("geometry", {
-      addSidecarNotes: true
-    });
+    documentContent.addTile("geometry", { addSidecarNotes: true });
     expect(documentContent.tileMap.size).toBe(3);
     expect(documentContent.defaultInsertRow).toBe(2);
+    documentContent.addTile("table");
+    expect(documentContent.tileMap.size).toBe(4);
+    documentContent.addTile("drawing");
+    expect(documentContent.tileMap.size).toBe(5);
+    expect(parsedContentExport()).toEqual({
+      tiles: [
+        { content: { type: "Text", format: "html", text: ["<p></p>"] } },
+        [
+          { content: { type: "Geometry", objects: [] } },
+          { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+        ],
+        { content: { type: "Table", columns: [{ name: "x" }, { name: "y" }] } },
+        { content: { type: "Drawing", objects: [] } }
+      ]
+    });
   });
 
   it("allows the tool tiles to be added as new rows at specified locations", () => {
@@ -92,6 +154,15 @@ describe("DocumentContentModel", () => {
     const rowIndex2 = documentContent.rowOrder.findIndex((id: string) => id === rowId2);
 
     expect(rowIndex2).toBe(3);
+
+    expect(parsedContentExport()).toEqual({
+      tiles: [
+        { content: { type: "Text", format: "html", text: ["<p></p>"] } },
+        { content: { type: "Image", url: placeholderImage } },
+        { content: { type: "Text", format: "html", text: ["<p></p>"] } },
+        { content: { type: "Image", url: placeholderImage } }
+      ]
+    });
   });
 
   it("allows the tool tiles to be added at side of existing rows", () => {
@@ -122,6 +193,16 @@ describe("DocumentContentModel", () => {
     textTile2RowIndex1 = documentContent.rowOrder.findIndex((id: string) => id === textTile2RowId);
 
     expect(textTile2RowIndex1).toBe(1);
+
+    expect(parsedContentExport()).toEqual({
+      tiles: [
+        { content: { type: "Text", format: "html", text: ["<p></p>"] } },
+        [
+          { content: { type: "Image", url: placeholderImage } },
+          { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+        ]
+      ]
+    });
   });
 
   it("allows the geometry tiles to be added with sidecar text as new row", () => {
@@ -155,6 +236,16 @@ describe("DocumentContentModel", () => {
     const textTile2RowIndex1 = documentContent.rowOrder.findIndex((id: string) => id === textTile2RowId);
 
     expect(textTile2RowIndex1).toBe(2);
+    expect(parsedContentExport()).toEqual({
+      tiles: [
+        { content: { type: "Text", format: "html", text: ["<p></p>"] } },
+        [
+          { content: { type: "Geometry", objects: [] } },
+          { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+        ],
+        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+      ]
+    });
   });
 
   it("allows the geometry tiles to be added with sidecar text at side of existing rows", () => {
@@ -188,6 +279,16 @@ describe("DocumentContentModel", () => {
     const textTile2RowIndex1 = documentContent.rowOrder.findIndex((id: string) => id === textTile2RowId);
 
     expect(textTile2RowIndex1).toBe(1);
+    expect(parsedContentExport()).toEqual({
+      tiles: [
+        { content: { type: "Text", format: "html", text: ["<p></p>"] } },
+        [
+          { content: { type: "Geometry", objects: [] } },
+          { content: { type: "Text", format: "html", text: ["<p></p>"] } },
+          { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+        ]
+      ]
+    });
   });
 
 });
@@ -195,6 +296,8 @@ describe("DocumentContentModel", () => {
 describe("DocumentContentModel -- sectioned documents --", () => {
 
   const content = DocumentContentModel.create({});
+
+  const parsedContentExport = () => parsedExport(content);
 
   function isPlaceholderSection(sectionId: string) {
     const rows = content.getRowsInSection(sectionId);
@@ -249,6 +352,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.isPlaceholderRow(content.getRowByIndex(3)!)).toBe(true);
     expect(isPlaceholderSection("B")).toBe(true);
     expect(content.defaultInsertRow).toBe(1);
+    expect(parsedContentExport()).toEqual({ tiles: [] });
   });
 
   it("will remove placeholder tiles when adding a new tile in the last section", () => {
@@ -259,6 +363,11 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isPlaceholderSection("A")).toBe(true);
     expect(isContentSection("B")).toBe(true);
     expect(content.defaultInsertRow).toBe(4);
+    expect(parsedContentExport()).toEqual({
+      tiles: [
+        { content: { type: "Text", format: "html", text: ["<p>foo</p>"] } }
+      ]
+    });
   });
 
   it("will remove placeholder tiles when adding a new tile in an interior section", () => {
@@ -269,6 +378,12 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isContentSection("A")).toBe(true);
     expect(isContentSection("B")).toBe(true);
     expect(content.defaultInsertRow).toBe(4);
+    expect(parsedContentExport()).toEqual({
+      tiles: [
+        { content: { type: "Text", format: "html", text: ["<p>foo</p>"] } },
+        { content: { type: "Text", format: "html", text: ["<p>foo</p>"] } }
+      ]
+    });
   });
 
   it("will restore placeholder tiles when deleting the last row in an interior section", () => {
@@ -280,6 +395,11 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isPlaceholderSection("A")).toBe(true);
     expect(isContentSection("B")).toBe(true);
     expect(content.defaultInsertRow).toBe(4);
+    expect(parsedContentExport()).toEqual({
+      tiles: [
+        { content: { type: "Text", format: "html", text: ["<p>foo</p>"] } }
+      ]
+    });
 });
 
   it("will restore placeholder tiles when deleting the last row in the last section", () => {
@@ -291,6 +411,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isPlaceholderSection("A")).toBe(true);
     expect(isPlaceholderSection("B")).toBe(true);
     expect(content.defaultInsertRow).toBe(1);
+    expect(parsedContentExport()).toEqual({ tiles: [] });
   });
 
   it("will add/remove placeholder rows when moving entire rows (3 => 1)", () => {
@@ -303,6 +424,11 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isContentSection("A")).toBe(true);
     expect(isPlaceholderSection("B")).toBe(true);
     expect(content.defaultInsertRow).toBe(2);
+    expect(parsedContentExport()).toEqual({
+      tiles: [
+        { content: { type: "Text", format: "html", text: ["<p>foo</p>"] } }
+      ]
+    });
   });
 
   it("will add/remove placeholder rows when moving entire rows (1 => 3)", () => {
@@ -313,6 +439,11 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isPlaceholderSection("A")).toBe(true);
     expect(isContentSection("B")).toBe(true);
     expect(content.defaultInsertRow).toBe(4);
+    expect(parsedContentExport()).toEqual({
+      tiles: [
+        { content: { type: "Text", format: "html", text: ["<p>foo</p>"] } }
+      ]
+    });
   });
 
   it("will add/remove placeholder rows when moving a tile back to a new row", () => {
@@ -324,6 +455,11 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isContentSection("A")).toBe(true);
     expect(isPlaceholderSection("B")).toBe(true);
     expect(content.defaultInsertRow).toBe(2);
+    expect(parsedContentExport()).toEqual({
+      tiles: [
+        { content: { type: "Text", format: "html", text: ["<p>foo</p>"] } }
+      ]
+    });
   });
 
   it("will add/remove placeholder rows when moving a tile forward to a new row", () => {
@@ -335,6 +471,11 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isPlaceholderSection("A")).toBe(true);
     expect(isContentSection("B")).toBe(true);
     expect(content.defaultInsertRow).toBe(4);
+    expect(parsedContentExport()).toEqual({
+      tiles: [
+        { content: { type: "Text", format: "html", text: ["<p>foo</p>"] } }
+      ]
+    });
   });
 
   it("will add/remove placeholder rows when moving a tile back to an existing row", () => {
@@ -346,6 +487,11 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isContentSection("A")).toBe(true);
     expect(isPlaceholderSection("B")).toBe(true);
     expect(content.defaultInsertRow).toBe(2);
+    expect(parsedContentExport()).toEqual({
+      tiles: [
+        { content: { type: "Text", format: "html", text: ["<p>foo</p>"] } }
+      ]
+    });
   });
 
   it("will add/remove placeholder rows when moving a tile forward to an existing row", () => {
@@ -356,6 +502,11 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.rowCount).toBe(4);
     expect(isPlaceholderSection("A")).toBe(true);
     expect(isContentSection("B")).toBe(true);
+    expect(parsedContentExport()).toEqual({
+      tiles: [
+        { content: { type: "Text", format: "html", text: ["<p>foo</p>"] } }
+      ]
+    });
   });
 
   it("deleteTile() will add/remove placeholder rows", () => {
@@ -366,6 +517,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.rowCount).toBe(4);
     expect(isPlaceholderSection("A")).toBe(true);
     expect(isPlaceholderSection("B")).toBe(true);
+    expect(parsedContentExport()).toEqual({ tiles: [] });
   });
 
   it("addTile() will add/remove placeholder rows", () => {
@@ -375,6 +527,11 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.rowCount).toBe(4);
     expect(isPlaceholderSection("A")).toBe(true);
     expect(isContentSection("B")).toBe(true);
+    expect(parsedContentExport()).toEqual({
+      tiles: [
+        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+      ]
+    });
   });
 
   it("moveTile() will add/remove placeholder rows", () => {
@@ -385,30 +542,59 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.rowCount).toBe(4);
     expect(isContentSection("A")).toBe(true);
     expect(isPlaceholderSection("B")).toBe(true);
+    expect(parsedContentExport()).toEqual({
+      tiles: [
+        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+      ]
+    });
 
     content.moveTile(tileId, { rowDropIndex: 3, rowDropLocation: "left", rowInsertIndex: 3 });
     // [Header:A, Placeholder, Header:B, Text]
     expect(content.rowCount).toBe(4);
     expect(isPlaceholderSection("A")).toBe(true);
     expect(isContentSection("B")).toBe(true);
+    expect(parsedContentExport()).toEqual({
+      tiles: [
+        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+      ]
+    });
 
     content.moveTile(tileId, { rowInsertIndex: 1 });
     // [Header:A, Text, Header:B, Placeholder]
     expect(content.rowCount).toBe(4);
     expect(isContentSection("A")).toBe(true);
     expect(isPlaceholderSection("B")).toBe(true);
+    expect(parsedContentExport()).toEqual({
+      tiles: [
+        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+      ]
+    });
 
     content.moveTile(tileId, { rowInsertIndex: 3 });
     // [Header:A, Placeholder, Header:B, Text]
     expect(content.rowCount).toBe(4);
     expect(isPlaceholderSection("A")).toBe(true);
     expect(isContentSection("B")).toBe(true);
+    expect(parsedContentExport()).toEqual({
+      tiles: [
+        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+      ]
+    });
 
     content.addTile("geometry", { addSidecarNotes: true, insertRowInfo: { rowInsertIndex: 2 } });
     // [Header:A, [Geometry, Text], Header:B, Text]
     expect(content.rowCount).toBe(4);
     expect(isContentSection("A", 2)).toBe(true);
     expect(isContentSection("B")).toBe(true);
+    expect(parsedContentExport()).toEqual({
+      tiles: [
+        [
+          { content: { type: "Geometry", objects: [] } },
+          { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+        ],
+        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+      ]
+    });
 
     const geometryId = content.getRowByIndex(1)!.tiles[0].tileId;
     content.moveTile(geometryId, { rowDropIndex: 3, rowDropLocation: "left", rowInsertIndex: 3 });
@@ -416,22 +602,65 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.rowCount).toBe(4);
     expect(isContentSection("A")).toBe(true);
     expect(isContentSection("B", 2)).toBe(true);
+    expect(parsedContentExport()).toEqual({
+      tiles: [
+        { content: { type: "Text", format: "html", text: ["<p></p>"] } },
+        [
+          { content: { type: "Geometry", objects: [] } },
+          { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+        ]
+      ]
+    });
 
     content.moveTile(geometryId, { rowDropIndex: 1, rowDropLocation: "left", rowInsertIndex: 1 });
     // [Header:A, [Geometry, Text], Header:B, Text]
     expect(content.rowCount).toBe(4);
     expect(isContentSection("A", 2)).toBe(true);
     expect(isContentSection("B")).toBe(true);
+    expect(parsedContentExport()).toEqual({
+      tiles: [
+        [
+          { content: { type: "Geometry", objects: [] } },
+          { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+        ],
+        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+      ]
+    });
+  });
+
+  it("moveTileToRow() will move tiles within a row", () => {
+    // [Header:A, [Geometry, Text], Header:B, Text]
+    const tileId = content.getRowByIndex(1)!.tiles[1].tileId;
+    content.moveTileToRow(tileId, 1, 0);
+    // [Header:A, [Text, Geometry], Header:B, Text]
+    expect(content.rowCount).toBe(4);
+    expect(isContentSection("A", 2)).toBe(true);
+    expect(isContentSection("B")).toBe(true);
+    expect(parsedContentExport()).toEqual({
+      tiles: [
+        [
+          { content: { type: "Text", format: "html", text: ["<p></p>"] } },
+          { content: { type: "Geometry", objects: [] } }
+        ],
+        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+      ]
+    });
   });
 
   it("deleteTile() will remove individual tiles from rows", () => {
-    // [Header:A, [Geometry, Text], Header:B, Text]
-    const tileId = content.getRowByIndex(1)!.tiles[1].tileId;
+    // [Header:A, [Text, Geometry], Header:B, Text]
+    const tileId = content.getRowByIndex(1)!.tiles[0].tileId;
     content.deleteTile(tileId);
     // [Header:A, Geometry, Header:B, Text]
     expect(content.rowCount).toBe(4);
     expect(isContentSection("A")).toBe(true);
     expect(isContentSection("B")).toBe(true);
+    expect(parsedContentExport()).toEqual({
+      tiles: [
+        { content: { type: "Geometry", objects: [] } },
+        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+      ]
+    });
   });
 
 });
@@ -453,17 +682,30 @@ describe("DocumentContentModel", () => {
     const srcContent: any = {
             tiles: [
               { content: { isSectionHeader: true, sectionId: "Foo" } },
-              { content: { type: "Text", text: "foo" } }
+              { content: { type: "Text", text: "foo" } },
+              [
+                { content: { type: "Text", text: "bar" } },
+                { content: { type: "Text", text: "baz" } }
+              ]
             ]
           };
     const content = DocumentContentModel.create(srcContent);
-    expect(content.rowCount).toBe(2);
+    expect(content.rowCount).toBe(3);
     const row = content.getRowByIndex(1);
     expect(row!.tileCount).toBe(1);
     const tileId = row!.getTileIdAtIndex(0);
-    const tile = content.tileMap.get(tileId);
+    const tile = tileId ? content.tileMap.get(tileId) : undefined;
     const tileContent = tile!.content;
     expect(tileContent.type).toBe("Text");
+    expect(parsedExport(content)).toEqual({
+      tiles: [
+        { content: { type: "Text", format: "html", text: ["<p>foo</p>"] } },
+        [
+          { content: { type: "Text", format: "html", text: ["<p>bar</p>"] } },
+          { content: { type: "Text", format: "html", text: ["<p>baz</p>"] } }
+        ]
+      ]
+    });
   });
 
   it("can import authored content with sections and placeholders", () => {
@@ -687,7 +929,7 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
     }
   };
   beforeEach(() => {
-      documentContent = DocumentContentModel.create(srcContent);
+    documentContent = DocumentContentModel.create(srcContent);
   });
 
   const getDragTiles = (tileIds: string[]) => {
@@ -740,6 +982,39 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
         nowWhatDoYouKnowRow1: [ "nowWhatDoYouKnowPlaceholder" ]
     }
   */
+
+  it("can export more complicated content", () => {
+    expect(documentContent.isEmpty).toBe(false);
+    expect(documentContent.firstTile!.id).toBe("textTool1");
+    expect(documentContent.getTileCountsPerSection(["introduction"])).toEqual({ introduction: 2 });
+    expect(documentContent.getTileCountsPerSection(["initialChallenge"])).toEqual({ initialChallenge: 5 });
+    expect(documentContent.getTilesOfType("Text")).toEqual(["textTool1", "textTool2"]);
+    expect(documentContent.getTilesOfType("Drawing")).toEqual(["drawingTool1", "drawingTool2"]);
+    expect(parsedExport(documentContent)).toEqual({
+      tiles: [
+        { content: { type: "Text", format: "html", text: ["<p>Some text</p>"] } },
+        { content: { type: "Drawing", objects: [] } },
+        [
+          {
+            content: {
+              type: "Table",
+              columns: [
+                { name: "x", values: [1, 2, 3] },
+                { name: "y", values: [2, 4, 6] }
+              ]
+            }
+          },
+          { content: { type: "Image", url: "image/url" } }
+        ],
+        [
+          { content: { type: "Geometry", objects: [] } },
+          { content: { type: "Text", format: "html", text: ["<p>More text</p>"] } },
+          { content: { type: "Drawing", objects: [] } }
+        ]
+      ]
+    });
+  });
+
   describe("single tile moves", () => {
     it("can move a tile with its own row before another tile in its own row", () => {
       // move textToo11 to the left of drawingTool1

@@ -1,8 +1,9 @@
 import { Parser } from "expr-eval";
 import { castArray, each } from "lodash";
 import { types, IAnyStateTreeNode, Instance, SnapshotIn, SnapshotOut } from "mobx-state-tree";
+import { exportTableContentAsJson } from "./table-export";
 import { getRowLabel, kSerializedXKey, canonicalizeValue, isLinkableValue } from "./table-model-types";
-import { registerToolContentInfo } from "../tool-content-info";
+import { IDocumentExportOptions, registerToolContentInfo } from "../tool-content-info";
 import { addLinkedTable, removeLinkedTable } from "../table-links";
 import { IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
 import { canonicalizeExpression } from "../../../components/tools/table-tool/expression-utils";
@@ -645,6 +646,11 @@ export const TableContentModel = types
       const dataSet = DataSet.create();
       self.applyChangesToDataSet(dataSet);
       return self.isValidDataSetForGeometryLink(dataSet);
+    },
+    exportJson(options?: IDocumentExportOptions) {
+      const dataSet = DataSet.create();
+      self.applyChangesToDataSet(dataSet);
+      return exportTableContentAsJson(self.metadata, dataSet);
     }
   }));
 

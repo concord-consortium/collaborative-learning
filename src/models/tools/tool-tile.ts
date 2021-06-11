@@ -1,6 +1,7 @@
 import { cloneDeep } from "lodash";
 import { getSnapshot, Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree";
 import { kPlaceholderToolID } from "./placeholder/placeholder-content";
+import { ITileExportOptions } from "./tool-content-info";
 import { findMetadata, ToolContentUnion } from "./tool-types";
 import { DisplayUserTypeEnum } from "../stores/user-types";
 import { uniqueId } from "../../utilities/js-utils";
@@ -60,6 +61,9 @@ export const ToolTileModel = types
     },
     get placeholderSectionId() {
       return (self.content.type === kPlaceholderToolID) ? self.content.sectionId : undefined;
+    },
+    exportJson(options?: ITileExportOptions): string | undefined {
+      return (self.content as any).exportJson?.(options);
     }
   }))
   .actions(self => ({

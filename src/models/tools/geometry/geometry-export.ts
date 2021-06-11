@@ -1,5 +1,6 @@
 import { castArray } from "lodash";
 import { safeJsonParse } from "../../../utilities/js-utils";
+import { comma, StringBuilder } from "../../../utilities/string-builder";
 import { JXGChange, JXGCoordPair, JXGImageParents, JXGObjectType, JXGProperties } from "./jxg-changes";
 import {
   getMovableLinePointIds, kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth
@@ -82,15 +83,7 @@ function getDependenciesFromChange(change: JXGChange, objectInfoMap: Record<stri
 export const exportGeometryJson = (changes: string[]) => {
   const objectInfoMap: Record<string, IGeomObjectInfo> = {};
   const orderedIds: string[] = [];
-  const lines: string[] = [];
-
-  const pushLine = (line: string, indent: number) => {
-    let space = "";
-    for (; space.length < indent; space += " ");
-    lines.push(space + line);
-  };
-
-  const comma = (condition: boolean) => condition ? "," : "";
+  const builder = new StringBuilder();
 
   const exportBoard = () => {
     if (!objectInfoMap.board) return;
@@ -110,14 +103,14 @@ export const exportGeometryJson = (changes: string[]) => {
                             : props.boundingBox[1] - yMin;
     const hasNames = (props.xName != null) || (props.yName != null);
     const hasLabels = (props.xAnnotation != null) || (props.yAnnotation != null);
-    pushLine(`"board": {`, 2);
-    pushLine(`"properties": {`, 4);
-    pushLine(`"axisMin": [${fix3(xMin)}, ${fix3(yMin)}],`, 6);
-    pushLine(`"axisRange": [${fix3(xRange)}, ${fix3(yRange)}]${comma(hasNames || hasLabels)}`, 6);
-    hasNames && pushLine(`"axisNames": ["${props.xName}", "${props.yName}"]${comma(hasLabels)}`, 6);
-    hasLabels && pushLine(`"axisLabels": ["${props.xAnnotation}", "${props.yAnnotation}"]`, 6);
-    pushLine(`}`, 4);
-    pushLine(`},`, 2);
+    builder.pushLine(`"board": {`, 2);
+    builder.pushLine(`"properties": {`, 4);
+    builder.pushLine(`"axisMin": [${fix3(xMin)}, ${fix3(yMin)}],`, 6);
+    builder.pushLine(`"axisRange": [${fix3(xRange)}, ${fix3(yRange)}]${comma(hasNames || hasLabels)}`, 6);
+    hasNames && builder.pushLine(`"axisNames": ["${props.xName}", "${props.yName}"]${comma(hasLabels)}`, 6);
+    hasLabels && builder.pushLine(`"axisLabels": ["${props.xAnnotation}", "${props.yAnnotation}"]`, 6);
+    builder.pushLine(`}`, 4);
+    builder.pushLine(`},`, 2);
   };
 
   const isValidId = (id: string) => objectInfoMap[id] && !objectInfoMap[id].isDeleted;
@@ -346,7 +339,7 @@ export const exportGeometryJson = (changes: string[]) => {
   };
 
   const exportObjects = () => {
-    pushLine(`"objects": [`, 2);
+    builder.pushLine(`"objects": [`, 2);
     let lastExportedId: string;
     orderedIds.forEach(id => {
       if (isExportable(id)) {
@@ -356,10 +349,10 @@ export const exportGeometryJson = (changes: string[]) => {
     orderedIds.forEach(id => {
       if (isExportable(id)) {
         const objLine = exportObject(id, id === lastExportedId);
-        objLine && castArray(objLine).forEach(line => pushLine(line, 4));
+        objLine && castArray(objLine).forEach(line => builder.pushLine(line, 4));
       }
     });
-    pushLine(`]`, 2);
+    builder.pushLine(`]`, 2);
   };
 
   // loop through each change, adding it to the set of changes that affect each object
@@ -423,20 +416,18 @@ export const exportGeometryJson = (changes: string[]) => {
     }
   });
 
-  pushLine(`"type": "Geometry",`, 2);
+  builder.pushLine("{");
+  builder.pushLine(`"type": "Geometry",`, 2);
   if (objectInfoMap.metadata) {
     let title = "";
     objectInfoMap.metadata.changes.forEach(change => {
       const changeTitle = (change.properties as JXGProperties)?.title;
       changeTitle && (title = changeTitle);
     });
-    title && pushLine(`"title": "${title}",`, 2);
+    title && builder.pushLine(`"title": "${title}",`, 2);
   }
   exportBoard();
   exportObjects();
-  return [
-    `{`,
-    ...lines,
-    `}`
-  ].join("\n");
+  builder.pushLine("}");
+  return builder.build();
 };
