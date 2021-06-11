@@ -199,7 +199,7 @@ class ClueCanvas {
             .then(() => {
                 expect(clipSpy.callCount).to.be.eq(1);
             })
-            .type(`{${cmdKey}+option+s}`)
+            .type(`{${cmdKey}+shift+s}`)
             .then(() => {
                 expect(clipSpy.callCount).to.be.eq(2);
             });

@@ -55,7 +55,7 @@ export class CanvasComponent extends React.Component<IProps> {
     };
 
     this.hotKeys.register({
-      "cmd-option-s": this.handleCopyDocumentJson
+      "cmd-shift-s": this.handleCopyDocumentJson
     });
   }
 
