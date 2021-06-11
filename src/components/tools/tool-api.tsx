@@ -1,5 +1,7 @@
 import { createContext } from "react";
+import { Optional } from "utility-types";
 
+export type TileResizeEntry = Optional<ResizeObserverEntry, "borderBoxSize" | "contentBoxSize">;
 export interface IToolApi {
   getTitle?: () => string | undefined;
   hasSelection?: () => boolean;
@@ -12,7 +14,7 @@ export interface IToolApi {
   getContentHeight?: () => number | undefined;
   exportContentAsTileJson?: () => string;
   handleDocumentScroll?: (x: number, y: number) => void;
-  handleTileResize?: (entry: ResizeObserverEntry) => void;
+  handleTileResize?: (entry: TileResizeEntry) => void;
 }
 
 export interface IToolApiInterface {

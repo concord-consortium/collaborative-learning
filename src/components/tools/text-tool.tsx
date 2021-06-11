@@ -10,7 +10,7 @@ import { debouncedSelectTile } from "../../models/stores/ui";
 import { TextContentModelType } from "../../models/tools/text/text-content";
 import { hasSelectionModifier } from "../../utilities/event-utils";
 import { TextToolbarComponent } from "./text-toolbar";
-import { IToolApi } from "./tool-api";
+import { IToolApi, TileResizeEntry } from "./tool-api";
 import { IToolTileProps } from "./tool-tile";
 
 import "./text-tool.sass";
@@ -88,7 +88,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
   private prevText: any;
   private textToolDiv: HTMLElement | null;
   private editor: Editor | undefined;
-  private tileContentRect: Omit<DOMRectReadOnly, "toJSON">;
+  private tileContentRect: DOMRectReadOnly;
   private toolbarToolApi: IToolApi | undefined;
 
   // map from slate type string to button icon name
@@ -146,9 +146,9 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
       handleDocumentScroll: (x: number, y: number) => {
         this.toolbarToolApi?.handleDocumentScroll?.(x, y);
       },
-      handleTileResize: (entry: ResizeObserverEntry) => {
+      handleTileResize: (entry: TileResizeEntry) => {
         const { x, y, width, height, top, left, bottom, right } = entry.contentRect;
-        this.tileContentRect = { x, y, width, height, top, left, bottom, right };
+        this.tileContentRect = { x, y, width, height, top, left, bottom, right, toJSON: () => "" };
         this.toolbarToolApi?.handleTileResize?.(entry);
       }
     });
