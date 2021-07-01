@@ -4,6 +4,7 @@
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const ESLintPlugin = require('eslint-webpack-plugin');
 const packageJson = require('./package.json');
 const fs = require('fs');
 const path = require('path');
@@ -57,12 +58,6 @@ module.exports = (env, argv) => {
               }
             ]
           }
-        },
-        {
-          test: /\.(js|json|jsx|tsx?)$/i,
-          exclude: /node_modules/,
-          enforce: 'pre',
-          loader: 'eslint-loader',
         },
         {
           test: /\.[tj]sx?$/i,
@@ -173,6 +168,7 @@ module.exports = (env, argv) => {
       warningsFilter: /export .* was not found in/
     },
     plugins: [
+      new ESLintPlugin(),
       new MiniCssExtractPlugin({
         filename: devMode ? 'index.css' : 'index.[hash].css'
       }),
