@@ -52,7 +52,7 @@ describe("logger", () => {
 
   describe ("tile CRUD events", () => {
 
-    it("can log a simple message with all the appropriate properties", async (done) => {
+    it("can log a simple message with all the appropriate properties", (done) => {
       mock.post(/.*/, (req, res) => {
         expect(req.header("Content-Type")).toEqual("application/json; charset=UTF-8");
 
@@ -75,7 +75,7 @@ describe("logger", () => {
       Logger.log(LogEventName.CREATE_TILE, { foo: "bar" });
     });
 
-    it("can log tile creation", async (done) => {
+    it("can log tile creation", (done) => {
       const tile = ToolTileModel.create({ content: defaultTextContent() });
 
       mock.post(/.*/, (req, res) => {
@@ -97,7 +97,7 @@ describe("logger", () => {
       Logger.logTileEvent(LogEventName.CREATE_TILE, tile);
     });
 
-    it("can log tile creation in a document", async (done) => {
+    it("can log tile creation in a document", (done) => {
       const document = DocumentModel.create({
         type: ProblemDocument,
         uid: "1",
@@ -128,7 +128,7 @@ describe("logger", () => {
       document.content.userAddTile("text");
     });
 
-    it("can log copying tiles between documents", async (done) => {
+    it("can log copying tiles between documents", (done) => {
       const sourceDocument = DocumentModel.create({
         type: ProblemDocument,
         uid: "source-user",
@@ -190,7 +190,7 @@ describe("logger", () => {
   });
 
   describe("Tile changes", () => {
-    it("can log tile change events", async (done) => {
+    it("can log tile change events", (done) => {
       const tile = ToolTileModel.create({ content: defaultGeometryContent() });
       const change: JXGChange = { operation: "create", target: "point" };
 
@@ -240,7 +240,7 @@ describe("logger", () => {
       });
     });
 
-    it("can log opening the primary document", async (done) => {
+    it("can log opening the primary document", (done) => {
       mock.post(/.*/, (req, res) => {
         const request = JSON.parse(req.body());
 
@@ -255,7 +255,7 @@ describe("logger", () => {
       workspace.setPrimaryDocument(doc1);
     });
 
-    it("can log opening the comparison document", async (done) => {
+    it("can log opening the comparison document", (done) => {
       mock.post(/.*/, (req, res) => {
         const request = JSON.parse(req.body());
 
@@ -270,7 +270,7 @@ describe("logger", () => {
       workspace.setComparisonDocument(doc2);
     });
 
-    it("can log toggling the comparison panel", async (done) => {
+    it("can log toggling the comparison panel", (done) => {
       mock.post(/.*/, (req, res) => {
         const request = JSON.parse(req.body());
 
@@ -283,7 +283,7 @@ describe("logger", () => {
       workspace.toggleComparisonVisible();
     });
 
-    it("can log toggling of mode", async (done) => {
+    it("can log toggling of mode", (done) => {
       mock.post(/.*/, (req, res) => {
         const request = JSON.parse(req.body());
 

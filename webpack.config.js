@@ -114,8 +114,7 @@ module.exports = (env, argv) => {
               loader: 'url-loader',
               options: {
                 limit: 8192,
-                name: 'assets/images/[name].[hash:6].[ext]',
-                esModule: false
+                name: 'assets/images/[name].[hash:6].[ext]'
               }
             }
           ]
@@ -127,7 +126,6 @@ module.exports = (env, argv) => {
             {
               loader: 'css-loader',
               options: {
-                esModule: false,
                 modules: {
                   // required for :import from scss files
                   // cf. https://github.com/webpack-contrib/css-loader#separating-interoperable-css-only-and-css-module-features
@@ -144,8 +142,7 @@ module.exports = (env, argv) => {
           loader: 'url-loader',
           options: {
             limit: 8192,
-            name: 'assets/fonts/[name].[hash:6].[ext]',
-            esModule: false
+            name: 'assets/fonts/[name].[hash:6].[ext]'
           }
         },
         {
@@ -153,8 +150,7 @@ module.exports = (env, argv) => {
           test: /image_placeholder\.png$/,
           loader: 'file-loader',
           options: {
-            name: 'assets/images/[name].[ext]',
-            esModule: false
+            name: 'assets/images/[name].[ext]'
           }
         },
         {
@@ -164,8 +160,7 @@ module.exports = (env, argv) => {
           loader: 'url-loader',
           options: {
             limit: 8192,
-            name: 'assets/images/[name].[hash:6].[ext]',
-            esModule: false
+            name: 'assets/images/[name].[hash:6].[ext]'
           }
         }
       ]
