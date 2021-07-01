@@ -1,3 +1,4 @@
+import firebase from "firebase/app";
 import { DB } from "../db";
 import { SupportTarget, TeacherSupportModel, TeacherSupportModelType, ClassAudienceModel, AudienceEnum,
         AudienceModelType, GroupAudienceModel, UserAudienceModel, addSupportDocumentsToStore

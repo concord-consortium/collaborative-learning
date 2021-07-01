@@ -1,3 +1,4 @@
+import firebase from "firebase/app";
 import { DB } from "../db";
 import { BaseListener } from "./base-listener";
 

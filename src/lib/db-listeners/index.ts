@@ -1,3 +1,4 @@
+import firebase from "firebase/app";
 import { observable } from "mobx";
 import { IDisposer, onSnapshot } from "mobx-state-tree";
 

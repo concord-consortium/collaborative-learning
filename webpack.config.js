@@ -4,6 +4,7 @@
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const ESLintPlugin = require('eslint-webpack-plugin');
 const packageJson = require('./package.json');
 const fs = require('fs');
 const path = require('path');
@@ -59,12 +60,6 @@ module.exports = (env, argv) => {
           }
         },
         {
-          test: /\.(js|json|jsx|tsx?)$/i,
-          exclude: /node_modules/,
-          enforce: 'pre',
-          loader: 'eslint-loader',
-        },
-        {
           test: /\.[tj]sx?$/i,
           loader: 'ts-loader',
           exclude: /node_modules/
@@ -114,8 +109,7 @@ module.exports = (env, argv) => {
               loader: 'url-loader',
               options: {
                 limit: 8192,
-                name: 'assets/images/[name].[hash:6].[ext]',
-                esModule: false
+                name: 'assets/images/[name].[hash:6].[ext]'
               }
             }
           ]
@@ -127,7 +121,6 @@ module.exports = (env, argv) => {
             {
               loader: 'css-loader',
               options: {
-                esModule: false,
                 modules: {
                   // required for :import from scss files
                   // cf. https://github.com/webpack-contrib/css-loader#separating-interoperable-css-only-and-css-module-features
@@ -144,8 +137,7 @@ module.exports = (env, argv) => {
           loader: 'url-loader',
           options: {
             limit: 8192,
-            name: 'assets/fonts/[name].[hash:6].[ext]',
-            esModule: false
+            name: 'assets/fonts/[name].[hash:6].[ext]'
           }
         },
         {
@@ -153,8 +145,7 @@ module.exports = (env, argv) => {
           test: /image_placeholder\.png$/,
           loader: 'file-loader',
           options: {
-            name: 'assets/images/[name].[ext]',
-            esModule: false
+            name: 'assets/images/[name].[ext]'
           }
         },
         {
@@ -164,8 +155,7 @@ module.exports = (env, argv) => {
           loader: 'url-loader',
           options: {
             limit: 8192,
-            name: 'assets/images/[name].[hash:6].[ext]',
-            esModule: false
+            name: 'assets/images/[name].[hash:6].[ext]'
           }
         }
       ]
@@ -178,6 +168,7 @@ module.exports = (env, argv) => {
       warningsFilter: /export .* was not found in/
     },
     plugins: [
+      new ESLintPlugin(),
       new MiniCssExtractPlugin({
         filename: devMode ? 'index.css' : 'index.[hash].css'
       }),
