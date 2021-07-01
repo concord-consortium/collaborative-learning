@@ -1,3 +1,4 @@
+import firebase from "firebase/app";
 import { DB } from "../db";
 import { UserStarModel } from "../../models/tools/user-star";
 import { forEach } from "lodash";

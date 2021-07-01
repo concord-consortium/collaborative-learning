@@ -1,3 +1,4 @@
+import firebase from "firebase/app";
 import { DB } from "../db";
 import { TileCommentModel, TileCommentsModel } from "../../models/tools/tile-comments";
 import { forEach } from "lodash";

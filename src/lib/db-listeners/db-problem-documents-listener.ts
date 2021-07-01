@@ -1,3 +1,4 @@
+import firebase from "firebase/app";
 import { DB, Monitor } from "../db";
 import { DBOfferingUser, DBOfferingUserMap } from "../db-types";
 import { forEach } from "lodash";

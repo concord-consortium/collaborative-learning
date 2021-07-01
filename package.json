@@ -182,7 +182,7 @@
     "escape-string-regexp": "^4.0.0",
     "expr-eval": "^2.0.2",
     "file-saver": "^2.0.5",
-    "firebase": "^7.24.0",
+    "firebase": "^8.6.8",
     "immutable": "^3.8.2",
     "initials": "^3.1.1",
     "jsonwebtoken": "^8.5.1",

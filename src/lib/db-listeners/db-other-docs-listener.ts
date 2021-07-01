@@ -1,3 +1,4 @@
+import firebase from "firebase/app";
 import { DB } from "../db";
 import { DBOtherDocument, DBOtherPublication } from "../db-types";
 import {
