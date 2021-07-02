@@ -12,6 +12,7 @@ export interface IToolContentInfo {
   metadataClass?: any;
   addSidecarNotes?: boolean;
   defaultHeight?: number;
+  exportNonDefaultHeight?: boolean;
   defaultContent: (input?: any) => any;
   snapshotPostProcessor?: ToolTileModelContentSnapshotPostProcessor;
 }
@@ -38,6 +39,7 @@ export function getToolContentInfoByTool(tool: string) {
 }
 
 export interface ITileExportOptions {
+  rowHeight?: number;
 }
 
 export interface IDocumentExportOptions extends ITileExportOptions {

@@ -1340,6 +1340,7 @@ registerToolContentInfo({
   metadataClass: GeometryMetadataModel,
   addSidecarNotes: true,
   defaultHeight: kGeometryDefaultHeight,
+  exportNonDefaultHeight: true,
   defaultContent: defaultGeometryContent,
   snapshotPostProcessor: mapTileIdsInGeometrySnapshot
 });

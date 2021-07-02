@@ -264,5 +264,6 @@ registerToolContentInfo({
   tool: "drawing",
   modelClass: DrawingContentModel,
   defaultHeight: kDrawingDefaultHeight,
+  exportNonDefaultHeight: true,
   defaultContent: defaultDrawingContent
 });

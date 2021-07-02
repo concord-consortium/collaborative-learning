@@ -266,8 +266,14 @@ export const DocumentContentModel = types
     exportTileAsJson(tileInfo: TileLayoutModelType, options?: IDocumentExportOptions) {
       const { includeTileIds, ...otherOptions } = options || {};
       const tile = self.getTile(tileInfo.tileId);
-      const json = tile?.exportJson(otherOptions);
+      let json = tile?.exportJson(otherOptions);
       if (!json) return;
+      if (options?.rowHeight) {
+        // add comma before layout/height entry
+        json = json[json.length - 1] === "\n"
+                ? `${json.slice(0, json.length - 1)},\n`
+                : `${json},`;
+      }
 
       const builder = new StringBuilder();
       builder.pushLine("{");
@@ -275,8 +281,21 @@ export const DocumentContentModel = types
         builder.pushLine(`"id": "${tileInfo.tileId}",`, 2);
       }
       builder.pushBlock(`"content": ${json}`, 2);
+      options?.rowHeight && builder.pushLine(`"layout": { "height": ${options.rowHeight} }`, 2);
       builder.pushLine(`}${comma(!!options?.appendComma)}`);
       return builder.build();
+    }
+  }))
+  .views(self => ({
+    rowHeightToExport(row: TileRowModelType, tileId: string) {
+      if (!row?.height) return;
+      // we only export heights for specific tiles configured to do so
+      const tileType = self.getTile(tileId)?.content.type;
+      const tileContentInfo = tileType && getToolContentInfoById(tileType);
+      if (!tileContentInfo?.exportNonDefaultHeight) return;
+      // we only export heights when they differ from the default height for the tile
+      const defaultHeight = tileContentInfo.defaultHeight;
+      return defaultHeight && (row.height !== defaultHeight) ? row.height : undefined;
     }
   }))
   .views(self => ({
@@ -316,7 +335,9 @@ export const DocumentContentModel = types
         const tileExports = row?.tiles.map((tileInfo, tileIndex) => {
           const isLastTile = tileIndex === row.tiles.length - 1;
           const showComma = row.tiles.length > 1 ? !isLastTile : !isLastRow;
-          return self.exportTileAsJson(tileInfo, { ...options, appendComma: showComma });
+          const rowHeight = self.rowHeightToExport(row, tileInfo.tileId);
+          const rowHeightOption = rowHeight ? { rowHeight } : undefined;
+          return self.exportTileAsJson(tileInfo, { ...options, appendComma: showComma, ...rowHeightOption });
         }).filter(json => !!json);
         if (tileExports?.length) {
           // multiple tiles in a row are exported in an array

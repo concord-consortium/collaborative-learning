@@ -993,7 +993,8 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
     expect(parsedExport(documentContent)).toEqual({
       tiles: [
         { content: { type: "Text", format: "html", text: ["<p>Some text</p>"] } },
-        { content: { type: "Drawing", objects: [] } },
+        // explicit row height exported since it differs from drawing tool default
+        { content: { type: "Drawing", objects: [] }, layout: { height: 320 } },
         [
           {
             content: {
@@ -1009,7 +1010,8 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
         [
           { content: { type: "Geometry", objects: [] } },
           { content: { type: "Text", format: "html", text: ["<p>More text</p>"] } },
-          { content: { type: "Drawing", objects: [] } }
+          // explicit row height exported since it differs from drawing tool default
+          { content: { type: "Drawing", objects: [] }, layout: { height: 320 } }
         ]
       ]
     });
