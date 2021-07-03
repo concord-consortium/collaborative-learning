@@ -1060,6 +1060,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         const image: ImageObject = new ImageObject({
           type: "image",
           url,
+          filename: imageEntry.filename,
           x: 0,
           y: 0,
           width: imageEntry.width!,

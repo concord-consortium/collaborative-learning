@@ -1,6 +1,7 @@
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { comma, StringBuilder } from "../../../utilities/string-builder";
-import { DrawingObjectDataType } from "./drawing-objects";
+import { ITileExportOptions } from "../tool-content-info";
+import { DrawingObjectDataType, ImageDrawingObjectData } from "./drawing-objects";
 import { DrawingToolChange } from "./drawing-types";
 
 export interface IDrawingObjectInfo {
@@ -10,7 +11,7 @@ export interface IDrawingObjectInfo {
   isDeleted?: boolean;          // true if the object has been deleted
 }
 
-export const exportDrawingTileSpec = (changes: string[]) => {
+export const exportDrawingTileSpec = (changes: string[], options?: ITileExportOptions) => {
   const objectInfoMap: Record<string, IDrawingObjectInfo> = {};
   const orderedIds: string[] = [];
   const builder = new StringBuilder();
@@ -45,6 +46,12 @@ export const exportDrawingTileSpec = (changes: string[]) => {
       }
     }
     const { id: idData, type, ...others } = data;
+    if ((data.type === "image") && options?.transformImageUrl) {
+      if (data.filename) {
+        (others as Partial<ImageDrawingObjectData>).url = options.transformImageUrl(data.url, data.filename);
+        delete (others as Partial<ImageDrawingObjectData>).filename;
+      }
+    }
     const othersJson = JSON.stringify(others);
     const othersStr = othersJson.slice(1, othersJson.length - 1);
     builder.pushLine(`{ "type": "${objInfo.type}", "id": "${id}", ${othersStr} }${comma(!isLast)}`, 4);

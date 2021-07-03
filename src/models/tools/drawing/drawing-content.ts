@@ -129,7 +129,7 @@ export const DrawingContentModel = types
       return { stroke, fill, strokeDashArray, strokeWidth };
     },
     exportJson(options?: ITileExportOptions) {
-      return exportDrawingTileSpec(self.changes);
+      return exportDrawingTileSpec(self.changes, options);
     }
   }))
   .extend(self => {
