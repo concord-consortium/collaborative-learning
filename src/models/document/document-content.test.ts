@@ -420,6 +420,8 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     // [Header:A, Placeholder, Header:B, Text]
     content.moveRowToIndex(3, 1);
     // [Header:A, Text, Header:B, Placeholder]
+    // moving to row 0 when row 0 is a section header is a no-op
+    content.moveRowToIndex(1, 0);
     expect(content.rowCount).toBe(4);
     expect(isContentSection("A")).toBe(true);
     expect(isPlaceholderSection("B")).toBe(true);
@@ -983,13 +985,20 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
     }
   */
 
-  it("can export more complicated content", () => {
+  it("can query content", () => {
     expect(documentContent.isEmpty).toBe(false);
+    expect(documentContent.contentId).toBeDefined();
     expect(documentContent.firstTile!.id).toBe("textTool1");
+    expect(documentContent.getTileType("drawingTool1")).toBe("Drawing");
+    expect(documentContent.getTileContent("drawingTool1")?.type).toBe("Drawing");
     expect(documentContent.getTileCountsPerSection(["introduction"])).toEqual({ introduction: 2 });
     expect(documentContent.getTileCountsPerSection(["initialChallenge"])).toEqual({ initialChallenge: 5 });
     expect(documentContent.getTilesOfType("Text")).toEqual(["textTool1", "textTool2"]);
     expect(documentContent.getTilesOfType("Drawing")).toEqual(["drawingTool1", "drawingTool2"]);
+    expect(documentContent.getUniqueTitle("Geometry", "Graph", () => "Graph 1")).toBe("Graph 2");
+  });
+
+  it("can export more complicated content", () => {
     expect(parsedExport(documentContent)).toEqual({
       tiles: [
         { content: { type: "Text", format: "html", text: ["<p>Some text</p>"] } },

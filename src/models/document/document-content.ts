@@ -118,8 +118,10 @@ export const DocumentContentModel = types
         return tileId ? self.tileMap.get(tileId) : undefined;
       },
       getTileContent(tileId: string): ToolContentUnionType | undefined {
-        const tile = self.tileMap.get(tileId);
-        return tile?.content;
+        return self.tileMap.get(tileId)?.content;
+      },
+      getTileType(tileId: string) {
+        return self.tileMap.get(tileId)?.content.type;
       },
       get rowCount() {
         return self.rowOrder.length;
@@ -252,8 +254,7 @@ export const DocumentContentModel = types
       self.rowOrder.forEach(rowId => {
         const row = self.getRow(rowId);
         each(row?.tiles, tileEntry => {
-          const tile = self.getTile(tileEntry.tileId);
-          if (tile?.content.type === type) {
+          if (self.getTileType(tileEntry.tileId) === type) {
             tiles.push(tileEntry.tileId);
           }
         });
@@ -290,7 +291,7 @@ export const DocumentContentModel = types
     rowHeightToExport(row: TileRowModelType, tileId: string) {
       if (!row?.height) return;
       // we only export heights for specific tiles configured to do so
-      const tileType = self.getTile(tileId)?.content.type;
+      const tileType = self.getTileType(tileId);
       const tileContentInfo = tileType && getToolContentInfoById(tileType);
       if (!tileContentInfo?.exportNonDefaultHeight) return;
       // we only export heights when they differ from the default height for the tile
@@ -424,8 +425,7 @@ export const DocumentContentModel = types
     },
     removePlaceholderTilesFromRow(rowIndex: number) {
       const isPlaceholderTile = (tileId: string) => {
-        const tile = self.tileMap.get(tileId);
-        return tile?.content.type === "Placeholder";
+        return self.getTileType(tileId) === "Placeholder";
       };
       const row = self.getRowByIndex(rowIndex);
       row?.removeTilesFromRow(isPlaceholderTile);
