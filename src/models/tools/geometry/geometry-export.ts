@@ -1,4 +1,5 @@
 import { castArray } from "lodash";
+import { ITileExportOptions } from "../tool-content-info";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { comma, StringBuilder } from "../../../utilities/string-builder";
 import { JXGChange, JXGCoordPair, JXGImageParents, JXGObjectType, JXGProperties } from "./jxg-changes";
@@ -80,7 +81,7 @@ function getDependenciesFromChange(change: JXGChange, objectInfoMap: Record<stri
   return [];
 }
 
-export const exportGeometryJson = (changes: string[]) => {
+export const exportGeometryJson = (changes: string[], options?: ITileExportOptions) => {
   const objectInfoMap: Record<string, IGeomObjectInfo> = {};
   const orderedIds: string[] = [];
   const builder = new StringBuilder();
@@ -183,19 +184,22 @@ export const exportGeometryJson = (changes: string[]) => {
   const exportImage = (id: string, isLast: boolean) => {
     const _changes = objectInfoMap[id].changes;
     const inParents = _changes[0].parents as JXGImageParents;
+    const inFilename = (_changes[0].properties as JXGProperties)?.filename;
     const [url, coords, size] = inParents;
+    const transformedUrl = options?.transformImageUrl?.(url, inFilename) || url;
     let props: any = {};
     _changes.forEach(change => {
       props = {...props, ...change.properties };
     });
-    const { position, ...others } = props;
+    const { filename, position, ...others } = props;
     if (others.id !== id) others.id = id;
     const x = position?.[0] ?? coords?.[0];
     const y = position?.[1] ?? coords?.[1];
     const pxSize = size.map(s => Math.round(s * kGeometryDefaultPixelsPerUnit));
-    const parents = `"parents": { "url": "${url}", "coords": [${x}, ${y}], "size": [${pxSize[0]}, ${pxSize[1]}] }`;
+    const sizeValue = `[${pxSize[0]}, ${pxSize[1]}]`;
+    const parents = `"parents": { "url": "${transformedUrl}", "coords": [${x}, ${y}], "size": ${sizeValue} }`;
     const otherProps = Object.keys(others).length > 0
-                        ? `"properties": ${JSON.stringify(others)}`
+                        ? ` "properties": ${JSON.stringify(others)}`
                         : "";
     return `{ "type": "image", ${parents}${comma(!!otherProps)}${otherProps} }${comma(!isLast)}`;
   };

@@ -9,6 +9,7 @@ import { kGeometryToolID } from "../../models/tools/geometry/geometry-content";
 import { kTableToolID } from "../../models/tools/table/table-content";
 import { kTextToolID } from "../../models/tools/text/text-content";
 import { kImageToolID } from "../../models/tools/image/image-content";
+import { transformCurriculumImageUrl } from "../../models/tools/image/image-import-export";
 import { kPlaceholderToolID } from "../../models/tools/placeholder/placeholder-content";
 import { kUnknownToolID } from "../../models/tools/unknown-content";
 import { getToolContentInfoById } from "../../models/tools/tool-content-info";
@@ -328,9 +329,14 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleCopyImportJson = () => {
+    const { appConfig, unit } = this.stores;
+    const unitBasePath = appConfig.getUnitBasePath(unit.code);
+    const transformImageUrl = (url: string, filename?: string) => {
+      return transformCurriculumImageUrl(url, unitBasePath, filename);
+    };
     const toolApiInterface = this.context;
     const toolApi = toolApiInterface?.getToolApi(this.modelId);
-    const importJson = toolApi?.exportContentAsTileJson?.();
+    const importJson = toolApi?.exportContentAsTileJson?.({ transformImageUrl });
     importJson && navigator.clipboard.writeText(importJson);
     return true;
   }

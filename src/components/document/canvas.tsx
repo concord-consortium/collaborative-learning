@@ -1,9 +1,11 @@
 import { each } from "lodash";
-import { observer } from "mobx-react";
+import { inject, observer } from "mobx-react";
 import React from "react";
+import { BaseComponent } from "../base";
 import { DocumentContentComponent } from "./document-content";
 import { DocumentModelType } from "../../models/document/document";
 import { DocumentContentModelType } from "../../models/document/document-content";
+import { transformCurriculumImageUrl } from "../../models/tools/image/image-import-export";
 import {
   IToolApi, IToolApiInterface, IToolApiMap, ToolApiInterfaceContext, EditableToolApiInterfaceRefContext
 } from "../tools/tool-api";
@@ -26,8 +28,9 @@ interface IProps {
   viaTeacherDashboard?: boolean;
 }
 
+@inject("stores")
 @observer
-export class CanvasComponent extends React.Component<IProps> {
+export class CanvasComponent extends BaseComponent<IProps> {
 
   private toolApiMap: IToolApiMap = {};
   private toolApiInterface: IToolApiInterface;
@@ -132,8 +135,13 @@ export class CanvasComponent extends React.Component<IProps> {
 
   private handleCopyDocumentJson = () => {
     const {content, document } = this.props;
+    const { appConfig, unit } = this.stores;
+    const unitBasePath = appConfig.getUnitBasePath(unit.code);
     const documentContent = document?.content ?? content;
-    const json = documentContent?.exportAsJson({ includeTileIds: true });
+    const transformImageUrl = (url: string, filename?: string) => {
+      return transformCurriculumImageUrl(url, unitBasePath, filename);
+    };
+    const json = documentContent?.exportAsJson({ includeTileIds: true, transformImageUrl });
     json && navigator.clipboard.writeText(json);
   }
 }

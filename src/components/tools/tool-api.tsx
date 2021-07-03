@@ -1,5 +1,6 @@
 import { createContext } from "react";
 import { Optional } from "utility-types";
+import { ITileExportOptions } from "../../models/tools/tool-content-info";
 
 export type TileResizeEntry = Optional<ResizeObserverEntry, "borderBoxSize" | "contentBoxSize">;
 export interface IToolApi {
@@ -12,7 +13,7 @@ export interface IToolApi {
   getLinkIndex?: (index?: number) => number;
   getLinkedTables?: () => string[] | undefined;
   getContentHeight?: () => number | undefined;
-  exportContentAsTileJson?: () => string;
+  exportContentAsTileJson?: (options?: ITileExportOptions) => string;
   handleDocumentScroll?: (x: number, y: number) => void;
   handleTileResize?: (entry: TileResizeEntry) => void;
 }

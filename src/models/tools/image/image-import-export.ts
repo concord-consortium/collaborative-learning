@@ -1,12 +1,11 @@
 import { createChange, ImageToolChange } from "./image-change";
+import { ITileExportOptions } from "../tool-content-info";
 import { safeJsonParse } from "../../../utilities/js-utils";
 
 export interface IImageTileImportSpec {
   type: "Image";
   url: string;
 }
-
-const comma = (condition: boolean) => condition ? "," : "";
 
 export const isImageTileImportSpec = (snapshot: any): snapshot is IImageTileImportSpec =>
               (snapshot?.type === "Image") && (snapshot.url != null) && !snapshot.changes;
@@ -16,12 +15,13 @@ export const importImageTileSpec = (snapshot: IImageTileImportSpec) => {
   return { changes: [createChange(url)], ...others };
 };
 
-export interface IExportImageTileOptions {
-  transformUrl?: (url: string, filename?: string) => string;
-}
+export const transformCurriculumImageUrl = (url: string, unitBasePath?: string, filename?: string) => {
+  return unitBasePath && filename
+          ? `${unitBasePath}/images/${filename}`
+          : url;
+};
 
-export const exportImageTileSpec = (changes: string[], options?: IExportImageTileOptions) => {
-  const { transformUrl } = options || {};
+export const exportImageTileSpec = (changes: string[], options?: ITileExportOptions) => {
   let url = "";
   let filename = "";
   changes.forEach(change => {
@@ -31,11 +31,11 @@ export const exportImageTileSpec = (changes: string[], options?: IExportImageTil
       filename = imageChange.filename || "";
     }
   });
+  const transformedUrl = options?.transformImageUrl?.(url, filename) || url;
   return [
     `{`,
     `  "type": "Image",`,
-    `  "url": "${transformUrl?.(url, filename) || url}"${comma(!!filename)}`,
-    ...(filename ? [`  "filename": "${filename}"`] : []),
+    `  "url": "${transformedUrl}"`,
     `}`
   ].join("\n");
 };

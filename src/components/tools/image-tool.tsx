@@ -13,7 +13,7 @@ import { IDocumentContext } from "../../models/document/document-types";
 import { debouncedSelectTile } from "../../models/stores/ui";
 import { gImageMap, IImageContext, ImageMapEntryType } from "../../models/image-map";
 import { ImageContentModelType } from "../../models/tools/image/image-content";
-import { exportImageTileSpec } from "../../models/tools/image/image-import-export";
+import { ITileExportOptions } from "../../models/tools/tool-content-info";
 import { hasSelectionModifier } from "../../utilities/event-utils";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { isPlaceholderImage } from "../../utilities/image-utils";
@@ -127,18 +127,8 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     this.imageElt && this.resizeObserver.observe(this.imageElt);
 
     this.props.onRegisterToolApi({
-      exportContentAsTileJson: () => {
-        const changes = this.getContent().changes;
-        // for authoring, convert to curriculum-relative URL on export
-        const transformUrl = (url: string) => {
-          const { appConfig, unit } = this.stores;
-          const basePath = appConfig.getUnitBasePath(unit.code);
-          const filename = this.state.imageEntry?.filename;
-          return basePath && filename
-                  ? `${basePath}/images/${filename}`
-                  : url;
-        };
-        return exportImageTileSpec(changes, { transformUrl });
+      exportContentAsTileJson: (options?: ITileExportOptions) => {
+        return this.getContent().exportJson(options);
       },
       handleDocumentScroll: (x: number, y: number) => {
         this.toolbarToolApi?.handleDocumentScroll?.(x, y);

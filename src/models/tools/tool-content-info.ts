@@ -40,6 +40,7 @@ export function getToolContentInfoByTool(tool: string) {
 
 export interface ITileExportOptions {
   rowHeight?: number;
+  transformImageUrl?: (url: string, filename?: string) => string;
 }
 
 export interface IDocumentExportOptions extends ITileExportOptions {
