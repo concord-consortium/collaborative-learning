@@ -106,7 +106,6 @@ export default class GeometryToolComponent extends BaseComponent<IGeometryProps,
             return (
               <div className="geometry-size-me">
                 <GeometryContentComponent
-                  size={size}
                   onSetBoard={this.handleSetBoard}
                   onSetActionHandlers={this.handleSetActionHandlers}
                   onUpdateToolbar={this.handleUpdateToolbar}
