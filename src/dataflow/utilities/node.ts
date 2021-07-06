@@ -280,6 +280,7 @@ export const NodePlotColor = "#969696";
 export interface ProgramRunTime {
   text: string;
   val: number;
+  disabled?: boolean;
 }
 export interface IntervalTime extends ProgramRunTime {
   maxProgramRunTime: number;
@@ -304,23 +305,28 @@ export const ProgramRunTimes: ProgramRunTime[] = [
   },
   {
     text: "1 hour",
-    val: 3600
+    val: 3600,
+    disabled: true
   },
   {
     text: "6 hours",
-    val: 21600
+    val: 21600,
+    disabled: true
   },
   {
     text: "1 day",
-    val: 86400
+    val: 86400,
+    disabled: true
   },
   {
     text: "5 days",
-    val: 432000
+    val: 432000,
+    disabled: true
   },
   {
     text: "30 days",
-    val: 2592000
+    val: 2592000,
+    disabled: true
   }
 ];
 
