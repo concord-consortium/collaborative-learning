@@ -1,13 +1,14 @@
 import { safeJsonParse } from "../../../utilities/js-utils";
+import { ITileExportOptions } from "../tool-content-info";
 import { ImageToolChange } from "./image-change";
 import {
-  exportImageTileSpec, IExportImageTileOptions, IImageTileImportSpec, importImageTileSpec, isImageTileImportSpec
+  exportImageTileSpec, IImageTileImportSpec, importImageTileSpec, isImageTileImportSpec, transformCurriculumImageUrl
 } from "./image-import-export";
 
 const isImageToolChangeArray = (changes: ImageToolChange[] | string[]): changes is ImageToolChange[] =>
         (changes.length > 0) && (typeof changes[0] === "object");
 
-const exportImageToolJson = (changes: ImageToolChange[] | string[], options?: IExportImageTileOptions) => {
+const exportImageToolJson = (changes: ImageToolChange[] | string[], options?: ITileExportOptions) => {
   const changesJson = isImageToolChangeArray(changes)
                         ? changes.map(change => JSON.stringify(change))
                         : changes;
@@ -79,7 +80,7 @@ describe("Image export with default options", () => {
       { operation: "update", url: "my/img/url", filename: "my/filename" }
     ];
     expect(exportImageToolJson(changes))
-            .toEqual({ type: "Image", url: "my/img/url", filename: "my/filename" });
+            .toEqual({ type: "Image", url: "my/img/url" });
   });
 
   it("should export updated tiles", () => {
@@ -97,7 +98,7 @@ describe("Image export with default options", () => {
       { operation: "update", url: "my/updated/img/url", filename: "my/updated/filename" }
     ];
     expect(exportImageToolJson(changes))
-            .toEqual({ type: "Image", url: "my/updated/img/url", filename: "my/updated/filename" });
+            .toEqual({ type: "Image", url: "my/updated/img/url" });
   });
 
   it("should export updated tiles with filenames", () => {
@@ -112,17 +113,17 @@ describe("Image export with default options", () => {
 });
 
 describe('Image export with transformUrl option', () => {
-  const transformUrl = (url: string, filename?: string) => {
-    return filename
-            ? `curriculum/images/${filename}`
-            : url;
+  const unitBasePath = "curriculum";
+
+  const transformImageUrl = (url: string, filename?: string) => {
+    return transformCurriculumImageUrl(url, unitBasePath, filename);
   };
 
   it("should export tiles created without filename", () => {
     const changes: ImageToolChange[] = [
       { operation: "update", url: "my/img/url" }
     ];
-    expect(exportImageToolJson(changes, { transformUrl }))
+    expect(exportImageToolJson(changes, { transformImageUrl }))
             .toEqual({ type: "Image", url: "my/img/url" });
   });
 
@@ -130,8 +131,8 @@ describe('Image export with transformUrl option', () => {
     const changes: ImageToolChange[] = [
       { operation: "update", url: "my/img/url", filename: "my/filename" }
     ];
-    expect(exportImageToolJson(changes, { transformUrl }))
-            .toEqual({ type: "Image", url: "curriculum/images/my/filename", filename: "my/filename" });
+    expect(exportImageToolJson(changes, { transformImageUrl }))
+            .toEqual({ type: "Image", url: "curriculum/images/my/filename" });
   });
 
 });

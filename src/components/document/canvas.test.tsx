@@ -26,7 +26,11 @@ describe("Canvas Component", () => {
   });
 
   it("can render without a document or content", () => {
-    const wrapper = mount(<CanvasComponent context="test" />);
+    const stores = createStores();
+    const wrapper = mount(
+      <Provider stores={stores}>
+        <CanvasComponent context="test" />
+      </Provider>);
     expect(wrapper.find(DocumentContentComponent).length).toEqual(0);
   });
 

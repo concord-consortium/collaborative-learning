@@ -968,11 +968,11 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     );
   }
 
-  private updateLoadingImages = (url: string) => {
+  private updateLoadingImages = (url: string, filename?: string) => {
     if (this.fetchingImages.indexOf(url) > -1) return;
     this.fetchingImages.push(url);
 
-    gImageMap.getImage(url)
+    gImageMap.getImage(url, { filename })
       .then(image => {
         if (!this._isMounted) return;
         // update all images with this originalUrl that have not been updated
@@ -1060,6 +1060,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         const image: ImageObject = new ImageObject({
           type: "image",
           url,
+          filename: imageEntry.filename,
           x: 0,
           y: 0,
           width: imageEntry.width!,
@@ -1112,7 +1113,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         drawingObject = new ImageObject(assign({}, data, { url: displayUrl }));
         if (!imageEntry) {
           drawingObject.model.originalUrl = data.url;
-          this.updateImageUrl(data.url);
+          this.updateImageUrl(data.url, data.filename);
         }
         break;
       }
@@ -1137,11 +1138,11 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     }
   }
 
-  private updateImageUrl(url: string) {
+  private updateImageUrl(url: string, filename?: string) {
     if (!this.state.isLoading) {
       this.setState({ isLoading: true });
     }
-    this.updateLoadingImages(url);
+    this.updateLoadingImages(url, filename);
   }
 
   private updateDrawingObjects(update: DrawingToolUpdate) {

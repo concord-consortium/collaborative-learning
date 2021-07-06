@@ -118,8 +118,10 @@ export const DocumentContentModel = types
         return tileId ? self.tileMap.get(tileId) : undefined;
       },
       getTileContent(tileId: string): ToolContentUnionType | undefined {
-        const tile = self.tileMap.get(tileId);
-        return tile?.content;
+        return self.tileMap.get(tileId)?.content;
+      },
+      getTileType(tileId: string) {
+        return self.tileMap.get(tileId)?.content.type;
       },
       get rowCount() {
         return self.rowOrder.length;
@@ -252,8 +254,7 @@ export const DocumentContentModel = types
       self.rowOrder.forEach(rowId => {
         const row = self.getRow(rowId);
         each(row?.tiles, tileEntry => {
-          const tile = self.getTile(tileEntry.tileId);
-          if (tile?.content.type === type) {
+          if (self.getTileType(tileEntry.tileId) === type) {
             tiles.push(tileEntry.tileId);
           }
         });
@@ -266,8 +267,14 @@ export const DocumentContentModel = types
     exportTileAsJson(tileInfo: TileLayoutModelType, options?: IDocumentExportOptions) {
       const { includeTileIds, ...otherOptions } = options || {};
       const tile = self.getTile(tileInfo.tileId);
-      const json = tile?.exportJson(otherOptions);
+      let json = tile?.exportJson(otherOptions);
       if (!json) return;
+      if (options?.rowHeight) {
+        // add comma before layout/height entry
+        json = json[json.length - 1] === "\n"
+                ? `${json.slice(0, json.length - 1)},\n`
+                : `${json},`;
+      }
 
       const builder = new StringBuilder();
       builder.pushLine("{");
@@ -275,8 +282,21 @@ export const DocumentContentModel = types
         builder.pushLine(`"id": "${tileInfo.tileId}",`, 2);
       }
       builder.pushBlock(`"content": ${json}`, 2);
+      options?.rowHeight && builder.pushLine(`"layout": { "height": ${options.rowHeight} }`, 2);
       builder.pushLine(`}${comma(!!options?.appendComma)}`);
       return builder.build();
+    }
+  }))
+  .views(self => ({
+    rowHeightToExport(row: TileRowModelType, tileId: string) {
+      if (!row?.height) return;
+      // we only export heights for specific tiles configured to do so
+      const tileType = self.getTileType(tileId);
+      const tileContentInfo = tileType && getToolContentInfoById(tileType);
+      if (!tileContentInfo?.exportNonDefaultHeight) return;
+      // we only export heights when they differ from the default height for the tile
+      const defaultHeight = tileContentInfo.defaultHeight;
+      return defaultHeight && (row.height !== defaultHeight) ? row.height : undefined;
     }
   }))
   .views(self => ({
@@ -316,7 +336,9 @@ export const DocumentContentModel = types
         const tileExports = row?.tiles.map((tileInfo, tileIndex) => {
           const isLastTile = tileIndex === row.tiles.length - 1;
           const showComma = row.tiles.length > 1 ? !isLastTile : !isLastRow;
-          return self.exportTileAsJson(tileInfo, { ...options, appendComma: showComma });
+          const rowHeight = self.rowHeightToExport(row, tileInfo.tileId);
+          const rowHeightOption = rowHeight ? { rowHeight } : undefined;
+          return self.exportTileAsJson(tileInfo, { ...options, appendComma: showComma, ...rowHeightOption });
         }).filter(json => !!json);
         if (tileExports?.length) {
           // multiple tiles in a row are exported in an array
@@ -403,8 +425,7 @@ export const DocumentContentModel = types
     },
     removePlaceholderTilesFromRow(rowIndex: number) {
       const isPlaceholderTile = (tileId: string) => {
-        const tile = self.tileMap.get(tileId);
-        return tile?.content.type === "Placeholder";
+        return self.getTileType(tileId) === "Placeholder";
       };
       const row = self.getRowByIndex(rowIndex);
       row?.removeTilesFromRow(isPlaceholderTile);

@@ -52,7 +52,7 @@ export const ImageContentModel = types
       return !!url && !isPlaceholderImage(url);
     },
     exportJson(options?: ITileExportOptions) {
-      return exportImageTileSpec(self.changes);
+      return exportImageTileSpec(self.changes, options);
     }
   }))
   .actions(self => ({

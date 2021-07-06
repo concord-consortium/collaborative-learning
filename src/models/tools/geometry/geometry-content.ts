@@ -285,7 +285,7 @@ export const GeometryContentModel = types
       return board.objectsList.filter(obj => self.isSelected(obj.id));
     },
     exportJson(options?: ITileExportOptions) {
-      return exportGeometryJson(self.changes);
+      return exportGeometryJson(self.changes, options);
     }
   }))
   .actions(self => ({
@@ -1049,13 +1049,13 @@ export const GeometryContentModel = types
         getOneSelectedSegment,
         getOneSelectedComment,
         getCommentAnchor,
-        getLastImageUrl(): string | undefined{
+        getLastImageUrl(): string[] | undefined {
           for (let i = self.changes.length - 1; i >= 0; --i) {
             const jsonChange = self.changes[i];
             const change = safeJsonParse<JXGChange>(jsonChange);
-            const imageUrl = getImageUrl(change);
+            const [imageUrl, filename] = getImageUrl(change) || [];
             if (imageUrl) {
-              return imageUrl;
+              return [imageUrl, filename];
             }
           }
         }
@@ -1322,13 +1322,14 @@ export function mapTileIdsInGeometrySnapshot(snapshot: SnapshotOut<GeometryConte
   return snapshot;
 }
 
-export function getImageUrl(change?: JXGChange) {
+export function getImageUrl(change?: JXGChange): string[] | undefined {
   if (!change) return;
 
   if (change.operation === "create" && change.target === "image" && change.parents) {
-    return change.parents[0] as string;
-  } else if (change.operation === "update" && change.properties && !Array.isArray(change.properties)) {
-    return change.properties.url;
+    return [change.parents[0] as string, (change.properties as JXGProperties)?.filename];
+  } else if (change.operation === "update" && change.properties &&
+              !Array.isArray(change.properties) && change.properties.url) {
+    return [change.properties.url, change.properties.filename];
   }
 }
 
@@ -1340,6 +1341,7 @@ registerToolContentInfo({
   metadataClass: GeometryMetadataModel,
   addSidecarNotes: true,
   defaultHeight: kGeometryDefaultHeight,
+  exportNonDefaultHeight: true,
   defaultContent: defaultGeometryContent,
   snapshotPostProcessor: mapTileIdsInGeometrySnapshot
 });

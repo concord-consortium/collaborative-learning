@@ -8,7 +8,6 @@ import { getTableContent } from "../../../models/tools/table/table-content";
 import { IGeometryProps, IActionHandlers } from "./geometry-shared";
 import { GeometryContentModelType, GeometryMetadataModelType, setElementColor, getImageUrl, IAxesParams
         } from "../../../models/tools/geometry/geometry-content";
-import { exportGeometryJson } from "../../../models/tools/geometry/geometry-export";
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
           isDragTargetOrAncestor } from "../../../models/tools/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
@@ -31,6 +30,7 @@ import { isFeatureSupported } from "../../../models/stores/stores";
 import { injectGetTableLinkColorsFunction } from "../../../models/tools/geometry/jxg-table-link";
 import { extractDragTileType, kDragTileContent, kDragTileId, dragTileSrcDocId } from "../tool-tile";
 import { ImageMapEntryType, gImageMap } from "../../../models/image-map";
+import { ITileExportOptions } from "../../../models/tools/tool-content-info";
 import { getParentWithTypeName } from "../../../utilities/mst-utils";
 import { getUrlFromImageContent } from "../../../utilities/image-utils";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
@@ -74,6 +74,7 @@ interface IState extends Mutable<SizeMeProps> {
   isLoading?: boolean;
   isEditingTitle?: boolean;
   imageContentUrl?: string;
+  imageFilename?: string;
   imageEntry?: ImageMapEntryType;
   disableRotate: boolean;
   redoStack: string[][];
@@ -188,8 +189,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   private lastPasteId: string;
   private lastPasteCount: number;
 
-  private debouncedUpdateImage = debounce((url: string) => {
-            gImageMap.getImage(url)
+  private debouncedUpdateImage = debounce((url: string, filename?: string) => {
+            gImageMap.getImage(url, { filename })
               .then(image => {
                 if (!this._isMounted) return;
                 // update JSXGraph state
@@ -326,9 +327,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       getLinkedTables: () => {
         return metadata.linkedTableIds;
       },
-      exportContentAsTileJson: () => {
-        const changes = this.getContent().changes;
-        return exportGeometryJson(changes);
+      exportContentAsTileJson: (options?: ITileExportOptions) => {
+        return this.getContent().exportJson(options);
       }
     });
 
@@ -340,16 +340,20 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         const nextState: IState = {} as any;
 
         // synchronize background image changes
-        let lastUrl;
+        let lastUrl, lastFilename;
         for (let i = this.syncedChanges; i < geometryContent.changes.length; ++i) {
           const jsonChange = geometryContent.changes[i];
           const change = safeJsonParse<JXGChange>(jsonChange);
-          const url = getImageUrl(change);
-          if (url) lastUrl = url;
+          const [url, filename] = getImageUrl(change) || [];
+          if (url) {
+            lastUrl = url;
+            lastFilename = filename;
+          }
         }
         if (lastUrl) {
           // signal update to be triggered in componentDidUpdate
           nextState.imageContentUrl = lastUrl;
+          nextState.imageFilename = lastFilename;
         }
         // If the incoming list of changes is shorter, an undo has occurred.
         // In this case, clear the board and replay it.
@@ -593,9 +597,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const board = content.initializeBoard(this.elementId, this.handleCreateElements);
       if (board) {
         this.handleCreateBoard(board);
-        const imageUrl = this.getContent().getLastImageUrl();
+        const [imageUrl, filename] = this.getContent().getLastImageUrl() || [];
         if (imageUrl) {
-          this.updateImageUrl(imageUrl);
+          this.updateImageUrl(imageUrl, filename);
         }
         this.setState({ board });
       }
@@ -619,11 +623,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             : undefined;
   }
 
-  private updateImageUrl(url: string) {
+  private updateImageUrl(url: string, filename?: string) {
     if (!this.state.isLoading) {
       this.setState({ isLoading: true });
     }
-    this.debouncedUpdateImage(url);
+    this.debouncedUpdateImage(url, filename);
   }
 
   private rescaleBoardAndAxes(params: IAxesParams) {
@@ -1090,7 +1094,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
                                       });
       }
       else {
-        geometryContent.addImage(board, contentUrl, [0, 0], [width, height]);
+        const properties = image.filename ? { filename: image.filename } : undefined;
+        geometryContent.addImage(board, contentUrl, [0, 0], [width, height], properties);
       }
     });
     this.updateImageUrl(contentUrl);

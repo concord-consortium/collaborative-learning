@@ -1,4 +1,5 @@
 import { safeJsonParse } from "../../../utilities/js-utils";
+import { ITileExportOptions } from "../tool-content-info";
 import { exportDrawingTileSpec } from "./drawing-export";
 import { importDrawingTileSpec } from "./drawing-import";
 import {
@@ -7,14 +8,14 @@ import {
 } from "./drawing-objects";
 import { DrawingToolChange } from "./drawing-types";
 
-function exportDrawing(changes: DrawingToolChange[]) {
+function exportDrawing(changes: DrawingToolChange[], options?: ITileExportOptions) {
   const changesJson = changes.map(change => JSON.stringify(change));
-  const exportJson = exportDrawingTileSpec(changesJson);
+  const exportJson = exportDrawingTileSpec(changesJson, options);
   const exportJs = safeJsonParse(exportJson);
   if (exportJs) {
     // validate export-import-export round-trip
     const importJs = importDrawingTileSpec(exportJs);
-    const export2Json = exportDrawingTileSpec(importJs.changes);
+    const export2Json = exportDrawingTileSpec(importJs.changes, options);
     expect(safeJsonParse(export2Json)).toEqual(exportJs);
   }
   else {
@@ -221,7 +222,6 @@ describe("exportDrawingTileSpec", () => {
     expect(exportDrawing(changesWithDeletion)).toEqual({ type: "Drawing", objects: [e1Data] });
   });
 
-
   it("should export images", () => {
     const imageData: ImageDrawingObjectData = {
       type: "image",
@@ -266,4 +266,61 @@ describe("exportDrawingTileSpec", () => {
     expect(exportDrawing(changesWithDeletion)).toEqual({ type: "Drawing", objects: [i1Data, i3Data] });
   });
 
+  it("should export images with transformed urls when appropriate", () => {
+    const options: ITileExportOptions = {
+      transformImageUrl(url: string, _filename?: string) {
+        return _filename ? `curriculum/images/${_filename}` : url;
+      }
+    };
+    const exportDrawingWithTransform = (_changes: DrawingToolChange[]) => exportDrawing(_changes, options);
+    const imageData: ImageDrawingObjectData = {
+      type: "image",
+      url: "my/image/url",
+      originalUrl: "my/image/originalUrl",
+      filename: "image.png",
+      x: 10, y: 10,
+      width: 10, height: 10,
+    };
+    const { filename, ...others } = imageData;
+    const exportImageData = { ...others, url: "curriculum/images/image.png" };
+    const changes: DrawingToolChange[] = [
+      { action: "create", data: imageData }
+    ];
+    // skips objects without ids
+    expect(exportDrawingWithTransform(changes)).toEqual({ type: "Drawing", objects: [] });
+
+    const i1Data: ImageDrawingObjectData = { ...imageData, id: "i1" };
+    const i2Data: ImageDrawingObjectData = { ...imageData, id: "i2" };
+    const i3Data: ImageDrawingObjectData = { ...imageData, id: "i3" };
+    const changesWithId: DrawingToolChange[] = [
+      { action: "create", data: i1Data },
+      { action: "create", data: i2Data },
+      { action: "create", data: i3Data }
+    ];
+    const i1OutData = { ...exportImageData, id: "i1" };
+    const i2OutData = { ...exportImageData, id: "i2" };
+    const i3OutData = { ...exportImageData, id: "i3" };
+    expect(exportDrawingWithTransform(changesWithId))
+            .toEqual({ type: "Drawing", objects: [i1OutData, i2OutData, i3OutData] });
+
+    const changesWithUpdates: DrawingToolChange[] = [
+      { action: "create", data: i1Data },
+      { action: "create", data: i2Data },
+      { action: "create", data: i3Data },
+      { action: "move", data: [{ id: "i1", destination: { x: 5, y: 5 } }, { id: "i2", destination: { x: 5, y: 5 } }] }
+    ];
+    const i1DataMoved = { ...i1OutData, x: 5, y: 5 };
+    const i2DataMoved = { ...i2OutData, x: 5, y: 5 };
+    expect(exportDrawingWithTransform(changesWithUpdates))
+            .toEqual({ type: "Drawing", objects: [i1DataMoved, i2DataMoved, i3OutData] });
+
+    const changesWithDeletion: DrawingToolChange[] = [
+      { action: "create", data: i1Data },
+      { action: "create", data: i2Data },
+      { action: "create", data: i3Data },
+      { action: "delete", data: ["i2", "i4"]}
+    ];
+    expect(exportDrawingWithTransform(changesWithDeletion))
+            .toEqual({ type: "Drawing", objects: [i1OutData, i3OutData] });
+  });
 });
