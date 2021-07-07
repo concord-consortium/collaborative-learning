@@ -140,9 +140,11 @@ $duration-label-back: $gray-mid
         border-left: 4px solid transparent
         border-right: 4px solid transparent
         border-top: 6px solid $duration-label-back
-
         svg
           display: none
+      .duration-options option
+        &:disabled
+          color: $gray-disabled
 
   .program-state-button
     position: relative
