@@ -1,14 +1,36 @@
 # Changelog
 
+## Version 1.9.0 - released July 7, 2021
+
+### Features/Improvements
+- Add confirmation dialog for tile deletion [#177614012] (#968)
+- Drawing tile JSON export [#178336893] (#976)
+- Geometry tile JSON export [#176874271] (#973)
+- Geometry tile comments JSON export [#178324795] (#977)
+- Image tile JSON export [#176874262] (#975)
+- Document JSON export [#176874236] (#978)
+- Update dependencies (#979) (#981)
+
+### Bugs Fixed
+- Don't show link button when linking is disabled (#970)
+- Fix tooltips for superscript/subscript in text toolbar [#178148677] (#971)
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 417,598 bytes | 6.7% |
+| index.js | 4,728,056 bytes | 3.0% |
+
 ## Version 1.8.4 - released May 17, 2021
 
 ### Features/Improvements
-- Log presentation of network status alerts [#178163876](#967)
+- Log presentation of network status alerts [#178163876] (#967)
 
 ### Bugs Fixed
-- Validate students in teacher dashboard [#178165267](#964)
-- Don't log DELETE_TILE when specified tile doesn't exist [#178162887](#965)
-- Geometry: Update toolbar on selection change [#178148390] [#178166203](#966)
+- Validate students in teacher dashboard [#178165267] (#964)
+- Don't log DELETE_TILE when specified tile doesn't exist [#178162887] (#965)
+- Geometry: Update toolbar on selection change [#178148390] [#178166203] (#966)
 
 ### Asset Sizes
 
@@ -20,7 +42,7 @@
 ## Version 1.8.3 - released May 10, 2021
 
 ### Features/Improvements
-- Fix handling of table formulas referencing column names with spaces [#178097891](#959)
+- Fix handling of table formulas referencing column names with spaces [#178097891] (#959)
 
 ### Asset Sizes
 
