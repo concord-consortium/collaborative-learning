@@ -2,9 +2,9 @@ import { types, Instance } from "mobx-state-tree";
 import { Value } from "slate";
 import Plain from "slate-plain-serializer";
 import Markdown from "slate-md-serializer";
-import { registerToolContentInfo } from "../tool-content-info";
+import { ITileExportOptions, registerToolContentInfo } from "../tool-content-info";
 import {
-  deserializeValueFromLegacy, htmlToSlate, serializeValueToLegacy, textToSlate
+  deserializeValueFromLegacy, htmlToSlate, serializeValueToLegacy, slateToHtml, textToSlate
 } from "@concord-consortium/slate-editor";
 
 export const kTextToolID = "Text";
@@ -47,6 +47,22 @@ export const TextContentModel = types
         default:
           return Plain.deserialize(self.joinText);
       }
+    }
+  }))
+  .views(self => ({
+    exportJson(options?: ITileExportOptions) {
+      const value = self.asSlate();
+      const html = value ? slateToHtml(value) : "";
+      const exportHtml = html.split("\n").map((line, i, arr) => `    "${line}"${i < arr.length - 1 ? "," : ""}`);
+      return [
+        `{`,
+        `  "type": "Text",`,
+        `  "format": "html",`,
+        `  "text": [`,
+        ...exportHtml,
+        `  ]`,
+        `}`
+      ].join("\n");
     }
   }))
   .actions(self => ({

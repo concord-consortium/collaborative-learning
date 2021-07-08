@@ -11,9 +11,8 @@ import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-
 import { useForceUpdate } from "../hooks/use-force-update";
 import { useMobXOnChange } from "../hooks/use-mobx-on-change";
 import { IRegisterToolApiProps } from "../tool-tile";
-import {
-  DrawingContentModelType, ToolbarModalButton, ToolbarSettings
-} from "../../../models/tools/drawing/drawing-content";
+import { DrawingContentModelType } from "../../../models/tools/drawing/drawing-content";
+import { ToolbarModalButton, ToolbarSettings } from "../../../models/tools/drawing/drawing-types";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 
 interface IPaletteState {

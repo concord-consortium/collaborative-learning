@@ -4,6 +4,7 @@ import { observer, inject } from "mobx-react";
 import { BaseComponent } from "../base";
 import { TileLayoutModelType, TileRowModelType } from "../../models/document/tile-row";
 import { isShowingTeacherContent } from "../../models/stores/stores";
+import { getToolContentInfoById } from "../../models/tools/tool-content-info";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { SectionHeader } from "../tools/section-header";
 import { ToolApiInterfaceContext } from "../tools/tool-api";
@@ -124,15 +125,18 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
   }
 
   private getContentHeight() {
-    const { model: { tiles } } = this.props;
-    const toolApiInterface = this.context;
-    let rowHeight: number | undefined;
-    tiles.forEach(tile => {
-      const toolApi = toolApiInterface?.getToolApi(tile.tileId);
-      const tileHeight = toolApi?.getContentHeight?.();
-      tileHeight && (rowHeight = Math.max(tileHeight, rowHeight || 0));
+    return this.props.model.getContentHeight((tileId: string) => {
+      // if the tile has a specific content height, use it
+      const toolApiInterface = this.context;
+      const toolApi = toolApiInterface?.getToolApi(tileId);
+      const contentHeight = toolApi?.getContentHeight?.();
+      if (contentHeight) return contentHeight;
+      // otherwise, use the default height for this type of tile
+      const tile = this.getTile(tileId);
+      const tileType = tile?.content.type;
+      const contentInfo = tileType && getToolContentInfoById(tileType);
+      if (contentInfo?.defaultHeight) return contentInfo.defaultHeight;
     });
-    return rowHeight;
   }
 
   private renderTiles(tiles: TileLayoutModelType[], rowHeight?: number) {

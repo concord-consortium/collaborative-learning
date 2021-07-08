@@ -34,7 +34,7 @@ class ClueCanvas {
     }
 
     getRowSectionHeader() {
-        return cy.get('.row-section-header');
+        return cy.get('.primary-workspace .row-section-header');
     }
 
     getSectionHeader(header) {
@@ -44,7 +44,7 @@ class ClueCanvas {
     }
 
     getPlaceHolder() {
-        return cy.get('.placeholder-tool');
+        return cy.get('.primary-workspace .placeholder-tool');
     }
 
     getFourUpViewToggle() {
@@ -185,6 +185,26 @@ class ClueCanvas {
         }
     }
 
+    exportTileAndDocument(tileClass) {
+        let clipSpy;
+        cy.window().then((win) => {
+            // https://github.com/cypress-io/cypress-example-recipes/tree/master/examples/stubbing-spying__window
+            clipSpy = cy.spy(win.navigator.clipboard, "writeText");
+        });
+        // platform test from hot-keys library
+        const isMac = navigator.platform.indexOf("Mac") === 0;
+        const cmdKey = isMac ? "meta" : "ctrl";
+        cy.get(`.primary-workspace .tool-tile.${tileClass}`)
+            .type(`{${cmdKey}+option+e}`)
+            .then(() => {
+                expect(clipSpy.callCount).to.be.eq(1);
+            })
+            .type(`{${cmdKey}+shift+s}`)
+            .then(() => {
+                expect(clipSpy.callCount).to.be.eq(2);
+            });
+    }
+
     deleteTile(tile) {
         switch (tile) {
             case 'text':
@@ -205,6 +225,7 @@ class ClueCanvas {
                 break;
         }
         this.getDeleteTool().click({ force: true });
+        cy.get('.ReactModalPortal .modal-footer .modal-button.default').click();
     }
 
     getSupportList() {

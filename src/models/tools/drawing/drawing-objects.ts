@@ -8,6 +8,7 @@ export interface BoundingBox {
   end?: Point;
 }
 
+// "line" == polyline
 export interface LineDrawingObjectData {
   type: "line";
   id?: string;
@@ -19,6 +20,7 @@ export interface LineDrawingObjectData {
   strokeWidth: number;
 }
 
+// "vector" == simple line
 export interface VectorDrawingObjectData {
   type: "vector";
   id?: string;
@@ -62,6 +64,7 @@ export interface ImageDrawingObjectData {
   id?: string;
   url: string;
   originalUrl?: string;
+  filename?: string;
   x: number;
   y: number;
   width: number;

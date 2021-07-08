@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useCurrent } from "../../../hooks/use-current";
 import { getToolbarLocation, IGetToolbarLocationBaseArgs } from "../../utilities/tile-utils";
+import { TileResizeEntry } from "../tool-api";
 import { IRegisterToolApiProps } from "../tool-tile";
 import { useForceUpdate } from "./use-force-update";
 
@@ -34,7 +35,7 @@ export const useFloatingToolbarLocation = ({
       handleDocumentScroll: () => {
         enabledRef.current && forceUpdate();
       },
-      handleTileResize: (entry: ResizeObserverEntry) => {
+      handleTileResize: (entry: TileResizeEntry) => {
         const { contentRect } = entry;
         setTileOffset({ left: contentRect.left, bottom: contentRect.bottom });
       }

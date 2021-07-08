@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useCurrent } from "../../../hooks/use-current";
 import { useUIStore } from "../../../hooks/use-stores";
-import { IToolApi } from "../tool-api";
+import { IToolApi, TileResizeEntry } from "../tool-api";
 
 export interface IUseToolbarToolApi {
   id: string;
@@ -22,7 +22,7 @@ export const useToolbarToolApi = (
       handleDocumentScroll: (x: number, y: number) => {
         toolbarToolApi.current?.handleDocumentScroll?.(x, y);
       },
-      handleTileResize: (entry: ResizeObserverEntry) => {
+      handleTileResize: (entry: TileResizeEntry) => {
         toolbarToolApi.current?.handleTileResize?.(entry);
       }
     }, "layout");

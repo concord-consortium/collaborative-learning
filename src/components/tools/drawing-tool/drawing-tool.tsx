@@ -5,6 +5,9 @@ import { ToolbarView } from "./drawing-toolbar";
 import { DrawingLayerView } from "./drawing-layer";
 import { useToolbarToolApi } from "../hooks/use-toolbar-tool-api";
 import { DrawingContentModelType } from "../../../models/tools/drawing/drawing-content";
+import { useCurrent } from "../../../hooks/use-current";
+import { exportDrawingTileSpec } from "../../../models/tools/drawing/drawing-export";
+import { ITileExportOptions } from "../../../models/tools/tool-content-info";
 
 import "./drawing-tool.sass";
 
@@ -12,11 +15,19 @@ type IProps = IToolTileProps;
 
 const DrawingToolComponent: React.FC<IProps> = (props) => {
   const { documentContent, toolTile, model, readOnly, scale, onRegisterToolApi, onUnregisterToolApi } = props;
+  const contentRef = useCurrent(model.content as DrawingContentModelType);
 
   useEffect(() => {
     if (!readOnly) {
-      (model.content as DrawingContentModelType).reset();
+      contentRef.current.reset();
     }
+
+    onRegisterToolApi({
+      exportContentAsTileJson: (options?: ITileExportOptions) => {
+        return exportDrawingTileSpec(contentRef.current.changes, options);
+      }
+    });
+
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });

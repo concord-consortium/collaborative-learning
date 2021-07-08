@@ -1,18 +1,14 @@
 import { assign, each, find } from "lodash";
 import "./jxg";
 import { JXGChange, JXGChangeAgent, JXGProperties } from "./jxg-changes";
-import { isAxis, isBoard, isLinkedPoint, isPoint } from "./jxg-types";
+import {
+  isAxis, isBoard, isLinkedPoint, isPoint,
+  kGeometryDefaultAxisMin, kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj
+} from "./jxg-types";
 import { goodTickValue } from "../../../utilities/graph-utils";
 import { ITableLinkProperties } from "../table/table-change";
 
 const kScalerClasses = ["canvas-scaler", "scaled-list-item"];
-
-export const toObj = (p: string, v: any) => v != null ? { [p]: v } : undefined;
-
-export const kGeometryDefaultWidth = 480;
-export const kGeometryDefaultHeight = 320;
-export const kGeometryDefaultPixelsPerUnit = 18.3;  // matches S&S curriculum images
-export const kGeometryDefaultAxisMin = 0;
 
 export function getObjectById(board: JXG.Board, id: string): JXG.GeometryElement | undefined {
   let obj: JXG.GeometryElement | undefined = board.objects[id];
@@ -142,7 +138,7 @@ function getCanvasScale(eltOrId: string | HTMLElement | null) {
     if (kScalerClasses.some(_class => elt?.classList.contains(_class))) {
       const transform = getComputedStyle(elt).transform;
       const match = transform && /(scale|matrix)\((.+)\)/.exec(transform);
-      return match && match[2] ? parseFloat(match[2]) : 1;
+      return match?.[2] ? parseFloat(match[2]) : 1;
     }
   }
   return 1;
@@ -184,9 +180,9 @@ function getAxisAnnotationsFromProps(props: JXGProperties) {
   return [xAnnotation, yAnnotation];
 }
 
-function getAxisUnitsFromProps(changeProps?: JXGProperties, scale = 1) {
-  const unitX = changeProps?.unitX || changeProps?.boardScale?.unitX || kGeometryDefaultPixelsPerUnit;
-  const unitY = changeProps?.unitY || changeProps?.boardScale?.unitY || kGeometryDefaultPixelsPerUnit;
+function getAxisUnitsFromProps(props?: JXGProperties, scale = 1) {
+  const unitX = props?.boardScale?.unitX || props?.unitX || kGeometryDefaultPixelsPerUnit;
+  const unitY = props?.boardScale?.unitY || props?.unitY || kGeometryDefaultPixelsPerUnit;
   return [unitX * scale, unitY * scale];
 }
 
@@ -197,11 +193,10 @@ function createBoard(domElementId: string, properties?: JXGProperties) {
           showNavigation: false,
           minimizeReflow: "none"
         };
-  const changeProps = properties;
-  const [unitX, unitY] = getAxisUnitsFromProps(changeProps);
+  const [unitX, unitY] = getAxisUnitsFromProps(properties);
   // cf. https://www.intmath.com/cg3/jsxgraph-axes-ticks-grids.php
   const overrides = { axis: false, keepaspectratio: unitX === unitY };
-  const props = combineProperties(domElementId, defaults, changeProps, overrides);
+  const props = combineProperties(domElementId, defaults, properties, overrides);
   const board = JXG.JSXGraph.initBoard(domElementId, props);
   return board;
 }
@@ -262,18 +257,18 @@ function addAxes(board: JXG.Board, params: IAddAxesParams) {
 }
 
 export const boardChangeAgent: JXGChangeAgent = {
-  create: (boardDomId: JXG.Board|string, change: JXGChange) => {
-    const props = change.properties;
-    const board = isBoard(boardDomId)
-                    ? boardDomId
-                    : createBoard(boardDomId, props);
+  create: (boardOrDomId: JXG.Board|string, change: JXGChange) => {
+    const props = change.properties as JXGProperties;
+    const board = isBoard(boardOrDomId)
+                    ? boardOrDomId
+                    : createBoard(boardOrDomId, props);
     // If we created the board from a DOM element ID, then we need to add the axes.
     // If we are undoing an action, then the board already exists but its axes have
     // been removed, so we have to add the axes in that case as well.
     const boundingBox = scaleBoundingBoxToElement(board.containerObj.id, props);
-    const scale = getCanvasScale(board ? board.container : boardDomId as string);
-    const [xName, yName] = getAxisLabelsFromProps(props as JXGProperties);
-    const [xAnnotation, yAnnotation] = getAxisAnnotationsFromProps(props as JXGProperties);
+    const scale = getCanvasScale(board ? board.container : boardOrDomId as string);
+    const [xName, yName] = getAxisLabelsFromProps(props);
+    const [xAnnotation, yAnnotation] = getAxisAnnotationsFromProps(props);
     const [unitX, unitY] = getAxisUnitsFromProps(props, scale);
     const axes = addAxes(board, {
                           unitX, unitY, boundingBox,
@@ -291,7 +286,7 @@ export const boardChangeAgent: JXGChangeAgent = {
       if (boardScale) {
         const { canvasWidth, canvasHeight } = boardScale;
         const [xClientName, yClientName] = getClientAxisLabels(board);
-        const [xPropName, yPropName] = getAxisLabelsFromProps(change.properties);
+        const [xPropName, yPropName] = getAxisLabelsFromProps(props);
         const xName = xPropName ?? xClientName;
         const yName = yPropName ?? yClientName;
         const [xClientAnnotation, yClientAnnotation] = getClientAxisAnnotations(board);
@@ -302,8 +297,8 @@ export const boardChangeAgent: JXGChangeAgent = {
         const height = board.canvasHeight;
         const widthMultiplier = (width - kAxisBuffer * 2) / canvasWidth;
         const heightMultiplier = (height - kAxisBuffer * 2) / canvasHeight;
-        const unitX = boardScale.unitX as number;
-        const unitY = boardScale.unitY as number;
+        const unitX = boardScale.unitX;
+        const unitY = boardScale.unitY;
         const xBuffer = kAxisBuffer / unitX;
         const yBuffer = kAxisBuffer / unitY;
         // The change might have been performed on a different-sized tile due to a 2-up switch or reload

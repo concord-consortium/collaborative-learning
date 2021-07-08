@@ -45,7 +45,7 @@ export const TileRowModel = types
       return self.tiles.map(tile => tile.tileId).join(", ");
     },
     getTileIdAtIndex(index: number) {
-      const layout = self.tiles[index];
+      const layout = (index >= 0) && (index < self.tiles.length) ? self.tiles[index] : undefined;
       return layout && layout.tileId;
     },
     hasTile(tileId: string) {
@@ -53,6 +53,14 @@ export const TileRowModel = types
     },
     indexOfTile(tileId: string) {
       return self.tiles.findIndex(tileRef => tileRef.tileId === tileId);
+    },
+    getContentHeight(getTileHeight?: (tileId: string) => number | undefined) {
+      let rowHeight: number | undefined;
+      self.tiles.forEach(tileInfo => {
+        const tileHeight = getTileHeight?.(tileInfo.tileId);
+        tileHeight && (rowHeight = Math.max(tileHeight, rowHeight || 0));
+      });
+      return rowHeight;
     }
   }))
   .actions(self => ({

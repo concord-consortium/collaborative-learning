@@ -1,31 +1,19 @@
 import { types, Instance, SnapshotOut } from "mobx-state-tree";
-import { registerToolContentInfo } from "../tool-content-info";
+import { createChange, ImageToolChange } from "./image-change";
+import { exportImageTileSpec, importImageTileSpec, isImageTileImportSpec } from "./image-import-export";
+import { ITileExportOptions, registerToolContentInfo } from "../tool-content-info";
 import { isPlaceholderImage } from "../../../utilities/image-utils";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import placeholderImage from "../../../assets/image_placeholder.png";
 
 export const kImageToolID = "Image";
 
-export type ImageOperation = "update";
-
-export interface ImageToolChange {
-  operation: ImageOperation;
-  url: string;
-}
-
 export function defaultImageContent(url?: string) {
-  const change = JSON.stringify({
-                  operation: "update",
-                  url: url || placeholderImage
-                });
+  const change = createChange(url || placeholderImage);
   return ImageContentModel.create({
                             type: "Image",
                             changes: [change]
                           });
-}
-
-function createChange(url: string) {
-  return JSON.stringify({ operation: "update", url });
 }
 
 export const ImageContentModel = types
@@ -34,9 +22,8 @@ export const ImageContentModel = types
     changes: types.array(types.string)
   })
   .preProcessSnapshot(snapshot => {
-    const { url, changes, ...others } = snapshot as any;
-    return url && !changes
-            ? { changes: [createChange(url)], ...others }
+    return isImageTileImportSpec(snapshot)
+            ? importImageTileSpec(snapshot)
             : snapshot;
   })
   .views(self => ({
@@ -45,6 +32,12 @@ export const ImageContentModel = types
     },
     get changeCount() {
       return self.changes.length;
+    },
+    get filename() {
+      if (!self.changes.length) return;
+      const lastChangeJson = self.changes[self.changes.length - 1];
+      const lastChange = safeJsonParse<ImageToolChange>(lastChangeJson);
+      return lastChange?.filename;
     },
     get url() {
       if (!self.changes.length) return;
@@ -55,12 +48,16 @@ export const ImageContentModel = types
   }))
   .views(self => ({
     get hasValidImage() {
-      return !isPlaceholderImage(self.url);
+      const url = self.url;
+      return !!url && !isPlaceholderImage(url);
+    },
+    exportJson(options?: ITileExportOptions) {
+      return exportImageTileSpec(self.changes, options);
     }
   }))
   .actions(self => ({
-    setUrl(url: string) {
-      self.changes.push(createChange(url));
+    setUrl(url: string, filename?: string) {
+      self.changes.push(createChange(url, filename));
     },
     updateImageUrl(oldUrl: string, newUrl: string) {
       if (!oldUrl || !newUrl || (oldUrl === newUrl)) return;

@@ -1,38 +1,36 @@
+import { assign, castArray, each, keys, omit, size as _size } from "lodash";
 import { types, Instance, SnapshotOut, IAnyStateTreeNode } from "mobx-state-tree";
 import { Lambda } from "mobx";
 import { Optional } from "utility-types";
 import { SelectionStoreModelType } from "../../stores/selection";
 import { addLinkedTable, removeLinkedTable } from "../table-links";
-import { registerToolContentInfo } from "../tool-content-info";
+import { ITileExportOptions, registerToolContentInfo } from "../tool-content-info";
 import {
   getRowLabelFromLinkProps, IColumnProperties, ICreateRowsProperties, IRowProperties,
   ITableChange, ITableLinkProperties
 } from "../table/table-change";
 import { getAxisLabelsFromDataSet, getTableContent, kLabelAttrName } from "../table/table-content";
 import { canonicalizeValue, linkedPointId } from "../table/table-model-types";
+import { exportGeometryJson } from "./geometry-export";
+import { defaultGeometryBoardChange, preprocessImportFormat } from "./geometry-import";
 import { getAxisAnnotations, getBaseAxisLabels, getObjectById, guessUserDesiredBoundingBox,
-          kAxisBuffer, kGeometryDefaultAxisMin, kGeometryDefaultHeight, kGeometryDefaultWidth,
-          kGeometryDefaultPixelsPerUnit, syncAxisLabels, toObj } from "./jxg-board";
+          kAxisBuffer, syncAxisLabels } from "./jxg-board";
 import { ESegmentLabelOption, forEachNormalizedChange, ILinkProperties, JXGChange, JXGCoordPair,
-          JXGProperties, JXGParentType, JXGUnsafeCoordPair, JXGStringPair } from "./jxg-changes";
+          JXGProperties, JXGParentType, JXGUnsafeCoordPair } from "./jxg-changes";
 import { applyChange, applyChanges, IDispatcherChangeContext } from "./jxg-dispatcher";
 import {  kPointDefaults, kSnapUnit } from "./jxg-point";
 import { prepareToDeleteObjects } from "./jxg-polygon";
 import { getTableIdFromLinkChange } from "./jxg-table-link";
 import {
-  isAxisArray, isBoard, isComment, isFreePoint, isImage, isLinkedPoint, isMovableLine, isPoint,
-  isPointArray, isPolygon, isVertexAngle, isVisibleEdge
+  isAxisArray, isBoard, isComment, isFreePoint, isImage, isLinkedPoint, isMovableLine, isPoint, isPointArray,
+  isPolygon, isVertexAngle, isVisibleEdge, kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, toObj
 } from "./jxg-types";
 import { IDataSet } from "../../data/data-set";
-import { assign, castArray, each, keys, omit, size as _size } from "lodash";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { getTileContentById } from "../../../utilities/mst-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
-import { gImageMap } from "../../image-map";
 
 export const kGeometryToolID = "Geometry";
-
-export { kGeometryDefaultHeight };
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
 
@@ -45,50 +43,6 @@ export interface IAxesParams {
   yAnnotation?: string;
   yMin: number;
   yMax: number;
-}
-
-function getAxisUnits(protoRange: JXGCoordPair | undefined) {
-  const pRange = protoRange && castArray(protoRange);
-  if (!pRange || !pRange.length) return [kGeometryDefaultPixelsPerUnit, kGeometryDefaultPixelsPerUnit];
-  // a single value is treated as the y-range
-  if (pRange.length === 1) {
-    const [yProtoRange] = pRange;
-    const yUnit = kGeometryDefaultHeight / yProtoRange;
-    return [yUnit, yUnit];
-  }
-  else {
-    const [xProtoRange, yProtoRange] = pRange as JXGCoordPair;
-    return [kGeometryDefaultWidth / xProtoRange, kGeometryDefaultHeight / yProtoRange];
-  }
-}
-
-function getBoardBounds(axisMin?: JXGCoordPair, protoRange?: JXGCoordPair) {
-  const [xAxisMin, yAxisMin] = axisMin || [kGeometryDefaultAxisMin, kGeometryDefaultAxisMin];
-  const [xPixelsPerUnit, yPixelsPerUnit] = getAxisUnits(protoRange);
-  const xAxisMax = xAxisMin + kGeometryDefaultWidth / xPixelsPerUnit;
-  const yAxisMax = yAxisMin + kGeometryDefaultHeight / yPixelsPerUnit;
-  return [xAxisMin, yAxisMax, xAxisMax, yAxisMin];
-}
-
-function defaultGeometryBoardChange(overrides?: JXGProperties) {
-  const [xMin, yMax, xMax, yMin] = getBoardBounds();
-  const unitX = kGeometryDefaultPixelsPerUnit;
-  const unitY = kGeometryDefaultPixelsPerUnit;
-  const xBufferRange = kAxisBuffer / unitX;
-  const yBufferRange = kAxisBuffer / unitY;
-  const boundingBox = [xMin - (xBufferRange * 2), yMax + yBufferRange, xMax + xBufferRange, yMin - yBufferRange];
-  const change: JXGChange = {
-    operation: "create",
-    target: "board",
-    properties: {
-                  axis: true,
-                  boundingBox,
-                  unitX,
-                  unitY,
-                  ...overrides
-                }
-  };
-  return change;
 }
 
 export function defaultGeometryContent(overrides?: JXGProperties): GeometryContentModelType {
@@ -329,6 +283,9 @@ export const GeometryContentModel = types
     },
     selectedObjects(board: JXG.Board) {
       return board.objectsList.filter(obj => self.isSelected(obj.id));
+    },
+    exportJson(options?: ITileExportOptions) {
+      return exportGeometryJson(self.changes, options);
     }
   }))
   .actions(self => ({
@@ -1092,13 +1049,13 @@ export const GeometryContentModel = types
         getOneSelectedSegment,
         getOneSelectedComment,
         getCommentAnchor,
-        getLastImageUrl(): string | undefined{
+        getLastImageUrl(): string[] | undefined {
           for (let i = self.changes.length - 1; i >= 0; --i) {
             const jsonChange = self.changes[i];
             const change = safeJsonParse<JXGChange>(jsonChange);
-            const imageUrl = getImageUrl(change);
+            const [imageUrl, filename] = getImageUrl(change) || [];
             if (imageUrl) {
-              return imageUrl;
+              return [imageUrl, filename];
             }
           }
         }
@@ -1348,168 +1305,6 @@ export const GeometryContentModel = types
 
 export type GeometryContentModelType = Instance<typeof GeometryContentModel>;
 
-interface IBoardImportProps {
-  axisNames?: JXGStringPair;
-  axisLabels?: JXGStringPair;
-  axisMin?: JXGCoordPair;
-  axisRange?: JXGCoordPair;
-  [prop: string]: any;
-}
-interface IBoardImportSpec {
-  properties?: IBoardImportProps;
-}
-
-interface IPointImportSpec {
-  type: "point";
-  parents: [number, number];
-  properties?: Record<string, unknown>;
-}
-
-interface IVertexImportSpec extends IPointImportSpec {
-  angleLabel?: boolean;
-}
-
-interface IPolygonImportSpec {
-  type: "polygon";
-  parents: IVertexImportSpec[];
-  properties?: Record<string, unknown>;
-}
-
-interface IImageImportSpec {
-  type: "image";
-  parents: {
-    url: string;
-    coords: JXGCoordPair;
-    size: JXGCoordPair;
-  };
-  properties?: Record<string, unknown>;
-}
-
-interface IMovableLineImportSpec {
-  type: "movableLine";
-  parents: [IPointImportSpec, IPointImportSpec];
-  properties?: Record<string, unknown>;
-  comment?: Record<string, unknown>;
-}
-
-type IObjectImportSpec = IPointImportSpec | IPolygonImportSpec | IImageImportSpec | IMovableLineImportSpec;
-
-interface IImportSpec {
-  title?: string;
-  board: IBoardImportSpec;
-  objects: IObjectImportSpec[];
-}
-
-function preprocessImportFormat(snapshot: any) {
-  if (!snapshot.objects) return snapshot;
-
-  const { title, board: boardSpecs, objects: objectSpecs } = snapshot as IImportSpec;
-  const changes: JXGChange[] = [];
-
-  if (title) {
-    changes.push({ operation: "update", target: "metadata", properties: { title } });
-  }
-
-  function addBoard(boardSpec: IBoardImportSpec) {
-    const { properties } = boardSpec || {} as IBoardImportSpec;
-    const { axisNames, axisLabels, axisMin, axisRange, ...others } = properties || {} as IBoardImportProps;
-    const boundingBox = getBoardBounds(axisMin, axisRange);
-    const [unitX, unitY] = getAxisUnits(axisRange);
-    changes.push(defaultGeometryBoardChange({
-                  unitX, unitY,
-                  ...toObj("xName", axisNames?.[0]), ...toObj("yName", axisNames?.[1]),
-                  ...toObj("xAnnotation", axisLabels?.[0]), ...toObj("yAnnotation", axisLabels?.[1]),
-                  boundingBox, ...others }));
-  }
-
-  addBoard(boardSpecs);
-
-  function addComment(props: Record<string, unknown>) {
-    const id = uniqueId();
-    changes.push({ operation: "create", target: "comment", properties: {id, ...props }});
-    return id;
-  }
-
-  function addPoint(pointSpec: IPointImportSpec) {
-    const { type, properties: _properties, ...others } = pointSpec;
-    const id = uniqueId();
-    const properties = { id, ..._properties };
-    changes.push({ operation: "create", target: "point", properties, ...others });
-    return id;
-  }
-
-  function addPolygon(polygonSpec: IPolygonImportSpec) {
-    const { parents: parentSpecs, properties: _properties } = polygonSpec;
-    const id = uniqueId();
-    const vertices: Array<{ id: string, angleLabel?: boolean }> = [];
-    const parents = parentSpecs.map(spec => {
-                      const ptId = addPoint(spec);
-                      vertices.push({ id: ptId, angleLabel: spec.angleLabel });
-                      return ptId;
-                    });
-    const properties = { id, ..._properties };
-    changes.push({ operation: "create", target: "polygon", parents, properties });
-    const lastIndex = vertices.length - 1;
-    vertices.forEach((pt, i) => {
-      let angleParents;
-      if (pt.angleLabel) {
-        const prev = i === 0 ? vertices[lastIndex].id : vertices[i - 1].id;
-        const self = vertices[i].id;
-        const next = i === lastIndex ? vertices[0].id : vertices[i + 1].id;
-        angleParents = [prev, self, next];
-      }
-      changes.push({ operation: "create", target: "vertexAngle", parents: angleParents });
-    });
-    return id;
-  }
-
-  function addImage(imageSpec: IImageImportSpec) {
-    const { type, parents: _parents, properties: _properties, ...others } = imageSpec;
-    const { url, coords, size: pxSize } = _parents;
-    const size = pxSize.map(s => s / kGeometryDefaultPixelsPerUnit) as JXGCoordPair;
-    const parents = [url, coords, size];
-    const id = uniqueId();
-    const properties = { id, ..._properties };
-    gImageMap.getImage(url);  // register with image map
-    changes.push({ operation: "create", target: "image", parents, properties, ...others });
-    return id;
-  }
-
-  function addMovableLine(movableLineSpec: IMovableLineImportSpec) {
-    const { type, parents: _parents, properties: _properties, ...others } = movableLineSpec;
-    const id = uniqueId();
-    const [pt1Spec, pt2Spec] = _parents;
-    const parents = _parents.map(ptSpec => ptSpec.parents);
-    const properties = { id, pt1: pt1Spec.properties, pt2: pt2Spec.properties, ..._properties };
-    changes.push({ operation: "create", target: "movableLine", parents, properties, ...others });
-    if (movableLineSpec.comment) {
-      addComment({ anchor: id, ...movableLineSpec.comment });
-    }
-    return id;
-  }
-
-  objectSpecs.forEach(spec => {
-    switch (spec.type) {
-      case "point":
-        addPoint(spec);
-        break;
-      case "polygon":
-        addPolygon(spec);
-        break;
-      case "image":
-        addImage(spec);
-        break;
-      case "movableLine":
-        addMovableLine(spec);
-        break;
-    }
-  });
-
-  return {
-    changes: changes.map(change => JSON.stringify(change))
-  };
-}
-
 export function mapTileIdsInGeometrySnapshot(snapshot: SnapshotOut<GeometryContentModelType>,
                                              idMap: { [id: string]: string }) {
   snapshot.changes = snapshot.changes.map((changeJson: any) => {
@@ -1527,13 +1322,14 @@ export function mapTileIdsInGeometrySnapshot(snapshot: SnapshotOut<GeometryConte
   return snapshot;
 }
 
-export function getImageUrl(change?: JXGChange) {
+export function getImageUrl(change?: JXGChange): string[] | undefined {
   if (!change) return;
 
   if (change.operation === "create" && change.target === "image" && change.parents) {
-    return change.parents[0] as string;
-  } else if (change.operation === "update" && change.properties && !Array.isArray(change.properties)) {
-    return change.properties.url;
+    return [change.parents[0] as string, (change.properties as JXGProperties)?.filename];
+  } else if (change.operation === "update" && change.properties &&
+              !Array.isArray(change.properties) && change.properties.url) {
+    return [change.properties.url, change.properties.filename];
   }
 }
 
@@ -1545,6 +1341,7 @@ registerToolContentInfo({
   metadataClass: GeometryMetadataModel,
   addSidecarNotes: true,
   defaultHeight: kGeometryDefaultHeight,
+  exportNonDefaultHeight: true,
   defaultContent: defaultGeometryContent,
   snapshotPostProcessor: mapTileIdsInGeometrySnapshot
 });

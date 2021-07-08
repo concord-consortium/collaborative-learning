@@ -10,6 +10,8 @@ export type JXGCoordPair = [number, number];
 export type JXGUnsafeCoordPair = [number?, number?];
 export type JXGStringPair = [string?, string?];
 
+export type JXGImageParents = [string, JXGCoordPair, JXGCoordPair];
+
 export type JXGParentType = string | number | JXGCoordPair | JXGUnsafeCoordPair;
 
 export enum ESegmentLabelOption {
@@ -18,8 +20,22 @@ export enum ESegmentLabelOption {
   kLength = "length"
 }
 
+export interface IBoardScale {
+  xMin: number;
+  yMin: number;
+  unitX: number;
+  unitY: number;
+  canvasWidth: number;
+  canvasHeight: number;
+  xName?: string;
+  yName?: string;
+  xAnnotation?: string;
+  yAnnotation?: string;
+}
+
 export interface JXGProperties {
   id?: string;
+  ids?: string[]; // ids of linked points in tabeLink change
   labelOption?: ESegmentLabelOption;
   position?: JXGUnsafeCoordPair;
   title?: string; // metadata property
@@ -28,6 +44,7 @@ export interface JXGProperties {
   yMin?: number;
   unitX?: number;
   unitY?: number;
+  boardScale?: IBoardScale;
   [key: string]: any;
 }
 

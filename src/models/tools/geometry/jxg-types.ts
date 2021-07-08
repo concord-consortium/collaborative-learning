@@ -1,5 +1,13 @@
 import { values } from "lodash";
 
+export const kGeometryDefaultWidth = 480;
+export const kGeometryDefaultHeight = 320;
+export const kGeometryDefaultPixelsPerUnit = 18.3;  // matches S&S curriculum images
+export const kGeometryDefaultAxisMin = 0;
+
+// utility for creating an object from a property/value pair
+export const toObj = (p: string, v: any) => v != null ? { [p]: v } : undefined;
+
 export const isBoard = (v: any): v is JXG.Board => v instanceof JXG.Board;
 export const isAxis = (v: any): v is JXG.Line => (v instanceof JXG.Line) && (v.elType === "axis");
 export const isAxisArray = (v: any): v is JXG.Line[] => Array.isArray(v) && v.every(isAxis);
@@ -56,4 +64,7 @@ export const isMovableLineControlPoint = (v: any): v is JXG.Point => {
 };
 export const isMovableLineLabel = (v: any): v is JXG.Text => {
   return v instanceof JXG.Text && v.getAttribute("clientType") === kMovableLineType;
+};
+export const getMovableLinePointIds = (lineId: string) => {
+  return [`${lineId}-point1`, `${lineId}-point2`] as [string, string];
 };

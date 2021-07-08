@@ -62,7 +62,7 @@ context('Test Canvas', function () {
     });
     describe('Test personal workspace canvas', function () {
       it('verify personal workspace does not have section headers', function () {
-        clueCanvas.getRowSectionHeader().should('not.be.visible');
+        clueCanvas.getRowSectionHeader().should('not.exist');
       });
       it('verify tool tiles', function () { //to be used for save and restore test
         clueCanvas.addTile('geometry');
@@ -208,22 +208,29 @@ context('Test Canvas', function () {
         clueCanvas.addTile('text');
         textToolTile.getTextTile().should('exist');
         textToolTile.enterText('This is the Investigation ' + this.title);
+        clueCanvas.exportTileAndDocument('text-tool-tile');
       });
       it('adds a graph tool', function () {
         clueCanvas.addTile('geometry');
         graphToolTile.getGraphTile().should('exist');
+        clueCanvas.exportTileAndDocument('geometry-tool-tile');
+        // in case we created a point while exporting
+        cy.get('.primary-workspace .geometry-toolbar .button.delete').click({ force: true});
       });
       it('adds an image tool', function () {
         clueCanvas.addTile('image');
         imageToolTile.getImageTile().should('exist');
+        clueCanvas.exportTileAndDocument('image-tool-tile');
       });
       it('adds a draw tool', function () {
         clueCanvas.addTile('drawing');
         drawToolTile.getDrawTile().should('exist');
+        clueCanvas.exportTileAndDocument('drawing-tool-tile');
       });
       it('adds a table tool', function () {
         clueCanvas.addTile('table');
         tableToolTile.getTableTile().should('exist');
+        clueCanvas.exportTileAndDocument('table-tool-tile');
       });
       it('verifies scrolling', function () {
         graphToolTile.getGraphTile().scrollIntoView();

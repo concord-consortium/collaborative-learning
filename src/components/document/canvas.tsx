@@ -1,12 +1,15 @@
 import { each } from "lodash";
-import { observer } from "mobx-react";
+import { inject, observer } from "mobx-react";
 import React from "react";
+import { BaseComponent } from "../base";
 import { DocumentContentComponent } from "./document-content";
 import { DocumentModelType } from "../../models/document/document";
 import { DocumentContentModelType } from "../../models/document/document-content";
+import { transformCurriculumImageUrl } from "../../models/tools/image/image-import-export";
 import {
   IToolApi, IToolApiInterface, IToolApiMap, ToolApiInterfaceContext, EditableToolApiInterfaceRefContext
 } from "../tools/tool-api";
+import { HotKeys } from "../../utilities/hot-keys";
 import { DEBUG_CANVAS } from "../../lib/debug";
 
 import "./canvas.sass";
@@ -25,11 +28,13 @@ interface IProps {
   viaTeacherDashboard?: boolean;
 }
 
+@inject("stores")
 @observer
-export class CanvasComponent extends React.Component<IProps> {
+export class CanvasComponent extends BaseComponent<IProps> {
 
   private toolApiMap: IToolApiMap = {};
   private toolApiInterface: IToolApiInterface;
+  private hotKeys: HotKeys = new HotKeys();
 
   static contextType = EditableToolApiInterfaceRefContext;
   declare context: React.ContextType<typeof EditableToolApiInterfaceRefContext>;
@@ -51,6 +56,10 @@ export class CanvasComponent extends React.Component<IProps> {
         each(this.toolApiMap, api => callback(api));
       }
     };
+
+    this.hotKeys.register({
+      "cmd-shift-s": this.handleCopyDocumentJson
+    });
   }
 
   public render() {
@@ -60,7 +69,7 @@ export class CanvasComponent extends React.Component<IProps> {
     }
     return (
       <ToolApiInterfaceContext.Provider value={this.toolApiInterface}>
-        <div key="canvas" className="canvas" data-test="canvas">
+        <div key="canvas" className="canvas" data-test="canvas" onKeyDown={this.handleKeyDown}>
           {this.renderContent()}
           {this.renderEditability()}
           {this.renderDebugInfo()}
@@ -118,5 +127,21 @@ export class CanvasComponent extends React.Component<IProps> {
         </div>
       );
     }
+  }
+
+  private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    this.hotKeys.dispatch(e);
+  }
+
+  private handleCopyDocumentJson = () => {
+    const {content, document } = this.props;
+    const { appConfig, unit } = this.stores;
+    const unitBasePath = appConfig.getUnitBasePath(unit.code);
+    const documentContent = document?.content ?? content;
+    const transformImageUrl = (url: string, filename?: string) => {
+      return transformCurriculumImageUrl(url, unitBasePath, filename);
+    };
+    const json = documentContent?.exportAsJson({ includeTileIds: true, transformImageUrl });
+    json && navigator.clipboard.writeText(json);
   }
 }

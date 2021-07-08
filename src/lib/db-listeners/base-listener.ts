@@ -1,3 +1,4 @@
+import firebase from "firebase/app";
 import {DEBUG_LISTENERS} from "../../lib/debug";
 
 export class BaseListener {

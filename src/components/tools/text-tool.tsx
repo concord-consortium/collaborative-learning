@@ -2,7 +2,7 @@ import React from "react";
 import { autorun, IReactionDisposer, reaction } from "mobx";
 import { observer, inject } from "mobx-react";
 import {
-  Editor, EditorRange, EditorValue, EFormat, handleToggleSuperSubscript, SlateEditor, slateToHtml
+  Editor, EditorRange, EditorValue, EFormat, handleToggleSuperSubscript, SlateEditor
 } from "@concord-consortium/slate-editor";
 
 import { BaseComponent } from "../base";
@@ -10,7 +10,7 @@ import { debouncedSelectTile } from "../../models/stores/ui";
 import { TextContentModelType } from "../../models/tools/text/text-content";
 import { hasSelectionModifier } from "../../utilities/event-utils";
 import { TextToolbarComponent } from "./text-toolbar";
-import { IToolApi } from "./tool-api";
+import { IToolApi, TileResizeEntry } from "./tool-api";
 import { IToolTileProps } from "./tool-tile";
 
 import "./text-tool.sass";
@@ -88,7 +88,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
   private prevText: any;
   private textToolDiv: HTMLElement | null;
   private editor: Editor | undefined;
-  private tileContentRect: Omit<DOMRectReadOnly, "toJSON">;
+  private tileContentRect: DOMRectReadOnly;
   private toolbarToolApi: IToolApi | undefined;
 
   // map from slate type string to button icon name
@@ -141,25 +141,14 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
 
     this.props.onRegisterToolApi({
       exportContentAsTileJson: () => {
-        const { value } = this.state;
-        const html = value ? slateToHtml(value) : "";
-        const exportHtml = html.split("\n").map((line, i, arr) => `    "${line}"${i < arr.length - 1 ? "," : ""}`);
-        return [
-          `{`,
-          `  "type": "Text",`,
-          `  "format": "html",`,
-          `  "text": [`,
-          ...exportHtml,
-          `  ]`,
-          `}`
-        ].join("\n");
+        return this.getContent().exportJson();
       },
       handleDocumentScroll: (x: number, y: number) => {
         this.toolbarToolApi?.handleDocumentScroll?.(x, y);
       },
-      handleTileResize: (entry: ResizeObserverEntry) => {
+      handleTileResize: (entry: TileResizeEntry) => {
         const { x, y, width, height, top, left, bottom, right } = entry.contentRect;
-        this.tileContentRect = { x, y, width, height, top, left, bottom, right };
+        this.tileContentRect = { x, y, width, height, top, left, bottom, right, toJSON: () => "" };
         this.toolbarToolApi?.handleTileResize?.(entry);
       }
     });

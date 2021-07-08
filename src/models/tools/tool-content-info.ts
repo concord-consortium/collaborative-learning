@@ -12,6 +12,7 @@ export interface IToolContentInfo {
   metadataClass?: any;
   addSidecarNotes?: boolean;
   defaultHeight?: number;
+  exportNonDefaultHeight?: boolean;
   defaultContent: (input?: any) => any;
   snapshotPostProcessor?: ToolTileModelContentSnapshotPostProcessor;
 }
@@ -35,4 +36,14 @@ export function getToolContentInfoById(id: string) {
 // tool name used in a few places, e.g. "drawing", "geometry", etc.
 export function getToolContentInfoByTool(tool: string) {
   return gToolContentInfoMapByTool[tool];
+}
+
+export interface ITileExportOptions {
+  rowHeight?: number;
+  transformImageUrl?: (url: string, filename?: string) => string;
+}
+
+export interface IDocumentExportOptions extends ITileExportOptions {
+  includeTileIds?: boolean;
+  appendComma?: boolean;
 }
