@@ -28,7 +28,7 @@ before(()=>{
 })
 
 context('canvas test',()=>{
-    var buttons = ['Sensor','Number','Generator', 'Timer', 'Math','Logic','Transform','Relay', 'Data Storage'];
+    var buttons = ['Sensor','Number','Generator','Timer','Math','Logic','Transform','Relay','Light Bulb','Data Storage'];
     const numButtons = buttons.length;
 
     describe('canvas ui',()=>{
