@@ -13,6 +13,7 @@ import { TransformReteNodeFactory } from "./nodes/factories/transform-rete-node-
 import { LogicReteNodeFactory } from "./nodes/factories/logic-rete-node-factory";
 import { SensorReteNodeFactory } from "./nodes/factories/sensor-rete-node-factory";
 import { RelayReteNodeFactory } from "./nodes/factories/relay-rete-node-factory";
+import { LightBulbReteNodeFactory } from "./nodes/factories/light-bulb-rete-node-factory";
 import { GeneratorReteNodeFactory } from "./nodes/factories/generator-rete-node-factory";
 import { TimerReteNodeFactory } from "./nodes/factories/timer-rete-node-factory";
 import { DataStorageReteNodeFactory } from "./nodes/factories/data-storage-rete-node-factory";
@@ -264,6 +265,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         new LogicReteNodeFactory(numSocket),
         new SensorReteNodeFactory(numSocket),
         new RelayReteNodeFactory(numSocket),
+        new LightBulbReteNodeFactory(numSocket),
         new GeneratorReteNodeFactory(numSocket),
         new TimerReteNodeFactory(numSocket),
         new DataStorageReteNodeFactory(numSocket)];
