@@ -254,7 +254,11 @@ export class DB {
     const personalDocumentsSnapshot = await personalDocumentsRef.once("value");
     const personalDocuments: DBOtherDocumentMap = personalDocumentsSnapshot &&
                                                   personalDocumentsSnapshot.val();
-    const lastPersonalDocument = findLast(personalDocuments, (pd) => !pd.properties || !pd.properties.isDeleted);
+    const lastProgramPersonalDocument = findLast(personalDocuments,
+      (pd) => !pd.properties || (!pd.properties.isDeleted && !pd.properties.dfHasRelay && !pd.properties.dfHasData));
+    const lastPersonalDocument = lastProgramPersonalDocument?.self?.documentKey
+      ? lastProgramPersonalDocument
+      : lastProgramPersonalDocument || findLast(personalDocuments, (pd) => !pd.properties || !pd.properties.isDeleted);
     return lastPersonalDocument?.self?.documentKey
       ? this.openOtherDocument(PersonalDocument, lastPersonalDocument.self.documentKey)
       : this.createPersonalDocument({ content: defaultContent });
