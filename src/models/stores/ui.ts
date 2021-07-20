@@ -9,7 +9,7 @@ import { isSelectionModifierKeyDown } from "../../utilities/event-utils";
 
 export type ToggleElement = "rightNavExpanded" | "leftNavExpanded";
 
-export const UIDialogTypeEnum = types.enumeration("dialogType", ["alert", "confirm", "prompt"]);
+export const UIDialogTypeEnum = types.enumeration("dialogType", ["alert", "confirm", "prompt", "welcome"]);
 export type UIDialogType = typeof UIDialogTypeEnum.Type;
 
 type BooleanDialogResolver = (value?: boolean | PromiseLike<boolean> | undefined) => void;
@@ -79,6 +79,11 @@ export const UIModel = types
       dialogResolver = undefined;
     };
 
+    const welcome = () => {
+      self.dialog = UIDialogModel.create({type: "welcome", text: ""});
+      dialogResolver = undefined;
+    };
+
     const confirm = (text: string, title?: string) => {
       self.dialog = UIDialogModel.create({type: "confirm", text, title});
       return new Promise<boolean>((resolve, reject) => {
@@ -130,6 +135,7 @@ export const UIModel = types
     return {
       restoreDefaultNavExpansion,
       alert,
+      welcome,
       prompt,
       confirm,
       resolveDialog,
