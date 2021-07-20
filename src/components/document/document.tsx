@@ -62,14 +62,14 @@ const DownloadButton = ({ onClick }: { onClick: SVGClickHandler }) => {
 const PublishButton = ({ onClick, dataTestName }: { onClick: () => void, dataTestName?: string }) => {
   return (
     <IconButton icon="publish" key="publish" className="action icon-publish" dataTestName={dataTestName}
-                onClickButton={onClick} title="Publish Workspace" />
+                onClickButton={onClick} title="Publish Program" />
   );
 };
 
 const PublishedButton = ({ onClick, dataTestName }: { onClick: () => void, dataTestName?: string }) => {
   return (
     <IconButton icon="published" key="published" className="action icon-published" dataTestName={dataTestName}
-                onClickButton={onClick} title="Published Workspace" />
+                onClickButton={onClick} title="Published Program" />
   );
 };
 
@@ -83,21 +83,21 @@ const PublishSupportButton = ({ onClick }: { onClick: () => void }) => {
 const NewButton = ({ onClick }: { onClick: () => void }) => {
   return (
     <IconButton icon="new" key="new" className="action icon-new"
-                onClickButton={onClick} title="Create New Workspace" />
+                onClickButton={onClick} title="Create New Program" />
   );
 };
 
 const EditButton = ({ onClick }: { onClick: () => void }) => {
   return (
     <IconButton icon="edit" key="edit" className="action icon-edit"
-                onClickButton={onClick} title="Rename Workspace" />
+                onClickButton={onClick} title="Rename Program" />
   );
 };
 
 const CopyButton = ({ onClick }: { onClick: () => void }) => {
   return (
     <IconButton icon="copy" key="copy" className="action icon-copy"
-                onClickButton={onClick} title="Copy Workspace" />
+                onClickButton={onClick} title="Copy Program" />
   );
 };
 
@@ -124,7 +124,7 @@ const DeleteButton = ({ onClick, enabled }: { onClick: () => void, enabled: bool
     return (
       <IconButton icon="delete" key={`delete-${enabledClass}`} className={`action icon-delete delete-${enabledClass}`}
                   enabled={enabled} innerClassName={enabledClass}
-                  onClickButton={enabled ? onClick : undefined} title="Delete Workspace" />
+                  onClickButton={enabled ? onClick : undefined} title="Delete Program" />
     );
 };
 
