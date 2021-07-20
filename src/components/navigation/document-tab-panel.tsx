@@ -79,19 +79,21 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
         selectedIndex={tabIndex}
         selectedTabClassName="selected"
       >
-        <TabList className={`tab-list ${navTabSpec?.tab}`}>
-          {this.subTabs.map((subTab) => {
-            const sectionTitle = subTab.label.toLowerCase().replace(' ', '-');
-            const type = subTab.sections[0].type;
-            return (
-              <Tab className={`doc-tab ${navTabSpec?.tab} ${sectionTitle} ${type}`}
-                   key={`section-${sectionTitle}`}
-                   onClick={() => onTabClick?.(subTab.label, type)}>
-                {subTab.label}
-              </Tab>
-            );
-          })}
-        </TabList>
+        <div className="tab-header-row">
+          <TabList className={`tab-list ${navTabSpec?.tab}`}>
+            {this.subTabs.map((subTab) => {
+              const sectionTitle = subTab.label.toLowerCase().replace(' ', '-');
+              const type = subTab.sections[0].type;
+              return (
+                <Tab className={`doc-tab ${navTabSpec?.tab} ${sectionTitle} ${type}`}
+                    key={`section-${sectionTitle}`}
+                    onClick={() => onTabClick?.(subTab.label, type)}>
+                  {subTab.label}
+                </Tab>
+              );
+            })}
+          </TabList>
+        </div>
         <div className="documents-panel">
           {this.subTabs.map((subTab, index) => {
             const sectionTitle = subTab.label.toLowerCase().replace(' ', '-');
