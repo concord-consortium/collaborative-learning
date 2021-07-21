@@ -41,7 +41,7 @@ context('Teacher Dashboard View', () => {
         dashboard.getClassDropdown().should('be.visible').click({ force: true });
         // Check Dashboard and Workspace toggle default
         dashboard.getViewToggle('Dashboard').should('be.visible').and('have.class', 'selected');
-        dashboard.getViewToggle('Workspace').should('be.visible').and('not.have.class', 'selected');
+        dashboard.getViewToggle('Workspace & Resources').should('be.visible').and('not.have.class', 'selected');
       });
     });
     it('verifies six pack and group names', () => { //check this test again
@@ -89,9 +89,9 @@ context('Teacher Dashboard View', () => {
     it('verify dashboard/workspace switch changes workspace view', () => {
       dashboard.getViewToggle('Dashboard').should('be.visible').and('have.class', 'selected');
       clueCanvas.getSingleWorkspace().should('not.exist');
-      dashboard.getViewToggle('Workspace').should('be.visible').and('not.have.class', 'selected');
-      dashboard.getViewToggle('Workspace').click({ force: true });
-      dashboard.getViewToggle("Workspace").should('have.class', 'selected');
+      dashboard.getViewToggle('Workspace & Resources').should('be.visible').and('not.have.class', 'selected');
+      dashboard.getViewToggle('Workspace & Resources').click({ force: true });
+      dashboard.getViewToggle("Workspace & Resources").should('have.class', 'selected');
       clueCanvas.getSingleWorkspace().should('be.visible');
       dashboard.getViewToggle("Dashboard").click({ force: true });
       dashboard.getViewToggle('Dashboard').should('be.visible').and('have.class', 'selected');
