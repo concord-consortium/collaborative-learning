@@ -53,6 +53,10 @@ export class DialogComponent extends BaseComponent<IProps, IState> {
           title = title || "Prompt";
           contents = this.renderPromptContents(dialog);
           break;
+        case "welcome":
+          title = title || "Welcome to Dataflow";
+          contents = this.renderWelcomeContents(dialog);
+          break;
         default:
         case "alert":
           title = title || "Alert";
@@ -73,6 +77,26 @@ export class DialogComponent extends BaseComponent<IProps, IState> {
     else {
       return null;
     }
+  }
+
+  private renderWelcomeContents(dialog: UIDialogModelType) {
+    const welcome1 = "This is a limited demo of Dataflow. Dataflow lets you create and run flow programs made of connected program blocks that can collect, manipulate, and save sensor data and control real-world devices using relays.";
+    const welcome2 = "Press the toolbar buttons on the left to add blocks to your program. Click and drag connections to connect blocks and flow data from sensors through transformations and into a stored data set or controlled device. When ready, select the program duration and press the Run button to run your program. Create a new program using the + button on the top left, or open existing programs and stored data sets from the My Work tab on the right. ";
+    const welcome3 = "For the purposes of this demo, live sensors and relays are not available. Use the Sensor block and Light Bulb block to simulate what these physical devices do in the full version of Dataflow.";
+    const welcome4 = "View data collected by other students from the Shared Work tab on the right.";
+    return (
+      <div className="dialog-contents">
+        <div className="dialog-text">
+          <div className="welcome">{welcome1}</div>
+          <div className="welcome">{welcome2}</div>
+          <div className="welcome">{welcome3}</div>
+          <div className="welcome">{welcome4}</div>
+        </div>
+        <div className="dialog-buttons" data-test="dialog-buttons">
+          <button id="okButton" onClick={this.handleCancelDialog}>Ok</button>
+        </div>
+      </div>
+    );
   }
 
   private renderAlertContents(dialog: UIDialogModelType) {

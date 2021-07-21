@@ -574,14 +574,14 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       });
     }
     if (!hasRelay && !hasDataStorage && !hasLightbulb) {
-      ui.alert("Program must contain a Relay, Light Bulb, or Data Storage node before it can be run.", "No Program Output");
+      ui.alert("Program must contain a Relay, Light Bulb, or Data Storage block before it can be run.", "No Program Output");
       return false;
     } else if (!hasValidRelay && !hasValidDataStorage && !hasLightbulb) {
       const relayMessage = hasRelay && !hasValidRelay
-                            ? "Relay nodes need a valid selected relay and valid input before the program can be run. "
+                            ? "Relay blocks need a valid selected relay and valid input before the program can be run. "
                             : "";
       const dataStorageMessage = hasDataStorage && !hasValidDataStorage
-                            ? "Data Storage nodes need a valid data input before the program can be run. "
+                            ? "Data Storage blocks need a valid data input before the program can be run. "
                             : "";
       ui.alert(relayMessage + dataStorageMessage, "Invalid Program Output");
       return false;
@@ -858,9 +858,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private deviceRefresh = () => {
-    const message = "Refresh will update the list of sensor and relay devices that appear in the node selection menus. \
+    const message = "Refresh will update the list of sensor and relay devices that appear in the block selection menus. \
                      Please wait 5-10 seconds for refresh to complete. \
-                     If your device does not appear in the node selection after refresh, \
+                     If your device does not appear in the block selection after refresh, \
                      check if the device is plugged in and the hub is turned on.";
     this.stores.ui.confirm(message, "Refresh Sensors and Relays?")
     .then(ok => {
