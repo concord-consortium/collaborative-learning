@@ -161,6 +161,24 @@ $node-inner-width: 140px
         background-color: $relay-orange-outline
       .type-options span
         border-top-color: $relay-orange
+    &.light-bulb
+      background-color: $light-bulb-orange
+      border-color: $light-bulb-orange-outline
+      .main-color
+        color: $light-bulb-orange
+        border: 2px solid $light-bulb-orange
+        &:hover
+          background-color: $light-bulb-orange-outline
+      .control-color
+        color: $light-bulb-orange-control
+      .control-color-hoverable:hover
+        color: $light-bulb-orange-node
+      .active
+        background-color: $light-bulb-orange-control
+      .type-options select
+        background-color: $light-bulb-orange-outline
+      .type-options span
+        border-top-color: $light-bulb-orange
     &.data-storage
       background-color: $data-storage-orange
       border-color: $data-storage-orange-outline
@@ -287,6 +305,9 @@ $node-inner-width: 140px
             background-color: $transform-green-readout
           &.relay
             background-color: $relay-orange-readout
+            margin-left: 0px
+          &.light-bulb
+            background-color: $light-bulb-orange-readout
             margin-left: 0px
           &.data-storage
             display: none
