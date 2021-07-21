@@ -18,7 +18,7 @@ before(() => {
 
   cy.visit(queryParams);
   cy.waitForSpinner();
-  dashboard.switchView("Workspace");
+  dashboard.switchView("Workspace & Resources");
   cy.wait(2000);
   clueCanvas.getInvestigationCanvasTitle().eq(0).text().as('investigationTitle');
 });

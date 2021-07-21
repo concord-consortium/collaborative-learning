@@ -15,7 +15,7 @@ import ClueCanvas from "../../../../support/elements/clue/cCanvas";
 
         cy.visit(baseUrl+queryParams);
         cy.waitForSpinner();
-        dashboard.switchView("Workspace");
+        dashboard.switchView("Workspace & Resources");
         cy.wait(2000);
         clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
     });
@@ -40,7 +40,7 @@ import ClueCanvas from "../../../../support/elements/clue/cCanvas";
         it('verify unstar in dashboard unstars in workspace', function(){
             dashboard.clearAllStarsFromPublishedWork();
             cy.wait(1000);
-            dashboard.switchView('Workspace');
+            dashboard.switchView('Workspace & Resources');
             cy.openTopTab('class-work');
             cy.openSection('class-work','starred');
             cy.getCanvasItemTitle('class-work', 'starred', studentDoc).should('not.exist');

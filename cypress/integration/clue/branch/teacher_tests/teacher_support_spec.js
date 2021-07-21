@@ -16,7 +16,7 @@ import ClueRightNav from "../../../../support/elements/clue/cRightNav";
 
         cy.visit(queryParams);
         cy.waitForSpinner();
-        dashboard.switchView("Workspace");
+        dashboard.switchView("Workspace & Resources");
         cy.wait(2000);
     });
 

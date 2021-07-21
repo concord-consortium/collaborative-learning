@@ -97,7 +97,7 @@ Cypress.Commands.add("deleteWorkspaces",(baseUrl,queryParams)=>{
 
     cy.visit(baseUrl+queryParams);
     cy.waitForSpinner();
-    dashboard.switchView("Workspace");
+    dashboard.switchView("Workspace & Resources");
     cy.wait(2000);
     rightNav.openRightNavTab("my-work");
     cy.openSection("my-work","workspaces");
