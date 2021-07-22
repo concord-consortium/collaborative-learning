@@ -12,11 +12,20 @@
   border-radius: 8px 0 0 0;
   box-sizing: border-box;
   background-color: $workspace-teal-light-4;
+  display: flex;
 
-  .collapsed-tab-label{
+  .collapsed-tab-label {
     writing-mode: vertical-rl;
     text-orientation: mixed;
     font-size: 14px;
     margin: 20px 7px;
+    width: 50px;
+  }
+  .expand-right-indicator {
+    transform: rotate(180deg);
+    position: relative;
+    right: 33px;
+    align-self: center;
+    justify-self: center;
   }
 }

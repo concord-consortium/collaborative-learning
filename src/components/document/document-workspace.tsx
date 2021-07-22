@@ -12,15 +12,20 @@ import {
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { NavTabPanel } from "../navigation/nav-tab-panel";
 import { NavTabButtons } from "../navigation/nav-tab-buttons";
+import { CollapsedWorkspaceTab } from "./collapsed-workspace-tab";
 
 import "./document-workspace.sass";
 
 interface IProps extends IBaseProps {
 }
 
+interface IState {
+  expandWorkspace: boolean;
+}
+
 @inject("stores")
 @observer
-export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
+export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
   private imageDragDrop: ImageDragDrop;
 
   constructor(props: IProps) {
@@ -29,6 +34,9 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     this.imageDragDrop = new ImageDragDrop({
       isAcceptableImageDrag: this.isAcceptableImageDrag
     });
+    this.state = {
+      expandWorkspace: false
+    };
   }
 
   public componentDidMount() {
@@ -52,7 +60,9 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
           onDragOver={this.handleDragOverWorkspace}
           onDrop={this.handleImageDrop}
         />
-        {this.renderDocuments()}
+        {this.state.expandWorkspace ? this.renderDocuments()
+                         : <CollapsedWorkspaceTab onExpandWorkspace={this.setExpandWorkspace} />
+        }
         <NavTabPanel
           tabs={tabsToDisplay}
           isTeacher={isTeacher}
@@ -398,5 +408,9 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     if (documentKey) {
       return this.stores.documents.getDocument(documentKey);
     }
+  }
+
+  private setExpandWorkspace = (expand: boolean) => {
+    this.setState({ expandWorkspace: expand });
   }
 }

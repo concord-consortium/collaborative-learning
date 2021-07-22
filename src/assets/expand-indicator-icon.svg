@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 34 34">
+    <g fill="none" fill-rule="evenodd">
+      <g>
+        <path fill-rule="nonzero" d="M0 0H34V34H0z" transform="translate(-826.000000, -1496.000000) translate(548.000000, 1470.000000) translate(278.000000, 26.000000)"/>
+        <path fill="#707070" d="M18.308 11.769L24.846 22.231 11.769 22.231z" transform="translate(-826.000000, -1496.000000) translate(548.000000, 1470.000000) translate(278.000000, 26.000000) translate(18.307692, 17.000000) scale(-1, 1) rotate(-90.000000) translate(-18.307692, -17.000000)"/>
+      </g>
+    </g>
+</svg>
