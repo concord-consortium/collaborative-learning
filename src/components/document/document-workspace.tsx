@@ -12,6 +12,7 @@ import {
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { NavTabPanel } from "../navigation/nav-tab-panel";
 import { NavTabButtons } from "../navigation/nav-tab-buttons";
+import { ResizePanelDivider } from "./resize-panel-divider";
 
 import "./document-workspace.sass";
 
@@ -52,7 +53,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
           onDragOver={this.handleDragOverWorkspace}
           onDrop={this.handleImageDrop}
         />
-        {this.renderDocuments()}
         <NavTabPanel
           tabs={tabsToDisplay}
           isTeacher={isTeacher}
@@ -65,6 +65,9 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
           onDragOver={this.handleDragOverWorkspace}
           onDrop={this.handleImageDrop}
         />
+        <ResizePanelDivider />
+        {this.renderDocuments()}
+
       </div>
     );
   }
