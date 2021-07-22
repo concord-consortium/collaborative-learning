@@ -53,7 +53,7 @@ context('Sensor block tests',()=>{
                 dfblock.openHubSensorComboListDropdown();
                 dfblock.getHubSensorComboOptionList().each(($option, index, $optionList)=>{
                     if(($optionList.length<2)) {
-                        expect($option).to.contain('None Available');
+                        expect($option).to.contain(sensor + " Demo Data");
                     }
                     else {
                         expect($option).to.contain(sensor.toLowerCase());

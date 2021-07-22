@@ -18,7 +18,7 @@ import { GeneratorReteNodeFactory } from "./nodes/factories/generator-rete-node-
 import { TimerReteNodeFactory } from "./nodes/factories/timer-rete-node-factory";
 import { DataStorageReteNodeFactory } from "./nodes/factories/data-storage-rete-node-factory";
 import { NodeChannelInfo, NodeSensorTypes, NodeGeneratorTypes, ProgramRunTimes,
-         NodeTimerInfo, DEFAULT_PROGRAM_TIME, IntervalTimes } from "../utilities/node";
+         NodeTimerInfo, DEFAULT_PROGRAM_TIME, IntervalTimes, virtualSensorChannels } from "../utilities/node";
 import { uploadProgram, fetchProgramData, fetchActiveRelays, deleteProgram } from "../utilities/aws";
 import { DropdownListControl, ListOption } from "./nodes/controls/dropdown-list-control";
 import { PlotButtonControl } from "./nodes/controls/plot-button-control";
@@ -377,6 +377,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       return Number.isFinite(chValue) ? chValue : NaN;
     }
 
+    // add virtual channels that always appear
+    this.channels = [...virtualSensorChannels];
+
     hubStore.hubs.forEach(hub => {
       hub.hubChannels.forEach(ch => {
         // add channel if it is new
@@ -389,6 +392,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                     type: ch.type,
                     units: ch.units,
                     plug: ch.plug,
+                    name: ch.type,
                     value: parseValue(ch.value)};
           this.channels.push(chInfo);
         }
@@ -977,6 +981,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
     if (sensorSelect && !this.isComplete()) {
       const chInfo = this.channels.find(ci => ci.channelId === n.data.sensor);
+
+      // update virtual sensors
+      if (chInfo?.virtual) {
+        const time = Math.floor(Date.now() / 1000);
+        chInfo.value = chInfo.method ? chInfo.method(time) : 0;
+      }
+
       if (chInfo && chInfo.value) {
         sensorSelect.setSensorValue(chInfo.value);
       } else {
