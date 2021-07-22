@@ -65,7 +65,6 @@ const SolutionsButton = ({ onClick, isToggled }: { onClick: () => void, isToggle
   const classes = classNames("solutions-button", { toggled: isToggled });
   return (
     <div className="solutions-switch">
-      {<div className="solutions-separator" />}
       <ToggleControl className={classes} dataTest="solutions-button"
                       initialValue={isToggled} onChange={onClick}
                       title={isToggled
