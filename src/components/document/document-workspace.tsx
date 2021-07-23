@@ -13,6 +13,7 @@ import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { NavTabPanel } from "../navigation/nav-tab-panel";
 import { NavTabButtons } from "../navigation/nav-tab-buttons";
 import { CollapsedWorkspaceTab } from "./collapsed-workspace-tab";
+import { CollapsedResourcesTab } from "../navigation/collapsed-resources-tab";
 
 import "./document-workspace.sass";
 
@@ -21,6 +22,7 @@ interface IProps extends IBaseProps {
 
 interface IState {
   expandWorkspace: boolean;
+  expandResources: boolean;
 }
 
 @inject("stores")
@@ -35,7 +37,8 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
       isAcceptableImageDrag: this.isAcceptableImageDrag
     });
     this.state = {
-      expandWorkspace: false
+      expandWorkspace: false,
+      expandResources: false
     };
   }
 
@@ -47,10 +50,11 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
     const { appConfig : { navTabs: { tabSpecs } },
             teacherGuide,
             user: { isTeacher },
-            ui: { problemWorkspace: { type } } } = this.stores;
+            ui: { problemWorkspace: { type }, activeNavTab } } = this.stores;
     const studentTabs = tabSpecs.filter((t) => !t.teacherOnly);
     const teacherTabs = tabSpecs.filter(t => (t.tab !== "teacher-guide") || teacherGuide);
     const tabsToDisplay = isTeacher ? teacherTabs : studentTabs;
+    console.log("activeNavTab: ", activeNavTab);
     // NOTE: the drag handlers are in three different divs because we cannot overlay
     // the renderDocuments() div otherwise the Cypress tests will fail because none
     // of the html elements in the documents will be visible to it.  The first div acts
@@ -68,18 +72,21 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
                                                              workspaceType={type}
                                       />
         }
-        <NavTabPanel
+        {this.state.expandResources
+          ? <NavTabPanel
+              tabs={tabsToDisplay}
+              isTeacher={isTeacher}
+              onDragOver={this.handleDragOverWorkspace}
+              onDrop={this.handleImageDrop}
+            />
+          : <CollapsedResourcesTab onExpandResources={this.setExpandResources} resourceType={activeNavTab} />
+        }
+        {/* <NavTabButtons
           tabs={tabsToDisplay}
           isTeacher={isTeacher}
           onDragOver={this.handleDragOverWorkspace}
           onDrop={this.handleImageDrop}
-        />
-        <NavTabButtons
-          tabs={tabsToDisplay}
-          isTeacher={isTeacher}
-          onDragOver={this.handleDragOverWorkspace}
-          onDrop={this.handleImageDrop}
-        />
+        /> */}
       </div>
     );
   }
@@ -417,5 +424,11 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
 
   private setExpandWorkspace = (expand: boolean) => {
     this.setState({ expandWorkspace: expand });
+  }
+
+  private setExpandResources = (expand: boolean) => {
+    const { ui } = this.stores;
+    this.setState({ expandResources: expand });
+    ui.toggleNavTabContent(expand);
   }
 }
