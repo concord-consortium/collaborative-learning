@@ -1,0 +1,60 @@
+import mockXhr from "xhr-mock";
+import { Logger } from "./logger";
+import { AppConfigModel } from "../models/stores/app-config-model";
+import { InvestigationModel } from "../models/curriculum/investigation";
+import { IStores, createStores } from "../models/stores/stores";
+import { UserModel } from "../models/stores/user";
+
+const investigation = InvestigationModel.create({
+  ordinal: 1,
+  title: "Investigation 1",
+  problems: [ { ordinal: 1, title: "Problem 1.1" } ]
+});
+const problem = investigation.getProblem(1);
+
+jest.mock("../lib/debug", () => ({
+  DEBUG_LOGGER: true
+}));
+
+describe("dev/qa/test logger with DEBUG_LOGGER true", () => {
+  let stores: IStores;
+  let mockConsoleLog: jest.SpyInstance;
+
+  beforeEach(() => {
+    mockXhr.setup();
+    stores = createStores({
+      appMode: "test",
+      appConfig: AppConfigModel.create({ appName: "TestLogger"}),
+      user: UserModel.create({id: "0", type: "teacher", portal: "test"})
+    });
+
+    // intercept and suppress console logs
+    mockConsoleLog = jest.spyOn(global.console, "log").mockImplementation(() => null);
+
+    Logger.initializeLogger(stores, investigation, problem);
+  });
+
+  afterEach(() => {
+    mockXhr.reset();
+    mockXhr.teardown();
+
+    mockConsoleLog.mockRestore();
+  });
+
+  it("does not log in dev/qa/test modes", (done) => {
+    const TEST_LOG_MESSAGE = 999;
+    const mockPostHandler = jest.fn((req, res) => {
+      expect(mockPostHandler).toHaveBeenCalledTimes(1);
+      done();
+      return res.status(201);
+    });
+    mockXhr.use(mockPostHandler);
+
+    // should be logged despite mode
+    Logger.log(TEST_LOG_MESSAGE);
+
+    // once for initialize and once for the log
+    expect(mockConsoleLog).toHaveBeenCalledTimes(2);
+  });
+
+});

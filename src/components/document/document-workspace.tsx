@@ -12,6 +12,8 @@ import {
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { NavTabPanel } from "../navigation/nav-tab-panel";
 import { NavTabButtons } from "../navigation/nav-tab-buttons";
+import { CollapsedResourcesTab } from "../navigation/collapsed-resources-tab";
+import { CollapsedWorkspaceTab } from "./collapsed-workspace-tab";
 import { ResizePanelDivider } from "./resize-panel-divider";
 
 import "./document-workspace.sass";
@@ -19,9 +21,13 @@ import "./document-workspace.sass";
 interface IProps extends IBaseProps {
 }
 
+interface IState {
+  expandWorkspace: boolean;
+}
+
 @inject("stores")
 @observer
-export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
+export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
   private imageDragDrop: ImageDragDrop;
 
   constructor(props: IProps) {
@@ -30,6 +36,9 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     this.imageDragDrop = new ImageDragDrop({
       isAcceptableImageDrag: this.isAcceptableImageDrag
     });
+    this.state = {
+      expandWorkspace: false
+    };
   }
 
   public componentDidMount() {
@@ -37,7 +46,10 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   public render() {
-    const { appConfig : { navTabs: { tabSpecs } }, teacherGuide, user: { isTeacher } } = this.stores;
+    const { appConfig : { navTabs: { tabSpecs } },
+            teacherGuide,
+            user: { isTeacher },
+            ui: { problemWorkspace: { type }, activeNavTab, navTabContentShown } } = this.stores;
     const studentTabs = tabSpecs.filter((t) => !t.teacherOnly);
     const teacherTabs = tabSpecs.filter(t => (t.tab !== "teacher-guide") || teacherGuide);
     const tabsToDisplay = isTeacher ? teacherTabs : studentTabs;
@@ -53,21 +65,21 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
           onDragOver={this.handleDragOverWorkspace}
           onDrop={this.handleImageDrop}
         />
-        <NavTabPanel
-          tabs={tabsToDisplay}
-          isTeacher={isTeacher}
-          onDragOver={this.handleDragOverWorkspace}
-          onDrop={this.handleImageDrop}
-        />
-        <NavTabButtons
-          tabs={tabsToDisplay}
-          isTeacher={isTeacher}
-          onDragOver={this.handleDragOverWorkspace}
-          onDrop={this.handleImageDrop}
-        />
+        {this.state.expandWorkspace ? this.renderDocuments()
+                                    : <CollapsedWorkspaceTab onExpandWorkspace={this.setExpandWorkspace}
+                                                             workspaceType={type}
+                                      />
+        }
+        {navTabContentShown
+          ? <NavTabPanel
+              tabs={tabsToDisplay}
+              isTeacher={isTeacher}
+              onDragOver={this.handleDragOverWorkspace}
+              onDrop={this.handleImageDrop}
+            />
+          : <CollapsedResourcesTab onExpandResources={this.setExpandResources} resourceType={activeNavTab} />
+        }
         <ResizePanelDivider />
-        {this.renderDocuments()}
-
       </div>
     );
   }
@@ -401,5 +413,14 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     if (documentKey) {
       return this.stores.documents.getDocument(documentKey);
     }
+  }
+
+  private setExpandWorkspace = (expand: boolean) => {
+    this.setState({ expandWorkspace: expand });
+  }
+
+  private setExpandResources = (expand: boolean) => {
+    const { ui } = this.stores;
+    ui.toggleNavTabContent(expand);
   }
 }

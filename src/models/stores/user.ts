@@ -2,6 +2,7 @@ import initials from "initials";
 import { types } from "mobx-state-tree";
 import { AuthenticatedUser } from "../../lib/auth";
 import { PortalFirebaseStudentJWT } from "../../lib/portal-types";
+import { urlParams } from "../../utilities/url-params";
 import { UserTypeEnum } from "./user-types";
 
 export const PortalClassOffering = types
@@ -35,6 +36,7 @@ export const UserModel = types
     offeringId: "",
     latestGroupId: types.maybe(types.string),
     portal: "",
+    teacherNetwork: types.maybe(types.string),
     loggingRemoteEndpoint: types.maybe(types.string),
     portalClassOfferings: types.array(PortalClassOffering),
     demoClassHashes: types.array(types.string),
@@ -68,6 +70,8 @@ export const UserModel = types
       self.id = user.id;
       self.portal = user.portal;
       self.type = user.type;
+      // TODO: replace this with real implementation
+      self.teacherNetwork = user.type === "teacher" ? urlParams.network : undefined;
       self.className = user.className;
       self.classHash = user.classHash;
       self.offeringId = user.offeringId;
@@ -100,6 +104,9 @@ export const UserModel = types
     },
     get isTeacher() {
       return self.type === "teacher";
+    },
+    get isNetworkedTeacher() {
+      return (self.type === "teacher") && !!self.teacherNetwork;
     },
     get initials() {
       return initials(self.name);

@@ -79,9 +79,15 @@ describe("TextContentModel", () => {
     const model = TextContentModel.create({ text: foo });
     expect(Plain.serialize(model.asSlate())).toBe(foo);
 
-    model.setMarkdown("foo");
-    expect(model.format).toBe("markdown");
-    expect(Plain.serialize(model.asSlate())).toBe(foo);
+    jestSpyConsole("warn", mockConsole => {
+      // triggers console warning about "the `leaves` property of Text nodes has been removed"
+      model.setMarkdown("foo");
+      expect(model.format).toBe("markdown");
+      expect(Plain.serialize(model.asSlate())).toBe(foo);
+
+      // failure of this test => the console mock can be removed
+      expect(mockConsole).toHaveBeenCalled();
+    });
 
     const fooValue = Value.fromJSON(fooJson);
     model.setSlate(fooValue);
