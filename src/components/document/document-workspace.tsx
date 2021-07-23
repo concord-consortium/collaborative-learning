@@ -22,7 +22,6 @@ interface IProps extends IBaseProps {
 
 interface IState {
   expandWorkspace: boolean;
-  expandResources: boolean;
 }
 
 @inject("stores")
@@ -37,8 +36,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
       isAcceptableImageDrag: this.isAcceptableImageDrag
     });
     this.state = {
-      expandWorkspace: false,
-      expandResources: false
+      expandWorkspace: false
     };
   }
 
@@ -50,7 +48,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
     const { appConfig : { navTabs: { tabSpecs } },
             teacherGuide,
             user: { isTeacher },
-            ui: { problemWorkspace: { type }, activeNavTab } } = this.stores;
+            ui: { problemWorkspace: { type }, activeNavTab, navTabContentShown } } = this.stores;
     const studentTabs = tabSpecs.filter((t) => !t.teacherOnly);
     const teacherTabs = tabSpecs.filter(t => (t.tab !== "teacher-guide") || teacherGuide);
     const tabsToDisplay = isTeacher ? teacherTabs : studentTabs;
@@ -72,7 +70,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
                                                              workspaceType={type}
                                       />
         }
-        {this.state.expandResources
+        {navTabContentShown
           ? <NavTabPanel
               tabs={tabsToDisplay}
               isTeacher={isTeacher}
@@ -81,12 +79,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
             />
           : <CollapsedResourcesTab onExpandResources={this.setExpandResources} resourceType={activeNavTab} />
         }
-        {/* <NavTabButtons
-          tabs={tabsToDisplay}
-          isTeacher={isTeacher}
-          onDragOver={this.handleDragOverWorkspace}
-          onDrop={this.handleImageDrop}
-        /> */}
       </div>
     );
   }
@@ -428,7 +420,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
 
   private setExpandResources = (expand: boolean) => {
     const { ui } = this.stores;
-    this.setState({ expandResources: expand });
     ui.toggleNavTabContent(expand);
   }
 }
