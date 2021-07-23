@@ -44,7 +44,10 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { appConfig : { navTabs: { tabSpecs } }, teacherGuide, user: { isTeacher } } = this.stores;
+    const { appConfig : { navTabs: { tabSpecs } },
+            teacherGuide,
+            user: { isTeacher },
+            ui: { problemWorkspace: { type } } } = this.stores;
     const studentTabs = tabSpecs.filter((t) => !t.teacherOnly);
     const teacherTabs = tabSpecs.filter(t => (t.tab !== "teacher-guide") || teacherGuide);
     const tabsToDisplay = isTeacher ? teacherTabs : studentTabs;
@@ -61,7 +64,9 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
           onDrop={this.handleImageDrop}
         />
         {this.state.expandWorkspace ? this.renderDocuments()
-                         : <CollapsedWorkspaceTab onExpandWorkspace={this.setExpandWorkspace} />
+                                    : <CollapsedWorkspaceTab onExpandWorkspace={this.setExpandWorkspace}
+                                                             workspaceType={type}
+                                      />
         }
         <NavTabPanel
           tabs={tabsToDisplay}

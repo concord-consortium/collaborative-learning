@@ -6,13 +6,33 @@
   right: 0;
   height: calc(100vh - (#{$header-height} + #{$workspace-content-margin} * 2));
   width: 38px;
-  border: 2px solid $workspace-teal;
   margin: 4px 4px 0 2px;
   padding: 2px;
   border-radius: 8px 0 0 0;
   box-sizing: border-box;
-  background-color: $workspace-teal-light-4;
+  border-width: 2px;
+  border-style: solid;
   display: flex;
+  &.problem {
+    border-color: $workspace-teal;
+    background-color: $workspace-teal-light-4;
+    &:hover {
+      background-color: $workspace-teal-light-2;
+    }
+    &:active {
+      background-color: $workspace-teal-light-1-b;
+    }
+  }
+  &.learninglog {
+    border-color: $learninglog-green;
+    background-color: $learninglog-green-light-5;
+    &:hover {
+      background-color: $learninglog-green-light-3;
+    }
+    &:active {
+      background-color: $learninglog-green-light-2;
+    }
+  }
 
   .collapsed-tab-label {
     writing-mode: vertical-rl;
