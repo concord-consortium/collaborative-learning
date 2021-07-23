@@ -70,6 +70,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
                                                              workspaceType={type}
                                       />
         }
+        <ResizePanelDivider />
         {navTabContentShown
           ? <NavTabPanel
               tabs={tabsToDisplay}
