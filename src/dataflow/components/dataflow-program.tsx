@@ -730,7 +730,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     let hasValidRelay = false;
     let hasLightbulb = false;
     this.programEditor.nodes.forEach((n: Node) => {
-      if (n.name === "Sensor" && n.data.sensor) {
+      if (n.name === "Sensor" && n.data.sensor && !n.data.virtual) {
         const chInfo = this.channels.find(ci => ci.channelId === n.data.sensor);
         if (chInfo) {
           // only add hubs once
@@ -983,9 +983,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const chInfo = this.channels.find(ci => ci.channelId === n.data.sensor);
 
       // update virtual sensors
-      if (chInfo?.virtual) {
+      if (chInfo?.virtualValueMethod) {
         const time = Math.floor(Date.now() / 1000);
-        chInfo.value = chInfo.method ? chInfo.method(time) : 0;
+        chInfo.value = chInfo.virtualValueMethod(time);
       }
 
       if (chInfo && chInfo.value) {
