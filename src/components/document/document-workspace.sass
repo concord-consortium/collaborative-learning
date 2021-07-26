@@ -11,7 +11,7 @@
   .single-workspace
     position: absolute
     top: $header-height
-    left: $nav-tabs-width
+    left: calc(#{$collapsed-tab-width} + 4px)
     right: 0
     bottom: $half-nav-expanded-peek
     height: calc(100vh - (#{$header-height} + #{$workspace-content-margin} * 2))

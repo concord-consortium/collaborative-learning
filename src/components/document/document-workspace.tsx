@@ -37,7 +37,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
       isAcceptableImageDrag: this.isAcceptableImageDrag
     });
     this.state = {
-      expandWorkspace: false
+      expandWorkspace: true
     };
   }
 
@@ -65,12 +65,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
           onDragOver={this.handleDragOverWorkspace}
           onDrop={this.handleImageDrop}
         />
-        {this.state.expandWorkspace ? this.renderDocuments()
-                                    : <CollapsedWorkspaceTab onExpandWorkspace={this.setExpandWorkspace}
-                                                             workspaceType={type}
-                                      />
-        }
-        <ResizePanelDivider />
+
         {navTabContentShown
           ? <NavTabPanel
               tabs={tabsToDisplay}
@@ -80,7 +75,12 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
             />
           : <CollapsedResourcesTab onExpandResources={this.setExpandResources} resourceType={activeNavTab} />
         }
-        <ResizePanelDivider />
+        <ResizePanelDivider isResourceExpanded={navTabContentShown} onExpandWorkspace={this.setExpandWorkspace}/>
+        {this.state.expandWorkspace ? this.renderDocuments()
+                                    : <CollapsedWorkspaceTab onExpandWorkspace={this.setExpandWorkspace}
+                                                             workspaceType={type}
+                                      />
+        }
       </div>
     );
   }

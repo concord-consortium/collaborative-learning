@@ -3,13 +3,16 @@
   .resize-panel-divider {
     display: flex;
     align-items: center;
-    flex-flow: column;
+    flex-direction: column;
+    position: absolute;
+    top: $header-height;
+    height: calc(100vh - (#{$header-height} + #{$workspace-content-margin} * 2));
+    transition-duration: 1s;
 
     .divider {
       position: absolute;
-      top: $header-height;
       width: 4px;
-      height: calc(100vh - (#{$header-height} + #{$workspace-content-margin} * 2));
+      height: 100%;
       margin: 10px 2px 0;
       border-radius: 2px;
       background-color: $charcoal-light-4;
@@ -19,15 +22,16 @@
 
     .drag-thumbnail {
       position: absolute;
-      align-self: center;
       z-index: 2;
       margin-top: 9px;
+      top: 50%;
     }
     .left-right-drag {
       position: absolute;
       z-index: 2;
       opacity: 1%;
       cursor: col-resize;
+      top: 50%;
       &:hover {
         transition: .25s;
         opacity: 50%;
