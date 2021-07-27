@@ -26,7 +26,7 @@ context('single student functional test',()=>{
     });
     describe('Nav tabs open and close',()=>{
       it('will verify that clicking on any tab opens the nav area', function () {
-        cy.openTab('my-work');
+        cy.get(".collapsed-resources-tab.my-work").click();
         cy.get('[data-test=my-work-section-investigations-documents]').should('be.visible');
       });
       it('will verify clicking on subtab opens panel to subtab section', function () {
@@ -52,7 +52,8 @@ context('single student functional test',()=>{
 
     describe('test header elements', function(){
       before(function(){
-        cy.openTab('my-work');
+        // cy.openTab('my-work');
+        cy.get(".collapsed-resources-tab.my-work").click();
         cy.openDocumentWithTitle("my-work", "workspaces", this.title);
       });
         it('verifies views button changes when clicked and shows the correct corresponding workspace view', function(){

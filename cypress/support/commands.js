@@ -120,9 +120,9 @@ Cypress.Commands.add("openTab", (tab) => {
 Cypress.Commands.add("openTopTab", (tab) => {
   cy.get('.nav-tab-panel .tab-'+tab).click();
 } );
-// Cypress.Commands.add("openSubTab", (tab, subTab) => {
-//   cy.get('.document-tabs.'+tab+'.'+subTab).click();
-// } );
+Cypress.Commands.add("openTopTab", (tab) => {
+  cy.get('.top-tab.tab-'+tab).click();
+} );
 Cypress.Commands.add("openSection", (tab, section) => {//doc-tab my-work workspaces problem-documents selected
   cy.get('.doc-tab.'+tab+'.'+section).click();
 });
