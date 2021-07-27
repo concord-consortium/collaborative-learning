@@ -421,7 +421,7 @@ const virtualLightChannel: NodeChannelInfo = {
     return vals[t % vals.length];
   } };
 const virtualPartChannel: NodeChannelInfo = {
-  hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "Particulates", channelId: "00007VIR",
+  hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "Particulates", channelId: "00006VIR",
   missing: false, type: "particulates", units: "PM2.5", plug: 7, value: 0, virtual: true,
   virtualValueMethod: (t: number) => {
     const vals = [10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11];
