@@ -43,10 +43,11 @@ import ClueCanvas from "../../../../support/elements/clue/cCanvas";
 
               cy.visit(queryParams);
               cy.waitForSpinner();
-              cy.get(".collapsed-resources-tab.my-work").click();
-                cy.get('.support-badge').should('be.visible');
-                cy.openSection('supports', 'teacher-supports');
-                cy.getCanvasItemTitle('teacher-supports', title).should('be.visible');
+              cy.openResourceTabs();
+              cy.openTopTab("supports");
+              cy.get('.support-badge').should('be.visible');
+              cy.openSection('supports', 'teacher-supports');
+              cy.getCanvasItemTitle('teacher-supports', title).should('be.visible');
             });
     });
 

@@ -46,13 +46,13 @@ context('single student functional test',()=>{
       });
       it('verify close of nav tabs', function () {
         cy.closeTabs();
-        cy.get('.nav-tab-panel').should('not.have.class', 'shown');
+        cy.get('.nav-tab-panel').should('not.exist');
       });
     });
 
     describe('test header elements', function(){
       before(function(){
-        cy.openResourcesTab();
+        cy.openResourceTabs();
         cy.openTopTab('my-work');
         cy.openDocumentWithTitle("my-work", "workspaces", this.title);
       });
