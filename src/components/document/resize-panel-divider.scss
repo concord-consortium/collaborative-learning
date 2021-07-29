@@ -7,7 +7,7 @@
     position: absolute;
     top: $header-height;
     height: calc(100vh - (#{$header-height} + #{$workspace-content-margin} * 2));
-    transition-duration: 1s;
+    transition-duration: .5s;
 
     .divider {
       position: absolute;
@@ -26,15 +26,38 @@
       margin-top: 9px;
       top: 50%;
     }
-    .left-right-drag {
-      position: absolute;
-      z-index: 2;
-      opacity: 1%;
-      cursor: col-resize;
+    .drag-handles{
+      display: flex;
+      flex-direction: row;
+      position: relative;
+      width: 44px;
+      height: 44px;
+      z-index: 3;
       top: 50%;
+      opacity: 0.01%;
       &:hover {
-        transition: .25s;
         opacity: 50%;
+      }
+
+      .left-right-drag {
+        position: absolute;
+        left: 0;
+      }
+      .drag-left-handle {
+        position: relative;
+        width: 21px;
+        height: 100%;
+        left: 0;
+        z-index: 2;
+        cursor: pointer;
+      }
+      .drag-right-handle {
+        position: relative;
+        width: 21px;
+        height: 100%;
+        right: 0;
+        z-index: 2;
+        cursor: pointer;
       }
     }
   }

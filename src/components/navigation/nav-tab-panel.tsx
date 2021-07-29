@@ -15,6 +15,7 @@ import "./nav-tab-panel.sass";
 interface IProps extends IBaseProps {
   tabs?: NavTabSpec[];
   isTeacher: boolean;
+  navTabWidth: string;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
   onDrop: (e: React.DragEvent<HTMLDivElement>) => void;
 }
@@ -35,11 +36,11 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { tabs } = this.props;
+    const { tabs, navTabWidth } = this.props;
     const { ui, user, supports } = this.stores;
     const selectedTabIndex = tabs?.findIndex(t => t.tab === ui.activeNavTab);
     return (
-      <div className={`nav-tab-panel ${ui.navTabContentShown ? "shown" : ""}`}>
+      <div className={`nav-tab-panel ${ui.navTabContentShown ? "shown" : ""} ${navTabWidth}`}>
         <Tabs selectedIndex={selectedTabIndex} onSelect={this.handleSelectTab} forceRenderTabPanel={true}>
           <div className="top-row">
             <TabList className="top-tab-list">

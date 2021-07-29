@@ -4,16 +4,26 @@ import LeftRightDragIcon from "../../assets/left-right-drag.svg";
 import "./resize-panel-divider.scss";
 
 interface IProps {
-  isResourceExpanded: boolean
+  isResourceExpanded: boolean,
+  resourceWidth: string,
   onExpandWorkspace: (expand: boolean) => void;
+  onExpandResources: (expand: boolean) => void;
 }
-export const ResizePanelDivider: React.FC <IProps>= ({isResourceExpanded, onExpandWorkspace}) => {
-  const dividerPosition = isResourceExpanded ? {right: "50%"} :  {left: 44};
+export const ResizePanelDivider: React.FC <IProps> =
+  ({isResourceExpanded, resourceWidth, onExpandWorkspace, onExpandResources}) => {
+    const dividerPosition = !isResourceExpanded ? {left: 22}
+                                                : resourceWidth==="full" ? {right : 22}
+                                                                         : {right: "calc(50% - 22px)"};
+
   return (
-    <div className="resize-panel-divider" onClick={()=>onExpandWorkspace(false)} style={dividerPosition}>
+    <div className="resize-panel-divider"  style={dividerPosition}>
       <div className="divider" />
       <DragThumbnailIcon className="drag-thumbnail"/>
-      <LeftRightDragIcon className="left-right-drag"/>
+      <div className="drag-handles">
+        <div className="drag-left-handle" onClick={()=>onExpandResources(false)}></div>
+        <LeftRightDragIcon className="left-right-drag"/>
+        <div className="drag-right-handle" onClick={()=>onExpandWorkspace(false)}></div>
+      </div>
     </div>
   );
 };

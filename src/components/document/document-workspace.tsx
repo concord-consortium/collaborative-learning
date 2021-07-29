@@ -23,6 +23,7 @@ interface IProps extends IBaseProps {
 
 interface IState {
   expandWorkspace: boolean;
+  navTabWidth: string;
 }
 
 @inject("stores")
@@ -37,7 +38,8 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
       isAcceptableImageDrag: this.isAcceptableImageDrag
     });
     this.state = {
-      expandWorkspace: true
+      expandWorkspace: true,
+      navTabWidth: ""
     };
   }
 
@@ -53,6 +55,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
     const studentTabs = tabSpecs.filter((t) => !t.teacherOnly);
     const teacherTabs = tabSpecs.filter(t => (t.tab !== "teacher-guide") || teacherGuide);
     const tabsToDisplay = isTeacher ? teacherTabs : studentTabs;
+    // const navTabWidthProp = !navTabContentShown ? "" : this.state.expandWorkspace ? "half" : "full";
     // NOTE: the drag handlers are in three different divs because we cannot overlay
     // the renderDocuments() div otherwise the Cypress tests will fail because none
     // of the html elements in the documents will be visible to it.  The first div acts
@@ -70,12 +73,17 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
           ? <NavTabPanel
               tabs={tabsToDisplay}
               isTeacher={isTeacher}
+              navTabWidth={this.state.navTabWidth}
               onDragOver={this.handleDragOverWorkspace}
               onDrop={this.handleImageDrop}
             />
           : <CollapsedResourcesTab onExpandResources={this.setExpandResources} resourceType={activeNavTab} />
         }
-        <ResizePanelDivider isResourceExpanded={navTabContentShown} onExpandWorkspace={this.setExpandWorkspace}/>
+        <ResizePanelDivider isResourceExpanded={navTabContentShown}
+                            resourceWidth={this.state.navTabWidth}
+                            onExpandWorkspace={this.setExpandWorkspace}
+                            onExpandResources={this.setExpandResources}
+        />
         {this.state.expandWorkspace ? this.renderDocuments()
                                     : <CollapsedWorkspaceTab onExpandWorkspace={this.setExpandWorkspace}
                                                              workspaceType={type}
@@ -417,11 +425,30 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
   }
 
   private setExpandWorkspace = (expand: boolean) => {
+    const { ui } = this.stores;
+    if (ui.navTabContentShown) {
+      if (this.state.navTabWidth === "full") {
+        this.setState({navTabWidth: "half"});
+      } else if (!expand) {
+        this.setState({navTabWidth: "full"});
+      }
+    } else {
+      ui.toggleNavTabContent(!expand);
+      this.setState({navTabWidth: "full"});
+    }
     this.setState({ expandWorkspace: expand });
   }
 
   private setExpandResources = (expand: boolean) => {
     const { ui } = this.stores;
     ui.toggleNavTabContent(expand);
+    if (this.state.expandWorkspace) {
+        this.setState({navTabWidth: "half"});
+      } else {
+        this.setState({navTabWidth: "full"});
+      }
+    if (!expand) {
+      this.setState({expandWorkspace: true});
+    }
   }
 }
