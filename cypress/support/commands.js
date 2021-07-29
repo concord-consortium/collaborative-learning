@@ -114,8 +114,8 @@ Cypress.Commands.add("deleteWorkspaces",(baseUrl,queryParams)=>{
 
     });
 });
-Cypress.Commands.add("openTab", (tab) => {
-  cy.get('.nav-tab-buttons .tab-'+tab).click();
+Cypress.Commands.add("openResourceTabs", () => {
+  cy.get('.collapsed-resources-tab').click();
 } );
 Cypress.Commands.add("openTopTab", (tab) => {
   cy.get('.nav-tab-panel .tab-'+tab).click();
@@ -138,7 +138,7 @@ Cypress.Commands.add("openDocumentWithTitle", (tab, section, title) => {
   cy.get('.edit-button').click();
 });
 Cypress.Commands.add('closeTabs', () => {
-  cy.get('.close-button').click();
+  cy.get('.drag-left-handle').click();
 });
 Cypress.Commands.add('linkTableToGraph', (table, graph) => {
   cy.get('.table-title').contains(table).within(() => {

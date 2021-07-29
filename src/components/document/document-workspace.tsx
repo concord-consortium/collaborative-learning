@@ -11,7 +11,6 @@ import {
 } from "../../models/document/document-types";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { NavTabPanel } from "../navigation/nav-tab-panel";
-import { NavTabButtons } from "../navigation/nav-tab-buttons";
 import { CollapsedResourcesTab } from "../navigation/collapsed-resources-tab";
 import { CollapsedWorkspaceTab } from "./collapsed-workspace-tab";
 import { ResizePanelDivider } from "./resize-panel-divider";
@@ -77,16 +76,17 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
               onDragOver={this.handleDragOverWorkspace}
               onDrop={this.handleImageDrop}
             />
-          : <CollapsedResourcesTab onExpandResources={this.setExpandResources} resourceType={activeNavTab} />
+          : <CollapsedResourcesTab onExpandResources={this.toggleExpandResources} resourceType={activeNavTab} />
         }
         <ResizePanelDivider isResourceExpanded={navTabContentShown}
                             resourceWidth={this.state.navTabWidth}
-                            onExpandWorkspace={this.setExpandWorkspace}
-                            onExpandResources={this.setExpandResources}
+                            onExpandWorkspace={this.toggleExpandWorkspace}
+                            onExpandResources={this.toggleExpandResources}
         />
         {this.state.expandWorkspace ? this.renderDocuments()
-                                    : <CollapsedWorkspaceTab onExpandWorkspace={this.setExpandWorkspace}
-                                                             workspaceType={type}
+                                    : <CollapsedWorkspaceTab
+                                        onExpandWorkspace={this.toggleExpandWorkspace}
+                                        workspaceType={type}
                                       />
         }
       </div>
@@ -424,7 +424,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private setExpandWorkspace = (expand: boolean) => {
+  private toggleExpandWorkspace = (expand: boolean) => {
     const { ui } = this.stores;
     if (ui.navTabContentShown) {
       if (this.state.navTabWidth === "full") {
@@ -439,7 +439,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
     this.setState({ expandWorkspace: expand });
   }
 
-  private setExpandResources = (expand: boolean) => {
+  private toggleExpandResources = (expand: boolean) => {
     const { ui } = this.stores;
     ui.toggleNavTabContent(expand);
     if (this.state.expandWorkspace) {

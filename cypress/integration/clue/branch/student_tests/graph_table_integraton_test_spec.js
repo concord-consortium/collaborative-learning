@@ -182,7 +182,8 @@ context('Save and restore keeps the connection between table and graph', functio
     let title = '2.3 Mouthing Off and Nosing Around';
     canvas.createNewExtraDocumentFromFileMenu("empty",'my-work');
     cy.wait(2000);
-    cy.openTab('my-work');
+    cy.openResourceTabs();
+    cy.openTopTab('my-work');
     cy.openDocumentWithTitle('my-work', 'workspaces', title);
     cy.closeTabs();
   });

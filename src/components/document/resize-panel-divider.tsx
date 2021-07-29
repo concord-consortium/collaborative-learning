@@ -16,13 +16,13 @@ export const ResizePanelDivider: React.FC <IProps> =
                                                                          : {right: "calc(50% - 22px)"};
 
   return (
-    <div className="resize-panel-divider"  style={dividerPosition}>
+    <div className="resize-panel-divider" style={dividerPosition}>
       <div className="divider" />
       <DragThumbnailIcon className="drag-thumbnail"/>
       <div className="drag-handles">
-        <div className="drag-left-handle" onClick={()=>onExpandResources(false)}></div>
+        <div className="drag-left-handle" onClick={() => onExpandResources(false)}></div>
         <LeftRightDragIcon className="left-right-drag"/>
-        <div className="drag-right-handle" onClick={()=>onExpandWorkspace(false)}></div>
+        <div className="drag-right-handle" onClick={() => onExpandWorkspace(false)}></div>
       </div>
     </div>
   );

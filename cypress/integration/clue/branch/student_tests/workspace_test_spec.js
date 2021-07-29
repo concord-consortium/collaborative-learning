@@ -15,7 +15,8 @@ before(function () {
 context('Test the overall workspace', function () {
   describe('Desktop functionalities', function () {
     it('will verify that clicking on any tab opens the nav area', function () {
-      cy.openTab('my-work');
+      cy.get(".collapsed-resources-tab.my-work").click();
+      cy.openTopTab("my-work");
       cy.get('[data-test=my-work-section-investigations-documents]').should('be.visible');
     });
     it('will verify clicking on subtab opens panel to subtab section', function () {
@@ -35,7 +36,7 @@ context('Test the overall workspace', function () {
     });
     it('verify close of nav tabs', function () {
       cy.closeTabs();
-      cy.get('.nav-tab-panel').should('not.have.class', 'shown');
+      cy.get('.nav-tab-panel').should('not.exist');
     });
     // TODO: Changes in new document add feature.
     it('will verify canvases do not persist between problems', function () {

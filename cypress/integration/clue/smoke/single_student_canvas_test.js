@@ -52,8 +52,8 @@ context('single student functional test',()=>{
 
     describe('test header elements', function(){
       before(function(){
-        // cy.openTab('my-work');
-        cy.get(".collapsed-resources-tab.my-work").click();
+        cy.openResourcesTab();
+        cy.openTopTab('my-work');
         cy.openDocumentWithTitle("my-work", "workspaces", this.title);
       });
         it('verifies views button changes when clicked and shows the correct corresponding workspace view', function(){
