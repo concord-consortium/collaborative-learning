@@ -45,17 +45,16 @@ context('Sensor block tests',()=>{
             dfblock.getInputNodesNum(testBlock).should('not.exist');
         })
         it('verify changing sensor type changes the hub list selection',()=>{
-            var sensorTypes=['Humidity','Temperature','Particulates'];
+            var sensorTypes = ['Humidity','Temperature','Particulates'];
 
             cy.wrap(sensorTypes).each((sensor, index, sensorList)=>{
                 dfblock.selectSensorType(sensor);
                 cy.wait(10000)
                 dfblock.openHubSensorComboListDropdown();
-                dfblock.getHubSensorComboOptionList().each(($option, index, $optionList)=>{
-                    if(($optionList.length<2)) {
-                        expect($option).to.contain('None Available');
-                    }
-                    else {
+                dfblock.getHubSensorComboOptionList().each(($option, index, $optionList) => {
+                    if (index === 0) {
+                        expect($option).to.contain(sensor + " Demo Data");
+                    } else {
                         expect($option).to.contain(sensor.toLowerCase());
                     }
                 })

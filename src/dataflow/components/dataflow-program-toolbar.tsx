@@ -53,6 +53,7 @@ export class DataflowProgramToolbar extends React.Component<IProps, {}> {
         nodeIcons.push(<div className="icon-node right mid" key={"icon-node-r-m" + i}/>);
         break;
       case "Relay":
+      case "Light Bulb":
       case "Data Storage":
         nodeIcons.push(<div className="icon-node left mid" key={"icon-node-l-m" + i}/>);
         break;
@@ -60,7 +61,7 @@ export class DataflowProgramToolbar extends React.Component<IProps, {}> {
     return (
       <button
         disabled={nodeType === "Data Storage" && this.props.isDataStorageDisabled || this.props.disabled}
-        key={i} title={`Add ${nodeType} Node`}
+        key={i} title={`Add ${nodeType} Block`}
         onClick={handleAddNodeButtonClick}
       >
         <div className={iconClass}>{nodeIcons}</div>

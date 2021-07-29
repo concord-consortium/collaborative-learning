@@ -43,6 +43,9 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, {}> {
 
   public componentDidMount() {
     this.guaranteeInitialDocuments();
+    if (this.stores.appMode !== "qa") {
+      this.stores.ui.welcome();
+    }
   }
 
   public render() {

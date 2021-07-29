@@ -13,6 +13,7 @@ $button-math: $math-green
 $button-logic: $logic-green
 $button-transform: $transform-green
 $button-relay: $relay-orange
+$button-light-bulb: $light-bulb-orange
 $button-data-storage: $data-storage-orange
 
 $button-hover: $gray-light-hover
@@ -37,6 +38,7 @@ $button-label-text: $gray-text
     background-color: $toolbar-background
     border: 0
     outline: 0
+    cursor: pointer
     &:hover:not([disabled])
       background-color: $button-hover
     &:active:not([disabled])
@@ -82,6 +84,8 @@ $button-label-text: $gray-text
         background-color: $button-transform
       &.relay
         background-color: $button-relay
+      &.light-bulb
+        background-color: $button-data-storage
       &.data-storage
         background-color: $button-data-storage
 

@@ -69,7 +69,7 @@ const DurationSelectorComponent: React.SFC<DurationSelectorProps> = (props: Dura
             value={props.programDefaultRunTime.toString()}
           >
             { props.programRunTimes.map((rt: ProgramRunTime) => (
-                <option key={rt.text} value={rt.val}>
+                <option key={rt.text} value={rt.val} disabled={rt.disabled}>
                   {rt.text}
                 </option>
               ))

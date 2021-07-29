@@ -13,11 +13,12 @@ import { TransformReteNodeFactory } from "./nodes/factories/transform-rete-node-
 import { LogicReteNodeFactory } from "./nodes/factories/logic-rete-node-factory";
 import { SensorReteNodeFactory } from "./nodes/factories/sensor-rete-node-factory";
 import { RelayReteNodeFactory } from "./nodes/factories/relay-rete-node-factory";
+import { LightBulbReteNodeFactory } from "./nodes/factories/light-bulb-rete-node-factory";
 import { GeneratorReteNodeFactory } from "./nodes/factories/generator-rete-node-factory";
 import { TimerReteNodeFactory } from "./nodes/factories/timer-rete-node-factory";
 import { DataStorageReteNodeFactory } from "./nodes/factories/data-storage-rete-node-factory";
 import { NodeChannelInfo, NodeSensorTypes, NodeGeneratorTypes, ProgramRunTimes,
-         NodeTimerInfo, DEFAULT_PROGRAM_TIME, IntervalTimes } from "../utilities/node";
+         NodeTimerInfo, DEFAULT_PROGRAM_TIME, IntervalTimes, virtualSensorChannels } from "../utilities/node";
 import { uploadProgram, fetchProgramData, fetchActiveRelays, deleteProgram } from "../utilities/aws";
 import { DropdownListControl, ListOption } from "./nodes/controls/dropdown-list-control";
 import { PlotButtonControl } from "./nodes/controls/plot-button-control";
@@ -264,6 +265,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         new LogicReteNodeFactory(numSocket),
         new SensorReteNodeFactory(numSocket),
         new RelayReteNodeFactory(numSocket),
+        new LightBulbReteNodeFactory(numSocket),
         new GeneratorReteNodeFactory(numSocket),
         new TimerReteNodeFactory(numSocket),
         new DataStorageReteNodeFactory(numSocket)];
@@ -375,6 +377,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       return Number.isFinite(chValue) ? chValue : NaN;
     }
 
+    // add virtual channels that always appear
+    this.channels = [...virtualSensorChannels];
+
     hubStore.hubs.forEach(hub => {
       hub.hubChannels.forEach(ch => {
         // add channel if it is new
@@ -387,6 +392,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                     type: ch.type,
                     units: ch.units,
                     plug: ch.plug,
+                    name: ch.type,
                     value: parseValue(ch.value)};
           this.channels.push(chInfo);
         }
@@ -546,6 +552,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const { ui } = this.stores;
     const hasRelay = this.hasRelay();
     const hasDataStorage = this.hasDataStorage();
+    const hasLightbulb = this.hasLightbulb();
     let hasValidRelay = false;
     let hasValidDataStorage = false;
     if (hasRelay || hasDataStorage) {
@@ -570,15 +577,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         }
       });
     }
-    if (!hasRelay && !hasDataStorage) {
-      ui.alert("Program must contain a Relay or Data Storage node before it can be run.", "No Program Output");
+    if (!hasRelay && !hasDataStorage && !hasLightbulb) {
+      ui.alert("Program must contain a Relay, Light Bulb, or Data Storage block before it can be run.", "No Program Output");
       return false;
-    } else if (!hasValidRelay && !hasValidDataStorage) {
+    } else if (!hasValidRelay && !hasValidDataStorage && !hasLightbulb) {
       const relayMessage = hasRelay && !hasValidRelay
-                            ? "Relay nodes need a valid selected relay and valid input before the program can be run. "
+                            ? "Relay blocks need a valid selected relay and valid input before the program can be run. "
                             : "";
       const dataStorageMessage = hasDataStorage && !hasValidDataStorage
-                            ? "Data Storage nodes need a valid data input before the program can be run. "
+                            ? "Data Storage blocks need a valid data input before the program can be run. "
                             : "";
       ui.alert(relayMessage + dataStorageMessage, "Invalid Program Output");
       return false;
@@ -721,8 +728,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const relays: string[] = [];
     let hasValidData = false;
     let hasValidRelay = false;
+    let hasLightbulb = false;
     this.programEditor.nodes.forEach((n: Node) => {
-      if (n.name === "Sensor" && n.data.sensor) {
+      if (n.name === "Sensor" && n.data.sensor && !n.data.virtual) {
         const chInfo = this.channels.find(ci => ci.channelId === n.data.sensor);
         if (chInfo) {
           // only add hubs once
@@ -752,6 +760,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       } else if (n.name === "Data Storage") {
         interval = n.data.interval as number;
         hasValidData = true;
+        datasetName = programTitle;
+      } else if (n.name === "Light Bulb") {
+        hasLightbulb = true;
         datasetName = programTitle;
       }
     });
@@ -793,7 +804,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                 startTime: programStartTime,
                 endTime: programEndTime,
                 hasData: hasValidData,
-                hasRelay: hasValidRelay
+                hasRelay: hasValidRelay || hasLightbulb
               });
 
     return programData;
@@ -851,9 +862,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private deviceRefresh = () => {
-    const message = "Refresh will update the list of sensor and relay devices that appear in the node selection menus. \
+    const message = "Refresh will update the list of sensor and relay devices that appear in the block selection menus. \
                      Please wait 5-10 seconds for refresh to complete. \
-                     If your device does not appear in the node selection after refresh, \
+                     If your device does not appear in the block selection after refresh, \
                      check if the device is plugged in and the hub is turned on.";
     this.stores.ui.confirm(message, "Refresh Sensors and Relays?")
     .then(ok => {
@@ -901,6 +912,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private hasRelay() {
     return this.getNodeCount("Relay") > 0;
+  }
+
+  private hasLightbulb() {
+    return this.getNodeCount("Light Bulb") > 0;
   }
 
   private isValidRelay(id: string) {
@@ -966,6 +981,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
     if (sensorSelect && !this.isComplete()) {
       const chInfo = this.channels.find(ci => ci.channelId === n.data.sensor);
+
+      // update virtual sensors
+      if (chInfo?.virtualValueMethod) {
+        const time = Math.floor(Date.now() / 1000);
+        chInfo.value = chInfo.virtualValueMethod(time);
+      }
+
       if (chInfo && chInfo.value) {
         sensorSelect.setSensorValue(chInfo.value);
       } else {

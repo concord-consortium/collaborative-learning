@@ -34,7 +34,7 @@ export class DataflowNode extends Node {
               key={deleteControl.key}
               control={deleteControl}
               innerRef={bindControl}
-              title={"Delete Node"}
+              title={"Delete Block"}
             />
           }
         </div>
