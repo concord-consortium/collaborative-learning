@@ -23,6 +23,7 @@ import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
 import { getParentWithTypeName } from "../../utilities/mst-utils";
 import { comma, StringBuilder } from "../../utilities/string-builder";
 import { DocumentTool, IDocumentAddTileOptions } from "./document";
+import { kDataflowToolID } from "../tools/dataflow/dataflow-content";
 
 export interface INewTileOptions {
   rowHeight?: number;
@@ -44,6 +45,9 @@ export interface INewTextTileOptions extends INewTileOptions {
 
 export interface INewImageTileOptions extends INewTileOptions {
   url?: string;
+}
+
+export interface INewDataflowTileOptions extends INewTileOptions {
 }
 
 export interface INewRowTile {
@@ -540,6 +544,10 @@ export const DocumentContentModel = types
                     drawingContentInfo?.defaultContent({stamps: defaultStamps}),
                     { rowHeight: drawingContentInfo.defaultHeight, ...options });
     },
+    addDataflowTile(options?: INewDataflowTileOptions) {
+      const dataflowContentInfo = getToolContentInfoById(kDataflowToolID);
+      return self.addTileContentInNewRow(dataflowContentInfo?.defaultContent(), options);
+    },
     copyTilesIntoExistingRow(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
       const results: NewRowTileArray = [];
       if (tiles.length > 0) {
@@ -733,6 +741,9 @@ export const DocumentContentModel = types
             break;
           case "drawing":
             tileInfo = self.addDrawingTile(addTileOptions);
+            break;
+          case "dataflow":
+            tileInfo = self.addDataflowTile(addTileOptions);
             break;
         }
 

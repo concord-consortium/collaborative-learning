@@ -11,6 +11,7 @@ import { kUnknownToolID, UnknownContentModel, UnknownContentModelType } from "./
 import { DrawingContentModelType, DrawingContentModel,
           DrawingToolMetadataModel, DrawingToolMetadataModelType } from "./drawing/drawing-content";
 import { kDrawingToolID } from "./drawing/drawing-types";
+import { DataflowContentModel, DataflowContentModelType, kDataflowToolID } from "./dataflow/dataflow-content";
 
 export const ToolTypeEnum = types.enumeration(
                               "ToolTypes",
@@ -21,6 +22,7 @@ export const ToolTypeEnum = types.enumeration(
                                 kTableToolID,
                                 kTextToolID,
                                 kDrawingToolID,
+                                kDataflowToolID,
                                 kUnknownToolID
                               ]);
 export const ToolContentUnion = types.union(
@@ -31,6 +33,7 @@ export const ToolContentUnion = types.union(
                                   TableContentModel,
                                   TextContentModel,
                                   DrawingContentModel,
+                                  DataflowContentModel,
                                   UnknownContentModel);
 
 export type ToolContentUnionType = PlaceholderContentModelType |
@@ -39,6 +42,7 @@ export type ToolContentUnionType = PlaceholderContentModelType |
                                     TableContentModelType |
                                     TextContentModelType |
                                     DrawingContentModelType |
+                                    DataflowContentModelType |
                                     UnknownContentModelType;
 
 export type ToolMetadataUnionType = GeometryMetadataModelType |
@@ -73,6 +77,7 @@ export const _private: IPrivate = {
     [kTableToolID]: TableContentModel,
     [kTextToolID]: TextContentModel,
     [kDrawingToolID]: DrawingContentModel,
+    [kDataflowToolID]: DataflowContentModel,
     [kUnknownToolID]: UnknownContentModel
   },
 

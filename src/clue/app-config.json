@@ -251,6 +251,12 @@
       "isTileTool": true
     },
     {
+      "name": "dataflow",
+      "title": "Program",
+      "iconId": "icon-dataflow-tool",
+      "isTileTool": true
+    },
+    {
       "name": "delete",
       "title": "Delete",
       "iconId": "icon-delete-tool"

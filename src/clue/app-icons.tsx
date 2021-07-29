@@ -8,6 +8,7 @@ import DeleteToolIcon from "./assets/icons/delete-tool.svg";
 import DrawingToolIcon from "./assets/icons/draw-tool.svg";
 import GeometryToolIcon from "./assets/icons/graph-tool.svg";
 import ImageToolIcon from "./assets/icons/image-tool.svg";
+import DataflowToolIcon from "./assets/icons/dataflow-tool.svg";
 import RedoToolIcon from "./assets/icons/redo-tool.svg";
 import SelectToolIcon from "./assets/icons/select-tool.svg";
 import TableToolIcon from "./assets/icons/table-tool.svg";
@@ -25,6 +26,7 @@ export const appIcons: Record<string, FunctionComponent<SVGProps<SVGSVGElement>>
   "icon-drawing-tool": DrawingToolIcon,
   "icon-geometry-tool": GeometryToolIcon,
   "icon-image-tool": ImageToolIcon,
+  "icon-dataflow-tool": DataflowToolIcon,
   "icon-redo-tool": RedoToolIcon,
   "icon-select-tool": SelectToolIcon,
   "icon-table-tool": TableToolIcon,

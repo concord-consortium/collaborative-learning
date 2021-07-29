@@ -9,6 +9,7 @@ import { kGeometryToolID } from "../../models/tools/geometry/geometry-content";
 import { kTableToolID } from "../../models/tools/table/table-content";
 import { kTextToolID } from "../../models/tools/text/text-content";
 import { kImageToolID } from "../../models/tools/image/image-content";
+import { kDataflowToolID } from "../../models/tools/dataflow/dataflow-content";
 import { transformCurriculumImageUrl } from "../../models/tools/image/image-import-export";
 import { kPlaceholderToolID } from "../../models/tools/placeholder/placeholder-content";
 import { kUnknownToolID } from "../../models/tools/unknown-content";
@@ -32,6 +33,7 @@ import TileResizeHandle from "../../assets/icons/resize-tile/expand-handle.svg";
 import "../../utilities/dom-utils";
 
 import "./tool-tile.sass";
+import DataflowToolComponent from "./dataflow/dataflow-tool";
 
 export const kDragTiles = "org.concord.clue.drag-tiles";
 
@@ -101,6 +103,7 @@ const kToolComponentMap: Record<string, ToolComponentInfo> = {
         [kImageToolID]: { ToolComponent: ImageToolComponent, toolTileClass: "image-tool-tile" },
         [kTableToolID]: { ToolComponent: TableToolComponent, toolTileClass: "table-tool-tile" },
         [kTextToolID]: { ToolComponent: TextToolComponent, toolTileClass: "text-tool-tile" },
+        [kDataflowToolID]: { ToolComponent: DataflowToolComponent, toolTileClass: "dataflow-tool-tile" },
         // TODO: should really have a separate unknown tool that shows an "unknown tile" message
         [kUnknownToolID]: { ToolComponent: PlaceholderToolComponent, toolTileClass: "placeholder-tile" }
       };
