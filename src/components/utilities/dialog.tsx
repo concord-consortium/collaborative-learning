@@ -80,10 +80,12 @@ export class DialogComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderWelcomeContents(dialog: UIDialogModelType) {
-    const welcome1 = "This is a limited demo of Dataflow. Dataflow lets you create and run flow programs made of connected program blocks that can collect, manipulate, and save sensor data and control real-world devices using relays.";
-    const welcome2 = "Press the toolbar buttons on the left to add blocks to your program. Click and drag connections to connect blocks and flow data from sensors through transformations and into a stored data set or controlled device. When ready, select the program duration and press the Run button to run your program. Create a new program using the + button on the top left, or open existing programs and stored data sets from the My Work tab on the right. ";
-    const welcome3 = "For the purposes of this demo, live sensors and relays are not available. Use the Sensor block and Light Bulb block to simulate what these physical devices do in the full version of Dataflow.";
-    const welcome4 = "View data collected by other students from the Shared Work tab on the right.";
+    const welcome1 = "This is a limited version of Dataflow for demonstration purposes.";
+    const welcome2 = "Dataflow allows you to collect data from real-world sensors and create programs to process and store that data. You can also write programs to control real-world devices, such as relays.";
+    const welcome3 = "Dataflow programs create a \"flow\" of data by connecting \"blocks\" to one another. You can add blocks to your program from the toolbar at the left. Use Sensor blocks to connect to real sensors, and Math blocks to process the incoming data. To connect blocks, click and drag from the connection pins on each block.";
+    const welcome4 = "This limited demo version does not connect to real sensors or relays. To test out Dataflow programming, try using a Generator block as a source of data and a Light Bulb block as an output.";
+    const welcome5 = "Dataflow is designed to be used in science classrooms. Programs and datasets are saved in the \"My Work\" tab at the right and can be shared with the whole class (and will appear in the \"Shared Work\" tab).";
+    const welcome6 = "Read more about Dataflow and the InSPECT project ";
     return (
       <div className="dialog-contents">
         <div className="dialog-text">
@@ -91,6 +93,11 @@ export class DialogComponent extends BaseComponent<IProps, IState> {
           <div className="welcome">{welcome2}</div>
           <div className="welcome">{welcome3}</div>
           <div className="welcome">{welcome4}</div>
+          <div className="welcome">{welcome5}</div>
+          <div className="welcome">
+            {welcome6}
+            <a href="https://concord.org/our-work/research-projects/inspect/" target="_blank">here</a>.
+          </div>
         </div>
         <div className="dialog-buttons" data-test="dialog-buttons">
           <button id="okButton" onClick={this.handleCancelDialog}>Ok</button>
