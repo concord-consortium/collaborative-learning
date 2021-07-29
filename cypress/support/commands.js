@@ -140,6 +140,9 @@ Cypress.Commands.add("openDocumentWithTitle", (tab, section, title) => {
 Cypress.Commands.add('closeTabs', () => {
   cy.get('.drag-left-handle').click();
 });
+Cypress.Commands.add('collapseWorkspace', () => {
+  cy.get('.drag-right-handle').click();
+});
 Cypress.Commands.add('linkTableToGraph', (table, graph) => {
   cy.get('.table-title').contains(table).within(() => {
     cy.get('.link-geometry-button').click();
