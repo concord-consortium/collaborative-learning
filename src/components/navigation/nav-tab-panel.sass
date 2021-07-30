@@ -1,6 +1,10 @@
 @import ../vars
 
-.nav-tab-panel
+.resource-and-chat-panel
+  display: flex
+  flex-direction: row
+  justify-content: flex-start
+  width: 50%
   height: calc(100vh - (#{$header-height} + #{$workspace-content-margin} * 2))
   position: fixed
   left: calc(0px - 100vw * .5)
@@ -17,56 +21,101 @@
     right: 44px
     width: calc(100% - 48px)
 
-  .top-row
-    display: flex
-    align-items: center
-    justify-content: flex-start
-
-  .close-button
-    flex-shrink: 0
-    width: 36px
-    height: $nav-tab-height
-    background-color: $charcoal-light-6
-    border-radius: 0 6px 0 0
-    border-style: solid
-    border-color: $charcoal-light-2
-    border-width: 2px 2px 0 0
-    background-image: url("../../assets/icons/close/close.svg")
-    background-repeat: no-repeat
-    background-position: center
-    cursor: pointer
-    &:hover
-      background-color: $charcoal-light-4
-      background-image: url("../../assets/icons/arrow-back/arrow-back.svg")
-    &:active
-      background-color: $charcoal-light-2
-      background-image: url("../../assets/icons/arrow-back/arrow-back.svg")
-
-  .top-tab-list
-    display: flex
-    align-items: center
+  .nav-tab-panel
     width: 100%
-    padding: 0
-    margin: 0
-    .top-tab
-      flex-grow: 1
-      height: $nav-tab-height
-      font-size: 13px
-      color: $charcoal-dark-2
-      border-style: solid
-      border-color: $charcoal-light-2
-      border-width: 2px 2px 0 0
-      border-radius: 0
+    &.chat-open
+      width: 64%
+    .top-row
+      display: flex
+      align-items: center
+      justify-content: flex-start
+    .chat-panel-toggle
       display: flex
       align-items: center
       justify-content: center
+      width: 36px
       cursor: pointer
-    .support-badge
-      position: absolute
-      right: 34px
+      height: $nav-tab-height
+      background-color: $charcoal-light-6
+      border-radius: 0 6px 0 0
+      border-style: solid
+      border-width: 2px 2px 0 2px
+      &.problems
+        border-color: $problem-orange-light-3
+      &.my-work
+        border-color: $workspace-teal
+      &.class-work
+        border-color: $classwork-purple
+      &.supports
+        border-color: $support-blue
+      .new-comment-badge
+        position: absolute
+        top: -2px
+        right: -2px
+        width: 17px
+        height: 17px
+        margin: 0 0 21px 29px
+        padding: 2px 6px 3px 5px
+        border: solid 1.5px $workspace-teal-dark-1
+        border-radius: 50%
+        background-color: #5fff32
+        font-size: 10px
+        color: $charcoal-dark-2
+        display: flex
+        align-items: center
+        justify-content: center
+
+      .chat-button
+        &.problems
+          fill: $problem-orange
+          &:hover
+            background-color: $problem-orange-light-5
+          &:active
+            background-color: $problem-orange-light-4
+        &.my-work
+          fill: $workspace-teal
+          &:hover
+            background-color: $workspace-teal-light-4
+          &:active
+            background-color: $workspace-teal-light-3
+        &.class-work
+          fill: $classwork-purple
+          &:hover
+            background-color: $classwork-purple-light-4
+          &:active
+            background-color: $classwork-purple-light-3
+        &.supports
+          fill: $support-blue
+          &:hover
+            background-color: $support-blue-light-4
+          &:active
+            background-color: $support-blue-light-3
+
+    .top-tab-list
+      display: flex
       align-items: center
-      border: 2px solid $charcoal-light-2
-      border-radius: 50%
-      background-color: $decoration-yellow
-      height: 12px
-      width: 12px
+      width: 100%
+      padding: 0
+      margin: 0
+      .top-tab
+        flex-grow: 1
+        height: $nav-tab-height
+        font-size: 13px
+        color: $charcoal-dark-2
+        border-style: solid
+        border-color: $charcoal-light-2
+        border-width: 2px 2px 0 0
+        border-radius: 0
+        display: flex
+        align-items: center
+        justify-content: center
+        cursor: pointer
+      .support-badge
+        position: absolute
+        right: 34px
+        align-items: center
+        border: 2px solid $charcoal-light-2
+        border-radius: 50%
+        background-color: $decoration-yellow
+        height: 12px
+        width: 12px
