@@ -40,7 +40,8 @@ export const UIModel = types
     dialog: types.maybe(UIDialogModel),
     problemWorkspace: WorkspaceModel,
     learningLogWorkspace: WorkspaceModel,
-    teacherPanelKey: types.maybe(types.string)
+    teacherPanelKey: types.maybe(types.string),
+    workspaceShown: true,
   })
   .volatile(self => ({
     defaultLeftNavExpanded: false,
@@ -119,6 +120,9 @@ export const UIModel = types
 
       toggleNavTabContent(show: boolean) {
         self.navTabContentShown = show;
+      },
+      toggleWorkspaceContent(show: boolean) {
+        self.workspaceShown = show;
       },
       toggleShowTeacherContent(show: boolean) {
         self.showTeacherContent = show;

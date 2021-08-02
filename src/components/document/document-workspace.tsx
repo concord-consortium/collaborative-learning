@@ -21,7 +21,6 @@ interface IProps extends IBaseProps {
 }
 
 interface IState {
-  expandWorkspace: boolean;
   navTabWidth: string;
 }
 
@@ -37,7 +36,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
       isAcceptableImageDrag: this.isAcceptableImageDrag
     });
     this.state = {
-      expandWorkspace: true,
       navTabWidth: ""
     };
   }
@@ -50,11 +48,10 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
     const { appConfig : { navTabs: { tabSpecs } },
             teacherGuide,
             user: { isTeacher },
-            ui: { problemWorkspace: { type }, activeNavTab, navTabContentShown } } = this.stores;
+            ui: { problemWorkspace: { type }, activeNavTab, navTabContentShown, workspaceShown } } = this.stores;
     const studentTabs = tabSpecs.filter((t) => !t.teacherOnly);
     const teacherTabs = tabSpecs.filter(t => (t.tab !== "teacher-guide") || teacherGuide);
     const tabsToDisplay = isTeacher ? teacherTabs : studentTabs;
-    // const navTabWidthProp = !navTabContentShown ? "" : this.state.expandWorkspace ? "half" : "full";
     // NOTE: the drag handlers are in three different divs because we cannot overlay
     // the renderDocuments() div otherwise the Cypress tests will fail because none
     // of the html elements in the documents will be visible to it.  The first div acts
@@ -83,7 +80,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
                             onExpandWorkspace={this.toggleExpandWorkspace}
                             onExpandResources={this.toggleExpandResources}
         />
-        {this.state.expandWorkspace ? this.renderDocuments()
+        {workspaceShown ? this.renderDocuments()
                                     : <CollapsedWorkspaceTab
                                         onExpandWorkspace={this.toggleExpandWorkspace}
                                         workspaceType={type}
@@ -430,25 +427,26 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
       if (this.state.navTabWidth === "full") {
         this.setState({navTabWidth: "half"});
       } else if (!expand) {
+        ui.toggleWorkspaceContent(false);
         this.setState({navTabWidth: "full"});
       }
     } else {
       ui.toggleNavTabContent(!expand);
       this.setState({navTabWidth: "full"});
     }
-    this.setState({ expandWorkspace: expand });
+    ui.toggleWorkspaceContent(expand);
   }
 
   private toggleExpandResources = (expand: boolean) => {
     const { ui } = this.stores;
     ui.toggleNavTabContent(expand);
-    if (this.state.expandWorkspace) {
+    if (ui.workspaceShown) {
         this.setState({navTabWidth: "half"});
       } else {
         this.setState({navTabWidth: "full"});
       }
     if (!expand) {
-      this.setState({expandWorkspace: true});
+      ui.toggleWorkspaceContent(true);
     }
   }
 }

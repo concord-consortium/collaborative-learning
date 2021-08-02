@@ -43,7 +43,12 @@ context('Test the overall workspace', function () {
       cy.collapseWorkspace();
       cy.get('.primary-workspace').should('not.exist');
       cy.get('.collapsed-workspace-tab').should('exist');
-      cy.get('.nav-tab-panel').should('exist');
+      cy.get('.nav-tab-panel').should('exist').and('have.class', 'full');
+    });
+    it('verify collapsed workspace tab opens on click', function () {
+      cy.get('.collapsed-workspace-tab').click({force:true});
+      cy.get('.primary-workspace').should('exist');
+      cy.get('.nav-tab-panel').should('exist').and('have.class', 'half');
     });
     // TODO: Changes in new document add feature.
     it('will verify canvases do not persist between problems', function () {

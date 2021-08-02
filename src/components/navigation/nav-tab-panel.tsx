@@ -133,6 +133,6 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
   private handleClose = () => {
     const { ui } = this.stores;
     ui.toggleNavTabContent(false);
+    ui.toggleWorkspaceContent(true);
   }
-
 }
