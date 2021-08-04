@@ -29,7 +29,7 @@ type UIDialogModelSnapshotWithoutType = Omit<UIDialogModelSnapshot, "type">;
 
 export const UIModel = types
   .model("UI", {
-    navTabContentShown: false,
+    dividerPosition: 0,
     error: types.maybeNull(types.string),
     activeNavTab: ENavTab.kMyWork,
     activeGroupId: "",
@@ -41,7 +41,6 @@ export const UIModel = types
     problemWorkspace: WorkspaceModel,
     learningLogWorkspace: WorkspaceModel,
     teacherPanelKey: types.maybe(types.string),
-    workspaceShown: true,
   })
   .volatile(self => ({
     defaultLeftNavExpanded: false,
@@ -49,6 +48,12 @@ export const UIModel = types
   .views((self) => ({
     isSelectedTile(tile: ToolTileModelType) {
       return self.selectedTileIds.indexOf(tile.id) !== -1;
+    },
+    get navTabContentShown () {
+      return self.dividerPosition > 0;
+    },
+    get workspaceShown () {
+      return self.dividerPosition < 100;
     }
   }))
   .actions((self) => {
@@ -118,11 +123,8 @@ export const UIModel = types
       confirm,
       resolveDialog,
 
-      toggleNavTabContent(show: boolean) {
-        self.navTabContentShown = show;
-      },
-      toggleWorkspaceContent(show: boolean) {
-        self.workspaceShown = show;
+      setDividerPosition(position: number) {
+        self.dividerPosition = position;
       },
       toggleShowTeacherContent(show: boolean) {
         self.showTeacherContent = show;

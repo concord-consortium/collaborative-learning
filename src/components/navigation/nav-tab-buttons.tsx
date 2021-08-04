@@ -58,7 +58,7 @@ export class NavTabButtons extends BaseComponent<IProps, IState> {
       ui.setActiveNavTab(tab);
       logEvent();
     }
-    ui.toggleNavTabContent(true);
+    // ui.toggleNavTabContent(true);
   }
 
 }

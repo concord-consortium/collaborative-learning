@@ -4,11 +4,12 @@ import "./collapsed-workspace-tab.scss";
 
 interface IProps {
   workspaceType: string;
-  onExpandWorkspace: (expand: boolean) => void;
+  onExpandWorkspace: () => void;
 }
+
 export const CollapsedWorkspaceTab: React.FC<IProps> = ({ workspaceType, onExpandWorkspace }) => {
   return (
-    <div className={`collapsed-workspace-tab ${workspaceType}`} onClick={() => onExpandWorkspace(true)}>
+    <div className={`collapsed-workspace-tab ${workspaceType}`} onClick={() => onExpandWorkspace()}>
       <div className="collapsed-tab-label">My Workspaces</div>
       <div className="expand-right-indicator">
         <ExpandIndicatorIcon />

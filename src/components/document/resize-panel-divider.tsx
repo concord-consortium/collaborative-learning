@@ -5,24 +5,25 @@ import "./resize-panel-divider.scss";
 
 interface IProps {
   isResourceExpanded: boolean,
-  resourceWidth: string,
-  onExpandWorkspace: (expand: boolean) => void;
-  onExpandResources: (expand: boolean) => void;
+  dividerPosition: number,
+  onExpandWorkspace: () => void;
+  onExpandResources: () => void;
 }
-export const ResizePanelDivider: React.FC <IProps> =
-  ({isResourceExpanded, resourceWidth, onExpandWorkspace, onExpandResources}) => {
-    const dividerPosition = !isResourceExpanded ? {left: 22}
-                                                : resourceWidth==="full" ? {right : 22}
-                                                                         : {right: "calc(50% - 22px)"};
 
+export const ResizePanelDivider: React.FC <IProps> =
+  ({isResourceExpanded, dividerPosition, onExpandWorkspace, onExpandResources}) => {
+    const dividerPositionStyle = dividerPosition  === 0
+                               ? {left: 22}
+                               : dividerPosition === 50 ? {left: `calc(${dividerPosition}% - 22px)`}
+                                                        : {left: `calc(${dividerPosition}% - 67px)`};
   return (
-    <div className="resize-panel-divider" style={dividerPosition}>
+    <div className="resize-panel-divider" style={dividerPositionStyle}>
       <div className="divider" />
       <DragThumbnailIcon className="drag-thumbnail"/>
       <div className="drag-handles">
-        <div className="drag-left-handle" onClick={() => onExpandResources(false)}></div>
+        <div className="drag-left-handle" onClick={() => onExpandWorkspace()}></div>
         <LeftRightDragIcon className="left-right-drag"/>
-        <div className="drag-right-handle" onClick={() => onExpandWorkspace(false)}></div>
+        <div className="drag-right-handle" onClick={() => onExpandResources()}></div>
       </div>
     </div>
   );

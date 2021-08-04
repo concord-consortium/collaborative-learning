@@ -15,7 +15,6 @@ import "./nav-tab-panel.sass";
 interface IProps extends IBaseProps {
   tabs?: NavTabSpec[];
   isTeacher: boolean;
-  navTabWidth: string;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
   onDrop: (e: React.DragEvent<HTMLDivElement>) => void;
 }
@@ -36,11 +35,14 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { tabs, navTabWidth } = this.props;
+    const { tabs } = this.props;
     const { ui, user, supports } = this.stores;
     const selectedTabIndex = tabs?.findIndex(t => t.tab === ui.activeNavTab);
+    const resourceWidth = ui.dividerPosition === 50 ? `calc(50% - 4px)`
+                                                    : ui.dividerPosition === 100 ? `calc(100% - 48px)` : 0;
+    const resourceWidthStyle = {width: resourceWidth};
     return (
-      <div className={`nav-tab-panel ${ui.navTabContentShown ? "shown" : ""} ${navTabWidth}`}>
+      <div className={`nav-tab-panel ${ui.navTabContentShown ? "shown" : ""}`} style={resourceWidthStyle}>
         <Tabs selectedIndex={selectedTabIndex} onSelect={this.handleSelectTab} forceRenderTabPanel={true}>
           <div className="top-row">
             <TabList className="top-tab-list">
@@ -55,7 +57,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
                 })
               }
             </TabList>
-            <button className="close-button" onClick={this.handleClose}/>
+            <button className="close-button" onClick={this.handleCloseResources}/>
           </div>
           { tabs?.map((tabSpec) => {
               return (
@@ -130,9 +132,8 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
     ui.setActiveStudentGroup(groupId);
   }
 
-  private handleClose = () => {
+  private handleCloseResources = () => {
     const { ui } = this.stores;
-    ui.toggleNavTabContent(false);
-    ui.toggleWorkspaceContent(true);
+    ui.setDividerPosition(0);
   }
 }

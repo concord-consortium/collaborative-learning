@@ -75,11 +75,11 @@
   }
 
   .collapsed-tab-label {
-    writing-mode: vertical-lr;
-    text-orientation: mixed;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
     font-size: 14px;
     margin: 20px 7px;
-    width: 50px;
+    height: max-content;
   }
   .expand-left-indicator {
     position: relative;
