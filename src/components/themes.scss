@@ -1,0 +1,126 @@
+@import "./vars";
+
+.themed {
+  &.problems {
+    fill: $problem-orange;
+    background-color: white;
+    &:hover {
+      background-color: $problem-orange-light-5;
+    }
+    &:active {
+      background-color: $problem-orange-light-4;
+    }
+  }
+  &.my-work {
+    fill: $workspace-teal;
+    background-color: white;
+    &:hover {
+      background-color: $workspace-teal-light-4;
+    }
+    &:active {
+      background-color: $workspace-teal-light-3;
+    }
+  }
+  &.class-work {
+    fill: $classwork-purple;
+    background-color: white;
+    &:hover {
+      background-color: $classwork-purple-light-4;
+    }
+    &:active {
+      background-color: $classwork-purple-light-3;
+    }
+  }
+  &.supports {
+    fill: $support-blue;
+    background-color: white;
+    &:hover {
+      background-color: $support-blue-light-4;
+    }
+    &:active {
+      background-color: $support-blue-light-3;
+    }
+  }
+  &.teacher-guide {
+    fill: $learninglog-green-dark-1;
+    background-color: white;
+    &:hover {
+      background-color: $learninglog-green-light-5;
+    }
+    &:active {
+      background-color: $learninglog-green-light-4;
+    }
+  }
+  .student-groups {
+    fill: $charcoal-dark-1;
+    background-color: white;
+    &:hover {
+      background-color: $charcoal-light-4;
+    }
+    &:active {
+      background-color: $charcoal-light-3;
+    }
+  }
+}
+
+.themed-negative {
+  &.problems {
+    fill: $problem-orange;
+    &:hover {
+      background-color: $problem-orange-light-4;
+    }
+    &:active {
+      fill: white;
+      background-color: $problem-orange;
+    }
+  }
+  &.my-work {
+    fill: $workspace-teal-dark-1;
+    &:hover {
+      background-color: $workspace-teal-light-3;
+    }
+    &:active {
+      fill: white;
+      background-color: $workspace-teal-dark-1;
+    }
+  }
+  &.class-work {
+    fill: $classwork-purple-dark-1;
+    &:hover {
+      background-color: $classwork-purple-light-4;
+    }
+    &:active {
+      fill: white;
+      background-color: $classwork-purple-dark-1;
+    }
+  }
+  &.supports {
+    fill: $support-blue-dark-1;
+    &:hover {
+      background-color: $support-blue-light-4;
+    }
+    &:active {
+      fill: white;
+      background-color: $support-blue-dark-1;
+    }
+  }
+  &.teacher-guide {
+    fill: $learninglog-green-dark-1;
+    &:hover {
+      background-color: $learninglog-green-light-4;
+    }
+    &:active {
+      fill: white;
+      background-color: $learninglog-green-dark-1;
+    }
+  }
+  .student-groups {
+    fill: $charcoal-dark-1;
+    &:hover {
+      background-color: $charcoal-light-3;
+    }
+    &:active {
+      background-color: $charcoal-dark-1;
+    }
+  }
+}
