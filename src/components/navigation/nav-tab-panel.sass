@@ -29,6 +29,25 @@
       display: flex
       align-items: center
       justify-content: flex-start
+    .close-button
+      flex-shrink: 0
+      width: 36px
+      height: $nav-tab-height
+      background-color: $charcoal-light-6
+      border-radius: 0 6px 0 0
+      border-style: solid
+      border-color: $charcoal-light-2
+      border-width: 2px 2px 0 0
+      background-image: url("../../assets/icons/close/close.svg")
+      background-repeat: no-repeat
+      background-position: center
+      cursor: pointer
+      &:hover
+        background-color: $charcoal-light-4
+        background-image: url("../../assets/icons/arrow-back/arrow-back.svg")
+      &:active
+        background-color: $charcoal-light-2
+        background-image: url("../../assets/icons/arrow-back/arrow-back.svg")
     .chat-panel-toggle
       display: flex
       align-items: center

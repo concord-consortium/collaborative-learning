@@ -40,7 +40,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { tabs } = this.props;
+    const { tabs, isTeacher } = this.props;
     const { ui, user, supports } = this.stores;
     const selectedTabIndex = tabs?.findIndex(t => t.tab === ui.activeNavTab);
     const resizePanelWidth = 4;
@@ -69,14 +69,15 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
                   })
                 }
               </TabList>
-              {!this.state.showChatColumn &&
-                <div className={`chat-panel-toggle ${ui.activeNavTab}`}>
-                  <div className="new-comment-badge">{newCommentCount}</div>
-                  <ChatIcon
-                    className={`chat-button ${ui.activeNavTab}`}
-                    onClick={() => this.handleShowChatColumn(true)}
-                  />
-                </div>
+              { isTeacher ? (!this.state.showChatColumn) &&
+                              <div className={`chat-panel-toggle ${ui.activeNavTab}`}>
+                                <div className="new-comment-badge">{newCommentCount}</div>
+                                <ChatIcon
+                                  className={`chat-button ${ui.activeNavTab}`}
+                                  onClick={() => this.handleShowChatColumn(true)}
+                                />
+                              </div>
+                          : <button className="close-button" onClick={this.handleClose}/>
               }
             </div>
             { tabs?.map((tabSpec) => {
