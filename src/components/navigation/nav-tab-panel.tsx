@@ -52,7 +52,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
                               ? `calc(100% - ${collapseTabWidth}px - ${resizePanelWidth}px)`
                               : `calc(${ui.dividerPosition}% - ${resizePanelWidth}px)`;
     const resourceWidthStyle = {width: resourceWidth};
-    const newCommentCount = 88;
+    const newCommentCount = 8;
     return (
       <div className={`resource-and-chat-panel ${ui.navTabContentShown ? "shown" : ""}`} style={resourceWidthStyle}>
         <div className={`nav-tab-panel ${this.state.showChatColumn ? "chat-open" : ""}`}>
@@ -60,7 +60,8 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
             <div className="top-row">
               <TabList className="top-tab-list">
                 { tabs?.map((tabSpec, index) => {
-                    const tabClass = `top-tab tab-${tabSpec.tab} ${selectedTabIndex === index ? "selected" : ""}`;
+                    const tabClass = `top-tab tab-${tabSpec.tab}
+                                      ${selectedTabIndex === index ? "selected" : ""}`;
                     return (
                       <React.Fragment key={tabSpec.tab}>
                         <Tab className={tabClass}>{tabSpec.label}</Tab>
@@ -90,7 +91,8 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
               })
             }
           </Tabs>
-          {this.state.showChatColumn && <ChatPanel onCloseChatPanel={this.handleShowChatColumn} />}
+          {this.state.showChatColumn &&
+            <ChatPanel onCloseChatPanel={this.handleShowChatColumn} newCommentCount={newCommentCount}/>}
         </div>
       </div>
     );
@@ -116,14 +118,14 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
 
   private renderDocuments = (tabSpec: NavTabSpec) => {
     return (
-      <DocumentTabContent tabSpec={tabSpec}/>
+      <DocumentTabContent tabSpec={tabSpec} isChatOpen={this.state.showChatColumn}/>
     );
   }
 
   private renderProblem = () => {
     const { user: { isTeacher }, problem: { sections } } = this.stores;
     return (
-      <ProblemTabContent sections={sections} showSolutionsSwitch={isTeacher}/>
+      <ProblemTabContent sections={sections} showSolutionsSwitch={isTeacher} isChatOpen={this.state.showChatColumn}/>
     );
   }
 
@@ -131,7 +133,11 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
     const { user: { isTeacher }, teacherGuide } = this.stores;
     const sections = teacherGuide?.sections;
     return isTeacher && sections && (
-      <ProblemTabContent context={ENavTab.kTeacherGuide} sections={sections} showSolutionsSwitch={false}/>
+      <ProblemTabContent
+        context={ENavTab.kTeacherGuide}
+        sections={sections}
+        showSolutionsSwitch={false}
+        isChatOpen={this.state.showChatColumn}/>
     );
   }
 

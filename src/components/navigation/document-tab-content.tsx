@@ -14,9 +14,10 @@ import "./document-tab-content.sass";
 
 interface IProps {
   tabSpec: NavTabSpec;
+  isChatOpen?: boolean;
 }
 
-export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
+export const DocumentTabContent: React.FC<IProps> = ({ tabSpec, isChatOpen }) => {
   const [referenceDocument, setReferenceDocument] = useState<DocumentModelType | undefined>(undefined);
   const appConfigStore = useAppConfigStore();
   const problemStore = useProblemStore();
@@ -83,6 +84,7 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
         onTabClick={handleTabClick}
         onSelectDocument={handleSelectDocument}
         documentView={documentView}
+        isChatOpen={isChatOpen}
       />
     </div>
   );

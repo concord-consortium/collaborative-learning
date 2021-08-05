@@ -2,7 +2,6 @@
 
 .chat-panel {
   width: 36%;
-  border-width: 2px 2px 2px 0;
   border-style: solid;
   border-radius: 0 8px 0 0;
   height: calc(100vh - (#{$header-height} + #{$workspace-content-margin} * 2));

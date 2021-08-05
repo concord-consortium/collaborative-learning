@@ -9,6 +9,7 @@ import "../themes.scss";
 import { inject, observer } from "mobx-react";
 
 interface IProps {
+  newCommentCount: number;
   onCloseChatPanel:(show:boolean) => void;
 }
 
@@ -33,12 +34,12 @@ export class ChatPanelHeader extends BaseComponent<IProps> {
   }
 
   private renderNotification = () => {
-    const newCommentCount = 88;
+    const { newCommentCount } = this.props;
     const { ui } = this.stores;
     return (
       <div className="notification-toggle">
         <div className={`notification-icon themed-negative ${ui.activeNavTab}`}>
-          <NotificationIcon className={`icon-image  themed-negative ${ui.activeNavTab}`}/>
+          <NotificationIcon className={`icon-image themed-negative ${ui.activeNavTab}`}/>
         </div>
         <div className="new-comment-badge">{newCommentCount}</div>
       </div>

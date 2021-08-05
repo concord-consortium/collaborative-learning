@@ -1,4 +1,3 @@
-import classNames from "classnames";
 import { inject, observer } from "mobx-react";
 import React from "react";
 import { BaseComponent } from "../base";
@@ -6,6 +5,7 @@ import { ChatPanelHeader } from "./chat-panel-header";
 import "./chat-panel.scss";
 
 interface IProps {
+  newCommentCount: number;
   onCloseChatPanel:(show:boolean) => void;
 }
 
@@ -18,11 +18,11 @@ export class ChatPanel extends BaseComponent<IProps> {
   }
 
   public render() {
-    const { onCloseChatPanel } = this.props;
+    const { newCommentCount, onCloseChatPanel } = this.props;
     const { ui } = this.stores;
     return (
       <div className={`chat-panel ${ui.activeNavTab}`}>
-        <ChatPanelHeader onCloseChatPanel={onCloseChatPanel} />
+        <ChatPanelHeader onCloseChatPanel={onCloseChatPanel} newCommentCount={newCommentCount} />
       </div>
     );
   }

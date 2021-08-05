@@ -14,12 +14,15 @@ interface IProps {
   context?: string;
   sections: SectionModelType[];
   showSolutionsSwitch: boolean;
+  isChatOpen?: boolean
 }
 
-export const ProblemTabContent: React.FC<IProps> = observer(({ context, sections, showSolutionsSwitch}: IProps) => {
+export const ProblemTabContent: React.FC<IProps>
+  = observer(({ context, sections, showSolutionsSwitch, isChatOpen}: IProps) => {
   const { isTeacher } = useUserStore();
   const ui = useUIStore();
   const { showTeacherContent } = ui;
+  const chatBorder = isChatOpen ? "chat-open" : "";
 
   const handleTabClick = (title: string, type: string) => {
     Logger.log(LogEventName.SHOW_TAB_SECTION, {
@@ -34,7 +37,7 @@ export const ProblemTabContent: React.FC<IProps> = observer(({ context, sections
   };
 
   return (
-    <Tabs className={classNames("problem-tabs", context)} selectedTabClassName="selected">
+    <Tabs className={classNames("problem-tabs", context, chatBorder)} selectedTabClassName="selected">
       <div className="tab-header-row">
         <TabList className="tab-list">
           {sections.map((section) => {

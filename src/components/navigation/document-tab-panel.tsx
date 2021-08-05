@@ -19,6 +19,7 @@ interface IProps extends IBaseProps {
   onSelectDocument?: (document: DocumentModelType) => void;
   onTabClick?: (title: string, type: string) => void;
   documentView?: React.ReactNode;
+  isChatOpen?: boolean;
 }
 
 interface IState {
@@ -67,13 +68,13 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { documentView, tabSpec, onTabClick } = this.props;
+    const { documentView, tabSpec, onTabClick, isChatOpen } = this.props;
     const { tabIndex } = this.state;
     const navTabSpecs = this.stores.appConfig.navTabs.tabSpecs;
     const navTabSpec = navTabSpecs.find(spec => spec.tab === tabSpec.tab);
     return (
       <Tabs
-        className={`document-tabs ${navTabSpec?.tab}`}
+        className={`document-tabs ${navTabSpec?.tab} ${isChatOpen ? "chat-open" : ""}`}
         forceRenderTabPanel={true}
         onSelect={this.handleTabSelect}
         selectedIndex={tabIndex}
