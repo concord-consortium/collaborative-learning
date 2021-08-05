@@ -61,6 +61,14 @@
       background-color: $charcoal-light-3;
     }
   }
+  &.no-action {
+    &:hover {
+      background-color: white;
+    }
+    &:active {
+      background-color: white;
+    }
+  }
 }
 
 .themed-negative {

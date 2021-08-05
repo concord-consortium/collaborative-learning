@@ -14,6 +14,7 @@ import ChatIcon from "../../assets/chat-icon.svg";
 
 import "react-tabs/style/react-tabs.css";
 import "./nav-tab-panel.sass";
+import "../themes.scss";
 
 interface IProps extends IBaseProps {
   tabs?: NavTabSpec[];
@@ -70,7 +71,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
                 }
               </TabList>
               { isTeacher ? (!this.state.showChatColumn) &&
-                              <div className={`chat-panel-toggle ${ui.activeNavTab}`}>
+                              <div className={`chat-panel-toggle themed ${ui.activeNavTab}`}>
                                 <div className="new-comment-badge">{newCommentCount}</div>
                                 <ChatIcon
                                   className={`chat-button ${ui.activeNavTab}`}

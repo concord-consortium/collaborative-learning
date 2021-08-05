@@ -61,12 +61,28 @@
       border-width: 2px 2px 0 2px
       &.problems
         border-color: $problem-orange-light-3
+        &:hover
+          background-color: $problem-orange-light-5
+        &:active
+          background-color: $problem-orange-light-4
       &.my-work
         border-color: $workspace-teal
+        &:hover
+          background-color: $workspace-teal-light-4
+        &:active
+          background-color: $workspace-teal-light-3
       &.class-work
         border-color: $classwork-purple
+        &:hover
+          background-color: $classwork-purple-light-4
+        &:active
+          background-color: $classwork-purple-light-3
       &.supports
         border-color: $support-blue
+        &:hover
+          background-color: $support-blue-light-4
+        &:active
+          background-color: $support-blue-light-3
       .new-comment-badge
         position: absolute
         top: -2px
@@ -85,30 +101,6 @@
         justify-content: center
 
       .chat-button
-        &.problems
-          fill: $problem-orange
-          &:hover
-            background-color: $problem-orange-light-5
-          &:active
-            background-color: $problem-orange-light-4
-        &.my-work
-          fill: $workspace-teal
-          &:hover
-            background-color: $workspace-teal-light-4
-          &:active
-            background-color: $workspace-teal-light-3
-        &.class-work
-          fill: $classwork-purple
-          &:hover
-            background-color: $classwork-purple-light-4
-          &:active
-            background-color: $classwork-purple-light-3
-        &.supports
-          fill: $support-blue
-          &:hover
-            background-color: $support-blue-light-4
-          &:active
-            background-color: $support-blue-light-3
 
     .top-tab-list
       display: flex
