@@ -38,8 +38,13 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
     const { tabs } = this.props;
     const { ui, user, supports } = this.stores;
     const selectedTabIndex = tabs?.findIndex(t => t.tab === ui.activeNavTab);
-    const resourceWidth = ui.dividerPosition === 50 ? `calc(50% - 4px)`
-                                                    : ui.dividerPosition === 100 ? `calc(100% - 48px)` : 0;
+    const resizePanelWidth = 4;
+    const collapseTabWidth = 44;
+    const resourceWidth = ui.dividerPosition === 0
+                            ? 0
+                            : ui.dividerPosition === 100
+                              ? `calc(100% - ${collapseTabWidth}px - ${resizePanelWidth}px)`
+                              : `calc(${ui.dividerPosition}% - ${resizePanelWidth}px)`;
     const resourceWidthStyle = {width: resourceWidth};
     return (
       <div className={`nav-tab-panel ${ui.navTabContentShown ? "shown" : ""}`} style={resourceWidthStyle}>

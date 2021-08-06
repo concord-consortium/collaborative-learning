@@ -16,9 +16,9 @@ export const ResizePanelDivider: React.FC <IProps> =
     const tabWidth = 45;
     const dividerPositionStyle = dividerPosition  === 0
                                   ? {left: dividerLeftOffset}
-                                  : dividerPosition === 50
-                                      ? {left: `calc(${dividerPosition}% - ${dividerLeftOffset}px)`}
-                                      : {left: `calc(${dividerPosition}% - ${tabWidth}px - ${dividerLeftOffset}px)`};
+                                  : dividerPosition === 100
+                                      ? {left: `calc(${dividerPosition}% - ${tabWidth}px - ${dividerLeftOffset}px)`}
+                                      :  {left: `calc(${dividerPosition}% - ${dividerLeftOffset}px)`};
   return (
     <div className="resize-panel-divider" style={dividerPositionStyle}>
       <div className="divider" />
