@@ -70,7 +70,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
                   })
                 }
               </TabList>
-              { user.isTeacherInNetwork ? (!this.state.showChatColumn) &&
+              { user.isNetworkedTeacher ? (!this.state.showChatColumn) &&
                                         <div className={`chat-panel-toggle themed ${ui.activeNavTab}`}>
                                           <div className="new-comment-badge">{newCommentCount}</div>
                                           <ChatIcon

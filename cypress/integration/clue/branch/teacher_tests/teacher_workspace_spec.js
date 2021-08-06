@@ -27,8 +27,6 @@ beforeEach(() => {
 });
 
 describe('teacher specific navigation tabs', () => {
-  // For these tests, Close button is replaced with Chat icon because this is currently defaulting to teacher is in network
-  // TODO: need to write separate tests for when teacher in network mocking becomes available
   it('verify problem tab solution switch', () => {
     cy.get('.nav-tab.tab-problems').should('exist').click();
     cy.get('.prob-tab').contains('What If...?').click();
@@ -37,25 +35,14 @@ describe('teacher specific navigation tabs', () => {
     cy.get('[data-test=solutions-button]').click();
     cy.get('[data-test=solutions-button]').should('have.not.class', "toggled");
     cy.get('.has-teacher-tiles').should("not.exist");
+  });
 
-    // cy.get('.close-button').click(); //Close button is replaced with Chat icon for teacher in network
-  });
-  it('verify chat panel opens', () => {
-    cy.get('.chat-panel-toggle').should('exist').click();
-    cy.get('.chat-panel').should('exist');
-    cy.get('.notification-toggle').should('exist');
-    cy.get('.chat-close-button').should('exist').click();
-    cy.get('.chat-panel-toggle').should('exist');
-    cy.get('.chat-panel').should('not.exist');
-  });
   it('verify teacher guide', () => {
     cy.get('.nav-tab.tab-teacher-guide').should('exist').click({force:true});
     cy.get('.prob-tab.teacher-guide').should('exist').and('have.length', 4).each(function (subTab, index, subTabList) {
       const teacherGuideSubTabs = ["Overview", "Launch", "Explore", "Summarize"];
       cy.wrap(subTab).text().should('contain', teacherGuideSubTabs[index]);
     });
-
-    // cy.get('.close-button').click(); //Close button is replaced with Chat icon for teacher in network
   });
 });
 
@@ -93,6 +80,28 @@ describe('teacher document functionality', function () {
     cy.openDocumentWithTitle("my-work", "workspaces", this.investigationTitle);
     clueCanvas.deleteTile('draw');
     clueCanvas.deleteTile('table');
+  });
+});
+
+describe('Chat panel for networked teacher', () => {
+  it('verify chat does not appear when no url params are passed to indicate teacher status (teachers are in network', () => {
+    cy.get('.chat-panel-toggle').should('not.exist');
+  });
+  it('verify chat panel is accessible is teacher is in network (via url params)', () => {
+    cy.visit("/?appMode=qa&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=msa&chat&network=foo");
+    cy.waitForSpinner();
+    dashboard.switchView("Workspace & Resources");
+    cy.wait(2000);
+    cy.get('.nav-tab.tab-problems').click();
+    cy.get('.chat-panel-toggle').should('exist');
+  });
+  it('verify chat panel opens', () => {
+    cy.get('.chat-panel-toggle').click();
+    cy.get('.chat-panel').should('exist');
+    cy.get('.notification-toggle').should('exist');
+    cy.get('.chat-close-button').should('exist').click();
+    cy.get('.chat-panel-toggle').should('exist');
+    cy.get('.chat-panel').should('not.exist');
   });
 });
 
