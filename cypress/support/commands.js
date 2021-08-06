@@ -118,13 +118,13 @@ Cypress.Commands.add("openResourceTabs", () => {
   cy.get('.collapsed-resources-tab').click();
 } );
 Cypress.Commands.add("openTopTab", (tab) => {
-  cy.get('.nav-tab-panel .tab-'+tab).click();
+  cy.get('.nav-tab-panel .tab-'+tab).click({force:true});
 } );
 Cypress.Commands.add("openTopTab", (tab) => {
   cy.get('.top-tab.tab-'+tab).click();
 } );
 Cypress.Commands.add("openSection", (tab, section) => {//doc-tab my-work workspaces problem-documents selected
-  cy.get('.doc-tab.'+tab+'.'+section).click();
+  cy.get('.doc-tab.'+tab+'.'+section).click({force:true});
 });
 Cypress.Commands.add("getCanvasItemTitle", (section) => {
   cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer');

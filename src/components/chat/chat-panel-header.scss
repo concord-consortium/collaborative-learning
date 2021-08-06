@@ -71,11 +71,9 @@
       background-image: url("../../assets/icons/close/close-problems.svg");
       background-repeat: no-repeat;
       &:hover {
-        // background-color: $problem-orange-light-5;
         background-image: url("../../assets/icons/arrow-back/arrow-back-problems.svg");
       }
       &:active {
-        // background-color: $problem-orange-light-4;
         background-image: url("../../assets/icons/arrow-back/arrow-back-problems.svg");
       }
     }
@@ -83,11 +81,9 @@
       background-image: url("../../assets/icons/close/close-my-work.svg");
       background-repeat: no-repeat;
       &:hover {
-        // background-color: $workspace-teal-light-4;
         background-image: url("../../assets/icons/arrow-back/arrow-back-my-work.svg");
       }
       &:active {
-        // background-color: $workspace-teal-light-3;
         background-image: url("../../assets/icons/arrow-back/arrow-back-my-work.svg");
       }
     }
@@ -96,11 +92,9 @@
       background-repeat: no-repeat;
       fill: $classwork-purple;
       &:hover {
-        // background-color: $classwork-purple-light-4;
         background-image: url("../../assets/icons/arrow-back/arrow-back-class-work.svg");
       }
       &:active {
-        // background-color: $classwork-purple-light-3;
         background-image: url("../../assets/icons/arrow-back/arrow-back-class-work.svg");
       }
     }
@@ -109,11 +103,9 @@
       background-repeat: no-repeat;
       fill: $support-blue;
       &:hover {
-        // background-color: $support-blue-light-4;
         background-image: url("../../assets/icons/arrow-back/arrow-back-supports.svg");
       }
       &:active {
-        // background-color: $support-blue-light-3;
         background-image: url("../../assets/icons/arrow-back/arrow-back-supports.svg");
       }
     }
@@ -122,11 +114,9 @@
       background-repeat: no-repeat;
       fill: $support-blue;
       &:hover {
-        // background-color: $support-blue-light-4;
         background-image: url("../../assets/icons/arrow-back/arrow-back-teacher-guide.svg");
       }
       &:active {
-        // background-color: $support-blue-light-3;
         background-image: url("../../assets/icons/arrow-back/arrow-back-teacher-guide.svg");
       }
     }
