@@ -23,12 +23,10 @@ before(() => {
   clueCanvas.getInvestigationCanvasTitle().eq(0).text().as('investigationTitle');
 });
 
-beforeEach(() => {
-  cy.fixture("teacher-dash-data-msa-test.json").as("clueData");
-});
-
-describe.skip('teacher specific navigation tabs', () => {
-
+describe('teacher specific navigation tabs', () => {
+  // before(() => {
+  //   cy.fixture("teacher-dash-data-msa-test.json").as("clueData");
+  // });
   it('verify problem tab solution switch', () => {
     cy.get('.nav-tab.tab-problems').should('exist').click();
     cy.get('.prob-tab').contains('What If...?').click();
@@ -38,18 +36,26 @@ describe.skip('teacher specific navigation tabs', () => {
     cy.get('[data-test=solutions-button]').should('have.not.class', "toggled");
     cy.get('.has-teacher-tiles').should("not.exist");
 
-    cy.get('.close-button').click();
+    // cy.get('.close-button').click(); Close button is replaced with Chat icon for teacher in network
   });
-  it('verify teacher guide', () => {
+  it('verify chat panel opens', () => {
+    cy.get('.chat-panel-toggle').should('exist').click();
+    cy.get('.chat-panel').should('exist');
+    cy.get('.notification-toggle').should('exist');
+    cy.get('.chat-close-button').should('exist').click();
+    cy.get('.chat-panel-toggle').should('exist');
+    cy.get('.chat-panel').should('not.exist');
+  });
+  it.skip('verify teacher guide', () => {
     cy.get('.nav-tab.tab-teacher-guide').should('exist').click();
     cy.get('.prob-tab.teacher-guide').should('exist').and('have.length', 4).each(function (subTab, index, subTabList) {
       const teacherGuideSubTabs = ["Overview", "Launch", "Explore", "Summarize"];
       cy.wrap(subTab).text().should('contain', teacherGuideSubTabs[index]);
     });
 
-    cy.get('.close-button').click();
+    // cy.get('.close-button').click(); Close button is replaced with Chat icon for teacher in network
   });
-  it('verify student workspace tab', () => {
+  it.skip('verify student workspace tab', () => {
     cy.get('@clueData').then((clueData) => {
       const groups = clueData.classes[0].problems[0].groups;
 
@@ -66,7 +72,7 @@ describe.skip('teacher specific navigation tabs', () => {
       cy.get('.group-title').should('contain', 'Group 3');
       cy.get('.canvas-area .four-up .member').eq(0).should('contain', 'S9');
     });
-    cy.get('.close-button').click();
+    // cy.get('.close-button').click(); Close button is replaced with Chat icon for teacher in network
   });
 });
 
