@@ -3,7 +3,7 @@ import { observable } from "mobx";
 import { IDisposer, onSnapshot } from "mobx-state-tree";
 
 import { DB, Monitor } from "../db";
-import { LogEventName, Logger } from "../logger";
+// import { LogEventName, Logger } from "../logger";
 import { DBLatestGroupIdListener } from "./db-latest-group-id-listener";
 import { DBGroupsListener } from "./db-groups-listener";
 import { DBOtherDocumentsListener } from "./db-other-docs-listener";
@@ -245,8 +245,8 @@ export class DBListeners extends BaseListener {
       // Only log the first time we monitor the document. We generally monitor/unmonitor/remonitor
       // several times during startup, but this function always adds monitoring as the last step,
       // so logging the first instance is sufficient for our purposes.
-      Logger.log(LogEventName.INTERNAL_MONITOR_DOCUMENT,
-                { type: document.type, key: document.key, uid: document.uid, groupId: document.groupId });
+      // Logger.log(LogEventName.INTERNAL_MONITOR_DOCUMENT,
+      //           { type: document.type, key: document.key, uid: document.uid, groupId: document.groupId });
     }
 
     const updatePath = this.db.firebase.getUserDocumentPath(user, key, document.uid);
@@ -274,8 +274,8 @@ export class DBListeners extends BaseListener {
     // if it were to be called for a user's own document the result would be not saving the user's work.
     const { user } = this.db.stores;
     if (user.id === document.uid) {
-      Logger.log(LogEventName.INTERNAL_UNMONITOR_DOCUMENT,
-                { type: document.type, key: document.key, uid: document.uid, groupId: document.groupId });
+      // Logger.log(LogEventName.INTERNAL_UNMONITOR_DOCUMENT,
+      //           { type: document.type, key: document.key, uid: document.uid, groupId: document.groupId });
     }
     const docListener = this.modelListeners[`document:${document.key}`];
     docListener?.modelDisposer?.();

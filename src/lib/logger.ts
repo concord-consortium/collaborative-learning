@@ -116,7 +116,13 @@ interface IDocumentInfo {
 }
 
 export class Logger {
+  public static isLoggingEnabled = false;
+
   public static initializeLogger(stores: IStores, investigation?: InvestigationModelType, problem?: ProblemModelType) {
+    const { appMode } = stores;
+    const noLogModes: Array<typeof appMode> = ["dev", "qa", "test"];
+    this.isLoggingEnabled = !noLogModes.includes(appMode) || DEBUG_LOGGER;
+
     if (DEBUG_LOGGER) {
       // eslint-disable-next-line no-console
       console.log("Logger#initializeLogger called.");
@@ -274,7 +280,7 @@ export class Logger {
     const document = this.stores.documents.findDocumentOfTile(tileId);
     if (document) {
       const { type, key, uid, title, changeCount, properties } = document;
-      return { type, key, uid, title, changeCount, properties: properties && properties.toJSON() || {} };
+      return { type, key, uid, title, changeCount, properties: properties?.toJSON() || {} };
     } else {
       return {
         type: "Instructions"        // eventually we will need to include copying from supports
@@ -288,6 +294,8 @@ function sendToLoggingService(data: LogMessage, user: UserModelType) {
     // eslint-disable-next-line no-console
     console.log("Logger#sendToLoggingService sending", JSON.stringify(data), "to", logManagerUrl);
   }
+  if (!Logger.isLoggingEnabled) return;
+
   const request = new XMLHttpRequest();
 
   request.upload.addEventListener("load", () => user.setIsLoggingConnected(true));
