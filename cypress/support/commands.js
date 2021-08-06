@@ -142,6 +142,7 @@ Cypress.Commands.add('closeTabs', () => {
 });
 Cypress.Commands.add('collapseWorkspace', () => {
   cy.get('.drag-right-handle').click();
+  cy.get('.drag-right-handle').click(); // to ensure workspace is collapsed regardless of initial position
 });
 Cypress.Commands.add('linkTableToGraph', (table, graph) => {
   cy.get('.table-title').contains(table).within(() => {
