@@ -18,7 +18,6 @@ import "../themes.scss";
 
 interface IProps extends IBaseProps {
   tabs?: NavTabSpec[];
-  isTeacher: boolean;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
   onDrop: (e: React.DragEvent<HTMLDivElement>) => void;
 }
@@ -41,7 +40,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { tabs, isTeacher } = this.props;
+    const { tabs } = this.props;
     const { ui, user, supports } = this.stores;
     const selectedTabIndex = tabs?.findIndex(t => t.tab === ui.activeNavTab);
     const resizePanelWidth = 4;
@@ -71,15 +70,15 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
                   })
                 }
               </TabList>
-              { isTeacher ? (!this.state.showChatColumn) &&
-                              <div className={`chat-panel-toggle themed ${ui.activeNavTab}`}>
-                                <div className="new-comment-badge">{newCommentCount}</div>
-                                <ChatIcon
-                                  className={`chat-button ${ui.activeNavTab}`}
-                                  onClick={() => this.handleShowChatColumn(true)}
-                                />
-                              </div>
-                          : <button className="close-button" onClick={this.handleClose}/>
+              { user.isTeacherInNetwork ? (!this.state.showChatColumn) &&
+                                        <div className={`chat-panel-toggle themed ${ui.activeNavTab}`}>
+                                          <div className="new-comment-badge">{newCommentCount}</div>
+                                          <ChatIcon
+                                            className={`chat-button ${ui.activeNavTab}`}
+                                            onClick={() => this.handleShowChatColumn(true)}
+                                          />
+                                        </div>
+                                    : <button className="close-button" onClick={this.handleClose}/>
               }
             </div>
             { tabs?.map((tabSpec) => {
@@ -125,7 +124,10 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
   private renderProblem = () => {
     const { user: { isTeacher }, problem: { sections } } = this.stores;
     return (
-      <ProblemTabContent sections={sections} showSolutionsSwitch={isTeacher} isChatOpen={this.state.showChatColumn}/>
+      <ProblemTabContent
+        sections={sections}
+        showSolutionsSwitch={isTeacher}
+        isChatOpen={this.state.showChatColumn}/>
     );
   }
 

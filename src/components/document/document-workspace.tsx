@@ -68,7 +68,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         {navTabContentShown
           ? <NavTabPanel
               tabs={tabsToDisplay}
-              isTeacher={isTeacher}
               onDragOver={this.handleDragOverWorkspace}
               onDrop={this.handleImageDrop}
             />
