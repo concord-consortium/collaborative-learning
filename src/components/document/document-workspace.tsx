@@ -20,12 +20,9 @@ import "./document-workspace.sass";
 interface IProps extends IBaseProps {
 }
 
-interface IState {
-}
-
 @inject("stores")
 @observer
-export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
+export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   private imageDragDrop: ImageDragDrop;
 
   constructor(props: IProps) {
@@ -34,8 +31,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
     this.imageDragDrop = new ImageDragDrop({
       isAcceptableImageDrag: this.isAcceptableImageDrag
     });
-    this.state = {
-    };
   }
 
   public componentDidMount() {
@@ -78,10 +73,11 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
             />
           : <CollapsedResourcesTab onExpandResources={this.toggleExpandResources} resourceType={activeNavTab} />
         }
-        <ResizePanelDivider isResourceExpanded={navTabContentShown}
-                            dividerPosition={dividerPosition}
-                            onExpandWorkspace={this.toggleExpandWorkspace}
-                            onExpandResources={this.toggleExpandResources}
+        <ResizePanelDivider
+          isResourceExpanded={navTabContentShown}
+          dividerPosition={dividerPosition}
+          onExpandWorkspace={this.toggleExpandWorkspace}
+          onExpandResources={this.toggleExpandResources}
         />
         {workspaceShown ? this.renderDocuments()
                         : <CollapsedWorkspaceTab
@@ -428,7 +424,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
     const { ui } = this.stores;
     if (ui.dividerPosition === 100) {
       ui.setDividerPosition(50);
-    } else if ( ui.dividerPosition === 50 ) {
+    } else if (ui.dividerPosition === 50) {
       ui.setDividerPosition(0);
     }
   }
@@ -437,7 +433,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IState> {
     const { ui } = this.stores;
     if (ui.dividerPosition === 0) {
       ui.setDividerPosition(50);
-    } else if ( ui.dividerPosition === 50 ) {
+    } else if (ui.dividerPosition === 50) {
       ui.setDividerPosition(100);
     }
   }
