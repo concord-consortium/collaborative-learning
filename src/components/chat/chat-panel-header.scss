@@ -70,20 +70,14 @@
     &.problems {
       background-image: url("../../assets/icons/close/close-problems.svg");
       background-repeat: no-repeat;
-      &:hover {
-        background-image: url("../../assets/icons/arrow-back/arrow-back-problems.svg");
-      }
-      &:active {
+      &:hover, &:active{
         background-image: url("../../assets/icons/arrow-back/arrow-back-problems.svg");
       }
     }
     &.my-work {
       background-image: url("../../assets/icons/close/close-my-work.svg");
       background-repeat: no-repeat;
-      &:hover {
-        background-image: url("../../assets/icons/arrow-back/arrow-back-my-work.svg");
-      }
-      &:active {
+      &:hover, &:active {
         background-image: url("../../assets/icons/arrow-back/arrow-back-my-work.svg");
       }
     }
@@ -91,10 +85,7 @@
       background-image: url("../../assets/icons/close/close-class-work.svg");
       background-repeat: no-repeat;
       fill: $classwork-purple;
-      &:hover {
-        background-image: url("../../assets/icons/arrow-back/arrow-back-class-work.svg");
-      }
-      &:active {
+      &:hover, &:active  {
         background-image: url("../../assets/icons/arrow-back/arrow-back-class-work.svg");
       }
     }
@@ -102,10 +93,7 @@
       background-image: url("../../assets/icons/close/close-supports.svg");
       background-repeat: no-repeat;
       fill: $support-blue;
-      &:hover {
-        background-image: url("../../assets/icons/arrow-back/arrow-back-supports.svg");
-      }
-      &:active {
+      &:hover, &:active {
         background-image: url("../../assets/icons/arrow-back/arrow-back-supports.svg");
       }
     }
@@ -113,10 +101,7 @@
       background-image: url("../../assets/icons/close/close-teacher-guide.svg");
       background-repeat: no-repeat;
       fill: $support-blue;
-      &:hover {
-        background-image: url("../../assets/icons/arrow-back/arrow-back-teacher-guide.svg");
-      }
-      &:active {
+      &:hover, &:active{
         background-image: url("../../assets/icons/arrow-back/arrow-back-teacher-guide.svg");
       }
     }

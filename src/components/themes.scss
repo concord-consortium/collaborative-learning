@@ -1,9 +1,10 @@
 @import "./vars";
 
 .themed {
+  background-color: white;
+
   &.problems {
     fill: $problem-orange;
-    background-color: white;
     &:hover {
       background-color: $problem-orange-light-5;
     }
@@ -13,7 +14,6 @@
   }
   &.my-work {
     fill: $workspace-teal;
-    background-color: white;
     &:hover {
       background-color: $workspace-teal-light-4;
     }
@@ -23,7 +23,6 @@
   }
   &.class-work {
     fill: $classwork-purple;
-    background-color: white;
     &:hover {
       background-color: $classwork-purple-light-4;
     }
@@ -33,7 +32,6 @@
   }
   &.supports {
     fill: $support-blue;
-    background-color: white;
     &:hover {
       background-color: $support-blue-light-4;
     }
@@ -43,7 +41,6 @@
   }
   &.teacher-guide {
     fill: $learninglog-green-dark-1;
-    background-color: white;
     &:hover {
       background-color: $learninglog-green-light-5;
     }
@@ -51,9 +48,8 @@
       background-color: $learninglog-green-light-4;
     }
   }
-  .student-groups {
+  &.student-work {
     fill: $charcoal-dark-1;
-    background-color: white;
     &:hover {
       background-color: $charcoal-light-4;
     }
@@ -122,7 +118,7 @@
       background-color: $learninglog-green-dark-1;
     }
   }
-  .student-groups {
+  &.student-work {
     fill: $charcoal-dark-1;
     &:hover {
       background-color: $charcoal-light-3;
