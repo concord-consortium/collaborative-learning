@@ -1,5 +1,5 @@
 import { parse } from "query-string";
-import { AppMode } from "../models/stores/stores";
+import { AppMode, AppModes } from "../models/stores/store-types";
 import { DBClearLevel } from "../lib/db";
 
 export interface QueryParams {
@@ -42,6 +42,16 @@ export interface QueryParams {
   reportType?: string;
 
   //
+  // teacher network development features
+  //
+
+  // name of teacher network to associate teacher with (until we have a real implementation)
+  network?: string;
+  // if present without a value show actual (under development) chat implementation
+  // if present with value "fixtures" include fake messages for development purposes
+  chat?: boolean | "fixtures";
+
+  //
   // demo or qa mode parameters
   //
 
@@ -60,24 +70,23 @@ export interface QueryParams {
   qaClear?: DBClearLevel;
 }
 
-const params = parse(location.search);
-
-export const DefaultUrlParams: QueryParams = {
-  appMode: "dev",
-  unit: undefined,
-  problem: undefined,
-  token: undefined,
-  domain: undefined,
-  demo: undefined,
-  demoName: undefined,
-  class: undefined,
-  offering: undefined,
-  reportType: undefined,
-  fakeClass: undefined,
-  fakeUser: undefined,
-  qaGroup: undefined,
-  qaClear: undefined,
-  testMigration: undefined,
+export const processUrlParams = (): QueryParams => {
+  const params = parse(location.search);
+  return {
+    ...params,
+    // defaults to dev mode if not specified or not valid
+    appMode: (typeof params.appMode === "string") && AppModes.includes(params.appMode as AppMode)
+              ? params.appMode as AppMode
+              : "dev",
+    // allows use of ?demo without a value for demo mode
+    demo: params.demo !== undefined,
+    // allows use of ?chat without a value to enable chat feature
+    chat: params.chat === undefined
+            ? false
+            : params.chat === "fixtures"
+                ? params.chat
+                : true  // any other value simply enables the feature
+  };
 };
-                                                    // allows use of ?demo for url
-export const urlParams: QueryParams = { ...params, ...{ demo: typeof params.demo !== "undefined" } };
+
+export const urlParams = processUrlParams();

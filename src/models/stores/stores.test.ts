@@ -1,4 +1,5 @@
-import { createStores, AppMode, isFeatureSupported, getDisabledFeaturesOfTile } from "./stores";
+import { AppMode } from "./store-types";
+import { createStores, isFeatureSupported, getDisabledFeaturesOfTile } from "./stores";
 import { UnitModel } from "../curriculum/unit";
 import { InvestigationModel } from "../curriculum/investigation";
 import { ProblemModel } from "../curriculum/problem";

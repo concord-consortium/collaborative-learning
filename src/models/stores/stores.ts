@@ -14,8 +14,7 @@ import { LearningLogWorkspace, ProblemWorkspace } from "./workspace";
 import { ClipboardModel, ClipboardModelType } from "./clipboard";
 import { SelectionStoreModel, SelectionStoreModelType } from "./selection";
 import { getSetting } from "./settings";
-
-export type AppMode = "authed" | "dev" | "test" | "demo" | "qa";
+import { AppMode } from "./store-types";
 
 export interface IBaseStores {
   appMode: AppMode;

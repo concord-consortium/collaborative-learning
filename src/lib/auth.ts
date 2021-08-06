@@ -1,8 +1,8 @@
 import initials from "initials";
 import jwt from "jsonwebtoken";
 import superagent from "superagent";
-import { AppMode } from "../models/stores/stores";
-import { QueryParams, DefaultUrlParams } from "../utilities/url-params";
+import { AppMode } from "../models/stores/store-types";
+import { QueryParams, urlParams as pageUrlParams } from "../utilities/url-params";
 import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
 import { AppConfigModelType } from "../models/stores/app-config-model";
 import { IPortalClassOffering } from "../models/stores/user";
@@ -244,7 +244,7 @@ export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, ur
     unitCode?: string;
   }
   return new Promise<IAuthenticateResponse>((resolve, reject) => {
-    urlParams = urlParams || DefaultUrlParams;
+    urlParams = urlParams || pageUrlParams;
     const unitCode = urlParams.unit || "";
     // when launched as a report, the params will not contain the problemOrdinal
     const problemOrdinal = urlParams.problem || appConfig.defaultProblemOrdinal;
