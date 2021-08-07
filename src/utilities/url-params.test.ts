@@ -25,10 +25,11 @@ describe("urlParams", () => {
     mockWindowLocation(originalLocation);
   });
 
-  it("appMode defaults to dev but can be overridden", () => {
-    expect(processQueryParams().appMode).toBe("dev");
-    expect(processQueryParams("appMode").appMode).toBe("dev");
-    expect(processQueryParams("appMode=bogus").appMode).toBe("dev");
+  it("appMode must be valid", () => {
+    expect(processQueryParams().appMode).toBeUndefined();
+    expect(processQueryParams("appMode").appMode).toBeUndefined();
+    expect(processQueryParams("appMode=bogus").appMode).toBeUndefined();
+    expect(processQueryParams("appMode=dev").appMode).toBe("dev");
     expect(processQueryParams("appMode=authed").appMode).toBe("authed");
   });
 

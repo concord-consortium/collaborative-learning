@@ -74,12 +74,10 @@ export const processUrlParams = (): QueryParams => {
   const params = parse(location.search);
   return {
     ...params,
-    // defaults to dev mode if not specified or not valid
-    appMode: (typeof params.appMode === "string")
-              ? AppModes.includes(params.appMode as AppMode)
+    // validate appMode
+    appMode: (typeof params.appMode === "string") && AppModes.includes(params.appMode as AppMode)
                   ? params.appMode as AppMode
-                  : "dev"
-              : undefined,
+                  : undefined,  // appMode will be determined internally
     // allows use of ?demo without a value for demo mode
     demo: params.demo !== undefined,
     // allows use of ?chat without a value to enable chat feature
