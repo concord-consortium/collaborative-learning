@@ -71,7 +71,7 @@ export const UserModel = types
       self.portal = user.portal;
       self.type = user.type;
       // TODO: replace this with real implementation
-      self.teacherNetwork = user.type === "teacher" ? urlParams.network : undefined;
+      self.teacherNetwork = (user.type === "teacher") && urlParams.network ? urlParams.network : undefined;
       self.className = user.className;
       self.classHash = user.classHash;
       self.offeringId = user.offeringId;
