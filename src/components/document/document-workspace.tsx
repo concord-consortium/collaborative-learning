@@ -9,9 +9,12 @@ import { DocumentContentModel } from "../../models/document/document-content";
 import {
   DocumentDragKey, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
 } from "../../models/document/document-types";
+import { kDividerHalf, kDividerMax, kDividerMin } from "../../models/stores/ui-types";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { NavTabPanel } from "../navigation/nav-tab-panel";
-import { NavTabButtons } from "../navigation/nav-tab-buttons";
+import { CollapsedResourcesTab } from "../navigation/collapsed-resources-tab";
+import { CollapsedWorkspaceTab } from "./collapsed-workspace-tab";
+import { ResizePanelDivider } from "./resize-panel-divider";
 
 import "./document-workspace.sass";
 
@@ -36,7 +39,16 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   public render() {
-    const { appConfig : { navTabs: { tabSpecs } }, teacherGuide, user: { isTeacher } } = this.stores;
+    const { appConfig : { navTabs: { tabSpecs } },
+            teacherGuide,
+            user: { isTeacher },
+            ui: { problemWorkspace: { type },
+                  activeNavTab,
+                  navTabContentShown,
+                  workspaceShown,
+                  dividerPosition
+                }
+          } = this.stores;
     const studentTabs = tabSpecs.filter((t) => !t.teacherOnly);
     const teacherTabs = tabSpecs.filter(t => (t.tab !== "teacher-guide") || teacherGuide);
     const tabsToDisplay = isTeacher ? teacherTabs : studentTabs;
@@ -52,19 +64,28 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
           onDragOver={this.handleDragOverWorkspace}
           onDrop={this.handleImageDrop}
         />
-        {this.renderDocuments()}
-        <NavTabPanel
-          tabs={tabsToDisplay}
-          isTeacher={isTeacher}
-          onDragOver={this.handleDragOverWorkspace}
-          onDrop={this.handleImageDrop}
+
+        {navTabContentShown
+          ? <NavTabPanel
+              tabs={tabsToDisplay}
+              isTeacher={isTeacher}
+              onDragOver={this.handleDragOverWorkspace}
+              onDrop={this.handleImageDrop}
+            />
+          : <CollapsedResourcesTab onExpandResources={this.toggleExpandResources} resourceType={activeNavTab} />
+        }
+        <ResizePanelDivider
+          isResourceExpanded={navTabContentShown}
+          dividerPosition={dividerPosition}
+          onExpandWorkspace={this.toggleExpandWorkspace}
+          onExpandResources={this.toggleExpandResources}
         />
-        <NavTabButtons
-          tabs={tabsToDisplay}
-          isTeacher={isTeacher}
-          onDragOver={this.handleDragOverWorkspace}
-          onDrop={this.handleImageDrop}
-        />
+        {workspaceShown ? this.renderDocuments()
+                        : <CollapsedWorkspaceTab
+                            onExpandWorkspace={this.toggleExpandWorkspace}
+                            workspaceType={type}
+                          />
+        }
       </div>
     );
   }
@@ -174,12 +195,12 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
 
   private renderDocument(className: string, side: WorkspaceSide, child?: JSX.Element) {
     const { ui } = this.stores;
-    const style = { right: 0 };
-    const positionedClassName = ui.navTabContentShown ? className + " half" : className;
+    const workspaceLeft = ui.navTabContentShown ? "50%" : 42;
+    const style = { left: workspaceLeft };
     const roleClassName = side === "primary" ? "primary-workspace" : "reference-workspace";
     return (
       <div
-        className={`${positionedClassName} ${roleClassName}`}
+        className={`${className} ${roleClassName}`}
         style={style}
         onDragOver={this.handleDragOverSide}
         onDrop={this.handleDropSide(side)}
@@ -397,6 +418,24 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   private getPrimaryDocument(documentKey?: string) {
     if (documentKey) {
       return this.stores.documents.getDocument(documentKey);
+    }
+  }
+
+  private toggleExpandWorkspace = () => {
+    const { ui } = this.stores;
+    if (ui.dividerPosition === kDividerMax) {
+      ui.setDividerPosition(kDividerHalf);
+    } else if (ui.dividerPosition === kDividerHalf) {
+      ui.setDividerPosition(kDividerMin);
+    }
+  }
+
+  private toggleExpandResources = () => {
+    const { ui } = this.stores;
+    if (ui.dividerPosition === kDividerMin) {
+      ui.setDividerPosition(kDividerHalf);
+    } else if (ui.dividerPosition === kDividerHalf) {
+      ui.setDividerPosition(kDividerMax);
     }
   }
 }

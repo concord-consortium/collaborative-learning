@@ -77,7 +77,8 @@ describe.skip('teacher document functionality', function () {
     clueCanvas.addTile('drawing');
     canvas.copyDocument(teacherDoc);
     cy.wait(2000);
-    cy.openTab("my-work");
+    cy.openResourcesTab();
+    cy.openTopTab("my-work");
     cy.openDocumentWithTitle('my-work', 'workspaces', teacherDoc);
     clueCanvas.addTile('table');
   });

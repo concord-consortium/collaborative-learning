@@ -24,7 +24,8 @@ import ClueCanvas from "../../../../support/elements/clue/cCanvas";
         let studentDoc = "Student 5: SAS 2.1 Drawing Wumps";
 
         it('verify starring a student published investigation',function(){
-            cy.openTab('class-work');
+            cy.openResourceTab();
+            cy.openTopTab('class-work');
             cy.openSection('class-work','problem-workspaces');
             rightNav.starCanvasItem('class-work','problem-workspaces',studentDoc);
             rightNav.getCanvasStarIcon('class-work','problem-workspaces',studentDoc).should('have.class','starred');

@@ -2,6 +2,7 @@ import { inject, observer } from "mobx-react";
 import React from "react";
 import { BaseComponent, IBaseProps } from "../base";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
+import { kDividerMax, kDividerMin } from "../../models/stores/ui-types";
 import { NavTabSpec, ENavTab } from "../../models/view/nav-tabs";
 import { Logger, LogEventName } from "../../lib/logger";
 import { StudentGroupView } from "../document/student-group-view";
@@ -38,8 +39,16 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
     const { tabs } = this.props;
     const { ui, user, supports } = this.stores;
     const selectedTabIndex = tabs?.findIndex(t => t.tab === ui.activeNavTab);
+    const resizePanelWidth = 4;
+    const collapseTabWidth = 44;
+    const resourceWidth = ui.dividerPosition === kDividerMin
+                            ? kDividerMin
+                            : ui.dividerPosition === kDividerMax
+                              ? `calc(100% - ${collapseTabWidth}px - ${resizePanelWidth}px)`
+                              : `calc(${ui.dividerPosition}% - ${resizePanelWidth}px)`;
+    const resourceWidthStyle = {width: resourceWidth};
     return (
-      <div className={`nav-tab-panel ${ui.navTabContentShown ? "shown" : ""}`}>
+      <div className={`nav-tab-panel ${ui.navTabContentShown ? "shown" : ""}`} style={resourceWidthStyle}>
         <Tabs selectedIndex={selectedTabIndex} onSelect={this.handleSelectTab} forceRenderTabPanel={true}>
           <div className="top-row">
             <TabList className="top-tab-list">
@@ -54,7 +63,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
                 })
               }
             </TabList>
-            <button className="close-button" onClick={this.handleClose}/>
+            <button className="close-button" onClick={this.handleCloseResources}/>
           </div>
           { tabs?.map((tabSpec) => {
               return (
@@ -129,9 +138,8 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
     ui.setActiveStudentGroup(groupId);
   }
 
-  private handleClose = () => {
+  private handleCloseResources = () => {
     const { ui } = this.stores;
-    ui.toggleNavTabContent(false);
+    ui.setDividerPosition(kDividerMin);
   }
-
 }

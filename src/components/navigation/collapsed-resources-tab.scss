@@ -1,0 +1,90 @@
+@import "../vars";
+
+.collapsed-resources-tab {
+  position: absolute;
+  top: $header-height;
+  left: 0;
+  height: calc(100vh - (#{$header-height} + #{$workspace-content-margin} * 2));
+  width: 38px;
+  margin: 4px 4px 0 2px;
+  padding: 2px;
+  border-radius: 0 8px 0 0;
+  box-sizing: border-box;
+  border-width: 2px;
+  border-style: solid;
+  display: flex;
+  &.problems {
+    border-color: $problem-orange;
+    background-color: $problem-orange-light-4;
+    &:hover {
+      background-color: $problem-orange-light-3;
+    }
+    &:active {
+      background-color: $problem-orange-light-2;
+    }
+  }
+  &.teacher-guide {
+    border-color: $learninglog-green;
+    background-color: $learninglog-green-light-5;
+    &:hover {
+      background-color: $learninglog-green-light-3;
+    }
+    &:active {
+      background-color: $learninglog-green-light-2;
+    }
+  }
+  &.student-work {
+    border-color: $charcoal;
+    background-color: $charcoal-light-3;
+    &:hover {
+      background-color: $charcoal-light-2;
+    }
+    &:active {
+      background-color: $charcoal-light-1-b;
+    }
+  }
+  &.my-work {
+    border-color: $workspace-teal;
+    background-color: $workspace-teal-light-3;
+    &:hover {
+      background-color: $workspace-teal-light-2;
+    }
+    &:active {
+      background-color: $workspace-teal-light-1-b;
+    }
+  }
+  &.class-work {
+    border-color: $classwork-purple;
+    background-color: $classwork-purple-light-4;
+    &:hover {
+      background-color: $classwork-purple-light-3;
+    }
+    &:active {
+      background-color: $classwork-purple-light-2;
+    }
+  }
+  &.supports {
+    border-color: $support-blue;
+    background-color: $support-blue-light-4;
+    &:hover {
+      background-color: $support-blue-light-3;
+    }
+    &:active {
+      background-color: $support-blue-light-2;
+    }
+  }
+
+  .collapsed-tab-label {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: 14px;
+    margin: 20px 7px;
+    height: max-content;
+  }
+  .expand-left-indicator {
+    position: relative;
+    left: -33px;
+    align-self: center;
+    justify-self: center;
+  }
+}

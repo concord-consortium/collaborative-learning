@@ -84,7 +84,6 @@ export class TeacherGroupSixPackFourUp extends BaseComponent<IProps, IState> {
         Logger.log(LogEventName.VIEW_GROUP, {group: group.id, via: "dashboard-show-comparison-group"});
         ui.setTeacherPanelKey(EPanelId.workspace);
         ui.setActiveStudentGroup(group.id);
-        ui.toggleNavTabContent(true);
       };
 
       return(

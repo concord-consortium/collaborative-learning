@@ -26,7 +26,8 @@ describe('Test nav panel tabs', function () {
   describe("Investigation Tab tests", function () {
     describe("Problem tabs", function () {
       it('verify tab names are visible', () => {
-        cy.openTab("problems");
+        cy.get(".collapsed-resources-tab.my-work").click();
+        cy.openTopTab("problems");
         cy.get(".problem-tabs .tab-list .prob-tab").each(($tab, index, $tabList) => {
           expect($tab.text()).to.contain(problemSubTabTitles[index]);
         });
@@ -44,7 +45,6 @@ describe('Test nav panel tabs', function () {
       it('verify publish Investigation', function () {
         canvas.publishCanvas("investigation");
         cy.openTopTab('class-work');
-        // cy.openSection('class-work','published');
         cy.getCanvasItemTitle('problem-workspaces').should('contain', this.title);
       });
       it('verify make a copy of a canvas', function () {
@@ -90,7 +90,8 @@ describe('Test nav panel tabs', function () {
     });
     describe('Starred section', function () {
       before(() => {
-        cy.openTab('my-work');
+        cy.get(".collapsed-resources-tab.my-work").click();
+        cy.openTopTab('my-work');
         cy.openSection("my-work", "workspaces");
         rightNav.starCanvasItem('my-work', 'workspaces', copyDocumentTitle);
       });
@@ -136,7 +137,8 @@ describe('Test nav panel tabs', function () {
 
   describe('Class Work tab tests', function () { //uses publish documents from earlier tests
     before(() => {
-      cy.openTab('class-work');
+      cy.get(".collapsed-resources-tab.class-work").click();
+      cy.openTopTab('class-work');
     });
     describe('Open correct canvas from correct section', function () {
       it('verify open published canvas from Workspace list', function () { //this assumes there are published work
