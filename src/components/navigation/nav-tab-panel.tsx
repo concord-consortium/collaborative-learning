@@ -2,6 +2,7 @@ import { inject, observer } from "mobx-react";
 import React from "react";
 import { BaseComponent, IBaseProps } from "../base";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
+import { kDividerMax, kDividerMin } from "../../models/stores/ui-types";
 import { NavTabSpec, ENavTab } from "../../models/view/nav-tabs";
 import { Logger, LogEventName } from "../../lib/logger";
 import { StudentGroupView } from "../document/student-group-view";
@@ -40,9 +41,9 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
     const selectedTabIndex = tabs?.findIndex(t => t.tab === ui.activeNavTab);
     const resizePanelWidth = 4;
     const collapseTabWidth = 44;
-    const resourceWidth = ui.dividerPosition === 0
-                            ? 0
-                            : ui.dividerPosition === 100
+    const resourceWidth = ui.dividerPosition === kDividerMin
+                            ? kDividerMin
+                            : ui.dividerPosition === kDividerMax
                               ? `calc(100% - ${collapseTabWidth}px - ${resizePanelWidth}px)`
                               : `calc(${ui.dividerPosition}% - ${resizePanelWidth}px)`;
     const resourceWidthStyle = {width: resourceWidth};
@@ -139,6 +140,6 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
 
   private handleCloseResources = () => {
     const { ui } = this.stores;
-    ui.setDividerPosition(0);
+    ui.setDividerPosition(kDividerMin);
   }
 }

@@ -1,6 +1,7 @@
 import React from "react";
 import DragThumbnailIcon from "../../assets/drag-thumb-icon.svg";
 import LeftRightDragIcon from "../../assets/left-right-drag.svg";
+import { kDividerMax, kDividerMin } from "../../models/stores/ui-types";
 import "./resize-panel-divider.scss";
 
 interface IProps {
@@ -14,11 +15,11 @@ export const ResizePanelDivider: React.FC <IProps> =
   ({isResourceExpanded, dividerPosition, onExpandWorkspace, onExpandResources}) => {
     const dividerLeftOffset = 22;
     const tabWidth = 45;
-    const dividerPositionStyle = dividerPosition  === 0
+    const dividerPositionStyle = dividerPosition  === kDividerMin
                                   ? {left: dividerLeftOffset}
-                                  : dividerPosition === 100
+                                  : dividerPosition === kDividerMax
                                       ? {left: `calc(${dividerPosition}% - ${tabWidth}px - ${dividerLeftOffset}px)`}
-                                      :  {left: `calc(${dividerPosition}% - ${dividerLeftOffset}px)`};
+                                      : {left: `calc(${dividerPosition}% - ${dividerLeftOffset}px)`};
   return (
     <div className="resize-panel-divider" style={dividerPositionStyle}>
       <div className="divider" />

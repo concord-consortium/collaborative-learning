@@ -1,15 +1,11 @@
 import { SnapshotIn, types } from "mobx-state-tree";
 import { debounce } from "lodash";
 import { AppConfigModelType } from "./app-config-model";
+import { kDividerMax, kDividerMin, UIDialogTypeEnum } from "./ui-types";
 import { WorkspaceModel } from "./workspace";
 import { DocumentModelType } from "../document/document";
 import { ToolTileModelType } from "../tools/tool-tile";
 import { ENavTab } from "../view/nav-tabs";
-
-export type ToggleElement = "leftNavExpanded";
-
-export const UIDialogTypeEnum = types.enumeration("dialogType", ["alert", "confirm", "prompt"]);
-export type UIDialogType = typeof UIDialogTypeEnum.Type;
 
 type BooleanDialogResolver = (value: boolean | PromiseLike<boolean>) => void;
 type StringDialogResolver = (value: string | PromiseLike<string>) => void;
@@ -29,7 +25,7 @@ type UIDialogModelSnapshotWithoutType = Omit<UIDialogModelSnapshot, "type">;
 
 export const UIModel = types
   .model("UI", {
-    dividerPosition: 0,
+    dividerPosition: kDividerMin,
     error: types.maybeNull(types.string),
     activeNavTab: ENavTab.kMyWork,
     activeGroupId: "",
@@ -40,7 +36,7 @@ export const UIModel = types
     dialog: types.maybe(UIDialogModel),
     problemWorkspace: WorkspaceModel,
     learningLogWorkspace: WorkspaceModel,
-    teacherPanelKey: types.maybe(types.string),
+    teacherPanelKey: types.maybe(types.string)
   })
   .volatile(self => ({
     defaultLeftNavExpanded: false,
@@ -50,10 +46,10 @@ export const UIModel = types
       return self.selectedTileIds.indexOf(tile.id) !== -1;
     },
     get navTabContentShown () {
-      return self.dividerPosition > 0;
+      return self.dividerPosition > kDividerMin;
     },
     get workspaceShown () {
-      return self.dividerPosition < 100;
+      return self.dividerPosition < kDividerMax;
     }
   }))
   .actions((self) => {

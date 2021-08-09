@@ -9,6 +9,7 @@ import { DocumentContentModel } from "../../models/document/document-content";
 import {
   DocumentDragKey, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
 } from "../../models/document/document-types";
+import { kDividerHalf, kDividerMax, kDividerMin } from "../../models/stores/ui-types";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { NavTabPanel } from "../navigation/nav-tab-panel";
 import { CollapsedResourcesTab } from "../navigation/collapsed-resources-tab";
@@ -422,19 +423,19 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
 
   private toggleExpandWorkspace = () => {
     const { ui } = this.stores;
-    if (ui.dividerPosition === 100) {
-      ui.setDividerPosition(50);
-    } else if (ui.dividerPosition === 50) {
-      ui.setDividerPosition(0);
+    if (ui.dividerPosition === kDividerMax) {
+      ui.setDividerPosition(kDividerHalf);
+    } else if (ui.dividerPosition === kDividerHalf) {
+      ui.setDividerPosition(kDividerMin);
     }
   }
 
   private toggleExpandResources = () => {
     const { ui } = this.stores;
-    if (ui.dividerPosition === 0) {
-      ui.setDividerPosition(50);
-    } else if (ui.dividerPosition === 50) {
-      ui.setDividerPosition(100);
+    if (ui.dividerPosition === kDividerMin) {
+      ui.setDividerPosition(kDividerHalf);
+    } else if (ui.dividerPosition === kDividerHalf) {
+      ui.setDividerPosition(kDividerMax);
     }
   }
 }
