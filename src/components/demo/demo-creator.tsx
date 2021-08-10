@@ -23,7 +23,7 @@ interface IProblemOption {
 /* istanbul ignore next */
 @inject("stores")
 @observer
-export class DemoCreatorComponment extends BaseComponent<IProps> {
+export class DemoCreatorComponent extends BaseComponent<IProps> {
   private problemOptions: IProblemOption[] = [];
 
   constructor(props: IProps) {
