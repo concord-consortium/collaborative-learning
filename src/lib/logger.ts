@@ -89,6 +89,7 @@ export enum LogEventName {
 
   // the following are for potential debugging purposes and are all marked "internal"
   INTERNAL_AUTHENTICATED,
+  INTERNAL_ERROR_ENCOUNTERED,
   INTERNAL_FIREBASE_DISCONNECTED,
   INTERNAL_NETWORK_STATUS_ALERTED,
   INTERNAL_MONITOR_DOCUMENT,

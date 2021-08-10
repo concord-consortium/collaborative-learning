@@ -42,10 +42,13 @@ describe("ui model", () => {
   });
 
   it("allows error to be set", () => {
-    const error = "the sky is falling!";
-    ui.setError(error);
-    expect(ui.error).toBe(error);
-    ui.setError(null);
+    jestSpyConsole("error", mockConsoleFn => {
+      const error = "the sky is falling!";
+      ui.setError(error);
+      expect(ui.error).toBe(error);
+      expect(mockConsoleFn).toHaveBeenCalled();
+    });
+    ui.clearError();
     expect(ui.error).toBe(null);
   });
 

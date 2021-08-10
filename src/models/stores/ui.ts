@@ -4,6 +4,7 @@ import { AppConfigModelType } from "./app-config-model";
 import { kDividerMax, kDividerMin, UIDialogTypeEnum } from "./ui-types";
 import { WorkspaceModel } from "./workspace";
 import { DocumentModelType } from "../document/document";
+import { LogEventName, Logger } from "../../lib/logger";
 import { ToolTileModelType } from "../tools/tool-tile";
 import { ENavTab } from "../view/nav-tabs";
 
@@ -125,8 +126,13 @@ export const UIModel = types
       toggleShowTeacherContent(show: boolean) {
         self.showTeacherContent = show;
       },
-      setError(error: string|null) {
+      setError(error: string) {
         self.error = error ? error.toString() : error;
+        Logger.log(LogEventName.INTERNAL_ERROR_ENCOUNTERED, { message: self.error });
+        console.error(self.error);
+      },
+      clearError() {
+        self.error = null;
       },
       setActiveNavTab(tab: string) {
         self.activeNavTab = tab;

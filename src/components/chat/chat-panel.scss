@@ -1,0 +1,28 @@
+@import "../vars";
+
+.chat-panel {
+  width: 36%;
+  border-style: solid;
+  border-radius: 0 8px 0 0;
+  height: calc(100vh - (#{$header-height} + #{$workspace-content-margin} * 2));
+  background-color: white;
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+  &.problems {
+    border-color: $problem-orange-light-3;
+  }
+  &.my-work {
+    border-color: $workspace-teal;
+  }
+  &.class-work {
+    border-color: $classwork-purple;
+  }
+  &.supports {
+    border-color: $support-blue;
+  }
+  &.student-work {
+    border-color: $charcoal-dark-1;
+  }
+}

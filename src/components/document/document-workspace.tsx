@@ -65,21 +65,20 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
           onDrop={this.handleImageDrop}
         />
 
-        {navTabContentShown
-          ? <NavTabPanel
-              tabs={tabsToDisplay}
-              isTeacher={isTeacher}
-              onDragOver={this.handleDragOverWorkspace}
-              onDrop={this.handleImageDrop}
-            />
-          : <CollapsedResourcesTab onExpandResources={this.toggleExpandResources} resourceType={activeNavTab} />
-        }
         <ResizePanelDivider
           isResourceExpanded={navTabContentShown}
           dividerPosition={dividerPosition}
           onExpandWorkspace={this.toggleExpandWorkspace}
           onExpandResources={this.toggleExpandResources}
         />
+        {navTabContentShown
+          ? <NavTabPanel
+              tabs={tabsToDisplay}
+              onDragOver={this.handleDragOverWorkspace}
+              onDrop={this.handleImageDrop}
+            />
+          : <CollapsedResourcesTab onExpandResources={this.toggleExpandResources} resourceType={activeNavTab} />
+        }
         {workspaceShown ? this.renderDocuments()
                         : <CollapsedWorkspaceTab
                             onExpandWorkspace={this.toggleExpandWorkspace}

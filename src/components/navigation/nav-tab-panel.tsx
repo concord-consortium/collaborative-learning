@@ -9,19 +9,22 @@ import { StudentGroupView } from "../document/student-group-view";
 import { ProblemTabContent } from "./problem-tab-content";
 import { DocumentTabContent } from "./document-tab-content";
 import { SupportBadge } from "./support-badge";
+import { ChatPanel } from "../chat/chat-panel";
+import ChatIcon from "../../assets/chat-icon.svg";
 
 import "react-tabs/style/react-tabs.css";
 import "./nav-tab-panel.sass";
+import "../themes.scss";
 
 interface IProps extends IBaseProps {
   tabs?: NavTabSpec[];
-  isTeacher: boolean;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
   onDrop: (e: React.DragEvent<HTMLDivElement>) => void;
 }
 
 interface IState {
   tabLoadAllowed: { [tab: number]: boolean };
+  showChatColumn: boolean;
 }
 
 @inject("stores")
@@ -32,6 +35,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
     super(props);
     this.state = {
       tabLoadAllowed: {},
+      showChatColumn: false,
     };
   }
 
@@ -47,33 +51,49 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
                               ? `calc(100% - ${collapseTabWidth}px - ${resizePanelWidth}px)`
                               : `calc(${ui.dividerPosition}% - ${resizePanelWidth}px)`;
     const resourceWidthStyle = {width: resourceWidth};
+    const newCommentCount = 8;
     return (
-      <div className={`nav-tab-panel ${ui.navTabContentShown ? "shown" : ""}`} style={resourceWidthStyle}>
-        <Tabs selectedIndex={selectedTabIndex} onSelect={this.handleSelectTab} forceRenderTabPanel={true}>
-          <div className="top-row">
-            <TabList className="top-tab-list">
-              { tabs?.map((tabSpec, index) => {
-                  const tabClass = `top-tab tab-${tabSpec.tab} ${selectedTabIndex === index ? "selected" : ""}`;
-                  return (
-                    <React.Fragment key={tabSpec.tab}>
-                      <Tab className={tabClass}>{tabSpec.label}</Tab>
-                      {(tabSpec.tab === "supports") && <SupportBadge user={user} supports={supports} /> }
-                    </React.Fragment>
-                  );
-                })
+      <div className={`resource-and-chat-panel ${ui.navTabContentShown ? "shown" : ""}`} style={resourceWidthStyle}>
+        <div className={`nav-tab-panel ${this.state.showChatColumn ? "chat-open" : ""}`}>
+          <Tabs selectedIndex={selectedTabIndex} onSelect={this.handleSelectTab} forceRenderTabPanel={true}>
+            <div className="top-row">
+              <TabList className="top-tab-list">
+                { tabs?.map((tabSpec, index) => {
+                    const tabClass = `top-tab tab-${tabSpec.tab}
+                                      ${selectedTabIndex === index ? "selected" : ""}`;
+                    return (
+                      <React.Fragment key={tabSpec.tab}>
+                        <Tab className={tabClass}>{tabSpec.label}</Tab>
+                        {(tabSpec.tab === "supports") && <SupportBadge user={user} supports={supports} /> }
+                      </React.Fragment>
+                    );
+                  })
+                }
+              </TabList>
+              { user.isNetworkedTeacher
+                  ? (!this.state.showChatColumn) &&
+                    <div className={`chat-panel-toggle themed ${ui.activeNavTab}`}>
+                      <div className="new-comment-badge">{newCommentCount}</div>
+                      <ChatIcon
+                        className={`chat-button ${ui.activeNavTab}`}
+                        onClick={() => this.handleShowChatColumn(true)}
+                      />
+                    </div>
+                  : <button className="close-button" onClick={this.handleCloseResources}/>
               }
-            </TabList>
-            <button className="close-button" onClick={this.handleCloseResources}/>
-          </div>
-          { tabs?.map((tabSpec) => {
-              return (
-                <TabPanel key={tabSpec.tab}>
-                  {this.renderTabContent(tabSpec)}
-                </TabPanel>
-              );
-            })
-          }
-        </Tabs>
+            </div>
+            { tabs?.map((tabSpec) => {
+                return (
+                  <TabPanel key={tabSpec.tab}>
+                    {this.renderTabContent(tabSpec)}
+                  </TabPanel>
+                );
+              })
+            }
+          </Tabs>
+          {this.state.showChatColumn &&
+            <ChatPanel onCloseChatPanel={this.handleShowChatColumn} newCommentCount={newCommentCount}/>}
+        </div>
       </div>
     );
   }
@@ -98,14 +118,17 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
 
   private renderDocuments = (tabSpec: NavTabSpec) => {
     return (
-      <DocumentTabContent tabSpec={tabSpec}/>
+      <DocumentTabContent tabSpec={tabSpec} isChatOpen={this.state.showChatColumn}/>
     );
   }
 
   private renderProblem = () => {
     const { user: { isTeacher }, problem: { sections } } = this.stores;
     return (
-      <ProblemTabContent sections={sections} showSolutionsSwitch={isTeacher}/>
+      <ProblemTabContent
+        sections={sections}
+        showSolutionsSwitch={isTeacher}
+        isChatOpen={this.state.showChatColumn}/>
     );
   }
 
@@ -113,7 +136,11 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
     const { user: { isTeacher }, teacherGuide } = this.stores;
     const sections = teacherGuide?.sections;
     return isTeacher && sections && (
-      <ProblemTabContent context={ENavTab.kTeacherGuide} sections={sections} showSolutionsSwitch={false}/>
+      <ProblemTabContent
+        context={ENavTab.kTeacherGuide}
+        sections={sections}
+        showSolutionsSwitch={false}
+        isChatOpen={this.state.showChatColumn}/>
     );
   }
 
@@ -136,6 +163,10 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
   private selectStudentGroup = (groupId: string) => {
     const { ui } = this.stores;
     ui.setActiveStudentGroup(groupId);
+  }
+
+  private handleShowChatColumn = (show: boolean) => {
+    this.setState({showChatColumn: show});
   }
 
   private handleCloseResources = () => {
