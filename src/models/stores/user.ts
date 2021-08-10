@@ -1,6 +1,6 @@
 import initials from "initials";
 import { types } from "mobx-state-tree";
-import { AuthenticatedUser } from "../../lib/auth";
+import { AuthenticatedUser, isAuthenticatedTeacher } from "../../lib/auth";
 import { PortalFirebaseStudentJWT } from "../../lib/portal-types";
 import { urlParams } from "../../utilities/url-params";
 import { UserTypeEnum } from "./user-types";
@@ -19,7 +19,8 @@ export const PortalClassOffering = types
   })
   .views(self => ({
     get problemPath() {
-      return `${self.unitCode}/${self.problemOrdinal.replace(".", "/")}`;
+      const separator = self.unitCode && self.problemOrdinal ? "/" : "";
+      return `${self.unitCode}${separator}${self.problemOrdinal.replace(".", "/")}`;
     }
   }));
 
@@ -71,7 +72,9 @@ export const UserModel = types
       self.portal = user.portal;
       self.type = user.type;
       // TODO: replace this with real implementation
-      self.teacherNetwork = (user.type === "teacher") && urlParams.network ? urlParams.network : undefined;
+      self.teacherNetwork = isAuthenticatedTeacher(user)
+                              ? urlParams.network || user.network || undefined
+                              : undefined;
       self.className = user.className;
       self.classHash = user.classHash;
       self.offeringId = user.offeringId;
@@ -113,7 +116,7 @@ export const UserModel = types
     },
     get activityUrl() {
       const offering = self.portalClassOfferings.find(o => o.offeringId === self.offeringId);
-      return offering?.activityUrl || undefined;
+      return offering?.activityUrl;
     }
   }))
   .views((self) => ({

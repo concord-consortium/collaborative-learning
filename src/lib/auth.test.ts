@@ -12,7 +12,7 @@ import { authenticate,
 import { PortalStudentJWT, PortalTeacherJWT } from "./portal-types";
 import { AppConfigModel } from "../models/stores/app-config-model";
 import nock from "nock";
-import { NUM_FAKE_STUDENTS } from "../components/demo/demo-creator";
+import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
 import { QueryParams } from "../utilities/url-params";
 
 /* eslint-disable max-len */
@@ -144,7 +144,7 @@ describe("demo mode", () => {
     expect(mode).toBe("demo");
   });
 
-  it("should authenticate", (done) => {
+  it("should authenticate demo students", (done) => {
     authenticate("demo", appConfig, urlParams).then(({authenticatedUser}) => {
       const demoUser = createFakeUser({
         appMode: "demo",
@@ -328,7 +328,7 @@ describe("student authentication", () => {
       .catch(() => done());
   });
 
-  it("can create demo info", () => {
+  it("can create demo students", () => {
     const demoInfo = createFakeAuthentication({
       appMode: "demo",
       classId: "1",
@@ -352,6 +352,39 @@ describe("student authentication", () => {
     expect(demoInfo.classInfo.name).toEqual("Demo Class 1");
     expect(demoInfo.classInfo.classHash).toEqual("democlass1");
     expect(demoInfo.classInfo.students.length).toEqual(NUM_FAKE_STUDENTS);
+  });
+
+  it("can create demo teachers", () => {
+    const demoInfo = createFakeAuthentication({
+      appMode: "demo",
+      classId: "1",
+      userType: "teacher",
+      userId: "2",
+      network: "demo-network",
+      unitCode: "",
+      problemOrdinal: "3.1"
+    });
+    expect(demoInfo.authenticatedUser).toEqual({
+      type: "teacher",
+      id: "1002",
+      portal: "demo",
+      firstName: "Teacher",
+      lastName: "2",
+      fullName: "Teacher 2",
+      initials: "T2",
+      className: "Demo Class 1",
+      classHash: "democlass1",
+      network: "demo-network",
+      offeringId: "301",
+      demoClassHashes: ["democlass1", "democlass2", "democlass3"]
+    });
+    expect(demoInfo.classInfo.name).toEqual("Demo Class 1");
+    expect(demoInfo.classInfo.classHash).toEqual("democlass1");
+    expect(demoInfo.classInfo.students.length).toEqual(NUM_FAKE_STUDENTS);
+    const demoTeachers = demoInfo.classInfo.teachers;
+    expect(demoTeachers.length).toEqual(NUM_FAKE_TEACHERS);
+    expect(demoTeachers[0].network).toBeUndefined();
+    expect(demoTeachers[1].network).toBe("demo-network");
   });
 });
 

@@ -6,7 +6,7 @@ import { authenticate } from "../lib/auth";
 import { AppContentContainerComponent } from "./app-content";
 import { BaseComponent, IBaseProps } from "./base";
 import { urlParams } from "../utilities/url-params";
-import { DemoCreatorComponment } from "./demo/demo-creator";
+import { DemoCreatorComponent } from "./demo/demo-creator";
 
 import { GroupChooserComponent } from "./group/group-chooser";
 import { IStores, setAppMode, setUnitAndProblem } from "../models/stores/stores";
@@ -139,7 +139,7 @@ export class AppComponent extends BaseComponent<IProps, IState> {
     const {appConfig, user, ui, db, groups} = this.stores;
 
     if (ui.showDemoCreator) {
-      return this.renderApp(<DemoCreatorComponment />);
+      return this.renderApp(<DemoCreatorComponent />);
     }
 
     if (ui.error) {

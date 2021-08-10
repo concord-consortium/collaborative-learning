@@ -56,6 +56,7 @@ export interface RawUser {
 }
 
 export type AuthenticatedUser = StudentUser | TeacherUser;
+export const isAuthenticatedTeacher = (u: AuthenticatedUser): u is TeacherUser => u.type === "teacher";
 
 interface User {
   id: string;
@@ -81,6 +82,7 @@ export interface StudentUser extends User {
 
 export interface TeacherUser extends User {
   type: "teacher";
+  network?: string;
 }
 
 export interface RawClassInfo {
@@ -412,6 +414,7 @@ export interface CreateFakeUserOptions {
   classId: string;
   userType: UserType;
   userId: string;
+  network?: string;
   offeringId: string;
 }
 
@@ -435,7 +438,7 @@ const getFakeTeacherClassHashes = (appMode: AppMode, classId: string) => {
 };
 
 export const createFakeUser = (options: CreateFakeUserOptions) => {
-  const {appMode, classId, userType, userId, offeringId} = options;
+  const {appMode, classId, userType, userId, network, offeringId} = options;
   const className = `${appMode === "demo" ? "Demo" : "QA"} Class ${classId}`;
   if (userType === "student") {
     const student: StudentUser = {
@@ -461,6 +464,7 @@ export const createFakeUser = (options: CreateFakeUserOptions) => {
       lastName: `${userId}`,
       fullName: `Teacher ${userId}`,
       initials: `T${userId}`,
+      network,
       className,
       classHash: getFakeClassHash(appMode, classId),
       demoClassHashes: getFakeTeacherClassHashes(appMode, classId),
@@ -475,14 +479,18 @@ export interface CreateFakeAuthenticationOptions {
   classId: string;
   userType: UserType;
   userId: string;
+  network?: string;
   unitCode: string;
   problemOrdinal: string;
 }
 
 export const createFakeAuthentication = (options: CreateFakeAuthenticationOptions) => {
-  const {appMode, classId, userType, userId, unitCode, problemOrdinal} = options;
+  const {appMode, classId, userType, userId, network: _network, unitCode, problemOrdinal} = options;
+  const network = userType === "teacher"
+                    ? _network || (parseInt(userId, 10) > 1 ? "demo-network" : undefined) || undefined
+                    : undefined;
   const offeringId = createOfferingIdFromProblem(unitCode, problemOrdinal);
-  const authenticatedUser = createFakeUser({appMode, classId, userType, userId, offeringId});
+  const authenticatedUser = createFakeUser({appMode, classId, userType, network, userId, offeringId});
   const classInfo: ClassInfo = {
     name: authenticatedUser.className,
     classHash: authenticatedUser.classHash,
@@ -507,6 +515,8 @@ export const createFakeAuthentication = (options: CreateFakeAuthenticationOption
         classId,
         userType: "teacher",
         userId: `${i}`,
+        // teacher 1 is solo; others are networked
+        network: i > 1 ? "demo-network" : undefined,
         offeringId
       }) as TeacherUser
     );
