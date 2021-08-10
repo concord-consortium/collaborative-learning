@@ -70,15 +70,16 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
                   })
                 }
               </TabList>
-              { user.isNetworkedTeacher ? (!this.state.showChatColumn) &&
-                                        <div className={`chat-panel-toggle themed ${ui.activeNavTab}`}>
-                                          <div className="new-comment-badge">{newCommentCount}</div>
-                                          <ChatIcon
-                                            className={`chat-button ${ui.activeNavTab}`}
-                                            onClick={() => this.handleShowChatColumn(true)}
-                                          />
-                                        </div>
-                                    : <button className="close-button" onClick={this.handleClose}/>
+              { user.isNetworkedTeacher
+                  ? (!this.state.showChatColumn) &&
+                    <div className={`chat-panel-toggle themed ${ui.activeNavTab}`}>
+                      <div className="new-comment-badge">{newCommentCount}</div>
+                      <ChatIcon
+                        className={`chat-button ${ui.activeNavTab}`}
+                        onClick={() => this.handleShowChatColumn(true)}
+                      />
+                    </div>
+                  : <button className="close-button" onClick={this.handleCloseResources}/>
               }
             </div>
             { tabs?.map((tabSpec) => {

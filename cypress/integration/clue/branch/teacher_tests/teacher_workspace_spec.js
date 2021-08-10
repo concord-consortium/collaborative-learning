@@ -26,7 +26,7 @@ beforeEach(() => {
   cy.fixture("teacher-dash-data-msa-test.json").as("clueData");
 });
 
-describe('teacher specific navigation tabs', () => {
+describe.skip('teacher specific navigation tabs', () => {
   it('verify problem tab solution switch', () => {
     cy.get('.nav-tab.tab-problems').should('exist').click();
     cy.get('.prob-tab').contains('What If...?').click();
@@ -46,7 +46,7 @@ describe('teacher specific navigation tabs', () => {
   });
 });
 
-describe('teacher document functionality', function () {
+describe.skip('teacher document functionality', function () {
   before(function () {
     clueCanvas.addTile('table');
     clueCanvas.addTile('drawing');
@@ -83,7 +83,7 @@ describe('teacher document functionality', function () {
   });
 });
 
-describe('Chat panel for networked teacher', () => {
+describe.skip('Chat panel for networked teacher', () => {
   it('verify chat does not appear when no url params are passed to indicate teacher status (teachers are in network', () => {
     cy.get('.chat-panel-toggle').should('not.exist');
   });

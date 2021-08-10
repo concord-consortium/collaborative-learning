@@ -1,12 +1,11 @@
+import { inject, observer } from "mobx-react";
 import React from "react";
 import { BaseComponent } from "../base";
 import  ChatIcon from "../../assets/chat-icon.svg";
 import  NotificationIcon from "../../assets/notifications-icon.svg";
-// import CloseIcon from "../../assets/icons/close.svg";
 
 import "./chat-panel-header.scss";
 import "../themes.scss";
-import { inject, observer } from "mobx-react";
 
 interface IProps {
   newCommentCount: number;
