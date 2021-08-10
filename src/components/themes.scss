@@ -12,6 +12,15 @@
       background-color: $problem-orange-light-4;
     }
   }
+  &.student-work {
+    fill: $charcoal-dark-1;
+    &:hover {
+      background-color: $charcoal-light-4;
+    }
+    &:active {
+      background-color: $charcoal-light-3;
+    }
+  }
   &.my-work {
     fill: $workspace-teal;
     &:hover {
@@ -48,15 +57,6 @@
       background-color: $learninglog-green-light-4;
     }
   }
-  &.student-work {
-    fill: $charcoal-dark-1;
-    &:hover {
-      background-color: $charcoal-light-4;
-    }
-    &:active {
-      background-color: $charcoal-light-3;
-    }
-  }
   &.no-action {
     &:hover {
       background-color: white;
@@ -76,6 +76,16 @@
     &:active {
       fill: white;
       background-color: $problem-orange;
+    }
+  }
+  &.student-work {
+    fill: $charcoal-dark-1;
+    &:hover {
+      background-color: $charcoal-light-3;
+    }
+    &:active {
+      fill: white;
+      background-color: $charcoal-dark-1;
     }
   }
   &.my-work {
@@ -116,15 +126,6 @@
     &:active {
       fill: white;
       background-color: $learninglog-green-dark-1;
-    }
-  }
-  &.student-work {
-    fill: $charcoal-dark-1;
-    &:hover {
-      background-color: $charcoal-light-3;
-    }
-    &:active {
-      background-color: $charcoal-dark-1;
     }
   }
 }

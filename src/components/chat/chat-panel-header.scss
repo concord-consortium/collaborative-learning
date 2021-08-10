@@ -67,11 +67,21 @@
     background-color: white;
     background-position: center;
     cursor: pointer;
+    &:active {
+      outline: none;
+    }
     &.problems {
       background-image: url("../../assets/icons/close/close-problems.svg");
       background-repeat: no-repeat;
       &:hover, &:active{
         background-image: url("../../assets/icons/arrow-back/arrow-back-problems.svg");
+      }
+    }
+    &.student-work {
+      background-image: url("../../assets/icons/close/close-student-work.svg");
+      background-repeat: no-repeat;
+      &:hover, &:active{
+        background-image: url("../../assets/icons/arrow-back/arrow-back-student-work.svg");
       }
     }
     &.my-work {
