@@ -23,11 +23,13 @@ export class ChatPanelHeader extends BaseComponent<IProps> {
     const { onCloseChatPanel } = this.props;
     const { ui } = this.stores;
    return (
-      <div className="chat-panel-header">
+      <div className="chat-panel-header" data-testid="chat-panel-header">
         <ChatIcon className={`chat-icon themed ${ui.activeNavTab} no-action`}/>
         Comments
         {this.renderNotification()}
-        <button className={`chat-close-button themed ${ui.activeNavTab}`} onClick={() => onCloseChatPanel(false)}/>
+        <button className={`chat-close-button themed ${ui.activeNavTab}`}
+                data-testid="chat-close-button"
+                onClick={() => onCloseChatPanel(false)}/>
       </div>
     );
   }

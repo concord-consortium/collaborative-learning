@@ -21,7 +21,7 @@ export class ChatPanel extends BaseComponent<IProps> {
     const { newCommentCount, onCloseChatPanel } = this.props;
     const { ui } = this.stores;
     return (
-      <div className={`chat-panel ${ui.activeNavTab}`}>
+      <div className={`chat-panel ${ui.activeNavTab}`} data-testid="chat-panel">
         <ChatPanelHeader onCloseChatPanel={onCloseChatPanel} newCommentCount={newCommentCount} />
       </div>
     );
