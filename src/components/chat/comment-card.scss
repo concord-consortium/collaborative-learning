@@ -1,0 +1,122 @@
+@import "../vars";
+
+$comment-selected-green: #d7ffcc;
+$comment-selected-green-2: #c1f3b3;
+
+.comment-card {
+  width: 100%;
+  height: 106px;
+  margin: 2px;
+  border: solid 2px $charcoal-light-2;
+  &.selected {
+    background-color: $comment-selected-green;
+  }
+
+  .comment-card-header {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 25px;
+    margin: 0 3px;
+    padding: 4px;
+    &.selected {
+      background-color: $comment-selected-green-2;
+    }
+    .initial {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid $charcoal;
+      border-radius: 3px;
+      width: 18px;
+      height: 18px;
+      padding: 1px 0 0;
+      margin-right: 5px;
+    }
+  }
+
+  .comment-text {
+    .comment-text-header {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      //what is the spread of the icon, name, timesatmp and menu?
+      .user-icon {
+        margin: 5px 8px;
+        border-radius: 4px;
+        border: solid 1px #979797;
+        background-color: white;
+        width: 21px;
+        height: 21px;
+      }
+      .user-name {
+        margin-left: 5px;
+        font-size: 11px;
+        font-weight: bold;
+        color: $charcoal-dark-1;
+      }
+      .time-stamp {
+        margin-left: 5px;
+        font-size: 11px;
+        font-weight: normal;
+        color: $charcoal-dark-1;
+      }
+      .menu {
+        margin-right: 8px;
+        opacity: 0.35;
+        height: 13px;
+      }
+    }
+    .comment-text {
+      color: $charcoal-dark-2;
+      margin: 4px 8px;
+    }
+    .new-marker {
+      display: flex;
+      flex-direction: row;
+      .new-text{
+        font-size: 9px;
+        font-weight: bold;
+        color: $charcoal-dark-2;
+        background-color: $new-comment-notice;
+      }
+    }
+  }
+
+  .comment-textbox {
+    height: 70px;
+    padding: 8px 0 0;
+    border-radius: 4px;
+    border: solid 1.5px $charcoal-light-4;
+    background-color: $white;
+    margin: 8px;
+
+    .comment-textbox-footer {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-end;
+
+      .comment-footer-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 4px 4px 4px 0;
+        width: 56px;
+        height: 26px;
+        border-radius: 5px;
+        border: solid 1.5px $charcoal-light-1;
+        &.cancel {
+          background-color: $white;
+          color: $charcoal-dark-2;
+          &:hover {
+            background-color: $charcoal-light-4;
+          }
+          $:active {
+            background-color: $charcoal-light-3;
+          }
+        }
+      }
+    }
+  }
+}

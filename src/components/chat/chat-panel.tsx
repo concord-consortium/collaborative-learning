@@ -2,6 +2,7 @@ import { inject, observer } from "mobx-react";
 import React from "react";
 import { BaseComponent } from "../base";
 import { ChatPanelHeader } from "./chat-panel-header";
+import { CommentCard } from "./comment-card";
 import "./chat-panel.scss";
 
 interface IProps {
@@ -23,6 +24,7 @@ export class ChatPanel extends BaseComponent<IProps> {
     return (
       <div className={`chat-panel ${ui.activeNavTab}`} data-testid="chat-panel">
         <ChatPanelHeader onCloseChatPanel={onCloseChatPanel} newCommentCount={newCommentCount} />
+        <CommentCard />
       </div>
     );
   }
