@@ -1,8 +1,8 @@
 import { inject, observer } from "mobx-react";
 import React from "react";
 import { BaseComponent } from "../base";
-import OpenWorkspaceIcon from "./../assets/icons/1-4-up/1-up-icon-default.svg";
-import PostIcon from "../../assets/post-icon";
+import OpenWorkspaceIcon from "../../assets/icons/1-4-up/1-up-icon-default.svg";
+import SendIcon from "../../assets/send-icon.svg";
 import "./comment-card.scss";
 import "../themes.scss";
 
@@ -60,13 +60,14 @@ export class CommentCard extends BaseComponent<IProps> {
   }
 
   private renderCommentTextbox() {
+    const { ui } = this.stores;
     return (
       <div className="comment-textbox">
-        <input placeholder="Reply ..."></input>
+        <textarea placeholder="Reply ..."></textarea>
         <div className="comment-textbox-footer">
           <div className="comment-footer-button cancel">Cancel</div>
-          <div className="comment-footer-button theme-dark">
-            {PostIcon}
+          <div className={`comment-footer-button themed-negative ${ui.activeNavTab}`}>
+            <SendIcon />
             Post
           </div>
         </div>

@@ -76,6 +76,7 @@
     &:active {
       fill: white;
       background-color: $problem-orange;
+      color: white;
     }
   }
   &.student-work {
@@ -86,6 +87,7 @@
     &:active {
       fill: white;
       background-color: $charcoal-dark-1;
+      color: white;
     }
   }
   &.my-work {
@@ -96,6 +98,7 @@
     &:active {
       fill: white;
       background-color: $workspace-teal-dark-1;
+      color: white;
     }
   }
   &.class-work {
@@ -106,6 +109,7 @@
     &:active {
       fill: white;
       background-color: $classwork-purple-dark-1;
+      color: white;
     }
   }
   &.supports {
@@ -116,6 +120,7 @@
     &:active {
       fill: white;
       background-color: $support-blue-dark-1;
+      color: white;
     }
   }
   &.teacher-guide {
@@ -126,6 +131,7 @@
     &:active {
       fill: white;
       background-color: $learninglog-green-dark-1;
+      color: white;
     }
   }
 }
