@@ -60,13 +60,13 @@
     right: 0;
     width: 32px;
     height: 26px;
-    border-radius: 0 6px 0 0;
+    border-radius: 5px;
     border: none;
     box-sizing: border-box;
-    height: $nav-tab-height;
     background-color: white;
     background-position: center;
     cursor: pointer;
+    margin: 4px;
     &:active {
       outline: none;
     }

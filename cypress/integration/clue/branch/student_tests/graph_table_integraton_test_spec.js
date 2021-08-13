@@ -23,30 +23,30 @@ context('Tests for graph and table integration', function () {
   const y = ['2.5', '5', '1', '0'];
   before(function () {
     clueCanvas.addTile('table');
-    tableToolTile.getTableCell().eq(1).click().type(x[0] +'{enter}');
-    tableToolTile.getTableCell().eq(2).click();
-    tableToolTile.getTableCell().eq(2).type(y[0] +'{enter}');
-    tableToolTile.getTableCell().eq(5).click();
-    tableToolTile.getTableCell().eq(5).type(x[1] + '{enter}');
-    tableToolTile.getTableCell().eq(6).click();
-    cy.wait(500);
-    tableToolTile.getTableCell().eq(6).type(y[1] + '{enter}');
-    tableToolTile.getTableCell().eq(9).click();
-    tableToolTile.getTableCell().eq(9).type(x[2] + '{enter}');
-    tableToolTile.getTableCell().eq(10).click();
-    tableToolTile.getTableCell().eq(10).type(y[2] + '{enter}');
-    tableToolTile.getTableCell().eq(13).click();
-    tableToolTile.getTableCell().eq(13).type(x[3] + '{enter}');
-    tableToolTile.getTableCell().eq(14).click();
-    tableToolTile.getTableCell().eq(14).type(y[3] + '{enter}');
-    tableToolTile.getTableCell().eq(17).click();
-
+    cy.get(".primary-workspace").within((workspace) => {
+      tableToolTile.getTableCell().eq(1).click().type(x[0] +'{enter}');
+      tableToolTile.getTableCell().eq(2).click();
+      tableToolTile.getTableCell().eq(2).type(y[0] +'{enter}');
+      tableToolTile.getTableCell().eq(5).click();
+      tableToolTile.getTableCell().eq(5).type(x[1] + '{enter}');
+      tableToolTile.getTableCell().eq(6).click();
+      cy.wait(500);
+      tableToolTile.getTableCell().eq(6).type(y[1] + '{enter}');
+      tableToolTile.getTableCell().eq(9).click();
+      tableToolTile.getTableCell().eq(9).type(x[2] + '{enter}');
+      tableToolTile.getTableCell().eq(10).click();
+      tableToolTile.getTableCell().eq(10).type(y[2] + '{enter}');
+      tableToolTile.getTableCell().eq(13).click();
+      tableToolTile.getTableCell().eq(13).type(x[3] + '{enter}');
+      tableToolTile.getTableCell().eq(14).click();
+      tableToolTile.getTableCell().eq(14).type(y[3] + '{enter}');
+      tableToolTile.getTableCell().eq(17).click();
+    });
     clueCanvas.addTile('geometry');
     clueCanvas.deleteTile('text');
     clueCanvas.addTile('geometry');
     clueCanvas.deleteTile('text');
     graphToolTile.getGraphTitle().last().type('Second One{enter}');
-
   });
   describe('Link graph dialog', () => {
     it('verify correct graph names appear in selection list', function () {
@@ -106,8 +106,10 @@ context('Tests for graph and table integration', function () {
     it('will move a point by changing coordinates on the table', function () {
       let new_y = '8';
       tableToolTile.getTableTile().click();
-      tableToolTile.getTableCell().eq(10).click();
-      tableToolTile.getTableCell().eq(10).type(new_y + '{enter}');
+      cy.get(".primary-workspace").within((workspace) => {
+        tableToolTile.getTableCell().eq(10).click();
+        tableToolTile.getTableCell().eq(10).type(new_y + '{enter}');
+      });
       graphToolTile.getGraphPointCoordinates(2).should('contain', '(8, ' + new_y + ')');
     });
     it.skip('will delete a point in the table', function () {
@@ -134,7 +136,9 @@ context('Tests for graph and table integration', function () {
   describe('text axes changes', function () {
     it('will change the name of the x-axis in the table', function () {
       tableToolTile.getTableTile().click();
-      tableToolTile.renameColumn('x', 'mars');
+      cy.get(".primary-workspace").within((workspace) => {
+        tableToolTile.renameColumn('x', 'mars');
+      });
       graphToolTile.getGraphAxisLabelId('x')
         .then((id) => {
           id = '#'.concat(id);
@@ -145,7 +149,9 @@ context('Tests for graph and table integration', function () {
     });
     it('will change the name of the y-axis in the table', function () {
       tableToolTile.getTableTile().click();
-      tableToolTile.renameColumn('y', 'venus');
+      cy.get(".primary-workspace").within((workspace) => {
+        tableToolTile.renameColumn('y', 'venus');
+      });
       graphToolTile.getGraphAxisLabelId('y')
         .then((id) => {
           id = '#'.concat(id);

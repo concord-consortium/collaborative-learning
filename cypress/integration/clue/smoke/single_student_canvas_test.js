@@ -46,7 +46,7 @@ context('single student functional test',()=>{
       });
       it('verify close of nav tabs', function () {
         cy.closeTabs();
-        cy.get('.nav-tab-panel').should('not.exist');
+        cy.get('.nav-tab-panel').should('not.have.class', 'shown');
       });
     });
 

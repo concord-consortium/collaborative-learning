@@ -22,7 +22,7 @@
 
     .drag-thumbnail {
       position: absolute;
-      z-index: 2;
+      z-index: 3;
       margin-top: 9px;
       top: 50%;
     }
@@ -37,18 +37,22 @@
       opacity: 0.01%;
       &:hover {
         opacity: 50%;
+      &:active {
+        opacity: 100%;
       }
+    }
 
       .left-right-drag {
         position: absolute;
         left: 0;
+        z-index: 2;
       }
       .drag-left-handle {
         position: relative;
         width: 21px;
         height: 100%;
         left: 0;
-        z-index: 2;
+        z-index: 3;
         cursor: pointer;
       }
       .drag-right-handle {
@@ -56,7 +60,7 @@
         width: 21px;
         height: 100%;
         right: 0;
-        z-index: 2;
+        z-index: 3;
         cursor: pointer;
       }
     }

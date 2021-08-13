@@ -36,7 +36,7 @@ context('Test the overall workspace', function () {
     });
     it('verify close of nav tabs', function () {
       cy.closeTabs();
-      cy.get('.nav-tab-panel').should('not.exist');
+      cy.get('.nav-tab-panel').should('not.have.class','shown');
       cy.get('.primary-workspace').should('be.visible');
     });
     it('verify collapse workspace', function () {

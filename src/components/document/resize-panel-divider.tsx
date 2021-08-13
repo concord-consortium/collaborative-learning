@@ -23,12 +23,12 @@ export const ResizePanelDivider: React.FC <IProps> =
   return (
     <div className="resize-panel-divider" style={dividerPositionStyle}>
       <div className="divider" />
-      <DragThumbnailIcon className="drag-thumbnail"/>
       <div className="drag-handles">
         <div className="drag-left-handle" onClick={() => onExpandWorkspace()}></div>
         <LeftRightDragIcon className="left-right-drag"/>
         <div className="drag-right-handle" onClick={() => onExpandResources()}></div>
       </div>
+      <DragThumbnailIcon className="drag-thumbnail"/>
     </div>
   );
 };
