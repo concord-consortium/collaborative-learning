@@ -18,7 +18,7 @@ type FSDate = Date;
  *
  * Subcollection of domain with some fields copied from portal (e.g. name) with potential synchronization issues.
  * At least initially, the list of networks a teacher is a part of will be maintained manually by editing in the
- * Firestore console. It is anticipated that the numbers of teachers and networks will be small initially.
+ * Firestore console. It is anticipated that the numbers of teachers and networks will be small.
  */
 interface UserDocument {
   uid: string;                // portal user id
@@ -52,17 +52,19 @@ type CommentsCollection = FSCollection<CommentDocument>;
  * with potential synchronization issues.
  * Documents and their comments are accessible to the owning teacher in addition to any network access.
  * Documents owned by one teacher are accessible to all teachers that share a network with the owner.
- * Networked access will be mediated by a Firebase function which can check whether the requesting user and
- * the owning user share a network.
+ * Networked access will be mediated by Firestore security rules which can check whether the requesting user and
+ * one of the teachers of the class associated with the document share a network.
  */
 interface DocumentDocument {
-  uid: string;
-  type: string;
-  key: string;
-  createdAt: FSDate;
-  title?: string;
-  properties: Record<string, string>;
-  comments: CommentsCollection;
+  classHash: string;                  // class hash for document context
+  teachers: string[];                 // [denormalized] uids of teachers of class
+  uid: string;                        // original document owner (could be student)
+  type: string;                       // original document type
+  key: string;                        // original document key (id)
+  createdAt: FSDate;                  // original document timestamp
+  title?: string;                     // original document title
+  properties: Record<string, string>; // original document properties
+  comments: CommentsCollection;       // comments/chats subcollection
 }
 // collection key is id in Firebase Real-time Database
 type DocumentsCollection = FSCollection<DocumentDocument>;
@@ -73,7 +75,7 @@ type DocumentsCollection = FSCollection<DocumentDocument>;
  * Subcollection of domain with several fields copied from portal (e.g. name, teachers) with
  * potential synchronization issues.
  * Class resources are accessible to other teachers that share a network with one of the teachers of the class.
- * Networked access will be mediated by a Firebase function which can check whether the requesting user and
+ * Networked access will be mediated by Firestore security rules which can check whether the requesting user and
  * one of the teachers of the class share a network.
  */
 interface ClassDocument {
