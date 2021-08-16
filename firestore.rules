@@ -4,6 +4,10 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // all documents are inaccessible unless allowed by rules below
+    match /{document=**} {
+      allow read, write: if false;
+    }
 
     function isAuthed() {
       return request.auth != null;
@@ -47,7 +51,26 @@ service cloud.firestore {
         string(request.auth.token.platform_user_id) == resource.data.uid;
     }
 
-    function classInClasses() {
+    function classInRequestClasses() {
+      return isAuthed() && request.auth.token.class_hash in request.resource.data.classes;
+    }
+
+    function classIsRequestContextId() {
+      return isAuthed() && request.auth.token.class_hash == request.resource.data.context_id;
+    }
+
+    function hasSupportContentAndType() {
+      return (request.resource.data.content != null) && (request.resource.data.type == "supportPublication");
+    }
+
+    function isValidSupportRequest() {
+      return requestMatchUserId() &&
+              classInRequestClasses() &&
+              classIsRequestContextId() &&
+              hasSupportContentAndType();
+    }
+
+    function classInResourceClasses() {
       return isAuthed() && request.auth.token.class_hash in resource.data.classes;
     }
 
@@ -57,14 +80,16 @@ service cloud.firestore {
     match /authed/{portal} {
       allow read, write: if isAuthedTeacher();
 
-        match /mcsupports/{docId} {
-          // any portal-authenticated teacher can create supports
-          allow create: if isAuthedTeacher() && requestMatchUserId();
-          // teachers can only update/delete their own supports
-          allow update, delete: if requestMatchUserId() && docMatchUserId();
-          // teachers and students in appropriate classes can read supports
-          allow read: if docMatchUserId() || classInClasses();
-        }
+      match /mcsupports/{docId} {
+        // portal-authenticated teachers can create valid supports
+        allow create: if isAuthedTeacher() && isValidSupportRequest();
+        // teachers can only update their own supports and only if they're valid
+        allow update: if isAuthedTeacher() && isValidSupportRequest() && docMatchUserId();
+        // teachers can only delete their own supports
+        allow delete: if isAuthedTeacher() && docMatchUserId();
+        // teachers and students in appropriate classes can read supports
+        allow read: if docMatchUserId() || classInResourceClasses();
+      }
     }
 
     //
