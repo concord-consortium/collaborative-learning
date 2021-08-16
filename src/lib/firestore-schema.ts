@@ -56,8 +56,9 @@ type CommentsCollection = FSCollection<CommentDocument>;
  * one of the teachers of the class associated with the document share a network.
  */
 interface DocumentDocument {
-  classHash: string;                  // class hash for document context
+  context_id: string;                 // class hash for document context
   teachers: string[];                 // [denormalized] uids of teachers of class
+  network: string;                    // (current) network of teacher creating document
   uid: string;                        // original document owner (could be student)
   type: string;                       // original document type
   key: string;                        // original document key (id)
@@ -81,10 +82,11 @@ type DocumentsCollection = FSCollection<DocumentDocument>;
 interface ClassDocument {
   id: string;                 // portal class id
   name: string;               // portal class name
-  hash: string;               // portal class hash
+  context_id: string;         // portal class hash
   teachers: string[];         // uids of teachers of class
+  network: string;            // (current) network of teacher creating class
 }
-// collection key is class id (or class hash?)
+// collection key is context_id (class hash)
 type ClassesCollection = FSCollection<ClassDocument>;
 
 /*
@@ -113,6 +115,8 @@ interface SupportDocument {
   content: string;            // JSON stringified content of support
   context_id: string;         // class hash of class in which support was created
   createdAt: FSDate;          // timestamp
+  network: string;            // (current) network of teacher creating support document
+                              // seems useful to add for consistency; migration required for older supports
   originDoc: string;          // id of document from which the support was published
   platform_id: string;        // portal, e.g. "learn.concord.org"
   problem: string;            // e.g. "msa/2/1"
