@@ -14,7 +14,7 @@ before(function () {
 });
 context('Test the overall workspace', function () {
   describe('Desktop functionalities', function () {
-    it('will verify that clicking on any tab opens the nav area', function () {
+    it('will verify that clicking on collapsed resource tab opens the nav area', function () {
       cy.get(".collapsed-resources-tab.my-work").click();
       cy.openTopTab("my-work");
       cy.get('[data-test=my-work-section-investigations-documents]').should('be.visible');
@@ -36,7 +36,7 @@ context('Test the overall workspace', function () {
     });
     it('verify close of nav tabs', function () {
       cy.closeTabs();
-      cy.get('.nav-tab-panel').should('not.have.class','shown');
+      cy.get('.nav-tab-panel').should('not.be.visible');
       cy.get('.primary-workspace').should('be.visible');
     });
     it('verify collapse workspace', function () {

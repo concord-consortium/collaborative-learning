@@ -18,6 +18,7 @@ import "../themes.scss";
 
 interface IProps extends IBaseProps {
   tabs?: NavTabSpec[];
+  isResourceExpanded: boolean;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
   onDrop: (e: React.DragEvent<HTMLDivElement>) => void;
 }
@@ -40,7 +41,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { tabs } = this.props;
+    const { tabs, isResourceExpanded } = this.props;
     const { ui, user, supports } = this.stores;
     const selectedTabIndex = tabs?.findIndex(t => t.tab === ui.activeNavTab);
     const resizePanelWidth = 4;
@@ -53,7 +54,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
     const resourceWidthStyle = {width: resourceWidth};
     const newCommentCount = 8;
     return (
-      <div className={`resource-and-chat-panel ${ui.navTabContentShown ? "shown" : ""}`} style={resourceWidthStyle}>
+      <div className={`resource-and-chat-panel ${isResourceExpanded ? "shown" : ""}`} style={resourceWidthStyle}>
         <div className={`nav-tab-panel ${this.state.showChatColumn ? "chat-open" : ""}`}>
           <Tabs selectedIndex={selectedTabIndex} onSelect={this.handleSelectTab} forceRenderTabPanel={true}>
             <div className="top-row">

@@ -1,26 +1,16 @@
-import { inject, observer } from "mobx-react";
 import React from "react";
 import ExpandIndicatorIcon from "../../assets/expand-indicator-icon.svg";
-import { BaseComponent } from "../base";
 import "./collapsed-resources-tab.scss";
 
 interface IProps {
   resourceType: string;
+  isResourceExpanded: boolean;
   onExpandResources: () => void;
 }
 
-@inject("stores")
-@observer
-export class CollapsedResourcesTab extends BaseComponent<IProps> {
-
-  constructor(props: IProps) {
-    super(props);
-  }
-  render() {
-    const { resourceType, onExpandResources } = this.props;
-    const { ui } = this.stores;
+export const CollapsedResourcesTab: React.FC<IProps> = ({ resourceType, isResourceExpanded, onExpandResources }) => {
     return (
-      <div className={`collapsed-resources-tab ${resourceType} ${!ui.navTabContentShown ? "shown" : ""}`}
+      <div className={`collapsed-resources-tab ${resourceType} ${isResourceExpanded ? "shown" : ""}`}
            onClick={() => onExpandResources()}>
         <div className="collapsed-tab-label">My Resources</div>
         <div className="expand-left-indicator">
@@ -28,5 +18,5 @@ export class CollapsedResourcesTab extends BaseComponent<IProps> {
         </div>
       </div>
     );
-  }
-}
+  };
+

@@ -119,7 +119,7 @@ describe('edit table entries', function () {
 describe("formulas", function () {
   let formula = "3*pluto+2";
   it('will verify formula modal', function () {
-      cy.get(".primary-workspace").within((workspace) => {
+    cy.get(".primary-workspace").within((workspace) => {
       tableToolTile.getTableToolbarButton('set-expression').click();
     });
     cy.get('.modal-title').should('contain', "Set Expression");
@@ -143,10 +143,10 @@ describe("formulas", function () {
       tableToolTile.renameColumn('y', headerY); //makes it easier to find the correct column header
       tableToolTile.getTableToolbarButton('set-expression').click();
     });
-      cy.get('.modal-title').should('contain', "Set Expression");
-      cy.get('.modal-content .prompt select').should('exist');
-      cy.get('.modal-content .prompt select').select(headerY);
-      cy.get('.expression label').should('contain', headerY);
+    cy.get('.modal-title').should('contain', "Set Expression");
+    cy.get('.modal-content .prompt select').should('exist');
+    cy.get('.modal-content .prompt select').select(headerY);
+    cy.get('.expression label').should('contain', headerY);
   });
   it('verify cancel does not enter in a formula', function(){
     cy.get('#expression-input').click().type(formula );

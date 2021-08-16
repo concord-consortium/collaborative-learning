@@ -70,6 +70,9 @@
     &:active {
       outline: none;
     }
+    &:focus:not(:focus-visible) {
+      outline: none;
+    }
     &.problems {
       background-image: url("../../assets/icons/close/close-problems.svg");
       background-repeat: no-repeat;
