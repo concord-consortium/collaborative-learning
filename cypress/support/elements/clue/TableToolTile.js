@@ -53,7 +53,7 @@ class TableToolTile{
       });
     }
     getTableToolbarButton(button){// ['set-expression']
-      return cy.get(`.primary-workspace .table-toolbar .toolbar-button.${button}`);
+      return cy.get(`.table-toolbar .toolbar-button.${button}`);
     }
 }
 export default TableToolTile;

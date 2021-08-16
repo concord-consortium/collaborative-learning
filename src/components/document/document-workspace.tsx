@@ -46,7 +46,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
                   activeNavTab,
                   navTabContentShown,
                   workspaceShown,
-                  dividerPosition
+                  dividerPosition,
                 }
           } = this.stores;
     const studentTabs = tabSpecs.filter((t) => !t.teacherOnly);
@@ -71,14 +71,17 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
           onExpandWorkspace={this.toggleExpandWorkspace}
           onExpandResources={this.toggleExpandResources}
         />
-        {navTabContentShown
-          ? <NavTabPanel
-              tabs={tabsToDisplay}
-              onDragOver={this.handleDragOverWorkspace}
-              onDrop={this.handleImageDrop}
-            />
-          : <CollapsedResourcesTab onExpandResources={this.toggleExpandResources} resourceType={activeNavTab} />
-        }
+        <NavTabPanel
+          tabs={tabsToDisplay}
+          onDragOver={this.handleDragOverWorkspace}
+          onDrop={this.handleImageDrop}
+          isResourceExpanded={navTabContentShown}
+        />
+        <CollapsedResourcesTab
+          onExpandResources={this.toggleExpandResources}
+          resourceType={activeNavTab}
+          isResourceExpanded={!navTabContentShown}
+        />
         {workspaceShown ? this.renderDocuments()
                         : <CollapsedWorkspaceTab
                             onExpandWorkspace={this.toggleExpandWorkspace}

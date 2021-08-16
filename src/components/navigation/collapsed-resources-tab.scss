@@ -13,6 +13,10 @@
   border-width: 2px;
   border-style: solid;
   display: flex;
+  visibility: hidden;
+  &.shown {
+    visibility: visible;
+  }
   &.problems {
     border-color: $problem-orange;
     background-color: $problem-orange-light-4;

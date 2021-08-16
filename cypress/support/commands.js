@@ -145,7 +145,7 @@ Cypress.Commands.add('collapseWorkspace', () => {
   cy.get('.drag-right-handle').click(); // to ensure workspace is collapsed regardless of initial position
 });
 Cypress.Commands.add('linkTableToGraph', (table, graph) => {
-  cy.get('.table-title').contains(table).within(() => {
+  cy.get('.primary-workspace .table-title').contains(table).within(() => {
     cy.get('.link-geometry-button').click();
   });
   cy.get('.ReactModalPortal').within(() => {
@@ -154,7 +154,7 @@ Cypress.Commands.add('linkTableToGraph', (table, graph) => {
   });
 });
 Cypress.Commands.add('unlinkTableToGraph', (table, graph) => {
-  cy.get('.table-title').contains(table).within(() => {
+  cy.get('.primary-workspace .table-title').contains(table).within(() => {
     cy.get('.link-geometry-button').click();
   });
   cy.get('.ReactModalPortal').within(() => {
