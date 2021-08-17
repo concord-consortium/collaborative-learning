@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="22" height="44" viewBox="0 0 22 44">
+  <g fill="none" fill-rule="evenodd">
+    <path fill="#FFF" d="M22 44V0C9.85 0 0 9.85 0 22s9.85 22 22 22z" transform="translate(-772.000000, -2140.000000) translate(548.000000, 2060.000000) translate(224.000000, 80.000000)"/>
+    <path fill="#CFCFCF" d="M22 42V2C10.954 2 2 10.954 2 22s8.954 20 20 20z" transform="translate(-772.000000, -2140.000000) translate(548.000000, 2060.000000) translate(224.000000, 80.000000)"/>
+    <path fill="#545454" d="M10 18L15 26 5 26z" transform="translate(-772.000000, -2140.000000) translate(548.000000, 2060.000000) translate(224.000000, 80.000000) translate(10.000000, 22.000000) rotate(-90.000000) translate(-10.000000, -22.000000)"/>
+  </g>
+</svg>
