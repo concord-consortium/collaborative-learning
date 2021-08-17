@@ -23,6 +23,7 @@
     "testPathIgnorePatterns": [
       "/node_modules/",
       "/cypress/",
+      "/firebase-test/",
       "/functions/"
     ],
     "coveragePathIgnorePatterns": [
