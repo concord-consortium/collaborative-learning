@@ -1,8 +1,9 @@
 import firebase from "firebase";
 import {
   adminWriteDoc, expectDeleteToFail, expectDeleteToSucceed, expectReadToFail, expectReadToSucceed,
-  expectWriteToFail, expectWriteToSucceed, genericAuth, initFirestore, mockTimestamp, prepareEachTest,
-  studentAuth, teacher2Auth, teacherAuth, teacherId, teacherName, tearDownTests, thisClass
+  expectUpdateToFail, expectUpdateToSucceed, expectWriteToFail, expectWriteToSucceed, genericAuth,
+  initFirestore, mockTimestamp, prepareEachTest, studentAuth, teacher2Auth, teacher2Id, teacherAuth,
+  teacherId, teacherName, tearDownTests, thisClass
 } from "./setup-rules-tests";
 
 describe("Firestore security rules", () => {
@@ -71,13 +72,19 @@ describe("Firestore security rules", () => {
     it("authenticated teachers can update user documents", async () => {
       db = initFirestore(teacherAuth);
       await adminWriteDoc(kDocumentDocPath, specDocumentDoc());
-      await expectWriteToSucceed(db, kDocumentDocPath, specDocumentDoc({ add: { title: "new-title" } }));
+      await expectUpdateToSucceed(db, kDocumentDocPath, { title: "new-title" });
+    });
+
+    it("authenticated teachers can't update user documents' read-only fields", async () => {
+      db = initFirestore(teacherAuth);
+      await adminWriteDoc(kDocumentDocPath, specDocumentDoc());
+      await expectUpdateToFail(db, kDocumentDocPath, { title: "new-title", uid: teacher2Id });
     });
 
     it("authenticated teachers can't update other teachers' documents", async () => {
       db = initFirestore(teacher2Auth);
       await adminWriteDoc(kDocumentDocPath, specDocumentDoc());
-      await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({ add: { title: "new-title" } }));
+      await expectUpdateToFail(db, kDocumentDocPath, { title: "new-title" });
     });
 
     it("authenticated teachers can delete user documents", async () => {
@@ -163,16 +170,22 @@ describe("Firestore security rules", () => {
       await expectWriteToSucceed(db, kDocumentCommentDocPath, specCommentDoc());
     });
 
+    it("authenticated teachers can't update document comments' read-only fields", async () => {
+      initFirestoreWithUserDocument(teacherAuth);
+      await adminWriteDoc(kDocumentCommentDocPath, specCommentDoc());
+      await expectUpdateToFail(db, kDocumentCommentDocPath, { content: "A new comment!", uid: teacher2Id });
+    });
+
     it("authenticated teachers can update document comments", async () => {
       initFirestoreWithUserDocument(teacherAuth);
       await adminWriteDoc(kDocumentCommentDocPath, specCommentDoc());
-      await expectWriteToSucceed(db, kDocumentCommentDocPath, specCommentDoc({ add: { content: "A new comment!" } }));
+      await expectUpdateToSucceed(db, kDocumentCommentDocPath, { content: "A new comment!" });
     });
 
     it("authenticated teachers can't update other teachers' document comments", async () => {
       initFirestoreWithUserDocument(teacher2Auth);
       await adminWriteDoc(kDocumentCommentDocPath, specCommentDoc());
-      await expectWriteToFail(db, kDocumentCommentDocPath, specCommentDoc({ add: { content: "A new comment!" } }));
+      await expectUpdateToFail(db, kDocumentCommentDocPath, { content: "A new comment!" });
     });
 
     it("authenticated teachers can delete document comments", async () => {

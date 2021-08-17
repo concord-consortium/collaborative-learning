@@ -1,8 +1,9 @@
 import firebase from "firebase";
 import {
   adminWriteDoc, expectDeleteToFail, expectDeleteToSucceed, expectReadToFail, expectReadToSucceed,
-  expectWriteToFail, expectWriteToSucceed, genericAuth, initFirestore, otherClass, prepareEachTest,
-  student2Auth, studentAuth, teacher2Auth, teacherAuth, teacherId, tearDownTests, thisClass
+  expectUpdateToFail, expectUpdateToSucceed, expectWriteToFail, expectWriteToSucceed, genericAuth,
+  initFirestore, otherClass, prepareEachTest, student2Auth, studentAuth, teacher2Auth, teacher2Id,
+  teacherAuth, teacherId, tearDownTests, thisClass
 } from "./setup-rules-tests";
 
 describe("Firestore security rules", () => {
@@ -151,7 +152,13 @@ describe("Firestore security rules", () => {
     it("authenticated teachers can update their own multi-class supports", async () => {
       db = initFirestore(teacherAuth);
       await adminWriteDoc(kSupportDocPath, specSupportDoc())
-      await expectWriteToSucceed(db, kSupportDocPath, specSupportDoc({ add: { content: { foo: "bar" } } }));
+      await expectUpdateToSucceed(db, kSupportDocPath, { content: { foo: "bar" } });
+    });
+
+    it("authenticated teachers can't update their own multi-class supports' read-only fields", async () => {
+      db = initFirestore(teacherAuth);
+      await adminWriteDoc(kSupportDocPath, specSupportDoc())
+      await expectUpdateToFail(db, kSupportDocPath, { content: { foo: "bar" }, uid: teacher2Id });
     });
 
     it("authenticated teachers can't update other teachers' multi-class supports", async () => {

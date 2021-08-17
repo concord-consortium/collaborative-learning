@@ -59,6 +59,13 @@ export const expectWriteToSucceed = async (db: firebase.firestore.Firestore, doc
   // when the write succeeds the return value is undefined
   expect(await assertSucceeds(db.doc(docPath).set(value))).toBeUndefined();
 };
+export const expectUpdateToFail = async (db: firebase.firestore.Firestore, docPath: string, value: any) => {
+  expect(await assertFails(db.doc(docPath).set(value, { merge: true }))).toBeDefined();
+};
+export const expectUpdateToSucceed = async (db: firebase.firestore.Firestore, docPath: string, value: any) => {
+  // when the write succeeds the return value is undefined
+  expect(await assertSucceeds(db.doc(docPath).set(value, { merge: true }))).toBeUndefined();
+};
 export const expectDeleteToFail = async (db: firebase.firestore.Firestore, docPath: string) => {
   expect(await assertFails(db.doc(docPath).delete())).toBeDefined();
 };
