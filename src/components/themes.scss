@@ -58,12 +58,16 @@
     }
   }
   &.no-action {
+    cursor: none;
     &:hover {
       background-color: white;
     }
     &:active {
       background-color: white;
     }
+  }
+  &.disabled {
+    opacity: 35%;
   }
 }
 
@@ -133,5 +137,12 @@
       background-color: $learninglog-green-dark-1;
       color: white;
     }
+  }
+  &.no-action {
+    cursor: none;
+    pointer-events: none;
+  }
+  &.disabled {
+    opacity: 35%;
   }
 }

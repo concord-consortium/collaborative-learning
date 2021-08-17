@@ -58,16 +58,15 @@ $comment-selected-green-2: #c1f3b3;
     margin: 2px 4px;
     padding: 2px 0;
 
-    textarea {
+    .comment-textarea {
       border-style: none;
       border-color: Transparent;
-      overflow: auto;
+      overflow: hidden;
       resize: vertical;
       font-family: Lato;
       margin: 2px;
       width: calc(100% - 5px);
       box-sizing: border-box;
-      height: 35px;
 
       &::placeholder {
         color: $charcoal;

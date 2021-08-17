@@ -9,12 +9,27 @@ import "../themes.scss";
 interface IProps {
 }
 
+interface IState {
+  commentTextAreaHeight: number | string;
+  commentAdded: boolean;
+  commentText: string;
+}
+
 @inject("stores")
 @observer
-export class CommentCard extends BaseComponent<IProps> {
+export class CommentCard extends BaseComponent<IProps, IState> {
 
   constructor(props: IProps) {
     super(props);
+    this.handleCommentTextAreaChange = this.handleCommentTextAreaChange.bind(this);
+    this.handleCancelPost = this.handleCancelPost.bind(this);
+    this.handleSendPost = this.handleSendPost.bind(this);
+
+    this.state = {
+      commentTextAreaHeight: 35,
+      commentAdded: false,
+      commentText: "",
+    }
   }
 
   public render() {
@@ -37,15 +52,39 @@ export class CommentCard extends BaseComponent<IProps> {
       </div>
     );
   }
+  handleCommentTextAreaChange = (event: React.FormEvent<HTMLTextAreaElement>) => {
+    const target = event.currentTarget as HTMLTextAreaElement;
+    const targetText = target.value;
+    if (targetText === "") {
+      this.setState({commentTextAreaHeight: 35, commentAdded: false, commentText: ""});
+    } else {
+      this.setState({commentTextAreaHeight: target.scrollHeight, commentAdded: true, commentText: targetText});
+    }
+  };
+  handleCancelPost = () => {
+    this.setState({commentTextAreaHeight: 35, commentAdded: false, commentText: ""});
+  }
+  handleSendPost = () => {
+    alert(`You are sending this comment: ${this.state.commentText}`);
+  }
 
   private renderCommentTextbox() {
     const { ui } = this.stores;
+    const { commentTextAreaHeight, commentAdded, commentText } = this.state;
+    const textareaStyle = {height: commentTextAreaHeight};
+    const postButtonClass = `comment-footer-button themed-negative ${ui.activeNavTab} ${!commentAdded ? "disabled no-action" : "" }`;
     return (
       <div className="comment-textbox">
-        <textarea placeholder="Comment on this document..."></textarea>
+        <textarea
+          className="comment-textarea"
+          style={textareaStyle}
+          placeholder="Comment on this document..."
+          value={commentText}
+          onChange={this.handleCommentTextAreaChange}
+        />
         <div className="comment-textbox-footer">
-          <div className="comment-footer-button cancel">Cancel</div>
-          <div className={`comment-footer-button themed-negative ${ui.activeNavTab}`}>
+          <div className="comment-footer-button cancel" onClick={this.handleCancelPost}>Cancel</div>
+          <div className={postButtonClass} onClick={this.handleSendPost}>
             <SendIcon />
             Post
           </div>
