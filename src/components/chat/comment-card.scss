@@ -23,64 +23,30 @@ $comment-selected-green-2: #c1f3b3;
     &.selected {
       background-color: $comment-selected-green-2;
     }
-    .initial {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid $charcoal;
-      border-radius: 3px;
-      width: 18px;
-      height: 18px;
-      padding: 1px 0 0;
-      margin-right: 5px;
+    &.problems {
+      background-color: $problem-orange-light-7;
+    }
+    &.teacher-guide {
+      background-color: $learninglog-green-light-7;
+    }
+    &.my-work {
+      background-color: $workspace-teal-light-6;
+    }
+    &.class-work {
+      background-color: $classwork-purple-light-7;
+    }
+    &.supports {
+      background-color: $support-blue-light-7;
+    }
+    .new-thread-header-icon {
+      fill: $charcoal;
     }
   }
 
   .comment-text {
-    .comment-text-header {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      //what is the spread of the icon, name, timesatmp and menu?
-      .user-icon {
-        margin: 5px 8px;
-        border-radius: 4px;
-        border: solid 1px #979797;
-        background-color: white;
-        width: 21px;
-        height: 21px;
-      }
-      .user-name {
-        margin-left: 5px;
-        font-size: 11px;
-        font-weight: bold;
-        color: $charcoal-dark-1;
-      }
-      .time-stamp {
-        margin-left: 5px;
-        font-size: 11px;
-        font-weight: normal;
-        color: $charcoal-dark-1;
-      }
-      .menu {
-        margin-right: 8px;
-        opacity: 0.35;
-        height: 13px;
-      }
-    }
     .comment-text {
       color: $charcoal-dark-2;
       margin: 4px 8px;
-    }
-    .new-marker {
-      display: flex;
-      flex-direction: row;
-      .new-text{
-        font-size: 9px;
-        font-weight: bold;
-        color: $charcoal-dark-2;
-        background-color: $new-comment-notice;
-      }
     }
   }
 

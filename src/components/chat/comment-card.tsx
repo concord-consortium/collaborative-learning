@@ -1,7 +1,7 @@
 import { inject, observer } from "mobx-react";
 import React from "react";
 import { BaseComponent } from "../base";
-import OpenWorkspaceIcon from "../../assets/icons/1-4-up/1-up-icon-default.svg";
+import DocumentCommentIcon from "../../assets/document-id.svg";
 import SendIcon from "../../assets/send-icon.svg";
 import "./comment-card.scss";
 import "../themes.scss";
@@ -30,31 +30,10 @@ export class CommentCard extends BaseComponent<IProps> {
   }
 
   private renderThreadHeader() {
-    const teacherInitial = this.getTeacherInitial();
+    const { ui } = this.stores;
     return (
-      <div className="comment-card-header">
-        <div className="initial">
-          {teacherInitial}
-        </div>
-      </div>
-    );
-  }
-
-  private CommentText() {
-    const { user } = this.stores;
-    const teacherInitial = this.getTeacherInitial();
-
-    return (
-      <div className="comment-text">
-        <div className="comment-text-header">
-          <div className="user-icon">{teacherInitial}</div>
-          <div className="user-name">{user.name}</div>
-          <div className="time-stamp"></div>
-          <div className="menu"></div>
-        </div>
-        <div className="comment-text">
-          Lorem
-        </div>
+      <div className={`comment-card-header ${ui.activeNavTab}`}>
+        <DocumentCommentIcon className="new-thread-header-icon"/>
       </div>
     );
   }
@@ -63,7 +42,7 @@ export class CommentCard extends BaseComponent<IProps> {
     const { ui } = this.stores;
     return (
       <div className="comment-textbox">
-        <textarea placeholder="Reply ..."></textarea>
+        <textarea placeholder="Comment on this document..."></textarea>
         <div className="comment-textbox-footer">
           <div className="comment-footer-button cancel">Cancel</div>
           <div className={`comment-footer-button themed-negative ${ui.activeNavTab}`}>
@@ -74,18 +53,4 @@ export class CommentCard extends BaseComponent<IProps> {
       </div>
     );
   }
-  private renderNewThreadHeader() {
-    return (
-      <div className="new-thread-header">
-        <OpenWorkspaceIcon />
-      </div>
-    );
-  }
-
-  private getTeacherInitial() {
-    const { user } = this.stores;
-    return user.name.charAt(0);
-  }
-
-
 }
