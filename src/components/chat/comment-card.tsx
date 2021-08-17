@@ -29,12 +29,10 @@ export class CommentCard extends BaseComponent<IProps, IState> {
       commentTextAreaHeight: 35,
       commentAdded: false,
       commentText: "",
-    }
+    };
   }
 
   public render() {
-    // eslint-disable-next-line no-empty-pattern
-    const {} = this.props;
     const { ui } = this.stores;
     return (
       <div className={`comment-card ${ui.activeNavTab}`} data-testid="comment-card">
@@ -72,7 +70,10 @@ export class CommentCard extends BaseComponent<IProps, IState> {
     const { ui } = this.stores;
     const { commentTextAreaHeight, commentAdded, commentText } = this.state;
     const textareaStyle = {height: commentTextAreaHeight};
-    const postButtonClass = `comment-footer-button themed-negative ${ui.activeNavTab} ${!commentAdded ? "disabled no-action" : "" }`;
+    const postButtonClass = `comment-footer-button
+                             themed-negative
+                             ${ui.activeNavTab}
+                             ${!commentAdded ? "disabled no-action" : "" }`;
     return (
       <div className="comment-textbox">
         <textarea
@@ -83,8 +84,12 @@ export class CommentCard extends BaseComponent<IProps, IState> {
           onChange={this.handleCommentTextAreaChange}
         />
         <div className="comment-textbox-footer">
-          <div className="comment-footer-button cancel" onClick={this.handleCancelPost}>Cancel</div>
-          <div className={postButtonClass} onClick={this.handleSendPost}>
+          <div className="comment-footer-button cancel"
+               onClick={this.handleCancelPost}
+               data-testid="comment-cancel-button">
+            Cancel
+          </div>
+          <div className={postButtonClass} onClick={this.handleSendPost} data-testid="comment-post-button">
             <SendIcon />
             Post
           </div>
