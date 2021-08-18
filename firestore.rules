@@ -87,7 +87,7 @@ service cloud.firestore {
 
     function preservesReadOnlyDocumentFields() {
       let readOnlyFieldsSet = ["uid", "type", "key", "createdAt"].toSet();
-      let affectedFieldsSet = debug(debug(request.resource.data).diff(resource.data).affectedKeys());
+      let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
       return !affectedFieldsSet.hasAny(readOnlyFieldsSet);
     }
 
@@ -102,7 +102,7 @@ service cloud.firestore {
 
     function preservesReadOnlyCommentFields() {
       let readOnlyFieldsSet = ["uid", "createdAt", "tileId"].toSet();
-      let affectedFieldsSet = debug(debug(request.resource.data).diff(resource.data).affectedKeys());
+      let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
       return !affectedFieldsSet.hasAny(readOnlyFieldsSet);
     }
 
@@ -121,7 +121,7 @@ service cloud.firestore {
     function preservesReadOnlySupportFields() {
       let readOnlyFieldsSet = ["context_id", "createdAt", "network", "originDoc", "platform_id",
                                 "problem", "resource_link_id", "resource_url", "type", "uid"].toSet();
-      let affectedFieldsSet = debug(debug(request.resource.data).diff(resource.data).affectedKeys());
+      let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
       return !affectedFieldsSet.hasAny(readOnlyFieldsSet);
     }
 
