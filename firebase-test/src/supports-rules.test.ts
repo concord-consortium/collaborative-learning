@@ -1,8 +1,9 @@
 import firebase from "firebase";
 import {
-  adminWriteDoc, expectDeleteToSucceed, expectReadToFail, expectReadToSucceed,
-  expectWriteToFail, expectWriteToSucceed, genericAuth, initFirestore, otherClass, prepareEachTest,
-  student2Auth, studentAuth, teacher2Auth, teacherAuth, teacherId, tearDownTests, thisClass
+  adminWriteDoc, expectDeleteToFail, expectDeleteToSucceed, expectReadToFail, expectReadToSucceed,
+  expectUpdateToFail, expectUpdateToSucceed, expectWriteToFail, expectWriteToSucceed, genericAuth,
+  initFirestore, otherClass, prepareEachTest, student2Auth, studentAuth, teacher2Auth, teacher2Id,
+  teacherAuth, teacherId, tearDownTests, thisClass
 } from "./setup-rules-tests";
 
 describe("Firestore security rules", () => {
@@ -151,13 +152,31 @@ describe("Firestore security rules", () => {
     it("authenticated teachers can update their own multi-class supports", async () => {
       db = initFirestore(teacherAuth);
       await adminWriteDoc(kSupportDocPath, specSupportDoc())
-      await expectWriteToSucceed(db, kSupportDocPath, specSupportDoc({ add: { content: { foo: "bar" } } }));
+      await expectUpdateToSucceed(db, kSupportDocPath, { content: { foo: "bar" } });
+    });
+
+    it("authenticated teachers can't update their own multi-class supports' read-only fields", async () => {
+      db = initFirestore(teacherAuth);
+      await adminWriteDoc(kSupportDocPath, specSupportDoc())
+      await expectUpdateToFail(db, kSupportDocPath, { content: { foo: "bar" }, uid: teacher2Id });
+    });
+
+    it("authenticated teachers can't update other teachers' multi-class supports", async () => {
+      db = initFirestore(teacher2Auth);
+      await adminWriteDoc(kSupportDocPath, specSupportDoc({ add: { classes: [thisClass, otherClass] } }))
+      await expectUpdateToFail(db, kSupportDocPath, { content: { foo: "bar" } });
     });
 
     it("authenticated teachers can delete their own multi-class supports", async () => {
       db = initFirestore(teacherAuth);
       await adminWriteDoc(kSupportDocPath, specSupportDoc())
       await expectDeleteToSucceed(db, kSupportDocPath);
+    });
+
+    it("authenticated teachers can't delete other teachers' multi-class supports", async () => {
+      db = initFirestore(teacher2Auth);
+      await adminWriteDoc(kSupportDocPath, specSupportDoc({ add: { classes: [thisClass, otherClass] } }))
+      await expectDeleteToFail(db, kSupportDocPath);
     });
 
     it("authenticated students can read multi-class supports for their class", async () => {

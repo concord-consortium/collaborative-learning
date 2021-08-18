@@ -41,37 +41,92 @@ service cloud.firestore {
       return hasUserId() && hasRole("teacher");
     }
 
+    // uid of submitted document must match user's platform_user_id
     function requestMatchUserId() {
       return isAuthed() &&
         string(request.auth.token.platform_user_id) == request.resource.data.uid;
     }
 
-    function docMatchUserId() {
+    // user's platform_user_id must be in submitted document's list of teachers
+    function requestMatchTeachers() {
+      return isAuthed() &&
+        string(request.auth.token.platform_user_id) in request.resource.data.teachers;
+    }
+
+    // uid of requested document must match user's platform_user_id
+    function resourceMatchUserId() {
       return isAuthed() &&
         string(request.auth.token.platform_user_id) == resource.data.uid;
     }
 
+    // user's platform_user_id must be in requested document's list of teachers
+    function resourceMatchTeacher() {
+      return isAuthed() &&
+        string(request.auth.token.platform_user_id) in resource.data.teachers;
+    }
+
+    // user's class_hash must be in submitted document's list of classes
     function classInRequestClasses() {
       return isAuthed() && request.auth.token.class_hash in request.resource.data.classes;
     }
 
+    // user's class_hash must be submitted document's context_id
     function classIsRequestContextId() {
       return isAuthed() && request.auth.token.class_hash == request.resource.data.context_id;
     }
 
-    function hasSupportContentAndType() {
-      return (request.resource.data.content != null) && (request.resource.data.type == "supportPublication");
+    // user's class_hash must be in requested document's list of classes
+    function classInResourceClasses() {
+      return isAuthed() && request.auth.token.class_hash in resource.data.classes;
     }
 
-    function isValidSupportRequest() {
+    function isValidDocumentCreateRequest() {
+      return requestMatchTeachers() && classIsRequestContextId() &&
+              request.resource.data.keys().hasAll(["uid", "type", "key", "createdAt"]);
+    }
+
+    function preservesReadOnlyDocumentFields() {
+      let readOnlyFieldsSet = ["uid", "type", "key", "createdAt"].toSet();
+      let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
+      return !affectedFieldsSet.hasAny(readOnlyFieldsSet);
+    }
+
+    function isValidDocumentUpdateRequest() {
+      return resourceMatchTeacher() && preservesReadOnlyDocumentFields();
+    }
+
+    function isValidCommentCreateRequest() {
+      return requestMatchUserId() &&
+              request.resource.data.keys().hasAll(["name", "createdAt", "content"]);
+    }
+
+    function preservesReadOnlyCommentFields() {
+      let readOnlyFieldsSet = ["uid", "createdAt", "tileId"].toSet();
+      let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
+      return !affectedFieldsSet.hasAny(readOnlyFieldsSet);
+    }
+
+    function isValidCommentUpdateRequest() {
+      return requestMatchUserId() && preservesReadOnlyCommentFields();
+    }
+
+    function isValidSupportCreateRequest() {
       return requestMatchUserId() &&
               classInRequestClasses() &&
               classIsRequestContextId() &&
-              hasSupportContentAndType();
+              (request.resource.data.content != null) &&
+              (request.resource.data.type == "supportPublication");
     }
 
-    function classInResourceClasses() {
-      return isAuthed() && request.auth.token.class_hash in resource.data.classes;
+    function preservesReadOnlySupportFields() {
+      let readOnlyFieldsSet = ["context_id", "createdAt", "network", "originDoc", "platform_id",
+                                "problem", "resource_link_id", "resource_url", "type", "uid"].toSet();
+      let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
+      return !affectedFieldsSet.hasAny(readOnlyFieldsSet);
+    }
+
+    function isValidSupportUpdateRequest() {
+      return resourceMatchUserId() && preservesReadOnlySupportFields();
     }
 
     //
@@ -80,15 +135,45 @@ service cloud.firestore {
     match /authed/{portal} {
       allow read, write: if isAuthedTeacher();
 
+      match /documents/{docId} {
+        // portal-authenticated teachers can create valid documents
+        allow create: if isAuthedTeacher() && isValidDocumentCreateRequest();
+        // teachers can only update their own documents and only if they're valid
+        allow update: if isAuthedTeacher() && isValidDocumentUpdateRequest();
+        // teachers can only delete their own documents
+        allow delete: if isAuthedTeacher() && resourceMatchUserId();
+        // only teachers that "own" the document can read it (for now)
+        allow read: if isAuthedTeacher() && resourceMatchTeacher();
+
+        function getDocumentTeachers() {
+          return get(/databases/$(database)/documents/authed/$(portal)/documents/$(docId)).data.teachers;
+        }
+
+        function teacherInDocumentTeachers() {
+          return isAuthedTeacher() && (request.auth.uid in getDocumentTeachers());
+        }
+
+        match /comments/{commentId} {
+          // portal-authenticated teachers with access to the document can create valid comments
+          allow create: if teacherInDocumentTeachers() && isValidCommentCreateRequest();
+          // teachers can only update their own comments and only if they're valid
+          allow update: if teacherInDocumentTeachers() && isValidCommentUpdateRequest();
+          // teachers can only delete their own comments
+          allow delete: if teacherInDocumentTeachers() && resourceMatchUserId();
+          // only teachers that "own" the document can read the comments (for now)
+          allow read: if teacherInDocumentTeachers();
+        }
+      }
+
       match /mcsupports/{docId} {
         // portal-authenticated teachers can create valid supports
-        allow create: if isAuthedTeacher() && isValidSupportRequest();
+        allow create: if isAuthedTeacher() && isValidSupportCreateRequest();
         // teachers can only update their own supports and only if they're valid
-        allow update: if isAuthedTeacher() && isValidSupportRequest() && docMatchUserId();
+        allow update: if isAuthedTeacher() && isValidSupportUpdateRequest();
         // teachers can only delete their own supports
-        allow delete: if isAuthedTeacher() && docMatchUserId();
+        allow delete: if isAuthedTeacher() && resourceMatchUserId();
         // teachers and students in appropriate classes can read supports
-        allow read: if docMatchUserId() || classInResourceClasses();
+        allow read: if resourceMatchUserId() || classInResourceClasses();
       }
     }
 
