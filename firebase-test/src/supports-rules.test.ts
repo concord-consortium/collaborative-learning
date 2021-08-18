@@ -164,7 +164,7 @@ describe("Firestore security rules", () => {
     it("authenticated teachers can't update other teachers' multi-class supports", async () => {
       db = initFirestore(teacher2Auth);
       await adminWriteDoc(kSupportDocPath, specSupportDoc({ add: { classes: [thisClass, otherClass] } }))
-      await expectWriteToFail(db, kSupportDocPath, specSupportDoc({ add: { content: { foo: "bar" } } }));
+      await expectUpdateToFail(db, kSupportDocPath, { content: { foo: "bar" } });
     });
 
     it("authenticated teachers can delete their own multi-class supports", async () => {
