@@ -25,7 +25,7 @@ describe("Firestore security rules", () => {
     remove?: string[];
   }
   function specDocumentDoc(options?: ISpecDocumentDoc) {
-    // a valid support document specification
+    // a valid document specification
     const documentDoc = { context_id: thisClass, teachers: [teacherId], uid: teacherId, type: "problemDocument",
                           key: "my-document", createdAt: mockTimestamp() };
     // remove specified props for validating the tests that require them
@@ -120,7 +120,7 @@ describe("Firestore security rules", () => {
       remove?: string[];
     }
     function specCommentDoc(options?: ISpecDocumentDoc) {
-      // a valid support document specification
+      // a valid comment document specification
       const commentDoc = { uid: teacherId, name: teacherName, content: "A comment!",
                             createdAt: mockTimestamp() };
       // remove specified props for validating the tests that require them
