@@ -112,15 +112,15 @@ describe.skip('Chat panel for networked teacher', () => {
   });
   it('verify user can cancel a comment', () => {
     const documentComment = "This comment is for the document.";
-    cy.get('.comment-textarea').click().type(documentComment);
-    cy.get('.comment-textarea').should('contain', documentComment);
+    cy.get('[data-testid=comment-textarea]').click().type(documentComment);
+    cy.get('[data-testid=comment-textarea]').should('contain', documentComment);
     cy.get('[data-testid=comment-cancel-button]').click();
-    cy.get('.comment-textarea').should('not.contain', documentComment);
+    cy.get('[data-testid=comment-textarea]').should('not.contain', documentComment);
   });
   it('verify user can post a comment', () => { //need to change when posting comment actually puts a comment card
     const documentComment = "An alert should show this document comment.";
-    cy.get('.comment-textarea').click().type(documentComment);
-    cy.get('.comment-textarea').should('contain', documentComment);
+    cy.get('[data-testid=comment-textarea]').click().type(documentComment);
+    cy.get('[data-testid=comment-textarea]').should('contain', documentComment);
     cy.get('[data-testid=comment-post-button]').click();
     cy.on ('window:alert', (str) => {
       expect(str).to.contain(documentComment);

@@ -5,6 +5,7 @@ import DocumentCommentIcon from "../../assets/document-id.svg";
 import SendIcon from "../../assets/send-icon.svg";
 import "./comment-card.scss";
 import "../themes.scss";
+import classNames from "classnames";
 
 interface IProps {
 }
@@ -14,22 +15,27 @@ interface IState {
   commentAdded: boolean;
   commentText: string;
 }
+const minTextAreaHeight = 35;
 
 @inject("stores")
 @observer
 export class CommentCard extends BaseComponent<IProps, IState> {
+  state = {
+    commentTextAreaHeight: minTextAreaHeight,
+    commentAdded: false,
+    commentText: "",
+  };
 
-  constructor(props: IProps) {
-    super(props);
-    this.handleCommentTextAreaChange = this.handleCommentTextAreaChange.bind(this);
-    this.handleCancelPost = this.handleCancelPost.bind(this);
-    this.handleSendPost = this.handleSendPost.bind(this);
-
-    this.state = {
-      commentTextAreaHeight: 35,
-      commentAdded: false,
-      commentText: "",
-    };
+  escFunction = (event: any) => {
+    if(event.keyCode === 27) {
+      this.setState({commentTextAreaHeight: minTextAreaHeight, commentAdded: false, commentText: ""});
+    }
+  }
+  componentDidMount(){
+    document.addEventListener("keydown", this.escFunction, false);
+  }
+  componentWillUnmount(){
+    document.removeEventListener("keydown", this.escFunction, false);
   }
 
   public render() {
@@ -50,37 +56,36 @@ export class CommentCard extends BaseComponent<IProps, IState> {
       </div>
     );
   }
-  handleCommentTextAreaChange = (event: React.FormEvent<HTMLTextAreaElement>) => {
-    const target = event.currentTarget as HTMLTextAreaElement;
+  handleCommentTextAreaChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const target = event.target;
     const targetText = target.value;
-    if (targetText === "") {
-      this.setState({commentTextAreaHeight: 35, commentAdded: false, commentText: ""});
+    if (!targetText) {
+      this.setState({commentTextAreaHeight: minTextAreaHeight, commentAdded: false, commentText: ""});
     } else {
       this.setState({commentTextAreaHeight: target.scrollHeight, commentAdded: true, commentText: targetText});
     }
   };
   handleCancelPost = () => {
-    this.setState({commentTextAreaHeight: 35, commentAdded: false, commentText: ""});
+    this.setState({commentTextAreaHeight: minTextAreaHeight, commentAdded: false, commentText: ""});
   }
   handleSendPost = () => {
     alert(`You are sending this comment: ${this.state.commentText}`);
+    this.setState({commentTextAreaHeight: minTextAreaHeight, commentAdded: false, commentText: ""});
   }
 
   private renderCommentTextbox() {
     const { ui } = this.stores;
     const { commentTextAreaHeight, commentAdded, commentText } = this.state;
     const textareaStyle = {height: commentTextAreaHeight};
-    const postButtonClass = `comment-footer-button
-                             themed-negative
-                             ${ui.activeNavTab}
-                             ${!commentAdded ? "disabled no-action" : "" }`;
+    const postButtonClass = classNames("comment-footer-button", "themed-negative", ui.activeNavTab,
+                                       { disabled: !commentAdded, "no-action": !commentAdded });
     return (
       <div className="comment-textbox">
         <textarea
-          className="comment-textarea"
           style={textareaStyle}
           placeholder="Comment on this document..."
           value={commentText}
+          data-testid="comment-textarea"
           onChange={this.handleCommentTextAreaChange}
         />
         <div className="comment-textbox-footer">

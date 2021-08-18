@@ -43,13 +43,6 @@ $comment-selected-green-2: #c1f3b3;
     }
   }
 
-  .comment-text {
-    .comment-text {
-      color: $charcoal-dark-2;
-      margin: 4px 8px;
-    }
-  }
-
   .comment-textbox {
     padding: 3px 0 0;
     border-radius: 4px;
@@ -57,16 +50,19 @@ $comment-selected-green-2: #c1f3b3;
     background-color: white;
     margin: 2px 4px;
     padding: 2px 0;
+    font-size: 14px;
+    font-family: Lato;
 
-    .comment-textarea {
+    textarea {
       border-style: none;
       border-color: Transparent;
       overflow: hidden;
       resize: vertical;
-      font-family: Lato;
       margin: 2px;
       width: calc(100% - 5px);
       box-sizing: border-box;
+      font-size: 14px;
+      font-family: Lato;
 
       &::placeholder {
         color: $charcoal;
