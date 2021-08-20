@@ -63,7 +63,7 @@ export const ProblemTabContent: React.FC<IProps>
       {sections.map((section) => {
         return (
           <TabPanel key={`section-${section.type}`} data-focus-section={section.type}>
-            <ProblemPanelComponent section={section} key={`section-${section.type}`} />
+            <ProblemPanelComponent section={section} key={`section-${section.type}`}  isChatOpen={isChatOpen}/>
           </TabPanel>
         );
       })}

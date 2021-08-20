@@ -13,6 +13,7 @@ import { dragTileSrcDocId, kDragTileCreate, kDragTiles } from "../tools/tool-til
 import { safeJsonParse } from "../../utilities/js-utils";
 
 import "./document-content.sass";
+import classNames from "classnames";
 
 interface IProps extends IBaseProps {
   context: string;
@@ -22,6 +23,7 @@ interface IProps extends IBaseProps {
   scale?: number;
   selectedSectionId?: string | null;
   viaTeacherDashboard?: boolean;
+  documentSelectedForComment?: boolean;
 }
 
 interface IDragResizeRow {
@@ -99,9 +101,11 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const {viaTeacherDashboard} = this.props;
+    const {viaTeacherDashboard, documentSelectedForComment} = this.props;
+    const documentClass = classNames("document-content", viaTeacherDashboard ? "document-content-smooth-scroll" : "",
+                                     documentSelectedForComment ? "comment-select" : "");
     return (
-      <div className={`document-content${viaTeacherDashboard ? " document-content-smooth-scroll" : ""}`}
+      <div className={documentClass}
         onScroll={this.handleScroll}
         onClick={this.handleClick}
         onDragOver={this.handleDragOver}
