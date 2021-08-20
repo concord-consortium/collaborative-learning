@@ -3,15 +3,9 @@ import React from "react";
 import { BaseComponent } from "../base";
 import { getDisplayTimeDate } from "../../utilities/time";
 import { ChatPanelHeader } from "./chat-panel-header";
-import { CommentCard } from "./comment-card";
+import { CommentCard, ICommentData } from "./comment-card";
 import "./chat-panel.scss";
-import { UserModelType } from "../../models/stores/user";
 
-export interface ICommentData {
-  comment: string;
-  timePosted: string | number;
-  user: UserModelType;
-}
 interface IProps {
   newCommentCount: number;
   onCloseChatPanel:(show:boolean) => void;

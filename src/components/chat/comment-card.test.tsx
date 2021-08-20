@@ -1,22 +1,15 @@
 import { render, screen } from "@testing-library/react";
-import { Provider } from "mobx-react";
 import React from "react";
 import { UserModelType } from "../../models/stores/user";
-import { ENavTab } from "../../models/view/nav-tabs";
-import { ICommentData } from "./chat-panel";
-import { CommentCard } from "./comment-card";
+import { CommentCard, ICommentData } from "./comment-card";
 
 describe("CommentCard", () => {
-
-  const stores = { ui: { activeNavTab: ENavTab.kMyWork } };
-  const activeNavTab = stores.ui.activeNavTab;
   const testUser  = { id: "0", name: "Test Teacher" } as UserModelType;
+  const activeNavTab = "my-work";
 
   it("should render successfully", () => {
     render((
-      <Provider stores={stores}>
-        <CommentCard activeNavTab={activeNavTab} />
-      </Provider>
+      <CommentCard activeNavTab={activeNavTab} />
     ));
     expect(screen.getByTestId("comment-card")).toBeInTheDocument();
     expect(screen.getByTestId("comment-card")).toHaveClass(activeNavTab);

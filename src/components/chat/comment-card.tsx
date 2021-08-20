@@ -5,7 +5,12 @@ import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
 import DocumentCommentIcon from "../../assets/document-id.svg";
 import "./comment-card.scss";
 import "../themes.scss";
-import { ICommentData } from "./chat-panel";
+
+export interface ICommentData {
+  comment: string;
+  timePosted: string | number;
+  user: UserModelType;
+}
 
 interface IProps {
   user?: UserModelType;
