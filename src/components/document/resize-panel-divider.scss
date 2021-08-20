@@ -22,7 +22,7 @@
 
     .drag-thumbnail {
       position: absolute;
-      z-index: 3;
+      z-index: 1;
       margin-top: 9px;
       top: 50%;
     }
@@ -30,6 +30,7 @@
       display: flex;
       flex-direction: row;
       position: relative;
+      left: 0;
       width: 44px;
       height: 44px;
       z-index: 3;
@@ -41,27 +42,27 @@
         opacity: 100%;
       }
     }
-
-      .left-right-drag {
-        position: absolute;
-        left: 0;
-        z-index: 2;
-      }
       .drag-left-handle {
-        position: relative;
+        position: absolute;
         width: 21px;
         height: 100%;
         left: 0;
         z-index: 3;
         cursor: pointer;
+        &.disabled {
+          visibility: hidden;
+        }
       }
       .drag-right-handle {
-        position: relative;
+        position: absolute;
         width: 21px;
         height: 100%;
         right: 0;
         z-index: 3;
         cursor: pointer;
+        &.disabled {
+          visibility: hidden;
+        }
       }
     }
   }

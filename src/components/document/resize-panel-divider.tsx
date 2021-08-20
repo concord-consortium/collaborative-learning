@@ -1,6 +1,7 @@
 import React from "react";
 import DragThumbnailIcon from "../../assets/drag-thumb-icon.svg";
-import LeftRightDragIcon from "../../assets/left-right-drag.svg";
+import LeftDragIcon from "../../assets/left-drag.svg";
+import RightDragIcon from "../../assets/right-drag.svg";
 import { kDividerMax, kDividerMin } from "../../models/stores/ui-types";
 import "./resize-panel-divider.scss";
 
@@ -24,9 +25,14 @@ export const ResizePanelDivider: React.FC <IProps> =
     <div className="resize-panel-divider" style={dividerPositionStyle}>
       <div className="divider" />
       <div className="drag-handles">
-        <div className="drag-left-handle" onClick={() => onExpandWorkspace()}></div>
-        <LeftRightDragIcon className="left-right-drag"/>
-        <div className="drag-right-handle" onClick={() => onExpandResources()}></div>
+        {!(dividerPosition === kDividerMin) &&
+          <LeftDragIcon className={`drag-left-handle ${dividerPosition === kDividerMin ? "disabled" : "" }`}
+                        onClick={() => onExpandWorkspace()} />
+        }
+        {!(dividerPosition === kDividerMax) &&
+          <RightDragIcon className={`drag-right-handle ${dividerPosition === kDividerMax ? "disabled" : ""}`}
+                         onClick={() => onExpandResources()} />
+        }
       </div>
       <DragThumbnailIcon className="drag-thumbnail"/>
     </div>

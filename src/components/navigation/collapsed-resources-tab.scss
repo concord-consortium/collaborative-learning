@@ -13,6 +13,7 @@
   border-width: 2px;
   border-style: solid;
   display: flex;
+  z-index: 2;
   visibility: hidden;
   &.shown {
     visibility: visible;

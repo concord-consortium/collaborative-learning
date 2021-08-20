@@ -12,6 +12,7 @@
   box-sizing: border-box;
   border-width: 2px;
   border-style: solid;
+  z-index: 2;
   display: flex;
   &.problem {
     border-color: $workspace-teal;
