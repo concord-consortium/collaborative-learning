@@ -6,6 +6,8 @@ const displayTimeDate = getDisplayTimeDate(time); // 12:05 PM Nov 14
 const localDaySecondDigit = timestamp[1];
 const localHourFirstDigit = timestamp[8];
 const localHourSecondDigit = timestamp[9];
+const localDisplayHourFirstDigit = displayTimeDate[0];
+const localDisplayHourSecondDigit = displayTimeDate[1];
 
 describe("Human Readable Timestamp", () => {
   it("can return the day", () => {
@@ -45,6 +47,6 @@ describe("Human Readable Timestamp", () => {
     expect(timestamp).toHaveLength(16);
   });
   it("can return correct display time format of the timestamp", () => {
-    expect(displayTimeDate).toContain(`12:05 PM Nov 14`);
+    expect(displayTimeDate).toContain(`${localDisplayHourFirstDigit}${localDisplayHourSecondDigit}:05 PM Nov 14`);
   });
 });

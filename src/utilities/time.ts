@@ -76,9 +76,10 @@ export const getDisplayTimeDate = (time: number) => { //returns 12:05 PM Nov 14
   const fullMinutes = (`0${minutes}`).slice(-2);
   const ampm = hours >= 12 ? 'PM' : 'AM';
   const hours12 = hours > 12 ? hours - 12 : hours === 0 ? 12 : hours;
+  const full12Hours = (`0${hours12}`).slice(-2);
   // This returns a three-letter abbreviated month in EN-US
   const monthsEN = ["January", "February", "March", "April", "May", "June",
                   "July", "August", "September", "October", "November", "December"];
   const abbrMonth = monthsEN[month].slice(0, 3);
-  return `${hours12}:${fullMinutes} ${ampm} ${abbrMonth} ${day}`;
+  return `${full12Hours}:${fullMinutes} ${ampm} ${abbrMonth} ${day}`;
 };

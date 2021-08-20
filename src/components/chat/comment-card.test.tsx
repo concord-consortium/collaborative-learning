@@ -22,7 +22,6 @@ describe("CommentCard", () => {
     expect(screen.getByTestId("comment-card")).toBeInTheDocument();
     expect(screen.getByTestId("comment-card")).toHaveClass(activeNavTab);
     expect(screen.getByTestId("comment-card-header")).toBeInTheDocument();
-
   });
   it("should show the correct header icon when there are no comments", () => {
     const postedComments:any = [];
