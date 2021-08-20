@@ -5,11 +5,12 @@ import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
 import DocumentCommentIcon from "../../assets/document-id.svg";
 import "./comment-card.scss";
 import "../themes.scss";
+import { ICommentData } from "./chat-panel";
 
 interface IProps {
   user?: UserModelType;
   activeNavTab?: string;
-  postedComments?: {comment: string, timePosted: string, user: UserModelType}[]
+  postedComments?: ICommentData[]
   onPostComment?: (comment: string) => void;
 }
 

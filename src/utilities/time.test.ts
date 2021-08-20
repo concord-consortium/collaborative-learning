@@ -7,7 +7,7 @@ const localDaySecondDigit = timestamp[1];
 const localHourFirstDigit = timestamp[8];
 const localHourSecondDigit = timestamp[9];
 const localDisplayHourFirstDigit = displayTimeDate[0];
-const localDisplayHourSecondDigit = displayTimeDate[1];
+const localDisplayHourSecondDigit = parseInt(localDisplayHourFirstDigit, 10) > 1 ? "" : displayTimeDate[1];
 
 describe("Human Readable Timestamp", () => {
   it("can return the day", () => {

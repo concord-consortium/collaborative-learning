@@ -95,14 +95,10 @@ $comment-selected-green-2: #c1f3b3;
         height: 13px;
       }
     }
-    .comment-text {
-      color: $charcoal-dark-2;
-      margin: 0 5px;
-    }
     .new-marker {
       display: flex;
       flex-direction: row;
-      .new-text{
+      .new-text {
         font-size: 9px;
         font-weight: bold;
         color: $charcoal-dark-2;

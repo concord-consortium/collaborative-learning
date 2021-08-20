@@ -1,21 +1,15 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Provider } from "mobx-react";
 import React from "react";
 import { act } from "react-dom/test-utils";
-import { ENavTab } from "../../models/view/nav-tabs";
 import { CommentTextBox } from "./comment-textbox";
 
 describe("Comment Textbox", () => {
 
-  const stores = { ui: { activeNavTab: ENavTab.kMyWork } };
-
   it("should render successfully", () => {
     const activeNavTab = "problems";
     render((
-      <Provider stores={stores}>
-        <CommentTextBox activeNavTab={activeNavTab} numPostedComments={5} />
-      </Provider>
+      <CommentTextBox activeNavTab={activeNavTab} numPostedComments={5} />
     ));
     expect(screen.getByTestId("comment-textarea")).toBeInTheDocument();
     expect(screen.getByTestId("comment-post-button")).toBeInTheDocument();
@@ -25,9 +19,7 @@ describe("Comment Textbox", () => {
 
   it("should allow user to type text in the textarea and enable Post button", () => {
     const { rerender } = render((
-      <Provider stores={stores}>
-        <CommentTextBox numPostedComments={5}/>
-      </Provider>
+      <CommentTextBox numPostedComments={5}/>
     ));
     const postButton = screen.getByTestId("comment-post-button");
     const textarea = screen.getByTestId("comment-textarea") as HTMLTextAreaElement;
@@ -37,9 +29,8 @@ describe("Comment Textbox", () => {
       userEvent.type(textarea, text);
     });
     rerender(
-      <Provider stores={stores}>
-        <CommentTextBox numPostedComments={5} />
-      </Provider>);
+      <CommentTextBox numPostedComments={5} />
+    );
     expect(textarea.value).toBe(text);
     expect(postButton).not.toHaveClass("disabled");
     act(() => {
@@ -52,9 +43,7 @@ describe("Comment Textbox", () => {
     const onPostComment = jest.fn();
     window.alert = jest.fn();
     const { rerender } = render((
-      <Provider stores={stores}>
-        <CommentTextBox numPostedComments={5} onPostComment={onPostComment} />
-      </Provider>
+      <CommentTextBox numPostedComments={5} onPostComment={onPostComment} />
     ));
     const postButton = screen.getByTestId("comment-post-button");
     const textarea = screen.getByTestId("comment-textarea") as HTMLTextAreaElement;
@@ -64,9 +53,8 @@ describe("Comment Textbox", () => {
       userEvent.type(textarea, text);
     });
     rerender(
-      <Provider stores={stores}>
-        <CommentTextBox numPostedComments={5} onPostComment={onPostComment} />
-      </Provider>);
+      <CommentTextBox numPostedComments={5} onPostComment={onPostComment} />
+    );
     expect(textarea.value).toBe(text);
     expect(postButton).not.toHaveClass("disabled");
     act(() => {

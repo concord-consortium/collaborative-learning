@@ -7,13 +7,18 @@ import { CommentCard } from "./comment-card";
 import "./chat-panel.scss";
 import { UserModelType } from "../../models/stores/user";
 
+export interface ICommentData {
+  comment: string;
+  timePosted: string | number;
+  user: UserModelType;
+}
 interface IProps {
   newCommentCount: number;
   onCloseChatPanel:(show:boolean) => void;
 }
 
 interface IState {
-  commentData: { comment: string; timePosted: string; user: UserModelType}[];
+  commentData: ICommentData[];
 }
 
 @inject("stores")
@@ -24,7 +29,6 @@ export class ChatPanel extends BaseComponent<IProps, IState> {
     this.state = {
       commentData: [],
     };
-    this.handlePostComment = this.handlePostComment.bind(this);
   }
 
   public render() {
@@ -44,7 +48,7 @@ export class ChatPanel extends BaseComponent<IProps, IState> {
     );
   }
 
-  private handlePostComment(commentStr: string) {
+  private handlePostComment = (commentStr: string) => {
     const time = getDisplayTimeDate(Date.now());
     const commentDataPosted = {comment: commentStr, timePosted: time, user: this.stores.user};
     this.setState(prevState => ({commentData: [...prevState.commentData, commentDataPosted]}));
