@@ -25,12 +25,12 @@ export const ResizePanelDivider: React.FC <IProps> =
     <div className="resize-panel-divider" style={dividerPositionStyle}>
       <div className="divider" />
       <div className="drag-handles">
-        {!(dividerPosition  === kDividerMin) &&
-          <LeftDragIcon className={`drag-left-handle ${dividerPosition  === kDividerMin ? "disabled" : "" }`}
+        {!(dividerPosition === kDividerMin) &&
+          <LeftDragIcon className={`drag-left-handle ${dividerPosition === kDividerMin ? "disabled" : "" }`}
                         onClick={() => onExpandWorkspace()} />
         }
-        {!(dividerPosition  === kDividerMax) &&
-          <RightDragIcon className={`drag-right-handle ${dividerPosition  === kDividerMax ? "disabled" : ""}`}
+        {!(dividerPosition === kDividerMax) &&
+          <RightDragIcon className={`drag-right-handle ${dividerPosition === kDividerMax ? "disabled" : ""}`}
                          onClick={() => onExpandResources()} />
         }
       </div>
