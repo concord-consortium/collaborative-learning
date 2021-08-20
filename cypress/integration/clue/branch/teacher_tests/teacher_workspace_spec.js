@@ -28,6 +28,7 @@ beforeEach(() => {
 
 describe.skip('teacher specific navigation tabs', () => {
   it('verify problem tab solution switch', () => {
+    cy.get('.collapsed-resources-tab').click();
     cy.get('.nav-tab.tab-problems').should('exist').click();
     cy.get('.prob-tab').contains('What If...?').click();
     cy.get('[data-test=solutions-button]').should('have.class', "toggled");
@@ -92,7 +93,8 @@ describe.skip('Chat panel for networked teacher', () => {
     cy.waitForSpinner();
     dashboard.switchView("Workspace & Resources");
     cy.wait(2000);
-    cy.get('.nav-tab.tab-problems').click();
+    cy.get('.collapsed-resources-tab').click();
+    cy.openTopTab("problems");
     cy.get('.chat-panel-toggle').should('exist');
   });
   it('verify chat panel opens', () => {
@@ -102,6 +104,27 @@ describe.skip('Chat panel for networked teacher', () => {
     cy.get('.chat-close-button').should('exist').click();
     cy.get('.chat-panel-toggle').should('exist');
     cy.get('.chat-panel').should('not.exist');
+  });
+  it('verify new comment card is visible, and Post button is disabled', () => {
+    cy.get('.chat-panel-toggle').click();
+    cy.get('[data-testid=comment-card]').should('be.visible');
+    cy.get('[data-testid=comment-post-button]').should('have.class', 'disabled');
+  });
+  it('verify user can cancel a comment', () => {
+    const documentComment = "This comment is for the document.";
+    cy.get('[data-testid=comment-textarea]').click().type(documentComment);
+    cy.get('[data-testid=comment-textarea]').should('contain', documentComment);
+    cy.get('[data-testid=comment-cancel-button]').click();
+    cy.get('[data-testid=comment-textarea]').should('not.contain', documentComment);
+  });
+  it('verify user can post a comment', () => { //need to change when posting comment actually puts a comment card
+    const documentComment = "An alert should show this document comment.";
+    cy.get('[data-testid=comment-textarea]').click().type(documentComment);
+    cy.get('[data-testid=comment-textarea]').should('contain', documentComment);
+    cy.get('[data-testid=comment-post-button]').click();
+    cy.on ('window:alert', (str) => {
+      expect(str).to.contain(documentComment);
+    });
   });
 });
 
