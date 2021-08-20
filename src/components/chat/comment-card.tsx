@@ -1,105 +1,62 @@
-import { inject, observer } from "mobx-react";
 import React from "react";
-import { BaseComponent } from "../base";
+import { UserModelType } from "../../models/stores/user";
+import { CommentTextBox } from "./comment-textbox";
+import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
 import DocumentCommentIcon from "../../assets/document-id.svg";
-import SendIcon from "../../assets/send-icon.svg";
 import "./comment-card.scss";
 import "../themes.scss";
-import classNames from "classnames";
 
 interface IProps {
+  user?: UserModelType;
+  activeNavTab?: string;
+  postedComments?: {comment: string, timePosted: string, user: UserModelType}[]
+  onPostComment?: (comment: string) => void;
 }
 
-interface IState {
-  commentTextAreaHeight: number | string;
-  commentAdded: boolean;
-  commentText: string;
-}
-const minTextAreaHeight = 35;
-
-@inject("stores")
-@observer
-export class CommentCard extends BaseComponent<IProps, IState> {
-  state = {
-    commentTextAreaHeight: minTextAreaHeight,
-    commentAdded: false,
-    commentText: "",
+export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedComments, onPostComment }) => {
+   const renderThreadHeader = () => {
+    const teacherInitial = user?.name.charAt(0);
+    return (
+      <div className={`comment-card-header ${activeNavTab}`} data-testid="comment-card-header">
+        {postedComments && postedComments.length < 1
+          ? <DocumentCommentIcon className="new-thread-header-icon" data-testid="document-comment-icon"/>
+          : <div className="initial" data-testid="teacher-initial">{teacherInitial}</div>
+        }
+      </div>
+    );
   };
 
-  escFunction = (event: any) => {
-    if(event.keyCode === 27) {
-      this.setState({commentTextAreaHeight: minTextAreaHeight, commentAdded: false, commentText: ""});
-    }
-  }
-  componentDidMount(){
-    document.addEventListener("keydown", this.escFunction, false);
-  }
-  componentWillUnmount(){
-    document.removeEventListener("keydown", this.escFunction, false);
-  }
-
-  public render() {
-    const { ui } = this.stores;
-    return (
-      <div className={`comment-card ${ui.activeNavTab}`} data-testid="comment-card">
-        {this.renderThreadHeader()}
-        {this.renderCommentTextbox()}
-      </div>
-    );
-  }
-
-  private renderThreadHeader() {
-    const { ui } = this.stores;
-    return (
-      <div className={`comment-card-header ${ui.activeNavTab}`}>
-        <DocumentCommentIcon className="new-thread-header-icon"/>
-      </div>
-    );
-  }
-  handleCommentTextAreaChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const target = event.target;
-    const targetText = target.value;
-    if (!targetText) {
-      this.setState({commentTextAreaHeight: minTextAreaHeight, commentAdded: false, commentText: ""});
-    } else {
-      this.setState({commentTextAreaHeight: target.scrollHeight, commentAdded: true, commentText: targetText});
-    }
-  };
-  handleCancelPost = () => {
-    this.setState({commentTextAreaHeight: minTextAreaHeight, commentAdded: false, commentText: ""});
-  }
-  handleSendPost = () => {
-    alert(`You are sending this comment: ${this.state.commentText}`);
-    this.setState({commentTextAreaHeight: minTextAreaHeight, commentAdded: false, commentText: ""});
-  }
-
-  private renderCommentTextbox() {
-    const { ui } = this.stores;
-    const { commentTextAreaHeight, commentAdded, commentText } = this.state;
-    const textareaStyle = {height: commentTextAreaHeight};
-    const postButtonClass = classNames("comment-footer-button", "themed-negative", ui.activeNavTab,
-                                       { disabled: !commentAdded, "no-action": !commentAdded });
-    return (
-      <div className="comment-textbox">
-        <textarea
-          style={textareaStyle}
-          placeholder="Comment on this document..."
-          value={commentText}
-          data-testid="comment-textarea"
-          onChange={this.handleCommentTextAreaChange}
-        />
-        <div className="comment-textbox-footer">
-          <div className="comment-footer-button cancel"
-               onClick={this.handleCancelPost}
-               data-testid="comment-cancel-button">
-            Cancel
-          </div>
-          <div className={postButtonClass} onClick={this.handleSendPost} data-testid="comment-post-button">
-            <SendIcon />
-            Post
-          </div>
-        </div>
-      </div>
-    );
-  }
-}
+  return (
+    <div className={`comment-card ${activeNavTab}`} data-testid="comment-card">
+      {renderThreadHeader()}
+      { postedComments?.map((comment, idx) => {
+          const userInitialBackgroundColor = ["#f79999", "#ffc18a", "#99d099", "#ff9", "#b2b2ff", "#efa6ef"];
+          const commenterInitial = comment.user.name.charAt(0);
+          const userInitialBackgroundColorIndex = parseInt(comment.user.id, 10) % 6;
+          const backgroundStyle = user?.id === comment.user.id
+                                    ? {backgroundColor: "white"}
+                                    : {backgroundColor: userInitialBackgroundColor[userInitialBackgroundColorIndex]};
+          return (
+            <div key={idx} className="comment-thread" data-testid="comment-thread">
+              <div className="comment-text-header">
+                <div className="user-icon" style={backgroundStyle}>
+                  {user?.id === comment.user.id ? <UserIcon />
+                                                : commenterInitial
+                  }
+                </div>
+                <div className="user-name">{comment.user.name}</div>
+                <div className="time-stamp">{comment.timePosted}</div>
+                <div className="menu"></div>
+              </div>
+              <div key={idx} className="comment-text" data-testid="comment">{comment.comment}</div>
+            </div>
+          );
+        })
+      }
+      <CommentTextBox
+        activeNavTab={activeNavTab}
+        onPostComment={onPostComment}
+        numPostedComments={postedComments?.length || 0} />
+    </div>
+  );
+};

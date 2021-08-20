@@ -41,6 +41,74 @@ $comment-selected-green-2: #c1f3b3;
     .new-thread-header-icon {
       fill: $charcoal;
     }
+    .initial {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid $charcoal;
+      border-radius: 3px;
+      width: 18px;
+      height: 18px;
+      padding: 1px 0 0;
+      margin-right: 5px;
+    }
+  }
+  .comment-thread {
+    margin: 3px 0 2px 5px;
+    .comment-text-header {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      .user-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 2px;
+        border-radius: 4px;
+        border: solid 1px #979797;
+        background-color: white;
+        width: 21px;
+        height: 21px;
+        font-size: 14px;
+        font-weight: bold;
+        svg {
+          width: 14px;
+          height: 14px;
+          fill: $problem-orange;
+        }
+      }
+      .user-name {
+        margin-left: 5px;
+        font-size: 11px;
+        font-weight: bold;
+        color: $charcoal-dark-1;
+      }
+      .time-stamp {
+        margin-left: 5px;
+        font-size: 11px;
+        font-weight: normal;
+        color: $charcoal-dark-1;
+      }
+      .menu {
+        margin-right: 8px;
+        opacity: 0.35;
+        height: 13px;
+      }
+    }
+    .comment-text {
+      color: $charcoal-dark-2;
+      margin: 0 5px;
+    }
+    .new-marker {
+      display: flex;
+      flex-direction: row;
+      .new-text{
+        font-size: 9px;
+        font-weight: bold;
+        color: $charcoal-dark-2;
+        background-color: $new-comment-notice;
+      }
+    }
   }
 
   .comment-textbox {
@@ -48,8 +116,7 @@ $comment-selected-green-2: #c1f3b3;
     border-radius: 4px;
     border: solid 1.5px $charcoal-light-4;
     background-color: white;
-    margin: 2px 4px;
-    padding: 2px 0;
+    margin: 5px;
     font-size: 14px;
     font-family: Lato;
 
@@ -57,7 +124,7 @@ $comment-selected-green-2: #c1f3b3;
       border-style: none;
       border-color: Transparent;
       overflow: hidden;
-      resize: vertical;
+      resize: none;
       margin: 2px;
       width: calc(100% - 5px);
       box-sizing: border-box;

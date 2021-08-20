@@ -44,7 +44,7 @@ export const niceDateTime = (timestamp: number) => {
   return new Date(timestamp).toLocaleString();
 };
 
-export const getLocalTimeStamp = (time: number) => {
+export const getLocalTimeStamp = (time: number) => { //returns 14NOV19-12:05:33
   const start = new Date(time);
   const year = start.getFullYear();
   const month = start.getMonth();
@@ -65,4 +65,20 @@ export const getLocalTimeStamp = (time: number) => {
   const fullMinutes = (`0${minutes}`).slice(-2);
   const fullSeconds = (`0${seconds}`).slice(-2);
   return `${fullDay}${abbrMonth}${abbrYear}-${fullHours}:${fullMinutes}:${fullSeconds}`;
+};
+
+export const getDisplayTimeDate = (time: number) => { //returns 12:05 PM Nov 14
+  const start = new Date(time);
+  const month = start.getMonth();
+  const day = start.getDate();
+  const hours = start.getHours();
+  const minutes = start.getMinutes();
+  const fullMinutes = (`0${minutes}`).slice(-2);
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  const hours12 = hours > 12 ? hours - 12 : hours === 0 ? 12 : hours;
+  // This returns a three-letter abbreviated month in EN-US
+  const monthsEN = ["January", "February", "March", "April", "May", "June",
+                  "July", "August", "September", "October", "November", "December"];
+  const abbrMonth = monthsEN[month].slice(0, 3);
+  return `${hours12}:${fullMinutes} ${ampm} ${abbrMonth} ${day}`;
 };

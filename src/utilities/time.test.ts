@@ -1,7 +1,8 @@
-import { getLocalTimeStamp } from "./time";
+import { getDisplayTimeDate, getLocalTimeStamp } from "./time";
 
 const time = 1573761933537; // Thu Nov 14 2019 12:05:33 GMT-0800 (Pacific Standard Time)
 const timestamp = getLocalTimeStamp(time); // 14NOV19-12:05:33
+const displayTimeDate = getDisplayTimeDate(time); // 12:05 PM Nov 14
 const localDaySecondDigit = timestamp[1];
 const localHourFirstDigit = timestamp[8];
 const localHourSecondDigit = timestamp[9];
@@ -42,5 +43,8 @@ describe("Human Readable Timestamp", () => {
   it("can return the correct format of the timestamp", () => {
     expect(timestamp).toContain(`1${localDaySecondDigit}NOV19-${localHourFirstDigit}${localHourSecondDigit}:05:33`);
     expect(timestamp).toHaveLength(16);
+  });
+  it("can return correct display time format of the timestamp", () => {
+    expect(displayTimeDate).toContain(`12:05 PM Nov 14`);
   });
 });
