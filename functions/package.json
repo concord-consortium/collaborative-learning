@@ -6,7 +6,9 @@
     "serve": "npm run build && firebase emulators:start",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
-    "deploy": "firebase deploy --only functions",
+    "deploy:all": "firebase deploy --only functions",
+    "deploy:getImageData": "firebase deploy --only functions:getImageData",
+    "deploy:postDocumentComment": "firebase deploy --only functions:postDocumentComment_v1",
     "logs": "firebase functions:log",
     "test": "ts-node node_modules/jest/bin/jest.js --detectOpenHandles"
   },
