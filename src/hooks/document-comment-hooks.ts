@@ -66,9 +66,21 @@ const commentConverter = {
  * and reuse if multiple clients request the same comments.
  */
 export const useDocumentComments = (documentKey: string) => {
-  return useCollectionOrderedRealTimeQuery(
-          `documents/${documentKey}/comments`, {
-            converter: commentConverter,
-            orderBy: "createdAt"
-          });
+  const path = documentKey ? `documents/${documentKey}/comments` : "";
+  const converter = commentConverter;
+  return useCollectionOrderedRealTimeQuery(path, { converter, orderBy: "createdAt" });
+};
+
+/*
+ * useUnreadDocumentComments
+ *
+ * Shares the same Firestore real-time listener as the previous hook but filters the results
+ * to return unread messages. We don't have an implementation for this yet, but this hook
+ * serves as a placeholder. Eventually, we will need to figure out whether this will be
+ * based on a single timestamp, or a separate timestamp for each thread, or flags for each
+ * message indicated which have been read, etc.
+ */
+export const useUnreadDocumentComments = (documentKey: string) => {
+  // TODO: figure this out; for now it's just a comment counter
+  return useDocumentComments(documentKey);
 };

@@ -22,6 +22,16 @@ jest.mock("../../hooks/document-comment-hooks", () => ({
     ],
     error: undefined
   }),
+  useUnreadDocumentComments: () => ({
+    isLoading: false,
+    isError: false,
+    data: [
+      { uid: "1", name: "Teacher 1", createdAt: new Date(), content: "Comment 6" },
+      { uid: "1", name: "Teacher 1", createdAt: new Date(), content: "Comment 7" },
+      { uid: "1", name: "Teacher 1", createdAt: new Date(), content: "Comment 8" }
+    ],
+    error: undefined
+  }),
   usePostDocumentComment: () => ({
     mutate: () => mockPostComment()
   })

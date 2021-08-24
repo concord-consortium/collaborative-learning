@@ -29,18 +29,21 @@ export function useCollectionOrderedRealTimeQuery<T>(
   const { converter = defaultConverter<T>(), orderBy, useQueryOptions: _useQueryOptions } = options || {};
   const queryClient = useQueryClient();
   const [db, root] = useFirestore();
-  const fsPath = `${root}/${partialPath}`;
+  const fsPath = partialPath ? `${root}/${partialPath}` : "";
 
   useEffect(() => {
     // use Firestore real-time listener to update query data automatically
     // cf. https://aggelosarvanitakis.medium.com/a-real-time-hook-with-firebase-react-query-f7eb537d5145
-    const ref = db.collectionRef(fsPath).withConverter(converter);
-    const query = orderBy ? ref.orderBy(orderBy) : ref;
-    const unsubscribe = query.onSnapshot(querySnapshot => {
-                          const docs = querySnapshot.docs.map(doc => doc.data());
-                          queryClient.setQueryData(fsPath, docs);
-                        });
-    return () => unsubscribe();
+    // TODO: share a listener instance across hook instances rather than having multiple listeners
+    if (fsPath) {
+      const ref = db.collectionRef(fsPath).withConverter(converter);
+      const query = orderBy ? ref.orderBy(orderBy) : ref;
+      const unsubscribe = query.onSnapshot(querySnapshot => {
+                            const docs = querySnapshot.docs.map(doc => doc.data());
+                            queryClient.setQueryData(fsPath, docs);
+                          });
+      return () => unsubscribe();
+    }
   }, [converter, db, fsPath, options?.orderBy, orderBy, queryClient]);
 
   // set staleTime to Infinity; we never need to re-run this query, since the listener handles updates

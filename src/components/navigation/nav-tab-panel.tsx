@@ -9,6 +9,7 @@ import { StudentGroupView } from "../document/student-group-view";
 import { ProblemTabContent } from "./problem-tab-content";
 import { DocumentTabContent } from "./document-tab-content";
 import { SupportBadge } from "./support-badge";
+import { NewCommentsBadge } from "./new-comments-badge";
 import { ChatPanel } from "../chat/chat-panel";
 import ChatIcon from "../../assets/chat-icon.svg";
 
@@ -53,7 +54,6 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
                               : `calc(${ui.dividerPosition}% - ${resizePanelWidth}px)`;
     const resourceWidthStyle = {width: resourceWidth};
     const referenceDocument = ui.referenceDocument && documents.getDocument(ui.referenceDocument);
-    const newCommentCount = 8;
     return (
       <div className={`resource-and-chat-panel ${isResourceExpanded ? "shown" : ""}`} style={resourceWidthStyle}>
         <div className={`nav-tab-panel ${this.state.showChatColumn ? "chat-open" : ""}`}>
@@ -75,7 +75,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
               { user.isNetworkedTeacher
                   ? (!this.state.showChatColumn) &&
                     <div className={`chat-panel-toggle themed ${ui.activeNavTab}`}>
-                      <div className="new-comment-badge">{newCommentCount}</div>
+                      <NewCommentsBadge documentKey={ui.referenceDocument} />
                       <ChatIcon
                         className={`chat-button ${ui.activeNavTab}`}
                         onClick={() => this.handleShowChatColumn(true)}
