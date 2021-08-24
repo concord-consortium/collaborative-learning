@@ -97,4 +97,14 @@ describe("document model", () => {
     expect(document.getProperty("foo")).toBeUndefined();
     expect(document.getProperty("bar")).toBe("baz");
   });
+
+  it("can get document metadata", () => {
+    expect(document.getMetadata()).toEqual({
+      type: ProblemDocument,
+      uid: "1",
+      key: "test",
+      createdAt: 1,
+      properties: {}
+    });
+  });
 });

@@ -35,7 +35,7 @@ type UsersCollection = FSCollection<UserDocument>;
  * Subcollection of documents with a denormalized teacher name field with potential synchronization issues.
  * Comments associated with a document are accessible to any user with access to the document.
  */
-interface CommentDocument {
+export interface CommentDocument {
   uid: string;                // user id of author of comment
   name: string;               // [denormalized] name of user to avoid having to request user data separately
   createdAt: FSDate;          // timestamp used for sorting

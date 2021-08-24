@@ -1,50 +1,33 @@
-import { inject, observer } from "mobx-react";
-import React from "react";
-import { BaseComponent } from "../base";
-import { getDisplayTimeDate } from "../../utilities/time";
+import React, { useCallback } from "react";
 import { ChatPanelHeader } from "./chat-panel-header";
-import { CommentCard, ICommentData } from "./comment-card";
+import { CommentCard } from "./comment-card";
+import { useDocumentComments, usePostDocumentComment } from "../../hooks/document-comment-hooks";
+import { CommentDocument } from "../../lib/firestore-schema";
 import "./chat-panel.scss";
 
 interface IProps {
-  newCommentCount: number;
+  activeNavTab: string;
+  document: any;
   onCloseChatPanel:(show:boolean) => void;
 }
 
-interface IState {
-  commentData: ICommentData[];
-}
+export const ChatPanel: React.FC<IProps> = ({ activeNavTab, document, onCloseChatPanel }) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { isLoading, isError, data, error } = useDocumentComments(document.key);
+  const comments: CommentDocument[] | undefined = data?.docs.map(c => c.data()) as any;
+  const mutation = usePostDocumentComment();
+  const postComment = useCallback((comment: string) => mutation.mutate({ document, comment }), [document, mutation]);
+  const newCommentCount = 8;  // TODO: figure this out
 
-@inject("stores")
-@observer
-export class ChatPanel extends BaseComponent<IProps, IState> {
-  constructor(props: IProps) {
-    super(props);
-    this.state = {
-      commentData: [],
-    };
-  }
-
-  public render() {
-    const { newCommentCount, onCloseChatPanel } = this.props;
-    const { ui, user } = this.stores;
-
-    return (
-      <div className={`chat-panel ${ui.activeNavTab}`} data-testid="chat-panel">
-        <ChatPanelHeader onCloseChatPanel={onCloseChatPanel} newCommentCount={newCommentCount} />
-        <CommentCard
-          activeNavTab={ui.activeNavTab}
-          user={user}
-          onPostComment={this.handlePostComment}
-          postedComments={this.state.commentData}
-        />
-      </div>
-    );
-  }
-
-  private handlePostComment = (commentStr: string) => {
-    const time = getDisplayTimeDate(Date.now());
-    const commentDataPosted = {comment: commentStr, timePosted: time, user: this.stores.user};
-    this.setState(prevState => ({commentData: [...prevState.commentData, commentDataPosted]}));
-  }
-}
+  return (
+    <div className={`chat-panel ${activeNavTab}`} data-testid="chat-panel">
+      <ChatPanelHeader activeNavTab={activeNavTab} newCommentCount={newCommentCount}
+                       onCloseChatPanel={onCloseChatPanel} />
+      <CommentCard
+        activeNavTab={activeNavTab}
+        onPostComment={postComment}
+        postedComments={comments}
+      />
+    </div>
+  );
+};

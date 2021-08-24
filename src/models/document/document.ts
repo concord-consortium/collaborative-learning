@@ -57,6 +57,10 @@ export const DocumentModel = types
               || (self.type === PersonalPublication)
               || (self.type === SupportPublication);
     },
+    getMetadata() {
+      const { uid, type, key, createdAt, title, originDoc, properties } = self;
+      return { uid, type, key, createdAt, title, originDoc, properties: properties.toJSON() };
+    },
     getProperty(key: string) {
       return self.properties.get(key);
     },

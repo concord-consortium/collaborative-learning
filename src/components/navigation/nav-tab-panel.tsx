@@ -42,7 +42,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
 
   public render() {
     const { tabs, isResourceExpanded } = this.props;
-    const { ui, user, supports } = this.stores;
+    const { ui, user, documents, supports } = this.stores;
     const selectedTabIndex = tabs?.findIndex(t => t.tab === ui.activeNavTab);
     const resizePanelWidth = 4;
     const collapseTabWidth = 44;
@@ -52,6 +52,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
                               ? `calc(100% - ${collapseTabWidth}px - ${resizePanelWidth}px)`
                               : `calc(${ui.dividerPosition}% - ${resizePanelWidth}px)`;
     const resourceWidthStyle = {width: resourceWidth};
+    const referenceDocument = ui.referenceDocument && documents.getDocument(ui.referenceDocument);
     const newCommentCount = 8;
     return (
       <div className={`resource-and-chat-panel ${isResourceExpanded ? "shown" : ""}`} style={resourceWidthStyle}>
@@ -92,8 +93,9 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
               })
             }
           </Tabs>
-          {this.state.showChatColumn &&
-            <ChatPanel onCloseChatPanel={this.handleShowChatColumn} newCommentCount={newCommentCount}/>}
+          {this.state.showChatColumn && referenceDocument &&
+            <ChatPanel activeNavTab={ui.activeNavTab} document={referenceDocument.getMetadata()}
+                        onCloseChatPanel={this.handleShowChatColumn} />}
         </div>
       </div>
     );
