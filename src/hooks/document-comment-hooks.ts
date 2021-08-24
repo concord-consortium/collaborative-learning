@@ -4,6 +4,7 @@ import { useMutation, UseMutationOptions } from "react-query";
 import { IDocumentMetadata, IPostCommentParams, IUserContext } from "../../functions/src/shared-types";
 import { CommentDocument } from "../lib/firestore-schema";
 import { useCollectionOrderedRealTimeQuery } from "./firestore-hooks";
+import { useNetworkDocumentKey } from "./use-stores";
 import { useUserContext } from "./use-user-context";
 
 /*
@@ -66,7 +67,8 @@ const commentConverter = {
  * and reuse if multiple clients request the same comments.
  */
 export const useDocumentComments = (documentKey: string) => {
-  const path = documentKey ? `documents/${documentKey}/comments` : "";
+  const docKey = useNetworkDocumentKey(documentKey);
+  const path = documentKey ? `documents/${docKey}/comments` : "";
   const converter = commentConverter;
   return useCollectionOrderedRealTimeQuery(path, { converter, orderBy: "createdAt" });
 };

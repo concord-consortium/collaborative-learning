@@ -1,6 +1,6 @@
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
-import { IPostCommentParams } from "./shared-types";
+import { IPostCommentParams, networkDocumentKey } from "./shared-types";
 import { validateUserContext } from "./user-context";
 
 export const postDocumentComment = async (params?: IPostCommentParams, callableContext?: functions.https.CallableContext) => {
@@ -23,7 +23,8 @@ export const postDocumentComment = async (params?: IPostCommentParams, callableC
   }
 
   const firestore = admin.firestore();
-  const kDocumentDocPath = `${firestoreRoot}/documents/${document.key}`;
+  const kDocumentKey = networkDocumentKey(document.key, context.network);
+  const kDocumentDocPath = `${firestoreRoot}/documents/${kDocumentKey}`;
   const kCommentsCollectionPath = `${kDocumentDocPath}/comments`;
 
   // see if the document is already in firestore
@@ -44,6 +45,7 @@ export const postDocumentComment = async (params?: IPostCommentParams, callableC
   const result = await firestore.collection(kCommentsCollectionPath).add({
     uid,
     name: context.name,
+    network: context.network,
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
     ...comment
   });

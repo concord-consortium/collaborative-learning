@@ -1,7 +1,7 @@
 import { MobXProviderContext } from "mobx-react";
 import { useContext } from "react";
 import { DB } from "../lib/db";
-import { IDocumentMetadata } from "../../functions/src/shared-types";
+import { IDocumentMetadata, networkDocumentKey } from "../../functions/src/shared-types";
 import { ProblemModelType } from "../models/curriculum/problem";
 import { AppConfigModelType } from "../models/stores/app-config-model";
 import { GroupsModelType } from "../models/stores/groups";
@@ -51,6 +51,10 @@ export function useFeatureFlag(feature: string) {
 
 export function useGroupsStore(): GroupsModelType {
   return useStores().groups;
+}
+
+export function useNetworkDocumentKey(documentKey: string) {
+  return networkDocumentKey(documentKey, useUserStore().teacherNetwork);
 }
 
 export function useProblemStore(): ProblemModelType {

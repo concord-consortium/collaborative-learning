@@ -38,6 +38,7 @@ type UsersCollection = FSCollection<UserDocument>;
 export interface CommentDocument {
   uid: string;                // user id of author of comment
   name: string;               // [denormalized] name of user to avoid having to request user data separately
+  network?: string;           // [denormalized] teacher network of containing document for network-wide queries
   createdAt: FSDate;          // timestamp used for sorting
   tileId?: string;            // empty for document comments
   content: string;            // plain text for now; potentially html if we need rich text
@@ -67,7 +68,8 @@ interface DocumentDocument {
   properties: Record<string, string>; // original document properties
   comments: CommentsCollection;       // comments/chats subcollection
 }
-// collection key is id in Firebase Real-time Database
+// collection key is {network}_{id in Firebase Real-time Database} because
+// the same document might get added in different networks over time
 type DocumentsCollection = FSCollection<DocumentDocument>;
 
 /*
@@ -84,7 +86,7 @@ interface ClassDocument {
   name: string;               // portal class name
   context_id: string;         // portal class hash
   teachers: string[];         // uids of teachers of class
-  network: string;            // (current) network of teacher creating class
+  network: string;            // network of teacher creating class
 }
 // collection key is context_id (class hash)
 type ClassesCollection = FSCollection<ClassDocument>;

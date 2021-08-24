@@ -13,6 +13,15 @@ export interface IUserContext {
   teachers?: string[];          // user ids of class's teachers
 }
 
+/*
+ * networkDocumentKey
+ *
+ * To accommodate the fact that the same document can be commented upon in multiple networks, the
+ * id of a document in the documents collection is a mashup of the network and the document key.
+ */
+export const networkDocumentKey = (documentKey: string, network?: string) =>
+              network ? `${network}_${documentKey}` : documentKey;
+
 export interface IDocumentMetadata {
   uid: string;
   type: string;

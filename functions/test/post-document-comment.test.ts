@@ -2,10 +2,10 @@ import {
   apps, clearFirestoreData, initializeAdminApp, useEmulators
 } from "@firebase/rules-unit-testing";
 import { postDocumentComment } from "../src/post-document-comment";
-import { IDocumentMetadata, IPostCommentParams, IUserContext } from "../src/shared-types";
+import { IDocumentMetadata, IPostCommentParams, IUserContext, networkDocumentKey } from "../src/shared-types";
 import {
-  kCanonicalPortal, kCreatedAt, kDemoName, kDocumentKey, kDocumentType, kFirebaseUserId, kTeacherName, kUserId,
-  specAuth, specUserContext
+  kCanonicalPortal, kCreatedAt, kDemoName, kDocumentKey, kDocumentType, kFirebaseUserId,
+  kTeacherName, kTeacherNetwork, kUserId, specAuth, specUserContext
 } from "./test-utils";
 
 useEmulators({
@@ -127,7 +127,8 @@ describe("postDocumentComment", () => {
     expect.assertions(8);
 
     // can add a comment to a document that doesn't yet exist in Firestore
-    const commentsCollectionPath = `authed/${kCanonicalPortal}/documents/${kDocumentKey}/comments`;
+    const docKey = networkDocumentKey(kDocumentKey, kTeacherNetwork);
+    const commentsCollectionPath = `authed/${kCanonicalPortal}/documents/${docKey}/comments`;
     await expect(postDocumentComment(specPostComment(), authWithTeacherClaims as any))
                   .resolves.toHaveProperty("id");
     // there should be one comment in the comments subcollection
@@ -151,7 +152,8 @@ describe("postDocumentComment", () => {
     expect.assertions(8);
 
     // can add a comment to a document that doesn't yet exist in Firestore
-    const commentsCollectionPath = `demo/${kDemoName}/documents/${kDocumentKey}/comments`;
+    const docKey = networkDocumentKey(kDocumentKey, kTeacherNetwork);
+    const commentsCollectionPath = `demo/${kDemoName}/documents/${docKey}/comments`;
     await expect(postDocumentComment(specPostComment({ context: specUserContext({ appMode: "demo" }) }),
                                                       authWithNoClaims as any))
                   .resolves.toHaveProperty("id");
@@ -178,7 +180,8 @@ describe("postDocumentComment", () => {
     expect.assertions(8);
 
     // can add a comment to a document that doesn't yet exist in Firestore
-    const commentsCollectionPath = `qa/${kFirebaseUserId}/documents/${kDocumentKey}/comments`;
+    const docKey = networkDocumentKey(kDocumentKey, kTeacherNetwork);
+    const commentsCollectionPath = `qa/${kFirebaseUserId}/documents/${docKey}/comments`;
     await expect(postDocumentComment(specPostComment({ context: specUserContext({ appMode: "qa" }) }),
                                                       authWithNoClaims as any))
                   .resolves.toHaveProperty("id");
