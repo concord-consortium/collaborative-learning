@@ -61,44 +61,63 @@ The code for the functions is in the `functions` directory. You should be able t
 $ cd functions
 $ npm install     # install local dependencies
 $ npm run lint    # lint the functions code
+$ npm run test    # runs jest (unit) tests for the functions code
 $ npm run build   # build the functions code (transpile TypeScript)
 ```
 Note that there seems to be an uneasy relationship between the `node_modules` folder in the
-`functions` directory and the one in the parent directory. I had to back down to ESLint 6.x in
-the `functions` directory to avoid ESLint plugin confusion and I also had to explicitly specify
-the path to typescript in the `build` function. There's probably a better configuration available,
+`functions` directory and the one in the parent directory. I had to explicitly specify the
+path to typescript in the `build` function. There's probably a better configuration available,
 but in the meantime this seems to mostly work.
+
+### Testing cloud functions
 
 Google recommends (requires?) that [firebase-tools](https://www.npmjs.com/package/firebase-tools) be installed globally:
 ```
 $ npm install -g firebase-tools
 ```
+#### Running tests locally (without running functions in the emulator)
+```
+$ npm run serve                 # build and then start the emulators
+$ npm run test                  # run all tests in `functions` directory
+$ npm run test -- some.test.ts  # run a particular test
+```
+The existing tests currently work this way. They test the basic functionality of the cloud functions by importing and calling them directly from node.js test code. This is a simple and efficient way of testing the basic functionality without all the overhead of the functions emulator. The downside is that the node.js test environment is not the same as the hosted function environment. For instance, it's possible to return objects in node.js that can't be JSON-stringified which will throw an error when the function is hosted. That said, you can't beat the convenience of simply calling the functions directly.
 
-To run the functions locally in the emulator:
+#### Running local tests against functions hosted in the emulator
+To run jest tests against functions running in the emulator requires [serving functions using a Cloud Functions Shell](https://firebase.google.com/docs/functions/local-shell#serve_functions_using_a_cloud_functions_shell). Currently, all of our functions are `HTTPS Callable` functions, which [can be called](https://firebase.google.com/docs/functions/local-shell#invoke_https_callable_functions) in this shell mode, but:
+>Emulation of context.auth is currently unavailable.
+
+#### Running CLUE against functions running locally in the emulator:
 ```
 $ npm run serve   # build and then start the functions emulator
 ```
-and uncomment the line in the code that configures CLUE to use the emulated functions:
-```
-firebase.functions().useFunctionsEmulator("http://localhost:5001");
-```
+and launch CLUE with url parameter `functions=emulator`.
 
-To deploy the function(s) to production:
+### To deploy the function(s) to production:
 ```
 $ npm run deploy
 ```
 
-To test the deployed function(s) from your local development environment, you will need to run
-your local dev server with https to avoid CORS errors. To do so,
-[create a certificate](https://www.matthewhoelter.com/2019/10/21/how-to-setup-https-on-your-local-development-environment-localhost-in-minutes.html)
-and [configure Webpack to use it](https://webpack.js.org/configuration/dev-server/#devserverhttps). These changes are specific to your installation, so be careful not to commit them to the GitHub repository.
+### Serving CLUE from https://localhost
+To test the deployed function(s) from your local development environment, you may need to run your local dev server with https to avoid CORS errors. To do so, [create a certificate](https://www.matthewhoelter.com/2019/10/21/how-to-setup-https-on-your-local-development-environment-localhost-in-minutes.html) in your `~/.localhost-ssl` directory and name the files `localhost.pem` and `localhost.key`. To use the certificate:
+```
+$ npm run start:secure
+```
 
-## Deploying database rules
+## Testing/Deploying database rules
 
 ### Requirements:
 
  * You should install the firebase CLI via: `npm install -g firebase-tools`
- * You shouuld be logged in to firebase: `firebase login`
+ * You should be logged in to firebase: `firebase login`
+
+Firestore security rules are unit tested and realtime database rules could be with some additional work.
+
+### To test database rules
+```
+$ cd firebase-test
+$ npm run test
+```
 
 You deploy firebase functions and rules directly from the working directory using
 the `firebase deploy` command. You can see `firebase deploy help` for more info.
@@ -108,7 +127,7 @@ See which project you have access to and which you are currently using via: `fir
 ### To deploy database rules:
 ```
 $ npm run deploy:firestore:rules    # deploys firestore rules
-$ npm run deploy:firebase:rules     # deploys firebase (real-time-database) rules
+$ npm run deploy:firebase:rules     # deploys firebase (realtime database) rules
 ```
 
 ## Debugging
