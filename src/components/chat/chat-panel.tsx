@@ -2,7 +2,6 @@ import React, { useCallback } from "react";
 import { ChatPanelHeader } from "./chat-panel-header";
 import { CommentCard } from "./comment-card";
 import { useDocumentComments, usePostDocumentComment } from "../../hooks/document-comment-hooks";
-import { CommentDocument } from "../../lib/firestore-schema";
 import "./chat-panel.scss";
 
 interface IProps {
@@ -13,10 +12,10 @@ interface IProps {
 
 export const ChatPanel: React.FC<IProps> = ({ activeNavTab, document, onCloseChatPanel }) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { isLoading, isError, data, error } = useDocumentComments(document.key);
-  const comments: CommentDocument[] | undefined = data?.docs.map(c => c.data()) as any;
-  const mutation = usePostDocumentComment();
-  const postComment = useCallback((comment: string) => mutation.mutate({ document, comment }), [document, mutation]);
+  const { isLoading, data: comments } = useDocumentComments(document.key);
+  const postCommentMutation = usePostDocumentComment();
+  const postComment = useCallback((comment: string) => postCommentMutation.mutate({ document, comment }),
+                                  [document, postCommentMutation]);
   const newCommentCount = 8;  // TODO: figure this out
 
   return (

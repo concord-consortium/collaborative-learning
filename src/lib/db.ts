@@ -4,7 +4,7 @@ import "firebase/database";
 import "firebase/firestore";
 import "firebase/functions";
 import "firebase/storage";
-import { IStores } from "../models/stores/stores";
+import { find, findLast } from "lodash";
 import { observable } from "mobx";
 import { DBOfferingGroup, DBOfferingGroupUser, DBOfferingGroupMap, DBOfferingUser, DBDocumentMetadata, DBDocument,
         DBGroupUserConnections, DBPublication, DBPublicationDocumentMetadata, DBDocumentType, DBImage, DBTileComment,
@@ -24,9 +24,10 @@ import { Firebase } from "./firebase";
 import { Firestore } from "./firestore";
 import { DBListeners } from "./db-listeners";
 import { Logger, LogEventName } from "./logger";
+import { IStores } from "../models/stores/stores";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
 import { safeJsonParse } from "../utilities/js-utils";
-import { find, findLast } from "lodash";
+import { urlParams } from "../utilities/url-params";
 
 export enum Monitor {
   None = "None",
@@ -122,8 +123,33 @@ export class DB {
           appId: "1:112537088884:web:c51b1b8432fff36faff221"
         });
       }
-      // uncomment next line to direct requests to functions emulator
-      // firebase.functions().useFunctionsEmulator("http://localhost:5001");
+
+      if (urlParams.firebase) {
+        // pass `firebase=emulator` to test against firebase emulator instance
+        const url = new URL(urlParams.firebase === "emulator"
+                              ? "http://localhost:9000" : urlParams.firebase);
+        if (url.hostname && url.port) {
+          firebase.database().useEmulator(url.hostname, parseInt(url.port, 10));
+        }
+      }
+
+      if (urlParams.firestore) {
+        // pass `firestore=emulator` to test against firestore emulator instance
+        const url = new URL(urlParams.firestore === "emulator"
+                              ? "http://localhost:8088" : urlParams.firestore);
+        if (url.hostname && url.port) {
+          firebase.firestore().useEmulator(url.hostname, parseInt(url.port, 10));
+        }
+      }
+
+      if (urlParams.functions) {
+        // pass `functions=emulator` to test against functions running in the emulator
+        const url = new URL(urlParams.functions === "emulator"
+                              ? "http://localhost:5001" : urlParams.functions);
+        if (url.hostname && url.port) {
+          firebase.functions().useEmulator(url.hostname, parseInt(url.port, 10));
+        }
+      }
 
       this.stores = options.stores;
 
@@ -797,7 +823,7 @@ export class DB {
             .then(blob => blob && URL.createObjectURL(blob));
   }
 
-  public createTileComment(document: DocumentModelType, tileId: string, content: string, selectionInfo?: string) {
+  public createLegacyTileComment(document: DocumentModelType, tileId: string, content: string, selectionInfo?: string) {
     const { user } = this.stores;
     const { key: docKey } = document;
     const commentsRef = this.firebase.ref(
@@ -815,7 +841,7 @@ export class DB {
     commentRef.set(comment);
   }
 
-  public deleteComment(docKey: string, tileId: string, commentKey: string) {
+  public deleteLegacyTileComment(docKey: string, tileId: string, commentKey: string) {
     const { user } = this.stores;
     const updateRef = this.firebase.ref(
       this.firebase.getUserDocumentCommentsPath(user, docKey, tileId, commentKey)

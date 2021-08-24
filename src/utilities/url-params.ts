@@ -68,6 +68,13 @@ export interface QueryParams {
   qaGroup?: string;
   // db level to clear for qa
   qaClear?: DBClearLevel;
+
+  // direct firebase realtime database access to the emulator
+  firebase?: string; // "emulator" or host:port url
+  // direct firestore access to the emulator
+  firestore?: string; // "emulator" or host:port url
+  // direct firebase function calls to the emulator
+  functions?: string; // "emulator" or host:port url
 }
 
 export const processUrlParams = (): QueryParams => {

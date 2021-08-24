@@ -1,5 +1,4 @@
 import { AuthData } from "firebase-functions/lib/common/providers/https";
-// import { PortalFirebaseJWTClaims } from "./portal-types";
 import { IUserContext } from "./shared-types";
 
 export interface IValidatedUserContext {
@@ -46,6 +45,13 @@ export const getFirebaseClassPath = (context?: IUserContext, auth?: AuthData) =>
   return `${root}/classes/${context.classHash}`;
 };
 
+/*
+ * getFirestoreRoot
+ *
+ * Returns the path to the root of the firestore database for the provided user context.
+ * Returns the empty string if insufficient information is provided to determine the path.
+ * cf. Firestore.getRootFolder() in `firebase.ts` in client code
+ */
 export const getFirestoreRoot = (context?: IUserContext, auth?: AuthData) => {
   const { appMode, demoName, portal } = context || {};
   if (!appMode) return "";

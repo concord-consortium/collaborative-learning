@@ -1,5 +1,7 @@
 import { MobXProviderContext } from "mobx-react";
 import { useContext } from "react";
+import { DB } from "../lib/db";
+import { IDocumentMetadata } from "../../functions/src/shared-types";
 import { ProblemModelType } from "../models/curriculum/problem";
 import { AppConfigModelType } from "../models/stores/app-config-model";
 import { GroupsModelType } from "../models/stores/groups";
@@ -25,6 +27,10 @@ export function useClassStore() {
   return useStores().class;
 }
 
+export function useDBStore(): DB {
+  return useStores().db;
+}
+
 export function useDemoStore() {
   return useStores().demo;
 }
@@ -32,6 +38,11 @@ export function useDemoStore() {
 export function useDocumentFromStore(key?: string) {
   const stores = useStores();
   return key ? stores.documents.getDocument(key) : undefined;
+}
+
+export function useDocumentMetadataFromStore(key?: string): IDocumentMetadata | undefined{
+  const document = useDocumentFromStore(key);
+  return key && document ? document.getMetadata() : undefined;
 }
 
 export function useFeatureFlag(feature: string) {

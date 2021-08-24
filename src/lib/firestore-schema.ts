@@ -39,7 +39,7 @@ export interface CommentDocument {
   uid: string;                // user id of author of comment
   name: string;               // [denormalized] name of user to avoid having to request user data separately
   createdAt: FSDate;          // timestamp used for sorting
-  tileId?: string;            // empty for document contents
+  tileId?: string;            // empty for document comments
   content: string;            // plain text for now; potentially html if we need rich text
 }
 // collection key is Firestore-assigned id

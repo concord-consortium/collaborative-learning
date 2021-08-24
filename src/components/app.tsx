@@ -2,6 +2,7 @@ import { inject, observer } from "mobx-react";
 import React from "react";
 import Modal from "react-modal";
 import { ModalProvider } from "react-modal-hook";
+import { QueryClient, QueryClientProvider } from "react-query";
 import { authenticate } from "../lib/auth";
 import { AppContentContainerComponent } from "./app-content";
 import { BaseComponent, IBaseProps } from "./base";
@@ -110,6 +111,8 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
     });
 };
 
+const queryClient = new QueryClient();
+
 @inject("stores")
 @observer
 export class AppComponent extends BaseComponent<IProps, IState> {
@@ -181,9 +184,11 @@ export class AppComponent extends BaseComponent<IProps, IState> {
     // cf. https://github.com/reactjs/react-modal/issues/699#issuecomment-496685847
     return (
       <ModalProvider>
-        <div className="app">
-          {children}
-        </div>
+        <QueryClientProvider client={queryClient}>
+          <div className="app">
+            {children}
+          </div>
+        </QueryClientProvider>
       </ModalProvider>
     );
   }

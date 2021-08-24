@@ -1,3 +1,6 @@
+/*
+ * Types that are shared between cloud functions and client code.
+ */
 export interface IUserContext {
   appMode: string;
   demoName?: string;

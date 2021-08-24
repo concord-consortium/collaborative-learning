@@ -28,16 +28,18 @@ export class Firestore {
   //
 
   public getRootFolder() {
-    const { appMode, demo: { name: demoName }, user } = this.db.stores;
+    const { appMode, demo: { name: demoName }, user: { portal } } = this.db.stores;
     let rootDocId: string;
+    const escapedPortal = portal ? escapeKey(portal) : portal;
 
     // `authed/${escapedPortalDomain}`
     if (appMode === "authed") {
-      rootDocId = escapeKey(user.portal);
+      rootDocId = escapedPortal;
     }
     // `demo/${escapedDemoName}`
     else if ((appMode === "demo") && (demoName?.length > 0)) {
-      rootDocId = escapeKey(demoName);
+      const escapedDemoName = demoName ? escapeKey(demoName) : demoName;
+      rootDocId = escapedDemoName || escapedPortal || "demo";
     }
     // `${appMode}/${userId}`
     else {  // (appMode === "dev") || (appMode === "test") || (appMode === "qa")
@@ -49,6 +51,30 @@ export class Firestore {
 
   public getFullPath(path = "") {
     return `${this.getRootFolder()}${path}`;
+  }
+
+  public getDocumentsCollectionPath() {
+    return this.getFullPath("documents");
+  }
+
+  public getDocumentsCollectionRef() {
+    return this.collectionRef(this.getDocumentsCollectionPath());
+  }
+
+  public getDocumentPath(docId: string) {
+    return `${this.getDocumentsCollectionPath()}/${docId}`;
+  }
+
+  public getDocumentRef(docId: string) {
+    return this.documentRef(this.getDocumentPath(docId));
+  }
+
+  public getCommentsCollectionPath(docId: string) {
+    return this.getFullPath(`documents/${docId}/comments`);
+  }
+
+  public getCommentsCollectionRef(docId: string) {
+    return this.documentRef(this.getCommentsCollectionPath(docId));
   }
 
   public getMulticlassSupportsPath() {

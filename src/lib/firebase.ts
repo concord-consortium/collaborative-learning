@@ -58,7 +58,11 @@ export class Firebase {
   }
 
   public getRootFolder() {
-    // in the form of /(dev|test|demo|authed)/[<firebaseUserId> if dev or test]/portals/<escapedPortalDomain>
+    // authed: /authed/portals/<escapedPortalDomain>
+    // demo: /demo/<demoName>/portals/demo <as portalDomain>
+    // dev: /dev/<firebaseUserId>/portals/localhost <as portalDomain>
+    // qa: /qa/<firebaseUserId>/portals/qa <as portalDomain>
+    // test: /test/<firebaseUserId>/portals/<arbitraryString as portalDomain>
     const { appMode, demo: { name: demoName }, user } = this.db.stores;
 
     const parts = [];

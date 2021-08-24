@@ -70,7 +70,7 @@ export class DBPublicationsListener extends BaseListener {
               const comment = patch.value;
               const { text, selectionInfo } = comment;
               if (text) {
-                this.db.createTileComment(doc, tileId, text, selectionInfo);
+                this.db.createLegacyTileComment(doc, tileId, text, selectionInfo);
               }
             } else if (patch.op === "replace" && replaceKey === "deleted") {
               const tileComments = doc.comments.get(tileId);
@@ -78,7 +78,7 @@ export class DBPublicationsListener extends BaseListener {
                 const commentIndex = parseInt(index, 10);
                 const comment = tileComments.getCommentAtIndex(commentIndex);
                 if (comment) {
-                  this.db.deleteComment(doc.key, tileId, comment.key);
+                  this.db.deleteLegacyTileComment(doc.key, tileId, comment.key);
                 }
               }
             }
