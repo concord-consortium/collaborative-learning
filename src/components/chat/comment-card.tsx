@@ -1,21 +1,17 @@
 import React from "react";
 import { UserModelType } from "../../models/stores/user";
 import { CommentTextBox } from "./comment-textbox";
+import { CommentDocument } from "../../lib/firestore-schema";
+import { getDisplayTimeDate } from "../../utilities/time";
 import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
 import DocumentCommentIcon from "../../assets/document-id.svg";
 import "./comment-card.scss";
 import "../themes.scss";
 
-export interface ICommentData {
-  comment: string;
-  timePosted: string | number;
-  user: UserModelType;
-}
-
 interface IProps {
   user?: UserModelType;
   activeNavTab?: string;
-  postedComments?: ICommentData[]
+  postedComments?: CommentDocument[];
   onPostComment?: (comment: string) => void;
 }
 
@@ -37,24 +33,22 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
       {renderThreadHeader()}
       { postedComments?.map((comment, idx) => {
           const userInitialBackgroundColor = ["#f79999", "#ffc18a", "#99d099", "#ff9", "#b2b2ff", "#efa6ef"];
-          const commenterInitial = comment.user.name.charAt(0);
-          const userInitialBackgroundColorIndex = parseInt(comment.user.id, 10) % 6;
-          const backgroundStyle = user?.id === comment.user.id
+          const commenterInitial = comment.name.charAt(0);
+          const userInitialBackgroundColorIndex = parseInt(comment.uid, 10) % 6;
+          const backgroundStyle = user?.id === comment.uid
                                     ? {backgroundColor: "white"}
                                     : {backgroundColor: userInitialBackgroundColor[userInitialBackgroundColorIndex]};
           return (
             <div key={idx} className="comment-thread" data-testid="comment-thread">
               <div className="comment-text-header">
                 <div className="user-icon" style={backgroundStyle}>
-                  {user?.id === comment.user.id ? <UserIcon />
-                                                : commenterInitial
-                  }
+                  {user?.id === comment.uid ? <UserIcon /> : commenterInitial}
                 </div>
-                <div className="user-name">{comment.user.name}</div>
-                <div className="time-stamp">{comment.timePosted}</div>
+                <div className="user-name">{comment.name}</div>
+                <div className="time-stamp">{getDisplayTimeDate(comment.createdAt.getTime())}</div>
                 <div className="menu"></div>
               </div>
-              <div key={idx} className="comment-text" data-testid="comment">{comment.comment}</div>
+              <div key={idx} className="comment-text" data-testid="comment">{comment.content}</div>
             </div>
           );
         })

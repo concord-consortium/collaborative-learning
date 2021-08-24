@@ -393,7 +393,21 @@ export const generateDevAuthentication = (unitCode: string, problemOrdinal: stri
   DEV_CLASS_INFO.students.forEach((student) => student.offeringId = offeringId);
   DEV_CLASS_INFO.teachers.forEach((teacher) => teacher.offeringId = offeringId);
 
-  return {authenticatedUser: DEV_STUDENT, classInfo: DEV_CLASS_INFO};
+  let authenticatedUser: AuthenticatedUser = DEV_STUDENT;
+
+  const fakeUser = pageUrlParams.fakeUser;
+  if (fakeUser) {
+    const [role, fakeId] = fakeUser.split(":");
+    if (role === "teacher") {
+      authenticatedUser = DEV_TEACHER;
+      fakeId && (DEV_TEACHER.id = fakeId);
+    }
+    else {
+      fakeId && (DEV_STUDENT.id = fakeId);
+    }
+  }
+
+  return {authenticatedUser, classInfo: DEV_CLASS_INFO};
 };
 
 const createOfferingIdFromProblem = (unitCode: string, problemOrdinal: string) => {

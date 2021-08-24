@@ -8,12 +8,14 @@ import { authenticate,
         RawClassInfo,
         getAppMode,
         createFakeUser,
-        getFirebaseJWTParams} from "./auth";
+        getFirebaseJWTParams,
+        generateDevAuthentication} from "./auth";
 import { PortalStudentJWT, PortalTeacherJWT } from "./portal-types";
 import { AppConfigModel } from "../models/stores/app-config-model";
 import nock from "nock";
 import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
-import { QueryParams } from "../utilities/url-params";
+import * as UrlParams from "../utilities/url-params";
+type QueryParams = UrlParams.QueryParams;
 
 /* eslint-disable max-len */
 const RAW_STUDENT_PORTAL_JWT = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhbGciOiJIUzI1NiIsImlhdCI6MTUzODA1NTg5MCwiZXhwIjoxNTM4MDU5NDkwLCJ1aWQiOjQ1NDMsImRvbWFpbiI6Imh0dHBzOi8vbGVhcm4uc3RhZ2luZy5jb25jb3JkLm9yZy8iLCJ1c2VyX3R5cGUiOiJsZWFybmVyIiwidXNlcl9pZCI6Imh0dHBzOi8vbGVhcm4uc3RhZ2luZy5jb25jb3JkLm9yZy91c2Vycy80NTQzIiwibGVhcm5lcl9pZCI6MTIzMiwiY2xhc3NfaW5mb191cmwiOiJodHRwczovL2xlYXJuLnN0YWdpbmcuY29uY29yZC5vcmcvYXBpL3YxL2NsYXNzZXMvNjYiLCJvZmZlcmluZ19pZCI6MTAzM30.WxfzUkv7mWBv3fN_I3eYKp7VxBNADLLhIurxXjewoK4";
@@ -101,6 +103,16 @@ const PARTIAL_RAW_OFFERING_INFO = {
 };
 
 describe("dev mode", () => {
+  const originalUrlParams = UrlParams.urlParams;
+
+  const setUrlParams = (params: QueryParams) => {
+    (UrlParams as any).urlParams = params;
+  };
+
+  afterEach(() => {
+    setUrlParams(originalUrlParams);
+  });
+
   it("should be in dev mode on a local machine", () => {
     const mode = getAppMode(undefined, undefined, "localhost");
     expect(mode).toBe("dev");
@@ -119,6 +131,31 @@ describe("dev mode", () => {
   it("should use the dev mode parameter if it's specified", () => {
     const trueMode = getAppMode("dev", undefined, "learning.concord.org");
     expect(trueMode).toBe("dev");
+  });
+
+  it("should generateDevAuthentication for a student by default", () => {
+    const { authenticatedUser } = generateDevAuthentication("UNIT", "1.1");
+    expect(authenticatedUser.type).toBe("student");
+  });
+
+  it("should generateDevAuthentication for a student with a fake id", () => {
+    setUrlParams({ fakeUser: "student:2222" });
+    const { authenticatedUser } = generateDevAuthentication("UNIT", "1.1");
+    expect(authenticatedUser.type).toBe("student");
+    expect(authenticatedUser.id).toBe("2222");
+  });
+
+  it("should generateDevAuthentication for a teacher with the fakeUser url parameter", () => {
+    setUrlParams({ fakeUser: "teacher" });
+    const { authenticatedUser } = generateDevAuthentication("UNIT", "1.1");
+    expect(authenticatedUser.type).toBe("teacher");
+  });
+
+  it("should generateDevAuthentication for a teacher with a fake id", () => {
+    setUrlParams({ fakeUser: "teacher:2222" });
+    const { authenticatedUser } = generateDevAuthentication("UNIT", "1.1");
+    expect(authenticatedUser.type).toBe("teacher");
+    expect(authenticatedUser.id).toBe("2222");
   });
 });
 
@@ -154,6 +191,17 @@ describe("demo mode", () => {
         offeringId: "301"
       });
       expect(authenticatedUser).toEqual(demoUser);
+      done();
+    });
+  });
+
+  it("should handle preview launch from portal", (done) => {
+    urlParams.domain = "preview";
+    urlParams.domain_uid = "2222";
+    authenticate("demo", appConfig, urlParams).then(({authenticatedUser}) => {
+      expect(authenticatedUser.className).toBe("Demo Class preview-2222");
+      expect(authenticatedUser.type).toBe("student");
+      expect(authenticatedUser.id).toBe("2222");
       done();
     });
   });

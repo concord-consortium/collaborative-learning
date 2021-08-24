@@ -1,4 +1,4 @@
-import { inject, observer } from "mobx-react";
+import { observer } from "mobx-react";
 import React from "react";
 import { BaseComponent } from "../base";
 import  ChatIcon from "../../assets/chat-icon.svg";
@@ -8,11 +8,11 @@ import "./chat-panel-header.scss";
 import "../themes.scss";
 
 interface IProps {
+  activeNavTab: string;
   newCommentCount: number;
   onCloseChatPanel:(show:boolean) => void;
 }
 
-@inject("stores")
 @observer
 export class ChatPanelHeader extends BaseComponent<IProps> {
 
@@ -20,14 +20,13 @@ export class ChatPanelHeader extends BaseComponent<IProps> {
     super(props);
   }
   render () {
-    const { onCloseChatPanel } = this.props;
-    const { ui } = this.stores;
+    const { activeNavTab, onCloseChatPanel } = this.props;
    return (
       <div className="chat-panel-header" data-testid="chat-panel-header">
-        <ChatIcon className={`chat-icon themed ${ui.activeNavTab} no-action`}/>
+        <ChatIcon className={`chat-icon themed ${activeNavTab} no-action`}/>
         Comments
         {this.renderNotification()}
-        <button className={`chat-close-button themed ${ui.activeNavTab}`}
+        <button className={`chat-close-button themed ${activeNavTab}`}
                 data-testid="chat-close-button"
                 onClick={() => onCloseChatPanel(false)}/>
       </div>
@@ -35,12 +34,11 @@ export class ChatPanelHeader extends BaseComponent<IProps> {
   }
 
   private renderNotification = () => {
-    const { newCommentCount } = this.props;
-    const { ui } = this.stores;
+    const { activeNavTab, newCommentCount } = this.props;
     return (
       <div className="notification-toggle">
-        <div className={`notification-icon themed-negative ${ui.activeNavTab}`}>
-          <NotificationIcon className={`icon-image themed-negative ${ui.activeNavTab}`}/>
+        <div className={`notification-icon themed-negative ${activeNavTab}`}>
+          <NotificationIcon className={`icon-image themed-negative ${activeNavTab}`}/>
         </div>
         <div className="new-comment-badge">{newCommentCount}</div>
       </div>

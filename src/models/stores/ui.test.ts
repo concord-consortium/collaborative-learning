@@ -21,7 +21,8 @@ describe("ui model", () => {
   it("has default values", () => {
     expect(ui.error).toBe(null);
     expect(ui.showDemoCreator).toBe(false);
-    expect(ui.dialog).toBe(undefined);
+    expect(ui.showTeacherContent).toBe(true);
+    expect(ui.dialog).toBeUndefined();
   });
 
   it("uses override values", () => {
@@ -60,16 +61,33 @@ describe("ui model", () => {
 
   it("allows selected tile to be set", () => {
     expect(ui.selectedTileIds).toStrictEqual([]);
-    ui.setSelectedTile(ToolTileModel.create({
+    const tile = ToolTileModel.create({
       id: "1",
       content: {
         type: "Text",
         text: "test"
       }
-    }));
+    });
+    ui.setSelectedTile(tile);
     expect(ui.selectedTileIds).toStrictEqual(["1"]);
+    expect(ui.isSelectedTile(tile)).toBe(true);
     ui.setSelectedTile();
     expect(ui.selectedTileIds).toStrictEqual([]);
+    expect(ui.isSelectedTile(tile)).toBe(false);
+  });
+
+  it("allows divider position to be set", () => {
+    expect(ui.navTabContentShown).toBe(false);
+    expect(ui.workspaceShown).toBe(true);
+    ui.setDividerPosition(50);
+    expect(ui.navTabContentShown).toBe(true);
+    expect(ui.workspaceShown).toBe(true);
+  });
+
+  it("allows reference document to be set", () => {
+    expect(ui.referenceDocument).toBeUndefined();
+    ui.setReferenceDocument("1234");
+    expect(ui.referenceDocument).toBe("1234");
   });
 
   it("allows alert dialogs", () => {
@@ -86,7 +104,7 @@ describe("ui model", () => {
     expect(dialog.title).toBe("Test Alert Title");
   });
 
-  it("allows comfirm dialogs", () => {
+  it("allows confirm dialogs", () => {
     expect(ui.dialog).toBe(undefined);
     ui.confirm("confirm test");
     let dialog = ui.dialog as UIDialogModelType;
@@ -98,6 +116,7 @@ describe("ui model", () => {
     ui.confirm("confirm test", "Test Confirm Title");
     dialog = ui.dialog as UIDialogModelType;
     expect(dialog.title).toBe("Test Confirm Title");
+    ui.closeDialog();
   });
 
   it("allows prompt dialogs", () => {
@@ -109,6 +128,7 @@ describe("ui model", () => {
     expect(dialog.text).toBe("prompt test");
     expect(dialog.defaultValue).toBe("");
     expect(dialog.title).toBe(undefined);
+    ui.closeDialog();
 
     ui.prompt("prompt test", "default value");
     dialog = ui.dialog as UIDialogModelType;

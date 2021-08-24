@@ -35,6 +35,7 @@ export const UIModel = types
     showDemoCreator: false,
     showTeacherContent: true,
     dialog: types.maybe(UIDialogModel),
+    referenceDocument: types.maybe(types.string),
     problemWorkspace: WorkspaceModel,
     learningLogWorkspace: WorkspaceModel,
     teacherPanelKey: types.maybe(types.string)
@@ -154,7 +155,9 @@ export const UIModel = types
         self.showDemoCreator = showDemoCreator;
       },
       closeDialog,
-
+      setReferenceDocument(documentKey?: string) {
+        self.referenceDocument = documentKey;
+      },
       rightNavDocumentSelected(appConfig: AppConfigModelType, document: DocumentModelType) {
         if (!document.isPublished || appConfig.showPublishedDocsInPrimaryWorkspace) {
           self.problemWorkspace.setAvailableDocument(document);

@@ -150,7 +150,7 @@ describe('Test nav panel tabs', function () {
         cy.openDocumentThumbnail('problem-workspaces', this.title);
       });
       it('will verify that published canvas does not have Edit button', function () {
-        cy.get('.edit-button').should("not.exist");
+        cy.get('.edit-button').should("not.to.be.visible");
       });
     });
   });

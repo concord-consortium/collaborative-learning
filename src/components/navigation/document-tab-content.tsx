@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { DocumentModelType } from "../../models/document/document";
 import { isProblemType } from "../../models/document/document-types";
 import { AppConfigModelType } from "../../models/stores/app-config-model";
@@ -6,7 +6,7 @@ import { ProblemModelType } from "../../models/curriculum/problem";
 import { ENavTabSectionType, NavTabSpec } from "../../models/view/nav-tabs";
 import { DocumentTabPanel } from "./document-tab-panel";
 import { EditableDocumentContent } from "../document/editable-document-content";
-import { useAppConfigStore, useProblemStore, useUIStore } from "../../hooks/use-stores";
+import { useAppConfigStore, useDocumentFromStore, useProblemStore, useUIStore } from "../../hooks/use-stores";
 import { Logger, LogEventName } from "../../lib/logger";
 import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
 
@@ -18,13 +18,13 @@ interface IProps {
 }
 
 export const DocumentTabContent: React.FC<IProps> = ({ tabSpec, isChatOpen }) => {
-  const [referenceDocument, setReferenceDocument] = useState<DocumentModelType | undefined>(undefined);
   const appConfigStore = useAppConfigStore();
   const problemStore = useProblemStore();
-  const uiStore = useUIStore();
+  const ui = useUIStore();
+  const referenceDocument = useDocumentFromStore(ui.referenceDocument);
 
   const handleTabClick = (title: string, type: string) => {
-    setReferenceDocument(undefined);
+    ui.setReferenceDocument();
     Logger.log(LogEventName.SHOW_TAB_SECTION, {
       tab_section_name: title,
       tab_section_type: type
@@ -32,7 +32,7 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec, isChatOpen }) =>
   };
 
   const handleSelectDocument = (document: DocumentModelType) => {
-    setReferenceDocument(document);
+    ui.setReferenceDocument(document.key);
   };
 
   const documentTitle = (document: DocumentModelType, appConfig: AppConfigModelType, problem: ProblemModelType) => {
@@ -43,7 +43,7 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec, isChatOpen }) =>
   };
 
   function handleEditClick(document: DocumentModelType) {
-    uiStore.problemWorkspace.setPrimaryDocument(document);
+    ui.problemWorkspace.setPrimaryDocument(document);
   }
 
   const editButton = (type: string, sClass: string, document: DocumentModelType) => {

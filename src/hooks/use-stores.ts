@@ -17,12 +17,29 @@ export function useAppConfigStore(): AppConfigModelType {
   return useStores().appConfig;
 }
 
-export function useGroupsStore(): GroupsModelType {
-  return useStores().groups;
+export function useAppMode() {
+  return useStores().appMode;
 }
 
-export function useUserStore(): UserModelType {
-  return useStores().user;
+export function useClassStore() {
+  return useStores().class;
+}
+
+export function useDemoStore() {
+  return useStores().demo;
+}
+
+export function useDocumentFromStore(key?: string) {
+  const stores = useStores();
+  return key ? stores.documents.getDocument(key) : undefined;
+}
+
+export function useFeatureFlag(feature: string) {
+  return isFeatureSupported(useStores(), feature);
+}
+
+export function useGroupsStore(): GroupsModelType {
+  return useStores().groups;
 }
 
 export function useProblemStore(): ProblemModelType {
@@ -41,6 +58,6 @@ export function useUIStore(): UIModelType {
   return useStores().ui;
 }
 
-export function useFeatureFlag(feature: string) {
-  return isFeatureSupported(useStores(), feature);
+export function useUserStore(): UserModelType {
+  return useStores().user;
 }
