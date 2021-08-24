@@ -1,4 +1,5 @@
 import React, { useCallback } from "react";
+import { UserModelType } from "../../models/stores/user";
 import { ChatPanelHeader } from "./chat-panel-header";
 import { CommentCard } from "./comment-card";
 import {
@@ -8,12 +9,13 @@ import { useDocumentOrCurriculumMetadata } from "../../hooks/use-stores";
 import "./chat-panel.scss";
 
 interface IProps {
+  user?: UserModelType;
   activeNavTab: string;
   documentKey?: string;
   onCloseChatPanel:(show:boolean) => void;
 }
 
-export const ChatPanel: React.FC<IProps> = ({ activeNavTab, documentKey, onCloseChatPanel }) => {
+export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, documentKey, onCloseChatPanel }) => {
   const document = useDocumentOrCurriculumMetadata(documentKey);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { isLoading, data: comments } = useDocumentComments(documentKey);
@@ -31,6 +33,7 @@ export const ChatPanel: React.FC<IProps> = ({ activeNavTab, documentKey, onClose
       <ChatPanelHeader activeNavTab={activeNavTab} newCommentCount={newCommentCount}
                        onCloseChatPanel={onCloseChatPanel} />
       <CommentCard
+        user={user}
         activeNavTab={activeNavTab}
         onPostComment={postComment}
         postedComments={comments}

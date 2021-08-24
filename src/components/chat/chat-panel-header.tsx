@@ -1,6 +1,5 @@
 import { observer } from "mobx-react";
 import React from "react";
-import { BaseComponent } from "../base";
 import  ChatIcon from "../../assets/chat-icon.svg";
 import  NotificationIcon from "../../assets/notifications-icon.svg";
 
@@ -13,28 +12,8 @@ interface IProps {
   onCloseChatPanel:(show:boolean) => void;
 }
 
-@observer
-export class ChatPanelHeader extends BaseComponent<IProps> {
-
-  constructor(props: IProps) {
-    super(props);
-  }
-  render () {
-    const { activeNavTab, onCloseChatPanel } = this.props;
-   return (
-      <div className="chat-panel-header" data-testid="chat-panel-header">
-        <ChatIcon className={`chat-icon themed ${activeNavTab} no-action`}/>
-        Comments
-        {this.renderNotification()}
-        <button className={`chat-close-button themed ${activeNavTab}`}
-                data-testid="chat-close-button"
-                onClick={() => onCloseChatPanel(false)}/>
-      </div>
-    );
-  }
-
-  private renderNotification = () => {
-    const { activeNavTab, newCommentCount } = this.props;
+export const ChatPanelHeader: React.FC<IProps> = observer(({activeNavTab, newCommentCount, onCloseChatPanel}) => {
+  const renderNotification = () => {
     return (
       <div className="notification-toggle">
         <div className={`notification-icon themed-negative ${activeNavTab}`}>
@@ -44,4 +23,15 @@ export class ChatPanelHeader extends BaseComponent<IProps> {
       </div>
     );
   };
-}
+
+  return (
+    <div className="chat-panel-header" data-testid="chat-panel-header">
+      <ChatIcon className={`chat-icon themed ${activeNavTab} no-action`}/>
+      Comments
+      {renderNotification()}
+      <button className={`chat-close-button themed ${activeNavTab}`}
+              data-testid="chat-close-button"
+              onClick={() => onCloseChatPanel(false)}/>
+    </div>
+  );
+});

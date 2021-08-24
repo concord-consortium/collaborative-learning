@@ -5,6 +5,7 @@ import { BaseComponent, IBaseProps } from "../base";
 import { kDividerMax, kDividerMin } from "../../models/stores/ui-types";
 import { NavTabSpec, ENavTab } from "../../models/view/nav-tabs";
 import { Logger, LogEventName } from "../../lib/logger";
+import { urlParams } from "../../utilities/url-params";
 import { StudentGroupView } from "../document/student-group-view";
 import { ProblemTabContent } from "./problem-tab-content";
 import { DocumentTabContent } from "./document-tab-content";
@@ -75,7 +76,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
                   })
                 }
               </TabList>
-              { user.isNetworkedTeacher
+              { (user.isNetworkedTeacher  && urlParams.chat)
                   ? (!this.state.showChatColumn) &&
                     <div className={`chat-panel-toggle themed ${activeNavTab}`}>
                       <NewCommentsBadge documentKey={focusDocument} />
@@ -97,7 +98,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
             }
           </Tabs>
           {this.state.showChatColumn && focusDocument &&
-            <ChatPanel activeNavTab={activeNavTab} documentKey={focusDocument}
+            <ChatPanel user={user} activeNavTab={activeNavTab} documentKey={focusDocument}
                         onCloseChatPanel={this.handleShowChatColumn} />}
         </div>
       </div>
