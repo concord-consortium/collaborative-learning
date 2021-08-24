@@ -30,7 +30,8 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
     const { showGroup } = this.props;
     const { appConfig, appMode, appVersion, db, user, problem, groups, investigation, unit } = this.stores;
     const myGroup = showGroup ? groups.groupForUser(user.id) : undefined;
-    const userTitle = appMode !== "authed" ? `Firebase UID: ${db.firebase.userId}` : undefined;
+    const userTitle = appMode !== "authed" && appMode !== "demo"
+                        ? `Firebase UID: ${db.firebase.userId}` : undefined;
 
     if (user.isTeacher && appConfig.showClassSwitcher) {
       return this.renderTeacherHeader(userTitle);
@@ -59,9 +60,9 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
           <NetworkStatus user={user}/>
           <div className="version">Version {appVersion}</div>
           {myGroup ? this.renderGroup(myGroup) : null}
-          <div className="user">
+          <div className="user" title={userTitle}>
             <div className="user-contents">
-              <div className="name" title={userTitle} data-test="user-name">{user.name}</div>
+              <div className="name" data-test="user-name">{user.name}</div>
               <div className="class" data-test="user-class">{user.className}</div>
             </div>
             <div className="profile-icon">
@@ -96,7 +97,7 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
         </div>
         <div className="right">
           <div className="version">Version {appVersion}</div>
-          <div className="user teacher">
+          <div className="user teacher" title={userTitle}>
             <div className="class" data-test="user-class">
               <ClassMenuContainer />
             </div>
