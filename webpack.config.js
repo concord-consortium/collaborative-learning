@@ -31,7 +31,7 @@ module.exports = (env, argv) => {
     module: {
       rules: [
         {
-          test: /bundle\.js$/,
+          test: /react-data-grid\/lib\/bundle\.js$/,
           loader: require.resolve('string-replace-loader'),
           options: {
             multiple: [
