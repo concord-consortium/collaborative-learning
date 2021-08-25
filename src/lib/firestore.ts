@@ -28,16 +28,18 @@ export class Firestore {
   //
 
   public getRootFolder() {
-    const { appMode, demo: { name: demoName }, user } = this.db.stores;
+    const { appMode, demo: { name: demoName }, user: { portal } } = this.db.stores;
     let rootDocId: string;
+    const escapedPortal = portal ? escapeKey(portal) : portal;
 
     // `authed/${escapedPortalDomain}`
     if (appMode === "authed") {
-      rootDocId = escapeKey(user.portal);
+      rootDocId = escapedPortal;
     }
     // `demo/${escapedDemoName}`
     else if ((appMode === "demo") && (demoName?.length > 0)) {
-      rootDocId = escapeKey(demoName);
+      const escapedDemoName = demoName ? escapeKey(demoName) : demoName;
+      rootDocId = escapedDemoName || escapedPortal || "demo";
     }
     // `${appMode}/${userId}`
     else {  // (appMode === "dev") || (appMode === "test") || (appMode === "qa")

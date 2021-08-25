@@ -10,18 +10,26 @@ jest.mock("../../hooks/document-comment-hooks", () => ({
   useDocumentComments: () => ({
     isLoading: false,
     isError: false,
-    data: {
-      docs: [
-        { data: () => ({ uid: "1", name: "Teacher 1", createdAt: new Date(), content: "Comment 1"}) },
-        { data: () => ({ uid: "1", name: "Teacher 1", createdAt: new Date(), content: "Comment 2"}) },
-        { data: () => ({ uid: "1", name: "Teacher 1", createdAt: new Date(), content: "Comment 3"}) },
-        { data: () => ({ uid: "1", name: "Teacher 1", createdAt: new Date(), content: "Comment 4"}) },
-        { data: () => ({ uid: "1", name: "Teacher 1", createdAt: new Date(), content: "Comment 5"}) },
-        { data: () => ({ uid: "1", name: "Teacher 1", createdAt: new Date(), content: "Comment 6"}) },
-        { data: () => ({ uid: "1", name: "Teacher 1", createdAt: new Date(), content: "Comment 7"}) },
-        { data: () => ({ uid: "1", name: "Teacher 1", createdAt: new Date(), content: "Comment 8"}) },
-      ]
-    },
+    data: [
+      { uid: "1", name: "Teacher 1", createdAt: new Date(), content: "Comment 1" },
+      { uid: "1", name: "Teacher 1", createdAt: new Date(), content: "Comment 2" },
+      { uid: "1", name: "Teacher 1", createdAt: new Date(), content: "Comment 3" },
+      { uid: "1", name: "Teacher 1", createdAt: new Date(), content: "Comment 4" },
+      { uid: "1", name: "Teacher 1", createdAt: new Date(), content: "Comment 5" },
+      { uid: "1", name: "Teacher 1", createdAt: new Date(), content: "Comment 6" },
+      { uid: "1", name: "Teacher 1", createdAt: new Date(), content: "Comment 7" },
+      { uid: "1", name: "Teacher 1", createdAt: new Date(), content: "Comment 8" }
+    ],
+    error: undefined
+  }),
+  useUnreadDocumentComments: () => ({
+    isLoading: false,
+    isError: false,
+    data: [
+      { uid: "1", name: "Teacher 1", createdAt: new Date(), content: "Comment 6" },
+      { uid: "1", name: "Teacher 1", createdAt: new Date(), content: "Comment 7" },
+      { uid: "1", name: "Teacher 1", createdAt: new Date(), content: "Comment 8" }
+    ],
     error: undefined
   }),
   usePostDocumentComment: () => ({

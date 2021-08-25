@@ -49,11 +49,11 @@ module.exports = {
       "no-debugger": "off", // enabled in .eslintrc.build.js
       "no-duplicate-imports": "error",
       "no-sequences": "error",
-      "no-shadow": "off", // superceded by @typescript-eslint/no-shadow
+      "no-shadow": "off", // superseded by @typescript-eslint/no-shadow
       "no-tabs": "error",
       "no-unneeded-ternary": "error",
       "no-unused-expressions": ["error", { allowShortCircuit: true }],
-      "no-unused-vars": "off",  // superceded by @typescript-eslint/no-unused-vars
+      "no-unused-vars": "off",  // superseded by @typescript-eslint/no-unused-vars
       "no-useless-call": "error",
       "no-useless-concat": "error",
       "no-useless-rename": "error",
@@ -82,6 +82,8 @@ module.exports = {
         files: ["**/*.test.*"],
         rules: {
           "@typescript-eslint/no-non-null-assertion": "off",
+          // var is useful in mocking due to its hoisting semantics
+          "no-var": "off"
         }
       },
       {
