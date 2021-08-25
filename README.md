@@ -93,10 +93,14 @@ $ npm run serve   # build and then start the functions emulator
 ```
 and launch CLUE with url parameter `functions=emulator`.
 
-### To deploy the function(s) to production:
+### To deploy firebase functions to production:
 ```
-$ npm run deploy
+$ npm run deploy                        # deploy all functions
+$ npm run deploy:getImageData           # deploy individual function
+$ npm run deploy:postDocumentComment    # deploy individual function
 ```
+
+By convention, our firebase functions have an internal version number that is returned with any results. This should be incremented appropriately when new versions are deployed. This will allow us to determine whether the current code in GitHub has been deployed or not, for instance. Also by convention, our firebase functions accept parameters of `{ warmUp: true }` which can be issued in advance of any actual call to mitigate the google cloud function cold-start issue.
 
 ### Serving CLUE from https://localhost
 To test the deployed function(s) from your local development environment, you may need to run your local dev server with https to avoid CORS errors. To do so, [create a certificate](https://www.matthewhoelter.com/2019/10/21/how-to-setup-https-on-your-local-development-environment-localhost-in-minutes.html) in your `~/.localhost-ssl` directory and name the files `localhost.pem` and `localhost.key`. To use the certificate:
@@ -138,7 +142,38 @@ To enable per component debugging set the "debug" localstorage key with one or m
 
 ## Testing
 
-Run `npm test` to run all Jest tests.
+CLUE has a fairly extensive set of jest (unit/integration) tests and cypress (integration/end-to-end) tests. To run them:
+```
+$ npm [run] test                # run all jest tests
+$ npm [run] test -- abc.test.ts # run a single jest test
+$ npm run test:coverage         # run all jest tests and report coverage
+$ npm run test:cypress          # run the cypress tests headless
+$ npm run test:cypress:open     # open the cypress app for running the cypress tests interactively
+```
+
+The tests are run automatically on PRs and Codecov is configured to track coverage. Codecov will report on whether a given PR increases or decreases overall coverage to encourage good testing habits.
+
+Note that currently, some of the jest tests (notably `db.test.ts`) and many of the cypress tests target the the production database, albeit generally `qa` or `test`-specific portions of the production database. It would be better if these tests targeted the emulators. Furthermore, some of the cypress tests require launching from the portal via activities which target the `master` branch, which means that the automated cypress tests that run on a PR can fail due to code on the master branch. This should be fixed with some combination of targeting the emulators and mocking the necessary portal interactions.
+
+### URL parameters
+
+There are a number of URL parameters that can aid in testing:
+
+|Parameter|Value(s)|Description|
+|---|---|---|
+|`appMode`|`dev`, `qa`, `test`|Unsecured modes that are partitioned off from authenticated sections of the database.|
+|`unit`|`sas`, `msa`, etc.|Abbreviated code for selecting a curriculum unit.|
+|`problem`|`2.1`, `3.2`, etc.|Reference to individual problem in curriculum unit.|
+|`demo`|none|Launches demo creator UI|
+|`demoName`|string (default: `CLUE`)|Used to partition the demo portion of the database.|
+|`network`|string|Specify the network with which a teacher user is affiliated.|
+|`fakeClass`|string|Class id for demo, qa, or test modes.|
+|`fakeUser`|`(student|teacher):<id>`|Configure user type and (optionally) id.|
+|`qaGroup`|string|Group id for qa, e.g. automated tests.|
+|`qaClear`|`all`, `class`, `offering`|Extent of database clearing for automated tests.|
+|`firebase`|`emulator` (for default) or `host:port`|Target emulator for firebase realtime database calls.|
+|`firestore`|`emulator` (for default) or `host:port`|Target emulator for firestore database calls.|
+|`functions`|`emulator` (for default) or `host:port`|Target emulator-hosted firebase functions.|
 
 ### QA
 
