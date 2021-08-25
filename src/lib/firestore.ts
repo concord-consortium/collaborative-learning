@@ -53,30 +53,6 @@ export class Firestore {
     return `${this.getRootFolder()}${path}`;
   }
 
-  public getDocumentsCollectionPath() {
-    return this.getFullPath("documents");
-  }
-
-  public getDocumentsCollectionRef() {
-    return this.collectionRef(this.getDocumentsCollectionPath());
-  }
-
-  public getDocumentPath(docId: string) {
-    return `${this.getDocumentsCollectionPath()}/${docId}`;
-  }
-
-  public getDocumentRef(docId: string) {
-    return this.documentRef(this.getDocumentPath(docId));
-  }
-
-  public getCommentsCollectionPath(docId: string) {
-    return this.getFullPath(`documents/${docId}/comments`);
-  }
-
-  public getCommentsCollectionRef(docId: string) {
-    return this.documentRef(this.getCommentsCollectionPath(docId));
-  }
-
   public getMulticlassSupportsPath() {
     return this.getFullPath("mcsupports");
   }

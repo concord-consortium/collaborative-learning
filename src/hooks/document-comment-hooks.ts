@@ -55,7 +55,7 @@ const commentConverter = {
   fromFirestore: (doc: firebase.firestore.QueryDocumentSnapshot): CommentDocument => {
     const { createdAt, ...others } = doc.data();
     // Convert Firestore Timestamp to JavaScript Date
-    return { createdAt: createdAt.toDate(), ...others } as CommentDocument;
+    return { createdAt: createdAt?.toDate(), ...others } as CommentDocument;
   }
 };
 

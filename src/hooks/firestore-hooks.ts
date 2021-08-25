@@ -49,5 +49,5 @@ export function useCollectionOrderedRealTimeQuery<T>(
   // set staleTime to Infinity; we never need to re-run this query, since the listener handles updates
   const useQueryOptions: UseQueryOptions<T[]> = { ..._useQueryOptions, staleTime: Infinity };
   // the actual query function here doesn't do anything; everything comes through the snapshot handler
-  return useQuery<T[]>(fsPath, () => new Promise(() => {/* nop */}), useQueryOptions);
+  return useQuery<T[]>(fsPath || "__EMPTY__", () => new Promise(() => {/* nop */}), useQueryOptions);
 }
