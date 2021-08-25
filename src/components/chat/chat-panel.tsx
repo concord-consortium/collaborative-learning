@@ -32,12 +32,15 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, documentKey, o
     <div className={`chat-panel ${activeNavTab}`} data-testid="chat-panel">
       <ChatPanelHeader activeNavTab={activeNavTab} newCommentCount={newCommentCount}
                        onCloseChatPanel={onCloseChatPanel} />
-      <CommentCard
-        user={user}
-        activeNavTab={activeNavTab}
-        onPostComment={postComment}
-        postedComments={comments}
-      />
+      {((activeNavTab !=="my-work") || document?.key)
+        ? <CommentCard
+            user={user}
+            activeNavTab={activeNavTab}
+            onPostComment={postComment}
+            postedComments={comments}
+          />
+        : <div className="select-doc-instruction">Open a document to begin or view comment threads</div>
+      }
     </div>
   );
 };

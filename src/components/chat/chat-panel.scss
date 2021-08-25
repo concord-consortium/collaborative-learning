@@ -25,4 +25,13 @@
   &.student-work {
     border-color: $charcoal-dark-1;
   }
+
+  .select-doc-instruction {
+    font-style: italic;
+    color: $charcoal;
+    text-align: center;
+    border-top: solid 1px $charcoal-light-1-c;
+    margin: 0 7px;
+    padding: 7px 0;
+  }
 }
