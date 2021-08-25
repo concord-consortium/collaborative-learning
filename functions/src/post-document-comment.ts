@@ -1,9 +1,14 @@
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
-import { IPostCommentParams, networkDocumentKey } from "./shared-types";
+import { IPostDocumentCommentUnionParams, isWarmUpParams, networkDocumentKey } from "./shared-types";
 import { validateUserContext } from "./user-context";
 
-export const postDocumentComment = async (params?: IPostCommentParams, callableContext?: functions.https.CallableContext) => {
+// update this when deploying updates to this function
+const version = "1.0.0";
+
+export const postDocumentComment = async (params?: IPostDocumentCommentUnionParams, callableContext?: functions.https.CallableContext) => {
+  if (isWarmUpParams(params)) return { version };
+
   const { context, document, comment } = params || {};
   const { isValid, uid, firestoreRoot } = validateUserContext(context, callableContext?.auth);
   if (!isValid || !context?.classHash || !uid) {
@@ -49,5 +54,5 @@ export const postDocumentComment = async (params?: IPostCommentParams, callableC
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
     ...comment
   });
-  return { id: result.id };
+  return { version, id: result.id };
 };

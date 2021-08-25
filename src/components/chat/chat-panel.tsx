@@ -18,8 +18,9 @@ export const ChatPanel: React.FC<IProps> = ({ activeNavTab, document, onCloseCha
   const { isLoading, data: comments } = useDocumentComments(document.key);
   const { data: unreadComments } = useUnreadDocumentComments(document.key);
   const postCommentMutation = usePostDocumentComment();
-  const postComment = useCallback((comment: string) => postCommentMutation.mutate({ document, comment }),
-                                  [document, postCommentMutation]);
+  const postComment = useCallback(
+                        (comment: string) => postCommentMutation.mutate({ document, comment: { content: comment } }),
+                        [document, postCommentMutation]);
   const newCommentCount = unreadComments?.length || 0;
 
   return (

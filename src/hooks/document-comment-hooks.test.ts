@@ -65,7 +65,7 @@ describe("Document comment hooks", () => {
       const { result } = renderHook(() => usePostDocumentComment());
       expect(mockUseMutation).toHaveBeenCalled();
       expect(typeof result.current.mutate).toBe("function");
-      result.current.mutate({ document: { key: "key" } as IDocumentMetadata , comment: "foo" });
+      result.current.mutate({ document: { key: "key" } as IDocumentMetadata , comment: { content: "foo" } });
       expect(mockHttpsCallable).toHaveBeenCalled();
       expect(mockHttpsCallable.mock.calls[0][0]).toBe("postDocumentComment_v1");
       expect(mockPostDocumentComment_v1).toHaveBeenCalled();

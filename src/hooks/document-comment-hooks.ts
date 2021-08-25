@@ -1,46 +1,28 @@
 import firebase from "firebase/app";
 import { useCallback } from "react";
 import { useMutation, UseMutationOptions } from "react-query";
-import { IDocumentMetadata, IPostCommentParams, IUserContext } from "../../functions/src/shared-types";
+import { IPostDocumentCommentParams } from "../../functions/src/shared-types";
 import { CommentDocument } from "../lib/firestore-schema";
 import { useCollectionOrderedRealTimeQuery } from "./firestore-hooks";
+import { useFirebaseFunction } from "./use-firebase-function";
 import { useNetworkDocumentKey } from "./use-stores";
 import { useUserContext } from "./use-user-context";
-
-/*
- * postDocumentComment
- *
- * Uses firebase function under the hood.
- */
-interface IPostDocumentCommentParams {
-  userContext: IUserContext;
-  document: IDocumentMetadata;
-  tileId?: string;
-  comment: string;
-}
-const postDocumentComment = ({ userContext, document, tileId, comment }: IPostDocumentCommentParams) => {
-  const params: IPostCommentParams = { context: userContext, document, comment: { tileId, content: comment } };
-  const postDocumentComment_v1 = firebase.functions().httpsCallable("postDocumentComment_v1");
-  return postDocumentComment_v1(params);
-};
 
 /*
  * usePostDocumentComment
  *
  * Implemented via React Query's useMutation hook.
  */
-interface IPostCommentInfo {
-  document: IDocumentMetadata;
-  comment: string;
-  tileId?: string;
-}
+type IPostDocumentCommentClientParams = Omit<IPostDocumentCommentParams, "context">;
 type PostDocumentCommentUseMutationOptions =
-      UseMutationOptions<firebase.functions.HttpsCallableResult, unknown, IPostCommentInfo>;
+      UseMutationOptions<firebase.functions.HttpsCallableResult, unknown, IPostDocumentCommentClientParams>;
+
 export const usePostDocumentComment = (options?: PostDocumentCommentUseMutationOptions) => {
-  const userContext = useUserContext();
-  const postComment = useCallback((postCommentInfo: IPostCommentInfo) => {
-    return postDocumentComment({ userContext, ...postCommentInfo });
-  }, [userContext]);
+  const postDocumentComment = useFirebaseFunction<IPostDocumentCommentParams>("postDocumentComment_v1");
+  const context = useUserContext();
+  const postComment = useCallback((clientParams: IPostDocumentCommentClientParams) => {
+    return postDocumentComment({ context, ...clientParams });
+  }, [context, postDocumentComment]);
   return useMutation(postComment, options);
 };
 

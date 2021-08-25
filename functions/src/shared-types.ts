@@ -32,11 +32,22 @@ export interface IDocumentMetadata {
   properties?: Record<string, string>;
 }
 
-export interface IPostCommentParams {
-  context: IUserContext,
-  document: IDocumentMetadata,
-  comment: {
-    tileId?: string;      // empty for document comments
-    content: string;      // plain text for now; potentially html if we need rich text
-  }
+interface IFirebaseFunctionWarmUpParams {
+  warmUp: boolean;
 }
+export const isWarmUpParams = (params: any): params is IFirebaseFunctionWarmUpParams => !!params?.warmUp;
+
+interface IFirebaseFunctionBaseParams {
+  context: IUserContext;
+}
+
+export interface IClientCommentParams {
+  tileId?: string;    // empty for document comments
+  content: string;    // plain text for now; potentially html if we need rich text
+}
+
+export interface IPostDocumentCommentParams extends IFirebaseFunctionBaseParams {
+  document: IDocumentMetadata;
+  comment: IClientCommentParams;
+}
+export type IPostDocumentCommentUnionParams = IPostDocumentCommentParams | IFirebaseFunctionWarmUpParams;

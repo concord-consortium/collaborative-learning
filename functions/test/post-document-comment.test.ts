@@ -2,7 +2,7 @@ import {
   apps, clearFirestoreData, initializeAdminApp, useEmulators
 } from "@firebase/rules-unit-testing";
 import { postDocumentComment } from "../src/post-document-comment";
-import { IDocumentMetadata, IPostCommentParams, IUserContext, networkDocumentKey } from "../src/shared-types";
+import { IDocumentMetadata, IPostDocumentCommentParams, IUserContext, networkDocumentKey } from "../src/shared-types";
 import {
   kCanonicalPortal, kCreatedAt, kDemoName, kDocumentKey, kDocumentType, kFirebaseUserId,
   kTeacherName, kTeacherNetwork, kUserId, specAuth, specUserContext
@@ -55,7 +55,7 @@ export interface IPartialPostCommentParams {
   }>;
 }
 
-const specPostComment = (overrides?: IPartialPostCommentParams): IPostCommentParams => {
+const specPostComment = (overrides?: IPartialPostCommentParams): IPostDocumentCommentParams => {
   return {
     context: specUserContext(overrides?.context),
     document: { uid: kUserId, type: kDocumentType, key: kDocumentKey, createdAt: kCreatedAt, ...overrides?.document },
@@ -77,6 +77,10 @@ describe("postDocumentComment", () => {
 
   it("should fail without sufficient arguments", async () => {
     await expect(postDocumentComment()).rejects.toBeDefined();
+  });
+
+  it("should succeed when asked to warm up", async () => {
+    await expect(postDocumentComment({ warmUp: true })).resolves.toHaveProperty("version");
   });
 
   it("should fail without valid arguments", async () => {
@@ -124,13 +128,14 @@ describe("postDocumentComment", () => {
   });
 
   it("should add comments for authenticated users", async () => {
-    expect.assertions(8);
+    expect.assertions(10);
 
     // can add a comment to a document that doesn't yet exist in Firestore
     const docKey = networkDocumentKey(kDocumentKey, kTeacherNetwork);
     const commentsCollectionPath = `authed/${kCanonicalPortal}/documents/${docKey}/comments`;
-    await expect(postDocumentComment(specPostComment(), authWithTeacherClaims as any))
-                  .resolves.toHaveProperty("id");
+    const post1Result = await postDocumentComment(specPostComment(), authWithTeacherClaims as any);
+    expect(post1Result).toHaveProperty("id");
+    expect(post1Result).toHaveProperty("version");
     // there should be one comment in the comments subcollection
     const result1 = await dbAdmin.collection(commentsCollectionPath).orderBy("createdAt").get();
     expect(result1.docs.length).toBe(1);
@@ -138,9 +143,10 @@ describe("postDocumentComment", () => {
     expect(result1.docs[0].data().content).toBe(kComment1);
 
     // can add a second comment to a document that already exists
-    await expect(postDocumentComment(specPostComment({ comment: { content: kComment2 } }),
-                                      authWithTeacherClaims as any))
-                  .resolves.toHaveProperty("id");
+    const post2Result = await postDocumentComment(specPostComment({ comment: { content: kComment2 } }),
+                                                  authWithTeacherClaims as any);
+    expect(post2Result).toHaveProperty("id");
+    expect(post2Result).toHaveProperty("version");
     // there should be two comments in the comments subcollection
     const result2 = await dbAdmin.collection(commentsCollectionPath).orderBy("createdAt").get();
     expect(result2.docs.length).toBe(2);
