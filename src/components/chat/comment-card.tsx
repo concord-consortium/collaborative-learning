@@ -31,7 +31,6 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
   };
 
   return (
-    // <div className={`comment-card ${activeNavTab}`} data-testid="comment-card">
     <div className={`comment-card selected`} data-testid="comment-card">
       {renderThreadHeader()}
       { postedComments?.map((comment, idx) => {

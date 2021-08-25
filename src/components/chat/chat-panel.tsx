@@ -39,7 +39,9 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, documentKey, o
             onPostComment={postComment}
             postedComments={comments}
           />
-        : <div className="select-doc-instruction">Open a document to begin or view comment threads</div>
+        : <div className="select-doc-message" data-testid="select-doc-messsage">
+            Open a document to begin or view comment threads
+          </div>
       }
     </div>
   );

@@ -58,28 +58,27 @@ describe("ChatPanel", () => {
     });
     expect(mockCloseChatPanel).toHaveBeenCalled();
   });
-
-  it("should allow user to type text in the textarea and click Post button", () => {
+  it("should show select document message if document has not been selected", () => {
     const mockCloseChatPanel = jest.fn();
-    const { rerender } = render((
-      <ChatPanel activeNavTab={ENavTab.kMyWork} documentKey="document-key" onCloseChatPanel={mockCloseChatPanel}/>
+    render((
+      <ChatPanel activeNavTab={ENavTab.kMyWork} onCloseChatPanel={mockCloseChatPanel} />
     ));
-    const postButton = screen.getByTestId("comment-post-button");
-    const textarea = screen.getByTestId("comment-textarea") as HTMLTextAreaElement;
-    const text = "X"; //testing library issue when typing in more than one character
-    expect(postButton).toHaveClass("disabled");
-    act(() =>{
-      userEvent.type(textarea, text);
-    });
-    rerender(
-      <ChatPanel activeNavTab={ENavTab.kMyWork} documentKey="document-key" onCloseChatPanel={mockCloseChatPanel}/>
-    );
-    expect(textarea.value).toBe(text);
-    expect(postButton).not.toHaveClass("disabled");
-    act(() => {
-      userEvent.click(postButton);
-    });
-    expect(textarea.value).toBe("");
-    expect(postButton).toHaveClass("disabled");
+    expect(screen.getByTestId("select-doc-messsage")).toBeInTheDocument();
   });
+  it("should show comment card if document has been selected", () => {
+    const mockCloseChatPanel = jest.fn();
+    const mockDocument = { key: "document-key" } as any;
+    render((
+      <ChatPanel activeNavTab={ENavTab.kMyWork} document={mockDocument} onCloseChatPanel={mockCloseChatPanel} />
+    ));
+    expect(screen.getByTestId("comment-card")).toBeInTheDocument();
+  });
+  it("should show comment card if selected tab is not My Work", () => {
+    const mockCloseChatPanel = jest.fn();
+    render((
+      <ChatPanel activeNavTab={ENavTab.kProblems} onCloseChatPanel={mockCloseChatPanel} />
+    ));
+    expect(screen.getByTestId("comment-card")).toBeInTheDocument();
+  });
+
 });
