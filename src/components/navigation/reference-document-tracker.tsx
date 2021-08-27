@@ -3,6 +3,22 @@ import { useEffect } from "react";
 import { usePrevious } from "../../hooks/use-previous";
 import { useUIStore } from "../../hooks/use-stores";
 
+/*
+ * ReferenceDocumentTracker
+ *
+ * This component is basically a hook wrapped in a functional component so that
+ * it can be called from a class component (NavTabPanel in this case). It's basic
+ * purpose is to walk the DOM to figure out what user document or curriculum section
+ * is currently visible in the left-side navigation panel for the purpose of deciding
+ * what document or curriculum section can be commented upon in the comments panel.
+ * We had been trying to determine this by tracking clicks in the various tab headers
+ * but this was getting increasingly complicated and wasn't working very well. This
+ * ties the behavior of the comments panel to what's actually visible to the user, as
+ * it should be. The mechanism is that components that are responsible for presenting
+ * documents or curriculum sections to the user add a `data-reference-document` or
+ * `data-reference-section` attribute which can then be detected when we crawl the
+ * DOM thus guaranteeing that we're finding the top-most visible documents/sections.
+ */
 interface IProps {
   navTabPanelElt: HTMLDivElement | null;
 }
@@ -41,7 +57,6 @@ export const ReferenceDocumentTracker = observer(({ navTabPanelElt }: IProps) =>
         ui.setReferenceDocument(referenceSection
                                   ? `${referenceDocument}/${referenceSection}`
                                   : referenceDocument);
-        console.log("ReferenceDocumentTracker", "referenceDocument:", ui.referenceDocument);
       }, 30);
     }
   }, [navTabPanelElt, prevUpdates, ui, ui.refDocUpdates]);
