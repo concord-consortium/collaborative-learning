@@ -55,27 +55,26 @@ export const CommentTextBox: React.FC<IProps> = ({ activeNavTab, numPostedCommen
   };
 
   return (
-      <div className="comment-textbox">
-        <textarea
-          style={textareaStyle}
-          placeholder={numPostedComments < 1 ? "Comment on this document...": "Reply..."}
-          value={commentText}
-          data-testid="comment-textarea"
-          onChange={handleCommentTextAreaChange}
-          onKeyDown={handleEscKey}
-        />
-        <div className="comment-textbox-footer">
-          <div className="comment-footer-button cancel"
-               onClick={handleCancelPost}
-               data-testid="comment-cancel-button">
-            Cancel
-          </div>
-          <div className={postButtonClass} onClick={handlePostComment} data-testid="comment-post-button">
-            <SendIcon />
-            Post
-          </div>
+    <div className="comment-textbox">
+      <textarea
+        style={textareaStyle}
+        placeholder={numPostedComments < 1 ? "Comment on this document...": "Reply..."}
+        value={commentText}
+        data-testid="comment-textarea"
+        onChange={handleCommentTextAreaChange}
+        onKeyDown={handleEscKey}
+      />
+      <div className="comment-textbox-footer">
+        <div className="comment-footer-button cancel"
+              onClick={handleCancelPost}
+              data-testid="comment-cancel-button">
+          Cancel
+        </div>
+        <div className={postButtonClass} onClick={handlePostComment} data-testid="comment-post-button">
+          <SendIcon />
+          Post
         </div>
       </div>
-    );
-  // };
+    </div>
+  );
 };

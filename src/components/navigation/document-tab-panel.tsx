@@ -136,6 +136,7 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
 
   private handleTabSelect = (tabIndex: number) => {
     this.setState({ tabIndex });
+    this.stores.ui.updateReferenceDocument();
   }
 
   private renderSubSections(subTab: any) {

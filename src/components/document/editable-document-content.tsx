@@ -86,7 +86,8 @@ export const EditableDocumentContent: React.FC<IProps> = props => {
   return (
     <DocumentContextReact.Provider value={documentContext}>
       <EditableToolApiInterfaceRefContext.Provider value={editableToolApiInterfaceRef}>
-        <div key="editable-document" className={`editable-document-content ${showToolbarClass}`} >
+        <div key="editable-document" className={`editable-document-content ${showToolbarClass}`}
+              data-reference-document={document.key} >
           {isShowingToolbar && <DocumentToolbar document={document} toolbar={toolbar} />}
           {isShowingToolbar && <div className="canvas-separator"/>}
           <DocumentCanvas mode={mode} isPrimary={isPrimary} document={document} readOnly={isReadOnly} />

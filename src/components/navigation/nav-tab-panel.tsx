@@ -1,13 +1,14 @@
 import { inject, observer } from "mobx-react";
 import React from "react";
-import { BaseComponent, IBaseProps } from "../base";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
+import { BaseComponent, IBaseProps } from "../base";
 import { kDividerMax, kDividerMin } from "../../models/stores/ui-types";
 import { NavTabSpec, ENavTab } from "../../models/view/nav-tabs";
 import { Logger, LogEventName } from "../../lib/logger";
 import { StudentGroupView } from "../document/student-group-view";
 import { ProblemTabContent } from "./problem-tab-content";
 import { DocumentTabContent } from "./document-tab-content";
+import { ReferenceDocumentTracker } from "./reference-document-tracker";
 import { SupportBadge } from "./support-badge";
 import { NewCommentsBadge } from "./new-comments-badge";
 import { ChatPanel } from "../chat/chat-panel";
@@ -32,6 +33,7 @@ interface IState {
 @inject("stores")
 @observer
 export class NavTabPanel extends BaseComponent<IProps, IState> {
+  private navTabPanelElt: HTMLDivElement | null = null;
 
   constructor(props: IProps) {
     super(props);
@@ -43,20 +45,21 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
 
   public render() {
     const { tabs, isResourceExpanded } = this.props;
-    const { ui, user, documents, supports } = this.stores;
-    const selectedTabIndex = tabs?.findIndex(t => t.tab === ui.activeNavTab);
+    const { ui: { activeNavTab, dividerPosition, referenceDocument }, user, supports } = this.stores;
+    const selectedTabIndex = tabs?.findIndex(t => t.tab === activeNavTab);
     const resizePanelWidth = 4;
     const collapseTabWidth = 44;
-    const resourceWidth = ui.dividerPosition === kDividerMin
+    const resourceWidth = dividerPosition === kDividerMin
                             ? kDividerMin
-                            : ui.dividerPosition === kDividerMax
+                            : dividerPosition === kDividerMax
                               ? `calc(100% - ${collapseTabWidth}px - ${resizePanelWidth}px)`
-                              : `calc(${ui.dividerPosition}% - ${resizePanelWidth}px)`;
+                              : `calc(${dividerPosition}% - ${resizePanelWidth}px)`;
     const resourceWidthStyle = {width: resourceWidth};
-    const referenceDocument = ui.referenceDocument && documents.getDocument(ui.referenceDocument);
     return (
       <div className={`resource-and-chat-panel ${isResourceExpanded ? "shown" : ""}`} style={resourceWidthStyle}>
-        <div className={`nav-tab-panel ${this.state.showChatColumn ? "chat-open" : ""}`}>
+        <div className={`nav-tab-panel ${this.state.showChatColumn ? "chat-open" : ""}`}
+            ref={elt => this.navTabPanelElt = elt}>
+          <ReferenceDocumentTracker navTabPanelElt={this.navTabPanelElt} />
           <Tabs selectedIndex={selectedTabIndex} onSelect={this.handleSelectTab} forceRenderTabPanel={true}>
             <div className="top-row">
               <TabList className="top-tab-list">
@@ -74,10 +77,10 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
               </TabList>
               { user.isNetworkedTeacher
                   ? (!this.state.showChatColumn) &&
-                    <div className={`chat-panel-toggle themed ${ui.activeNavTab}`}>
-                      <NewCommentsBadge documentKey={ui.referenceDocument} />
+                    <div className={`chat-panel-toggle themed ${activeNavTab}`}>
+                      <NewCommentsBadge documentKey={referenceDocument} />
                       <ChatIcon
-                        className={`chat-button ${ui.activeNavTab}`}
+                        className={`chat-button ${activeNavTab}`}
                         onClick={() => this.handleShowChatColumn(true)}
                       />
                     </div>
@@ -94,7 +97,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
             }
           </Tabs>
           {this.state.showChatColumn && referenceDocument &&
-            <ChatPanel activeNavTab={ui.activeNavTab} document={referenceDocument.getMetadata()}
+            <ChatPanel activeNavTab={activeNavTab} documentKey={referenceDocument}
                         onCloseChatPanel={this.handleShowChatColumn} />}
         </div>
       </div>
@@ -154,6 +157,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
       const tabSpec = tabs[tabIndex];
       if (ui.activeNavTab !== tabSpec.tab) {
         ui.setActiveNavTab(tabSpec.tab);
+        ui.updateReferenceDocument();
         const logParameters = {
           tab_name: tabSpec.tab.toString()
         };

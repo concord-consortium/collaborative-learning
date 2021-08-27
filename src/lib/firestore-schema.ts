@@ -47,19 +47,39 @@ export interface CommentDocument {
 type CommentsCollection = FSCollection<CommentDocument>;
 
 /*
+ * curriculum documents
+ *
+ * Subcollection of domain with several metadata fields for referencing curriculum content.
+ * Since curriculum "documents" are available to anyone, the only access restriction is that
+ * comments can only be viewed by teachers in the same network.
+ */
+interface CurriculumDocument {
+  unit: string;                       // unit code, e.g. "sas", "msa", etc.
+  facet?: string;                     // empty for regular curriculum; "guide" for teacher guide, etc.
+  problem: string;                    // ordinal string, e.g. "2.1"
+  section: string;                    // "introduction", etc.
+  path: string;                       // e.g. "sas/2/1/introduction"
+  network?: string;                   // network of teacher commenting on document
+  comments: CommentsCollection;       // comments/chats subcollection
+}
+// collection key is {network}_{escapedProblemPath} because
+// the same document might get added in different networks over time
+type CurriculumCollection = FSCollection<CurriculumDocument>;
+
+/*
  * documents
  *
  * Subcollection of domain with several metadata fields copied from real-time database (e.g. title, properties)
  * with potential synchronization issues.
  * Documents and their comments are accessible to the owning teacher in addition to any network access.
- * Documents owned by one teacher are accessible to all teachers that share a network with the owner.
- * Networked access will be mediated by Firestore security rules which can check whether the requesting user and
- * one of the teachers of the class associated with the document share a network.
+ * Documents are associated with a network and all teachers in that network can access the document.
+ * Networked access will be mediated by Firestore security rules which can check whether the requesting user
+ * is in the appropriate network.
  */
 interface DocumentDocument {
   context_id: string;                 // class hash for document context
   teachers: string[];                 // [denormalized] uids of teachers of class
-  network: string;                    // (current) network of teacher creating document
+  network?: string;                   // network of teacher commenting on document
   uid: string;                        // original document owner (could be student)
   type: string;                       // original document type
   key: string;                        // original document key (id)
@@ -141,6 +161,7 @@ interface DomainDocument {
   users: UsersCollection;
   networks: NetworksCollection;
   classes: ClassesCollection;
+  curriculum: CurriculumCollection;
   documents: DocumentsCollection;
   mcsupports: SupportsCollection;
   updatedAt: FSDate;

@@ -1,26 +1,29 @@
 import React, { useCallback } from "react";
 import { ChatPanelHeader } from "./chat-panel-header";
 import { CommentCard } from "./comment-card";
-import { IDocumentMetadata } from "../../../functions/src/shared-types";
 import {
   useDocumentComments, usePostDocumentComment, useUnreadDocumentComments
 } from "../../hooks/document-comment-hooks";
+import { useDocumentOrCurriculumMetadata } from "../../hooks/use-stores";
 import "./chat-panel.scss";
 
 interface IProps {
   activeNavTab: string;
-  document: IDocumentMetadata;
+  documentKey?: string;
   onCloseChatPanel:(show:boolean) => void;
 }
 
-export const ChatPanel: React.FC<IProps> = ({ activeNavTab, document, onCloseChatPanel }) => {
+export const ChatPanel: React.FC<IProps> = ({ activeNavTab, documentKey, onCloseChatPanel }) => {
+  const document = useDocumentOrCurriculumMetadata(documentKey);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { isLoading, data: comments } = useDocumentComments(document.key);
-  const { data: unreadComments } = useUnreadDocumentComments(document.key);
+  const { isLoading, data: comments } = useDocumentComments(documentKey);
+  const { data: unreadComments } = useUnreadDocumentComments(documentKey);
   const postCommentMutation = usePostDocumentComment();
-  const postComment = useCallback(
-                        (comment: string) => postCommentMutation.mutate({ document, comment: { content: comment } }),
-                        [document, postCommentMutation]);
+  const postComment = useCallback((comment: string) => {
+    return document
+            ? postCommentMutation.mutate({ document, comment: { content: comment } })
+            : undefined;
+  }, [document, postCommentMutation]);
   const newCommentCount = unreadComments?.length || 0;
 
   return (
