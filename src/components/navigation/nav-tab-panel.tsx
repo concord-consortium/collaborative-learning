@@ -8,7 +8,7 @@ import { Logger, LogEventName } from "../../lib/logger";
 import { StudentGroupView } from "../document/student-group-view";
 import { ProblemTabContent } from "./problem-tab-content";
 import { DocumentTabContent } from "./document-tab-content";
-import { ReferenceDocumentTracker } from "./reference-document-tracker";
+import { FocusDocumentTracker } from "./focus-document-tracker";
 import { SupportBadge } from "./support-badge";
 import { NewCommentsBadge } from "./new-comments-badge";
 import { ChatPanel } from "../chat/chat-panel";
@@ -45,7 +45,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
 
   public render() {
     const { tabs, isResourceExpanded } = this.props;
-    const { ui: { activeNavTab, dividerPosition, referenceDocument }, user, supports } = this.stores;
+    const { ui: { activeNavTab, dividerPosition, focusDocument }, user, supports } = this.stores;
     const selectedTabIndex = tabs?.findIndex(t => t.tab === activeNavTab);
     const resizePanelWidth = 4;
     const collapseTabWidth = 44;
@@ -59,7 +59,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
       <div className={`resource-and-chat-panel ${isResourceExpanded ? "shown" : ""}`} style={resourceWidthStyle}>
         <div className={`nav-tab-panel ${this.state.showChatColumn ? "chat-open" : ""}`}
             ref={elt => this.navTabPanelElt = elt}>
-          <ReferenceDocumentTracker navTabPanelElt={this.navTabPanelElt} />
+          <FocusDocumentTracker navTabPanelElt={this.navTabPanelElt} />
           <Tabs selectedIndex={selectedTabIndex} onSelect={this.handleSelectTab} forceRenderTabPanel={true}>
             <div className="top-row">
               <TabList className="top-tab-list">
@@ -78,7 +78,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
               { user.isNetworkedTeacher
                   ? (!this.state.showChatColumn) &&
                     <div className={`chat-panel-toggle themed ${activeNavTab}`}>
-                      <NewCommentsBadge documentKey={referenceDocument} />
+                      <NewCommentsBadge documentKey={focusDocument} />
                       <ChatIcon
                         className={`chat-button ${activeNavTab}`}
                         onClick={() => this.handleShowChatColumn(true)}
@@ -96,8 +96,8 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
               })
             }
           </Tabs>
-          {this.state.showChatColumn && referenceDocument &&
-            <ChatPanel activeNavTab={activeNavTab} documentKey={referenceDocument}
+          {this.state.showChatColumn && focusDocument &&
+            <ChatPanel activeNavTab={activeNavTab} documentKey={focusDocument}
                         onCloseChatPanel={this.handleShowChatColumn} />}
         </div>
       </div>
@@ -157,7 +157,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
       const tabSpec = tabs[tabIndex];
       if (ui.activeNavTab !== tabSpec.tab) {
         ui.setActiveNavTab(tabSpec.tab);
-        ui.updateReferenceDocument();
+        ui.updateFocusDocument();
         const logParameters = {
           tab_name: tabSpec.tab.toString()
         };

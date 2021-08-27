@@ -34,7 +34,7 @@ export const ProblemTabContent: React.FC<IProps>
       tab_section_type: typeArgButReallyTitle
     });
 
-    ui.updateReferenceDocument();
+    ui.updateFocusDocument();
 };
 
   const handleToggleSolutions = () => {

@@ -36,7 +36,7 @@ export const UIModel = types
     showTeacherContent: true,
     dialog: types.maybe(UIDialogModel),
     // document key or section path for reference (left) document
-    referenceDocument: types.maybe(types.string),
+    focusDocument: types.maybe(types.string),
     // counter that serves to trigger updates
     refDocUpdates: 0,
     problemWorkspace: WorkspaceModel,
@@ -158,10 +158,10 @@ export const UIModel = types
         self.showDemoCreator = showDemoCreator;
       },
       closeDialog,
-      setReferenceDocument(documentKey?: string) {
-        self.referenceDocument = documentKey;
+      setFocusDocument(documentKey?: string) {
+        self.focusDocument = documentKey;
       },
-      updateReferenceDocument() {
+      updateFocusDocument() {
         // increment counter to trigger observers to update
         ++self.refDocUpdates;
       },

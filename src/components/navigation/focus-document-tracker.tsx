@@ -22,7 +22,7 @@ import { useUIStore } from "../../hooks/use-stores";
 interface IProps {
   navTabPanelElt: HTMLDivElement | null;
 }
-export const ReferenceDocumentTracker = observer(({ navTabPanelElt }: IProps) => {
+export const FocusDocumentTracker = observer(({ navTabPanelElt }: IProps) => {
   // this component is basically a hook wrapped in a functional component so that
   // it can be called from a class component (NavTabPanel in this case).
   const ui = useUIStore();
@@ -54,9 +54,9 @@ export const ReferenceDocumentTracker = observer(({ navTabPanelElt }: IProps) =>
           refDoc && (referenceDocument = refDoc);
           refSec && (referenceSection = refSec);
         }
-        ui.setReferenceDocument(referenceSection
-                                  ? `${referenceDocument}/${referenceSection}`
-                                  : referenceDocument);
+        ui.setFocusDocument(referenceSection
+                              ? `${referenceDocument}/${referenceSection}`
+                              : referenceDocument);
       }, 30);
     }
   }, [navTabPanelElt, prevUpdates, ui, ui.refDocUpdates]);

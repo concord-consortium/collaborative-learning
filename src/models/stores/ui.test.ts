@@ -85,9 +85,9 @@ describe("ui model", () => {
   });
 
   it("allows reference document to be set", () => {
-    expect(ui.referenceDocument).toBeUndefined();
-    ui.setReferenceDocument("1234");
-    expect(ui.referenceDocument).toBe("1234");
+    expect(ui.focusDocument).toBeUndefined();
+    ui.setFocusDocument("1234");
+    expect(ui.focusDocument).toBe("1234");
   });
 
   it("allows alert dialogs", () => {
