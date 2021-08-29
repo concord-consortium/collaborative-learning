@@ -1,9 +1,9 @@
 import TeacherDashboard from "../../../../support/elements/clue/TeacherDashboard";
-import RightNav from "../../../../support/elements/common/RightNav";
+import PrimaryWorkspace from "../../../../support/elements/common/PrimaryWorkspace";
 import ClueCanvas from "../../../../support/elements/clue/cCanvas";
 
     let dashboard = new TeacherDashboard();
-    let rightNav = new RightNav();
+    let primaryWorkspace = new PrimaryWorkspace();
     let clueCanvas = new ClueCanvas;
 
     const title = "Drawing Wumps";
@@ -25,7 +25,7 @@ import ClueCanvas from "../../../../support/elements/clue/cCanvas";
             cy.get(".collapsed-resources-tab.my-work").click();
             cy.openTopTab("supports");
             cy.openSection('supports','teacher-supports');
-            rightNav.getCanvasItemTitle('supports','teacher-supports').should('contain',title);
+            primaryWorkspace.getCanvasItemTitle('supports','teacher-supports').should('contain',title);
         });
     });
 

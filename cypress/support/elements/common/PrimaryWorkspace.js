@@ -3,7 +3,7 @@
 //           ['personal', 'published', 'learning-log', 'starred']
 //           [''],
 //           ['jit','teacher-supports']]
-class RightNav{
+class PrimaryWorkspace{
     testDocumentWithTitle(tab, subTab, title, shouldTest) {
         const tabName = 'tab-' + tab;
         const buttonSelector = '.nav-tab-buttons .nav-tab.' + tabName;
@@ -36,28 +36,28 @@ class RightNav{
         return this.testDocumentWithTitle(tab, subTab, title, 'not.contain');
     }
 
-    getRightNavTabs(){
+    getPrimaryWorkspaceTabs(){
         return cy.get('.right-nav .tabs');
     }
 
-    closeRightNavTabs(){
+    closePrimaryWorkspaceTabs(){
         cy.get('.close-button').click();
         cy.wait(1000);
     }
 
-    getRightNavTab(tab){
+    getPrimaryWorkspaceTab(tab){
         return cy.get('.nav-tab.tab-'+tab);
     }
 
-    openRightNavTab(tab){
-        this.getRightNavTab(tab).click();
+    openPrimaryWorkspaceTab(tab){
+        this.getPrimaryWorkspaceTab(tab).click();
     }
-    closeRightNavTab(tab){
-        cy.get('#rightNavTab-'+tab+'.tab').click();
+    closePrimaryWorkspaceTab(tab){
+        cy.get('#primaryWorkspaceTab-'+tab+'.tab').click();
         cy.wait(2000);
     }
 
-    getRightNavExpandedSpace(){
+    getPrimaryWorkspaceExpandedSpace(){
         return cy.get('.right-nav > .expanded-area.expanded > .contents > .container');
     }
 
@@ -84,7 +84,7 @@ class RightNav{
       return cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer');
     }
 
-    starCanvasItem(tab,section,title){
+    starCanvasItem(section,title){
         cy.getCanvasItemTitle(section).contains(title).parent().parent().siblings('.icon-holder').find('.icon-star').click();
     }
     getCanvasStarIcon(tab,section,title){
@@ -106,4 +106,4 @@ class RightNav{
         });
     }
 }
-export default RightNav;
+export default PrimaryWorkspace;

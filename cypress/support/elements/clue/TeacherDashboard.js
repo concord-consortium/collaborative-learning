@@ -172,15 +172,15 @@ class TeacherDashboard {
         });
     }
     clearAllStarred() {
-        this.getRightNavTabListShown().within(() => {
+        this.getPrimaryWorkspaceTabListShown().within(() => {
             cy.get('svg.starred').click({ multiple: true });
         });
     }
     // Teacher Workspace Right Nav
-    getRightNavTabListHidden() {
+    getPrimaryWorkspaceTabListHidden() {
         return cy.get('.class-work').find('.list').should('have.class', 'hidden');
     }
-    getRightNavTabListShown() {
+    getPrimaryWorkspaceTabListShown() {
         return cy.get('.class-work').find('.shown').should('have.class', 'list');
     }
     verifyPublishStatus(group){

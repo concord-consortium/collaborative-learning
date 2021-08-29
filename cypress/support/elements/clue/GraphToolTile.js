@@ -95,10 +95,10 @@ class GraphToolTile{
         return cy.get('.geometry-menu-button');
     }
     showAngle(){
-        cy.get('.geometry-tool .button.angle-label.enabled').click();
+        cy.get('.single-workspace.primary-workspace .geometry-toolbar .button.angle-label.enabled').click();
     }
     hideAngle(){
-        cy.get('.geometry-tool .button.angle-label.enabled').click();
+        cy.get('.single-workspace.primary-workspace .geometry-toolbar .button.angle-label.enabled').click();
     }
     getAngleAdornment(){
         return cy.get('.single-workspace .geometry-content g polygon').siblings('path');
