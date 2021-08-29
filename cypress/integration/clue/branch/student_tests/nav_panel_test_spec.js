@@ -1,8 +1,8 @@
-import RightNav from '../../../../support/elements/common/RightNav';
+import PrimaryWorkspace from '../../../../support/elements/common/PrimaryWorkspace';
 import Canvas from '../../../../support/elements/common/Canvas';
 import ClueCanvas from '../../../../support/elements/clue/cCanvas';
 
-const rightNav = new RightNav;
+const primaryWorkspace = new PrimaryWorkspace;
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 const problemSubTabTitles = ['Introduction', 'Initial Challenge', 'What If', 'Now What'];
@@ -93,10 +93,10 @@ describe('Test nav panel tabs', function () {
         cy.get(".collapsed-resources-tab.my-work").click();
         cy.openTopTab('my-work');
         cy.openSection("my-work", "workspaces");
-        rightNav.starCanvasItem('my-work', 'workspaces', copyDocumentTitle);
+        primaryWorkspace.starCanvasItem('my-work', 'workspaces', copyDocumentTitle);
       });
       it('verify starred document star is highlighted', function () {
-        rightNav.getCanvasStarIcon('my-work', 'workspaces', copyDocumentTitle).should('have.class', 'starred');
+        primaryWorkspace.getCanvasStarIcon('my-work', 'workspaces', copyDocumentTitle).should('have.class', 'starred');
       });
       it('verify starred document appears in the Starred section', function () {
         cy.openSection('my-work', 'starred');
