@@ -34,7 +34,7 @@ export const ProblemTabContent: React.FC<IProps>
       tab_section_type: typeArgButReallyTitle
     });
 
-    ui.updateReferenceDocument();
+    ui.updateFocusDocument();
 };
 
   const handleToggleSolutions = () => {
@@ -44,7 +44,7 @@ export const ProblemTabContent: React.FC<IProps>
 
   return (
     <Tabs className={classNames("problem-tabs", context, chatBorder)} selectedTabClassName="selected"
-          data-reference-document={problemPath}>
+          data-focus-document={problemPath}>
       <div className="tab-header-row">
         <TabList className="tab-list">
           {sections.map((section) => {
@@ -62,7 +62,7 @@ export const ProblemTabContent: React.FC<IProps>
       </div>
       {sections.map((section) => {
         return (
-          <TabPanel key={`section-${section.type}`} data-reference-section={section.type}>
+          <TabPanel key={`section-${section.type}`} data-focus-section={section.type}>
             <ProblemPanelComponent section={section} key={`section-${section.type}`} />
           </TabPanel>
         );
