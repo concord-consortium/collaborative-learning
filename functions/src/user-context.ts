@@ -1,5 +1,5 @@
 import { AuthData } from "firebase-functions/lib/common/providers/https";
-import { IUserContext } from "./shared-types";
+import { escapeKey, IUserContext } from "./shared";
 
 export interface IValidatedUserContext {
   isValid: boolean;
@@ -9,10 +9,6 @@ export interface IValidatedUserContext {
   firestoreRoot: string;
   classPath: string;
 }
-
-export const escapeKey = (s: string): string => {
-  return s.replace(/[.$[\]#/]/g, "_");
-};
 
 export const canonicalizePortal = (portal: string) => {
   return escapeKey(portal.replace(/^https?:?\/?\/?/, ""));

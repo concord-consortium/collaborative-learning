@@ -1,6 +1,6 @@
 import { AuthData } from "firebase-functions/lib/common/providers/https";
 import { DeepPartial } from "utility-types";
-import { IUserContext } from "../src/shared-types";
+import { IUserContext } from "../src/shared";
 
 export const kPortal = "https://test.portal";
 export const kCanonicalPortal = "test_portal";
@@ -23,6 +23,7 @@ export const kTeacherNetwork = "teacher-network";
 export const kOtherTeacherNetwork = "other-network";
 export const kDocumentType = "problem";
 export const kDocumentKey = "document-key";
+export const kCurriculumKey = "abc/1/2/intro";
 export const kCreatedAt = Date.now();
 
 

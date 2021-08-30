@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { IUserContext } from "../../functions/src/shared-types";
+import { IUserContext } from "../../functions/src/shared";
 import { useAppMode, useClassStore, useDemoStore, useUserStore } from "./use-stores";
 
 export const useUserContext = (): IUserContext => {

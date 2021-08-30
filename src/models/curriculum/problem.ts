@@ -13,19 +13,17 @@ export const ProblemModel = types
     supports: types.array(SupportModel),
     settings: types.maybe(SettingsMstType)
   })
-  .views((self) => {
-    return {
-      get fullTitle() {
-        return `${self.title}${self.subtitle ? `: ${self.subtitle}` : ""}`;
-      },
-      getSectionByIndex(index: number): SectionModelType|undefined {
-        const safeIndex = Math.max(0, Math.min(index, self.sections.length - 1));
-        return self.sections[safeIndex];
-      },
-      getSectionById(sectionId: string): SectionModelType|undefined {
-        return self.sections.find((section) => section.type === sectionId);
-      }
-    };
-  });
+  .views(self => ({
+    get fullTitle() {
+      return `${self.title}${self.subtitle ? `: ${self.subtitle}` : ""}`;
+    },
+    getSectionByIndex(index: number): SectionModelType|undefined {
+      const safeIndex = Math.max(0, Math.min(index, self.sections.length - 1));
+      return self.sections[safeIndex];
+    },
+    getSectionById(sectionId: string): SectionModelType|undefined {
+      return self.sections.find((section) => section.type === sectionId);
+    }
+  }));
 
 export type ProblemModelType = typeof ProblemModel.Type;

@@ -35,7 +35,10 @@ export const UIModel = types
     showDemoCreator: false,
     showTeacherContent: true,
     dialog: types.maybe(UIDialogModel),
+    // document key or section path for reference (left) document
     referenceDocument: types.maybe(types.string),
+    // counter that serves to trigger updates
+    refDocUpdates: 0,
     problemWorkspace: WorkspaceModel,
     learningLogWorkspace: WorkspaceModel,
     teacherPanelKey: types.maybe(types.string)
@@ -157,6 +160,10 @@ export const UIModel = types
       closeDialog,
       setReferenceDocument(documentKey?: string) {
         self.referenceDocument = documentKey;
+      },
+      updateReferenceDocument() {
+        // increment counter to trigger observers to update
+        ++self.refDocUpdates;
       },
       rightNavDocumentSelected(appConfig: AppConfigModelType, document: DocumentModelType) {
         if (!document.isPublished || appConfig.showPublishedDocsInPrimaryWorkspace) {

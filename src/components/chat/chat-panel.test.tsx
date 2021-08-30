@@ -37,13 +37,18 @@ jest.mock("../../hooks/document-comment-hooks", () => ({
   })
 }));
 
+jest.mock("../../hooks/use-stores", () => ({
+  useDocumentOrCurriculumMetadata: (documentKey: string) => ({
+    uid: "1", key: documentKey, type: "problem"
+  })
+}));
+
 describe("ChatPanel", () => {
 
   it("should render successfully", () => {
     const mockCloseChatPanel = jest.fn();
-    const mockDocument = { key: "document-key" } as any;
     render((
-      <ChatPanel activeNavTab={ENavTab.kMyWork} document={mockDocument} onCloseChatPanel={mockCloseChatPanel}/>
+      <ChatPanel activeNavTab={ENavTab.kMyWork} documentKey="document-key" onCloseChatPanel={mockCloseChatPanel}/>
     ));
     expect(screen.getByTestId("chat-panel")).toBeInTheDocument();
     expect(screen.getByTestId("chat-panel-header")).toBeInTheDocument();
@@ -52,5 +57,29 @@ describe("ChatPanel", () => {
       userEvent.click(screen.getByTestId("chat-close-button"));
     });
     expect(mockCloseChatPanel).toHaveBeenCalled();
+  });
+
+  it("should allow user to type text in the textarea and click Post button", () => {
+    const mockCloseChatPanel = jest.fn();
+    const { rerender } = render((
+      <ChatPanel activeNavTab={ENavTab.kMyWork} documentKey="document-key" onCloseChatPanel={mockCloseChatPanel}/>
+    ));
+    const postButton = screen.getByTestId("comment-post-button");
+    const textarea = screen.getByTestId("comment-textarea") as HTMLTextAreaElement;
+    const text = "X"; //testing library issue when typing in more than one character
+    expect(postButton).toHaveClass("disabled");
+    act(() =>{
+      userEvent.type(textarea, text);
+    });
+    rerender(
+      <ChatPanel activeNavTab={ENavTab.kMyWork} documentKey="document-key" onCloseChatPanel={mockCloseChatPanel}/>
+    );
+    expect(textarea.value).toBe(text);
+    expect(postButton).not.toHaveClass("disabled");
+    act(() => {
+      userEvent.click(postButton);
+    });
+    expect(textarea.value).toBe("");
+    expect(postButton).toHaveClass("disabled");
   });
 });

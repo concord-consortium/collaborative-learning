@@ -1,12 +1,16 @@
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
-import { IPostDocumentCommentUnionParams, isWarmUpParams, networkDocumentKey } from "./shared-types";
+import {
+  IPostDocumentCommentUnionParams, isCurriculumMetadata, isDocumentMetadata, isWarmUpParams, networkDocumentKey
+} from "./shared";
 import { validateUserContext } from "./user-context";
 
 // update this when deploying updates to this function
-const version = "1.0.0";
+const version = "1.1.0";
 
-export const postDocumentComment = async (params?: IPostDocumentCommentUnionParams, callableContext?: functions.https.CallableContext) => {
+export async function postDocumentComment(
+                        params?: IPostDocumentCommentUnionParams,
+                        callableContext?: functions.https.CallableContext) {
   if (isWarmUpParams(params)) return { version };
 
   const { context, document, comment } = params || {};
@@ -19,7 +23,7 @@ export const postDocumentComment = async (params?: IPostDocumentCommentUnionPara
     throw new functions.https.HttpsError("invalid-argument", "Some required teacher information was not provided.");
   }
 
-  if (!document?.uid || !document.type || !document.key || !document.createdAt) {
+  if (!isDocumentMetadata(document) && !isCurriculumMetadata(document)) {
     throw new functions.https.HttpsError("invalid-argument", "Some required document information was not provided.");
   }
 
@@ -28,22 +32,27 @@ export const postDocumentComment = async (params?: IPostDocumentCommentUnionPara
   }
 
   const firestore = admin.firestore();
-  const kDocumentKey = networkDocumentKey(document.key, context.network);
-  const kDocumentDocPath = `${firestoreRoot}/documents/${kDocumentKey}`;
+  const kCollection = isCurriculumMetadata(document) ? "curriculum" : "documents";
+  const kDocumentKey = networkDocumentKey(
+                        isCurriculumMetadata(document) ? document.path : document.key,
+                        context.network);
+  const kDocumentDocPath = `${firestoreRoot}/${kCollection}/${kDocumentKey}`;
   const kCommentsCollectionPath = `${kDocumentDocPath}/comments`;
 
   // see if the document is already in firestore
   const docReadResponse = await firestore.doc(kDocumentDocPath).get();
   if (!docReadResponse.data()) {
     // if not already present, create it
-    await firestore.doc(kDocumentDocPath).set({
-      context_id: context.classHash,
-      teachers: context.teachers,
-      network: context.network,
-      // we could pull some of the document metadata from the realtime database,
-      // but for now we trust the client to provide valid values.
-      ...document
-    });
+    const documentParams = isDocumentMetadata(document)
+                            ? {
+                              // we could pull some of the document metadata from the realtime database,
+                              // but for now we trust the client to provide valid values.
+                              ...document,
+                              context_id: context.classHash,
+                              teachers: context.teachers
+                            }
+                            : document;
+    await firestore.doc(kDocumentDocPath).set({ ...documentParams, network: context.network });
   }
 
   // add the comment once we're certain the document exists

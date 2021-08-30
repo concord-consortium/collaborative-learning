@@ -1,7 +1,9 @@
 import { MobXProviderContext } from "mobx-react";
-import { useContext } from "react";
+import { useContext, useMemo } from "react";
 import { DB } from "../lib/db";
-import { IDocumentMetadata, networkDocumentKey } from "../../functions/src/shared-types";
+import {
+  buildSectionPath, getCurriculumMetadata, ICurriculumMetadata, IDocumentMetadata, isSectionPath, networkDocumentKey
+} from "../../functions/src/shared";
 import { ProblemModelType } from "../models/curriculum/problem";
 import { AppConfigModelType } from "../models/stores/app-config-model";
 import { GroupsModelType } from "../models/stores/groups";
@@ -40,9 +42,19 @@ export function useDocumentFromStore(key?: string) {
   return key ? stores.documents.getDocument(key) : undefined;
 }
 
-export function useDocumentMetadataFromStore(key?: string): IDocumentMetadata | undefined{
+export function useDocumentMetadataFromStore(key?: string): IDocumentMetadata | undefined {
   const document = useDocumentFromStore(key);
-  return key && document ? document.getMetadata() : undefined;
+  return useMemo(() => {
+    return key && document ? document.getMetadata() : undefined;
+    // updating when the key changes is sufficient
+  }, [key]);  // eslint-disable-line react-hooks/exhaustive-deps
+}
+
+export function useDocumentOrCurriculumMetadata(key?: string): IDocumentMetadata | ICurriculumMetadata | undefined {
+  const documentMetadata = useDocumentMetadataFromStore(key);
+  return useMemo(() => {
+    return isSectionPath(key) ? getCurriculumMetadata(key) : documentMetadata;
+  }, [documentMetadata, key]);
 }
 
 export function useFeatureFlag(feature: string) {
@@ -55,6 +67,15 @@ export function useGroupsStore(): GroupsModelType {
 
 export function useNetworkDocumentKey(documentKey: string) {
   return networkDocumentKey(documentKey, useUserStore().teacherNetwork);
+}
+
+export function useProblemPath() {
+  return useStores().problemPath;
+}
+
+export function useProblemPathWithFacet(facet?: string) {
+  const problemPath = useProblemPath();
+  return buildSectionPath(problemPath, undefined, facet);
 }
 
 export function useProblemStore(): ProblemModelType {

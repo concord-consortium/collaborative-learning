@@ -1,5 +1,5 @@
 import { renderHook } from "@testing-library/react-hooks";
-import { IDocumentMetadata } from "../../functions/src/shared-types";
+import { IDocumentMetadata } from "../../functions/src/shared";
 import { CommentDocument } from "../lib/firestore-schema";
 import { useDocumentComments, usePostDocumentComment, useUnreadDocumentComments } from "./document-comment-hooks";
 
