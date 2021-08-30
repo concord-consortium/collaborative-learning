@@ -38,7 +38,7 @@ export const UIModel = types
     // document key or section path for reference (left) document
     focusDocument: types.maybe(types.string),
     // counter that serves to trigger updates
-    refDocUpdates: 0,
+    focusDocUpdates: 0,
     problemWorkspace: WorkspaceModel,
     learningLogWorkspace: WorkspaceModel,
     teacherPanelKey: types.maybe(types.string)
@@ -163,7 +163,7 @@ export const UIModel = types
       },
       updateFocusDocument() {
         // increment counter to trigger observers to update
-        ++self.refDocUpdates;
+        ++self.focusDocUpdates;
       },
       rightNavDocumentSelected(appConfig: AppConfigModelType, document: DocumentModelType) {
         if (!document.isPublished || appConfig.showPublishedDocsInPrimaryWorkspace) {

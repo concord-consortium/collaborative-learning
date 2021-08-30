@@ -64,8 +64,8 @@ const commentConverter = {
  * key of a user document in Firebase. The returned results are managed by React Query,
  * e.g. caching and reuse if multiple clients request the same comments.
  */
-export const useDocumentComments = (documentKey?: string) => {
-  const path = useCommentsCollectionPath(documentKey || "");
+export const useDocumentComments = (documentKeyOrSectionPath?: string) => {
+  const path = useCommentsCollectionPath(documentKeyOrSectionPath || "");
   const converter = commentConverter;
   return useCollectionOrderedRealTimeQuery(path, { converter, orderBy: "createdAt" });
 };
@@ -79,7 +79,7 @@ export const useDocumentComments = (documentKey?: string) => {
  * based on a single timestamp, or a separate timestamp for each thread, or flags for each
  * message indicated which have been read, etc.
  */
-export const useUnreadDocumentComments = (documentKey?: string) => {
+export const useUnreadDocumentComments = (documentKeyOrSectionPath?: string) => {
   // TODO: figure this out; for now it's just a comment counter
-  return useDocumentComments(documentKey);
+  return useDocumentComments(documentKeyOrSectionPath);
 };
