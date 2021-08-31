@@ -15,6 +15,7 @@ import {
 import {
   TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType, TileLayoutModelType
 } from "../document/tile-row";
+import { SectionModelType } from "../curriculum/section";
 import { Logger, LogEventName } from "../../lib/logger";
 import { IDragTileItem } from "../../models/tools/tool-tile";
 import { DocumentsModelType } from "../stores/documents";
@@ -962,6 +963,18 @@ function migrateSnapshot(snapshot: any): any {
 
 export type DocumentContentModelType = Instance<typeof DocumentContentModel>;
 export type DocumentContentSnapshotType = SnapshotIn<typeof DocumentContentModel>;
+
+export function createDefaultSectionedContent(sections: SectionModelType[]) {
+  const tiles: OriginalToolTileModel[] = [];
+  // for blank sectioned documents, default content is a section header row and a placeholder
+  // tile for each section that is present in the template (the passed sections)
+  sections.forEach(section => {
+    tiles.push({ content: { isSectionHeader: true, sectionId: section.type }});
+    tiles.push({ content: { type: "Placeholder", sectionId: section.type }});
+  });
+  // cast required because we're using the import format
+  return DocumentContentModel.create({ tiles } as any);
+}
 
 export function cloneContentWithUniqueIds(content?: DocumentContentModelType,
                                           asTemplate?: boolean): DocumentContentModelType | undefined {

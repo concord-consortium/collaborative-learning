@@ -247,6 +247,9 @@ export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, ur
   }
   return new Promise<IAuthenticateResponse>((resolve, reject) => {
     urlParams = urlParams || pageUrlParams;
+    // TODO: we should be defaulting to appConfig.defaultUnit here rather than the empty string,
+    // but some cypress tests rely on the fact that in demo mode the offeringId is prefixed with
+    // the unit code, which results in an offeringId of `101` instead of `sas101`.
     const unitCode = urlParams.unit || "";
     // when launched as a report, the params will not contain the problemOrdinal
     const problemOrdinal = urlParams.problem || appConfig.defaultProblemOrdinal;
@@ -283,7 +286,7 @@ export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, ur
     }
 
     if (appMode !== "authed") {
-      return resolve(generateDevAuthentication(unitCode, problemOrdinal));
+      return resolve(generateDevAuthentication(unitCode || appConfig.defaultUnit, problemOrdinal));
     }
 
     if (!bearerToken) {

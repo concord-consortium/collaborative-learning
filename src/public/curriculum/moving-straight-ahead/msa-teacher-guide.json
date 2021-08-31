@@ -13,12 +13,12 @@
     "overview": {
       "initials": "OV",
       "title": "Overview",
-      "placeholder": "Work area for\noverview section"
+      "placeholder": "Work area for\nOverview section"
     },
     "launch": {
       "initials": "LC",
       "title": "Launch",
-      "placeholder": "Work area for\nInitial Challenge section"
+      "placeholder": "Work area for\nLaunch section"
     },
     "explore": {
       "initials": "EX",

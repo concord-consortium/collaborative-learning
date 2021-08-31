@@ -1,7 +1,8 @@
 import firebase from "firebase/app";
+import { forEach } from "lodash";
 import { DB, Monitor } from "../db";
 import { DBOfferingUser, DBOfferingUserMap } from "../db-types";
-import { forEach } from "lodash";
+import { ProblemDocument } from "../../models/document/document-types";
 import { BaseListener } from "./base-listener";
 import { syncStars } from "./sync-stars";
 
@@ -78,13 +79,18 @@ export class DBProblemDocumentsListener extends BaseListener {
       if (existingDoc) {
         this.db.updateDocumentFromProblemDocument(existingDoc, document);
       } else {
+        // both teachers and students listen to all problem documents
+        // but only teachers listen to all content.  students only listen
+        // to content of users in their group to reduce network traffic
         const isOwnDocument = user.self.uid === currentUser.id;
         const userInGroup = groups.userInGroup(document.self.uid, currentUser.latestGroupId);
-        const monitorRemote = currentUser.isTeacher || (!isOwnDocument && userInGroup);
-        const monitorLocal = isOwnDocument;
-        // Local changes take precident over remote changes …
-        const monitor = monitorLocal ? Monitor.Local : (monitorRemote ? Monitor.Remote : Monitor.None);
-        this.db.createDocumentFromProblemDocument(document.self.uid, document, monitor)
+        // Local changes take precedence over remote changes
+        const monitor = isOwnDocument
+                          ? Monitor.Local
+                          : currentUser.isTeacher || userInGroup
+                            ? Monitor.Remote
+                            : Monitor.None;
+        this.db.createDocumentModelFromProblemMetadata(ProblemDocument, document.self.uid, document, monitor)
           .then((doc) => {
             if (isOwnDocument) {
               syncStars(doc, this.db);

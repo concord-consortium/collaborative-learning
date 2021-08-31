@@ -1,5 +1,5 @@
 import { getSectionInitials, getSectionPlaceholder, getSectionTitle,
-        kAllSectionType, SectionModel, setSectionInfoMap, kDefaultPlaceholder } from "./section";
+        kAllSectionType, SectionModel, registerSectionInfo, kDefaultPlaceholder } from "./section";
 
 describe("SectionModel", () => {
 
@@ -16,8 +16,8 @@ describe("SectionModel", () => {
     expect(section.title).toBe("Unknown");
   });
 
-  it("supports setSectionInfoMap() to configure sections", () => {
-    setSectionInfoMap({ foo: { initials: "FS", title: "Foo Section", placeholder: "Foo Placeholder" } });
+  it("supports registerSectionInfo() to configure sections", () => {
+    registerSectionInfo({ foo: { initials: "FS", title: "Foo Section", placeholder: "Foo Placeholder" } });
 
     const fooSection = SectionModel.create({ type: "foo" });
     expect(fooSection.initials).toBe("FS");
