@@ -5,6 +5,7 @@ export const DocumentDragKey = "org.concord.clue.document.key";
 export const SectionDocumentDEPRECATED = "section";
 export const ProblemDocument = "problem";
 export const PersonalDocument = "personal";
+export const PlanningDocument = "planning";
 export const LearningLogDocument = "learningLog";
 export const ProblemPublication = "publication";
 export const PersonalPublication = "personalPublication";
@@ -14,26 +15,35 @@ export const SupportPublication = "supportPublication";
 export function isProblemType(type: string) {
   return [ProblemDocument, ProblemPublication].indexOf(type) >= 0;
 }
+export function isPlanningType(type: string) {
+  return type === PlanningDocument;
+}
 export function isPersonalType(type: string) {
   return [PersonalDocument, PersonalPublication].indexOf(type) >= 0;
 }
 export function isLearningLogType(type: string) {
   return [LearningLogDocument, LearningLogPublication].indexOf(type) >= 0;
 }
+// is this type of document associated with the offering (i.e. with a particular problem)
+export function isOfferingType(type: string) {
+  return [SectionDocumentDEPRECATED, PlanningDocument, ProblemDocument, ProblemPublication, SupportPublication]
+          .indexOf(type) >= 0;
+}
 export function isUnpublishedType(type: string) {
-  return [SectionDocumentDEPRECATED, ProblemDocument, PersonalDocument, LearningLogDocument]
+  return [SectionDocumentDEPRECATED, PlanningDocument, ProblemDocument, PersonalDocument, LearningLogDocument]
           .indexOf(type) >= 0;
 }
 export function isPublishedType(type: string) {
-  return [ProblemPublication, PersonalPublication, LearningLogPublication, SupportPublication].indexOf(type) >= 0;
+  return [ProblemPublication, PersonalPublication, LearningLogPublication, SupportPublication]
+          .indexOf(type) >= 0;
 }
 
 export const DocumentTypeEnum = types.enumeration("type",
               [SectionDocumentDEPRECATED,
-                ProblemDocument, PersonalDocument, LearningLogDocument,
-                ProblemPublication, PersonalPublication, LearningLogPublication,
-                SupportPublication]);
+                ProblemDocument, PersonalDocument, PlanningDocument, LearningLogDocument,
+                ProblemPublication, PersonalPublication, LearningLogPublication, SupportPublication]);
 export type DocumentType = Instance<typeof DocumentTypeEnum>;
+export type ProblemOrPlanningDocumentType = typeof ProblemDocument | typeof PlanningDocument;
 export type OtherDocumentType = typeof PersonalDocument | typeof LearningLogDocument;
 export type PublishableType = typeof ProblemDocument | OtherDocumentType;
 export type OtherPublicationType = typeof PersonalPublication | typeof LearningLogPublication;

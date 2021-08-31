@@ -14,11 +14,13 @@ import { DBOfferingGroup, DBOfferingGroupUser, DBOfferingGroupMap, DBOfferingUse
 import { DocumentModelType, DocumentModel } from "../models/document/document";
 import {
   DocumentType, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
-  PersonalDocument, PersonalPublication, ProblemDocument, ProblemPublication, SupportPublication
+  PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemOrPlanningDocumentType,
+  ProblemPublication, SupportPublication
 } from "../models/document/document-types";
+import { SectionModelType } from "../models/curriculum/section";
 import { SupportModelType } from "../models/curriculum/support";
 import { ImageModelType } from "../models/image";
-import { DocumentContentSnapshotType, DocumentContentModelType, cloneContentWithUniqueIds
+import { DocumentContentSnapshotType, DocumentContentModelType, cloneContentWithUniqueIds, createDefaultSectionedContent
        } from "../models/document/document-content";
 import { Firebase } from "./firebase";
 import { Firestore } from "./firestore";
@@ -89,8 +91,6 @@ export class DB {
   public firestore: Firestore;
   public listeners: DBListeners;
   public stores: IStores;
-
-  public creatingDocuments: string[] = [];
 
   private authStateUnsubscribe?: firebase.Unsubscribe;
 
@@ -281,18 +281,19 @@ export class DB {
 
       const problemDocumentsRef = this.firebase.ref(this.firebase.getProblemDocumentsPath(user));
       const problemDocumentsSnapshot = await problemDocumentsRef.once("value");
-      const problemDocuments: DBOfferingUserProblemDocumentMap = problemDocumentsSnapshot &&
-                                                                  problemDocumentsSnapshot.val();
+      const problemDocuments: DBOfferingUserProblemDocumentMap = problemDocumentsSnapshot?.val();
       const lastProblemDocument = findLast(problemDocuments, () => true);
       return lastProblemDocument?.documentKey
-              ? this.openProblemDocument(lastProblemDocument.documentKey)
-              : this.createProblemDocument(defaultContent);
+              ? this.openProblemOrPlanningDocument(ProblemDocument, lastProblemDocument.documentKey)
+              : this.createProblemOrPlanningDocument(ProblemDocument, defaultContent);
     }
 
     // personal document
+    // if we've already loaded it into our model documents then simply return it
     const personalDocument = documents.getPersonalDocument(user.id);
     if (personalDocument && !personalDocument.getProperty("isDeleted")) return personalDocument;
 
+    // retrieve metadata for any personal documents and return the most recently created one
     const personalDocumentsRef = this.firebase.ref(this.firebase.getUserPersonalDocPath(user));
     const personalDocumentsSnapshot = await personalDocumentsRef.once("value");
     const personalDocuments: DBOtherDocumentMap = personalDocumentsSnapshot &&
@@ -300,7 +301,27 @@ export class DB {
     const lastPersonalDocument = findLast(personalDocuments, (pd) => !pd.properties || !pd.properties.isDeleted);
     return lastPersonalDocument?.self?.documentKey
       ? this.openOtherDocument(PersonalDocument, lastPersonalDocument.self.documentKey)
+      // if we didn't find one then create a new one
       : this.createPersonalDocument({ content: defaultContent });
+  }
+
+  public async guaranteePlanningDocument(sections: SectionModelType[]) {
+    const {user, documents} = this.stores;
+
+    // if we've already loaded it into our model documents then simply return it
+    const planningDocument = documents.getPlanningDocument(user.id);
+    if (planningDocument) return planningDocument;
+
+    // retrieve metadata for any planning documents and return the most recently created one
+    const planningDocumentsRef = this.firebase.ref(this.firebase.getPlanningDocumentsPath(user));
+    const planningDocumentSnapshot = await planningDocumentsRef.once("value");
+    // planning documents share a metadata type with problem documents
+    const planningDocuments: DBOfferingUserProblemDocumentMap = planningDocumentSnapshot?.val();
+    const lastPlanningDocument = findLast(planningDocuments, () => true);
+    // if we found metadata for a planning document, open its contents; otherwise create one
+    return lastPlanningDocument?.documentKey
+            ? this.openProblemOrPlanningDocument(PlanningDocument, lastPlanningDocument.documentKey)
+            : this.createProblemOrPlanningDocument(PlanningDocument, createDefaultSectionedContent(sections));
   }
 
   public async guaranteeLearningLog(initialTitle?: string, defaultContent?: DocumentContentModelType) {
@@ -319,7 +340,7 @@ export class DB {
       : this.createOtherDocument(LearningLogDocument, { title: initialTitle, content: defaultContent });
   }
 
-  public createProblemDocument(content?: DocumentContentModelType) {
+  public createProblemOrPlanningDocument(type: ProblemOrPlanningDocumentType, content?: DocumentContentModelType) {
     return new Promise<DocumentModelType>((resolve, reject) => {
       const {user, documents} = this.stores;
       const offeringUserRef = this.firebase.ref(this.firebase.getOfferingUserPath(user));
@@ -341,9 +362,9 @@ export class DB {
          })
         .then(() => {
           // create the new document
-          return this.createDocument({ type: ProblemDocument, content: JSON.stringify(content) })
+          return this.createDocument({ type, content: JSON.stringify(content) })
             .then(({document, metadata}) => {
-                const newDocument = {
+                const newDocument: DBOfferingUserProblemDocument = {
                   version: "1.0",
                   self: {
                     classHash: user.classHash,
@@ -353,17 +374,18 @@ export class DB {
                   visibility: "private",
                   documentKey: document.self.documentKey,
                 };
-                const newDocumentRef = this.firebase.ref(
-                                        this.firebase.getProblemDocumentPath(user, document.self.documentKey));
+                const newDocumentPath = type === PlanningDocument
+                                          ? this.firebase.getPlanningDocumentPath(user, document.self.documentKey)
+                                          : this.firebase.getProblemDocumentPath(user, document.self.documentKey);
+                const newDocumentRef = this.firebase.ref(newDocumentPath);
                 return newDocumentRef.set(newDocument).then(() => newDocument);
             });
         })
         .then((newDocument) => {
-          return this.openProblemDocument(newDocument.documentKey);
+          return this.openProblemOrPlanningDocument(type, newDocument.documentKey);
         })
         .then((newDocument) => {
           documents.add(newDocument);
-          this.creatingDocuments.splice(this.creatingDocuments.indexOf(newDocument.key), 1);
           return newDocument;
         })
         .then(resolve)
@@ -371,11 +393,15 @@ export class DB {
     });
   }
 
-  public openProblemDocument(documentKey?: string) {
+  public openProblemOrPlanningDocument(type: ProblemOrPlanningDocumentType, documentKey?: string) {
     const { user } = this.stores;
 
     return new Promise<DocumentModelType>((resolve, reject) => {
-      const problemDocumentsRef = this.firebase.ref(this.firebase.getProblemDocumentsPath(user));
+      // first load the metadata for any documents of the appropriate type
+      const problemDocumentsPath = type === PlanningDocument
+                                    ? this.firebase.getPlanningDocumentsPath(user)
+                                    : this.firebase.getProblemDocumentsPath(user);
+      const problemDocumentsRef = this.firebase.ref(problemDocumentsPath);
       return problemDocumentsRef.once("value")
         .then((snapshot) => {
           const problemDocuments: DBOfferingUserProblemDocumentMap|null = snapshot.val();
@@ -384,7 +410,7 @@ export class DB {
           return found;
         })
         .then((problemDocument) => {
-          return this.createDocumentFromProblemDocument(user.id, problemDocument, Monitor.Local);
+          return this.createDocumentModelFromProblemMetadata(type, user.id, problemDocument, Monitor.Local);
         })
         .then(resolve)
         .catch(reject);
@@ -416,6 +442,7 @@ export class DB {
         case LearningLogPublication:
           metadata = {version, self, createdAt, type};
           break;
+        case PlanningDocument:
         case ProblemDocument:
         case ProblemPublication:
         case SupportPublication:
@@ -679,17 +706,17 @@ export class DB {
     });
   }
 
-  public createDocumentFromProblemDocument(userId: string,
-                                           problemDocument: DBOfferingUserProblemDocument,
-                                           monitor: Monitor) {
-    const {documentKey} = problemDocument;
+  public createDocumentModelFromProblemMetadata(
+          type: ProblemOrPlanningDocumentType, userId: string,
+          metadata: DBOfferingUserProblemDocument, monitor: Monitor) {
+    const {documentKey} = metadata;
     const group = this.stores.groups.groupForUser(userId);
     return this.openDocument({
-        type: ProblemDocument,
+        type,
         userId,
-        groupId: group && group.id,
+        groupId: group?.id,
         documentKey,
-        visibility: problemDocument.visibility
+        visibility: metadata.visibility
       })
       .then((document) => {
         if (monitor !== Monitor.None) {
