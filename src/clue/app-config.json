@@ -117,7 +117,7 @@
             "type": "problem-documents",
             "dataTestHeader": "my-work-section-investigations",
             "dataTestItem": "my-work-list-items",
-            "documentTypes": ["problem"],
+            "documentTypes": ["problem", "planning"],
             "showStars": ["student", "teacher"]
           },
           {

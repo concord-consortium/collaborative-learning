@@ -2,7 +2,7 @@ import firebase from "firebase/app";
 import { forEach } from "lodash";
 import { DB, Monitor } from "../db";
 import { DBOfferingUser, DBOfferingUserMap } from "../db-types";
-import { ProblemDocument } from "../../models/document/document-types";
+import { PlanningDocument, ProblemDocument } from "../../models/document/document-types";
 import { BaseListener } from "./base-listener";
 import { syncStars } from "./sync-stars";
 
@@ -73,6 +73,7 @@ export class DBProblemDocumentsListener extends BaseListener {
   private handleOfferingUser = (user: DBOfferingUser) => {
     if (!user?.self?.uid) return;
     const { documents, user: currentUser, groups } = this.db.stores;
+    // monitor problem documents
     forEach(user.documents, document => {
       if (!document?.documentKey || !document?.self?.uid) return;
       const existingDoc = documents.getDocument(document.documentKey);
@@ -98,6 +99,15 @@ export class DBProblemDocumentsListener extends BaseListener {
             }
             return doc;
           })
+          .then(documents.add);
+      }
+    });
+    // monitor planning documents
+    forEach(user.planning, document => {
+      if (!document?.documentKey || !document?.self?.uid) return;
+      const existingDoc = documents.getDocument(document.documentKey);
+      if (!existingDoc) {
+        this.db.createDocumentModelFromProblemMetadata(PlanningDocument, document.self.uid, document, Monitor.Local)
           .then(documents.add);
       }
     });

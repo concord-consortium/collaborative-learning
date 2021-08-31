@@ -15,6 +15,9 @@ export const SupportPublication = "supportPublication";
 export function isProblemType(type: string) {
   return [ProblemDocument, ProblemPublication].indexOf(type) >= 0;
 }
+export function isPlanningType(type: string) {
+  return type === PlanningDocument;
+}
 export function isPersonalType(type: string) {
   return [PersonalDocument, PersonalPublication].indexOf(type) >= 0;
 }
