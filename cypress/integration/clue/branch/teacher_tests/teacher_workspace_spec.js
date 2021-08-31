@@ -26,10 +26,10 @@ beforeEach(() => {
   cy.fixture("teacher-dash-data-msa-test.json").as("clueData");
 });
 
-describe.skip('teacher specific navigation tabs', () => {
+describe('teacher specific navigation tabs', () => {
   it('verify problem tab solution switch', () => {
     cy.get('.collapsed-resources-tab').click();
-    cy.get('.nav-tab.tab-problems').should('exist').click();
+    cy.get('.top-tab.tab-problems').should('exist').click();
     cy.get('.prob-tab').contains('What If...?').click();
     cy.get('[data-test=solutions-button]').should('have.class', "toggled");
     cy.get('.has-teacher-tiles').should("exist");
@@ -39,7 +39,7 @@ describe.skip('teacher specific navigation tabs', () => {
   });
 
   it('verify teacher guide', () => {
-    cy.get('.nav-tab.tab-teacher-guide').should('exist').click({force:true});
+    cy.get('.top-tab.tab-teacher-guide').should('exist').click({force:true});
     cy.get('.prob-tab.teacher-guide').should('exist').and('have.length', 4).each(function (subTab, index, subTabList) {
       const teacherGuideSubTabs = ["Overview", "Launch", "Explore", "Summarize"];
       cy.wrap(subTab).text().should('contain', teacherGuideSubTabs[index]);

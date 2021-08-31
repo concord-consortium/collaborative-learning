@@ -31,6 +31,15 @@ describe("SectionModel", () => {
 
     expect(getSectionInitials(kAllSectionType)).toBe("*");
     expect(getSectionTitle(kAllSectionType)).toBe("All");
+
+    // ignores re-registration of the same info
+    jestSpyConsole("warn", () => {
+      registerSectionInfo({ foo: { initials: "SF", title: "Section Foo", placeholder: "Placeholder Foo" } });
+    });
+    const foo2Section = SectionModel.create({ type: "foo" });
+    expect(foo2Section.initials).toBe("FS");
+    expect(foo2Section.title).toBe("Foo Section");
+    expect(foo2Section.placeholder).toBe("Foo Placeholder");
   });
 
 });
