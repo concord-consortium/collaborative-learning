@@ -1,6 +1,7 @@
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
+import { UserModelType } from "../../models/stores/user";
 import { ENavTab } from "../../models/view/nav-tabs";
 import { ChatPanel } from "./chat-panel";
 
@@ -74,8 +75,9 @@ describe("ChatPanel", () => {
   });
   it("should show comment card if selected tab is not My Work", () => {
     const mockCloseChatPanel = jest.fn();
+    const username = { name: "Teacher" } as UserModelType;
     render((
-      <ChatPanel activeNavTab={ENavTab.kProblems} onCloseChatPanel={mockCloseChatPanel} />
+      <ChatPanel user={username} activeNavTab={ENavTab.kProblems} onCloseChatPanel={mockCloseChatPanel} />
     ));
     expect(screen.getByTestId("comment-card")).toBeInTheDocument();
   });
