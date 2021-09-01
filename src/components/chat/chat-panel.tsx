@@ -27,12 +27,11 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, documentKey, o
             : undefined;
   }, [document, postCommentMutation]);
   const newCommentCount = unreadComments?.length || 0;
-
   return (
     <div className={`chat-panel ${activeNavTab}`} data-testid="chat-panel">
       <ChatPanelHeader activeNavTab={activeNavTab} newCommentCount={newCommentCount}
                        onCloseChatPanel={onCloseChatPanel} />
-      {((activeNavTab !=="my-work") || document?.key)
+      {((activeNavTab ==="problems") || (activeNavTab ==="teacher-guide") || documentKey)
         ? <CommentCard
             user={user}
             activeNavTab={activeNavTab}

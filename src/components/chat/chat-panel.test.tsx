@@ -67,9 +67,8 @@ describe("ChatPanel", () => {
   });
   it("should show comment card if document has been selected", () => {
     const mockCloseChatPanel = jest.fn();
-    const mockDocument = { key: "document-key" } as any;
     render((
-      <ChatPanel activeNavTab={ENavTab.kMyWork} document={mockDocument} onCloseChatPanel={mockCloseChatPanel} />
+      <ChatPanel activeNavTab={ENavTab.kMyWork} documentKey="document-key" onCloseChatPanel={mockCloseChatPanel} />
     ));
     expect(screen.getByTestId("comment-card")).toBeInTheDocument();
   });

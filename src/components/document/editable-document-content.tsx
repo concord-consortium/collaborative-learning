@@ -90,7 +90,7 @@ export const EditableDocumentContent: React.FC<IProps> = props => {
   return (
     <DocumentContextReact.Provider value={documentContext}>
       <EditableToolApiInterfaceRefContext.Provider value={editableToolApiInterfaceRef}>
-        <div key="editable-document" className={`editableDocContentClass`}
+        <div key="editable-document" className={editableDocContentClass}
               data-focus-document={document.key} >
           {isShowingToolbar && <DocumentToolbar document={document} toolbar={toolbar} />}
           {isShowingToolbar && <div className="canvas-separator"/>}
