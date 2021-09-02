@@ -26,6 +26,7 @@ interface IProps {
   overlayMessage?: string;
   selectedSectionId?: string | null;
   viaTeacherDashboard?: boolean;
+  documentSelectedForComment?: boolean;
 }
 
 @inject("stores")

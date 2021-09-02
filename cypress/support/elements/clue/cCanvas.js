@@ -17,7 +17,7 @@ let graphToolTile = new GraphToolTile,
 class ClueCanvas {
     //canvas header
     getInvestigationCanvasTitle() {
-        return cy.get('[data-test=document-title]');
+        return cy.get('.primary-workspace [data-test=document-title]');
     }
 
     getPublishSupport() {

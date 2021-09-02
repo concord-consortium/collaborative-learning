@@ -87,11 +87,13 @@ export interface IUserContext {
  * networkDocumentKey
  *
  * To accommodate the fact that the same document can be commented upon in multiple networks, the
- * id of a document in firestore is a mashup of the network and the document key.
+ * id of a document in firestore is a mashup of the network/uid and the document key.
  */
-export function networkDocumentKey(documentKey: string, network?: string) {
+export function networkDocumentKey(uid: string, documentKey: string, network?: string) {
   const escapedKey = escapeKey(documentKey);
-  return network ? `${network}_${escapedKey}` : escapedKey;
+  const escapedNetwork = network && escapeKey(network);
+  const prefix = escapedNetwork || `uid:${uid}`;
+  return `${prefix}_${escapedKey}`;
 }
 
 export interface IDocumentMetadata {

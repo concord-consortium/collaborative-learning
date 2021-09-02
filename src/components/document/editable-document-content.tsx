@@ -1,4 +1,5 @@
 import React, { useContext, useRef } from "react";
+import classNames from "classnames";
 import { AppConfigContext } from "../../app-config-context";
 import { CanvasComponent } from "./canvas";
 import { DocumentContextReact } from "./document-context";
@@ -71,9 +72,10 @@ export interface IProps {
   document: DocumentModelType;
   toolbar?: ToolbarConfig;
   readOnly?: boolean;
+  documentSelectedForComment?: boolean;
 }
 export const EditableDocumentContent: React.FC<IProps> = props => {
-  const { mode, isPrimary, document, toolbar, readOnly } = props;
+  const { mode, isPrimary, document, toolbar, readOnly, documentSelectedForComment } = props;
 
   const documentContext = useDocumentContext(document);
 
@@ -83,10 +85,12 @@ export const EditableDocumentContent: React.FC<IProps> = props => {
   const isReadOnly = !isPrimary || readOnly || document.isPublished;
   const isShowingToolbar = !!toolbar && !isReadOnly;
   const showToolbarClass = isShowingToolbar ? "show-toolbar" : "hide-toolbar";
+  const editableDocContentClass = classNames("editable-document-content", showToolbarClass,
+                                             {"comment-select" : documentSelectedForComment});
   return (
     <DocumentContextReact.Provider value={documentContext}>
       <EditableToolApiInterfaceRefContext.Provider value={editableToolApiInterfaceRef}>
-        <div key="editable-document" className={`editable-document-content ${showToolbarClass}`}
+        <div key="editable-document" className={editableDocContentClass}
               data-focus-document={document.key} >
           {isShowingToolbar && <DocumentToolbar document={document} toolbar={toolbar} />}
           {isShowingToolbar && <div className="canvas-separator"/>}

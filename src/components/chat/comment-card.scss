@@ -1,15 +1,12 @@
 @import "../vars";
 
-$comment-selected-green: #d7ffcc;
-$comment-selected-green-2: #c1f3b3;
-
 .comment-card {
   width: calc(100% - 4px);
   min-height: 106px;
   margin: 2px;
   border: solid 2px $charcoal-light-2;
   &.selected {
-    background-color: $comment-selected-green;
+    background-color: $comment-select-green;
   }
 
   .comment-card-header {
@@ -20,8 +17,8 @@ $comment-selected-green-2: #c1f3b3;
     padding: 4px;
     background-color: $charcoal-light-8;
     color: $charcoal;
-    &.selected {
-      background-color: $comment-selected-green-2;
+    &.comment-select {
+      background-color: $comment-select-green-dark;
     }
     &.problems {
       background-color: $problem-orange-light-7;
@@ -65,7 +62,7 @@ $comment-selected-green-2: #c1f3b3;
         justify-content: center;
         margin: 2px;
         border-radius: 4px;
-        border: solid 1px #979797;
+        border: solid 1px $charcoal-light-1-c;
         background-color: white;
         width: 21px;
         height: 21px;

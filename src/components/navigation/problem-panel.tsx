@@ -9,6 +9,7 @@ import "./problem-panel.sass";
 
 interface IProps extends IBaseProps {
   section?: SectionModelType | null;
+  isChatOpen?: boolean;
 }
 
 @inject("stores")
@@ -35,8 +36,9 @@ export class ProblemPanelComponent extends BaseComponent<IProps> {
   }
 
   private renderContent(content: DocumentContentModelType) {
+    const { isChatOpen } = this.props;
     return (
-      <CanvasComponent context="left-nav" readOnly={true} content={content} />
+      <CanvasComponent context="left-nav" readOnly={true} content={content} documentSelectedForComment={isChatOpen}/>
     );
   }
 

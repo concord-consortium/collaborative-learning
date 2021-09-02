@@ -20,7 +20,7 @@ before(() => {
   cy.waitForSpinner();
   dashboard.switchView("Workspace & Resources");
   cy.wait(2000);
-  clueCanvas.getInvestigationCanvasTitle().eq(0).text().as('investigationTitle');
+  clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
 });
 beforeEach(() => {
   cy.fixture("teacher-dash-data-msa-test.json").as("clueData");
@@ -29,6 +29,7 @@ beforeEach(() => {
 describe('teacher specific navigation tabs', () => {
   it('verify problem tab solution switch', () => {
     cy.get('.collapsed-resources-tab').click();
+    cy.wait(500);
     cy.get('.top-tab.tab-problems').should('exist').click();
     cy.get('.prob-tab').contains('What If...?').click();
     cy.get('[data-test=solutions-button]').should('have.class', "toggled");
@@ -85,7 +86,7 @@ describe.skip('teacher document functionality', function () {
 });
 
 describe('Chat panel for networked teacher', () => {
-  it.skip('verify chat does not appear when no url params are passed to indicate teacher status (teachers are in network', () => {
+  it('verify chat does not appear when no url params are passed to indicate teacher status (teachers are in network', () => {
     cy.get('.chat-panel-toggle').should('not.exist');
   });
   it('verify chat panel is accessible is teacher is in network (via url params)', () => {
@@ -114,16 +115,31 @@ describe('Chat panel for networked teacher', () => {
     const documentComment = "This comment is for the document.";
     cy.get('[data-testid=comment-textarea]').click().type(documentComment);
     cy.get('[data-testid=comment-textarea]').should('contain', documentComment);
-    cy.get('[data-testid=comment-cancel-button]').click();
+    cy.get('[data-testid=comment-cancel-button]').scrollIntoView().click();
     cy.get('[data-testid=comment-textarea]').should('not.contain', documentComment);
   });
-  it('verify user can post a comment', () => { //need to change when posting comment actually puts a comment card
+  it('verify user can post a comment', () => {
     const documentComment = "An alert should show this document comment.";
     cy.get('[data-testid=comment-textarea]').click().type(documentComment);
     cy.get('[data-testid=comment-textarea]').should('contain', documentComment);
     cy.get('[data-testid=comment-post-button]').click();
     cy.wait(5000);
     cy.get('[data-testid=comment-thread] [data-testid=comment]').should('contain', documentComment);
+  });
+  it('verify teacher name and initial appear on comment correctly', () => {
+    cy.get('[data-testid=teacher-initial]').should('contain', "T");
+    cy.get('.comment-text-header .user-name').should('contain', "Teacher 7");
+  });
+  it("verify problem document is hightlighted", () => {
+    cy.get('.problem-panel .document-content').should('have.class', 'comment-select');
+  });
+  it('verify workspace tab document is highlighted', () => {
+    clueCanvas.getInvestigationCanvasTitle().text().then((title)=>{
+      cy.openTopTab('my-work');
+      cy.openSection('my-work', 'workspaces');
+      cy.openDocumentThumbnail('workspaces', title);
+      cy.get('.documents-panel .editable-document-content').should('have.class','comment-select');
+    });
   });
 });
 
@@ -135,8 +151,8 @@ describe.skip('Student Workspace', () => { //flaky -- could be because it is try
     cy.wait(2000);
     cy.get('@clueData').then((clueData) => {
       const groups = clueData.classes[0].problems[0].groups;
-      cy.get('.nav-tab.tab-student-work').should('exist').click({force:true});
-      cy.get('.nav-tab-buttons').should('have.class', 'hidden');
+      cy.get('.top-tab.tab-student-work').should('exist').click({force:true});
+      cy.get('.top-tab-buttons').should('have.class', 'hidden');
       cy.get('.student-group-view').should('be.visible');
       cy.get('.student-group .group-number').should('be.visible').and('have.length', groups.length);
       cy.get('.student-group .group-number').eq(0).should('have.class', 'active');
