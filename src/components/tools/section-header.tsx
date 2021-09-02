@@ -8,22 +8,22 @@ import "./section-header.sass";
 
 interface IProps {
   type: SectionType;
-  documentTypeThemeClass?: string;
+  typeClass?: string;
 }
 
 @inject("stores")
 export class SectionHeader extends BaseComponent<IProps> {
 
   public render() {
-    const { type, documentTypeThemeClass } = this.props;
+    const { type, typeClass } = this.props;
     const initials = getSectionInitials(type);
     const title = getSectionTitle(type);
-    const rowSectionHeaderClassNames = classNames("row-section-header", documentTypeThemeClass);
+    const rowSectionHeaderClassNames = classNames("row-section-header", typeClass);
     // id is set to allow for scrolling to section in teacher dashboard
     return (
       <div id={`section_${initials}`} className={rowSectionHeaderClassNames} data-test="section-header"
           onMouseDown={this.handleMouseDown} >
-        <div className={`initials ${documentTypeThemeClass}`}>{initials}</div>
+        <div className={`initials ${typeClass}`}>{initials}</div>
         <div className="title">{title}</div>
       </div>
     );

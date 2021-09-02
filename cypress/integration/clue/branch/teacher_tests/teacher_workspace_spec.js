@@ -84,8 +84,8 @@ describe.skip('teacher document functionality', function () {
   });
 });
 
-describe.skip('Chat panel for networked teacher', () => {
-  it('verify chat does not appear when no url params are passed to indicate teacher status (teachers are in network', () => {
+describe('Chat panel for networked teacher', () => {
+  it.skip('verify chat does not appear when no url params are passed to indicate teacher status (teachers are in network', () => {
     cy.get('.chat-panel-toggle').should('not.exist');
   });
   it('verify chat panel is accessible is teacher is in network (via url params)', () => {
@@ -122,9 +122,8 @@ describe.skip('Chat panel for networked teacher', () => {
     cy.get('[data-testid=comment-textarea]').click().type(documentComment);
     cy.get('[data-testid=comment-textarea]').should('contain', documentComment);
     cy.get('[data-testid=comment-post-button]').click();
-    cy.on ('window:alert', (str) => {
-      expect(str).to.contain(documentComment);
-    });
+    cy.wait(5000);
+    cy.get('[data-testid=comment-thread] [data-testid=comment]').should('contain', documentComment);
   });
 });
 

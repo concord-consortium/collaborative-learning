@@ -18,7 +18,7 @@ interface IProps extends IBaseProps {
   context: string;
   documentId?: string;
   content?: DocumentContentModelType;
-  documentTypeThemeClass: string;
+  typeClass: string;
   readOnly?: boolean;
   scale?: number;
   selectedSectionId?: string | null;

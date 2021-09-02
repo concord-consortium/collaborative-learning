@@ -230,7 +230,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
               onOpenDocument={this.handleOpenDocumentClick}
               onCopyDocument={this.handleCopyDocumentClick}
               isDeleteDisabled={true} />
-            {(this.showPublishButton(document) && type !== "planning") &&
+            {this.showPublishButton(document) &&
               <PublishButton key="publish" onClick={this.handlePublishDocument} />}
           </div>
         }
