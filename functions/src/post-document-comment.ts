@@ -6,7 +6,7 @@ import {
 import { validateUserContext } from "./user-context";
 
 // update this when deploying updates to this function
-const version = "1.1.0";
+const version = "1.1.1";
 
 export async function postDocumentComment(
                         params?: IPostDocumentCommentUnionParams,
@@ -33,9 +33,8 @@ export async function postDocumentComment(
 
   const firestore = admin.firestore();
   const kCollection = isCurriculumMetadata(document) ? "curriculum" : "documents";
-  const kDocumentKey = networkDocumentKey(
-                        isCurriculumMetadata(document) ? document.path : document.key,
-                        context.network);
+  const kBaseDocumentKey = isCurriculumMetadata(document) ? document.path : document.key;
+  const kDocumentKey = networkDocumentKey(uid, kBaseDocumentKey, context.network);
   const kDocumentDocPath = `${firestoreRoot}/${kCollection}/${kDocumentKey}`;
   const kCommentsCollectionPath = `${kDocumentDocPath}/comments`;
 
@@ -51,8 +50,13 @@ export async function postDocumentComment(
                               context_id: context.classHash,
                               teachers: context.teachers
                             }
-                            : document;
-    await firestore.doc(kDocumentDocPath).set({ ...documentParams, network: context.network });
+                            : {
+                              ...document,
+                              uid
+                            };
+    // convert empty/falsy networks to null
+    const network = context.network || null;
+    await firestore.doc(kDocumentDocPath).set({ ...documentParams, network });
   }
 
   // add the comment once we're certain the document exists

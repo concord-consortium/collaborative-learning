@@ -1,4 +1,4 @@
-import { buildSectionPath, escapeKey, getCurriculumMetadata, isProblemPath, isSectionPath, parseProblemPath, parseSectionPath } from "../src/shared";
+import { buildSectionPath, escapeKey, getCurriculumMetadata, isProblemPath, isSectionPath, networkDocumentKey, parseProblemPath, parseSectionPath } from "../src/shared";
 
 describe("shared types and utilities", () => {
 
@@ -93,6 +93,13 @@ describe("shared types and utilities", () => {
               .toEqual({ unit: "foo", problem: "1.2", section: "intro", path: "foo/1/2/intro" });
       expect(getCurriculumMetadata("foo:facet/1/2/intro"))
               .toEqual({ unit: "foo", facet: "facet", problem: "1.2", section: "intro", path: "foo:facet/1/2/intro" });
+    });
+  });
+
+  describe("networkDocumentKey", () => {
+    it("should return appropriate document key combining network and uid as appropriate", () => {
+      expect(networkDocumentKey("user", "doc123")).toBe("uid:user_doc123");
+      expect(networkDocumentKey("user", "doc123", "network")).toBe("network_doc123");
     });
   });
 
