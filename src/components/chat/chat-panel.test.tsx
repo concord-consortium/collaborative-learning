@@ -49,7 +49,7 @@ describe("ChatPanel", () => {
   it("should render successfully", () => {
     const mockCloseChatPanel = jest.fn();
     render((
-      <ChatPanel activeNavTab={ENavTab.kMyWork} documentKey="document-key" onCloseChatPanel={mockCloseChatPanel}/>
+      <ChatPanel activeNavTab={ENavTab.kMyWork} focusDocument="document-key" onCloseChatPanel={mockCloseChatPanel}/>
     ));
     expect(screen.getByTestId("chat-panel")).toBeInTheDocument();
     expect(screen.getByTestId("chat-panel-header")).toBeInTheDocument();
@@ -69,7 +69,7 @@ describe("ChatPanel", () => {
   it("should show comment card if document has been selected", () => {
     const mockCloseChatPanel = jest.fn();
     render((
-      <ChatPanel activeNavTab={ENavTab.kMyWork} documentKey="document-key" onCloseChatPanel={mockCloseChatPanel} />
+      <ChatPanel activeNavTab={ENavTab.kMyWork} focusDocument="document-key" onCloseChatPanel={mockCloseChatPanel} />
     ));
     expect(screen.getByTestId("comment-card")).toBeInTheDocument();
   });

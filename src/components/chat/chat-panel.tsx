@@ -11,15 +11,15 @@ import "./chat-panel.scss";
 interface IProps {
   user?: UserModelType;
   activeNavTab: string;
-  documentKey?: string;
+  focusDocument?: string;
   onCloseChatPanel:(show:boolean) => void;
 }
 
-export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, documentKey, onCloseChatPanel }) => {
-  const document = useDocumentOrCurriculumMetadata(documentKey);
+export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument, onCloseChatPanel }) => {
+  const document = useDocumentOrCurriculumMetadata(focusDocument);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { isLoading, data: comments } = useDocumentComments(documentKey);
-  const { data: unreadComments } = useUnreadDocumentComments(documentKey);
+  const { isLoading, data: comments } = useDocumentComments(focusDocument);
+  const { data: unreadComments } = useUnreadDocumentComments(focusDocument);
   const postCommentMutation = usePostDocumentComment();
   const postComment = useCallback((comment: string) => {
     return document
@@ -31,7 +31,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, documentKey, o
     <div className={`chat-panel ${activeNavTab}`} data-testid="chat-panel">
       <ChatPanelHeader activeNavTab={activeNavTab} newCommentCount={newCommentCount}
                        onCloseChatPanel={onCloseChatPanel} />
-      {((activeNavTab ==="problems") || (activeNavTab ==="teacher-guide") || documentKey)
+      {focusDocument
         ? <CommentCard
             user={user}
             activeNavTab={activeNavTab}

@@ -86,7 +86,7 @@ export const EditableDocumentContent: React.FC<IProps> = props => {
   const isShowingToolbar = !!toolbar && !isReadOnly;
   const showToolbarClass = isShowingToolbar ? "show-toolbar" : "hide-toolbar";
   const editableDocContentClass = classNames("editable-document-content", showToolbarClass,
-                                             documentSelectedForComment ? "comment-select" : "");
+                                             {"comment-select" : documentSelectedForComment});
   return (
     <DocumentContextReact.Provider value={documentContext}>
       <EditableToolApiInterfaceRefContext.Provider value={editableToolApiInterfaceRef}>

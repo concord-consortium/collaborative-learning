@@ -102,8 +102,8 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
   public render() {
     const {viaTeacherDashboard, documentSelectedForComment} = this.props;
-    const documentClass = classNames("document-content", viaTeacherDashboard ? "document-content-smooth-scroll" : "",
-                                     documentSelectedForComment ? "comment-select" : "");
+    const documentClass = classNames("document-content", {"document-content-smooth-scroll" : viaTeacherDashboard},
+                                     {"comment-select" : documentSelectedForComment});
     return (
       <div className={documentClass}
         onScroll={this.handleScroll}

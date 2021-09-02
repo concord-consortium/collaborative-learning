@@ -19,9 +19,8 @@ interface IProps {
 export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedComments, onPostComment }) => {
    const renderThreadHeader = () => {
     const teacherInitial = user?.name.charAt(0);
-    const commentCardHeaderClass = classNames("comment-card-header", "comment-select");
     return (
-      <div className={commentCardHeaderClass} data-testid="comment-card-header">
+      <div className="comment-card-header comment-select" data-testid="comment-card-header">
         {postedComments && postedComments.length < 1
           ? <DocumentCommentIcon className="new-thread-header-icon" data-testid="document-comment-icon"/>
           : <div className="initial" data-testid="teacher-initial">{teacherInitial}</div>
