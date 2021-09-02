@@ -73,11 +73,10 @@ describe("ChatPanel", () => {
     ));
     expect(screen.getByTestId("comment-card")).toBeInTheDocument();
   });
-  it("should show comment card if selected tab is not My Work", () => {
+  it("should show comment card if there is a focused document outside of My Work", () => {
     const mockCloseChatPanel = jest.fn();
-    const username = { name: "Teacher" } as UserModelType;
     render((
-      <ChatPanel user={username} activeNavTab={ENavTab.kProblems} onCloseChatPanel={mockCloseChatPanel} />
+      <ChatPanel activeNavTab={ENavTab.kProblems} focusDocument="document-key" onCloseChatPanel={mockCloseChatPanel} />
     ));
     expect(screen.getByTestId("comment-card")).toBeInTheDocument();
   });
