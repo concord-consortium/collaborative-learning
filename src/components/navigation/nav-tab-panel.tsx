@@ -56,10 +56,11 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
                               ? `calc(100% - ${collapseTabWidth}px - ${resizePanelWidth}px)`
                               : `calc(${dividerPosition}% - ${resizePanelWidth}px)`;
     const resourceWidthStyle = {width: resourceWidth};
-    const showChat = this.state.showChatColumn && (urlParams.chat !== undefined);
+    const showChatPanel = this.state.showChatColumn;
+    const isChatEnabled = user.isNetworkedTeacher && urlParams.chat;
     return (
       <div className={`resource-and-chat-panel ${isResourceExpanded ? "shown" : ""}`} style={resourceWidthStyle}>
-        <div className={`nav-tab-panel ${showChat ? "chat-open" : ""}`}
+        <div className={`nav-tab-panel ${showChatPanel ? "chat-open" : ""}`}
             ref={elt => this.navTabPanelElt = elt}>
           <FocusDocumentTracker navTabPanelElt={this.navTabPanelElt} />
           <Tabs selectedIndex={selectedTabIndex} onSelect={this.handleSelectTab} forceRenderTabPanel={true}>
@@ -77,8 +78,8 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
                   })
                 }
               </TabList>
-              { (user.isNetworkedTeacher)
-                  ? (!showChat) &&
+              { isChatEnabled
+                  ? (!showChatPanel) &&
                     <div className={`chat-panel-toggle themed ${activeNavTab}`}>
                       <NewCommentsBadge documentKey={focusDocument} />
                       <ChatIcon
@@ -98,7 +99,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
               })
             }
           </Tabs>
-          {showChat &&
+          {showChatPanel &&
             <ChatPanel user={user} activeNavTab={activeNavTab} focusDocument={focusDocument}
                         onCloseChatPanel={this.handleShowChatColumn} />}
         </div>
