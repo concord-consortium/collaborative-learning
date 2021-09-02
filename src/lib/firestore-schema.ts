@@ -24,6 +24,7 @@ interface UserDocument {
   uid: string;                // portal user id
   name: string;               // teacher name
   type: string;               // "teacher" for now although maybe students eventually
+  network: string;            // id of primary/default network for this teacher
   networks: string[];         // ids of networks this teacher is part of
 }
 // collection key is portal uid
