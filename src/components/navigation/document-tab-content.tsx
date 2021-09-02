@@ -75,6 +75,7 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec, isChatOpen }) =>
         isPrimary={false}
         document={referenceDocument}
         readOnly={true}
+        documentSelectedForComment={isChatOpen}
       />
     </div>;
 

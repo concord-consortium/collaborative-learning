@@ -46,7 +46,7 @@ export const ProblemTabContent: React.FC<IProps>
     <Tabs className={classNames("problem-tabs", context, chatBorder)} selectedTabClassName="selected"
           data-focus-document={problemPath}>
       <div className="tab-header-row">
-        <TabList className="tab-list">
+        <TabList className={classNames("tab-list", {"chat-open" : isChatOpen})}>
           {sections.map((section) => {
             const sectionTitle = getSectionTitle(section.type);
             return (
@@ -63,7 +63,7 @@ export const ProblemTabContent: React.FC<IProps>
       {sections.map((section) => {
         return (
           <TabPanel key={`section-${section.type}`} data-focus-section={section.type}>
-            <ProblemPanelComponent section={section} key={`section-${section.type}`} />
+            <ProblemPanelComponent section={section} key={`section-${section.type}`} isChatOpen={isChatOpen}/>
           </TabPanel>
         );
       })}

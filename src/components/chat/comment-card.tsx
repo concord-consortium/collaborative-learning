@@ -19,7 +19,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
    const renderThreadHeader = () => {
     const teacherInitial = user?.name.charAt(0);
     return (
-      <div className={`comment-card-header ${activeNavTab}`} data-testid="comment-card-header">
+      <div className="comment-card-header comment-select" data-testid="comment-card-header">
         {postedComments && postedComments.length < 1
           ? <DocumentCommentIcon className="new-thread-header-icon" data-testid="document-comment-icon"/>
           : <div className="initial" data-testid="teacher-initial">{teacherInitial}</div>
@@ -29,7 +29,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
   };
 
   return (
-    <div className={`comment-card ${activeNavTab}`} data-testid="comment-card">
+    <div className={`comment-card selected`} data-testid="comment-card">
       {renderThreadHeader()}
       { postedComments?.map((comment, idx) => {
           const userInitialBackgroundColor = ["#f79999", "#ffc18a", "#99d099", "#ff9", "#b2b2ff", "#efa6ef"];
@@ -56,7 +56,8 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
       <CommentTextBox
         activeNavTab={activeNavTab}
         onPostComment={onPostComment}
-        numPostedComments={postedComments?.length || 0} />
+        numPostedComments={postedComments?.length || 0}
+      />
     </div>
   );
 };
