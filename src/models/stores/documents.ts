@@ -2,7 +2,7 @@ import { types } from "mobx-state-tree";
 import { DocumentModel, DocumentModelType } from "../document/document";
 import {
   DocumentType, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
-  PersonalDocument, PersonalPublication, ProblemDocument, ProblemPublication
+  PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemPublication
 } from "../document/document-types";
 import { UnitModel, UnitModelType } from "../curriculum/unit";
 import { ClassModelType } from "./class";
@@ -66,6 +66,12 @@ export const DocumentsModel = types
     getLearningLogDocument(userId: string) {
       return self.all.find((document) => {
         return (document.type === LearningLogDocument) && (document.uid === userId);
+      });
+    },
+
+    getPlanningDocument(userId: string) {
+      return self.all.find((document) => {
+        return (document.type === PlanningDocument) && (document.uid === userId);
       });
     },
 

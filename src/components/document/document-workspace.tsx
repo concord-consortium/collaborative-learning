@@ -5,7 +5,7 @@ import { DocumentComponent, WorkspaceSide } from "../../components/document/docu
 import { GroupVirtualDocumentComponent } from "../../components/document/group-virtual-document";
 import { BaseComponent, IBaseProps } from "../../components/base";
 import { DocumentModelType } from "../../models/document/document";
-import { DocumentContentModel } from "../../models/document/document-content";
+import { createDefaultSectionedContent } from "../../models/document/document-content";
 import {
   DocumentDragKey, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
 } from "../../models/document/document-types";
@@ -96,12 +96,9 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     const { appConfig: { autoSectionProblemDocuments, defaultDocumentType, defaultDocumentContent },
             problem } = this.stores;
     if ((defaultDocumentType === ProblemDocument) && autoSectionProblemDocuments) {
-      const tiles: any = [];
-      problem.sections.forEach(section => {
-        tiles.push({ content: { isSectionHeader: true, sectionId: section.type }});
-        tiles.push({ content: { type: "Placeholder", sectionId: section.type }});
-      });
-      return DocumentContentModel.create({ tiles } as any);
+      // for problem documents, default content is a section header row and a placeholder tile
+      // for each section that is present in the corresponding problem content
+      return createDefaultSectionedContent(problem.sections);
     }
     else if (defaultDocumentContent) {
       return defaultDocumentContent;
@@ -109,9 +106,9 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   private async guaranteeInitialDocuments() {
-    const { appConfig: { defaultDocumentType, defaultLearningLogDocument,
-                        defaultLearningLogTitle, initialLearningLogTitle },
-            db, ui: { problemWorkspace } } = this.stores;
+    const { appConfig: {
+              defaultDocumentType, defaultLearningLogDocument, defaultLearningLogTitle, initialLearningLogTitle },
+            db, ui: { problemWorkspace }, unit: { planningDocument }, user: { type: role } } = this.stores;
     if (!problemWorkspace.primaryDocumentKey) {
       const documentContent = this.getDefaultDocumentContent();
       const defaultDocument = await db.guaranteeOpenDefaultDocument(defaultDocumentType, documentContent);
@@ -121,6 +118,8 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     }
     // Guarantee the user starts with one learning log
     defaultLearningLogDocument && await db.guaranteeLearningLog(initialLearningLogTitle || defaultLearningLogTitle);
+    planningDocument?.isEnabledForRole(role) && planningDocument.default &&
+      await db.guaranteePlanningDocument(planningDocument.sections);
   }
 
   private renderDocuments() {
@@ -176,7 +175,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         side="primary"
       />;
 
-    // Show Pimary and comparison docs:
+    // Show Primary and comparison docs:
     if (comparisonVisible && showPrimary) {
       return (
         <div onClick={this.handleClick}>

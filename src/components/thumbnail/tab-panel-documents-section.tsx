@@ -3,7 +3,7 @@ import { observer } from "mobx-react";
 import { ThumbnailDocumentItem } from "./thumbnail-document-item";
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
 import {
-  isProblemType, isPublishedType, isUnpublishedType, PersonalDocument, SupportPublication
+  isPlanningType, isProblemType, isPublishedType, isUnpublishedType, PersonalDocument, SupportPublication
 } from "../../models/document/document-types";
 import { IStores } from "../../models/stores/stores";
 import { ENavTabOrder, NavTabSectionModelType  } from "../../models/view/nav-tabs";
@@ -47,7 +47,11 @@ function getDocumentCaption(stores: IStores, document: DocumentModelType) {
   const user = _class && _class.getUserById(uid);
   const userName = user && user.displayName;
   const namePrefix = isPublishedType(type) ? `${userName}: ` : "";
-  const title = isProblemType(type) ? problem.title : document.getDisplayTitle(appConfig);
+  const title = isProblemType(type)
+                  ? problem.title
+                  : isPlanningType(type)
+                      ? `${problem.title} Planning`
+                      : document.getDisplayTitle(appConfig);
   return `${namePrefix}${title}`;
 }
 

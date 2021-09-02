@@ -66,7 +66,8 @@ export function useGroupsStore(): GroupsModelType {
 }
 
 export function useNetworkDocumentKey(documentKey: string) {
-  return networkDocumentKey(documentKey, useUserStore().teacherNetwork);
+  const user = useUserStore();
+  return networkDocumentKey(user.id, documentKey, user.teacherNetwork);
 }
 
 export function useProblemPath() {
