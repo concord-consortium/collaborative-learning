@@ -17,6 +17,15 @@ export const teacherAuth = { uid: teacherId, platform_user_id: teacherId, user_t
 export const teacher2Id = "user-teacher2";
 export const teacher2Name = "John Teacher";
 export const teacher2Auth = { uid: teacher2Id, platform_user_id: teacher2Id, user_type: "teacher", class_hash: otherClass };
+export const noNetwork = null;
+export const network1 = "network-1";
+export const network2 = "network-2";
+export const cUnit = "abc";
+export const cFacet = "facet";
+export const cProblem = "1.2";
+export const cSection = "intro";
+export const cPath = `${cUnit}/1/2/intro`;
+export const cPathWithFacet = `${cUnit}:${cFacet}/1/2/intro`;
 
 // @firebase/rules-unit-testing doesn't support firebase.firestore.FieldValue.serverTimestamp()
 export const mockTimestamp = () => Date.now();

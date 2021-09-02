@@ -2,7 +2,7 @@ import firebase from "firebase";
 import {
   adminWriteDoc, expectDeleteToFail, expectDeleteToSucceed, expectReadToFail, expectReadToSucceed,
   expectUpdateToFail, expectUpdateToSucceed, expectWriteToFail, expectWriteToSucceed, genericAuth,
-  initFirestore, mockTimestamp, prepareEachTest, studentAuth, teacher2Auth, teacher2Id, teacherAuth,
+  initFirestore, mockTimestamp, noNetwork, prepareEachTest, studentAuth, teacher2Auth, teacher2Id, teacherAuth,
   teacherId, teacherName, tearDownTests, thisClass
 } from "./setup-rules-tests";
 
@@ -26,8 +26,8 @@ describe("Firestore security rules", () => {
   }
   function specDocumentDoc(options?: ISpecDocumentDoc) {
     // a valid document specification
-    const documentDoc = { context_id: thisClass, teachers: [teacherId], uid: teacherId, type: "problemDocument",
-                          key: "my-document", createdAt: mockTimestamp() };
+    const documentDoc = { context_id: thisClass, network: noNetwork, teachers: [teacherId], uid: teacherId,
+                          type: "problemDocument", key: "my-document", createdAt: mockTimestamp() };
     // remove specified props for validating the tests that require them
     options?.remove?.forEach(prop => delete (documentDoc as any)[prop]);
     // add additional props to test behavior of additional props
@@ -62,6 +62,26 @@ describe("Firestore security rules", () => {
       db = initFirestore(teacherAuth);
       await adminWriteDoc(kDocumentDocPath, specDocumentDoc());
       await expectReadToSucceed(db, kDocumentDocPath);
+    });
+
+    it("authenticated teachers can't write user documents without required uid", async () => {
+      db = initFirestore(teacherAuth);
+      await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({ remove: ["uid"] }));
+    });
+
+    it("authenticated teachers can't write user documents without required network", async () => {
+      db = initFirestore(teacherAuth);
+      await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({ remove: ["network"] }));
+    });
+
+    it("authenticated teachers can't write user documents without required type", async () => {
+      db = initFirestore(teacherAuth);
+      await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({ remove: ["type"] }));
+    });
+
+    it("authenticated teachers can't write user documents without required key", async () => {
+      db = initFirestore(teacherAuth);
+      await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({ remove: ["key"] }));
     });
 
     it("authenticated teachers can write user documents", async () => {
@@ -115,14 +135,14 @@ describe("Firestore security rules", () => {
   describe("teacher document comments", () => {
     const kDocumentCommentDocPath = `${kDocumentDocPath}/comments/myComment`;
 
-    interface ISpecDocumentDoc {
+    interface ISpecCommentDoc {
       add?: Record<string, string | string[] | object>;
       remove?: string[];
     }
-    function specCommentDoc(options?: ISpecDocumentDoc) {
+    function specCommentDoc(options?: ISpecCommentDoc) {
       // a valid comment document specification
-      const commentDoc = { uid: teacherId, name: teacherName, content: "A comment!",
-                            createdAt: mockTimestamp() };
+      const commentDoc = { uid: teacherId, name: teacherName, network: noNetwork,
+                            content: "A comment!", createdAt: mockTimestamp() };
       // remove specified props for validating the tests that require them
       options?.remove?.forEach(prop => delete (commentDoc as any)[prop]);
       // add additional props to test behavior of additional props
@@ -138,76 +158,102 @@ describe("Firestore security rules", () => {
     };
 
     it("unauthenticated users can't read document comments", async () => {
-      initFirestoreWithUserDocument();
+      await initFirestoreWithUserDocument();
       await adminWriteDoc(kDocumentCommentDocPath, specCommentDoc());
       await expectReadToFail(db, kDocumentCommentDocPath);
     });
 
     it("unauthenticated users can't write document comments", async () => {
-      initFirestoreWithUserDocument();
+      await initFirestoreWithUserDocument();
       await expectWriteToFail(db, kDocumentCommentDocPath, specCommentDoc());
     });
 
     it("authenticated generic users can't read document comments", async () => {
-      initFirestoreWithUserDocument(genericAuth);
+      await initFirestoreWithUserDocument(genericAuth);
       await adminWriteDoc(kDocumentCommentDocPath, specCommentDoc());
       await expectReadToFail(db, kDocumentCommentDocPath);
     });
 
     it("authenticated generic users can't write document comments", async () => {
-      initFirestoreWithUserDocument(genericAuth);
+      await initFirestoreWithUserDocument(genericAuth);
       await expectWriteToFail(db, kDocumentCommentDocPath, specCommentDoc());
     });
 
     it("authenticated teachers can read their own document comments", async () => {
-      initFirestoreWithUserDocument(teacherAuth);
+      await initFirestoreWithUserDocument(teacherAuth);
       await adminWriteDoc(kDocumentCommentDocPath, specCommentDoc());
       await expectReadToSucceed(db, kDocumentCommentDocPath);
     });
 
+    it("authenticated teachers can't write document comments without required uid", async () => {
+      await initFirestoreWithUserDocument(teacherAuth);
+      await expectWriteToFail(db, kDocumentCommentDocPath, specCommentDoc({ remove: ["uid"] }));
+    });
+
+    it("authenticated teachers can't write document comments without required name", async () => {
+      await initFirestoreWithUserDocument(teacherAuth);
+      await expectWriteToFail(db, kDocumentCommentDocPath, specCommentDoc({ remove: ["name"] }));
+    });
+
+    it("authenticated teachers can't write document comments without required name", async () => {
+      await initFirestoreWithUserDocument(teacherAuth);
+      await expectWriteToFail(db, kDocumentCommentDocPath, specCommentDoc({ remove: ["content"] }));
+    });
+
+    it("authenticated teachers can't write document comments with inconsistent network", async () => {
+      await initFirestoreWithUserDocument(teacherAuth);
+      await expectWriteToFail(db, kDocumentCommentDocPath, specCommentDoc({ add: { network: "other-network" } }));
+    });
+
     it("authenticated teachers can write document comments", async () => {
-      initFirestoreWithUserDocument(teacherAuth);
+      await initFirestoreWithUserDocument(teacherAuth);
       await expectWriteToSucceed(db, kDocumentCommentDocPath, specCommentDoc());
     });
 
-    it("authenticated teachers can't update document comments' read-only fields", async () => {
-      initFirestoreWithUserDocument(teacherAuth);
+    it("authenticated teachers can't update document comments' read-only uid field", async () => {
+      await initFirestoreWithUserDocument(teacherAuth);
       await adminWriteDoc(kDocumentCommentDocPath, specCommentDoc());
       await expectUpdateToFail(db, kDocumentCommentDocPath, { content: "A new comment!", uid: teacher2Id });
     });
 
+    it("authenticated teachers can't update document comments' read-only network field", async () => {
+      await initFirestoreWithUserDocument(teacherAuth);
+      await adminWriteDoc(kDocumentCommentDocPath, specCommentDoc());
+      await expectUpdateToFail(db, kDocumentCommentDocPath, { content: "A new comment!", network: "other-network" });
+    });
+
     it("authenticated teachers can update document comments", async () => {
-      initFirestoreWithUserDocument(teacherAuth);
+      await initFirestoreWithUserDocument(teacherAuth);
       await adminWriteDoc(kDocumentCommentDocPath, specCommentDoc());
       await expectUpdateToSucceed(db, kDocumentCommentDocPath, { content: "A new comment!" });
     });
 
     it("authenticated teachers can't update other teachers' document comments", async () => {
-      initFirestoreWithUserDocument(teacher2Auth);
+      await initFirestoreWithUserDocument(teacher2Auth);
       await adminWriteDoc(kDocumentCommentDocPath, specCommentDoc());
       await expectUpdateToFail(db, kDocumentCommentDocPath, { content: "A new comment!" });
     });
 
     it("authenticated teachers can delete document comments", async () => {
-      initFirestoreWithUserDocument(teacherAuth);
+      await initFirestoreWithUserDocument(teacherAuth);
       await adminWriteDoc(kDocumentCommentDocPath, specCommentDoc());
       await expectDeleteToSucceed(db, kDocumentCommentDocPath);
     });
 
     it("authenticated teachers can't delete other teachers' document comments", async () => {
-      initFirestoreWithUserDocument(teacher2Auth);
+      await initFirestoreWithUserDocument(teacher2Auth);
       await adminWriteDoc(kDocumentCommentDocPath, specCommentDoc());
       await expectDeleteToFail(db, kDocumentCommentDocPath);
     });
 
     it("authenticated students can't read document comments", async () => {
-      initFirestoreWithUserDocument(studentAuth);
+      await initFirestoreWithUserDocument(studentAuth);
       await adminWriteDoc(kDocumentCommentDocPath, specCommentDoc());
       await expectReadToFail(db, kDocumentCommentDocPath);
     });
 
     it("authenticated students can't write document comments", async () => {
-      initFirestoreWithUserDocument(studentAuth);
+      await initFirestoreWithUserDocument(studentAuth);
       await expectWriteToFail(db, kDocumentCommentDocPath, specCommentDoc());
     });
 
