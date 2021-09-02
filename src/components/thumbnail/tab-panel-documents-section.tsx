@@ -50,7 +50,7 @@ function getDocumentCaption(stores: IStores, document: DocumentModelType) {
   const title = isProblemType(type)
                   ? problem.title
                   : isPlanningType(type)
-                      ? `${problem.title} Planning`
+                      ? `${problem.title}: Planning`
                       : document.getDisplayTitle(appConfig);
   return `${namePrefix}${title}`;
 }

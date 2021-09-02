@@ -202,7 +202,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private renderTitleBar(type: string) {
     const { document, side } = this.props;
     const hideButtons = (side === "comparison") || document.isPublished;
-    if (document.isProblem) {
+    if (document.isProblem || document.isPlanning) {
       return this.renderProblemTitleBar(type, hideButtons);
     }
     if (document.isPersonal || document.isLearningLog) {
@@ -230,17 +230,17 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
               onOpenDocument={this.handleOpenDocumentClick}
               onCopyDocument={this.handleCopyDocumentClick}
               isDeleteDisabled={true} />
-            {this.showPublishButton(document) &&
+            {(this.showPublishButton(document) && type!=="planning") &&
               <PublishButton key="publish" onClick={this.handlePublishDocument} />}
           </div>
         }
         <div className="title" data-test="document-title">
-          {problemTitle} {this.renderStickyNotes()}
+          {`${problemTitle}${type==="planning" ? ": Planning" : ""}`} {this.renderStickyNotes()}
         </div>
         {!hideButtons &&
           <div className="actions right" data-test="document-titlebar-actions">
             {downloadButton}
-            {isTeacher &&
+            {(isTeacher && type!=="planning") &&
               <PublishSupportButton onClick={this.handlePublishSupport} />}
             {show4up && this.renderMode()}
             {!isTeacher &&

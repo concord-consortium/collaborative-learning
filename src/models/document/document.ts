@@ -3,7 +3,8 @@ import { forEach } from "lodash";
 import { DocumentContentModel, DocumentContentModelType } from "./document-content";
 import {
   DocumentType, DocumentTypeEnum, IDocumentContext, ISetProperties, LearningLogDocument, LearningLogPublication,
-  PersonalDocument, PersonalPublication, ProblemDocument, ProblemPublication, SupportPublication
+  PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemPublication,
+  SupportPublication
 } from "./document-types";
 import { AppConfigModelType } from "../stores/app-config-model";
 import { TileCommentsModel, TileCommentsModelType } from "../tools/tile-comments";
@@ -41,6 +42,9 @@ export const DocumentModel = types
   .views(self => ({
     get isProblem() {
       return (self.type === ProblemDocument) || (self.type === ProblemPublication);
+    },
+    get isPlanning() {
+      return (self.type === PlanningDocument);
     },
     get isPersonal() {
       return (self.type === PersonalDocument || (self.type === PersonalPublication));
