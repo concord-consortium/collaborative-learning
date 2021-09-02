@@ -1,4 +1,5 @@
 import React, { useContext, useRef } from "react";
+import classNames from "classnames";
 import { AppConfigContext } from "../../app-config-context";
 import { CanvasComponent } from "./canvas";
 import { DocumentContextReact } from "./document-context";
@@ -12,7 +13,6 @@ import { ProblemDocument } from "../../models/document/document-types";
 import { WorkspaceMode } from "../../models/stores/workspace";
 
 import "./editable-document-content.scss";
-import classNames from "classnames";
 
 interface IToolbarProps {
   document: DocumentModelType;

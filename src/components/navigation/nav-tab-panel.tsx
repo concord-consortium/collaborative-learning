@@ -56,8 +56,9 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
                               ? `calc(100% - ${collapseTabWidth}px - ${resizePanelWidth}px)`
                               : `calc(${dividerPosition}% - ${resizePanelWidth}px)`;
     const resourceWidthStyle = {width: resourceWidth};
-    const showChatPanel = this.state.showChatColumn;
     const isChatEnabled = user.isNetworkedTeacher && urlParams.chat;
+    const showChatPanel = isChatEnabled && this.state.showChatColumn;
+
     return (
       <div className={`resource-and-chat-panel ${isResourceExpanded ? "shown" : ""}`} style={resourceWidthStyle}>
         <div className={`nav-tab-panel ${showChatPanel ? "chat-open" : ""}`}
@@ -79,7 +80,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
                 }
               </TabList>
               { isChatEnabled
-                  ? (!showChatPanel) &&
+                  ? !showChatPanel &&
                     <div className={`chat-panel-toggle themed ${activeNavTab}`}>
                       <NewCommentsBadge documentKey={focusDocument} />
                       <ChatIcon

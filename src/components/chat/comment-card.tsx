@@ -1,5 +1,4 @@
 import React from "react";
-import classNames from "classnames";
 import { UserModelType } from "../../models/stores/user";
 import { CommentTextBox } from "./comment-textbox";
 import { CommentDocument } from "../../lib/firestore-schema";

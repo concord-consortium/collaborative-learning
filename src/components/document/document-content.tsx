@@ -2,6 +2,7 @@ import { inject, observer } from "mobx-react";
 import React from "react";
 import { findDOMNode } from "react-dom";
 import { throttle } from "lodash";
+import classNames from "classnames";
 import { BaseComponent, IBaseProps } from "../base";
 import { TileRowComponent, kDragResizeRowId, extractDragResizeRowId, extractDragResizeY,
         extractDragResizeModelHeight, extractDragResizeDomHeight } from "../document/tile-row";
@@ -13,7 +14,6 @@ import { dragTileSrcDocId, kDragTileCreate, kDragTiles } from "../tools/tool-til
 import { safeJsonParse } from "../../utilities/js-utils";
 
 import "./document-content.sass";
-import classNames from "classnames";
 
 interface IProps extends IBaseProps {
   context: string;
@@ -102,8 +102,8 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
   public render() {
     const {viaTeacherDashboard, documentSelectedForComment} = this.props;
-    const documentClass = classNames("document-content", {"document-content-smooth-scroll" : viaTeacherDashboard},
-                                     {"comment-select" : documentSelectedForComment});
+    const documentClass = classNames("document-content", {"document-content-smooth-scroll" : viaTeacherDashboard,
+                                     "comment-select" : documentSelectedForComment});
     return (
       <div className={documentClass}
         onScroll={this.handleScroll}
