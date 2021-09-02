@@ -94,7 +94,9 @@ export const validateUserContext =
   const classPathParts = classPath.split("/");
   const classPathIncludesAppMode = classPathParts[1] === appMode;
   // for authenticated users, claims must match values passed by client
-  const hasValidPortalClaim = !!claims?.platform_id && !!portal?.includes(claims?.platform_id);
+  const canonicalContextPortal = !!portal && canonicalizePortal(portal);
+  const canonicalClaimPortal = !!claims?.platform_id && canonicalizePortal(claims.platform_id);
+  const hasValidPortalClaim = !!canonicalClaimPortal && (canonicalClaimPortal === canonicalContextPortal);
   const hasValidClassClaim = !!claims?.class_hash && (claims?.class_hash === classHash);
   const hasValidClassPath = classPathIncludesAppMode &&
                             !!claims?.class_hash &&

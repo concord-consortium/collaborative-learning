@@ -2,8 +2,8 @@ import { AuthData } from "firebase-functions/lib/common/providers/https";
 import { IUserContext } from "../src/shared";
 import { getFirebaseClassPath, validateUserContext } from "../src/user-context";
 import {
-  kCanonicalOtherPortal, kCanonicalPortal, kClassHash, kDemoName, kFirebaseUserId, kOtherClassHash, kOtherDemoName,
-  kOtherFirebaseUserId, kOtherPlatformUserId, kOtherPortal, kOtherUserId, specAuth, specUserContext
+  kCanonicalPortal, kClassHash, kDemoName, kFirebaseUserId, kOtherCanonicalPortal, kOtherClaimPortal, kOtherClassHash,
+  kOtherDemoName, kOtherFirebaseUserId, kOtherPlatformUserId, kOtherPortal, kOtherUserId, specAuth, specUserContext
 } from "./test-utils";
 
 describe("UserContext", () => {
@@ -32,7 +32,7 @@ describe("UserContext", () => {
       expect(classPathContainsAll(specUserContext(), specAuth(),
                                   ["/authed", kCanonicalPortal, kClassHash])).toBe(true);
       expect(classPathContainsAll(specUserContext({ portal: kOtherPortal }), specAuth(),
-                                  ["/authed", kCanonicalOtherPortal, kClassHash])).toBe(true);
+                                  ["/authed", kOtherCanonicalPortal, kClassHash])).toBe(true);
       expect(classPathContainsAll(specUserContext({ appMode: "demo" }), specAuth(),
                                   ["/demo", kDemoName, kClassHash])).toBe(true);
       expect(classPathContainsAll(specUserContext({ appMode: "demo", demoName: "foo-bar" }), specAuth(),
@@ -73,7 +73,7 @@ describe("UserContext", () => {
 
     it("should return isValid: false for authenticated users whose claims don't match", () => {
       expect(validateUserContext(specUserContext(),
-                                  specAuth({ token: { platform_id: kOtherPortal } })).isValid).toBe(false);
+                                  specAuth({ token: { platform_id: kOtherClaimPortal } })).isValid).toBe(false);
       expect(validateUserContext(specUserContext(),
                                   specAuth({ token: { platform_user_id: kOtherPlatformUserId } })).isValid).toBe(false);
       expect(validateUserContext(specUserContext(),
