@@ -2,10 +2,12 @@ import { AuthData } from "firebase-functions/lib/common/providers/https";
 import { DeepPartial } from "utility-types";
 import { IUserContext } from "../src/shared";
 
-export const kPortal = "https://test.portal";
+export const kPortal = "test.portal";
+export const kClaimPortal = "https://test.portal";
 export const kCanonicalPortal = "test_portal";
-export const kOtherPortal = "https://other.test.portal";
-export const kCanonicalOtherPortal = "other_test_portal";
+export const kOtherPortal = "other.test.portal";
+export const kOtherClaimPortal = "https://other.test.portal";
+export const kOtherCanonicalPortal = "other_test_portal";
 export const kDemoName = "demo-name";
 export const kOtherDemoName = "demo-name";
 export const kPlatformUserId = 123456;

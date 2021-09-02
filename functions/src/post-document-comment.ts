@@ -6,7 +6,7 @@ import {
 import { validateUserContext } from "./user-context";
 
 // update this when deploying updates to this function
-const version = "1.1.1";
+const version = "1.1.2";
 
 export async function postDocumentComment(
                         params?: IPostDocumentCommentUnionParams,
