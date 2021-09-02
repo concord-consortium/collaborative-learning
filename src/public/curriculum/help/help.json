@@ -26,6 +26,38 @@
       "placeholder": "Work area for\nInstructors section"
     }
   },
+  "planningDocument": {
+    "enable": "teacher",
+    "default": true,
+    "sectionMap": {
+      "overview": {
+        "initials": "OV",
+        "title": "Overview",
+        "placeholder": "Work area for\nOverview section"
+      },
+      "launch": {
+        "initials": "LC",
+        "title": "Launch",
+        "placeholder": "Work area for\nLaunch section"
+      },
+      "explore": {
+        "initials": "EX",
+        "title": "Explore",
+        "placeholder": "Work area for\nExplore section"
+      },
+      "summarize": {
+        "initials": "SM",
+        "title": "Summarize",
+        "placeholder": "Work area for\nSummarize section"
+      }
+    },
+    "sections": [
+      { "type": "overview" },
+      { "type": "launch" },
+      { "type": "explore" },
+      { "type": "summarize" }
+    ]
+  },
   "investigations": [
     {
       "description": "Investigation 1",
@@ -124,7 +156,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Click the <strong>Geometry</strong> tool icon to create a geometry graph tile. Note that a Text tile will be created to the right of the graph at the same time. (Select and delete the Text tile if you would like the graph to extend full width, showing more of the x axis.) Drag the bottom of the tile lower if you want to show more on the y axis. To create shapes on the graph, first click to create single points. Then double-click the final point to connect all points (e.g., the third point in a triangle)." 
+                        "Click the <strong>Geometry</strong> tool icon to create a geometry graph tile. Note that a Text tile will be created to the right of the graph at the same time. (Select and delete the Text tile if you would like the graph to extend full width, showing more of the x axis.) Drag the bottom of the tile lower if you want to show more on the y axis. To create shapes on the graph, first click to create single points. Then double-click the final point to connect all points (e.g., the third point in a triangle)."
                       ]
                     }
                   },
