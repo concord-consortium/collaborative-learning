@@ -54,6 +54,7 @@ type CommentsCollection = FSCollection<CommentDocument>;
  * comments can only be viewed by teachers in the same network.
  */
 interface CurriculumDocument {
+  uid: string;                        // uid of teacher making first comment, i.e. adding the record
   unit: string;                       // unit code, e.g. "sas", "msa", etc.
   facet?: string;                     // empty for regular curriculum; "guide" for teacher guide, etc.
   problem: string;                    // ordinal string, e.g. "2.1"
@@ -62,8 +63,8 @@ interface CurriculumDocument {
   network?: string;                   // network of teacher commenting on document
   comments: CommentsCollection;       // comments/chats subcollection
 }
-// collection key is {network}_{escapedProblemPath} because
-// the same document might get added in different networks over time
+// collection key is {network}_{escapedProblemPath} or {uid:userId}_{escapedProblemPath} because
+// the same document might get added in different networks or different un-networked teachers
 type CurriculumCollection = FSCollection<CurriculumDocument>;
 
 /*

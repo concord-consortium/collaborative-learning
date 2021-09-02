@@ -3,7 +3,8 @@ import {
 } from "@firebase/rules-unit-testing";
 import { postDocumentComment } from "../src/post-document-comment";
 import {
-  ICurriculumMetadata, IDocumentMetadata, IPostDocumentCommentParams, IUserContext, networkDocumentKey
+  ICurriculumMetadata, IDocumentMetadata, IPostDocumentCommentParams, isCurriculumMetadata,
+  IUserContext, networkDocumentKey
 } from "../src/shared";
 import {
   kCanonicalPortal, kCreatedAt, kCurriculumKey, kDemoName, kDocumentKey, kDocumentType, kFirebaseUserId,
@@ -73,15 +74,34 @@ const specPostCurriculumComment = (overrides?: IPartialPostCommentParams): IPost
   };
 };
 
-async function testWriteComments(commentsPath : string, authContext: any, context?: Partial<IUserContext>) {
+const kExpectedAssertions = 12;
+
+async function testWriteComments(documentPath : string, authContext: any, context?: Partial<IUserContext>) {
   // can add a comment to a document that doesn't yet exist in Firestore
+  const commentsPath = `${documentPath}/comments`;
   const isCurriculumComment = commentsPath.includes("curriculum");
+  const docKey = isCurriculumComment ? kCurriculumKey : kDocumentKey;
+  expect(documentPath).toContain(networkDocumentKey(kUserId, docKey, kTeacherNetwork));
   const post1Comment = isCurriculumComment
                         ? specPostCurriculumComment({ context })
                         : specPostDocumentComment({ context })
   const post1Result = await postDocumentComment(post1Comment, authContext);
   expect(post1Result).toHaveProperty("id");
   expect(post1Result).toHaveProperty("version");
+
+  // the document should be at the expected path
+  const docResult = await dbAdmin.doc(documentPath).get();
+  const docData = isCurriculumComment
+                    ? docResult.data() as ICurriculumMetadata
+                    : docResult.data() as IDocumentMetadata;
+  if (isCurriculumMetadata(docData)) {
+    // not part of metadata, but added by firebase function
+    expect((docData as any).uid).toBe(kUserId);
+  }
+  else {
+    expect(docData.uid).toBe(kUserId);
+  }
+
   // there should be one comment in the comments subcollection
   const result1 = await dbAdmin.collection(commentsPath).orderBy("createdAt").get();
   expect(result1.docs.length).toBe(1);
@@ -167,50 +187,50 @@ describe("postDocumentComment", () => {
   });
 
   it("should add document comments for authenticated users", async () => {
-    expect.assertions(10);
+    expect.assertions(kExpectedAssertions);
 
-    const docKey = networkDocumentKey(kDocumentKey, kTeacherNetwork);
-    const commentsCollectionPath = `authed/${kCanonicalPortal}/documents/${docKey}/comments`;
-    await testWriteComments(commentsCollectionPath, authWithTeacherClaims);
+    const docKey = networkDocumentKey(kUserId, kDocumentKey, kTeacherNetwork);
+    const documentCollectionPath = `authed/${kCanonicalPortal}/documents/${docKey}`;
+    await testWriteComments(documentCollectionPath, authWithTeacherClaims);
   });
 
   it("should add document comments for demo users", async () => {
-    expect.assertions(10);
+    expect.assertions(kExpectedAssertions);
 
-    const docKey = networkDocumentKey(kDocumentKey, kTeacherNetwork);
-    const commentsCollectionPath = `demo/${kDemoName}/documents/${docKey}/comments`;
-    await testWriteComments(commentsCollectionPath, authWithNoClaims, { appMode: "demo" });
+    const docKey = networkDocumentKey(kUserId, kDocumentKey, kTeacherNetwork);
+    const documentCollectionPath = `demo/${kDemoName}/documents/${docKey}`;
+    await testWriteComments(documentCollectionPath, authWithNoClaims, { appMode: "demo" });
   });
 
   it("should add document comments for qa users", async () => {
-    expect.assertions(10);
+    expect.assertions(kExpectedAssertions);
 
-    const docKey = networkDocumentKey(kDocumentKey, kTeacherNetwork);
-    const commentsCollectionPath = `qa/${kFirebaseUserId}/documents/${docKey}/comments`;
-    await testWriteComments(commentsCollectionPath, authWithNoClaims, { appMode: "qa" });
+    const docKey = networkDocumentKey(kUserId, kDocumentKey, kTeacherNetwork);
+    const documentCollectionPath = `qa/${kFirebaseUserId}/documents/${docKey}`;
+    await testWriteComments(documentCollectionPath, authWithNoClaims, { appMode: "qa" });
   });
 
   it("should add curriculum comments for authenticated users", async () => {
-    expect.assertions(10);
+    expect.assertions(kExpectedAssertions);
 
-    const docKey = networkDocumentKey(kCurriculumKey, kTeacherNetwork);
-    const commentsCollectionPath = `authed/${kCanonicalPortal}/curriculum/${docKey}/comments`;
-    await testWriteComments(commentsCollectionPath, authWithTeacherClaims);
+    const docKey = networkDocumentKey(kUserId, kCurriculumKey, kTeacherNetwork);
+    const documentCollectionPath = `authed/${kCanonicalPortal}/curriculum/${docKey}`;
+    await testWriteComments(documentCollectionPath, authWithTeacherClaims);
   });
 
   it("should add curriculum comments for demo users", async () => {
-    expect.assertions(10);
+    expect.assertions(kExpectedAssertions);
 
-    const docKey = networkDocumentKey(kCurriculumKey, kTeacherNetwork);
-    const commentsCollectionPath = `demo/${kDemoName}/curriculum/${docKey}/comments`;
-    await testWriteComments(commentsCollectionPath, authWithNoClaims, { appMode: "demo" });
+    const docKey = networkDocumentKey(kUserId, kCurriculumKey, kTeacherNetwork);
+    const documentCollectionPath = `demo/${kDemoName}/curriculum/${docKey}`;
+    await testWriteComments(documentCollectionPath, authWithNoClaims, { appMode: "demo" });
   });
 
   it("should add curriculum comments for qa users", async () => {
-    expect.assertions(10);
+    expect.assertions(kExpectedAssertions);
 
-    const docKey = networkDocumentKey(kCurriculumKey, kTeacherNetwork);
-    const commentsCollectionPath = `qa/${kFirebaseUserId}/curriculum/${docKey}/comments`;
-    await testWriteComments(commentsCollectionPath, authWithNoClaims, { appMode: "qa" });
+    const docKey = networkDocumentKey(kUserId, kCurriculumKey, kTeacherNetwork);
+    const documentCollectionPath = `qa/${kFirebaseUserId}/curriculum/${docKey}`;
+    await testWriteComments(documentCollectionPath, authWithNoClaims, { appMode: "qa" });
   });
 });
