@@ -254,6 +254,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private showPublishButton(document: DocumentModelType) {
     const { appConfig } = this.stores;
     if (!appConfig.disablePublish) return true;
+    if (document.type === "planning") return false;
     return appConfig.disablePublish
             .findIndex(spec => {
               return (document.type === spec.documentType) &&

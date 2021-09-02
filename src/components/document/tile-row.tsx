@@ -60,7 +60,7 @@ interface IProps {
   documentId?: string;  // permanent id (key) of the containing document
   docId: string;  // ephemeral contentId for the DocumentContent
   documentContent: HTMLElement | null;
-  documentType: string | undefined;
+  documentTypeThemeClass?: string;
   scale?: number;
   model: TileRowModelType;
   rowIndex: number;
@@ -88,7 +88,7 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
   private tileRowDiv: HTMLElement | null;
 
   public render() {
-    const { model, documentType } = this.props;
+    const { model, documentTypeThemeClass } = this.props;
     const { isSectionHeader, sectionId, tiles } = model;
     // ignore height setting for section header rows
     const height = !isSectionHeader
@@ -103,7 +103,7 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
       <div className={classes} data-row-id={model.id}
           style={style} ref={elt => this.tileRowDiv = elt}>
         { isSectionHeader && sectionId
-          ? <SectionHeader type={sectionId} documentType={documentType}/>
+          ? <SectionHeader type={sectionId} documentTypeThemeClass={documentTypeThemeClass}/>
           : this.renderTiles(renderableTiles, height)
         }
         {!this.props.readOnly && this.renderDragDropHandles()}

@@ -96,13 +96,13 @@ export class CanvasComponent extends BaseComponent<IProps> {
     const {content, document, ...others} = this.props;
     const documentContent = document ? document.content : content;
     const documentId = document?.key;
-    const documentType = document?.type;
+    const documentTypeThemeClass = document?.type === "planning" ? "planning-doc" : "";
 
     if (documentContent) {
       return (
         <DocumentContentComponent content={documentContent}
                                   documentId={documentId}
-                                  documentType={documentType}
+                                  documentTypeThemeClass={documentTypeThemeClass}
                                   {...others} />
       );
     }
