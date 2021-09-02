@@ -230,17 +230,17 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
               onOpenDocument={this.handleOpenDocumentClick}
               onCopyDocument={this.handleCopyDocumentClick}
               isDeleteDisabled={true} />
-            {(this.showPublishButton(document) && type!=="planning") &&
+            {(this.showPublishButton(document) && type !== "planning") &&
               <PublishButton key="publish" onClick={this.handlePublishDocument} />}
           </div>
         }
         <div className="title" data-test="document-title">
-          {`${problemTitle}${type==="planning" ? ": Planning" : ""}`} {this.renderStickyNotes()}
+          {`${problemTitle}${type === "planning" ? ": Planning" : ""}`} {this.renderStickyNotes()}
         </div>
         {!hideButtons &&
           <div className="actions right" data-test="document-titlebar-actions">
             {downloadButton}
-            {(isTeacher && type!=="planning") &&
+            {(isTeacher && type !== "planning") &&
               <PublishSupportButton onClick={this.handlePublishSupport} />}
             {show4up && this.renderMode()}
             {!isTeacher &&

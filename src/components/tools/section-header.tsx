@@ -18,7 +18,7 @@ export class SectionHeader extends BaseComponent<IProps> {
     const { type, documentType } = this.props;
     const initials = getSectionInitials(type);
     const title = getSectionTitle(type);
-    const docTypeClass = documentType==="planning" ? "planning-doc" : "";
+    const docTypeClass = documentType === "planning" ? "planning-doc" : "";
     const rowSectionHeaderClassNames = classNames("row-section-header", docTypeClass);
     // id is set to allow for scrolling to section in teacher dashboard
     return (
