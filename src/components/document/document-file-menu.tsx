@@ -32,6 +32,7 @@ export const DocumentFileMenu: React.FC<IProps> = props => {
   const TitleIcon = appIcons?.["icon-open-workspace"];
   // not clear why we need to reset the viewBox
   const titleIcon = TitleIcon && <TitleIcon viewBox="0 0 32 32" />;
+  const isCopyReallyDisabled = (isCopyDisabled || document.type === "planning");
 
   const menuItems: ICustomDropdownItem[] = useMemo(() => ([
     {
@@ -43,7 +44,7 @@ export const DocumentFileMenu: React.FC<IProps> = props => {
     {
       ...idAndIcon("icon-copy-workspace", appIcons),
       text: "Make a copy",
-      disabled: !!isCopyDisabled,
+      disabled: !!isCopyReallyDisabled,
       onClick: () => onCopyDocument?.(document)
     },
     {

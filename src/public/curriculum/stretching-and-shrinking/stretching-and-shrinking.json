@@ -54,7 +54,7 @@
   "planningDocument": {
     "enable": "teacher",
     "default": true,
-    "sectionMap": {
+    "sectionInfo": {
       "overview": {
         "initials": "OV",
         "title": "Overview",

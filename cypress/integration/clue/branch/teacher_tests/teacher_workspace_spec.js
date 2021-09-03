@@ -124,8 +124,9 @@ describe('Chat panel for networked teacher', () => {
     cy.get('[data-testid=comment-textarea]').should('contain', documentComment);
     cy.get('[data-testid=comment-post-button]').click();
     cy.wait(5000);
+    cy.get('[data-testid=comment-thread] [data-testid=comment]').should('contain', documentComment);
   });
-  it.skip('verify teacher name and initial appear on comment correctly', () => {
+  it('verify teacher name and initial appear on comment correctly', () => {
     cy.get('[data-testid=teacher-initial]').should('contain', "T");
     cy.get('.comment-text-header .user-name').should('contain', "Teacher 7");
   });
