@@ -63,7 +63,7 @@ export const TabPanelDocumentsSection = observer(({ tab, section, index, numOfSe
     const newDocumentLabel = getNewDocumentLabel(section, stores);
     let sectionDocs: DocumentModelType[] = [];
     const publishedDocs: { [source: string]: DocumentModelType } = {};
-    const numPanels = numOfSections > 1 ? 2 : 1;
+    const numPanels = numOfSections > 1 ? numOfSections : 1;
     const tabName = tab.toLowerCase().replace(' ', '-');
 
     (section.documentTypes || []).forEach(type => {
@@ -104,12 +104,13 @@ export const TabPanelDocumentsSection = observer(({ tab, section, index, numOfSe
     function handleNewDocumentClick() {
       onSelectNewDocument?.(section.documentTypes[0]);
     }
-
+    const isInNetwork = user.type === "teacher" && user.teacherNetwork;
+    const isTopPanel = index === 0 && numPanels > 1;
     return (
       <div className={`tab-panel-documents-section ${tabName} ${ index === 0 && numPanels > 1 ? `top-panel`:"" }`}
             key={`${tab}-${section.type}`}
             data-test={`${section.dataTestHeader}-documents`}>
-        <div className={`list ${tabName} ${ index === 0 && numPanels > 1 ? `top-panel`:"" }`}>
+        <div className={`list ${tabName} ${ isTopPanel ? `top-panel`:"" }`}>
           {showNewDocumentThumbnail &&
             <NewDocumentThumbnail label={newDocumentLabel} onClick={handleNewDocumentClick} />}
 
@@ -164,6 +165,7 @@ export const TabPanelDocumentsSection = observer(({ tab, section, index, numOfSe
             );
           })}
         </div>
+        { (isInNetwork && isTopPanel) && <div className="network-divider">Network</div> }
       </div>
     );
   });
@@ -187,3 +189,7 @@ const NewDocumentThumbnail: React.FC<INewDocumentThumbnailProps> = ({ label, onC
     </div>
   );
 };
+function className(arg0: string, tabName: string, arg2: number, arg3: boolean) {
+  throw new Error("Function not implemented.");
+}
+
