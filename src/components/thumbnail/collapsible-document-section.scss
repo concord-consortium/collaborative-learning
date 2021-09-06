@@ -1,0 +1,45 @@
+@import "../vars";
+
+$network-section-yellow: #faec8d;
+
+.collapsible-documents-section {
+  min-height: 26px;
+  width: 100%;
+  position: relative;
+  background-color: $network-section-yellow 10%;
+
+  .section-collapse-toggle {
+    font-size: 13px;
+    color: $charcoal-dark-2;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 1px 5px 1px 6px;
+
+
+    &:hover {
+      background-color: $network-section-yellow 50%;
+    }
+    &:active, .open {
+      background-color: $network-section-yellow 100%;
+    }
+
+    .arrow-icon {
+      fill: $charcoal-dark-1;
+      transform: rotate(0deg);
+      transition: transform;
+      transition-duration: .25s;
+      &:active {
+        transform: rotate(180deg);
+      }
+      .open {
+        transform: rotate(180deg);
+      }
+    }
+  }
+  .documents{
+    display: flex;
+    flex-direction: row;
+
+  }
+}

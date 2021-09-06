@@ -1,5 +1,6 @@
 import React from "react";
 import { observer } from "mobx-react";
+import { uniq } from "lodash";
 import { ThumbnailDocumentItem } from "./thumbnail-document-item";
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
 import {
@@ -9,6 +10,8 @@ import { IStores } from "../../models/stores/stores";
 import { ENavTabOrder, NavTabSectionModelType  } from "../../models/view/nav-tabs";
 import { CanvasComponent } from "../document/canvas";
 import { DocumentContextReact } from "../document/document-context";
+import { CollapsibleDocumentsSection } from "./collapsible-document-section";
+import { useUserContext } from "../../hooks/use-user-context";
 import NewDocumentIcon from "../../assets/icons/new/add.svg";
 
 import "./tab-panel-documents-section.sass";
@@ -59,12 +62,18 @@ export const TabPanelDocumentsSection = observer(({ tab, section, index, numOfSe
                                   onSelectNewDocument, onSelectDocument, onDocumentDragStart,
                                   onDocumentStarClick, onDocumentDeleteClick }: IProps) => {
     const { documents, user } = stores;
+    // const isInNetwork = user.type === "teacher" && user.teacherNetwork;
+    const isInNetwork = true;
     const showNewDocumentThumbnail = section.addDocument && !!onSelectNewDocument;
     const newDocumentLabel = getNewDocumentLabel(section, stores);
     let sectionDocs: DocumentModelType[] = [];
     const publishedDocs: { [source: string]: DocumentModelType } = {};
-    const numPanels = numOfSections > 1 ? numOfSections : 1;
+    // const numPanels = numOfSections > 1 ? numOfSections : 1;
+    const numPanels = isInNetwork? numOfSections + 1 : numOfSections;
+    const isTopPanel = index === 0 && numPanels > 1;
     const tabName = tab.toLowerCase().replace(' ', '-');
+    const userContext = useUserContext();
+    const classNames = uniq(user.portalClassOfferings.map(o => o.className));
 
     (section.documentTypes || []).forEach(type => {
       if (isUnpublishedType(type)) {
@@ -104,12 +113,12 @@ export const TabPanelDocumentsSection = observer(({ tab, section, index, numOfSe
     function handleNewDocumentClick() {
       onSelectNewDocument?.(section.documentTypes[0]);
     }
-    const isInNetwork = user.type === "teacher" && user.teacherNetwork;
-    const isTopPanel = index === 0 && numPanels > 1;
+
     return (
       <div className={`tab-panel-documents-section ${tabName} ${ index === 0 && numPanels > 1 ? `top-panel`:"" }`}
             key={`${tab}-${section.type}`}
             data-test={`${section.dataTestHeader}-documents`}>
+        {/* if index === 1 && isInNetwork, need to loop over all the network teachers and their classes */}
         <div className={`list ${tabName} ${ isTopPanel ? `top-panel`:"" }`}>
           {showNewDocumentThumbnail &&
             <NewDocumentThumbnail label={newDocumentLabel} onClick={handleNewDocumentClick} />}
@@ -165,7 +174,15 @@ export const TabPanelDocumentsSection = observer(({ tab, section, index, numOfSe
             );
           })}
         </div>
-        { (isInNetwork && isTopPanel) && <div className="network-divider">Network</div> }
+        { (isInNetwork && isTopPanel) &&
+          <>
+            <div className="network-divider">Network</div>
+            { classNames.map((classNameStr: string, idx: number) => {
+                return <CollapsibleDocumentsSection key={idx} userName={user.name} classNameStr={classNameStr}/>;
+              })
+            }
+          </>
+        }
       </div>
     );
   });
@@ -189,7 +206,3 @@ const NewDocumentThumbnail: React.FC<INewDocumentThumbnailProps> = ({ label, onC
     </div>
   );
 };
-function className(arg0: string, tabName: string, arg2: number, arg3: boolean) {
-  throw new Error("Function not implemented.");
-}
-

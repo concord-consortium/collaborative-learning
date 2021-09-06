@@ -32,6 +32,7 @@
 
     &:active .arrow
       background-image: url("../../assets/icons/arrow/arrow-open.svg")
+      fill: white
 
     .title-container
       display: flex
@@ -62,10 +63,12 @@
       background-repeat: no-repeat
       background-position: center
       background-image: url("../../assets/icons/arrow/arrow.svg")
+      fill: $workspace-teal-dark-1
 
       &.show-list
         background-image: url("../../assets/icons/arrow/arrow-open.svg")
         transform: rotate(180deg)
+        fill: white
 
       &.disabled
         display: none
