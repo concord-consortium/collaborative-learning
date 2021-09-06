@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import ArrowIcon from "../../assets/icons/arrow/arrow.svg";
-import NotSharedIcon from "../../assets/icons/share/not-share-active.svg";
+import NotSharedIcon from "../../assets/icons/share/not-share.svg";
 
 import "./tab-panel-documents-section.sass";
 import "./collapsible-document-section.scss";

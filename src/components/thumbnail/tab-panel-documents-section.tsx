@@ -62,13 +62,11 @@ export const TabPanelDocumentsSection = observer(({ tab, section, index, numOfSe
                                   onSelectNewDocument, onSelectDocument, onDocumentDragStart,
                                   onDocumentStarClick, onDocumentDeleteClick }: IProps) => {
     const { documents, user } = stores;
-    // const isInNetwork = user.type === "teacher" && user.teacherNetwork;
-    const isInNetwork = true;
+    const isInNetwork = user.type === "teacher" && user.teacherNetwork;
     const showNewDocumentThumbnail = section.addDocument && !!onSelectNewDocument;
     const newDocumentLabel = getNewDocumentLabel(section, stores);
     let sectionDocs: DocumentModelType[] = [];
     const publishedDocs: { [source: string]: DocumentModelType } = {};
-    // const numPanels = numOfSections > 1 ? numOfSections : 1;
     const numPanels = isInNetwork? numOfSections + 1 : numOfSections;
     const isTopPanel = index === 0 && numPanels > 1;
     const isBottomPanel = index === numOfSections-1;
