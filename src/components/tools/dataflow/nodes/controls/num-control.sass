@@ -1,0 +1,50 @@
+@import ../../dataflow-vars
+
+.number-container
+  display: flex
+  flex-direction: row
+  justify-content: center
+  align-items: center
+  color: white
+  margin-top: 3px
+  margin-bottom: 3px
+  text-align-last: right
+
+  .number-input
+    border-radius: 3px
+    &.units
+      border-top-right-radius: 0
+      border-bottom-right-radius: 0
+
+  .number-label
+    color: white
+    margin-right: 5px
+
+  .type-options-back
+    text-align-last: auto
+    height: 24px
+    color: $gray-text
+
+  .type-options
+    height: 24px
+
+  .type-options span
+    top: 9px
+    width: 0
+    height: 0
+    border-left: 4px solid transparent
+    border-right: 4px solid transparent
+    border-top-width: 6px
+    border-top-style: solid
+
+    svg
+      display: none
+
+  .type-options select
+    width: 49px
+    height: 24px
+    border-radius: 0 12px 12px 0
+    padding: 0 2px 2px 6px
+    margin: 0
+    box-sizing: border-box
+    box-shadow: none

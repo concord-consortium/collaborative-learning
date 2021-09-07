@@ -1,0 +1,57 @@
+@import ./dataflow-vars
+
+$dataflow-topbar-height: 40px
+$dataflow-toolbar-height: 364px
+.flow-tool
+  background: white
+  font-family: 'Ubuntu', sans-serif
+  font-weight: 400
+
+  svg
+    z-index: -1
+
+// Connections are offset without this for some reason
+.flow-tool > div > div
+    position: absolute
+
+.dataflow-program-container
+  display: flex
+  flex-direction: column
+  width: 100%
+  min-height: 300px
+  height: 100%
+
+  .toolbar-editor-container
+    display: flex
+    flex-direction: row
+    width: 100%
+    height: calc(100% - #{$dataflow-topbar-height})
+    &.complete
+      height: 100%
+
+  .editor-graph-container
+    position: relative
+    display: flex
+    flex: 1
+    overflow: hidden
+    min-height: $dataflow-toolbar-height
+
+    .editor
+      flex: 0 0 auto
+      &.half
+        width: 50%
+      &.some
+        width: calc(20% - #{$dataflow-toolbar-width / 5})
+
+    .open-program.program-editor
+      position: absolute
+      left: 20px
+      bottom: 10px
+
+  .half
+    width: 50%
+  .full
+    height: 100%
+    width: 100%
+  .hidden
+    display: none
