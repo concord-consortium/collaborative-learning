@@ -1,7 +1,8 @@
 import React from "react";
+import { observer } from "mobx-react";
 import { CanvasComponent } from "../document/canvas";
 import { DocumentModelType } from "../../models/document/document";
-import { observer } from "mobx-react";
+import { DocumentCaption } from "./document-caption";
 
 interface IProps {
   dataTestName: string;
@@ -70,26 +71,6 @@ export const ThumbnailDocumentItem = observer((props: IProps) => {
 });
 
 /*
- * DocumentCaption
- */
-interface IDocumentCaptionProps {
-  captionText: string;
-  onDeleteClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
-}
-
-const DocumentCaption = (props: IDocumentCaptionProps) => {
-  const { captionText, onDeleteClick } = props;
-  return (
-    <div className="footer">
-      <div className="info">
-        <div>{captionText}</div>
-      </div>
-      { onDeleteClick && <DocumentDelete onDeleteClick={onDeleteClick} /> }
-    </div>
-  );
-};
-
-/*
  * DocumentStar
  */
 interface IDocumentStarProps {
@@ -108,17 +89,4 @@ const DocumentStar = (props: IDocumentStarProps) => {
   );
 };
 
-interface IDocumentDeleteProps {
-  onDeleteClick: (e: React.MouseEvent<HTMLDivElement>) => void;
-}
 
-const DocumentDelete = (props: IDocumentDeleteProps) => {
-  const { onDeleteClick } = props;
-  return (
-    <div className="icon-holder" onClick={onDeleteClick}>
-      <svg className="icon-delete-document">
-        <use xlinkHref="#icon-delete-document"/>
-      </svg>
-    </div>
-  );
-};
