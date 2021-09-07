@@ -2,16 +2,14 @@ import React from "react";
 import { observer } from "mobx-react";
 import { uniq } from "lodash";
 import classNames from "classnames";
-import { ThumbnailDocumentItem } from "./thumbnail-document-item";
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
-import {
-  isPlanningType, isProblemType, isPublishedType, isUnpublishedType, PersonalDocument, SupportPublication
-} from "../../models/document/document-types";
+import { isPublishedType, isUnpublishedType, PersonalDocument } from "../../models/document/document-types";
 import { IStores } from "../../models/stores/stores";
 import { ENavTabOrder, NavTabSectionModelType  } from "../../models/view/nav-tabs";
 import { CanvasComponent } from "../document/canvas";
 import { DocumentContextReact } from "../document/document-context";
 import { CollapsibleDocumentsSection } from "./collapsible-document-section";
+import { TabPanelDocumentsSubSectionPanel } from "./tab-panel-documents-subsection-panel";
 import NewDocumentIcon from "../../assets/icons/new/add.svg";
 
 import "./tab-panel-documents-section.sass";
@@ -41,21 +39,6 @@ function getNewDocumentLabel(section: NavTabSectionModelType , stores: IStores) 
     }
   });
   return "New " + (documentLabel || "Workspace");
-}
-
-function getDocumentCaption(stores: IStores, document: DocumentModelType) {
-  const { appConfig, problem, class: _class } = stores;
-  const { type, uid } = document;
-  if (type === SupportPublication) return document.getProperty("caption") || "Support";
-  const user = _class && _class.getUserById(uid);
-  const userName = user && user.displayName;
-  const namePrefix = isPublishedType(type) ? `${userName}: ` : "";
-  const title = isProblemType(type)
-                  ? problem.title
-                  : isPlanningType(type)
-                      ? `${problem.title}: Planning`
-                      : document.getDisplayTitle(appConfig);
-  return `${namePrefix}${title}`;
 }
 
 export const TabPanelDocumentsSection = observer(({ tab, section, index, numOfSections, stores, scale, selectedDocument,
@@ -111,7 +94,6 @@ export const TabPanelDocumentsSection = observer(({ tab, section, index, numOfSe
     function handleNewDocumentClick() {
       onSelectNewDocument?.(section.documentTypes[0]);
     }
-
     const tabPanelDocumentSectionClass = classNames("tab-panel-documents-section", tabName,
                                                     { "top-panel": isTopPanel }, { "bottom-panel": isBottomPanel });
     const listClass = classNames("list", tabName, {"top-panel": isTopPanel}, {"bottom-panel": isBottomPanel});
@@ -124,51 +106,15 @@ export const TabPanelDocumentsSection = observer(({ tab, section, index, numOfSe
             <NewDocumentThumbnail label={newDocumentLabel} onClick={handleNewDocumentClick} />}
 
           {sectionDocs.map(document => {
-
-            function handleDocumentClick() {
-              onSelectDocument?.(document);
-              (section.type === "teacher-supports") && user.setLastSupportViewTimestamp(Date.now());
-            }
-            function handleDocumentDragStart(e: React.DragEvent<HTMLDivElement>) {
-              onDocumentDragStart?.(e, document);
-            }
-            function handleDocumentStarClick() {
-              onDocumentStarClick?.(document);
-            }
-            function handleDocumentDeleteClick() {
-              onDocumentDeleteClick?.(document);
-            }
-
-            // pass function so logic stays here but access occurs from child
-            // so that mobx-react triggers child render not parent render.
-            const onIsStarred = () => {
-              return section.showStarsForUser(user)
-                      ? user.isTeacher
-                        ? document.isStarredByUser(user.id)
-                        : document.isStarred
-                      : false;
-            };
-            const _handleDocumentStarClick = section.showStarsForUser(user)
-                                              ? handleDocumentStarClick
-                                              : undefined;
-            const _handleDocumentDeleteClick = section.showDeleteForUser(user)
-                                              ? handleDocumentDeleteClick
-                                              : undefined;
             const documentContext = getDocumentContext(document);
             return (
               <DocumentContextReact.Provider key={document.key} value={documentContext}>
-                <ThumbnailDocumentItem
-                  key={document.key}
-                  dataTestName={`${tabName}-list-items`}
-                  canvasContext={tab}
-                  document={document}
-                  scale={scale}
-                  isSelected={document.key === selectedDocument}
-                  captionText={getDocumentCaption(stores, document)}
-                  onDocumentClick={handleDocumentClick} onDocumentDragStart={handleDocumentDragStart}
-                  onIsStarred={onIsStarred}
-                  onDocumentStarClick={_handleDocumentStarClick}
-                  onDocumentDeleteClick={_handleDocumentDeleteClick}
+                <TabPanelDocumentsSubSectionPanel section={section} sectionDocument={document} tab={tab} stores={stores}
+                  scale={scale} selectedDocument={selectedDocument}
+                  onSelectDocument={onSelectDocument}
+                  onDocumentDragStart={onDocumentDragStart}
+                  onDocumentStarClick={onDocumentStarClick}
+                  onDocumentDeleteClick={onDocumentDeleteClick}
                 />
               </DocumentContextReact.Provider>
             );
@@ -178,7 +124,11 @@ export const TabPanelDocumentsSection = observer(({ tab, section, index, numOfSe
           <>
             <div className="network-divider">Network</div>
             { classNamesStrings.map((classNameStr: string, idx: number) => {
-                return <CollapsibleDocumentsSection key={idx} userName={user.name} classNameStr={classNameStr}/>;
+                return <CollapsibleDocumentsSection key={idx} userName={user.name} classNameStr={classNameStr}
+                                                    section={section} stores={stores} tab={tab} scale={scale}
+                                                    selectedDocument={selectedDocument}
+                                                    onSelectDocument={onSelectDocument}
+                                                    />;
               })
             }
           </>
