@@ -1,5 +1,4 @@
 import "ts-polyfill";
-import "regenerator-runtime/runtime";
 
 import { Provider } from "mobx-react";
 import React from "react";
