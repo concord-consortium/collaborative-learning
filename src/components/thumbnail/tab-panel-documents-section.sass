@@ -20,7 +20,6 @@ $section-padding: 6px
     overflow-y: auto
     &.top-panel
       height: $first-panel-height
-      border-bottom: solid 1px $charcoal-light-1
       overflow-y: hidden
     &.bottom-panel
       border-top: solid 1px $charcoal-light-1
@@ -142,13 +141,18 @@ $section-padding: 6px
       background-color: $support-blue-light-6
 
   .network-divider
+    width: 100%
+    border-top: solid 1px $charcoal-light-1
     display: flex
-    position: relative
-    top: -14px
     justify-content: center
-    align-self: center
-    align-items: center
-    background-color: #faec8d
-    border: solid 1px $charcoal-light-1
-    width: 71px
-    height: 26px
+    .network-divider-label
+      display: flex
+      position: relative
+      top: -14px
+      justify-content: center
+      align-self: center
+      align-items: center
+      background-color: #faec8d
+      border: solid 1px $charcoal-light-1
+      width: 71px
+      height: 26px

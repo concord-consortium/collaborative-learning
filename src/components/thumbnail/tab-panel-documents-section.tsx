@@ -122,13 +122,15 @@ export const TabPanelDocumentsSection = observer(({ tab, section, index, numOfSe
         </div>
         { (isInNetwork && isTopPanel) &&
           <>
-            <div className="network-divider">Network</div>
-            { classNamesStrings.map((classNameStr: string, idx: number) => {
-                return <CollapsibleDocumentsSection key={idx} userName={user.name} classNameStr={classNameStr}
-                                                    section={section} stores={stores} tab={tab} scale={scale}
-                                                    selectedDocument={selectedDocument}
-                                                    onSelectDocument={onSelectDocument}
-                                                    />;
+          <div className="network-divider">
+            <div className="network-divider-label">Network</div>
+          </div>
+          { classNamesStrings.map((classNameStr: string, idx: number) => {
+              return <CollapsibleDocumentsSection key={idx} userName={user.name} classNameStr={classNameStr}
+                                                  section={section} stores={stores} tab={tab} scale={scale}
+                                                  selectedDocument={selectedDocument}
+                                                  onSelectDocument={onSelectDocument}
+                     />;
               })
             }
           </>
