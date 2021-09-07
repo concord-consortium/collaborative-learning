@@ -18,7 +18,6 @@ $section-padding: 6px;
     display: flex;
     flex-direction: row;
     align-items: center;
-    background-color: rgba(250, 236, 141, 0.1);
     height: 26px;
 
     &:hover {
@@ -67,7 +66,7 @@ $section-padding: 6px;
       flex-direction: column;
       align-items: center;
       overflow: hidden;
-      background-color:rgba(250, 236, 141, 0.1);
+      background-color:rgba(250, 236, 141, 0.0);
       cursor: pointer;
       .scaled-list-item-container {
         border-radius: 5px;
