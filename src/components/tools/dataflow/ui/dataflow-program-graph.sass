@@ -1,0 +1,116 @@
+@import ../dataflow-vars
+
+.program-graph
+  height: 100%
+  width: 50%
+  flex: 0 0 auto
+  padding: 5px 5px 25px 5px
+  border: 2px solid $data-storage-orange
+  border-left-width: 6px
+  position: relative
+
+  &.most
+    width: 80%
+
+  &.full
+    width: 100%
+
+  .graph-loading
+    display: flex
+    flex-direction: column
+    align-items: center
+    justify-content: center
+    height: 100%
+    width: 100%
+    background-image: url("../../../../assets/tools/dataflow/Spinner-1s-200px.svg")
+    background-repeat: no-repeat
+    background-size: 20%
+    background-position-x: 50%
+
+  .graph-error
+    display: flex
+    flex-direction: column
+    align-items: center
+    justify-content: center
+    height: 100%
+    width: 100%
+
+  .stacked-graph-container
+    display: flex
+    flex-direction: column
+    align-items: center
+    justify-content: center
+    height: 100%
+    width: 100%
+
+    .stacked-graph
+      flex: 1
+      width: 100%
+      margin: 5px
+      min-height: 75px
+
+  .overlapped-graph-container
+    height: 100%
+    width: 100%
+
+  .graph-buttons
+    position: absolute
+    bottom: 6px
+    display: flex
+    flex-direction: row
+    width: 100%
+    padding-right: 10px
+  .graph-button
+    margin-left: 2px
+    font-family: 'Ubuntu', sans-serif
+    min-width: 60px
+    background-color: $data-storage-orange
+    color: white
+    font-size: 12px
+    font-style: normal
+    height: 24px
+    border: 0
+    outline: 0
+    border-radius: 3px
+    cursor: pointer
+    &.program
+      position: absolute
+      width: 128px
+      height: 60px
+      background-image: url("../../../../assets/tools/dataflow/both.png")
+      background-size: contain
+      background-repeat: no-repeat
+      background-position: center
+      border: 2px solid $data-storage-orange
+      margin-top: -35px
+      &:hover
+        filter: drop-shadow(2px 2px 2px $gray-mid)
+      &:active
+        filter: brightness(0.95)
+    &.program.split
+      left: -100%
+      background-image: url("../../../../assets/tools/dataflow/graph.png")
+    &.open-program
+      position: absolute
+      left: -152px
+      bottom: 0
+      &.wide
+        left: 0
+    &.data
+      margin-left: auto
+    &:hover
+      background-color: $data-storage-orange-node
+    &:active
+      background-color: $data-storage-orange-control
+    &.export
+      border: 2px solid $gray-mid
+      color: $gray-text
+      background-color: #ffffff
+      &.wide
+        margin-left: calc(50% - 100px)
+      &:hover
+        background-color: $gray-light-hover
+      &:active
+        background-color: $gray-light-click
+
+

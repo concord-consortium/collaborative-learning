@@ -1,0 +1,185 @@
+@import ../../../vars
+@import ../dataflow-vars
+
+$topbar-height: 44px
+$topbar-color: $gray-light
+$duration-label-back: $gray-mid
+
+.program-editor-topbar
+  display: flex
+  flex-direction: row
+  align-items: center
+  justify-content: center
+  width: 100%
+  flex: 0 0 $topbar-height
+  background-color: $topbar-color
+  border: solid 2px #ffffff
+
+  .refresh
+    .icon-refresh
+      background-color: white
+      width: 28px
+      height: 28px
+      position: absolute
+      top: 6px
+      right: 6px
+      margin: 0
+      padding: 0
+      border: 2px solid #bcbcbc
+      &:hover:not([disabled])
+        background-color: $gray-light-hover
+        cursor: pointer
+      &:active:not([disabled])
+        background-color: $gray-light-click
+      &:disabled
+        opacity: 0.6
+      .refresh
+        position: absolute
+        top: 4px
+        left: 4px
+        width: 16px
+        height: 16px
+        background-repeat: no-repeat
+        background-image: url("../../../../assets/tools/dataflow/icons/refresh/refresh.svg")
+        &:hover
+          background-image: url("../../../../assets/tools/dataflow/icons/refresh/refresh-hover.svg")
+        &:active
+          background-image: url("../../../../assets/tools/dataflow/icons/refresh/refresh-active.svg")
+
+  .running-container
+    display: flex
+    flex-direction: row
+    &.countdown
+      position: relative
+      width: 208px
+    .total
+      display: flex
+      flex-direction: column
+      align-items: flex-start
+      justify-content: center
+      background-color: #bcbcbc
+      width: 130px
+      height: 28px
+      border-radius: 3px
+      font-size: 14px
+      padding-left: 5px
+      color: white
+    .remaining
+      display: flex
+      flex-direction: column
+      align-items: center
+      justify-content: center
+      position: absolute
+      left: 118px
+      width: 84px
+      height: 28px
+      border-radius: 3px 3px 3px 3px
+      color: black
+      background-color: white
+      border: solid 2px #bcbcbc
+      .progress-bar
+        position: absolute
+        left: 2px
+        height: 20px
+        background-color: #fde5c1
+        border-radius: 2pxpx 2px 2px 2px
+      .progress-time
+        position: absolute
+
+  .duration
+    position: relative
+    width: 152px
+
+    .label-back
+      width: 70px
+      height: 28px
+      border-radius: 3px
+      border-top-right-radius: 0px
+      border-bottom-right-radius: 0px
+      background-color: $duration-label-back
+      padding: 6px 3px 5px 9px
+      .label
+        width: 58px
+        height: 17px
+        font-size: 14px
+        font-weight: 500
+        font-style: normal
+        font-stretch: normal
+        line-height: normal
+        letter-spacing: normal
+        text-align: right
+        color: white
+
+    .duration-options-back
+      position: absolute
+      right: 0px
+      top: 0px
+      padding: 2px
+      width: 84px
+      height: 28px
+      border-radius: 14px
+      border-top-left-radius: 0px
+      border-bottom-left-radius: 0px
+      background-color: $duration-label-back
+
+      .duration-options select
+        position: relative
+        width: 80px
+        height: 24px
+        border-radius: 12px
+        background-color: #ffffff
+        font-size: 11px
+        outline: 0
+        &:disabled
+          cursor: default
+
+      .duration-options span
+        top: 9px
+        width: 0
+        height: 0
+        border-left: 4px solid transparent
+        border-right: 4px solid transparent
+        border-top: 6px solid $duration-label-back
+        svg
+          display: none
+      .duration-options option
+        &:disabled
+          color: $gray-disabled
+
+  .program-state-button
+    position: relative
+    width: 70px
+    height: 28px
+    border-radius: 3px
+    border: solid 2px $gray-mid
+    background-color: #ffffff
+    margin: 0px 0px 0px 8px
+    outline: 0
+    &:hover:not([disabled])
+      cursor: pointer
+      background-color: $gray-light-hover
+    &:active:not([disabled])
+      background-color: $gray-light-click
+    &:disabled
+      opacity: 0.6
+
+    .icon
+      position: absolute
+      left: 4px
+      top: 3px
+      width: 18px
+      height: 18px
+      &.run
+        background-image: url("../../../../assets/tools/dataflow/run.svg")
+      &.stop
+        background-image: url("../../../../assets/tools/dataflow/stop.svg")
+
+    .text
+      position: absolute
+      right: 0
+      top: 3px
+      width: 48px
+      height: 16px
+      font-size: 14px
+      text-align: center
+      color: $gray-text

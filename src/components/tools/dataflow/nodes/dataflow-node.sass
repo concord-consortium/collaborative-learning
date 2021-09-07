@@ -1,0 +1,327 @@
+@import ../../../vars
+@import ../dataflow-vars
+
+$node-width: 176px
+$node-inner-width: 140px
+
+.flow-tool
+  .node
+    display: flex
+    flex-direction: column
+    align-items: center
+    width: $node-width
+    min-width: $node-width
+    padding-bottom: 16px
+    border-radius: 5px
+    font-size: 11px
+    box-sizing: border-box
+    color: $gray-text
+
+    &.sensor
+      background-color: $sensor-blue
+      border-color: $sensor-blue-outline
+      .main-color
+        color: $sensor-blue
+        border: 2px solid $sensor-blue
+        &:hover
+          background-color: $sensor-blue-outline
+      .control-color
+        color: $sensor-blue-control
+      .control-color-hoverable:hover
+        color: $sensor-blue-node
+      .active
+        background-color: $sensor-blue-control
+      .type-options select
+        background-color: $sensor-blue-outline
+      .type-options span
+        border-top-color: $sensor-blue
+    &.number
+      background-color: $number-blue
+      border-color: $number-blue-outline
+      .main-color
+        color: $number-blue
+        border: 2px solid $number-blue
+        &:hover
+          background-color: $number-blue-outline
+      .control-color
+        color: $number-blue-control
+      .control-color-hoverable:hover
+        color: $number-blue-node
+      .active
+        background-color: $number-blue-control
+      .type-options select
+        background-color: $number-blue-outline
+      .type-options span
+        border-top-color: $number-blue
+    &.generator
+      background-color: $generator-blue
+      border-color: $generator-blue-outline
+      .main-color
+        color: $generator-blue
+        border: 2px solid $generator-blue
+        &:hover
+          background-color: $generator-blue-outline
+      .control-color
+        color: $generator-blue-control
+      .control-color-hoverable:hover
+        color: $generator-blue-node
+      .active
+        background-color: $generator-blue-control
+      .type-options select
+        background-color: $generator-blue-outline
+      .type-options span
+        border-top-color: $generator-blue
+    &.timer
+      background-color: $timer-blue
+      border-color: $timer-blue-outline
+      .main-color
+        color: $timer-blue
+        border: 2px solid $timer-blue
+        &:hover
+          background-color: $timer-blue-outline
+      .control-color
+        color: $timer-blue-control
+      .control-color-hoverable:hover
+        color: $timer-blue-node
+      .active
+        background-color: $timer-blue-control
+      .type-options select
+        background-color: $timer-blue-outline
+      .type-options span
+        border-top-color: $timer-blue
+    &.math
+      background-color: $math-green
+      border-color: $math-green-outline
+      .main-color
+        color: $math-green
+        border: 2px solid $math-green
+        &:hover
+          background-color: $math-green-outline
+      .control-color
+        color: $math-green-control
+      .control-color-hoverable:hover
+        color: $math-green-node
+      .active
+        background-color: $math-green-control
+      .type-options select
+        background-color: $math-green-outline
+      .type-options span
+        border-top-color: $math-green
+    &.logic
+      background-color: $logic-green
+      border-color: $logic-green-outline
+      .main-color
+        color: $logic-green
+        border: 2px solid $logic-green
+        &:hover
+          background-color: $logic-green-outline
+      .control-color
+        color: $logic-green-control
+      .control-color-hoverable:hover
+        color: $logic-green-node
+      .active
+        background-color: $logic-green-control
+      .type-options select
+        background-color: $logic-green-outline
+      .type-options span
+        border-top-color: $logic-green
+    &.transform
+      background-color: $transform-green
+      border-color: $transform-green-outline
+      .main-color
+        color: $transform-green
+        border: 2px solid $transform-green
+        &:hover
+          background-color: $transform-green-outline
+      .control-color
+        color: $transform-green-control
+      .control-color-hoverable:hover
+        color: $transform-green-node
+      .active
+        background-color: $transform-green-control
+      .type-options select
+        background-color: $transform-green-outline
+      .type-options span
+        border-top-color: $transform-green
+    &.relay
+      background-color: $relay-orange
+      border-color: $relay-orange-outline
+      .main-color
+        color: $relay-orange
+        border: 2px solid $relay-orange
+        &:hover
+          background-color: $relay-orange-outline
+      .control-color
+        color: $relay-orange-control
+      .control-color-hoverable:hover
+        color: $relay-orange-node
+      .active
+        background-color: $relay-orange-control
+      .type-options select
+        background-color: $relay-orange-outline
+      .type-options span
+        border-top-color: $relay-orange
+    &.light-bulb
+      background-color: $light-bulb-orange
+      border-color: $light-bulb-orange-outline
+      .main-color
+        color: $light-bulb-orange
+        border: 2px solid $light-bulb-orange
+        &:hover
+          background-color: $light-bulb-orange-outline
+      .control-color
+        color: $light-bulb-orange-control
+      .control-color-hoverable:hover
+        color: $light-bulb-orange-node
+      .active
+        background-color: $light-bulb-orange-control
+      .type-options select
+        background-color: $light-bulb-orange-outline
+      .type-options span
+        border-top-color: $light-bulb-orange
+    &.data-storage
+      background-color: $data-storage-orange
+      border-color: $data-storage-orange-outline
+      .main-color
+        color: $data-storage-orange
+        border: 2px solid $data-storage-orange
+        &:hover
+          background-color: $data-storage-orange-outline
+      .control-color
+        color: $data-storage-orange-control
+      .control-color-hoverable:hover
+        color: $data-storage-orange-node
+      .active
+        background-color: $data-storage-orange-control
+      .type-options select
+        background-color: $data-storage-orange-outline
+      .type-options span
+        border-top-color: $data-storage-orange
+
+    .top-bar
+      display: flex
+      width: $node-inner-width
+      height: 21px
+      padding: 4px 0 2px 0
+
+      .node-title
+        font-size: 12px
+        font-weight: 500
+        text-align: left
+        color: white
+
+      .close-node-button
+        position: absolute
+        right: 0px
+        top: 1px
+        width: 18px
+        height: 18px
+        svg
+          width: 8px
+          height: 8px
+          z-index: 1
+
+    .node-output
+      padding: 0
+      margin: 0
+      height: 20px
+
+    .control
+      padding: 0px
+      max-width: $node-inner-width
+
+    select, input
+      font-family: 'Ubuntu', sans-serif
+      font-weight: 400
+      font-size: 14px
+      background-color: white
+      padding: 2px 6px
+      border: 0px solid #999
+      &.sensor
+        color: #0592AF
+
+    .socket
+        background: $gray-mid
+    input
+      min-width: 0
+      width: 100%
+      height: 24px
+      box-sizing: border-box
+      flex: 1
+
+    .hr
+      border: 1px solid
+      width: 70%
+      margin: 8px 0
+
+    .inputs-outputs
+      width: $node-width
+      max-height: 30px
+      display: flex
+      align-items: center
+      justify-content: space-between
+
+      .inputs,.outputs
+        display: flex
+        flex-direction: column
+        justify-content: center
+
+      .inputs
+        min-width: 9px
+
+      .socket
+        width: 20px
+        height: 20px
+        margin-top: 1px
+        margin-bottom: 1px
+        margin-right: 1px
+
+      .output-controls
+        display: flex
+        justify-content: space-evenly
+        min-width: 151px
+
+        .output-container
+          margin: 0 3px 0 10px
+          padding: 3px
+          display: flex
+          justify-content: center
+          align-items: center
+          background-color: white
+          border-radius: 3px 15px 15px 3px
+          width: 140px
+          height: 30px
+          box-sizing: border-box
+          border: solid 2px white
+          &.sensor, &.number
+            background-color: $sensor-blue-readout
+          &.generator
+            background-color: $generator-blue-readout
+          &.math
+            background-color: $math-green-readout
+          &.logic
+            background-color: $logic-green-readout
+          &.transform
+            background-color: $transform-green-readout
+          &.relay
+            background-color: $relay-orange-readout
+            margin-left: 0px
+          &.light-bulb
+            background-color: $light-bulb-orange-readout
+            margin-left: 0px
+          &.data-storage
+            display: none
+
+    .decorated-inputs
+      width: $node-width
+
+    .node-graph
+      padding: 5px 5px 0 0
+      margin: 10px 0
+      width: $node-inner-width
+      background-color: white
+
+  svg
+    path.main-path
+      stroke: $gray-mid-click
+      stroke-dasharray: 5
