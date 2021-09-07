@@ -1,5 +1,5 @@
 import { types, Instance } from "mobx-state-tree";
-import { registerToolContentInfo } from "../tool-content-info";
+import { ToolContentModel } from "../tool-types";
 
 export const kDataflowToolID = "Dataflow";
 
@@ -9,8 +9,9 @@ export function defaultDataflowContent(): DataflowContentModelType {
 
 export const kDataflowDefaultHeight = 480;
 
-export const DataflowContentModel = types
-  .model("DataflowTool", {
+export const DataflowContentModel = ToolContentModel
+  .named("DataflowTool")
+  .props({
     type: types.optional(types.literal(kDataflowToolID), kDataflowToolID),
   })
   .views(self => ({
@@ -22,11 +23,3 @@ export const DataflowContentModel = types
   }));
 
 export type DataflowContentModelType = Instance<typeof DataflowContentModel>;
-
-registerToolContentInfo({
-  id: kDataflowToolID,
-  tool: "dataflow",
-  modelClass: DataflowContentModel,
-  defaultHeight: kDataflowDefaultHeight,
-  defaultContent: defaultDataflowContent,
-});

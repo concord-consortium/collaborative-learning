@@ -1,11 +1,13 @@
 import React from "react";
+import { SizeMe, SizeMeProps } from "react-sizeme";
 import { observer, inject } from "mobx-react";
 import { BaseComponent } from "../../../components/base";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
-import { SizeMe, SizeMeProps } from "react-sizeme";
+import { IToolTileProps } from "../tool-tile";
+
 import "./dataflow-tool.sass";
 
-interface IProps {
+interface IProps extends IToolTileProps{
   model: ToolTileModelType;
 }
 
