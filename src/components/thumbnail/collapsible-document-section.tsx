@@ -87,7 +87,7 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(({userName
             return (
               <DocumentContextReact.Provider key={document.key} value={documentContext}>
                 { docNotShared
-                  ? <DocumentNoSharedThumbnail label={docLabel}/>
+                  ? <DocumentNoSharedThumbnail label={docLabel} notShared={docNotShared} />
                   : <TabPanelDocumentsSubSectionPanel section={section} sectionDocument={document} tab={tab}
                   stores={stores} scale={scale} selectedDocument={selectedDocument}
                       onSelectDocument={onSelectDocument}
@@ -104,10 +104,9 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(({userName
 
 interface IDocumentNotSharedProps {
   label: string;
+  notShared?: boolean;
 }
-const DocumentNoSharedThumbnail: React.FC<IDocumentNotSharedProps> = ({ label }) => {
-  const notShared=true;
-
+const DocumentNoSharedThumbnail: React.FC<IDocumentNotSharedProps> = ({ label, notShared }) => {
   return (
     <div className="list-item not-shared" data-test="my-work-new-document" >
       { notShared
