@@ -1,3 +1,4 @@
+import "regenerator-runtime/runtime";
 import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../../../components/base";
 import React from "react";
