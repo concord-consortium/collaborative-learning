@@ -41,55 +41,61 @@ function getNewDocumentLabel(section: NavTabSectionModelType , stores: IStores) 
   return "New " + (documentLabel || "Workspace");
 }
 
+function getSectionDocs(section: NavTabSectionModelType, stores: IStores, classStr: string) {
+  const { documents, user } = stores;
+  const publishedDocs: { [source: string]: DocumentModelType } = {};
+  let sectDocs: DocumentModelType[] = [];
+  (section.documentTypes || []).forEach(type => {
+    if (isUnpublishedType(type)) {
+      sectDocs.push(...documents.byTypeForUser(type as any, user.id));
+    }
+    else if (isPublishedType(type)) {
+      // only show the most recent publication of each document
+      documents
+        .byType(type as any)
+        .forEach(doc => {
+          // personal documents and learning logs have originDocs.
+          // problem documents only have the uids of their creator,
+          // but as long as we're scoped to a single problem, there
+          // shouldn't be published documents from other problems.
+          const source = doc.originDoc || doc.uid;
+          if (source) {
+            const entry = publishedDocs[source];
+            if (!entry || (entry.createdAt < doc.createdAt)) {
+              publishedDocs[source] = doc;
+            }
+          }
+        });
+        sectDocs.push(...Object.values(publishedDocs));
+    }
+  });
+
+  // Reverse the order to approximate a most-recently-used ordering.
+  if (section.order === ENavTabOrder.kReverse) {
+    sectDocs = sectDocs.reverse();
+  }
+  console.log("documents: ", documents);
+  // filter by additional properties
+  if (section.properties && section.properties.length) {
+    sectDocs = sectDocs.filter(doc => doc.matchProperties(section.properties));
+  }
+  return sectDocs;
+}
+
 export const TabPanelDocumentsSection = observer(({ tab, section, index, numOfSections, stores, scale, selectedDocument,
                                   onSelectNewDocument, onSelectDocument, onDocumentDragStart,
                                   onDocumentStarClick, onDocumentDeleteClick }: IProps) => {
-    const { documents, user } = stores;
+    const { user } = stores;
     const isInNetwork = user.type === "teacher" && user.teacherNetwork;
     const showNewDocumentThumbnail = section.addDocument && !!onSelectNewDocument;
     const newDocumentLabel = getNewDocumentLabel(section, stores);
-    let sectionDocs: DocumentModelType[] = [];
-    const publishedDocs: { [source: string]: DocumentModelType } = {};
     const numPanels = isInNetwork? numOfSections + 1 : numOfSections;
     const isTopPanel = index === 0 && numPanels > 1;
-    const isBottomPanel = index === numOfSections-1;
+    const isBottomPanel = index === numOfSections-1 && index > 0;
     const tabName = tab.toLowerCase().replace(' ', '-');
-    const classNamesStrings = uniq(user.portalClassOfferings.map(o => o.className));
-
-    (section.documentTypes || []).forEach(type => {
-      if (isUnpublishedType(type)) {
-        sectionDocs.push(...documents.byTypeForUser(type as any, user.id));
-      }
-      else if (isPublishedType(type)) {
-        // only show the most recent publication of each document
-        documents
-          .byType(type as any)
-          .forEach(doc => {
-            // personal documents and learning logs have originDocs.
-            // problem documents only have the uids of their creator,
-            // but as long as we're scoped to a single problem, there
-            // shouldn't be published documents from other problems.
-            const source = doc.originDoc || doc.uid;
-            if (source) {
-              const entry = publishedDocs[source];
-              if (!entry || (entry.createdAt < doc.createdAt)) {
-                publishedDocs[source] = doc;
-              }
-            }
-          });
-        sectionDocs.push(...Object.values(publishedDocs));
-      }
-    });
-
-    // Reverse the order to approximate a most-recently-used ordering.
-    if (section.order === ENavTabOrder.kReverse) {
-      sectionDocs = sectionDocs.reverse();
-    }
-
-    // filter by additional properties
-    if (section.properties && section.properties.length) {
-      sectionDocs = sectionDocs.filter(doc => doc.matchProperties(section.properties));
-    }
+    const currentClass = stores.class.name;
+    const classNamesStrings = (uniq(user.portalClassOfferings.map(o => o.className))).filter(c => c !== currentClass);
+    const sectionDocs: DocumentModelType[] = getSectionDocs(section, stores, currentClass);
 
     function handleNewDocumentClick() {
       onSelectNewDocument?.(section.documentTypes[0]);
@@ -127,6 +133,7 @@ export const TabPanelDocumentsSection = observer(({ tab, section, index, numOfSe
           </div>
           { classNamesStrings.map((classNameStr: string, idx: number) => {
               return <CollapsibleDocumentsSection key={idx} userName={user.name} classNameStr={classNameStr}
+                                                  sectionDocs={sectionDocs}
                                                   section={section} stores={stores} tab={tab} scale={scale}
                                                   selectedDocument={selectedDocument}
                                                   onSelectDocument={onSelectDocument}
