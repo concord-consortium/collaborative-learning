@@ -28,7 +28,6 @@ interface IProps extends IBaseProps {
 
 interface IState {
   tabLoadAllowed: { [tab: number]: boolean };
-  showChatColumn: boolean;
 }
 
 @inject("stores")
@@ -40,13 +39,13 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
     super(props);
     this.state = {
       tabLoadAllowed: {},
-      showChatColumn: false,
     };
   }
 
   public render() {
     const { tabs, isResourceExpanded } = this.props;
-    const { ui: { activeNavTab, dividerPosition, focusDocument }, user, supports } = this.stores;
+    const { ui: { activeNavTab, dividerPosition, focusDocument, showChatPanel },
+            user, supports } = this.stores;
     const selectedTabIndex = tabs?.findIndex(t => t.tab === activeNavTab);
     const resizePanelWidth = 4;
     const collapseTabWidth = 44;
@@ -57,7 +56,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
                               : `calc(${dividerPosition}% - ${resizePanelWidth}px)`;
     const resourceWidthStyle = {width: resourceWidth};
     const isChatEnabled = user.isNetworkedTeacher && urlParams.chat;
-    const showChatPanel = isChatEnabled && this.state.showChatColumn;
+    const openChatPanel = isChatEnabled && showChatPanel;
 
     return (
       <div className={`resource-and-chat-panel ${isResourceExpanded ? "shown" : ""}`} style={resourceWidthStyle}>
@@ -80,12 +79,12 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
                 }
               </TabList>
               { isChatEnabled
-                  ? !showChatPanel &&
+                  ? !openChatPanel &&
                     <div className={`chat-panel-toggle themed ${activeNavTab}`}>
                       <NewCommentsBadge documentKey={focusDocument} />
                       <ChatIcon
                         className={`chat-button ${activeNavTab}`}
-                        onClick={() => this.handleShowChatColumn(true)}
+                        onClick={this.handleShowChatColumn}
                       />
                     </div>
                   : <button className="close-button" onClick={this.handleCloseResources}/>
@@ -128,7 +127,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
 
   private renderDocuments = (tabSpec: NavTabSpec) => {
     return (
-      <DocumentTabContent tabSpec={tabSpec} isChatOpen={this.state.showChatColumn}/>
+      <DocumentTabContent tabSpec={tabSpec} />
     );
   }
 
@@ -137,8 +136,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
     return (
       <ProblemTabContent
         sections={sections}
-        showSolutionsSwitch={isTeacher}
-        isChatOpen={this.state.showChatColumn}/>
+        showSolutionsSwitch={isTeacher}/>
     );
   }
 
@@ -149,8 +147,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
       <ProblemTabContent
         context={ENavTab.kTeacherGuide}
         sections={sections}
-        showSolutionsSwitch={false}
-        isChatOpen={this.state.showChatColumn}/>
+        showSolutionsSwitch={false}/>
     );
   }
 
@@ -176,8 +173,9 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
     ui.setActiveStudentGroup(groupId);
   }
 
-  private handleShowChatColumn = (show: boolean) => {
-    this.setState({showChatColumn: show});
+  private handleShowChatColumn = () => {
+    const { ui } = this.stores;
+    ui.toggleShowChatPanel(!ui.showChatPanel);
   }
 
   private handleCloseResources = () => {

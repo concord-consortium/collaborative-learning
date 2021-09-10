@@ -34,6 +34,7 @@ export const UIModel = types
     showDemo: false,
     showDemoCreator: false,
     showTeacherContent: true,
+    showChatPanel: false,
     dialog: types.maybe(UIDialogModel),
     // document key or section path for reference (left) document
     focusDocument: types.maybe(types.string),
@@ -129,6 +130,9 @@ export const UIModel = types
       },
       toggleShowTeacherContent(show: boolean) {
         self.showTeacherContent = show;
+      },
+      toggleShowChatPanel(show:boolean) {
+        self.showChatPanel = show;
       },
       setError(error: string) {
         self.error = error ? error.toString() : error;

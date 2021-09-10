@@ -4,6 +4,7 @@ import { findDOMNode } from "react-dom";
 import { throttle } from "lodash";
 import classNames from "classnames";
 import { BaseComponent, IBaseProps } from "../base";
+import { urlParams } from "../../utilities/url-params";
 import { TileRowComponent, kDragResizeRowId, extractDragResizeRowId, extractDragResizeY,
         extractDragResizeModelHeight, extractDragResizeDomHeight } from "../document/tile-row";
 import { DocumentContentModelType, IDragToolCreateInfo, IDropRowInfo } from "../../models/document/document-content";
@@ -24,7 +25,6 @@ interface IProps extends IBaseProps {
   scale?: number;
   selectedSectionId?: string | null;
   viaTeacherDashboard?: boolean;
-  documentSelectedForComment?: boolean;
 }
 
 interface IDragResizeRow {
@@ -102,7 +102,10 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const {viaTeacherDashboard, documentSelectedForComment} = this.props;
+    const {viaTeacherDashboard} = this.props;
+    const {ui, user: {isNetworkedTeacher}} = this.stores;
+    const isChatEnabled = isNetworkedTeacher && urlParams.chat;
+    const documentSelectedForComment = isChatEnabled && ui.showChatPanel && ui.selectedTileIds.length === 0;
     const documentClass = classNames("document-content", {"document-content-smooth-scroll" : viaTeacherDashboard,
                                      "comment-select" : documentSelectedForComment});
     return (

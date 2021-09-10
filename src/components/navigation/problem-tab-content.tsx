@@ -14,16 +14,15 @@ interface IProps {
   context?: string;   // ENavTab.kTeacherGuide for teacher guide, blank otherwise
   sections: SectionModelType[];
   showSolutionsSwitch: boolean;
-  isChatOpen?: boolean
 }
 
 export const ProblemTabContent: React.FC<IProps>
-  = observer(({ context, sections, showSolutionsSwitch, isChatOpen}: IProps) => {
+  = observer(({ context, sections, showSolutionsSwitch }: IProps) => {
   const { isTeacher } = useUserStore();
   const ui = useUIStore();
   const problemPath = useProblemPathWithFacet(context);
   const { showTeacherContent } = ui;
-  const chatBorder = isChatOpen ? "chat-open" : "";
+  const chatBorder = ui.showChatPanel ? "chat-open" : "";
 
   const handleTabClick = (titleArgButReallyType: string, typeArgButReallyTitle: string) => {
     // TODO: this function has its argument names reversed (see caller for details.)
@@ -46,7 +45,7 @@ export const ProblemTabContent: React.FC<IProps>
     <Tabs className={classNames("problem-tabs", context, chatBorder)} selectedTabClassName="selected"
           data-focus-document={problemPath}>
       <div className="tab-header-row">
-        <TabList className={classNames("tab-list", {"chat-open" : isChatOpen})}>
+        <TabList className={classNames("tab-list", {"chat-open" : ui.showChatPanel})}>
           {sections.map((section) => {
             const sectionTitle = getSectionTitle(section.type);
             return (
@@ -63,7 +62,7 @@ export const ProblemTabContent: React.FC<IProps>
       {sections.map((section) => {
         return (
           <TabPanel key={`section-${section.type}`} data-focus-section={section.type}>
-            <ProblemPanelComponent section={section} key={`section-${section.type}`} isChatOpen={isChatOpen}/>
+            <ProblemPanelComponent section={section} key={`section-${section.type}`} />
           </TabPanel>
         );
       })}

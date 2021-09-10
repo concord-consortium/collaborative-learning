@@ -5,7 +5,8 @@ import { CanvasComponent } from "./canvas";
 import { DocumentContextReact } from "./document-context";
 import { FourUpComponent } from "../four-up";
 import { useDocumentContext } from "../../hooks/use-document-context";
-import { useGroupsStore } from "../../hooks/use-stores";
+import { useGroupsStore, useUIStore, useUserStore } from "../../hooks/use-stores";
+import { urlParams } from "../../utilities/url-params";
 import { ToolbarComponent, ToolbarConfig } from "../toolbar";
 import { EditableToolApiInterfaceRef, EditableToolApiInterfaceRefContext } from "../tools/tool-api";
 import { DocumentModelType } from "../../models/document/document";
@@ -63,7 +64,6 @@ const DocumentCanvas: React.FC<IDocumentCanvasProps> = props => {
         : <OneUpCanvas document={document} readOnly={readOnly} />}
     </div>
   );
-
 };
 
 export interface IProps {
@@ -72,12 +72,13 @@ export interface IProps {
   document: DocumentModelType;
   toolbar?: ToolbarConfig;
   readOnly?: boolean;
-  documentSelectedForComment?: boolean;
 }
 export const EditableDocumentContent: React.FC<IProps> = props => {
-  const { mode, isPrimary, document, toolbar, readOnly, documentSelectedForComment } = props;
+  const { mode, isPrimary, document, toolbar, readOnly } = props;
 
   const documentContext = useDocumentContext(document);
+  const ui = useUIStore();
+  const { isNetworkedTeacher } = useUserStore();
 
   // set by the canvas and used by the toolbar
   const editableToolApiInterfaceRef: EditableToolApiInterfaceRef = useRef(null);
@@ -85,6 +86,8 @@ export const EditableDocumentContent: React.FC<IProps> = props => {
   const isReadOnly = !isPrimary || readOnly || document.isPublished;
   const isShowingToolbar = !!toolbar && !isReadOnly;
   const showToolbarClass = isShowingToolbar ? "show-toolbar" : "hide-toolbar";
+  const isChatEnabled = isNetworkedTeacher && urlParams.chat;
+  const documentSelectedForComment = isChatEnabled && ui.showChatPanel && ui.selectedTileIds.length === 0;
   const editableDocContentClass = classNames("editable-document-content", showToolbarClass,
                                              {"comment-select" : documentSelectedForComment});
   return (

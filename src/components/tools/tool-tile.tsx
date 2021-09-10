@@ -208,11 +208,13 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     const { ToolComponent, toolTileClass } = kToolComponentMap[model.content.type];
     const isPlaceholderTile = ToolComponent === PlaceholderToolComponent;
     const isTileSelected = ui.isSelectedTile(model);
+    const tileSelectedForComment = isTileSelected && ui.showChatPanel;
     const classes = classNames("tool-tile", model.display, toolTileClass, {
                       placeholder: isPlaceholderTile,
                       readonly: readOnly,
                       hovered: this.state.hoverTile,
-                      selected: isTileSelected });
+                      selected: isTileSelected ,
+                      "selected-for-comment": tileSelectedForComment});
     const isDraggable = !isPlaceholderTile && !appConfig.disableTileDrags;
     const dragTileButton = isDraggable &&
                             <DragTileButton divRef={elt => this.dragElement = elt}

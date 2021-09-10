@@ -14,10 +14,9 @@ import "./document-tab-content.sass";
 
 interface IProps {
   tabSpec: NavTabSpec;
-  isChatOpen?: boolean;
 }
 
-export const DocumentTabContent: React.FC<IProps> = ({ tabSpec, isChatOpen }) => {
+export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
   const [referenceDocument, setReferenceDocument] = useState<DocumentModelType>();
   const appConfigStore = useAppConfigStore();
   const problemStore = useProblemStore();
@@ -75,7 +74,6 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec, isChatOpen }) =>
         isPrimary={false}
         document={referenceDocument}
         readOnly={true}
-        documentSelectedForComment={isChatOpen}
       />
     </div>;
 
@@ -87,7 +85,6 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec, isChatOpen }) =>
         onTabClick={handleTabClick}
         onSelectDocument={handleSelectDocument}
         documentView={documentView}
-        isChatOpen={isChatOpen}
       />
     </div>
   );
