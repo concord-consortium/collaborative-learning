@@ -153,7 +153,6 @@ describe('Student Workspace', () => { //flaky -- could be because it is trying t
     cy.get('@clueData').then((clueData) => {
       const groups = clueData.classes[0].problems[0].groups;
       cy.get('.top-tab.tab-student-work').should('exist').click({force:true});
-      cy.get('.top-tab-buttons').should('have.class', 'hidden');
       cy.get('.student-group-view').should('be.visible');
       cy.get('.student-group .group-number').should('be.visible').and('have.length', groups.length);
       cy.get('.student-group .group-number').eq(0).should('have.class', 'active');
