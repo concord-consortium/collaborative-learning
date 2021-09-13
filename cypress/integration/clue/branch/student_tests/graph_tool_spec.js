@@ -210,10 +210,9 @@ context('Test graph tool functionalities', function(){
                 // graphToolTile.deleteGraphElement();
                 // graphToolTile.getGraphPoint().should('have.length', basePointCount-3)
             });
-            it('verify delete polygon',()=>{
-                primaryWorkspace.getResizePanelDivider().click();
+            it.skip('verify delete polygon',()=>{
+                primaryWorkspace.getResizeRightPanelHandle().click();
                 cy.openDocumentWithTitle('my-work','workspaces', polyDoc);
-
                 graphToolTile.getGraphPolygon().last().click({force:true});
                 graphToolTile.deleteGraphElement();
                 graphToolTile.getGraphPolygon().should('have.length',1);
