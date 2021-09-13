@@ -46,11 +46,23 @@ export const CommentTextBox: React.FC<IProps> = ({ activeNavTab, numPostedCommen
     setCommentText("");
   };
 
-  const handleEscKey = (event: React.KeyboardEvent) => {
-    if(event.key === "Escape") {
-      setCommentTextAreaHeight(minTextAreaHeight);
-      setCommentAdded(false);
-      setCommentText("");
+  const handleCommentTextboxKeyDown = (event: React.KeyboardEvent) => {
+    switch(event.key) {
+      case "Escape":
+        setCommentTextAreaHeight(minTextAreaHeight);
+        setCommentAdded(false);
+        setCommentText("");
+        break;
+      case "Enter":
+        if(event.shiftKey) {
+          const content = commentText;
+          event.preventDefault();
+          setCommentText(content+"\n");
+        } else {
+          event.preventDefault();
+          handlePostComment();
+        }
+        break;
     }
   };
 
@@ -62,7 +74,7 @@ export const CommentTextBox: React.FC<IProps> = ({ activeNavTab, numPostedCommen
         value={commentText}
         data-testid="comment-textarea"
         onChange={handleCommentTextAreaChange}
-        onKeyDown={handleEscKey}
+        onKeyDown={handleCommentTextboxKeyDown}
       />
       <div className="comment-textbox-footer">
         <div className="comment-footer-button cancel"
