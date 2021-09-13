@@ -30,14 +30,6 @@ import ClueCanvas from "../../../../support/elements/clue/cCanvas";
     });
 
     describe("test visibility of teacher supports in student's workspace", function() {
-            it.skip('verify badge on Support Tab',function(){ //this test isn't needed anymore?
-                // const queryParams = `${Cypress.config("queryParams")}`;
-
-                // cy.visit(queryParams);
-                // cy.waitForSpinner();
-                // cy.get(".collapsed-resources-tab.my-work").click();
-                // clueRightNav.getSupportBadge().should('be.visible');
-            });
             it('verify teacher support is visible in student nav', function() {
               const queryParams = `${Cypress.config("queryParams")}`;
 

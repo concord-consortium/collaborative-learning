@@ -46,7 +46,19 @@ class PrimaryWorkspace{
     }
 
     getPrimaryWorkspaceTab(tab){
-        return cy.get('.nav-tab.tab-'+tab);
+        return cy.get('.top-tab.tab-'+tab);
+    }
+
+    getResizePanelDivider(){
+       return cy.get('.resize-panel-divider .drag-handles svg g');
+    }
+
+    getResizeLeftPanelHandle(){
+        return cy.get('.resize-panel-divider .drag-handles svg.drag-left-handle g');
+    }
+
+    getResizeRightPanelHandle(){
+        return cy.get('.resize-panel-divider .drag-handles svg.drag-right-handle g');
     }
 
     openPrimaryWorkspaceTab(tab){
@@ -84,8 +96,9 @@ class PrimaryWorkspace{
       return cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer');
     }
 
-    starCanvasItem(section,title){
-        cy.getCanvasItemTitle(section).contains(title).parent().parent().siblings('.icon-holder').find('.icon-star').click();
+    starCanvasItem(tab, section,title){
+        cy.get('.list.'+section+' .list-item[data-test='+section+'-list-items]').contains('.footer', title).siblings('.icon-holder').find('.icon-star').click();
+        // cy.getCanvasItemTitle(section).contains(title).parent().parent().siblings('.icon-holder').find('.icon-star').click();
     }
     getCanvasStarIcon(tab,section,title){
         return this.getCanvasItemTitle(tab, section).contains(title).parent().parent().siblings('.icon-holder').find('.icon-star');
