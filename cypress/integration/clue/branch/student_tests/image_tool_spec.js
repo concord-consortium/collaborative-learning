@@ -21,35 +21,6 @@ before(function(){
 });
 
 context('Test image functionalities', function(){
-    describe.skip('upload image from URL', function(){
-        it('will load an png from a URL', function(){
-            const imageFileURL = 'https://codap.concord.org/~eireland/image.png';
-            clueCanvas.addTile('image');
-            imageToolTile.getImageToolControl().last().click();
-            imageToolTile.getImageURLTextField().last().click().clear().type(imageFileURL);
-            cy.get(imageToolTile.imageChooseFileButton()).last().click();
-            imageToolTile.getImageToolImage().last().should('have.css', 'background-image','url("'+imageFileURL+'")');
-        });
-        it('will load an jpg from a URL', function(){
-            const imageFileURL = 'https://codap.concord.org/~eireland/case_image.jpg';
-            clueCanvas.addTile('image');
-            imageToolTile.getImageToolControl().last().click();
-            imageToolTile.getImageURLTextField().last().click().clear().type(imageFileURL);
-            cy.wait(1000);
-            cy.get(imageToolTile.imageChooseFileButton()).last().click();
-            cy.wait(2000);
-            imageToolTile.getImageToolImage().last().should('have.css', 'background-image','url("'+imageFileURL+'")');
-        });
-        it('will load an gif from a URL', function(){
-            const imageFileURL = 'https://codap.concord.org/~eireland/model_image.gif';
-            clueCanvas.addTile('image');
-            imageToolTile.getImageToolControl().last().click();
-            imageToolTile.getImageURLTextField().click().clear().type(imageFileURL);
-            cy.get(imageToolTile.imageChooseFileButton()).click();
-            cy.wait(2000);
-            imageToolTile.getImageToolImage().last().should('have.css', 'background-image','url("'+imageFileURL+'")');
-        });
-    });
     describe('upload image from user computer',()=>{
         before(()=>{ //create a new doc so that save and restore can be tested
             canvas.createNewExtraDocumentFromFileMenu(userCanvas, "my-work");

@@ -16,7 +16,7 @@ import DrawToolTile from "../../../../support/elements/clue/DrawToolTile";
  *    all of the students in the dashboard's current view
  */
 
-context.skip("Teacher Space", () => {
+context("Teacher Space", () => {
 
     let dashboard = new TeacherDashboard();
     let clueCanvas = new ClueCanvas;
@@ -51,7 +51,7 @@ context.skip("Teacher Space", () => {
         cy.fixture("teacher-dash-data.json").as("clueData");
     });
 
-    context('Teacher Workspace', function () {
+    context.skip('Teacher Workspace', function () {
         describe('teacher document functionality', function () {
             before(function () {
                 clueCanvas.getSectionHeader('IN').click();
