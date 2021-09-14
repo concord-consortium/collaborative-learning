@@ -21,12 +21,18 @@ export const CommentTextBox: React.FC<IProps> = ({ activeNavTab, numPostedCommen
                                      { disabled: !commentAdded, "no-action": !commentAdded });
   // resize textarea when user deletes some text
   useEffect(() => {
-    if (textareaRef && textareaRef.current) {
+    if (textareaRef?.current) {
       textareaRef.current.style.height = minTextAreaHeight + "px";
       const scrollHeight = textareaRef.current.scrollHeight;
       textareaRef.current.style.height = scrollHeight + "px";
     }
   });
+
+  const trimContent = (content: string) => {
+    const trimmed = content.trim().replace(/\s+\n/g, "\n");
+    const isEmpty = !trimmed || (trimmed === "\n") || (trimmed === " ");
+    return [trimmed, isEmpty];
+  };
 
   const handleCommentTextAreaChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     const target = event.target;
@@ -50,9 +56,11 @@ export const CommentTextBox: React.FC<IProps> = ({ activeNavTab, numPostedCommen
 
   const handlePostComment = () => {
     // do not send post if text area is empty, only has spaces or new lines
-    const content = commentText.trim().replace(/\s\s+/g, " ");
-    if (!(content === "" || content === "\n" || content === " ")) {
-      onPostComment?.(commentText);
+    const content = trimContent(commentText);
+    const trimmedCommentText = content[0] as string;
+    const isEmpty = content[1];
+    if (!isEmpty) {
+      onPostComment?.(trimmedCommentText);
       setCommentTextAreaHeight(minTextAreaHeight);
       setCommentAdded(false);
       setCommentText("");
@@ -60,7 +68,9 @@ export const CommentTextBox: React.FC<IProps> = ({ activeNavTab, numPostedCommen
   };
 
   const handleCommentTextboxKeyDown = (event: React.KeyboardEvent) => {
-    const content = commentText.trim().replace(/\s\s+/g, " ");
+    const content = trimContent(commentText);
+    const trimmedCommentText = content[0] as string;
+    const isEmpty = content[1];
     switch(event.key) {
       case "Escape":
         setCommentTextAreaHeight(minTextAreaHeight);
@@ -70,8 +80,8 @@ export const CommentTextBox: React.FC<IProps> = ({ activeNavTab, numPostedCommen
       case "Enter":
         if(event.shiftKey) {
           event.preventDefault();
-          setCommentText(content+"\n");
-        } else if (content === "" || content === "\n" || content === " ") {
+          setCommentText(trimmedCommentText+"\n");
+        } else if (isEmpty) {
           // do not send post if text area is empty, only has spaces or new lines
           event.preventDefault();
           break;
