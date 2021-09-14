@@ -79,7 +79,6 @@ describe('teacher document functionality', function () {
     canvas.deleteDocument();
     cy.openTopTab("my-work");
     cy.openSection('my-work', 'workspaces');
-    // cy.openDocumentWithTitle("my-work", "workspaces", this.investigationTitle);
     clueCanvas.deleteTile('draw');
     clueCanvas.deleteTile('table');
   });

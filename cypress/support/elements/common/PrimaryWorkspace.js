@@ -36,19 +36,6 @@ class PrimaryWorkspace{
         return this.testDocumentWithTitle(tab, subTab, title, 'not.contain');
     }
 
-    getPrimaryWorkspaceTabs(){
-        return cy.get('.right-nav .tabs');
-    }
-
-    closePrimaryWorkspaceTabs(){
-        cy.get('.close-button').click();
-        cy.wait(1000);
-    }
-
-    getPrimaryWorkspaceTab(tab){
-        return cy.get('.top-tab.tab-'+tab);
-    }
-
     getResizePanelDivider(){
        return cy.get('.resize-panel-divider .drag-handles svg g');
     }
@@ -61,25 +48,10 @@ class PrimaryWorkspace{
         return cy.get('.resize-panel-divider .drag-handles svg.drag-right-handle g');
     }
 
-    openPrimaryWorkspaceTab(tab){
-        this.getPrimaryWorkspaceTab(tab).click();
-    }
-    closePrimaryWorkspaceTab(tab){
-        cy.get('#primaryWorkspaceTab-'+tab+'.tab').click();
-        cy.wait(2000);
-    }
-
-    getPrimaryWorkspaceExpandedSpace(){
-        return cy.get('.right-nav > .expanded-area.expanded > .contents > .container');
-    }
-
     getSectionTitle(tab, section){
         return cy.get('[data-test='+tab+'-section-'+section+'] .title');
     }
 
-    openTopTab(tab) {
-      cy.get('.top-tab.tab-'+tab).click();
-    }
     openSection(tab, section) {
       cy.get('.doc-tab.'+tab+'.'+section).click();
     }
@@ -96,10 +68,6 @@ class PrimaryWorkspace{
       return cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer');
     }
 
-    starCanvasItem(tab, section,title){
-        cy.get('.list.'+section+' .list-item[data-test='+section+'-list-items]').contains('.footer', title).siblings('.icon-holder').find('.icon-star').click();
-        // cy.getCanvasItemTitle(section).contains(title).parent().parent().siblings('.icon-holder').find('.icon-star').click();
-    }
     getCanvasStarIcon(tab,section,title){
         return this.getCanvasItemTitle(tab, section).contains(title).parent().parent().siblings('.icon-holder').find('.icon-star');
     }

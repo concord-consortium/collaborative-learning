@@ -44,9 +44,6 @@ context('Tests for graph and table integration', function () {
     });
     clueCanvas.addTile('geometry');
     clueCanvas.deleteTile('text');
-    // clueCanvas.addTile('geometry');
-    // clueCanvas.deleteTile('text');
-    // graphToolTile.getGraphTitle().last().type('Second One{enter}');
   });
   describe('Link graph dialog', () => {
     it('verify correct graph names appear in selection list', function () {
@@ -75,22 +72,22 @@ context('Tests for graph and table integration', function () {
       tableToolTile.getTableIndexColumnCell().first().should('contain', '1');
       graphToolTile.getGraphPointLabel().contains('p1').should('exist');
     });
-    // it('verify table can be linked to two graphs', function () {
-    //   cy.linkTableToGraph('Table 1', "Second One");
-    //   graphToolTile.getGraphTile().siblings(clueCanvas.linkIconEl()).should('have.length', 2);
-    //   // graphToolTile.getGraphPointLabel().contains('p1').should('have.length', 2);
-    // });
-    // it('verify unlink of graph and table', function () {
-    //   cy.unlinkTableToGraph('Table 1', "Second One");
-    //   graphToolTile.getGraphTile().siblings(clueCanvas.linkIconEl()).should('have.length', 1);
-    //   graphToolTile.getGraph().last().should('not.have.class', 'is-linked');
-    // });
+    it('verify table can be linked to two graphs', function () {
+      clueCanvas.addTile('geometry');
+      cy.linkTableToGraph('Table 1', "Graph 2");
+      graphToolTile.getGraphTile().siblings(clueCanvas.linkIconEl()).should('have.length', 2);
+    });
+    it('verify unlink of graph and table', function () {
+      cy.unlinkTableToGraph('Table 1', "Graph 2");
+      graphToolTile.getGraphTile().siblings(clueCanvas.linkIconEl()).should('have.length', 1);
+      graphToolTile.getGraph().last().should('not.have.class', 'is-linked');
+    });
     it('verify point no longer has p1 in table and graph', function () {
       graphToolTile.getGraphPointLabel().contains('p1').should('have.length', 1);
     });
-    // after(function () {
-    //   clueCanvas.deleteTile('graph');
-    // });
+    after(function () {
+      clueCanvas.deleteTile('graph');
+    });
   });
   describe('test creating a polygon', function () {
     it('will create a polygon', function () {
@@ -179,10 +176,7 @@ context('Tests for graph and table integration', function () {
   describe.skip('test non-numeric entries in table', function () {
     it('will enter non-numeric number in the table', function () {
       tableToolTile.getTableCellWithColIndex(2, 6).scrollIntoView();
-      // tableToolTile.getTableRow().click({multiple: true});
-      // tableToolTile.getTableCell().eq(1).click({force: true}).type(9 +'{enter}', {force: true});
       tableToolTile.getTableCellWithColIndex(2, 6).click({force: true}).type(9);
-      // tableToolTile.getTableCell().eq(3), {force: true});
       tableToolTile.getTableCell().eq(3).should('contain', x[1]);
     });
   });

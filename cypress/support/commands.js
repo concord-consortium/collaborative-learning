@@ -29,6 +29,7 @@ import Canvas from './elements/common/Canvas';
 import TeacherDashboard from "./elements/clue/TeacherDashboard";
 import 'cypress-file-upload';
 import 'cypress-commands';
+import ResourcesPanel from "./elements/clue/ResourcesPanel";
 
 Cypress.Commands.add("setupGroup", (students, group) => {
     const baseUrl = `${Cypress.config("baseUrl")}`;
@@ -92,6 +93,7 @@ Cypress.Commands.add("waitForSpinner", () => {
 });
 Cypress.Commands.add("deleteWorkspaces",(baseUrl,queryParams)=>{
     let primaryWorkspace = new PrimaryWorkspace;
+    let resourcesPanel = new ResourcesPanel;
     let canvas = new Canvas;
     let dashboard = new TeacherDashboard();
 
@@ -99,7 +101,7 @@ Cypress.Commands.add("deleteWorkspaces",(baseUrl,queryParams)=>{
     cy.waitForSpinner();
     dashboard.switchView("Workspace & Resources");
     cy.wait(2000);
-    primaryWorkspace.openPrimaryWorkspaceTab("my-work");
+    resourcesPanel.openPrimaryWorkspaceTab("my-work");
     cy.openSection("my-work","workspaces");
     cy.wait(2000);
     primaryWorkspace.getAllSectionCanvasItems("my-work","workspaces").then((document_list)=>{
@@ -109,7 +111,7 @@ Cypress.Commands.add("deleteWorkspaces",(baseUrl,queryParams)=>{
             cy.wait(1111);
             canvas.deleteDocument();
             listLength=listLength-1;
-            primaryWorkspace.openPrimaryWorkspaceTab("my-work");
+            resourcesPanel.openPrimaryWorkspaceTab("my-work");
         }
 
     });

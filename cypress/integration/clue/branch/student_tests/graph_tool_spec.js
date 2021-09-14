@@ -2,11 +2,13 @@ import Canvas from '../../../../support/elements/common/Canvas';
 import ClueCanvas from '../../../../support/elements/clue/cCanvas';
 import GraphToolTile from '../../../../support/elements/clue/GraphToolTile';
 import PrimaryWorkspace from '../../../../support/elements/common/PrimaryWorkspace';
+import ResourcePanel from '../../../../support/elements/clue/ResourcesPanel';
 
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 const graphToolTile = new GraphToolTile;
 const primaryWorkspace = new PrimaryWorkspace;
+const resourcePanel = new ResourcePanel;
 
 const problemDoc = '2.1 Drawing Wumps';
 const ptsDoc = 'Points';
@@ -55,7 +57,7 @@ context('Test graph tool functionalities', function(){
     describe('restore points to canvas', function(){
         it('will verify restore of point at origin', function(){
             primaryWorkspace.getResizePanelDivider().click();
-            primaryWorkspace.openPrimaryWorkspaceTab("my-work");
+            resourcePanel.openPrimaryWorkspaceTab("my-work");
             cy.openDocumentWithTitle('my-work','workspaces', problemDoc);
             graphToolTile.getGraphPointCoordinates().should('contain', '(0, 0)');
         });
@@ -74,7 +76,7 @@ context('Test graph tool functionalities', function(){
             it('will select a point', function(){
                 let point=4;
                 cy.openDocumentWithTitle('my-work','workspaces', ptsDoc);
-                primaryWorkspace.closePrimaryWorkspaceTabs();
+                resourcePanel.closePrimaryWorkspaceTabs();
                 graphToolTile.getGraphTile().click({multiple: true});
                 graphToolTile.selectGraphPoint(10,10);
                 graphToolTile.getGraphPointID(point)
@@ -108,9 +110,10 @@ context('Test graph tool functionalities', function(){
             it('will show and hide angles to a polygon', function(){
                 let numAngles=1;
                 primaryWorkspace.getResizePanelDivider().click();
-                primaryWorkspace.openPrimaryWorkspaceTab("my-work");
+                resourcePanel.openPrimaryWorkspaceTab("my-work");
+                // primaryWorkspace.openPrimaryWorkspaceTab("my-work");
                 cy.openDocumentWithTitle('my-work','workspaces', polyDoc);
-                primaryWorkspace.closePrimaryWorkspaceTabs();
+                resourcePanel.closePrimaryWorkspaceTabs();
                 graphToolTile.selectGraphPoint(4.2,2);
                 graphToolTile.selectGraphPoint(4.2,2);
                 graphToolTile.showAngle();
@@ -145,9 +148,6 @@ context('Test graph tool functionalities', function(){
                 const dataTransfer = new DataTransfer;
                 const graphUnit = 18.33;
                 let x= 18, y=5;
-                let newX1 = 9, newY1=6;
-                let newX2 = 16, newY2=11;
-                let newX3 = 18, newY3=6;
 
                 let transX=(graphToolTile.transformFromCoordinate('x', x))+(8*graphUnit),
                     transY=(graphToolTile.transformFromCoordinate('y', y))+(5*graphUnit);
@@ -156,11 +156,6 @@ context('Test graph tool functionalities', function(){
                     .trigger('mousedown',{dataTransfer, force:true})
                     .trigger('mousemove',{clientX:transX, clientY:transY, dataTransfer, force:true})
                     .trigger('mouseup',{dataTransfer, force:true});
-                //TODO: verify move
-                // graphToolTile.getGraphPointCoordinates(0).should('contain', '('+newX1+', '+newY1+')');
-                // graphToolTile.getGraphPointCoordinates(1).should('contain', '('+newX2+', '+newY2+')');
-                // graphToolTile.getGraphPointCoordinates(2).should('contain', '('+newX3+', '+newY3+')');
-
                 graphToolTile.getGraphPointCoordinates(0).should('contain', '(12, 6)');
                 graphToolTile.getGraphPointCoordinates(1).should('contain', '(18, 11)');
                 graphToolTile.getGraphPointCoordinates(2).should('contain', '(21, 6)');
@@ -189,7 +184,7 @@ context('Test graph tool functionalities', function(){
             });
             it('will restore changes to a graph', function(){
                 primaryWorkspace.getResizePanelDivider().click();
-                primaryWorkspace.openPrimaryWorkspaceTab("my-work");
+                resourcePanel.openPrimaryWorkspaceTab("my-work");
                 cy.openDocumentWithTitle('my-work','workspaces', polyDoc);
                 graphToolTile.getAngleAdornment().should('exist').and('have.length',6);
             });
