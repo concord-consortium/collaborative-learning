@@ -31,7 +31,7 @@ export const CommentTextBox: React.FC<IProps> = ({ activeNavTab, numPostedCommen
   const trimContent = (content: string) => {
     const trimmed = content.trim().replace(/\s+\n/g, "\n");
     const isEmpty = !trimmed || (trimmed === "\n") || (trimmed === " ");
-    return [trimmed, isEmpty];
+    return [trimmed, isEmpty] as const;
   };
 
   const handleCommentTextAreaChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -56,11 +56,9 @@ export const CommentTextBox: React.FC<IProps> = ({ activeNavTab, numPostedCommen
 
   const handlePostComment = () => {
     // do not send post if text area is empty, only has spaces or new lines
-    const content = trimContent(commentText);
-    const trimmedCommentText = content[0] as string;
-    const isEmpty = content[1];
+    const [trimmedText, isEmpty] = trimContent(commentText);
     if (!isEmpty) {
-      onPostComment?.(trimmedCommentText);
+      onPostComment?.(trimmedText);
       setCommentTextAreaHeight(minTextAreaHeight);
       setCommentAdded(false);
       setCommentText("");
@@ -68,9 +66,7 @@ export const CommentTextBox: React.FC<IProps> = ({ activeNavTab, numPostedCommen
   };
 
   const handleCommentTextboxKeyDown = (event: React.KeyboardEvent) => {
-    const content = trimContent(commentText);
-    const trimmedCommentText = content[0] as string;
-    const isEmpty = content[1];
+    const [trimmedText, isEmpty] = trimContent(commentText);
     switch(event.key) {
       case "Escape":
         setCommentTextAreaHeight(minTextAreaHeight);
@@ -80,7 +76,7 @@ export const CommentTextBox: React.FC<IProps> = ({ activeNavTab, numPostedCommen
       case "Enter":
         if(event.shiftKey) {
           event.preventDefault();
-          setCommentText(trimmedCommentText+"\n");
+          setCommentText(trimmedText+"\n");
         } else if (isEmpty) {
           // do not send post if text area is empty, only has spaces or new lines
           event.preventDefault();
