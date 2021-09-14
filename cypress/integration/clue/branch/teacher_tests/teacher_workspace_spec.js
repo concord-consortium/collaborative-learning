@@ -141,6 +141,25 @@ describe('Chat panel for networked teacher', () => {
       cy.get('.documents-panel .editable-document-content').should('have.class','comment-select');
     });
   });
+  it("verify escape key empties textarea", () => {
+    cy.get("[data-testid=comment-textarea]").type("this should be erased. {esc}");
+    cy.get("[data-testid=comment-textarea]").should("contain", "");
+    cy.get(".comment-text").should("not.exist");
+  });
+  it('verify user can use shift+enter to go to the next line and not post', () => {
+    cy.get("[data-testid=comment-textarea]").type("this is the first line. {shift}{enter}");
+    cy.get(".comment-text").should("not.exist");
+    cy.get("[data-testid=comment-textarea]").type("this is the second line.");
+    cy.get("[data-testid=comment-post-button]").click();
+    cy.get(".comment-text").should("have.length", 1);
+    cy.get(".comment-text").should("contain", "this is the first line.\nthis is the second line.");
+  });
+  it('verify user can use enter send post', () => {
+    cy.get("[data-testid=comment-textarea]").type("Send this comment after enter.{enter}");
+    cy.wait(1000);
+    cy.get(".comment-text").should("have.length", 2);
+    cy.get(".comment-text").last().should("contain", "Send this comment after enter.");
+  });
 });
 
 describe.skip('Student Workspace', () => { //flaky -- could be because it is trying to connect to firebase?
