@@ -42,7 +42,10 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(({userName
       </div>
       { isOpen &&
         <div className="list">
-          {sectionDocs.map(document => {
+          <div>Documents for this class will go here.
+                A hide icon will be shown over the document if document is not shared
+          </div>
+          {/* {sectionDocs.map(document => {
             const documentContext = getDocumentContext(document);
             const docNotShared = document.visibility === "private";
             const docLabel = document?.title || "Untitled";
@@ -57,7 +60,7 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(({userName
                 }
               </DocumentContextReact.Provider>
             );
-          })}
+          })} */}
         </div>
       }
     </div>
