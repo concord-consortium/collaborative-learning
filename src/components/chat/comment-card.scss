@@ -5,6 +5,9 @@
   min-height: 106px;
   margin: 2px;
   border: solid 2px $charcoal-light-2;
+  height: calc(100% - 34px);
+  overflow-y: auto;
+  white-space: pre-wrap;
   &.selected {
     background-color: $comment-select-green;
   }

@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import SendIcon from "../../assets/send-icon.svg";
 import "../themes.scss";
 
@@ -12,12 +12,27 @@ interface IProps {
 const minTextAreaHeight = 35;
 
 export const CommentTextBox: React.FC<IProps> = ({ activeNavTab, numPostedComments, onPostComment }) => {
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [commentTextAreaHeight, setCommentTextAreaHeight] = useState(minTextAreaHeight);
   const [commentAdded, setCommentAdded] = useState(false);
   const [commentText, setCommentText] = useState("");
   const textareaStyle = {height: commentTextAreaHeight};
   const postButtonClass = classNames("comment-footer-button", "themed-negative", activeNavTab,
                                      { disabled: !commentAdded, "no-action": !commentAdded });
+  // resize textarea when user deletes some text
+  useEffect(() => {
+    if (textareaRef?.current) {
+      textareaRef.current.style.height = minTextAreaHeight + "px"; //needed to resize text area when user partial delete
+      const scrollHeight = textareaRef.current.scrollHeight;
+      textareaRef.current.style.height = scrollHeight + "px";
+    }
+  });
+
+  const trimContent = (content: string) => {
+    const trimmed = content.trim().replace(/\s+\n/g, "\n");
+    const isEmpty = !trimmed || (trimmed === "\n") || (trimmed === " ");
+    return [trimmed, isEmpty] as const;
+  };
 
   const handleCommentTextAreaChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     const target = event.target;
@@ -40,29 +55,50 @@ export const CommentTextBox: React.FC<IProps> = ({ activeNavTab, numPostedCommen
   };
 
   const handlePostComment = () => {
-    onPostComment?.(commentText);
-    setCommentTextAreaHeight(minTextAreaHeight);
-    setCommentAdded(false);
-    setCommentText("");
-  };
-
-  const handleEscKey = (event: React.KeyboardEvent) => {
-    if(event.key === "Escape") {
+    // do not send post if text area is empty, only has spaces or new lines
+    const [trimmedText, isEmpty] = trimContent(commentText);
+    if (!isEmpty) {
+      onPostComment?.(trimmedText);
       setCommentTextAreaHeight(minTextAreaHeight);
       setCommentAdded(false);
       setCommentText("");
     }
   };
 
+  const handleCommentTextboxKeyDown = (event: React.KeyboardEvent) => {
+    const [trimmedText, isEmpty] = trimContent(commentText);
+    switch(event.key) {
+      case "Escape":
+        setCommentTextAreaHeight(minTextAreaHeight);
+        setCommentAdded(false);
+        setCommentText("");
+        break;
+      case "Enter":
+        if(event.shiftKey) {
+          event.preventDefault();
+          setCommentText(trimmedText+"\n");
+        } else if (isEmpty) {
+          // do not send post if text area is empty, only has spaces or new lines
+          event.preventDefault();
+          break;
+        } else {
+          event.preventDefault();
+          handlePostComment();
+        }
+        break;
+    }
+  };
+
   return (
     <div className="comment-textbox">
       <textarea
+        ref={textareaRef}
         style={textareaStyle}
         placeholder={numPostedComments < 1 ? "Comment on this document...": "Reply..."}
         value={commentText}
         data-testid="comment-textarea"
         onChange={handleCommentTextAreaChange}
-        onKeyDown={handleEscKey}
+        onKeyDown={handleCommentTextboxKeyDown}
       />
       <div className="comment-textbox-footer">
         <div className="comment-footer-button cancel"
