@@ -120,6 +120,9 @@ Cypress.Commands.add("openResourceTabs", () => {
 Cypress.Commands.add("openTopTab", (tab) => {
   cy.get('.top-tab.tab-'+tab).click();
 } );
+Cypress.Commands.add("openProblemSection", (section) => {//doc-tab my-work workspaces problem-documents selected
+  cy.get('.prob-tab').contains(section).click({force:true});
+});
 Cypress.Commands.add("openSection", (tab, section) => {//doc-tab my-work workspaces problem-documents selected
   cy.get('.doc-tab.'+tab+'.'+section).click({force:true});
 });

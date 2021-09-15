@@ -159,6 +159,7 @@ describe('Chat panel for networked teacher', () => {
     cy.wait(1000);
     cy.get(".comment-text").should("have.length", 2);
     cy.get(".comment-text").last().should("contain", "Send this comment after enter.");
+  });
   it("verify commenting on document only shows document comment, and tile only shows tile comments", () => {
     //setup
     cy.openTopTab("problems");
@@ -173,16 +174,20 @@ describe('Chat panel for networked teacher', () => {
     cy.get('[data-testid=comment-textarea]').click().type("This is the 4th tile comment.");
     cy.get('[data-testid=comment-post-button]').click();
     //test comments for tile
+    cy.get('.problem-panel .document-content .tile-row').find('.tool-tile').eq(3).should('have.class', 'selected-for-comment');
     cy.get('[data-testid=comment-thread] [data-testid=comment]').should('not.contain', "This is a document comment");
     cy.get('[data-testid=comment-thread] [data-testid=comment]').should('not.contain', "This is a tile comment for the first tile");
     cy.get('[data-testid=comment-thread] [data-testid=comment]').should('contain', "This is the 4th tile comment.");
     cy.get('.problem-panel .document-content .tile-row').first().click();
+    cy.get('.problem-panel .document-content .tile-row .tool-tile').first().should('have.class', 'selected-for-comment');
     cy.get('[data-testid=comment-thread] [data-testid=comment]').should('not.contain', "This is a document comment");
     cy.get('[data-testid=comment-thread] [data-testid=comment]').should('contain', "This is a tile comment for the first tile");
     cy.get('[data-testid=comment-thread] [data-testid=comment]').should('not.contain', "This is the 4th tile comment.");
-    cy.openTopTab("my-work"); //deselects the tile
-    cy.get("[data-test=subtab-workspaces] .editable-document-content [data-test=canvas] .document-content").click(); //should reselect the document again
-    cy.openTopTab("problems");
+    // It would be hard to click on document to deselect tile so instead we go to a different tab to deselect
+    cy.openProblemSection("Initial Challenge");
+    cy.openProblemSection("Introduction");
+    cy.get('.problem-panel .document-content').should('have.class', 'comment-select');
+    cy.get('.problem-panel .document-content .tile-row .tool-tile').first().should('not.have.class', 'selected-for-comment');
     cy.get('[data-testid=comment-thread] [data-testid=comment]').should('contain', "This is a document comment");
     cy.get('[data-testid=comment-thread] [data-testid=comment]').should('not.contain', "This is a tile comment for the first tile");
     cy.get('[data-testid=comment-thread] [data-testid=comment]').should('not.contain', "This is the 4th tile comment.");
