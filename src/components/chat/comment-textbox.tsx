@@ -26,7 +26,8 @@ export const CommentTextBox: React.FC<IProps> = ({ activeNavTab, numPostedCommen
     if (textareaRef?.current) {
       textareaRef.current.style.height = minTextAreaHeight + "px"; //needed to resize text area when user partial delete
       const scrollHeight = textareaRef.current.scrollHeight;
-      textareaRef.current.style.height = scrollHeight + "px";
+      textareaRef.current.style.height = textareaRef.current?.value !== ""
+                                          ? scrollHeight + "px" : minTextAreaHeight + "px";
     }
   });
 
