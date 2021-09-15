@@ -12,20 +12,24 @@ interface IProps {
   user?: UserModelType;
   activeNavTab: string;
   focusDocument?: string;
+  focusTileId?: string;
   onCloseChatPanel:(show:boolean) => void;
 }
 
-export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument, onCloseChatPanel }) => {
+export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument, focusTileId, onCloseChatPanel }) => {
   const document = useDocumentOrCurriculumMetadata(focusDocument);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { isLoading, data: comments } = useDocumentComments(focusDocument);
   const { data: unreadComments } = useUnreadDocumentComments(focusDocument);
+  const documentComments = comments?.filter(comment => comment.tileId === null);
+  const tileComments = comments?.filter(comment => comment.tileId === focusTileId);
+  const postedComments = focusTileId? tileComments : documentComments;
   const postCommentMutation = usePostDocumentComment();
   const postComment = useCallback((comment: string) => {
     return document
-            ? postCommentMutation.mutate({ document, comment: { content: comment } })
+            ? postCommentMutation.mutate({ document, comment: { content: comment, tileId: focusTileId } })
             : undefined;
-  }, [document, postCommentMutation]);
+  }, [document, focusTileId, postCommentMutation]);
   const newCommentCount = unreadComments?.length || 0;
   return (
     <div className={`chat-panel ${activeNavTab}`} data-testid="chat-panel">
@@ -36,7 +40,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
             user={user}
             activeNavTab={activeNavTab}
             onPostComment={postComment}
-            postedComments={comments}
+            postedComments={postedComments}
           />
         : <div className="select-doc-message" data-testid="select-doc-messsage">
             Open a document to begin or view comment threads

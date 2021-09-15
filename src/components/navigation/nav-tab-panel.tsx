@@ -44,7 +44,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
 
   public render() {
     const { tabs, isResourceExpanded } = this.props;
-    const { ui: { activeNavTab, dividerPosition, focusDocument, showChatPanel },
+    const { ui: { activeNavTab, dividerPosition, focusDocument, showChatPanel, selectedTileIds },
             user, supports } = this.stores;
     const selectedTabIndex = tabs?.findIndex(t => t.tab === activeNavTab);
     const resizePanelWidth = 4;
@@ -57,6 +57,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
     const resourceWidthStyle = {width: resourceWidth};
     const isChatEnabled = user.isNetworkedTeacher && urlParams.chat;
     const openChatPanel = isChatEnabled && showChatPanel;
+    const focusTileId = selectedTileIds?.length === 1 ? selectedTileIds[0]: undefined;
 
     return (
       <div className={`resource-and-chat-panel ${isResourceExpanded ? "shown" : ""}`} style={resourceWidthStyle}>
@@ -100,7 +101,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
             }
           </Tabs>
           {showChatPanel &&
-            <ChatPanel user={user} activeNavTab={activeNavTab} focusDocument={focusDocument}
+            <ChatPanel user={user} activeNavTab={activeNavTab} focusDocument={focusDocument} focusTileId={focusTileId}
                         onCloseChatPanel={this.handleShowChatColumn} />}
         </div>
       </div>
