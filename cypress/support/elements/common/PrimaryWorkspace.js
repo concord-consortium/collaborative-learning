@@ -64,14 +64,6 @@ class PrimaryWorkspace{
         return cy.get('[data-test='+tab+'-section-'+section).siblings('.list-container').find('[data-test='+tab+'-list-items]');
     }
 
-    getCanvasItemTitle(tab, section){
-      return cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer');
-    }
-
-    getCanvasStarIcon(tab,section,title){
-        return this.getCanvasItemTitle(tab, section).contains(title).parent().parent().siblings('.icon-holder').find('.icon-star');
-    }
-
     deleteSupport(index) {
         if (index === "all") {
             return cy.get('svg.icon-delete-document').click({multiple:true, force:true});

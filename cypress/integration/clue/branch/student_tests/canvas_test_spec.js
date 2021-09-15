@@ -83,13 +83,13 @@ context('Test Canvas', function () {
       });
       it('verify title change in document thumbnail in nav panel', function () {
         cy.get(".collapsed-resources-tab.my-work").click();
-        primaryWorkspace.getCanvasItemTitle('my-work', 'workspaces').should('contain', renameTitlePencil);
+        resourcesPanel.getCanvasItemTitle('my-work', 'workspaces').should('contain', renameTitlePencil);
       });
       it('verify publish document', function () {
         canvas.publishCanvas("personal");
         resourcesPanel.openTopTab('class-work');
         cy.openSection('class-work', "extra-workspaces");
-        primaryWorkspace.getCanvasItemTitle('class-work', 'extra-workspaces').should('contain', renameTitlePencil);
+        resourcesPanel.getCanvasItemTitle('class-work', 'extra-workspaces').should('contain', renameTitlePencil);
       });
     });
 
@@ -145,7 +145,7 @@ context('Test Canvas', function () {
         canvas.publishCanvas("investigation");
         resourcesPanel.openTopTab('class-work');
         cy.openSection('class-work', "problem-workspaces");
-        primaryWorkspace.getCanvasItemTitle('class-work', 'problem-workspaces').should('contain', "Student 5: "+this.title);
+        resourcesPanel.getCanvasItemTitle('class-work', 'problem-workspaces').should('contain', "Student 5: "+this.title);
       });
       it('verifies copy of investigation', function () {
         let investigationTitle = 'Investigation Copy';
@@ -153,7 +153,7 @@ context('Test Canvas', function () {
         canvas.getPersonalDocTitle().should('contain', investigationTitle);
         resourcesPanel.openTopTab("my-work");
         cy.openSection('my-work', "workspaces");
-        primaryWorkspace.getCanvasItemTitle('my-work', 'workspaces').should('contain', investigationTitle);
+        resourcesPanel.getCanvasItemTitle('my-work', 'workspaces').should('contain', investigationTitle);
       });
     });
     describe('Test 4up view', function () {
@@ -358,10 +358,10 @@ context('Test Canvas', function () {
       canvas.deleteDocument();
       resourcesPanel.openTopTab("my-work");
       cy.openSection("my-work", "workspaces");
-      primaryWorkspace.getCanvasItemTitle("my-work","workspaces").contains('Investigation Copy').should('not.exist');
+      resourcesPanel.getCanvasItemTitle("my-work","workspaces").contains('Investigation Copy').should('not.exist');
     });
     it('verify original investigation canvas still exist after copy delete', function () {
-      primaryWorkspace.getCanvasItemTitle("my-work","workspaces").contains('Drawing Wumps').should('be.visible');
+      resourcesPanel.getCanvasItemTitle("my-work","workspaces").contains('Drawing Wumps').should('be.visible');
     });
     it('verify that original personal workspace is not deleted when copy is deleted', function () {
       resourcesPanel.openTopTab("my-work");
@@ -369,7 +369,7 @@ context('Test Canvas', function () {
       canvas.deleteDocument();
       resourcesPanel.openTopTab("my-work");
       cy.openSection("my-work", "workspaces");
-      primaryWorkspace.getCanvasItemTitle("my-work","workspaces").contains(renameTitlePencil).should('not.exist');
+      resourcesPanel.getCanvasItemTitle("my-work","workspaces").contains(renameTitlePencil).should('not.exist');
 
     });
     it('verify delete of personal workspace', function () {
@@ -378,7 +378,7 @@ context('Test Canvas', function () {
       canvas.deleteDocument();
       resourcesPanel.openTopTab("my-work");
       cy.openSection("my-work", "workspaces");
-      primaryWorkspace.getCanvasItemTitle("my-work","workspaces").contains(studentWorkspace).should('not.exist');
+      resourcesPanel.getCanvasItemTitle("my-work","workspaces").contains(studentWorkspace).should('not.exist');
     });
     it('verify starred document is no longer in the Starred section after delete', function () {
       cy.openSection('my-work', 'starred');

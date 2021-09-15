@@ -98,7 +98,7 @@ describe('Test nav panel tabs', function () {
         resourcesPanel.starCanvasItem('my-work', 'workspaces', copyDocumentTitle);
       });
       it('verify starred document star is highlighted', function () {
-        primaryWorkspace.getCanvasStarIcon('my-work', 'workspaces', copyDocumentTitle).should('have.class', 'starred');
+        resourcesPanel.getCanvasStarIcon('my-work', 'workspaces', copyDocumentTitle).should('have.class', 'starred');
       });
       it('verify starred document appears in the Starred section', function () {
         cy.openSection('my-work', 'starred');

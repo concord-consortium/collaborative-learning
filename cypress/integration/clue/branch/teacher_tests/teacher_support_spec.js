@@ -25,7 +25,7 @@ import ClueCanvas from "../../../../support/elements/clue/cCanvas";
             cy.get(".collapsed-resources-tab.my-work").click();
             cy.openTopTab("supports");
             cy.openSection('supports','teacher-supports');
-            primaryWorkspace.getCanvasItemTitle('supports','teacher-supports').should('contain',title);
+            resourcesPanel.getCanvasItemTitle('supports','teacher-supports').should('contain',title);
         });
     });
 
