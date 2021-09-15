@@ -26,8 +26,8 @@ function getDocumentCaption(stores: IStores, document: DocumentModelType) {
   const { appConfig, problem, class: _class } = stores;
   const { type, uid } = document;
   if (type === SupportPublication) return document.getProperty("caption") || "Support";
-  const user = _class && _class.getUserById(uid);
-  const userName = user && user.displayName;
+  const user = _class?.getUserById(uid);
+  const userName = user?.displayName;
   const namePrefix = isPublishedType(type) ? `${userName}: ` : "";
   const title = isProblemType(type)
                   ? problem.title
