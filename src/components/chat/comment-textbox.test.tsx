@@ -4,8 +4,14 @@ import React from "react";
 import { act } from "react-dom/test-utils";
 import { CommentTextBox } from "./comment-textbox";
 
-describe("Comment Textbox", () => {
+jest.mock("../../hooks/use-stores", () => ({
+  useUIStore: () => ({
+    showChatPanel: true,
+    selectedTileIds: []
+  })
+}));
 
+describe("Comment Textbox", () => {
   it("should render successfully", () => {
     const activeNavTab = "problems";
     render((

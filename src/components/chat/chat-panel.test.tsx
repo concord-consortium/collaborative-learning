@@ -40,6 +40,10 @@ jest.mock("../../hooks/document-comment-hooks", () => ({
 jest.mock("../../hooks/use-stores", () => ({
   useDocumentOrCurriculumMetadata: (documentKey: string) => ({
     uid: "1", key: documentKey, type: "problem"
+  }),
+  useUIStore: () => ({
+    showChatPanel: true,
+    selectedTileIds: []
   })
 }));
 
