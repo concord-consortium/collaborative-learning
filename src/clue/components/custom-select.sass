@@ -31,7 +31,7 @@
       border-radius: 5px 5px 0 0
 
     &:active .arrow
-      background-image: url("../../assets/icons/arrow/arrow-open.svg")
+      fill: white
 
     .title-container
       display: flex
@@ -59,13 +59,10 @@
       margin: 0 5px 0 0
       transition-property: transform
       transition-duration: .25s
-      background-repeat: no-repeat
-      background-position: center
-      background-image: url("../../assets/icons/arrow/arrow.svg")
 
       &.show-list
-        background-image: url("../../assets/icons/arrow/arrow-open.svg")
         transform: rotate(180deg)
+        fill: white
 
       &.disabled
         display: none

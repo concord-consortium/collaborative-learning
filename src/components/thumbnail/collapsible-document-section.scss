@@ -1,0 +1,109 @@
+@import "../vars";
+
+$list-item-height: 660px;
+$list-item-width: 880px;
+$list-item-scale: 0.11;
+$first-panel-height: 157px;
+$section-padding: 6px;
+
+.collapsible-documents-section {
+  min-height: 26px;
+  width: 100%;
+  position: relative;
+  background-color: rgba(250, 236, 141, 0.1);
+
+  .section-collapse-toggle {
+    font-size: 13px;
+    color: $charcoal-dark-2;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 26px;
+
+    &:hover {
+      background-color: rgba(250, 236, 141, 0.5);
+    }
+    &:active {
+      background-color: rgba(250, 236, 141, 1.0);
+    }
+    .teacher-class-info {
+      margin: 5px 6px
+    }
+
+    .arrow-icon {
+      fill: $charcoal-dark-1;
+      transform: rotate(0deg);
+      transition: transform;
+      transition-duration: .25s;
+      position: absolute;
+      right: 5px;
+      &:active, &.open {
+        transform: rotate(180deg);
+      }
+    }
+  }
+
+  .list {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    overflow-y: auto;
+    &.top-panel {
+      height: $first-panel-height;
+      border-bottom: solid 1px $charcoal-light-1;
+      overflow-y: hidden;
+    }
+    .list-item {
+      position: relative;
+      min-height: 120px;
+      width: 116px;
+      border-radius: 5px;
+      padding: $padding 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow: hidden;
+      background-color:rgba(250, 236, 141, 0.0);
+      cursor: pointer;
+      .scaled-list-item-container {
+        border-radius: 5px;
+        border: solid 1.5px $charcoal-light-1;
+        width: $list-item-width * $list-item-scale;
+        height: $list-item-height * $list-item-scale;
+        padding: 1px;
+        .scaled-list-item {
+          transform: scale(.1);
+          transform-origin: 0 0;
+          height: $list-item-height;
+          width: $list-item-width;
+        }
+      }
+      .not-shared {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 5px;
+        border: solid 1.5px $charcoal-light-1;
+        height: 74px;
+        width: 96px;
+        fill: $workspace-teal-dark-1;
+        .not-shared-icon {
+          height: 26px;
+          width: 30px;
+          fill: $workspace-teal-dark-1
+        }
+      }
+      .info {
+        margin-top: $half-margin;
+        text-align: center;
+        font-size: 10px;
+        width: 90px;
+      }
+      .footer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+  }
+}
