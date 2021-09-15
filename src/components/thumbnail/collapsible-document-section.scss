@@ -37,10 +37,7 @@ $section-padding: 6px;
       transition-duration: .25s;
       position: absolute;
       right: 5px;
-      &:active {
-        transform: rotate(180deg);
-      }
-      &.open {
+      &:active, &.open {
         transform: rotate(180deg);
       }
     }

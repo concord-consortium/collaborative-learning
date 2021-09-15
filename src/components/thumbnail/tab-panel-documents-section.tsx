@@ -74,7 +74,6 @@ function getSectionDocs(section: NavTabSectionModelType, stores: IStores, classS
   if (section.order === ENavTabOrder.kReverse) {
     sectDocs = sectDocs.reverse();
   }
-  console.log("documents: ", documents);
   // filter by additional properties
   if (section.properties && section.properties.length) {
     sectDocs = sectDocs.filter(doc => doc.matchProperties(section.properties));
@@ -89,9 +88,9 @@ export const TabPanelDocumentsSection = observer(({ tab, section, index, numOfSe
     const isInNetwork = user.type === "teacher" && user.teacherNetwork;
     const showNewDocumentThumbnail = section.addDocument && !!onSelectNewDocument;
     const newDocumentLabel = getNewDocumentLabel(section, stores);
-    const numPanels = isInNetwork? numOfSections + 1 : numOfSections;
+    const numPanels = isInNetwork ? numOfSections + 1 : numOfSections;
     const isTopPanel = index === 0 && numPanels > 1;
-    const isBottomPanel = index === numOfSections-1 && index > 0;
+    const isBottomPanel = index === numOfSections - 1 && index > 0;
     const tabName = tab.toLowerCase().replace(' ', '-');
     const currentClass = stores.class.name;
     const classNamesStrings = (uniq(user.portalClassOfferings.map(o => o.className))).filter(c => c !== currentClass);

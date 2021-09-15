@@ -48,22 +48,22 @@ export const TabPanelDocumentsSubSectionPanel = ({section, sectionDocument, tab,
       (section.type === "teacher-supports") && user.setLastSupportViewTimestamp(Date.now());
     }
     function handleDocumentDragStart(e: React.DragEvent<HTMLDivElement>) {
-          onDocumentDragStart?.(e, sectionDocument);
+      onDocumentDragStart?.(e, sectionDocument);
     }
     function handleDocumentStarClick() {
-          onDocumentStarClick?.(sectionDocument);
+      onDocumentStarClick?.(sectionDocument);
     }
     function handleDocumentDeleteClick() {
-          onDocumentDeleteClick?.(sectionDocument);
+      onDocumentDeleteClick?.(sectionDocument);
     }
     // pass function so logic stays here but access occurs from child
     // so that mobx-react triggers child render not parent render.
     const onIsStarred = () => {
-          return section.showStarsForUser(user)
-                  ? user.isTeacher
-                    ? sectionDocument.isStarredByUser(user.id)
-                    : sectionDocument.isStarred
-                  : false;
+      return section.showStarsForUser(user)
+              ? user.isTeacher
+                ? sectionDocument.isStarredByUser(user.id)
+                : sectionDocument.isStarred
+              : false;
     };
     const _handleDocumentStarClick = section.showStarsForUser(user)
                                       ? handleDocumentStarClick

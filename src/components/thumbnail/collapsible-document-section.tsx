@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import { observer } from "mobx-react";
 import { NavTabSectionModelType } from "../../models/view/nav-tabs";
-import { DocumentModelType, getDocumentContext } from "../../models/document/document";
-import { DocumentContextReact } from "../document/document-context";
-import { TabPanelDocumentsSubSectionPanel } from "./tab-panel-documents-subsection-panel";
+import { DocumentModelType } from "../../models/document/document";
 import { DocumentCaption } from "./document-caption";
 import { IStores } from "../../models/stores/stores";
 import ArrowIcon from "../../assets/icons/arrow/arrow.svg";
@@ -25,9 +23,8 @@ interface IProps {
   onSelectDocument?: (document: DocumentModelType) => void;
 }
 
-export const CollapsibleDocumentsSection: React.FC<IProps> = observer(({userName, classNameStr, sectionDocs, section,
-                                                                        stores, tab, scale, selectedDocument,
-                                                                        onSelectDocument}) => {
+export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
+  ({userName, classNameStr, sectionDocs, section, stores, tab, scale, selectedDocument, onSelectDocument}) => {
   const [isOpen, setIsOpen] = useState(true);
   const handleSectionToggle = () => {
     setIsOpen(!isOpen);
