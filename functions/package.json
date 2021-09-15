@@ -4,6 +4,7 @@
     "lint": "eslint \"src/**/*\"",
     "build": "./node_modules/typescript/bin/tsc",
     "serve": "npm run build && firebase emulators:start",
+    "serve:functions": "npm run build && firebase emulators:start --only functions",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "deploy:all": "firebase deploy --only functions",

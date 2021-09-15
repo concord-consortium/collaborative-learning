@@ -1,12 +1,27 @@
 import firebase from "firebase/app";
 import { useCallback } from "react";
-import { useMutation, UseMutationOptions } from "react-query";
-import { IPostDocumentCommentParams, isSectionPath } from "../../functions/src/shared";
-import { CommentDocument } from "../lib/firestore-schema";
-import { useCollectionOrderedRealTimeQuery } from "./firestore-hooks";
+import { useMutation, UseMutationOptions, useQuery } from "react-query";
+import { ICommentableDocumentParams, IPostDocumentCommentParams, isSectionPath } from "../../functions/src/shared";
+import { CommentDocument, CurriculumDocument, DocumentDocument } from "../lib/firestore-schema";
+import { useCollectionOrderedRealTimeQuery, useFirestore } from "./firestore-hooks";
 import { useFirebaseFunction } from "./use-firebase-function";
-import { useNetworkDocumentKey } from "./use-stores";
+import { useDocumentOrCurriculumMetadata, useNetworkDocumentKey } from "./use-stores";
 import { useUserContext } from "./use-user-context";
+
+/*
+ * useCommentableDocumentPath
+ *
+ * For now, parses the specified key to see if it looks like a curriculum document path,
+ * otherwise assumes it's a document key.
+ */
+export const useCommentableDocumentPath = (documentKeyOrSectionPath: string) => {
+  const docKey = useNetworkDocumentKey(documentKeyOrSectionPath);
+  if (!documentKeyOrSectionPath) return documentKeyOrSectionPath;
+  // if it looks like a section path, assume it's a curriculum document reference
+  return isSectionPath(documentKeyOrSectionPath)
+          ? `curriculum/${docKey}`
+          : `documents/${docKey}`;
+};
 
 /*
  * useCommentsCollectionPath
@@ -15,12 +30,62 @@ import { useUserContext } from "./use-user-context";
  * otherwise assumes it's a document key.
  */
 export const useCommentsCollectionPath = (documentKeyOrSectionPath: string) => {
-  const docKey = useNetworkDocumentKey(documentKeyOrSectionPath);
+  const docPath = useCommentableDocumentPath(documentKeyOrSectionPath);
   if (!documentKeyOrSectionPath) return documentKeyOrSectionPath;
-  // if it looks like a section path, assume it's a curriculum document reference
-  return isSectionPath(documentKeyOrSectionPath)
-          ? `curriculum/${docKey}/comments`
-          : `documents/${docKey}/comments`;
+  return `${docPath}/comments`;
+};
+
+/*
+ * useValidateCommentableDocument
+ *
+ * Implemented via React Query's useMutation hook.
+ */
+type IValidateDocumentClientParams = Omit<ICommentableDocumentParams, "context">;
+type ValidateDocumentUseMutationOptions =
+      UseMutationOptions<firebase.functions.HttpsCallableResult, unknown, IValidateDocumentClientParams>;
+
+export const useValidateCommentableDocument = (options?: ValidateDocumentUseMutationOptions) => {
+  const validateCommentableDocument = useFirebaseFunction<ICommentableDocumentParams>("validateCommentableDocument_v1");
+  const context = useUserContext();
+  const validateDocument = useCallback((clientParams: IValidateDocumentClientParams) => {
+    return validateCommentableDocument({ context, ...clientParams });
+  }, [context, validateCommentableDocument]);
+  return useMutation(validateDocument, options);
+};
+
+/*
+ * useCommentableDocument
+ *
+ * Checks whether the specified document exists and creates it if not.
+ * Implemented via React Query's useQuery hook.
+ */
+export type DocumentQueryType = CurriculumDocument | DocumentDocument | undefined;
+export const useCommentableDocument = (documentKeyOrSectionPath?: string) => {
+  const [firestore, firestoreRoot] = useFirestore();
+  const documentPath = useCommentableDocumentPath(documentKeyOrSectionPath || "");
+  const documentMetadata = useDocumentOrCurriculumMetadata(documentKeyOrSectionPath);
+  const validateDocumentMutation = useValidateCommentableDocument();
+  return useQuery(documentPath, () => new Promise<DocumentQueryType>((resolve, reject) => {
+    const documentRef = firestore.documentRef(`${firestoreRoot}/${documentPath}`);
+    const unsubscribeDocListener = documentRef?.onSnapshot({
+      next: docSnapshot => {
+        unsubscribeDocListener?.();
+        resolve(docSnapshot.data() as DocumentQueryType);
+      },
+      error: readError => {
+        unsubscribeDocListener?.();
+        // an error presumably means that the document doesn't exist yet, so we create it
+        validateDocumentMutation.mutate({ document: documentMetadata! }, {  // ! since query won't run otherwise
+          onSuccess: result => resolve(result.data),
+          onError: createError => { throw createError; }
+        });
+      }
+    });
+  }), { // useQuery options
+    enabled: !!documentPath && !!documentMetadata,  // don't run the query if we don't have prerequisites
+    staleTime: Infinity,                            // never need to rerun the query once it succeeds
+    cacheTime: 60 * 60 * 1000                       // keep it in cache for 60 minutes
+  });
 };
 
 /*
@@ -65,9 +130,11 @@ const commentConverter = {
  * e.g. caching and reuse if multiple clients request the same comments.
  */
 export const useDocumentComments = (documentKeyOrSectionPath?: string) => {
+  const { isSuccess } = useCommentableDocument(documentKeyOrSectionPath);
   const path = useCommentsCollectionPath(documentKeyOrSectionPath || "");
+  const queryPath = isSuccess ? path : "";
   const converter = commentConverter;
-  return useCollectionOrderedRealTimeQuery(path, { converter, orderBy: "createdAt" });
+  return useCollectionOrderedRealTimeQuery(queryPath, { converter, orderBy: "createdAt" });
 };
 
 /*

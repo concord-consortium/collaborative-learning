@@ -1,12 +1,13 @@
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
 import {
-  IPostDocumentCommentUnionParams, isCurriculumMetadata, isDocumentMetadata, isWarmUpParams, networkDocumentKey
+  IPostDocumentCommentUnionParams, isCurriculumMetadata, isDocumentMetadata, isWarmUpParams
 } from "./shared";
 import { validateUserContext } from "./user-context";
+import { createCommentableDocumentIfNecessary } from "./validate-commentable-document";
 
 // update this when deploying updates to this function
-const version = "1.1.2";
+const version = "1.1.3";
 
 export async function postDocumentComment(
                         params?: IPostDocumentCommentUnionParams,
@@ -31,36 +32,12 @@ export async function postDocumentComment(
     throw new functions.https.HttpsError("invalid-argument", "Some required comment information was not provided.");
   }
 
-  const firestore = admin.firestore();
-  const kCollection = isCurriculumMetadata(document) ? "curriculum" : "documents";
-  const kBaseDocumentKey = isCurriculumMetadata(document) ? document.path : document.key;
-  const kDocumentKey = networkDocumentKey(uid, kBaseDocumentKey, context.network);
-  const kDocumentDocPath = `${firestoreRoot}/${kCollection}/${kDocumentKey}`;
-  const kCommentsCollectionPath = `${kDocumentDocPath}/comments`;
-
-  // see if the document is already in firestore
-  const docReadResponse = await firestore.doc(kDocumentDocPath).get();
-  if (!docReadResponse.data()) {
-    // if not already present, create it
-    const documentParams = isDocumentMetadata(document)
-                            ? {
-                              // we could pull some of the document metadata from the realtime database,
-                              // but for now we trust the client to provide valid values.
-                              ...document,
-                              context_id: context.classHash,
-                              teachers: context.teachers
-                            }
-                            : {
-                              ...document,
-                              uid
-                            };
-    // convert empty/falsy networks to null
-    const network = context.network || null;
-    await firestore.doc(kDocumentDocPath).set({ ...documentParams, network });
-  }
+  const docResult = await createCommentableDocumentIfNecessary({ context, document, firestoreRoot, uid });
+  if (!docResult?.ref) throw new functions.https.HttpsError("invalid-argument", "Some required arguments were not valid.");
 
   // add the comment once we're certain the document exists
-  const result = await firestore.collection(kCommentsCollectionPath).add({
+  const commentsCollectionRef = admin.firestore().collection(`${docResult.ref.path}/comments`);
+  const result = await commentsCollectionRef.add({
     uid,
     name: context.name,
     network: context.network,

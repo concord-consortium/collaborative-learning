@@ -1,10 +1,20 @@
 import { renderHook } from "@testing-library/react-hooks";
 import { IDocumentMetadata } from "../../functions/src/shared";
 import { CommentDocument } from "../lib/firestore-schema";
-import { useDocumentComments, usePostDocumentComment, useUnreadDocumentComments } from "./document-comment-hooks";
+import {
+  DocumentQueryType, useDocumentComments, usePostDocumentComment, useUnreadDocumentComments
+} from "./document-comment-hooks";
 
+var mockValidateCommentableDocument_v1 = jest.fn();
 var mockPostDocumentComment_v1 = jest.fn();
-var mockHttpsCallable = jest.fn((fn: string) => mockPostDocumentComment_v1);
+var mockHttpsCallable = jest.fn((fn: string) => {
+  switch(fn) {
+    case "validateCommentableDocument_v1":
+      return mockValidateCommentableDocument_v1;
+    case "postDocumentComment_v1":
+      return mockPostDocumentComment_v1;
+  }
+});
 jest.mock("firebase/app", () => ({
   firestore: {
     Timestamp: {
@@ -21,11 +31,24 @@ jest.mock("firebase/app", () => ({
 var mockUseMutation = jest.fn((callback: () => void) => {
   return { mutate: () => callback() };
 });
+var mockCurriculumDocument = { unit: "unit", problem: "1.1", section: "intro", path: "unit/1/1/intro" };
+var mockUseQuery = jest.fn(() => ({
+  isLoading: false,
+  isError: false,
+  isSuccess: true,
+  data: Promise.resolve(mockCurriculumDocument)
+}));
 jest.mock("react-query", () => ({
-  useMutation: (callback: () => void) => mockUseMutation(callback)
+  useMutation: (callback: () => void) => mockUseMutation(callback),
+  useQuery: (key: string, fn: () => Promise<DocumentQueryType>) => mockUseQuery()
 }));
 
+var mockUseDocumentOrCurriculumMetadata = jest.fn((docKeyOrSectionPath: string) => {
+  return mockCurriculumDocument;
+});
 jest.mock("./use-stores", () => ({
+  useDocumentOrCurriculumMetadata:
+    (docKeyOrSectionPath: string) => mockUseDocumentOrCurriculumMetadata(docKeyOrSectionPath),
   useNetworkDocumentKey: (documentKey: string) => `network_${documentKey}`
 }));
 
@@ -49,6 +72,12 @@ var mockUseCollectionOrderedRealTimeQuery = jest.fn((path: string, options?: any
   }
 });
 jest.mock("./firestore-hooks", () => ({
+  useFirestore: () => ([
+    {
+      documentRef: (path: string) => jest.fn()
+    },
+    "firestore/root"
+  ]),
   useCollectionOrderedRealTimeQuery:
     (path: string, options?: any) => mockUseCollectionOrderedRealTimeQuery(path, options)
 }));
@@ -56,6 +85,9 @@ jest.mock("./firestore-hooks", () => ({
 describe("Document comment hooks", () => {
 
   beforeEach(() => {
+    mockValidateCommentableDocument_v1.mockClear();
+    mockPostDocumentComment_v1.mockClear();
+    mockHttpsCallable.mockClear();
     mockUseMutation.mockClear();
     mockUseCollectionOrderedRealTimeQuery.mockClear();
   });
