@@ -32,7 +32,7 @@ export const ProblemTabContent: React.FC<IProps>
       tab_section_name: titleArgButReallyType,
       tab_section_type: typeArgButReallyTitle
     });
-
+    ui.setSelectedTile();
     ui.updateFocusDocument();
 };
 

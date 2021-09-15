@@ -25,6 +25,7 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
   const handleTabClick = (title: string, type: string) => {
     setReferenceDocument(undefined);
     ui.updateFocusDocument();
+    ui.setSelectedTile();
     Logger.log(LogEventName.SHOW_TAB_SECTION, {
       tab_section_name: title,
       tab_section_type: type
