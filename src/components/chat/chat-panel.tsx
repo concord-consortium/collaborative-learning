@@ -23,7 +23,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   const { data: unreadComments } = useUnreadDocumentComments(focusDocument);
   const documentComments = comments?.filter(comment => comment.tileId === null);
   const tileComments = comments?.filter(comment => comment.tileId === focusTileId);
-  const postedComments = focusTileId? tileComments : documentComments;
+  const postedComments = focusTileId ? tileComments : documentComments;
   const postCommentMutation = usePostDocumentComment();
   const postComment = useCallback((comment: string) => {
     return document
