@@ -1,5 +1,6 @@
 import classNames from "classnames";
 import React, { useEffect, useRef, useState } from "react";
+import { useUIStore } from "../../hooks/use-stores";
 import SendIcon from "../../assets/send-icon.svg";
 import "../themes.scss";
 
@@ -19,12 +20,14 @@ export const CommentTextBox: React.FC<IProps> = ({ activeNavTab, numPostedCommen
   const textareaStyle = {height: commentTextAreaHeight};
   const postButtonClass = classNames("comment-footer-button", "themed-negative", activeNavTab,
                                      { disabled: !commentAdded, "no-action": !commentAdded });
+  const ui = useUIStore();
   // resize textarea when user deletes some text
   useEffect(() => {
     if (textareaRef?.current) {
       textareaRef.current.style.height = minTextAreaHeight + "px"; //needed to resize text area when user partial delete
       const scrollHeight = textareaRef.current.scrollHeight;
-      textareaRef.current.style.height = scrollHeight + "px";
+      textareaRef.current.style.height = textareaRef.current?.value !== ""
+                                          ? scrollHeight + "px" : minTextAreaHeight + "px";
     }
   });
 
@@ -89,12 +92,17 @@ export const CommentTextBox: React.FC<IProps> = ({ activeNavTab, numPostedCommen
     }
   };
 
+  const placeholderText = ui.selectedTileIds.length === 0 && numPostedComments < 1
+                            ? "Comment on this document..."
+                            : ui.selectedTileIds.length !== 0 && numPostedComments < 1
+                              ? "Comment on this tile..."
+                              : "Reply...";
   return (
     <div className="comment-textbox">
       <textarea
         ref={textareaRef}
         style={textareaStyle}
-        placeholder={numPostedComments < 1 ? "Comment on this document...": "Reply..."}
+        placeholder={placeholderText}
         value={commentText}
         data-testid="comment-textarea"
         onChange={handleCommentTextAreaChange}

@@ -4,6 +4,13 @@ import { CommentDocument } from "../../lib/firestore-schema";
 import { UserModelType } from "../../models/stores/user";
 import { CommentCard } from "./comment-card";
 
+jest.mock("../../hooks/use-stores", () => ({
+  useUIStore: () => ({
+    showChatPanel: true,
+    selectedTileIds: []
+  })
+}));
+
 describe("CommentCard", () => {
   const testUser  = { id: "0", name: "Test Teacher" } as UserModelType;
   const activeNavTab = "my-work";
