@@ -10,6 +10,7 @@
     "deploy:all": "firebase deploy --only functions",
     "deploy:getImageData": "firebase deploy --only functions:getImageData",
     "deploy:postDocumentComment": "firebase deploy --only functions:postDocumentComment_v1",
+    "deploy:validateCommentableDocument": "firebase deploy --only functions:validateCommentableDocument_v1",
     "logs": "firebase functions:log",
     "test": "ts-node node_modules/jest/bin/jest.js --detectOpenHandles"
   },
