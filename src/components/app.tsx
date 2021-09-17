@@ -168,7 +168,10 @@ export class AppComponent extends BaseComponent<IProps, IState> {
           // use userId as groupId
           db.joinGroup(user.id);
         }
-        else {
+        //only show the group chooser if the logged in user is a student with no group
+        //right now the only difference between the preview URL and the student URL is that the
+        //student url has the `learner` query param, and a token.
+        else if (urlParams === "learner") {
           return this.renderApp(<GroupChooserComponent />);
         }
       }
