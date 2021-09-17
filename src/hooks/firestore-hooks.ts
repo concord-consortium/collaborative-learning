@@ -39,7 +39,7 @@ export function useCollectionOrderedRealTimeQuery<T>(
       const ref = db.collectionRef(fsPath).withConverter(converter);
       const query = orderBy ? ref.orderBy(orderBy) : ref;
       const unsubscribe = query.onSnapshot(querySnapshot => {
-                            const docs = querySnapshot.docs.map(doc => doc.data());
+                            const docs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                             queryClient.setQueryData(fsPath, docs);
                           });
       return () => unsubscribe();
