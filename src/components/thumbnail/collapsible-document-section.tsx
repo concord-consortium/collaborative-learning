@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import { observer } from "mobx-react";
 import { NavTabSectionModelType } from "../../models/view/nav-tabs";
 import { DocumentModelType } from "../../models/document/document";
-import { DocumentCaption } from "./document-caption";
+// import { DocumentCaption } from "./document-caption";
 import { IStores } from "../../models/stores/stores";
 import ArrowIcon from "../../assets/icons/arrow/arrow.svg";
-import NotSharedIcon from "../../assets/icons/share/not-share.svg";
+// import NotSharedIcon from "../../assets/icons/share/not-share.svg";
 
 import "./tab-panel-documents-section.sass";
 import "./collapsible-document-section.scss";
@@ -64,22 +64,22 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
   );
 });
 
-interface IDocumentNotSharedProps {
-  label: string;
-  notShared?: boolean;
-}
-const DocumentNoSharedThumbnail: React.FC<IDocumentNotSharedProps> = ({ label, notShared }) => {
-  return (
-    <div className="list-item not-shared" data-test="my-work-new-document" >
-      { notShared
-          ? <div className="not-shared">
-              <NotSharedIcon className="not-shared-icon" />
-            </div>
-          : <div className="scaled-list-item-container new-document-button" >
-              <div className="scaled-list-item"></div>
-            </div>
-      }
-      <DocumentCaption captionText={label} />
-    </div>
-  );
-};
+// interface IDocumentNotSharedProps {
+//   label: string;
+//   notShared?: boolean;
+// }
+// const DocumentNoSharedThumbnail: React.FC<IDocumentNotSharedProps> = ({ label, notShared }) => {
+//   return (
+//     <div className="list-item not-shared" data-test="my-work-new-document" >
+//       { notShared
+//           ? <div className="not-shared">
+//               <NotSharedIcon className="not-shared-icon" />
+//             </div>
+//           : <div className="scaled-list-item-container new-document-button" >
+//               <div className="scaled-list-item"></div>
+//             </div>
+//       }
+//       <DocumentCaption captionText={label} />
+//     </div>
+//   );
+// };

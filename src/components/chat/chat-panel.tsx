@@ -21,7 +21,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { isLoading, data: comments } = useDocumentComments(focusDocument);
   const { data: unreadComments } = useUnreadDocumentComments(focusDocument);
-  const documentComments = comments?.filter(comment => comment.tileId === null);
+  const documentComments = comments?.filter(comment => comment.tileId == null);
   const tileComments = comments?.filter(comment => comment.tileId === focusTileId);
   const postedComments = focusTileId ? tileComments : documentComments;
   const postCommentMutation = usePostDocumentComment();
