@@ -54,7 +54,7 @@ type CommentsCollection = FSCollection<CommentDocument>;
  * Since curriculum "documents" are available to anyone, the only access restriction is that
  * comments can only be viewed by teachers in the same network.
  */
-interface CurriculumDocument {
+export interface CurriculumDocument {
   uid: string;                        // uid of teacher making first comment, i.e. adding the record
   unit: string;                       // unit code, e.g. "sas", "msa", etc.
   facet?: string;                     // empty for regular curriculum; "guide" for teacher guide, etc.
@@ -78,7 +78,7 @@ type CurriculumCollection = FSCollection<CurriculumDocument>;
  * Networked access will be mediated by Firestore security rules which can check whether the requesting user
  * is in the appropriate network.
  */
-interface DocumentDocument {
+export interface DocumentDocument {
   context_id: string;                 // class hash for document context
   teachers: string[];                 // [denormalized] uids of teachers of class
   network?: string;                   // network of teacher commenting on document

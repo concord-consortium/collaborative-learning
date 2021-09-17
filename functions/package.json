@@ -4,11 +4,13 @@
     "lint": "eslint \"src/**/*\"",
     "build": "./node_modules/typescript/bin/tsc",
     "serve": "npm run build && firebase emulators:start",
+    "serve:functions": "npm run build && firebase emulators:start --only functions",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "deploy:all": "firebase deploy --only functions",
     "deploy:getImageData": "firebase deploy --only functions:getImageData",
     "deploy:postDocumentComment": "firebase deploy --only functions:postDocumentComment_v1",
+    "deploy:validateCommentableDocument": "firebase deploy --only functions:validateCommentableDocument_v1",
     "logs": "firebase functions:log",
     "test": "ts-node node_modules/jest/bin/jest.js --detectOpenHandles"
   },

@@ -136,8 +136,12 @@ export interface IClientCommentParams {
   content: string;    // plain text for now; potentially html if we need rich text
 }
 
-export interface IPostDocumentCommentParams extends IFirebaseFunctionBaseParams {
+export interface ICommentableDocumentParams extends IFirebaseFunctionBaseParams {
   document: IDocumentMetadata | ICurriculumMetadata;
+}
+export type ICommentableDocumentUnionParams = ICommentableDocumentParams | IFirebaseFunctionWarmUpParams;
+
+export interface IPostDocumentCommentParams extends ICommentableDocumentParams {
   comment: IClientCommentParams;
 }
 export type IPostDocumentCommentUnionParams = IPostDocumentCommentParams | IFirebaseFunctionWarmUpParams;
