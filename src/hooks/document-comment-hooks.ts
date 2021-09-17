@@ -106,6 +106,18 @@ export const usePostDocumentComment = (options?: PostDocumentCommentUseMutationO
   return useMutation(postComment, options);
 };
 
+interface DeleteDocumentCommentParams {
+  commentsPath: string;
+  commentId: string;
+}
+
+export const useDeleteDocumentComment = () => {
+  const deleteDocumentComment = useCallback(({commentsPath, commentId}: DeleteDocumentCommentParams) => {
+    return firebase.firestore().doc(`${commentsPath}/${commentId}`).delete();
+  },[]);
+  return useMutation(deleteDocumentComment);
+};
+
 const commentConverter = {
   toFirestore: (comment: CommentDocument) => {
     const { createdAt: createdAtDate, ...others } = comment;

@@ -1,10 +1,9 @@
-import React from "react";
+import React, { useRef } from "react";
 import { UserModelType } from "../../models/stores/user";
 import { CommentTextBox } from "./comment-textbox";
 import { CommentDocument } from "../../lib/firestore-schema";
 import { getDisplayTimeDate } from "../../utilities/time";
 import { useCautionAlert } from "../utilities/use-caution-alert";
-import { useUIStore } from "../../hooks/use-stores";
 import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
 import DocumentCommentIcon from "../../assets/document-id.svg";
 import DeleteMessageIcon from "../../assets/delete-message-icon.svg";
@@ -16,10 +15,12 @@ interface IProps {
   activeNavTab?: string;
   postedComments?: CommentDocument[];
   onPostComment?: (comment: string) => void;
+  onDeleteComment?: (commentId: string) => void;
 }
 
-export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedComments, onPostComment }) => {
-  const uiStore = useUIStore();
+export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedComments,
+                                                onPostComment, onDeleteComment }) => {
+  const commentIdRef = useRef<string>();
   const alertContent = () => {
     return (
       <>
@@ -33,16 +34,14 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
     title: "Delete Message",
     content: alertContent,
     confirmLabel: "Delete",
-    onConfirm: () => deleteComment()
+    onConfirm: () => commentIdRef.current && onDeleteComment?.(commentIdRef.current)
   });
 
   const handleDeleteComment = (commentId: string) => {
-    uiStore.setSelectedCommentId(commentId);
-    return showConfirmDeleteAlert;
-  };
-
-  const deleteComment = () => {
-    window.alert("deleting comment"+uiStore.selectedCommentId);
+    if (commentId) {
+      commentIdRef.current = commentId;
+      showConfirmDeleteAlert();
+    }
   };
 
   const renderThreadHeader = () => {
@@ -77,7 +76,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
                 <div className="user-name">{comment.name}</div>
                 <div className="time-stamp">{getDisplayTimeDate(comment.createdAt.getTime())}</div>
                 {isCurrentUserComment &&
-                  <div className="delete-message-icon-container" onClick={handleDeleteComment(comment.id)}>
+                  <div className="delete-message-icon-container" onClick={() => handleDeleteComment(comment.id)}>
                     <DeleteMessageIcon />
                   </div>
                 }
