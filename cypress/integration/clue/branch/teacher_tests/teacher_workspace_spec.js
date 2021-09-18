@@ -85,7 +85,7 @@ describe.skip('teacher document functionality', function () {
   });
 });
 
-describe('Chat panel for networked teacher', () => {
+describe.skip('Chat panel for networked teacher', () => {
   it('verify chat does not appear when no url params are passed to indicate teacher status (teachers are in network', () => {
     cy.get('.chat-panel-toggle').should('not.exist');
   });
