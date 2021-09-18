@@ -2,9 +2,10 @@ import React, { useCallback } from "react";
 import { UserModelType } from "../../models/stores/user";
 import { ChatPanelHeader } from "./chat-panel-header";
 import { CommentCard } from "./comment-card";
-import { useCommentsCollectionPath, useDeleteDocumentComment,
-        useDocumentComments, usePostDocumentComment, useUnreadDocumentComments
+import {
+  useCommentsCollectionPath, useDocumentComments, usePostDocumentComment, useUnreadDocumentComments
 } from "../../hooks/document-comment-hooks";
+import { useDeleteDocument } from "../../hooks/firestore-hooks";
 import { useDocumentOrCurriculumMetadata } from "../../hooks/use-stores";
 import "./chat-panel.scss";
 
@@ -31,10 +32,10 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
             : undefined;
   }, [document, focusTileId, postCommentMutation]);
   const commentsPath = useCommentsCollectionPath(focusDocument || "");
-  const deleteCommentMutation = useDeleteDocumentComment();
+  const deleteCommentMutation = useDeleteDocument();
   const deleteComment = useCallback((commentId: string) => {
     return document
-      ? deleteCommentMutation.mutate({commentsPath, commentId})
+      ? deleteCommentMutation.mutate(`${commentsPath}/${commentId}`)
       : undefined;
   }, [document, deleteCommentMutation, commentsPath]);
 
@@ -51,7 +52,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
             onDeleteComment={deleteComment}
             postedComments={postedComments}
           />
-        : <div className="select-doc-message" data-testid="select-doc-messsage">
+        : <div className="select-doc-message" data-testid="select-doc-message">
             Open a document to begin or view comment threads
           </div>
       }

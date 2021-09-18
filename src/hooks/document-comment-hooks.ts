@@ -61,12 +61,12 @@ export const useValidateCommentableDocument = (options?: ValidateDocumentUseMuta
  */
 export type DocumentQueryType = CurriculumDocument | DocumentDocument | undefined;
 export const useCommentableDocument = (documentKeyOrSectionPath?: string) => {
-  const [firestore, firestoreRoot] = useFirestore();
+  const [firestore] = useFirestore();
   const documentPath = useCommentableDocumentPath(documentKeyOrSectionPath || "");
   const documentMetadata = useDocumentOrCurriculumMetadata(documentKeyOrSectionPath);
   const validateDocumentMutation = useValidateCommentableDocument();
   return useQuery(documentPath, () => new Promise<DocumentQueryType>((resolve, reject) => {
-    const documentRef = firestore.documentRef(`${firestoreRoot}/${documentPath}`);
+    const documentRef = firestore.docRef(documentPath);
     const unsubscribeDocListener = documentRef?.onSnapshot({
       next: docSnapshot => {
         unsubscribeDocListener?.();
@@ -104,18 +104,6 @@ export const usePostDocumentComment = (options?: PostDocumentCommentUseMutationO
     return postDocumentComment({ context, ...clientParams });
   }, [context, postDocumentComment]);
   return useMutation(postComment, options);
-};
-
-interface DeleteDocumentCommentParams {
-  commentsPath: string;
-  commentId: string;
-}
-
-export const useDeleteDocumentComment = () => {
-  const deleteDocumentComment = useCallback(({commentsPath, commentId}: DeleteDocumentCommentParams) => {
-    return firebase.firestore().doc(`${commentsPath}/${commentId}`).delete();
-  },[]);
-  return useMutation(deleteDocumentComment);
 };
 
 const commentConverter = {

@@ -79,6 +79,10 @@ export class Firestore {
             : firebase.firestore().doc(collectionOrFullDocumentPath);
   }
 
+  public docRef(partialPath: string) {
+    return firebase.firestore().doc(`${this.getRootFolder()}${partialPath}`);
+  }
+
   public newDocumentRef(collectionPath: string) {
     return firebase.firestore().collection(collectionPath).doc();
   }

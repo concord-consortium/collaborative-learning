@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
+import { ModalProvider } from "react-modal-hook";
 import { CommentDocument } from "../../lib/firestore-schema";
 import { UserModelType } from "../../models/stores/user";
 import { CommentCard } from "./comment-card";
@@ -17,8 +18,10 @@ describe("CommentCard", () => {
 
   it("should render successfully", () => {
     render((
-      <CommentCard activeNavTab={activeNavTab} />
-    ));
+      <ModalProvider>
+        <CommentCard activeNavTab={activeNavTab} />
+      </ModalProvider>
+));
     expect(screen.getByTestId("comment-card")).toBeInTheDocument();
     expect(screen.getByTestId("comment-card")).toHaveClass("selected");
     expect(screen.getByTestId("comment-card-header")).toBeInTheDocument();
@@ -27,7 +30,9 @@ describe("CommentCard", () => {
     const postedComments: CommentDocument[] = [];
     const commentThread = screen.queryByTestId("comment-thread");
     render((
-      <CommentCard user={testUser} postedComments={postedComments}/>
+      <ModalProvider>
+        <CommentCard user={testUser} postedComments={postedComments}/>
+      </ModalProvider>
     ));
     expect(screen.getByTestId("document-comment-icon")).toBeInTheDocument();
     expect(commentThread).toBeNull();
@@ -38,7 +43,9 @@ describe("CommentCard", () => {
             { uid: "1", name: "T1", createdAt: new Date(), content: testComment }
           ];
     render((
-      <CommentCard user={testUser} postedComments={postedComments}/>
+      <ModalProvider>
+        <CommentCard user={testUser} postedComments={postedComments}/>
+      </ModalProvider>
     ));
     expect(screen.getByTestId("teacher-initial")).toHaveTextContent("T");
     expect(screen.getByTestId("comment-thread")).toBeInTheDocument();
