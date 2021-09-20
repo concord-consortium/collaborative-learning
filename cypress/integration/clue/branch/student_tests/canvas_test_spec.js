@@ -294,7 +294,6 @@ context('Test Canvas', function () {
           clueCanvas.getNorthWestCanvas().should('be.visible');
         });
         after(() => { //restore to 1up view
-          // primaryWorkspace.closePrimaryWorkspaceTab('my-work');
           clueCanvas.openOneUpViewFromFourUp();
         });
       });
@@ -312,7 +311,7 @@ context('Test Canvas', function () {
     describe('Drag element from left nav', function () {
       const dataTransfer = new DataTransfer;
       // TODO: Unable to get elements
-      it('will drag an image from left nav to canvas', () => {
+      it('will drag image from resource panel to canvas', () => {
         resourcesPanel.openResourcesPanel('Introduction');
         resourcesPanel.getResourcesPanelExpandedSpace().find('.image-tool').first()
           .trigger('dragstart', { dataTransfer });
