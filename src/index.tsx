@@ -26,7 +26,8 @@ const appConfig = AppConfigModel.create(appConfigSpec);
 
 const initializeApp = async () => {
   const host = window.location.host.split(":")[0];
-  const appMode = getAppMode(urlParams.appMode, urlParams.token, host);
+  const inPreviewMode = !urlParams.appMode && !urlParams.token && !!urlParams.domain && !!urlParams.domain_uid;
+  const appMode = getAppMode(urlParams.appMode, urlParams.token, host, inPreviewMode);
   const appVersion = PackageJson.version;
 
   const user = UserModel.create();
@@ -35,7 +36,7 @@ const initializeApp = async () => {
   const problemOrdinal = urlParams.problem || appConfigSpec.defaultProblemOrdinal;
   const showDemoCreator = urlParams.demo;
   const demoName = urlParams.demoName;
-
+  
   const stores = createStores({ appMode, appVersion, appConfig, user, showDemoCreator, demoName });
 
   await setUnitAndProblem(stores, unitId, problemOrdinal);
@@ -46,6 +47,9 @@ const initializeApp = async () => {
 
   if (kEnableLivelinessChecking) {
     setLivelinessChecking("error");
+  }
+  if (inPreviewMode) {
+    stores.appConfig.setAutoAssignStudentsToIndividualGroups(true);
   }
 
   setPageTitle(stores);

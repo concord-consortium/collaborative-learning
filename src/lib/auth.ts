@@ -109,10 +109,13 @@ export interface AuthQueryParams {
 // An explicitly set appMode takes priority
 // Otherwise, assume that local users are devs, unless a token is specified,
 // in which authentication is likely being tested
-export const getAppMode = (appModeParam?: AppMode, token?: string, host?: string) => {
+export const getAppMode = (appModeParam?: AppMode, token?: string, host?: string, inPreviewMode?: boolean) => {
+  const isLocalhost = host === "localhost" || host === "127.0.0.1";
+  //For now, we will be treating Portal Preview mode as being in dev mode.
+  //Eventually, we may need to create a preview mode
   return appModeParam != null
            ? appModeParam
-           : (token == null && (host === "localhost" || host === "127.0.0.1") ? "dev" : "authed");
+           : (token == null && (isLocalhost || inPreviewMode) ? "dev" : "authed");
 };
 
 export const getPortalJWTWithBearerToken = (basePortalUrl: string, type: string, rawToken: string) => {

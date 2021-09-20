@@ -94,7 +94,8 @@ export const AppConfigModel = types
     },
     getNavTabSpec(tabId: ENavTab): NavTabSpec | undefined {
       return self.navTabs.tabSpecs.find(tab => tabId === tab.tab);
-    }
+    },
+
   }))
   .views(self => ({
     getUnitBasePath(unitId: string) {
@@ -105,6 +106,11 @@ export const AppConfigModel = types
         parts.splice(parts.length - 1, 1);
       }
       return parts.join("/");
+    }
+  }))
+  .actions(self => ({
+    setAutoAssignStudentsToIndividualGroups(auto: boolean) {
+      self.autoAssignStudentsToIndividualGroups = auto;
     }
   }));
 export type AppConfigModelType = Instance<typeof AppConfigModel>;
