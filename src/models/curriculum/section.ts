@@ -42,10 +42,10 @@ export function registerSectionInfo(sectionInfoMap?: ISectionInfoMap) {
     if (!gSectionInfoMap[sectionType]) {
       gSectionInfoMap[sectionType] = sectionInfo;
     }
-    else {
-      console.warn("registerSectionInfo skipping redundant assignment of section type:",
-                  `${sectionType} "${sectionInfo.title}"`);
-    }
+    // else {
+    //   console.warn("registerSectionInfo skipping redundant assignment of section type:",
+    //               `${sectionType} "${sectionInfo.title}"`);
+    // }
   });
 }
 
