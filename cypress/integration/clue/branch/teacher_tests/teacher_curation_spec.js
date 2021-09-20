@@ -1,10 +1,12 @@
 import TeacherDashboard from "../../../../support/elements/clue/TeacherDashboard";
-import RightNav from "../../../../support/elements/common/RightNav";
+import PrimaryWorkspace from "../../../../support/elements/common/PrimaryWorkspace";
+import ResourcesPanel from "../../../../support/elements/clue/ResourcesPanel";
 import ClueCanvas from "../../../../support/elements/clue/cCanvas";
 
 
     let dashboard = new TeacherDashboard();
-    let rightNav = new RightNav();
+    let primaryWorkspace = new PrimaryWorkspace();
+    let resourcesPanel = new ResourcesPanel();
     let clueCanvas = new ClueCanvas;
 
     const baseUrl = `${Cypress.config("baseUrl")}`;
@@ -27,8 +29,8 @@ import ClueCanvas from "../../../../support/elements/clue/cCanvas";
             cy.openResourceTab();
             cy.openTopTab('class-work');
             cy.openSection('class-work','problem-workspaces');
-            rightNav.starCanvasItem('class-work','problem-workspaces',studentDoc);
-            rightNav.getCanvasStarIcon('class-work','problem-workspaces',studentDoc).should('have.class','starred');
+            resourcesPanel.starCanvasItem('class-work','problem-workspaces',studentDoc);
+            resourcesPanel.getCanvasStarIcon('class-work','problem-workspaces',studentDoc).should('have.class','starred');
             //make sure only one canvas is starred,
             // but length 2 because there is one in published section and one in Starred section
             cy.get('.icon-star.starred').should('have.length',2);
@@ -46,6 +48,6 @@ import ClueCanvas from "../../../../support/elements/clue/cCanvas";
             cy.openSection('class-work','starred');
             cy.getCanvasItemTitle('class-work', 'starred', studentDoc).should('not.exist');
             cy.openSection('class-work','problem-workspaces');
-            rightNav.getCanvasStarIcon('class-work','problem-workspaces',studentDoc).should('not.have.class','starred');
+            resourcesPanel.getCanvasStarIcon('class-work','problem-workspaces',studentDoc).should('not.have.class','starred');
         });
     });

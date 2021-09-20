@@ -70,7 +70,7 @@ class ClueCanvas {
     }
 
     getLeftSideFourUpView() {
-        return cy.get('.left-workspace .canvas-area .four-up');
+        return cy.get('.nav-tab-panel .canvas-area .four-up');
     }
     northWestCanvas() {
         return '.canvas-area .four-up .canvas-container.north-west .canvas'; //.document-content'
@@ -110,11 +110,11 @@ class ClueCanvas {
     }
 
     getLeftSideToolPalette() {
-        return cy.get('.left-workspace > .toolbar');
+        return cy.get('.nav-tab-panel > .toolbar');
     }
 
     getRightSideToolPalette() {
-        return cy.get('.right-workspace > .toolbar');
+        return cy.get('.single-workspace.half.primary-workspace > .toolbar');
     }
     getSelectTool() {
         return cy.get('.primary-workspace .tool.select[title=Select]');
@@ -237,21 +237,21 @@ class ClueCanvas {
     }
 
     getTwoUpViewToggle() {
-        return cy.get('.single-workspace .statusbar .action > .up1');
+        return cy.get('.single-workspace .titlebar .action > .up1');
     }
     getTwoToOneUpViewToggle() {// from 2up view
-        return cy.get('.left-workspace .statusbar .action > .up2');
+        return cy.get('.nav-tab-panel .statusbar .action > .up2');
     }
 
-    getRightSideWorkspace() {
-        return cy.get('.right-workspace');
+    getPrimaryWorkspace() {
+        return cy.get('.single-workspace.half.primary-workspace');
     }
     getLeftSideWorkspace() {
-        return cy.get('.left-workspace .canvas-area');
+        return cy.get('.nav-tab-panel .canvas-area');
     }
     openTwoUpView() {
         this.getTwoUpViewToggle().click({ force: true });
-        this.getRightSideWorkspace().should('be.visible');
+        this.getPrimaryWorkspace().should('be.visible');
         this.getLeftSideWorkspace().should('be.visible');
     }
 
@@ -260,24 +260,24 @@ class ClueCanvas {
         canvas.getSingleCanvas().should('be.visible');
     }
 
-    getRightSideWorkspaceTitle() {
-        return cy.get('.right-workspace [data-test=personal-doc-title]');
+    getPrimaryWorkspaceTitle() {
+        return cy.get('.single-workspace.half.primary-workspace [data-test=personal-doc-title]');
     }
-    getRightSideInvestigationTitle() {
-        return cy.get('.right-workspace [data-test=document-title]');
+    getPrimaryWorkspaceInvestigationTitle() {
+        return cy.get('.single-workspace.half.primary-workspace [data-test=document-title]');
     }
-    getRightSideLLTitle() {
-        return cy.get('.right-workspace [data-test=learning-log-title]');
+    getPrimaryWorkspaceLLTitle() {
+        return cy.get('.single-workspace.half.primary-workspace [data-test=learning-log-title]');
     }
 
      getLeftSideWorkspaceTitle(){
-         return cy.get('.left-workspace [data-test=document-title]');
+         return cy.get('.nav-tab-panel [data-test=document-title]');
      }
      getLeftSidePersonalDocTitle(){
-         return cy.get('.left-workspace [data-test=personal-doc-title]');
+         return cy.get('.nav-tab-panel [data-test=personal-doc-title]');
      }
-     getRightSideDocumentContent(){
-         return cy.get('.right-workspace .document-content');
+     getPrimaryWorkspaceDocumentContent(){
+         return cy.get('.single-workspace.half.primary-workspace .document-content');
      }
      getToolTileDragHandle(){ //putting it here because all tool tiles have this. Use as in a .find() after tool tile
         return '.tool-tile-drag-handle';

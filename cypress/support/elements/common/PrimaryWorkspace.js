@@ -3,7 +3,7 @@
 //           ['personal', 'published', 'learning-log', 'starred']
 //           [''],
 //           ['jit','teacher-supports']]
-class RightNav{
+class PrimaryWorkspace{
     testDocumentWithTitle(tab, subTab, title, shouldTest) {
         const tabName = 'tab-' + tab;
         const buttonSelector = '.nav-tab-buttons .nav-tab.' + tabName;
@@ -36,38 +36,22 @@ class RightNav{
         return this.testDocumentWithTitle(tab, subTab, title, 'not.contain');
     }
 
-    getRightNavTabs(){
-        return cy.get('.right-nav .tabs');
+    getResizePanelDivider(){
+       return cy.get('.resize-panel-divider .drag-handles svg g');
     }
 
-    closeRightNavTabs(){
-        cy.get('.close-button').click();
-        cy.wait(1000);
+    getResizeLeftPanelHandle(){
+        return cy.get('.resize-panel-divider .drag-handles svg.drag-left-handle g');
     }
 
-    getRightNavTab(tab){
-        return cy.get('.nav-tab.tab-'+tab);
-    }
-
-    openRightNavTab(tab){
-        this.getRightNavTab(tab).click();
-    }
-    closeRightNavTab(tab){
-        cy.get('#rightNavTab-'+tab+'.tab').click();
-        cy.wait(2000);
-    }
-
-    getRightNavExpandedSpace(){
-        return cy.get('.right-nav > .expanded-area.expanded > .contents > .container');
+    getResizeRightPanelHandle(){
+        return cy.get('.resize-panel-divider .drag-handles svg.drag-right-handle g');
     }
 
     getSectionTitle(tab, section){
         return cy.get('[data-test='+tab+'-section-'+section+'] .title');
     }
 
-    openTopTab(tab) {
-      cy.get('.top-tab.tab-'+tab).click();
-    }
     openSection(tab, section) {
       cy.get('.doc-tab.'+tab+'.'+section).click();
     }
@@ -78,17 +62,6 @@ class RightNav{
 
     getAllSectionCanvasItems(tab, section){
         return cy.get('[data-test='+tab+'-section-'+section).siblings('.list-container').find('[data-test='+tab+'-list-items]');
-    }
-
-    getCanvasItemTitle(tab, section){
-      return cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer');
-    }
-
-    starCanvasItem(tab,section,title){
-        cy.getCanvasItemTitle(section).contains(title).parent().parent().siblings('.icon-holder').find('.icon-star').click();
-    }
-    getCanvasStarIcon(tab,section,title){
-        return this.getCanvasItemTitle(tab, section).contains(title).parent().parent().siblings('.icon-holder').find('.icon-star');
     }
 
     deleteSupport(index) {
@@ -106,4 +79,4 @@ class RightNav{
         });
     }
 }
-export default RightNav;
+export default PrimaryWorkspace;
