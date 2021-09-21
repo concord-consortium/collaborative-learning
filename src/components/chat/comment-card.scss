@@ -5,7 +5,6 @@
   min-height: 106px;
   margin: 2px;
   border: solid 2px $charcoal-light-2;
-  height: calc(100% - 34px);
   overflow-y: auto;
   white-space: pre-wrap;
   &.selected {
@@ -89,11 +88,20 @@
         font-weight: normal;
         color: $charcoal-dark-1;
       }
-      .menu {
-        margin-right: 8px;
-        opacity: 0.35;
-        height: 13px;
+      .delete-message-icon-container {
+        height: 20px;
+        width: 20px;
+        border-radius: 5px;
+        position: absolute;
+        right: 11px;
+        &:hover {
+          background-color: $charcoal-light-4;
+        }
+        &:active {
+          background-color: $charcoal-light-3;
+        }
       }
+
     }
     .new-marker {
       display: flex;
@@ -162,5 +170,22 @@
         }
       }
     }
+  }
+}
+.custom-modal.error-alert.confirm-delete-alert {
+  height: 149px;
+  width: 200px;
+  border-color: $charcoal;
+  display: flex;
+  justify-content: center;
+  .modal-icon {
+    display: none;
+  }
+  .modal-content {
+    justify-content: center !important;
+    align-items: center !important;
+  }
+  .modal-footer {
+    justify-content: space-evenly;
   }
 }

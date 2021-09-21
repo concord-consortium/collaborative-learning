@@ -1,6 +1,6 @@
 import firebase from "firebase/app";
-import { useEffect } from 'react';
-import { useQuery, useQueryClient, UseQueryOptions } from 'react-query';
+import { useCallback, useEffect } from 'react';
+import { useMutation, useQuery, useQueryClient, UseQueryOptions } from 'react-query';
 import { useDBStore } from './use-stores';
 
 export function useFirestore() {
@@ -39,7 +39,7 @@ export function useCollectionOrderedRealTimeQuery<T>(
       const ref = db.collectionRef(fsPath).withConverter(converter);
       const query = orderBy ? ref.orderBy(orderBy) : ref;
       const unsubscribe = query.onSnapshot(querySnapshot => {
-                            const docs = querySnapshot.docs.map(doc => doc.data());
+                            const docs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                             queryClient.setQueryData(fsPath, docs);
                           });
       return () => unsubscribe();
@@ -51,3 +51,11 @@ export function useCollectionOrderedRealTimeQuery<T>(
   // the actual query function here doesn't do anything; everything comes through the snapshot handler
   return useQuery<T[]>(fsPath || "__EMPTY__", () => new Promise(() => {/* nop */}), useQueryOptions);
 }
+
+export const useDeleteDocument = () => {
+  const [firestore] = useFirestore();
+  const deleteDocument = useCallback((partialPath: string) => {
+    return firestore.docRef(partialPath).delete();
+  }, [firestore]);
+  return useMutation(deleteDocument);
+};

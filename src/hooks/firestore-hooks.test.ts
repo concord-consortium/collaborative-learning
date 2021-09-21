@@ -1,30 +1,42 @@
 import firebase from "firebase/app";
 import { renderHook } from "@testing-library/react-hooks";
-import { useCollectionOrderedRealTimeQuery } from "./firestore-hooks";
+import { useCollectionOrderedRealTimeQuery, useDeleteDocument } from "./firestore-hooks";
 
+var mockData = [
+  { id: 1, value: "foo" },
+  { id: 2, value: "bar" }
+];
 var mockSetQueryData = jest.fn();
 var mockUseQuery = jest.fn((...args) => ({
   isLoading: false,
   isError: false,
-  data: ["foo", "bar"],
+  data: mockData,
   error: undefined
 }));
+var mockUseMutation = jest.fn((callback: (...args: any[]) => void) => {
+  return { mutate: (...args: any[]) => callback(...args) };
+});
 jest.mock("react-query", () => ({
   useQuery: (...args: any[]) => mockUseQuery(...args),
   useQueryClient: () => ({
     setQueryData: mockSetQueryData
-  })
+  }),
+  useMutation: (callback: () => void) => mockUseMutation(callback),
 }));
 
 var mockRootCounter = 0;
 var mockOnSnapshot = (callback: (snap: any) => void) => {
   callback(({
     docs: [
-      { data: () => "foo" },
-      { data: () => "bar" }
+      { id: 1, data: () => ({ value: "foo" }) },
+      { id: 2, data: () => ({ value: "bar" }) }
     ]
   }));
 };
+var mockDelete = jest.fn();
+var mockDocRef = jest.fn((path: string) => ({
+  delete: mockDelete
+}));
 jest.mock("./use-stores", () => ({
   useDBStore: () => ({
     firestore: {
@@ -41,7 +53,8 @@ jest.mock("./use-stores", () => ({
             })
           };
         }
-      })
+      }),
+      docRef: mockDocRef
     }
   })
 }));
@@ -64,7 +77,7 @@ describe("Firestore hooks", () => {
       renderHook(() => useCollectionOrderedRealTimeQuery("foo"));
       expect(mockSetQueryData).toHaveBeenCalledTimes(1);
       expect(mockSetQueryData.mock.calls[0][0]).toBe("root/foo");
-      expect(mockSetQueryData.mock.calls[0][1]).toEqual(["foo", "bar"]);
+      expect(mockSetQueryData.mock.calls[0][1]).toEqual(mockData);
       expect(mockUseQuery.mock.calls[0][0]).toBe("root/foo");
     });
 
@@ -72,8 +85,19 @@ describe("Firestore hooks", () => {
       renderHook(() => useCollectionOrderedRealTimeQuery("bar", { orderBy: "baz" }));
       expect(mockSetQueryData).toHaveBeenCalledTimes(1);
       expect(mockSetQueryData.mock.calls[0][0]).toBe("root/bar");
-      expect(mockSetQueryData.mock.calls[0][1]).toEqual(["foo", "bar"]);
+      expect(mockSetQueryData.mock.calls[0][1]).toEqual(mockData);
       expect(mockUseQuery.mock.calls[0][0]).toBe("root/bar");
+    });
+  });
+
+  describe("useDeleteDocument", () => {
+    it("should delete a document", () => {
+      const { result } = renderHook(() => useDeleteDocument());
+      const docPath = "doc/to/delete";
+      result.current.mutate(docPath);
+      expect(mockDocRef).toHaveBeenCalled();
+      expect(mockDocRef.mock.calls[0][0]).toBe(docPath);
+      expect(mockDelete).toHaveBeenCalled();
     });
   });
 });

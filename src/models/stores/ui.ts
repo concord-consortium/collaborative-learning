@@ -31,6 +31,7 @@ export const UIModel = types
     activeNavTab: ENavTab.kMyWork,
     activeGroupId: "",
     selectedTileIds: types.array(types.string),
+    selectedCommentId: types.maybe(types.string),
     showDemo: false,
     showDemoCreator: false,
     showTeacherContent: true,
