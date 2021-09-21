@@ -24,9 +24,9 @@ class GraphToolTile{
     getGraph(workspaceClass){
         return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .geometry-content`);
     }
-    getGraphPoint(workspaceClass){
-        return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .geometry-content svg g`);
-    }
+    // getGraphPoint(workspaceClass){
+    //     return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .geometry-content svg g`);
+    // }
 
     getGraphPointEclipse(workspaceClass){
         return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .geometry-content svg g ellipse`);

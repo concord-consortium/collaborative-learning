@@ -1,4 +1,4 @@
-import PrimaryWorkspace from "../common/PrimaryWorkspace";
+// import PrimaryWorkspace from "../common/PrimaryWorkspace";
 import ResourcesPanel from "./ResourcesPanel";
 import Dialog from "../common/Dialog";
 

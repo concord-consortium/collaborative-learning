@@ -1,7 +1,7 @@
 import ResourcesPanel from '../../../../support/elements/clue/ResourcesPanel';
 import Canvas from '../../../../support/elements/common/Canvas';
 import ClueCanvas from '../../../../support/elements/clue/cCanvas';
-import PrimaryWorkspace from '../../../../support/elements/common/PrimaryWorkspace';
+// import PrimaryWorkspace from '../../../../support/elements/common/PrimaryWorkspace';
 import GraphToolTile from '../../../../support/elements/clue/GraphToolTile';
 import ImageToolTile from '../../../../support/elements/clue/ImageToolTile';
 import DrawToolTile from '../../../../support/elements/clue/DrawToolTile';
@@ -11,7 +11,7 @@ import TableToolTile from '../../../../support/elements/clue/TableToolTile';
 let resourcesPanel = new ResourcesPanel;
 let canvas = new Canvas;
 let clueCanvas = new ClueCanvas;
-let primaryWorkspace = new PrimaryWorkspace;
+// let primaryWorkspace = new PrimaryWorkspace;
 let graphToolTile = new GraphToolTile;
 let imageToolTile = new ImageToolTile;
 let drawToolTile = new DrawToolTile;

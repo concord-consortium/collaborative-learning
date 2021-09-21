@@ -231,12 +231,12 @@ context('Test graph tool functionalities', function(){
         });
 
         describe.skip('movable line tests',()=>{
-            it('verify add a movable line', function(){
-                canvas.createNewExtraDocumentFromFileMenu(lineDoc, "my-work");
-                clueCanvas.addTile('geometry');
-                graphToolTile.addMovableLine();
+            // it('verify add a movable line', function(){
+            //     canvas.createNewExtraDocumentFromFileMenu(lineDoc, "my-work");
+            //     clueCanvas.addTile('geometry');
+            //     graphToolTile.addMovableLine();
 
-            });
+            // });
             // it.skip('verify move the movable line', function () {
 
             // });
