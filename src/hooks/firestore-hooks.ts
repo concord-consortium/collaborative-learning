@@ -3,6 +3,8 @@ import { useCallback, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from 'react-query';
 import { useDBStore } from './use-stores';
 
+export type WithId<T> = T & { id: string };
+
 export function useFirestore() {
   const db = useDBStore();
   let root = db.firestore.getRootFolder();
@@ -22,7 +24,7 @@ const defaultConverter = <T>(): firebase.firestore.FirestoreDataConverter<T> => 
 export interface IUseOrderedCollectionRealTimeQuery<T> {
   converter?: firebase.firestore.FirestoreDataConverter<T>;
   orderBy?: string;
-  useQueryOptions?: UseQueryOptions<T[]>;
+  useQueryOptions?: UseQueryOptions<WithId<T>[]>;
 }
 export function useCollectionOrderedRealTimeQuery<T>(
           partialPath: string, options?: IUseOrderedCollectionRealTimeQuery<T>) {
@@ -39,6 +41,7 @@ export function useCollectionOrderedRealTimeQuery<T>(
       const ref = db.collectionRef(fsPath).withConverter(converter);
       const query = orderBy ? ref.orderBy(orderBy) : ref;
       const unsubscribe = query.onSnapshot(querySnapshot => {
+                            // add the id to the returned data
                             const docs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                             queryClient.setQueryData(fsPath, docs);
                           });
@@ -47,9 +50,9 @@ export function useCollectionOrderedRealTimeQuery<T>(
   }, [converter, db, fsPath, options?.orderBy, orderBy, queryClient]);
 
   // set staleTime to Infinity; we never need to re-run this query, since the listener handles updates
-  const useQueryOptions: UseQueryOptions<T[]> = { ..._useQueryOptions, staleTime: Infinity };
+  const useQueryOptions: UseQueryOptions<WithId<T>[]> = { ..._useQueryOptions, staleTime: Infinity };
   // the actual query function here doesn't do anything; everything comes through the snapshot handler
-  return useQuery<T[]>(fsPath || "__EMPTY__", () => new Promise(() => {/* nop */}), useQueryOptions);
+  return useQuery<WithId<T>[]>(fsPath || "__EMPTY__", () => new Promise(() => {/* nop */}), useQueryOptions);
 }
 
 export const useDeleteDocument = () => {

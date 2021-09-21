@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { ModalProvider } from "react-modal-hook";
+import { WithId } from "../../hooks/firestore-hooks";
 import { CommentDocument } from "../../lib/firestore-schema";
 import { UserModelType } from "../../models/stores/user";
 import { CommentCard } from "./comment-card";
@@ -27,7 +28,7 @@ describe("CommentCard", () => {
     expect(screen.getByTestId("comment-card-header")).toBeInTheDocument();
   });
   it("should show the correct header icon when there are no comments", () => {
-    const postedComments: CommentDocument[] = [];
+    const postedComments: WithId<CommentDocument>[] = [];
     const commentThread = screen.queryByTestId("comment-thread");
     render((
       <ModalProvider>
@@ -39,8 +40,8 @@ describe("CommentCard", () => {
   });
   it("should show the correct header icon when there are comments and comment appears in card", () => {
     const testComment = "test comment";
-    const postedComments: CommentDocument[] = [
-            { uid: "1", name: "T1", createdAt: new Date(), content: testComment }
+    const postedComments: WithId<CommentDocument>[] = [
+            { id: "1", uid: "1", name: "T1", createdAt: new Date(), content: testComment }
           ];
     render((
       <ModalProvider>
