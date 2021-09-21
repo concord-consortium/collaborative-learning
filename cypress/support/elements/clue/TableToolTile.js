@@ -37,7 +37,7 @@ class TableToolTile{
         return cy.get('.rdg-row .rdg-cell');
     }
     getTableCellWithColIndex(colIndex, colValue){
-        return cy.get('.rdg-row').contains('.rdg-cell[aria-colindex=\"' + colIndex + '\"]', colValue);
+        return cy.get('.rdg-row').contains('.rdg-cell[aria-colindex="' + colIndex + '"]', colValue);
         // return cy.get('.rdg-row .rdg-cell[aria-colindex=\"' + colIndex + '\"]');
     }
     enterData(cell, num){

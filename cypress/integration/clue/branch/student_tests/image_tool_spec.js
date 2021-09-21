@@ -1,13 +1,13 @@
 import Canvas from '../../../../support/elements/common/Canvas';
 import ClueCanvas from '../../../../support/elements/clue/cCanvas';
 import ImageToolTile from '../../../../support/elements/clue/ImageToolTile';
-import PrimaryWorkspace from '../../../../support/elements/common/PrimaryWorkspace';
+// import PrimaryWorkspace from '../../../../support/elements/common/PrimaryWorkspace';
 import ResourcesPanel from "../../../../support/elements/clue/ResourcesPanel";
 
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 const imageToolTile = new ImageToolTile;
-const primaryWorkspace = new PrimaryWorkspace;
+// const primaryWorkspace = new PrimaryWorkspace;
 const resourcesPanel = new ResourcesPanel;
 // const baseUrl = (`${Cypress.config("baseUrl")}`).split('/branch/')[0];
 
@@ -58,7 +58,7 @@ context('Test image functionalities', function(){
             cy.openSection('my-work','workspaces');
             cy.openDocumentWithTitle('my-work','workspaces', '2.1 Drawing Wumps');
             cy.wait(5000);
-            resourcePanel.closePrimaryWorkspaceTabs();
+            // resourcePanel.closePrimaryWorkspaceTabs();
         });
         it('verify restore of all images that were added by URL', function(){
             // TODO: Need to figure out how to check that correct images were reloaded. For now just checking for 3 image tools are reloaded

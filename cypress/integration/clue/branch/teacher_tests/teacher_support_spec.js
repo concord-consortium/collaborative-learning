@@ -1,11 +1,11 @@
 import TeacherDashboard from "../../../../support/elements/clue/TeacherDashboard";
-import PrimaryWorkspace from "../../../../support/elements/common/PrimaryWorkspace";
+// import PrimaryWorkspace from "../../../../support/elements/common/PrimaryWorkspace";
 import ClueCanvas from "../../../../support/elements/clue/cCanvas";
 import ResourcesPanel from "../../../../support/elements/clue/ResourcesPanel";
 
     let dashboard = new TeacherDashboard();
-    let primaryWorkspace = new PrimaryWorkspace();
-    let resourcesPanel = new ResourcesPanel()
+    // let primaryWorkspace = new PrimaryWorkspace();
+    let resourcesPanel = new ResourcesPanel();
     let clueCanvas = new ClueCanvas;
 
     const title = "Drawing Wumps";

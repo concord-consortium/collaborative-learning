@@ -160,6 +160,41 @@ describe("user model", () => {
     expect(user.classHashesForProblemPath("unit/3/4")).toEqual([classHash]);
   });
 
+  it("can set an authenticated teacher user in a network", () => {
+    const user = UserModel.create();
+    const classHash = "class-hash";
+    const activityUrl = "https://concord.org/activity";
+    const unitCode = "unit";
+    const problemOrdinal = "3.4";
+    const offering = PortalClassOffering.create({ offeringId: "1", classHash, activityUrl, unitCode, problemOrdinal });
+    const authenticatedUser: AuthenticatedUser = {
+      type: "teacher",
+      id: "1",
+      portal: "test",
+      firstName: "Fred",
+      lastName: "Flintstone",
+      fullName: "Fred Flintstone",
+      initials: "FF",
+      network: "network",
+      networks: ["network"],
+      className: "Bedrock",
+      classHash,
+      offeringId: "1",
+      portalClassOfferings: [offering]
+    };
+    user.setAuthenticatedUser(authenticatedUser);
+    expect(user.authenticated).toBe(true);
+    expect(user.id).toBe(authenticatedUser.id);
+    expect(user.name).toBe(authenticatedUser.fullName);
+    expect(user.className).toBe(authenticatedUser.className);
+    expect(user.latestGroupId).toBeUndefined();
+    expect(user.isStudent).toBe(false);
+    expect(user.isTeacher).toBe(true);
+    expect(user.isNetworkedTeacher).toBe(true);
+    expect(user.activityUrl).toBe(activityUrl);
+    expect(user.classHashesForProblemPath("unit/3/4")).toEqual([classHash]);
+  });
+
   it("can set a demo teacher user", () => {
     const user = UserModel.create();
     const classHash = "class-hash";
@@ -186,6 +221,9 @@ describe("user model", () => {
     expect(user.isTeacher).toBe(true);
     expect(user.isNetworkedTeacher).toBe(false);
     expect(user.classHashesForProblemPath("unit/3/4")).toEqual([classHash]);
+
+    user.setNetworks("demo-network", ["demo-network"]);
+    expect(user.isNetworkedTeacher).toBe(true);
   });
 
   it("can set connected status", () => {

@@ -20,7 +20,7 @@ type FSDate = Date;
  * At least initially, the list of networks a teacher is a part of will be maintained manually by editing in the
  * Firestore console. It is anticipated that the numbers of teachers and networks will be small.
  */
-interface UserDocument {
+export interface UserDocument {
   uid: string;                // portal user id
   name: string;               // teacher name
   type: string;               // "teacher" for now although maybe students eventually

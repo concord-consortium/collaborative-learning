@@ -85,7 +85,7 @@ export const TabPanelDocumentsSection = observer(({ tab, section, index, numOfSe
                                   onSelectNewDocument, onSelectDocument, onDocumentDragStart,
                                   onDocumentStarClick, onDocumentDeleteClick }: IProps) => {
     const { user } = stores;
-    const isInNetwork = user.type === "teacher" && user.teacherNetwork;
+    const isInNetwork = user.type === "teacher" && user.network;
     const showNewDocumentThumbnail = section.addDocument && !!onSelectNewDocument;
     const newDocumentLabel = getNewDocumentLabel(section, stores);
     const numPanels = isInNetwork ? numOfSections + 1 : numOfSections;

@@ -2,6 +2,7 @@ import firebase from "firebase/app";
 import "firebase/firestore";
 import { DB } from "./db";
 import { escapeKey } from "./fire-utils";
+import { UserDocument } from "./firestore-schema";
 
 export class Firestore {
   private user: firebase.User | null = null;
@@ -79,6 +80,10 @@ export class Firestore {
             : firebase.firestore().doc(collectionOrFullDocumentPath);
   }
 
+  public docRef(partialPath: string) {
+    return firebase.firestore().doc(`${this.getRootFolder()}${partialPath}`);
+  }
+
   public newDocumentRef(collectionPath: string) {
     return firebase.firestore().collection(collectionPath).doc();
   }
@@ -96,5 +101,10 @@ export class Firestore {
 
   public timestamp() {
     return firebase.firestore.FieldValue.serverTimestamp() as unknown as number;
+  }
+
+  public async getFirestoreUser(uid: string) {
+    const userDoc = await this.docRef(`users/${uid}`).get();
+    return userDoc.data() as UserDocument | undefined;
   }
 }

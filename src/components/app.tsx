@@ -50,14 +50,14 @@ function resolveAppMode(
   const { appMode, db, ui} = stores;
   if (appMode === "authed")  {
     if (rawFirebaseJWT) {
-      db.connect({appMode, stores, rawFirebaseJWT}).catch(error => ui.setError(error));
+      return db.connect({appMode, stores, rawFirebaseJWT}).catch(error => ui.setError(error));
     }
     else {
       ui.setError("No firebase token available to connect to db!");
     }
   }
   else {
-    db.connect({appMode, stores})
+    return db.connect({appMode, stores})
       .then(() => {
         if (appMode === "qa") {
           const {qaClear, qaGroup} = urlParams;
@@ -81,7 +81,7 @@ function resolveAppMode(
 }
 
 export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, err?: string) => void) => {
-  const {appConfig, appMode, user, ui} = stores;
+  const {appConfig, appMode, db, user, ui} = stores;
 
   authenticate(appMode, appConfig, urlParams)
     .then(({appMode: newAppMode, authenticatedUser, classInfo, problemId, unitCode}) => {
@@ -99,7 +99,17 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
         });
       }
       initRollbar(stores, problemId || stores.appConfig.defaultProblemOrdinal);
-      resolveAppMode(stores, authenticatedUser.rawFirebaseJWT, onQAClear);
+      return resolveAppMode(stores, authenticatedUser.rawFirebaseJWT, onQAClear);
+    })
+    .then(() => {
+      return user.isTeacher
+              ? db.firestore.getFirestoreUser(user.id)
+              : undefined;
+    })
+    .then(firestoreUser => {
+      if (firestoreUser) {
+        user.setNetworks(firestoreUser.network, firestoreUser.networks);
+      }
     })
     .catch((error) => {
       let errorMessage = error.toString();

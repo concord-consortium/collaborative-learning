@@ -1,9 +1,9 @@
-import PrimaryWorkspace from '../../../../support/elements/common/PrimaryWorkspace';
+// import PrimaryWorkspace from '../../../../support/elements/common/PrimaryWorkspace';
 import Canvas from '../../../../support/elements/common/Canvas';
 import ClueCanvas from '../../../../support/elements/clue/cCanvas';
 import ResourcesPanel from "../../../../support/elements/clue/ResourcesPanel";
 
-const primaryWorkspace = new PrimaryWorkspace;
+// const primaryWorkspace = new PrimaryWorkspace;
 const resourcesPanel = new ResourcesPanel;
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;

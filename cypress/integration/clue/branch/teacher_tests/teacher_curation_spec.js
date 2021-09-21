@@ -1,11 +1,11 @@
 import TeacherDashboard from "../../../../support/elements/clue/TeacherDashboard";
-import PrimaryWorkspace from "../../../../support/elements/common/PrimaryWorkspace";
+// import PrimaryWorkspace from "../../../../support/elements/common/PrimaryWorkspace";
 import ResourcesPanel from "../../../../support/elements/clue/ResourcesPanel";
 import ClueCanvas from "../../../../support/elements/clue/cCanvas";
 
 
     let dashboard = new TeacherDashboard();
-    let primaryWorkspace = new PrimaryWorkspace();
+    // let primaryWorkspace = new PrimaryWorkspace();
     let resourcesPanel = new ResourcesPanel();
     let clueCanvas = new ClueCanvas;
 

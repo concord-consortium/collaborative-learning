@@ -130,7 +130,7 @@ service cloud.firestore {
       allow read, write: if isAuthedTeacher();
 
       function getTeacherNetworks() {
-        let platformUserId = request.auth.token.platform_user_id;
+        let platformUserId = string(request.auth.token.platform_user_id);
         return get(/databases/$(database)/documents/authed/$(portal)/users/$(platformUserId)).data.networks;
       }
 
@@ -140,7 +140,7 @@ service cloud.firestore {
 
       match /users/{userId} {
         // teachers can read their own user documents
-        allow read: if isAuthedTeacher() && (request.auth.token.platform_user_id == userId);
+        allow read: if isAuthedTeacher() && (string(request.auth.token.platform_user_id) == userId);
         // currently, only admins can write user information
         allow write: if false;
       }
@@ -168,7 +168,7 @@ service cloud.firestore {
 
         function teacherIsCurriculumOwner() {
           let curriculumOwner = getCurriculumOwner();
-          return request.auth.token.platform_user_id == curriculumOwner;
+          return string(request.auth.token.platform_user_id) == curriculumOwner;
         }
 
         function teacherCanAccessCurriculum() {

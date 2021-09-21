@@ -2,7 +2,6 @@ import initials from "initials";
 import { types } from "mobx-state-tree";
 import { AuthenticatedUser, isAuthenticatedTeacher } from "../../lib/auth";
 import { PortalFirebaseStudentJWT } from "../../lib/portal-types";
-import { urlParams } from "../../utilities/url-params";
 import { UserTypeEnum } from "./user-types";
 
 export const PortalClassOffering = types
@@ -37,7 +36,8 @@ export const UserModel = types
     offeringId: "",
     latestGroupId: types.maybe(types.string),
     portal: "",
-    teacherNetwork: types.maybe(types.string),
+    network: types.maybe(types.string),
+    networks: types.array(types.string),
     loggingRemoteEndpoint: types.maybe(types.string),
     portalClassOfferings: types.array(PortalClassOffering),
     demoClassHashes: types.array(types.string),
@@ -64,6 +64,10 @@ export const UserModel = types
     setId(id: string) {
       self.id = id;
     },
+    setNetworks(network: string, networks: string[]) {
+      self.network = network;
+      self.networks.push(...networks);
+    },
     setAuthenticatedUser(user: AuthenticatedUser) {
       self.authenticated = true;
       self.name = user.fullName;
@@ -71,10 +75,12 @@ export const UserModel = types
       self.id = user.id;
       self.portal = user.portal;
       self.type = user.type;
-      // TODO: replace this with real implementation
-      self.teacherNetwork = isAuthenticatedTeacher(user)
-                              ? urlParams.network || user.network || undefined
-                              : undefined;
+      if (isAuthenticatedTeacher(user)) {
+        self.network = user.network;
+        if (user.networks) {
+          self.networks.push(...user.networks);
+        }
+      }
       self.className = user.className;
       self.classHash = user.classHash;
       self.offeringId = user.offeringId;
@@ -109,7 +115,7 @@ export const UserModel = types
       return self.type === "teacher";
     },
     get isNetworkedTeacher() {
-      return (self.type === "teacher") && !!self.teacherNetwork;
+      return (self.type === "teacher") && !!self.network;
     },
     get initials() {
       return initials(self.name);
