@@ -59,7 +59,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
   return (
     <div className={`comment-card selected`} data-testid="comment-card">
       {renderThreadHeader()}
-      {postedComments?.map((comment: any, idx) => {
+      {postedComments?.map((comment, idx) => {
           const userInitialBackgroundColor = ["#f79999", "#ffc18a", "#99d099", "#ff9", "#b2b2ff", "#efa6ef"];
           const commenterInitial = comment.name.charAt(0);
           const userInitialBackgroundColorIndex = parseInt(comment.uid, 10) % 6;
@@ -76,7 +76,8 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
                 <div className="user-name">{comment.name}</div>
                 <div className="time-stamp">{getDisplayTimeDate(comment.createdAt.getTime())}</div>
                 {isCurrentUserComment &&
-                  <div className="delete-message-icon-container" onClick={() => handleDeleteComment(comment.id)}>
+                  <div className="delete-message-icon-container" data-testid="delete-message-button"
+                        onClick={() => handleDeleteComment(comment.id)}>
                     <DeleteMessageIcon />
                   </div>
                 }

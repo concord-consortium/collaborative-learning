@@ -159,9 +159,6 @@ export const UIModel = types
       removeTileIdFromSelection(tileId: string) {
         self.selectedTileIds.remove(tileId);
       },
-      setSelectedCommentId(commentId: string) {
-        self.selectedCommentId = commentId;
-      },
       setShowDemoCreator(showDemoCreator: boolean) {
         self.showDemoCreator = showDemoCreator;
       },
