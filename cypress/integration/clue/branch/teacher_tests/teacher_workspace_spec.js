@@ -150,6 +150,7 @@ describe('Chat panel for networked teacher', () => {
     cy.get(".comment-text").should("not.exist");
     cy.get("[data-testid=comment-textarea]").type("this is the second line.");
     cy.get("[data-testid=comment-post-button]").click();
+    cy.wait(5000);
     cy.get(".comment-text").should("have.length", 1);
     cy.get(".comment-text").should("contain", "this is the first line.\nthis is the second line.");
   });
@@ -216,4 +217,3 @@ describe('Student Workspace', () => { //flaky -- could be because it is trying t
     });
   });
 });
-

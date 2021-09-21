@@ -151,6 +151,12 @@ describe("dev mode", () => {
     expect(authenticatedUser.type).toBe("teacher");
   });
 
+  it("should generateDevAuthentication for a teacher with a network url parameter", () => {
+    setUrlParams({ fakeUser: "teacher", network: "network" });
+    const { authenticatedUser } = generateDevAuthentication("UNIT", "1.1");
+    expect(authenticatedUser.type).toBe("teacher");
+  });
+
   it("should generateDevAuthentication for a teacher with a fake id", () => {
     setUrlParams({ fakeUser: "teacher:2222" });
     const { authenticatedUser } = generateDevAuthentication("UNIT", "1.1");
