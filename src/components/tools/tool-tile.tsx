@@ -9,6 +9,7 @@ import { kGeometryToolID } from "../../models/tools/geometry/geometry-content";
 import { kTableToolID } from "../../models/tools/table/table-content";
 import { kTextToolID } from "../../models/tools/text/text-content";
 import { kImageToolID } from "../../models/tools/image/image-content";
+import { kPluginToolID } from "../../models/tools/plugin/plugin-content";
 import { transformCurriculumImageUrl } from "../../models/tools/image/image-import-export";
 import { kPlaceholderToolID } from "../../models/tools/placeholder/placeholder-content";
 import { kUnknownToolID } from "../../models/tools/unknown-content";
@@ -20,6 +21,7 @@ import TextToolComponent from "./text-tool";
 import ImageToolComponent from "./image-tool";
 import DrawingToolComponent from "./drawing-tool/drawing-tool";
 import PlaceholderToolComponent from "./placeholder-tool/placeholder-tool";
+import PluginToolComponent from "./plugin-tool";
 import { IToolApi, TileResizeEntry, ToolApiInterfaceContext } from "./tool-api";
 import { HotKeys } from "../../utilities/hot-keys";
 import { TileCommentsComponent } from "./tile-comments";
@@ -83,7 +85,13 @@ export interface IRegisterToolApiProps {
   onUnregisterToolApi: (facet?: string) => void;
 }
 
-export interface IToolTileProps extends IToolTileBaseProps, IRegisterToolApiProps {
+export interface IPluginProps {
+  render: (pluginContainerDiv: any) => void;
+  serialize: () => void;
+  deserialize: (serializedPluginContent: string) => void;
+}
+
+export interface IToolTileProps extends IToolTileBaseProps, IRegisterToolApiProps, IPluginProps {
   toolTile: HTMLElement | null;
 }
 
@@ -101,6 +109,7 @@ const kToolComponentMap: Record<string, ToolComponentInfo> = {
         [kImageToolID]: { ToolComponent: ImageToolComponent, toolTileClass: "image-tool-tile" },
         [kTableToolID]: { ToolComponent: TableToolComponent, toolTileClass: "table-tool-tile" },
         [kTextToolID]: { ToolComponent: TextToolComponent, toolTileClass: "text-tool-tile" },
+        [kPluginToolID]: { ToolComponent: PluginToolComponent, toolTileClass: "plugin-tool-tile" },
         // TODO: should really have a separate unknown tool that shows an "unknown tile" message
         [kUnknownToolID]: { ToolComponent: PlaceholderToolComponent, toolTileClass: "placeholder-tile" }
       };
@@ -258,7 +267,11 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
             ? <ToolComponent
                 key={tileId} toolTile={this.domElement} {...this.props}
                 onRegisterToolApi={this.handleRegisterToolApi}
-                onUnregisterToolApi={this.handleUnregisterToolApi} />
+                onUnregisterToolApi={this.handleUnregisterToolApi}
+                render={this.renderPlugin}
+                serialize={this.serializePlugin}
+                deserialize={this.deserializePlugin}
+              />
             : null;
   }
 
@@ -487,6 +500,36 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
       };
       // calling the resize handler triggers a re-render
       handler(entry);
+    }
+  }
+
+  private renderPlugin = (pluginContainerDiv: any) => {
+    console.log("renderPlugin");
+    if (pluginContainerDiv.current !== null) {
+      const contentDiv = document.createElement("div");
+      contentDiv.setAttribute("class", "plugin-content");
+      contentDiv.setAttribute("id", "plugin-content");
+      contentDiv.innerHTML = "Hello World!";
+      pluginContainerDiv.current.appendChild(contentDiv);
+    }
+  }
+  private serializePlugin = () => {
+    const pluginContentDiv = document.getElementById("plugin-content");
+    console.log("Serialized Content:");
+    const pluginContent  = {content: pluginContentDiv?.innerHTML};
+    const serializedPluginContent = JSON.stringify(pluginContent);
+    console.log(serializedPluginContent);
+  }
+  private deserializePlugin = (serializedPluginContent: string) => {
+    console.log("Deserializing and applying the following content:  " + serializedPluginContent);
+    const deserializedPluginContent = JSON.parse(serializedPluginContent);
+    deserializedPluginContent
+
+    const pluginContentDivs = document.getElementsByClassName("plugin-content");
+    if (pluginContentDivs) {
+      for (let i = 0; i < pluginContentDivs.length; i++) {
+        pluginContentDivs[i].innerHTML = deserializedPluginContent.content;
+      }
     }
   }
 }

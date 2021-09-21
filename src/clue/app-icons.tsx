@@ -13,6 +13,7 @@ import SelectToolIcon from "./assets/icons/select-tool.svg";
 import TableToolIcon from "./assets/icons/table-tool.svg";
 import TextToolIcon from "./assets/icons/text-tool.svg";
 import UndoToolIcon from "./assets/icons/undo-tool.svg";
+import PluginToolIcon from "./assets/icons/plugin-tool.svg";
 
 export const appIcons: Record<string, FunctionComponent<SVGProps<SVGSVGElement>>> = {
   // workspace icons
@@ -29,5 +30,6 @@ export const appIcons: Record<string, FunctionComponent<SVGProps<SVGSVGElement>>
   "icon-select-tool": SelectToolIcon,
   "icon-table-tool": TableToolIcon,
   "icon-text-tool": TextToolIcon,
-  "icon-undo-tool": UndoToolIcon
+  "icon-undo-tool": UndoToolIcon,
+  "icon-plugin-tool": PluginToolIcon
 };
