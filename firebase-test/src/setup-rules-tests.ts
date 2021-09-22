@@ -7,6 +7,7 @@ export const kCLUEFirebaseProjectId = "collaborative-learning-ec215";
 export const genericAuth = { uid: "user-generic" };
 export const thisClass = "this-class";
 export const otherClass = "other-class";
+export const lastClass = "last-class";
 export const studentIdNumeric = 1;
 export const studentId = `${studentIdNumeric}`;
 export const studentAuth = { uid: studentId, platform_user_id: studentIdNumeric, user_type: "student", class_hash: thisClass };
@@ -21,6 +22,12 @@ export const teacher2IdNumeric = 12;
 export const teacher2Id = `${teacher2IdNumeric}`;
 export const teacher2Name = "John Teacher";
 export const teacher2Auth = { uid: teacher2Id, platform_user_id: teacher2IdNumeric, user_type: "teacher", class_hash: otherClass };
+export const teacher3IdNumeric = 13;
+export const teacher3Id = `${teacher3IdNumeric}`;
+export const teacher3Name = "Jade Teacher";
+export const teacher3Auth = { uid: teacher3Id, platform_user_id: teacher3IdNumeric, user_type: "teacher", class_hash: lastClass };
+export const offeringIdNumeric = 2000;
+export const offeringId = `${offeringIdNumeric}`;
 export const noNetwork = null;
 export const network1 = "network-1";
 export const network2 = "network-2";
@@ -41,8 +48,12 @@ export const prepareEachTest = async () => {
   await clearFirestoreData({ projectId: kCLUEFirebaseProjectId });
 }
 
-export const tearDownTests = async () => {
-  await clearFirestoreData({ projectId: kCLUEFirebaseProjectId });
+// Pass false to preserve the contents of the database after tests are run.
+// This is particularly useful in combination with `.only` to see what was
+// written to the database for a particular test.
+// The database contents can be viewed in the emulator UI at http://localhost:4000/firestore
+export const tearDownTests = async (clear = true) => {
+  clear && await clearFirestoreData({ projectId: kCLUEFirebaseProjectId });
   // https://firebase.google.com/docs/firestore/security/test-rules-emulator#run_local_tests
   await Promise.all(apps().map(app => app.delete()))
 };
