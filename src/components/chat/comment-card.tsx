@@ -1,6 +1,7 @@
 import React, { useRef } from "react";
 import { UserModelType } from "../../models/stores/user";
 import { CommentTextBox } from "./comment-textbox";
+import { WithId } from "../../hooks/firestore-hooks";
 import { CommentDocument } from "../../lib/firestore-schema";
 import { getDisplayTimeDate } from "../../utilities/time";
 import { useCautionAlert } from "../utilities/use-caution-alert";
@@ -13,7 +14,7 @@ import "../themes.scss";
 interface IProps {
   user?: UserModelType;
   activeNavTab?: string;
-  postedComments?: CommentDocument[];
+  postedComments?: WithId<CommentDocument>[];
   onPostComment?: (comment: string) => void;
   onDeleteComment?: (commentId: string) => void;
 }
@@ -59,7 +60,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
   return (
     <div className={`comment-card selected`} data-testid="comment-card">
       {renderThreadHeader()}
-      {postedComments?.map((comment: any, idx) => {
+      {postedComments?.map((comment, idx) => {
           const userInitialBackgroundColor = ["#f79999", "#ffc18a", "#99d099", "#ff9", "#b2b2ff", "#efa6ef"];
           const commenterInitial = comment.name.charAt(0);
           const userInitialBackgroundColorIndex = parseInt(comment.uid, 10) % 6;
