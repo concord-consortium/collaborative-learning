@@ -172,9 +172,10 @@ export class AppComponent extends BaseComponent<IProps, IState> {
       );
     }
 
+    const isPreviewing = urlParams.domain && urlParams.domain_uid && !urlParams.token;
     if (user.isStudent) {
       if (!groups.groupForUser(user.id)) {
-        if (appConfig.autoAssignStudentsToIndividualGroups) {
+        if (appConfig.autoAssignStudentsToIndividualGroups || isPreviewing) {
           // use userId as groupId
           db.joinGroup(user.id);
         }
