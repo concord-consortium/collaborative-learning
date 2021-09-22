@@ -118,6 +118,7 @@
             "dataTestHeader": "my-work-section-investigations",
             "dataTestItem": "my-work-list-items",
             "documentTypes": ["problem", "planning"],
+            "order": "original",
             "showStars": ["student", "teacher"]
           },
           {
