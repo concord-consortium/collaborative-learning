@@ -66,6 +66,18 @@ export const adminWriteDoc = async (docPath: string, value: any) => {
   await dbAdmin.doc(docPath).set(value);
 };
 
+export const expectQueryToFail = async (db: firebase.firestore.Firestore, query: firebase.firestore.Query) => {
+  // awaited writes via admin app don't always complete before the read occurs
+  await db.waitForPendingWrites();
+  expect(await assertFails(query.get())).toBeDefined();
+}
+
+export const expectQueryToSucceed = async (db: firebase.firestore.Firestore, query: firebase.firestore.Query) => {
+  // awaited writes via admin app don't always complete before the read occurs
+  await db.waitForPendingWrites();
+  expect(await assertSucceeds(query.get())).toBeDefined();
+}
+
 export const expectReadToFail = async (db: firebase.firestore.Firestore, docPath: string) => {
   // awaited writes via admin app don't always complete before the read occurs
   await db.waitForPendingWrites();

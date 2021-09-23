@@ -1,9 +1,9 @@
 import firebase from "firebase";
 import {
-  adminWriteDoc, expectDeleteToFail, expectReadToFail, expectReadToSucceed, expectWriteToFail, expectWriteToSucceed,
-  genericAuth, initFirestore, network1, network2, offeringId, prepareEachTest, studentAuth,
-  teacher2Auth, teacher2Id, teacher2Name, teacher3Auth, teacher3Id, teacher3Name, teacherAuth, teacherId, teacherName,
-  tearDownTests, thisClass
+  adminWriteDoc, expectDeleteToFail, expectQueryToFail, expectQueryToSucceed, expectReadToFail, expectReadToSucceed,
+  expectWriteToFail, expectWriteToSucceed, genericAuth, initFirestore, network1, network2, offeringId, prepareEachTest,
+  studentAuth, teacher2Auth, teacher2Id, teacher2Name, teacher3Auth, teacher3Id, teacher3Name, teacherAuth, teacherId,
+  teacherName, tearDownTests, thisClass
 } from "./setup-rules-tests";
 
 describe("Firestore security rules for offering (activity) documents", () => {
@@ -40,7 +40,8 @@ describe("Firestore security rules for offering (activity) documents", () => {
 
   describe("offering documents", () => {
     const offeringKey = `${network1}_${offeringId}`;
-    const kOfferingDocPath = `authed/myPortal/offerings/${offeringKey}`;
+    const kOfferingsCollectionPath = "authed/myPortal/offerings";
+    const kOfferingDocPath = `${kOfferingsCollectionPath}/${offeringKey}`;
 
     it("unauthenticated users can't read offering documents", async () => {
       db = initFirestore();
@@ -205,6 +206,41 @@ describe("Firestore security rules for offering (activity) documents", () => {
       db = initFirestore(teacherAuth);
       await adminWriteDoc(kOfferingDocPath, specOffering());
       await expectDeleteToFail(db, kOfferingDocPath);
+    });
+
+    it("authenticated teachers can query for offering documents in their network", async () => {
+      db = initFirestore(teacherAuth);
+      await adminWriteDoc(kOfferingDocPath, specOffering());
+      const query = db.collection(kOfferingsCollectionPath)
+                      .where("network", "==", network1)
+                      .where("problemPath", "==", "msa/1/4");
+      await expectQueryToSucceed(db, query);
+    });
+
+    it("authenticated teachers can query for other offering documents in their network", async () => {
+      db = initFirestore(teacher2Auth);
+      await adminWriteDoc(kOfferingDocPath, specOffering());
+      const query = db.collection(kOfferingsCollectionPath)
+                      .where("network", "==", network1)
+                      .where("problemPath", "==", "msa/1/4");
+      await expectQueryToSucceed(db, query);
+    });
+
+    it("authenticated teachers can't query for offering documents in another network", async () => {
+      db = initFirestore(teacher3Auth);
+      await adminWriteDoc(kOfferingDocPath, specOffering());
+      const query = db.collection(kOfferingsCollectionPath)
+                      .where("network", "==", network1)
+                      .where("problemPath", "==", "msa/1/4");
+      await expectQueryToFail(db, query);
+    });
+
+    it("authenticated teachers can't query for offering documents without specifying a network", async () => {
+      db = initFirestore(teacherAuth);
+      await adminWriteDoc(kOfferingDocPath, specOffering());
+      const query = db.collection(kOfferingsCollectionPath)
+                      .where("problemPath", "==", "msa/1/4");
+      await expectQueryToFail(db, query);
     });
 
     it("authenticated students can't read offering documents", async () => {
