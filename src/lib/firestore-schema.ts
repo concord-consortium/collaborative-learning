@@ -95,6 +95,28 @@ export interface DocumentDocument {
 type DocumentsCollection = FSCollection<DocumentDocument>;
 
 /*
+ * offerings
+ *
+ * Subcollection of domain with several fields copied from portal.
+ * When viewing a particular problem in CLUE, the set of classes available via the network is limited to
+ * those classes that have assigned the same problem. In other words, it makes more sense to search for
+ * offerings first and then use that to determine the available classes.
+ */
+export interface OfferingDocument {
+  id: string;             // e.g. "2000"
+  name: string;           // name/title of activity
+  uri: string;            // e.g. "https://collaborative-learning.concord.org/branch/master/?unit=msa&problem=1.4"
+  context_id: string;     // portal class hash
+  teachers: string[];     // [denormalized] uids of teachers of class
+  unit: string;           // e.g. "msa"
+  problem: string;        // e.g. "1.4"
+  problemPath: string;    // e.g. "msa/1/4"
+  network: string;        // network within which this offering instance is available
+}
+// collection key is `${network}_${offering id}`
+type OfferingsCollection = FSCollection<OfferingDocument>;
+
+/*
  * classes
  *
  * Subcollection of domain with several fields copied from portal (e.g. name, teachers) with
@@ -106,11 +128,12 @@ type DocumentsCollection = FSCollection<DocumentDocument>;
 interface ClassDocument {
   id: string;                 // portal class id
   name: string;               // portal class name
+  uri: string;                // portal class info url
   context_id: string;         // portal class hash
   teachers: string[];         // uids of teachers of class
   network: string;            // network of teacher creating class
 }
-// collection key is context_id (class hash)
+// collection key is `${network}_${context_id (class hash)}`
 type ClassesCollection = FSCollection<ClassDocument>;
 
 /*
@@ -163,6 +186,7 @@ interface DomainDocument {
   users: UsersCollection;
   networks: NetworksCollection;
   classes: ClassesCollection;
+  offerings: OfferingsCollection;
   curriculum: CurriculumCollection;
   documents: DocumentsCollection;
   mcsupports: SupportsCollection;
