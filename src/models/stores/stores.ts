@@ -18,6 +18,7 @@ import { AppMode } from "./store-types";
 
 export interface IBaseStores {
   appMode: AppMode;
+  isPreviewing?: boolean;
   appVersion: string;
   appConfig: AppConfigModelType;
   unit: UnitModelType;
@@ -35,7 +36,6 @@ export interface IBaseStores {
   supports: SupportsModelType;
   clipboard: ClipboardModelType;
   selection: SelectionStoreModelType;
-  isPreviewing?: boolean;
 }
 
 export interface IStores extends IBaseStores {
