@@ -31,7 +31,8 @@ export const GroupModel = types
 
 export const GroupsModel = types
   .model("Groups", {
-    allGroups: types.array(GroupModel)
+    allGroups: types.array(GroupModel),
+    acceptUnknownStudents: false
   })
   .actions((self) => ({
     updateFromDB(uid: string, groups: DBOfferingGroupMap, clazz: ClassModelType) {
@@ -46,12 +47,14 @@ export const GroupsModel = types
           // causing the disconnectedAt timestamp to be set at the groupUser level
           if (groupUser.self) {
             const student = clazz.getUserById(groupUser.self.uid);
-            // skip students who are not recognized members of the class
-            if (student) {
+            // skip students who are not recognized members of the class when authenticated
+            // this actually occurred in the classroom causing great consternation
+            // when previewing, however, we need to accept unknown students
+            if (student || self.acceptUnknownStudents) {
               users.push(GroupUserModel.create({
                 id: groupUserId,
-                name: student.fullName,
-                initials: student.initials,
+                name: student?.fullName || "Unknown",
+                initials: student?.initials || "??",
                 connectedTimestamp,
                 disconnectedTimestamp
               }));

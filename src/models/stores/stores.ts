@@ -18,6 +18,7 @@ import { AppMode } from "./store-types";
 
 export interface IBaseStores {
   appMode: AppMode;
+  isPreviewing?: boolean;
   appVersion: string;
   appConfig: AppConfigModelType;
   unit: UnitModelType;
@@ -67,7 +68,7 @@ export function createStores(params?: ICreateStores): IStores {
         mode: "1-up"
       },
     }),
-    groups: params?.groups || GroupsModel.create({}),
+    groups: params?.groups || GroupsModel.create({ acceptUnknownStudents: params?.isPreviewing }),
     class: params?.class || ClassModel.create({ name: "Null Class", classHash: "" }),
     db: params?.db || new DB(),
     documents: params?.documents || DocumentsModel.create({}),

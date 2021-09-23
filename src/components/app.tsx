@@ -174,7 +174,7 @@ export class AppComponent extends BaseComponent<IProps, IState> {
 
     if (user.isStudent) {
       if (!groups.groupForUser(user.id)) {
-        if (appConfig.autoAssignStudentsToIndividualGroups) {
+        if (appConfig.autoAssignStudentsToIndividualGroups || this.stores.isPreviewing) {
           // use userId as groupId
           db.joinGroup(user.id);
         }
@@ -183,7 +183,6 @@ export class AppComponent extends BaseComponent<IProps, IState> {
         }
       }
     }
-
     return this.renderApp(<AppContentContainerComponent />);
   }
 
