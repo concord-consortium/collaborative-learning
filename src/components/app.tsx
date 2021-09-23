@@ -184,7 +184,6 @@ export class AppComponent extends BaseComponent<IProps, IState> {
         }
       }
     }
-
     return this.renderApp(<AppContentContainerComponent />);
   }
 

@@ -43,6 +43,7 @@ export interface IStores extends IBaseStores {
 
 interface ICreateStores extends Partial<IStores> {
   demoName?: string;
+  isPreviewing?: boolean;
 }
 
 export function createStores(params?: ICreateStores): IStores {
@@ -67,7 +68,7 @@ export function createStores(params?: ICreateStores): IStores {
         mode: "1-up"
       },
     }),
-    groups: params?.groups || GroupsModel.create({}),
+    groups: params?.groups || GroupsModel.create({ acceptUnknownStudents: params?.isPreviewing }),
     class: params?.class || ClassModel.create({ name: "Null Class", classHash: "" }),
     db: params?.db || new DB(),
     documents: params?.documents || DocumentsModel.create({}),

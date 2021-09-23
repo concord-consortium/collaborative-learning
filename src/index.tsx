@@ -36,7 +36,8 @@ const initializeApp = async () => {
   const showDemoCreator = urlParams.demo;
   const demoName = urlParams.demoName;
 
-  const stores = createStores({ appMode, appVersion, appConfig, user, showDemoCreator, demoName });
+  const isPreviewing = !!(urlParams.domain && urlParams.domain_uid && !urlParams.token);
+  const stores = createStores({ appMode, appVersion, appConfig, user, showDemoCreator, demoName, isPreviewing });
 
   await setUnitAndProblem(stores, unitId, problemOrdinal);
 
