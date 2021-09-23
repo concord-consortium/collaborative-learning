@@ -35,6 +35,7 @@ export interface IBaseStores {
   supports: SupportsModelType;
   clipboard: ClipboardModelType;
   selection: SelectionStoreModelType;
+  isPreviewing?: boolean;
 }
 
 export interface IStores extends IBaseStores {
@@ -43,7 +44,6 @@ export interface IStores extends IBaseStores {
 
 interface ICreateStores extends Partial<IStores> {
   demoName?: string;
-  isPreviewing?: boolean;
 }
 
 export function createStores(params?: ICreateStores): IStores {
