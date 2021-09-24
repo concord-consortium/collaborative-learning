@@ -8,7 +8,6 @@
   height: calc(100% - #{$workspace-titlebar-height});
   &.comment-select {
     .document-content {
-      background-color: $comment-select-green;
       .tool-tile {
         border: 2px solid $comment-select-green;
       }
