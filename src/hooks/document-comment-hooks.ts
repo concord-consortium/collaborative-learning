@@ -66,7 +66,7 @@ export const useCommentableDocument = (documentKeyOrSectionPath?: string) => {
   const documentMetadata = useDocumentOrCurriculumMetadata(documentKeyOrSectionPath);
   const validateDocumentMutation = useValidateCommentableDocument();
   return useQuery(documentPath, () => new Promise<DocumentQueryType>((resolve, reject) => {
-    const documentRef = firestore.docRef(documentPath);
+    const documentRef = firestore.doc(documentPath);
     const unsubscribeDocListener = documentRef?.onSnapshot({
       next: docSnapshot => {
         unsubscribeDocListener?.();

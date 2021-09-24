@@ -4,6 +4,17 @@ import { DB } from "./db";
 import { escapeKey } from "./fire-utils";
 import { UserDocument } from "./firestore-schema";
 
+export function isFirestoreError(e: any): e is firebase.firestore.FirestoreError {
+  return (e instanceof Error) && !!(e as firebase.firestore.FirestoreError).code;
+}
+
+// security rules violations are signaled as permissions errors
+// for instance, requesting a non-existent document whose security rules depend on its contents
+// results in a permissions error, because the non-existent document can't satisfy the rules
+export function isFirestorePermissionsError(e: any): e is firebase.firestore.FirestoreError {
+  return isFirestoreError(e) && (e.code === "permission-denied");
+}
+
 export class Firestore {
   private user: firebase.User | null = null;
   private db: DB;
@@ -70,8 +81,8 @@ export class Firestore {
     return this.documentRef(this.getMulticlassSupportDocumentPath(docId));
   }
 
-  public collectionRef(path: string) {
-    return firebase.firestore().collection(path);
+  public collectionRef(fullPath: string) {
+    return firebase.firestore().collection(fullPath);
   }
 
   public documentRef(collectionOrFullDocumentPath: string, documentPath?: string) {
@@ -80,7 +91,11 @@ export class Firestore {
             : firebase.firestore().doc(collectionOrFullDocumentPath);
   }
 
-  public docRef(partialPath: string) {
+  public collection(partialPath: string) {
+    return firebase.firestore().collection(`${this.getRootFolder()}${partialPath}`);
+  }
+
+  public doc(partialPath: string) {
     return firebase.firestore().doc(`${this.getRootFolder()}${partialPath}`);
   }
 
@@ -104,7 +119,7 @@ export class Firestore {
   }
 
   public async getFirestoreUser(uid: string) {
-    const userDoc = await this.docRef(`users/${uid}`).get();
+    const userDoc = await this.doc(`users/${uid}`).get();
     return userDoc.data() as UserDocument | undefined;
   }
 }

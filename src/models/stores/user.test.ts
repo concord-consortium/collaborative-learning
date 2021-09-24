@@ -1,11 +1,11 @@
-import { PortalClassOffering, UserModel } from "./user";
+import { UserPortalOffering, UserModel } from "./user";
 import { AuthenticatedUser } from "../../lib/auth";
 import { PortalFirebaseStudentJWT } from "../../lib/portal-types";
 
-describe("PortalClassOffering", () => {
+describe("UserPortalOffering", () => {
 
   it("defaults to empty", () => {
-    const offering = PortalClassOffering.create();
+    const offering = UserPortalOffering.create();
     expect(offering.classId).toBe("");
     expect(offering.classHash).toBe("");
     expect(offering.problemPath).toBe("");
@@ -16,7 +16,7 @@ describe("PortalClassOffering", () => {
     const kClassHash = "class-hash";
     const kUnitCode = "unit";
     const kProblemOrdinal = "2.3";
-    const offering = PortalClassOffering.create({
+    const offering = UserPortalOffering.create({
                       classId: kClassId,
                       classHash: kClassHash,
                       unitCode: kUnitCode,
@@ -133,7 +133,7 @@ describe("user model", () => {
     const activityUrl = "https://concord.org/activity";
     const unitCode = "unit";
     const problemOrdinal = "3.4";
-    const offering = PortalClassOffering.create({ offeringId: "1", classHash, activityUrl, unitCode, problemOrdinal });
+    const offering = UserPortalOffering.create({ offeringId: "1", classHash, activityUrl, unitCode, problemOrdinal });
     const authenticatedUser: AuthenticatedUser = {
       type: "teacher",
       id: "1",
@@ -166,7 +166,7 @@ describe("user model", () => {
     const activityUrl = "https://concord.org/activity";
     const unitCode = "unit";
     const problemOrdinal = "3.4";
-    const offering = PortalClassOffering.create({ offeringId: "1", classHash, activityUrl, unitCode, problemOrdinal });
+    const offering = UserPortalOffering.create({ offeringId: "1", classHash, activityUrl, unitCode, problemOrdinal });
     const authenticatedUser: AuthenticatedUser = {
       type: "teacher",
       id: "1",

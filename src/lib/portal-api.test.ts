@@ -1,7 +1,8 @@
-import { getPortalOfferings, IPortalOffering, PortalOfferingParser } from "./portal-api";
 import nock from "nock";
+import { getPortalClassOfferings, getPortalOfferings, PortalOfferingParser } from "./portal-api";
+import { IPortalOffering } from "./portal-types";
 import { TeacherMineClasses, TeacherOfferings } from "../test-fixtures/sample-portal-offerings";
-import { AppConfigModel } from "../models/stores/app-config-model";
+import { AppConfigModel, AppConfigModelType } from "../models/stores/app-config-model";
 
 const userType = "teacher";
 const userID = 22;
@@ -95,6 +96,19 @@ describe("Portal Offerings", () => {
         const unitCode = getUnitCode(samplePortalOffering.activity_url, appConfig);
         expect(unitCode).toBeUndefined();
       });
+    });
+
+    describe("getPortalClassOfferings", () => {
+      const mockAppConfig = { defaultProblemOrdinal: "1.1", defaultUnit: "sas", unitCodeMap: {} } as AppConfigModelType;
+      const mockUrlParams = {
+              class: "https://learn.staging.concord.org/api/v1/classes/242",
+              offering: "https://collaborative-learning.concord.org/branch/master/?problem=1.2",
+              reportType: "report-type",
+              token: "token"
+            };
+      const offerings = getPortalClassOfferings(TeacherOfferings, mockAppConfig, mockUrlParams);
+      // TeacherOfferings has one non-CLUE activity
+      expect(offerings.length).toBe(TeacherOfferings.length - 1);
     });
   });
 });

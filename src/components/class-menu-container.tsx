@@ -4,7 +4,7 @@ import { inject, observer } from "mobx-react";
 import { BaseComponent, IBaseProps } from "./base";
 import { LogEventName, Logger, LogEventMethod } from "../lib/logger";
 import { IDropdownItem } from "@concord-consortium/react-components";
-import { IPortalClassOffering } from "../models/stores/user";
+import { IUserPortalOffering } from "../models/stores/user";
 import { CustomSelect } from "../clue/components/custom-select";
 
 interface IProps extends IBaseProps {}
@@ -52,7 +52,7 @@ export class ClassMenuContainer extends BaseComponent <IProps> {
         window.location.replace(url);
       };
 
-      const addMenuItemForOffering = (offering: IPortalClassOffering, showProblemTitle: boolean) => {
+      const addMenuItemForOffering = (offering: IUserPortalOffering, showProblemTitle: boolean) => {
         // Note that the same problem can be assigned multiple times to the same class
         // (e.g. as a pre- and post-test), so we optionally include the activity title as well.
         const text = showProblemTitle && offering.activityTitle

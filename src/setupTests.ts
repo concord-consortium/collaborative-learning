@@ -1,4 +1,7 @@
 import "@testing-library/jest-dom";
+import { enableFetchMocks } from "jest-fetch-mock";
+// make fetch mocking available in all tests
+enableFetchMocks();
 
 /*
  * jestSpyConsole

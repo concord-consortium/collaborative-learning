@@ -125,11 +125,12 @@ type OfferingsCollection = FSCollection<OfferingDocument>;
  * Networked access will be mediated by Firestore security rules which can check whether the requesting user and
  * one of the teachers of the class share a network.
  */
-interface ClassDocument {
+export interface ClassDocument {
   id: string;                 // portal class id
   name: string;               // portal class name
   uri: string;                // portal class info url
   context_id: string;         // portal class hash
+  teacher: string;            // name of primary(?) teacher
   teachers: string[];         // uids of teachers of class
   network: string;            // network of teacher creating class
 }

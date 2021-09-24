@@ -1,14 +1,16 @@
 import initials from "initials";
-import { types } from "mobx-state-tree";
+import { Instance, types } from "mobx-state-tree";
 import { AuthenticatedUser, isAuthenticatedTeacher } from "../../lib/auth";
 import { PortalFirebaseStudentJWT } from "../../lib/portal-types";
 import { UserTypeEnum } from "./user-types";
 
-export const PortalClassOffering = types
-  .model("PortalClassOffering", {
+export const UserPortalOffering = types
+  .model("UserPortalOffering", {
     classId: "",
     classHash: "",
     className: "",
+    classUrl: "",
+    teacher: "",
     activityTitle: "",
     activityUrl: "",
     problemOrdinal: "",
@@ -23,7 +25,7 @@ export const PortalClassOffering = types
     }
   }));
 
-export type IPortalClassOffering = typeof PortalClassOffering.Type;
+export type IUserPortalOffering = Instance<typeof UserPortalOffering>;
 
 export const UserModel = types
   .model("User", {
@@ -39,7 +41,7 @@ export const UserModel = types
     network: types.maybe(types.string),
     networks: types.array(types.string),
     loggingRemoteEndpoint: types.maybe(types.string),
-    portalClassOfferings: types.array(PortalClassOffering),
+    portalClassOfferings: types.array(UserPortalOffering),
     demoClassHashes: types.array(types.string),
     lastSupportViewTimestamp: types.maybe(types.number),
     lastStickyNoteViewTimestamp: types.maybe(types.number)
