@@ -126,10 +126,12 @@ describe("Teacher network functions", () => {
       resetMocks();
     });
 
+    const classDocPath = `classes/test-network_${kClass1Hash}`;
+
     it("should do nothing if the class already exists", async () => {
       mockDocGet.mockImplementation(() => Promise.resolve(fsClass1));
       const result = await syncClass(firestore, kPortalJWT, partClass1);
-      expect(mockDoc).toHaveBeenCalledWith("classes/test-network_class-hash-1");
+      expect(mockDoc).toHaveBeenCalledWith(classDocPath);
       expect(mockDocGet).toHaveBeenCalled();
       expect(mockDocSet).not.toHaveBeenCalled();
       return result;
@@ -140,7 +142,7 @@ describe("Teacher network functions", () => {
       // !ok response from fetch
       fetchMock.mockResponseOnce('{}', { status: 500, headers: { 'content-type': 'application/json' } });
       const result = await syncClass(firestore, kPortalJWT, partClass1);
-      expect(mockDoc).toHaveBeenCalledWith("classes/test-network_class-hash-1");
+      expect(mockDoc).toHaveBeenCalledWith(classDocPath);
       expect(mockDocGet).toHaveBeenCalled();
       expect(mockDocSet).not.toHaveBeenCalled();
       return result;
@@ -150,7 +152,7 @@ describe("Teacher network functions", () => {
       mockDocGet.mockImplementation(() => { throw new MockFirestorePermissionsError(); });
       fetchMock.mockRejectOnce(new Error());
       const result = await syncClass(firestore, kPortalJWT, partClass1);
-      expect(mockDoc).toHaveBeenCalledWith("classes/test-network_class-hash-1");
+      expect(mockDoc).toHaveBeenCalledWith(classDocPath);
       expect(mockDocGet).toHaveBeenCalled();
       expect(mockDocSet).not.toHaveBeenCalled();
       return result;
@@ -160,7 +162,7 @@ describe("Teacher network functions", () => {
       mockDocGet.mockImplementation(() => { throw new MockFirestorePermissionsError(); });
       fetchMock.mockResponseOnce(JSON.stringify(portalClass1));
       const result = await syncClass(firestore, kPortalJWT, partClass1);
-      expect(mockDoc).toHaveBeenCalledWith("classes/test-network_class-hash-1");
+      expect(mockDoc).toHaveBeenCalledWith(classDocPath);
       expect(mockDocGet).toHaveBeenCalled();
       expect(mockDocSet).toHaveBeenCalledWith(fsClass1);
       return result;
@@ -173,10 +175,12 @@ describe("Teacher network functions", () => {
       resetMocks();
     });
 
+    const offeringDocPath = `offerings/test-network_${kOffering1Id}`;
+
     it("should do nothing if the offering already exists", async () => {
       mockDocGet.mockImplementation(() => Promise.resolve(fsOffering1));
       const result = await syncOffering(firestore, kPortalJWT, kClass1Url, partOffering1);
-      expect(mockDoc).toHaveBeenCalledWith("offerings/test-network_class-hash-1");
+      expect(mockDoc).toHaveBeenCalledWith(offeringDocPath);
       expect(mockDocGet).toHaveBeenCalled();
       expect(mockDocSet).not.toHaveBeenCalled();
       return result;
@@ -187,7 +191,7 @@ describe("Teacher network functions", () => {
       // !ok response from fetch
       fetchMock.mockResponseOnce('{}', { status: 500, headers: { 'content-type': 'application/json' } });
       const result = await syncOffering(firestore, kPortalJWT, kClass1Url, partOffering1);
-      expect(mockDoc).toHaveBeenCalledWith("offerings/test-network_class-hash-1");
+      expect(mockDoc).toHaveBeenCalledWith(offeringDocPath);
       expect(mockDocGet).toHaveBeenCalled();
       expect(mockDocSet).not.toHaveBeenCalled();
       return result;
@@ -197,7 +201,7 @@ describe("Teacher network functions", () => {
       mockDocGet.mockImplementation(() => { throw new MockFirestorePermissionsError(); });
       fetchMock.mockRejectOnce(new Error());
       const result = await syncOffering(firestore, kPortalJWT, kClass1Url, partOffering1);
-      expect(mockDoc).toHaveBeenCalledWith("offerings/test-network_class-hash-1");
+      expect(mockDoc).toHaveBeenCalledWith(offeringDocPath);
       expect(mockDocGet).toHaveBeenCalled();
       expect(mockDocSet).not.toHaveBeenCalled();
       return result;
@@ -207,7 +211,7 @@ describe("Teacher network functions", () => {
       mockDocGet.mockImplementation(() => { throw new MockFirestorePermissionsError(); });
       fetchMock.mockResponseOnce(JSON.stringify(portalClass1));
       const result = await syncOffering(firestore, kPortalJWT, kClass1Url, partOffering1);
-      expect(mockDoc).toHaveBeenCalledWith("offerings/test-network_class-hash-1");
+      expect(mockDoc).toHaveBeenCalledWith(offeringDocPath);
       expect(mockDocGet).toHaveBeenCalled();
       expect(mockDocSet).toHaveBeenCalledWith(fsOffering1);
       return result;

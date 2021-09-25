@@ -105,9 +105,9 @@ export async function syncClass(firestore: Firestore, rawPortalJWT: string, aCla
 export async function syncOffering(
   firestore: Firestore, rawPortalJWT: string, classUrl: string, offering: OfferingWithoutTeachers)
 {
-  const { context_id, network } = offering;
+  const { network, id } = offering;
   if (classUrl && network && rawPortalJWT) {
-    const offeringDoc = firestore.doc(`offerings/${network}_${context_id}`);
+    const offeringDoc = firestore.doc(`offerings/${network}_${id}`);
     try {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const fsOffering = await offeringDoc.get();
