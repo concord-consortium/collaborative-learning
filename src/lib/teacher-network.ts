@@ -124,3 +124,11 @@ export async function syncOffering(
     }
   }
 }
+
+export function getNetworkClassesThatAssignedProblem(firestore: Firestore, network: string, problemPath: string) {
+  return firestore
+          .collection("offerings")
+          .where("network", "==", network)
+          .where("problemPath", "==", problemPath)
+          .get();
+}
