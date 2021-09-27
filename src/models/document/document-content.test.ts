@@ -1,5 +1,6 @@
 import {
-  DocumentContentModel, DocumentContentModelType, cloneContentWithUniqueIds, DocumentContentSnapshotType
+  cloneContentWithUniqueIds, createDefaultSectionedContent,
+  DocumentContentModel, DocumentContentModelType, DocumentContentSnapshotType
 } from "./document-content";
 import { IDropRowInfo } from "../../models/document/document-content";
 import { cloneTileSnapshotWithoutId, IDragTileItem } from "../../models/tools/tool-tile";
@@ -7,6 +8,7 @@ import { defaultTextContent } from "../tools/text/text-content";
 import { IDocumentExportOptions } from "../tools/tool-content-info";
 import { safeJsonParse } from "../../utilities/js-utils";
 import placeholderImage from "../../assets/image_placeholder.png";
+import { SectionModel, SectionModelType } from "../curriculum/section";
 
 // mock uniqueId so we can recognize auto-generated IDs
 jest.mock("../../utilities/js-utils", () => {
@@ -696,6 +698,7 @@ describe("DocumentContentModel", () => {
     const row = content.getRowByIndex(1);
     expect(row!.tileCount).toBe(1);
     const tileId = row!.getTileIdAtIndex(0);
+    expect(tileId).toBe("Foo_Text_1");
     const tile = tileId ? content.tileMap.get(tileId) : undefined;
     const tileContent = tile!.content;
     expect(tileContent.type).toBe("Text");
@@ -1463,5 +1466,16 @@ describe("DocumentContentModel -- user-logging actions", () => {
     // deleting it again has no effect
     documentContent.userDeleteTile(newTileId!);
     expect(logTileEvent).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("DocumentContentModel -- createDefaultSectionedContent", () => {
+  it("creates sectioned content", () => {
+    const sections: SectionModelType[] = [
+            SectionModel.create({ type: "foo" }),
+            SectionModel.create({ type: "bar" })
+          ];
+    const content = createDefaultSectionedContent(sections);
+    expect(content.rowCount).toBe(4);
   });
 });
