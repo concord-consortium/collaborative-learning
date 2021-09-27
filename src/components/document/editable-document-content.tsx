@@ -87,7 +87,7 @@ export const EditableDocumentContent: React.FC<IProps> = props => {
   const isShowingToolbar = !!toolbar && !isReadOnly;
   const showToolbarClass = isShowingToolbar ? "show-toolbar" : "hide-toolbar";
   const isChatEnabled = isNetworkedTeacher && urlParams.chat;
-  const documentSelectedForComment = isChatEnabled && ui.showChatPanel && ui.selectedTileIds.length === 0;
+  const documentSelectedForComment = isChatEnabled && ui.showChatPanel && ui.selectedTileIds.length === 0 && !isPrimary;
   const editableDocContentClass = classNames("editable-document-content", showToolbarClass,
                                              {"comment-select" : documentSelectedForComment});
   return (
