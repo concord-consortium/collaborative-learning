@@ -2,13 +2,13 @@ import {
   cloneContentWithUniqueIds, createDefaultSectionedContent,
   DocumentContentModel, DocumentContentModelType, DocumentContentSnapshotType
 } from "./document-content";
+import { SectionModel, SectionModelType } from "../curriculum/section";
 import { IDropRowInfo } from "../../models/document/document-content";
 import { cloneTileSnapshotWithoutId, IDragTileItem } from "../../models/tools/tool-tile";
 import { defaultTextContent } from "../tools/text/text-content";
 import { IDocumentExportOptions } from "../tools/tool-content-info";
 import { safeJsonParse } from "../../utilities/js-utils";
 import placeholderImage from "../../assets/image_placeholder.png";
-import { SectionModel, SectionModelType } from "../curriculum/section";
 
 // mock uniqueId so we can recognize auto-generated IDs
 jest.mock("../../utilities/js-utils", () => {
