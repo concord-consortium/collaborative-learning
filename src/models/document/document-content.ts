@@ -87,7 +87,9 @@ export const DocumentContentModel = types
   })
   .volatile(self => ({
     visibleRows: [] as string[],
-    highlightPendingDropLocation: -1
+    highlightPendingDropLocation: -1,
+    importContextCurrentSection: "",
+    importContextTileCounts: {} as Record<string, number>
   }))
   .views(self => {
     // used for drag/drop self-drop detection, for instance
@@ -363,6 +365,20 @@ export const DocumentContentModel = types
     }
   }))
   .actions(self => ({
+    setImportContext(section: string) {
+      self.importContextCurrentSection = section;
+      self.importContextTileCounts = {};
+    },
+    getNextTileId(tileType: string) {
+      if (!self.importContextTileCounts[tileType]) {
+        self.importContextTileCounts[tileType] = 1;
+      }
+      else {
+        ++self.importContextTileCounts[tileType];
+      }
+      const section = self.importContextCurrentSection || "document";
+      return `${section}_${tileType}_${self.importContextTileCounts[tileType]}`;
+    },
     insertRow(row: TileRowModelType, index?: number) {
       self.rowMap.put(row);
       if ((index != null) && (index < self.rowOrder.length)) {
@@ -910,23 +926,59 @@ interface OriginalTileLayoutModel {
   height?: number;
 }
 
+interface OriginalSectionHeaderContent {
+  isSectionHeader: true;
+  sectionId: string;
+}
+
+function isOriginalSectionHeaderContent(content: IAuthoredTileContent | OriginalSectionHeaderContent)
+          : content is OriginalSectionHeaderContent {
+  return !!content?.isSectionHeader && !!content.sectionId;
+}
+
 interface OriginalToolTileModel {
+  id?: string;
   display?: DisplayUserType;
   layout?: OriginalTileLayoutModel;
-  content: any;
+  content: IAuthoredTileContent | OriginalSectionHeaderContent;
 }
+interface OriginalAuthoredToolTileModel extends OriginalToolTileModel {
+  content: IAuthoredTileContent;
+}
+function isOriginalAuthoredToolTileModel(tile: OriginalToolTileModel): tile is OriginalAuthoredToolTileModel {
+  return !!(tile.content as IAuthoredTileContent)?.type && !tile.content.isSectionHeader;
+}
+
 type OriginalTilesSnapshot = Array<OriginalToolTileModel | OriginalToolTileModel[]>;
+
+function addImportedTileInNewRow(
+          content: DocumentContentModelType,
+          tile: OriginalAuthoredToolTileModel,
+          options: INewTileOptions) {
+  const id = tile.id || content.getNextTileId(tile.content.type);
+  const tileSnapshot = { id, ...tile };
+  return content.addTileSnapshotInNewRow(tileSnapshot as ToolTileSnapshotInType, options);
+}
+
+function addImportedTileInExistingRow(
+          content: DocumentContentModelType,
+          tile: OriginalAuthoredToolTileModel,
+          options: INewTileOptions) {
+  const id = tile.id || content.getNextTileId(tile.content.type);
+  const tileSnapshot = { id, ...tile };
+  return content.addTileSnapshotInExistingRow(tileSnapshot as ToolTileSnapshotInType, options);
+}
 
 function migrateTile(content: DocumentContentModelType, tile: OriginalToolTileModel) {
   const { layout, ...newTile } = cloneDeep(tile);
   const tileHeight = layout?.height;
-  const { isSectionHeader, sectionId } = newTile.content;
-  if (isSectionHeader && sectionId) {
+  if (isOriginalSectionHeaderContent(newTile.content)) {
+    const { sectionId } = newTile.content;
+    content.setImportContext(sectionId);
     content.addSectionHeaderRow(sectionId);
   }
-  else {
-    const options = { rowIndex: content.rowCount, rowHeight: tileHeight };
-    content.addTileSnapshotInNewRow(newTile, options);
+  else if (isOriginalAuthoredToolTileModel(newTile)) {
+    addImportedTileInNewRow(content, newTile, { rowIndex: content.rowCount, rowHeight: tileHeight });
   }
 }
 
@@ -936,13 +988,15 @@ function migrateRow(content: DocumentContentModelType, tiles: OriginalToolTileMo
     const { layout, ...newTile } = cloneDeep(tile);
     const tileHeight = layout?.height;
     const options = { rowIndex: insertRowIndex, rowHeight: tileHeight };
-    if (tileIndex === 0) {
-      const newRowInfo = content.addTileSnapshotInNewRow(newTile, options);
-      const newRowIndex = content.getRowIndex(newRowInfo.rowId);
-      (newRowIndex >= 0) && (insertRowIndex = newRowIndex);
-    }
-    else {
-      content.addTileSnapshotInExistingRow(newTile, options);
+    if (isOriginalAuthoredToolTileModel(newTile)) {
+      if (tileIndex === 0) {
+        const newRowInfo = addImportedTileInNewRow(content, newTile, options);
+        const newRowIndex = content.getRowIndex(newRowInfo.rowId);
+        (newRowIndex >= 0) && (insertRowIndex = newRowIndex);
+      }
+      else {
+        addImportedTileInExistingRow(content, newTile, options);
+      }
     }
   });
 }
