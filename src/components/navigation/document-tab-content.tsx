@@ -64,7 +64,7 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
   const selectedSection = tabSpec.tab === "supports" ? ENavTabSectionType.kTeacherSupports : undefined;
   const documentView = referenceDocument && !referenceDocument?.getProperty("isDeleted") &&
     <div>
-      <div className={`document-header ${tabSpec.tab} ${sectionClass}`}>
+      <div className={`document-header ${tabSpec.tab} ${sectionClass}`} onClick={() => ui.setSelectedTile()}>
         <div className={`document-title`}>
           {documentTitle(referenceDocument, appConfigStore, problemStore)}
         </div>
