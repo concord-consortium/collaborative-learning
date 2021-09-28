@@ -43,6 +43,9 @@ export const DocumentsModel = types
     }
   }))
   .views(self => ({
+    getTypeOfTileInDocument(documentKey: string, tileId: string) {
+      return self.getDocument(documentKey)?.content.getTileType(tileId);
+    },
     getNextPersonalDocumentTitle(user: UserModelType, base: string) {
       let maxUntitled = 0;
       self.byTypeForUser(PersonalDocument, user.id)

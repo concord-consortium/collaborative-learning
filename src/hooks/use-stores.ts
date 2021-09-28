@@ -57,6 +57,19 @@ export function useDocumentOrCurriculumMetadata(key?: string): IDocumentMetadata
   }, [documentMetadata, key]);
 }
 
+export function useTypeOfTileInDocumentOrCurriculum(key?: string, tileId?: string) {
+  const { documents } = useStores();
+  if (!key || !tileId) return;
+  if (isSectionPath(key)) {
+    // for curriculum documents, tileId is `${section}_${tileType}_${index}`
+    const execResult = /.*_(.+)_\d+$/.exec(tileId);
+    return execResult?.[1];
+  }
+  else {
+    return documents.getTypeOfTileInDocument(key, tileId);
+  }
+}
+
 export function useFeatureFlag(feature: string) {
   return isFeatureSupported(useStores(), feature);
 }
