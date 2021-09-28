@@ -108,6 +108,38 @@ export class Firestore {
     return docRef.get();
   }
 
+  /*
+   * Guarantees the existence of the specified document by reading it first and then
+   * creating it if it doesn't already exist. Optionally, client can specify a
+   * `shouldUpdate()` function which determines whether the document should be written
+   * even if it already exists (e.g. because the contents have changed). When either
+   * creating or updating the document, the client's `writeContent()` function is called
+   * to determine the content to be written. Returns the read content in the case of
+   * preexisting documents that are not updated or the promise returned from the `set()`
+   * function in the case of documents created or updated.
+   */
+  public async guaranteeDocument<T>(
+    partialPath: string, writeContent: () => Promise<T>, shouldUpdate?: (content?: T) => boolean)
+  {
+    const docRef = this.doc(partialPath);
+    try {
+      const content: T | undefined = (await docRef.get()).data() as T | undefined;
+      if (shouldUpdate?.(content)) {
+        // update the document if client indicates the need to do so
+        return docRef.set(await writeContent(), { merge: true });
+      }
+      return content;
+    }
+    catch(e) {
+      // security rules violations (e.g. requests for non-existent documents whose security
+      // rules depend on the contents of the document) are signaled as permissions errors
+      if (isFirestorePermissionsError(e)) {
+        // create the document if it doesn't already exist
+        return docRef.set(await writeContent());
+      }
+    }
+  }
+
   public batch(fn: (b: firebase.firestore.WriteBatch) => void) {
     const batch = firebase.firestore().batch();
     fn(batch);

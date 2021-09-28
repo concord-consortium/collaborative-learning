@@ -51,7 +51,7 @@ export function syncTeacherClassesAndOfferings(firestore: Firestore, user: UserM
   const { network } = user;
   if (!network) return [];
 
-  const promises: Promise<void>[] = [];
+  const promises: Promise<any>[] = [];
 
   // map portal offerings to classes
   const userClasses: Record<string, ClassWithoutTeachers> = {};
@@ -63,8 +63,8 @@ export function syncTeacherClassesAndOfferings(firestore: Firestore, user: UserM
   });
 
   // synchronize the classes
-  Object.keys(userClasses).forEach(async classHash => {
-    promises.push(syncClass(firestore, rawPortalJWT, userClasses[classHash]));
+  Object.keys(userClasses).forEach(async context_id => {
+    promises.push(syncClass(firestore, rawPortalJWT, userClasses[context_id]));
   });
 
   // synchronize the offerings
@@ -84,21 +84,13 @@ export function syncTeacherClassesAndOfferings(firestore: Firestore, user: UserM
 export async function syncClass(firestore: Firestore, rawPortalJWT: string, aClass: ClassWithoutTeachers) {
   const { uri, context_id, network } = aClass;
   if (uri && context_id && network && rawPortalJWT) {
-    const classDoc = firestore.doc(`classes/${network}_${context_id}`);
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const fsClass = await classDoc.get();
-      // class already exists in firestore; could sync contents but we'll skip for now
-    }
-    catch(e) {
-      if (isFirestorePermissionsError(e)) {
-        const teachers = await getClassTeachers(uri, rawPortalJWT);
-        if (teachers) {
-          aClass.teachers = teachers;
-          classDoc.set(aClass);
-        }
+    return firestore.guaranteeDocument(`classes/${network}_${context_id}`, async () => {
+      const teachers = await getClassTeachers(uri, rawPortalJWT);
+      if (teachers) {
+        aClass.teachers = teachers;
       }
-    }
+      return aClass;
+    });
   }
 }
 
@@ -107,21 +99,13 @@ export async function syncOffering(
 {
   const { network, id } = offering;
   if (classUrl && network && rawPortalJWT) {
-    const offeringDoc = firestore.doc(`offerings/${network}_${id}`);
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const fsOffering = await offeringDoc.get();
-      // offering already exists in firestore; could sync contents but we'll skip for now
-    }
-    catch(e) {
-      if (isFirestorePermissionsError(e)) {
-        const teachers = await getClassTeachers(classUrl, rawPortalJWT);
-        if (teachers) {
-          offering.teachers = teachers;
-          offeringDoc.set(offering);
-        }
+    return firestore.guaranteeDocument(`offerings/${network}_${id}`, async () => {
+      const teachers = await getClassTeachers(classUrl, rawPortalJWT);
+      if (teachers) {
+        offering.teachers = teachers;
       }
-    }
+      return offering;
+    });
   }
 }
 
