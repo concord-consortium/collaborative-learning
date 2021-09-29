@@ -5,11 +5,11 @@ import { AppMode } from "../models/stores/store-types";
 import { QueryParams, urlParams as pageUrlParams } from "../utilities/url-params";
 import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
 import { AppConfigModelType } from "../models/stores/app-config-model";
-import { IPortalClassOffering } from "../models/stores/user";
+import { IUserPortalOffering } from "../models/stores/user";
 import { UserType } from "../models/stores/user-types";
 import { getErrorMessage } from "../utilities/super-agent-helpers";
 import { getPortalOfferings, getPortalClassOfferings,  getProblemIdForAuthenticatedUser } from "./portal-api";
-import { PortalJWT, PortalFirebaseJWT } from "./portal-types";
+import { PortalJWT, PortalFirebaseJWT, IPortalClassInfo } from "./portal-types";
 import { Logger, LogEventName } from "../lib/logger";
 
 export const PORTAL_JWT_URL_SUFFIX = "api/v1/jwt/portal";
@@ -49,12 +49,6 @@ export const DEV_CLASS_INFO: ClassInfo = {
   teachers: [DEV_TEACHER]
 };
 
-export interface RawUser {
-  id: string;
-  first_name: string;
-  last_name: string;
-}
-
 export type AuthenticatedUser = StudentUser | TeacherUser;
 export const isAuthenticatedTeacher = (u: AuthenticatedUser): u is TeacherUser => u.type === "teacher";
 
@@ -72,7 +66,7 @@ interface User {
   rawPortalJWT?: string;
   firebaseJWT?: PortalFirebaseJWT;
   rawFirebaseJWT?: string;
-  portalClassOfferings?: IPortalClassOffering[];
+  portalClassOfferings?: IUserPortalOffering[];
   demoClassHashes?: string[];
 }
 
@@ -84,15 +78,6 @@ export interface TeacherUser extends User {
   type: "teacher";
   network?: string;     // default network for teacher
   networks?: string[];  // list of networks available to teacher
-}
-
-export interface RawClassInfo {
-  uri: string;
-  name: string;
-  state: string;
-  class_hash: string;
-  teachers: RawUser[];
-  students: RawUser[];
 }
 
 export interface ClassInfo {
@@ -191,7 +176,7 @@ export const getClassInfo = (params: GetClassInfoParams) => {
       } else if (!res.body || !res.body.class_hash) {
         reject("Invalid class info response");
       } else {
-        const rawClassInfo: RawClassInfo = res.body;
+        const rawClassInfo: IPortalClassInfo = res.body;
 
         const classInfo: ClassInfo = {
           name: rawClassInfo.name,

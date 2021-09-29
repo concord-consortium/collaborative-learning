@@ -34,7 +34,7 @@ var mockOnSnapshot = (callback: (snap: any) => void) => {
   }));
 };
 var mockDelete = jest.fn();
-var mockDocRef = jest.fn((path: string) => ({
+var mockDoc = jest.fn((path: string) => ({
   delete: mockDelete
 }));
 jest.mock("./use-stores", () => ({
@@ -54,7 +54,7 @@ jest.mock("./use-stores", () => ({
           };
         }
       }),
-      docRef: mockDocRef
+      doc: mockDoc
     }
   })
 }));
@@ -95,8 +95,8 @@ describe("Firestore hooks", () => {
       const { result } = renderHook(() => useDeleteDocument());
       const docPath = "doc/to/delete";
       result.current.mutate(docPath);
-      expect(mockDocRef).toHaveBeenCalled();
-      expect(mockDocRef.mock.calls[0][0]).toBe(docPath);
+      expect(mockDoc).toHaveBeenCalled();
+      expect(mockDoc.mock.calls[0][0]).toBe(docPath);
       expect(mockDelete).toHaveBeenCalled();
     });
   });

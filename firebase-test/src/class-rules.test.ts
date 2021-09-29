@@ -6,6 +6,17 @@ import {
   tearDownTests, thisClass
 } from "./setup-rules-tests";
 
+// duplicated from firestore-schema.ts since we can't reach outside our folder
+interface ClassDocument {
+  id: string;                 // portal class id
+  name: string;               // portal class name
+  uri: string;                // portal class info url
+  context_id: string;         // portal class hash
+  teacher: string;            // name of primary(?) teacher
+  teachers: string[];         // uids of teachers of class
+  network: string;            // network of teacher creating class
+}
+
 describe("Firestore security rules for offering (activity) documents", () => {
 
   let db: firebase.firestore.Firestore;
@@ -30,12 +41,12 @@ describe("Firestore security rules for offering (activity) documents", () => {
     await tearDownTests();
   });
 
-  function specClass(additions?: Record<string, string | string[]>, subtractions?: string[]) {
-    const offering: Record<string, string | string[]> = {
+  function specClass(additions?: Partial<ClassDocument>, subtractions?: string[]) {
+    const _class: ClassDocument = {
             id: thisClass, name: "My Class", uri: "https://concord.org/class", context_id: thisClass,
-            teachers: [teacherId], network: network1, ...additions };
-    subtractions?.forEach(prop => delete offering[prop]);
-    return offering;
+            teacher: "Teacher 1", teachers: [teacherId], network: network1, ...additions };
+    subtractions?.forEach(prop => delete (_class as any)[prop]);
+    return _class;
   }
 
   describe("class documents", () => {
@@ -105,6 +116,11 @@ describe("Firestore security rules for offering (activity) documents", () => {
       await expectWriteToFail(db, kClassDocPath, specClass({}, ["context_id"]));
     });
 
+    it("authenticated teachers can't write their own class documents without a primary teacher", async () => {
+      db = initFirestore(teacherAuth);
+      await expectWriteToFail(db, kClassDocPath, specClass({}, ["teacher"]));
+    });
+
     it("authenticated teachers can't write their own class documents without teachers", async () => {
       db = initFirestore(teacherAuth);
       await expectWriteToFail(db, kClassDocPath, specClass({}, ["teachers"]));
@@ -124,6 +140,12 @@ describe("Firestore security rules for offering (activity) documents", () => {
       db = initFirestore(teacherAuth);
       await adminWriteDoc(kClassDocPath, specClass());
       await expectWriteToSucceed(db, kClassDocPath, specClass({ name: "Improved Class Name" }));
+    });
+
+    it("authenticated teachers can update the primary teacher's name of their own class documents", async () => {
+      db = initFirestore(teacherAuth);
+      await adminWriteDoc(kClassDocPath, specClass());
+      await expectWriteToSucceed(db, kClassDocPath, specClass({ teacher: "Ms. Teacher 1" }));
     });
 
     it("authenticated teachers can update the teachers of their own class documents", async () => {

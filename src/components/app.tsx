@@ -4,6 +4,7 @@ import Modal from "react-modal";
 import { ModalProvider } from "react-modal-hook";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { authenticate } from "../lib/auth";
+import { syncTeacherClassesAndOfferings } from "../lib/teacher-network";
 import { AppContentContainerComponent } from "./app-content";
 import { BaseComponent, IBaseProps } from "./base";
 import { urlParams } from "../utilities/url-params";
@@ -82,6 +83,7 @@ function resolveAppMode(
 
 export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, err?: string) => void) => {
   const {appConfig, appMode, db, user, ui} = stores;
+  let rawPortalJWT: string | undefined;
 
   authenticate(appMode, appConfig, urlParams)
     .then(({appMode: newAppMode, authenticatedUser, classInfo, problemId, unitCode}) => {
@@ -90,6 +92,7 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
         setAppMode(stores, newAppMode);
       }
       user.setAuthenticatedUser(authenticatedUser);
+      rawPortalJWT = authenticatedUser.rawPortalJWT;
       if (classInfo) {
         stores.class.updateFromPortal(classInfo);
       }
@@ -107,8 +110,12 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
               : undefined;
     })
     .then(firestoreUser => {
-      if (firestoreUser) {
+      if (firestoreUser?.network) {
         user.setNetworks(firestoreUser.network, firestoreUser.networks);
+
+        if (rawPortalJWT) {
+          syncTeacherClassesAndOfferings(db.firestore, user, rawPortalJWT);
+        }
       }
     })
     .catch((error) => {

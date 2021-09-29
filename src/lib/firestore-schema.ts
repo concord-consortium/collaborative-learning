@@ -124,12 +124,18 @@ type OfferingsCollection = FSCollection<OfferingDocument>;
  * Class resources are accessible to other teachers that share a network with one of the teachers of the class.
  * Networked access will be mediated by Firestore security rules which can check whether the requesting user and
  * one of the teachers of the class share a network.
+ *
+ * TODO: This declaration is redundantly specified in `firestore-rules/class-rules.test.ts` due to access rules.
+ * In the near term, changes to this interface should be synchronized there as well. Ultimately, we should figure
+ * out a way to share the declaration, which might be to combine the `firebase-test` and `functions` directories
+ * and then to move this file to a shared folder within the combined directory.
  */
-interface ClassDocument {
+export interface ClassDocument {
   id: string;                 // portal class id
   name: string;               // portal class name
   uri: string;                // portal class info url
   context_id: string;         // portal class hash
+  teacher: string;            // name of primary(?) teacher
   teachers: string[];         // uids of teachers of class
   network: string;            // network of teacher creating class
 }

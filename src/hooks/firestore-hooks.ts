@@ -58,7 +58,7 @@ export function useCollectionOrderedRealTimeQuery<T>(
 export const useDeleteDocument = () => {
   const [firestore] = useFirestore();
   const deleteDocument = useCallback((partialPath: string) => {
-    return firestore.docRef(partialPath).delete();
+    return firestore.doc(partialPath).delete();
   }, [firestore]);
   return useMutation(deleteDocument);
 };

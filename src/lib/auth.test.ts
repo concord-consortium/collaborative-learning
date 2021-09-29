@@ -4,13 +4,11 @@ import { authenticate,
         PORTAL_JWT_URL_SUFFIX,
         FIREBASE_JWT_URL_SUFFIX,
         FIREBASE_JWT_QUERY,
-        RawUser,
-        RawClassInfo,
         getAppMode,
         createFakeUser,
         getFirebaseJWTParams,
         generateDevAuthentication} from "./auth";
-import { PortalStudentJWT, PortalTeacherJWT } from "./portal-types";
+import { IPortalClassInfo, IPortalClassUser, PortalStudentJWT, PortalTeacherJWT } from "./portal-types";
 import { AppConfigModel } from "../models/stores/app-config-model";
 import nock from "nock";
 import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
@@ -71,31 +69,35 @@ const CLASSES_MINE_PATH = "/api/v1/classes/mine";
 const CLASS_INFO_URL = BASE_PORTAL_HOST + CLASS_INFO_PATH;
 const OFFERING_INFO_URL = BASE_PORTAL_HOST + OFFERING_INFO_PATH;
 
-const RAW_CORRECT_STUDENT: RawUser = {
+const RAW_CORRECT_STUDENT: IPortalClassUser = {
   id: STUDENT_PORTAL_JWT.user_id,
+  user_id: STUDENT_PORTAL_JWT.uid,
   first_name: "GoodFirst",
   last_name: "GoodLast",
 };
 
-const RAW_INCORRECT_STUDENT: RawUser = {
+const RAW_INCORRECT_STUDENT: IPortalClassUser = {
   id: "bad id",
+  user_id: 0,
   first_name: "BadFirst",
   last_name: "BadLast",
 };
 
-const RAW_CORRECT_TEACHER: RawUser = {
+const RAW_CORRECT_TEACHER: IPortalClassUser = {
   id: TEACHER_PORTAL_JWT.user_id,
+  user_id: TEACHER_PORTAL_JWT.uid,
   first_name: "GoodFirst",
   last_name: "GoodLast",
 };
 
-const RAW_CLASS_INFO: RawClassInfo = {
+const RAW_CLASS_INFO: IPortalClassInfo = {
+  id: 12345,
   uri: "https://foo.bar",
   name: "test name",
-  state: "test state",
   class_hash: CLASS_HASH,
   students: [RAW_CORRECT_STUDENT, RAW_INCORRECT_STUDENT ],
   teachers: [RAW_CORRECT_TEACHER],
+  offerings: []
 };
 
 const PARTIAL_RAW_OFFERING_INFO = {

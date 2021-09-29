@@ -4,6 +4,17 @@ import { DB } from "./db";
 import { escapeKey } from "./fire-utils";
 import { UserDocument } from "./firestore-schema";
 
+export function isFirestoreError(e: any): e is firebase.firestore.FirestoreError {
+  return (e instanceof Error) && !!(e as firebase.firestore.FirestoreError).code;
+}
+
+// security rules violations are signaled as permissions errors
+// for instance, requesting a non-existent document whose security rules depend on its contents
+// results in a permissions error, because the non-existent document can't satisfy the rules
+export function isFirestorePermissionsError(e: any): e is firebase.firestore.FirestoreError {
+  return isFirestoreError(e) && (e.code === "permission-denied");
+}
+
 export class Firestore {
   private user: firebase.User | null = null;
   private db: DB;
@@ -70,8 +81,8 @@ export class Firestore {
     return this.documentRef(this.getMulticlassSupportDocumentPath(docId));
   }
 
-  public collectionRef(path: string) {
-    return firebase.firestore().collection(path);
+  public collectionRef(fullPath: string) {
+    return firebase.firestore().collection(fullPath);
   }
 
   public documentRef(collectionOrFullDocumentPath: string, documentPath?: string) {
@@ -80,7 +91,11 @@ export class Firestore {
             : firebase.firestore().doc(collectionOrFullDocumentPath);
   }
 
-  public docRef(partialPath: string) {
+  public collection(partialPath: string) {
+    return firebase.firestore().collection(`${this.getRootFolder()}${partialPath}`);
+  }
+
+  public doc(partialPath: string) {
     return firebase.firestore().doc(`${this.getRootFolder()}${partialPath}`);
   }
 
@@ -91,6 +106,40 @@ export class Firestore {
   public getDocument(collectionOrFullDocumentPath: string, documentPath?: string) {
     const docRef = this.documentRef(collectionOrFullDocumentPath, documentPath);
     return docRef.get();
+  }
+
+  /*
+   * Guarantees the existence of the specified document by reading it first and then
+   * creating it if it doesn't already exist. Optionally, client can specify a
+   * `shouldUpdate()` function which determines whether the document should be written
+   * even if it already exists (e.g. because the contents have changed). When either
+   * creating or updating the document, the client's `writeContent()` function is called
+   * to determine the content to be written. Returns the read content in the case of
+   * preexisting documents that are not updated or the promise returned from the `set()`
+   * function in the case of documents created or updated.
+   */
+  public async guaranteeDocument<T>(
+    partialPath: string, writeContent: () => Promise<T>, shouldUpdate?: (content?: T) => boolean)
+  {
+    const docRef = this.doc(partialPath);
+    try {
+      const content: T | undefined = (await docRef.get()).data() as T | undefined;
+      if (shouldUpdate?.(content)) {
+        // update the document if client indicates the need to do so
+        const _content = await writeContent();
+        return _content ? docRef.set(_content, { merge: true }) : undefined;
+      }
+      return content;
+    }
+    catch(e) {
+      // security rules violations (e.g. requests for non-existent documents whose security
+      // rules depend on the contents of the document) are signaled as permissions errors
+      if (isFirestorePermissionsError(e)) {
+        // create the document if it doesn't already exist
+        const _content = await writeContent();
+        return _content ? docRef.set(_content) : undefined;
+      }
+    }
   }
 
   public batch(fn: (b: firebase.firestore.WriteBatch) => void) {
@@ -104,7 +153,7 @@ export class Firestore {
   }
 
   public async getFirestoreUser(uid: string) {
-    const userDoc = await this.docRef(`users/${uid}`).get();
+    const userDoc = await this.doc(`users/${uid}`).get();
     return userDoc.data() as UserDocument | undefined;
   }
 }
