@@ -1,6 +1,6 @@
 import { Optional } from "utility-types";
 import { UserModelType } from "../models/stores/user";
-import { Firestore, isFirestorePermissionsError } from "./firestore";
+import { Firestore } from "./firestore";
 import { ClassDocument, OfferingDocument } from "./firestore-schema";
 import { IPortalClassInfo } from "./portal-types";
 
@@ -88,8 +88,8 @@ export async function syncClass(firestore: Firestore, rawPortalJWT: string, aCla
       const teachers = await getClassTeachers(uri, rawPortalJWT);
       if (teachers) {
         aClass.teachers = teachers;
+        return aClass;
       }
-      return aClass;
     });
   }
 }
@@ -103,8 +103,8 @@ export async function syncOffering(
       const teachers = await getClassTeachers(classUrl, rawPortalJWT);
       if (teachers) {
         offering.teachers = teachers;
+        return offering;
       }
-      return offering;
     });
   }
 }

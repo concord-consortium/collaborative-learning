@@ -126,7 +126,8 @@ export class Firestore {
       const content: T | undefined = (await docRef.get()).data() as T | undefined;
       if (shouldUpdate?.(content)) {
         // update the document if client indicates the need to do so
-        return docRef.set(await writeContent(), { merge: true });
+        const _content = await writeContent();
+        return _content ? docRef.set(_content, { merge: true }) : undefined;
       }
       return content;
     }
@@ -135,7 +136,8 @@ export class Firestore {
       // rules depend on the contents of the document) are signaled as permissions errors
       if (isFirestorePermissionsError(e)) {
         // create the document if it doesn't already exist
-        return docRef.set(await writeContent());
+        const _content = await writeContent();
+        return _content ? docRef.set(_content) : undefined;
       }
     }
   }

@@ -8,21 +8,35 @@ import {
   ClassWithoutTeachers, clearTeachersPromises, getNetworkClassesThatAssignedProblem, getProblemPath,
   OfferingWithoutTeachers, syncClass, syncOffering, syncTeacherClassesAndOfferings
 } from "./teacher-network";
+import { DB } from "./db";
 
+var mockStores = {
+  appMode: "authed",
+  demo: { name: "demo" },
+  user: { portal: "test-portal" }
+};
+var mockDB = {
+  stores: mockStores
+} as DB;
 var mockDocGet = jest.fn();
 var mockDocSet = jest.fn();
+var mockDoc = jest.fn((path: string) => ({
+      get: mockDocGet,
+      set: (obj: any) => mockDocSet(obj)
+    }));
 var mockCollectionGet = jest.fn();
 var mockCollectionWhere = jest.fn();
-var mockDoc = jest.fn((path: string) => ({ get: mockDocGet, set: mockDocSet }));
 var mockCollection = jest.fn((path: string) => {
-  const mockObject = { get: mockCollectionGet, where: mockCollectionWhere };
+  const mockObject = { doc: mockDoc, get: mockCollectionGet, where: mockCollectionWhere };
   mockObject.where.mockImplementation(() => mockObject);
   return mockObject;
 });
-const firestore = {
-  collection: mockCollection,
-  doc: mockDoc
-} as any as Firestore;
+jest.mock("firebase/app", () => ({
+  firestore: () => ({
+    collection: mockCollection,
+    doc: mockDoc
+  })
+}));
 
 // permissions error is returned for document not found due to security rules
 class MockFirestorePermissionsError extends Error {
@@ -147,10 +161,11 @@ describe("Teacher network functions", () => {
       resetMocks();
     });
 
-    const classDocPath = `classes/test-network_${kClass1Hash}`;
+    const classDocPath = `/authed/test-portal/classes/test-network_${kClass1Hash}`;
 
     it("should do nothing if the class already exists", async () => {
       mockDocGet.mockImplementation(() => Promise.resolve(fsClass1));
+      const firestore = new Firestore(mockDB);
       const result = await syncClass(firestore, kPortalJWT, partClass1);
       expect(mockDoc).toHaveBeenCalledWith(classDocPath);
       expect(mockDocGet).toHaveBeenCalled();
@@ -162,6 +177,7 @@ describe("Teacher network functions", () => {
       mockDocGet.mockImplementation(() => { throw new MockFirestorePermissionsError(); });
       // !ok response from fetch
       fetchMock.mockResponseOnce('{}', { status: 500, headers: { 'content-type': 'application/json' } });
+      const firestore = new Firestore(mockDB);
       const result = await syncClass(firestore, kPortalJWT, partClass1);
       expect(mockDoc).toHaveBeenCalledWith(classDocPath);
       expect(mockDocGet).toHaveBeenCalled();
@@ -172,6 +188,7 @@ describe("Teacher network functions", () => {
     it("should do nothing if the portal class api call fails", async () => {
       mockDocGet.mockImplementation(() => { throw new MockFirestorePermissionsError(); });
       fetchMock.mockRejectOnce(new Error());
+      const firestore = new Firestore(mockDB);
       const result = await syncClass(firestore, kPortalJWT, partClass1);
       expect(mockDoc).toHaveBeenCalledWith(classDocPath);
       expect(mockDocGet).toHaveBeenCalled();
@@ -182,6 +199,7 @@ describe("Teacher network functions", () => {
     it("should do nothing if an unexpected firestore error occurs", async () => {
       mockDocGet.mockImplementation(() => { throw new MockFirestoreOtherError(); });
       fetchMock.mockResponseOnce(JSON.stringify(portalClass1));
+      const firestore = new Firestore(mockDB);
       const result = await syncClass(firestore, kPortalJWT, partClass1);
       expect(mockDoc).toHaveBeenCalledWith(classDocPath);
       expect(mockDocGet).toHaveBeenCalled();
@@ -192,6 +210,7 @@ describe("Teacher network functions", () => {
     it("should write class to firestore if it's not already there", async () => {
       mockDocGet.mockImplementation(() => { throw new MockFirestorePermissionsError(); });
       fetchMock.mockResponseOnce(JSON.stringify(portalClass1));
+      const firestore = new Firestore(mockDB);
       const result = await syncClass(firestore, kPortalJWT, partClass1);
       expect(mockDoc).toHaveBeenCalledWith(classDocPath);
       expect(mockDocGet).toHaveBeenCalled();
@@ -206,10 +225,11 @@ describe("Teacher network functions", () => {
       resetMocks();
     });
 
-    const offeringDocPath = `offerings/test-network_${kOffering1Id}`;
+    const offeringDocPath = `/authed/test-portal/offerings/test-network_${kOffering1Id}`;
 
     it("should do nothing if the offering already exists", async () => {
       mockDocGet.mockImplementation(() => Promise.resolve(fsOffering1));
+      const firestore = new Firestore(mockDB);
       const result = await syncOffering(firestore, kPortalJWT, kClass1Url, partOffering1);
       expect(mockDoc).toHaveBeenCalledWith(offeringDocPath);
       expect(mockDocGet).toHaveBeenCalled();
@@ -221,6 +241,7 @@ describe("Teacher network functions", () => {
       mockDocGet.mockImplementation(() => { throw new MockFirestorePermissionsError(); });
       // !ok response from fetch
       fetchMock.mockResponseOnce('{}', { status: 500, headers: { 'content-type': 'application/json' } });
+      const firestore = new Firestore(mockDB);
       const result = await syncOffering(firestore, kPortalJWT, kClass1Url, partOffering1);
       expect(mockDoc).toHaveBeenCalledWith(offeringDocPath);
       expect(mockDocGet).toHaveBeenCalled();
@@ -231,6 +252,7 @@ describe("Teacher network functions", () => {
     it("should do nothing if the portal class api call fails", async () => {
       mockDocGet.mockImplementation(() => { throw new MockFirestorePermissionsError(); });
       fetchMock.mockRejectOnce(new Error());
+      const firestore = new Firestore(mockDB);
       const result = await syncOffering(firestore, kPortalJWT, kClass1Url, partOffering1);
       expect(mockDoc).toHaveBeenCalledWith(offeringDocPath);
       expect(mockDocGet).toHaveBeenCalled();
@@ -241,6 +263,7 @@ describe("Teacher network functions", () => {
     it("should do nothing if an unexpected firestore error occurs", async () => {
       mockDocGet.mockImplementation(() => { throw new MockFirestoreOtherError(); });
       fetchMock.mockResponseOnce(JSON.stringify(portalClass1));
+      const firestore = new Firestore(mockDB);
       const result = await syncOffering(firestore, kPortalJWT, kClass1Url, partOffering1);
       expect(mockDoc).toHaveBeenCalledWith(offeringDocPath);
       expect(mockDocGet).toHaveBeenCalled();
@@ -251,6 +274,7 @@ describe("Teacher network functions", () => {
     it("should write class to firestore if it's not already there", async () => {
       mockDocGet.mockImplementation(() => { throw new MockFirestorePermissionsError(); });
       fetchMock.mockResponseOnce(JSON.stringify(portalClass1));
+      const firestore = new Firestore(mockDB);
       const result = await syncOffering(firestore, kPortalJWT, kClass1Url, partOffering1);
       expect(mockDoc).toHaveBeenCalledWith(offeringDocPath);
       expect(mockDocGet).toHaveBeenCalled();
@@ -269,6 +293,7 @@ describe("Teacher network functions", () => {
 
     it("should do nothing if there is no portal JWT", async () => {
       const user = UserModel.create({ id: kTeacher1Id, type: "teacher", network: "test-network" });
+      const firestore = new Firestore(mockDB);
       await syncTeacherClassesAndOfferings(firestore, user, "");
       expect(mockDoc).not.toHaveBeenCalled();
       expect(mockDocGet).not.toHaveBeenCalled();
@@ -277,6 +302,7 @@ describe("Teacher network functions", () => {
 
     it("should do nothing if the user has no offerings", async () => {
       const user = UserModel.create({ id: kTeacher1Id, type: "teacher", network: "test-network" });
+      const firestore = new Firestore(mockDB);
       await syncTeacherClassesAndOfferings(firestore, user, kPortalJWT);
       expect(mockDoc).not.toHaveBeenCalled();
       expect(mockDocGet).not.toHaveBeenCalled();
@@ -285,6 +311,7 @@ describe("Teacher network functions", () => {
 
     it("should do nothing if the user has no network", async () => {
       const user = UserModel.create({ id: kTeacher1Id, type: "teacher", portalClassOfferings: [userOffering1()] });
+      const firestore = new Firestore(mockDB);
       await syncTeacherClassesAndOfferings(firestore, user, kPortalJWT);
       expect(mockDoc).not.toHaveBeenCalled();
       expect(mockDocGet).not.toHaveBeenCalled();
@@ -294,6 +321,7 @@ describe("Teacher network functions", () => {
     it("should sync classes and offerings when appropriate", async () => {
       mockDocGet.mockImplementation(() => { throw new MockFirestorePermissionsError(); });
       fetchMock.mockResponseOnce(JSON.stringify(portalClass1));
+      const firestore = new Firestore(mockDB);
       await Promise.all(syncTeacherClassesAndOfferings(firestore, completeTeacher, kPortalJWT));
       expect(mockDoc).toHaveBeenCalledTimes(3);
       expect(mockDocGet).toHaveBeenCalledTimes(3);
@@ -304,8 +332,9 @@ describe("Teacher network functions", () => {
   describe("getNetworkClassesThatAssignedProblem", () => {
     it("calls appropriate firestore methods", () => {
       const problemPath = getProblemPath(kOffering1Unit, kOffering1Problem);
+      const firestore = new Firestore(mockDB);
       getNetworkClassesThatAssignedProblem(firestore, "test-network", problemPath);
-      expect(mockCollection).toHaveBeenCalledWith("offerings");
+      expect(mockCollection).toHaveBeenCalledWith("/authed/test-portal/offerings");
       expect(mockCollectionWhere).toHaveBeenCalledTimes(2);
       expect(mockCollectionGet).toHaveBeenCalledTimes(1);
     });
