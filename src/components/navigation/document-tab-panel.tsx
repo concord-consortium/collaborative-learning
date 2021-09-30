@@ -8,6 +8,7 @@ import { TabPanelDocumentsSection } from "../thumbnail/tab-panel-documents-secti
 import { DocumentModelType } from "../../models/document/document";
 import { DocumentDragKey, SupportPublication } from "../../models/document/document-types";
 import { LogEventName, Logger } from "../../lib/logger";
+import { CollapsibleDocumentsSection } from "../thumbnail/collapsible-document-section";
 
 import "./document-tab-panel.sass";
 
@@ -142,33 +143,55 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
   private renderSubSections(subTab: any) {
     const { selectedDocument, onSelectNewDocument, onSelectDocument } = this.props;
     const { user } = this.stores;
+    const classHash = this.stores.class.classHash;
+    const classNamesStrings = (user.portalClassOfferings.filter(o => o.classHash !== classHash)).map(o => o.className);
     return (
       <div>
         { subTab.sections.map((section: any, index: any) => {
-          const _handleDocumentStarClick = section.showStarsForUser(user)
-            ? this.handleDocumentStarClick
-            : undefined;
-          const _handleDocumentDeleteClick = section.showDeleteForUser(user)
-            ? this.handleDocumentDeleteClick
-            : undefined;
-          return (
-            <TabPanelDocumentsSection
-              key={section.type}
-              tab={subTab.label}
-              section={section}
-              index={index}
-              numOfSections={subTab.sections.length}
-              stores={this.stores}
-              scale={kNavItemScale}
-              selectedDocument={selectedDocument}
-              onSelectNewDocument={onSelectNewDocument}
-              onSelectDocument={onSelectDocument}
-              onDocumentDragStart={this.handleDocumentDragStart}
-              onDocumentStarClick={_handleDocumentStarClick}
-              onDocumentDeleteClick={_handleDocumentDeleteClick}
-            />
-          );
-        })
+            const _handleDocumentStarClick = section.showStarsForUser(user)
+              ? this.handleDocumentStarClick
+              : undefined;
+            const _handleDocumentDeleteClick = section.showDeleteForUser(user)
+              ? this.handleDocumentDeleteClick
+              : undefined;
+            return (
+              <TabPanelDocumentsSection
+                key={section.type}
+                tab={subTab.label}
+                section={section}
+                index={index}
+                numOfSections={subTab.sections.length}
+                stores={this.stores}
+                scale={kNavItemScale}
+                selectedDocument={selectedDocument}
+                onSelectNewDocument={onSelectNewDocument}
+                onSelectDocument={onSelectDocument}
+                onDocumentDragStart={this.handleDocumentDragStart}
+                onDocumentStarClick={_handleDocumentStarClick}
+                onDocumentDeleteClick={_handleDocumentDeleteClick}
+              />
+            );
+          })
+        }
+        { user.isNetworkedTeacher &&
+          <>
+            <div className="network-divider">
+              <div className="network-divider-label">Network</div>
+            </div>
+            { classNamesStrings.map((classNameStr: string, idx: number) =>
+                <CollapsibleDocumentsSection
+                  key={idx}
+                  userName={user.name}
+                  stores={this.stores}
+                  tab={subTab.label}
+                  scale={kNavItemScale}
+                  classNameStr={classNameStr}
+                  selectedDocument={selectedDocument}
+                  onSelectDocument={onSelectDocument}
+                />
+              )
+            }
+          </>
         }
       </div>
     );
