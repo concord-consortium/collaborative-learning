@@ -83,10 +83,9 @@ export const TabPanelDocumentsSection = observer(({ tab, section, index, numOfSe
                                   onSelectNewDocument, onSelectDocument, onDocumentDragStart,
                                   onDocumentStarClick, onDocumentDeleteClick }: IProps) => {
     const { user } = stores;
-    const isInNetwork = user.type === "teacher" && user.network;
     const showNewDocumentThumbnail = section.addDocument && !!onSelectNewDocument;
     const newDocumentLabel = getNewDocumentLabel(section, stores);
-    const numPanels = isInNetwork ? numOfSections + 1 : numOfSections;
+    const numPanels = user.isNetworkedTeacher ? numOfSections + 1 : numOfSections;
     const isTopPanel = index === 0 && numPanels > 1;
     const isBottomPanel = index === numOfSections - 1 && index > 0;
     const tabName = tab.toLowerCase().replace(' ', '-');

@@ -1,6 +1,5 @@
 import { inject, observer } from "mobx-react";
 import React from "react";
-import { uniq } from "lodash";
 import { BaseComponent, IBaseProps } from "../base";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { ENavTabSectionType, NavTabSectionSpec, NavTabSpec }
@@ -144,9 +143,8 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
   private renderSubSections(subTab: any) {
     const { selectedDocument, onSelectNewDocument, onSelectDocument } = this.props;
     const { user } = this.stores;
-    const isInNetwork = user.type === "teacher" && user.network;
-    const currentClass = this.stores.class.name;
-    const classNamesStrings = (uniq(user.portalClassOfferings.map(o => o.className))).filter(c => c !== currentClass);
+    const classHash = this.stores.class.classHash;
+    const classNamesStrings = (user.portalClassOfferings.filter(o => o.classHash !== classHash)).map(o => o.className);
     return (
       <div>
         { subTab.sections.map((section: any, index: any) => {
@@ -175,7 +173,7 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
             );
           })
         }
-        { isInNetwork &&
+        { user.isNetworkedTeacher &&
           <>
             <div className="network-divider">
               <div className="network-divider-label">Network</div>
