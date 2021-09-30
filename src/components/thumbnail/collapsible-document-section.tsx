@@ -25,7 +25,7 @@ interface IProps {
 
 export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
   ({userName, classNameStr, sectionDocs, section, stores, tab, scale, selectedDocument, onSelectDocument}) => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const handleSectionToggle = () => {
     setIsOpen(!isOpen);
   };
