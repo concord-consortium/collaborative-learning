@@ -7,7 +7,9 @@ import {
 } from "../../hooks/document-comment-hooks";
 import { useDeleteDocument } from "../../hooks/firestore-hooks";
 import { useDocumentOrCurriculumMetadata } from "../../hooks/use-stores";
+
 import "./chat-panel.scss";
+import { isDocumentMetadata } from "../../../functions/src/shared";
 
 interface IProps {
   user?: UserModelType;
@@ -40,6 +42,11 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   }, [document, deleteCommentMutation, commentsPath]);
 
   const newCommentCount = unreadComments?.length || 0;
+
+// console.log('chat-panel:focusTileId', focusTileId);
+
+  const documentKey = (document && isDocumentMetadata(document)) ? document.key : undefined;
+
   return (
     <div className={`chat-panel ${activeNavTab}`} data-testid="chat-panel">
       <ChatPanelHeader activeNavTab={activeNavTab} newCommentCount={newCommentCount}
@@ -51,6 +58,8 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
             onPostComment={postComment}
             onDeleteComment={deleteComment}
             postedComments={postedComments}
+            documentKey={documentKey}
+            focusTileId={focusTileId}
           />
         : <div className="select-doc-message" data-testid="select-doc-message">
             Open a document to begin or view comment threads

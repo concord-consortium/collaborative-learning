@@ -15,8 +15,8 @@
     display: flex;
     align-items: center;
     width: 100%;
-    height: 25px;
-    padding: 4px;
+    height: fit-content;
+    padding: 0;
     background-color: $charcoal-light-8;
     color: $charcoal;
     &.comment-select {
@@ -37,19 +37,22 @@
     &.supports {
       background-color: $support-blue-light-7;
     }
-    .new-thread-header-icon {
-      fill: $charcoal;
-    }
-    .initial {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid $charcoal;
-      border-radius: 3px;
-      width: 18px;
-      height: 18px;
-      padding: 1px 0 0;
-      margin-right: 5px;
+    // .new-thread-header-icon {
+    //   fill: $charcoal;
+    // }
+    // .initial {
+    //   display: flex;
+    //   align-items: center;
+    //   justify-content: center;
+    //   border: 1px solid $charcoal;
+    //   border-radius: 3px;
+    //   width: 18px;
+    //   height: 18px;
+    //   padding: 1px 0 0;
+    //   margin-right: 5px;
+    // }
+    .comment-card-header-icon {
+      height: 34px;
     }
   }
   .comment-thread {

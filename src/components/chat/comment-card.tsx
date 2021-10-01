@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useContext } from "react";
 import { UserModelType } from "../../models/stores/user";
 import { CommentTextBox } from "./comment-textbox";
 import { WithId } from "../../hooks/firestore-hooks";
@@ -6,10 +6,12 @@ import { CommentDocument } from "../../lib/firestore-schema";
 import { getDisplayTimeDate } from "../../utilities/time";
 import { useCautionAlert } from "../utilities/use-caution-alert";
 import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
-import DocumentCommentIcon from "../../assets/document-id.svg";
 import DeleteMessageIcon from "../../assets/delete-message-icon.svg";
 import "./comment-card.scss";
 import "../themes.scss";
+import { ToolIconComponent } from "./tool-icon-component";
+import { AppConfigContext } from "../../app-config-context";
+import OpenWorkspaceIcon from "../../assets/icons/1-4-up/1-up-icon-default.svg";
 
 interface IProps {
   user?: UserModelType;
@@ -17,10 +19,13 @@ interface IProps {
   postedComments?: WithId<CommentDocument>[];
   onPostComment?: (comment: string) => void;
   onDeleteComment?: (commentId: string) => void;
+  documentKey?: string;
+  focusTileId?: string;
 }
 
 export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedComments,
-                                                onPostComment, onDeleteComment }) => {
+                                                onPostComment, onDeleteComment,
+                                                documentKey, focusTileId }) => {
   const commentIdRef = useRef<string>();
   const alertContent = () => {
     return (
@@ -45,21 +50,27 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
     }
   };
 
-  const renderThreadHeader = () => {
-    const teacherInitial = user?.name.charAt(0);
+  const renderThreadHeader = (documentKey: string | undefined, focusTileId: string | undefined) => {
+    const { appIcons } = useContext(AppConfigContext);
+    // console.log('coment-card:appIcons', appIcons);
+    // console.log('coment-card:documentKey', documentKey);
+    // console.log('coment-card:focusTileId', focusTileId);
+
     return (
       <div className="comment-card-header comment-select" data-testid="comment-card-header">
-        {postedComments && postedComments.length < 1
-          ? <DocumentCommentIcon className="new-thread-header-icon" data-testid="document-comment-icon"/>
-          : <div className="initial" data-testid="teacher-initial">{teacherInitial}</div>
-        }
+        <div className="comment-card-header-icon" data-testid="comment-card-header-icon">
+          { (!documentKey || !focusTileId) && <OpenWorkspaceIcon/>}
+          { documentKey && focusTileId
+             &&  <ToolIconComponent documentKey={documentKey} tileId={focusTileId}/>
+          }
+        </div>
       </div>
     );
   };
 
   return (
     <div className={`comment-card selected`} data-testid="comment-card">
-      {renderThreadHeader()}
+      {renderThreadHeader(documentKey, focusTileId)}
       {postedComments?.map((comment, idx) => {
           const userInitialBackgroundColor = ["#f79999", "#ffc18a", "#99d099", "#ff9", "#b2b2ff", "#efa6ef"];
           const commenterInitial = comment.name.charAt(0);
