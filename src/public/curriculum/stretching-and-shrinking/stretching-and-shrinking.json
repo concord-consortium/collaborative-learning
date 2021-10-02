@@ -51,6 +51,28 @@
       "placeholder": "Work area for\nMathematical Reflection 4 section"
     }
   },
+  "defaultStamps": [
+    {
+      "url": "curriculum/moving-straight-ahead/stamps/plus.png",
+      "width": 25,
+      "height": 25
+    },
+    {
+      "url": "curriculum/moving-straight-ahead/stamps/equals.png",
+      "width": 25,
+      "height": 25
+    },
+    {
+      "url": "curriculum/moving-straight-ahead/stamps/lparen.png",
+      "width": 25,
+      "height": 25
+    },
+    {
+      "url": "curriculum/moving-straight-ahead/stamps/rparen.png",
+      "width": 25,
+      "height": 25
+    }
+  ],
   "planningDocument": {
     "enable": "teacher",
     "default": true,
@@ -81,100 +103,6 @@
       { "type": "launch" },
       { "type": "explore" },
       { "type": "summarize" }
-    ]
-  },
-  "lookingAhead": {
-    "tiles": [
-      {
-        "content": {
-          "type": "Text",
-          "text": "A map is a scale drawing of the place it represents. You can use a map to find actual distances to any place in the world. How can you estimate the distance from Cape Town, South Africa to Port Elizabeth, South Africa?"
-        }
-      },
-      {
-        "content": {
-          "type": "Image",
-          "url": "curriculum/stretching-and-shrinking/images/SS_LA_01_map_500w.png"
-        }
-      },
-      {
-        "content": {
-          "type": "Text",
-          "text": "Suppose that you want to find the width of a river that is too wide to measure directly. How can you use similar triangles to find the distance across the river?"
-        }
-      },
-      {
-        "content": {
-          "type": "Image",
-          "url": "curriculum/stretching-and-shrinking/images/SS_LA_02_river_500w.png"
-        }
-      },
-      {
-        "content": {
-          "type": "Text",
-          "text": "Here is a picture of Duke, a real dog. If you know the scale factor between Duke and the picture, how can you determine how long Duke is from his nose to the tip of his tail?"
-        }
-      },
-      {
-        "content": {
-          "type": "Image",
-          "url": "curriculum/stretching-and-shrinking/images/SS_LA_03_dog_500w.png"
-        }
-      },
-      {
-        "content": {
-          "type": "Image",
-          "url": "curriculum/stretching-and-shrinking/images/SS_LA_04_city_spoon_500w.png"
-        }
-      },
-      {
-        "content": {
-          "type": "Text",
-          "text": "You probably use the word similar in everyday conversation. For example, you might say that one song sounds similar to another song. You may also say that your friend’s bike is similar to yours. In many cases, you might use the word similar to describe objects and images that are the same shape but not the same size."
-        }
-      },
-      {
-        "content": {
-          "type": "Text",
-          "text": "A floor plan of a house has the same shape as the actual house, but it is much smaller. The images on a movie screen as the same shape as the real people and objects they depict, but they are much larger. You can order your school portrait in a variety of sizes, but your face will have the same shape in each photo. In the Shapes and Design units you studied a variety of shapes, including the properties that make some shapes important in science, engineering, construction, and art."
-        }
-      },
-      {
-        "content": {
-          "type": "Text",
-          "text": "What features of shapes are important in determining the unique shape, like polygons?"
-        }
-      },
-      {
-        "content": {
-          "type": "Text",
-          "text": "When you encounter a new problem, it is a good idea to ask yourself questions. In this Unit, you might ask questions such as:"
-        }
-      },
-      {
-        "content": {
-          "type": "Text",
-          "text": "What determines whether two shapes are similar?"
-        }
-      },
-      {
-        "content": {
-          "type": "Text",
-          "text": "What is the same and what is different about two similar figures?"
-        }
-      },
-      {
-        "content": {
-          "type": "Text",
-          "text": "When figures are similar, how are the side lengths, areas, and scale factors related?"
-        }
-      },
-      {
-        "content": {
-          "type": "Text",
-          "text": "How can I use similar figures to find missing measurements?"
-        }
-      }
     ]
   },
   "investigations": [
@@ -411,11 +339,44 @@
                       "type": "Text",
                       "format": "markdown",
                       "text": [
-                        "* Is Daphne's claim correct? Is it possible to use the magazine and the picture to estimate the teacher's height? Explain.",
+                        "* Is Daphne's claim correct? Is it possible to use the magazine and the picture to estimate the teacher's height? Explain."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Daphne’s claim is correct. In her picture, we can measure both the height of the P.I. magazine and the height of the teacher and then compare two values. Knowing the P.I. magazine is 10 inches high in real life, you can estimate the teacher’s real height.</p>",
+                        "<p> Possible student strategies:</p>",
+                        "<ul><li>Students can use rulers or edges of a piece of paper to make informal estimates of various measurements. Do not push for precise measurement at this time. Pay attention, though, to which students measure naturally and easily and which struggle with measurement. This will help you to plan your teaching in later Problems in the Unit where careful measurement is important. </li><li>Some students will measure the height in inches on the magazine and of the mystery teacher. They will then divide the height of the teacher by the height of the magazine to find how many magazines tall the teacher is. This is a more precise version of the first strategy. Make sure students are clear about the comparisons that they are making. They may compare the real magazine to the magazine in the picture or the magazine in the picture to the teacher in the picture. </li><li>The magazine is 10 inches tall. The teacher is about 7 magazines, or 70 inches, tall. </li><li>In the picture, the height of the P.I. Monthly is 0.5 in. We know that the height of the real magazine is 10 in. So, the real magazine is 100.5=20 times larger than in the picture. The teacher should also be 20 times larger in real life than he/she is in the picture. The teacher’s height in the picture is about  in. So, the actual height is about 20  =72.5 in. </li><li>Students may use ratio or “for every” statements, such as “The ratio of the teacher’s height in the picture to her height in real life is about 1 to 20.” Or “For every inch in height of the magazine in the picture there are 20 inches in height for the real magazine.”</li><li>Students may also compare the magazine in the picture to the teacher in the picture. In this case, the teacher is / = 7 times as tall as the magazine. Students may say that the teacher is 7 magazines tall. This should be true in real life as well. Since the height of the magazine is 10 in., the teacher is 10x7=72.5 in. tall. </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
                         "* Could you find the height of the teacher if you did not know that the magazine was 10 inches tall? Explain."
                       ]
                     }
-                  }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": 
+                      {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Answers will vary. Possible answers: </p>",
+                          "<ul><li>Yes. Instead of the height of the magazine, I could have measured the height of the actual bookshelf shown in the picture and used it to figure out the teacher’s height.  </li><li>No. If I do not know the real height of the magazine is 10 inches, I would not be able to find the real height of the teacher. I only know the teacher is 7.25 times taller than the magazine.  </li></ul>",
+                      "<p>Students will think about the proportional relationship of heights between the picture and the reality. <strong></strong></p>"
+                        ]
+                      }
+                    }
                 ]
               },
               "supports": []
@@ -448,6 +409,15 @@
                       "text": [
                         "Complete Daphne’s reasoning to estimate the height of the teacher."
                       ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "\u2938 x 7"
                     }
                   },
                   {
@@ -2885,7 +2855,8 @@
               "supports" : []
             }
           ]
-        }, {
+        }, 
+        {
           "description": "Problem 4.2",
           "ordinal": 2,
           "title": "SAS 4.2 Finding Missing Parts",
@@ -3018,7 +2989,8 @@
             { "text": "How could you use scale factors?"},
             { "text": "How could you use ratio of adjacent side lengths?"}
           ]
-        }, {
+        }, 
+        {
           "description": "Problem 4.3",
           "ordinal": 3,
           "title": "SAS 4.3 Using Shadows to Find Heights",
@@ -3147,8 +3119,6 @@
             }
           ]
         }
-      ],
-      "supports": [
       ]
     },
     {
