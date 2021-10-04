@@ -58,41 +58,43 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
   };
 
   return (
-    <div className={`comment-card selected`} data-testid="comment-card">
-      {renderThreadHeader()}
-      {postedComments?.map((comment, idx) => {
-          const userInitialBackgroundColor = ["#f79999", "#ffc18a", "#99d099", "#ff9", "#b2b2ff", "#efa6ef"];
-          const commenterInitial = comment.name.charAt(0);
-          const userInitialBackgroundColorIndex = parseInt(comment.uid, 10) % 6;
-          const isCurrentUserComment = user?.id === comment.uid;
-          const backgroundStyle = isCurrentUserComment
-                                    ? {backgroundColor: "white"}
-                                    : {backgroundColor: userInitialBackgroundColor[userInitialBackgroundColorIndex]};
-          return (
-            <div key={idx} className="comment-thread" data-testid="comment-thread">
-              <div className="comment-text-header">
-                <div className="user-icon" style={backgroundStyle}>
-                  {isCurrentUserComment ? <UserIcon /> : commenterInitial}
-                </div>
-                <div className="user-name">{comment.name}</div>
-                <div className="time-stamp">{getDisplayTimeDate(comment.createdAt.getTime())}</div>
-                {isCurrentUserComment &&
-                  <div className="delete-message-icon-container" data-testid="delete-message-button"
-                        onClick={() => handleDeleteComment(comment.id)}>
-                    <DeleteMessageIcon />
+    <div className="comment-card" data-testid="comment-card">
+      <div className="comment-card-content selected" data-testid="comment-card-content">
+        {renderThreadHeader()}
+        {postedComments?.map((comment, idx) => {
+            const userInitialBackgroundColor = ["#f79999", "#ffc18a", "#99d099", "#ff9", "#b2b2ff", "#efa6ef"];
+            const commenterInitial = comment.name.charAt(0);
+            const userInitialBackgroundColorIndex = parseInt(comment.uid, 10) % 6;
+            const isCurrentUserComment = user?.id === comment.uid;
+            const backgroundStyle = isCurrentUserComment
+                                      ? {backgroundColor: "white"}
+                                      : {backgroundColor: userInitialBackgroundColor[userInitialBackgroundColorIndex]};
+            return (
+              <div key={idx} className="comment-thread" data-testid="comment-thread">
+                <div className="comment-text-header">
+                  <div className="user-icon" style={backgroundStyle}>
+                    {isCurrentUserComment ? <UserIcon /> : commenterInitial}
                   </div>
-                }
+                  <div className="user-name">{comment.name}</div>
+                  <div className="time-stamp">{getDisplayTimeDate(comment.createdAt.getTime())}</div>
+                  {isCurrentUserComment &&
+                    <div className="delete-message-icon-container" data-testid="delete-message-button"
+                          onClick={() => handleDeleteComment(comment.id)}>
+                      <DeleteMessageIcon />
+                    </div>
+                  }
+                </div>
+                <div key={idx} className="comment-text" data-testid="comment">{comment.content}</div>
               </div>
-              <div key={idx} className="comment-text" data-testid="comment">{comment.content}</div>
-            </div>
-          );
-        })
-      }
-      <CommentTextBox
-        activeNavTab={activeNavTab}
-        onPostComment={onPostComment}
-        numPostedComments={postedComments?.length || 0}
-      />
+            );
+          })
+        }
+        <CommentTextBox
+          activeNavTab={activeNavTab}
+          onPostComment={onPostComment}
+          numPostedComments={postedComments?.length || 0}
+        />
+      </div>
     </div>
   );
 };

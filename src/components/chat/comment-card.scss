@@ -8,8 +8,12 @@
   border: solid 2px $charcoal-light-2;
   overflow-y: auto;
   white-space: pre-wrap;
-  &.selected {
-    background-color: $comment-select-green;
+
+  .comment-card-content {
+    padding-bottom: 2px;
+    &.selected {
+      background-color: $comment-select-green;
+    }
   }
 
   .comment-card-header {

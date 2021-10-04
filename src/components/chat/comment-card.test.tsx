@@ -24,7 +24,8 @@ describe("CommentCard", () => {
       </ModalProvider>
 ));
     expect(screen.getByTestId("comment-card")).toBeInTheDocument();
-    expect(screen.getByTestId("comment-card")).toHaveClass("selected");
+    expect(screen.getByTestId("comment-card-content")).toBeInTheDocument();
+    expect(screen.getByTestId("comment-card-content")).toHaveClass("selected");
     expect(screen.getByTestId("comment-card-header")).toBeInTheDocument();
   });
   it("should show the correct header icon when there are no comments", () => {
