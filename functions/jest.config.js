@@ -3,9 +3,9 @@ module.exports = {
   transform: {
     '^.+\\.tsx?$': 'ts-jest',
   },
+  coveragePathIgnorePatterns: ['test/'],
   testRegex: '(\\S+)\\.(test|spec)\\.([jt]sx?)$',
   testPathIgnorePatterns: ['lib/', 'node_modules/'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
-  testEnvironment: 'node',
-  rootDir: 'test'
+  testEnvironment: 'node'
 }
