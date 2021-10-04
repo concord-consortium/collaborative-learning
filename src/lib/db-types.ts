@@ -124,7 +124,8 @@ export interface DBOtherDocument {
   properties?: IDocumentProperties;
 }
 
-// metadata written to {classHash}/publications for published section [deprecated] and problem documents
+// metadata written to {classHash}/offerings/{offeringId}/publications
+// for published section [deprecated] and problem documents
 export interface DBPublication {
   version: "1.0";
   self: {
@@ -137,8 +138,8 @@ export interface DBPublication {
   groupUserConnections?: DBGroupUserConnections;
 }
 
-// metadata written to {classHash}/personalPublications for published personal documents
-// and to {classHash}/publications for learning logs ¯\_(ツ)_/¯
+// metadata written to {classHash}/offerings/{offeringId}/personalPublications for published personal documents
+// and to {classHash}/offerings/{offeringId}/publications for learning logs ¯\_(ツ)_/¯
 export interface DBOtherPublication {
   version: "1.0";
   self: {

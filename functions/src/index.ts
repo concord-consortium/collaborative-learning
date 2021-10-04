@@ -1,5 +1,6 @@
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
+import { getNetworkResourceList } from "./get-network-resource-list";
 import { PortalFirebaseJWTClaims } from "./portal-types";
 import { postDocumentComment } from "./post-document-comment";
 import { validateCommentableDocument } from "./validate-commentable-document";
@@ -49,6 +50,8 @@ export const validateCommentableDocument_v1 = functions.https.onCall(validateCom
  * The _v1 suffix allows us to version the API if necessary moving forward.
  */
 export const postDocumentComment_v1 = functions.https.onCall(postDocumentComment);
+
+export const getNetworkResourceList_v1 = functions.https.onCall(getNetworkResourceList);
 
 /*
  * TODO: Clean up this file so it's just wrapping and forwarding functions defined in their own modules,
