@@ -126,7 +126,6 @@ describe('Chat panel for networked teacher', () => {
     cy.get('[data-testid=comment-thread] [data-testid=comment]').should('contain', documentComment);
   });
   it('verify teacher name and initial appear on comment correctly', () => {
-    cy.get('[data-testid=teacher-initial]').should('contain', "T");
     cy.get('.comment-text-header .user-name').should('contain', "Teacher 7");
   });
   it("verify problem document is hightlighted", () => {

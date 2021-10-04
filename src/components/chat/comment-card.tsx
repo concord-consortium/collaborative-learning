@@ -10,7 +10,6 @@ import DeleteMessageIcon from "../../assets/delete-message-icon.svg";
 import "./comment-card.scss";
 import "../themes.scss";
 import { ToolIconComponent } from "./tool-icon-component";
-import { AppConfigContext } from "../../app-config-context";
 import OpenWorkspaceIcon from "../../assets/icons/1-4-up/1-up-icon-default.svg";
 
 interface IProps {
@@ -51,11 +50,6 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
   };
 
   const renderThreadHeader = (documentKey: string | undefined, focusTileId: string | undefined) => {
-    const { appIcons } = useContext(AppConfigContext);
-    // console.log('coment-card:appIcons', appIcons);
-    // console.log('coment-card:documentKey', documentKey);
-    // console.log('coment-card:focusTileId', focusTileId);
-
     return (
       <div className="comment-card-header comment-select" data-testid="comment-card-header">
         <div className="comment-card-header-icon" data-testid="comment-card-header-icon">

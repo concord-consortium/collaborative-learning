@@ -11,8 +11,6 @@ export const ToolIconComponent: React.FC<IProps> = ({documentKey, tileId}) => {
 
   const tileType = useTypeOfTileInDocumentOrCurriculum(documentKey, tileId);
   const { appIcons } = useContext(AppConfigContext);
-console.log('tool-icon-component:tileType', tileType);
-console.log('tool-icon-component:appIcons', appIcons);
   
   if (!documentKey || !tileId || !appIcons ) {
     return null;
@@ -23,7 +21,6 @@ console.log('tool-icon-component:appIcons', appIcons);
   }
 
   const iconName = `icon-${tileType.toLowerCase()}-tool`;
-console.log('tool-icon-component:iconName', iconName);
   const TheIcon = appIcons?.[iconName];
   return <div><TheIcon/></div>;
 };

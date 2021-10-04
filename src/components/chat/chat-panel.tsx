@@ -43,8 +43,6 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
 
   const newCommentCount = unreadComments?.length || 0;
 
-// console.log('chat-panel:focusTileId', focusTileId);
-
   const documentKey = (document && isDocumentMetadata(document)) ? document.key : undefined;
 
   return (
