@@ -1,4 +1,4 @@
-import React, { useRef, useContext } from "react";
+import React, { useRef } from "react";
 import { UserModelType } from "../../models/stores/user";
 import { CommentTextBox } from "./comment-textbox";
 import { WithId } from "../../hooks/firestore-hooks";
@@ -49,7 +49,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
     }
   };
 
-  const renderThreadHeader = (documentKey: string | undefined, focusTileId: string | undefined) => {
+  const renderThreadHeader = () => {
     return (
       <div className="comment-card-header comment-select" data-testid="comment-card-header">
         <div className="comment-card-header-icon" data-testid="comment-card-header-icon">
@@ -64,7 +64,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
 
   return (
     <div className={`comment-card selected`} data-testid="comment-card">
-      {renderThreadHeader(documentKey, focusTileId)}
+      {renderThreadHeader()}
       {postedComments?.map((comment, idx) => {
           const userInitialBackgroundColor = ["#f79999", "#ffc18a", "#99d099", "#ff9", "#b2b2ff", "#efa6ef"];
           const commenterInitial = comment.name.charAt(0);
