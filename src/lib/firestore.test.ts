@@ -168,11 +168,14 @@ describe("Firestore class", () => {
 
   describe("getFirestoreUser", () => {
     beforeEach(() => resetMocks());
-    it("should call the `doc()` and `get()` methods with an appropriate path", () => {
+    it("should call the `doc()` and `get()` methods with an appropriate path", async () => {
+      const content = { uid: "user-1", name: "Jane Teacher", type: "teacher" };
+      mockDocGet.mockImplementation(() => ({ data: () => Promise.resolve(content) }));
       const firestore = new Firestore(mockDB);
-      firestore.getFirestoreUser("user-1");
+      const result = await firestore.getFirestoreUser("user-1");
       expect(mockDoc).toHaveBeenCalledWith(`/authed/test-portal/users/user-1`);
       expect(mockDocGet).toHaveBeenCalled();
+      expect(result).toEqual(content);
     });
   });
 

@@ -1,6 +1,5 @@
 import React from "react";
 import { observer } from "mobx-react";
-import { uniq } from "lodash";
 import classNames from "classnames";
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
 import { isPublishedType, isUnpublishedType, PersonalDocument } from "../../models/document/document-types";
@@ -8,7 +7,6 @@ import { IStores } from "../../models/stores/stores";
 import { ENavTabOrder, NavTabSectionModelType  } from "../../models/view/nav-tabs";
 import { CanvasComponent } from "../document/canvas";
 import { DocumentContextReact } from "../document/document-context";
-import { CollapsibleDocumentsSection } from "./collapsible-document-section";
 import { TabPanelDocumentsSubSectionPanel } from "./tab-panel-documents-subsection-panel";
 import NewDocumentIcon from "../../assets/icons/new/add.svg";
 
@@ -85,15 +83,13 @@ export const TabPanelDocumentsSection = observer(({ tab, section, index, numOfSe
                                   onSelectNewDocument, onSelectDocument, onDocumentDragStart,
                                   onDocumentStarClick, onDocumentDeleteClick }: IProps) => {
     const { user } = stores;
-    const isInNetwork = user.type === "teacher" && user.network;
     const showNewDocumentThumbnail = section.addDocument && !!onSelectNewDocument;
     const newDocumentLabel = getNewDocumentLabel(section, stores);
-    const numPanels = isInNetwork ? numOfSections + 1 : numOfSections;
+    const numPanels = user.isNetworkedTeacher ? numOfSections + 1 : numOfSections;
     const isTopPanel = index === 0 && numPanels > 1;
     const isBottomPanel = index === numOfSections - 1 && index > 0;
     const tabName = tab.toLowerCase().replace(' ', '-');
     const currentClass = stores.class.name;
-    const classNamesStrings = (uniq(user.portalClassOfferings.map(o => o.className))).filter(c => c !== currentClass);
     const sectionDocs: DocumentModelType[] = getSectionDocs(section, stores, currentClass);
 
     function handleNewDocumentClick() {
@@ -125,22 +121,6 @@ export const TabPanelDocumentsSection = observer(({ tab, section, index, numOfSe
             );
           })}
         </div>
-        { (isInNetwork && isTopPanel) &&
-          <>
-          <div className="network-divider">
-            <div className="network-divider-label">Network</div>
-          </div>
-          { classNamesStrings.map((classNameStr: string, idx: number) => {
-              return <CollapsibleDocumentsSection key={idx} userName={user.name} classNameStr={classNameStr}
-                                                  sectionDocs={sectionDocs}
-                                                  section={section} stores={stores} tab={tab} scale={scale}
-                                                  selectedDocument={selectedDocument}
-                                                  onSelectDocument={onSelectDocument}
-                     />;
-              })
-            }
-          </>
-        }
       </div>
     );
   });

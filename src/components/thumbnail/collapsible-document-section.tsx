@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { observer } from "mobx-react";
-import { NavTabSectionModelType } from "../../models/view/nav-tabs";
+// import { NavTabSectionModelType } from "../../models/view/nav-tabs";
 import { DocumentModelType } from "../../models/document/document";
 // import { DocumentCaption } from "./document-caption";
 import { IStores } from "../../models/stores/stores";
@@ -10,12 +10,9 @@ import ArrowIcon from "../../assets/icons/arrow/arrow.svg";
 import "./tab-panel-documents-section.sass";
 import "./collapsible-document-section.scss";
 
-
 interface IProps {
   userName: string;
   classNameStr: string;
-  sectionDocs: DocumentModelType[];
-  section: NavTabSectionModelType;
   stores: IStores;
   tab: string;
   scale: number;
@@ -24,7 +21,7 @@ interface IProps {
 }
 
 export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
-  ({userName, classNameStr, sectionDocs, section, stores, tab, scale, selectedDocument, onSelectDocument}) => {
+  ({userName, classNameStr, stores, tab, scale, selectedDocument, onSelectDocument}) => {
   const [isOpen, setIsOpen] = useState(false);
   const handleSectionToggle = () => {
     setIsOpen(!isOpen);

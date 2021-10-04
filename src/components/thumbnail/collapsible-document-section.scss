@@ -48,11 +48,7 @@ $section-padding: 6px;
     flex-wrap: wrap;
     align-content: flex-start;
     overflow-y: auto;
-    &.top-panel {
-      height: $first-panel-height;
-      border-bottom: solid 1px $charcoal-light-1;
-      overflow-y: hidden;
-    }
+
     .list-item {
       position: relative;
       min-height: 120px;
