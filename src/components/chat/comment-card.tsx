@@ -25,14 +25,14 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
   const alertContent = () => {
     return (
       <>
-        <p>Delete this message?</p>
+        <p>Delete this comment?</p>
         <p>This cannot be undone.</p>
       </>
     );
   };
   const [showConfirmDeleteAlert] = useCautionAlert({
     className: "confirm-delete-alert",
-    title: "Delete Message",
+    title: "Delete Comment",
     content: alertContent,
     confirmLabel: "Delete",
     onConfirm: () => commentIdRef.current && onDeleteComment?.(commentIdRef.current)
