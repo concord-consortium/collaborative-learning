@@ -5,7 +5,6 @@ import { BaseComponent, IBaseProps } from "../base";
 import { kDividerMax, kDividerMin } from "../../models/stores/ui-types";
 import { NavTabSpec, ENavTab } from "../../models/view/nav-tabs";
 import { Logger, LogEventName } from "../../lib/logger";
-import { urlParams } from "../../utilities/url-params";
 import { StudentGroupView } from "../document/student-group-view";
 import { ProblemTabContent } from "./problem-tab-content";
 import { DocumentTabContent } from "./document-tab-content";
@@ -55,7 +54,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
                               ? `calc(100% - ${collapseTabWidth}px - ${resizePanelWidth}px)`
                               : `calc(${dividerPosition}% - ${resizePanelWidth}px)`;
     const resourceWidthStyle = {width: resourceWidth};
-    const isChatEnabled = user.isNetworkedTeacher && urlParams.chat;
+    const isChatEnabled = user.isNetworkedTeacher;
     const openChatPanel = isChatEnabled && showChatPanel;
     const focusTileId = selectedTileIds?.length === 1 ? selectedTileIds[0] : undefined;
 

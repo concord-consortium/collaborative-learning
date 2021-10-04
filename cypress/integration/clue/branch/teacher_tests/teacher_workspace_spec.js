@@ -85,11 +85,8 @@ describe('teacher document functionality', function () {
 });
 
 describe('Chat panel for networked teacher', () => {
-  it('verify chat does not appear when no url params are passed to indicate teacher status (teachers are in network', () => {
-    cy.get('.chat-panel-toggle').should('not.exist');
-  });
   it('verify chat panel is accessible is teacher is in network (via url params)', () => {
-    cy.visit("/?appMode=qa&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=msa&chat&network=foo");
+    cy.visit("/?appMode=qa&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=msa&network=foo");
     cy.waitForSpinner();
     dashboard.switchView("Workspace & Resources");
     cy.wait(2000);

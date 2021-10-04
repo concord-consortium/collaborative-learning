@@ -39,12 +39,4 @@ describe("urlParams", () => {
     expect(processQueryParams("demo=true").demo).toBe(true);
     expect(processQueryParams("demo=yes").demo).toBe(true);
   });
-
-  it("chat param accepts but does not require value", () => {
-    expect(processQueryParams().chat).toBe(false);
-    expect(processQueryParams("chat").chat).toBe(true);
-    expect(processQueryParams("chat=true").chat).toBe(true);
-    expect(processQueryParams("chat=yes").chat).toBe(true);
-    expect(processQueryParams("chat=fixtures").chat).toBe("fixtures");
-  });
 });

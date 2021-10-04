@@ -6,7 +6,6 @@ import { DocumentContextReact } from "./document-context";
 import { FourUpComponent } from "../four-up";
 import { useDocumentContext } from "../../hooks/use-document-context";
 import { useGroupsStore, useUIStore, useUserStore } from "../../hooks/use-stores";
-import { urlParams } from "../../utilities/url-params";
 import { ToolbarComponent, ToolbarConfig } from "../toolbar";
 import { EditableToolApiInterfaceRef, EditableToolApiInterfaceRefContext } from "../tools/tool-api";
 import { DocumentModelType } from "../../models/document/document";
@@ -86,7 +85,7 @@ export const EditableDocumentContent: React.FC<IProps> = props => {
   const isReadOnly = !isPrimary || readOnly || document.isPublished;
   const isShowingToolbar = !!toolbar && !isReadOnly;
   const showToolbarClass = isShowingToolbar ? "show-toolbar" : "hide-toolbar";
-  const isChatEnabled = isNetworkedTeacher && urlParams.chat;
+  const isChatEnabled = isNetworkedTeacher;
   const documentSelectedForComment = isChatEnabled && ui.showChatPanel && ui.selectedTileIds.length === 0 && !isPrimary;
   const editableDocContentClass = classNames("editable-document-content", showToolbarClass,
                                              {"comment-select" : documentSelectedForComment});

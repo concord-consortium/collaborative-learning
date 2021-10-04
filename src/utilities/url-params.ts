@@ -86,13 +86,7 @@ export const processUrlParams = (): QueryParams => {
                   ? params.appMode as AppMode
                   : undefined,  // appMode will be determined internally
     // allows use of ?demo without a value for demo mode
-    demo: params.demo !== undefined,
-    // allows use of ?chat without a value to enable chat feature
-    chat: params.chat === undefined
-            ? false
-            : params.chat === "fixtures"
-                ? params.chat
-                : true  // any other value simply enables the feature
+    demo: (params.demo !== undefined)
   };
 };
 
