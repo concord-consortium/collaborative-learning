@@ -493,7 +493,7 @@
                     "id": "n64HrxB1wW1q1lb8",
                     "content": {
                       "type": "Image",
-                      "url": "ccimg://fbrtdb.concord.org/-MjF5z7KlqfFvJiuObgE"
+                      "url": "curriculum/stretching-and-shrinking/images/TG_1.jpg"
                     }
                   },
                   {
@@ -522,7 +522,7 @@
                     "id": "DPMOfLD2PxQ3Lz_t",
                     "content": {
                       "type": "Image",
-                      "url": "ccimg://fbrtdb.concord.org/-MjF8_wqFpSYxL5KjYNr"
+                      "url": "curriculum/stretching-and-shrinking/images/TG_2.jpg"
                     }
                   },
                   {
@@ -646,7 +646,7 @@
                     "id": "24hCGEXVpFNUQjwi",
                     "content": {
                       "type": "Image",
-                      "url": "ccimg://fbrtdb.concord.org/-MjFBygBIk7zMik-s52J"
+                      "url": "curriculum/stretching-and-shrinking/images/TG_3.jpg"
                     }
                   },
                   {
@@ -680,7 +680,7 @@
                     "id": "YLidaiv0RWNbLk7h",
                     "content": {
                       "type": "Image",
-                      "url": "ccimg://fbrtdb.concord.org/-MjFCOzdFLAZSHB-9NNg"
+                      "url": "curriculum/stretching-and-shrinking/images/TG_4.jpg"
                     }
                   },
                   {
@@ -987,7 +987,7 @@
                     "id": "m0aG_wNWHybXqdg2",
                     "content": {
                       "type": "Image",
-                      "url": "ccimg://fbrtdb.concord.org/-MjFkhxxNUFE8JZnUC6d"
+                      "url": "curriculum/stretching-and-shrinking/images/TG_5.jpg"
                     }
                   },
                   {
@@ -1001,10 +1001,33 @@
                     }
                   },
                   {
+                    "type": "Geometry",
+                    "title": "Enlarging a shape",
+                    "board": {
+                      "properties": {
+                        "axisMin": [-2.186, -1.093],
+                        "axisRange": [26.23, 17.486]
+                      }
+                    },
+                    "objects": [
+                      { "type": "point", "parents": [1, 1], "properties": {"id":"zxnw1S3P_6RRxSJ9","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                      { "type": "point", "parents": [1, 1], "properties": {"id":"jm-9QT1wWia976W_","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                      { "type": "point", "parents": [1, 5], "properties": {"id":"3fqjb2eArXfmU2WX","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                      { "type": "point", "parents": [1, 5], "properties": {"id":"qv9KBFiipADCs3tZ","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                      { "type": "polygon", "parents": ["zxnw1S3P_6RRxSJ9", "jm-9QT1wWia976W_", "3fqjb2eArXfmU2WX", "qv9KBFiipADCs3tZ"],"properties": {"id":"XrAtOscgQutMyDnx"} },
+                      { "type": "point", "parents": [1, 7], "properties": {"id":"V_CLC7VUpqVQNaxx","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                      { "type": "point", "parents": [1, 7], "properties": {"id":"RPlssU7812RDrI3i","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                      { "type": "point", "parents": [1, 12], "properties": {"id":"KnuZnKztH3bj5OgH","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                      { "type": "point", "parents": [1, 12], "properties": {"id":"K4IpL6Wqs7weDEdt","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                      { "type": "polygon", "parents": ["V_CLC7VUpqVQNaxx", "RPlssU7812RDrI3i", "KnuZnKztH3bj5OgH", "K4IpL6Wqs7weDEdt"],"properties": {"id":"tE4SBJpvY9LAPTAs"} },
+                      { "type": "comment", "parents": [2.3900158999945216, -8.81967213114754], "properties": {"id":"y0EYZP0gMnaqBU-5","anchor":"tE4SBJpvY9LAPTAs","text":"x 1.25 of the original box"} }
+                    ]
+                  },
+                  {
                     "id": "jzlo4jLJau1YBtvV",
                     "content": {
                       "type": "Image",
-                      "url": "ccimg://fbrtdb.concord.org/-MjFkok8NAJLTGwGmVQn"
+                      "url": "curriculum/stretching-and-shrinking/images/TG_6.jpg"
                     }
                   },
                   {
@@ -1181,7 +1204,7 @@
                     "id": "jbsxKuJ1lnKPvbYR",
                     "content": {
                       "type": "Image",
-                      "url": "ccimg://fbrtdb.concord.org/-MjG1otRCtTsspNiF9kh"
+                      "url": "curriculum/stretching-and-shrinking/images/TG_7.jpg"
                     }
                   },
                   {
@@ -1223,7 +1246,7 @@
                     "id": "FKwLn_Fo2Zo18bBg",
                     "content": {
                       "type": "Image",
-                      "url": "ccimg://fbrtdb.concord.org/-MjG2B2hLoQEP7-c-rEt"
+                      "url": "curriculum/stretching-and-shrinking/images/TG_8.jpg"
                     }
                   },
                   {
@@ -1303,7 +1326,7 @@
                     "id": "K5tNdvYdQcLKJ41x",
                     "content": {
                       "type": "Image",
-                      "url": "ccimg://fbrtdb.concord.org/-MjG4Z81Z-Pqfw8YAIXz"
+                      "url": "curriculum/stretching-and-shrinking/images/TG_9.jpg"
                     }
                   },
                   {
@@ -2004,7 +2027,7 @@
                     "id": "KVr12DYAKUFgPcFs",
                     "content": {
                       "type": "Image",
-                      "url": "ccimg://fbrtdb.concord.org/-MjUmWxc4HhkpXfrqmMv"
+                      "url": "curriculum/stretching-and-shrinking/images/TG_10.jpg"
                     }
                   },
                   {
@@ -2251,7 +2274,7 @@
                     "id": "_Vs89RdradVhHR7E",
                     "content": {
                       "type": "Image",
-                      "url": "ccimg://fbrtdb.concord.org/-MjV-Z88z40UeBNC69at"
+                      "url": "curriculum/stretching-and-shrinking/images/TG_11.jpg"
                     }
                   },
                   {
@@ -2301,7 +2324,7 @@
                     "id": "iWBy06QHYNEakMFl",
                     "content": {
                       "type": "Image",
-                      "url": "ccimg://fbrtdb.concord.org/-MjV-utS4Ph5zD403dbS"
+                      "url": "curriculum/stretching-and-shrinking/images/TG_12.jpg"
                     }
                   },
                   {
@@ -2442,7 +2465,7 @@
                     "id": "JYGjynwmL1tZB17j",
                     "content": {
                       "type": "Image",
-                      "url": "ccimg://fbrtdb.concord.org/-MjV58qP6lLy1AMvIaZv"
+                      "url": "curriculum/stretching-and-shrinking/images/TG_13.jpg"
                     }
                   },
                   {
@@ -2772,7 +2795,7 @@
                     "id": "0VqM0_xYDymLs8-4",
                     "content": {
                       "type": "Image",
-                      "url": "ccimg://fbrtdb.concord.org/-Mj_5_6xkKVxXhJA9idH"
+                      "url": "curriculum/stretching-and-shrinking/images/TG_14.jpg"
                     }
                   },
                   {
@@ -2923,7 +2946,7 @@
                     "id": "XaQzwanwb_Qorb9z",
                     "content": {
                       "type": "Image",
-                      "url": "ccimg://fbrtdb.concord.org/-MjdpxJrbcRxe68VxFMX"
+                      "url": "curriculum/stretching-and-shrinking/images/TG_15.jpg"
                     }
                   },
                   {
@@ -3230,7 +3253,7 @@
                     "id": "LSR6qAJi5tWiVaI0",
                     "content": {
                       "type": "Image",
-                      "url": "ccimg://fbrtdb.concord.org/-MjeONIsu2K17A7GiYGa"
+                      "url": "curriculum/stretching-and-shrinking/images/TG_16.jpg"
                     }
                   },
                   {
@@ -3377,7 +3400,7 @@
                    "display": "teacher",
                     "content": {
                       "type": "Image",
-                      "url": "ccimg://fbrtdb.concord.org/-MjeZdBAM48k1H_4JwbR"
+                      "url": "curriculum/stretching-and-shrinking/images/TG_17.jpg"
                     }
                   },
                   {
@@ -3593,7 +3616,7 @@
                     "id": "-MCSc0um2sM2EPaJ",
                     "content": {
                       "type": "Image",
-                      "url": "ccimg://fbrtdb.concord.org/-MjitRM5wksMVWw-jxst"
+                      "url": "curriculum/stretching-and-shrinking/images/TG_18.jpg"
                     }
                   },
                   {
@@ -3634,7 +3657,7 @@
                     "id": "7OfGeizw49Hhehpn",
                     "content": {
                       "type": "Image",
-                      "url": "ccimg://fbrtdb.concord.org/-Mjitix4wWpJhIr1bLat"
+                      "url": "curriculum/stretching-and-shrinking/images/TG_19.jpg"
                     }
                   },
                   {
@@ -4007,7 +4030,7 @@
                     "id": "avp1BcVKybx8Y-Q2",
                     "content": {
                       "type": "Image",
-                      "url": "ccimg://fbrtdb.concord.org/-MjizBHLdM1TVUeml6Q2"
+                      "url": "curriculum/stretching-and-shrinking/images/TG_20.jpg"
                     }
                   },
                   {
