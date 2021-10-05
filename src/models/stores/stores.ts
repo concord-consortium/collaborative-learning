@@ -52,6 +52,7 @@ export function createStores(params?: ICreateStores): IStores {
   const demoName = params?.demoName || appConfig.appName;
   const stores: IBaseStores = {
     appMode: params?.appMode || "dev",
+    isPreviewing: params?.isPreviewing || false,
     appVersion: params?.appVersion || "unknown",
     appConfig,
     // for testing, we create a null problem or investigation if none is provided
