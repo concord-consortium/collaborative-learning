@@ -66,7 +66,6 @@ export async function getNetworkResources(
         const offeringPromises: Promise<INetworkResourceOfferingResponse>[] = [];
         resource_link_ids.forEach(resource_link_id => {
           const offeringRoot = `${databaseRoot}/${context_id}/offerings/${resource_link_id}`;
-          const offeringUserRoot = `${offeringRoot}/users/${uid}`;
           offeringPromises.push(new Promise(async (resolveOffering, rejectOffering) => {
             if (isValidClassNetwork) {
               // return promises for individual metadata requests
@@ -81,6 +80,7 @@ export async function getNetworkResources(
                 type TeacherOfferingPromise = Promise<INetworkResourceTeacherOfferingResponse>;
                 const teachers: TeacherOfferingPromise[] = classDoc.data()?.teachers.map(async (teacherId: string) => {
                   return new Promise<INetworkResourceTeacherOfferingResponse>(async (resolve, reject) => {
+                    const offeringUserRoot = `${offeringRoot}/users/${teacherId}`;
                     const [problemDocumentsSnap, planningDocumentsSnap] = await Promise.all([
                       admin.database().ref(`${offeringUserRoot}/documents`).get(),
                       admin.database().ref(`${offeringUserRoot}/planning`).get()
