@@ -7,10 +7,10 @@ import { getDisplayTimeDate } from "../../utilities/time";
 import { useCautionAlert } from "../utilities/use-caution-alert";
 import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
 import DeleteMessageIcon from "../../assets/delete-message-icon.svg";
-import "./comment-card.scss";
-import "../themes.scss";
 import { ToolIconComponent } from "./tool-icon-component";
 import OpenWorkspaceIcon from "../../assets/icons/1-4-up/1-up-icon-default.svg";
+import "./comment-card.scss";
+import "../themes.scss";
 
 interface IProps {
   user?: UserModelType;
@@ -55,7 +55,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
         <div className="comment-card-header-icon" data-testid="comment-card-header-icon">
           { (!documentKey || !focusTileId) && <OpenWorkspaceIcon/>}
           { documentKey && focusTileId
-             &&  <ToolIconComponent documentKey={documentKey} tileId={focusTileId}/>
+             && <ToolIconComponent documentKey={documentKey} tileId={focusTileId}/>
           }
         </div>
       </div>

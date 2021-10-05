@@ -11,8 +11,8 @@ export const ToolIconComponent: React.FC<IProps> = ({documentKey, tileId}) => {
 
   const tileType = useTypeOfTileInDocumentOrCurriculum(documentKey, tileId);
   const { appIcons } = useContext(AppConfigContext);
-  
-  if (!documentKey || !tileId || !appIcons ) {
+
+  if (!documentKey || !tileId || !appIcons) {
     return null;
   }
 

@@ -7,9 +7,8 @@ import {
 } from "../../hooks/document-comment-hooks";
 import { useDeleteDocument } from "../../hooks/firestore-hooks";
 import { useDocumentOrCurriculumMetadata } from "../../hooks/use-stores";
-
-import "./chat-panel.scss";
 import { isDocumentMetadata } from "../../../functions/src/shared";
+import "./chat-panel.scss";
 
 interface IProps {
   user?: UserModelType;
