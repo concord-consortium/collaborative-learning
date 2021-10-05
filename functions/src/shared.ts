@@ -145,3 +145,32 @@ export interface IPostDocumentCommentParams extends ICommentableDocumentParams {
   comment: IClientCommentParams;
 }
 export type IPostDocumentCommentUnionParams = IPostDocumentCommentParams | IFirebaseFunctionWarmUpParams;
+
+export interface INetworkResourceTeacherResponse {
+  uid: string;
+  problemDocument?: any;
+  planningDocument?: any;
+  personalDocuments?: any[];
+}
+export interface INetworkResourceOfferingResponse {
+  resource_link_id: string;
+  problemPublications?: any[];
+  personalPublications?: any[];
+  teachers?: INetworkResourceTeacherResponse[];
+}
+export interface INetworkResourceClassResponse {
+  id?: string;          // portal class id
+  name?: string;        // portal class name
+  context_id: string;   // portal class hash
+  teacher?: string;     // name of primary(?) teacher
+  teachers?: string[];  // uids of teachers of class
+  resources: INetworkResourceOfferingResponse[];
+}
+export interface IGetNetworkResourcesParams extends IFirebaseFunctionBaseParams {
+  problem: string;  // problem path, e.g. "sas/1/2"
+}
+export interface IGetNetworkResourcesResponse {
+  version: string;
+  response: INetworkResourceClassResponse[];
+}
+export type IGetNetworkResourceListUnionParams = IGetNetworkResourcesParams | IFirebaseFunctionWarmUpParams;

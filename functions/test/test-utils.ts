@@ -18,14 +18,16 @@ export const kOtherUserId = `${kOtherPlatformUserId}`;
 export const kOtherFirebaseUserId = `fb-${kOtherUserId}`;
 export const kClassHash = "class-hash";
 export const kOtherClassHash = "other-class-hash";
-export const kOfferingId = "offering-id";
+export const kOffering1Id = "1001";
+export const kOffering2Id = "1002";
 export const kTeacherName = "Jane Teacher";
 export const kOtherTeacherName = "John Teacher";
 export const kTeacherNetwork = "teacher-network";
 export const kOtherTeacherNetwork = "other-network";
 export const kDocumentType = "problem";
 export const kDocumentKey = "document-key";
-export const kCurriculumKey = "abc/1/2/intro";
+export const kProblemPath = "abc/1/2";
+export const kCurriculumKey = `${kProblemPath}/intro`;
 export const kCreatedAt = Date.now();
 
 
@@ -60,7 +62,7 @@ export const specAuth = (overrides?: DeepPartial<AuthData>, exclude?: string[]):
   const userId = overrides?.token?.platform_user_id || kPlatformUserId;
   const classHash = overrides?.token?.class_hash || kClassHash;
   const userType = overrides?.token?.user_type === "teacher" ? overrides.token.user_type : "learner";
-  const offeringId = userType === "teacher" ? undefined : overrides?.token?.offering_id || kOfferingId;
+  const offeringId = userType === "teacher" ? undefined : overrides?.token?.offering_id || kOffering1Id;
   return {
     uid: overrides?.uid || kFirebaseUserId,
     token: {
