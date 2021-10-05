@@ -146,24 +146,28 @@ export interface IPostDocumentCommentParams extends ICommentableDocumentParams {
 }
 export type IPostDocumentCommentUnionParams = IPostDocumentCommentParams | IFirebaseFunctionWarmUpParams;
 
-export interface INetworkResourceTeacherResponse {
+export interface INetworkResourceTeacherClassResponse {
   uid: string;
-  problemDocument?: any;
-  planningDocument?: any;
   personalDocuments?: any[];
+  learningLogs?: any[];
+}
+export interface INetworkResourceTeacherOfferingResponse {
+  uid: string;
+  problemDocuments?: any[];
+  planningDocuments?: any[];
 }
 export interface INetworkResourceOfferingResponse {
   resource_link_id: string;
   problemPublications?: any[];
   personalPublications?: any[];
-  teachers?: INetworkResourceTeacherResponse[];
+  teachers?: INetworkResourceTeacherOfferingResponse[];
 }
 export interface INetworkResourceClassResponse {
   id?: string;          // portal class id
   name?: string;        // portal class name
   context_id: string;   // portal class hash
   teacher?: string;     // name of primary(?) teacher
-  teachers?: string[];  // uids of teachers of class
+  teachers?: INetworkResourceTeacherClassResponse[];
   resources: INetworkResourceOfferingResponse[];
 }
 export interface IGetNetworkResourcesParams extends IFirebaseFunctionBaseParams {
