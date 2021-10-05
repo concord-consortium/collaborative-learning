@@ -27,7 +27,7 @@ export interface DBDocumentMap {
   [key /* documentKey */: string]: DBDocument;
 }
 
-export type DBDocumentType = "section" |
+export type DBDocumentType = "section" |  // section documents are deprecated
                               "problem" | "planning" | "publication" |
                               "personal" | "personalPublication" |
                               "learningLog" | "learningLogPublication" |
