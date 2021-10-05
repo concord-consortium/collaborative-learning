@@ -47,9 +47,6 @@ export interface QueryParams {
 
   // name of teacher network to associate teacher with (until we have a real implementation)
   network?: string;
-  // if present without a value show actual (under development) chat implementation
-  // if present with value "fixtures" include fake messages for development purposes
-  chat?: boolean | "fixtures";
 
   //
   // demo or qa mode parameters
