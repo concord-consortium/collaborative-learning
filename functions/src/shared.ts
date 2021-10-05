@@ -162,7 +162,11 @@ export interface INetworkResourceClassResponse {
   context_id: string; // class hash
   resources: INetworkResourceOfferingResponse[];
 }
-export interface IGetNetworkResourceListParams extends IFirebaseFunctionBaseParams {
+export interface IGetNetworkResourcesParams extends IFirebaseFunctionBaseParams {
   problem: string;  // problem path, e.g. "sas/1/2"
 }
-export type IGetNetworkResourceListUnionParams = IGetNetworkResourceListParams | IFirebaseFunctionWarmUpParams;
+export interface IGetNetworkResourcesResponse {
+  version: string;
+  response: INetworkResourceClassResponse[];
+}
+export type IGetNetworkResourceListUnionParams = IGetNetworkResourcesParams | IFirebaseFunctionWarmUpParams;

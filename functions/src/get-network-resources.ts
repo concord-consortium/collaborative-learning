@@ -8,7 +8,7 @@ import { validateUserContext } from "./user-context";
 // update this when deploying updates to this function
 const version = "1.0.0";
 
-export async function getNetworkResourceList(
+export async function getNetworkResources(
                         params?: IGetNetworkResourceListUnionParams,
                         callableContext?: functions.https.CallableContext) {
   if (isWarmUpParams(params)) return { version };

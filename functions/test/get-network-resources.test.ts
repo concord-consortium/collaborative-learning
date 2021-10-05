@@ -1,8 +1,8 @@
 import {
   apps, clearFirestoreData, initializeAdminApp, useEmulators
 } from "@firebase/rules-unit-testing";
-import { getNetworkResourceList } from "../src/get-network-resource-list";
-import { IGetNetworkResourceListParams } from "../src/shared";
+import { getNetworkResources } from "../src/get-network-resources";
+import { IGetNetworkResourcesParams } from "../src/shared";
 import { kClassHash, kOffering1Id, kOffering2Id, kOtherClassHash, kProblemPath, kTeacherName, kTeacherNetwork, kUserId, specAuth, specUserContext } from "./test-utils";
 
 useEmulators({
@@ -81,7 +81,7 @@ async function writeOfferingRecordToFirestore(overrides?: any) {
   return await firestoreAdmin.doc(`/authed/test_portal/offerings/${kTeacherNetwork}_${id}`).set(_class);
 }
 
-describe("getNetworkResourceList", () => {
+describe("getNetworkResources", () => {
 
   beforeEach(async () => {
     await clearFirestoreData({ projectId: kCLUEFirebaseProjectId });
@@ -98,45 +98,45 @@ describe("getNetworkResourceList", () => {
   });
 
   it("should fail without sufficient arguments", async () => {
-    await expect(getNetworkResourceList()).rejects.toBeDefined();
+    await expect(getNetworkResources()).rejects.toBeDefined();
   });
 
   it("should succeed when asked to warm up", async () => {
-    await expect(getNetworkResourceList({ warmUp: true })).resolves.toHaveProperty("version");
+    await expect(getNetworkResources({ warmUp: true })).resolves.toHaveProperty("version");
   });
 
   it("should fail without valid arguments", async () => {
-    await expect(getNetworkResourceList({} as any, {} as any)).rejects.toBeDefined();
+    await expect(getNetworkResources({} as any, {} as any)).rejects.toBeDefined();
   });
 
   it("should fail without corresponding teacher record in firestore", async () => {
     const context = specUserContext();
-    const params: IGetNetworkResourceListParams = { context, problem: kProblemPath };
-    await expect(getNetworkResourceList(params, authWithTeacherClaims as any)).rejects.toBeDefined();
+    const params: IGetNetworkResourcesParams = { context, problem: kProblemPath };
+    await expect(getNetworkResources(params, authWithTeacherClaims as any)).rejects.toBeDefined();
   });
 
   it("should fail without valid network", async () => {
     await writeTeacherRecordToFirestore();
 
     const context = specUserContext({}, ["network"]);
-    const params: IGetNetworkResourceListParams = { context, problem: kProblemPath };
-    await expect(getNetworkResourceList(params, authWithTeacherClaims as any)).rejects.toBeDefined();
+    const params: IGetNetworkResourcesParams = { context, problem: kProblemPath };
+    await expect(getNetworkResources(params, authWithTeacherClaims as any)).rejects.toBeDefined();
   });
 
   it("should fail with bogus network", async () => {
     await writeTeacherRecordToFirestore();
 
     const context = specUserContext({ network: "bogus-network"});
-    const params: IGetNetworkResourceListParams = { context, problem: kProblemPath };
-    await expect(getNetworkResourceList(params, authWithTeacherClaims as any)).rejects.toBeDefined();
+    const params: IGetNetworkResourcesParams = { context, problem: kProblemPath };
+    await expect(getNetworkResources(params, authWithTeacherClaims as any)).rejects.toBeDefined();
   });
 
   it("should return empty response if no matching classes/offerings in requested network", async () => {
     await writeTeacherRecordToFirestore();
 
     const context = specUserContext();
-    const params: IGetNetworkResourceListParams = { context, problem: kProblemPath };
-    const response = await getNetworkResourceList(params, authWithTeacherClaims as any);
+    const params: IGetNetworkResourcesParams = { context, problem: kProblemPath };
+    const response = await getNetworkResources(params, authWithTeacherClaims as any);
     expect(response).toHaveProperty("version");
     expect(response.response).toEqual([]);
   });
@@ -148,8 +148,8 @@ describe("getNetworkResourceList", () => {
     await writeOfferingRecordToFirestore();
 
     const context = specUserContext();
-    const params: IGetNetworkResourceListParams = { context, problem: kProblemPath };
-    const response = await getNetworkResourceList(params, authWithTeacherClaims as any);
+    const params: IGetNetworkResourcesParams = { context, problem: kProblemPath };
+    const response = await getNetworkResources(params, authWithTeacherClaims as any);
     expect(response).toHaveProperty("version");
     const expectedOffering = { resource_link_id: kOffering1Id, teachers: [{ uid: kUserId }]};
     expect(response.response).toEqual([{ context_id: kClassHash, resources: [expectedOffering] }]);
@@ -166,8 +166,8 @@ describe("getNetworkResourceList", () => {
     });
 
     const context = specUserContext();
-    const params: IGetNetworkResourceListParams = { context, problem: kProblemPath };
-    const response = await getNetworkResourceList(params, authWithTeacherClaims as any);
+    const params: IGetNetworkResourcesParams = { context, problem: kProblemPath };
+    const response = await getNetworkResources(params, authWithTeacherClaims as any);
     expect(response).toHaveProperty("version");
     const expectedOffering = { resource_link_id: kOffering1Id };
     expect(response.response).toEqual([{ context_id: kClassHash, resources: [expectedOffering] }]);
@@ -184,8 +184,8 @@ describe("getNetworkResourceList", () => {
     });
 
     const context = specUserContext();
-    const params: IGetNetworkResourceListParams = { context, problem: kProblemPath };
-    const response = await getNetworkResourceList(params, authWithTeacherClaims as any);
+    const params: IGetNetworkResourcesParams = { context, problem: kProblemPath };
+    const response = await getNetworkResources(params, authWithTeacherClaims as any);
     expect(response).toHaveProperty("version");
     const expectedOffering = { resource_link_id: kOffering1Id };
     expect(response.response).toEqual([{ context_id: kClassHash, resources: [expectedOffering] }]);
@@ -223,8 +223,8 @@ describe("getNetworkResourceList", () => {
     });
 
     const context = specUserContext();
-    const params: IGetNetworkResourceListParams = { context, problem: kProblemPath };
-    const response = await getNetworkResourceList(params, authWithTeacherClaims as any);
+    const params: IGetNetworkResourcesParams = { context, problem: kProblemPath };
+    const response = await getNetworkResources(params, authWithTeacherClaims as any);
     expect(response).toHaveProperty("version");
     const expectedOffering = {
       resource_link_id: kOffering1Id,
@@ -287,8 +287,8 @@ describe("getNetworkResourceList", () => {
     });
 
     const context = specUserContext();
-    const params: IGetNetworkResourceListParams = { context, problem: kProblemPath };
-    const response = await getNetworkResourceList(params, authWithTeacherClaims as any);
+    const params: IGetNetworkResourcesParams = { context, problem: kProblemPath };
+    const response = await getNetworkResources(params, authWithTeacherClaims as any);
     expect(response).toHaveProperty("version");
     const expectedOffering1 = {
       resource_link_id: kOffering1Id,
