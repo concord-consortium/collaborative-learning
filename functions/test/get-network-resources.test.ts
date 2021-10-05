@@ -156,7 +156,7 @@ describe("getNetworkResources", () => {
     expect(response).toHaveProperty("version");
     const expectedOffering = { resource_link_id: kOffering1Id, teachers: [{ uid: kUserId }]};
     expect(response.response).toEqual([{
-      id: "101", name: "Class 1", context_id: kClassHash, teacher: kTeacherName, teachers: [kUserId],
+      id: "101", name: "Class 1", context_id: kClassHash, teacher: kTeacherName, teachers: [{ uid: kUserId }],
       resources: [expectedOffering], uri: `https://concord.org/class/101`
     }]);
   });
@@ -195,7 +195,7 @@ describe("getNetworkResources", () => {
     expect(response).toHaveProperty("version");
     const expectedOffering = { resource_link_id: kOffering1Id };
     expect(response.response).toEqual([{
-      id: "101", name: "Class 1", context_id: kClassHash, teacher: kTeacherName, teachers: [kUserId],
+      id: "101", name: "Class 1", context_id: kClassHash, teacher: kTeacherName, teachers: [{ uid: kUserId }],
       resources: [expectedOffering], uri: `https://concord.org/class/101`
     }]);
   });
@@ -242,7 +242,92 @@ describe("getNetworkResources", () => {
       teachers: [{ uid: kUserId }]
     };
     expect(response.response).toEqual([{
-      id: "101", name: "Class 1", context_id: kClassHash, teacher: kTeacherName, teachers: [kUserId],
+      id: "101", name: "Class 1", context_id: kClassHash, teacher: kTeacherName, teachers: [{ uid: kUserId }],
+      resources: [expectedOffering], uri: `https://concord.org/class/101`
+    }]);
+  });
+
+  it("should return problem/planning document metadata for a single class with a single offering", async () => {
+    await writeTeacherRecordToFirestore();
+    await writeClassRecordToFirestore();
+    await writeOfferingRecordToFirestore();
+    const problemDocuments = [{
+            version: "1.0",
+            self: { classHash: kClassHash, offeringId: kOffering1Id, uid: kUserId },
+            documentKey: "problem-document",
+            visibility: "public"
+          }];
+    const planningDocuments = [{
+            version: "1.0",
+            self: { classHash: kClassHash, offeringId: kOffering1Id, uid: kUserId },
+            title: "title-1",
+            documentKey: "planning-document",
+            visibility: "private"
+          }];
+    mockDatabaseGet.mockImplementation(path => {
+      const dbMap: Record<string, any> = {
+        "/authed/portals/test_portal/classes/class-hash/offerings/1001/users/123456/documents":
+          problemDocuments,
+        "/authed/portals/test_portal/classes/class-hash/offerings/1001/users/123456/planning":
+          planningDocuments
+      };
+      const content = dbMap[path];
+      return content
+              ? { exists: () => true, val: () => content }
+              : { exists: () => false, val: () => null };
+    });
+
+    const context = specUserContext();
+    const params: IGetNetworkResourcesParams = { context, problem: kProblemPath };
+    const response = await getNetworkResources(params, authWithTeacherClaims as any);
+    expect(response).toHaveProperty("version");
+    const expectedOffering = {
+      resource_link_id: kOffering1Id,
+      teachers: [{ uid: kUserId, problemDocuments, planningDocuments }]
+    };
+    expect(response.response).toEqual([{
+      id: "101", name: "Class 1", context_id: kClassHash, teacher: kTeacherName, teachers: [{ uid: kUserId }],
+      resources: [expectedOffering], uri: `https://concord.org/class/101`
+    }]);
+  });
+
+  it("should return personal/learning log document metadata for a single class with a single offering", async () => {
+    await writeTeacherRecordToFirestore();
+    await writeClassRecordToFirestore();
+    await writeOfferingRecordToFirestore();
+    const personalDocuments = [{
+            version: "1.0",
+            self: { uid: kUserId, classHash: kClassHash, documentKey: "personal-document-1" },
+            title: "Personal Document 1",
+            properties: { foo: "bar" }
+          }];
+    const learningLogs = [{
+            version: "1.0",
+            self: { uid: kUserId, classHash: kClassHash, documentKey: "learning-log-1" },
+            title: "Learning Log 1",
+            properties: { baz: "roo" }
+          }];
+    mockDatabaseGet.mockImplementation(path => {
+      const dbMap: Record<string, any> = {
+        "/authed/portals/test_portal/classes/class-hash/users/123456/personalDocs":
+          personalDocuments,
+        "/authed/portals/test_portal/classes/class-hash/users/123456/learningLogs":
+          learningLogs
+      };
+      const content = dbMap[path];
+      return content
+              ? { exists: () => true, val: () => content }
+              : { exists: () => false, val: () => null };
+    });
+
+    const context = specUserContext();
+    const params: IGetNetworkResourcesParams = { context, problem: kProblemPath };
+    const response = await getNetworkResources(params, authWithTeacherClaims as any);
+    expect(response).toHaveProperty("version");
+    const expectedTeacher = { uid: kUserId, personalDocuments, learningLogs };
+    const expectedOffering = { resource_link_id: kOffering1Id, teachers: [{ uid: kUserId }] };
+    expect(response.response).toEqual([{
+      id: "101", name: "Class 1", context_id: kClassHash, teacher: kTeacherName, teachers: [expectedTeacher],
       resources: [expectedOffering], uri: `https://concord.org/class/101`
     }]);
   });
@@ -315,9 +400,9 @@ describe("getNetworkResources", () => {
       teachers: [{ uid: kUserId }]
     };
     expect(response.response).toEqual([
-      { id: "101", name: "Class 1", context_id: kClassHash, teacher: kTeacherName, teachers: [kUserId],
+      { id: "101", name: "Class 1", context_id: kClassHash, teacher: kTeacherName, teachers: [{ uid: kUserId }],
         resources: [expectedOffering1], uri: `https://concord.org/class/101` },
-      { id: "102", name: "Class 2", context_id: kOtherClassHash, teacher: kTeacherName, teachers: [kUserId],
+      { id: "102", name: "Class 2", context_id: kOtherClassHash, teacher: kTeacherName, teachers: [{ uid: kUserId }],
         resources: [expectedOffering2], uri: `https://concord.org/class/102` }
     ]);
   });

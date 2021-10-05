@@ -9,6 +9,7 @@
     "start": "npm run shell",
     "deploy:all": "firebase deploy --only functions",
     "deploy:getImageData": "firebase deploy --only functions:getImageData",
+    "deploy:getNetworkResources": "firebase deploy --only functions:getNetworkResources_v1",
     "deploy:postDocumentComment": "firebase deploy --only functions:postDocumentComment_v1",
     "deploy:validateCommentableDocument": "firebase deploy --only functions:validateCommentableDocument_v1",
     "logs": "firebase functions:log",
