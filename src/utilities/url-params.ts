@@ -47,9 +47,6 @@ export interface QueryParams {
 
   // name of teacher network to associate teacher with (until we have a real implementation)
   network?: string;
-  // if present without a value show actual (under development) chat implementation
-  // if present with value "fixtures" include fake messages for development purposes
-  chat?: boolean | "fixtures";
 
   //
   // demo or qa mode parameters
@@ -86,13 +83,7 @@ export const processUrlParams = (): QueryParams => {
                   ? params.appMode as AppMode
                   : undefined,  // appMode will be determined internally
     // allows use of ?demo without a value for demo mode
-    demo: params.demo !== undefined,
-    // allows use of ?chat without a value to enable chat feature
-    chat: params.chat === undefined
-            ? false
-            : params.chat === "fixtures"
-                ? params.chat
-                : true  // any other value simply enables the feature
+    demo: (params.demo !== undefined)
   };
 };
 

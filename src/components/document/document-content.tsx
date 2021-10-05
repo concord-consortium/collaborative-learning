@@ -4,7 +4,6 @@ import { findDOMNode } from "react-dom";
 import { throttle } from "lodash";
 import classNames from "classnames";
 import { BaseComponent, IBaseProps } from "../base";
-import { urlParams } from "../../utilities/url-params";
 import { TileRowComponent, kDragResizeRowId, extractDragResizeRowId, extractDragResizeY,
         extractDragResizeModelHeight, extractDragResizeDomHeight } from "../document/tile-row";
 import { DocumentContentModelType, IDragToolCreateInfo, IDropRowInfo } from "../../models/document/document-content";
@@ -104,7 +103,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   public render() {
     const {viaTeacherDashboard} = this.props;
     const {ui, user: {isNetworkedTeacher}} = this.stores;
-    const isChatEnabled = isNetworkedTeacher && urlParams.chat;
+    const isChatEnabled = isNetworkedTeacher;
     const documentSelectedForComment = isChatEnabled && ui.showChatPanel && ui.selectedTileIds.length === 0;
     const documentClass = classNames("document-content", {"document-content-smooth-scroll" : viaTeacherDashboard,
                                      "comment-select" : documentSelectedForComment});
