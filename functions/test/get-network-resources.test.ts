@@ -3,7 +3,10 @@ import {
 } from "@firebase/rules-unit-testing";
 import { getNetworkResources } from "../src/get-network-resources";
 import { IGetNetworkResourcesParams } from "../src/shared";
-import { kClassHash, kOffering1Id, kOffering2Id, kOtherClassHash, kProblemPath, kTeacherName, kTeacherNetwork, kUserId, specAuth, specUserContext } from "./test-utils";
+import {
+  kClassHash, kOffering1Id, kOffering2Id, kOtherClassHash, kProblemPath,
+  kTeacherName, kTeacherNetwork, kUserId, specAuth, specUserContext
+} from "./test-utils";
 
 useEmulators({
   database: { host: "localhost", port: 9000 },
@@ -152,7 +155,10 @@ describe("getNetworkResources", () => {
     const response = await getNetworkResources(params, authWithTeacherClaims as any);
     expect(response).toHaveProperty("version");
     const expectedOffering = { resource_link_id: kOffering1Id, teachers: [{ uid: kUserId }]};
-    expect(response.response).toEqual([{ context_id: kClassHash, resources: [expectedOffering] }]);
+    expect(response.response).toEqual([{
+      id: "101", name: "Class 1", context_id: kClassHash, teacher: kTeacherName, teachers: [kUserId],
+      resources: [expectedOffering], uri: `https://concord.org/class/101`
+    }]);
   });
 
   it("should return a single class with a single empty offering if class doesn't exist in firestore", async () => {
@@ -188,7 +194,10 @@ describe("getNetworkResources", () => {
     const response = await getNetworkResources(params, authWithTeacherClaims as any);
     expect(response).toHaveProperty("version");
     const expectedOffering = { resource_link_id: kOffering1Id };
-    expect(response.response).toEqual([{ context_id: kClassHash, resources: [expectedOffering] }]);
+    expect(response.response).toEqual([{
+      id: "101", name: "Class 1", context_id: kClassHash, teacher: kTeacherName, teachers: [kUserId],
+      resources: [expectedOffering], uri: `https://concord.org/class/101`
+    }]);
   });
 
   it("should return appropriate publications metadata for a single class with a single offering", async () => {
@@ -232,13 +241,16 @@ describe("getNetworkResources", () => {
       personalPublications: personalPublicationsMetadata,
       teachers: [{ uid: kUserId }]
     };
-    expect(response.response).toEqual([{ context_id: kClassHash, resources: [expectedOffering] }]);
+    expect(response.response).toEqual([{
+      id: "101", name: "Class 1", context_id: kClassHash, teacher: kTeacherName, teachers: [kUserId],
+      resources: [expectedOffering], uri: `https://concord.org/class/101`
+    }]);
   });
 
   it("should return appropriate publications metadata for multiple classes with offerings", async () => {
     await writeTeacherRecordToFirestore();
     await writeClassRecordToFirestore();
-    await writeClassRecordToFirestore({ id: "102", context_id: kOtherClassHash });
+    await writeClassRecordToFirestore({ id: "102", context_id: kOtherClassHash, name: "Class 2" });
     await writeOfferingRecordToFirestore();
     await writeOfferingRecordToFirestore({ id: kOffering2Id, context_id: kOtherClassHash });
     const offering1ProblemPublicationsMetadata = [{
@@ -303,8 +315,10 @@ describe("getNetworkResources", () => {
       teachers: [{ uid: kUserId }]
     };
     expect(response.response).toEqual([
-      { context_id: kClassHash, resources: [expectedOffering1] },
-      { context_id: kOtherClassHash, resources: [expectedOffering2] }
+      { id: "101", name: "Class 1", context_id: kClassHash, teacher: kTeacherName, teachers: [kUserId],
+        resources: [expectedOffering1], uri: `https://concord.org/class/101` },
+      { id: "102", name: "Class 2", context_id: kOtherClassHash, teacher: kTeacherName, teachers: [kUserId],
+        resources: [expectedOffering2], uri: `https://concord.org/class/102` }
     ]);
   });
 });
