@@ -159,7 +159,11 @@ export interface INetworkResourceOfferingResponse {
   teachers?: INetworkResourceTeacherResponse[];
 }
 export interface INetworkResourceClassResponse {
-  context_id: string; // class hash
+  id?: string;          // portal class id
+  name?: string;        // portal class name
+  context_id: string;   // portal class hash
+  teacher?: string;     // name of primary(?) teacher
+  teachers?: string[];  // uids of teachers of class
   resources: INetworkResourceOfferingResponse[];
 }
 export interface IGetNetworkResourcesParams extends IFirebaseFunctionBaseParams {

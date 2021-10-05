@@ -90,8 +90,11 @@ export async function getNetworkResources(
             }
           }));
         });
+        const classDocData = classDoc?.exists ? classDoc.data() : {};
+        const { id, name, uri, teacher, teachers } = classDocData || {};
+        const classData = classDocData ? { id, name, uri, teacher, teachers } : {};
         const resources = await Promise.all(offeringPromises);
-        resolveClass({ context_id, resources })
+        resolveClass({ context_id, ...classData, resources })
       }
       catch(e) {
         // on error we just don't return any resources for the class
