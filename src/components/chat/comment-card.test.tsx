@@ -7,6 +7,7 @@ import { UserModelType } from "../../models/stores/user";
 import { CommentCard } from "./comment-card";
 
 jest.mock("../../hooks/use-stores", () => ({
+  useTypeOfTileInDocumentOrCurriculum: () => "Text",
   useUIStore: () => ({
     showChatPanel: true,
     selectedTileIds: []
