@@ -80,21 +80,36 @@
   &.chat-open
     border-right: 0
 
+  .my-classes
+    .spacer
+      background-color: rgba(255, 193, 138, 0.1)
+      height: 20px
+
+  .my-network
+    .spacer
+      background-color: rgba(250, 236, 141, 0.1)
+      height: 20px
+
   .network-divider
     width: 100%
     border-top: solid 1px $charcoal-light-1
+    height: 20px
     display: flex
     justify-content: center
-    margin-top: 15px
     background-color: rgba(250, 236, 141, 0.1)
+    &.classes
+      margin-top: 15px
+      background-color: rgba(255, 193, 138, 0.1)
     .network-divider-label
       display: flex
       position: relative
-      top: -14px
+      top: -10px
       justify-content: center
       align-self: center
       align-items: center
       background-color: #faec8d
       border: solid 1px $charcoal-light-1
-      width: 71px
+      width: 92px
       height: 26px
+      &.classes
+        background-color: #ffc18a

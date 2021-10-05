@@ -144,7 +144,9 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
     const { selectedDocument, onSelectNewDocument, onSelectDocument } = this.props;
     const { user } = this.stores;
     const classHash = this.stores.class.classHash;
-    const classNamesStrings = (user.portalClassOfferings.filter(o => o.classHash !== classHash)).map(o => o.className);
+    // TODO: both of these arrays must be populated with valid class data from the teacher network
+    const myClasses = (user.portalClassOfferings.filter(o => o.classHash !== classHash)).map(o => o.className);
+    const myNetworkClasses: string[] = [];
     return (
       <div>
         { subTab.sections.map((section: any, index: any) => {
@@ -174,11 +176,11 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
           })
         }
         { user.isNetworkedTeacher &&
-          <>
-            <div className="network-divider">
-              <div className="network-divider-label">Network</div>
+          <div className="my-classes">
+            <div className="network-divider classes">
+              <div className="network-divider-label classes">My Classes</div>
             </div>
-            { classNamesStrings.map((classNameStr: string, idx: number) =>
+            { myClasses.map((classNameStr: string, idx: number) =>
                 <CollapsibleDocumentsSection
                   key={idx}
                   userName={user.name}
@@ -191,7 +193,29 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
                 />
               )
             }
-          </>
+            <div className="spacer" />
+          </div>
+        }
+        { user.isNetworkedTeacher &&
+          <div className="my-network">
+            <div className="network-divider">
+              <div className="network-divider-label">My Network</div>
+            </div>
+            { myNetworkClasses.map((classNameStr: string, idx: number) =>
+                <CollapsibleDocumentsSection
+                  key={idx}
+                  userName={user.name}
+                  stores={this.stores}
+                  tab={subTab.label}
+                  scale={kNavItemScale}
+                  classNameStr={classNameStr}
+                  selectedDocument={selectedDocument}
+                  onSelectDocument={onSelectDocument}
+                />
+              )
+            }
+            <div className="spacer" />
+          </div>
         }
       </div>
     );
