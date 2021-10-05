@@ -17,13 +17,13 @@ interface IProps {
   postedComments?: WithId<CommentDocument>[];
   onPostComment?: (comment: string) => void;
   onDeleteComment?: (commentId: string) => void;
-  documentKey?: string;
+  focusDocument?: string;
   focusTileId?: string;
 }
 
 export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedComments,
                                                 onPostComment, onDeleteComment,
-                                                documentKey, focusTileId }) => {
+                                                focusDocument, focusTileId }) => {
   const commentIdRef = useRef<string>();
   const alertContent = () => {
     return (
@@ -52,7 +52,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
     return (
       <div className="comment-card-header comment-select" data-testid="comment-card-header">
         <div className="comment-card-header-icon" data-testid="comment-card-header-icon">
-          <ToolIconComponent documentKey={documentKey} tileId={focusTileId}/>
+          <ToolIconComponent documentKey={focusDocument} tileId={focusTileId}/>
         </div>
       </div>
     );

@@ -7,7 +7,6 @@ import {
 } from "../../hooks/document-comment-hooks";
 import { useDeleteDocument } from "../../hooks/firestore-hooks";
 import { useDocumentOrCurriculumMetadata } from "../../hooks/use-stores";
-import { isDocumentMetadata } from "../../../functions/src/shared";
 import "./chat-panel.scss";
 
 interface IProps {
@@ -42,8 +41,6 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
 
   const newCommentCount = unreadComments?.length || 0;
 
-  const documentKey = (document && isDocumentMetadata(document)) ? document.key : undefined;
-
   return (
     <div className={`chat-panel ${activeNavTab}`} data-testid="chat-panel">
       <ChatPanelHeader activeNavTab={activeNavTab} newCommentCount={newCommentCount}
@@ -55,7 +52,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
             onPostComment={postComment}
             onDeleteComment={deleteComment}
             postedComments={postedComments}
-            documentKey={documentKey}
+            focusDocument={focusDocument}
             focusTileId={focusTileId}
           />
         : <div className="select-doc-message" data-testid="select-doc-message">
