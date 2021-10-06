@@ -23,7 +23,7 @@ export const NetworkDocumentsSection: React.FC<IProps> = ({ currentClassHash, cu
 
   const myClassesData: INetworkResourceClassResponse[] = [];
   const myNetworkClassesData: INetworkResourceClassResponse[] = [];
-  if (data && status === "success") {
+  if (data) {
     data.forEach((item) => {
       // skip the current class
       if (item.context_id !== currentClassHash) {
@@ -51,15 +51,16 @@ export const NetworkDocumentsSection: React.FC<IProps> = ({ currentClassHash, cu
         </div>
         {status !== "success"
           ? <div className={`network-status-label ${sectionClass}`}>{statusMessage}</div>
-          : classData?.map((c, index) =>
-              <CollapsibleDocumentsSection
+          : classData?.map((c, index) => {
+              const userName = networkSectionType === NetworkSectionType.myClasses
+                ? currentTeacherName
+                : c.teacher || "unknown teacher"
+              return <CollapsibleDocumentsSection
                 key={index}
-                userName={networkSectionType === NetworkSectionType.myClasses
-                  ? currentTeacherName
-                  : c.teacher || "unknown teacher"}
+                userName={userName}
                 classNameStr={c.name || "unknown class"}
               />
-            )
+            })
         }
         <div className={`network-container-spacer ${sectionClass}`} />
       </div>
