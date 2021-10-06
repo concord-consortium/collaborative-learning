@@ -204,20 +204,24 @@ describe("getNetworkResources", () => {
     await writeTeacherRecordToFirestore();
     await writeClassRecordToFirestore();
     await writeOfferingRecordToFirestore();
-    const problemPublicationsMetadata = [{
-            version: "1.0",
-            self: { classHash: kClassHash, offeringId: kOffering1Id },
-            documentKey: "publication-1",
-            userId: kUserId
-          }];
-    const personalPublicationsMetadata = [{
-            version: "1.0",
-            self: { classHash: kClassHash, documentKey: "personal-publication-1" },
-            title: "title-1",
-            properties: {},
-            uid: kUserId,
-            originDoc: "origin-doc-1"
-          }];
+    const problemPublicationsMetadata = {
+            "publication-1": {
+              version: "1.0",
+              self: { classHash: kClassHash, offeringId: kOffering1Id },
+              documentKey: "publication-1",
+              userId: kUserId
+            }
+          };
+    const personalPublicationsMetadata = {
+            "personal-publication-1": {
+              version: "1.0",
+              self: { classHash: kClassHash, documentKey: "personal-publication-1" },
+              title: "title-1",
+              properties: {},
+              uid: kUserId,
+              originDoc: "origin-doc-1"
+            }
+          };
     mockDatabaseGet.mockImplementation(path => {
       const dbMap: Record<string, any> = {
         "/authed/portals/test_portal/classes/class-hash/offerings/1001/publications":
@@ -251,19 +255,23 @@ describe("getNetworkResources", () => {
     await writeTeacherRecordToFirestore();
     await writeClassRecordToFirestore();
     await writeOfferingRecordToFirestore();
-    const problemDocuments = [{
-            version: "1.0",
-            self: { classHash: kClassHash, offeringId: kOffering1Id, uid: kUserId },
-            documentKey: "problem-document",
-            visibility: "public"
-          }];
-    const planningDocuments = [{
-            version: "1.0",
-            self: { classHash: kClassHash, offeringId: kOffering1Id, uid: kUserId },
-            title: "title-1",
-            documentKey: "planning-document",
-            visibility: "private"
-          }];
+    const problemDocuments = {
+            "problem-document": {
+              version: "1.0",
+              self: { classHash: kClassHash, offeringId: kOffering1Id, uid: kUserId },
+              documentKey: "problem-document",
+              visibility: "public"
+            }
+          };
+    const planningDocuments = {
+            "planning-document": {
+              version: "1.0",
+              self: { classHash: kClassHash, offeringId: kOffering1Id, uid: kUserId },
+              title: "title-1",
+              documentKey: "planning-document",
+              visibility: "private"
+            }
+          };
     mockDatabaseGet.mockImplementation(path => {
       const dbMap: Record<string, any> = {
         "/authed/portals/test_portal/classes/class-hash/offerings/1001/users/123456/documents":
@@ -295,18 +303,22 @@ describe("getNetworkResources", () => {
     await writeTeacherRecordToFirestore();
     await writeClassRecordToFirestore();
     await writeOfferingRecordToFirestore();
-    const personalDocuments = [{
-            version: "1.0",
-            self: { uid: kUserId, classHash: kClassHash, documentKey: "personal-document-1" },
-            title: "Personal Document 1",
-            properties: { foo: "bar" }
-          }];
-    const learningLogs = [{
-            version: "1.0",
-            self: { uid: kUserId, classHash: kClassHash, documentKey: "learning-log-1" },
-            title: "Learning Log 1",
-            properties: { baz: "roo" }
-          }];
+    const personalDocuments = {
+            "personal-document-1": {
+              version: "1.0",
+              self: { uid: kUserId, classHash: kClassHash, documentKey: "personal-document-1" },
+              title: "Personal Document 1",
+              properties: { foo: "bar" }
+            }
+          };
+    const learningLogs = {
+            "learning-log-1": {
+              version: "1.0",
+              self: { uid: kUserId, classHash: kClassHash, documentKey: "learning-log-1" },
+              title: "Learning Log 1",
+              properties: { baz: "roo" }
+            }
+          };
     mockDatabaseGet.mockImplementation(path => {
       const dbMap: Record<string, any> = {
         "/authed/portals/test_portal/classes/class-hash/users/123456/personalDocs":
@@ -338,34 +350,42 @@ describe("getNetworkResources", () => {
     await writeClassRecordToFirestore({ id: "102", context_id: kOtherClassHash, name: "Class 2" });
     await writeOfferingRecordToFirestore();
     await writeOfferingRecordToFirestore({ id: kOffering2Id, context_id: kOtherClassHash });
-    const offering1ProblemPublicationsMetadata = [{
-            version: "1.0",
-            self: { classHash: kClassHash, offeringId: kOffering1Id },
-            documentKey: "publication-1",
-            userId: kUserId
-          }];
-    const offering2ProblemPublicationsMetadata = [{
-            version: "1.0",
-            self: { classHash: kOtherClassHash, offeringId: kOffering2Id },
-            documentKey: "publication-2",
-            userId: kUserId
-          }];
-    const offering1PersonalPublicationsMetadata = [{
-            version: "1.0",
-            self: { classHash: kClassHash, documentKey: "personal-publication-1" },
-            title: "title-1",
-            properties: {},
-            uid: kUserId,
-            originDoc: "origin-doc-1"
-          }];
-    const offering2PersonalPublicationsMetadata = [{
-            version: "1.0",
-            self: { classHash: kOtherClassHash, documentKey: "personal-publication-2" },
-            title: "title-2",
-            properties: {},
-            uid: kUserId,
-            originDoc: "origin-doc-2"
-          }];
+    const offering1ProblemPublicationsMetadata = {
+            "publication-1": {
+              version: "1.0",
+              self: { classHash: kClassHash, offeringId: kOffering1Id },
+              documentKey: "publication-1",
+              userId: kUserId
+            }
+          };
+    const offering2ProblemPublicationsMetadata = {
+            "publication-2": {
+              version: "1.0",
+              self: { classHash: kOtherClassHash, offeringId: kOffering2Id },
+              documentKey: "publication-2",
+              userId: kUserId
+            }
+          };
+    const offering1PersonalPublicationsMetadata = {
+            "personal-publication-1": {
+              version: "1.0",
+              self: { classHash: kClassHash, documentKey: "personal-publication-1" },
+              title: "title-1",
+              properties: {},
+              uid: kUserId,
+              originDoc: "origin-doc-1"
+            }
+          };
+    const offering2PersonalPublicationsMetadata = {
+            "personal-publication-2": {
+              version: "1.0",
+              self: { classHash: kOtherClassHash, documentKey: "personal-publication-2" },
+              title: "title-2",
+              properties: {},
+              uid: kUserId,
+              originDoc: "origin-doc-2"
+            }
+          };
     mockDatabaseGet.mockImplementation(path => {
       const dbMap: Record<string, any> = {
         "/authed/portals/test_portal/classes/class-hash/offerings/1001/publications":

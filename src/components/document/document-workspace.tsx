@@ -277,10 +277,10 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     this.imageDragDrop.drop(e)
       .then((url) => {
         const primaryDocument = this.getPrimaryDocument(ui.problemWorkspace.primaryDocumentKey);
-        if (primaryDocument) {
+        if (primaryDocument?.content) {
           // insert the tile after the row it was dropped on otherwise add to end of document
-          const rowIndex = rowId ? primaryDocument.content.getRowIndex(rowId) : undefined;
-          const rowInsertIndex = (rowIndex !== undefined ? rowIndex + 1 : primaryDocument.content.rowOrder.length);
+          const rowIndex = rowId ? primaryDocument.content?.getRowIndex(rowId) : undefined;
+          const rowInsertIndex = (rowIndex !== undefined ? rowIndex + 1 : primaryDocument.content?.rowOrder.length);
           primaryDocument.content.userAddTile("image", {
             url,
             insertRowInfo: {
@@ -411,7 +411,8 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
                                           ? () => db.publishProblemDocument(document)
                                           : () => db.publishOtherDocument(document);
           dbPublishDocumentFunc()
-            .then(() => ui.alert(`Your ${docTypeStringL} was published.`, `${docTypeString} Published`));
+            .then(() => ui.alert(`Your ${docTypeStringL} was published.`, `${docTypeString} Published`))
+            .catch((reason) => ui.alert(`Your document failed to publish: ${reason}`, "Error"));
         }
       });
   }

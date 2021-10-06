@@ -24,6 +24,7 @@ describe("document model", () => {
       type: ProblemDocument,
       uid: "1",
       key: "test",
+      remoteContext: "",
       createdAt: 1,
       groupId: undefined,
       title: undefined,
@@ -50,8 +51,8 @@ describe("document model", () => {
   it("can set content", () => {
     const content = createSingleTileContent({ type: "Text", text: "test" });
     document.setContent(DocumentContentModel.create(content));
-    expect(document.content.tileMap.size).toBe(1);
-    document.content.tileMap.forEach(tile => {
+    expect(document.content!.tileMap.size).toBe(1);
+    document.content!.tileMap.forEach(tile => {
       const textContent = tile.content as TextContentModelType;
       expect(textContent.type).toBe("Text");
       expect(textContent.text).toBe("test");
@@ -59,20 +60,20 @@ describe("document model", () => {
   });
 
   it("allows the tools to be added", () => {
-    expect(document.content.tileMap.size).toBe(0);
+    expect(document.content!.tileMap.size).toBe(0);
     document.addTile("text");
-    expect(document.content.tileMap.size).toBe(1);
+    expect(document.content!.tileMap.size).toBe(1);
     // adding geometry tool adds sidecar text tool
     document.addTile("geometry", {addSidecarNotes: true});
-    expect(document.content.tileMap.size).toBe(3);
+    expect(document.content!.tileMap.size).toBe(3);
   });
 
   it("allows tiles to be deleted", () => {
     const result = document.addTile("text");
     const tileId = result && result.tileId;
-    expect(document.content.tileMap.size).toBe(1);
+    expect(document.content!.tileMap.size).toBe(1);
     document.deleteTile(tileId!);
-    expect(document.content.tileMap.size).toBe(0);
+    expect(document.content!.tileMap.size).toBe(0);
   });
 
   it("allows the visibility to be toggled", () => {

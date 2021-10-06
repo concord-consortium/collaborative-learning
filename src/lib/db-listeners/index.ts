@@ -251,22 +251,24 @@ export class DBListeners extends BaseListener {
 
     const updatePath = this.db.firebase.getUserDocumentPath(user, key, document.uid);
     const updateRef = this.db.firebase.ref(updatePath);
-    docListener.modelDisposer = onSnapshot(content, (newContent) => {
-                                  document.incChangeCount();
-                                  updateRef.update({
-                                    content: JSON.stringify(newContent),
-                                    changeCount: document.changeCount
-                                  })
-                                  .then(() => {
-                                    // console.log("Successful save", "document:", document.key,
-                                    //             "changeCount:", document.changeCount);
-                                  })
-                                  .catch(() => {
-                                    user.setIsFirebaseConnected(false);
-                                    // console.warn("Failed save!", "document:", document.key,
-                                    //             "changeCount:", document.changeCount);
+    if (content) {
+      docListener.modelDisposer = onSnapshot(content, (newContent) => {
+                                    document.incChangeCount();
+                                    updateRef.update({
+                                      content: JSON.stringify(newContent),
+                                      changeCount: document.changeCount
+                                    })
+                                    .then(() => {
+                                      // console.log("Successful save", "document:", document.key,
+                                      //             "changeCount:", document.changeCount);
+                                    })
+                                    .catch(() => {
+                                      user.setIsFirebaseConnected(false);
+                                      // console.warn("Failed save!", "document:", document.key,
+                                      //             "changeCount:", document.changeCount);
+                                    });
                                   });
-                                });
+    }
   }
 
   private unmonitorDocumentModel = (document: DocumentModelType) => {

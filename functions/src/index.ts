@@ -1,5 +1,6 @@
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
+import { getNetworkDocument } from "./get-network-document";
 import { getNetworkResources } from "./get-network-resources";
 import { PortalFirebaseJWTClaims } from "./portal-types";
 import { postDocumentComment } from "./post-document-comment";
@@ -50,6 +51,8 @@ export const validateCommentableDocument_v1 = functions.https.onCall(validateCom
  * The _v1 suffix allows us to version the API if necessary moving forward.
  */
 export const postDocumentComment_v1 = functions.https.onCall(postDocumentComment);
+
+export const getNetworkDocument_v1 = functions.https.onCall(getNetworkDocument);
 
 export const getNetworkResources_v1 = functions.https.onCall(getNetworkResources);
 

@@ -33,7 +33,9 @@ jest.mock("react-query", () => ({
   }
 }));
 
+var mockAddDocument = jest.fn();
 jest.mock("./use-stores", () => ({
+  useNetworkDocuments: () => ({ add: mockAddDocument }),
   useProblemPath: () => "abc/1/2"
 }));
 jest.mock("./use-user-context", () => ({

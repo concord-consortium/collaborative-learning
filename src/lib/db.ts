@@ -465,8 +465,11 @@ export class DB {
 
   public publishProblemDocument(documentModel: DocumentModelType) {
     const {user, groups} = this.stores;
-    const content = documentModel.content.publish();
-    return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
+    const content = documentModel.content?.publish();
+    if (!content) {
+      throw new Error("Could not publish the specified document because its content is not available.");
+    }
+  return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
       this.createDocument({ type: ProblemPublication, content }).then(({document, metadata}) => {
         const publicationRef = this.firebase.ref(this.firebase.getPublicationsPath(user)).push();
         const userGroup = groups.groupForUser(user.id)!;
@@ -500,7 +503,10 @@ export class DB {
 
   public publishOtherDocument(documentModel: DocumentModelType) {
     const {user} = this.stores;
-    const content = documentModel.content.publish();
+    const content = documentModel.content?.publish();
+    if (!content) {
+      throw new Error("Could not publish the specified document because its content is not available.");
+    }
     const publicationType = documentModel.type + "Publication" as DBDocumentType;
     return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
       this.createDocument({ type: publicationType, content }).then(({document, metadata}) => {
@@ -532,7 +538,10 @@ export class DB {
 
   public publishDocumentAsSupport(documentModel: DocumentModelType, caption: string) {
     const { appMode, demo: { name: demoName }, user, problemPath } = this.stores;
-    const content = documentModel.content.publish();
+    const content = documentModel.content?.publish();
+    if (!content) {
+      throw new Error("Could not publish the specified document because its content is not available.");
+    }
     const fs = this.firestore;
     return fs.batch(batch => {
       const rootRef = fs.documentRef(fs.getRootFolder());

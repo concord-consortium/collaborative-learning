@@ -1,16 +1,16 @@
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
 import {
-  IGetNetworkResourceListUnionParams, INetworkResourceClassResponse, INetworkResourceOfferingResponse,
+  IGetNetworkResourcesUnionParams, INetworkResourceClassResponse, INetworkResourceOfferingResponse,
   INetworkResourceTeacherClassResponse, INetworkResourceTeacherOfferingResponse, isWarmUpParams
 } from "./shared";
 import { validateUserContext } from "./user-context";
 
 // update this when deploying updates to this function
-const version = "1.0.0";
+const version = "1.1.0";
 
 export async function getNetworkResources(
-                        params?: IGetNetworkResourceListUnionParams,
+                        params?: IGetNetworkResourcesUnionParams,
                         callableContext?: functions.https.CallableContext) {
   if (isWarmUpParams(params)) return { version };
 
@@ -18,14 +18,14 @@ export async function getNetworkResources(
   const { appMode, classHash: userContextId, network } = context || {};
   const { isValid, uid, classPath, firestoreRoot } = validateUserContext(context, callableContext?.auth);
   if (!context || !isValid || !userContextId || !network || !uid) {
-    throw new functions.https.HttpsError("invalid-argument", "The provided user context is not valid.");
+    throw new functions.https.HttpsError("failed-precondition", "The provided user context is not valid.");
   };
 
   // validate that authenticated users are in the network they claim to be in
   if (appMode === "authed") {
     const userDocResult = await admin.firestore().doc(`/${firestoreRoot}/users/${uid}`).get();
     if (!userDocResult.exists || (userDocResult.data()?.network !== network)) {
-      throw new functions.https.HttpsError("invalid-argument", "The provided user network is not valid.");
+      throw new functions.https.HttpsError("failed-precondition", "The provided user network is not valid.");
     }
   }
 
