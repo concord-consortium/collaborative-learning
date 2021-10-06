@@ -19,7 +19,9 @@ export const ChatPanelHeader: React.FC<IProps> = observer(({activeNavTab, newCom
         <div className={`notification-icon themed-negative ${activeNavTab}`}>
           <NotificationIcon className={`icon-image themed-negative ${activeNavTab}`}/>
         </div>
-        <div className="new-comment-badge">{newCommentCount}</div>
+        {/* The next line of code is commented out, but deliberately not removed,
+            per: https://www.pivotaltracker.com/story/show/179754830 */}
+        {/* <div className="new-comment-badge">{newCommentCount}</div> */}
       </div>
     );
   };

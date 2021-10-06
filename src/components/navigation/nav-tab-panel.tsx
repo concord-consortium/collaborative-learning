@@ -81,7 +81,9 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
               { isChatEnabled
                   ? !openChatPanel &&
                     <div className={`chat-panel-toggle themed ${activeNavTab}`}>
-                      <NewCommentsBadge documentKey={focusDocument} />
+                      {/* The next line of code is commented out, but deliberately not removed,
+                          per: https://www.pivotaltracker.com/story/show/179754830 */}
+                      {/* <NewCommentsBadge documentKey={focusDocument} /> */}
                       <ChatIcon
                         className={`chat-button ${activeNavTab}`}
                         onClick={this.handleShowChatColumn}
