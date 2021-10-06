@@ -8,7 +8,7 @@ import { TabPanelDocumentsSection } from "../thumbnail/tab-panel-documents-secti
 import { DocumentModelType } from "../../models/document/document";
 import { DocumentDragKey, SupportPublication } from "../../models/document/document-types";
 import { LogEventName, Logger } from "../../lib/logger";
-import { CollapsibleDocumentsSection } from "../thumbnail/collapsible-document-section";
+import { NetworkDocumentsSection } from "./network-documents-section";
 
 import "./document-tab-panel.sass";
 
@@ -144,7 +144,6 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
     const { selectedDocument, onSelectNewDocument, onSelectDocument } = this.props;
     const { user } = this.stores;
     const classHash = this.stores.class.classHash;
-    const classNamesStrings = (user.portalClassOfferings.filter(o => o.classHash !== classHash)).map(o => o.className);
     return (
       <div>
         { subTab.sections.map((section: any, index: any) => {
@@ -173,26 +172,11 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
             );
           })
         }
-        { user.isNetworkedTeacher &&
-          <>
-            <div className="network-divider">
-              <div className="network-divider-label">Network</div>
-            </div>
-            { classNamesStrings.map((classNameStr: string, idx: number) =>
-                <CollapsibleDocumentsSection
-                  key={idx}
-                  userName={user.name}
-                  stores={this.stores}
-                  tab={subTab.label}
-                  scale={kNavItemScale}
-                  classNameStr={classNameStr}
-                  selectedDocument={selectedDocument}
-                  onSelectDocument={onSelectDocument}
-                />
-              )
-            }
-          </>
-        }
+        <NetworkDocumentsSection
+          currentClassHash={classHash}
+          currentTeacherName={user.name}
+          currentTeacherId={user.id}
+        />
       </div>
     );
   }

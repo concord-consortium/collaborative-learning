@@ -19,6 +19,7 @@ $section-padding: 6px;
     flex-direction: row;
     align-items: center;
     height: 26px;
+    cursor: pointer;
 
     &:hover {
       background-color: rgba(250, 236, 141, 0.5);
@@ -99,6 +100,20 @@ $section-padding: 6px;
         display: flex;
         align-items: center;
         justify-content: center;
+      }
+    }
+  }
+}
+
+.my-classes {
+  .collapsible-documents-section {
+    background-color: rgba(255, 193, 138, 0.1);
+    .section-collapse-toggle {
+      &:hover {
+        background-color: rgba(255, 193, 138, 0.5);
+      }
+      &:active {
+        background-color: rgba(255, 193, 138, 1.0);
       }
     }
   }
