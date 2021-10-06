@@ -49,6 +49,7 @@ jest.mock("react-query", () => ({
 }));
 
 jest.mock("../../hooks/use-stores", () => ({
+  useTypeOfTileInDocumentOrCurriculum: () => "Text",
   useDBStore: () => ({
     firestore: {
       getRootFolder: () => "firestore/root"

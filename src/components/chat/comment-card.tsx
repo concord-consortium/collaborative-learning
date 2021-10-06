@@ -6,8 +6,8 @@ import { CommentDocument } from "../../lib/firestore-schema";
 import { getDisplayTimeDate } from "../../utilities/time";
 import { useCautionAlert } from "../utilities/use-caution-alert";
 import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
-import DocumentCommentIcon from "../../assets/document-id.svg";
 import DeleteMessageIcon from "../../assets/delete-message-icon.svg";
+import { ToolIconComponent } from "./tool-icon-component";
 import "./comment-card.scss";
 import "../themes.scss";
 
@@ -17,10 +17,13 @@ interface IProps {
   postedComments?: WithId<CommentDocument>[];
   onPostComment?: (comment: string) => void;
   onDeleteComment?: (commentId: string) => void;
+  focusDocument?: string;
+  focusTileId?: string;
 }
 
 export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedComments,
-                                                onPostComment, onDeleteComment }) => {
+                                                onPostComment, onDeleteComment,
+                                                focusDocument, focusTileId }) => {
   const commentIdRef = useRef<string>();
   const alertContent = () => {
     return (
@@ -46,13 +49,11 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
   };
 
   const renderThreadHeader = () => {
-    const teacherInitial = user?.name.charAt(0);
     return (
       <div className="comment-card-header comment-select" data-testid="comment-card-header">
-        {postedComments && postedComments.length < 1
-          ? <DocumentCommentIcon className="new-thread-header-icon" data-testid="document-comment-icon"/>
-          : <div className="initial" data-testid="teacher-initial">{teacherInitial}</div>
-        }
+        <div className="comment-card-header-icon" data-testid="comment-card-header-icon">
+          <ToolIconComponent documentKey={focusDocument} tileId={focusTileId}/>
+        </div>
       </div>
     );
   };

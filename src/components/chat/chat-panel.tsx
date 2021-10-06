@@ -40,6 +40,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   }, [document, deleteCommentMutation, commentsPath]);
 
   const newCommentCount = unreadComments?.length || 0;
+
   return (
     <div className={`chat-panel ${activeNavTab}`} data-testid="chat-panel">
       <ChatPanelHeader activeNavTab={activeNavTab} newCommentCount={newCommentCount}
@@ -51,6 +52,8 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
             onPostComment={postComment}
             onDeleteComment={deleteComment}
             postedComments={postedComments}
+            focusDocument={focusDocument}
+            focusTileId={focusTileId}
           />
         : <div className="select-doc-message" data-testid="select-doc-message">
             Open a document to begin or view comment threads
