@@ -1,0 +1,48 @@
+@import "../vars";
+
+.network-container {
+  .network-container-spacer {
+    background-color: rgba(250, 236, 141, 0.1);
+    height: 20px;
+    &.my-classes {
+      background-color: rgba(255, 193, 138, 0.1);
+    }
+  }
+}
+
+.network-status-label {
+  background-color: rgba(250, 236, 141, 0.1);
+  padding: 10px;
+  &.my-classes {
+    background-color: rgba(255, 193, 138, 0.1);
+  }
+}
+
+.network-divider {
+  width: 100%;
+  border-top: solid 1px $charcoal-light-1;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  background-color: rgba(250, 236, 141, 0.1);
+  &.my-classes {
+    margin-top: 15px;
+    background-color: rgba(255, 193, 138, 0.1);
+  }
+  .network-divider-label {
+    display: flex;
+    position: relative;
+    top: -10px;
+    justify-content: center;
+    align-self: center;
+    align-items: center;
+    background-color: $network-yellow;
+    border: solid 1px $charcoal-light-1;
+    width: 92px;
+    height: 26px;
+    &.my-classes {
+      background-color: $problem-orange-light-4;
+    }
+  }
+
+}

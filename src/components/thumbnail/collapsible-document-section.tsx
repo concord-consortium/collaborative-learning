@@ -13,9 +13,9 @@ import "./collapsible-document-section.scss";
 interface IProps {
   userName: string;
   classNameStr: string;
-  stores: IStores;
-  tab: string;
-  scale: number;
+  stores?: IStores;
+  tab?: string;
+  scale?: number;
   selectedDocument?: string;
   onSelectDocument?: (document: DocumentModelType) => void;
 }
