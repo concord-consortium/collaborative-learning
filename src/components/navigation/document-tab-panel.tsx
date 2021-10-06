@@ -176,6 +176,8 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
           currentClassHash={classHash}
           currentTeacherName={user.name}
           currentTeacherId={user.id}
+          subTab={subTab}
+          problemTitle={this.stores.problem.title}
         />
       </div>
     );

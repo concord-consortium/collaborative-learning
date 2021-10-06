@@ -2,6 +2,7 @@ import React from "react";
 import { INetworkResourceClassResponse } from "../../../functions/src/shared";
 import { useNetworkResources } from "../../hooks/network-resources";
 import { CollapsibleDocumentsSection } from "../thumbnail/collapsible-document-section";
+import { ISubTabSpec } from "./document-tab-panel";
 
 import "./network-documents-section.scss";
 
@@ -9,6 +10,8 @@ interface IProps {
   currentClassHash: string;
   currentTeacherId: string;
   currentTeacherName: string;
+  subTab: ISubTabSpec;
+  problemTitle: string;
 }
 
 export enum NetworkSectionType {
@@ -17,7 +20,7 @@ export enum NetworkSectionType {
 }
 
 export const NetworkDocumentsSection: React.FC<IProps> = ({ currentClassHash, currentTeacherName,
-  currentTeacherId }) => {
+  currentTeacherId, subTab, problemTitle }) => {
   const { data, status } = useNetworkResources();
   const statusMessage = `${status} network data`;
 
@@ -59,6 +62,9 @@ export const NetworkDocumentsSection: React.FC<IProps> = ({ currentClassHash, cu
                 key={index}
                 userName={userName}
                 classNameStr={c.name || "unknown class"}
+                subTab={subTab}
+                networkResource={c}
+                problemTitle={problemTitle}
               />;
             })
         }
