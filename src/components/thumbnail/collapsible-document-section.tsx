@@ -21,12 +21,12 @@ interface IProps {
   onSelectDocument?: (document: DocumentModelType) => void;
   subTab: ISubTabSpec;
   networkResource: INetworkResourceClassResponse;
-  problem: string;
+  problemTitle: string;
 }
 
 export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
   ({userName, classNameStr, stores, tab, scale, selectedDocument, onSelectDocument, subTab,
-    networkResource, problem}) => {
+    networkResource, problemTitle}) => {
   const [isOpen, setIsOpen] = useState(false);
   const handleSectionToggle = () => {
     setIsOpen(!isOpen);
@@ -38,8 +38,8 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
       // get the personal documents
       networkResource.teachers?.forEach((teacher) => {
         if (teacher.personalDocuments) {
-          for (const [, document] of Object.entries(teacher.personalDocuments)) {
-            documentNames.push(document.title);
+          for (const [key, document] of Object.entries(teacher.personalDocuments)) {
+            documentNames.push(`${document.title} (${key})`);
           }
         }
       });
@@ -48,13 +48,13 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
       networkResource.resources?.forEach((resource) => {
         resource.teachers?.forEach((teacher) => {
           if (teacher.problemDocuments) {
-            for (const [, document] of Object.entries(teacher.problemDocuments)) {
-              documentNames.push(problem);
+            for (const [key, document] of Object.entries(teacher.problemDocuments)) {
+              documentNames.push(`${problemTitle} (${key})`);
             }
           }
           if (teacher.planningDocuments) {
-            for (const [, document] of Object.entries(teacher.planningDocuments)) {
-              documentNames.push(`${problem}: planning}`);
+            for (const [key, document] of Object.entries(teacher.planningDocuments)) {
+              documentNames.push(`${problemTitle}: planning (${key})`);
             }
           }
         });
@@ -63,8 +63,8 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
       // get the learning logs
       networkResource.teachers?.forEach((teacher) => {
         if (teacher.learningLogs) {
-          for (const [, document] of Object.entries(teacher.learningLogs)) {
-            documentNames.push(document.title);
+          for (const [key, document] of Object.entries(teacher.learningLogs)) {
+            documentNames.push(`${document.title} (${key})`);
           }
         }
       });

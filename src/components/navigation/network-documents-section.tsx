@@ -11,7 +11,7 @@ interface IProps {
   currentTeacherId: string;
   currentTeacherName: string;
   subTab: ISubTabSpec;
-  problem: string;
+  problemTitle: string;
 }
 
 export enum NetworkSectionType {
@@ -20,7 +20,7 @@ export enum NetworkSectionType {
 }
 
 export const NetworkDocumentsSection: React.FC<IProps> = ({ currentClassHash, currentTeacherName,
-  currentTeacherId, subTab, problem }) => {
+  currentTeacherId, subTab, problemTitle }) => {
   const { data, status } = useNetworkResources();
   const statusMessage = `${status} network data`;
 
@@ -64,7 +64,7 @@ export const NetworkDocumentsSection: React.FC<IProps> = ({ currentClassHash, cu
                 classNameStr={c.name || "unknown class"}
                 subTab={subTab}
                 networkResource={c}
-                problem={problem}
+                problemTitle={problemTitle}
               />;
             })
         }
