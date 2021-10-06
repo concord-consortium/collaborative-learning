@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { observer } from "mobx-react";
-// import { NavTabSectionModelType } from "../../models/view/nav-tabs";
+import { INetworkResourceClassResponse } from "../../../functions/src/shared";
 import { DocumentModelType } from "../../models/document/document";
 // import { DocumentCaption } from "./document-caption";
 import { IStores } from "../../models/stores/stores";
 import ArrowIcon from "../../assets/icons/arrow/arrow.svg";
 // import NotSharedIcon from "../../assets/icons/share/not-share.svg";
+import { ISubTabSpec } from "../navigation/document-tab-panel";
 
 import "./tab-panel-documents-section.sass";
 import "./collapsible-document-section.scss";
@@ -18,14 +19,59 @@ interface IProps {
   scale?: number;
   selectedDocument?: string;
   onSelectDocument?: (document: DocumentModelType) => void;
+  subTab: ISubTabSpec;
+  networkResource: INetworkResourceClassResponse;
+  problem: string;
 }
 
 export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
-  ({userName, classNameStr, stores, tab, scale, selectedDocument, onSelectDocument}) => {
+  ({userName, classNameStr, stores, tab, scale, selectedDocument, onSelectDocument, subTab,
+    networkResource, problem}) => {
   const [isOpen, setIsOpen] = useState(false);
   const handleSectionToggle = () => {
     setIsOpen(!isOpen);
   };
+
+  const documentNames: string[] = [];
+  subTab.sections.forEach(section => {
+    if (section.type === "personal-documents") {
+      // get the personal documents
+      networkResource.teachers?.forEach((teacher) => {
+        if (teacher.personalDocuments) {
+          for (const [, document] of Object.entries(teacher.personalDocuments)) {
+            documentNames.push(document.title);
+          }
+        }
+      });
+    } else if (section.type === "problem-documents") {
+      // get the problem and planning documents
+      networkResource.resources?.forEach((resource) => {
+        resource.teachers?.forEach((teacher) => {
+          if (teacher.problemDocuments) {
+            for (const [, document] of Object.entries(teacher.problemDocuments)) {
+              documentNames.push(problem);
+            }
+          }
+          if (teacher.planningDocuments) {
+            for (const [, document] of Object.entries(teacher.planningDocuments)) {
+              documentNames.push(`${problem}: planning}`);
+            }
+          }
+        });
+      });
+    } else if (section.type === "learning-logs") {
+      // get the learning logs
+      networkResource.teachers?.forEach((teacher) => {
+        if (teacher.learningLogs) {
+          for (const [, document] of Object.entries(teacher.learningLogs)) {
+            documentNames.push(document.title);
+          }
+        }
+      });
+    }
+  });
+
+
   return (
     <div className="collapsible-documents-section">
       <div className="section-collapse-toggle" onClick={handleSectionToggle}>
@@ -36,9 +82,11 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
       </div>
       { isOpen &&
         <div className="list">
-          <div>Documents for this class will go here.
-                A hide icon will be shown over the document if document is not shared
-          </div>
+          { documentNames.length > 0
+            ? documentNames.map((docName, i) =>
+                <div key={i} style={{padding: "5px 10px"}}>{`DOCUMENT: ${docName}`}</div>)
+            : <div style={{padding: "5px 10px"}}>No Documents</div>
+          }
           {/* {sectionDocs.map(document => {
             const documentContext = getDocumentContext(document);
             const docNotShared = document.visibility === "private";
