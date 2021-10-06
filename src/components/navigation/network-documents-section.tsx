@@ -54,12 +54,12 @@ export const NetworkDocumentsSection: React.FC<IProps> = ({ currentClassHash, cu
           : classData?.map((c, index) => {
               const userName = networkSectionType === NetworkSectionType.myClasses
                 ? currentTeacherName
-                : c.teacher || "unknown teacher"
+                : c.teacher || "unknown teacher";
               return <CollapsibleDocumentsSection
                 key={index}
                 userName={userName}
                 classNameStr={c.name || "unknown class"}
-              />
+              />;
             })
         }
         <div className={`network-container-spacer ${sectionClass}`} />
