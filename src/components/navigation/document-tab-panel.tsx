@@ -178,6 +178,9 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
           currentTeacherId={user.id}
           subTab={subTab}
           problemTitle={this.stores.problem.title}
+          stores={this.stores}
+          scale={kNavItemScale}
+          onSelectDocument={onSelectDocument}
         />
       </div>
     );

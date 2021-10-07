@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useQueryClient } from 'react-query';
 import { DocumentModelType } from "../../models/document/document";
 import { isProblemType } from "../../models/document/document-types";
 import { AppConfigModelType } from "../../models/stores/app-config-model";
@@ -9,6 +10,7 @@ import { EditableDocumentContent } from "../document/editable-document-content";
 import { useAppConfigStore, useProblemStore, useUIStore } from "../../hooks/use-stores";
 import { Logger, LogEventName } from "../../lib/logger";
 import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
+import { useUserContext } from "../../hooks/use-user-context";
 
 import "./document-tab-content.sass";
 
@@ -20,6 +22,8 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
   const [referenceDocument, setReferenceDocument] = useState<DocumentModelType>();
   const appConfigStore = useAppConfigStore();
   const problemStore = useProblemStore();
+  const context = useUserContext();
+  const queryClient = useQueryClient();
   const ui = useUIStore();
 
   const handleTabClick = (title: string, type: string) => {
@@ -33,8 +37,15 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
   };
 
   const handleSelectDocument = (document: DocumentModelType) => {
+    if (!document.hasContent && document.isRemote) {
+      loadDocumentContent(document);
+    }
     setReferenceDocument(document);
     ui.updateFocusDocument();
+  };
+
+  const loadDocumentContent = async (document: DocumentModelType) => {
+    await document.fetchRemoteContent(queryClient, context);
   };
 
   const documentTitle = (document: DocumentModelType, appConfig: AppConfigModelType, problem: ProblemModelType) => {

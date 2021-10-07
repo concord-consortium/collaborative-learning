@@ -1,12 +1,16 @@
 import React, { useState } from "react";
 import { observer } from "mobx-react";
+import { DocumentContextReact } from "../document/document-context";
 import { INetworkResourceClassResponse } from "../../../functions/src/shared";
-import { DocumentModelType } from "../../models/document/document";
-// import { DocumentCaption } from "./document-caption";
+import { DocumentModelType, getDocumentContext } from "../../models/document/document";
 import { IStores } from "../../models/stores/stores";
 import ArrowIcon from "../../assets/icons/arrow/arrow.svg";
-// import NotSharedIcon from "../../assets/icons/share/not-share.svg";
 import { ISubTabSpec } from "../navigation/document-tab-panel";
+import { useNetworkDocuments } from "../../hooks/use-stores";
+import { TabPanelDocumentsSubSectionPanel } from "./tab-panel-documents-subsection-panel";
+import { NavTabSectionModelType } from "../../models/view/nav-tabs";
+// import NotSharedIcon from "../../assets/icons/share/not-share.svg";
+// import { DocumentCaption } from "./document-caption";
 
 import "./tab-panel-documents-section.sass";
 import "./collapsible-document-section.scss";
@@ -14,9 +18,8 @@ import "./collapsible-document-section.scss";
 interface IProps {
   userName: string;
   classNameStr: string;
-  stores?: IStores;
-  tab?: string;
-  scale?: number;
+  stores: IStores;
+  scale: number;
   selectedDocument?: string;
   onSelectDocument?: (document: DocumentModelType) => void;
   subTab: ISubTabSpec;
@@ -25,21 +28,21 @@ interface IProps {
 }
 
 export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
-  ({userName, classNameStr, stores, tab, scale, selectedDocument, onSelectDocument, subTab,
+  ({userName, classNameStr, stores, scale, selectedDocument, onSelectDocument, subTab,
     networkResource, problemTitle}) => {
   const [isOpen, setIsOpen] = useState(false);
   const handleSectionToggle = () => {
     setIsOpen(!isOpen);
   };
 
-  const documentNames: string[] = [];
+  const documentKeys: string[] = [];
   subTab.sections.forEach(section => {
     if (section.type === "personal-documents") {
       // get the personal documents
       networkResource.teachers?.forEach((teacher) => {
         if (teacher.personalDocuments) {
           for (const [key, document] of Object.entries(teacher.personalDocuments)) {
-            documentNames.push(`${document.title} (${key})`);
+            documentKeys.push(key);
           }
         }
       });
@@ -49,12 +52,12 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
         resource.teachers?.forEach((teacher) => {
           if (teacher.problemDocuments) {
             for (const [key, document] of Object.entries(teacher.problemDocuments)) {
-              documentNames.push(`${problemTitle} (${key})`);
+              documentKeys.push(key);
             }
           }
           if (teacher.planningDocuments) {
             for (const [key, document] of Object.entries(teacher.planningDocuments)) {
-              documentNames.push(`${problemTitle}: planning (${key})`);
+              documentKeys.push(key);
             }
           }
         });
@@ -64,13 +67,16 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
       networkResource.teachers?.forEach((teacher) => {
         if (teacher.learningLogs) {
           for (const [key, document] of Object.entries(teacher.learningLogs)) {
-            documentNames.push(`${document.title} (${key})`);
+            documentKeys.push(key);
           }
         }
       });
     }
   });
 
+  const networkDocuments = useNetworkDocuments();
+
+  const currentSection = subTab.sections[0] as NavTabSectionModelType;
 
   return (
     <div className="collapsible-documents-section">
@@ -82,10 +88,22 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
       </div>
       { isOpen &&
         <div className="list">
-          { documentNames.length > 0
-            ? documentNames.map((docName, i) =>
-                <div key={i} style={{padding: "5px 10px"}}>{`DOCUMENT: ${docName}`}</div>)
-            : <div style={{padding: "5px 10px"}}>No Documents</div>
+
+          { documentKeys.length > 0
+            ? documentKeys.map((key, i) => {
+              const document = networkDocuments.getDocument(key);
+              if (!document) return <div>Document Missing</div>;
+              const documentContext = getDocumentContext(document);
+              return (
+                <DocumentContextReact.Provider key={document.key} value={documentContext}>
+                  <TabPanelDocumentsSubSectionPanel section={currentSection} sectionDocument={document} tab={subTab.label}
+                    stores={stores} scale={scale} selectedDocument={selectedDocument}
+                    onSelectDocument={onSelectDocument}
+                  />
+                </DocumentContextReact.Provider>
+              );
+            })
+            : <div style={{padding: "5px 10px"}}>No Documents Found</div>
           }
           {/* {sectionDocs.map(document => {
             const documentContext = getDocumentContext(document);
