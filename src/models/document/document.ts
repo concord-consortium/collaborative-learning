@@ -72,7 +72,9 @@ export const DocumentModel = types
       return !!self.remoteContext;
     },
     get remoteSpec() {
-      return [self.remoteContext, self.uid, self.key];
+      return self.remoteContext
+              ? [self.remoteContext, self.uid, self.key]
+              : undefined;
     },
     get hasContent() {
       return !!self.content;
@@ -234,6 +236,14 @@ export const DocumentModel = types
         });
       }
       return self.queryPromise;
+    },
+
+    refreshRemoteContent(queryClient: QueryClient) {
+      if (self.queryPromise) {
+        const { remoteContext: context_id, uid, key } = self;
+        const queryKey = ["network-documents", context_id, uid, key];
+        queryClient.invalidateQueries(queryKey, { exact: true });
+      }
     },
 
     setProperties(properties: ISetProperties) {
