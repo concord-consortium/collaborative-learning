@@ -5,7 +5,7 @@ import { IGetNetworkResourcesParams, IGetNetworkResourcesResponse } from "../../
 import { DBOfferingUserProblemDocument, DBOtherDocument, DBOtherPublication, DBPublication } from "../lib/db-types";
 import { DocumentModel } from "../models/document/document";
 import {
-  LearningLogDocument, PersonalDocument, PersonalPublication, ProblemDocument, ProblemPublication
+  LearningLogDocument, PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemPublication
 } from "../models/document/document-types";
 import { useFirebaseFunction } from "./use-firebase-function";
 import { useNetworkDocuments, useProblemPath } from "./use-stores";
@@ -58,7 +58,7 @@ export function useNetworkResources() {
           });
           each(teacher.planningDocuments, (metadata: DBOfferingUserProblemDocument, key: string) => {
             const { self: { uid }, visibility } = metadata;
-            const type = ProblemDocument;
+            const type = PlanningDocument;
             documents.add(DocumentModel.create({ uid, type, key, remoteContext, visibility }));
           });
         });
