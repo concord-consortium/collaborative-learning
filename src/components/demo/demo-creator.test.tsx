@@ -2,7 +2,7 @@ import Adapter from "enzyme-adapter-react-16";
 import React from "react";
 
 import { configure, mount } from "enzyme";
-import { DemoCreatorComponent } from "./demo-creator";
+import { DemoCreatorComponent, passThroughQueryItemsFromUrl } from "./demo-creator";
 import { createStores, IStores } from "../../models/stores/stores";
 import { DemoModel } from "../../models/stores/demo";
 import { UnitModel } from "../../models/curriculum/unit";
@@ -40,6 +40,28 @@ const demoUnitJson = {
     }
   ]
 };
+
+
+test("Pass-Through Parameters being missing yields an empty string", () => {
+  const href = "http://b.cc:8080/";
+  expect(passThroughQueryItemsFromUrl(href)).toEqual("");
+});
+
+test("Pass-Through Parameters ONLY being in the exclude list yields an empty string", () => {
+  const href = "http://b.cc:8080/?demo&fakeUser=JimAbbott&problem=NaN";
+  expect(passThroughQueryItemsFromUrl(href)).toEqual("");
+});
+
+test("Pass-Through Parameters NOT being in the exclude list yields a (pre-pended) query string", () => {
+  const href = "http://b.cc:8080/?passValuelessKey&passKeyPlusValue=myvalue";
+  expect(passThroughQueryItemsFromUrl(href)).toEqual("&passKeyPlusValue=myvalue&passValuelessKey");
+});
+
+test("Mix of excluded/OK params yields a (pre-pended) query string with only OK ones", () => {
+  const href = "http://b.cc:8080/?passKeyPlusValue=fred&unit";
+  expect(passThroughQueryItemsFromUrl(href)).toEqual("&passKeyPlusValue=fred");
+});
+
 
 configure({ adapter: new Adapter() });
 
