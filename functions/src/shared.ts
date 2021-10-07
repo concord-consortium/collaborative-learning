@@ -148,18 +148,18 @@ export type IPostDocumentCommentUnionParams = IPostDocumentCommentParams | IFire
 
 export interface INetworkResourceTeacherClassResponse {
   uid: string;
-  personalDocuments?: any[];
-  learningLogs?: any[];
+  personalDocuments?: Record<string, any>;
+  learningLogs?: Record<string, any>;
 }
 export interface INetworkResourceTeacherOfferingResponse {
   uid: string;
-  problemDocuments?: any[];
-  planningDocuments?: any[];
+  problemDocuments?: Record<string, any>;
+  planningDocuments?: Record<string, any>;
 }
 export interface INetworkResourceOfferingResponse {
   resource_link_id: string;
-  problemPublications?: any[];
-  personalPublications?: any[];
+  problemPublications?: Record<string, any>;
+  personalPublications?: Record<string, any>;
   teachers?: INetworkResourceTeacherOfferingResponse[];
 }
 export interface INetworkResourceClassResponse {
@@ -177,4 +177,17 @@ export interface IGetNetworkResourcesResponse {
   version: string;
   response: INetworkResourceClassResponse[];
 }
-export type IGetNetworkResourceListUnionParams = IGetNetworkResourcesParams | IFirebaseFunctionWarmUpParams;
+export type IGetNetworkResourcesUnionParams = IGetNetworkResourcesParams | IFirebaseFunctionWarmUpParams;
+
+export interface IGetNetworkDocumentParams extends IFirebaseFunctionBaseParams {
+  context_id: string;
+  uid: string;
+  key: string;
+}
+export type IGetNetworkDocumentUnionParams = IGetNetworkDocumentParams | IFirebaseFunctionWarmUpParams;
+
+export interface IGetNetworkDocumentResponse {
+  version: string;
+  content: any;     // DBDocument
+  metadata: any;    // DBDocumentMetadata
+}

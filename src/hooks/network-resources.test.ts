@@ -2,8 +2,8 @@ import { renderHook } from "@testing-library/react-hooks";
 import { INetworkResourceClassResponse } from "../../functions/src/shared";
 import { useNetworkResources } from "./network-resources";
 
-var mockGetNetworkResources = jest.fn(() => ({
-  data: Promise.resolve({ version: "1.0", response: [] })
+var mockGetNetworkResources = jest.fn(() => Promise.resolve({
+  data: { version: "1.0", response: [] as any }
 }));
 var mockHttpsCallable = jest.fn((fn: string) => {
   switch(fn) {
@@ -33,7 +33,9 @@ jest.mock("react-query", () => ({
   }
 }));
 
+var mockAddDocument = jest.fn();
 jest.mock("./use-stores", () => ({
+  useNetworkDocuments: () => ({ add: mockAddDocument }),
   useProblemPath: () => "abc/1/2"
 }));
 jest.mock("./use-user-context", () => ({
@@ -43,6 +45,46 @@ jest.mock("./use-user-context", () => ({
 describe("Network resources hooks", () => {
   describe("useNetworkResources", () => {
     it("should render the hook", () => {
+      renderHook(() => useNetworkResources());
+      expect(mockGetNetworkResources).toHaveBeenCalled();
+    });
+    it("should process the results of the hook", () => {
+      mockGetNetworkResources.mockImplementation(() => {
+        return Promise.resolve({
+          data: {
+            version: "1.0",
+            response: [{
+              context_id: "class-hash",
+              teachers: [{
+                uid: "user-1",
+                personalDocuments: {
+                  "document-1": { self: { uid: "user-1" }, title: "title", properties: {} }
+                },
+                learningLogs: {
+                  "log-1": { self: { uid: "user-1" }, title: "log", properties: {} }
+                },
+              }],
+              resources: [{
+                problemPublications: {
+                  "pub-1": { userId: "user-1" }
+                },
+                personalPublications: {
+                  "pub-2": { uid: "user-1", title: "title", properties: {}, originDoc: "origin-1" }
+                },
+                teachers: [{
+                  uid: "user-1",
+                  problemDocuments: {
+                    "problem-1": { self: { uid: "user-1" }, visibility: "public" }
+                  },
+                  planningDocuments: {
+                    "planning-1": { self: { uid: "user-1" }, visibility: "private" }
+                  }
+                }]
+              }]
+            }]
+          }
+        });
+      });
       renderHook(() => useNetworkResources());
       expect(mockGetNetworkResources).toHaveBeenCalled();
     });

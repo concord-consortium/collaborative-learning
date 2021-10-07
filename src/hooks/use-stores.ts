@@ -6,6 +6,7 @@ import {
 } from "../../functions/src/shared";
 import { ProblemModelType } from "../models/curriculum/problem";
 import { AppConfigModelType } from "../models/stores/app-config-model";
+import { DocumentsModelType } from "../models/stores/documents";
 import { GroupsModelType } from "../models/stores/groups";
 import { SelectionStoreModelType } from "../models/stores/selection";
 import { getSettingFromStores, isFeatureSupported, IStores } from "../models/stores/stores";
@@ -76,6 +77,10 @@ export function useFeatureFlag(feature: string) {
 
 export function useGroupsStore(): GroupsModelType {
   return useStores().groups;
+}
+
+export function useNetworkDocuments(): DocumentsModelType {
+  return useStores().networkDocuments;
 }
 
 export function useNetworkDocumentKey(documentKey: string) {

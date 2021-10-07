@@ -44,7 +44,7 @@ export const DocumentsModel = types
   }))
   .views(self => ({
     getTypeOfTileInDocument(documentKey: string, tileId: string) {
-      return self.getDocument(documentKey)?.content.getTileType(tileId);
+      return self.getDocument(documentKey)?.content?.getTileType(tileId);
     },
     getNextPersonalDocumentTitle(user: UserModelType, base: string) {
       let maxUntitled = 0;
@@ -175,7 +175,7 @@ export const DocumentsModel = types
     };
 
     const findDocumentOfTile = (tileId: string): DocumentModelType | null => {
-      const parentDocument = self.all.find(document => !!document.content.tileMap.get(tileId));
+      const parentDocument = self.all.find(document => !!document.content?.tileMap.get(tileId));
       return parentDocument || null;
     };
 
