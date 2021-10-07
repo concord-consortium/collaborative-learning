@@ -14,6 +14,7 @@ import { IGetNetworkDocumentParams, IGetNetworkDocumentResponse, IUserContext } 
 import { getFirebaseFunction } from "../../hooks/use-firebase-function";
 import { IDocumentProperties } from "../../lib/db-types";
 import { getLocalTimeStamp } from "../../utilities/time";
+import { safeJsonParse } from "../../utilities/js-utils";
 
 export interface IDocumentAddTileOptions {
   title?: string;
@@ -230,7 +231,8 @@ export const DocumentModel = types
         self.queryPromise = queryClient.fetchQuery(queryKey, async () => {
           const networkDocument = await getNetworkDocument({ context, context_id, uid, key });
           const { content, metadata } = networkDocument.data as IGetNetworkDocumentResponse;
-          self.setContent(DocumentContentModel.create(content));
+          const _content = safeJsonParse(content.content);
+          _content && self.setContent(DocumentContentModel.create(_content));
           self.setCreatedAt(metadata.createdAt);
           return { content, metadata };
         });
