@@ -65,7 +65,7 @@ export const TabPanelDocumentsSubSectionPanel = ({section, sectionDocument, tab,
                 : sectionDocument.isStarred
               : false;
     };
-    const _handleDocumentStarClick = section.showStarsForUser(user)
+    const _handleDocumentStarClick = section.showStarsForUser(user) && !sectionDocument.isRemote
                                       ? handleDocumentStarClick
                                       : undefined;
     const _handleDocumentDeleteClick = section.showDeleteForUser(user)
