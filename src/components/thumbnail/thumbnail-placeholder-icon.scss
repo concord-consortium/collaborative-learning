@@ -1,0 +1,12 @@
+.thumbnail-placeholder {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+
+  .placeholder-icon {
+    height: 40px;
+    width: 40px;
+  }
+}
