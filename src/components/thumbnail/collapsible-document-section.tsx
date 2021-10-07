@@ -29,7 +29,7 @@ interface IProps {
 
 export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
   ({userName, classNameStr, stores, scale, selectedDocument, onSelectDocument, subTab,
-    networkResource, problemTitle}) => {
+    networkResource}) => {
   const [isOpen, setIsOpen] = useState(false);
   const handleSectionToggle = () => {
     setIsOpen(!isOpen);
@@ -41,7 +41,7 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
       // get the personal documents
       networkResource.teachers?.forEach((teacher) => {
         if (teacher.personalDocuments) {
-          for (const [key, document] of Object.entries(teacher.personalDocuments)) {
+          for (const [key] of Object.entries(teacher.personalDocuments)) {
             documentKeys.push(key);
           }
         }
@@ -51,12 +51,12 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
       networkResource.resources?.forEach((resource) => {
         resource.teachers?.forEach((teacher) => {
           if (teacher.problemDocuments) {
-            for (const [key, document] of Object.entries(teacher.problemDocuments)) {
+            for (const [key] of Object.entries(teacher.problemDocuments)) {
               documentKeys.push(key);
             }
           }
           if (teacher.planningDocuments) {
-            for (const [key, document] of Object.entries(teacher.planningDocuments)) {
+            for (const [key] of Object.entries(teacher.planningDocuments)) {
               documentKeys.push(key);
             }
           }
@@ -66,7 +66,25 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
       // get the learning logs
       networkResource.teachers?.forEach((teacher) => {
         if (teacher.learningLogs) {
-          for (const [key, document] of Object.entries(teacher.learningLogs)) {
+          for (const [key] of Object.entries(teacher.learningLogs)) {
+            documentKeys.push(key);
+          }
+        }
+      });
+    } else if (section.type === "published-personal-documents") {
+      // get the published personal documents
+      networkResource.resources?.forEach((resource) => {
+        if (resource.personalPublications) {
+          for (const [key] of Object.entries(resource.personalPublications)) {
+            documentKeys.push(key);
+          }
+        }
+      });
+    } else if (section.type === "published-problem-documents") {
+      // get the published problem documents
+      networkResource.resources?.forEach((resource) => {
+        if (resource.problemPublications) {
+          for (const [key] of Object.entries(resource.problemPublications)) {
             documentKeys.push(key);
           }
         }
@@ -75,7 +93,6 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
   });
 
   const networkDocuments = useNetworkDocuments();
-
   const currentSection = subTab.sections[0] as NavTabSectionModelType;
 
   return (
@@ -96,8 +113,8 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
               const documentContext = getDocumentContext(document);
               return (
                 <DocumentContextReact.Provider key={document.key} value={documentContext}>
-                  <TabPanelDocumentsSubSectionPanel section={currentSection} sectionDocument={document} tab={subTab.label}
-                    stores={stores} scale={scale} selectedDocument={selectedDocument}
+                  <TabPanelDocumentsSubSectionPanel section={currentSection} sectionDocument={document}
+                    tab={subTab.label} stores={stores} scale={scale} selectedDocument={selectedDocument}
                     onSelectDocument={onSelectDocument}
                   />
                 </DocumentContextReact.Provider>
