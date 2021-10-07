@@ -225,27 +225,25 @@ export const DocumentModel = types
   .actions(self => ({
     fetchRemoteContent(queryClient: QueryClient, context: IUserContext) {
       const { remoteContext: context_id, uid, key } = self;
-      if (!self.queryPromise && context_id && uid && key) {
-        const queryKey = ["network-documents", context_id, uid, key];
-        const getNetworkDocument = getFirebaseFunction<IGetNetworkDocumentParams>("getNetworkDocument_v1");
-        self.queryPromise = queryClient.fetchQuery(queryKey, async () => {
-          const networkDocument = await getNetworkDocument({ context, context_id, uid, key });
-          const { content, metadata } = networkDocument.data as IGetNetworkDocumentResponse;
-          const _content = safeJsonParse(content.content);
-          _content && self.setContent(DocumentContentModel.create(_content));
-          self.setCreatedAt(metadata.createdAt);
-          return { content, metadata };
-        });
+      const queryKey = ["network-documents", context_id, uid, key];
+      if (context_id && uid && key) {
+        if (!self.queryPromise) {
+          const getNetworkDocument = getFirebaseFunction<IGetNetworkDocumentParams>("getNetworkDocument_v1");
+          self.queryPromise = queryClient.fetchQuery(queryKey, async () => {
+            const networkDocument = await getNetworkDocument({ context, context_id, uid, key });
+            const { content, metadata } = networkDocument.data as IGetNetworkDocumentResponse;
+            const _content = safeJsonParse(content.content);
+            _content && self.setContent(DocumentContentModel.create(_content));
+            self.setCreatedAt(metadata.createdAt);
+            return { content, metadata };
+          });
+        }
+        else {
+          // re-run the query when client calls this function again
+          queryClient.invalidateQueries(queryKey, { exact: true });
+        }
       }
       return self.queryPromise;
-    },
-
-    refreshRemoteContent(queryClient: QueryClient) {
-      if (self.queryPromise) {
-        const { remoteContext: context_id, uid, key } = self;
-        const queryKey = ["network-documents", context_id, uid, key];
-        queryClient.invalidateQueries(queryKey, { exact: true });
-      }
     },
 
     setProperties(properties: ISetProperties) {

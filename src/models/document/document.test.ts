@@ -195,7 +195,7 @@ describe("document model", () => {
     expect(mockFetchQuery).toHaveBeenCalled();
     expect(mockGetNetworkDocument).toHaveBeenCalled();
 
-    document.refreshRemoteContent(mockQueryClient);
+    document.fetchRemoteContent(mockQueryClient, mockUserContext);
     expect(mockInvalidateQueries).toHaveBeenCalled();
   });
 });
