@@ -92,7 +92,7 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
           { documentKeys.length > 0
             ? documentKeys.map((key, i) => {
               const document = networkDocuments.getDocument(key);
-              if (!document) return <div>Documen Missing</div>;
+              if (!document) return <div>Document Missing</div>;
               const documentContext = getDocumentContext(document);
               return (
                 <DocumentContextReact.Provider key={document.key} value={documentContext}>
