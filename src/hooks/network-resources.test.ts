@@ -56,31 +56,35 @@ describe("Network resources hooks", () => {
             response: [{
               context_id: "class-hash",
               personalPublications: {
-                "pub-2": { uid: "user-1", title: "title", properties: {}, originDoc: "personal-1" }
+                "pub-2-meta": {
+                  self: { documentKey: "pub-2" }, uid: "user-1", title: "title", properties: {}, originDoc: "personal-1"
+                }
               },
               learningLogPublications: {
-                "log-2": { uid: "user-1", title: "title", properties: {}, originDoc: "log-1" }
+                "log-2-meta": {
+                  self: { documentKey: "log-2" }, uid: "user-1", title: "title", properties: {}, originDoc: "log-1"
+                }
               },
               teachers: [{
                 uid: "user-1",
                 personalDocuments: {
-                  "document-1": { self: { uid: "user-1" }, title: "title", properties: {} }
+                  "document-1": { self: { uid: "user-1", documentKey: "document-1" }, title: "title", properties: {} }
                 },
                 learningLogs: {
-                  "log-1": { self: { uid: "user-1" }, title: "log", properties: {} }
+                  "log-1": { self: { uid: "user-1", documentKey: "log-1" }, title: "log", properties: {} }
                 },
               }],
               resources: [{
                 problemPublications: {
-                  "pub-1": { userId: "user-1" }
+                  "pub-1-meta": { documentKey: "pub-1", userId: "user-1" }
                 },
                 teachers: [{
                   uid: "user-1",
                   problemDocuments: {
-                    "problem-1": { self: { uid: "user-1" }, visibility: "public" }
+                    "problem-1": { self: { uid: "user-1" }, documentKey: "problem-1", visibility: "public" }
                   },
                   planningDocuments: {
-                    "planning-1": { self: { uid: "user-1" }, visibility: "private" }
+                    "planning-1": { self: { uid: "user-1" }, documentKey: "planning-1", visibility: "private" }
                   }
                 }]
               }]

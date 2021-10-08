@@ -29,7 +29,7 @@ interface IProps {
 
 export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
   ({userName, classNameStr, stores, scale, selectedDocument, onSelectDocument, subTab,
-    networkResource, problemTitle}) => {
+    networkResource}) => {
   const [isOpen, setIsOpen] = useState(false);
   const handleSectionToggle = () => {
     setIsOpen(!isOpen);
@@ -40,42 +40,36 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
     if (section.type === "personal-documents") {
       // get the personal documents
       networkResource.teachers?.forEach((teacher) => {
-        if (teacher.personalDocuments) {
-          for (const [key, document] of Object.entries(teacher.personalDocuments)) {
-            documentKeys.push(key);
-          }
-        }
+        teacher.personalDocuments && documentKeys.push(...(teacher.personalDocuments as string[]));
       });
     } else if (section.type === "problem-documents") {
       // get the problem and planning documents
       networkResource.resources?.forEach((resource) => {
         resource.teachers?.forEach((teacher) => {
-          if (teacher.problemDocuments) {
-            for (const [key, document] of Object.entries(teacher.problemDocuments)) {
-              documentKeys.push(key);
-            }
-          }
-          if (teacher.planningDocuments) {
-            for (const [key, document] of Object.entries(teacher.planningDocuments)) {
-              documentKeys.push(key);
-            }
-          }
+          teacher.problemDocuments && documentKeys.push(...(teacher.problemDocuments as string[]));
+          teacher.planningDocuments && documentKeys.push(...(teacher.planningDocuments as string[]));
         });
       });
     } else if (section.type === "learning-logs") {
       // get the learning logs
       networkResource.teachers?.forEach((teacher) => {
-        if (teacher.learningLogs) {
-          for (const [key, document] of Object.entries(teacher.learningLogs)) {
-            documentKeys.push(key);
-          }
-        }
+        teacher.learningLogs && documentKeys.push(...(teacher.learningLogs as string[]));
       });
+    } else if (section.type === "published-personal-documents") {
+      // get the published personal documents
+      networkResource.personalPublications && documentKeys.push(...(networkResource.personalPublications as string[]));
+    } else if (section.type === "published-problem-documents") {
+      // get the published problem documents
+      networkResource.resources?.forEach((resource) => {
+        resource.problemPublications && documentKeys.push(...(resource.problemPublications as string[]));
+      });
+    } else if (section.type === "published-learning-logs") {
+      networkResource.learningLogPublications &&
+        documentKeys.push(...(networkResource.learningLogPublications as string[]));
     }
   });
 
   const networkDocuments = useNetworkDocuments();
-
   const currentSection = subTab.sections[0] as NavTabSectionModelType;
 
   return (
@@ -96,8 +90,8 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
               const documentContext = getDocumentContext(document);
               return (
                 <DocumentContextReact.Provider key={document.key} value={documentContext}>
-                  <TabPanelDocumentsSubSectionPanel section={currentSection} sectionDocument={document} tab={subTab.label}
-                    stores={stores} scale={scale} selectedDocument={selectedDocument}
+                  <TabPanelDocumentsSubSectionPanel section={currentSection} sectionDocument={document}
+                    tab={subTab.label} stores={stores} scale={scale} selectedDocument={selectedDocument}
                     onSelectDocument={onSelectDocument}
                   />
                 </DocumentContextReact.Provider>
