@@ -26,48 +26,69 @@ export function useNetworkResources() {
     response?.forEach(aClass => {
       const { context_id: remoteContext } = aClass;
       // add class-wide publications to the network documents store
-      each(aClass.personalPublications, (metadata: DBOtherPublication, key: string) => {
-        const { title, properties, uid, originDoc } = metadata;
+      let keys: string[] = [];
+      each(aClass.personalPublications, (metadata: DBOtherPublication) => {
+        const { self: { documentKey: key }, title, properties, uid, originDoc } = metadata;
         const type = PersonalPublication;
         documents.add(DocumentModel.create({ uid, type, key, remoteContext, title, properties, originDoc }));
+        keys.push(key);
       });
-      each(aClass.learningLogPublications, (metadata: DBOtherPublication, key: string) => {
-        const { title, properties, uid, originDoc } = metadata;
+      aClass.personalPublications && (aClass.personalPublications = keys);
+      keys = [];
+      each(aClass.learningLogPublications, (metadata: DBOtherPublication) => {
+        const { self: { documentKey: key }, title, properties, uid, originDoc } = metadata;
         const type = LearningLogPublication;
         documents.add(DocumentModel.create({ uid, type, key, remoteContext, title, properties, originDoc }));
+        keys.push(key);
       });
+      aClass.learningLogPublications && (aClass.learningLogPublications = keys);
       // add each teacher's class-wide documents to the network documents store
       aClass.teachers?.forEach(teacher => {
-        each(teacher.personalDocuments, (metadata: DBOtherDocument, key: string) => {
-          const { self: { uid }, title, properties } = metadata;
+        keys = [];
+        each(teacher.personalDocuments, (metadata: DBOtherDocument) => {
+          const { self: { uid, documentKey: key }, title, properties } = metadata;
           const type = PersonalDocument;
           documents.add(DocumentModel.create({ uid, type, key, remoteContext, title, properties }));
+          keys.push(key);
         });
-        each(teacher.learningLogs, (metadata: DBOtherDocument, key: string) => {
-          const { self: { uid }, title, properties } = metadata;
+        teacher.personalDocuments && (teacher.personalDocuments = keys);
+        keys = [];
+        each(teacher.learningLogs, (metadata: DBOtherDocument) => {
+          const { self: { uid, documentKey: key }, title, properties } = metadata;
           const type = LearningLogDocument;
           documents.add(DocumentModel.create({ uid, type, key, remoteContext, title, properties }));
+          keys.push(key);
         });
+        teacher.learningLogs && (teacher.learningLogs = keys);
       });
       // add problem-specific publications to the network document store
       aClass.resources?.forEach(offering => {
-        each(offering.problemPublications, (metadata: DBPublication, key: string) => {
-          const { userId: uid } = metadata;
+        keys = [];
+        each(offering.problemPublications, (metadata: DBPublication) => {
+          const { documentKey: key, userId: uid } = metadata;
           const type = ProblemPublication;
           documents.add(DocumentModel.create({ uid, type, key, remoteContext }));
+          keys.push(key);
         });
+        offering.problemPublications && (offering.problemPublications = keys);
         // add teacher's problem-specific documents to the network documents store
         offering.teachers?.forEach(teacher => {
-          each(teacher.problemDocuments, (metadata: DBOfferingUserProblemDocument, key: string) => {
-            const { self: { uid }, visibility } = metadata;
+          keys = [];
+          each(teacher.problemDocuments, (metadata: DBOfferingUserProblemDocument) => {
+            const { self: { uid }, documentKey: key, visibility } = metadata;
             const type = ProblemDocument;
             documents.add(DocumentModel.create({ uid, type, key, remoteContext, visibility }));
+            keys.push(key);
           });
-          each(teacher.planningDocuments, (metadata: DBOfferingUserProblemDocument, key: string) => {
-            const { self: { uid }, visibility } = metadata;
+          teacher.problemDocuments && (teacher.problemDocuments = keys);
+          keys = [];
+          each(teacher.planningDocuments, (metadata: DBOfferingUserProblemDocument) => {
+            const { self: { uid }, documentKey: key, visibility } = metadata;
             const type = PlanningDocument;
             documents.add(DocumentModel.create({ uid, type, key, remoteContext, visibility }));
+            keys.push(key);
           });
+          teacher.planningDocuments && (teacher.planningDocuments = keys);
         });
       });
     });

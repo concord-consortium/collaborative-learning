@@ -40,31 +40,32 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
     if (section.type === "personal-documents") {
       // get the personal documents
       networkResource.teachers?.forEach((teacher) => {
-        teacher.personalDocuments && documentKeys.push(...Object.keys(teacher.personalDocuments));
+        teacher.personalDocuments && documentKeys.push(...(teacher.personalDocuments as string[]));
       });
     } else if (section.type === "problem-documents") {
       // get the problem and planning documents
       networkResource.resources?.forEach((resource) => {
         resource.teachers?.forEach((teacher) => {
-          teacher.problemDocuments && documentKeys.push(...Object.keys(teacher.problemDocuments));
-          teacher.planningDocuments && documentKeys.push(...Object.keys(teacher.planningDocuments));
+          teacher.problemDocuments && documentKeys.push(...(teacher.problemDocuments as string[]));
+          teacher.planningDocuments && documentKeys.push(...(teacher.planningDocuments as string[]));
         });
       });
     } else if (section.type === "learning-logs") {
       // get the learning logs
       networkResource.teachers?.forEach((teacher) => {
-        teacher.learningLogs && documentKeys.push(...Object.keys(teacher.learningLogs));
+        teacher.learningLogs && documentKeys.push(...(teacher.learningLogs as string[]));
       });
     } else if (section.type === "published-personal-documents") {
       // get the published personal documents
-      networkResource.personalPublications && documentKeys.push(...Object.keys(networkResource.personalPublications));
+      networkResource.personalPublications && documentKeys.push(...(networkResource.personalPublications as string[]));
     } else if (section.type === "published-problem-documents") {
       // get the published problem documents
       networkResource.resources?.forEach((resource) => {
-        resource.problemPublications && documentKeys.push(...Object.keys(resource.problemPublications));
+        resource.problemPublications && documentKeys.push(...(resource.problemPublications as string[]));
       });
     } else if (section.type === "published-learning-logs") {
-      networkResource.learningLogPublications && documentKeys.push(...Object.keys(networkResource.learningLogPublications));
+      networkResource.learningLogPublications &&
+        documentKeys.push(...(networkResource.learningLogPublications as string[]));
     }
   });
 
