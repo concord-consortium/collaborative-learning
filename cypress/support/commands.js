@@ -24,11 +24,12 @@
 // -- This is will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 import ClueHeader from './elements/clue/cHeader';
-import RightNav from './elements/common/RightNav';
+import PrimaryWorkspace from './elements/common/PrimaryWorkspace';
 import Canvas from './elements/common/Canvas';
 import TeacherDashboard from "./elements/clue/TeacherDashboard";
 import 'cypress-file-upload';
 import 'cypress-commands';
+import ResourcesPanel from "./elements/clue/ResourcesPanel";
 
 Cypress.Commands.add("setupGroup", (students, group) => {
     const baseUrl = `${Cypress.config("baseUrl")}`;
@@ -91,40 +92,41 @@ Cypress.Commands.add("waitForSpinner", () => {
     cy.get('.progress', { timeout: 60000 }).should('not.exist');
 });
 Cypress.Commands.add("deleteWorkspaces",(baseUrl,queryParams)=>{
-    let rightNav = new RightNav;
+    let primaryWorkspace = new PrimaryWorkspace;
+    let resourcesPanel = new ResourcesPanel;
     let canvas = new Canvas;
     let dashboard = new TeacherDashboard();
 
     cy.visit(baseUrl+queryParams);
     cy.waitForSpinner();
-    dashboard.switchView("Workspace");
+    dashboard.switchView("Workspace & Resources");
     cy.wait(2000);
-    rightNav.openRightNavTab("my-work");
+    resourcesPanel.openPrimaryWorkspaceTab("my-work");
     cy.openSection("my-work","workspaces");
     cy.wait(2000);
-    rightNav.getAllSectionCanvasItems("my-work","workspaces").then((document_list)=>{
+    primaryWorkspace.getAllSectionCanvasItems("my-work","workspaces").then((document_list)=>{
         let listLength = document_list.length;
         while(listLength>1){
-            rightNav.getAllSectionCanvasItems("my-work","workspaces").eq(0).click();
+            primaryWorkspace.getAllSectionCanvasItems("my-work","workspaces").eq(0).click();
             cy.wait(1111);
             canvas.deleteDocument();
             listLength=listLength-1;
-            rightNav.openRightNavTab("my-work");
+            resourcesPanel.openPrimaryWorkspaceTab("my-work");
         }
 
     });
 });
-Cypress.Commands.add("openTab", (tab) => {
-  cy.get('.nav-tab-buttons .tab-'+tab).click();
+Cypress.Commands.add("openResourceTabs", () => {
+  cy.get('.collapsed-resources-tab').click();
 } );
 Cypress.Commands.add("openTopTab", (tab) => {
-  cy.get('.nav-tab-panel .tab-'+tab).click();
+  cy.get('.top-tab.tab-'+tab).click();
 } );
-// Cypress.Commands.add("openSubTab", (tab, subTab) => {
-//   cy.get('.document-tabs.'+tab+'.'+subTab).click();
-// } );
+Cypress.Commands.add("openProblemSection", (section) => {//doc-tab my-work workspaces problem-documents selected
+  cy.get('.prob-tab').contains(section).click({force:true});
+});
 Cypress.Commands.add("openSection", (tab, section) => {//doc-tab my-work workspaces problem-documents selected
-  cy.get('.doc-tab.'+tab+'.'+section).click();
+  cy.get('.doc-tab.'+tab+'.'+section).click({force:true});
 });
 Cypress.Commands.add("getCanvasItemTitle", (section) => {
   cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer');
@@ -138,10 +140,14 @@ Cypress.Commands.add("openDocumentWithTitle", (tab, section, title) => {
   cy.get('.edit-button').click();
 });
 Cypress.Commands.add('closeTabs', () => {
-  cy.get('.close-button').click();
+  cy.get('.drag-left-handle').click();
+});
+Cypress.Commands.add('collapseWorkspace', () => {
+  cy.get('.drag-right-handle').click();
+  cy.get('.drag-right-handle').click(); // to ensure workspace is collapsed regardless of initial position
 });
 Cypress.Commands.add('linkTableToGraph', (table, graph) => {
-  cy.get('.table-title').contains(table).within(() => {
+  cy.get('.primary-workspace .table-title').contains(table).within(() => {
     cy.get('.link-geometry-button').click();
   });
   cy.get('.ReactModalPortal').within(() => {
@@ -150,7 +156,7 @@ Cypress.Commands.add('linkTableToGraph', (table, graph) => {
   });
 });
 Cypress.Commands.add('unlinkTableToGraph', (table, graph) => {
-  cy.get('.table-title').contains(table).within(() => {
+  cy.get('.primary-workspace .table-title').contains(table).within(() => {
     cy.get('.link-geometry-button').click();
   });
   cy.get('.ReactModalPortal').within(() => {

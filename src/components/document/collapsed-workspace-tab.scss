@@ -1,0 +1,52 @@
+@import "../vars";
+
+.collapsed-workspace-tab {
+  position: absolute;
+  top: $header-height;
+  right: 0;
+  height: calc(100vh - (#{$header-height} + #{$workspace-content-margin} * 2));
+  width: 38px;
+  margin: 4px 4px 0 2px;
+  padding: 2px;
+  border-radius: 8px 0 0 0;
+  box-sizing: border-box;
+  border-width: 2px;
+  border-style: solid;
+  z-index: 2;
+  display: flex;
+  &.problem {
+    border-color: $workspace-teal;
+    background-color: $workspace-teal-light-4;
+    &:hover {
+      background-color: $workspace-teal-light-2;
+    }
+    &:active {
+      background-color: $workspace-teal-light-1-b;
+    }
+  }
+  &.learninglog {
+    border-color: $learninglog-green;
+    background-color: $learninglog-green-light-5;
+    &:hover {
+      background-color: $learninglog-green-light-3;
+    }
+    &:active {
+      background-color: $learninglog-green-light-2;
+    }
+  }
+
+  .collapsed-tab-label {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-size: 14px;
+    margin: 20px 7px;
+    width: 50px;
+  }
+  .expand-right-indicator {
+    transform: rotate(180deg);
+    position: relative;
+    right: 33px;
+    align-self: center;
+    justify-self: center;
+  }
+}

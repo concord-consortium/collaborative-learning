@@ -5,13 +5,16 @@ import { DocumentComponent, WorkspaceSide } from "../../components/document/docu
 import { GroupVirtualDocumentComponent } from "../../components/document/group-virtual-document";
 import { BaseComponent, IBaseProps } from "../../components/base";
 import { DocumentModelType } from "../../models/document/document";
-import { DocumentContentModel } from "../../models/document/document-content";
+import { createDefaultSectionedContent } from "../../models/document/document-content";
 import {
   DocumentDragKey, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
 } from "../../models/document/document-types";
+import { kDividerHalf, kDividerMax, kDividerMin } from "../../models/stores/ui-types";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { NavTabPanel } from "../navigation/nav-tab-panel";
-import { NavTabButtons } from "../navigation/nav-tab-buttons";
+import { CollapsedResourcesTab } from "../navigation/collapsed-resources-tab";
+import { CollapsedWorkspaceTab } from "./collapsed-workspace-tab";
+import { ResizePanelDivider } from "./resize-panel-divider";
 
 import "./document-workspace.sass";
 
@@ -36,7 +39,16 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   public render() {
-    const { appConfig : { navTabs: { tabSpecs } }, teacherGuide, user: { isTeacher } } = this.stores;
+    const { appConfig : { navTabs: { tabSpecs } },
+            teacherGuide,
+            user: { isTeacher },
+            ui: { problemWorkspace: { type },
+                  activeNavTab,
+                  navTabContentShown,
+                  workspaceShown,
+                  dividerPosition,
+                }
+          } = this.stores;
     const studentTabs = tabSpecs.filter((t) => !t.teacherOnly);
     const teacherTabs = tabSpecs.filter(t => (t.tab !== "teacher-guide") || teacherGuide);
     const tabsToDisplay = isTeacher ? teacherTabs : studentTabs;
@@ -52,19 +64,30 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
           onDragOver={this.handleDragOverWorkspace}
           onDrop={this.handleImageDrop}
         />
-        {this.renderDocuments()}
+
+        <ResizePanelDivider
+          isResourceExpanded={navTabContentShown}
+          dividerPosition={dividerPosition}
+          onExpandWorkspace={this.toggleExpandWorkspace}
+          onExpandResources={this.toggleExpandResources}
+        />
         <NavTabPanel
           tabs={tabsToDisplay}
-          isTeacher={isTeacher}
           onDragOver={this.handleDragOverWorkspace}
           onDrop={this.handleImageDrop}
+          isResourceExpanded={navTabContentShown}
         />
-        <NavTabButtons
-          tabs={tabsToDisplay}
-          isTeacher={isTeacher}
-          onDragOver={this.handleDragOverWorkspace}
-          onDrop={this.handleImageDrop}
+        <CollapsedResourcesTab
+          onExpandResources={this.toggleExpandResources}
+          resourceType={activeNavTab}
+          isResourceExpanded={!navTabContentShown}
         />
+        {workspaceShown ? this.renderDocuments()
+                        : <CollapsedWorkspaceTab
+                            onExpandWorkspace={this.toggleExpandWorkspace}
+                            workspaceType={type}
+                          />
+        }
       </div>
     );
   }
@@ -73,12 +96,9 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     const { appConfig: { autoSectionProblemDocuments, defaultDocumentType, defaultDocumentContent },
             problem } = this.stores;
     if ((defaultDocumentType === ProblemDocument) && autoSectionProblemDocuments) {
-      const tiles: any = [];
-      problem.sections.forEach(section => {
-        tiles.push({ content: { isSectionHeader: true, sectionId: section.type }});
-        tiles.push({ content: { type: "Placeholder", sectionId: section.type }});
-      });
-      return DocumentContentModel.create({ tiles } as any);
+      // for problem documents, default content is a section header row and a placeholder tile
+      // for each section that is present in the corresponding problem content
+      return createDefaultSectionedContent(problem.sections);
     }
     else if (defaultDocumentContent) {
       return defaultDocumentContent;
@@ -86,9 +106,9 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   private async guaranteeInitialDocuments() {
-    const { appConfig: { defaultDocumentType, defaultLearningLogDocument,
-                        defaultLearningLogTitle, initialLearningLogTitle },
-            db, ui: { problemWorkspace } } = this.stores;
+    const { appConfig: {
+              defaultDocumentType, defaultLearningLogDocument, defaultLearningLogTitle, initialLearningLogTitle },
+            db, ui: { problemWorkspace }, unit: { planningDocument }, user: { type: role } } = this.stores;
     if (!problemWorkspace.primaryDocumentKey) {
       const documentContent = this.getDefaultDocumentContent();
       const defaultDocument = await db.guaranteeOpenDefaultDocument(defaultDocumentType, documentContent);
@@ -98,6 +118,8 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     }
     // Guarantee the user starts with one learning log
     defaultLearningLogDocument && await db.guaranteeLearningLog(initialLearningLogTitle || defaultLearningLogTitle);
+    planningDocument?.isEnabledForRole(role) && planningDocument.default &&
+      await db.guaranteePlanningDocument(planningDocument.sections);
   }
 
   private renderDocuments() {
@@ -153,7 +175,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         side="primary"
       />;
 
-    // Show Pimary and comparison docs:
+    // Show Primary and comparison docs:
     if (comparisonVisible && showPrimary) {
       return (
         <div onClick={this.handleClick}>
@@ -174,12 +196,12 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
 
   private renderDocument(className: string, side: WorkspaceSide, child?: JSX.Element) {
     const { ui } = this.stores;
-    const style = { right: 0 };
-    const positionedClassName = ui.navTabContentShown ? className + " half" : className;
+    const workspaceLeft = ui.navTabContentShown ? "50%" : 42;
+    const style = { left: workspaceLeft };
     const roleClassName = side === "primary" ? "primary-workspace" : "reference-workspace";
     return (
       <div
-        className={`${positionedClassName} ${roleClassName}`}
+        className={`${className} ${roleClassName}`}
         style={style}
         onDragOver={this.handleDragOverSide}
         onDrop={this.handleDropSide(side)}
@@ -255,10 +277,10 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     this.imageDragDrop.drop(e)
       .then((url) => {
         const primaryDocument = this.getPrimaryDocument(ui.problemWorkspace.primaryDocumentKey);
-        if (primaryDocument) {
+        if (primaryDocument?.content) {
           // insert the tile after the row it was dropped on otherwise add to end of document
-          const rowIndex = rowId ? primaryDocument.content.getRowIndex(rowId) : undefined;
-          const rowInsertIndex = (rowIndex !== undefined ? rowIndex + 1 : primaryDocument.content.rowOrder.length);
+          const rowIndex = rowId ? primaryDocument.content?.getRowIndex(rowId) : undefined;
+          const rowInsertIndex = (rowIndex !== undefined ? rowIndex + 1 : primaryDocument.content?.rowOrder.length);
           primaryDocument.content.userAddTile("image", {
             url,
             insertRowInfo: {
@@ -389,7 +411,8 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
                                           ? () => db.publishProblemDocument(document)
                                           : () => db.publishOtherDocument(document);
           dbPublishDocumentFunc()
-            .then(() => ui.alert(`Your ${docTypeStringL} was published.`, `${docTypeString} Published`));
+            .then(() => ui.alert(`Your ${docTypeStringL} was published.`, `${docTypeString} Published`))
+            .catch((reason) => ui.alert(`Your document failed to publish: ${reason}`, "Error"));
         }
       });
   }
@@ -397,6 +420,24 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   private getPrimaryDocument(documentKey?: string) {
     if (documentKey) {
       return this.stores.documents.getDocument(documentKey);
+    }
+  }
+
+  private toggleExpandWorkspace = () => {
+    const { ui } = this.stores;
+    if (ui.dividerPosition === kDividerMax) {
+      ui.setDividerPosition(kDividerHalf);
+    } else if (ui.dividerPosition === kDividerHalf) {
+      ui.setDividerPosition(kDividerMin);
+    }
+  }
+
+  private toggleExpandResources = () => {
+    const { ui } = this.stores;
+    if (ui.dividerPosition === kDividerMin) {
+      ui.setDividerPosition(kDividerHalf);
+    } else if (ui.dividerPosition === kDividerHalf) {
+      ui.setDividerPosition(kDividerMax);
     }
   }
 }

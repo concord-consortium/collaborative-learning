@@ -58,7 +58,11 @@ export class Firebase {
   }
 
   public getRootFolder() {
-    // in the form of /(dev|test|demo|authed)/[<firebaseUserId> if dev or test]/portals/<escapedPortalDomain>
+    // authed: /authed/portals/<escapedPortalDomain>
+    // demo: /demo/<demoName>/portals/demo <as portalDomain>
+    // dev: /dev/<firebaseUserId>/portals/localhost <as portalDomain>
+    // qa: /qa/<firebaseUserId>/portals/qa <as portalDomain>
+    // test: /test/<firebaseUserId>/portals/<arbitraryString as portalDomain>
     const { appMode, demo: { name: demoName }, user } = this.db.stores;
 
     const parts = [];
@@ -102,17 +106,17 @@ export class Firebase {
     return `${this.getClassPath(user)}/users/${userId || user.id}`;
   }
 
-  // Published learning logs
+  // Published problem documents and learning logs metadata
   public getClassPublicationsPath(user: UserModelType) {
     return `${this.getClassPath(user)}/publications`;
   }
 
-  // Published personal documents
+  // Published personal documents metadata
   public getClassPersonalPublicationsPath(user: UserModelType) {
     return `${this.getClassPath(user)}/personalPublications`;
   }
 
-  // All documents associated with this user
+  // Content of all documents associated with this user
   public getUserDocumentPath(user: UserModelType, documentKey?: string, userId?: string) {
     const suffix = documentKey ? `/${documentKey}` : "";
     return `${this.getUserPath(user, userId)}/documents${suffix}`;
@@ -131,25 +135,26 @@ export class Firebase {
     return `${this.getOfferingPath(user)}/commentaries/stars${docSuffix}${starSuffix}`;
   }
 
+  // Basic metadata for all document types (in addition to type-specific metadata stored elsewhere)
   public getUserDocumentMetadataPath(user: UserModelType, documentKey?: string, userId?: string) {
     const suffix = documentKey ? `/${documentKey}` : "";
     return `${this.getUserPath(user, userId)}/documentMetadata${suffix}`;
   }
 
-  // Unpublished personal document/learning log
+  // Unpublished personal document/learning log metadata
   public getOtherDocumentPath(user: UserModelType, documentType: OtherDocumentType, documentKey?: string) {
     const dir = documentType === PersonalDocument ? "personalDocs" : "learningLogs";
     const key = documentKey ? `/${documentKey}` : "";
     return `${this.getUserPath(user)}/${dir}${key}`;
   }
 
-  // Unpublished learning log
+  // Unpublished learning log metadata
   public getLearningLogPath(user: UserModelType, documentKey?: string, userId?: string) {
     const suffix = documentKey ? `/${documentKey}` : "";
     return `${this.getUserPath(user, userId)}/learningLogs${suffix}`;
   }
 
-  // Unpublished personal document
+  // Unpublished personal document metadata
   public getUserPersonalDocPath(user: UserModelType, documentKey?: string, userId?: string) {
     const suffix = documentKey ? `/${documentKey}` : "";
     return `${this.getUserPath(user, userId)}/personalDocs${suffix}`;
@@ -171,18 +176,31 @@ export class Firebase {
     return `${this.getOfferingPath(user)}/users`;
   }
 
+  // the path to the user folder for a particular problem (assignment)
+  // metadata for each user document is in the class/offerings/users/userId path, but
+  // the contents of all of a user's documents are in the class/users/userId/documents path.
   public getOfferingUserPath(user: UserModelType, userId?: string) {
     return `${this.getOfferingUsersPath(user)}/${userId || user.id}`;
   }
 
-  // Unpublished problem document
+  // Unpublished problem document metadata
   public getProblemDocumentPath(user: UserModelType, documentKey: string, userId?: string) {
     return `${this.getOfferingUserPath(user, userId)}/documents/${documentKey}`;
   }
 
-  // Unpublished problem documents
+  // Unpublished problem documents metadata folder
   public getProblemDocumentsPath(user: UserModelType, userId?: string) {
     return `${this.getOfferingUserPath(user, userId)}/documents`;
+  }
+
+  // Planning document metadata
+  public getPlanningDocumentPath(user: UserModelType, documentKey: string, userId?: string) {
+    return `${this.getOfferingUserPath(user, userId)}/planning/${documentKey}`;
+  }
+
+  // Planning documents metadata folder
+  public getPlanningDocumentsPath(user: UserModelType, userId?: string) {
+    return `${this.getOfferingUserPath(user, userId)}/planning`;
   }
 
   // Unpublished section documents [deprecated]
@@ -203,7 +221,7 @@ export class Firebase {
     return `${this.getGroupPath(user, groupId)}/users/${userId || user.id}`;
   }
 
-  // Published section/problem documents
+  // Published section [deprecated] and problem document metadata
   public getPublicationsPath(user: UserModelType) {
     return `${this.getOfferingPath(user)}/publications`;
   }

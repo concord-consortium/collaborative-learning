@@ -1,15 +1,15 @@
 import initials from "initials";
 import jwt from "jsonwebtoken";
 import superagent from "superagent";
-import { AppMode } from "../models/stores/stores";
-import { QueryParams, DefaultUrlParams } from "../utilities/url-params";
+import { AppMode } from "../models/stores/store-types";
+import { QueryParams, urlParams as pageUrlParams } from "../utilities/url-params";
 import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
 import { AppConfigModelType } from "../models/stores/app-config-model";
-import { IPortalClassOffering } from "../models/stores/user";
+import { IUserPortalOffering } from "../models/stores/user";
 import { UserType } from "../models/stores/user-types";
 import { getErrorMessage } from "../utilities/super-agent-helpers";
 import { getPortalOfferings, getPortalClassOfferings,  getProblemIdForAuthenticatedUser } from "./portal-api";
-import { PortalJWT, PortalFirebaseJWT } from "./portal-types";
+import { PortalJWT, PortalFirebaseJWT, IPortalClassInfo } from "./portal-types";
 import { Logger, LogEventName } from "../lib/logger";
 
 export const PORTAL_JWT_URL_SUFFIX = "api/v1/jwt/portal";
@@ -49,13 +49,8 @@ export const DEV_CLASS_INFO: ClassInfo = {
   teachers: [DEV_TEACHER]
 };
 
-export interface RawUser {
-  id: string;
-  first_name: string;
-  last_name: string;
-}
-
 export type AuthenticatedUser = StudentUser | TeacherUser;
+export const isAuthenticatedTeacher = (u: AuthenticatedUser): u is TeacherUser => u.type === "teacher";
 
 interface User {
   id: string;
@@ -71,7 +66,7 @@ interface User {
   rawPortalJWT?: string;
   firebaseJWT?: PortalFirebaseJWT;
   rawFirebaseJWT?: string;
-  portalClassOfferings?: IPortalClassOffering[];
+  portalClassOfferings?: IUserPortalOffering[];
   demoClassHashes?: string[];
 }
 
@@ -81,15 +76,8 @@ export interface StudentUser extends User {
 
 export interface TeacherUser extends User {
   type: "teacher";
-}
-
-export interface RawClassInfo {
-  uri: string;
-  name: string;
-  state: string;
-  class_hash: string;
-  teachers: RawUser[];
-  students: RawUser[];
+  network?: string;     // default network for teacher
+  networks?: string[];  // list of networks available to teacher
 }
 
 export interface ClassInfo {
@@ -188,7 +176,7 @@ export const getClassInfo = (params: GetClassInfoParams) => {
       } else if (!res.body || !res.body.class_hash) {
         reject("Invalid class info response");
       } else {
-        const rawClassInfo: RawClassInfo = res.body;
+        const rawClassInfo: IPortalClassInfo = res.body;
 
         const classInfo: ClassInfo = {
           name: rawClassInfo.name,
@@ -244,7 +232,10 @@ export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, ur
     unitCode?: string;
   }
   return new Promise<IAuthenticateResponse>((resolve, reject) => {
-    urlParams = urlParams || DefaultUrlParams;
+    urlParams = urlParams || pageUrlParams;
+    // TODO: we should be defaulting to appConfig.defaultUnit here rather than the empty string,
+    // but some cypress tests rely on the fact that in demo mode the offeringId is prefixed with
+    // the unit code, which results in an offeringId of `101` instead of `sas101`.
     const unitCode = urlParams.unit || "";
     // when launched as a report, the params will not contain the problemOrdinal
     const problemOrdinal = urlParams.problem || appConfig.defaultProblemOrdinal;
@@ -268,12 +259,17 @@ export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, ur
       if (((userType !== "student") && (userType !== "teacher")) || !userId) {
         return reject("fakeUser must be in the form of student:<id> or teacher:<id>");
       }
+      // respect `network` url parameter in demo/qa modes
+      const networkProps = urlParams.network
+                            ? { network: urlParams.network, networks: [urlParams.network] }
+                            : undefined;
       return resolve({
               appMode,
               ...createFakeAuthentication({
                   appMode,
                   classId: fakeClass,
                   userType, userId,
+                  ...networkProps,
                   unitCode,
                   problemOrdinal
                 })
@@ -281,7 +277,7 @@ export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, ur
     }
 
     if (appMode !== "authed") {
-      return resolve(generateDevAuthentication(unitCode, problemOrdinal));
+      return resolve(generateDevAuthentication(unitCode || appConfig.defaultUnit, problemOrdinal));
     }
 
     if (!bearerToken) {
@@ -317,7 +313,6 @@ export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, ur
         const portal = parseUrl(basePortalUrl).host;
         let classInfoUrl: string | undefined;
         let offeringId: string | undefined;
-        let portalClassOfferings: any;
 
         if (portalJWT.user_type === "learner") {
           classInfoUrl = portalJWT.class_info_url;
@@ -334,50 +329,42 @@ export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, ur
 
         return getClassInfo({classInfoUrl, rawPortalJWT, portal, offeringId})
           .then((classInfo) => {
-            return getFirebaseJWTWithBearerToken(basePortalUrl, "Bearer", bearerToken, classInfo.classHash)
-              .then(([rawFirebaseJWT, firebaseJWT]) => {
-                getPortalOfferings(portalJWT.user_type, portalJWT.uid, portalJWT.domain, rawPortalJWT)
-                  .then(result => {
-                    portalClassOfferings = getPortalClassOfferings(result, appConfig, urlParams);
-                    const uidAsString = `${portalJWT.uid}`;
-                    let authenticatedUser: AuthenticatedUser | undefined;
+            const { user_type, uid, domain } = portalJWT;
+            const { classHash } = classInfo;
+            const uidAsString = `${portalJWT.uid}`;
+            const firebaseJWTPromise = getFirebaseJWTWithBearerToken(basePortalUrl, "Bearer", bearerToken, classHash);
+            const portalOfferingsPromise = getPortalOfferings(user_type, uid, domain, rawPortalJWT);
+            const problemIdPromise = getProblemIdForAuthenticatedUser(rawPortalJWT, appConfig, urlParams);
+            Promise
+              .all([firebaseJWTPromise, portalOfferingsPromise, problemIdPromise])
+              .then(([firebaseJWTResult, portalOfferingsResult, problemIdResult]) => {
+                const [rawFirebaseJWT, firebaseJWT] = firebaseJWTResult;
+                const { unitCode: newUnitCode, problemOrdinal: newProblemOrdinal } = problemIdResult;
 
-                    if (portalJWT.user_type === "learner") {
-                      authenticatedUser = classInfo.students.find((student) => student.id === uidAsString);
-                    } else {
-                      authenticatedUser = classInfo.teachers.find((teacher) => teacher.id === uidAsString);
-                    }
+                const authenticatedUser = user_type === "learner"
+                                            ? classInfo.students.find(student => student.id === uidAsString)
+                                            : classInfo.teachers.find(teacher => teacher.id === uidAsString);
+                if (!authenticatedUser) {
+                  throw new Error("Current user not found in class roster");
+                }
 
-                    if (!authenticatedUser) {
-                      throw new Error("Current user not found in class roster");
-                    }
+                authenticatedUser.portalJWT = portalJWT;
+                authenticatedUser.rawPortalJWT = rawPortalJWT;
+                authenticatedUser.firebaseJWT = firebaseJWT;
+                authenticatedUser.rawFirebaseJWT = rawFirebaseJWT;
+                authenticatedUser.id = uidAsString;
+                authenticatedUser.portal = portal;
+                authenticatedUser.portalClassOfferings =
+                  getPortalClassOfferings(portalOfferingsResult, appConfig, urlParams);
 
-                    authenticatedUser.portalJWT = portalJWT;
-                    authenticatedUser.rawPortalJWT = rawPortalJWT;
-                    authenticatedUser.firebaseJWT = firebaseJWT;
-                    authenticatedUser.rawFirebaseJWT = rawFirebaseJWT;
-                    authenticatedUser.id = uidAsString;
-                    authenticatedUser.portal = portal;
-                    if (portalClassOfferings) {
-                      authenticatedUser.portalClassOfferings = portalClassOfferings;
-                    }
-                    getProblemIdForAuthenticatedUser(rawPortalJWT, appConfig, urlParams)
-                      .then(({ unitCode: newUnitCode, problemOrdinal: newProblemOrdinal }) => {
-                        if (authenticatedUser) {
-                          Logger.log(LogEventName.INTERNAL_AUTHENTICATED, {id: authenticatedUser.id, portal});
-                          resolve({
-                            authenticatedUser,
-                            classInfo,
-                            unitCode: newUnitCode,
-                            problemId: newProblemOrdinal
-                          });
-                        }
-                      })
-                      .catch(reject);
-                  })
-                  .catch(reject);
-              })
-              .catch(reject);
+                Logger.log(LogEventName.INTERNAL_AUTHENTICATED, {id: authenticatedUser.id, portal});
+                resolve({
+                  authenticatedUser,
+                  classInfo,
+                  unitCode: newUnitCode,
+                  problemId: newProblemOrdinal
+                });
+              });
         })
         .catch(reject);
     })
@@ -391,7 +378,27 @@ export const generateDevAuthentication = (unitCode: string, problemOrdinal: stri
   DEV_CLASS_INFO.students.forEach((student) => student.offeringId = offeringId);
   DEV_CLASS_INFO.teachers.forEach((teacher) => teacher.offeringId = offeringId);
 
-  return {authenticatedUser: DEV_STUDENT, classInfo: DEV_CLASS_INFO};
+  let authenticatedUser: AuthenticatedUser = DEV_STUDENT;
+
+  const fakeUser = pageUrlParams.fakeUser;
+  if (fakeUser) {
+    const [role, fakeId] = fakeUser.split(":");
+    if (role === "teacher") {
+      authenticatedUser = DEV_TEACHER;
+      fakeId && (DEV_TEACHER.id = fakeId);
+
+      // respect `network` url parameter in dev mode
+      if (pageUrlParams.network) {
+        authenticatedUser.network = pageUrlParams.network;
+        authenticatedUser.networks = [pageUrlParams.network];
+      }
+    }
+    else {
+      fakeId && (DEV_STUDENT.id = fakeId);
+    }
+  }
+
+  return {authenticatedUser, classInfo: DEV_CLASS_INFO};
 };
 
 const createOfferingIdFromProblem = (unitCode: string, problemOrdinal: string) => {
@@ -412,6 +419,7 @@ export interface CreateFakeUserOptions {
   classId: string;
   userType: UserType;
   userId: string;
+  network?: string;
   offeringId: string;
 }
 
@@ -435,7 +443,7 @@ const getFakeTeacherClassHashes = (appMode: AppMode, classId: string) => {
 };
 
 export const createFakeUser = (options: CreateFakeUserOptions) => {
-  const {appMode, classId, userType, userId, offeringId} = options;
+  const {appMode, classId, userType, userId, network, offeringId} = options;
   const className = `${appMode === "demo" ? "Demo" : "QA"} Class ${classId}`;
   if (userType === "student") {
     const student: StudentUser = {
@@ -461,6 +469,7 @@ export const createFakeUser = (options: CreateFakeUserOptions) => {
       lastName: `${userId}`,
       fullName: `Teacher ${userId}`,
       initials: `T${userId}`,
+      network,
       className,
       classHash: getFakeClassHash(appMode, classId),
       demoClassHashes: getFakeTeacherClassHashes(appMode, classId),
@@ -475,14 +484,18 @@ export interface CreateFakeAuthenticationOptions {
   classId: string;
   userType: UserType;
   userId: string;
+  network?: string;
   unitCode: string;
   problemOrdinal: string;
 }
 
 export const createFakeAuthentication = (options: CreateFakeAuthenticationOptions) => {
-  const {appMode, classId, userType, userId, unitCode, problemOrdinal} = options;
+  const {appMode, classId, userType, userId, network: _network, unitCode, problemOrdinal} = options;
+  const network = userType === "teacher"
+                    ? _network || (parseInt(userId, 10) > 1 ? "demo-network" : undefined) || undefined
+                    : undefined;
   const offeringId = createOfferingIdFromProblem(unitCode, problemOrdinal);
-  const authenticatedUser = createFakeUser({appMode, classId, userType, userId, offeringId});
+  const authenticatedUser = createFakeUser({appMode, classId, userType, network, userId, offeringId});
   const classInfo: ClassInfo = {
     name: authenticatedUser.className,
     classHash: authenticatedUser.classHash,
@@ -507,6 +520,8 @@ export const createFakeAuthentication = (options: CreateFakeAuthenticationOption
         classId,
         userType: "teacher",
         userId: `${i}`,
+        // teacher 1 is solo; others are networked
+        network: i > 1 ? "demo-network" : undefined,
         offeringId
       }) as TeacherUser
     );

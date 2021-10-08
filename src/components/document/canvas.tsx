@@ -1,6 +1,7 @@
 import { each } from "lodash";
 import { inject, observer } from "mobx-react";
 import React from "react";
+import { OptionalLoadingSpinner } from "./optional-loading-spinner";
 import { BaseComponent } from "../base";
 import { DocumentContentComponent } from "./document-content";
 import { DocumentModelType } from "../../models/document/document";
@@ -96,14 +97,18 @@ export class CanvasComponent extends BaseComponent<IProps> {
     const {content, document, ...others} = this.props;
     const documentContent = document ? document.content : content;
     const documentId = document?.key;
+    const typeClass = document?.type === "planning" ? "planning-doc" : "";
 
     if (documentContent) {
       return (
-        <DocumentContentComponent content={documentContent} documentId={documentId} {...others} />
+        <DocumentContentComponent content={documentContent}
+                                  documentId={documentId}
+                                  typeClass={typeClass}
+                                  {...others} />
       );
     }
     else {
-      return null;
+      return <OptionalLoadingSpinner document={document} />;
     }
   }
 

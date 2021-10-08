@@ -1,8 +1,10 @@
-import RightNav from '../../../../support/elements/common/RightNav';
+// import PrimaryWorkspace from '../../../../support/elements/common/PrimaryWorkspace';
 import Canvas from '../../../../support/elements/common/Canvas';
 import ClueCanvas from '../../../../support/elements/clue/cCanvas';
+import ResourcesPanel from "../../../../support/elements/clue/ResourcesPanel";
 
-const rightNav = new RightNav;
+// const primaryWorkspace = new PrimaryWorkspace;
+const resourcesPanel = new ResourcesPanel;
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 const problemSubTabTitles = ['Introduction', 'Initial Challenge', 'What If', 'Now What'];
@@ -26,7 +28,8 @@ describe('Test nav panel tabs', function () {
   describe("Investigation Tab tests", function () {
     describe("Problem tabs", function () {
       it('verify tab names are visible', () => {
-        cy.openTab("problems");
+        cy.get(".collapsed-resources-tab.my-work").click();
+        cy.openTopTab("problems");
         cy.get(".problem-tabs .tab-list .prob-tab").each(($tab, index, $tabList) => {
           expect($tab.text()).to.contain(problemSubTabTitles[index]);
         });
@@ -44,7 +47,6 @@ describe('Test nav panel tabs', function () {
       it('verify publish Investigation', function () {
         canvas.publishCanvas("investigation");
         cy.openTopTab('class-work');
-        // cy.openSection('class-work','published');
         cy.getCanvasItemTitle('problem-workspaces').should('contain', this.title);
       });
       it('verify make a copy of a canvas', function () {
@@ -90,12 +92,13 @@ describe('Test nav panel tabs', function () {
     });
     describe('Starred section', function () {
       before(() => {
-        cy.openTab('my-work');
+        cy.get(".collapsed-resources-tab.my-work").click();
+        cy.openTopTab('my-work');
         cy.openSection("my-work", "workspaces");
-        rightNav.starCanvasItem('my-work', 'workspaces', copyDocumentTitle);
+        resourcesPanel.starCanvasItem('my-work', 'workspaces', copyDocumentTitle);
       });
       it('verify starred document star is highlighted', function () {
-        rightNav.getCanvasStarIcon('my-work', 'workspaces', copyDocumentTitle).should('have.class', 'starred');
+        resourcesPanel.getCanvasStarIcon('my-work', 'workspaces', copyDocumentTitle).should('have.class', 'starred');
       });
       it('verify starred document appears in the Starred section', function () {
         cy.openSection('my-work', 'starred');
@@ -136,7 +139,8 @@ describe('Test nav panel tabs', function () {
 
   describe('Class Work tab tests', function () { //uses publish documents from earlier tests
     before(() => {
-      cy.openTab('class-work');
+      cy.get(".collapsed-resources-tab.class-work").click();
+      cy.openTopTab('class-work');
     });
     describe('Open correct canvas from correct section', function () {
       it('verify open published canvas from Workspace list', function () { //this assumes there are published work

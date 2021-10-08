@@ -1,4 +1,4 @@
-import mock from "xhr-mock";
+import mockXhr from "xhr-mock";
 import { Logger, LogEventName } from "./logger";
 import { DocumentModel, DocumentModelType } from "../models/document/document";
 import { ProblemDocument } from "../models/document/document-types";
@@ -7,12 +7,15 @@ import { DocumentContentModel } from "../models/document/document-content";
 import { InvestigationModel } from "../models/curriculum/investigation";
 import { IStores, createStores } from "../models/stores/stores";
 import { UserModel } from "../models/stores/user";
-import { WorkspaceModel, ProblemWorkspace, WorkspaceModelType } from "../models/stores/workspace";
+import { WorkspaceModel, ProblemWorkspace, WorkspaceModelType, LearningLogWorkspace } from "../models/stores/workspace";
 import { defaultGeometryContent } from "../models/tools/geometry/geometry-content";
 import { JXGChange } from "../models/tools/geometry/jxg-changes";
 import { defaultTextContent } from "../models/tools/text/text-content";
 import { IDragTileItem, ToolTileModel } from "../models/tools/tool-tile";
 import { createSingleTileContent } from "../utilities/test-utils";
+import { ProblemModelType } from "../models/curriculum/problem";
+import { UIModel } from "../models/stores/ui";
+import { ENavTab } from "../models/view/nav-tabs";
 
 const investigation = InvestigationModel.create({
   ordinal: 1,
@@ -27,33 +30,138 @@ const problem = investigation.getProblem(1);
 // }));
 
 describe("uninitialized logger", () => {
-  it("throws exception if not initialized", () => {
-    expect(() => Logger.Instance).toThrow();
-  });
-});
-
-describe("logger", () => {
   let stores: IStores;
 
   beforeEach(() => {
-    mock.setup();
+    mockXhr.setup();
+    stores = createStores({
+      appMode: "authed",
+      appConfig: AppConfigModel.create({ appName: "TestLogger"}),
+      user: UserModel.create({id: "0", portal: "test"})
+    });
+  });
+
+  afterEach(() => {
+    mockXhr.reset();
+    mockXhr.teardown();
+  });
+
+  it("throws exception if not initialized", () => {
+    expect(() => Logger.Instance).toThrow();
+  });
+
+  it("does not log when not initialized", (done) => {
+    const TEST_LOG_MESSAGE = 999;
+    const mockPostHandler = jest.fn((req, res) => {
+      expect(mockPostHandler).toHaveBeenCalledTimes(1);
+      done();
+      return res.status(201);
+    });
+    mockXhr.use(mockPostHandler);
+
+    // should not log since we're not initialized
+    Logger.log(TEST_LOG_MESSAGE);
+    Logger.logTileEvent(TEST_LOG_MESSAGE);
+
+    Logger.initializeLogger(stores);
+
+    // should log now that we're initialized
+    Logger.logTileEvent(TEST_LOG_MESSAGE);
+  });
+});
+
+describe("dev/qa/test logger with DEBUG_LOGGER false", () => {
+  let stores: IStores;
+
+  beforeEach(() => {
+    mockXhr.setup();
     stores = createStores({
       appMode: "test",
       appConfig: AppConfigModel.create({ appName: "TestLogger"}),
-      user: UserModel.create({id: "0", portal: "test"})
+      ui: UIModel.create({
+        activeNavTab: ENavTab.kStudentWork,
+        problemWorkspace: {
+          type: ProblemWorkspace,
+          mode: "1-up"
+        },
+        learningLogWorkspace: {
+          type: LearningLogWorkspace,
+          mode: "1-up"
+        },
+      }),
+      user: UserModel.create({id: "0", type: "teacher", portal: "test"})
     });
 
     Logger.initializeLogger(stores, investigation, problem);
   });
 
   afterEach(() => {
-    mock.teardown();
+    mockXhr.reset();
+    mockXhr.teardown();
+  });
+
+  it("does not log in dev/qa/test modes", (done) => {
+    const TEST_LOG_MESSAGE = 999;
+    const mockPostHandler = jest.fn((req, res) => {
+      expect(mockPostHandler).toHaveBeenCalledTimes(1);
+      done();
+      return res.status(201);
+    });
+    mockXhr.use(mockPostHandler);
+
+    // should not be logged due to mode
+    Logger.log(TEST_LOG_MESSAGE);
+
+    // should be logged
+    Logger.isLoggingEnabled = true;
+    Logger.log(TEST_LOG_MESSAGE);
+  });
+
+});
+
+describe("authed logger", () => {
+  let stores: IStores;
+
+  beforeEach(() => {
+    mockXhr.setup();
+    stores = createStores({
+      appMode: "authed",
+      appConfig: AppConfigModel.create({ appName: "TestLogger"}),
+      user: UserModel.create({
+        id: "0", type: "student", portal: "test",
+        loggingRemoteEndpoint: "foo"
+      })
+    });
+
+    Logger.initializeLogger(stores, investigation, problem);
+  });
+
+  afterEach(() => {
+    mockXhr.teardown();
+  });
+
+  describe("updateProblem()", () => {
+
+    const _investigation = InvestigationModel.create({
+      ordinal: 2,
+      title: "Investigation 2",
+      problems: [ { ordinal: 1, title: "Problem 2.1" } ]
+    });
+    const _problem = investigation.getProblem(1) as ProblemModelType;
+
+    it("updateProblem()", () => {
+      Logger.updateProblem(_investigation, _problem);
+
+      expect((Logger as any)._instance.investigationTitle = "Investigation 2");
+      expect((Logger as any)._instance.problemTitle = "Problem 2.1");
+    });
+
   });
 
   describe ("tile CRUD events", () => {
 
     it("can log a simple message with all the appropriate properties", (done) => {
-      mock.post(/.*/, (req, res) => {
+      mockXhr.post(/.*/, (req, res) => {
         expect(req.header("Content-Type")).toEqual("application/json; charset=UTF-8");
 
         const request = JSON.parse(req.body());
@@ -78,7 +186,7 @@ describe("logger", () => {
     it("can log tile creation", (done) => {
       const tile = ToolTileModel.create({ content: defaultTextContent() });
 
-      mock.post(/.*/, (req, res) => {
+      mockXhr.post(/.*/, (req, res) => {
         const request = JSON.parse(req.body());
 
         expect(request.event).toBe("CREATE_TILE");
@@ -108,7 +216,7 @@ describe("logger", () => {
       });
       stores.documents.add(document);
 
-      mock.post(/.*/, (req, res) => {
+      mockXhr.post(/.*/, (req, res) => {
         const request = JSON.parse(req.body());
 
         expect(request.event).toBe("CREATE_TILE");
@@ -125,7 +233,7 @@ describe("logger", () => {
         return res.status(201);
       });
 
-      document.content.userAddTile("text");
+      document.content?.userAddTile("text");
     });
 
     it("can log copying tiles between documents", (done) => {
@@ -152,7 +260,7 @@ describe("logger", () => {
       stores.documents.add(sourceDocument);
       stores.documents.add(destinationDocument);
 
-      mock.post(/.*/, (req, res) => {
+      mockXhr.post(/.*/, (req, res) => {
         const request = JSON.parse(req.body());
 
         expect(request.event).toBe("COPY_TILE");
@@ -174,7 +282,7 @@ describe("logger", () => {
         return res.status(201);
       });
 
-      const tileToCopy = sourceDocument.content.firstTile!;
+      const tileToCopy = sourceDocument.content!.firstTile!;
 
       const copyTileInfo: IDragTileItem = {
         rowIndex: 0,
@@ -184,7 +292,7 @@ describe("logger", () => {
         tileType: tileToCopy.content.type
       };
 
-      destinationDocument.content.userCopyTiles([copyTileInfo], { rowInsertIndex: 0 });
+      destinationDocument.content!.userCopyTiles([copyTileInfo], { rowInsertIndex: 0 });
     });
 
   });
@@ -194,7 +302,7 @@ describe("logger", () => {
       const tile = ToolTileModel.create({ content: defaultGeometryContent() });
       const change: JXGChange = { operation: "create", target: "point" };
 
-      mock.post(/.*/, (req, res) => {
+      mockXhr.post(/.*/, (req, res) => {
         const request = JSON.parse(req.body());
 
         expect(request.event).toBe("GRAPH_TOOL_CHANGE");
@@ -241,7 +349,7 @@ describe("logger", () => {
     });
 
     it("can log opening the primary document", (done) => {
-      mock.post(/.*/, (req, res) => {
+      mockXhr.post(/.*/, (req, res) => {
         const request = JSON.parse(req.body());
 
         expect(request.event).toBe("VIEW_SHOW_DOCUMENT");
@@ -256,7 +364,7 @@ describe("logger", () => {
     });
 
     it("can log opening the comparison document", (done) => {
-      mock.post(/.*/, (req, res) => {
+      mockXhr.post(/.*/, (req, res) => {
         const request = JSON.parse(req.body());
 
         expect(request.event).toBe("VIEW_SHOW_COMPARISON_DOCUMENT");
@@ -271,7 +379,7 @@ describe("logger", () => {
     });
 
     it("can log toggling the comparison panel", (done) => {
-      mock.post(/.*/, (req, res) => {
+      mockXhr.post(/.*/, (req, res) => {
         const request = JSON.parse(req.body());
 
         expect(request.event).toBe("VIEW_SHOW_COMPARISON_PANEL");
@@ -284,7 +392,7 @@ describe("logger", () => {
     });
 
     it("can log toggling of mode", (done) => {
-      mock.post(/.*/, (req, res) => {
+      mockXhr.post(/.*/, (req, res) => {
         const request = JSON.parse(req.body());
 
         expect(request.event).toBe("VIEW_ENTER_FOUR_UP");

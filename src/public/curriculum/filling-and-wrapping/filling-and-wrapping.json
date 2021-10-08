@@ -56,6 +56,38 @@
       "placeholder": "Work area for\nMathematical Reflection 4 section"
     }
   },
+  "planningDocument": {
+    "enable": "teacher",
+    "default": true,
+    "sectionInfo": {
+      "overview": {
+        "initials": "OV",
+        "title": "Overview",
+        "placeholder": "Work area for\nOverview section"
+      },
+      "launch": {
+        "initials": "LC",
+        "title": "Launch",
+        "placeholder": "Work area for\nLaunch section"
+      },
+      "explore": {
+        "initials": "EX",
+        "title": "Explore",
+        "placeholder": "Work area for\nExplore section"
+      },
+      "summarize": {
+        "initials": "SM",
+        "title": "Summarize",
+        "placeholder": "Work area for\nSummarize section"
+      }
+    },
+    "sections": [
+      { "type": "overview" },
+      { "type": "launch" },
+      { "type": "explore" },
+      { "type": "summarize" }
+    ]
+  },
   "defaultStamps": [
   ],
   "investigations": [
@@ -591,7 +623,7 @@
                         "In this unit we are exploring surface area and volume of three-dimensional shapes, including right prisms and how these measurements are used to solve real world problems. At the end of this Investigation, <em>what do you know about surface area and volume of three-dimensional figures?</em>"
                       ]
                     }
-                  } 
+                  }
                 ]
               },
               "supports": [ ]
@@ -608,7 +640,7 @@
                         "In this unit we are exploring surface area and volume of three-dimensional shapes, including right prisms and how these measurements are used to solve real world problems. At the end of this Investigation, <em>what do you know about surface area and volume of three-dimensional figures?</em>"
                       ]
                     }
-                  } 
+                  }
                 ]
               },
               "supports": [ ]
@@ -625,7 +657,7 @@
                        "In this unit we are exploring surface area and volume of three-dimensional shapes, including right prisms and how these measurements are used to solve real world problems. At the end of this Investigation, <em>what do you know about surface area and volume of three-dimensional figures?</em>"
                       ]
                     }
-                  } 
+                  }
                 ]
               },
               "supports": [ ]
@@ -642,7 +674,7 @@
                        "In this unit we are continuing to explore rational numbers, including operations and their properties with positive, negative numbers and zero and how to recognize and use these operations to solve problems. At the end of this Investigation, <em>What do you know about rational numbers and their operations?</em>"
                       ]
                     }
-                  } 
+                  }
                 ]
               },
               "supports": [ ]

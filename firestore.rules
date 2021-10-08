@@ -4,6 +4,14 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // all documents are inaccessible unless allowed by rules below
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function exists(s) {
+      return (s != null) && (s != "");
+    }
 
     function isAuthed() {
       return request.auth != null;
@@ -37,18 +45,82 @@ service cloud.firestore {
       return hasUserId() && hasRole("teacher");
     }
 
-    function requestMatchUserId() {
+    // uid of submitted document must match user's platform_user_id
+    function userIsRequestUser() {
       return isAuthed() &&
         string(request.auth.token.platform_user_id) == request.resource.data.uid;
     }
 
-    function docMatchUserId() {
+    // user's platform_user_id must be in submitted document's list of teachers
+    function userInRequestTeachers() {
+      return isAuthed() &&
+        string(request.auth.token.platform_user_id) in request.resource.data.teachers;
+    }
+
+    // uid of requested document must match user's platform_user_id
+    function userIsResourceUser() {
       return isAuthed() &&
         string(request.auth.token.platform_user_id) == resource.data.uid;
     }
 
-    function classInClasses() {
+    // user's platform_user_id must be in requested document's list of teachers
+    function userInResourceTeachers() {
+      return isAuthed() &&
+        string(request.auth.token.platform_user_id) in resource.data.teachers;
+    }
+
+    // user's class_hash must be in submitted document's list of classes
+    function classInRequestClasses() {
+      return isAuthed() && request.auth.token.class_hash in request.resource.data.classes;
+    }
+
+    // user's class_hash must be submitted document's context_id
+    function classIsRequestContextId() {
+      return isAuthed() && request.auth.token.class_hash == request.resource.data.context_id;
+    }
+
+    // user's class_hash must be in requested document's list of classes
+    function classInResourceClasses() {
       return isAuthed() && request.auth.token.class_hash in resource.data.classes;
+    }
+
+    function isValidCurriculumCreateRequest() {
+      return userIsRequestUser() &&
+              request.resource.data.keys().hasAll(["uid", "unit", "problem", "section", "path", "network"]);
+    }
+
+    function isValidDocumentCreateRequest() {
+      return userInRequestTeachers() && classIsRequestContextId() &&
+              request.resource.data.keys().hasAll(["uid", "network", "type", "key", "createdAt"]);
+    }
+
+    function preservesReadOnlyDocumentFields() {
+      let readOnlyFieldsSet = ["uid", "network", "type", "key", "createdAt"].toSet();
+      let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
+      return !affectedFieldsSet.hasAny(readOnlyFieldsSet);
+    }
+
+    function isValidDocumentUpdateRequest() {
+      return userInResourceTeachers() && preservesReadOnlyDocumentFields();
+    }
+
+    function isValidSupportCreateRequest() {
+      return userIsRequestUser() &&
+              classInRequestClasses() &&
+              classIsRequestContextId() &&
+              (request.resource.data.content != null) &&
+              (request.resource.data.type == "supportPublication");
+    }
+
+    function preservesReadOnlySupportFields() {
+      let readOnlyFieldsSet = ["context_id", "createdAt", "network", "originDoc", "platform_id",
+                                "problem", "resource_link_id", "resource_url", "type", "uid"].toSet();
+      let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
+      return !affectedFieldsSet.hasAny(readOnlyFieldsSet);
+    }
+
+    function isValidSupportUpdateRequest() {
+      return userIsResourceUser() && preservesReadOnlySupportFields();
     }
 
     //
@@ -57,14 +129,228 @@ service cloud.firestore {
     match /authed/{portal} {
       allow read, write: if isAuthedTeacher();
 
-        match /mcsupports/{docId} {
-          // any portal-authenticated teacher can create supports
-          allow create: if isAuthedTeacher() && requestMatchUserId();
-          // teachers can only update/delete their own supports
-          allow update, delete: if requestMatchUserId() && docMatchUserId();
-          // teachers and students in appropriate classes can read supports
-          allow read: if docMatchUserId() || classInClasses();
+      // return list of networks available to the current teacher
+      function getTeacherNetworks() {
+        let platformUserId = string(request.auth.token.platform_user_id);
+        return get(/databases/$(database)/documents/authed/$(portal)/users/$(platformUserId)).data.networks;
+      }
+
+      // check whether the document being created/updated is associated with one of this teacher's networks
+      function requestInTeacherNetworks() {
+        return request.resource.data.network in getTeacherNetworks();
+      }
+
+      // check whether the document being read is associated with one of this teacher's networks
+      function resourceInTeacherNetworks() {
+        return resource.data.network in getTeacherNetworks();
+      }
+
+      match /users/{userId} {
+        // teachers can read their own user documents
+        allow read: if isAuthedTeacher() && (string(request.auth.token.platform_user_id) == userId);
+        // currently, only admins can write user information
+        allow write: if false;
+      }
+
+      function isValidClassCreateRequest() {
+        let requiredFields = ["id", "name", "uri", "context_id", "teacher", "teachers", "network"];
+        return userInRequestTeachers() && requestInTeacherNetworks() &&
+                request.resource.data.keys().hasAll(requiredFields);
+      }
+
+      function preservesReadOnlyClassFields() {
+        let readOnlyFieldsSet = ["id", "uri", "context_id", "network"].toSet();
+        let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
+        return !affectedFieldsSet.hasAny(readOnlyFieldsSet);
+      }
+
+      function isValidClassUpdateRequest() {
+        return userInRequestTeachers() && userInResourceTeachers() &&
+                requestInTeacherNetworks() && preservesReadOnlyClassFields();
+      }
+
+      match /classes/{classId} {
+        // portal-authenticated teachers can create valid classes
+        allow create: if isAuthedTeacher() && isValidClassCreateRequest();
+        // teachers can only update their own classes and only if they're valid
+        allow update: if isAuthedTeacher() && isValidClassUpdateRequest();
+        // we don't support deleting classes at this time
+        allow delete: if false;
+        // teachers can read their own classes or any class in their network
+        allow read: if isAuthedTeacher() && (userInRequestTeachers() || resourceInTeacherNetworks());
+      }
+
+      function isValidOfferingCreateRequest() {
+        let requiredFields = ["id", "name", "uri", "context_id", "teachers",
+                              "unit", "problem", "problemPath", "network"];
+        return userInRequestTeachers() && requestInTeacherNetworks() &&
+                request.resource.data.keys().hasAll(requiredFields);
+      }
+
+      function preservesReadOnlyOfferingFields() {
+        let readOnlyFieldsSet = ["id", "uri", "context_id", "unit",
+                                "problem", "problemPath", "network"].toSet();
+        let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
+        return !affectedFieldsSet.hasAny(readOnlyFieldsSet);
+      }
+
+      function isValidOfferingUpdateRequest() {
+        // teachers can update the list of teachers for the offering,
+        // but only if they were already a teacher and are still a teacher
+        return userInRequestTeachers() && userInResourceTeachers() &&
+                requestInTeacherNetworks() && preservesReadOnlyOfferingFields();
+      }
+
+      match /offerings/{offeringId} {
+        // portal-authenticated teachers can create valid offerings
+        allow create: if isAuthedTeacher() && isValidOfferingCreateRequest();
+        // teachers can only update their own documents and only if they're valid
+        allow update: if isAuthedTeacher() && isValidOfferingUpdateRequest();
+        // we don't support deleting offerings at this time
+        allow delete: if false;
+        // teachers can read offerings in their network
+        allow read: if isAuthedTeacher() && resourceInTeacherNetworks();
+      }
+
+      match /curriculum/{pathId} {
+        // portal-authenticated teachers can create valid curriculum documents
+        allow create: if isAuthedTeacher() && isValidCurriculumCreateRequest();
+        // curriculum documents can't be updated or deleted
+        allow update, delete: if false;
+        // teachers can read their own curriculum documents or others in their network
+        allow read: if isAuthedTeacher() && (userIsResourceUser() || resourceInTeacherNetworks());
+
+        // return the author/owner of the specified (curriculum) document
+        function getCurriculumOwner() {
+          return get(/databases/$(database)/documents/authed/$(portal)/curriculum/$(pathId)).data.uid;
         }
+
+        // return the network with which the specified (curriculum) document is associated
+        function getCurriculumNetwork() {
+          return get(/databases/$(database)/documents/authed/$(portal)/curriculum/$(pathId)).data.network;
+        }
+
+        // check whether the (curriculum) document is associated with one of the teacher's networks
+        function curriculumInTeacherNetworks() {
+          let curriculumNetwork = getCurriculumNetwork();
+          return exists(curriculumNetwork) && (curriculumNetwork in getTeacherNetworks());
+        }
+
+        // check whether the teacher owns/created the curriculum document
+        function teacherIsCurriculumOwner() {
+          let curriculumOwner = getCurriculumOwner();
+          return string(request.auth.token.platform_user_id) == curriculumOwner;
+        }
+
+        // teachers can access (curriculum) documents that they own or are associated with one of their networks
+        function teacherCanAccessCurriculum() {
+          return isAuthedTeacher() && (teacherIsCurriculumOwner() || curriculumInTeacherNetworks());
+        }
+
+        function isValidCommentCreateRequest() {
+          return userIsRequestUser() &&
+                  // comments network must match network of parent document
+                  (request.resource.data.network == getCurriculumNetwork()) &&
+                  request.resource.data.keys().hasAll(["name", "createdAt", "content", "network"]);
+        }
+
+        function preservesReadOnlyCommentFields() {
+          let readOnlyFieldsSet = ["uid", "network", "createdAt", "tileId"].toSet();
+          let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
+          return !affectedFieldsSet.hasAny(readOnlyFieldsSet);
+        }
+
+        function isValidCommentUpdateRequest() {
+          return userIsRequestUser() && preservesReadOnlyCommentFields();
+        }
+
+        match /comments/{commentId} {
+          // portal-authenticated teachers with access to the document can create valid comments
+          allow create: if teacherCanAccessCurriculum() && isValidCommentCreateRequest();
+          // teachers can only update their own comments and only if they're valid
+          allow update: if teacherCanAccessCurriculum() && isValidCommentUpdateRequest();
+          // teachers can only delete their own comments
+          allow delete: if teacherCanAccessCurriculum() && userIsResourceUser();
+          // teachers with access to the curriculum document can read the comments
+          allow read: if teacherCanAccessCurriculum();
+        }
+      }
+
+      match /documents/{docId} {
+        // portal-authenticated teachers can create valid documents
+        allow create: if isAuthedTeacher() && isValidDocumentCreateRequest();
+        // teachers can only update their own documents and only if they're valid
+        allow update: if isAuthedTeacher() && isValidDocumentUpdateRequest();
+        // teachers can only delete their own documents
+        allow delete: if isAuthedTeacher() && userIsResourceUser();
+        // teachers can read their own documents or other documents in their network
+        allow read: if isAuthedTeacher() && (userInResourceTeachers() || resourceInTeacherNetworks());
+
+        // return the list of teachers associated with the specified document
+        function getDocumentTeachers() {
+          return get(/databases/$(database)/documents/authed/$(portal)/documents/$(docId)).data.teachers;
+        }
+
+        // return the network with which the specified document is associated
+        function getDocumentNetwork() {
+          return get(/databases/$(database)/documents/authed/$(portal)/documents/$(docId)).data.network;
+        }
+
+        // check whether the current teacher is one of the teachers associated with the document
+        function teacherInDocumentTeachers() {
+          return isAuthedTeacher() && (request.auth.uid in getDocumentTeachers());
+        }
+
+        // check whether the document's network corresponds to one of the teacher's networks
+        function documentInTeacherNetworks() {
+          let docNetwork = getDocumentNetwork();
+          return exists(docNetwork) && (docNetwork in getTeacherNetworks());
+        }
+
+        // check whether the teacher can access the document
+        function teacherCanAccessDocument() {
+          return teacherInDocumentTeachers() || documentInTeacherNetworks();
+        }
+
+        function isValidCommentCreateRequest() {
+          return userIsRequestUser() &&
+                  // comment's network must match network of parent document
+                  (request.resource.data.network == getDocumentNetwork()) &&
+                  request.resource.data.keys().hasAll(["name", "createdAt", "content"]);
+        }
+
+        function preservesReadOnlyCommentFields() {
+          let readOnlyFieldsSet = ["uid", "network", "createdAt", "tileId"].toSet();
+          let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
+          return !affectedFieldsSet.hasAny(readOnlyFieldsSet);
+        }
+
+        function isValidCommentUpdateRequest() {
+          return userIsRequestUser() && preservesReadOnlyCommentFields();
+        }
+
+        match /comments/{commentId} {
+          // portal-authenticated teachers with access to the document can create valid comments
+          allow create: if isAuthedTeacher() && teacherCanAccessDocument() && isValidCommentCreateRequest();
+          // teachers can only update their own comments and only if they're valid
+          allow update: if isAuthedTeacher() && teacherCanAccessDocument() && isValidCommentUpdateRequest();
+          // teachers can only delete their own comments
+          allow delete: if isAuthedTeacher() && teacherCanAccessDocument() && userIsResourceUser();
+          // only teachers that "own" the document can read the comments (for now)
+          allow read: if isAuthedTeacher() && teacherCanAccessDocument();
+        }
+      }
+
+      match /mcsupports/{docId} {
+        // portal-authenticated teachers can create valid supports
+        allow create: if isAuthedTeacher() && isValidSupportCreateRequest();
+        // teachers can only update their own supports and only if they're valid
+        allow update: if isAuthedTeacher() && isValidSupportUpdateRequest();
+        // teachers can only delete their own supports
+        allow delete: if isAuthedTeacher() && userIsResourceUser();
+        // teachers and students in appropriate classes can read supports
+        allow read: if userIsResourceUser() || classInResourceClasses();
+      }
     }
 
     //

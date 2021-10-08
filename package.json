@@ -1,6 +1,6 @@
 {
   "name": "collaborative-learning",
-  "version": "1.9.0",
+  "version": "2.0.0-pre.1",
   "description": "Collaborative Learning environment",
   "main": "index.js",
   "config": {
@@ -23,7 +23,8 @@
     "testPathIgnorePatterns": [
       "/node_modules/",
       "/cypress/",
-      "/functions/"
+      "/firebase-test/",
+      "/functions/test/(?!(shared\\.test\\.ts)$).*$"
     ],
     "coveragePathIgnorePatterns": [
       "/node_modules/",
@@ -48,7 +49,6 @@
     "report-dir": "coverage-cypress"
   },
   "scripts": {
-    "start": "webpack-dev-server --inline --hot --content-base dist/",
     "build": "npm-run-all lint:build clean build:webpack",
     "build:debug": "npm-run-all lint clean build:webpack",
     "build:webpack": "cross-env NODE_OPTIONS=--max_old_space_size=4096 webpack --mode production",
@@ -62,6 +62,8 @@
     "lint:unused": "tsc --noUnusedLocals --project .",
     "migrate": "node ./migrations/migrate",
     "migrate:debug": "node --inspect-brk ./migrations/migrate",
+    "start": "webpack-dev-server --inline --hot --content-base dist/",
+    "start:secure": "webpack-dev-server --https --inline --hot --content-base dist/ --cert ~/.localhost-ssl/localhost.pem --key ~/.localhost-ssl/localhost.key",
     "test": "jest",
     "test:all": "npm-run-all build test start",
     "test:coverage": "jest --coverage",
@@ -100,6 +102,7 @@
     "@svgr/webpack": "^5.5.0",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^12.0.0",
+    "@testing-library/react-hooks": "^7.0.1",
     "@testing-library/user-event": "^13.1.9",
     "@types/color-string": "^1.5.0",
     "@types/common-tags": "^1.8.0",
@@ -128,7 +131,7 @@
     "copy-webpack-plugin": "^6.4.1",
     "cross-env": "^7.0.3",
     "css-loader": "^5.2.6",
-    "cypress": "^7.6.0",
+    "cypress": "^8.2.0",
     "cypress-commands": "^1.1.0",
     "cypress-file-upload": "^5.0.8",
     "enzyme": "^3.11.0",
@@ -149,6 +152,7 @@
     "istanbul-instrumenter-loader": "^3.0.1",
     "istanbul-lib-coverage": "^3.0.0",
     "jest": "^27.0.6",
+    "jest-fetch-mock": "^3.0.3",
     "mini-css-extract-plugin": "^1.6.2",
     "nock": "^13.1.0",
     "node-sass": "^6.0.1",
@@ -199,6 +203,7 @@
     "react-dom-factories": "^1.0.2",
     "react-modal": "^3.14.3",
     "react-modal-hook": "^3.0.0",
+    "react-query": "^3.21.0",
     "react-sizeme": "^3.0.1",
     "react-tabs": "^3.2.2",
     "react-tippy": "^1.4.0",

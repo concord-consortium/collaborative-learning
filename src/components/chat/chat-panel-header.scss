@@ -1,0 +1,124 @@
+@import "../vars";
+
+.chat-panel-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  position: relative;
+  top: 0;
+  height: 34px;
+  padding: 0 0 0 5px;
+  width: 100%;
+  font-weight: bold;
+
+  .chat-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+    cursor: none;
+  }
+
+  .notification-toggle {
+    position: absolute;
+    right: 40px;
+    display: flex;
+    align-items: center;
+
+    .notification-icon {
+      position: relative;
+      width: 32px;
+      height: 26px;
+      border-radius: 5px;
+      border: solid 1.5px $charcoal-light-1;
+      background-color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    // The next rule is commented out, but deliberately not removed,
+    // per: https://www.pivotaltracker.com/story/show/179754830
+    // .new-comment-badge {
+    //   position: absolute;
+    //   top: -3px;
+    //   right: -3px;
+    //   width: 17px;
+    //   height: 17px;
+    //   padding: 2px 6px 3px 5px;
+    //   border: solid 1.5px $workspace-teal-dark-1;
+    //   border-radius: 50%;
+    //   background-color: #5fff32;
+    //   font-size: 10px;
+    //   color: $charcoal-dark-2;
+    //   display: flex;
+    //   align-items: center;
+    //   justify-content: center;
+    //   font-weight: normal;
+    // }
+  }
+
+  .chat-close-button {
+    position: absolute;
+    right: 0;
+    width: 32px;
+    height: 26px;
+    border-radius: 5px;
+    border: none;
+    box-sizing: border-box;
+    background-color: white;
+    background-position: center;
+    cursor: pointer;
+    margin: 4px;
+    &:active {
+      outline: none;
+    }
+    &:focus:not(:focus-visible) {
+      outline: none;
+    }
+    &.problems {
+      background-image: url("../../assets/icons/close/close-problems.svg");
+      background-repeat: no-repeat;
+      &:hover, &:active{
+        background-image: url("../../assets/icons/arrow-back/arrow-back-problems.svg");
+      }
+    }
+    &.student-work {
+      background-image: url("../../assets/icons/close/close-student-work.svg");
+      background-repeat: no-repeat;
+      &:hover, &:active{
+        background-image: url("../../assets/icons/arrow-back/arrow-back-student-work.svg");
+      }
+    }
+    &.my-work {
+      background-image: url("../../assets/icons/close/close-my-work.svg");
+      background-repeat: no-repeat;
+      &:hover, &:active {
+        background-image: url("../../assets/icons/arrow-back/arrow-back-my-work.svg");
+      }
+    }
+    &.class-work {
+      background-image: url("../../assets/icons/close/close-class-work.svg");
+      background-repeat: no-repeat;
+      fill: $classwork-purple;
+      &:hover, &:active  {
+        background-image: url("../../assets/icons/arrow-back/arrow-back-class-work.svg");
+      }
+    }
+    &.supports {
+      background-image: url("../../assets/icons/close/close-supports.svg");
+      background-repeat: no-repeat;
+      fill: $support-blue;
+      &:hover, &:active {
+        background-image: url("../../assets/icons/arrow-back/arrow-back-supports.svg");
+      }
+    }
+    &.teacher-guide {
+      background-image: url("../../assets/icons/close/close-teacher-guide.svg");
+      background-repeat: no-repeat;
+      fill: $support-blue;
+      &:hover, &:active{
+        background-image: url("../../assets/icons/arrow-back/arrow-back-teacher-guide.svg");
+      }
+    }
+  }
+}

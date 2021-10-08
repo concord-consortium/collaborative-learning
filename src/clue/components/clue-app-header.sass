@@ -46,6 +46,10 @@ $member-size: 18px
       flex-shrink: 0
     .problem-dropdown
       height: 40px
+      .header .arrow
+        fill: $workspace-teal-dark-1
+        &.show-list
+          fill: white
   .middle
     display: flex
     align-items: center
@@ -185,6 +189,10 @@ $member-size: 18px
         min-width: 250px
         border-radius: 5px 0 0 5px
         border-right: 0
+        .arrow
+          fill: $workspace-teal-dark-1
+          &.show-list
+            fill: white
 
       .user-contents
         display: flex
@@ -237,15 +245,22 @@ $member-size: 18px
       border-radius: 5px
 
   .toggle-button
+    display: flex
+    align-items: center
+    justify-content: center
     border-style: solid
     border-color: $charcoal-light-1
     border-width: 1.5px 0 1.5px 1.5px
     height: 40px
-    padding: .75em
+    width: 92px
     color: $charcoal-dark-2
     cursor: pointer
     &.selected
       font-weight: bold
-      background-color: $workspace-teal-light-2
+      background-color: $workspace-teal-dark-1
+      color: white
+      border-style: solid
+      border-width: 1.5px 0 1.5px 1.5px
+      border-color: white
     &:last-child
       border-width: 1.5px

@@ -1,17 +1,12 @@
-import { getErrorMessage } from "../utilities/super-agent-helpers";
-import superagent from "superagent";
-import { safeDecodeURI } from "../utilities/js-utils";
-import { QueryParams } from "../utilities/url-params";
-import { AppConfigModelType } from "../models/stores/app-config-model";
-import { IPortalClassOffering, PortalClassOffering } from "../models/stores/user";
 import { sortBy } from "lodash";
 import { parseUrl } from "query-string";
-
-interface IPortalReport {
-  url: string;
-  name: string;
-  id: number;
-}
+import superagent from "superagent";
+import { safeDecodeURI } from "../utilities/js-utils";
+import { getErrorMessage } from "../utilities/super-agent-helpers";
+import { QueryParams } from "../utilities/url-params";
+import { AppConfigModelType } from "../models/stores/app-config-model";
+import { IUserPortalOffering, UserPortalOffering } from "../models/stores/user";
+import { IPortalOffering } from "./portal-types";
 
 const isClueAssignment = (offering: IPortalOffering) => {
   const clueActivityUrlRegex = /collaborative-learning/;
@@ -124,18 +119,6 @@ export const getProblemIdForAuthenticatedUser =
   });
 };
 
-// The portals native format of API returns
-export interface IPortalOffering {
-  id: number;
-  clazz: string;
-  clazz_id: number;
-  clazz_hash?: string;  // added in recent portal versions
-  activity: string;
-  activity_url: string;
-  external_report?: IPortalReport | null;
-  external_reports?: IPortalReport[];
-}
-
 // portal API return from /api/v1/classes/mine
 interface IMineClass {
   uri: string;
@@ -175,7 +158,7 @@ function getUnitCode(url: string, appConfig: AppConfigModelType) {
 export function getPortalClassOfferings(portalOfferings: IPortalOffering[],
                                         appConfig: AppConfigModelType,
                                         urlParams?: QueryParams) {
-  const result: IPortalClassOffering[] = [];
+  const result: IUserPortalOffering[] = [];
   const addOffering = (offering: IPortalOffering) => {
     if (isClueAssignment(offering) && urlParams) {
       let newLocationUrl = "";
@@ -186,10 +169,12 @@ export function getPortalClassOfferings(portalOfferings: IPortalOffering[],
           `&reportType=${urlParams.reportType}` +
           `&token=${urlParams.token}`;
       }
-      result.push(PortalClassOffering.create({
+      result.push(UserPortalOffering.create({
         classId: `${offering.clazz_id}`,
         classHash: offering.clazz_hash || "",
         className: offering.clazz,
+        classUrl: offering.clazz_info_url,
+        teacher: offering.teacher,
         activityTitle: offering.activity,
         activityUrl: safeDecodeURI(offering.activity_url),
         problemOrdinal: getProblemOrdinal(offering.activity_url) || appConfig.defaultProblemOrdinal,
@@ -205,7 +190,7 @@ export function getPortalClassOfferings(portalOfferings: IPortalOffering[],
 
 // Sorts the offerings by class name (alphabetically) and then by problem ordinal
 // within each class.
-function sortOfferings(offerings: IPortalClassOffering[]) {
+function sortOfferings(offerings: IUserPortalOffering[]) {
   const sortedByOrdinals = offerings.sort( (a, b) => {
     return numericOrdinal(a) - numericOrdinal(b);
   });
@@ -215,7 +200,7 @@ function sortOfferings(offerings: IPortalClassOffering[]) {
 // A quick hack to make it easy to compare ordinal values that are actually
 // strings composed of dot-separated numbers, like "2.11". This assumes there
 // are never more than 1,000 problems in an investigation.
-function numericOrdinal(offering: IPortalClassOffering) {
+function numericOrdinal(offering: IUserPortalOffering) {
   const ord = offering.problemOrdinal.split(".");
   return parseInt(ord[0], 10) * 1000 + parseInt(ord[1], 10);
 }

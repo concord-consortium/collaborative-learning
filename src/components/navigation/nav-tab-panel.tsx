@@ -1,20 +1,26 @@
 import { inject, observer } from "mobx-react";
 import React from "react";
-import { BaseComponent, IBaseProps } from "../base";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
+import { BaseComponent, IBaseProps } from "../base";
+import { kDividerMax, kDividerMin } from "../../models/stores/ui-types";
 import { NavTabSpec, ENavTab } from "../../models/view/nav-tabs";
 import { Logger, LogEventName } from "../../lib/logger";
 import { StudentGroupView } from "../document/student-group-view";
 import { ProblemTabContent } from "./problem-tab-content";
 import { DocumentTabContent } from "./document-tab-content";
+import { FocusDocumentTracker } from "./focus-document-tracker";
 import { SupportBadge } from "./support-badge";
+// import { NewCommentsBadge } from "./new-comments-badge";
+import { ChatPanel } from "../chat/chat-panel";
+import ChatIcon from "../../assets/chat-icon.svg";
 
 import "react-tabs/style/react-tabs.css";
 import "./nav-tab-panel.sass";
+import "../themes.scss";
 
 interface IProps extends IBaseProps {
   tabs?: NavTabSpec[];
-  isTeacher: boolean;
+  isResourceExpanded: boolean;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
   onDrop: (e: React.DragEvent<HTMLDivElement>) => void;
 }
@@ -26,6 +32,7 @@ interface IState {
 @inject("stores")
 @observer
 export class NavTabPanel extends BaseComponent<IProps, IState> {
+  private navTabPanelElt: HTMLDivElement | null = null;
 
   constructor(props: IProps) {
     super(props);
@@ -35,36 +42,69 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { tabs } = this.props;
-    const { ui, user, supports } = this.stores;
-    const selectedTabIndex = tabs?.findIndex(t => t.tab === ui.activeNavTab);
+    const { tabs, isResourceExpanded } = this.props;
+    const { ui: { activeNavTab, dividerPosition, focusDocument, showChatPanel, selectedTileIds },
+            user, supports } = this.stores;
+    const selectedTabIndex = tabs?.findIndex(t => t.tab === activeNavTab);
+    const resizePanelWidth = 4;
+    const collapseTabWidth = 44;
+    const resourceWidth = dividerPosition === kDividerMin
+                            ? kDividerMin
+                            : dividerPosition === kDividerMax
+                              ? `calc(100% - ${collapseTabWidth}px - ${resizePanelWidth}px)`
+                              : `calc(${dividerPosition}% - ${resizePanelWidth}px)`;
+    const resourceWidthStyle = {width: resourceWidth};
+    const isChatEnabled = user.isNetworkedTeacher;
+    const openChatPanel = isChatEnabled && showChatPanel;
+    const focusTileId = selectedTileIds?.length === 1 ? selectedTileIds[0] : undefined;
+
     return (
-      <div className={`nav-tab-panel ${ui.navTabContentShown ? "shown" : ""}`}>
-        <Tabs selectedIndex={selectedTabIndex} onSelect={this.handleSelectTab} forceRenderTabPanel={true}>
-          <div className="top-row">
-            <TabList className="top-tab-list">
-              { tabs?.map((tabSpec, index) => {
-                  const tabClass = `top-tab tab-${tabSpec.tab} ${selectedTabIndex === index ? "selected" : ""}`;
-                  return (
-                    <React.Fragment key={tabSpec.tab}>
-                      <Tab className={tabClass}>{tabSpec.label}</Tab>
-                      {(tabSpec.tab === "supports") && <SupportBadge user={user} supports={supports} /> }
-                    </React.Fragment>
-                  );
-                })
+      <div className={`resource-and-chat-panel ${isResourceExpanded ? "shown" : ""}`} style={resourceWidthStyle}>
+        <div className={`nav-tab-panel ${showChatPanel ? "chat-open" : ""}`}
+            ref={elt => this.navTabPanelElt = elt}>
+          <FocusDocumentTracker navTabPanelElt={this.navTabPanelElt} />
+          <Tabs selectedIndex={selectedTabIndex} onSelect={this.handleSelectTab} forceRenderTabPanel={true}>
+            <div className="top-row">
+              <TabList className="top-tab-list">
+                { tabs?.map((tabSpec, index) => {
+                    const tabClass = `top-tab tab-${tabSpec.tab}
+                                      ${selectedTabIndex === index ? "selected" : ""}`;
+                    return (
+                      <React.Fragment key={tabSpec.tab}>
+                        <Tab className={tabClass}>{tabSpec.label}</Tab>
+                        {(tabSpec.tab === "supports") && <SupportBadge user={user} supports={supports} /> }
+                      </React.Fragment>
+                    );
+                  })
+                }
+              </TabList>
+              { isChatEnabled
+                  ? !openChatPanel &&
+                    <div className={`chat-panel-toggle themed ${activeNavTab}`}>
+                      {/* The next line of code is commented out, but deliberately not removed,
+                          per: https://www.pivotaltracker.com/story/show/179754830 */}
+                      {/* <NewCommentsBadge documentKey={focusDocument} /> */}
+                      <ChatIcon
+                        className={`chat-button ${activeNavTab}`}
+                        onClick={this.handleShowChatColumn}
+                      />
+                    </div>
+                  : <button className="close-button" onClick={this.handleCloseResources}/>
               }
-            </TabList>
-            <button className="close-button" onClick={this.handleClose}/>
-          </div>
-          { tabs?.map((tabSpec) => {
-              return (
-                <TabPanel key={tabSpec.tab}>
-                  {this.renderTabContent(tabSpec)}
-                </TabPanel>
-              );
-            })
-          }
-        </Tabs>
+            </div>
+            { tabs?.map((tabSpec) => {
+                return (
+                  <TabPanel key={tabSpec.tab}>
+                    {this.renderTabContent(tabSpec)}
+                  </TabPanel>
+                );
+              })
+            }
+          </Tabs>
+          {showChatPanel &&
+            <ChatPanel user={user} activeNavTab={activeNavTab} focusDocument={focusDocument} focusTileId={focusTileId}
+                        onCloseChatPanel={this.handleShowChatColumn} />}
+        </div>
       </div>
     );
   }
@@ -89,14 +129,16 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
 
   private renderDocuments = (tabSpec: NavTabSpec) => {
     return (
-      <DocumentTabContent tabSpec={tabSpec}/>
+      <DocumentTabContent tabSpec={tabSpec} />
     );
   }
 
   private renderProblem = () => {
     const { user: { isTeacher }, problem: { sections } } = this.stores;
     return (
-      <ProblemTabContent sections={sections} showSolutionsSwitch={isTeacher}/>
+      <ProblemTabContent
+        sections={sections}
+        showSolutionsSwitch={isTeacher}/>
     );
   }
 
@@ -104,7 +146,10 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
     const { user: { isTeacher }, teacherGuide } = this.stores;
     const sections = teacherGuide?.sections;
     return isTeacher && sections && (
-      <ProblemTabContent context={ENavTab.kTeacherGuide} sections={sections} showSolutionsSwitch={false}/>
+      <ProblemTabContent
+        context={ENavTab.kTeacherGuide}
+        sections={sections}
+        showSolutionsSwitch={false}/>
     );
   }
 
@@ -115,6 +160,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
       const tabSpec = tabs[tabIndex];
       if (ui.activeNavTab !== tabSpec.tab) {
         ui.setActiveNavTab(tabSpec.tab);
+        ui.updateFocusDocument();
         const logParameters = {
           tab_name: tabSpec.tab.toString()
         };
@@ -129,9 +175,13 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
     ui.setActiveStudentGroup(groupId);
   }
 
-  private handleClose = () => {
+  private handleShowChatColumn = () => {
     const { ui } = this.stores;
-    ui.toggleNavTabContent(false);
+    ui.toggleShowChatPanel(!ui.showChatPanel);
   }
 
+  private handleCloseResources = () => {
+    const { ui } = this.stores;
+    ui.setDividerPosition(kDividerMin);
+  }
 }

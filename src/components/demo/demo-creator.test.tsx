@@ -2,7 +2,7 @@ import Adapter from "enzyme-adapter-react-16";
 import React from "react";
 
 import { configure, mount } from "enzyme";
-import { DemoCreatorComponment } from "./demo-creator";
+import { DemoCreatorComponent } from "./demo-creator";
 import { createStores, IStores } from "../../models/stores/stores";
 import { DemoModel } from "../../models/stores/demo";
 import { UnitModel } from "../../models/curriculum/unit";
@@ -59,7 +59,7 @@ describe("DemoCreator Component", () => {
   });
 
   it("can render", () => {
-    const wrapper = mount(<DemoCreatorComponment stores={stores} />);
+    const wrapper = mount(<DemoCreatorComponent stores={stores} />);
     expect(wrapper.contains(<h1>Demo Creator</h1>)).toEqual(true);
 
     // test changing classes

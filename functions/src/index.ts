@@ -1,7 +1,10 @@
-
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
+import { getNetworkDocument } from "./get-network-document";
+import { getNetworkResources } from "./get-network-resources";
 import { PortalFirebaseJWTClaims } from "./portal-types";
+import { postDocumentComment } from "./post-document-comment";
+import { validateCommentableDocument } from "./validate-commentable-document";
 
 // set to true to enable additional logging
 const DEBUG = false;
@@ -32,6 +35,32 @@ const firestore = app.firestore();
 
 // contents of context.auth?.token in firebase callable functions
 type IDecodedIdToken = admin.auth.DecodedIdToken & Partial<PortalFirebaseJWTClaims>;
+
+/*
+ * validateCommentableDocument
+ *
+ * Checks whether a specific commentable document exists in firestore and creates it if necessary.
+ * The _v1 suffix allows us to version the API if necessary moving forward.
+ */
+export const validateCommentableDocument_v1 = functions.https.onCall(validateCommentableDocument);
+
+/*
+ * postDocumentComment
+ *
+ * Posts a comment to a document in firestore, adding metadata for the document to firestore if necessary.
+ * The _v1 suffix allows us to version the API if necessary moving forward.
+ */
+export const postDocumentComment_v1 = functions.https.onCall(postDocumentComment);
+
+export const getNetworkDocument_v1 = functions.https.onCall(getNetworkDocument);
+
+export const getNetworkResources_v1 = functions.https.onCall(getNetworkResources);
+
+/*
+ * TODO: Clean up this file so it's just wrapping and forwarding functions defined in their own modules,
+ * the way postDocumentComment() is handled above. I'm leaving things alone for now because I don't want
+ * to get sucked into refactoring/retesting the getImageData() function at this time.
+ */
 
 // relevant contents of multi-class support document in firestore
 interface IFirestoreSupportPublication {

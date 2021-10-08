@@ -97,12 +97,12 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
   private showDropRowHighlight = () => {
     const { document } = this.props;
-    document.content.showPendingInsertHighlight(true);
+    document.content?.showPendingInsertHighlight(true);
   }
 
   private removeDropRowHighlight = () => {
     const { document } = this.props;
-    document.content.showPendingInsertHighlight(false);
+    document.content?.showPendingInsertHighlight(false);
   }
 
   private getUniqueTitle(toolContentInfo: IToolContentInfo) {
@@ -121,7 +121,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const newTileOptions: IDocumentContentAddTileOptions = {
             title: this.getUniqueTitle(toolContentInfo),
             addSidecarNotes: !!toolContentInfo?.addSidecarNotes,
-            insertRowInfo: { rowInsertIndex: document.content.defaultInsertRow }
+            insertRowInfo: { rowInsertIndex: document.content?.defaultInsertRow ?? 0 }
           };
     const rowTile = document.addTile(tool, newTileOptions);
     if (rowTile && rowTile.tileId) {

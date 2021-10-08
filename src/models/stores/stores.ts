@@ -14,11 +14,11 @@ import { LearningLogWorkspace, ProblemWorkspace } from "./workspace";
 import { ClipboardModel, ClipboardModelType } from "./clipboard";
 import { SelectionStoreModel, SelectionStoreModelType } from "./selection";
 import { getSetting } from "./settings";
-
-export type AppMode = "authed" | "dev" | "test" | "demo" | "qa";
+import { AppMode } from "./store-types";
 
 export interface IBaseStores {
   appMode: AppMode;
+  isPreviewing?: boolean;
   appVersion: string;
   appConfig: AppConfigModelType;
   unit: UnitModelType;
@@ -30,6 +30,7 @@ export interface IBaseStores {
   groups: GroupsModelType;
   class: ClassModelType;
   documents: DocumentsModelType;
+  networkDocuments: DocumentsModelType;
   db: DB;
   demo: DemoModelType;
   showDemoCreator: boolean;
@@ -52,6 +53,7 @@ export function createStores(params?: ICreateStores): IStores {
   const demoName = params?.demoName || appConfig.appName;
   const stores: IBaseStores = {
     appMode: params?.appMode || "dev",
+    isPreviewing: params?.isPreviewing || false,
     appVersion: params?.appVersion || "unknown",
     appConfig,
     // for testing, we create a null problem or investigation if none is provided
@@ -68,10 +70,11 @@ export function createStores(params?: ICreateStores): IStores {
         mode: "1-up"
       },
     }),
-    groups: params?.groups || GroupsModel.create({}),
+    groups: params?.groups || GroupsModel.create({ acceptUnknownStudents: params?.isPreviewing }),
     class: params?.class || ClassModel.create({ name: "Null Class", classHash: "" }),
     db: params?.db || new DB(),
     documents: params?.documents || DocumentsModel.create({}),
+    networkDocuments: params?.networkDocuments || DocumentsModel.create({}),
     unit: params?.unit || UnitModel.create({code: "NULL", title: "Null Unit"}),
     demo: params?.demo || DemoModel.create({name: demoName, class: {id: "0", name: "Null Class"}}),
     showDemoCreator: params?.showDemoCreator || false,

@@ -1,5 +1,35 @@
-import { UserModel } from "./user";
+import { UserPortalOffering, UserModel } from "./user";
 import { AuthenticatedUser } from "../../lib/auth";
+import { PortalFirebaseStudentJWT } from "../../lib/portal-types";
+
+describe("UserPortalOffering", () => {
+
+  it("defaults to empty", () => {
+    const offering = UserPortalOffering.create();
+    expect(offering.classId).toBe("");
+    expect(offering.classHash).toBe("");
+    expect(offering.problemPath).toBe("");
+  });
+
+  it("uses override values", () => {
+    const kClassId = "class-id";
+    const kClassHash = "class-hash";
+    const kUnitCode = "unit";
+    const kProblemOrdinal = "2.3";
+    const offering = UserPortalOffering.create({
+                      classId: kClassId,
+                      classHash: kClassHash,
+                      unitCode: kUnitCode,
+                      problemOrdinal: kProblemOrdinal
+                    });
+    expect(offering.classId).toBe(kClassId);
+    expect(offering.classHash).toBe(kClassHash);
+    expect(offering.unitCode).toBe(kUnitCode);
+    expect(offering.problemOrdinal).toBe(kProblemOrdinal);
+    expect(offering.problemPath).toBe(`${kUnitCode}/2/3`);
+  });
+
+});
 
 describe("user model", () => {
 
@@ -9,7 +39,7 @@ describe("user model", () => {
     expect(user.type).toBe("student");
     expect(user.name).toBe("Anonymous User");
     expect(user.className).toBe("");
-    expect(user.latestGroupId).toBe(undefined);
+    expect(user.latestGroupId).toBeUndefined();
     expect(user.id).toBe("0");
   });
 
@@ -71,6 +101,7 @@ describe("user model", () => {
 
   it("can set an authenticated student user", () => {
     const user = UserModel.create();
+    const classHash = "class-hash";
     const authenticatedUser: AuthenticatedUser = {
       type: "student",
       id: "1",
@@ -80,8 +111,9 @@ describe("user model", () => {
       fullName: "Fred Flintstone",
       initials: "FF",
       className: "Bedrock",
-      classHash: "test",
+      classHash,
       offeringId: "1",
+      firebaseJWT: { returnUrl: "https://concord.org/url" } as PortalFirebaseStudentJWT
     };
     user.setAuthenticatedUser(authenticatedUser);
     expect(user.authenticated).toBe(true);
@@ -89,10 +121,19 @@ describe("user model", () => {
     expect(user.name).toBe(authenticatedUser.fullName);
     expect(user.className).toBe(authenticatedUser.className);
     expect(user.latestGroupId).toBe(undefined);
+    expect(user.isStudent).toBe(true);
+    expect(user.isTeacher).toBe(false);
+    expect(user.isNetworkedTeacher).toBe(false);
+    expect(user.classHashesForProblemPath("unit/1/2")).toEqual([classHash]);
   });
 
   it("can set an authenticated teacher user", () => {
     const user = UserModel.create();
+    const classHash = "class-hash";
+    const activityUrl = "https://concord.org/activity";
+    const unitCode = "unit";
+    const problemOrdinal = "3.4";
+    const offering = UserPortalOffering.create({ offeringId: "1", classHash, activityUrl, unitCode, problemOrdinal });
     const authenticatedUser: AuthenticatedUser = {
       type: "teacher",
       id: "1",
@@ -102,14 +143,107 @@ describe("user model", () => {
       fullName: "Fred Flintstone",
       initials: "FF",
       className: "Bedrock",
-      classHash: "test",
+      classHash,
       offeringId: "1",
+      portalClassOfferings: [offering]
     };
     user.setAuthenticatedUser(authenticatedUser);
     expect(user.authenticated).toBe(true);
     expect(user.id).toBe(authenticatedUser.id);
     expect(user.name).toBe(authenticatedUser.fullName);
     expect(user.className).toBe(authenticatedUser.className);
-    expect(user.latestGroupId).toBe(undefined);
+    expect(user.latestGroupId).toBeUndefined();
+    expect(user.isStudent).toBe(false);
+    expect(user.isTeacher).toBe(true);
+    expect(user.isNetworkedTeacher).toBe(false);
+    expect(user.activityUrl).toBe(activityUrl);
+    expect(user.classHashesForProblemPath("unit/3/4")).toEqual([classHash]);
+  });
+
+  it("can set an authenticated teacher user in a network", () => {
+    const user = UserModel.create();
+    const classHash = "class-hash";
+    const activityUrl = "https://concord.org/activity";
+    const unitCode = "unit";
+    const problemOrdinal = "3.4";
+    const offering = UserPortalOffering.create({ offeringId: "1", classHash, activityUrl, unitCode, problemOrdinal });
+    const authenticatedUser: AuthenticatedUser = {
+      type: "teacher",
+      id: "1",
+      portal: "test",
+      firstName: "Fred",
+      lastName: "Flintstone",
+      fullName: "Fred Flintstone",
+      initials: "FF",
+      network: "network",
+      networks: ["network"],
+      className: "Bedrock",
+      classHash,
+      offeringId: "1",
+      portalClassOfferings: [offering]
+    };
+    user.setAuthenticatedUser(authenticatedUser);
+    expect(user.authenticated).toBe(true);
+    expect(user.id).toBe(authenticatedUser.id);
+    expect(user.name).toBe(authenticatedUser.fullName);
+    expect(user.className).toBe(authenticatedUser.className);
+    expect(user.latestGroupId).toBeUndefined();
+    expect(user.isStudent).toBe(false);
+    expect(user.isTeacher).toBe(true);
+    expect(user.isNetworkedTeacher).toBe(true);
+    expect(user.activityUrl).toBe(activityUrl);
+    expect(user.classHashesForProblemPath("unit/3/4")).toEqual([classHash]);
+  });
+
+  it("can set a demo teacher user", () => {
+    const user = UserModel.create();
+    const classHash = "class-hash";
+    const authenticatedUser: AuthenticatedUser = {
+      type: "teacher",
+      id: "1",
+      portal: "test",
+      firstName: "Fred",
+      lastName: "Flintstone",
+      fullName: "Fred Flintstone",
+      initials: "FF",
+      className: "Bedrock",
+      classHash,
+      offeringId: "1",
+      demoClassHashes: [classHash]
+    };
+    user.setAuthenticatedUser(authenticatedUser);
+    expect(user.authenticated).toBe(true);
+    expect(user.id).toBe(authenticatedUser.id);
+    expect(user.name).toBe(authenticatedUser.fullName);
+    expect(user.className).toBe(authenticatedUser.className);
+    expect(user.latestGroupId).toBeUndefined();
+    expect(user.isStudent).toBe(false);
+    expect(user.isTeacher).toBe(true);
+    expect(user.isNetworkedTeacher).toBe(false);
+    expect(user.classHashesForProblemPath("unit/3/4")).toEqual([classHash]);
+
+    user.setNetworks("demo-network", ["demo-network"]);
+    expect(user.isNetworkedTeacher).toBe(true);
+  });
+
+  it("can set connected status", () => {
+    const user = UserModel.create({type: "student"});
+    expect(user.isFirebaseConnected).toBe(false);
+    expect(user.isLoggingConnected).toBe(false);
+    user.setIsFirebaseConnected(true);
+    user.setIsLoggingConnected(true);
+    expect(user.isFirebaseConnected).toBe(true);
+    expect(user.isLoggingConnected).toBe(true);
+  });
+
+  it("can set view timestamps", () => {
+    const user = UserModel.create({type: "student"});
+    expect(user.lastSupportViewTimestamp).toBeUndefined();
+    expect(user.lastStickyNoteViewTimestamp).toBeUndefined();
+    const timestamp = new Date().getTime();
+    user.setLastSupportViewTimestamp(timestamp);
+    user.setLastStickyNoteViewTimestamp(timestamp);
+    expect(user.lastSupportViewTimestamp).toBe(timestamp);
+    expect(user.lastStickyNoteViewTimestamp).toBe(timestamp);
   });
 });

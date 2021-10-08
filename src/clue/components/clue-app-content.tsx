@@ -25,7 +25,7 @@ export class ClueAppContentComponent extends BaseComponent<IProps> {
 
     const panels: IPanelGroupSpec = [{
                     panelId: EPanelId.workspace,
-                    label: "Workspace",
+                    label: "Workspace & Resources",
                     content: <DocumentWorkspaceComponent />
                   }];
     if (user && user.isTeacher) {

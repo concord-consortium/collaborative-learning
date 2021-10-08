@@ -3,10 +3,9 @@
 $list-item-height: 660px
 $list-item-width: 880px
 $list-item-scale: 0.11
-$first-panel-height: 157px
 $section-padding: 6px
 
-.tab-panel-documents-section
+.tab-panel-documents-section, .collapsible-documents-section
   display: flex
   flex-direction: column
   padding: $section-padding
@@ -19,8 +18,9 @@ $section-padding: 6px
     align-content: flex-start
     overflow-y: auto
     &.top-panel
-      height: $first-panel-height
-      border-bottom: solid 1px $charcoal-light-1
+      overflow-y: hidden
+    &.bottom-panel
+      border-top: solid 1px $charcoal-light-1
       overflow-y: hidden
 
     .list-item

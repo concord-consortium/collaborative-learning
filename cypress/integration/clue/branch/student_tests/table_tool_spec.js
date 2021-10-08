@@ -87,19 +87,21 @@ context('Table Tool Tile', function () {
 describe('edit table entries', function () {
   // TODO: Found 1, expected 3
   it('will add content to table', function () {
-    tableToolTile.getTableCell().eq(1).click().type('3{enter}');
-    tableToolTile.getTableCell().eq(2).click();
-    // cy.wait(100);
-    tableToolTile.getTableCell().eq(1).should('contain', '3');
-    tableToolTile.getTableCell().eq(2).type('2.5{enter}');
-    tableToolTile.getTableCell().eq(5).click();
-    // cy.wait(100);
-    tableToolTile.getTableCell().eq(2).should('contain', '2.5');
-    tableToolTile.getTableCell().eq(1).click().type('5{enter}');
-    tableToolTile.getTableCell().eq(5).click();
-    // cy.wait(100);
-    tableToolTile.getTableCell().eq(1).should('contain', '5');
-    tableToolTile.getTableRow().should('have.length', 2);
+    cy.get(".primary-workspace").within((workspace) => {
+      tableToolTile.getTableCell().eq(1).click().type('3{enter}');
+      tableToolTile.getTableCell().eq(2).click();
+      // cy.wait(100);
+      tableToolTile.getTableCell().eq(1).should('contain', '3');
+      tableToolTile.getTableCell().eq(2).type('2.5{enter}');
+      tableToolTile.getTableCell().eq(5).click();
+      // cy.wait(100);
+      tableToolTile.getTableCell().eq(2).should('contain', '2.5');
+      tableToolTile.getTableCell().eq(1).click().type('5{enter}');
+      tableToolTile.getTableCell().eq(5).click();
+      // cy.wait(100);
+      tableToolTile.getTableCell().eq(1).should('contain', '5');
+      tableToolTile.getTableRow().should('have.length', 2);
+    });
   });
   it('will toggle index numbers', function () {
     tableToolTile.getIndexNumberToggle().click();
@@ -117,7 +119,9 @@ describe('edit table entries', function () {
 describe("formulas", function () {
   let formula = "3*pluto+2";
   it('will verify formula modal', function () {
-    tableToolTile.getTableToolbarButton('set-expression').click();
+    cy.get(".primary-workspace").within((workspace) => {
+      tableToolTile.getTableToolbarButton('set-expression').click();
+    });
     cy.get('.modal-title').should('contain', "Set Expression");
     cy.get('.modal-content .prompt select').should('not.exist');
     cy.get('.modal-content .prompt').should('contain', "y2");
@@ -134,9 +138,11 @@ describe("formulas", function () {
       .should('contain', formula);
   });
   it('verify selection of y axis when there is more than one',function(){
-    tableToolTile.getAddColumnButton().click();
-    tableToolTile.renameColumn('y', headerY); //makes it easier to find the correct column header
-    tableToolTile.getTableToolbarButton('set-expression').click();
+    cy.get(".primary-workspace").within((workspace) => {
+      tableToolTile.getAddColumnButton().click();
+      tableToolTile.renameColumn('y', headerY); //makes it easier to find the correct column header
+      tableToolTile.getTableToolbarButton('set-expression').click();
+    });
     cy.get('.modal-title').should('contain', "Set Expression");
     cy.get('.modal-content .prompt select').should('exist');
     cy.get('.modal-content .prompt select').select(headerY);

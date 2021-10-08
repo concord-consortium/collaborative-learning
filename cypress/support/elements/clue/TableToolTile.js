@@ -36,6 +36,10 @@ class TableToolTile{
     getTableCell(){
         return cy.get('.rdg-row .rdg-cell');
     }
+    getTableCellWithColIndex(colIndex, colValue){
+        return cy.get('.rdg-row').contains('.rdg-cell[aria-colindex="' + colIndex + '"]', colValue);
+        // return cy.get('.rdg-row .rdg-cell[aria-colindex=\"' + colIndex + '\"]');
+    }
     enterData(cell, num){
         this.getTableCell().eq(cell).type(num+'{enter}');
     }
@@ -53,7 +57,7 @@ class TableToolTile{
       });
     }
     getTableToolbarButton(button){// ['set-expression']
-      return cy.get(`.primary-workspace .table-toolbar .toolbar-button.${button}`);
+      return cy.get(`.table-toolbar .toolbar-button.${button}`);
     }
 }
 export default TableToolTile;

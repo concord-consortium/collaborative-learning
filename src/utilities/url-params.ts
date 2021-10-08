@@ -1,5 +1,5 @@
 import { parse } from "query-string";
-import { AppMode } from "../models/stores/stores";
+import { AppMode, AppModes } from "../models/stores/store-types";
 import { DBClearLevel } from "../lib/db";
 
 export interface QueryParams {
@@ -42,6 +42,13 @@ export interface QueryParams {
   reportType?: string;
 
   //
+  // teacher network development features
+  //
+
+  // name of teacher network to associate teacher with (until we have a real implementation)
+  network?: string;
+
+  //
   // demo or qa mode parameters
   //
 
@@ -58,26 +65,26 @@ export interface QueryParams {
   qaGroup?: string;
   // db level to clear for qa
   qaClear?: DBClearLevel;
+
+  // direct firebase realtime database access to the emulator
+  firebase?: string; // "emulator" or host:port url
+  // direct firestore access to the emulator
+  firestore?: string; // "emulator" or host:port url
+  // direct firebase function calls to the emulator
+  functions?: string; // "emulator" or host:port url
 }
 
-const params = parse(location.search);
-
-export const DefaultUrlParams: QueryParams = {
-  appMode: "dev",
-  unit: undefined,
-  problem: undefined,
-  token: undefined,
-  domain: undefined,
-  demo: undefined,
-  demoName: undefined,
-  class: undefined,
-  offering: undefined,
-  reportType: undefined,
-  fakeClass: undefined,
-  fakeUser: undefined,
-  qaGroup: undefined,
-  qaClear: undefined,
-  testMigration: undefined,
+export const processUrlParams = (): QueryParams => {
+  const params = parse(location.search);
+  return {
+    ...params,
+    // validate appMode
+    appMode: (typeof params.appMode === "string") && AppModes.includes(params.appMode as AppMode)
+                  ? params.appMode as AppMode
+                  : undefined,  // appMode will be determined internally
+    // allows use of ?demo without a value for demo mode
+    demo: (params.demo !== undefined)
+  };
 };
-                                                    // allows use of ?demo for url
-export const urlParams: QueryParams = { ...params, ...{ demo: typeof params.demo !== "undefined" } };
+
+export const urlParams = processUrlParams();

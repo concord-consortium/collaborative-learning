@@ -24,9 +24,18 @@ class GraphToolTile{
     getGraph(workspaceClass){
         return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .geometry-content`);
     }
+    // getGraphPoint(workspaceClass){
+    //     return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .geometry-content svg g`);
+    // }
+
+    getGraphPointEclipse(workspaceClass){
+        return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .geometry-content svg g ellipse`);
+    }
+
     getGraphTitle(workspaceClass){
       return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .geometry-tool .geometry-title`);
     }
+
     getGraphAxisLabelId(axis){
         return this.getGraphAxisLabel(axis)
             .then(($label)=>{
@@ -95,25 +104,25 @@ class GraphToolTile{
         return cy.get('.geometry-menu-button');
     }
     showAngle(){
-        cy.get('.geometry-tool .button.angle-label.enabled').click();
+        cy.get('.single-workspace.primary-workspace .geometry-toolbar .button.angle-label').click({force: true});
     }
     hideAngle(){
-        cy.get('.geometry-tool .button.angle-label.enabled').click();
+        cy.get('.single-workspace.primary-workspace .geometry-toolbar .button.angle-label.enabled').click();
     }
     getAngleAdornment(){
         return cy.get('.single-workspace .geometry-content g polygon').siblings('path');
     }
     copyGraphElement(){
-        cy.get('.geometry-tool .button.duplicate.enabled').click();
+        cy.get('.single-workspace.primary-workspace .geometry-toolbar .button.duplicate.enabled').click();
     }
     addMovableLine(){
         cy.get('.single-workspace .geometry-tool .button.movable-line.enabled').click();
     }
     addComment(){
-        cy.get('.geometry-tool .button.comment.enabled').click();
+        cy.get('.single-workspace.primary-workspace .geometry-toolbar .button.comment.enabled').click();
     }
     deleteGraphElement(){
-        cy.get('.geometry-tool .button.delete.enabled').click();
+        cy.get('.single-workspace.primary-workspace .geometry-toolbar .button.delete.enabled').click();
     }
 }
 export default GraphToolTile;

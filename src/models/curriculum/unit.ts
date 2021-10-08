@@ -1,12 +1,28 @@
 import { Instance, types } from "mobx-state-tree";
 import { DocumentContentModel } from "../document/document-content";
 import { InvestigationModel } from "./investigation";
-import { ISectionInfoMap, setSectionInfoMap } from "./section";
+import { ISectionInfoMap, SectionModel, registerSectionInfo } from "./section";
 import { SupportModel } from "./support";
 import { StampModel } from "../tools/drawing/drawing-content";
 import { AppConfigModelType } from "../stores/app-config-model";
 import { SettingsMstType } from "../stores/settings";
 import { IBaseStores } from "../stores/stores";
+
+const PlanningDocumentConfigModel = types
+  .model("PlanningDocumentConfigModel", {
+    // boolean true to enable for all; "teacher" or "student" to enable for specific user roles
+    enable: types.union(types.boolean, types.enumeration("role", ["student", "teacher"])),
+    // whether to create a default planning document for each problem for each user
+    default: true,
+    // planning document section definitions
+    sectionInfo: types.maybe(types.frozen<ISectionInfoMap>()),
+    sections: types.array(SectionModel)
+  })
+  .views(self => ({
+    isEnabledForRole(role?: "student" | "teacher") {
+      return (self.enable === true) || (self.enable === role);
+    }
+  }));
 
 export const UnitModel = types
   .model("Unit", {
@@ -16,7 +32,9 @@ export const UnitModel = types
     subtitle: "",
     disabled: types.array(types.string),
     placeholderText: "",
+    // problem document section definitions
     sections: types.maybe(types.frozen<ISectionInfoMap>()),
+    planningDocument: types.maybe(PlanningDocumentConfigModel),
     lookingAhead: types.maybe(DocumentContentModel),
     investigations: types.array(InvestigationModel),
     supports: types.array(SupportModel),
@@ -25,7 +43,10 @@ export const UnitModel = types
   })
   .actions(self => ({
     afterCreate() {
-      setSectionInfoMap(self.sections);
+      registerSectionInfo(self.sections);
+      if (self.planningDocument?.sectionInfo) {
+        registerSectionInfo(self.planningDocument.sectionInfo);
+      }
     }
   }))
   .views(self => ({

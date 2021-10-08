@@ -16,7 +16,7 @@ import DrawToolTile from "../../../../support/elements/clue/DrawToolTile";
  *    all of the students in the dashboard's current view
  */
 
-context.skip("Teacher Space", () => {
+context("Teacher Space", () => {
 
     let dashboard = new TeacherDashboard();
     let clueCanvas = new ClueCanvas;
@@ -42,7 +42,7 @@ context.skip("Teacher Space", () => {
         cy.login("https://learn.concord.org", clueTeacher);
         cy.visit('https://learn.concord.org/portal/offerings/' + offeringId + '/external_report/25');
         cy.waitForSpinner();
-        dashboard.switchView("Workspace");
+        dashboard.switchView("Workspace & Resources");
         cy.wait(4000);
         clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
     });
@@ -51,13 +51,14 @@ context.skip("Teacher Space", () => {
         cy.fixture("teacher-dash-data.json").as("clueData");
     });
 
-    context('Teacher Workspace', function () {
+    context.skip('Teacher Workspace', function () {
         describe('teacher document functionality', function () {
             before(function () {
                 clueCanvas.getSectionHeader('IN').click();
                 clueCanvas.addTile('drawing');
                 clueCanvas.addTile('table');
-                cy.openTab("my-work");
+                cy.openResourcesTab();
+                cy.openTopTab("my-work");
                 cy.openSection('my-work', 'workspaces');
                 cy.openDocumentWithTitle('my-work', 'workspaces', teacherDoc);
                 clueCanvas.addTile('table');
@@ -76,17 +77,18 @@ context.skip("Teacher Space", () => {
                         cy.waitForSpinner();
                     });
                     dashboard.getClassDropdown().should('contain', className);
-                    dashboard.switchView('Workspace');
+                    dashboard.switchView('Workspace & Resources');
                     tableToolTile.getTableTile().should('not.exist');
                     drawToolTile.getDrawTile().should('not.exist');
                     //switch back to original problem for later test
                     dashboard.getClassDropdown().click({ force: true });
                     dashboard.getClassList().find('.list-item').contains(initClassName).click({ force: true });
                     cy.waitForSpinner();
-                    dashboard.switchView('Workspace');
+                    dashboard.switchView('Workspace & Resources');
                     tableToolTile.getTableTile().should('exist');
                     drawToolTile.getDrawTile().should('exist');
-                    cy.openTab("my-work");
+                    cy.openResourcesTab();
+                    cy.openTopTab("my-work");
                     cy.openSection('my-work', 'workspaces');
                     cy.getCanvasItemTitle("workspaces").contains(teacherDoc).should('exist');
                     cy.openDocumentWithTitle("my-work", "workspaces", teacherDoc);
@@ -108,7 +110,7 @@ context.skip("Teacher Space", () => {
                         tempProblemIndex += 1;
                     });
                     dashboard.getProblemDropdown().should('contain', problems[tempProblemIndex].problemTitle);
-                    dashboard.switchView('Workspace');
+                    dashboard.switchView('Workspace & Resources');
                     clueCanvas.getInvestigationCanvasTitle().should('contain', problems[tempProblemIndex].problemTitle);
                     tableToolTile.getTableTile().should('not.exist');
                     drawToolTile.getDrawTile().should('not.exist');
@@ -116,8 +118,9 @@ context.skip("Teacher Space", () => {
                     dashboard.getProblemDropdown().click({ force: true });
                     dashboard.getProblemList().find('.list-item').contains(problems[initProblemIndex].problemTitle).click({ force: true });
                     cy.waitForSpinner();
-                    dashboard.switchView('Workspace');
-                    cy.openTab("my-work");
+                    dashboard.switchView('Workspace & Resources');
+                    cy.openResourcesTab();
+                    cy.openTopTab("my-work");
                     cy.openSection('my-work', 'workspaces');
                     clueCanvas.getInvestigationCanvasTitle().should('contain', problems[initProblemIndex].problemTitle);
                     tableToolTile.getTableTile().should('exist');

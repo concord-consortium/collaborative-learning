@@ -10,6 +10,7 @@ $title-margin: 2px
     background-color: $charcoal-light-5
     margin-top: $title-margin
     justify-content: center
+    position: relative
     &.my-work
       background-color: $workspace-teal-light-4
     &.class-work
@@ -68,3 +69,8 @@ $title-margin: 2px
     .canvas-area
       position: static
       height: 100%
+      .comment-select
+        .tool-tile.readonly
+          border: 2px solid $comment-select-green
+          &.selected
+            border: 2px solid white

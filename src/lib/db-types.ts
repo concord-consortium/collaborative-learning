@@ -28,19 +28,21 @@ export interface DBDocumentMap {
 }
 
 export type DBDocumentType = "section" |
-                              "problem" | "publication" |
+                              "problem" | "planning" | "publication" |
                               "personal" | "personalPublication" |
                               "learningLog" | "learningLogPublication" |
                               "supportPublication";
 export type DBDocumentMetadata = DBSectionDocumentMetadataDEPRECATED |
                                  DBProblemDocumentMetadata |
                                  DBPersonalDocumentMetadata |
+                                 DBPlanningDocumentMetadata |
                                  DBLearningLogDocumentMetadata |
                                  DBPublicationDocumentMetadata |
                                  DBPersonalPublicationMetadata |
                                  DBLearningLogPublicationMetadata |
                                  DBSupportPublicationMetadata;
 
+// metadata written to {classHash}/users/{userId}/documentMetadata for all document types
 export interface DBBaseDocumentMetadata {
   version: "1.0";
   self: {
@@ -62,6 +64,9 @@ export interface DBSectionDocumentMetadataDEPRECATED extends DBBaseProblemDocume
 }
 export interface DBProblemDocumentMetadata extends DBBaseProblemDocumentMetadata {
   type: "problem";
+}
+export interface DBPlanningDocumentMetadata extends DBBaseProblemDocumentMetadata {
+  type: "planning";
 }
 export interface DBPersonalDocumentMetadata extends DBBaseDocumentMetadata {
   type: "personal";
@@ -89,7 +94,7 @@ export interface DBGroupUserConnections {
   [key /*userId*/: string]: boolean;
 }
 
-// section documents [deprecated] and problem documents
+// contents written to {classHash}/users/{userId}/documents for all document types
 export interface DBDocument {
   version: "1.0";
   self: {
@@ -106,7 +111,8 @@ export interface IDocumentProperties {
   [key: string]: string;
 }
 
-// personal documents and learning logs
+// metadata written to {classHash}/users/{userId}/personalDocs (for personal documents)
+// and {classHash}/users/{userId}/learningLogs (for learning logs)
 export interface DBOtherDocument {
   version: "1.0";
   self: {
@@ -118,7 +124,8 @@ export interface DBOtherDocument {
   properties?: IDocumentProperties;
 }
 
-// published section documents [deprecated] and problem documents
+// metadata written to {classHash}/offerings/{offeringId}/publications
+// for published section [deprecated] and problem documents
 export interface DBPublication {
   version: "1.0";
   self: {
@@ -131,7 +138,8 @@ export interface DBPublication {
   groupUserConnections?: DBGroupUserConnections;
 }
 
-// published personal documents and learning logs
+// metadata written to {classHash}/offerings/{offeringId}/personalPublications for published personal documents
+// and to {classHash}/offerings/{offeringId}/publications for learning logs ¯\_(ツ)_/¯
 export interface DBOtherPublication {
   version: "1.0";
   self: {
@@ -143,6 +151,14 @@ export interface DBOtherPublication {
   uid: string;
   originDoc: string;
 }
+
+export type DBUnpublishedTypedDocumentMetadata = DBOfferingUserProblemDocument | DBOtherDocument;
+export type DBPublishedTypedDocumentMetadata = DBPublication | DBOtherPublication;
+
+export type DBProblemOrPublishedDocumentMetadata = DBOfferingUserProblemDocument | DBPublication;
+export type DBOtherOrPublishedDocumentMetadata = DBOtherDocument | DBOtherPublication;
+
+export type DBTypedDocumentMetadata = DBUnpublishedTypedDocumentMetadata | DBPublishedTypedDocumentMetadata;
 
 export interface DBClass {
   version: "1.0";
@@ -182,10 +198,13 @@ export interface DBOfferingUser {
     uid: string;
   };
   documents?: DBOfferingUserProblemDocumentMap;
+  planning?: DBOfferingUserProblemDocumentMap;
   sectionDocuments?: DBOfferingUserSectionDocumentMapDEPRECATED;
   // TDB: store ui information here?
 }
 
+// metadata written to {classHash}/offerings/{offeringId}/users/{userId}/documents (for problem documents)
+// and to {classHash}/offerings/{offeringId}/users/{userId}/planning (for planning documents)
 export interface DBOfferingUserProblemDocument {
   version: "1.0";
   self: {

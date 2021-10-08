@@ -202,7 +202,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private renderTitleBar(type: string) {
     const { document, side } = this.props;
     const hideButtons = (side === "comparison") || document.isPublished;
-    if (document.isProblem) {
+    if (document.isProblem || document.isPlanning) {
       return this.renderProblemTitleBar(type, hideButtons);
     }
     if (document.isPersonal || document.isLearningLog) {
@@ -235,12 +235,12 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           </div>
         }
         <div className="title" data-test="document-title">
-          {problemTitle} {this.renderStickyNotes()}
+          {`${problemTitle}${type === "planning" ? ": Planning" : ""}`} {this.renderStickyNotes()}
         </div>
         {!hideButtons &&
           <div className="actions right" data-test="document-titlebar-actions">
             {downloadButton}
-            {isTeacher &&
+            {(isTeacher && type !== "planning") &&
               <PublishSupportButton onClick={this.handlePublishSupport} />}
             {show4up && this.renderMode()}
             {!isTeacher &&
@@ -254,6 +254,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private showPublishButton(document: DocumentModelType) {
     const { appConfig } = this.stores;
     if (!appConfig.disablePublish) return true;
+    if (document.type === "planning") return false;
     return appConfig.disablePublish
             .findIndex(spec => {
               return (document.type === spec.documentType) &&

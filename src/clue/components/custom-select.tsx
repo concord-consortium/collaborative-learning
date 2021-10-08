@@ -1,5 +1,6 @@
 import React, { ReactNode } from "react";
 import { IDropdownItem } from "@concord-consortium/react-components";
+import ArrowIcon from "../../assets/icons/arrow/arrow.svg";
 
 import "./custom-select.sass";
 
@@ -83,7 +84,7 @@ export class CustomSelect extends React.PureComponent<IProps, IState> {
             </div>
           : <div className="item line-clamp">{titleText}</div>
         }
-        <div className={`arrow ${showListClass} ${disabled}`} />
+        <ArrowIcon className={`arrow ${showListClass} ${disabled}`} />
       </div>
     );
   }

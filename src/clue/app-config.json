@@ -37,7 +37,8 @@
       "content": "curriculum/samples-and-populations/samples-and-populations.json"
     },
     "sas": {
-      "content": "curriculum/stretching-and-shrinking/stretching-and-shrinking.json"
+      "content": "curriculum/stretching-and-shrinking/stretching-and-shrinking.json",
+      "guide": "curriculum/stretching-and-shrinking/sas-teacher-guide.json"
     },
     "sws": {
       "content": "curriculum/say-it-with-symbols/say-it-with-symbols.json"
@@ -117,7 +118,8 @@
             "type": "problem-documents",
             "dataTestHeader": "my-work-section-investigations",
             "dataTestItem": "my-work-list-items",
-            "documentTypes": ["problem"],
+            "documentTypes": ["problem", "planning"],
+            "order": "original",
             "showStars": ["student", "teacher"]
           },
           {

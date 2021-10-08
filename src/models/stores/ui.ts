@@ -1,15 +1,12 @@
 import { SnapshotIn, types } from "mobx-state-tree";
 import { debounce } from "lodash";
 import { AppConfigModelType } from "./app-config-model";
+import { kDividerMax, kDividerMin, UIDialogTypeEnum } from "./ui-types";
 import { WorkspaceModel } from "./workspace";
 import { DocumentModelType } from "../document/document";
+import { LogEventName, Logger } from "../../lib/logger";
 import { ToolTileModelType } from "../tools/tool-tile";
 import { ENavTab } from "../view/nav-tabs";
-
-export type ToggleElement = "leftNavExpanded";
-
-export const UIDialogTypeEnum = types.enumeration("dialogType", ["alert", "confirm", "prompt"]);
-export type UIDialogType = typeof UIDialogTypeEnum.Type;
 
 type BooleanDialogResolver = (value: boolean | PromiseLike<boolean>) => void;
 type StringDialogResolver = (value: string | PromiseLike<string>) => void;
@@ -29,15 +26,21 @@ type UIDialogModelSnapshotWithoutType = Omit<UIDialogModelSnapshot, "type">;
 
 export const UIModel = types
   .model("UI", {
-    navTabContentShown: false,
+    dividerPosition: kDividerMin,
     error: types.maybeNull(types.string),
     activeNavTab: ENavTab.kMyWork,
     activeGroupId: "",
     selectedTileIds: types.array(types.string),
+    selectedCommentId: types.maybe(types.string),
     showDemo: false,
     showDemoCreator: false,
     showTeacherContent: true,
+    showChatPanel: false,
     dialog: types.maybe(UIDialogModel),
+    // document key or section path for reference (left) document
+    focusDocument: types.maybe(types.string),
+    // counter that serves to trigger updates
+    focusDocUpdates: 0,
     problemWorkspace: WorkspaceModel,
     learningLogWorkspace: WorkspaceModel,
     teacherPanelKey: types.maybe(types.string)
@@ -48,6 +51,12 @@ export const UIModel = types
   .views((self) => ({
     isSelectedTile(tile: ToolTileModelType) {
       return self.selectedTileIds.indexOf(tile.id) !== -1;
+    },
+    get navTabContentShown () {
+      return self.dividerPosition > kDividerMin;
+    },
+    get workspaceShown () {
+      return self.dividerPosition < kDividerMax;
     }
   }))
   .actions((self) => {
@@ -117,14 +126,22 @@ export const UIModel = types
       confirm,
       resolveDialog,
 
-      toggleNavTabContent(show: boolean) {
-        self.navTabContentShown = show;
+      setDividerPosition(position: number) {
+        self.dividerPosition = position;
       },
       toggleShowTeacherContent(show: boolean) {
         self.showTeacherContent = show;
       },
-      setError(error: string|null) {
+      toggleShowChatPanel(show:boolean) {
+        self.showChatPanel = show;
+      },
+      setError(error: string) {
         self.error = error ? error.toString() : error;
+        Logger.log(LogEventName.INTERNAL_ERROR_ENCOUNTERED, { message: self.error });
+        console.error(self.error);
+      },
+      clearError() {
+        self.error = null;
       },
       setActiveNavTab(tab: string) {
         self.activeNavTab = tab;
@@ -146,7 +163,13 @@ export const UIModel = types
         self.showDemoCreator = showDemoCreator;
       },
       closeDialog,
-
+      setFocusDocument(documentKey?: string) {
+        self.focusDocument = documentKey;
+      },
+      updateFocusDocument() {
+        // increment counter to trigger observers to update
+        ++self.focusDocUpdates;
+      },
       rightNavDocumentSelected(appConfig: AppConfigModelType, document: DocumentModelType) {
         if (!document.isPublished || appConfig.showPublishedDocsInPrimaryWorkspace) {
           self.problemWorkspace.setAvailableDocument(document);

@@ -1,5 +1,52 @@
 export type UserType = "student" | "teacher";
 
+export interface IPortalReport {
+  url: string;
+  name: string;
+  id: number;
+}
+
+// The portal's native format of offerings API returns
+export interface IPortalOffering {
+  id: number;
+  clazz: string;
+  clazz_id: number;
+  clazz_hash?: string;  // added in recent portal versions
+  clazz_info_url: string;
+  activity: string;
+  activity_url: string;
+  external_report?: IPortalReport | null;
+  external_reports?: IPortalReport[];
+  teacher: string;
+}
+
+// portal's offerings format from classes API returns
+export interface IPortalClassOffering {
+  id: number;
+  name: string;
+  url: string;
+  active: boolean;
+  locked: boolean;
+}
+
+export interface IPortalClassUser {
+  id: string;               // e.g. "https://learn.staging.concord.org/users/5445"
+  user_id: number;          // e.g. 5445
+  first_name: string;
+  last_name: string;
+}
+
+// format of portal's `classes` api response
+export interface IPortalClassInfo {
+  id: number;               // e.g. 553
+  uri: string;              // "https://learn.staging.concord.org/api/v1/classes/553"
+  name: string;
+  class_hash: string;
+  teachers: IPortalClassUser[];
+  students: IPortalClassUser[];
+  offerings: IPortalClassOffering[];
+}
+
 export type PortalJWT = PortalStudentJWT | PortalTeacherJWT | PortalUserJWT;
 
 export interface BasePortalJWT {

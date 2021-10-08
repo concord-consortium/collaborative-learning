@@ -8,6 +8,7 @@ import { TabPanelDocumentsSection } from "../thumbnail/tab-panel-documents-secti
 import { DocumentModelType } from "../../models/document/document";
 import { DocumentDragKey, SupportPublication } from "../../models/document/document-types";
 import { LogEventName, Logger } from "../../lib/logger";
+import { NetworkDocumentsSection } from "./network-documents-section";
 
 import "./document-tab-panel.sass";
 
@@ -19,6 +20,7 @@ interface IProps extends IBaseProps {
   onSelectDocument?: (document: DocumentModelType) => void;
   onTabClick?: (title: string, type: string) => void;
   documentView?: React.ReactNode;
+  isChatOpen?: boolean;
 }
 
 interface IState {
@@ -67,31 +69,33 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { documentView, tabSpec, onTabClick } = this.props;
+    const { documentView, tabSpec, onTabClick, isChatOpen } = this.props;
     const { tabIndex } = this.state;
     const navTabSpecs = this.stores.appConfig.navTabs.tabSpecs;
     const navTabSpec = navTabSpecs.find(spec => spec.tab === tabSpec.tab);
     return (
       <Tabs
-        className={`document-tabs ${navTabSpec?.tab}`}
+        className={`document-tabs ${navTabSpec?.tab} ${isChatOpen ? "chat-open" : ""}`}
         forceRenderTabPanel={true}
         onSelect={this.handleTabSelect}
         selectedIndex={tabIndex}
         selectedTabClassName="selected"
       >
-        <TabList className={`tab-list ${navTabSpec?.tab}`}>
-          {this.subTabs.map((subTab) => {
-            const sectionTitle = subTab.label.toLowerCase().replace(' ', '-');
-            const type = subTab.sections[0].type;
-            return (
-              <Tab className={`doc-tab ${navTabSpec?.tab} ${sectionTitle} ${type}`}
-                   key={`section-${sectionTitle}`}
-                   onClick={() => onTabClick?.(subTab.label, type)}>
-                {subTab.label}
-              </Tab>
-            );
-          })}
-        </TabList>
+        <div className="tab-header-row">
+          <TabList className={`tab-list ${navTabSpec?.tab}`}>
+            {this.subTabs.map((subTab) => {
+              const sectionTitle = subTab.label.toLowerCase().replace(' ', '-');
+              const type = subTab.sections[0].type;
+              return (
+                <Tab className={`doc-tab ${navTabSpec?.tab} ${sectionTitle} ${type}`}
+                    key={`section-${sectionTitle}`}
+                    onClick={() => onTabClick?.(subTab.label, type)}>
+                  {subTab.label}
+                </Tab>
+              );
+            })}
+          </TabList>
+        </div>
         <div className="documents-panel">
           {this.subTabs.map((subTab, index) => {
             const sectionTitle = subTab.label.toLowerCase().replace(' ', '-');
@@ -133,39 +137,52 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
 
   private handleTabSelect = (tabIndex: number) => {
     this.setState({ tabIndex });
+    this.stores.ui.updateFocusDocument();
   }
 
   private renderSubSections(subTab: any) {
     const { selectedDocument, onSelectNewDocument, onSelectDocument } = this.props;
     const { user } = this.stores;
+    const classHash = this.stores.class.classHash;
     return (
       <div>
         { subTab.sections.map((section: any, index: any) => {
-          const _handleDocumentStarClick = section.showStarsForUser(user)
-            ? this.handleDocumentStarClick
-            : undefined;
-          const _handleDocumentDeleteClick = section.showDeleteForUser(user)
-            ? this.handleDocumentDeleteClick
-            : undefined;
-          return (
-            <TabPanelDocumentsSection
-              key={section.type}
-              tab={subTab.label}
-              section={section}
-              index={index}
-              numOfSections={subTab.sections.length}
-              stores={this.stores}
-              scale={kNavItemScale}
-              selectedDocument={selectedDocument}
-              onSelectNewDocument={onSelectNewDocument}
-              onSelectDocument={onSelectDocument}
-              onDocumentDragStart={this.handleDocumentDragStart}
-              onDocumentStarClick={_handleDocumentStarClick}
-              onDocumentDeleteClick={_handleDocumentDeleteClick}
-            />
-          );
-        })
+            const _handleDocumentStarClick = section.showStarsForUser(user)
+              ? this.handleDocumentStarClick
+              : undefined;
+            const _handleDocumentDeleteClick = section.showDeleteForUser(user)
+              ? this.handleDocumentDeleteClick
+              : undefined;
+            return (
+              <TabPanelDocumentsSection
+                key={section.type}
+                tab={subTab.label}
+                section={section}
+                index={index}
+                numOfSections={subTab.sections.length}
+                stores={this.stores}
+                scale={kNavItemScale}
+                selectedDocument={selectedDocument}
+                onSelectNewDocument={onSelectNewDocument}
+                onSelectDocument={onSelectDocument}
+                onDocumentDragStart={this.handleDocumentDragStart}
+                onDocumentStarClick={_handleDocumentStarClick}
+                onDocumentDeleteClick={_handleDocumentDeleteClick}
+              />
+            );
+          })
         }
+        {user.isNetworkedTeacher &&
+          <NetworkDocumentsSection
+            currentClassHash={classHash}
+            currentTeacherName={user.name}
+            currentTeacherId={user.id}
+            subTab={subTab}
+            problemTitle={this.stores.problem.title}
+            stores={this.stores}
+            scale={kNavItemScale}
+            onSelectDocument={onSelectDocument}
+          />}
       </div>
     );
   }

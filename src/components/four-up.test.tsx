@@ -14,7 +14,7 @@ import { DocumentsModelType, DocumentsModel } from "../models/stores/documents";
 
 configure({ adapter: new Adapter() });
 
-describe("Four Up Component", () => {
+describe.skip("Four Up Component", () => {
   let documents: DocumentsModelType;
   let document: DocumentModelType;
 

@@ -1,5 +1,24 @@
 # Changelog
 
+## Version 2.0.0-pre.1 - released October 8, 2021
+
+### Features/Improvements
+- Networked teachers can view list of other teachers' classes in the network
+- Networked teachers can view documents in other teachers' classes in the network
+- Networked teachers can comment on their own and other teachers' documents in the network
+- ...
+- More details with the official 2.0.0 release
+
+### Bugs Fixed
+- Will be listed with the official 2.0.0 release
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 452,138 bytes | 8.3% |
+| index.js | 4,806,669 bytes | 1.7% |
+
 ## Version 1.9.0 - released July 7, 2021
 
 ### Features/Improvements

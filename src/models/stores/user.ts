@@ -1,14 +1,16 @@
 import initials from "initials";
-import { types } from "mobx-state-tree";
-import { AuthenticatedUser } from "../../lib/auth";
+import { Instance, types } from "mobx-state-tree";
+import { AuthenticatedUser, isAuthenticatedTeacher } from "../../lib/auth";
 import { PortalFirebaseStudentJWT } from "../../lib/portal-types";
 import { UserTypeEnum } from "./user-types";
 
-export const PortalClassOffering = types
-  .model("PortalClassOffering", {
+export const UserPortalOffering = types
+  .model("UserPortalOffering", {
     classId: "",
     classHash: "",
     className: "",
+    classUrl: "",
+    teacher: "",
     activityTitle: "",
     activityUrl: "",
     problemOrdinal: "",
@@ -18,11 +20,12 @@ export const PortalClassOffering = types
   })
   .views(self => ({
     get problemPath() {
-      return `${self.unitCode}/${self.problemOrdinal.replace(".", "/")}`;
+      const separator = self.unitCode && self.problemOrdinal ? "/" : "";
+      return `${self.unitCode}${separator}${self.problemOrdinal.replace(".", "/")}`;
     }
   }));
 
-export type IPortalClassOffering = typeof PortalClassOffering.Type;
+export type IUserPortalOffering = Instance<typeof UserPortalOffering>;
 
 export const UserModel = types
   .model("User", {
@@ -35,8 +38,10 @@ export const UserModel = types
     offeringId: "",
     latestGroupId: types.maybe(types.string),
     portal: "",
+    network: types.maybe(types.string),
+    networks: types.array(types.string),
     loggingRemoteEndpoint: types.maybe(types.string),
-    portalClassOfferings: types.array(PortalClassOffering),
+    portalClassOfferings: types.array(UserPortalOffering),
     demoClassHashes: types.array(types.string),
     lastSupportViewTimestamp: types.maybe(types.number),
     lastStickyNoteViewTimestamp: types.maybe(types.number)
@@ -61,6 +66,10 @@ export const UserModel = types
     setId(id: string) {
       self.id = id;
     },
+    setNetworks(network: string, networks: string[]) {
+      self.network = network;
+      self.networks.push(...networks);
+    },
     setAuthenticatedUser(user: AuthenticatedUser) {
       self.authenticated = true;
       self.name = user.fullName;
@@ -68,6 +77,12 @@ export const UserModel = types
       self.id = user.id;
       self.portal = user.portal;
       self.type = user.type;
+      if (isAuthenticatedTeacher(user)) {
+        self.network = user.network;
+        if (user.networks) {
+          self.networks.push(...user.networks);
+        }
+      }
       self.className = user.className;
       self.classHash = user.classHash;
       self.offeringId = user.offeringId;
@@ -101,12 +116,15 @@ export const UserModel = types
     get isTeacher() {
       return self.type === "teacher";
     },
+    get isNetworkedTeacher() {
+      return (self.type === "teacher") && !!self.network;
+    },
     get initials() {
       return initials(self.name);
     },
     get activityUrl() {
       const offering = self.portalClassOfferings.find(o => o.offeringId === self.offeringId);
-      return offering?.activityUrl || undefined;
+      return offering?.activityUrl;
     }
   }))
   .views((self) => ({

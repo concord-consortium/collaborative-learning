@@ -1,10 +1,11 @@
 import React, { useContext, useRef } from "react";
+import classNames from "classnames";
 import { AppConfigContext } from "../../app-config-context";
 import { CanvasComponent } from "./canvas";
 import { DocumentContextReact } from "./document-context";
 import { FourUpComponent } from "../four-up";
 import { useDocumentContext } from "../../hooks/use-document-context";
-import { useGroupsStore } from "../../hooks/use-stores";
+import { useGroupsStore, useUIStore, useUserStore } from "../../hooks/use-stores";
 import { ToolbarComponent, ToolbarConfig } from "../toolbar";
 import { EditableToolApiInterfaceRef, EditableToolApiInterfaceRefContext } from "../tools/tool-api";
 import { DocumentModelType } from "../../models/document/document";
@@ -62,7 +63,6 @@ const DocumentCanvas: React.FC<IDocumentCanvasProps> = props => {
         : <OneUpCanvas document={document} readOnly={readOnly} />}
     </div>
   );
-
 };
 
 export interface IProps {
@@ -76,6 +76,8 @@ export const EditableDocumentContent: React.FC<IProps> = props => {
   const { mode, isPrimary, document, toolbar, readOnly } = props;
 
   const documentContext = useDocumentContext(document);
+  const ui = useUIStore();
+  const { isNetworkedTeacher } = useUserStore();
 
   // set by the canvas and used by the toolbar
   const editableToolApiInterfaceRef: EditableToolApiInterfaceRef = useRef(null);
@@ -83,10 +85,15 @@ export const EditableDocumentContent: React.FC<IProps> = props => {
   const isReadOnly = !isPrimary || readOnly || document.isPublished;
   const isShowingToolbar = !!toolbar && !isReadOnly;
   const showToolbarClass = isShowingToolbar ? "show-toolbar" : "hide-toolbar";
+  const isChatEnabled = isNetworkedTeacher;
+  const documentSelectedForComment = isChatEnabled && ui.showChatPanel && ui.selectedTileIds.length === 0 && !isPrimary;
+  const editableDocContentClass = classNames("editable-document-content", showToolbarClass,
+                                             {"comment-select" : documentSelectedForComment});
   return (
     <DocumentContextReact.Provider value={documentContext}>
       <EditableToolApiInterfaceRefContext.Provider value={editableToolApiInterfaceRef}>
-        <div key="editable-document" className={`editable-document-content ${showToolbarClass}`} >
+        <div key="editable-document" className={editableDocContentClass}
+              data-focus-document={document.key} >
           {isShowingToolbar && <DocumentToolbar document={document} toolbar={toolbar} />}
           {isShowingToolbar && <div className="canvas-separator"/>}
           <DocumentCanvas mode={mode} isPrimary={isPrimary} document={document} readOnly={isReadOnly} />
