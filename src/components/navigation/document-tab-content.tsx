@@ -79,7 +79,7 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
         <div className={`document-title`}>
           {documentTitle(referenceDocument, appConfigStore, problemStore)}
         </div>
-        {editButton(tabSpec.tab, sectionClass, referenceDocument)}
+        {!referenceDocument.isRemote && editButton(tabSpec.tab, sectionClass, referenceDocument)}
       </div>
       <EditableDocumentContent
         mode={"1-up"}
