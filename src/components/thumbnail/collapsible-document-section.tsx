@@ -40,46 +40,24 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
     if (section.type === "personal-documents") {
       // get the personal documents
       networkResource.teachers?.forEach((teacher) => {
-        if (teacher.personalDocuments) {
-          for (const [key] of Object.entries(teacher.personalDocuments)) {
-            documentKeys.push(key);
-          }
-        }
+        teacher.personalDocuments && documentKeys.push(...Object.keys(teacher.personalDocuments));
       });
     } else if (section.type === "problem-documents") {
       // get the problem and planning documents
       networkResource.resources?.forEach((resource) => {
         resource.teachers?.forEach((teacher) => {
-          if (teacher.problemDocuments) {
-            for (const [key] of Object.entries(teacher.problemDocuments)) {
-              documentKeys.push(key);
-            }
-          }
-          if (teacher.planningDocuments) {
-            for (const [key] of Object.entries(teacher.planningDocuments)) {
-              documentKeys.push(key);
-            }
-          }
+          teacher.problemDocuments && documentKeys.push(...Object.keys(teacher.problemDocuments));
+          teacher.planningDocuments && documentKeys.push(...Object.keys(teacher.planningDocuments));
         });
       });
     } else if (section.type === "learning-logs") {
       // get the learning logs
       networkResource.teachers?.forEach((teacher) => {
-        if (teacher.learningLogs) {
-          for (const [key] of Object.entries(teacher.learningLogs)) {
-            documentKeys.push(key);
-          }
-        }
+        teacher.learningLogs && documentKeys.push(...Object.keys(teacher.learningLogs));
       });
     } else if (section.type === "published-personal-documents") {
       // get the published personal documents
-      networkResource.resources?.forEach((resource) => {
-        if (resource.personalPublications) {
-          for (const [key] of Object.entries(resource.personalPublications)) {
-            documentKeys.push(key);
-          }
-        }
-      });
+      networkResource.personalPublications && documentKeys.push(...Object.keys(networkResource.personalPublications));
     } else if (section.type === "published-problem-documents") {
       // get the published problem documents
       networkResource.resources?.forEach((resource) => {
@@ -89,6 +67,8 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
           }
         }
       });
+    } else if (section.type === "published-learning-logs") {
+      networkResource.learningLogPublications && documentKeys.push(...Object.keys(networkResource.learningLogPublications));
     }
   });
 
