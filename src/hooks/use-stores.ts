@@ -39,14 +39,26 @@ export function useDemoStore() {
 }
 
 export function useDocumentFromStore(key?: string) {
-  const stores = useStores();
-  return key ? stores.documents.getDocument(key) : undefined;
+  const { documents, networkDocuments } = useStores();
+  return key
+          ? documents.getDocument(key) || networkDocuments?.getDocument(key)
+          : undefined;
 }
 
 export function useDocumentMetadataFromStore(key?: string): IDocumentMetadata | undefined {
-  const document = useDocumentFromStore(key);
+  const { documents, networkDocuments, user } = useStores();
+  // for local documents, the context is the user's classHash
+  let contextId = user.classHash;
+  let document = key ? documents.getDocument(key) : undefined;
+  let metadata = document ? { contextId, ...document.getMetadata() } : undefined;
+  if (!document) {
+    document = key ? networkDocuments?.getDocument(key) : undefined;
+    // for network documents, the context is the document's remoteContext
+    document && (contextId = document.remoteContext);
+    metadata = document ? { contextId, ...document.getMetadata() } : undefined;
+  }
   return useMemo(() => {
-    return key && document ? document.getMetadata() : undefined;
+    return metadata || undefined;
     // updating when the key changes is sufficient
   }, [key]);  // eslint-disable-line react-hooks/exhaustive-deps
 }
@@ -59,16 +71,15 @@ export function useDocumentOrCurriculumMetadata(key?: string): IDocumentMetadata
 }
 
 export function useTypeOfTileInDocumentOrCurriculum(key?: string, tileId?: string) {
-  const { documents } = useStores();
+  const { documents, networkDocuments } = useStores();
   if (!key || !tileId) return;
   if (isSectionPath(key)) {
     // for curriculum documents, tileId is `${section}_${tileType}_${index}`
     const execResult = /.*_(.+)_\d+$/.exec(tileId);
     return execResult?.[1];
   }
-  else {
-    return documents.getTypeOfTileInDocument(key, tileId);
-  }
+  return documents.getTypeOfTileInDocument(key, tileId) ||
+          networkDocuments?.getTypeOfTileInDocument(key, tileId);
 }
 
 export function useFeatureFlag(feature: string) {
@@ -77,6 +88,10 @@ export function useFeatureFlag(feature: string) {
 
 export function useGroupsStore(): GroupsModelType {
   return useStores().groups;
+}
+
+export function useLocalDocuments(): DocumentsModelType {
+  return useStores().documents;
 }
 
 export function useNetworkDocuments(): DocumentsModelType {

@@ -9,9 +9,10 @@ import { UIModel } from "../models/stores/ui";
 import { UserModel } from "../models/stores/user";
 import { LearningLogWorkspace, ProblemWorkspace, WorkspaceModel } from "../models/stores/workspace";
 import {
-  useAppConfigStore, useAppMode, useClassStore, useDemoStore, useGroupsStore, useNetworkDocumentKey, useProblemPath,
-  useProblemPathWithFacet, useProblemStore, useSharedSelectionStore, useTypeOfTileInDocumentOrCurriculum,
-  useUIStore, useUserStore
+  useAppConfigStore, useAppMode, useClassStore, useDemoStore, useDocumentFromStore, useDocumentMetadataFromStore,
+  useDocumentOrCurriculumMetadata, useGroupsStore, useLocalDocuments, useNetworkDocumentKey, useNetworkDocuments,
+  useProblemPath, useProblemPathWithFacet, useProblemStore, useSharedSelectionStore,
+  useTypeOfTileInDocumentOrCurriculum, useUIStore, useUserStore
 } from "./use-stores";
 
 jest.mock("@concord-consortium/slate-editor", () => ({}));
@@ -19,7 +20,8 @@ jest.mock("@concord-consortium/slate-editor", () => ({}));
 var mockUseContext = jest.fn();
 jest.mock("react", () => ({
   ...jest.requireActual("react"),
-  useContext: () => mockUseContext()
+  useContext: () => mockUseContext(),
+  useMemo: (fn: () => any) => fn()
 }));
 
 describe("useStores", () => {
@@ -34,6 +36,8 @@ describe("useStores", () => {
       const _class = ClassModel.create({ name: "Class 1", classHash: "hash-1" });
       const demo = DemoModel.create({ class : DemoClassModel.create({ id: "class-1", name: "Class 1" }) });
       const groups = GroupsModel.create();
+      const localDocuments = DocumentsModel.create();
+      const networkDocuments = DocumentsModel.create();
       const problemPath = "sas/1/2";
       const problemPathWithFacet = "sas:facet/1/2";
       const problem = ProblemModel.create({ ordinal: 2, title: "1.2" });
@@ -49,7 +53,9 @@ describe("useStores", () => {
           appMode : "authed",
           class: _class,
           demo,
+          documents: localDocuments,
           groups,
+          networkDocuments,
           problemPath,
           problem,
           selection,
@@ -62,6 +68,12 @@ describe("useStores", () => {
       expect(useClassStore()).toBe(_class);
       expect(useDemoStore()).toBe(demo);
       expect(useGroupsStore()).toBe(groups);
+      expect(useLocalDocuments()).toBe(localDocuments);
+      expect(useNetworkDocuments()).toBe(networkDocuments);
+      expect(useDocumentFromStore()).toBeUndefined();
+      expect(useDocumentFromStore("foo")).toBeUndefined();
+      expect(useDocumentMetadataFromStore("foo")).toBeUndefined();
+      expect(useDocumentOrCurriculumMetadata("foo")).toBeUndefined();
       expect(useNetworkDocumentKey("document-key")).toBe("network-1_document-key");
       expect(useProblemPath()).toBe(problemPath);
       expect(useProblemPathWithFacet("facet")).toBe(problemPathWithFacet);
@@ -104,6 +116,20 @@ describe("useStores", () => {
       mockUseContext.mockImplementation(() => ({
         stores: {
           documents : {
+            getTypeOfTileInDocument: () => "Text"
+          }
+        }
+      }));
+      expect(useTypeOfTileInDocumentOrCurriculum("document-key", "tile-id")).toBe("Text");
+    });
+
+    it("should return type of tile from content for remote user documents", () => {
+      mockUseContext.mockImplementation(() => ({
+        stores: {
+          documents : {
+            getTypeOfTileInDocument: () => undefined
+          },
+          networkDocuments : {
             getTypeOfTileInDocument: () => "Text"
           }
         }

@@ -7,7 +7,7 @@ import {
   IUserContext, networkDocumentKey
 } from "../src/shared";
 import {
-  kCanonicalPortal, kCreatedAt, kCurriculumKey, kDemoName, kDocumentKey, kDocumentType, kFirebaseUserId,
+  kCanonicalPortal, kClassHash, kCurriculumKey, kDemoName, kDocumentKey, kDocumentType, kFirebaseUserId,
   kTeacherName, kTeacherNetwork, kUserId, specAuth, specUserContext
 } from "./test-utils";
 
@@ -61,7 +61,7 @@ export interface IPartialPostCommentParams {
 const specPostDocumentComment = (overrides?: IPartialPostCommentParams): IPostDocumentCommentParams => {
   return {
     context: specUserContext(overrides?.context),
-    document: { uid: kUserId, type: kDocumentType, key: kDocumentKey, createdAt: kCreatedAt, ...overrides?.document },
+    document: { contextId: kClassHash, uid: kUserId, type: kDocumentType, key: kDocumentKey, ...overrides?.document },
     comment: { content: kComment1, ...overrides?.comment }
   };
 };
