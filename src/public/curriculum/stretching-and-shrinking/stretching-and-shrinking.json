@@ -392,14 +392,9 @@
                       "text": [
                         "**Situation A. Daphne’s Reasoning**",
                         "Daphne claims she used ratio reasoning to solve the problem. She wrote:",
-                        "> `For every inch measured of the PI magazine, there are 10 inches in real life. I used the PI magazine height to measure the height of the teacher.`"
+                        "> `For every inch measured of the PI magazine, there are 10 inches in real life. I used the PI magazine height to measure the height of the teacher.`",
+                        "How could this help her find the height of the teachers? "
                       ]
-                    }
-                  },
-                  {
-                    "content": {
-                    "type": "Image",
-                    "url": "curriculum/stretching-and-shrinking/images/SS_1_1_NW_07_did_you_know_350w.png"
                     }
                   },
                   {
@@ -417,7 +412,12 @@
                     {
                       "type": "Text",
                       "format": "html",
-                      "text": "\u2938 x 7"
+                      "text": [
+                        "Every 1 magazine represents 10 inches, we can scale this ratio to find how tall the teacher is. For example:",
+                        "<p>10 inches for every 1 magazine</p>",
+                        "<h2>     \u2938 x 7                  \u2938 x 7</h2>",
+                        "<p><strong>? inches</strong> for every <strong>7 magazines</strong> (if the teacher is 7 magazines tall in the picture)"
+                      ]
                     }
                   },
                   {
@@ -1463,9 +1463,6 @@
                           "values": [1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 7, 7, 1]
                         }
                       ]
-                    },
-                    "layout": {
-                      "height": 380
                     }
                   },
                   {
@@ -1483,9 +1480,6 @@
                           "values": [2, 2, 3, 3 ,2]
                         }
                       ]
-                    },
-                    "layout": {
-                      "height": 180
                     }
                   },
                   {
@@ -1503,12 +1497,9 @@
                           "values": [4,5,4,4]
                         }
                       ]
-                    },
-                    "layout": {
-                      "height": 145
                     }
                   },
-                   {
+                  {
                     "content": {
                       "type": "Table",
                       "columns": [
@@ -1523,17 +1514,18 @@
                           "values": [5, 5]
                         }
                       ]
-                    },
-                    "layout": {
-                      "height": 100
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "format": "html",
+                      "format": "markdown",
                       "text": [
-                        "• Use the given rule to find the coordinates of the points. Record the coordinates in Tables for Zug, Lug, Bug, and Glug. For example, the rule for Zug is (2x, 2y). This means that you multiply each of Mug’s coordinates by 2. Point A on Mug is (0, 1), so the corresponding point A on Zug is (0, 2). Point B on Mug is (2, 1), so the corresponding point B on Zug is (4, 2). \n\n• Plot and connect the points from A to X for each figure on separate axes, just as you did for Mug, putting each on separate axes. \n\n• Look at the figures created by Marta’s rules. Which ones appear to be family members who are similar to Mug? Which figures appear not to be similar, and thus “imposters”? How do you know?"
+                        "* Use the given rule to find the coordinates of the points. Record the coordinates in Tables for Zug, Lug, Bug, and Glug. For example, the rule for Zug is (2x, 2y). This means that you multiply each of Mug’s coordinates by 2. Point A on Mug is (0, 1), so the corresponding point A on Zug is (0, 2). Point B on Mug is (2, 1), so the corresponding point B on Zug is (4, 2).",
+                        "* Plot and connect the points from A to X for each figure on separate axes, just as you did for Mug, putting each on separate axes.",
+                        "Look at the figures created by Marta’s rules. Which ones appear to be family members who are similar to Mug? Which figures appear not to be similar, and thus “imposters”? How do you know?",
+                        "Zug and Bug are bigger versions of and have the same shape as Mug, so they are the other Wumps. From Mug to Zug and Bug, the angles and the general shape stayed the same. From Mug to Zug, the lengths doubled and from Mug to Bug, the lengths tripled. ",
+                        "On the other hand, Lug is too wide, and Glug is too tall to be the Wumps family. From Mug to Lug and Glug, corresponding lengths did not grow by the same factor. Lug is the same height as Mug but three times as wide. Lug is stretched on the x-axis values, but not the y-axis values. Glug is the same width as Mug but three times as tall. Glug is stretched on the y-axis values, but not the x-axis values. Many of Lug’s and Glug’s angles differ from Mug’s. So, Lug and Glug are impostors."
                       ]
                     }
                   }
@@ -1562,11 +1554,64 @@
                     }
                   },
                   {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "True. Like the rule (2x, 2y) makes Zug similar to Mug and the rule (3x, 3y) makes Bug similar to Mug, the rule (5x, 5y) also makes it similar to Mug. It will be 5 times wider and 5 times taller than Mug."
+                      ]
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<strong>Jacob’s Claim</strong> I can use the coordinate rule to predict how the side lengths compare between Mug and a similar Wump. Is he correct?"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Yes, this is true. With the rule (2x, 2y), Zug has double the side lengths of the corresponding side lengths of Mug’s. Also, with the rule (3x, 3y), Bug has triple the side lengths of the corresponding side lengths of Mug’s. Using the multiplier, you can predict how many times bigger (or smaller) the lengths on a similar figure are compared to the original lengths."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "True. Like the rule (2x, 2y) makes Zug similar to Mug and the rule (3x, 3y) makes Bug similar to Mug, the rule (5x, 5y) also makes it similar to Mug. It will be 5 times wider and 5 times taller than Mug."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Jacob’s Claim</strong> I can use the coordinate rule to predict how the side lengths compare between Mug and a similar Wump. Is he correct?"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Yes, this is true. With the rule (2x, 2y), Zug has double the side lengths of the corresponding side lengths of Mug’s. Also, with the rule (3x, 3y), Bug has triple the side lengths of the corresponding side lengths of Mug’s. Using the multiplier, you can predict how many times bigger (or smaller) the lengths on a similar figure are compared to the original lengths."
                       ]
                     }
                   },
@@ -1580,6 +1625,17 @@
                     }
                   },
                   {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "False. The angle measures do not change from the original to the corresponding angles on the image."
+                      ]
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -1589,19 +1645,59 @@
                     }
                   },
                   {
-                    "content": {
+                    "display": "teacher",
+                    "content": 
+                    {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Situation B. New Rules</h3><ol><li>1.  Make a rule that would create a figure similar to Lug. </li><li>Describe how the corresponding angle measures and side lengths change. </li></ol>"
+                        "True. The multiplier is 1, since (x, y) = (1x, 1y). Multiplying any quantity by 1 is the multiplicative identity. The values of the coordinates will stay the same. So, the figure is like the identity; it will be the same size and shape."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "### Situation B. New Rules",
+                        "1.  Make a rule that would create a figure similar to Lug."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Answer will vary. Possible answers: (6x, 2y), (9x, 3y), (12x, 4y), (x, 1/3y)</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "2. Describe how the corresponding angle measures and side lengths change."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Angle measure will stay the same from one corresponding angle to another. Corresponding side lengths from the original to the image will get larger or smaller by the amount of the multiplier. For example, from Lug to the shape made with (6x, 2y), all of the lengths will double. From Lug to the shape made with (9x, 3y), all of the lengths will triple."
                       ]
                     }
                   }
                 ]
-              },
-              "supports": [
-                {"text": "Consider the rules of Mug, Zug, Lug, Bug, and Glug. Mug (x, y), Zug (2x, 2y), Lug (3x, y), Bug (3x, 3y), Glug (x, 3y). Who are similar to Mug? What feature do these rules have in common?"}
-              ]
+              }
             },
             {
               "type": "nowWhatDoYouKnow",
@@ -1613,6 +1709,21 @@
                       "format": "html",
                       "text": [
                         "How can you determine if an original figure and its image are similar by looking at the coordinate rule that produced the image? What features (attributes) stay the same for Mug and similar figures? What features change?"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "Students should discuss enlarging geometric figures using coordinate grids and rules that produce both similar and non-similar figures. ",
+                        "If the coordinates for the original figure is (x, y), then the coordinates for the similar image is (kx, ky), which means that each x-coordinate and y- coordinate for the similar image is multiplied by the same number k to the original coordinates. ",
+                        "Also, students should expand understanding which attributes change and which stay the same: ",
+                        "* corresponding angles of two similar figures are the same measure while angles of non-similar figures may not be.",
+                        "* corresponding side lengths from the original shape to the similar figure increase by the multiplier used to create a new rule. "
                       ]
                     }
                   }
