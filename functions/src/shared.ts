@@ -159,13 +159,14 @@ export interface INetworkResourceTeacherOfferingResponse {
 export interface INetworkResourceOfferingResponse {
   resource_link_id: string;
   problemPublications?: Record<string, any>;
-  personalPublications?: Record<string, any>;
   teachers?: INetworkResourceTeacherOfferingResponse[];
 }
 export interface INetworkResourceClassResponse {
   id?: string;          // portal class id
   name?: string;        // portal class name
   context_id: string;   // portal class hash
+  personalPublications?: Record<string, any>;
+  learningLogPublications?: Record<string, any>;
   teacher?: string;     // name of primary(?) teacher
   teachers?: INetworkResourceTeacherClassResponse[];
   resources: INetworkResourceOfferingResponse[];

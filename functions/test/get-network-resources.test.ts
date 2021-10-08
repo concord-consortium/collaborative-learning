@@ -219,15 +219,27 @@ describe("getNetworkResources", () => {
               title: "title-1",
               properties: {},
               uid: kUserId,
-              originDoc: "origin-doc-1"
+              originDoc: "personal-doc-1"
+            }
+          };
+    const learningLogPublicationsMetadata = {
+            "learning-log-publication-1": {
+              version: "1.0",
+              self: { classHash: kClassHash, documentKey: "learning-log-publication-1" },
+              title: "title-1",
+              properties: {},
+              uid: kUserId,
+              originDoc: "learning-log-1"
             }
           };
     mockDatabaseGet.mockImplementation(path => {
       const dbMap: Record<string, any> = {
+        "/authed/portals/test_portal/classes/class-hash/publications":
+          learningLogPublicationsMetadata,
+        "/authed/portals/test_portal/classes/class-hash/personalPublications":
+          personalPublicationsMetadata,
         "/authed/portals/test_portal/classes/class-hash/offerings/1001/publications":
-          problemPublicationsMetadata,
-        "/authed/portals/test_portal/classes/class-hash/offerings/1001/personalPublications":
-          personalPublicationsMetadata
+          problemPublicationsMetadata
       };
       const content = dbMap[path];
       return content
@@ -242,11 +254,13 @@ describe("getNetworkResources", () => {
     const expectedOffering = {
       resource_link_id: kOffering1Id,
       problemPublications: problemPublicationsMetadata,
-      personalPublications: personalPublicationsMetadata,
       teachers: [{ uid: kUserId }]
     };
     expect(response.response).toEqual([{
-      id: "101", name: "Class 1", context_id: kClassHash, teacher: kTeacherName, teachers: [{ uid: kUserId }],
+      id: "101", name: "Class 1", context_id: kClassHash,
+      personalPublications: personalPublicationsMetadata,
+      learningLogPublications: learningLogPublicationsMetadata,
+      teacher: kTeacherName, teachers: [{ uid: kUserId }],
       resources: [expectedOffering], uri: `https://concord.org/class/101`
     }]);
   });
@@ -350,12 +364,52 @@ describe("getNetworkResources", () => {
     await writeClassRecordToFirestore({ id: "102", context_id: kOtherClassHash, name: "Class 2" });
     await writeOfferingRecordToFirestore();
     await writeOfferingRecordToFirestore({ id: kOffering2Id, context_id: kOtherClassHash });
+    const class1PersonalPublicationsMetadata = {
+            "personal-publication-1": {
+              version: "1.0",
+              self: { classHash: kClassHash, documentKey: "personal-publication-1" },
+              title: "title-1",
+              properties: {},
+              uid: kUserId,
+              originDoc: "personal-doc-1"
+            }
+          };
+    const class1LearningLogPublicationsMetadata = {
+            "learning-log-publication-1": {
+              version: "1.0",
+              self: { classHash: kClassHash, documentKey: "learning-log-publication-1" },
+              title: "title-1",
+              properties: {},
+              uid: kUserId,
+              originDoc: "learning-log-1"
+            }
+          };
     const offering1ProblemPublicationsMetadata = {
             "publication-1": {
               version: "1.0",
               self: { classHash: kClassHash, offeringId: kOffering1Id },
               documentKey: "publication-1",
               userId: kUserId
+            }
+          };
+    const class2PersonalPublicationsMetadata = {
+            "personal-publication-2": {
+              version: "1.0",
+              self: { classHash: kOtherClassHash, documentKey: "personal-publication-2" },
+              title: "title-2",
+              properties: {},
+              uid: kUserId,
+              originDoc: "personal-doc-2"
+            }
+          };
+    const class2LearningLogPublicationsMetadata = {
+            "learning-log-publication-2": {
+              version: "1.0",
+              self: { classHash: kOtherClassHash, documentKey: "learning-log-publication-2" },
+              title: "title-2",
+              properties: {},
+              uid: kUserId,
+              originDoc: "learning-log-2"
             }
           };
     const offering2ProblemPublicationsMetadata = {
@@ -366,36 +420,20 @@ describe("getNetworkResources", () => {
               userId: kUserId
             }
           };
-    const offering1PersonalPublicationsMetadata = {
-            "personal-publication-1": {
-              version: "1.0",
-              self: { classHash: kClassHash, documentKey: "personal-publication-1" },
-              title: "title-1",
-              properties: {},
-              uid: kUserId,
-              originDoc: "origin-doc-1"
-            }
-          };
-    const offering2PersonalPublicationsMetadata = {
-            "personal-publication-2": {
-              version: "1.0",
-              self: { classHash: kOtherClassHash, documentKey: "personal-publication-2" },
-              title: "title-2",
-              properties: {},
-              uid: kUserId,
-              originDoc: "origin-doc-2"
-            }
-          };
     mockDatabaseGet.mockImplementation(path => {
       const dbMap: Record<string, any> = {
+        "/authed/portals/test_portal/classes/class-hash/publications":
+          class1LearningLogPublicationsMetadata,
+        "/authed/portals/test_portal/classes/class-hash/personalPublications":
+          class1PersonalPublicationsMetadata,
         "/authed/portals/test_portal/classes/class-hash/offerings/1001/publications":
           offering1ProblemPublicationsMetadata,
-        "/authed/portals/test_portal/classes/class-hash/offerings/1001/personalPublications":
-          offering1PersonalPublicationsMetadata,
+        "/authed/portals/test_portal/classes/other-class-hash/publications":
+          class2LearningLogPublicationsMetadata,
+        "/authed/portals/test_portal/classes/other-class-hash/personalPublications":
+          class2PersonalPublicationsMetadata,
         "/authed/portals/test_portal/classes/other-class-hash/offerings/1002/publications":
-          offering2ProblemPublicationsMetadata,
-        "/authed/portals/test_portal/classes/other-class-hash/offerings/1002/personalPublications":
-          offering2PersonalPublicationsMetadata
+          offering2ProblemPublicationsMetadata
       };
       const content = dbMap[path];
       return content
@@ -410,19 +448,23 @@ describe("getNetworkResources", () => {
     const expectedOffering1 = {
       resource_link_id: kOffering1Id,
       problemPublications: offering1ProblemPublicationsMetadata,
-      personalPublications: offering1PersonalPublicationsMetadata,
       teachers: [{ uid: kUserId }]
     };
     const expectedOffering2 = {
       resource_link_id: kOffering2Id,
       problemPublications: offering2ProblemPublicationsMetadata,
-      personalPublications: offering2PersonalPublicationsMetadata,
       teachers: [{ uid: kUserId }]
     };
     expect(response.response).toEqual([
-      { id: "101", name: "Class 1", context_id: kClassHash, teacher: kTeacherName, teachers: [{ uid: kUserId }],
+      { id: "101", name: "Class 1", context_id: kClassHash,
+        personalPublications: class1PersonalPublicationsMetadata,
+        learningLogPublications: class1LearningLogPublicationsMetadata,
+        teacher: kTeacherName, teachers: [{ uid: kUserId }],
         resources: [expectedOffering1], uri: `https://concord.org/class/101` },
-      { id: "102", name: "Class 2", context_id: kOtherClassHash, teacher: kTeacherName, teachers: [{ uid: kUserId }],
+      { id: "102", name: "Class 2", context_id: kOtherClassHash,
+        personalPublications: class2PersonalPublicationsMetadata,
+        learningLogPublications: class2LearningLogPublicationsMetadata,
+        teacher: kTeacherName, teachers: [{ uid: kUserId }],
         resources: [expectedOffering2], uri: `https://concord.org/class/102` }
     ]);
   });

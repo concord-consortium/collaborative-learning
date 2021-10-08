@@ -7,7 +7,7 @@ import {
 import { validateUserContext } from "./user-context";
 
 // update this when deploying updates to this function
-const version = "1.1.0";
+const version = "1.1.1";
 
 export async function getNetworkResources(
                         params?: IGetNetworkResourcesUnionParams,
@@ -62,6 +62,23 @@ export async function getNetworkResources(
       try {
         const classDoc = await admin.firestore().doc(`/${firestoreRoot}/classes/${network}_${context_id}`).get();
         const isValidClassNetwork = classDoc.exists && (classDoc.data()?.network === network);
+        // retrieve metadata for class-wide publications
+        let learningLogPublications;
+        let personalPublications;
+        if (isValidClassNetwork) {
+          try {
+            const classRoot = `${databaseRoot}/${context_id}`;
+            const [learningLogPublicationsSnap, personalPublicationsSnap] = await Promise.all([
+              admin.database().ref(`${classRoot}/publications`).get(),        // published learning logs
+              admin.database().ref(`${classRoot}/personalPublications`).get() // published personal documents
+            ]);
+            learningLogPublications = learningLogPublicationsSnap.val() || undefined;
+            personalPublications = personalPublicationsSnap.val() || undefined;
+          }
+          catch(e) {
+            // ignore failing publications for now so we can return the rest of the results
+          }
+        }
         // return a promise for each offering within the class
         const offeringPromises: Promise<INetworkResourceOfferingResponse>[] = [];
         resource_link_ids.forEach(resource_link_id => {
@@ -70,12 +87,9 @@ export async function getNetworkResources(
             if (isValidClassNetwork) {
               // return promises for individual metadata requests
               try {
-                const [problemPublicationsSnap, personalPublicationsSnap] = await Promise.all([
-                  admin.database().ref(`${offeringRoot}/publications`).get(),
-                  admin.database().ref(`${offeringRoot}/personalPublications`).get()
-                ]);
+                // retrieve metadata for published problem documents
+                const problemPublicationsSnap = await admin.database().ref(`${offeringRoot}/publications`).get();
                 const problemPublications = problemPublicationsSnap.val() || undefined;
-                const personalPublications = personalPublicationsSnap.val() || undefined;
                 // teacher problem/planning documents are returned under each teacher
                 type TeacherOfferingPromise = Promise<INetworkResourceTeacherOfferingResponse>;
                 const teachers: TeacherOfferingPromise[] = classDoc.data()?.teachers.map(async (teacherId: string) => {
@@ -91,7 +105,7 @@ export async function getNetworkResources(
                   })
                 }) || [];
                 resolveOffering({
-                  resource_link_id, problemPublications, personalPublications, teachers: await Promise.all(teachers)
+                  resource_link_id, problemPublications, teachers: await Promise.all(teachers)
                 });
               }
               catch(e) {
@@ -129,7 +143,7 @@ export async function getNetworkResources(
         const classData = classDocData ? { id, name, uri, teacher, teachers: teacherResponses } : undefined;
 
         const resources = await Promise.all(offeringPromises);
-        resolveClass({ context_id, ...classData, resources })
+        resolveClass({ context_id, ...classData, personalPublications, learningLogPublications, resources })
       }
       catch(e) {
         // on error we just don't return any resources for the class
