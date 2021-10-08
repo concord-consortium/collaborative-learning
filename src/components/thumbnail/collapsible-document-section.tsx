@@ -71,19 +71,20 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
 
   const networkDocuments = useNetworkDocuments();
   const currentSection = subTab.sections[0] as NavTabSectionModelType;
+  const hasDocuments = documentKeys.length > 0;
 
   return (
     <div className="collapsible-documents-section">
-      <div className="section-collapse-toggle" onClick={handleSectionToggle}>
+      <div className="section-collapse-toggle" onClick={hasDocuments ? handleSectionToggle : undefined}>
         <div className="teacher-class-info">
           {userName} / {classNameStr}
         </div>
-        <ArrowIcon className={`arrow-icon ${isOpen ? "open": ""}`} />
+        {hasDocuments && <ArrowIcon className={`arrow-icon ${isOpen ? "open": ""}`} />}
       </div>
       { isOpen &&
         <div className="list">
 
-          { documentKeys.length > 0
+          {hasDocuments
             ? documentKeys.map((key, i) => {
               const document = networkDocuments.getDocument(key);
               if (!document) return <div>Document Missing</div>;
