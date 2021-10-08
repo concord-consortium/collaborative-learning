@@ -1,6 +1,7 @@
 import { each } from "lodash";
 import { inject, observer } from "mobx-react";
 import React from "react";
+import { OptionalLoadingSpinner } from "./optional-loading-spinner";
 import { BaseComponent } from "../base";
 import { DocumentContentComponent } from "./document-content";
 import { DocumentModelType } from "../../models/document/document";
@@ -107,7 +108,7 @@ export class CanvasComponent extends BaseComponent<IProps> {
       );
     }
     else {
-      return null;
+      return <OptionalLoadingSpinner document={document} />;
     }
   }
 

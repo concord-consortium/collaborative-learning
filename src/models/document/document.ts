@@ -246,6 +246,12 @@ export const DocumentModel = types
       return self.queryPromise;
     },
 
+    isLoadingContent(queryClient: QueryClient) {
+      const { remoteContext: context_id, uid, key } = self;
+      const queryKey = ["network-documents", context_id, uid, key];
+      return queryClient.getQueryState(queryKey)?.status === "loading";
+    },
+
     setProperties(properties: ISetProperties) {
       forEach(properties, (value, key) => self.setProperty(key, value));
     }

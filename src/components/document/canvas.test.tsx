@@ -25,7 +25,7 @@ describe("Canvas Component", () => {
     };
   });
 
-  it("can render without a document or content", () => {
+  it.skip("can render without a document or content", () => {
     const stores = createStores();
     const wrapper = mount(
       <Provider stores={stores}>
