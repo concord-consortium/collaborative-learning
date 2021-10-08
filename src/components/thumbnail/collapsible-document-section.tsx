@@ -61,11 +61,7 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
     } else if (section.type === "published-problem-documents") {
       // get the published problem documents
       networkResource.resources?.forEach((resource) => {
-        if (resource.problemPublications) {
-          for (const [key] of Object.entries(resource.problemPublications)) {
-            documentKeys.push(key);
-          }
-        }
+        resource.problemPublications && documentKeys.push(...Object.keys(resource.problemPublications));
       });
     } else if (section.type === "published-learning-logs") {
       networkResource.learningLogPublications && documentKeys.push(...Object.keys(networkResource.learningLogPublications));
