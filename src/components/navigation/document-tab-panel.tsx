@@ -172,16 +172,17 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
             );
           })
         }
-        <NetworkDocumentsSection
-          currentClassHash={classHash}
-          currentTeacherName={user.name}
-          currentTeacherId={user.id}
-          subTab={subTab}
-          problemTitle={this.stores.problem.title}
-          stores={this.stores}
-          scale={kNavItemScale}
-          onSelectDocument={onSelectDocument}
-        />
+        {user.isNetworkedTeacher &&
+          <NetworkDocumentsSection
+            currentClassHash={classHash}
+            currentTeacherName={user.name}
+            currentTeacherId={user.id}
+            subTab={subTab}
+            problemTitle={this.stores.problem.title}
+            stores={this.stores}
+            scale={kNavItemScale}
+            onSelectDocument={onSelectDocument}
+          />}
       </div>
     );
   }
