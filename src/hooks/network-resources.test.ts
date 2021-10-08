@@ -55,6 +55,12 @@ describe("Network resources hooks", () => {
             version: "1.0",
             response: [{
               context_id: "class-hash",
+              personalPublications: {
+                "pub-2": { uid: "user-1", title: "title", properties: {}, originDoc: "personal-1" }
+              },
+              learningLogPublications: {
+                "log-2": { uid: "user-1", title: "title", properties: {}, originDoc: "log-1" }
+              },
               teachers: [{
                 uid: "user-1",
                 personalDocuments: {
@@ -67,9 +73,6 @@ describe("Network resources hooks", () => {
               resources: [{
                 problemPublications: {
                   "pub-1": { userId: "user-1" }
-                },
-                personalPublications: {
-                  "pub-2": { uid: "user-1", title: "title", properties: {}, originDoc: "origin-1" }
                 },
                 teachers: [{
                   uid: "user-1",

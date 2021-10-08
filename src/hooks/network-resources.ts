@@ -5,7 +5,8 @@ import { IGetNetworkResourcesParams, IGetNetworkResourcesResponse } from "../../
 import { DBOfferingUserProblemDocument, DBOtherDocument, DBOtherPublication, DBPublication } from "../lib/db-types";
 import { DocumentModel } from "../models/document/document";
 import {
-  LearningLogDocument, PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemPublication
+  LearningLogDocument, LearningLogPublication, PersonalDocument, PersonalPublication,
+  PlanningDocument, ProblemDocument, ProblemPublication
 } from "../models/document/document-types";
 import { useFirebaseFunction } from "./use-firebase-function";
 import { useNetworkDocuments, useProblemPath } from "./use-stores";
@@ -24,6 +25,17 @@ export function useNetworkResources() {
     const { response } = networkResources.data as IGetNetworkResourcesResponse;
     response?.forEach(aClass => {
       const { context_id: remoteContext } = aClass;
+      // add class-wide publications to the network documents store
+      each(aClass.personalPublications, (metadata: DBOtherPublication, key: string) => {
+        const { title, properties, uid, originDoc } = metadata;
+        const type = PersonalPublication;
+        documents.add(DocumentModel.create({ uid, type, key, remoteContext, title, properties, originDoc }));
+      });
+      each(aClass.learningLogPublications, (metadata: DBOtherPublication, key: string) => {
+        const { title, properties, uid, originDoc } = metadata;
+        const type = LearningLogPublication;
+        documents.add(DocumentModel.create({ uid, type, key, remoteContext, title, properties, originDoc }));
+      });
       // add each teacher's class-wide documents to the network documents store
       aClass.teachers?.forEach(teacher => {
         each(teacher.personalDocuments, (metadata: DBOtherDocument, key: string) => {
@@ -43,11 +55,6 @@ export function useNetworkResources() {
           const { userId: uid } = metadata;
           const type = ProblemPublication;
           documents.add(DocumentModel.create({ uid, type, key, remoteContext }));
-        });
-        each(offering.personalPublications, (metadata: DBOtherPublication, key: string) => {
-          const { uid, title, properties, originDoc } = metadata;
-          const type = PersonalPublication;
-          documents.add(DocumentModel.create({ uid, type, key, remoteContext, title, properties, originDoc }));
         });
         // add teacher's problem-specific documents to the network documents store
         offering.teachers?.forEach(teacher => {
