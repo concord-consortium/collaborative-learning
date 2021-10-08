@@ -97,16 +97,17 @@ export function networkDocumentKey(uid: string, documentKey: string, network?: s
 }
 
 export interface IDocumentMetadata {
+  contextId: string;
   uid: string;
   type: string;
   key: string;
-  createdAt: number;
+  createdAt?: number;
   title?: string;
   originDoc?: string;
   properties?: Record<string, string>;
 }
 export function isDocumentMetadata(o: any): o is IDocumentMetadata {
-  return !!o?.uid && !!o.type && !!o.key && !!o.createdAt;
+  return !!o?.contextId && !!o.uid && !!o.type && !!o.key;
 }
 
 export interface ICurriculumMetadata {

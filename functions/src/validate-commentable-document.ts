@@ -1,13 +1,13 @@
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
 import {
-  ICommentableDocumentParams,
-  ICommentableDocumentUnionParams, isCurriculumMetadata, isDocumentMetadata, isWarmUpParams, networkDocumentKey
+  ICommentableDocumentParams, ICommentableDocumentUnionParams, isCurriculumMetadata, isDocumentMetadata,
+  isWarmUpParams, networkDocumentKey
 } from "./shared";
 import { validateUserContext } from "./user-context";
 
 // update this when deploying updates to this function
-const version = "1.0.0";
+const version = "1.0.1";
 
 export async function validateCommentableDocument(
                         params?: ICommentableDocumentUnionParams,

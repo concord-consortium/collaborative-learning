@@ -7,7 +7,7 @@ import {
 } from "../src/shared";
 import { validateCommentableDocument } from "../src/validate-commentable-document";
 import {
-  kCanonicalPortal, kCreatedAt, kCurriculumKey, kDemoName, kDocumentKey, kDocumentType, kFirebaseUserId,
+  kCanonicalPortal, kClassHash, kCurriculumKey, kDemoName, kDocumentKey, kDocumentType, kFirebaseUserId,
   kTeacherNetwork, kUserId, specAuth, specUserContext
 } from "./test-utils";
 
@@ -57,7 +57,7 @@ export interface IPartialValidateDocumentParams {
 const specValidateDocument = (overrides?: IPartialValidateDocumentParams): ICommentableDocumentParams => {
   return {
     context: specUserContext(overrides?.context),
-    document: { uid: kUserId, type: kDocumentType, key: kDocumentKey, createdAt: kCreatedAt, ...overrides?.document }
+    document: { contextId: kClassHash, uid: kUserId, type: kDocumentType, key: kDocumentKey, ...overrides?.document }
   };
 };
 
