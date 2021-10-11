@@ -1,12 +1,19 @@
 import firebase from "firebase/app";
 import { useCallback } from "react";
-import { useMutation, UseMutationOptions, useQuery } from "react-query";
-import { ICommentableDocumentParams, IPostDocumentCommentParams, isSectionPath } from "../../functions/src/shared";
+import { useMutation, UseMutationOptions, useQuery, useQueryClient } from "react-query";
+import {
+  ICommentableDocumentParams, ICurriculumMetadata, IDocumentMetadata, IPostDocumentCommentParams,
+  isCurriculumMetadata, isDocumentMetadata, isSectionPath
+} from "../../functions/src/shared";
 import { CommentDocument, CurriculumDocument, DocumentDocument } from "../lib/firestore-schema";
-import { useCollectionOrderedRealTimeQuery, useFirestore } from "./firestore-hooks";
+import { useCollectionOrderedRealTimeQuery, useFirestore, WithId } from "./firestore-hooks";
 import { useFirebaseFunction } from "./use-firebase-function";
 import { useDocumentOrCurriculumMetadata, useNetworkDocumentKey } from "./use-stores";
 import { useUserContext } from "./use-user-context";
+import { uniqueId } from "../utilities/js-utils";
+
+// documentKeyOrSectionPath => queryKey
+const commentsQueryKeyMap: Record<string, string> = {};
 
 /*
  * useCommentableDocumentPath
@@ -33,6 +40,13 @@ export const useCommentsCollectionPath = (documentKeyOrSectionPath: string) => {
   const docPath = useCommentableDocumentPath(documentKeyOrSectionPath);
   if (!documentKeyOrSectionPath) return documentKeyOrSectionPath;
   return `${docPath}/comments`;
+};
+
+export const getCommentsQueryKeyFromMetadata = (metadata: IDocumentMetadata | ICurriculumMetadata) => {
+  const documentKey = isDocumentMetadata(metadata) ? metadata.key : undefined;
+  const curriculumKey = isCurriculumMetadata(metadata) ? `${metadata.path}/${metadata.section}` : undefined;
+  const curriculumOrDocumentKey = curriculumKey || documentKey;
+  return curriculumOrDocumentKey && commentsQueryKeyMap[curriculumOrDocumentKey];
 };
 
 /*
@@ -98,12 +112,48 @@ type PostDocumentCommentUseMutationOptions =
       UseMutationOptions<firebase.functions.HttpsCallableResult, unknown, IPostDocumentCommentClientParams>;
 
 export const usePostDocumentComment = (options?: PostDocumentCommentUseMutationOptions) => {
+  const queryClient = useQueryClient();
   const postDocumentComment = useFirebaseFunction<IPostDocumentCommentParams>("postDocumentComment_v1");
   const context = useUserContext();
   const postComment = useCallback((clientParams: IPostDocumentCommentClientParams) => {
     return postDocumentComment({ context, ...clientParams });
   }, [context, postDocumentComment]);
-  return useMutation(postComment, options);
+  const { onMutate: clientOnMutate, onError: clientOnError, ...otherClientOptions } = options || {};
+  return useMutation(postComment, {
+    onMutate: async newCommentParams => {
+      const { document, comment } = newCommentParams;
+      const queryKey = getCommentsQueryKeyFromMetadata(document);
+      // snapshot the current state of the comments in case we need to roll back on error
+      const rollbackComments = queryKey && queryClient.getQueryData<CommentWithId[]>(queryKey);
+      type CommentWithId = WithId<CommentDocument>;
+      const newComment: CommentWithId = {
+        id: `pending-${uniqueId()}`,
+        uid: context.uid || "",
+        name: context.name || "",
+        network: context.network,
+        createdAt: new Date(),
+        tileId: comment.tileId,
+        content: comment.content
+      };
+      // optimistically add the new comment (https://react-query.tanstack.com/guides/optimistic-updates)
+      queryKey && queryClient.setQueryData<CommentWithId[]>(queryKey, prev => [...(prev || []), newComment]);
+      // call client-specified onMutate (if provided)
+      clientOnMutate?.({ document, comment });
+      // return a context object with the rollback value
+      return { rollbackComments };
+    },
+    onError: (err, newCommentParams, rollbackContext) => {
+      const queryKey = getCommentsQueryKeyFromMetadata(newCommentParams.document);
+      const rollbackComments = (rollbackContext as any)?.rollbackComments;
+      // For now we ignore the possibility that there has been a remote change since we captured
+      // the rollback comments. If we encountered an error on write it likely means there's a
+      // problem with our connection which means that it's unlikely we've successfully received
+      // any updates since we issued the write request. Things should sync up on the next update.
+      queryKey && rollbackComments && queryClient.setQueryData(queryKey, rollbackComments);
+      clientOnError?.(err, newCommentParams, rollbackContext);
+    },
+    ...otherClientOptions
+  });
 };
 
 const commentConverter = {
@@ -133,6 +183,7 @@ export const useDocumentComments = (documentKeyOrSectionPath?: string) => {
   const { isSuccess } = useCommentableDocument(documentKeyOrSectionPath);
   const path = useCommentsCollectionPath(documentKeyOrSectionPath || "");
   const queryPath = isSuccess ? path : "";
+  documentKeyOrSectionPath && queryPath && (commentsQueryKeyMap[documentKeyOrSectionPath] = queryPath);
   const converter = commentConverter;
   return useCollectionOrderedRealTimeQuery(queryPath, { converter, orderBy: "createdAt" });
 };
