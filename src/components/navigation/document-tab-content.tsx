@@ -42,6 +42,9 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
     }
     setReferenceDocument(document);
     ui.updateFocusDocument();
+    Logger.logDocumentEvent(document.isRemote
+      ? LogEventName.VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT
+      : LogEventName.VIEW_SHOW_COMPARISON_DOCUMENT, document);
   };
 
   const loadDocumentContent = async (document: DocumentModelType) => {
