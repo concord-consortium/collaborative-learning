@@ -200,7 +200,7 @@ export class Logger {
       documentProperties: document.properties?.toJSON() || {},
       documentVisibility: document.visibility,
       documentChanges: document.changeCount,
-      ...(teacherNetworkInfo || {})
+      ...teacherNetworkInfo
     };
     Logger.log(event, parameters);
   }
