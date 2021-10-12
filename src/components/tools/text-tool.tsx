@@ -208,6 +208,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
       // but 'text-tool` is used for the internal editor (cf. 'classes' above),
       // which is used for cypress tests and other purposes.
       <div className={`text-tool-wrapper ${readOnly ? "" : "editable"}`}
+        data-testid="text-tool-wrapper"
         ref={elt => this.textToolDiv = elt}
         onMouseDown={this.handleMouseDownInWrapper}>
         <TextToolbarComponent

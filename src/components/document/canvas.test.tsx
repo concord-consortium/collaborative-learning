@@ -1,19 +1,19 @@
-import Adapter from "enzyme-adapter-react-16";
+import { render, screen } from "@testing-library/react";
 import React from "react";
-
-import { configure, mount } from "enzyme";
 import { Provider } from "mobx-react";
 import { CanvasComponent } from "./canvas";
-import { DocumentContentComponent } from "./document-content";
 import { DocumentModel } from "../../models/document/document";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { ProblemDocument } from "../../models/document/document-types";
 import { createStores } from "../../models/stores/stores";
 import { createSingleTileContent } from "../../utilities/test-utils";
 
-// import { logComponent } from "../utilities/test-utils";
-
-configure({ adapter: new Adapter() });
+var mockGetQueryState = jest.fn();
+jest.mock("react-query", () => ({
+  useQueryClient: () => ({
+    getQueryState: mockGetQueryState
+  })
+}));
 
 describe("Canvas Component", () => {
 
@@ -25,13 +25,14 @@ describe("Canvas Component", () => {
     };
   });
 
-  it.skip("can render without a document or content", () => {
+ it("can render without a document or content", () => {
     const stores = createStores();
-    const wrapper = mount(
+    render(
       <Provider stores={stores}>
         <CanvasComponent context="test" />
-      </Provider>);
-    expect(wrapper.find(DocumentContentComponent).length).toEqual(0);
+      </Provider>
+    );
+    expect(screen.queryByTestId("document-content")).toBeNull();
   });
 
   it("can render with a document", () => {
@@ -48,12 +49,33 @@ describe("Canvas Component", () => {
       })
     });
     const stores = createStores();
-    const wrapper = mount(
+    render(
       <Provider stores={stores}>
         <CanvasComponent context="test" document={document} readOnly={true} />
-      </Provider>);
-    expect(wrapper.find(DocumentContentComponent).length).toEqual(1);
-    expect(wrapper.find(".text-tool").exists()).toBe(true);
+      </Provider>
+    );
+    expect(screen.getByTestId("document-content")).toBeInTheDocument();
+    expect(screen.getByTestId("text-tool-wrapper")).toBeInTheDocument();
+  });
+
+  it("renders spinner while loading remote document content", () => {
+    mockGetQueryState.mockImplementation(() => ({ status: "loading" }));
+    const document = DocumentModel.create({
+      type: ProblemDocument,
+      title: "test",
+      uid: "1",
+      key: "test",
+      remoteContext: "remote-context",
+      createdAt: 1,
+      visibility: "public"
+    });
+    const stores = createStores();
+    render(
+      <Provider stores={stores}>
+        <CanvasComponent context="test" document={document} readOnly={true} />
+      </Provider>
+    );
+    expect(screen.getByTestId("document-loading-spinner")).toBeInTheDocument();
   });
 
   it("can render with content", () => {
@@ -62,12 +84,13 @@ describe("Canvas Component", () => {
       text: "test"
     }));
     const stores = createStores();
-    const wrapper = mount(
+    render(
       <Provider stores={stores}>
         <CanvasComponent context="test" content={content} readOnly={true} />
-      </Provider>);
-    expect(wrapper.find(DocumentContentComponent).length).toEqual(1);
-    expect(wrapper.find(".text-tool").exists()).toBe(true);
+      </Provider>
+    );
+    expect(screen.getByTestId("document-content")).toBeInTheDocument();
+    expect(screen.getByTestId("text-tool-wrapper")).toBeInTheDocument();
   });
 
 });
