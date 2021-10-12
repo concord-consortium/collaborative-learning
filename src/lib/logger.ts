@@ -56,6 +56,7 @@ export enum LogEventName {
 
   VIEW_SHOW_DOCUMENT,
   VIEW_SHOW_COMPARISON_DOCUMENT,
+  VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT,
   VIEW_ENTER_FOUR_UP,
   VIEW_ENTER_ONE_UP,
   VIEW_SHOW_COMPARISON_PANEL,
@@ -100,7 +101,10 @@ export enum LogEventName {
   DASHBOARD_DESELECT_STUDENT,
   DASHBOARD_SELECT_STUDENT,
   DASHBOARD_TOGGLE_TO_WORKSPACE,
-  DASHBOARD_TOGGLE_TO_DASHBOARD
+  DASHBOARD_TOGGLE_TO_DASHBOARD,
+
+  TEACHER_NETWORK_EXPAND_DOCUMENT_SECTION,
+  TEACHER_NETWORK_COLLAPSE_DOCUMENT_SECTION,
 }
 
 type LoggableToolChangeEvent = Optional<JXGChange, "operation"> |
@@ -114,6 +118,13 @@ interface IDocumentInfo {
   title?: string;
   properties?: { [prop: string]: string };
   changeCount?: number;
+}
+
+interface ITeacherNetworkInfo {
+  networkClassHash?: string;
+  networkClassName?: string;
+  networkUserId?: string;
+  networkUserName?: string;
 }
 
 export class Logger {
@@ -179,7 +190,8 @@ export class Logger {
     Logger.log(event, parameters);
   }
 
-  public static logDocumentEvent(event: LogEventName, document: DocumentModelType) {
+  public static logDocumentEvent(event: LogEventName, document: DocumentModelType,
+    teacherNetworkInfo?: ITeacherNetworkInfo) {
     const parameters = {
       documentUid: document.uid,
       documentKey: document.key,
@@ -187,7 +199,8 @@ export class Logger {
       documentTitle: document.title || "",
       documentProperties: document.properties?.toJSON() || {},
       documentVisibility: document.visibility,
-      documentChanges: document.changeCount
+      documentChanges: document.changeCount,
+      ...teacherNetworkInfo
     };
     Logger.log(event, parameters);
   }

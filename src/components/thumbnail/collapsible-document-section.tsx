@@ -9,6 +9,7 @@ import { ISubTabSpec } from "../navigation/document-tab-panel";
 import { useNetworkDocuments } from "../../hooks/use-stores";
 import { TabPanelDocumentsSubSectionPanel } from "./tab-panel-documents-subsection-panel";
 import { NavTabSectionModelType } from "../../models/view/nav-tabs";
+import { Logger, LogEventName } from "../../lib/logger";
 // import NotSharedIcon from "../../assets/icons/share/not-share.svg";
 // import { DocumentCaption } from "./document-caption";
 
@@ -17,11 +18,14 @@ import "./collapsible-document-section.scss";
 
 interface IProps {
   userName: string;
+  userId: string;
   classNameStr: string;
+  classHash: string;
   stores: IStores;
   scale: number;
   selectedDocument?: string;
-  onSelectDocument?: (document: DocumentModelType) => void;
+  onSelectDocument?: (document: DocumentModelType, networkClassHash?: string,
+    networkClassName?: string, networkUserName?: string, networkUserId?: string) => void;
   subTab: ISubTabSpec;
   networkResource: INetworkResourceClassResponse;
   problemTitle: string;
@@ -29,9 +33,17 @@ interface IProps {
 
 export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
   ({userName, classNameStr, stores, scale, selectedDocument, onSelectDocument, subTab,
-    networkResource}) => {
+    networkResource, userId, classHash}) => {
   const [isOpen, setIsOpen] = useState(false);
   const handleSectionToggle = () => {
+    Logger.log(isOpen
+      ? LogEventName.TEACHER_NETWORK_COLLAPSE_DOCUMENT_SECTION
+      : LogEventName.TEACHER_NETWORK_EXPAND_DOCUMENT_SECTION, {
+      network_class_hash: classHash,
+      network_class_name: classNameStr,
+      network_user_name: userName,
+      network_user_id: userId
+    });
     setIsOpen(!isOpen);
   };
 
@@ -83,7 +95,6 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
       </div>
       { isOpen &&
         <div className="list">
-
           {hasDocuments
             ? documentKeys.map((key, i) => {
               const document = networkDocuments.getDocument(key);
@@ -93,7 +104,8 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
                 <DocumentContextReact.Provider key={document.key} value={documentContext}>
                   <TabPanelDocumentsSubSectionPanel section={currentSection} sectionDocument={document}
                     tab={subTab.label} stores={stores} scale={scale} selectedDocument={selectedDocument}
-                    onSelectDocument={onSelectDocument}
+                    onSelectDocument={() =>
+                      onSelectDocument?.(document, classHash, classNameStr, userName, userId)}
                   />
                 </DocumentContextReact.Provider>
               );

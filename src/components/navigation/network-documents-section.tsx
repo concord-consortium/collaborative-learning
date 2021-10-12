@@ -16,7 +16,8 @@ interface IProps {
   problemTitle: string;
   stores: IStores;
   scale: number;
-  onSelectDocument?: (document: DocumentModelType) => void;
+  onSelectDocument?: (document: DocumentModelType, networkClassHash?: string,
+    networkClassName?: string, networkUserName?: string, networkUserId?: string) => void;
 }
 
 export enum NetworkSectionType {
@@ -63,10 +64,18 @@ export const NetworkDocumentsSection: React.FC<IProps> = ({ currentClassHash, cu
               const userName = networkSectionType === NetworkSectionType.myClasses
                 ? currentTeacherName
                 : c.teacher || "unknown teacher";
+              const userId = networkSectionType === NetworkSectionType.myClasses
+                ? currentTeacherId
+                : c.id || "unknown teacher";
+              const classHash = networkSectionType === NetworkSectionType.myClasses
+                ? currentClassHash
+                : c.context_id;
               return <CollapsibleDocumentsSection
                 key={index}
                 userName={userName}
+                userId={userId}
                 classNameStr={c.name || "unknown class"}
+                classHash={classHash}
                 subTab={subTab}
                 networkResource={c}
                 problemTitle={problemTitle}
