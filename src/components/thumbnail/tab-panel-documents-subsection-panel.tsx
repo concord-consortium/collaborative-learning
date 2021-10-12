@@ -81,7 +81,8 @@ export const TabPanelDocumentsSubSectionPanel = ({section, sectionDocument, tab,
         scale={scale}
         isSelected={sectionDocument.key === selectedDocument}
         captionText={getDocumentCaption(stores, sectionDocument)}
-        onDocumentClick={handleDocumentClick} onDocumentDragStart={handleDocumentDragStart}
+        onDocumentClick={handleDocumentClick}
+        onDocumentDragStart={!sectionDocument.isRemote ? handleDocumentDragStart: undefined}
         onIsStarred={onIsStarred}
         onDocumentStarClick={_handleDocumentStarClick}
         onDocumentDeleteClick={_handleDocumentDeleteClick}
