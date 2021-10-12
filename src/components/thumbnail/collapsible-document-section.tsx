@@ -104,8 +104,8 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
                 <DocumentContextReact.Provider key={document.key} value={documentContext}>
                   <TabPanelDocumentsSubSectionPanel section={currentSection} sectionDocument={document}
                     tab={subTab.label} stores={stores} scale={scale} selectedDocument={selectedDocument}
-                    onSelectDocument={() => onSelectDocument
-                      && onSelectDocument(document, classHash, classNameStr, userName, userId)}
+                    onSelectDocument={() =>
+                      onSelectDocument?.(document, classHash, classNameStr, userName, userId)}
                   />
                 </DocumentContextReact.Provider>
               );

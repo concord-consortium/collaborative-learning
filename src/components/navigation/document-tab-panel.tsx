@@ -151,7 +151,7 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
       : undefined;
     Logger.logDocumentEvent(logEvent, document, networkInfo);
 
-    onSelectDocument && onSelectDocument(document);
+    onSelectDocument?.(document);
   }
 
   private renderSubSections(subTab: any) {
