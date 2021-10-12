@@ -143,22 +143,13 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
   private handleDocumentSelect = (document: DocumentModelType, networkClassHash?: string,
     networkClassName?: string, networkUserName?: string, networkUserId?: string) => {
     const { onSelectDocument } = this.props;
-    if (!document.isRemote) {
-      Logger.logDocumentEvent(LogEventName.VIEW_SHOW_COMPARISON_DOCUMENT, document);
-    } else {
-      Logger.log(LogEventName.VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT,
-        { documentUid: document.uid,
-          documentKey: document.key,
-          documentType: document.type,
-          documentTitle: document.title || "",
-          documentProperties: document.properties?.toJSON() || {},
-          documentVisibility: document.visibility,
-          documentChanges: document.changeCount,
-          network_class_hash: networkClassHash,
-          network_class_name: networkClassName,
-          network_user_name: networkUserName,
-          network_user_id: networkUserId });
-    }
+    const logEvent = document.isRemote
+      ? LogEventName.VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT
+      : LogEventName.VIEW_SHOW_COMPARISON_DOCUMENT;
+    const networkInfo = document.isRemote
+      ? {networkClassHash, networkClassName, networkUserName, networkUserId}
+      : undefined;
+    Logger.logDocumentEvent(logEvent, document, networkInfo);
 
     onSelectDocument && onSelectDocument(document);
   }

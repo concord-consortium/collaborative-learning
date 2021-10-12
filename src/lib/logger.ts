@@ -120,6 +120,13 @@ interface IDocumentInfo {
   changeCount?: number;
 }
 
+interface ITeacherNetworkInfo {
+  networkClassHash?: string;
+  networkClassName?: string;
+  networkUserId?: string;
+  networkUserName?: string;
+}
+
 export class Logger {
   public static isLoggingEnabled = false;
 
@@ -183,7 +190,8 @@ export class Logger {
     Logger.log(event, parameters);
   }
 
-  public static logDocumentEvent(event: LogEventName, document: DocumentModelType) {
+  public static logDocumentEvent(event: LogEventName, document: DocumentModelType,
+    teacherNetworkInfo?: ITeacherNetworkInfo) {
     const parameters = {
       documentUid: document.uid,
       documentKey: document.key,
@@ -191,7 +199,8 @@ export class Logger {
       documentTitle: document.title || "",
       documentProperties: document.properties?.toJSON() || {},
       documentVisibility: document.visibility,
-      documentChanges: document.changeCount
+      documentChanges: document.changeCount,
+      ...(teacherNetworkInfo || {})
     };
     Logger.log(event, parameters);
   }
