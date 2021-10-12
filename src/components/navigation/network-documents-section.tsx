@@ -16,7 +16,8 @@ interface IProps {
   problemTitle: string;
   stores: IStores;
   scale: number;
-  onSelectDocument?: (document: DocumentModelType) => void;
+  onSelectDocument?: (document: DocumentModelType, networkClassHash?: string,
+    networkClassName?: string, networkUserName?: string, networkUserId?: string) => void;
 }
 
 export enum NetworkSectionType {
