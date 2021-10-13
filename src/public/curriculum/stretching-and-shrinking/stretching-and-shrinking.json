@@ -967,7 +967,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In the last Problem, you worked with images, or scale drawings, that were similar to the original. Those scale drawings were larger than the original figure. In this Problem, you will work with scale drawings that are smaller than the original. You will also learn more about what it means for figures to be similar."
+                        "In the last Problem, we worked with images, or scale drawings, that were similar to the original. Those scale drawings were larger than the original figure. In this Problem, you will work with scale drawings that are smaller than the original. You will also learn more about what it means for figures to be similar."
                       ]
                     }
                   },
@@ -976,17 +976,54 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "When you study similar figures, you often compare their sides and angles. To compare the parts correctly, mathematicians use the terms corresponding sides and corresponding angles. In every pair of similar figures, each side of one figure has a corresponding side in the other figure. Also, each angle has a corresponding angle. \n\nRecall that there are two ways to identify angles. You can identify an angle with three letters. The angles in the small triangle have the following names:"
+                        "When we study similar figures, you often compare their sides and angles. Recall that to compare the parts correctly, mathematicians use the terms <strong>corresponding sides</strong> and <strong>corresponding angles</strong>. In every pair of similar figures, each side of one figure has a corresponding side in the other figure. Also, each angle has a corresponding angle.",
+                        "<p>The example below shows the corresponding sides and corresponding angles of two triangles.</p>"
                       ]
                     }
                   },
-                     {
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/SS_1_3_corresponding.jpg"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Geometry",
+                      "title": "Corresponding Angles",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-2, -2],
+                          "axisRange": [20, 16]
+                        }
+                      },
+                      "objects": [
+                        { "type": "point", "parents": [1, 1], "properties": {"id":"fD4BT7J3op3pVQtK","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [1, 6], "properties": {"id":"gIZaiLYMyd1FrE5x","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [4, 1], "properties": {"id":"Kn7fkbmzBqjMA32K","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "polygon", "parents": ["fD4BT7J3op3pVQtK", "gIZaiLYMyd1FrE5x", "Kn7fkbmzBqjMA32K"],"properties": {"id":"BTA-bCQzBm-RaG9S"} },
+                        { "type": "point", "parents": [6, 1], "properties": {"id":"d-I-pw7ySlzt7ETY","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [6, 9.4], "properties": {"id":"LaCUJeVNrw7NtNJ2","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [11, 1], "properties": {"id":"3jxIfnZmEvGoiXdO","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "polygon", "parents": ["d-I-pw7ySlzt7ETY", "LaCUJeVNrw7NtNJ2", "3jxIfnZmEvGoiXdO"],"properties": {"id":"7nB5OzVIjO7ZnjcC"} },
+                        { "type": "vertexAngle", "parents": ["d-I-pw7ySlzt7ETY", "LaCUJeVNrw7NtNJ2", "3jxIfnZmEvGoiXdO"],"properties": {"id":"qC8fQ3hGBhegjZ0m","radius":1} },
+                        { "type": "vertexAngle", "parents": ["fD4BT7J3op3pVQtK", "gIZaiLYMyd1FrE5x", "Kn7fkbmzBqjMA32K"],"properties": {"id":"Z8sxCfZoi_i7aA7U","radius":1} }
+                      ]
+                    }
+                  },   
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Angle BAC or ∠BAC"
+                        "There are different ways to identify angles. We can identify an angle with three letters. The letter identifying the vertex of an angle is always the middle letter in its name. We use the word ‘angle’ or the angle symbol ‘∠’. Also, we can also name an angle by its vertex when it is clear which angle we are referring to."
                       ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/SS_1_3_identify_angles.jpg"
                     }
                   },
                   {
@@ -994,89 +1031,12 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Angle BCA or ∠BCA"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "Angle ABC or ∠ABC"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "The letter identifying the vertex of an angle is always the middle letter in its name. For example, point A is the vertex of BAC. You can also name an angle by its vertex only when it is clear which angle you are referring to."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "∠BAC can also be called ∠ A"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "∠BCA can also be called ∠ C"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "∠ABC can also be called ∠ B"
-                      ]
-                    }
-                  },
-                   {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "The following example shows the corresponding sides and corresponding angles in the two triangles."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                    "type": "Image",
-                    "url": "curriculum/stretching-and-shrinking/images/SS_1_3_In_10_angles_350w.png"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<em>What names would you give the angles in the large triangle above?</em>"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
+                        "<em>What names would you give the angles in the large triangle?</em>",
                         "<em>Name the corresponding angles in the following two similar triangles?</em>"
                       ]
                     }
                   },
-                   {
+                  {
                     "content": {
                     "type": "Image",
                     "url": "curriculum/stretching-and-shrinking/images/SS_4_2_IC_35_Q2A_350w.png"
@@ -1128,7 +1088,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Image",
-                      "url": "/-MklmI8h3sX6mXDjfboy"
+                      "url": "curriculum/stretching-and-shrinking/images/1-3_Initial_Challenge_1.png"
                     }
                   },
                   {
@@ -1146,7 +1106,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Image",
-                      "url": "/-MklmI8h3sX6mXDjfboy"
+                      "url": "curriculum/stretching-and-shrinking/images/1-3_Initial_Challenge_2.png"
                     }
                   },
                   {
