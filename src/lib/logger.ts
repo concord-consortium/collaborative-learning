@@ -129,9 +129,7 @@ interface IDocumentInfo {
 
 interface ITeacherNetworkInfo {
   networkClassHash?: string;
-  networkClassName?: string;
   networkUserId?: string;
-  networkUserName?: string;
 }
 
 export class Logger {
@@ -199,6 +197,9 @@ export class Logger {
 
   public static logDocumentEvent(event: LogEventName, document: DocumentModelType,
     teacherNetworkInfo?: ITeacherNetworkInfo) {
+    const modifiedTeacherNetworkInfo = teacherNetworkInfo &&
+      {networkClassHash: teacherNetworkInfo.networkClassHash,
+       networkUsername: `${teacherNetworkInfo.networkUserId}@${this._instance.stores.user.portal}`};
     const parameters = {
       documentUid: document.uid,
       documentKey: document.key,
@@ -207,9 +208,10 @@ export class Logger {
       documentProperties: document.properties?.toJSON() || {},
       documentVisibility: document.visibility,
       documentChanges: document.changeCount,
-      ...teacherNetworkInfo
+      ...modifiedTeacherNetworkInfo
     };
     Logger.log(event, parameters);
+
   }
 
   public static logToolChange(
@@ -263,7 +265,7 @@ export class Logger {
 
     const logMessage: LogMessage = {
       application: appConfig.appName,
-      username:  `${user.id}@${user.portal}`,
+      username: `${user.id}@${user.portal}`,
       role: user.type || "unknown",
       classHash: user.classHash,
       session: this.session,
