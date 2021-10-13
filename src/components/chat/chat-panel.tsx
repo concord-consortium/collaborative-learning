@@ -58,7 +58,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
       ? postCommentMutation.mutate({ document, comment: { content: comment, tileId: focusTileId } })
       : undefined;
   }, [document, focusTileId, postCommentMutation, postedComments, focusDocument, localDocuments,
-      ui.selectedTileIds.length]);
+    networkDocuments, ui.selectedTileIds.length]);
 
   const commentsPath = useCommentsCollectionPath(focusDocument || "");
   const deleteCommentMutation = useDeleteDocument();
@@ -81,7 +81,8 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
     return document
       ? deleteCommentMutation.mutate(`${commentsPath}/${commentId}`)
       : undefined;
-  }, [document, deleteCommentMutation, commentsPath, focusDocument, localDocuments, ui.selectedTileIds.length]);
+  }, [document, deleteCommentMutation, commentsPath, focusDocument, localDocuments, networkDocuments,
+    ui.selectedTileIds.length, focusTileId]);
 
   const newCommentCount = unreadComments?.length || 0;
 
