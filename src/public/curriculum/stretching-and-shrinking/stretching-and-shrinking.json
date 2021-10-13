@@ -1356,7 +1356,8 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                         "Carlos explains that the computer screen can be thought of as a grid made up of thousands of tiny points, called pixels. To animate a figure, we need to enter the coordinates of key points on the figure. The computer uses these points to draw the figure in different positions. \n\nSometimes the figures in a computer game need to change size. A change in the code can make a figure larger or smaller. We can give it a rule for finding key points from the original figure. In this Investigation, we will explore answers to these questions.\n\n<em>Do the rules create scale drawings? That is, are the two figures similar?</em>"
+                         "Carlos explains that the computer screen can be thought of as a grid made up of thousands of tiny points, called pixels. To animate a figure, we need to enter the coordinates of key points on the figure. The computer uses these points to draw the figure in different positions. \n\nSometimes the figures in a computer game need to change size. A change in the code can make a figure larger or smaller. We can give it a rule for finding key points from the original figure. In this Investigation, we will explore answers to these questions.\n\n<em>Do the rules create scale drawings? That is, are the two figures similar?</em>",
+                         "<p>Zack and Marta’s computer game involves a family called the Wumps. The members of the Wump family are various sizes, but they all have the same shape. They are similar. Mug Wump is the game’s main character. By enlarging or reducing Mug, a player can transform him into other Wump family members.</p>"
                           ]
                       }
                     }
@@ -1381,18 +1382,127 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "html",
+                      "format": "markdown",
                       "text": [
-                        "Draw Mug on a coordinate graph paper by referring to the “Mug Wump” columns in the table.<ul><li>For Parts 1-3 of the figure, plot the points in order. Connect them as you go along.</li><li>For Part 4, plot the two points, but do not connect them.</li></ul>Use the coordinate rules in the table to draw Mug, Zug, Lug, Bug, and Glug on coordinate graph paper. "
+                        "### The Mug Experiment",
+                        "Equipment",
+                        "* Table of Coordinates for the Wump Game Characters",
+                        "* First Quadrant Grids to plot the Wump Characters/Digital graph"
                       ]
                     }
                   },
-                                    {
+                  {
                     "content": {
                       "type": "Text",
-                      "format": "html",
+                      "format": "markdown",
                       "text": [
-                        "<ul><li>Use the given rule to find the coordinates of the points. Record the coordinates in the columns Zug, Lug, Bug, and Glug.\nFor example, the rule for Zug is (2x, 2y). This means that you multiply each of Mug’s coordinates by 2. Point A on Mug is (0, 1), so the corresponding point A on Zug is (0, 2). Point B on Mug is (2, 1), so the corresponding point B on Zug is (4, 2).</li><li>Plot and connect the points from A to X for each figure on separate axes, just as you did for Mug, putting each on separate axes.</li></ul>\n\nLook at the figures created by Marta’s rules. Which ones appear to be family members who are similar to Mug? Which figures appear not to be similar, and thus “imposters”? How do you know?"
+                        "### Instructions for Plotting the Wumps",
+                        "* Plot Mug – Use the coordinate pairs in the “Mug Wump” column to draw Mug on grid paper. For Parts 1-3 of the figure, plot the points in order. Connect them as you go along. For Part 4, plot the two points, but do not connect them.",
+                        "* Find Coordinates for the other Wump characters – Use the given rules to find the new coordinates for each shape. Record the coordinates in the columns Zug, Lug, Bug, and Glug. For example, the rule for Zug is (2x, 2y). This means that you multiply each of Mug’s coordinates by 2. Point A on Mug is (0, 1), so the corresponding point A on Zug is (0, 2). Point B on Mug is (2, 1), so the corresponding point B on Zug is (4, 2).",
+                        "* Plot the other Wump characters – Plot and connect the points from A to X for each Wump character, just as you did for Mug. Put each shape on separate axes."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Table",
+                      "name": "Mug Wump",
+                      "columns": [
+                        {"name":"x","values":["0","2","2","3","3","5","5","6","6","8","6","2","0","2","6","6","2","2","3","4","5","3","2","6"]},
+                        {"name":"y","values":["1","1","0","0","1","1","0","0","1","1","7","7","1","2","2","3","3","2","4","5","4","4","5","5"]}
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Table",
+                      "name": "Zug",
+                      "columns": [
+                        {"name":"2x","values":["0","4","4","6","6","10","10","12","12","16","12","4","0","4","12","12","4","4","6","8","10","6","4","12"]},
+                        {"name":"2y","values":["2","2","0","0","2","2","0","0","2","2","14","14","2","4","4","6","6","4","8","10","8","8","10","10"]}
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Table",
+                      "name": "Lug",
+                      "columns": [
+                        {"name":"3x","values":["0","6","6","9","9","15","15","18","18","24","18","6","0","6","18","18","6","6","9","12","15","9","6","18"]},
+                        {"name":"y","values":["1","1","0","0","1","1","0","0","1","1","7","7","1","2","2","3","3","2","4","5","4","4","5","5"]}
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Table",
+                      "name": "Bug",
+                      "columns": [
+                        {"name":"3x","values":["0","6","6","9","9","15","15","18","18","24","18","6","0","6","18","18","6","6","9","12","15","9","6","18"]},
+                        {"name":"3y","values":["3","3","0","0","3","3","0","0","3","3","21","21","3","6","6","9","9","6","12","15","12","12","15","15"]}
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Table",
+                      "name": "Glug",
+                      "columns": [
+                        {"name":"x","values":["0","2","2","3","3","5","5","6","6","8","6","2","0","2","6","6","2","2","3","4","5","3","2","6"]},
+                        {"name":"3y","values":["3","3","0","0","3","3","0","0","3","3","21","21","3","6","6","9","9","6","12","15","12","12","15","15"]}
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "* Plot the other Wump characters – Plot and connect the points from A to X for each Wump character, just as you did for Mug. Put each shape on separate axes."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Geometry",
+                      "title": "Mug",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-2.186, -1.093],
+                          "axisRange": [26.23, 17.486]
+                        }
+                      },
+                      "objects": [
+                        { "type": "point", "parents": [0, 1], "properties": {"id":"F1a7NcGqeCYYipJh","snapToGrid":false,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [2, 1], "properties": {"id":"DRmVyYMGmkanOjDS","snapToGrid":false,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [2, 0], "properties": {"id":"hZhkF5Mig3RZy02e","snapToGrid":false,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [3, 0], "properties": {"id":"H5YpWIYGtAxk53gC","snapToGrid":false,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [3, 1], "properties": {"id":"S17Q8dWqbzHA7JGK","snapToGrid":false,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [5, 1], "properties": {"id":"60lQKvtYM8h3vsKn","snapToGrid":false,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [5, 0], "properties": {"id":"cxS_PyLJWoQkC6ei","snapToGrid":false,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [6, 0], "properties": {"id":"B9ZOtrRKmQla7-RF","snapToGrid":false,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [6, 1], "properties": {"id":"DwjXWysfUo6Hnwr7","snapToGrid":false,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [8, 1], "properties": {"id":"OcfiORSxXP7InqCm","snapToGrid":false,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [6, 7], "properties": {"id":"UElUzw_BVCP6a6qp","snapToGrid":false,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [2, 7], "properties": {"id":"PgTL9uudOfdS2i_S","snapToGrid":false,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "polygon", "parents": ["F1a7NcGqeCYYipJh", "DRmVyYMGmkanOjDS", "hZhkF5Mig3RZy02e", "H5YpWIYGtAxk53gC", "S17Q8dWqbzHA7JGK", "60lQKvtYM8h3vsKn", "cxS_PyLJWoQkC6ei", "B9ZOtrRKmQla7-RF", "DwjXWysfUo6Hnwr7", "OcfiORSxXP7InqCm", "UElUzw_BVCP6a6qp", "PgTL9uudOfdS2i_S"],"properties": {"id":"3DrDig0JbEcUKnNy"} },
+                        { "type": "point", "parents": [2, 3], "properties": {"id":"yXFgkhgt_4JiX0V8","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [2, 2], "properties": {"id":"N8K6It7RU7UyHa8o","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [6, 2], "properties": {"id":"X7eO3KmoXtjOES4n","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [6, 3], "properties": {"id":"a0tdbSaxvcPQvcSt","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "polygon", "parents": ["yXFgkhgt_4JiX0V8", "N8K6It7RU7UyHa8o", "X7eO3KmoXtjOES4n", "a0tdbSaxvcPQvcSt"],"properties": {"id":"cJyfTjFTygbi0IsK"} },
+                        { "type": "point", "parents": [3, 4], "properties": {"id":"xESFBOlqxY7MNsON","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [4, 5], "properties": {"id":"b1r_sm-pjVDer2Wd","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [5, 4], "properties": {"id":"5PtPxYz7glE4x8oA","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "polygon", "parents": ["xESFBOlqxY7MNsON", "b1r_sm-pjVDer2Wd", "5PtPxYz7glE4x8oA"],"properties": {"id":"_sLb6l-BeRW64IfK"} },
+                        { "type": "point", "parents": [2, 5], "properties": {"id":"4_LHrV5lP6EMZ0sM","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [6, 5], "properties": {"id":"0GvxPnul9g9dDeNe","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} }
                       ]
                     }
                   },
@@ -1408,14 +1518,15 @@
                   {
                     "content": {
                       "type": "Table",
+                      "name": "Mug Wump",
                       "columns": [
                         {
-                          "name": "Mug Wump x",
+                          "name": "Mug x",
                           "type": "number",
                           "values": [0, 2, 2, 3, 3, 5, 5, 6, 6, 8, 6, 2, 0]
                         },
                          {
-                          "name": "Mug Wump y",
+                          "name": "Mug y",
                           "type": "number",
                           "values": [1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 7, 7, 1]
                         }
@@ -1425,14 +1536,15 @@
                   {
                     "content": {
                       "type": "Table",
+                      "name": "Mug Wump Part 2",
                       "columns": [
                         {
-                          "name": "Mug Wump x, Part 2",
+                          "name": "x",
                           "type": "number",
                           "values": [2, 6, 6, 2, 2]
                         },
                          {
-                          "name": "Mug Wump y, Part 2",
+                          "name": "y",
                           "type": "number",
                           "values": [2, 2, 3, 3 ,2]
                         }
@@ -1442,14 +1554,15 @@
                   {
                     "content": {
                       "type": "Table",
+                      "name": "Mug Wump Part 3",
                       "columns": [
                         {
-                          "name": "Mug Wump x, Part 3",
+                          "name": "x",
                           "type": "number",
                           "values": [3,4,5,3]
                         },
                          {
-                          "name": "Mug Wump y, Part 3",
+                          "name": "y",
                           "type": "number",
                           "values": [4,5,4,4]
                         }
@@ -1459,14 +1572,15 @@
                   {
                     "content": {
                       "type": "Table",
+                      "name": "Mug Wump Part 4",
                       "columns": [
                         {
-                          "name": "Mug Wump x, Part 4",
+                          "name": "x",
                           "type": "number",
                           "values": [2, 6]
                         },
                          {
-                          "name": "Mug Wump y, Part 4",
+                          "name": "y",
                           "type": "number",
                           "values": [5, 5]
                         }
@@ -1478,11 +1592,18 @@
                       "type": "Text",
                       "format": "markdown",
                       "text": [
-                        "* Use the given rule to find the coordinates of the points. Record the coordinates in Tables for Zug, Lug, Bug, and Glug. For example, the rule for Zug is (2x, 2y). This means that you multiply each of Mug’s coordinates by 2. Point A on Mug is (0, 1), so the corresponding point A on Zug is (0, 2). Point B on Mug is (2, 1), so the corresponding point B on Zug is (4, 2).",
-                        "* Plot and connect the points from A to X for each figure on separate axes, just as you did for Mug, putting each on separate axes.",
-                        "Look at the figures created by Marta’s rules. Which ones appear to be family members who are similar to Mug? Which figures appear not to be similar, and thus “imposters”? How do you know?",
-                        "Zug and Bug are bigger versions of and have the same shape as Mug, so they are the other Wumps. From Mug to Zug and Bug, the angles and the general shape stayed the same. From Mug to Zug, the lengths doubled and from Mug to Bug, the lengths tripled. ",
-                        "On the other hand, Lug is too wide, and Glug is too tall to be the Wumps family. From Mug to Lug and Glug, corresponding lengths did not grow by the same factor. Lug is the same height as Mug but three times as wide. Lug is stretched on the x-axis values, but not the y-axis values. Glug is the same width as Mug but three times as tall. Glug is stretched on the y-axis values, but not the x-axis values. Many of Lug’s and Glug’s angles differ from Mug’s. So, Lug and Glug are impostors."
+                        "* Look at the figures created by Marta’s rules. Which family members are similar to Mug? Which figures appear not to be similar, and thus “imposters”? How do you know?"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Zug and Bug are bigger versions of and have the same shape as Mug, so they are the other Wumps. From Mug to Zug and Bug, the angles and the general shape stayed the same. From Mug to Zug, the lengths doubled and from Mug to Bug, the lengths tripled. </p>",
+                        "<p>On the other hand, Lug is too wide, and Glug is too tall to be the Wumps family. From Mug to Lug and Glug, corresponding lengths did not grow by the same factor. Lug is the same height as Mug but three times as wide. Lug is stretched on the x-axis values, but not the y-axis values. Glug is the same width as Mug but three times as tall. Glug is stretched on the y-axis values, but not the x-axis values. Many of Lug’s and Glug’s angles differ from Mug’s. So, Lug and Glug are impostors. </p>"
                       ]
                     }
                   }
@@ -1928,7 +2049,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "html",
+                      "format": "markdown",
                       "text": [
                         "### Situation A. Writing New Hat Rules",
                         "What if you wanted to create a hat that is similar to Mug’s hat? What rule would you write if:",
@@ -2065,6 +2186,13 @@
                         "<p>It is possible. Because you can move the hat upwards on the coordinate plane by adding numbers to the y-coordinate, you can put the hat on Mug. One possible rule for a hat that student can come up with is (x-1, y+6). Students might struggle with making a rule for the move at first. Students can first draw the hat on Mug and make a table for the coordinates of moved hat. Then they can compare the coordinates of the original (points A, B, …, G) with the new coordinates. For the corresponding coordinates, students may count units that moves from the original position to the new position. </p>"
                       ]
                     }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/SS_2_2_MughatOnMug.jpg"
+                    }
                   }
                 ]
               },
@@ -2101,9 +2229,9 @@
                       "text": [
                         "<p>For the coordinates (x, y) of the original figure, if you make the coordinate rules by multiplying each coordinate by the same number, k, then the new image with the coordinates (kx, ky) is similar to the original figure. For example, if you multiply (x, y) by 2, then you will have new coordinates (2x, 2y). It makes the side lengths of the new image 2 times longer than the side lengths of the original figure. This rule has the same effect as both a rubber band with two-band stretcher and a copy machine setting with 200%. </p>",
                         "<p>You can use the rule to predict what will happen to the lengths of corresponding sides. When looking at the coordinate rules, the multiplier from one coordinate to the next will tell how much the side lengths change from one figure to another. For example, if we think of Zug as the original and Bug as the image, each coordinate in the rule multiplies by 1.5. So, the lengths of Zug will grow 1.5 times to make the lengths of Bug. Zug’s nose is 2 units tall and Bug’s nose is 2 • 1.5 = 3 units tall. Zug’s forehead is 8 units long and Bug’s forehead is 8 • 1.5 = 12 units long</p>",
-                        "Zug        (2x, 2y)",
-                        "<h2>x1.5\u2938          \u2938 x1.5</h2>",
-                        "Bug        (3x, 3y)"
+                        "Zug             (2x, 2y)",
+                        "<h3>x1.5\u2938      \u2938 x1.5</h3>",
+                        "Bug              (3x, 3y)"
                       ]
                     }
                   }
@@ -2529,18 +2657,26 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "html",
+                      "format": "markdown",
                       "text": [
-                        "• Identify pairs of rectangles that are similar. Provide evidence that your rectangles are similar. For those that are similar, what is the scale factor?"
+                        "* Identify pairs of similar shapes. Provide evidence that your shapes are similar. What is the scale factor? "
                       ]
                     }
                   },
                   {
+                    "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "• Identify pairs of triangles that are similar. Provide evidence that your triangles are similar. For those that are similar, what is the scale factor? "
+                        "<p>Rectangles</p>",
+                        "<p>Rectangles (mouths) J, L, and N are similar to each other. Students should point out that since these are all rectangles, the angles are all right angles and hence congruent, or the same size. For rectangles, it is then only necessary to check side lengths.</p>",
+                        "<p>L to J is 2; L to N is 3; J to N is 3/2</p>",
+                        "<p>J to L is 1/2 (reciprocal of 2); N to L is 1/3  (reciprocal of 3); N to J is   2/3 (reciprocal of 3/2 ). </p>",
+                        "<p>Triangles</p>",
+                        "<p>Triangles (noses) O, R, and S are similar to each other.</p>",
+                        "<p>O to R is 2; O to S is 3; and R to S is 3/2 .  </p>",
+                        "<p>R to O is 1/2 (reciprocal of 2); S to O is 1/3  (reciprocal of 3); S to R is 2/3  (reciprocal of 3/2 ). </p>"
                       ]
                     }
                   },
@@ -2550,6 +2686,16 @@
                       "format": "html",
                       "text": [
                         "• In what ways could scale factor be useful when determining similar figures?"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The scale factor tells us how much the new figure has been stretched or shrunk in both vertical and horizontal directions. If the scale factor is larger than 1, then the new figure will be bigger than the original figure. The new side lengths and perimeters will be the scale factor times as large. If the scale factor is less than 1, then the new figure will be smaller than the original figure. The new side lengths and perimeters will be the scale factor times as small.</p>"
                       ]
                     }
                   }
@@ -2575,11 +2721,35 @@
                     }
                   },
                   {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Both are correct. Rectangles J and L are similar because each corresponding side length has the same ratio. If you multiply ½ to each side length of rectangle J, then you will get rectangle L that is similar to J. In this way, the scale factor is ½. If you multiply 2 to each side length of rectangle L, then you will get rectangle J that is similar to L. In this way, the scale factor is 2. Therefore, both Marta and Zack are correct.</p>"
+                      ]
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<strong>Zack's Claim</strong> To determine if two rectangles are similar, you can use ratios to show that the scale factor is the same for corresponding side lengths. For example, if the ratio of original side to corresponding side in two similar rectangles is 3:4, then the scale factor from the original to similar rectangle is 3/4."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Not correct. To increase an original side of 3 to a corresponding side of 4, ou would use a multiplier of 1 \u2153. The scale factor is the same as the multiplier. So, the scale factor is 1 \u2153, not 3/4 as Zack thought.</p>",
+                        "To find the multiplier, you can use the relationship between the sides. You can scale the ratio of the sides to a unit rate. For every 3 units on the original there are 4 units on the image. So, for every",
+                        "<strong>\u2938 \u00f7 3                                     \u2938 \u00f7 3</strong>",
+                        "1 unit on the original there are 1 \u2153 units on the image.",
+                        "Note that students have often found it easier to think of the scale factor as a multiplier rather than a ratio."
                       ]
                     }
                   },
@@ -2593,11 +2763,32 @@
                     }
                   },
                   {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Partially true. If two triangles are similar, you know that the corresponding angle measures are the same.</p>",
+                        "So, you can show that the scale factor is the same for corresponding side lengths. However, you need to find the multiplier from one shape to the other using the ratio of the sides."
+                      ]
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<strong>Marta's Claim</strong> If you know the perimeter of one shape, you can predict the perimeter of a similar shape. "
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Correct. As you can see in the similar rectangles J and L, when the width and length of rectangles grow by 2, the perimeters also grow by 2. So, if you know the perimeter of one shape and if you know the scale factor of the similar shape, then you can predict the perimeter of the similar shape. The perimeter is a length, so it behaves like the width and length. Some might say that the perimeter , and if the scale factor is 2, then the new perimeter is 2 times each length or  . This is just double of the original perimeter.</p>"
                       ]
                     }
                   }
@@ -2618,6 +2809,20 @@
                       "format": "html",
                       "text": [
                         "How can you decide if two shapes are similar? How can you determine the scale factor between two similar shapes?"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SOLUTION</strong></p>",
+                        "<p>To determine is two shapes are similar:</p>",
+                        "<ul><li>Corresponding angles must have the same measure.</li><li>Corresponding sides must change by the same multiplier. The name of the multiplier is “scale factor”.</li></ul>",
+                        "<p>Scale factor can be determined by measuring and comparing corresponding lengths between two figures. This done using proportional reasoning. For every unit of length in the original there are x times as many units in the corresponding side length. </p>",
+                        "<p>We have seen scale factor as the number of rubber bands used, the percent increase on a copy machine, or the coefficient relationship of the x and y coordinates.  </p>"
                       ]
                     }
                   },
