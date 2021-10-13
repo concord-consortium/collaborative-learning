@@ -141,13 +141,13 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
   }
 
   private handleDocumentSelect = (document: DocumentModelType, networkClassHash?: string,
-    networkUserId?: string) => {
+    networkUsername?: string) => {
     const { onSelectDocument } = this.props;
     const logEvent = document.isRemote
       ? LogEventName.VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT
       : LogEventName.VIEW_SHOW_COMPARISON_DOCUMENT;
     const networkInfo = document.isRemote
-      ? {networkClassHash, networkUserId}
+      ? {networkClassHash, networkUsername: `${networkUsername}@${this.stores.user.portal}`}
       : undefined;
     Logger.logDocumentEvent(logEvent, document, networkInfo);
 

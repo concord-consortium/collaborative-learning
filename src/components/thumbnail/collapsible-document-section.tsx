@@ -25,7 +25,7 @@ interface IProps {
   scale: number;
   selectedDocument?: string;
   onSelectDocument?: (document: DocumentModelType, networkClassHash?: string,
-    networkUserId?: string) => void;
+    networkUsername?: string) => void;
   subTab: ISubTabSpec;
   networkResource: INetworkResourceClassResponse;
   problemTitle: string;
@@ -39,10 +39,8 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
     Logger.log(isOpen
       ? LogEventName.TEACHER_NETWORK_COLLAPSE_DOCUMENT_SECTION
       : LogEventName.TEACHER_NETWORK_EXPAND_DOCUMENT_SECTION, {
-      network_class_hash: classHash,
-      network_class_name: classNameStr,
-      network_user_name: userName,
-      network_user_id: userId
+      networkClassHash: classHash,
+      networkUsername: `${userId}@${stores.user.portal}`
     });
     setIsOpen(!isOpen);
   };
