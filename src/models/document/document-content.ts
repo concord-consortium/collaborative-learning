@@ -7,6 +7,7 @@ import { kImageToolID } from "../tools/image/image-content";
 import { kPlaceholderToolID } from "../tools/placeholder/placeholder-content";
 import { kTableToolID } from "../tools/table/table-content";
 import { kTextToolID } from "../tools/text/text-content";
+import { kPluginToolID } from "../tools/plugin/plugin-content";
 import { getToolContentInfoById, IDocumentExportOptions } from "../tools/tool-content-info";
 import { ToolContentUnionType } from "../tools/tool-types";
 import {
@@ -45,6 +46,9 @@ export interface INewTextTileOptions extends INewTileOptions {
 
 export interface INewImageTileOptions extends INewTileOptions {
   url?: string;
+}
+
+export interface INewPluginTileOptions extends INewTileOptions {
 }
 
 export interface INewRowTile {
@@ -557,6 +561,10 @@ export const DocumentContentModel = types
                     drawingContentInfo?.defaultContent({stamps: defaultStamps}),
                     { rowHeight: drawingContentInfo.defaultHeight, ...options });
     },
+    addPluginTile(options?: INewPluginTileOptions) {
+      const pluginContentInfo = getToolContentInfoById(kPluginToolID);
+      return self.addTileContentInNewRow(pluginContentInfo?.defaultContent(), options);
+    },
     copyTilesIntoExistingRow(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
       const results: NewRowTileArray = [];
       if (tiles.length > 0) {
@@ -750,6 +758,9 @@ export const DocumentContentModel = types
             break;
           case "drawing":
             tileInfo = self.addDrawingTile(addTileOptions);
+            break;
+          case "plugin":
+            tileInfo = self.addPluginTile(addTileOptions);
             break;
         }
 

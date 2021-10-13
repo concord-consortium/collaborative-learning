@@ -23,7 +23,8 @@ export interface IDocumentAddTileOptions {
 }
 
 export const DocumentToolEnum = types.enumeration("tool",
-                                ["delete", "drawing", "geometry", "image", "select", "table", "text", "placeholder"]);
+                                ["delete", "drawing", "geometry", "image", "select", "table", "text", "placeholder",
+                                 "plugin"]);
 export type DocumentTool = typeof DocumentToolEnum.Type;
 
 export const DocumentModel = types
