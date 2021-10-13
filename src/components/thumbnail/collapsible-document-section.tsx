@@ -25,7 +25,7 @@ interface IProps {
   scale: number;
   selectedDocument?: string;
   onSelectDocument?: (document: DocumentModelType, networkClassHash?: string,
-    networkUsername?: string) => void;
+    networkUserId?: string) => void;
   subTab: ISubTabSpec;
   networkResource: INetworkResourceClassResponse;
   problemTitle: string;
