@@ -7,8 +7,7 @@ import {
   useCommentsCollectionPath, useDocumentComments, usePostDocumentComment, useUnreadDocumentComments
 } from "../../hooks/document-comment-hooks";
 import { useDeleteDocument } from "../../hooks/firestore-hooks";
-import { useDocumentOrCurriculumMetadata } from "../../hooks/use-stores";
-import { useUIStore } from "../../hooks/use-stores";
+import { useDocumentOrCurriculumMetadata, useUIStore } from "../../hooks/use-stores";
 import "./chat-panel.scss";
 
 interface IProps {
