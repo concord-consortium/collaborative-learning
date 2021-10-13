@@ -169,7 +169,8 @@ export class Logger {
     sendToLoggingService(logMessage, this._instance.stores.user);
   }
 
-  public static logTileEvent(event: LogEventName, tile?: ToolTileModelType, metaData?: TileLoggingMetadata) {
+  public static logTileEvent(event: LogEventName, tile?: ToolTileModelType, metaData?: TileLoggingMetadata,
+    commentText?: string) {
     if (!this._instance) return;
 
     let parameters = {};
@@ -184,7 +185,8 @@ export class Logger {
         documentUid: document.uid,
         documentKey: document.key,
         documentType: document.type,
-        documentChanges: document.changeCount
+        documentChanges: document.changeCount,
+        commentText
       };
 
       if (event === LogEventName.COPY_TILE && metaData && metaData.originalTileId) {
@@ -310,7 +312,8 @@ export class Logger {
   }
 
   private getDocumentForTile(tileId: string): IDocumentInfo {
-    const document = this.stores.documents.findDocumentOfTile(tileId);
+    const document = this.stores.documents.findDocumentOfTile(tileId)
+      || this.stores.networkDocuments.findDocumentOfTile(tileId);
     if (document) {
       const { type, key, uid, title, changeCount, properties } = document;
       return { type, key, uid, title, changeCount, properties: properties?.toJSON() || {} };
