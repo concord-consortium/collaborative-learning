@@ -670,7 +670,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/-MkgsTSUh8Ol5IEAHJd0"
+                      "url": "curriculum/stretching-and-shrinking/images/1-2_What_If_Situation_A_1.png"
                     }
                   },
                   {
@@ -698,7 +698,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Image",
-                      "url": "ccimg://fbrtdb.concord.org/-Mkgsi8rqnMaqmB7RVhc"
+                      "url": "curriculum/stretching-and-shrinking/images/1-2_What_If_Situation_A_2.png"
                     }
                   },
                   {
@@ -725,7 +725,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Image",
-                      "url": "ccimg://fbrtdb.concord.org/-MkgstYKJmr-sTVREd7m"
+                      "url": "curriculum/stretching-and-shrinking/images/1-2_What_If_Situation_A_3.png"
                     }
                   },
                   {
@@ -743,7 +743,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Image",
-                      "url": ""
+                      "url": "curriculum/stretching-and-shrinking/images/1-2_What_If_Situation_A_4.png"
                     }
                   },
                   {
@@ -776,9 +776,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>SOLUTION</strong></p>",
                         "<p>If the location of P is changed, the location of the image will also change. However, the location of P does not affect the size or shape of the image. </p>",
-                        "<p>For example, the darker blue triangle below is the original. Moving the location of P moves the image (lighter blue triangle). It does not change the shape or size. The length of the distances away from P remain proportional. If we look at corresponding right angles, on the image the right angle is always twice the distance from P while the right angle on the original is always one distance away from P.  </p>"
+                        "<p>For example, the darker blue triangle below is the original. Moving the location of P moves the image (lighter blue triangle). It does not change the shape or size. The length of the distances away from P remain proportional. If we look at corresponding right angles, on the image the right angle is always twice the distance from P while the right angle on the original is always one distance away from P.</p>"
                       ]
                     }
                   },
@@ -787,7 +786,7 @@
                     "content": 
                     {
                       "type": "Image",
-                      "url": "/-MkgtiCyR0kZ-cstvzCy"
+                      "url": "curriculum/stretching-and-shrinking/images/1-2_What_If_Situation_B.png"
                     }
                   },
                   {
@@ -806,7 +805,6 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>SOLUTION</strong></p>",
                         "<p>Note that there are two possible interpretations of this question. Most students will use the knot closer to the anchor point to trace the original figure. Some students may use the knot closer to the pencil. </p>",
                         "<p>Answers for the knots closer to the anchor point:</p>",
                         "<ul><li>The shapes are similar to each other. </li><li>The lengths in the image figure are about 3 times as long as the lengths in the original figure.  </li></ul>"
@@ -819,7 +817,7 @@
                     "content": 
                     {
                       "type": "Image",
-                      "url": "/-MkgtiCyR0kZ-cstvzCy"
+                      "url": "curriculum/stretching-and-shrinking/images/1-2_What_If_Situation_B_Sunyoungs_Question_1.png"
                     }
                   },
                   {
@@ -838,7 +836,7 @@
                     "content": 
                     {
                       "type": "Image",
-                      "url": "/-MkgtiCyR0kZ-cstvzCy"
+                      "url": "curriculum/stretching-and-shrinking/images/1-2_What_If_Situation_B_Sunyoungs_Question_2.png"
                     }
                   },
                   {
@@ -857,7 +855,7 @@
                     "content": 
                     {
                       "type": "Image",
-                      "url": "/-MkgtiCyR0kZ-cstvzCy"
+                      "url": "curriculum/stretching-and-shrinking/images/1-2_What_If_Situation_B_Sunyoungs_Question_3.png"
                     }
                   },
                    {
@@ -876,7 +874,7 @@
                     "content": 
                     {
                       "type": "Image",
-                      "url": "/-MkgtiCyR0kZ-cstvzCy"
+                      "url": "curriculum/stretching-and-shrinking/images/1-2_What_If_Situation_B_Sunyoungs_Question_4.png"
                     }
                   },
                   {
@@ -1154,7 +1152,7 @@
                       "text": [
                         "### Situation A. Comparing the Image to the Original",
                         "Compare each copier image to the original figure.",
-                        "* Comparison 1: Describe how the side lengths compare to the corresponding side lengths in the original figure."
+                        "* Side Length Comparison: Describe how the side lengths compare to the corresponding side lengths in the original figure."
                       ]
                     }
                   },
@@ -1174,7 +1172,7 @@
                       "type": "Text",
                       "format": "markdown",
                       "text": [
-                        "* Comparison 2: Describe how the angle measures compare to the corresponding angle measures in the original figure."
+                        "* Angle Comparison: Describe how the angle measures compare to the corresponding angle measures in the original figure."
                       ]
                     }
                   },
@@ -1194,7 +1192,7 @@
                       "type": "Text",
                       "format": "markdown",
                       "text": [
-                        "* Comparison 3: Describe how the perimeter of the triangle in each copy compares to the perimeter of the original figure."
+                        "* Perimeter Comparison: Describe how the perimeter of the triangle in each copy compares to the perimeter of the original figure."
                       ]
                     }
                   },
@@ -1214,7 +1212,7 @@
                       "type": "Text",
                       "format": "markdown",
                       "text": [
-                        "* Comparison 4: Describe how the area of the triangle in each copy compares to the area in the original figure."
+                        "* Area Comparison: Describe how the area of the triangle in each copy compares to the area in the original figure."
                       ]
                     }
                   },
@@ -1225,7 +1223,6 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>SOLUTION</strong></p>",
                         "<p>The area of the figure of Copy 1 gets little more than half the area of the original image.  </p>",
                         "<p>For the rectangular part of the design, students may reason that since both the length and width are changed by a factor, the area is changed by a product of the factor and itself. (Note: The area comparison factor is the squares of the copier size factor: 0.75 x 0.75 = 0.5625. In the next Investigation, the copier size factor is named the scale factor and student will look more in-depth at how the area changes.)</p>",
                         "<p>The area of the figure of Copy 2 gets little more than double the area of the original image. (Note: The area comparison factor is the squares of the copier size factor: 1.5 x 1.5 = 2.25. The area relationship will be formalized in Investigation 3.) </p>"
@@ -1237,7 +1234,7 @@
                       "type": "Text",
                       "format": "markdown",
                       "text": [
-                        "* Comparison 5: Explain how the percent setting can be used to predict the relationships between each copy and the original figure."
+                        "* Predicting Comparison: Explain how the percent setting can be used to predict the relationships between each copy and the original figure."
                       ]
                     }
                   },
@@ -1257,7 +1254,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Situation B. Changing Percents</strong>\nWhat if you wanted to create an image whose side lengths were twice the length of the original? What percent setting would you choose on the copier?"
+                        "<strong>Situation B. Changing Percents</strong>\nWhat if we wanted to create an image whose side lengths were twice the length of the original? What percent setting would you choose on the copier?"
                       ]
                     }
                   },
