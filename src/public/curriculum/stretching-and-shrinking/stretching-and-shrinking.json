@@ -1788,9 +1788,125 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "html",
+                      "format": "markdown",
                       "text": [
-                        "• Look at each rule and predict what will happen to the hat with each rule.\n• Test each rule. How does your result compare with your prediction? "
+                        "* Look at each rule and predict what will happen to the hat with each rule."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "Students’ predictions will vary. At this time, many students may not have connected the stretching and shrinking to a multiplicative relationship. They may predict that adding will make a shape enlarge and subtracting will make a shape shrink. If so, students may predict that Hat 1 and Hat 5 will look the same."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "* Test each rule. How does your result compare with your prediction? "
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "Answers will vary. Predictions may or may not have matched what happened to the shapes.",
+                        "* Hat 1 will move 2 units to the right and 3 units up without changing its size or shape. (congruent and similar)",
+                        "* Hat 2 will move 1 unit left and 4 units up, also without changing its size or shape. (congruent and similar)",
+                        "* Hat 3 will be located 2 units to the right, and it will be 3 times as high (stretched vertically and not similar)",
+                        "* Hat 4 will shrink vertically and horizontally by the same factor: 0.5. It keeps the same shape. Each length will be half of the original corresponding length. (similar)",
+                        "* Hat 5 will be stretched vertically by the factor of 2, and horizontally by the factor of 3. (not similar)",
+                        "* Hats 1, 2, and 4 are similar to Mug’s Hat. Hat 1 and Hat 2 are the same size and shape as Mug’s hat, but they move to different place on the coordinate graph. Hat 4 has the same shape, but different size from the Mug’s hat."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Table",
+                      "name": "Table of Coordinate Pairs",
+                      "columns": [
+                        {"name":" ","values":["Point","A","B","C","D","E","F","G"]},
+                        {"name":"Mug's Hat","values":["(x , y)","(1, 1)","(9, 1)","(6, 2)","(6, 3)","(4, 3)","(4, 2)","(1, 1)"]},
+                        {"name":"Hat 1","values":["(x + 2, y + 3)","(3, 4)","(11, 4)","(8, 5)"," (8, 6)","(6, 6)","(6, 5)","(3, 4)"]},
+                        {"name":"Hat 2","values":["(x - 1, y + 4)","(0, 5)","(8, 5)","(5, 6)","(5, 7)","(3, 7)","(3, 6)","(0, 5)"]},
+                        {"name":"Hat 3","values":["(x + 2, 3y)","(3, 3)","(11, 3)","(8, 6)","(8, 9)","(6, 9)","(6, 6)","(3, 3)"]},
+                        {"name":"Hat 4","values":["(0.5x, 0.5y)","(0,5, 0.5)","(4.5, 0.5)","(3, 1)","(3, 1.5)","(2, 1.5)","(2, 1)","(0.5, 0.5)"]},
+                        {"name":"Hat 5","values":["(2x, 3y)","(2, 3)","(18, 3)","(12, 6)","(12, 9)","(8, 9)","(8, 6)","(2, 3)"]}
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "layout": {
+                      "height": 200
+                    },
+                    "content": {
+                      "type": "Geometry",
+                      "title": "Mug’s Hat",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-1, -1],
+                          "axisRange": [15, 15]
+                        }
+                      },
+                      "objects": [
+                        {
+                          "type": "polygon",
+                          "parents": [
+                            {
+                              "type": "point",
+                              "parents": [1, 1],
+                              "properties": {
+                                "name": "A"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [9, 1],
+                              "properties": {
+                                "name": "B"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [6, 2],
+                              "properties": {
+                                "name": "C"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [6, 3],
+                              "properties": {
+                                "name": "D"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [4, 3],
+                              "properties": {
+                                "name": "E"
+                              }
+                            },
+                            {
+                              "type": "point",
+                              "parents": [4, 2],
+                              "properties": {
+                                "name": "F"
+                              }
+                            }
+                          ]
+                        }
                       ]
                     }
                   }
@@ -1814,7 +1930,79 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Situation A. Writing New Hat Rules</strong>\nWhat if you wanted to create a hat that is similar to Mug’s hat? What rule would you write if:<ol><li>The side lengths are one third as long as Mug’s hat?</li><li>The side lengths are 1.5 times as long as Mug’s hat?</li><li>The hat is the same size as Mug’s hat, but has moved right 1 unit and up 5 units?</li><li>The image is in another quadrant of the graph?</li></ol>"
+                        "### Situation A. Writing New Hat Rules",
+                        "What if you wanted to create a hat that is similar to Mug’s hat? What rule would you write if:",
+                        "1. The side lengths are one third as long as Mug’s hat?"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "(1/3 x, 1/3 y)"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "2. The side lengths are 1.5 times as long as Mug’s hat?"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "(1.5 x, 1.5 y)"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "3.The hat is the same size as Mug’s hat, but has moved right 1 unit and up 5 units?"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "(x + 1, y - 5)"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "4. The image is in another quadrant of the graph?"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Answers will vary. </p>",
+                        "<p>To move the image to the second quadrant, you should move it left more than 9 units and up more than 0: possible answers are (x-9, y), (x-10, y+1), (x-12, y+3).  </p>",
+                        "<p>To move the image to the third quadrant, you should move it left more than 9 units and down more than 3 units: possible answers are (x-9, y-3), (x-9, y-4), (x-11, y-4). </p>",
+                        "<p>To move the image to the fourth quadrant, you should move it down more than 3 units and right more than 0 units: possible answers are (x, y-3), (x, y-5), (x+2, y-5).</p>"
                       ]
                     }
                   },
@@ -1828,11 +2016,53 @@
                     }
                   },
                   {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>If you multiply each coordinate (x, y) by -1 so you get (-x, -y), then the image has the same size of the original, but it rotates 180 deg as if x-axis and y-axis are used as mirrors. Students may multiply -1 to each coordinate of Mug’s and draw it as an example to see how the image looks like. This new Negative Hat will be in quadrant 3.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Table",
+                      "name": "Mug's Hat",
+                      "columns": [
+                        {"name":"Point","values":["A","B","C","D","E","F","G"]},
+                        {"name":"(x, y)","values":["(1, 1)","(9, 1)","(6, 2)","(6, 3)","(4, 3)","(4, 2)","(1, 1)"]}
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Table",
+                      "name": "Negative Hat",
+                      "columns": [
+                        {"name":"x","values":["-1","-9","-6","-6","-4","-4","-1"]},
+                        {"name":"y","values":["-1","-1","-2","-3","-3","-2","-1"]}
+                      ]
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<strong>Situation C. Isaiah’s Challenge: Putting the Hat on Mug</strong>\nIsaiah challenges his group to write a rule that will put Mug’s hat on Mug. Is this possible? Why?"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>It is possible. Because you can move the hat upwards on the coordinate plane by adding numbers to the y-coordinate, you can put the hat on Mug. One possible rule for a hat that student can come up with is (x-1, y+6). Students might struggle with making a rule for the move at first. Students can first draw the hat on Mug and make a table for the coordinates of moved hat. Then they can compare the coordinates of the original (points A, B, …, G) with the new coordinates. For the corresponding coordinates, students may count units that moves from the original position to the new position. </p>"
                       ]
                     }
                   }
@@ -1860,6 +2090,20 @@
                       "format": "html",
                       "text": [
                         "If you know the coordinate rules to create an image, how can you tell if the two figures are similar? How can you use the rule to predict the side lengths of the image? How is the effect of a coordinate rule like the effect of a rubber band stretcher or a copy machine setting?"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>For the coordinates (x, y) of the original figure, if you make the coordinate rules by multiplying each coordinate by the same number, k, then the new image with the coordinates (kx, ky) is similar to the original figure. For example, if you multiply (x, y) by 2, then you will have new coordinates (2x, 2y). It makes the side lengths of the new image 2 times longer than the side lengths of the original figure. This rule has the same effect as both a rubber band with two-band stretcher and a copy machine setting with 200%. </p>",
+                        "<p>You can use the rule to predict what will happen to the lengths of corresponding sides. When looking at the coordinate rules, the multiplier from one coordinate to the next will tell how much the side lengths change from one figure to another. For example, if we think of Zug as the original and Bug as the image, each coordinate in the rule multiplies by 1.5. So, the lengths of Zug will grow 1.5 times to make the lengths of Bug. Zug’s nose is 2 units tall and Bug’s nose is 2 • 1.5 = 3 units tall. Zug’s forehead is 8 units long and Bug’s forehead is 8 • 1.5 = 12 units long</p>",
+                        "Zug        (2x, 2y)",
+                        "<h2>x1.5\u2938          \u2938 x1.5</h2>",
+                        "Bug        (3x, 3y)"
                       ]
                     }
                   }
