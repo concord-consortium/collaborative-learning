@@ -7,7 +7,7 @@ import {
   useCommentsCollectionPath, useDocumentComments, usePostDocumentComment, useUnreadDocumentComments
 } from "../../hooks/document-comment-hooks";
 import { useDeleteDocument } from "../../hooks/firestore-hooks";
-import { useDocumentOrCurriculumMetadata, useUIStore } from "../../hooks/use-stores";
+import { useDocumentOrCurriculumMetadata, useUIStore, useLocalDocuments } from "../../hooks/use-stores";
 import "./chat-panel.scss";
 
 interface IProps {
@@ -28,26 +28,48 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   const postedComments = focusTileId ? tileComments : documentComments;
   const postCommentMutation = usePostDocumentComment();
   const ui = useUIStore();
+  const localDocuments = useLocalDocuments();
   const postComment = useCallback((comment: string) => {
-    if (document) {
+    if (focusDocument) {
+      const localDocument = localDocuments.getDocument(focusDocument);
       const numComments = postedComments ? postedComments.length : 0;
-      const event = (ui.selectedTileIds.length === 0 && numComments < 1)
-        ? LogEventName.CHAT_PANEL_ADD_COMMENT_FOR_DOCUMENT
-        : ui.selectedTileIds.length !== 0 && numComments < 1
-          ? LogEventName.CHAT_PANEL_ADD_COMMENT_FOR_TILE
-          : LogEventName.CHAT_PANEL_ADD_COMMENT_RESPONSE;
-      Logger.log(event);
+      if (localDocument) {
+        if (ui.selectedTileIds.length === 0) {
+          if (numComments < 1) {
+            Logger.logDocumentEvent(LogEventName.CHAT_PANEL_ADD_INITIAL_COMMENT_FOR_DOCUMENT, localDocument, undefined, comment);
+          } else {
+            Logger.logDocumentEvent(LogEventName.CHAT_PANEL_ADD_RESPONSE_COMMENT_FOR_DOCUMENT, localDocument, undefined, comment);
+          }
+        } else {
+          if (numComments < 1) {
+            Logger.logDocumentEvent(LogEventName.CHAT_PANEL_ADD_INITIAL_COMMENT_FOR_TILE, localDocument, undefined, comment);
+          } else {
+            Logger.logDocumentEvent(LogEventName.CHAT_PANEL_ADD_RESPONSE_COMMENT_FOR_TILE, localDocument, undefined, comment);
+          }
+        }
+      }
+
     }
+
     return document
-            ? postCommentMutation.mutate({ document, comment: { content: comment, tileId: focusTileId } })
-            : undefined;
+      ? postCommentMutation.mutate({ document, comment: { content: comment, tileId: focusTileId } })
+      : undefined;
   }, [document, focusTileId, postCommentMutation]);
+
   const commentsPath = useCommentsCollectionPath(focusDocument || "");
   const deleteCommentMutation = useDeleteDocument();
-  const deleteComment = useCallback((commentId: string) => {
-    if (document) {
-      Logger.log(LogEventName.CHAT_PANEL_DELETE_COMMENT);
+  const deleteComment = useCallback((commentId: string, commentText: string) => {
+    if (focusDocument) {
+      const localDocument = localDocuments.getDocument(focusDocument);
+      if (localDocument) {
+        if (ui.selectedTileIds.length === 0) {
+          Logger.log(LogEventName.CHAT_PANEL_DELETE_COMMENT_FOR_DOCUMENT, { commentText: commentText });
+        } else {
+          Logger.log(LogEventName.CHAT_PANEL_DELETE_COMMENT_FOR_TILE, { commentText: commentText });
+        }
+      }
     }
+
     return document
       ? deleteCommentMutation.mutate(`${commentsPath}/${commentId}`)
       : undefined;

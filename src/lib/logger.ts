@@ -95,10 +95,12 @@ export enum LogEventName {
   CLOSE_STICKY_NOTES,
   OPEN_STICKY_NOTES,
 
-  CHAT_PANEL_ADD_COMMENT_FOR_DOCUMENT,
-  CHAT_PANEL_ADD_COMMENT_FOR_TILE,
-  CHAT_PANEL_ADD_COMMENT_RESPONSE,
-  CHAT_PANEL_DELETE_COMMENT,
+  CHAT_PANEL_ADD_INITIAL_COMMENT_FOR_DOCUMENT,
+  CHAT_PANEL_ADD_INITIAL_COMMENT_FOR_TILE,
+  CHAT_PANEL_ADD_RESPONSE_COMMENT_FOR_DOCUMENT,
+  CHAT_PANEL_ADD_RESPONSE_COMMENT_FOR_TILE,
+  CHAT_PANEL_DELETE_COMMENT_FOR_DOCUMENT,
+  CHAT_PANEL_DELETE_COMMENT_FOR_TILE,
   CHAT_PANEL_HIDE,
   CHAT_PANEL_SHOW,
 
@@ -203,7 +205,7 @@ export class Logger {
   }
 
   public static logDocumentEvent(event: LogEventName, document: DocumentModelType,
-    teacherNetworkInfo?: ITeacherNetworkInfo) {
+    teacherNetworkInfo?: ITeacherNetworkInfo, commentText?: string) {
     const modifiedTeacherNetworkInfo = teacherNetworkInfo &&
       {networkClassHash: teacherNetworkInfo.networkClassHash,
        networkUsername: `${teacherNetworkInfo.networkUserId}@${this._instance.stores.user.portal}`};
@@ -215,6 +217,7 @@ export class Logger {
       documentProperties: document.properties?.toJSON() || {},
       documentVisibility: document.visibility,
       documentChanges: document.changeCount,
+      commentText,
       ...modifiedTeacherNetworkInfo
     };
     Logger.log(event, parameters);
