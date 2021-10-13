@@ -1,4 +1,5 @@
 import React, { useCallback } from "react";
+import { LogEventName, Logger } from "../../lib/logger";
 import { UserModelType } from "../../models/stores/user";
 import { ChatPanelHeader } from "./chat-panel-header";
 import { CommentCard } from "./comment-card";
@@ -7,6 +8,7 @@ import {
 } from "../../hooks/document-comment-hooks";
 import { useDeleteDocument } from "../../hooks/firestore-hooks";
 import { useDocumentOrCurriculumMetadata } from "../../hooks/use-stores";
+import { useUIStore } from "../../hooks/use-stores";
 import "./chat-panel.scss";
 
 interface IProps {
@@ -26,7 +28,17 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   const tileComments = comments?.filter(comment => comment.tileId === focusTileId);
   const postedComments = focusTileId ? tileComments : documentComments;
   const postCommentMutation = usePostDocumentComment();
+  const ui = useUIStore();
   const postComment = useCallback((comment: string) => {
+    if (document) {
+      const numComments = postedComments ? postedComments.length : 0;
+      const event = (ui.selectedTileIds.length === 0 && numComments < 1)
+        ? LogEventName.CHAT_PANEL_ADD_COMMENT_FOR_DOCUMENT
+        : ui.selectedTileIds.length !== 0 && numComments < 1
+          ? LogEventName.CHAT_PANEL_ADD_COMMENT_FOR_TILE
+          : LogEventName.CHAT_PANEL_ADD_COMMENT_RESPONSE;
+      Logger.log(event);
+    }
     return document
             ? postCommentMutation.mutate({ document, comment: { content: comment, tileId: focusTileId } })
             : undefined;
@@ -34,6 +46,9 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   const commentsPath = useCommentsCollectionPath(focusDocument || "");
   const deleteCommentMutation = useDeleteDocument();
   const deleteComment = useCallback((commentId: string) => {
+    if (document) {
+      Logger.log(LogEventName.CHAT_PANEL_DELETE_COMMENT);
+    }
     return document
       ? deleteCommentMutation.mutate(`${commentsPath}/${commentId}`)
       : undefined;

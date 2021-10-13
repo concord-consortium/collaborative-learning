@@ -177,6 +177,9 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
 
   private handleShowChatColumn = () => {
     const { ui } = this.stores;
+    const event = ui.showChatPanel ? LogEventName.CHAT_PANEL_HIDE : LogEventName.CHAT_PANEL_SHOW;
+    const logEvent = () => { Logger.log(event); };
+    logEvent();
     ui.toggleShowChatPanel(!ui.showChatPanel);
   }
 
