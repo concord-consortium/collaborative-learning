@@ -147,7 +147,7 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
       ? LogEventName.VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT
       : LogEventName.VIEW_SHOW_COMPARISON_DOCUMENT;
     const networkInfo = document.isRemote
-      ? {networkClassHash, networkUserId: networkUserId}
+      ? {networkClassHash, networkUserId}
       : undefined;
     Logger.logDocumentEvent(logEvent, document, networkInfo);
 
