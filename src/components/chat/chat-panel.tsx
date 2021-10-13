@@ -36,15 +36,19 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
       if (localDocument) {
         if (ui.selectedTileIds.length === 0) {
           if (numComments < 1) {
-            Logger.logDocumentEvent(LogEventName.CHAT_PANEL_ADD_INITIAL_COMMENT_FOR_DOCUMENT, localDocument, undefined, comment);
+            Logger.logDocumentEvent(LogEventName.CHAT_PANEL_ADD_INITIAL_COMMENT_FOR_DOCUMENT, localDocument,
+              undefined, comment);
           } else {
-            Logger.logDocumentEvent(LogEventName.CHAT_PANEL_ADD_RESPONSE_COMMENT_FOR_DOCUMENT, localDocument, undefined, comment);
+            Logger.logDocumentEvent(LogEventName.CHAT_PANEL_ADD_RESPONSE_COMMENT_FOR_DOCUMENT, localDocument,
+              undefined, comment);
           }
         } else {
           if (numComments < 1) {
-            Logger.logDocumentEvent(LogEventName.CHAT_PANEL_ADD_INITIAL_COMMENT_FOR_TILE, localDocument, undefined, comment);
+            Logger.logDocumentEvent(LogEventName.CHAT_PANEL_ADD_INITIAL_COMMENT_FOR_TILE, localDocument,
+              undefined, comment);
           } else {
-            Logger.logDocumentEvent(LogEventName.CHAT_PANEL_ADD_RESPONSE_COMMENT_FOR_TILE, localDocument, undefined, comment);
+            Logger.logDocumentEvent(LogEventName.CHAT_PANEL_ADD_RESPONSE_COMMENT_FOR_TILE, localDocument,
+              undefined, comment);
           }
         }
       }
@@ -53,7 +57,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
     return document
       ? postCommentMutation.mutate({ document, comment: { content: comment, tileId: focusTileId } })
       : undefined;
-  }, [document, focusTileId, postCommentMutation, focusDocument, localDocuments, ui.selectedTileIds.length]);
+  }, [document, focusTileId, postCommentMutation, postedComments, focusDocument, localDocuments, ui.selectedTileIds.length]);
 
   const commentsPath = useCommentsCollectionPath(focusDocument || "");
   const deleteCommentMutation = useDeleteDocument();
@@ -62,9 +66,9 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
       const localDocument = localDocuments.getDocument(focusDocument);
       if (localDocument) {
         if (ui.selectedTileIds.length === 0) {
-          Logger.log(LogEventName.CHAT_PANEL_DELETE_COMMENT_FOR_DOCUMENT, { commentText: commentText });
+          Logger.log(LogEventName.CHAT_PANEL_DELETE_COMMENT_FOR_DOCUMENT, { commentText });
         } else {
-          Logger.log(LogEventName.CHAT_PANEL_DELETE_COMMENT_FOR_TILE, { commentText: commentText });
+          Logger.log(LogEventName.CHAT_PANEL_DELETE_COMMENT_FOR_TILE, { commentText });
         }
       }
     }
@@ -72,7 +76,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
     return document
       ? deleteCommentMutation.mutate(`${commentsPath}/${commentId}`)
       : undefined;
-  }, [document, deleteCommentMutation, commentsPath, focusDocument, localDocuments]);
+  }, [document, deleteCommentMutation, commentsPath, focusDocument, localDocuments, ui.selectedTileIds.length]);
 
   const newCommentCount = unreadComments?.length || 0;
 
