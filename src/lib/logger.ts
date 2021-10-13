@@ -13,7 +13,14 @@ import { ITableChange } from "../models/tools/table/table-change";
 import { ENavTab } from "../models/view/nav-tabs";
 import { DEBUG_LOGGER } from "../lib/debug";
 
-const logManagerUrl = "//cc-log-manager.herokuapp.com/api/logs";
+type LoggerEnvironment = "dev" | "production";
+
+const logManagerUrl: Record<LoggerEnvironment, string> = {
+  dev: "//cc-log-manager-dev.herokuapp.com/api/logs",
+  production: "//cc-log-manager.herokuapp.com/api/logs"
+};
+
+const productionPortal = "learn.concord.org";
 
 interface LogMessage {
   application: string;
@@ -316,7 +323,8 @@ function sendToLoggingService(data: LogMessage, user: UserModelType) {
   request.upload.addEventListener("error", () => user.setIsLoggingConnected(false));
   request.upload.addEventListener("abort", () => user.setIsLoggingConnected(false));
 
-  request.open("POST", logManagerUrl, true);
+  const url = logManagerUrl[user.portal === productionPortal ? "production" : "dev"];
+  request.open("POST", url, true);
   request.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
   request.send(JSON.stringify(data));
 }
