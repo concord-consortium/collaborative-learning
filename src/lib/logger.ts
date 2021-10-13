@@ -122,9 +122,7 @@ interface IDocumentInfo {
 
 interface ITeacherNetworkInfo {
   networkClassHash?: string;
-  networkClassName?: string;
   networkUserId?: string;
-  networkUserName?: string;
 }
 
 export class Logger {
