@@ -7,9 +7,7 @@ import {
   useCommentsCollectionPath, useDocumentComments, usePostDocumentComment, useUnreadDocumentComments
 } from "../../hooks/document-comment-hooks";
 import { useDeleteDocument } from "../../hooks/firestore-hooks";
-import {
-  useDocumentOrCurriculumMetadata, useUIStore, useLocalDocuments, useNetworkDocuments
-} from "../../hooks/use-stores";
+import { useDocumentOrCurriculumMetadata, useUIStore, useDocumentFromStore } from "../../hooks/use-stores";
 import { useCurrent } from "../../hooks/use-current";
 import "./chat-panel.scss";
 
@@ -31,23 +29,21 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   const postedComments = focusTileId ? tileComments : documentComments;
   const postCommentMutation = usePostDocumentComment();
   const ui = useUIStore();
-  const localDocuments = useLocalDocuments();
-  const networkDocuments = useNetworkDocuments();
+  const focusStoreDocument = useDocumentFromStore(focusDocument);
 
   const focusDocumentRef = useCurrent(focusDocument);
   const focusTileIdRef = useCurrent(focusTileId);
 
   const postComment = useCallback((comment: string) => {
     if (focusDocument) {
-      const commentDoc = localDocuments.getDocument(focusDocument) || networkDocuments.getDocument(focusDocument);
-      const commentTile = focusTileId && commentDoc?.content?.getTile(focusTileId);
+      const commentTile = focusTileId && focusStoreDocument?.content?.getTile(focusTileId);
       const numComments = postedComments ? postedComments.length : 0;
       if (ui.selectedTileIds.length === 0) {
-        if (commentDoc) {
+        if (focusStoreDocument) {
           Logger.logDocumentEvent(numComments < 1
             ? LogEventName.CHAT_PANEL_ADD_INITIAL_COMMENT_FOR_DOCUMENT
             : LogEventName.CHAT_PANEL_ADD_RESPONSE_COMMENT_FOR_DOCUMENT,
-            commentDoc, undefined, comment);
+            focusStoreDocument, comment);
         }
       } else {
         if (commentTile) {
@@ -62,22 +58,19 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
     return document
       ? postCommentMutation.mutate({ document, comment: { content: comment, tileId: focusTileId } })
       : undefined;
-  }, [document, focusTileId, postCommentMutation, postedComments, focusDocument, localDocuments,
-    networkDocuments, ui.selectedTileIds.length]);
+  }, [document, focusTileId, postCommentMutation, postedComments, focusDocument, focusStoreDocument,
+    ui.selectedTileIds.length]);
 
   const commentsPath = useCommentsCollectionPath(focusDocument || "");
   const deleteCommentMutation = useDeleteDocument();
   const deleteComment = useCallback((commentId: string, commentText: string) => {
     if (focusDocumentRef.current) {
-      const commentDoc = localDocuments.getDocument(focusDocumentRef.current)
-        || networkDocuments.getDocument(focusDocumentRef.current);
       if (ui.selectedTileIds.length === 0) {
-        if (commentDoc) {
-          Logger.logDocumentEvent(LogEventName.CHAT_PANEL_DELETE_COMMENT_FOR_DOCUMENT, commentDoc, undefined,
-            commentText);
+        if (focusStoreDocument) {
+          Logger.logDocumentEvent(LogEventName.CHAT_PANEL_DELETE_COMMENT_FOR_DOCUMENT, focusStoreDocument, commentText);
         }
       } else if (focusTileIdRef.current) {
-        const commentTile = commentDoc?.content?.getTile(focusTileIdRef.current);
+        const commentTile = focusStoreDocument?.content?.getTile(focusTileIdRef.current);
         if (commentTile) {
           Logger.logTileEvent(LogEventName.CHAT_PANEL_DELETE_COMMENT_FOR_TILE, commentTile, undefined, commentText);
         }
@@ -87,7 +80,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
     return document
       ? deleteCommentMutation.mutate(`${commentsPath}/${commentId}`)
       : undefined;
-  }, [document, deleteCommentMutation, commentsPath, localDocuments, networkDocuments, ui.selectedTileIds.length]);
+  }, [document, deleteCommentMutation, commentsPath, focusStoreDocument, ui.selectedTileIds.length]);
 
   const newCommentCount = unreadComments?.length || 0;
 

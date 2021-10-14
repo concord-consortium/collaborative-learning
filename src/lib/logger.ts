@@ -134,11 +134,12 @@ interface IDocumentInfo {
   title?: string;
   properties?: { [prop: string]: string };
   changeCount?: number;
+  remoteContext?: string;
 }
 
 interface ITeacherNetworkInfo {
   networkClassHash?: string;
-  networkUserId?: string;
+  networkUsername?: string;
 }
 
 export class Logger {
@@ -177,6 +178,10 @@ export class Logger {
 
     if (tile) {
       const document = Logger.Instance.getDocumentForTile(tile.id);
+      const teacherNetworkInfo: ITeacherNetworkInfo | undefined = document.remoteContext
+      ? { networkClassHash: document.remoteContext,
+          networkUsername: `${document.uid}@${this._instance.stores.user.portal}`}
+      : undefined;
 
       parameters = {
         objectId: tile.id,
@@ -186,7 +191,8 @@ export class Logger {
         documentKey: document.key,
         documentType: document.type,
         documentChanges: document.changeCount,
-        commentText
+        commentText,
+        ...teacherNetworkInfo
       };
 
       if (event === LogEventName.COPY_TILE && metaData && metaData.originalTileId) {
@@ -206,11 +212,12 @@ export class Logger {
     Logger.log(event, parameters);
   }
 
-  public static logDocumentEvent(event: LogEventName, document: DocumentModelType,
-    teacherNetworkInfo?: ITeacherNetworkInfo, commentText?: string) {
-    const modifiedTeacherNetworkInfo = teacherNetworkInfo &&
-      {networkClassHash: teacherNetworkInfo.networkClassHash,
-       networkUsername: `${teacherNetworkInfo.networkUserId}@${this._instance.stores.user.portal}`};
+  public static logDocumentEvent(event: LogEventName, document: DocumentModelType, commentText?: string) {
+    const teacherNetworkInfo: ITeacherNetworkInfo | undefined = document.isRemote
+        ? { networkClassHash: document.remoteContext,
+            networkUsername: `${document.uid}@${this._instance.stores.user.portal}`}
+        : undefined;
+
     const parameters = {
       documentUid: document.uid,
       documentKey: document.key,
@@ -220,7 +227,7 @@ export class Logger {
       documentVisibility: document.visibility,
       documentChanges: document.changeCount,
       commentText,
-      ...modifiedTeacherNetworkInfo
+      ...teacherNetworkInfo
     };
     Logger.log(event, parameters);
 
@@ -315,8 +322,8 @@ export class Logger {
     const document = this.stores.documents.findDocumentOfTile(tileId)
       || this.stores.networkDocuments.findDocumentOfTile(tileId);
     if (document) {
-      const { type, key, uid, title, changeCount, properties } = document;
-      return { type, key, uid, title, changeCount, properties: properties?.toJSON() || {} };
+      const { type, key, uid, title, changeCount, remoteContext, properties } = document;
+      return { type, key, uid, title, changeCount, remoteContext, properties: properties?.toJSON() || {} };
     } else {
       return {
         type: "Instructions"        // eventually we will need to include copying from supports

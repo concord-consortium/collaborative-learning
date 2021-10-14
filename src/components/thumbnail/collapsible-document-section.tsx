@@ -24,8 +24,7 @@ interface IProps {
   stores: IStores;
   scale: number;
   selectedDocument?: string;
-  onSelectDocument?: (document: DocumentModelType, networkClassHash?: string,
-    networkUserId?: string) => void;
+  onSelectDocument?: (document: DocumentModelType) => void;
   subTab: ISubTabSpec;
   networkResource: INetworkResourceClassResponse;
   problemTitle: string;
@@ -102,8 +101,7 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
                 <DocumentContextReact.Provider key={document.key} value={documentContext}>
                   <TabPanelDocumentsSubSectionPanel section={currentSection} sectionDocument={document}
                     tab={subTab.label} stores={stores} scale={scale} selectedDocument={selectedDocument}
-                    onSelectDocument={() =>
-                      onSelectDocument?.(document, classHash, userId)}
+                    onSelectDocument={() => onSelectDocument?.(document)}
                   />
                 </DocumentContextReact.Provider>
               );
