@@ -58,7 +58,7 @@ jest.mock("../../hooks/use-stores", () => ({
   useDocumentOrCurriculumMetadata: (documentKey: string) => ({
     uid: "1", key: documentKey, type: "problem"
   }),
-  useLocalDocuments: () => ({
+  useDocumentFromStore: () => ({
     getDocument: () => ({ undefined })
   }),
   useUIStore: () => ({
