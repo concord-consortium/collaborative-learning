@@ -140,16 +140,12 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
     this.stores.ui.updateFocusDocument();
   }
 
-  private handleDocumentSelect = (document: DocumentModelType, networkClassHash?: string,
-    networkUserId?: string) => {
+  private handleDocumentSelect = (document: DocumentModelType) => {
     const { onSelectDocument } = this.props;
     const logEvent = document.isRemote
       ? LogEventName.VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT
       : LogEventName.VIEW_SHOW_COMPARISON_DOCUMENT;
-    const networkInfo = document.isRemote
-      ? {networkClassHash, networkUserId}
-      : undefined;
-    Logger.logDocumentEvent(logEvent, document, networkInfo);
+    Logger.logDocumentEvent(logEvent, document);
 
     onSelectDocument?.(document);
   }

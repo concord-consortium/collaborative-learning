@@ -95,6 +95,15 @@ export enum LogEventName {
   CLOSE_STICKY_NOTES,
   OPEN_STICKY_NOTES,
 
+  CHAT_PANEL_ADD_INITIAL_COMMENT_FOR_DOCUMENT,
+  CHAT_PANEL_ADD_INITIAL_COMMENT_FOR_TILE,
+  CHAT_PANEL_ADD_RESPONSE_COMMENT_FOR_DOCUMENT,
+  CHAT_PANEL_ADD_RESPONSE_COMMENT_FOR_TILE,
+  CHAT_PANEL_DELETE_COMMENT_FOR_DOCUMENT,
+  CHAT_PANEL_DELETE_COMMENT_FOR_TILE,
+  CHAT_PANEL_HIDE,
+  CHAT_PANEL_SHOW,
+
   // the following are for potential debugging purposes and are all marked "internal"
   INTERNAL_AUTHENTICATED,
   INTERNAL_ERROR_ENCOUNTERED,
@@ -125,11 +134,12 @@ interface IDocumentInfo {
   title?: string;
   properties?: { [prop: string]: string };
   changeCount?: number;
+  remoteContext?: string;
 }
 
 interface ITeacherNetworkInfo {
   networkClassHash?: string;
-  networkUserId?: string;
+  networkUsername?: string;
 }
 
 export class Logger {
@@ -160,13 +170,18 @@ export class Logger {
     sendToLoggingService(logMessage, this._instance.stores.user);
   }
 
-  public static logTileEvent(event: LogEventName, tile?: ToolTileModelType, metaData?: TileLoggingMetadata) {
+  public static logTileEvent(event: LogEventName, tile?: ToolTileModelType, metaData?: TileLoggingMetadata,
+    commentText?: string) {
     if (!this._instance) return;
 
     let parameters = {};
 
     if (tile) {
       const document = Logger.Instance.getDocumentForTile(tile.id);
+      const teacherNetworkInfo: ITeacherNetworkInfo | undefined = document.remoteContext
+      ? { networkClassHash: document.remoteContext,
+          networkUsername: `${document.uid}@${this._instance.stores.user.portal}`}
+      : undefined;
 
       parameters = {
         objectId: tile.id,
@@ -175,7 +190,9 @@ export class Logger {
         documentUid: document.uid,
         documentKey: document.key,
         documentType: document.type,
-        documentChanges: document.changeCount
+        documentChanges: document.changeCount,
+        commentText,
+        ...teacherNetworkInfo
       };
 
       if (event === LogEventName.COPY_TILE && metaData && metaData.originalTileId) {
@@ -195,11 +212,12 @@ export class Logger {
     Logger.log(event, parameters);
   }
 
-  public static logDocumentEvent(event: LogEventName, document: DocumentModelType,
-    teacherNetworkInfo?: ITeacherNetworkInfo) {
-    const modifiedTeacherNetworkInfo = teacherNetworkInfo &&
-      {networkClassHash: teacherNetworkInfo.networkClassHash,
-       networkUsername: `${teacherNetworkInfo.networkUserId}@${this._instance.stores.user.portal}`};
+  public static logDocumentEvent(event: LogEventName, document: DocumentModelType, commentText?: string) {
+    const teacherNetworkInfo: ITeacherNetworkInfo | undefined = document.isRemote
+        ? { networkClassHash: document.remoteContext,
+            networkUsername: `${document.uid}@${this._instance.stores.user.portal}`}
+        : undefined;
+
     const parameters = {
       documentUid: document.uid,
       documentKey: document.key,
@@ -208,7 +226,8 @@ export class Logger {
       documentProperties: document.properties?.toJSON() || {},
       documentVisibility: document.visibility,
       documentChanges: document.changeCount,
-      ...modifiedTeacherNetworkInfo
+      commentText,
+      ...teacherNetworkInfo
     };
     Logger.log(event, parameters);
 
@@ -300,10 +319,11 @@ export class Logger {
   }
 
   private getDocumentForTile(tileId: string): IDocumentInfo {
-    const document = this.stores.documents.findDocumentOfTile(tileId);
+    const document = this.stores.documents.findDocumentOfTile(tileId)
+      || this.stores.networkDocuments.findDocumentOfTile(tileId);
     if (document) {
-      const { type, key, uid, title, changeCount, properties } = document;
-      return { type, key, uid, title, changeCount, properties: properties?.toJSON() || {} };
+      const { type, key, uid, title, changeCount, remoteContext, properties } = document;
+      return { type, key, uid, title, changeCount, remoteContext, properties: properties?.toJSON() || {} };
     } else {
       return {
         type: "Instructions"        // eventually we will need to include copying from supports

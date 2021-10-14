@@ -16,7 +16,7 @@ interface IProps {
   activeNavTab?: string;
   postedComments?: WithId<CommentDocument>[];
   onPostComment?: (comment: string) => void;
-  onDeleteComment?: (commentId: string) => void;
+  onDeleteComment?: (commentId: string, commentContent: string) => void;
   focusDocument?: string;
   focusTileId?: string;
 }
@@ -25,6 +25,8 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
                                                 onPostComment, onDeleteComment,
                                                 focusDocument, focusTileId }) => {
   const commentIdRef = useRef<string>();
+  const commentContentRef = useRef<string>("");
+
   const alertContent = () => {
     return (
       <>
@@ -38,12 +40,13 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
     title: "Delete Comment",
     content: alertContent,
     confirmLabel: "Delete",
-    onConfirm: () => commentIdRef.current && onDeleteComment?.(commentIdRef.current)
+    onConfirm: () => commentIdRef.current && onDeleteComment?.(commentIdRef.current, commentContentRef.current)
   });
 
-  const handleDeleteComment = (commentId: string) => {
+  const handleDeleteComment = (commentId: string, commentContent: string) => {
     if (commentId) {
       commentIdRef.current = commentId;
+      commentContentRef.current = commentContent;
       showConfirmDeleteAlert();
     }
   };
@@ -83,7 +86,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
                   <div className="time-stamp">{getDisplayTimeDate(comment.createdAt.getTime())}</div>
                   {shouldShowDeleteIcon &&
                     <div className="delete-message-icon-container" data-testid="delete-message-button"
-                          onClick={() => handleDeleteComment(comment.id)}>
+                          onClick={() => handleDeleteComment(comment.id, comment.content)}>
                       <DeleteMessageIcon />
                     </div>
                   }
