@@ -38,7 +38,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
     if (focusDocument) {
       const commentTile = focusTileId && focusStoreDocument?.content?.getTile(focusTileId);
       const numComments = postedComments ? postedComments.length : 0;
-      if (ui.selectedTileIds.length === 0) {
+      if (!focusTileId) {
         if (focusStoreDocument) {
           Logger.logDocumentEvent(numComments < 1
             ? LogEventName.CHAT_PANEL_ADD_INITIAL_COMMENT_FOR_DOCUMENT
@@ -65,11 +65,11 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   const deleteCommentMutation = useDeleteDocument();
   const deleteComment = useCallback((commentId: string, commentText: string) => {
     if (focusDocumentRef.current) {
-      if (ui.selectedTileIds.length === 0) {
+      if (!focusTileIdRef.current) {
         if (focusStoreDocument) {
           Logger.logDocumentEvent(LogEventName.CHAT_PANEL_DELETE_COMMENT_FOR_DOCUMENT, focusStoreDocument, commentText);
         }
-      } else if (focusTileIdRef.current) {
+      } else {
         const commentTile = focusStoreDocument?.content?.getTile(focusTileIdRef.current);
         if (commentTile) {
           Logger.logTileEvent(LogEventName.CHAT_PANEL_DELETE_COMMENT_FOR_TILE, commentTile, undefined, commentText);
@@ -80,7 +80,8 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
     return document
       ? deleteCommentMutation.mutate(`${commentsPath}/${commentId}`)
       : undefined;
-  }, [document, deleteCommentMutation, commentsPath, focusStoreDocument, ui.selectedTileIds.length]);
+  }, [document, deleteCommentMutation, commentsPath, focusStoreDocument, ui.selectedTileIds.length, focusDocumentRef,
+    focusTileIdRef]);
 
   const newCommentCount = unreadComments?.length || 0;
 
