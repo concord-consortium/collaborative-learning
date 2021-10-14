@@ -10,6 +10,7 @@ import { useDeleteDocument } from "../../hooks/firestore-hooks";
 import {
   useDocumentOrCurriculumMetadata, useUIStore, useLocalDocuments, useNetworkDocuments
 } from "../../hooks/use-stores";
+import { useCurrent } from "../../hooks/use-current";
 import "./chat-panel.scss";
 
 interface IProps {
@@ -32,6 +33,10 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   const ui = useUIStore();
   const localDocuments = useLocalDocuments();
   const networkDocuments = useNetworkDocuments();
+
+  const focusDocumentRef = useCurrent(focusDocument);
+  const focusTileIdRef = useCurrent(focusTileId);
+
   const postComment = useCallback((comment: string) => {
     if (focusDocument) {
       const commentDoc = localDocuments.getDocument(focusDocument) || networkDocuments.getDocument(focusDocument);
@@ -63,15 +68,16 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   const commentsPath = useCommentsCollectionPath(focusDocument || "");
   const deleteCommentMutation = useDeleteDocument();
   const deleteComment = useCallback((commentId: string, commentText: string) => {
-    if (focusDocument) {
-      const commentDoc = localDocuments.getDocument(focusDocument) || networkDocuments.getDocument(focusDocument);
+    if (focusDocumentRef.current) {
+      const commentDoc = localDocuments.getDocument(focusDocumentRef.current)
+        || networkDocuments.getDocument(focusDocumentRef.current);
       if (ui.selectedTileIds.length === 0) {
         if (commentDoc) {
           Logger.logDocumentEvent(LogEventName.CHAT_PANEL_DELETE_COMMENT_FOR_DOCUMENT, commentDoc, undefined,
             commentText);
         }
-      } else if (focusTileId) {
-        const commentTile = commentDoc?.content?.getTile(focusTileId);
+      } else if (focusTileIdRef.current) {
+        const commentTile = commentDoc?.content?.getTile(focusTileIdRef.current);
         if (commentTile) {
           Logger.logTileEvent(LogEventName.CHAT_PANEL_DELETE_COMMENT_FOR_TILE, commentTile, undefined, commentText);
         }
@@ -81,8 +87,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
     return document
       ? deleteCommentMutation.mutate(`${commentsPath}/${commentId}`)
       : undefined;
-  }, [document, deleteCommentMutation, commentsPath, focusDocument, localDocuments, networkDocuments,
-    ui.selectedTileIds.length, focusTileId]);
+  }, [document, deleteCommentMutation, commentsPath, localDocuments, networkDocuments, ui.selectedTileIds.length]);
 
   const newCommentCount = unreadComments?.length || 0;
 
