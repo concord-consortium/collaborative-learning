@@ -345,9 +345,13 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     const toolApi = toolApiInterface?.getToolApi(this.modelId);
     let tileJsonString = toolApi?.exportContentAsTileJson?.({ transformImageUrl });
     if (tileJsonString) {
-      // Put all exported content in a top-level object, under key: "content"
-      const tileJson = JSON.parse(tileJsonString);
-      tileJsonString = JSON.stringify({ content: tileJson }, null, "  ");
+      // Put all exported content in a top-level object, under key: "content",
+      // but _preserve_ existing formatting (which collapses some elements
+      // into a single line; no: indent). But DO indent w.r.t. the new key.
+      tileJsonString = (tileJsonString.slice(-1) === "\n")
+        ? tileJsonString.slice(0, -1) // Remove trailing new line char.
+        : tileJsonString;
+      tileJsonString = `{\n  "content": ${tileJsonString.replaceAll("\n", "\n  ")}` + "\n}\n";
     }
     tileJsonString && navigator.clipboard.writeText(tileJsonString);
     return true;
