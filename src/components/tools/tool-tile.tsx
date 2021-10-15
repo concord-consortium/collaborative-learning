@@ -173,7 +173,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     model.setDisabledFeatures(getDisabledFeaturesOfTile(this.stores, type));
 
     this.hotKeys.register({
-      "cmd-option-e": this.handleCopyImportJson,
+      "cmd-option-e": this.handleCopyImportJsonToClipboard,
       "cmd-shift-c": this.handleCopyModelJson
     });
   }
@@ -335,7 +335,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private handleCopyImportJson = () => {
+  private handleCopyImportJsonToClipboard = () => {
     const { appConfig, unit } = this.stores;
     const unitBasePath = appConfig.getUnitBasePath(unit.code);
     const transformImageUrl = (url: string, filename?: string) => {
@@ -343,8 +343,17 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     };
     const toolApiInterface = this.context;
     const toolApi = toolApiInterface?.getToolApi(this.modelId);
-    const importJson = toolApi?.exportContentAsTileJson?.({ transformImageUrl });
-    importJson && navigator.clipboard.writeText(importJson);
+    let tileJsonString = toolApi?.exportContentAsTileJson?.({ transformImageUrl });
+    if (tileJsonString) {
+      // Put all exported content in a top-level object, under key: "content",
+      // but _preserve_ existing formatting (which collapses some elements
+      // into a single line; no: indent). But DO indent w.r.t. the new key.
+      tileJsonString = (tileJsonString.slice(-1) === "\n")
+        ? tileJsonString.slice(0, -1) // Remove trailing new line char.
+        : tileJsonString;
+      tileJsonString = `{\n  "content": ${tileJsonString.replace(/\n/g, "\n  ")}\n}\n`;
+    }
+    tileJsonString && navigator.clipboard.writeText(tileJsonString);
     return true;
   }
 
