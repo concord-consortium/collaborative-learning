@@ -351,7 +351,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
       tileJsonString = (tileJsonString.slice(-1) === "\n")
         ? tileJsonString.slice(0, -1) // Remove trailing new line char.
         : tileJsonString;
-      tileJsonString = `{\n  "content": ${tileJsonString.replaceAll("\n", "\n  ")}` + "\n}\n";
+      tileJsonString = `{\n  "content": ${tileJsonString.replace(/\n/g, "\n  ")}\n}\n`;
     }
     tileJsonString && navigator.clipboard.writeText(tileJsonString);
     return true;
