@@ -3254,6 +3254,13 @@
                   {
                     "display": "teacher",
                     "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/3-1_What_If_Situation_B_2.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
@@ -3283,10 +3290,163 @@
                   {
                     "content": {
                       "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "* Would this work for triangles? Explain."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Situation C. Claims About Rep-tiles</h3>Examine each claim. Is it correct? Explain why. \n<strong>Patricia’s Claim</strong> If it takes nine copies of a certain rectangle or triangle to make a similar figure, the scale factor is 9. \n<strong>Pete’s Claim</strong>  If you are given a certain rectangle or triangle and a scale factor of 5, then it will take 5 copies of the original to make a scale copy. \n<strong>Tomiko’s Claim</strong> All triangles are rep-tiles. \n<strong>Kazuko’s Claim</strong>  If you want to show two triangles with the same angle measures are similar, you can use a unit rep-tile. I used an equilateral triangle whose side lengths are one unit. To show that the following two triangles are similar."
+                        "<p>Yes. Many find it more difficult to sub-divide triangles. You can begin by sub-dividing the side lengths. Then draw in the smaller triangles making sure you keep the corresponding sides parallel.</p>"
                       ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/3-1_What_If_Situation_B_3.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/3-1_What_If_Situation_B_4.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Then draw in the smaller triangles making sure you keep the corresponding sides parallel.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/3-1_What_If_Situation_B_5.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Example with a scale factor of 1/3.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/3-1_What_If_Situation_B_6.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation C. Claims About Rep-tiles</h3>Examine each claim. Is it correct? Explain why. ",
+                        "<strong>Patricia’s Claim</strong> If it takes nine copies of a certain rectangle or triangle to make a similar figure, the scale factor is 9. "
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Not correct. If it takes 9 copies of a figure to make a rep-tile, then the scale factor is 3. Since the area grows by the square of the scale factor, then the scale factor must be 3 since 3•3 or 32 is 9. Note: For students who have already been exposed to the idea of square root, the following equation can also be referenced: square root 9 = 3.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Pete’s Claim</strong>  If you are given a certain rectangle or triangle and a scale factor of 5, then it will take 5 copies of the original to make a scale copy."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Not correct. If we consider a rectangle, both the length and the width will increase by a factor of 5. You will need 25 copies of the original. The area grows by the scale factor times the scale factor, or square of the scale factor, so you need 25 copies. </p>",
+                        "<p>A<sub>original </sub>= L • W </p>",
+                        "<p>A<sub>scale factor</sub> <sub>5</sub> = 5 • L • 5 • W </p>",
+                        "<p>                              =  5 • 5 •L • W  or  </p>",
+                        "<p>                               = 5<sup>2</sup> • L • W</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Tomiko’s Claim</strong> All triangles are rep-tiles."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>It is true that all triangles are rep-tiles. You can subdivide any triangle into four congruent triangles, each of which is similar to the larger triangle. You can do this by finding the midpoint of each side of the triangle and then connecting the midpoints to form four smaller triangles. Each smaller triangle will be similar to the larger triangle. This can be extended to more scale factors by subdividing the sides into even smaller equal segments, then connecting these points so that the connecting lines are parallel.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Kazuko’s Claim</strong>  If you want to show two triangles with the same angle measures are similar, you can use a unit rep-tile. I used an equilateral triangle whose side lengths are one unit. To show that the following two triangles are similar."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>It is true. We can use a unit rep-tile to show that corresponding angles are the same measure. Note that this strategy may be more difficult to use if scale factors are not whole numbers.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/3-1_What_If_Situation_C_1.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/3-1_What_If_Situation_C_2.png"
                     }
                   },
                   {
@@ -3406,6 +3566,23 @@
                     }
                   },
                   {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>When rep-tiling, we can use multiple tiles of a shape to make a larger or smaller similar shape. Rep-tiles keep the corresponding angles the same measure. This lets us focus on the relationships in the other measures, like lengths and area.</p>",
+                        "<p>If you make a rep-tile using four same copies, then the area of a rep-tile is four times the area of the original copy. And the scale factor is 2, because the side length of a rep-tile will be twice the side length of the original copy. </p>",
+                        "<p>If the scale factor is k, then the side lengths of the image will be  times the side lengths of the original copy. Each dimension of the shape is stretched or shrunk by the scale factor. Since we find area by multiplying both dimensions, we also multiply the scale factor times the scale factor on the image. The area of the rep-tile will be times larger. If </p>",
+                        "<p>A<sub>original</sub> = L • W , then </p>",
+                        "<p>A <sub>scale factor k</sub> = K • L • K• W =  </p>",
+                        "<p>                                  K • K • L • W = </p>",
+                        "<p>                                        K<sup>2</sup> • L • W </p>",
+                        "<p>Note that students will need to use their knowledge of the Commutative Property from the previous unit.</p>"
+                      ]
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_3_1_NW_22_did_you_know_350w.png"
@@ -3454,9 +3631,101 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "html",
+                      "format": "markdown",
                       "text": [
-                        "<h3>Constraints for Rectangles</h3>For each part, draw a rectangle similar to Rectangle A that fits the given description. Explain your reasoning.\nDescribe the lengths, perimeters, and areas for each figure. <ul><li><strong>Rectangle P</strong> The scale factor from Rectangle A to Rectangle P is 2.5.</li><li><strong>Rectangle Q</strong> The perimeter of Rectangle Q is three times the perimeter of Rectangle A.</li><li><strong>Rectangle R</strong> The area of Rectangle R is 1/4 the area of Rectangle A.</li></ul>"
+                        "### Constraints for Rectangles",
+                        "For each part, draw a rectangle similar to Rectangle A that fits the given description. Explain your reasoning.",
+                        "Describe the lengths, perimeters, and areas for each figure.",
+                        "* **Rectangle P** The scale factor from Rectangle A to Rectangle P is 2.5."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "To make the new Rectangle P that is similar to A, multiply the scale factor, 2.5, by each side length of rectangle A. The size of rectangle A is 4 x 8. So, you can get 4 x 2.5 = 10, 8 x 2.5 =20, which becomes a 10 x 20 rectangle."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/3-2_Initial_Challenge_1.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "* **Rectangle Q** The perimeter of Rectangle Q is three times the perimeter of Rectangle A."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "If the perimeter of the new rectangle 3 is three times the perimeter of A, each side length of Rectangle Q will be three times the corresponding side length of A. We will have 4 x 3 = 12, 8 x 3 = 24, which becomes a 12 x 24 rectangle."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/3-2_Initial_Challenge_2.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "The lengths are 3 times larger. The perimeter increases from 24 units to72 units. This is an increase of 3 times. 24 • 3 = 72. The area increases from 32 square units to 288 square units. This is an increase of 9 times. 32 • 9 = 288. Using the Commutative Property, we can see that the area of P is (3 • 4) • (3 • 8) = 3 • 3 • 4 • 8 = 9 • 32. "
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "* **Rectangle R** The area of Rectangle R is 1/4 the area of Rectangle A."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "If the new Rectangle R is ¼ the area of the rectangle A, there are four congruent Rectangle Rs in the rectangle A. To divide the rectangle A into four of them, you should divide each side length of the rectangle A into two. So, the side lengths of the rectangle R are 2 and 4.  "
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/3-2_Initial_Challenge_3.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "The lengths are ½ the size of the original. The perimeter decreases from 24 units to 12 units. This is decrease of 0.5 times. 24 • 0.5 = 12. The area decreases from 32 square units to 8 square units. The new area is ¼ of the original. 32 • ¼  = 8. Using the Commutative Property, we can see that the area of P is (½ • 4) • (½ • 8) = ½ • ½ • 4 • 8 = ¼ • 32.  "
                       ]
                     }
                   },
@@ -3532,10 +3801,74 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "html",
+                      "format": "markdown",
                       "text": [
-                        "<h3>Constraints for Triangles</h3>For each part, draw a triangle similar to Triangle B that fits the given description. Explain your reasoning.<ul><li><strong>Triangle X</strong> The area of the Triangle X is 16 times the area of Triangle B.</li><li><strong>Triangle Y</strong> The scale factor from Triangle B to Triangle X is 1/2. </li><li><strong>Triangle Z</strong> The ratio of corresponding side lengths of Triangle B to Triangle Z is 2:3.</li></ul>"
+                        "### Constraints for Triangles",
+                        "For each part, draw a triangle similar to Triangle B that fits the given description. Explain your reasoning.",
+                        "**Triangle X** The area of the Triangle X is 16 times the area of Triangle B."
                       ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "If the new Rectangle R is ¼ the area of the rectangle A, there are four congruent Rectangle Rs in the rectangle A. To divide the rectangle A into four of them, you should divide each side length of the rectangle A into two. So, the side lengths of the rectangle R are 2 and 4. "
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/3-2_Initial_Challenge_4.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Triangle Y** The scale factor from Triangle B to Triangle X is 1/2."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "For the triangle B, the base length is 7 and the height is 4. Using the scale factor ½ to make a similar triangle X, the base length of the Triangle Y will be 3.5 and the height will be 2.  "
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Triangle Z** The ratio of corresponding side lengths of Triangle B to Triangle Z is 2:3."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "When the ratio of corresponding side lengths from Triangle B to Triangle Z is 2:3, the scale factor will be 3/2. For every length of 2 on Triangle B, we would have a length of 3 on Triangle Z. This means that the side increase 1.5 times. The base length of the Triangle Z will be 7 x 1.5 = 10.5 and the height of the Triangle 3 will be 4 x 1.5 = 6.  "
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/3-2_Initial_Challenge_5.png"
                     }
                   }
                 ]
@@ -3566,11 +3899,38 @@
                     }
                   },
                   {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "4cm. Side AD corresponds to side EH, and side CD corresponds to side EF."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/3-2_What_If_Situation_A_1.png"
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<h3>Situation B. Similar Triangles</h3>These two triangles are similar. Find all the missing side lengths and angles. Explain your reasoning."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "The scale factor from one figure to the other is 7.5 ÷ 6, or 1.25. Side DF is 3.75 cm since 3 × 1.25 is 3.75. Side FE is 6.25 cm (5 × 1.25 = 6.25). Because the triangles are similar, the corresponding angle measures are the same. So, the measure of angle F is 94°. Angle B and corresponding angle E are each 30° since 180 – (94 + 56) = 30. Note: Students will need to use the fact that the sum of the interior angles of a triangle is 180°."
                       ]
                     }
                   },
@@ -3593,6 +3953,13 @@
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_3_2_WI_25_Q2_500w.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/3-2_What_If_Situation_B_2.jpg"
                     }
                   }
                 ]
@@ -3619,6 +3986,19 @@
                       "format": "html",
                       "text": [
                         "How can you use scale factors to draw similar figures(scale drawings)? \n\nHow can you use scale factors to find missing information about angles measures? Side lengths? Area? Perimeter? "
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "With lengths of similar figures, you can multiply each length of the original figure by the scale factor to get the corresponding length on the image. Keeping all the angle measures the same as the original, you can draw the similar figures. ",
+                          "To find missing information about angles, you do not need to use scale factors because the corresponding angle measures of similar figures stay the same as the original. ",
+                          "To find missing information about area, you can use scale factors. When the scale factor from the original to the similar figure is , the area of the similar figure will be  times the area of the original.",
+                          "Perimeter is the sum of lengths. So, every relationship for length and scale factor is the same for perimeter and scale factor. To find missing information about perimeter, you can use scale factors. When the scale factor from the original to the similar figure is , the perimeter of the similar figure will be  times the perimeter of the original perimeter. "
                       ]
                     }
                   }
