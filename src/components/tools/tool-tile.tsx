@@ -30,6 +30,7 @@ import { getContentIdFromNode, getDocumentContentFromNode } from "../../utilitie
 import TileDragHandle from "../../assets/icons/drag-tile/move.svg";
 import TileResizeHandle from "../../assets/icons/resize-tile/expand-handle.svg";
 import "../../utilities/dom-utils";
+import dragPlaceholderImage from "../../assets/image_drag.png";
 
 import "./tool-tile.sass";
 
@@ -43,6 +44,7 @@ export const kDragTileCreate = "org.concord.clue.tile.create";
 // allows source compatibility to be checked in dragOver
 export const dragTileSrcDocId = (id: string) => `org.concord.clue.src.${id.toLowerCase()}`;
 export const dragTileType = (type: string) => `org.concord.clue.tile.type.${type}`;
+const kDefaultDragImageWidth = 300;
 
 export function extractDragTileSrcDocId(dataTransfer: DataTransfer) {
   for (const type of dataTransfer.types) {
@@ -140,6 +142,9 @@ const ResizeTileButton =
 interface IState {
   hoverTile: boolean;
 }
+
+const defaultDragImage = document.createElement("img");
+defaultDragImage.src = dragPlaceholderImage;
 
 @inject("stores")
 @observer
@@ -425,12 +430,14 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     // set the drag image
     const dragElt = e.target as HTMLElement;
     // tool components can provide alternate dom node for drag image
-    const dragImage = ToolComponent && ToolComponent.getDragImageNode
+    // use default drag image for all tiles that don't specify drag image
+    const useToolDragImage = !!(ToolComponent && ToolComponent.getDragImageNode);
+    const dragImage = useToolDragImage
                         ? ToolComponent.getDragImageNode(dragElt)
-                        : dragElt;
+                        : defaultDragImage;
     const clientRect = dragElt.getBoundingClientRect();
-    const offsetX = (e.clientX - clientRect.left) / (scale || 1);
-    const offsetY = (e.clientY - clientRect.top) / (scale || 1);
+    const offsetX = useToolDragImage ? (e.clientX - clientRect.left) / (scale || 1): kDefaultDragImageWidth;
+    const offsetY = useToolDragImage ? (e.clientY - clientRect.top) / (scale || 1) : 0;
     e.dataTransfer.setDragImage(dragImage, offsetX, offsetY);
   }
 
