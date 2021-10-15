@@ -1627,38 +1627,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Situation A. Student Claims</h3>Below are claims made by Marta’s class. Is each Claim true? Explain why.\n\n<strong>Marta’s Claim</strong> The rule (5x, 5y) will make a character that is similar to Mug, but the rule (5x, y) will not produce a character similar to Mug."
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": 
-                    {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "True. Like the rule (2x, 2y) makes Zug similar to Mug and the rule (3x, 3y) makes Bug similar to Mug, the rule (5x, 5y) also makes it similar to Mug. It will be 5 times wider and 5 times taller than Mug."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<strong>Jacob’s Claim</strong> I can use the coordinate rule to predict how the side lengths compare between Mug and a similar Wump. Is he correct?"
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": 
-                    {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "Yes, this is true. With the rule (2x, 2y), Zug has double the side lengths of the corresponding side lengths of Mug’s. Also, with the rule (3x, 3y), Bug has triple the side lengths of the corresponding side lengths of Mug’s. Using the multiplier, you can predict how many times bigger (or smaller) the lengths on a similar figure are compared to the original lengths."
+                        "<h3>Situation A. Student Claims</h3>Below are claims made by Marta’s class. Is each Claim true? Explain why.",
+                        "<strong>Marta’s Claim</strong> The rule (5x, 5y) will make a character that is similar to Mug, but the rule (5x, y) will not produce a character similar to Mug."
                       ]
                     }
                   },
@@ -2951,17 +2921,27 @@
                           "values": ["A right triangle", "An isosceles triangle"]
                         }
                       ]
-                    },
-                    "layout": {
-                      "height": 150
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "* Which shapes are a rep-tile? Make a sketch to show how the copies fit together."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
                       "format": "html",
                       "text": [
-                        "• Which shapes are a rep-tile? Make a sketch to show how the copies fit together."
+                        "<p>To determine is two shapes are similar:</p>",
+                        "<ul><li>Corresponding angles must have the same measure.</li><li>Corresponding sides must change by the same multiplier. The name of the multiplier is “scale factor”. </li></ul>",
+                        "<p>Scale factor can be determined by measuring and comparing corresponding lengths between two figures. This done using proportional reasoning. For every unit of length in the original there are x times as many units in the corresponding side length. </p>",
+                        "<p>We have seen scale factor as the number of rubber bands used, the percent increase on a copy machine, or the coefficient relationship of the x and y coordinates. </p>"
                       ]
                     }
                   },
@@ -2990,6 +2970,13 @@
                       "text": [
                         "• How does the area of the larger figure relate to the area of the original figure?"
                       ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/3-1_Initial_Challenge.png"
                     }
                   },
                   {
@@ -3200,35 +3187,11 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "html",
+                      "format": "markdown",
                       "text": [
-                        "For the shapes that rep-tile,"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "3. What is the scale factor from the original figure to the image? Explain your reasoning."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "4. How does the perimeter of the larger figure relate to the perimeter of the original figure?"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
+                        "For the shapes that rep-tile,",
+                        "3. What is the scale factor from the original figure to the image? Explain your reasoning.",
+                        "4. How does the perimeter of the larger figure relate to the perimeter of the original figure?",
                         "5. How does the area of the larger figure relate to the area of the original figure?"
                       ]
                     }
@@ -3251,11 +3214,69 @@
                     }
                   },
                   {
+                    "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Situation B. Going Backwards</h3>Make a sketch of a quadrilateral or triangle. Divide the quadrilateral or triangle into four smaller quadrilaterals that have the same size and shape (congruent). <ol><li>Explain why the smaller shapes are similar to the original.</li><li>How do the lengths, perimeter, and area of the original figure compare to one of the four smaller figures? </li></ol>"
+                        "<p><strong>SOLUTION</strong></p>",
+                        "<p>See the chart above for answers.  </p>",
+                        "<p>The side lengths and perimeter of the larger figure are the scale factor times the side lengths of the smaller figure. Note: The perimeter change can be explained by the Distributive Property. The scale factor multiplies by every length. </p>",
+                        "<p>So, if we have a rectangle with length of L, width of W, and scale factor of s, then the perimeter change is s(L) + s(L) + s(W) +  s(W) = s(L + L + S + S). </p>",
+                        "<p>The angle measures don’t change since corresponding angles</p>",
+                        "<p>The corresponding angles would all have equal measures. </p>",
+                        "<p>The area of the larger figure is the square of the scale factor, or scale factor time scale factor, times the area of the smaller figure. For example, if you have a scale factor of 5, each length would be 5 times larger. To make the reptile, you would need 25 copies of the original. The area grows by the square of the scale factor, or 52, so you need 25 copies. If we consider a rectangle with a scale factor of 5, then the area of the image would be 5L. </p>",
+                        "<p>Original rectangle:                                           L・W</p>",
+                        "<p>Image with scale factor of 5:                      5(L)・5(W) =</p>",
+                        "<p>Using associative property:                        5・5・L・W =</p>",
+                        "<p>See the impact of scale factor on area: 5²・L・W</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "### Situation B. Going Backwards",
+                        "* Make a sketch of a quadrilateral or triangle. Divide the quadrilateral or triangle into four smaller quadrilaterals that have the same size and shape (congruent).",
+                        "* Explain why the smaller shapes are similar to the original."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/3-1_What_If_Situation_B_1.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The smaller shapes have corresponding angles with the same measure. The corresponding lengths have all changed in the same way. We can see that two of the smaller lengths will equal the length of the corresponding side of the original.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "* How do the lengths, perimeter, and area of the original figure compare to one of the four smaller figures?"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The lengths, which includes the perimeters, are ½ the size of the original and areas are</p>"
                       ]
                     }
                   },
