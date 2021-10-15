@@ -83,6 +83,8 @@ export interface IToolTileProps extends IToolTileBaseProps, IRegisterToolApiProp
 }
 ```
 
+The `on*` properties are a way for the tool component tell the host things like wanting a larger height.
+
 ## IToolApi
 A tool API allows tool components to implement one or more functions that can be called generically for any tile that supports the ToolApi without knowing the specific tile type. This can be thought of as the beginnings of a generic plugin API model for tiles. The tool API interface is defined as follows:
 ```typescript
@@ -140,9 +142,45 @@ const toolApiInterface = this.context;
 const toolApi = toolApiInterface?.getToolApi(this.modelId);
 toolApi?.exportContentAsTileJson?.(tileContents);
 ```
+### Facet
+
+`onRegisterToolApi` also takes a facet parameter. This is so additional sets of functions can be registered and unregistered.
+Only a couple of the tool api functions are supported:
+- `handleTileResize`, if this function is provided with a facet of `"layout"`, this function is given precedence over the non-facet implementation.
+- `handleDocumentScroll` is called on all registered implementations, so it will be called on both the facet and non-facet implementations.
+
+Currently the `"layout"` facet is used by `useToolBarToolApi` and `useFloatingToolbarLocation`.
+
+## Floating Toolbar
+Most tools tiles have a floating toolbar.
+
+This is implemented by a child component of the tool component.
+This child component creates a React Portal in the main document div, and sets the location of the portal using `useFloatingToolbarLocation`.
+
+Functional tool components call `useToolbarToolApi` to setup properties to pass to this child component.
+
+Class tool components setup the the properties themselves without the hook.
+
+## Linked Tiles
+Some tool tiles can be linked together, so they can provide multiple views of the same data.
+
+### Shared Selection
+When tiles are linked they use the `selection` MST store to synchronize their selection. Currently only the Table and Geometry tools support this.
+
+The selection store is a map with keys of toolId and values of type `DataSetSelectionModel`. The `DataSetSelectionModel` is a map of booleans. For a table tool the ids in this map are the row ids.
+
+The table tool component accesses the `selection` store via `useSharedSelectionStore` . This hook is called indirectly via the `useGridContext` hook. The `useGridContext` hook provides callback methods used by ReactDataGrid, the implementations of these callbacks modify the table's selection model in the `selection` store. Additionally the table tool component is an MST observer so it is re-rendered when properties in the selection models are changed by other tool components.
+
+The geometry tool component takes a different approach. It has a child component called `GeometryContentComponent`. This is a class based component so the MST stores are injected with `@inject("stores")`, when `GeometryContentComponent` is initialized it sets the selection store on the content metadata model: `content.metadata.setSharedSelection(this.stores.selection)`. The geometry content model has a `setElementSelection` which is called when the JXGraph selects an element. If the selected element has `linkedTableId` and `linkedRowId` attributes, then the selection model is updated in the selection store.
+
+When a table is linked to the geometry tool using the `addTableLink` action, the selection model for the table in selection store is observed for changes. When a document is loaded that has a table linked to a geometry tool the table's event are replayed so the `addTableLink` action happens again and the table is again observing the selection model.
 
 ## Tool Components
-Tool components are React components that are built for each tool tile type and are conditionally rendered by `ToolTileComponent`. The following tool components are defined in CLUE:
+Tool components are React components that are built for each tool tile type and are conditionally rendered by `ToolTileComponent`.
+Each Tool Component is passed its content through a model property by the `ToolTileComponent` which wraps it.
+The `content` is a MST model that is part of a document in the `documents` store.
+
+The following tool components are defined in CLUE:
 
 ### PlaceholderToolComponent
 The `PlaceholderToolComponent` is used for the Placeholder Tile, an empty placeholder tile.
@@ -152,10 +190,12 @@ interface IProps {
   model: ToolTileModelType;
 }
 ```
-- class or functional component: <b>class component</b>
-- extends BaseComponent: <b>yes</b>
-- uses inject/observer pattern: <b>no</b>
-- stores accessed: `this.stores.ui`
+- class or functional component: **class component**
+- extends BaseComponent: **yes**
+- uses inject/observer pattern: **no**
+- stores accessed:
+    - `this.stores.ui`
+- floating toolbar: **no**
 
 ### DrawingToolComponent
 The `DrawingToolComponent` is used for the Drawing Tile, a tile that allows users to draw images.
@@ -163,10 +203,11 @@ The `DrawingToolComponent` is used for the Drawing Tile, a tile that allows user
 ```typescript
 type IProps = IToolTileProps;
 ```
-- class or functional component: <b>functional component</b>
-- extends BaseComponent: <b>no</b>
-- uses inject/observer pattern: <b>no</b>
+- class or functional component: **functional component**
+- extends BaseComponent: **no**
+- uses inject/observer pattern: **no**
 - stores accessed: none
+- floating toolbar: `ToolbarView`, setup with `useToolbarToolApi`
 
 Note: The drawing tool requires access to a set of stamp images that are defined by the curriculum unit. One might think that these would be passed in as props or perhaps accessed via the stores, but actually they are provided to the `DrawingContent` on construction and then stored (apparently redundantly) in each tile for reasons that have been lost to the mists of time.
 
@@ -176,10 +217,13 @@ The `GeometryToolComponent` is used for the Geometry Tile, a tile that allows us
 ```typescript
 IGeometryProps // same as IToolTileProps
 ```
-- class or functional component: <b>functional component</b>
-- extends BaseComponent: <b>no</b>
-- uses inject/observer pattern: <b>no</b>
-- stores accessed: `useUIStore` hook
+- class or functional component: **functional component**
+- extends BaseComponent: **no**
+- uses inject/observer pattern: **no**
+- stores accessed:
+    - `useUIStore` hook
+    - `this.stores.selection` in child component `GeometryContentComponent`
+- floating toolbar: `GeometryToolbar`, setup with `useToolbarToolApi`
 
 ### ImageToolComponent
 The `ImageToolComponent` is used for the Image Tile, a tile that allows users to display an image (e.g. PNG, JPEG, SVG, etc.).
@@ -187,10 +231,12 @@ The `ImageToolComponent` is used for the Image Tile, a tile that allows users to
 ```typescript
 type IProps = IToolTileProps;
 ```
-- class or functional component: <b>class component</b>
-- extends BaseComponent: <b>yes</b>
-- uses inject/observer pattern: <b>yes</b>
-- stores accessed: `this.stores.ui`
+- class or functional component: **class component**
+- extends BaseComponent: **yes**
+- uses inject/observer pattern: **yes**
+- stores accessed:
+    - `this.stores.ui`
+- floating toolbar: `ImageToolbar`
 
 ### TableToolComponent
 The `TableToolComponent` is used for the Table Tile, a tile that allows users to display data in a table.
@@ -198,10 +244,12 @@ The `TableToolComponent` is used for the Table Tile, a tile that allows users to
 ```typescript
 IToolTileProps
 ```
-- class or functional component: <b>functional component</b>
-- extends BaseComponent: <b>no</b>
-- uses inject/observer pattern: <b>yes, observes row selection from shared selection store</b>
-- stores accessed: `useSharedSelectionStore` hook
+- class or functional component: **functional component**
+- extends BaseComponent: **no**
+- uses inject/observer pattern: **yes, observes row selection from shared selection store**
+- stores accessed:
+    - `useSharedSelectionStore` hook
+- floating toolbar: `TableToolbar`, setup with `useToolbarToolApi`
 
 ### TextToolComponent
 The `TextToolComponent` is used for the Text Tile, a tile that allows users to enter/edit/display styled text.
@@ -209,10 +257,13 @@ The `TextToolComponent` is used for the Text Tile, a tile that allows users to e
 ```typescript
 IToolTileProps
 ```
-- class or functional component: <b>class component</b>
-- extends BaseComponent: <b>yes</b>
-- uses inject/observer pattern: <b>yes</b>
-- stores accessed: `this.stores.ui`, `this.stores.unit`
+- class or functional component: **class component**
+- extends BaseComponent: **yes**
+- uses inject/observer pattern: **yes**
+- stores accessed:
+    - `this.stores.ui`
+    - `this.stores.unit`
+- floating toolbar: `TextToolbarComponent`
 
 ### DataflowToolComponent
 The `DataflowToolComponent` is used for the Dataflow Tile: a tile that allows users to create flow programs. The Dataflow Tile and `DataflowToolComponent` are only available on dataflow branches.
@@ -224,10 +275,14 @@ interface IProps {
   height?: number;
 }
 ```
-- class or functional component: <b>class component</b>
-- extends BaseComponent: <b>yes</b>
-- uses inject/observer pattern: <b>yes</b>
-- stores accessed: `this.stores.ui`, `this.stores.documents`, `this.stores.db`. Child components access stores too `hub`, `ui`, `appMode`.
+- class or functional component: **class component**
+- extends BaseComponent: **yes**
+- uses inject/observer pattern: **yes**
+- stores accessed:
+    - `this.stores.ui`,
+    - `this.stores.documents`,
+    - `this.stores.db`.
+    - Child components access stores too `hub`, `ui`, `appMode`.
 
 ## Adding a tool tile
 New tool tiles are added to a document using an action in the `DocumentContentModel` such as `addPlaceholderTile` or `addGeometryTile`. For example:
