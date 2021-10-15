@@ -143,6 +143,9 @@ interface IState {
   hoverTile: boolean;
 }
 
+const defaultDragImage = document.createElement("img");
+defaultDragImage.src = dragPlaceholderImage;
+
 @inject("stores")
 @observer
 export class ToolTileComponent extends BaseComponent<IProps, IState> {
@@ -427,11 +430,8 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     // set the drag image
     const dragElt = e.target as HTMLElement;
     // tool components can provide alternate dom node for drag image
-    const useToolDragImage = !!(ToolComponent && ToolComponent.getDragImageNode);
     // use default drag image for all tiles that don't specify drag image
-    const defaultDragImage = document.createElement("img");
-    defaultDragImage.src = dragPlaceholderImage;
-
+    const useToolDragImage = !!(ToolComponent && ToolComponent.getDragImageNode);
     const dragImage = useToolDragImage
                         ? ToolComponent.getDragImageNode(dragElt)
                         : defaultDragImage;
