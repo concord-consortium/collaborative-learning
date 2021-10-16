@@ -4059,6 +4059,16 @@
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_3_3_In_26_river_triangle_500w.png"
                     }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>90ft. The distance from Tree 1 to Tree 2 is 140 ft. and the corresponding side length of the smaller triangle is 80 ft. Then the scale factor from the small triangle to the large one is 1.75 (80 × 1.75 = 140). This would make the distance from Stake 3 to Tree 1 is 210 ft (120 • 1.75 = 210), the distance across the river from Stake 1 to Tree 1 is 90 ft. (210 – 120 = 90)</p>"
+                      ]
+                    }
                   }
                 ]
               },
@@ -4088,6 +4098,17 @@
                     }
                   },
                   {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Durrell’s Claim is not correct. </p>",
+                        "<p>Students may refer back to Problem 3.1 Kazuko’s Claim. The scale factor is not a whole number. So, we cannot consider the smaller triangle as a unit rep-tile. The distance from Stake 1 to Stake 2 in smaller triangle is 80ft. The corresponding distance in larger triangle is 140ft (from Tree 1 to Tree 2). If you put two small triangles, it will be 160 ft long, which is longer than 140 ft. You cannot fit whole amounts of the small triangles in the large triangle. Therefore, you cannot use rep-tiles to show the similarity. </p>"
+                      ]
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -4100,6 +4121,16 @@
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_3_3_WI_27_river_triangle2_500w.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Yes, the distance will be the same. The scale factor from the small to the large triangle is 4. This gives the distance between Stake 3 and Tree 1 as 120 ft. From this, we subtract the 30 ft from Stake 3 to Stake 1 to get 90 ft across the river. In this case, you can use rep-tiles because you can fit 16 small triangles into the large triangle. </p>"
+                      ]
                     }
                   }
                 ]
@@ -4118,6 +4149,18 @@
                       "format": "html",
                       "text": [
                         "How can you use similar triangles to find a distance that is difficult to measure directly?"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SOLUTION</strong></p>",
+                        "<p>Students should express which attributes change and which stay the same when one figure is scaled to make an image:  </p>",
+                        "<ul><li>corresponding angles of two similar figures are the same measure while angles of non-similar figures may not be.</li><li>corresponding side lengths and perimeter of the similar figure increases or decreases by the scale factor (multiplier).  </li><li>area of similar figures increases or decreases by the scale factor squared (multiplier squared) </li></ul>"
                       ]
                     }
                   }
@@ -4212,7 +4255,9 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<em>What information does each ratio written in fraction fraction form represent in the similar figures?</em>\n\nFor this set of figures, the original figure is similar to the figure on the right. Notice that the ratios are equal."
+                        "<em>What information does each ratio written in fraction fraction form represent in the similar figures?</em>\n\nFor this set of figures, the original figure is similar to the figure on the right. Notice that the ratios are equal.",
+                        "We know that a scale factor relates each length in a figure to the corresponding length in its image. In this problem we will explore ratios of adjacent side lengths within figures.",
+                        "For the diagrams in this problem, all measurements are drawn to scale unless otherwise noted."
                       ]
                     }
                   }
@@ -4227,25 +4272,115 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "For each set of figures, which are similar? Why?\n\nIf two figures are similar, how does the ratio of <strong>adjacent</strong> side lengths in one shape compare to the corresponding ratio of <strong>adjacent</strong> side lengths in another shape?"
+                        "For each set of figures, which are similar? Why?",
+                        "If two figures are similar, how does the ratio of <strong>adjacent</strong> side lengths in one shape compare to the corresponding ratio of <strong>adjacent</strong> side lengths in another shape?"
                       ]
                     }
-                  }, {
+                  }, 
+                  {
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_4_1_IC_32_rectangles_350w.png"
                     }
-                  }, {
+                  }, 
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Rectangles: A, B, and C are similar.  </p>",
+                        "<p>Possible explanation:   </p>",
+                        "<p>Because the shapes are rectangles, all the angles will be 90˚. So, corresponding angles will have the same measures.  </p>",
+                        "<p>To determine similarity of these rectangles, students may use scale factors or ratios.  </p>",
+                        "<p>Ratio of adjacent side lengths:  </p>",
+                        "<p>Rectangle A: 12/20 = 0.6  </p>",
+                        "<p>Rectangle B: 6/10 = 0.6 </p>",
+                        "<p>Rectangle C: 9/15 = 0.6   </p>",
+                        "<p>Rectangle D: 6/20 = 0.3  </p>",
+                        "<p>The ratio of the length of the short side to the length of the long side is the same for all three similar rectangles. The rectangle that is not similar to the others has a different ratio.  </p>",
+                        "<p>If the scale factors for both length and width are equivalent, two rectangles are similar.  </p>",
+                        "<p>The scale factors are:  </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/4-1_Initial_Challenge_1.png"
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_4_1_IC_33_triangles_350w.png"
                     }
-                  }, {
+                  }, 
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Triangles: A, C, and D are similar. The corresponding angle measures of those triangles are congruent. (Note: Students have to use the fact that the sum of the angle measures in a triangle is 180˚. More exact measures of the angles for the triangles are 29.99˚, 61.02˚, and 88.98˚.)",
+                        "<p>Ratio of adjacent side lengths – longest side to short side lengths:  </p>",
+                        "<p>Triangle A: 8 to 4 = 2 to 1  </p>",
+                        "<p>Triangle C: 12 to 6 = 2 to 1 </p>",
+                        "<p>Triangle D: 20 to 10 = 2 to 1  </p>",
+                        "<p>Triangle B: 12 to 9 = 1 1/3 to 1  </p>",
+                        "<p>The unit rate of the length of one side to the length of an adjacent side is equivalent for all three similar triangles. The triangle that is not similar to the others has a different rate.   </p>",
+                        "<p>The scale factors are:</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/4-1_Initial_Challenge_2.png"
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_4_1_IC_34_parallelograms_350w.png"
                     }
-                  }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>F and G are similar. The corresponding angles have the same measure, the scale factors of each corresponding side lengths are the same and the ratio of the side lengths are equivalent.</p>",
+                        "<p>Ratio of side lengths – short side to long side lengths:   </p>",
+                        "<p>Triangle E: 8 to 10 = 0.8 to 1  </p>",
+                        "<p>Triangle F: 6 to 7.5 = 0.8 to 1 </p>",
+                        "<p>Triangle G: 4.8 to 6 = 0.8 to 1 </p>",
+                        "<p>For this example, all three parallelograms have equivalent ratios of the side lengths. It reminds us that we also need to check corresponding angles. </p>",
+                        "<p>The scale factors are:  </p>"
+                        ]
+                      }
+                    },
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/stretching-and-shrinking/images/4-1_Initial_Challenge_3.png"
+                      }
+                    },
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>If figures are similar, their ratios of corresponding side lengths will be equivalent. The ratio of adjacent side lengths within a figure gives an indication of the shape of the original figure (and image), since it compares measures within one figure. The ratio of side lengths is not enough to know of a figure is scaled, corresponding angles measures must be equivalent, as shown in Set 3. </p>",
+                          "<p>After finding these scale factors, many students will discuss the advantages of finding the ratio of the adjacent side lengths for measurements like these.</p>"
+                        ]
+                      }
+                    }
                 ]
               },
               "supports" : [
@@ -4269,8 +4404,42 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Situation A. Scale Factors and Ratios</h3>For each set in the Initial Challenge, <ol><li>Find the scale factor from one figure to a similar figure. What information does the scale factor give you?</li><li>How does the scale factor relate to the ratios of corresponding side lengths in two similar figures? </li><li>How does the scale factor relate to the ratios of adjacent sides in two similar figures?</li></ol>"
+                        "<h3>Situation A. Finding Missing Parts</h3>The pairs of figures in each set are similar. Find the missing side lengths x or y in each pair. Explain your reasoning."
                       ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/SS_4_1_WhatIf_4Shapes.jpg"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/4-1_What_If_Set_4.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/4-1_What_If_Set_5.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/4-1_What_If_Set_6.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/4-1_What_If_Set_7.png"
                     }
                   },
                   {
@@ -4278,7 +4447,40 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Situation B. Isaiah, Noah, and Anna’s Conjectures</h3>Examine each conjecture. Is it true? Explain. \n<strong>Isaiah's Conjectures</strong> Two rectangles are similar if the ratios of corresponding adjacent side lengths are equal. \n<strong>Noah's Conjectures</strong> Isaiah’s conjecture is true for parallelograms. \n<strong>Anna's Conjectures</strong> Isaiah’s conjecture is true for triangles if the corresponding angles are equal. "
+                        "<h3>Situation B. Alejandra’s New Strategy</h3>Alejandra claims that she can use the ratio of adjacent sides to find the distance across the river in Problem 3.3. Is this possible? Explain why. "
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/4-1_What_If_B.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Yes. I proportion can be solved to find the distance from Stake 3 to Tree 1. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/4-1_What_If_8.jpg"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>This gives a side length of 120 feet for the short side of the larger triangle. To find the distance across the river, we have to subtract the 30 feet from Stake 1 to Stake 3. That gives us a distance of 90 feet across the river.</p>"
                       ]
                     }
                   }
@@ -4299,7 +4501,18 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "What information do the ratios of adjacent side lengths within two similar figures provide about similar figures? Explain. How does the ratio of adjacent side lengths within two similar figures compare to the ratio of corresponding side lengths across two similar figures? How are these ratios helpful in solving problems?"
+                        "What information do the ratios of adjacent side lengths within two similar figures provide about similar figures? How are these ratios helpful in solving problems?"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>If two shapes have corresponding angles with the same measure and the ratios of adjacent side lengths are equivalent, the shapes are similar. If the ratios of corresponding adjacent side lengths are equal, the multiplicative relationship is the same which means the shape lengths are scaled in the same way.</p>",
+                        "<p>These ratios are helpful when you find missing side lengths related to two similar figures. </p>"
                       ]
                     }
                   }
@@ -4312,141 +4525,7 @@
         {
           "description": "Problem 4.2",
           "ordinal": 2,
-          "title": "SAS 4.2 Finding Missing Parts",
-          "subtitle": "Using Similarity to Find Measurements",
-          "sections": [
-            {
-              "type": "introduction",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "In the last problem we explored the ratio of adjacent side lengths in two similar figures. For example, the two rectangles below are similar. Note if two rectangles are similar, then the corresponding angle measures are equal, and the ratios of adjacent side lengths are equal. \n\n <strong>Ratios of adjacent side lengths within figures</strong>"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/SS_4_2_IN_350w.png"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<strong>Ratios of corresponding side lengths across figures</strong>\n\nRatio of height to height is 9 cm to 3 cm or 9cm/3cm = 3\nRatio of width to width is 4.5 cm to 1.5 cm or 4.5cm/1.5cm = 3 \n\nNote that the ratio of corresponding side lengths across the two rectangles are also equal. And this ratio is the scale factor between the two figures.\n\nSimilar figures are useful in determining missing measurements. In Problem 3.3, you used similar figures to find the distance across a river without crossing the river. In this problem, you will explore finding missing measures."
-                      ]
-                    }
-                  }
-                ]
-              }
-            }, {
-              "type": "initialChallenge",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "The pairs of figures in each set are similar.<ul><li>Find the missing side lengths in each pair. Explain how you know your answers are correct?</li><li>In Set 3 find the angle measures for each parallelogram. </li><ul>"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/SS_4_2_IC_35_Q2A_350w.png"
-                    }
-                  }, {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/SS_4_2_IC_36_Q2B_350w.png"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/SS_4_2_IC_37_Q2C_350w.png"
-                    }
-                  },
-                  {
-                    "layout": {
-                      "height": 400
-                    },
-                    "content":
-                   {"type":"Geometry","changes":["{\"operation\":\"create\",\"target\":\"board\",\"properties\":{\"axis\":true,\"boundingBox\":[-1.0928961748633879,18.579234972677593,27.3224043715847,-1.0928961748633879],\"unitX\":18.3,\"unitY\":18.3}}","{\"operation\":\"create\",\"properties\":{\"id\":\"4f8ef2ab-7858-4630-a957-d68386bf19f6\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"A\"},\"target\":\"point\",\"parents\":[1,18],\"startBatch\":true}","{\"operation\":\"create\",\"properties\":{\"id\":\"16aa98cf-ca0b-4c2b-9876-6e5a8a840f8e\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"B\"},\"target\":\"point\",\"parents\":[13,17.900000000000002]}","{\"operation\":\"create\",\"properties\":{\"id\":\"f2aafbcc-1804-4e0d-9604-ea484480310d\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"C\"},\"target\":\"point\",\"parents\":[3,19.900000000000002]}","{\"operation\":\"create\",\"properties\":{\"id\":\"256679af-d72d-4b5c-b7aa-f6c90e3262c4\",\"name\":\"P_{a}\"},\"target\":\"polygon\",\"parents\":[\"4f8ef2ab-7858-4630-a957-d68386bf19f6\",\"16aa98cf-ca0b-4c2b-9876-6e5a8a840f8e\",\"f2aafbcc-1804-4e0d-9604-ea484480310d\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"879b78e8-9c8c-4f76-97ae-4ffa3d72f047\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"D\"},\"target\":\"point\",\"parents\":[15.089629018888035,15.004098305593704]}","{\"operation\":\"create\",\"properties\":{\"id\":\"3aa83b2e-3138-4c17-b7a8-88863c6f783b\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"F\"},\"target\":\"point\",\"parents\":[15.987508722202124,19.20663997326249]}","{\"operation\":\"create\",\"properties\":{\"id\":\"b46394a9-e997-46d4-bc53-a341d5aaeeee\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"A\"},\"target\":\"point\",\"parents\":[1,6.300000000000001]}","{\"operation\":\"create\",\"properties\":{\"id\":\"cb7f6ab0-09fd-47bd-a3d1-704c1644c6e4\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"B\"},\"target\":\"point\",\"parents\":[1.1,1.8]}","{\"operation\":\"create\",\"properties\":{\"id\":\"f9731cb1-bfae-44be-9a79-5b7690f5e810\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"C\"},\"target\":\"point\",\"parents\":[3.7,0.8]}","{\"operation\":\"create\",\"properties\":{\"id\":\"d764cd74-54ea-4caa-a9a6-80b80ce7ecc7\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"D\"},\"target\":\"point\",\"parents\":[3.7,5.2]}","{\"operation\":\"create\",\"properties\":{\"id\":\"d067f66c-ba4a-4334-a356-ab4430be843c\",\"name\":\"P_{a}\"},\"target\":\"polygon\",\"parents\":[\"b46394a9-e997-46d4-bc53-a341d5aaeeee\",\"cb7f6ab0-09fd-47bd-a3d1-704c1644c6e4\",\"f9731cb1-bfae-44be-9a79-5b7690f5e810\",\"d764cd74-54ea-4caa-a9a6-80b80ce7ecc7\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"a88e59a8-8b96-433e-b7ed-23dbe0d93852\",\"radius\":1},\"target\":\"vertexAngle\",\"parents\":[\"cb7f6ab0-09fd-47bd-a3d1-704c1644c6e4\",\"b46394a9-e997-46d4-bc53-a341d5aaeeee\",\"d764cd74-54ea-4caa-a9a6-80b80ce7ecc7\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"2a966325-8c55-41ad-be77-ea10db7807a7\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"E\"},\"target\":\"point\",\"parents\":[5.817308417645462,0.6483504047306452]}","{\"operation\":\"create\",\"properties\":{\"id\":\"9456f6f0-c71f-4091-a730-db092f41350d\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"F\"},\"target\":\"point\",\"parents\":[15.669500594976327,0.6624620872369071]}","{\"operation\":\"create\",\"properties\":{\"id\":\"a68b7cff-812f-41d0-b3fb-429c5547ba51\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"G\"},\"target\":\"point\",\"parents\":[18.193215922236906,6.8494638029196295]}","{\"operation\":\"create\",\"properties\":{\"id\":\"9eec3cf3-73c0-42c4-ae8a-5e540172aa53\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"H\"},\"target\":\"point\",\"parents\":[8.333707570993896,6.769491261270044]}","{\"operation\":\"create\",\"properties\":{\"id\":\"e80894ff-e77e-4cee-952e-718e09ad24c6\",\"name\":\"P_{b}\"},\"target\":\"polygon\",\"parents\":[\"2a966325-8c55-41ad-be77-ea10db7807a7\",\"9456f6f0-c71f-4091-a730-db092f41350d\",\"a68b7cff-812f-41d0-b3fb-429c5547ba51\",\"9eec3cf3-73c0-42c4-ae8a-5e540172aa53\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"c34e47b3-8769-465d-9caf-5c09194511e3\",\"radius\":1},\"target\":\"vertexAngle\",\"parents\":[\"9456f6f0-c71f-4091-a730-db092f41350d\",\"2a966325-8c55-41ad-be77-ea10db7807a7\",\"9eec3cf3-73c0-42c4-ae8a-5e540172aa53\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"A\"},\"target\":\"point\",\"parents\":[3.5,9.9]}","{\"operation\":\"create\",\"properties\":{\"id\":\"c134b506-a474-477e-badd-6f3284e5f710\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"B\"},\"target\":\"point\",\"parents\":[5.1000000000000005,9.9]}","{\"operation\":\"create\",\"properties\":{\"id\":\"3ce6d325-a498-41ec-84dc-5a91e6a5812e\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"C\"},\"target\":\"point\",\"parents\":[5,12.4]}","{\"operation\":\"create\",\"properties\":{\"id\":\"9dc814a1-ea1c-4a92-a04e-a9ef02c2873b\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"D\"},\"target\":\"point\",\"parents\":[3.5,12.4]}","{\"operation\":\"create\",\"properties\":{\"id\":\"27b8354e-36e7-49fe-9749-aee6a9433fb3\",\"name\":\"P_{a}\"},\"target\":\"polygon\",\"parents\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\",\"c134b506-a474-477e-badd-6f3284e5f710\",\"3ce6d325-a498-41ec-84dc-5a91e6a5812e\",\"9dc814a1-ea1c-4a92-a04e-a9ef02c2873b\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"738bc31d-087d-4249-bbf9-b1584656471b\",\"radius\":1},\"target\":\"vertexAngle\",\"parents\":[\"c134b506-a474-477e-badd-6f3284e5f710\",\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\",\"9dc814a1-ea1c-4a92-a04e-a9ef02c2873b\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"ca28a5f5-64ae-4749-8dd7-b828b6bdefa0\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"E\"},\"target\":\"point\",\"parents\":[8,14]}","{\"operation\":\"create\",\"properties\":{\"id\":\"b8433027-b84c-4807-8ad0-124e3dc851e7\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"F\"},\"target\":\"point\",\"parents\":[8,8]}","{\"operation\":\"create\",\"properties\":{\"id\":\"64ae1ef1-abec-419c-b5e7-1f6ee5a425d0\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"G\"},\"target\":\"point\",\"parents\":[18,8]}","{\"operation\":\"create\",\"properties\":{\"id\":\"b1285468-8ac9-4717-b8b3-cdfbbde82c79\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"H\"},\"target\":\"point\",\"parents\":[18,13.9]}","{\"operation\":\"create\",\"properties\":{\"id\":\"a72286d7-fac7-40a4-8e43-996de471d3d2\",\"name\":\"P_{b}\"},\"target\":\"polygon\",\"parents\":[\"ca28a5f5-64ae-4749-8dd7-b828b6bdefa0\",\"b8433027-b84c-4807-8ad0-124e3dc851e7\",\"64ae1ef1-abec-419c-b5e7-1f6ee5a425d0\",\"b1285468-8ac9-4717-b8b3-cdfbbde82c79\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"758ead0e-0d33-4daf-a707-622da638e34b\",\"radius\":1},\"target\":\"vertexAngle\",\"parents\":[\"64ae1ef1-abec-419c-b5e7-1f6ee5a425d0\",\"b8433027-b84c-4807-8ad0-124e3dc851e7\",\"ca28a5f5-64ae-4749-8dd7-b828b6bdefa0\"],\"endBatch\":true}","{\"operation\":\"delete\",\"target\":\"object\",\"targetID\":[\"3aa83b2e-3138-4c17-b7a8-88863c6f783b\"]}","{\"operation\":\"create\",\"properties\":{\"id\":\"dba7c89b-b4f6-4404-a480-c71d9d594ca4\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"D\"},\"target\":\"point\",\"parents\":[15.089629018888035,15.004098305593704],\"startBatch\":true}","{\"operation\":\"create\",\"properties\":{\"id\":\"2a07874b-eeea-4853-a4df-03a995ad782e\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"E\"},\"target\":\"point\",\"parents\":[15.06188023264823,20.20345894829196]}","{\"operation\":\"create\",\"properties\":{\"id\":\"2c3e3378-b10b-4c44-9feb-6924de25d960\",\"snapToGrid\":false,\"snapSizeX\":0.1,\"snapSizeY\":0.1,\"name\":\"F\"},\"target\":\"point\",\"parents\":[15.987508722202124,19.20663997326249]}","{\"operation\":\"create\",\"properties\":{\"id\":\"08cf2680-1c94-4f1c-9296-6ec2b779d23b\",\"name\":\"P_{b}\"},\"target\":\"polygon\",\"parents\":[\"dba7c89b-b4f6-4404-a480-c71d9d594ca4\",\"2a07874b-eeea-4853-a4df-03a995ad782e\",\"2c3e3378-b10b-4c44-9feb-6924de25d960\"],\"endBatch\":true}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"2a966325-8c55-41ad-be77-ea10db7807a7\",\"9456f6f0-c71f-4091-a730-db092f41350d\",\"a68b7cff-812f-41d0-b3fb-429c5547ba51\",\"9eec3cf3-73c0-42c4-ae8a-5e540172aa53\"],\"properties\":[{\"position\":[1,5.926598035131802,0.9762192571896611]},{\"position\":[1,15.778790212462667,0.990330939695923]},{\"position\":[1,18.302505539723246,7.177332655378645]},{\"position\":[1,8.442997188480236,7.09736011372906]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"cb7f6ab0-09fd-47bd-a3d1-704c1644c6e4\"],\"properties\":[{\"position\":[1,1,1.8]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\",\"c134b506-a474-477e-badd-6f3284e5f710\",\"3ce6d325-a498-41ec-84dc-5a91e6a5812e\",\"9dc814a1-ea1c-4a92-a04e-a9ef02c2873b\"],\"properties\":[{\"snapToGrid\":false,\"position\":[3.0603141205063,11.865891487995759]},{\"snapToGrid\":false,\"position\":[3.0398895801024057,10.26602185638533]},{\"snapToGrid\":false,\"position\":[5.540962413268945,10.334100363979896]},{\"snapToGrid\":false,\"position\":[5.560110419897596,11.833978143614674]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"a68b7cff-812f-41d0-b3fb-429c5547ba51\"],\"properties\":[{\"position\":[1,18.247860730980076,7.013398229149137]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"dba7c89b-b4f6-4404-a480-c71d9d594ca4\"],\"properties\":[{\"position\":[1,15.034984210144865,15.004098305593702]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"2a07874b-eeea-4853-a4df-03a995ad782e\"],\"properties\":[{\"position\":[1,15.00723542390506,20.20345894829196]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"3ce6d325-a498-41ec-84dc-5a91e6a5812e\"],\"properties\":[{\"position\":[1,5.595607222012115,10.334100363979896]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\"],\"properties\":[{\"position\":[1,3.0603141205063005,11.865891487995759]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\"],\"properties\":[{\"position\":[1,3.0603141205063005,11.76589148799576]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\"],\"properties\":[{\"position\":[1,3.0603141205063005,11.865891487995759]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\"],\"properties\":[{\"position\":[1,2.9603141205063004,11.865891487995759]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\"],\"properties\":[{\"position\":[1,3.0603141205063005,11.865891487995759]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"9dc814a1-ea1c-4a92-a04e-a9ef02c2873b\"],\"properties\":[{\"position\":[1,5.490710382513662,11.90928961748634]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"3ce6d325-a498-41ec-84dc-5a91e6a5812e\"],\"properties\":[{\"position\":[1,5.486317604525776,10.334100363979896]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\"],\"properties\":[{\"position\":[1,2.9510245030199616,11.865891487995759]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"c134b506-a474-477e-badd-6f3284e5f710\"],\"properties\":[{\"position\":[1,3.0000000000000004,10.3]}]}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[28.087431693989064,8.688524590163937],\"properties\":{\"id\":\"ace52739-3491-4954-a913-ba153d6abc19\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1}}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"ace52739-3491-4954-a913-ba153d6abc19\"],\"properties\":[{\"position\":[1,28.1,8.8]}]}","{\"operation\":\"delete\",\"target\":\"object\",\"targetID\":[\"ace52739-3491-4954-a913-ba153d6abc19\"]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\"],\"properties\":[{\"position\":[1,2.841734885533623,11.811246679252589]}]}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[1.5300546448087426,9.890710382513664],\"properties\":{\"id\":\"a9ca75c5-6326-4b5d-aca6-7df5931c2ab3\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1}}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"a9ca75c5-6326-4b5d-aca6-7df5931c2ab3\"],\"properties\":[{\"position\":[1,1.6,9.9]}]}","{\"operation\":\"delete\",\"target\":\"object\",\"targetID\":[\"a9ca75c5-6326-4b5d-aca6-7df5931c2ab3\"]}","{\"operation\":\"delete\",\"target\":\"object\",\"targetID\":[\"6ac2f5f3-434f-4053-8a9a-1a8f39933c22\",\"c134b506-a474-477e-badd-6f3284e5f710\",\"3ce6d325-a498-41ec-84dc-5a91e6a5812e\",\"9dc814a1-ea1c-4a92-a04e-a9ef02c2873b\",\"27b8354e-36e7-49fe-9749-aee6a9433fb3\",\"738bc31d-087d-4249-bbf9-b1584656471b\"]}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[4.918032786885245,10.000000000000004],\"properties\":{\"id\":\"761a73cc-640c-4786-a55f-910f1343ef11\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1}}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"761a73cc-640c-4786-a55f-910f1343ef11\"],\"properties\":[{\"position\":[1,5,10.100000000000001]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"761a73cc-640c-4786-a55f-910f1343ef11\"],\"properties\":[{\"position\":[1,5,10.000000000000002]}]}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[3.55191256830601,10.000000000000004],\"properties\":{\"id\":\"0d952c5f-b94e-4037-9a09-cfe50700a1b8\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1}}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"0d952c5f-b94e-4037-9a09-cfe50700a1b8\"],\"properties\":[{\"position\":[1,3.7,10]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"0d952c5f-b94e-4037-9a09-cfe50700a1b8\"],\"properties\":[{\"position\":[1,3.6,10]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"0d952c5f-b94e-4037-9a09-cfe50700a1b8\"],\"properties\":[{\"position\":[1,3.5,10]}]}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[3.4426229508196715,12.568306010928964],\"properties\":{\"id\":\"38d2efb8-9485-4b74-8fbb-09aea8fd1ad0\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1}}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[4.972677595628414,12.677595628415304],\"properties\":{\"id\":\"5613b304-98e4-4ce8-8495-2917bc1ffd84\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1}}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"5613b304-98e4-4ce8-8495-2917bc1ffd84\"],\"properties\":[{\"position\":[1,5.1000000000000005,12.700000000000001]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"5613b304-98e4-4ce8-8495-2917bc1ffd84\"],\"properties\":[{\"position\":[1,5.000000000000001,12.700000000000001]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"5613b304-98e4-4ce8-8495-2917bc1ffd84\"],\"properties\":[{\"position\":[1,5.000000000000001,12.600000000000001]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"5613b304-98e4-4ce8-8495-2917bc1ffd84\"],\"properties\":[{\"position\":[1,5.000000000000001,12.500000000000002]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"38d2efb8-9485-4b74-8fbb-09aea8fd1ad0\"],\"properties\":[{\"position\":[1,3.4000000000000004,12.700000000000001]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"38d2efb8-9485-4b74-8fbb-09aea8fd1ad0\"],\"properties\":[{\"position\":[1,3.4000000000000004,12.600000000000001]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"38d2efb8-9485-4b74-8fbb-09aea8fd1ad0\"],\"properties\":[{\"position\":[1,3.4000000000000004,12.500000000000002]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"38d2efb8-9485-4b74-8fbb-09aea8fd1ad0\"],\"properties\":[{\"position\":[1,3.5000000000000004,12.500000000000002]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"38d2efb8-9485-4b74-8fbb-09aea8fd1ad0\"],\"properties\":[{\"position\":[1,3.55464480874317,12.500000000000002]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"dba7c89b-b4f6-4404-a480-c71d9d594ca4\",\"2a07874b-eeea-4853-a4df-03a995ad782e\",\"2c3e3378-b10b-4c44-9feb-6924de25d960\"],\"properties\":[{\"position\":[1,15.034984210144865,14.949453496850532]},{\"position\":[1,15.00723542390506,20.14881413954879]},{\"position\":[1,15.987508722202124,19.15199516451932]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"dba7c89b-b4f6-4404-a480-c71d9d594ca4\",\"2a07874b-eeea-4853-a4df-03a995ad782e\",\"2c3e3378-b10b-4c44-9feb-6924de25d960\"],\"properties\":[{\"position\":[1,16.073235576265084,14.949453496850532]},{\"position\":[1,16.04548679002528,20.14881413954879]},{\"position\":[1,17.025760088322343,19.15199516451932]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"879b78e8-9c8c-4f76-97ae-4ffa3d72f047\"],\"properties\":[{\"position\":[1,15.136612021857923,15.081967213114757]}]}","{\"operation\":\"delete\",\"target\":\"object\",\"targetID\":[\"879b78e8-9c8c-4f76-97ae-4ffa3d72f047\"]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"dba7c89b-b4f6-4404-a480-c71d9d594ca4\",\"2a07874b-eeea-4853-a4df-03a995ad782e\",\"2c3e3378-b10b-4c44-9feb-6924de25d960\"],\"properties\":[{\"position\":[1,15.034984210144867,15.004098305593699]},{\"position\":[1,15.007235423905062,20.203458948291956]},{\"position\":[1,15.987508722202126,19.206639973262487]}]}","{\"operation\":\"create\",\"target\":\"polygon\",\"parents\":[\"761a73cc-640c-4786-a55f-910f1343ef11\",\"0d952c5f-b94e-4037-9a09-cfe50700a1b8\",\"38d2efb8-9485-4b74-8fbb-09aea8fd1ad0\",\"5613b304-98e4-4ce8-8495-2917bc1ffd84\"],\"properties\":{\"id\":\"229fdb45-3397-46be-88a9-6a811cff5c4c\"}}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"38d2efb8-9485-4b74-8fbb-09aea8fd1ad0\"],\"properties\":[{\"position\":[1,3.5,12.5]}]}","{\"operation\":\"create\",\"target\":\"vertexAngle\",\"parents\":[\"761a73cc-640c-4786-a55f-910f1343ef11\",\"0d952c5f-b94e-4037-9a09-cfe50700a1b8\",\"38d2efb8-9485-4b74-8fbb-09aea8fd1ad0\"],\"properties\":{\"id\":\"0c35873c-4134-4536-a3cd-0c93dd9e557f\",\"radius\":1}}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[26.065573770491802,10.491803278688527],\"properties\":{\"id\":\"a266b80a-c47a-4b0c-8429-31b9d1155e59\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1}}","{\"operation\":\"delete\",\"target\":\"object\",\"targetID\":[\"a266b80a-c47a-4b0c-8429-31b9d1155e59\"]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"b1285468-8ac9-4717-b8b3-cdfbbde82c79\"],\"properties\":[{\"position\":[1,18,14]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"9eec3cf3-73c0-42c4-ae8a-5e540172aa53\"],\"properties\":[{\"position\":[1,8.442997188480236,6.99736011372906]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"2a966325-8c55-41ad-be77-ea10db7807a7\"],\"properties\":[{\"position\":[1,5.981242843874971,0.9762192571896623]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"2a966325-8c55-41ad-be77-ea10db7807a7\"],\"properties\":[{\"position\":[1,5.981242843874971,0.8762192571896623]}]}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"2a966325-8c55-41ad-be77-ea10db7807a7\"],\"properties\":[{\"position\":[1,5.981242843874971,0.9762192571896623]}]}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[32.349726775956285,10.819672131147543],\"properties\":{\"id\":\"9dd7ac4f-e63b-42e1-885f-a2d450d74f02\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1}}","{\"operation\":\"delete\",\"target\":\"object\",\"targetID\":[\"9dd7ac4f-e63b-42e1-885f-a2d450d74f02\"]}","{\"operation\":\"create\",\"target\":\"point\",\"parents\":[56.994535519125684,11.912568306010932],\"properties\":{\"id\":\"82b37f05-3244-4ce3-8750-b393d40ed41d\",\"snapToGrid\":true,\"snapSizeX\":0.1,\"snapSizeY\":0.1}}","{\"operation\":\"update\",\"target\":\"object\",\"targetID\":[\"82b37f05-3244-4ce3-8750-b393d40ed41d\"],\"properties\":[{\"position\":[1,56.900000000000006,11.9]}]}","{\"operation\":\"delete\",\"target\":\"object\",\"targetID\":[\"82b37f05-3244-4ce3-8750-b393d40ed41d\"]}"]}
-                  }
-                ]
-              },
-              "supports" : [
-                { "text": "What are the corresponding side lengths and corresponding angles?" },
-                { "text": "What are the scale factors or the ratios of adjacent side lengths?" }
-              ]
-            }, {
-              "type": "whatIf",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<h3>Situation A. New Figures</h3>The two figures are similar. Each side length is in centimeters.<ol><li>Find the value of x. Explain how you found it.</li><li>Find the value of y. Explain how you found it.</li></ol>"
-                      ]
-                    }
-                  }, {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/SS_4_2_WI_38_figs_500w.png"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<h3>Situation B. Predicting Perimeters and Areas</h3><ol><li>If you know the perimeter of one figure, how can you find the perimeter of the other figure? Is there another way? Explain.</li><li>If you know the area of one figure, how can you find the area of the other figure? Is there another way? Explain.</li></ol>"
-                      ]
-                    }
-                  }
-                ]
-              },
-              "supports": [
-                { "text": "(1)  How do you know if these two figures are similar?"},
-                { "text": "Would the scale factors or the ratios of adjacent side lengths help you find the missing values?"}
-              ]
-            }, {
-              "type": "nowWhatDoYouKnow",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "If two figures are similar, how can you use information about the figures to find unknown lengths, perimeters, areas, or angle measures?"
-                      ]
-                    }
-                  }
-                ]
-              }
-            }
-          ],
-          "supports": [
-            { "text": "How could you use scale factors?"},
-            { "text": "How could you use ratio of adjacent side lengths?"}
-          ]
-        }, 
-        {
-          "description": "Problem 4.3",
-          "ordinal": 3,
-          "title": "SAS 4.3 Using Shadows to Find Heights",
+          "title": "SAS 4.2 Using Shadows and Mirrors to Find Heights",
           "subtitle": "",
           "sections": [
             {
@@ -4458,7 +4537,10 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In the last problem you found two ways to find missing lengths in pairs of similar figures. <h3>Scale Factor method</h3>Use the ratio of corresponding side lengths across each figure to find the scale factor. Use scale factor to find the missing lengths.<h3>OR</h3><h3>Ratios of Side Lengths within Figures method</h3>Use the ratios of adjacent side lengths with each figure.\n\nIn the next problem the measures of the corresponding angles in the two triangles are equal. This means that the two triangles are similar. In 8th grade you will develop a proof to show why two triangles are similar if the measures of their corresponding angles are equal. "
+                        "In the last problem you found two ways to find missing lengths in pairs of similar figures. ",
+                        "<h3>Scale Factor method</h3>Use the ratio of corresponding side lengths across each figure to find the scale factor. Use scale factor to find the missing lengths.<h3>OR</h3>",
+                        "<h3>Ratios of Side Lengths within Figures method</h3>Use the ratios of adjacent side lengths with each figure. The ratios have the same unit rate.",
+                        "<p>In Problem 3.3, we found the distance across a river using similar triangles. We can find the height of a school building by climbing a ladder and using a long tape measure. We can also use easier and less dangerous ways to find the height.  In the next problem we will find the height of an object using similar triangles</p>"
                       ]
                     }
                   }
@@ -4474,28 +4556,33 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "We can find the height of a school building by climbing a ladder and using a long tape measure. We can also use easier and less dangerous ways to find the height. For example, on sunny days, you can use shadows to estimate outdoor heights that are difficult to measure directly. The diagram below shows how the method works. On a sunny day, any upright object casts a shadow. The diagram shows two triangles whose sides are the height of the object, the length of the object’s shadow, and the side connecting these two points."
+                        "One method for finding heights of objects is called the “mirror method”. Ashton’s class experiments with the mirror method. They want to understand how it works. They use it to measure the height of their principal. From science class, they knew that light reflects off a mirror at the same angle (angle of reflection) at which it hits the mirror (angle of incidence). "
                       ]
                     }
-                  }, {
+                  },
+                  {
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/SS_4_2_IC_39_statue_liberty_500w.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SS_4_2_Mirror_IC.png"
                     }
-                  }, {
+                  },
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Examine the diagram of the shadow method. <ul><li>Why are the measures of the corresponding angles of the large triangle and the small triangle equal? </li><li>How can we use this method to find the height of the Statue of Liberty? What is the height?</li></ol>"
+                        "<ol><li>Does this method work? Why?</li><li>What estimate should Ashton give for the principal’s height?</li><li>Try this method on an object in or near your school. </li></ol>"
                       ]
                     }
-                  }, {
+                  }, 
+                  {
+                    "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Experiment</h3>If the sun is shining, try the shadow method to find the height of an object outside your building. You will need:<ul><li> A building, tree, or other object whose height you want to measure</li><li>A meter stick</li><li>The length of the shadow of the stick</li><li>The length of the shadow of the building’s (tree’s, or other object’s) shadow</li></ul>"
+                        "<p>Yes, the triangles are scaled. The angles located at the mirror are congruent. If we imagined flipping the triangle created by the distance from the mirror to Ashton, we can see the triangles are similar. These triangles look like the ones that we created with the rep-tiles and with measuring the river distance.</p>",
+                        "It is 72 inches from the floor to the principal’s eyes."
                       ]
                     }
                   }
@@ -4514,38 +4601,102 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Situation A. A Tree’s Shadow</h3> A tree casts a 25-foot shadow. At the same time, a 6-foot vertical stick casts a shadow that is 4.5 feet in length. How tall is the tree?"
-                      ]
-                    }
-                  }, {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<h3>Situation B. Using the &quot;Mirror Method&quot;</h3> Another method for finding heights of objects is called the “mirror method.” Ashton’s class experimented with the mirror method to understand how it worked by using it to measure the height of their principal. They knew from science class that light reflects off a mirror at the same angle (angle of reflection) at which it hits the mirror (angle of incidence). Therefore, the two triangles are similar."
+                        "<h3>Situation A. Using Shadows to Find Height </h3>On sunny days, you can use shadows to estimate outdoor heights that are difficult to measure directly. The diagram shows how the method works. ",
+                        "<p>On a sunny day, any upright object casts a shadow. The diagram shows two triangles The triangles sides are the height of the object, the length of the objects shadow,  and the side connecting these two points. </p>"
                       ]
                     }
                   },
                   {
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/SS_4_2_WI_40_mirror_method_500w.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SS_4_2_IC_39_statue_liberty_500w.png"
                     }
-                  }, {
+                  }, 
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<ol><li>Does this method work? Why?</li><li>What estimate should Ashton give for the principal’s height?</li></ol>"
+                        "1. Why are the measures of the corresponding angles of the large triangle and the small triangle equal? "
                       ]
                     }
-                  }, {
+                  }, 
+                  {
+                    "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Situation C. Creating Similar Figures</h3>Mario claims that the mirrors and shadows created similar figures. Is his claim correct? Explain why. What other methods have you used in this unit to create similar figures?"
+                        "<p>The statue and the stick are at a right angle to the ground. Another angle is formed by the sun and the ground. For two nearby points at a common time, the sun appears at the same angle, making these corresponding angles congruent. The third angle must be the same in each triangle since all three interior angles of a triangle must add to 180°.</p>"
                       ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "2.  How can we use this method to find the height of the Statue of Liberty? "
+                      ]
+                    }
+                  }, 
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The length of the shadow depends on the height of the object. The shadow of the taller object will be longer. The stick and its shadow are two legs of the right triangle, and the statue and its shadow also form a right triangle. These two triangles are similar. You can compare the lengths of shadows, and then you will get the scale factor. Then you can find the height of the statue using the scale factor and the length of the stick. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation B. Using A Camera to Find Distance</h3>Cameras on satellites or planes are used to find distances on earth.  The following figure shows a tree and its image in a camera. The two triangles create are similar.</p><p>If the height of the image is 14 mm, the focal length is 35 mm, and the distance from the object is 10 m. What is the height of the tree?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/SS_4_2_Camera.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Using ratio of adjacent sides reasoning:</p>"
+                      ]
+                    }
+                  },
+                  { 
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/4-2_What_If_Situation_B_2.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Using scale factor reasoning:</p>"
+                      ]
+                    }
+                  },
+                  { 
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/4-2_What_If_Situation_B_3.png"
                     }
                   }
                 ]
@@ -4554,7 +4705,8 @@
                 { "text": "Are the two triangles similar? Why?"},
                 { "text": "What are  the corresponding side lengths and corresponding angles?"}
               ]
-            }, {
+            }, 
+            {
               "type": "nowWhatDoYouKnow",
               "content": {
                 "tiles": [
@@ -4563,13 +4715,487 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Describe how similar figures can be used to find missing measurements of objects that cannot be measured directly. Is there another method? Explain."
+                        "If two figures are similar, how can you use information about the figures to find unknown lengths, perimeters, areas, or angle measures?"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>For lengths and perimeters, you can use the scale factor and/or the ratio of adjacent side lengths. When two figures are similar, the ratios of corresponding adjacent side lengths will be equal. Also, when two figures are similar, the ratio of corresponding side lengths across two figures will be equal.  </p>",
+                        "<p>For areas, you can use the scale factor. When the scale factor from figure A to figure B is , the area of the figure B will be a times a, or a2 times the area of the figure A.</p>",
+                        "<p>For angle measures, you can use the fact that the corresponding angles measures in two similar figures are equal. You can find missing angle measures by looking at corresponding angle measures in the similar figure.  </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "### Did you know?",
+                        "Special cameras on satellites, airplanes, and ships take images of large areas on earth. They use the images to calculate lengths and areas of shapes. This process is called remote sensing. Some use of remote sensing is tracking forest fires, erupting volcanoes, ocean floor, growth of cities or forests.",
+                        "Georeferencing means that the internal coordinate system of a digital map or aerial photo can be related to a ground system of geographic coordinates. A georeferenced digital map or image has been tied to a known Earth coordinate system, so users can determine where every point on the map or aerial photo is located on the Earth's surface. ",
+                        "The relevant coordinate transforms are typically stored within the image file (GeoPDF and GeoTIFF are examples of georeferenced file formats), though there are many possible mechanisms for implementing georeferencing.  Georeferencing in the digital file allows basic map analysis to be done, such as pointing and clicking on the map to determine the coordinates of a point, to calculate distances and areas, and to determine other information."
+                      ]
+                    }
+                  },
+                  { 
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/SS_4_2_Camera_Georef.png"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "description": "Problem 4.3",
+          "ordinal": 3,
+          "title": "SAS 4.3 More Impostors",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Earlier in this unit we looked at several shapes of Wumps to see which one was an imposter. In this problem, we will look to see which shape is the imposter.    </p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }, 
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Students in Ms. Cho’s class created sets of figures, some of which had an imposter.  </p>",
+                        "<p>For each set,  </p>",
+                        "<ul><li>Which shapes are similar? That is, which one is the imposter? Give reasons for your choice.   </li><li>For those that are similar how do the lengths, angles, perimeter, and area compare?</li></ul>"
+                      ]
+                    }
+                  },
+                  [{
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_1.png"
+                      }
+                    }, 
+                    {
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_2.png"
+                      }
+                    }],
+                  [{
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_8.png"
+                      }
+                    },
+                    {
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_9.png"
+                      }
+                  }],
+                  [{
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_13.png"
+                      }
+                    },
+                    {
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_14.png"
+                      }
+                  }],
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>For measurements, see Teaching Aid 4.3.</p>",
+                        "<p>Rectangles 2 and 3 are similar</p>",
+                        "<p>Possible Reasoning:</p>",
+                        "<p>Rectangle #1 is not similar to the #2 or #3.</p>",
+                        "<p>From #1 to #2, corresponding sides grow by 2 (short side) or 3 (long side).</p>",
+                        "<p>From #1 to #3, corresponding side grow by 3 (short side) or 4.5 (long side).</p>",
+                        "<p>The ratio of short to long sides for the rectangle #1 would not be equivalent to the ratio of short to long sides for either #2 or #3.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_4.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Rectangles# 2 and # 3 are similar</p>",
+                        "<p>Corresponding angles are equivalent. All angles are 90˚ in rectangles.</p>",
+                        "<p>Comparing rectangle #2 to rectangle #3</p>",
+                        "<p>Scale Reasoning:</p>",
+                        "<p>From #2 to# 3, scale factor is 1.5.</p>",
+                        "<p>From #3 to #2, scale factor is 2/3.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Stars 1 and 3 are similar</p>",
+                        "<p>Possible Reasoning:</p>",
+                        "<p>Star #2 is not a scale drawing because corresponding angles are not equivalent to either Star #1 or #3.</p>",
+                        "<p>Scale Reasoning</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_3.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Ratio Reasoning:"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_5.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Flags 1 and 3 are similar</p>",
+                        "<p>Possible Reasoning:</p>",
+                        "<p>All corresponding angles have the same measures in all three flags.</p>",
+                        "<p>The triangle on Flag #1 and #2 are congruent. Students must use the measures of the whole shape including the pole. The length of the pole makes Flag #2 not similar to the other flags.</p>",
+                        "<p>All corresponding angles have the same measures in all three flags.</p>",
+                        "<p>Scale Reasoning:</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_10.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Ratio Reasoning:</p>",
+                        "<p>Shape #1 is small and difficult to get an accurate measure. But with the ratios, it shows that Shape #1 and Shape #3 almost have equivalent ratios. (within our measuring error)</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_11.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Circles – all circles are similar to other circles</p>",
+                        "<p>Possible Reasoning:</p>",
+                        "<p>All circles are the same shape. Any radius can be scaled to find a corresponding radius. Any diameter can be scaled to find a corresponding diameter.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Squares – all squares are similar to other squares</p>",
+                        "<p>Possible Reasoning:</p>",
+                        "<p>The corresponding angles will be 90˚. </p>",
+                        "<p>Scale Reasoning:</p>",
+                        "<p>For corresponding side lengths, you can always find a scale factor. </p>",
+                        "<p>Ratio Reasoning:</p>",
+                        "<p>Adjacent sides will always be equivalent ratios of side to side.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Hats 1 and 3 are similar </p>",
+                        "<p>Possible Reasoning:</p>",
+                        "<p>Why Shape #2 is not a scale drawing:</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_16.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Hats #1 and #3 are similar </p>",
+                        "<p>Corresponding angles are equivalent</p>",
+                        "<p>Scale Reasoning:</p>",
+                        "<p>Shape #1 to Shape# 2 is scale factor = 2.</p>",
+                        "<p>Shape #2 to Shape #1 is scale factor = ½ .</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Ratio Reasoning:</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_17.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_18.png"
+                    }
+                  }
+                ]
+              },
+              "supports" : [
+              ]
+            }, 
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "### Situation A. More Claims",
+                        "Ms. Cho’s students also made the following claims. Do you agree? Explain why.",
+                        "**Mitch’s Claim** All squares are similar."
+                      ]
+                    }
+                  }, 
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Yes. The corresponding angles will be 90˚. For corresponding side lengths, you can always find a scale factor. Adjacent sides will always be equivalent ratios of side to side.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Freda’s Claim** All circles are similar."
+                      ]
+                    }
+                  }, 
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Yes. All circles are the same shape. Any radius can be scaled to find a corresponding radius. Any diameter can be scaled to find a corresponding diameter.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Juan’s Claim** All quadrilaterals are similar."
+                      ]
+                    }
+                  }, 
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SOLUTION:</strong></p>",
+                        "<p>No. All of the following shapes are quadrilaterals. None of them are similar to the other. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Sze’s Claim** All triangles are similar if their corresponding angles are equal."
+                      ]
+                    }
+                  }, 
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Yes. If all of the angles have equivalent measures, the triangles will have the same basic shape. The corresponding side lengths can be scaled to form a similar triangle. </p>",
+                        "<p>We saw this idea when we had reptiles. </p>",
+                        "<p>And we used this idea when   measuring the river.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "**Matt’s Claim** Circles are not similar since the do not have angles or side lengths."
+                      ]
+                    }
+                  }, 
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SOLUTION:</strong></p>",
+                        "<p>Circles are not polygons. However, like any other shape, circles can be scaled.</p>",
+                        "<p>Circles have measures, such as, the radius or diameter.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Situation B. Creating More Sets</h3>José challenges his group to create another set of shapes that contains an imposter. He suggests that they use coordinate rules to create the set. ",
+                        "<p>1.  Show your reasoning with sketches of the shapes. </p>",
+                        "<p>2.  Include enough information to show which shapes are similar and which one is the imposter. </p>",
+                        "<p>3. What are strategies for identifying if shapes have been scaled (similar figures) or if the shapes are imposters? </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Answers will vary.  There are many possible solutions. Some possible answers: </p>",
+                        "Students may elect to use draw tiles, table tiles, or graph tiles, or a combination, to answer this question. Note that students can also elect to work this on paper, take a picture, and load that into an image tile to capture the work in the platform."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }, 
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "What are strategies for identifying if shapes have been scaled (similar figures) or if the shapes are imposters?"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Answers will vary.  There are many possible solutions. Some possible answers: </p>",
+                        "<ul><li>There is a scale factor for corresponding sides.</li><li>Equivalent ratios of adjacent side lengths in one shape and the corresponding ratio of adjacent side lengths of the other shape are equivalent. </li><li>One shape is a rep-tile of the other. </li><li>Corresponding angles are equal. This is not enough to determine similar figures. There must also be a relationship among corresponding lengths. This is mentioned above. </li></ul>"
                       ]
                     }
                   }
                 ]
               }
             }
+          ],
+          "supports": [
+           
           ]
         }
       ]
