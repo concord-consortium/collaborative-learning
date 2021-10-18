@@ -1,7 +1,10 @@
 import React from "react";
 import { INetworkResourceClassResponse } from "../../../functions/src/shared";
 import { useNetworkResources } from "../../hooks/network-resources";
+import { DocumentModelType } from "../../models/document/document";
+import { IStores } from "../../models/stores/stores";
 import { CollapsibleDocumentsSection } from "../thumbnail/collapsible-document-section";
+import { ISubTabSpec } from "./document-tab-panel";
 
 import "./network-documents-section.scss";
 
@@ -9,6 +12,11 @@ interface IProps {
   currentClassHash: string;
   currentTeacherId: string;
   currentTeacherName: string;
+  subTab: ISubTabSpec;
+  problemTitle: string;
+  stores: IStores;
+  scale: number;
+  onSelectDocument?: (document: DocumentModelType) => void;
 }
 
 export enum NetworkSectionType {
@@ -17,7 +25,7 @@ export enum NetworkSectionType {
 }
 
 export const NetworkDocumentsSection: React.FC<IProps> = ({ currentClassHash, currentTeacherName,
-  currentTeacherId }) => {
+  currentTeacherId, subTab, problemTitle, stores, scale, onSelectDocument }) => {
   const { data, status } = useNetworkResources();
   const statusMessage = `${status} network data`;
 
@@ -55,10 +63,22 @@ export const NetworkDocumentsSection: React.FC<IProps> = ({ currentClassHash, cu
               const userName = networkSectionType === NetworkSectionType.myClasses
                 ? currentTeacherName
                 : c.teacher || "unknown teacher";
+              const userId = networkSectionType === NetworkSectionType.myClasses
+                ? currentTeacherId
+                : c.id || "unknown teacher";
+              const classHash = c.context_id;
               return <CollapsibleDocumentsSection
                 key={index}
                 userName={userName}
+                userId={userId}
                 classNameStr={c.name || "unknown class"}
+                classHash={classHash}
+                subTab={subTab}
+                networkResource={c}
+                problemTitle={problemTitle}
+                stores={stores}
+                scale={scale}
+                onSelectDocument={onSelectDocument}
               />;
             })
         }

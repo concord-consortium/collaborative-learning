@@ -10,7 +10,7 @@ import { ProblemTabContent } from "./problem-tab-content";
 import { DocumentTabContent } from "./document-tab-content";
 import { FocusDocumentTracker } from "./focus-document-tracker";
 import { SupportBadge } from "./support-badge";
-import { NewCommentsBadge } from "./new-comments-badge";
+// import { NewCommentsBadge } from "./new-comments-badge";
 import { ChatPanel } from "../chat/chat-panel";
 import ChatIcon from "../../assets/chat-icon.svg";
 
@@ -177,6 +177,8 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
 
   private handleShowChatColumn = () => {
     const { ui } = this.stores;
+    const event = ui.showChatPanel ? LogEventName.CHAT_PANEL_HIDE : LogEventName.CHAT_PANEL_SHOW;
+    Logger.log(event);
     ui.toggleShowChatPanel(!ui.showChatPanel);
   }
 

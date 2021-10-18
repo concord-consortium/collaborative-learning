@@ -51,6 +51,28 @@
       "placeholder": "Work area for\nMathematical Reflection 4 section"
     }
   },
+  "defaultStamps": [
+    {
+      "url": "curriculum/moving-straight-ahead/stamps/plus.png",
+      "width": 25,
+      "height": 25
+    },
+    {
+      "url": "curriculum/moving-straight-ahead/stamps/equals.png",
+      "width": 25,
+      "height": 25
+    },
+    {
+      "url": "curriculum/moving-straight-ahead/stamps/lparen.png",
+      "width": 25,
+      "height": 25
+    },
+    {
+      "url": "curriculum/moving-straight-ahead/stamps/rparen.png",
+      "width": 25,
+      "height": 25
+    }
+  ],
   "planningDocument": {
     "enable": "teacher",
     "default": true,
@@ -81,100 +103,6 @@
       { "type": "launch" },
       { "type": "explore" },
       { "type": "summarize" }
-    ]
-  },
-  "lookingAhead": {
-    "tiles": [
-      {
-        "content": {
-          "type": "Text",
-          "text": "A map is a scale drawing of the place it represents. You can use a map to find actual distances to any place in the world. How can you estimate the distance from Cape Town, South Africa to Port Elizabeth, South Africa?"
-        }
-      },
-      {
-        "content": {
-          "type": "Image",
-          "url": "curriculum/stretching-and-shrinking/images/SS_LA_01_map_500w.png"
-        }
-      },
-      {
-        "content": {
-          "type": "Text",
-          "text": "Suppose that you want to find the width of a river that is too wide to measure directly. How can you use similar triangles to find the distance across the river?"
-        }
-      },
-      {
-        "content": {
-          "type": "Image",
-          "url": "curriculum/stretching-and-shrinking/images/SS_LA_02_river_500w.png"
-        }
-      },
-      {
-        "content": {
-          "type": "Text",
-          "text": "Here is a picture of Duke, a real dog. If you know the scale factor between Duke and the picture, how can you determine how long Duke is from his nose to the tip of his tail?"
-        }
-      },
-      {
-        "content": {
-          "type": "Image",
-          "url": "curriculum/stretching-and-shrinking/images/SS_LA_03_dog_500w.png"
-        }
-      },
-      {
-        "content": {
-          "type": "Image",
-          "url": "curriculum/stretching-and-shrinking/images/SS_LA_04_city_spoon_500w.png"
-        }
-      },
-      {
-        "content": {
-          "type": "Text",
-          "text": "You probably use the word similar in everyday conversation. For example, you might say that one song sounds similar to another song. You may also say that your friend’s bike is similar to yours. In many cases, you might use the word similar to describe objects and images that are the same shape but not the same size."
-        }
-      },
-      {
-        "content": {
-          "type": "Text",
-          "text": "A floor plan of a house has the same shape as the actual house, but it is much smaller. The images on a movie screen as the same shape as the real people and objects they depict, but they are much larger. You can order your school portrait in a variety of sizes, but your face will have the same shape in each photo. In the Shapes and Design units you studied a variety of shapes, including the properties that make some shapes important in science, engineering, construction, and art."
-        }
-      },
-      {
-        "content": {
-          "type": "Text",
-          "text": "What features of shapes are important in determining the unique shape, like polygons?"
-        }
-      },
-      {
-        "content": {
-          "type": "Text",
-          "text": "When you encounter a new problem, it is a good idea to ask yourself questions. In this Unit, you might ask questions such as:"
-        }
-      },
-      {
-        "content": {
-          "type": "Text",
-          "text": "What determines whether two shapes are similar?"
-        }
-      },
-      {
-        "content": {
-          "type": "Text",
-          "text": "What is the same and what is different about two similar figures?"
-        }
-      },
-      {
-        "content": {
-          "type": "Text",
-          "text": "When figures are similar, how are the side lengths, areas, and scale factors related?"
-        }
-      },
-      {
-        "content": {
-          "type": "Text",
-          "text": "How can I use similar figures to find missing measurements?"
-        }
-      }
     ]
   },
   "investigations": [
@@ -411,11 +339,44 @@
                       "type": "Text",
                       "format": "markdown",
                       "text": [
-                        "* Is Daphne's claim correct? Is it possible to use the magazine and the picture to estimate the teacher's height? Explain.",
+                        "* Is Daphne's claim correct? Is it possible to use the magazine and the picture to estimate the teacher's height? Explain."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Daphne’s claim is correct. In her picture, we can measure both the height of the P.I. magazine and the height of the teacher and then compare two values. Knowing the P.I. magazine is 10 inches high in real life, you can estimate the teacher’s real height.</p>",
+                        "<p> Possible student strategies:</p>",
+                        "<ul><li>Students can use rulers or edges of a piece of paper to make informal estimates of various measurements. Do not push for precise measurement at this time. Pay attention, though, to which students measure naturally and easily and which struggle with measurement. This will help you to plan your teaching in later Problems in the Unit where careful measurement is important. </li><li>Some students will measure the height in inches on the magazine and of the mystery teacher. They will then divide the height of the teacher by the height of the magazine to find how many magazines tall the teacher is. This is a more precise version of the first strategy. Make sure students are clear about the comparisons that they are making. They may compare the real magazine to the magazine in the picture or the magazine in the picture to the teacher in the picture. </li><li>The magazine is 10 inches tall. The teacher is about 7 magazines, or 70 inches, tall. </li><li>In the picture, the height of the P.I. Monthly is 0.5 in. We know that the height of the real magazine is 10 in. So, the real magazine is 10 \u00f7 0.5=20 times larger than in the picture. The teacher should also be 20 times larger in real life than he/she is in the picture. The teacher’s height in the picture is about  in. So, the actual height is about 20  =72.5 in. </li><li>Students may use ratio or “for every” statements, such as “The ratio of the teacher’s height in the picture to her height in real life is about 1 to 20.” Or “For every inch in height of the magazine in the picture there are 20 inches in height for the real magazine.”</li><li>Students may also compare the magazine in the picture to the teacher in the picture. In this case, the teacher is / = 7 times as tall as the magazine. Students may say that the teacher is 7 magazines tall. This should be true in real life as well. Since the height of the magazine is 10 in., the teacher is 10x7=72.5 in. tall. </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
                         "* Could you find the height of the teacher if you did not know that the magazine was 10 inches tall? Explain."
                       ]
                     }
-                  }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": 
+                      {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Answers will vary. Possible answers: </p>",
+                          "<ul><li>Yes. Instead of the height of the magazine, I could have measured the height of the actual bookshelf shown in the picture and used it to figure out the teacher’s height.  </li><li>No. If I do not know the real height of the magazine is 10 inches, I would not be able to find the real height of the teacher. I only know the teacher is 7.25 times taller than the magazine.  </li></ul>",
+                      "<p>Students will think about the proportional relationship of heights between the picture and the reality. <strong></strong></p>"
+                        ]
+                      }
+                    }
                 ]
               },
               "supports": []
@@ -431,14 +392,9 @@
                       "text": [
                         "**Situation A. Daphne’s Reasoning**",
                         "Daphne claims she used ratio reasoning to solve the problem. She wrote:",
-                        "> `For every inch measured of the PI magazine, there are 10 inches in real life. I used the PI magazine height to measure the height of the teacher.`"
+                        "> `For every inch measured of the PI magazine, there are 10 inches in real life. I used the PI magazine height to measure the height of the teacher.`",
+                        "How could this help her find the height of the teachers? "
                       ]
-                    }
-                  },
-                  {
-                    "content": {
-                    "type": "Image",
-                    "url": "curriculum/stretching-and-shrinking/images/SS_1_1_NW_07_did_you_know_350w.png"
                     }
                   },
                   {
@@ -451,12 +407,58 @@
                     }
                   },
                   {
+                    "display": "teacher",
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Every 1 magazine represents 10 inches, we can scale this ratio to find how tall the teacher is. For example:",
+                        "<p>10 inches for every 1 magazine</p>",
+                        "<h2>     \u2938 x 7                  \u2938 x 7</h2>",
+                        "<p><strong>? inches</strong> for every <strong>7 magazines</strong> (if the teacher is 7 magazines tall in the picture)"
+                      ]
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
                       "format": "markdown",
                       "text": [
                         "**Situation B. What’s Different?**",
-                        "1. How does the real-life teacher differ from the teacher in the photo? \n2. Can you think of some other times you could use a photo to estimate the size of something?"
+                        "1. How does the real-life teacher differ from the teacher in the photo?"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "The teacher in the photo is smaller than the real-life teacher. But the ratio between the height of the teacher in the photo and the height of the magazine in the photo is the same as the ratio between the height of the real-life teacher and the height of the real-life magazine. ",
+                        "If we cut the hat from the photo and put it on our head, it would be ridiculously small. We would need to scale-up the size of the hat to get it to fit."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "2. Can you think of some other times you could use a photo to estimate the size of something?"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "Answers will vary. Possible answers:",
+                        "* You might want to use a photograph to estimate the size of a large item you plan to buy, such as a large bookshelf. Estimating its size can help you determine whether or not it will fit in its designated spot.  ",
+                        "* You could also take a close-up shot of something small, like an insect, next to an object with a standard size, like a penny. Then you can compare the features of the insect, such as its size, to pictures in a reference book. "
                       ]
                     }
                   }
@@ -476,7 +478,31 @@
                         "The Mystery Club advisor says that the picture is similar to the actual scene. What do you suppose the advisor means by similar? How is the photo similar to the actual scene that is photographed?"
                       ]
                     }
-                  }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Answers will vary. Possible answers:</p>",
+                        "<ul><li>You might want to use a photograph to estimate the size of a large item you plan to buy, such as a large bookshelf. Estimating its size can help you determine whether or not it will fit in its designated spot. </li><li>You could also take a close-up shot of something small, like an insect, next to an object with a standard size, like a penny. Then you can compare the features of the insect, such as its size, to pictures in a reference book. </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": 
+                    {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>By similar, the advisor might mean that the figures in the picture look the same as the original shapes in the actual scene, except in size. The photo represents the actual scene in real life in a smaller version. </p>",
+                          "<p>As the introduction to the Unit, students might have general rather than mathematically specific answers. Students should begin to informally recognize that proportional relationships between quantities can be used to estimate the relationships between the lengths.</p>"
+                        ]
+                      }
+                    }
                 ],
                 "supports": []
               }
@@ -521,31 +547,45 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "html",
+                      "format": "markdown",
                       "text": [
-                        "Michelle, Daphne, and Mukesh are officers of the Mystery Club. Mukesh designs a flier to attract new members."
+                        "##Equipment",
+                        "* Rubber bands – identical size, bands about 3 inches long work well",
+                        "* Learning Aid – with a shape to enlarge and anchor point",
+                        "* Blank paper",
+                        "* Tape"
                       ]
-                    }
-                  },
-                  {
-                    "content": {
-                    "type": "Image",
-                    "url": "curriculum/stretching-and-shrinking/images/SS_1_2_In_08_flyer_350w.png"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "format": "html",
+                      "format": "markdown",
                       "text": [
-                        "Daphne wants to make a large poster to publicize the next meeting. She wants to redraw the club’s logo, “Super Sleuth,” in a larger size. Michelle shows her a clever way to enlarge the figure by using rubber band."
+                        "Instructions for Stretching a Figure",
+                        "* Make a “two-band stretcher” by tying the ends of the rubber bands together.",
+                        "* Tape the Learning Aid to your desk. Next to it, tape a blank sheet of paper. ",
+                        "If you are right-handed, put the blank paper on the right.",
+                        " If you are left-handed, put the blank paper on the left. "
                       ]
                     }
                   },
                   {
                     "content": {
                     "type": "Image",
-                    "url": "curriculum/stretching-and-shrinking/images/SS_1_2_In_09_instructions_500w.png"
+                    "url": "curriculum/stretching-and-shrinking/images/SS_1_2_rubberbands.jpg"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "Instructions for Stretching a Figure",
+                        "* With your finger, hold down one end of the rubber-band stretcher on point P. Point P is called the anchor point.",
+                        "* Put a pencil in the other hand of the stretcher. Stretch the rubber bands with the pencil until the knot is on the outline of the shape.",
+                        "* Keep the rubber bands taut (stretched). Move your pencil to guide the knot around the picture. Your pencil will draw a copy of the shape. The new picture is called the image of the original. It is also a scale drawing of the original."
+                      ]
                     }
                   },
                   {
@@ -555,6 +595,18 @@
                       "text": [
                         "1. Use the rubber-band method to enlarge the figure on the Mystery Club flier. Draw the figure as carefully as you can, so you can compare the size and shape of the image to the size and shape of the original figure.",
                         "1. How are the original figure and its image alike? Different? What is your evidence?"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Students may compare the general shapes of two figures, the lengths of line segments in the hats and bodies, the areas or the perimeters of the hats and bodies, the angles in the hats and bodies, or the distance of corresponding points on each figure from the anchor point P. Because the tool does provide exact replicas, the answers will be estimates at this time.</p>",
+                        "<ul><li>The general shapes of the two figures are the same.</li><li>The angles in the image are the same as the corresponding angles in the original. </li><li>The lengths of the corresponding line segments are different. The lengths in the image seem to be twice as long as the corresponding lengths in the original.</li><li>The perimeters of the body and the hat in the image seem to be twice as long as those in the original. Students may reason that since each line segment doubles, the perimeter, which is the sum of these doubled line segments, will also double. (Doubling each side individually then finding the perimeter is the same as finding the perimeter and then doubling it. This is intuitively the Distributive Property: 2L + 2L + 2w + 2w = 2(L + L + w + w).) </li><li>The areas of the body and hat in the image seem to be 4 times as large as those in the original. Students may see that approximately 4 of the original rectangles (hats) can fit into the enlarged rectangle (hat). If students say the areas are three or four times as large, this is fine at this stage. The important idea is that the area is more than twice as large. </li><li>The distances of each figure from the anchor point P also have a 2 to 1 ratio. That is, each point on the image is twice the distance from P as the original corresponding point is from P. </li></ul>",
+                        "<p>Note that the answers above are true in the ideal case. In practice, the 2 to 1 ratio of the lengths (and the 4 to 1 ratio of the areas) will not always be observed. This is because of the imperfection of the bands and some differences in the application of the method. The result is more accurate if the end of the rubber band on point P is fixed by holding a pin instead of holding by hand directly; if the image end of the band is held as close to the page as possible using the pencil; if the pencil chosen is as thin as possible since its thickness might cause the band in the image end to be shorter than it is supposed to be; if the bands are not stretched too much.</p>"
                       ]
                     }
                   }
@@ -583,27 +635,279 @@
                       "text": [
                         "### Situation A. Making Comparisons",
                         "Ms. Marvel’s class made several comparison statements about the original figure and the image.",
+                        "Merve’s Comparison: The lengths of the sides of the image are twice the lengths of the original.",
+                        "Ashley’s Comparison: The distance from a point on the original figure to anchor point P is equal to the distance from the image of the point to P.  ",
+                        "Eli’s Comparison: The measure of an angle in the original figure has the same measure as the image of the angle.",
+                        "Soro’s Comparison: The area of the hat of the original figure is about ¼ the area of the hat of image.",
                         "* Which of these statements are true? Explain your reasoning.",
                         "* Which of these statements represent ratios? Write these as ratio statements.",
-                        "* Use your rubber band stretcher to enlarge another figure, such as a circle or square. Which of the comparisons are true for the original figure and its image?",
-                        " ",
-                        "**Comparison 1.** The lengths of the sides of the image are twice the lengths of the original.",
-                        "**Comparison 2.** The distance from a point on the original figure to P is equal to the distance from the image of the point to P.",
-                        "**Comparison 3.** The measure of an angle in the original figure has the same measure as the image of the angle.",
-                        "**Comparison 4.** The area of the hat of the original figure is about ¼ the area of the hat of image."
+                        "* Use your rubber band stretcher to enlarge another figure, such as a circle or square. Which of the comparisons are true for the original figure and its image?"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "* Any of these are ratios, see examples below:",
+                        "* The same comparisons would be true for the original figure and its image."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Merve’s Comparison is true. We can place copies of the original lengths on the image to see this relationship. The ratio of original to image would be x to 2x. For every measurement in the original, the image is twice the size.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/-MkgsTSUh8Ol5IEAHJd0"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Any of the comparisons could be re-written as ratios. Examples include:</p>",
+                        "<p>Merve’s Comparison: The comparison of the lengths on the image to the original is 2 to 1</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Ashley’s Comparison is not true. The distance from the P to a point on the image is twice as long as the distance from the P to a point on the original. The distance between points on the image and original is equal to the distance between P to the original. A comparison statement that would be true might be: For every unit of measure going from P to the original, the image will have twice that distance. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "ccimg://fbrtdb.concord.org/-Mkgsi8rqnMaqmB7RVhc"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Ashley’s Comparison: (Re-written to be true.) The distance from the point P to a point on the image is twice the distance from a point on the original. Or, the distance from the point P to the original compares to the distance from the point P the image by a ratio of 1 to 2.</p>"
+                      ]
+                    } 
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Eli's Comparison is true. We can place copies of the original angles on the image to see this relationship. The angle ratios from the original to the image will always be 1 to 1. </p>"
+                      ] 
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "ccimg://fbrtdb.concord.org/-MkgstYKJmr-sTVREd7m"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Eli's Comparison: The measure of the angles have a 1 to 1 relationship. For every 90˚ on the original, there will be 90˚ on the corresponding angle of the image.</p>",
+                        "<p>Comparison 4 is true.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": ""
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "About 4 of the original hats fit inside the image hat. So, the original hat is about 1/4 the area of the image.",
+                        "Soro's Comparison: The area of the hat of the original figure to the area of the hat of image is 1 to 4.  "
                       ]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "### Situation B. Changing the Anchor Point and Number of Bands",
-                        "Use your rubber band stretcher to enlarge another figure, such as a circle or square. Which of the comparisons in Situation A are true for the original figure and its image?",
-                        "1. What if you could change the position of the anchor point? How does this affect the image?",
-                        "1. What if you used three rubber bands and traced the figure using the knot closest to the anchor point? How does this affect the image?",
-                        "1. Amy says the rubber bands are multipliers. They have a multiplying effect. Use the language of ratios to restate Amy’s idea mathematically."
+                        "<strong>Situation B. Changing the Anchor Point and Number of Bands</strong>",
+                        "Several students had questions about the anchor point and the number of rubber bands. What is your response to each question?",
+                        "DaShawn’s Question: What if we change the position of the anchor point? How does this affect the image?",
+                        "Sunyoung’s Question: What if we use three rubber bands? We would still trace the figure using the knot closest to the anchor point. How will this affect the image?  ",
+                        "Amy’s Question: The rubber bands seem to be acting like are multipliers. Since there is a multiplying effect, we can use ratios. How can I use ratio language to describe what happens to corresponding side lengths?"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SOLUTION</strong></p>",
+                        "<p>If the location of P is changed, the location of the image will also change. However, the location of P does not affect the size or shape of the image. </p>",
+                        "<p>For example, the darker blue triangle below is the original. Moving the location of P moves the image (lighter blue triangle). It does not change the shape or size. The length of the distances away from P remain proportional. If we look at corresponding right angles, on the image the right angle is always twice the distance from P while the right angle on the original is always one distance away from P.  </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Image",
+                      "url": "/-MkgtiCyR0kZ-cstvzCy"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "text",
+                      "text": [
+                        "2. What if you used three rubber bands and traced the figure using the knot closest to the anchor point? How does this affect the image?"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SOLUTION</strong></p>",
+                        "<p>Note that there are two possible interpretations of this question. Most students will use the knot closer to the anchor point to trace the original figure. Some students may use the knot closer to the pencil. </p>",
+                        "<p>Answers for the knots closer to the anchor point:</p>",
+                        "<ul><li>The shapes are similar to each other. </li><li>The lengths in the image figure are about 3 times as long as the lengths in the original figure.  </li></ul>"
+                      ]
+                    }
+                  },
+                  
+                  {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Image",
+                      "url": "/-MkgtiCyR0kZ-cstvzCy"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": 
+                     {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>The areas in the image figure are about 9 times as big as the areas in the original figure. </li><li>Each point on the image is about 3 times as far from P as its corresponding point on the original figure.</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Image",
+                      "url": "/-MkgtiCyR0kZ-cstvzCy"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": 
+                     {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Answers for the knots closer to the pencil:</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Image",
+                      "url": "/-MkgtiCyR0kZ-cstvzCy"
+                    }
+                  },
+                   {
+                    "display": "teacher",
+                    "content": 
+                     {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>The shapes are similar to each other.</li><li>The lengths in the image figure are about 1.5 times as long as the lengths in the original figure.</ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Image",
+                      "url": "/-MkgtiCyR0kZ-cstvzCy"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": 
+                     {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<ul><li>The areas in the image figure are about 2.25 times as big as the areas in the original figure. Students may estimate and say that the areas in the image are a little more than twice those in the original. </li><li>Each point on the image is about 1.5 times as far from P as its corresponding point on the original figure. </li></ul>"
+                        ]
+                      }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "text",
+                      "text": [
+                        "3. Amy says the rubber bands are multipliers. They have a multiplying effect. Use the language of ratios to restate Amy’s idea mathematically."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>If the distances of each figure from the anchor point P have a 2 to 1 ratio, like the 2 rubber band stretcher, then the side length of the image figure is 2 times the side length of the original figure. </p>",
+                        "<p>Using three rubber bands the ratio of the side length in figure 1 to the side length of corresponding side length in the image is 1 to 3 or 1 : 3.</p>"
                       ]
                     }
                   }
@@ -621,6 +925,19 @@
                       "format": "html",
                       "text": [
                         "The original figure and its image are <strong>similar figures</strong>. The image is also called the <em>scale drawing</em> of the original figure. For two similar figures, what characteristics and measures are the same?  Different? Explain how you know."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Informally students should see that when enlarging a geometric figure some attributes of shape change and some stay the same:</p>",
+                        "<ul><li>angles of the two figures appear to be the same, </li><li>side lengths of the enlarged figure are longer, </li><li>area of the enlarged figure is bigger. </li></ul>",
+                        "<p>Note that as the Unit continues, students will revisit these questions and add more specific mathematical detail to them. </p>"
                       ]
                     }
                   }
@@ -791,9 +1108,67 @@
                   {
                     "content": {
                       "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "* What percent size multiplier did Daphne use to create Copy 1 and Copy 2? Explain your reasoning."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
                       "format": "html",
                       "text": [
-                        "<ul><li>What percent size multiplier did Daphne use to create Copy 1 and Copy 2? Explain your reasoning.</li><li>How are the copies like the original? How are they different?</li></ul>"
+                        "<p>For Copy 2, if we compare corresponding sides such as the base of the triangle, 1 and ½ lengths of the original make the corresponding length of the copy. This means that the multiplier is 1.5 or 150% of the original.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "/-MklmI8h3sX6mXDjfboy"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>For Copy 1, if we compare corresponding sides such as the base of the triangle, ¾ of the length of the original makes the corresponding length of the copy. This means that the multiplier is 0.75 or 75% of the original.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "/-MklmI8h3sX6mXDjfboy"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "* How are the copies like the original? How are they different?"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SOLUTION</strong></p>",
+                        "<p>Alike: The original and the copies have the same basic shapes and their corresponding angle measures are the same.</p>",
+                        "<p>Different: The corresponding side lengths change and the areas change from the original to the copies. The corresponding side lengths in Copy 1 are ¾ the size of the corresponding side lengths in the original. For every length of 1 in the original, the copy has ¾ of the length. The area is smaller from the original to Copy 1. The corresponding side lengths in Copy 2 are 1.5 times the size of the corresponding side lengths in the original. For every length of 1 in the original, the copy has 150% of the length. The area is larger from the original to Copy 1, but it is not 1.5 times larger.</p>",
+                        "<p>The ratios are also different. For Copy 1, the ratio in length from the original is 1 to ¾. For Copy 2 the ratio in length from the original is 1 to 1 ½. </p>"
                       ]
                     }
                   }
@@ -815,9 +1190,105 @@
                   {
                     "content": {
                       "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "### Situation A. Comparing the Image to the Original",
+                        "Compare each copier image to the original figure.",
+                        "* Comparison 1: Describe how the side lengths compare to the corresponding side lengths in the original figure."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Situation A. Comparing the Image to the Original</strong>\nCompare each copier image to the original figure.<ol><li><strong>Comparison 1</strong>: Describe how the side lengths compare to the corresponding side lengths in the original figure.</li><li><strong>Comparison 2</strong>: Describe how the angle measures compare to the corresponding angle measures in the original figure.</li><li><strong>Comparison 3</strong>: Describe how the perimeter of the triangle in each copy compares to the perimeter of the original figure.</li><li><strong>Comparison 4</strong>: Describe how the area of the triangle in each copy compares to the area in the original figure.</li><li><strong>Comparison 5</strong>: Explain how the percent setting can be used to predict the relationships between each copy and the original figure.</li></ol>"
+                        "<p>The side lengths in Copy 2 get longer than the corresponding side lengths in the original image. The percent setting, 150%, tells you that the corresponding side lengths of Copy 2 are 150% of or 1.5 times the side lengths in the original.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "* Comparison 2: Describe how the angle measures compare to the corresponding angle measures in the original figure."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>For Copy 1 and 2, corresponding angles are the same. Even though you make the original image smaller in Copy 1 and larger in Copy 2, the angles do not change and stay the same. So, the angles are not affected by the percent setting.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "* Comparison 3: Describe how the perimeter of the triangle in each copy compares to the perimeter of the original figure."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The perimeters change in the same way the corresponding lengths change. This can be explained by the Distributive Property. In Copy 2 the sides of the hat change by 150%, so the perimeter will also change by 150%: 1.5/+ 1.5/ + 1.5w + 1.5w = 1.5 (/ + / + w + w).</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "* Comparison 4: Describe how the area of the triangle in each copy compares to the area in the original figure."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SOLUTION</strong></p>",
+                        "<p>The area of the figure of Copy 1 gets little more than half the area of the original image.  </p>",
+                        "<p>For the rectangular part of the design, students may reason that since both the length and width are changed by a factor, the area is changed by a product of the factor and itself. (Note: The area comparison factor is the squares of the copier size factor: 0.75 x 0.75 = 0.5625. In the next Investigation, the copier size factor is named the scale factor and student will look more in-depth at how the area changes.)</p>",
+                        "<p>The area of the figure of Copy 2 gets little more than double the area of the original image. (Note: The area comparison factor is the squares of the copier size factor: 1.5 x 1.5 = 2.25. The area relationship will be formalized in Investigation 3.) </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "* Comparison 5: Explain how the percent setting can be used to predict the relationships between each copy and the original figure."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>If the percent setting is greater than 100%, such as 150% or 125%, then the figure of the copy will be larger than the original figure. If the percent setting is less than 100%, such as 75% or 50%, then the figure of the copy will be smaller than the original figure. You can predict the side lengths of the copy by multiplying the side lengths of the original by the percent setting. </p>"
                       ]
                     }
                   },
@@ -831,11 +1302,34 @@
                     }
                   },
                   {
+                    "display": "teacher",
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>To increase a figure’s size by twice the length, you would want to make each side length 2 times as long as the side length of the original. The percent setting of 200% on the copier would make the side length of image 2 times longer than in the original.  </p>"
+                      ]
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<strong>Situation C. Amelia’s Claim</strong>\nAmelia thinks that the copier creates images that are similar to those made with the rubber band stretchers and the photograph. Do you agree? Explain why or why not."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Agree. The copier creates a more accurate image, but the relationships stay the same.</p>",
+                        "<p>When you want to create an image twice bigger than the original, you would use two rubber bands. You can also use the copier with 200% percent setting. If you want to make an image three times bigger than the original, you would use three rubber bands. It is the same as when you use the copier with 300% percent setting. You can use both the rubber bands and the copier when you want to make a similar image.  </p>"
                       ]
                     }
                   }
@@ -853,6 +1347,17 @@
                       "format": "html",
                       "text": [
                         "For similar figures, what features (attributes) and measures stay the same? What features (attributes) and measures change? How does a multiplier play a role in these changes?"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The shape will remain the same except in size. The measures of corresponding angles will also remain the same. Each corresponding length in the image will stretch or shrink by the multiplier. The areas seem to change in some predictable pattern.</p>"
                       ]
                     }
                   }
@@ -958,9 +1463,6 @@
                           "values": [1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 7, 7, 1]
                         }
                       ]
-                    },
-                    "layout": {
-                      "height": 380
                     }
                   },
                   {
@@ -978,9 +1480,6 @@
                           "values": [2, 2, 3, 3 ,2]
                         }
                       ]
-                    },
-                    "layout": {
-                      "height": 180
                     }
                   },
                   {
@@ -998,12 +1497,9 @@
                           "values": [4,5,4,4]
                         }
                       ]
-                    },
-                    "layout": {
-                      "height": 145
                     }
                   },
-                   {
+                  {
                     "content": {
                       "type": "Table",
                       "columns": [
@@ -1018,17 +1514,18 @@
                           "values": [5, 5]
                         }
                       ]
-                    },
-                    "layout": {
-                      "height": 100
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "format": "html",
+                      "format": "markdown",
                       "text": [
-                        "• Use the given rule to find the coordinates of the points. Record the coordinates in Tables for Zug, Lug, Bug, and Glug. For example, the rule for Zug is (2x, 2y). This means that you multiply each of Mug’s coordinates by 2. Point A on Mug is (0, 1), so the corresponding point A on Zug is (0, 2). Point B on Mug is (2, 1), so the corresponding point B on Zug is (4, 2). \n\n• Plot and connect the points from A to X for each figure on separate axes, just as you did for Mug, putting each on separate axes. \n\n• Look at the figures created by Marta’s rules. Which ones appear to be family members who are similar to Mug? Which figures appear not to be similar, and thus “imposters”? How do you know?"
+                        "* Use the given rule to find the coordinates of the points. Record the coordinates in Tables for Zug, Lug, Bug, and Glug. For example, the rule for Zug is (2x, 2y). This means that you multiply each of Mug’s coordinates by 2. Point A on Mug is (0, 1), so the corresponding point A on Zug is (0, 2). Point B on Mug is (2, 1), so the corresponding point B on Zug is (4, 2).",
+                        "* Plot and connect the points from A to X for each figure on separate axes, just as you did for Mug, putting each on separate axes.",
+                        "Look at the figures created by Marta’s rules. Which ones appear to be family members who are similar to Mug? Which figures appear not to be similar, and thus “imposters”? How do you know?",
+                        "Zug and Bug are bigger versions of and have the same shape as Mug, so they are the other Wumps. From Mug to Zug and Bug, the angles and the general shape stayed the same. From Mug to Zug, the lengths doubled and from Mug to Bug, the lengths tripled. ",
+                        "On the other hand, Lug is too wide, and Glug is too tall to be the Wumps family. From Mug to Lug and Glug, corresponding lengths did not grow by the same factor. Lug is the same height as Mug but three times as wide. Lug is stretched on the x-axis values, but not the y-axis values. Glug is the same width as Mug but three times as tall. Glug is stretched on the y-axis values, but not the x-axis values. Many of Lug’s and Glug’s angles differ from Mug’s. So, Lug and Glug are impostors."
                       ]
                     }
                   }
@@ -1057,11 +1554,64 @@
                     }
                   },
                   {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "True. Like the rule (2x, 2y) makes Zug similar to Mug and the rule (3x, 3y) makes Bug similar to Mug, the rule (5x, 5y) also makes it similar to Mug. It will be 5 times wider and 5 times taller than Mug."
+                      ]
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<strong>Jacob’s Claim</strong> I can use the coordinate rule to predict how the side lengths compare between Mug and a similar Wump. Is he correct?"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Yes, this is true. With the rule (2x, 2y), Zug has double the side lengths of the corresponding side lengths of Mug’s. Also, with the rule (3x, 3y), Bug has triple the side lengths of the corresponding side lengths of Mug’s. Using the multiplier, you can predict how many times bigger (or smaller) the lengths on a similar figure are compared to the original lengths."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "True. Like the rule (2x, 2y) makes Zug similar to Mug and the rule (3x, 3y) makes Bug similar to Mug, the rule (5x, 5y) also makes it similar to Mug. It will be 5 times wider and 5 times taller than Mug."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Jacob’s Claim</strong> I can use the coordinate rule to predict how the side lengths compare between Mug and a similar Wump. Is he correct?"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Yes, this is true. With the rule (2x, 2y), Zug has double the side lengths of the corresponding side lengths of Mug’s. Also, with the rule (3x, 3y), Bug has triple the side lengths of the corresponding side lengths of Mug’s. Using the multiplier, you can predict how many times bigger (or smaller) the lengths on a similar figure are compared to the original lengths."
                       ]
                     }
                   },
@@ -1075,6 +1625,17 @@
                     }
                   },
                   {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "False. The angle measures do not change from the original to the corresponding angles on the image."
+                      ]
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -1084,19 +1645,59 @@
                     }
                   },
                   {
-                    "content": {
+                    "display": "teacher",
+                    "content": 
+                    {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Situation B. New Rules</h3><ol><li>1.  Make a rule that would create a figure similar to Lug. </li><li>Describe how the corresponding angle measures and side lengths change. </li></ol>"
+                        "True. The multiplier is 1, since (x, y) = (1x, 1y). Multiplying any quantity by 1 is the multiplicative identity. The values of the coordinates will stay the same. So, the figure is like the identity; it will be the same size and shape."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "### Situation B. New Rules",
+                        "1.  Make a rule that would create a figure similar to Lug."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Answer will vary. Possible answers: (6x, 2y), (9x, 3y), (12x, 4y), (x, 1/3y)</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "2. Describe how the corresponding angle measures and side lengths change."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Angle measure will stay the same from one corresponding angle to another. Corresponding side lengths from the original to the image will get larger or smaller by the amount of the multiplier. For example, from Lug to the shape made with (6x, 2y), all of the lengths will double. From Lug to the shape made with (9x, 3y), all of the lengths will triple."
                       ]
                     }
                   }
                 ]
-              },
-              "supports": [
-                {"text": "Consider the rules of Mug, Zug, Lug, Bug, and Glug. Mug (x, y), Zug (2x, 2y), Lug (3x, y), Bug (3x, 3y), Glug (x, 3y). Who are similar to Mug? What feature do these rules have in common?"}
-              ]
+              }
             },
             {
               "type": "nowWhatDoYouKnow",
@@ -1108,6 +1709,21 @@
                       "format": "html",
                       "text": [
                         "How can you determine if an original figure and its image are similar by looking at the coordinate rule that produced the image? What features (attributes) stay the same for Mug and similar figures? What features change?"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": 
+                    {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "Students should discuss enlarging geometric figures using coordinate grids and rules that produce both similar and non-similar figures. ",
+                        "If the coordinates for the original figure is (x, y), then the coordinates for the similar image is (kx, ky), which means that each x-coordinate and y- coordinate for the similar image is multiplied by the same number k to the original coordinates. ",
+                        "Also, students should expand understanding which attributes change and which stay the same: ",
+                        "* corresponding angles of two similar figures are the same measure while angles of non-similar figures may not be.",
+                        "* corresponding side lengths from the original shape to the similar figure increase by the multiplier used to create a new rule. "
                       ]
                     }
                   }
@@ -2885,7 +3501,8 @@
               "supports" : []
             }
           ]
-        }, {
+        }, 
+        {
           "description": "Problem 4.2",
           "ordinal": 2,
           "title": "SAS 4.2 Finding Missing Parts",
@@ -3018,7 +3635,8 @@
             { "text": "How could you use scale factors?"},
             { "text": "How could you use ratio of adjacent side lengths?"}
           ]
-        }, {
+        }, 
+        {
           "description": "Problem 4.3",
           "ordinal": 3,
           "title": "SAS 4.3 Using Shadows to Find Heights",
@@ -3147,8 +3765,6 @@
             }
           ]
         }
-      ],
-      "supports": [
       ]
     },
     {

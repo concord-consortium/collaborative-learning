@@ -76,17 +76,17 @@ describe("Firestore hooks", () => {
     it("should install onSnapshot handler with default converter", () => {
       renderHook(() => useCollectionOrderedRealTimeQuery("foo"));
       expect(mockSetQueryData).toHaveBeenCalledTimes(1);
-      expect(mockSetQueryData.mock.calls[0][0]).toBe("root/foo");
+      expect(mockSetQueryData.mock.calls[0][0]).toBe("foo");
       expect(mockSetQueryData.mock.calls[0][1]).toEqual(mockData);
-      expect(mockUseQuery.mock.calls[0][0]).toBe("root/foo");
+      expect(mockUseQuery.mock.calls[0][0]).toBe("foo");
     });
 
     it("should install onSnapshot handler with default converter and orderBy", () => {
       renderHook(() => useCollectionOrderedRealTimeQuery("bar", { orderBy: "baz" }));
       expect(mockSetQueryData).toHaveBeenCalledTimes(1);
-      expect(mockSetQueryData.mock.calls[0][0]).toBe("root/bar");
+      expect(mockSetQueryData.mock.calls[0][0]).toBe("bar");
       expect(mockSetQueryData.mock.calls[0][1]).toEqual(mockData);
-      expect(mockUseQuery.mock.calls[0][0]).toBe("root/bar");
+      expect(mockUseQuery.mock.calls[0][0]).toBe("bar");
     });
   });
 

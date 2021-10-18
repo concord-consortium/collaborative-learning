@@ -43,16 +43,16 @@ export function useCollectionOrderedRealTimeQuery<T>(
       const unsubscribe = query.onSnapshot(querySnapshot => {
                             // add the id to the returned data
                             const docs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                            queryClient.setQueryData(fsPath, docs);
+                            queryClient.setQueryData(partialPath, docs);
                           });
       return () => unsubscribe();
     }
-  }, [converter, db, fsPath, options?.orderBy, orderBy, queryClient]);
+  }, [converter, db, fsPath, options?.orderBy, orderBy, partialPath, queryClient]);
 
   // set staleTime to Infinity; we never need to re-run this query, since the listener handles updates
   const useQueryOptions: UseQueryOptions<WithId<T>[]> = { ..._useQueryOptions, staleTime: Infinity };
   // the actual query function here doesn't do anything; everything comes through the snapshot handler
-  return useQuery<WithId<T>[]>(fsPath || "__EMPTY__", () => new Promise(() => {/* nop */}), useQueryOptions);
+  return useQuery<WithId<T>[]>(partialPath || "__EMPTY__", () => new Promise(() => {/* nop */}), useQueryOptions);
 }
 
 export const useDeleteDocument = () => {

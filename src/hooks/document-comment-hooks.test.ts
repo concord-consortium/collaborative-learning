@@ -1,5 +1,4 @@
 import { renderHook } from "@testing-library/react-hooks";
-import { IDocumentMetadata } from "../../functions/src/shared";
 import { CommentDocument } from "../lib/firestore-schema";
 import {
   DocumentQueryType, useDocumentComments, usePostDocumentComment, useUnreadDocumentComments
@@ -28,19 +27,34 @@ jest.mock("firebase/app", () => ({
   })
 }));
 
-var mockUseMutation = jest.fn((callback: () => void) => {
-  return { mutate: () => callback() };
+// mock QueryClient methods
+var mockGetQueryData = jest.fn();
+var mockSetQueryData = jest.fn();
+// tests may override implementation to simulate mutation succeeding (default) or failing
+var mockMutateSuccessOrError = jest.fn();
+var mockUseMutation = jest.fn((mutateFn: (params: any) => void, options: any) => {
+  return {
+    mutate: async (params: any) => {
+      mutateFn(params);
+      const mutationContext = await options?.onMutate?.(params);
+      mockMutateSuccessOrError(params, options, mutationContext);
+    }
+  };
 });
 var mockCurriculumDocument = { unit: "unit", problem: "1.1", section: "intro", path: "unit/1/1/intro" };
-var mockUseQuery = jest.fn(() => ({
+var mockUseQuery = jest.fn((key: string, fn: () => Promise<DocumentQueryType>, options: any) => ({
   isLoading: false,
   isError: false,
   isSuccess: true,
   data: Promise.resolve(mockCurriculumDocument)
 }));
 jest.mock("react-query", () => ({
-  useMutation: (callback: () => void) => mockUseMutation(callback),
-  useQuery: (key: string, fn: () => Promise<DocumentQueryType>) => mockUseQuery()
+  useMutation: (mutateFn: (params: any) => void, options: any) => mockUseMutation(mutateFn, options),
+  useQuery: (key: string, fn: () => Promise<DocumentQueryType>, options: any) => mockUseQuery(key, fn, options),
+  useQueryClient: () => ({
+    getQueryData: mockGetQueryData,
+    setQueryData: mockSetQueryData
+  })
 }));
 
 var mockUseDocumentOrCurriculumMetadata = jest.fn((docKeyOrSectionPath: string) => {
@@ -84,27 +98,72 @@ jest.mock("./firestore-hooks", () => ({
 
 describe("Document comment hooks", () => {
 
-  beforeEach(() => {
+  function resetMocks() {
     mockValidateCommentableDocument_v1.mockClear();
     mockPostDocumentComment_v1.mockClear();
     mockHttpsCallable.mockClear();
     mockUseMutation.mockClear();
+    mockMutateSuccessOrError.mockReset();
+    // default implementation calls onSuccess
+    mockMutateSuccessOrError.mockImplementation((params: any, options: any, context?: any) => {
+      const mutationResult = {};
+      options?.onSuccess?.(mutationResult, params, context);
+    });
+    mockGetQueryData.mockReset();
+    // default implementation returns empty array
+    mockGetQueryData.mockImplementation(() => []);
+    mockSetQueryData.mockReset();
     mockUseCollectionOrderedRealTimeQuery.mockClear();
-  });
+  }
 
   describe("postDocumentComment", () => {
-    it("should work as expected", () => {
-      const { result } = renderHook(() => usePostDocumentComment());
-      expect(mockUseMutation).toHaveBeenCalled();
-      expect(typeof result.current.mutate).toBe("function");
-      result.current.mutate({ document: { key: "key" } as IDocumentMetadata , comment: { content: "foo" } });
+    beforeEach(() => resetMocks());
+
+    it("should post comment successfully with optimistic update", () => {
+      const document = { contextId: "class-hash", uid: "user-id", type: "problem", key: "key" };
+      // useDocumentComments() fills the commentsQueryKeyMap
+      renderHook(() => useDocumentComments(document.key));
       expect(mockHttpsCallable).toHaveBeenCalled();
-      expect(mockHttpsCallable.mock.calls[0][0]).toBe("postDocumentComment_v1");
+      expect(mockHttpsCallable.mock.calls[0][0]).toBe("validateCommentableDocument_v1");
+      const { result: postCommentResult } = renderHook(() => usePostDocumentComment());
+      expect(mockUseMutation).toHaveBeenCalled();
+      expect(typeof postCommentResult.current.mutate).toBe("function");
+      postCommentResult.current.mutate({ document, comment: { content: "foo" } });
+      expect(mockGetQueryData).toHaveBeenCalled();
+      expect(mockSetQueryData).toHaveBeenCalled();
+      expect(mockSetQueryData.mock.calls[0][1]).toHaveLength(1);
+      expect(mockHttpsCallable).toHaveBeenCalled();
+      expect(mockHttpsCallable.mock.calls[1][0]).toBe("postDocumentComment_v1");
+      expect(mockPostDocumentComment_v1).toHaveBeenCalled();
+    });
+
+    it("should roll back optimistic update on error", async () => {
+      mockMutateSuccessOrError.mockImplementation((params: any, options: any, context?: any) => {
+        // call onError instead of onSuccess
+        const mutationResult = new Error("Failed");
+        options?.onError?.(mutationResult, params, context);
+      });
+      const document = { contextId: "class-hash", uid: "user-id", type: "problem", key: "key" };
+      // useDocumentComments() fills the commentsQueryKeyMap
+      renderHook(() => useDocumentComments(document.key));
+      const { result: postCommentResult } = renderHook(() => usePostDocumentComment());
+      expect(mockUseMutation).toHaveBeenCalled();
+      expect(typeof postCommentResult.current.mutate).toBe("function");
+      await postCommentResult.current.mutate({ document, comment: { content: "foo" } });
+      expect(mockGetQueryData).toHaveBeenCalled();
+      // one optimistic call and one rollback call
+      expect(mockSetQueryData).toHaveBeenCalledTimes(2);
+      // first call is optimistic, contains one comment
+      expect(mockSetQueryData.mock.calls[0][1]).toHaveLength(1);
+      // second call is rollback, contains no comments
+      expect(mockSetQueryData.mock.calls[1][1]).toHaveLength(0);
       expect(mockPostDocumentComment_v1).toHaveBeenCalled();
     });
   });
 
   describe("useDocumentComments", () => {
+    beforeEach(() => resetMocks());
+
     it("should handle empty path string", () => {
       renderHook(() => useDocumentComments(""));
       expect(mockUseCollectionOrderedRealTimeQuery).toHaveBeenCalled();
@@ -119,6 +178,8 @@ describe("Document comment hooks", () => {
   });
 
   describe("useUnreadDocumentComments", () => {
+    beforeEach(() => resetMocks());
+
     it("should handle empty path string", () => {
       renderHook(() => useUnreadDocumentComments(""));
       expect(mockUseCollectionOrderedRealTimeQuery).toHaveBeenCalled();

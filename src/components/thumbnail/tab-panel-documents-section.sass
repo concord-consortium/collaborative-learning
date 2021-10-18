@@ -5,7 +5,7 @@ $list-item-width: 880px
 $list-item-scale: 0.11
 $section-padding: 6px
 
-.tab-panel-documents-section
+.tab-panel-documents-section, .collapsible-documents-section
   display: flex
   flex-direction: column
   padding: $section-padding
@@ -49,6 +49,7 @@ $section-padding: 6px
           transform-origin: 0 0
           height: $list-item-height
           width: $list-item-width
+          pointer-events: none
 
         &.new-document-button
           position: relative

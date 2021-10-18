@@ -13,7 +13,14 @@ import { ITableChange } from "../models/tools/table/table-change";
 import { ENavTab } from "../models/view/nav-tabs";
 import { DEBUG_LOGGER } from "../lib/debug";
 
-const logManagerUrl = "//cc-log-manager.herokuapp.com/api/logs";
+type LoggerEnvironment = "dev" | "production";
+
+const logManagerUrl: Record<LoggerEnvironment, string> = {
+  dev: "//cc-log-manager-dev.herokuapp.com/api/logs",
+  production: "//cc-log-manager.herokuapp.com/api/logs"
+};
+
+const productionPortal = "learn.concord.org";
 
 interface LogMessage {
   application: string;
@@ -56,6 +63,7 @@ export enum LogEventName {
 
   VIEW_SHOW_DOCUMENT,
   VIEW_SHOW_COMPARISON_DOCUMENT,
+  VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT,
   VIEW_ENTER_FOUR_UP,
   VIEW_ENTER_ONE_UP,
   VIEW_SHOW_COMPARISON_PANEL,
@@ -87,6 +95,15 @@ export enum LogEventName {
   CLOSE_STICKY_NOTES,
   OPEN_STICKY_NOTES,
 
+  CHAT_PANEL_ADD_INITIAL_COMMENT_FOR_DOCUMENT,
+  CHAT_PANEL_ADD_INITIAL_COMMENT_FOR_TILE,
+  CHAT_PANEL_ADD_RESPONSE_COMMENT_FOR_DOCUMENT,
+  CHAT_PANEL_ADD_RESPONSE_COMMENT_FOR_TILE,
+  CHAT_PANEL_DELETE_COMMENT_FOR_DOCUMENT,
+  CHAT_PANEL_DELETE_COMMENT_FOR_TILE,
+  CHAT_PANEL_HIDE,
+  CHAT_PANEL_SHOW,
+
   // the following are for potential debugging purposes and are all marked "internal"
   INTERNAL_AUTHENTICATED,
   INTERNAL_ERROR_ENCOUNTERED,
@@ -100,7 +117,10 @@ export enum LogEventName {
   DASHBOARD_DESELECT_STUDENT,
   DASHBOARD_SELECT_STUDENT,
   DASHBOARD_TOGGLE_TO_WORKSPACE,
-  DASHBOARD_TOGGLE_TO_DASHBOARD
+  DASHBOARD_TOGGLE_TO_DASHBOARD,
+
+  TEACHER_NETWORK_EXPAND_DOCUMENT_SECTION,
+  TEACHER_NETWORK_COLLAPSE_DOCUMENT_SECTION,
 }
 
 type LoggableToolChangeEvent = Optional<JXGChange, "operation"> |
@@ -114,6 +134,12 @@ interface IDocumentInfo {
   title?: string;
   properties?: { [prop: string]: string };
   changeCount?: number;
+  remoteContext?: string;
+}
+
+interface ITeacherNetworkInfo {
+  networkClassHash?: string;
+  networkUsername?: string;
 }
 
 export class Logger {
@@ -144,13 +170,18 @@ export class Logger {
     sendToLoggingService(logMessage, this._instance.stores.user);
   }
 
-  public static logTileEvent(event: LogEventName, tile?: ToolTileModelType, metaData?: TileLoggingMetadata) {
+  public static logTileEvent(event: LogEventName, tile?: ToolTileModelType, metaData?: TileLoggingMetadata,
+    commentText?: string) {
     if (!this._instance) return;
 
     let parameters = {};
 
     if (tile) {
       const document = Logger.Instance.getDocumentForTile(tile.id);
+      const teacherNetworkInfo: ITeacherNetworkInfo | undefined = document.remoteContext
+      ? { networkClassHash: document.remoteContext,
+          networkUsername: `${document.uid}@${this._instance.stores.user.portal}`}
+      : undefined;
 
       parameters = {
         objectId: tile.id,
@@ -159,7 +190,9 @@ export class Logger {
         documentUid: document.uid,
         documentKey: document.key,
         documentType: document.type,
-        documentChanges: document.changeCount
+        documentChanges: document.changeCount,
+        commentText,
+        ...teacherNetworkInfo
       };
 
       if (event === LogEventName.COPY_TILE && metaData && metaData.originalTileId) {
@@ -179,7 +212,12 @@ export class Logger {
     Logger.log(event, parameters);
   }
 
-  public static logDocumentEvent(event: LogEventName, document: DocumentModelType) {
+  public static logDocumentEvent(event: LogEventName, document: DocumentModelType, commentText?: string) {
+    const teacherNetworkInfo: ITeacherNetworkInfo | undefined = document.isRemote
+        ? { networkClassHash: document.remoteContext,
+            networkUsername: `${document.uid}@${this._instance.stores.user.portal}`}
+        : undefined;
+
     const parameters = {
       documentUid: document.uid,
       documentKey: document.key,
@@ -187,9 +225,12 @@ export class Logger {
       documentTitle: document.title || "",
       documentProperties: document.properties?.toJSON() || {},
       documentVisibility: document.visibility,
-      documentChanges: document.changeCount
+      documentChanges: document.changeCount,
+      commentText,
+      ...teacherNetworkInfo
     };
     Logger.log(event, parameters);
+
   }
 
   public static logToolChange(
@@ -243,7 +284,7 @@ export class Logger {
 
     const logMessage: LogMessage = {
       application: appConfig.appName,
-      username:  `${user.id}@${user.portal}`,
+      username: `${user.id}@${user.portal}`,
       role: user.type || "unknown",
       classHash: user.classHash,
       session: this.session,
@@ -278,10 +319,11 @@ export class Logger {
   }
 
   private getDocumentForTile(tileId: string): IDocumentInfo {
-    const document = this.stores.documents.findDocumentOfTile(tileId);
+    const document = this.stores.documents.findDocumentOfTile(tileId)
+      || this.stores.networkDocuments.findDocumentOfTile(tileId);
     if (document) {
-      const { type, key, uid, title, changeCount, properties } = document;
-      return { type, key, uid, title, changeCount, properties: properties?.toJSON() || {} };
+      const { type, key, uid, title, changeCount, remoteContext, properties } = document;
+      return { type, key, uid, title, changeCount, remoteContext, properties: properties?.toJSON() || {} };
     } else {
       return {
         type: "Instructions"        // eventually we will need to include copying from supports
@@ -303,7 +345,8 @@ function sendToLoggingService(data: LogMessage, user: UserModelType) {
   request.upload.addEventListener("error", () => user.setIsLoggingConnected(false));
   request.upload.addEventListener("abort", () => user.setIsLoggingConnected(false));
 
-  request.open("POST", logManagerUrl, true);
+  const url = logManagerUrl[user.portal === productionPortal ? "production" : "dev"];
+  request.open("POST", url, true);
   request.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
   request.send(JSON.stringify(data));
 }

@@ -97,16 +97,17 @@ export function networkDocumentKey(uid: string, documentKey: string, network?: s
 }
 
 export interface IDocumentMetadata {
+  contextId: string;
   uid: string;
   type: string;
   key: string;
-  createdAt: number;
+  createdAt?: number;
   title?: string;
   originDoc?: string;
   properties?: Record<string, string>;
 }
 export function isDocumentMetadata(o: any): o is IDocumentMetadata {
-  return !!o?.uid && !!o.type && !!o.key && !!o.createdAt;
+  return !!o?.contextId && !!o.uid && !!o.type && !!o.key;
 }
 
 export interface ICurriculumMetadata {
@@ -148,24 +149,25 @@ export type IPostDocumentCommentUnionParams = IPostDocumentCommentParams | IFire
 
 export interface INetworkResourceTeacherClassResponse {
   uid: string;
-  personalDocuments?: any[];
-  learningLogs?: any[];
+  personalDocuments?: Record<string, any>;
+  learningLogs?: Record<string, any>;
 }
 export interface INetworkResourceTeacherOfferingResponse {
   uid: string;
-  problemDocuments?: any[];
-  planningDocuments?: any[];
+  problemDocuments?: Record<string, any>;
+  planningDocuments?: Record<string, any>;
 }
 export interface INetworkResourceOfferingResponse {
   resource_link_id: string;
-  problemPublications?: any[];
-  personalPublications?: any[];
+  problemPublications?: Record<string, any>;
   teachers?: INetworkResourceTeacherOfferingResponse[];
 }
 export interface INetworkResourceClassResponse {
   id?: string;          // portal class id
   name?: string;        // portal class name
   context_id: string;   // portal class hash
+  personalPublications?: Record<string, any>;
+  learningLogPublications?: Record<string, any>;
   teacher?: string;     // name of primary(?) teacher
   teachers?: INetworkResourceTeacherClassResponse[];
   resources: INetworkResourceOfferingResponse[];
@@ -177,4 +179,17 @@ export interface IGetNetworkResourcesResponse {
   version: string;
   response: INetworkResourceClassResponse[];
 }
-export type IGetNetworkResourceListUnionParams = IGetNetworkResourcesParams | IFirebaseFunctionWarmUpParams;
+export type IGetNetworkResourcesUnionParams = IGetNetworkResourcesParams | IFirebaseFunctionWarmUpParams;
+
+export interface IGetNetworkDocumentParams extends IFirebaseFunctionBaseParams {
+  context_id: string;
+  uid: string;
+  key: string;
+}
+export type IGetNetworkDocumentUnionParams = IGetNetworkDocumentParams | IFirebaseFunctionWarmUpParams;
+
+export interface IGetNetworkDocumentResponse {
+  version: string;
+  content: any;     // DBDocument
+  metadata: any;    // DBDocumentMetadata
+}

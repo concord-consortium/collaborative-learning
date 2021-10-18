@@ -233,7 +233,7 @@ describe("authed logger", () => {
         return res.status(201);
       });
 
-      document.content.userAddTile("text");
+      document.content?.userAddTile("text");
     });
 
     it("can log copying tiles between documents", (done) => {
@@ -282,7 +282,7 @@ describe("authed logger", () => {
         return res.status(201);
       });
 
-      const tileToCopy = sourceDocument.content.firstTile!;
+      const tileToCopy = sourceDocument.content!.firstTile!;
 
       const copyTileInfo: IDragTileItem = {
         rowIndex: 0,
@@ -292,7 +292,7 @@ describe("authed logger", () => {
         tileType: tileToCopy.content.type
       };
 
-      destinationDocument.content.userCopyTiles([copyTileInfo], { rowInsertIndex: 0 });
+      destinationDocument.content!.userCopyTiles([copyTileInfo], { rowInsertIndex: 0 });
     });
 
   });

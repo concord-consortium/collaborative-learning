@@ -3,6 +3,7 @@ import { observer } from "mobx-react";
 import { CanvasComponent } from "../document/canvas";
 import { DocumentModelType } from "../../models/document/document";
 import { DocumentCaption } from "./document-caption";
+import { ThumbnailPlaceHolderIcon } from "./thumbnail-placeholder-icon";
 
 interface IProps {
   dataTestName: string;
@@ -41,23 +42,21 @@ export const ThumbnailDocumentItem = observer((props: IProps) => {
   };
 
   return (
-    <div
-      className={`list-item ${selectedClass}`}
-      data-test={dataTestName}
-      key={document.key}
-      onClick={handleDocumentClick} >
-      <div
-        className="scaled-list-item-container"
-        onDragStart={handleDocumentDragStart}
-        draggable={!!onDocumentDragStart} >
-        <div className="scaled-list-item">
-          <CanvasComponent
-            context={canvasContext}
-            document={document}
-            readOnly={true}
-            scale={scale}
-          />
-        </div>
+    <div className={`list-item ${selectedClass}`} data-test={dataTestName} key={document.key}
+      onClick={handleDocumentClick}>
+      <div className="scaled-list-item-container" onDragStart={handleDocumentDragStart}
+        draggable={!!onDocumentDragStart}>
+        { document.content
+          ? <div className="scaled-list-item">
+              <CanvasComponent
+                context={canvasContext}
+                document={document}
+                readOnly={true}
+                scale={scale}
+              />
+            </div>
+          : <ThumbnailPlaceHolderIcon />
+        }
       </div>
       { onDocumentStarClick &&
           <DocumentStar isStarred={onIsStarred()} onStarClick={handleDocumentStarClick} />

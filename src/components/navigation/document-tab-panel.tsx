@@ -140,8 +140,18 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
     this.stores.ui.updateFocusDocument();
   }
 
+  private handleDocumentSelect = (document: DocumentModelType) => {
+    const { onSelectDocument } = this.props;
+    const logEvent = document.isRemote
+      ? LogEventName.VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT
+      : LogEventName.VIEW_SHOW_COMPARISON_DOCUMENT;
+    Logger.logDocumentEvent(logEvent, document);
+
+    onSelectDocument?.(document);
+  }
+
   private renderSubSections(subTab: any) {
-    const { selectedDocument, onSelectNewDocument, onSelectDocument } = this.props;
+    const { selectedDocument, onSelectNewDocument } = this.props;
     const { user } = this.stores;
     const classHash = this.stores.class.classHash;
     return (
@@ -164,7 +174,7 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
                 scale={kNavItemScale}
                 selectedDocument={selectedDocument}
                 onSelectNewDocument={onSelectNewDocument}
-                onSelectDocument={onSelectDocument}
+                onSelectDocument={this.handleDocumentSelect}
                 onDocumentDragStart={this.handleDocumentDragStart}
                 onDocumentStarClick={_handleDocumentStarClick}
                 onDocumentDeleteClick={_handleDocumentDeleteClick}
@@ -172,11 +182,17 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
             );
           })
         }
-        <NetworkDocumentsSection
-          currentClassHash={classHash}
-          currentTeacherName={user.name}
-          currentTeacherId={user.id}
-        />
+        {user.isNetworkedTeacher &&
+          <NetworkDocumentsSection
+            currentClassHash={classHash}
+            currentTeacherName={user.name}
+            currentTeacherId={user.id}
+            subTab={subTab}
+            problemTitle={this.stores.problem.title}
+            stores={this.stores}
+            scale={kNavItemScale}
+            onSelectDocument={this.handleDocumentSelect}
+          />}
       </div>
     );
   }

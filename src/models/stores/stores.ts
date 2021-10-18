@@ -30,6 +30,7 @@ export interface IBaseStores {
   groups: GroupsModelType;
   class: ClassModelType;
   documents: DocumentsModelType;
+  networkDocuments: DocumentsModelType;
   db: DB;
   demo: DemoModelType;
   showDemoCreator: boolean;
@@ -73,6 +74,7 @@ export function createStores(params?: ICreateStores): IStores {
     class: params?.class || ClassModel.create({ name: "Null Class", classHash: "" }),
     db: params?.db || new DB(),
     documents: params?.documents || DocumentsModel.create({}),
+    networkDocuments: params?.networkDocuments || DocumentsModel.create({}),
     unit: params?.unit || UnitModel.create({code: "NULL", title: "Null Unit"}),
     demo: params?.demo || DemoModel.create({name: demoName, class: {id: "0", name: "Null Class"}}),
     showDemoCreator: params?.showDemoCreator || false,

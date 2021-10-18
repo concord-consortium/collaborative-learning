@@ -10,7 +10,8 @@ import firebase from "firebase/app";
  * support the warm-up protocol ({ warmUp: true }).
  */
 const cachedFunctions = new Map<string, firebase.functions.HttpsCallable>();
-export function useFirebaseFunction<T>(name: string) {
+
+export function getFirebaseFunction<T>(name: string) {
   let callableFunction = cachedFunctions.get(name);
   if (!callableFunction) {
     callableFunction = firebase.functions().httpsCallable(name);
@@ -19,4 +20,8 @@ export function useFirebaseFunction<T>(name: string) {
     callableFunction({ warmUp: true });
   }
   return callableFunction as (params: T) => Promise<firebase.functions.HttpsCallableResult>;
+}
+
+export function useFirebaseFunction<T>(name: string) {
+  return getFirebaseFunction<T>(name);
 }

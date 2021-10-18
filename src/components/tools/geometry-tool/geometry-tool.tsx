@@ -73,11 +73,4 @@ const GeometryToolComponent: React.FC<IGeometryProps> = ({
     </div>
   );
 };
-(GeometryToolComponent as any).getDragImageNode = (dragTargetNode: HTMLElement) => {
-  // dragTargetNode is the tool-tile div
-  const geometryElts = dragTargetNode.getElementsByClassName("geometry-content");
-  const geometryElt = geometryElts?.[0];
-  // geometryElt's firstChild is the actual SVG, which works as a drag image
-  return geometryElt?.firstChild;
-};
 export default GeometryToolComponent;

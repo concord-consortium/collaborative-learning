@@ -65,7 +65,7 @@ export const TabPanelDocumentsSubSectionPanel = ({section, sectionDocument, tab,
                 : sectionDocument.isStarred
               : false;
     };
-    const _handleDocumentStarClick = section.showStarsForUser(user)
+    const _handleDocumentStarClick = section.showStarsForUser(user) && !sectionDocument.isRemote
                                       ? handleDocumentStarClick
                                       : undefined;
     const _handleDocumentDeleteClick = section.showDeleteForUser(user)
@@ -81,7 +81,8 @@ export const TabPanelDocumentsSubSectionPanel = ({section, sectionDocument, tab,
         scale={scale}
         isSelected={sectionDocument.key === selectedDocument}
         captionText={getDocumentCaption(stores, sectionDocument)}
-        onDocumentClick={handleDocumentClick} onDocumentDragStart={handleDocumentDragStart}
+        onDocumentClick={handleDocumentClick}
+        onDocumentDragStart={!sectionDocument.isRemote ? handleDocumentDragStart: undefined}
         onIsStarred={onIsStarred}
         onDocumentStarClick={_handleDocumentStarClick}
         onDocumentDeleteClick={_handleDocumentDeleteClick}

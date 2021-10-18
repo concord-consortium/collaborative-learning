@@ -1,5 +1,6 @@
 import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import { forEach } from "lodash";
+import { QueryClient, UseQueryResult } from "react-query";
 import { DocumentContentModel, DocumentContentModelType } from "./document-content";
 import {
   DocumentType, DocumentTypeEnum, IDocumentContext, ISetProperties, LearningLogDocument, LearningLogPublication,
@@ -9,8 +10,11 @@ import {
 import { AppConfigModelType } from "../stores/app-config-model";
 import { TileCommentsModel, TileCommentsModelType } from "../tools/tile-comments";
 import { UserStarModel, UserStarModelType } from "../tools/user-star";
+import { IGetNetworkDocumentParams, IGetNetworkDocumentResponse, IUserContext } from "../../../functions/src/shared";
+import { getFirebaseFunction } from "../../hooks/use-firebase-function";
 import { IDocumentProperties } from "../../lib/db-types";
 import { getLocalTimeStamp } from "../../utilities/time";
+import { safeJsonParse } from "../../utilities/js-utils";
 
 export interface IDocumentAddTileOptions {
   title?: string;
@@ -27,10 +31,11 @@ export const DocumentModel = types
     uid: types.string,
     type: DocumentTypeEnum,
     key: types.string,
-    createdAt: types.number,
+    remoteContext: "",  // e.g. remote class hash
+    createdAt: 0,       // remote documents fill this in when content is loaded
     title: types.maybe(types.string),
     properties: types.map(types.string),
-    content: DocumentContentModel,
+    content: types.maybe(DocumentContentModel),
     comments: types.map(TileCommentsModel),
     stars: types.array(UserStarModel),
     groupId: types.maybe(types.string),
@@ -39,6 +44,9 @@ export const DocumentModel = types
     originDoc: types.maybe(types.string),
     changeCount: types.optional(types.number, 0)
   })
+  .volatile(self => ({
+    queryPromise: undefined as Promise<UseQueryResult<IGetNetworkDocumentResponse>> | undefined
+  }))
   .views(self => ({
     get isProblem() {
       return (self.type === ProblemDocument) || (self.type === ProblemPublication);
@@ -60,6 +68,17 @@ export const DocumentModel = types
               || (self.type === LearningLogPublication)
               || (self.type === PersonalPublication)
               || (self.type === SupportPublication);
+    },
+    get isRemote() {
+      return !!self.remoteContext;
+    },
+    get remoteSpec() {
+      return self.remoteContext
+              ? [self.remoteContext, self.uid, self.key]
+              : undefined;
+    },
+    get hasContent() {
+      return !!self.content;
     },
     getMetadata() {
       const { uid, type, key, createdAt, title, originDoc, properties } = self;
@@ -124,7 +143,7 @@ export const DocumentModel = types
       return self.getProperty(docDisplayIdPropertyName);
     },
     getUniqueTitle(tileType: string, titleBase: string, getTileTitle: (tileId: string) => string | undefined) {
-      return self.content.getUniqueTitle(tileType, titleBase, getTileTitle);
+      return self.content?.getUniqueTitle(tileType, titleBase, getTileTitle);
     }
   }))
   .views(self => ({
@@ -133,6 +152,10 @@ export const DocumentModel = types
     }
   }))
   .actions((self) => ({
+    setCreatedAt(createdAt: number) {
+      self.createdAt = createdAt;
+    },
+
     setTitle(title: string) {
       self.title = title;
     },
@@ -161,11 +184,11 @@ export const DocumentModel = types
     },
 
     addTile(tool: DocumentTool, options?: IDocumentAddTileOptions) {
-      return self.content.userAddTile(tool, options);
+      return self.content?.userAddTile(tool, options);
     },
 
     deleteTile(tileId: string) {
-      self.content.userDeleteTile(tileId);
+      self.content?.userDeleteTile(tileId);
     },
 
     setTileComments(tileId: string, comments: TileCommentsModelType) {
@@ -200,6 +223,35 @@ export const DocumentModel = types
     }
   }))
   .actions(self => ({
+    fetchRemoteContent(queryClient: QueryClient, context: IUserContext) {
+      const { remoteContext: context_id, uid, key } = self;
+      const queryKey = ["network-documents", context_id, uid, key];
+      if (context_id && uid && key) {
+        if (!self.queryPromise) {
+          const getNetworkDocument = getFirebaseFunction<IGetNetworkDocumentParams>("getNetworkDocument_v1");
+          self.queryPromise = queryClient.fetchQuery(queryKey, async () => {
+            const networkDocument = await getNetworkDocument({ context, context_id, uid, key });
+            const { content, metadata } = networkDocument.data as IGetNetworkDocumentResponse;
+            const _content = safeJsonParse(content.content);
+            _content && self.setContent(DocumentContentModel.create(_content));
+            self.setCreatedAt(metadata.createdAt);
+            return { content, metadata };
+          });
+        }
+        else {
+          // re-run the query when client calls this function again
+          queryClient.invalidateQueries(queryKey, { exact: true });
+        }
+      }
+      return self.queryPromise;
+    },
+
+    isLoadingContent(queryClient: QueryClient) {
+      const { remoteContext: context_id, uid, key } = self;
+      const queryKey = ["network-documents", context_id, uid, key];
+      return queryClient.getQueryState(queryKey)?.status === "loading";
+    },
+
     setProperties(properties: ISetProperties) {
       forEach(properties, (value, key) => self.setProperty(key, value));
     }

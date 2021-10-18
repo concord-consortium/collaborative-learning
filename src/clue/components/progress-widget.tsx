@@ -54,7 +54,7 @@ export class ProgressWidget extends BaseComponent<IProps, IState> {
     const countsPerUser: {[key: string]: ITileCountsPerSection} = {};
     groups.allGroups.forEach(group => {
       documents.getProblemDocumentsForGroup(group.id).forEach(document => {
-        countsPerUser[document.uid] = document.content.getTileCountsPerSection(sectionIds);
+        countsPerUser[document.uid] = document.content?.getTileCountsPerSection(sectionIds) || {};
       });
     });
 
