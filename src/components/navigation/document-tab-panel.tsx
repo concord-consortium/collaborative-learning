@@ -183,7 +183,7 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
             );
           })
         }
-        {(user.isNetworkedTeacher && showNetworkDocuments) &&
+        { showNetworkDocuments &&
           <NetworkDocumentsSection
             currentClassHash={classHash}
             currentTeacherName={user.name}

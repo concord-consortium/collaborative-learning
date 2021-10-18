@@ -7,7 +7,7 @@ import { ProblemModelType } from "../../models/curriculum/problem";
 import { ENavTabSectionType, NavTabSpec } from "../../models/view/nav-tabs";
 import { DocumentTabPanel } from "./document-tab-panel";
 import { EditableDocumentContent } from "../document/editable-document-content";
-import { useAppConfigStore, useProblemStore, useUIStore } from "../../hooks/use-stores";
+import { useAppConfigStore, useProblemStore, useUIStore, useUserStore } from "../../hooks/use-stores";
 import { Logger, LogEventName } from "../../lib/logger";
 import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
 import { useUserContext } from "../../hooks/use-user-context";
@@ -25,6 +25,7 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
   const context = useUserContext();
   const queryClient = useQueryClient();
   const ui = useUIStore();
+  const user = useUserStore();
 
   const handleTabClick = (title: string, type: string) => {
     setReferenceDocument(undefined);
@@ -97,7 +98,7 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
         onTabClick={handleTabClick}
         onSelectDocument={handleSelectDocument}
         documentView={documentView}
-        showNetworkDocuments={true}
+        showNetworkDocuments={user.isNetworkedTeacher}
       />
     </div>
   );
