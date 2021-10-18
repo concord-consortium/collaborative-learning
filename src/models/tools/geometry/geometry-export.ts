@@ -221,8 +221,16 @@ export const exportGeometryJson = (changes: string[], options?: ITileExportOptio
     const { position, ...others } = props;
     if (others.id !== id) others.id = id;
     const changeParents = getParentsFromInitialChange(id, _changes[0]);
-    const xParent = position?.[0] ?? changeParents?.[0];
-    const yParent = position?.[1] ?? changeParents?.[1];
+    let xPos, yPos: number;
+    // some operations used normalized coordinates, which take the form [1, x, y]
+    if (Array.isArray(position) && (position.length === 3)) {
+      [, xPos, yPos] = position;
+    }
+    else {
+      [xPos, yPos] = position || [];
+    }
+    const xParent = xPos ?? changeParents?.[0];
+    const yParent = yPos ?? changeParents?.[1];
     const parents = [xParent, yParent] as JXGCoordPair;
     return { parents, others };
   };
