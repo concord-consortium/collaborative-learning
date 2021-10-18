@@ -7,7 +7,7 @@ import {
   useCommentsCollectionPath, useDocumentComments, usePostDocumentComment, useUnreadDocumentComments
 } from "../../hooks/document-comment-hooks";
 import { useDeleteDocument } from "../../hooks/firestore-hooks";
-import { useDocumentOrCurriculumMetadata, useUIStore, useDocumentFromStore } from "../../hooks/use-stores";
+import { useDocumentOrCurriculumMetadata, useDocumentFromStore } from "../../hooks/use-stores";
 import { useCurrent } from "../../hooks/use-current";
 import "./chat-panel.scss";
 
@@ -28,10 +28,10 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   const tileComments = comments?.filter(comment => comment.tileId === focusTileId);
   const postedComments = focusTileId ? tileComments : documentComments;
   const postCommentMutation = usePostDocumentComment();
-  const ui = useUIStore();
   const focusStoreDocument = useDocumentFromStore(focusDocument);
 
   const focusDocumentRef = useCurrent(focusDocument);
+  const focusStoreDocumentRef = useCurrent(focusStoreDocument);
   const focusTileIdRef = useCurrent(focusTileId);
 
   const postComment = useCallback((comment: string) => {
@@ -58,30 +58,29 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
     return document
       ? postCommentMutation.mutate({ document, comment: { content: comment, tileId: focusTileId } })
       : undefined;
-  }, [document, focusTileId, postCommentMutation, postedComments, focusDocument, focusStoreDocument,
-    ui.selectedTileIds.length]);
+  }, [document, focusDocument, focusStoreDocument, focusTileId, postCommentMutation, postedComments]);
 
-  const commentsPath = useCommentsCollectionPath(focusDocument || "");
+  const commentsPathRef = useCurrent(useCommentsCollectionPath(focusDocument || ""));
   const deleteCommentMutation = useDeleteDocument();
   const deleteComment = useCallback((commentId: string, commentText: string) => {
+    const storeDocument = focusStoreDocumentRef.current;
     if (focusDocumentRef.current) {
       if (!focusTileIdRef.current) {
-        if (focusStoreDocument) {
-          Logger.logDocumentEvent(LogEventName.CHAT_PANEL_DELETE_COMMENT_FOR_DOCUMENT, focusStoreDocument, commentText);
+        if (storeDocument) {
+          Logger.logDocumentEvent(LogEventName.CHAT_PANEL_DELETE_COMMENT_FOR_DOCUMENT, storeDocument, commentText);
         }
       } else {
-        const commentTile = focusStoreDocument?.content?.getTile(focusTileIdRef.current);
+        const commentTile = storeDocument?.content?.getTile(focusTileIdRef.current);
         if (commentTile) {
           Logger.logTileEvent(LogEventName.CHAT_PANEL_DELETE_COMMENT_FOR_TILE, commentTile, undefined, commentText);
         }
       }
     }
 
-    return document
-      ? deleteCommentMutation.mutate(`${commentsPath}/${commentId}`)
+    return commentsPathRef.current
+      ? deleteCommentMutation.mutate(`${commentsPathRef.current}/${commentId}`)
       : undefined;
-  }, [document, deleteCommentMutation, commentsPath, focusStoreDocument, ui.selectedTileIds.length, focusDocumentRef,
-    focusTileIdRef]);
+  }, [commentsPathRef, deleteCommentMutation, focusDocumentRef, focusStoreDocumentRef, focusTileIdRef]);
 
   const newCommentCount = unreadComments?.length || 0;
 
