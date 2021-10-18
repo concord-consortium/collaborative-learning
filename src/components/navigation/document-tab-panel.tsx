@@ -21,6 +21,7 @@ interface IProps extends IBaseProps {
   onTabClick?: (title: string, type: string) => void;
   documentView?: React.ReactNode;
   isChatOpen?: boolean;
+  showNetworkDocuments?: boolean;
 }
 
 interface IState {
@@ -151,7 +152,7 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
   }
 
   private renderSubSections(subTab: any) {
-    const { selectedDocument, onSelectNewDocument } = this.props;
+    const { selectedDocument, onSelectNewDocument, showNetworkDocuments } = this.props;
     const { user } = this.stores;
     const classHash = this.stores.class.classHash;
     return (
@@ -182,7 +183,7 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
             );
           })
         }
-        {user.isNetworkedTeacher &&
+        {(user.isNetworkedTeacher && showNetworkDocuments) &&
           <NetworkDocumentsSection
             currentClassHash={classHash}
             currentTeacherName={user.name}

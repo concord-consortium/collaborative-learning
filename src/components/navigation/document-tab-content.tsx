@@ -97,6 +97,7 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
         onTabClick={handleTabClick}
         onSelectDocument={handleSelectDocument}
         documentView={documentView}
+        showNetworkDocuments={true}
       />
     </div>
   );
