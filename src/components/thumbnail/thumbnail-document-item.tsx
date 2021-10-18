@@ -4,6 +4,7 @@ import { CanvasComponent } from "../document/canvas";
 import { DocumentModelType } from "../../models/document/document";
 import { DocumentCaption } from "./document-caption";
 import { ThumbnailPlaceHolderIcon } from "./thumbnail-placeholder-icon";
+import { ThumbnailPrivateIcon } from "./thumbnail-private-icon";
 
 interface IProps {
   dataTestName: string;
@@ -40,22 +41,27 @@ export const ThumbnailDocumentItem = observer((props: IProps) => {
     onDocumentDeleteClick?.(document);
     e.stopPropagation();
   };
+  // TODO: add proper state of isPrivate based on document properties
+  const isPrivate = false; // document.visibility === "private" && document.isRemote;
+  const privateClass = isPrivate ? "private" : "";
 
   return (
-    <div className={`list-item ${selectedClass}`} data-test={dataTestName} key={document.key}
-      onClick={handleDocumentClick}>
+    <div className={`list-item ${selectedClass} ${privateClass}`} data-test={dataTestName} key={document.key}
+      onClick={isPrivate ? undefined : handleDocumentClick}>
       <div className="scaled-list-item-container" onDragStart={handleDocumentDragStart}
-        draggable={!!onDocumentDragStart}>
-        { document.content
-          ? <div className="scaled-list-item">
-              <CanvasComponent
-                context={canvasContext}
-                document={document}
-                readOnly={true}
-                scale={scale}
-              />
-            </div>
-          : <ThumbnailPlaceHolderIcon />
+        draggable={!!onDocumentDragStart && !isPrivate}>
+        { isPrivate
+          ? <ThumbnailPrivateIcon />
+          : document.content
+            ? <div className="scaled-list-item">
+                <CanvasComponent
+                  context={canvasContext}
+                  document={document}
+                  readOnly={true}
+                  scale={scale}
+                />
+              </div>
+            : <ThumbnailPlaceHolderIcon />
         }
       </div>
       { onDocumentStarClick &&

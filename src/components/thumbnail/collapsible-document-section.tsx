@@ -10,8 +10,6 @@ import { useNetworkDocuments } from "../../hooks/use-stores";
 import { TabPanelDocumentsSubSectionPanel } from "./tab-panel-documents-subsection-panel";
 import { NavTabSectionModelType } from "../../models/view/nav-tabs";
 import { Logger, LogEventName } from "../../lib/logger";
-// import NotSharedIcon from "../../assets/icons/share/not-share.svg";
-// import { DocumentCaption } from "./document-caption";
 
 import "./tab-panel-documents-section.sass";
 import "./collapsible-document-section.scss";
@@ -108,44 +106,8 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
             })
             : <div style={{padding: "5px 10px"}}>No Documents Found</div>
           }
-          {/* {sectionDocs.map(document => {
-            const documentContext = getDocumentContext(document);
-            const docNotShared = document.visibility === "private";
-            const docLabel = document?.title || "Untitled";
-            return (
-              <DocumentContextReact.Provider key={document.key} value={documentContext}>
-                { docNotShared
-                  ? <DocumentNoSharedThumbnail label={docLabel} notShared={docNotShared} />
-                  : <TabPanelDocumentsSubSectionPanel section={section} sectionDocument={document} tab={tab}
-                      stores={stores} scale={scale} selectedDocument={selectedDocument}
-                      onSelectDocument={onSelectDocument}
-                    />
-                }
-              </DocumentContextReact.Provider>
-            );
-          })} */}
         </div>
       }
     </div>
   );
 });
-
-// interface IDocumentNotSharedProps {
-//   label: string;
-//   notShared?: boolean;
-// }
-// const DocumentNoSharedThumbnail: React.FC<IDocumentNotSharedProps> = ({ label, notShared }) => {
-//   return (
-//     <div className="list-item not-shared" data-test="my-work-new-document" >
-//       { notShared
-//           ? <div className="not-shared">
-//               <NotSharedIcon className="not-shared-icon" />
-//             </div>
-//           : <div className="scaled-list-item-container new-document-button" >
-//               <div className="scaled-list-item"></div>
-//             </div>
-//       }
-//       <DocumentCaption captionText={label} />
-//     </div>
-//   );
-// };
