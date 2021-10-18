@@ -27,7 +27,7 @@ context("Teacher Space", () => {
     before(() => {
         cy.login("https://learn.concord.org", clueTeacher);
         // insert offering number for your activity below
-        cy.visit('https://learn.concord.org/portal/offerings/40557/external_report/25');
+        cy.launchReport('https://learn.concord.org/portal/offerings/40557/external_report/25');
         cy.waitForSpinner();
 
         dashboard.switchWorkView('Published');
