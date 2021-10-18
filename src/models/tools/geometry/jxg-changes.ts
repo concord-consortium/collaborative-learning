@@ -7,7 +7,9 @@ export type JXGObjectType = "board" | "comment" | "image" | "linkedPoint" | "met
                               "object" | "point" | "polygon" | "tableLink" | "vertexAngle";
 
 export type JXGCoordPair = [number, number];
+export type JXGNormalizedCoordPair = [1, number, number];
 export type JXGUnsafeCoordPair = [number?, number?];
+export type JXGPositionProperty = JXGUnsafeCoordPair | JXGNormalizedCoordPair;
 export type JXGStringPair = [string?, string?];
 
 export type JXGImageParents = [string, JXGCoordPair, JXGCoordPair];
@@ -35,9 +37,9 @@ export interface IBoardScale {
 
 export interface JXGProperties {
   id?: string;
-  ids?: string[]; // ids of linked points in tabeLink change
+  ids?: string[]; // ids of linked points in tableLink change
   labelOption?: ESegmentLabelOption;
-  position?: JXGUnsafeCoordPair;
+  position?: JXGPositionProperty;
   title?: string; // metadata property
   url?: string;
   xMin?: number;

@@ -237,6 +237,29 @@ describe("Geometry Export", () => {
     expect(received).toEqual(expected);
   });
 
+  it("should export updated points using normalized coordinates", () => {
+    const changes: JXGChange[] = [
+      {
+        operation: "create",
+        target: "board",
+        properties: { axis: true, boundingBox: [-2, 15, 22, -1], unitX: 20, unitY: 20 }
+      },
+      { operation: "create", target: "point", parents: [0, 0], properties: { id: "p1" } },
+      { operation: "create", target: "point", parents: [5, 5], properties: { id: "p2" } },
+      { operation: "update", target: "point", targetID: "p2", properties: { position: [1, 2, 2] } }
+    ];
+    expect(exportGeometry(changes)).toEqual({
+      type: "Geometry",
+      board: { properties: { axisMin: [-2, -1], axisRange: [24, 16] } },
+      objects: [
+        { type: "point", parents: [0, 0], properties: { id: "p1" } },
+        { type: "point", parents: [2, 2], properties: { id: "p2" } }
+      ]
+    });
+    const [received, expected] = testRoundTrip(changes);
+    expect(received).toEqual(expected);
+  });
+
   it("should export point with comment at default location", () => {
     const changes: JXGChange[] = [
       {
