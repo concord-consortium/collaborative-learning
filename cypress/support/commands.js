@@ -85,6 +85,18 @@ Cypress.Commands.add("clearQAData", (data)=>{ //clears data from Firebase (curre
 // Login using cy.request, this is faster than using visit, and it makes it possible
 // to visit a local domain after logging in
 Cypress.Commands.add("login", (baseUrl, testTeacher) => {
+    /*
+      Cookies should be cleared automatically, but that doesn't seem to happen
+      with cy.request to other domains.
+      The use of {domain: null} is an undocumented feature that I found here:
+      https://github.com/cypress-io/cypress/issues/408
+      Without this, the tests will typically pass, but if you leave your cypress browser
+      open long enough, then an invalid cookie will be sent when the test is run and
+      the login will fail in a strange way. It returns success, but doesn't set a valid
+      cookie.
+    */
+    cy.clearCookies({domain: null});
+
     cy.request({
         url: `${baseUrl}/api/v1/users/sign_in`,
         method: "POST",
