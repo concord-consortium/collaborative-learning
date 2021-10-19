@@ -1,0 +1,15 @@
+@import "../vars";
+
+.thumbnail-private {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+
+  .private-icon {
+    height: 40px;
+    width: 40px;
+    fill: $workspace-teal-dark-1;
+  }
+}
