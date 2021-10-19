@@ -16,6 +16,10 @@ import { SelectionStoreModel, SelectionStoreModelType } from "./selection";
 import { getSetting } from "./settings";
 import { AppMode } from "./store-types";
 
+// reduce mobx strictness added in version 6, this should be removed if possible 
+//   https://mobx.js.org/migrating-from-4-or-5.html
+import {configure} from "mobx"; configure({ enforceActions: "never" });
+
 export interface IBaseStores {
   appMode: AppMode;
   isPreviewing?: boolean;
