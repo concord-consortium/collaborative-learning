@@ -111,7 +111,7 @@ Cypress.Commands.add("login", (baseUrl, testTeacher) => {
 
 // Launch a local report, this uses cy.request to first launch the portal report
 // this returns a redirect to a released version of CLUE
-// the URL is modifies to strip off the domain and path
+// the URL is modified to strip off the domain and path
 // this way the same url parameters are passed to the localhost CLUE server
 // The portal was not visited with cy.visit, so cypress will allow us to visit a different
 // second level domain (localhost)
@@ -126,6 +126,7 @@ Cypress.Commands.add("launchReport", (reportUrl) => {
         expect(resp.redirectedToUrl).to.match(/^https:\/\/collaborative-learning\.concord\.org/);
         const realReportUrl = resp.redirectedToUrl;
         const localReportUrl = new URL(realReportUrl).search;
+        // cy.visit resolves urls relative to the baseUrl
         cy.visit(localReportUrl);
     });
 });
