@@ -81,11 +81,54 @@ Cypress.Commands.add("clearQAData", (data)=>{ //clears data from Firebase (curre
         cy.get('span').should('contain','QA Cleared: OK');
     }
 });
+
+// Login using cy.request, this is faster than using visit, and it makes it possible
+// to visit a local domain after logging in
 Cypress.Commands.add("login", (baseUrl, testTeacher) => {
-    cy.visit(baseUrl + "/users/sign_in");
-    cy.get("input#user_login").type(testTeacher.username);
-    cy.get("input#user_password").type(testTeacher.password);
-    cy.get("form").submit();
+    /*
+      Cookies should be cleared automatically, but that doesn't seem to happen
+      with cy.request to other domains.
+      The use of {domain: null} is an undocumented feature that I found here:
+      https://github.com/cypress-io/cypress/issues/408
+      Without this, the tests will typically pass, but if you leave your cypress browser
+      open long enough, then an invalid cookie will be sent when the test is run and
+      the login will fail in a strange way. It returns success, but doesn't set a valid
+      cookie.
+    */
+    cy.clearCookies({domain: null});
+
+    cy.request({
+        url: `${baseUrl}/api/v1/users/sign_in`,
+        method: "POST",
+        body: {
+          "user[login]": testTeacher.username,
+          "user[password]": testTeacher.password
+        },
+        form: true
+    })
+    .its("status").should("equal", 200);
+});
+
+// Launch a local report, this uses cy.request to first launch the portal report
+// this returns a redirect to a released version of CLUE
+// the URL is modified to strip off the domain and path
+// this way the same url parameters are passed to the localhost CLUE server
+// The portal was not visited with cy.visit, so cypress will allow us to visit a different
+// second level domain (localhost)
+Cypress.Commands.add("launchReport", (reportUrl) => {
+    cy.request({
+        url: reportUrl,
+        method: "GET",
+        followRedirect: false
+    })
+    .then((resp) => {
+        expect(resp.status).to.eq(302);
+        expect(resp.redirectedToUrl).to.match(/^https:\/\/collaborative-learning\.concord\.org/);
+        const realReportUrl = resp.redirectedToUrl;
+        const localReportUrl = new URL(realReportUrl).search;
+        // cy.visit resolves urls relative to the baseUrl
+        cy.visit(localReportUrl);
+    });
 });
 Cypress.Commands.add("waitForSpinner", () => {
     cy.wait(2000);

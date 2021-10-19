@@ -40,7 +40,7 @@ context("Teacher Space", () => {
 
     before(function () {
         cy.login("https://learn.concord.org", clueTeacher);
-        cy.visit('https://learn.concord.org/portal/offerings/' + offeringId + '/external_report/25');
+        cy.launchReport('https://learn.concord.org/portal/offerings/' + offeringId + '/external_report/25');
         cy.waitForSpinner();
         dashboard.switchView("Workspace & Resources");
         cy.wait(4000);
