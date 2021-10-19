@@ -43,14 +43,14 @@ describe("ImageContent", () => {
     const content = ImageContentModel.create({ changes: [] });
     content.setUrl("my/image/firstUrl");
     content.setUrl("my/image/url");
-    const origChanges = content.changes.toJS();
+    const origChanges = content.changes.toJSON();
 
     content.updateImageUrl("my/image/url", "");
-    expect(content.changes.toJS()).toEqual(origChanges);
+    expect(content.changes.toJSON()).toEqual(origChanges);
     content.updateImageUrl("", "my/image/newUrl");
-    expect(content.changes.toJS()).toEqual(origChanges);
+    expect(content.changes.toJSON()).toEqual(origChanges);
     content.updateImageUrl("my/image/url", "my/image/url");
-    expect(content.changes.toJS()).toEqual(origChanges);
+    expect(content.changes.toJSON()).toEqual(origChanges);
 
     content.updateImageUrl("my/image/url", "my/image/newUrl");
     expect(content.isUserResizable).toBe(true);

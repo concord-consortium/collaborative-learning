@@ -5,7 +5,7 @@ import "firebase/firestore";
 import "firebase/functions";
 import "firebase/storage";
 import { find, findLast } from "lodash";
-import { observable } from "mobx";
+import { observable, makeObservable } from "mobx";
 import { DBOfferingGroup, DBOfferingGroupUser, DBOfferingGroupMap, DBOfferingUser, DBDocumentMetadata, DBDocument,
         DBGroupUserConnections, DBPublication, DBPublicationDocumentMetadata, DBDocumentType, DBImage, DBTileComment,
         DBUserStar, DBOfferingUserProblemDocument, DBOfferingUserProblemDocumentMap,
@@ -95,6 +95,7 @@ export class DB {
   private authStateUnsubscribe?: firebase.Unsubscribe;
 
   constructor() {
+    makeObservable(this);
     this.firebase = new Firebase(this);
     this.firestore = new Firestore(this);
     this.listeners = new DBListeners(this);
@@ -646,7 +647,7 @@ export class DB {
             title: newDocument.title
           });
           return documents.getDocument(newDocument.self.documentKey) ||
-                  await this.createDocumentModelFromOtherDocument(newDocument, documentType);
+                  (await this.createDocumentModelFromOtherDocument(newDocument, documentType));
         })
         .then(resolve)
         .catch(reject);

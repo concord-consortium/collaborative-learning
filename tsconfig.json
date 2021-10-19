@@ -15,7 +15,8 @@
     "forceConsistentCasingInFileNames": true,
     "experimentalDecorators": true,
     "skipLibCheck": true,
-    "jsx": "react"
+    "jsx": "react",
+    "useDefineForClassFields": true
   },
   "include": [
     "src/**/*"
