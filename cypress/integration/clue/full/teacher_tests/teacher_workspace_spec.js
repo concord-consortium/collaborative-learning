@@ -41,7 +41,7 @@ context("Teacher Space", () => {
     before(function () {
         cy.login("https://learn.concord.org", clueTeacher);
         cy.launchReport('https://learn.concord.org/portal/offerings/' + offeringId + '/external_report/25');
-        cy.waitForSpinner();
+        cy.waitForLoad();
         dashboard.switchView("Workspace & Resources");
         cy.wait(4000);
         clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
@@ -74,7 +74,7 @@ context("Teacher Space", () => {
 
                     dashboard.getClassDropdown().click({ force: true }).then(() => {
                         dashboard.getClassList().contains(className).click({ force: true });
-                        cy.waitForSpinner();
+                        cy.waitForLoad();
                     });
                     dashboard.getClassDropdown().should('contain', className);
                     dashboard.switchView('Workspace & Resources');
@@ -83,7 +83,7 @@ context("Teacher Space", () => {
                     //switch back to original problem for later test
                     dashboard.getClassDropdown().click({ force: true });
                     dashboard.getClassList().find('.list-item').contains(initClassName).click({ force: true });
-                    cy.waitForSpinner();
+                    cy.waitForLoad();
                     dashboard.switchView('Workspace & Resources');
                     tableToolTile.getTableTile().should('exist');
                     drawToolTile.getDrawTile().should('exist');
@@ -106,7 +106,7 @@ context("Teacher Space", () => {
                     dashboard.getProblemDropdown().click({ force: true }).then(() => {
                         dashboard.getProblemList().should('have.class', 'show');
                         dashboard.getProblemList().find('.list-item').contains(problems[tempProblemIndex].problemTitle).click({ force: true });
-                        cy.waitForSpinner();
+                        cy.waitForLoad();
                         tempProblemIndex += 1;
                     });
                     dashboard.getProblemDropdown().should('contain', problems[tempProblemIndex].problemTitle);
@@ -117,7 +117,7 @@ context("Teacher Space", () => {
                     //switch back to original problem to verify restore
                     dashboard.getProblemDropdown().click({ force: true });
                     dashboard.getProblemList().find('.list-item').contains(problems[initProblemIndex].problemTitle).click({ force: true });
-                    cy.waitForSpinner();
+                    cy.waitForLoad();
                     dashboard.switchView('Workspace & Resources');
                     cy.openResourcesTab();
                     cy.openTopTab("my-work");

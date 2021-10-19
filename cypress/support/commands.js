@@ -73,11 +73,9 @@ Cypress.Commands.add("uploadFile",(selector, filename, type="")=>{
     });
 });
 Cypress.Commands.add("clearQAData", (data)=>{ //clears data from Firebase (currently data='all' is the only one supported)
-    const baseUrl = `${Cypress.config("baseUrl")}`;
     if (data==='all') {
-        cy.visit(baseUrl + '?appMode=qa&qaClear=' + data + '&fakeClass=5&fakeUser=student:5');
-        cy.waitForSpinner();
-        cy.get('span').should('contain','QA Cleared: OK');
+        cy.visit('?appMode=qa&qaClear=' + data + '&fakeClass=5&fakeUser=student:5');
+        cy.get('span', {timeout: 60000}).should('contain','QA Cleared: OK');
     }
 });
 
@@ -129,6 +127,9 @@ Cypress.Commands.add("launchReport", (reportUrl) => {
         cy.visit(localReportUrl);
     });
 });
+Cypress.Commands.add("waitForLoad", () => {
+  cy.get('.version', {timeout: 60000});
+});
 Cypress.Commands.add("waitForSpinner", () => {
     cy.wait(2000);
     cy.get('.progress', { timeout: 60000 }).should('not.exist');
@@ -140,7 +141,7 @@ Cypress.Commands.add("deleteWorkspaces",(baseUrl,queryParams)=>{
     let dashboard = new TeacherDashboard();
 
     cy.visit(baseUrl+queryParams);
-    cy.waitForSpinner();
+    cy.waitForLoad();
     dashboard.switchView("Workspace & Resources");
     cy.wait(2000);
     resourcesPanel.openPrimaryWorkspaceTab("my-work");

@@ -8,12 +8,11 @@ let headerX = 'pluto';
 let headerY = 'mars';
 
 before(function () {
-  const baseUrl = `${Cypress.config("baseUrl")}`;
   const queryParams = `${Cypress.config("queryParams")}`;
   cy.clearQAData('all');
 
-  cy.visit(baseUrl + queryParams);
-  cy.waitForSpinner();
+  cy.visit(queryParams);
+  cy.waitForLoad();
 });
 
 context('Table Tool Tile', function () {
