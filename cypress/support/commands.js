@@ -32,8 +32,6 @@ import 'cypress-commands';
 import ResourcesPanel from "./elements/clue/ResourcesPanel";
 
 Cypress.Commands.add("setupGroup", (students, group) => {
-    const baseUrl = `${Cypress.config("baseUrl")}`;
-
     let qaClass = 10,
         problem = 2.3;
 
@@ -41,12 +39,13 @@ Cypress.Commands.add("setupGroup", (students, group) => {
     let i=0, j=0;
 
     for (i=0;i<students.length;i++) {
-        cy.wait(2000);
-        cy.visit(baseUrl+'?appMode=qa&qaGroup='+group+'&fakeClass='+qaClass+'&fakeUser=student:'+students[i]+'&problem='+problem);
-        // cy.waitForSpinner(); // using this wait does not set up the groups
-        cy.wait(3000);
+        cy.visit('?appMode=qa&qaGroup='+group+'&fakeClass='+qaClass+'&fakeUser=student:'+students[i]+'&problem='+problem);
+        // These checks are here to make sure the workspace has loaded enough to create
+        // the student
+        header.getGroupName().should('contain','Group '+group);
+        header.getGroupMembers().find('div.member').should('contain','S'+students[i]);
     }
-    //verify Group num and there are 4 students in the group
+    // Verify Group num and the correct 4 students are listed, now that all 4 are loaded
     header.getGroupName().should('contain','Group '+group);
     for (j=0; j<students.length; j++) {
         header.getGroupMembers().find('div.member').should('contain','S'+students[j]);
