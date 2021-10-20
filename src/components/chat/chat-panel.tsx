@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { LogEventName, Logger } from "../../lib/logger";
+import {  Logger } from "../../lib/logger";
 import { UserModelType } from "../../models/stores/user";
 import { ChatPanelHeader } from "./chat-panel-header";
 import { CommentCard } from "./comment-card";
@@ -51,7 +51,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
     return document
       ? postCommentMutation.mutate({ document, comment: { content: comment, tileId: focusTileId } })
       : undefined;
-  }, [document, focusDocument, focusStoreDocument, focusTileId, postCommentMutation, postedComments]);
+  }, [document, focusDocument, focusTileId, postCommentMutation, postedComments]);
 
   const commentsPathRef = useCurrent(useCommentsCollectionPath(focusDocument || ""));
   const deleteCommentMutation = useDeleteDocument();
@@ -70,7 +70,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
     return commentsPathRef.current
       ? deleteCommentMutation.mutate(`${commentsPathRef.current}/${commentId}`)
       : undefined;
-  }, [commentsPathRef, deleteCommentMutation, focusDocumentRef, focusStoreDocumentRef, focusTileIdRef]);
+  }, [commentsPathRef, deleteCommentMutation, focusDocumentRef, focusTileIdRef]);
 
   const newCommentCount = unreadComments?.length || 0;
 

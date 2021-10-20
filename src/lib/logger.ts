@@ -246,7 +246,13 @@ export class Logger {
     Logger.log(event, parameters);
   }
 
-  public static logCommentEvent({ focusDocumentId: focusDocumentId, focusTileId, isFirst, commentText, isAddingAComment }: ILogComment) {
+  public static logCommentEvent({
+    focusDocumentId,
+    focusTileId,
+    isFirst,
+    commentText,
+    isAddingAComment
+    }: ILogComment) {
     let event: LogEventName;
 
     if (isAddingAComment) {
