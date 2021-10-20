@@ -78,7 +78,7 @@ Cypress.Commands.add("clearQAData", (data)=>{ //clears data from Firebase (curre
         cy.get('span', {timeout: 60000}).should('contain','QA Cleared: OK');
         // According to the firebase documentation and our implementation we shouldn't be showing
         // QA Cleared: OK until the removal of the node in firebase is complete.
-        // However there are some randoming failing tests which could be explained if this
+        // However there are some randomly failing tests which could be explained if this
         // removal on the firebase server happens later and triggers an event after the next
         // visit command.
         // So to be safe there is a wait here to give firebase more of a chance to process.
