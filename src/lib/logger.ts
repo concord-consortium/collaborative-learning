@@ -96,12 +96,12 @@ export enum LogEventName {
   CLOSE_STICKY_NOTES,
   OPEN_STICKY_NOTES,
 
-  ADD_INITIAL_COMMENT_FOR_DOCUMENT,
-  ADD_INITIAL_COMMENT_FOR_TILE,
-  ADD_RESPONSE_COMMENT_FOR_DOCUMENT,
-  ADD_RESPONSE_COMMENT_FOR_TILE,
-  DELETE_COMMENT_FOR_DOCUMENT,
-  DELETE_COMMENT_FOR_TILE,
+  CHAT_PANEL_ADD_INITIAL_COMMENT_FOR_DOCUMENT,
+  CHAT_PANEL_ADD_INITIAL_COMMENT_FOR_TILE,
+  CHAT_PANEL_ADD_RESPONSE_COMMENT_FOR_DOCUMENT,
+  CHAT_PANEL_ADD_RESPONSE_COMMENT_FOR_TILE,
+  CHAT_PANEL_DELETE_COMMENT_FOR_DOCUMENT,
+  CHAT_PANEL_DELETE_COMMENT_FOR_TILE,
   CHAT_PANEL_HIDE,
   CHAT_PANEL_SHOW,
 
@@ -144,10 +144,11 @@ interface ITeacherNetworkInfo {
 }
 
 interface ILogComment {
-  focusDocument: string;
+  focusDocumentId: string;
   focusTileId?: string;
-  isFirst: boolean;
+  isFirst: boolean; // actual argument is ignored, when isAddingAComment is falsey
   commentText: string;
+  isAddingAComment: boolean;
 }
 
 export class Logger {
@@ -245,26 +246,35 @@ export class Logger {
     Logger.log(event, parameters);
   }
 
-  public static logCommentEvent({ focusDocument, focusTileId, isFirst, commentText }: ILogComment) {
-    const event = focusTileId
-                    ? isFirst
-                      ? LogEventName.ADD_INITIAL_COMMENT_FOR_TILE
-                      : LogEventName.ADD_RESPONSE_COMMENT_FOR_TILE
-                    : isFirst
-                      ? LogEventName.ADD_INITIAL_COMMENT_FOR_DOCUMENT
-                      : LogEventName.ADD_RESPONSE_COMMENT_FOR_DOCUMENT;
-    if (isSectionPath(focusDocument)) {
-      Logger.logCurriculumEvent(event, focusDocument, { tileId: focusTileId, commentText });
+  public static logCommentEvent({ focusDocumentId: focusDocumentId, focusTileId, isFirst, commentText, isAddingAComment }: ILogComment) {
+    let event: LogEventName;
+
+    if (isAddingAComment) {
+      event = focusTileId
+        ? isFirst
+          ? LogEventName.CHAT_PANEL_ADD_INITIAL_COMMENT_FOR_TILE
+          : LogEventName.CHAT_PANEL_ADD_RESPONSE_COMMENT_FOR_TILE
+        : isFirst
+          ? LogEventName.CHAT_PANEL_ADD_INITIAL_COMMENT_FOR_DOCUMENT
+          : LogEventName.CHAT_PANEL_ADD_RESPONSE_COMMENT_FOR_DOCUMENT;
+    } else {
+      event = focusTileId
+        ? LogEventName.CHAT_PANEL_DELETE_COMMENT_FOR_TILE
+        : LogEventName.CHAT_PANEL_DELETE_COMMENT_FOR_DOCUMENT;
+    }
+
+    if (isSectionPath(focusDocumentId)) {
+      Logger.logCurriculumEvent(event, focusDocumentId, { tileId: focusTileId, commentText });
     }
     else {
-      const document = this._instance.stores.documents.getDocument(focusDocument)
-                        || this._instance.stores.networkDocuments.getDocument(focusDocument);
+      const document = this._instance.stores.documents.getDocument(focusDocumentId)
+                        || this._instance.stores.networkDocuments.getDocument(focusDocumentId);
       if (document) {
         Logger.logDocumentEvent(event,
           document, { tileId: focusTileId, commentText });
       }
       else {
-        console.warn("Warning: couldn't log comment event for document:", focusDocument);
+        console.warn("Warning: couldn't log comment event for document:", focusDocumentId);
       }
     }
   }

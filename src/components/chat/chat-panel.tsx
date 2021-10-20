@@ -36,23 +36,16 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
 
   const postComment = useCallback((comment: string) => {
     if (focusDocument) {
-      const commentTile = focusTileId && focusStoreDocument?.content?.getTile(focusTileId);
       const numComments = postedComments ? postedComments.length : 0;
-      if (!focusTileId) {
-        if (focusStoreDocument) {
-          Logger.logDocumentEvent(numComments < 1
-            ? LogEventName.CHAT_PANEL_ADD_INITIAL_COMMENT_FOR_DOCUMENT
-            : LogEventName.CHAT_PANEL_ADD_RESPONSE_COMMENT_FOR_DOCUMENT,
-            focusStoreDocument, comment);
-        }
-      } else {
-        if (commentTile) {
-          Logger.logTileEvent(numComments < 1
-            ? LogEventName.CHAT_PANEL_ADD_INITIAL_COMMENT_FOR_TILE
-            : LogEventName.CHAT_PANEL_ADD_RESPONSE_COMMENT_FOR_TILE,
-            commentTile, undefined, comment);
-        }
-      }
+      const focusDocumentId = focusDocument;
+      const eventPayload = {
+        focusDocumentId,
+        focusTileId,
+        isFirst: (numComments < 1),
+        commentText: comment,
+        isAddingAComment: true
+      };
+      Logger.logCommentEvent(eventPayload);
     }
 
     return document
@@ -62,21 +55,18 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
 
   const commentsPathRef = useCurrent(useCommentsCollectionPath(focusDocument || ""));
   const deleteCommentMutation = useDeleteDocument();
-  const deleteComment = useCallback((commentId: string, commentText: string) => {
-    const storeDocument = focusStoreDocumentRef.current;
-    if (focusDocumentRef.current) {
-      if (!focusTileIdRef.current) {
-        if (storeDocument) {
-          Logger.logDocumentEvent(LogEventName.CHAT_PANEL_DELETE_COMMENT_FOR_DOCUMENT, storeDocument, commentText);
-        }
-      } else {
-        const commentTile = storeDocument?.content?.getTile(focusTileIdRef.current);
-        if (commentTile) {
-          Logger.logTileEvent(LogEventName.CHAT_PANEL_DELETE_COMMENT_FOR_TILE, commentTile, undefined, commentText);
-        }
-      }
-    }
 
+  const deleteComment = useCallback((commentId: string, commentText: string) => {
+    if (focusDocumentRef.current) {
+      const eventPayload = {
+        focusDocumentId: focusDocumentRef.current,
+        focusTileId: (focusTileIdRef && focusTileIdRef.current) || undefined,
+        isFirst: true, // NO-OP
+        commentText,
+        isAddingAComment: false
+      };
+      Logger.logCommentEvent(eventPayload);
+    }
     return commentsPathRef.current
       ? deleteCommentMutation.mutate(`${commentsPathRef.current}/${commentId}`)
       : undefined;
