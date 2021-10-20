@@ -130,10 +130,6 @@ Cypress.Commands.add("launchReport", (reportUrl) => {
 Cypress.Commands.add("waitForLoad", () => {
   cy.get('.version', {timeout: 60000});
 });
-Cypress.Commands.add("waitForSpinner", () => {
-    cy.wait(2000);
-    cy.get('.progress', { timeout: 60000 }).should('not.exist');
-});
 Cypress.Commands.add("deleteWorkspaces",(baseUrl,queryParams)=>{
     let primaryWorkspace = new PrimaryWorkspace;
     let resourcesPanel = new ResourcesPanel;
