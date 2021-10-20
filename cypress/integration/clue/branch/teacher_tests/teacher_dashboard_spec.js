@@ -8,7 +8,7 @@ before(() => {
   const queryParams = "/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:6";
   cy.clearQAData('all');
   cy.visit(queryParams);
-  cy.waitForSpinner();
+  cy.waitForLoad();
   dashboard.switchWorkView('Published');
   cy.wait(8000);
   dashboard.clearAllStarsFromPublishedWork();
@@ -220,7 +220,7 @@ context('Teacher Dashboard View', () => {
 
     it('verify student support note appears in student view', function () {
       cy.visit('/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=student:1&qaGroup=1');
-      cy.wait(5000);
+      cy.waitForLoad();
       cy.get('#icon-sticky-note').should('exist').click({force:true});
       cy.get('#icon-sticky-note').click({force:true});
       cy.get('.sticky-note-popup').should('exist');
@@ -228,12 +228,15 @@ context('Teacher Dashboard View', () => {
     });
     it("verify student support note is not in another student's view", function () {
       cy.visit('/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=student:3&qaGroup=1');
+      cy.waitForLoad();
+      // Because we are looking for an element not to exist we need to wait to give it time
+      // to show up
       cy.wait(3000);
       cy.get('#icon-sticky-note').should('not.exist');
     });
     it('verify group support note appears in student view', function () {
       cy.visit('/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=student:10&qaGroup=3');
-      cy.wait(5000);
+      cy.waitForLoad();
       cy.get('#icon-sticky-note').should('exist').click({force:true});
       cy.get('#icon-sticky-note').click({force:true});
       cy.get('.sticky-note-popup').should('exist');
@@ -241,6 +244,9 @@ context('Teacher Dashboard View', () => {
     });
     it('verify group support note not in student view in different group', function () {
       cy.visit('/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=student:7&qaGroup=2');
+      cy.waitForLoad();
+      // Because we are looking for an element not to exist we need to wait to give it time
+      // to show up
       cy.wait(3000);
       cy.get('#icon-sticky-note').should('not.exist');
     });

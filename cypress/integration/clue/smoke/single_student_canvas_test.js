@@ -16,11 +16,10 @@ let tableToolTile = new TableToolTile;
 
 context('single student functional test',()=>{
     before(function(){
-            const baseUrl = `${Cypress.config("baseUrl")}`;
             const queryParams = `${Cypress.config("queryParams")}`;
             cy.clearQAData('all');
-            cy.visit(baseUrl+queryParams);
-            cy.waitForSpinner();
+            cy.visit(queryParams);
+            cy.waitForLoad();
             // cy.wait(4000);
         clueCanvas.getInvestigationCanvasTitle().text().as('title');
     });
