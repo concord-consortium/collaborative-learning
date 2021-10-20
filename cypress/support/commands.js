@@ -32,8 +32,6 @@ import 'cypress-commands';
 import ResourcesPanel from "./elements/clue/ResourcesPanel";
 
 Cypress.Commands.add("setupGroup", (students, group) => {
-    const baseUrl = `${Cypress.config("baseUrl")}`;
-
     let qaClass = 10,
         problem = 2.3;
 
@@ -41,12 +39,13 @@ Cypress.Commands.add("setupGroup", (students, group) => {
     let i=0, j=0;
 
     for (i=0;i<students.length;i++) {
-        cy.wait(2000);
-        cy.visit(baseUrl+'?appMode=qa&qaGroup='+group+'&fakeClass='+qaClass+'&fakeUser=student:'+students[i]+'&problem='+problem);
-        // cy.waitForSpinner(); // using this wait does not set up the groups
-        cy.wait(3000);
+        cy.visit('?appMode=qa&qaGroup='+group+'&fakeClass='+qaClass+'&fakeUser=student:'+students[i]+'&problem='+problem);
+        // These checks are here to make sure the workspace has loaded enough to create
+        // the student
+        header.getGroupName().should('contain','Group '+group);
+        header.getGroupMembers().find('div.member').should('contain','S'+students[i]);
     }
-    //verify Group num and there are 4 students in the group
+    // Verify Group num and the correct 4 students are listed, now that all 4 are loaded
     header.getGroupName().should('contain','Group '+group);
     for (j=0; j<students.length; j++) {
         header.getGroupMembers().find('div.member').should('contain','S'+students[j]);
@@ -74,11 +73,16 @@ Cypress.Commands.add("uploadFile",(selector, filename, type="")=>{
     });
 });
 Cypress.Commands.add("clearQAData", (data)=>{ //clears data from Firebase (currently data='all' is the only one supported)
-    const baseUrl = `${Cypress.config("baseUrl")}`;
     if (data==='all') {
-        cy.visit(baseUrl + '?appMode=qa&qaClear=' + data + '&fakeClass=5&fakeUser=student:5');
-        cy.waitForSpinner();
-        cy.get('span').should('contain','QA Cleared: OK');
+        cy.visit('?appMode=qa&qaClear=' + data + '&fakeClass=5&fakeUser=student:5');
+        cy.get('span', {timeout: 60000}).should('contain','QA Cleared: OK');
+        // According to the firebase documentation and our implementation we shouldn't be showing
+        // QA Cleared: OK until the removal of the node in firebase is complete.
+        // However there are some randomly failing tests which could be explained if this
+        // removal on the firebase server happens later and triggers an event after the next
+        // visit command.
+        // So to be safe there is a wait here to give firebase more of a chance to process.
+        cy.wait(1000);
     }
 });
 
@@ -130,9 +134,8 @@ Cypress.Commands.add("launchReport", (reportUrl) => {
         cy.visit(localReportUrl);
     });
 });
-Cypress.Commands.add("waitForSpinner", () => {
-    cy.wait(2000);
-    cy.get('.progress', { timeout: 60000 }).should('not.exist');
+Cypress.Commands.add("waitForLoad", () => {
+  cy.get('.version', {timeout: 60000});
 });
 Cypress.Commands.add("deleteWorkspaces",(baseUrl,queryParams)=>{
     let primaryWorkspace = new PrimaryWorkspace;
@@ -141,7 +144,7 @@ Cypress.Commands.add("deleteWorkspaces",(baseUrl,queryParams)=>{
     let dashboard = new TeacherDashboard();
 
     cy.visit(baseUrl+queryParams);
-    cy.waitForSpinner();
+    cy.waitForLoad();
     dashboard.switchView("Workspace & Resources");
     cy.wait(2000);
     resourcesPanel.openPrimaryWorkspaceTab("my-work");

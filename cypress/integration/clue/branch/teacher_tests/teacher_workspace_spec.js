@@ -19,7 +19,7 @@ before(() => {
   cy.clearQAData('all');
 
   cy.visit(queryParams);
-  cy.waitForSpinner();
+  cy.waitForLoad();
   dashboard.switchView("Workspace & Resources");
   cy.wait(2000);
   clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
@@ -87,7 +87,7 @@ describe('teacher document functionality', function () {
 describe('Chat panel for networked teacher', () => {
   it('verify chat panel is accessible is teacher is in network (via url params)', () => {
     cy.visit("/?appMode=qa&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=msa&network=foo");
-    cy.waitForSpinner();
+    cy.waitForLoad();
     dashboard.switchView("Workspace & Resources");
     cy.wait(2000);
     cy.get('.collapsed-resources-tab').click();
@@ -200,7 +200,7 @@ describe('Chat panel for networked teacher', () => {
 describe('Student Workspace', () => { //flaky -- could be because it is trying to connect to firebase?
   it('verify student workspace tab', () => {
     cy.visit("/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=msa");
-    cy.waitForSpinner();
+    cy.waitForLoad();
     dashboard.switchView("Workspace & Resources");
     primaryWorkSpace.getResizeRightPanelHandle().click();
     cy.wait(2000);

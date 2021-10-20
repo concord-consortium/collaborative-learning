@@ -3,7 +3,6 @@ import ClueHeader from '../../../../support/elements/clue/cHeader';
 
 const header = new Header;
 const clueHeader = new ClueHeader;
-const baseUrl = `${Cypress.config("baseUrl")}`;
 
 before(() => {
       cy.clearQAData('all');
@@ -22,9 +21,17 @@ describe('Test student join a group', function(){
         group2='21';
 
 
-    function setup(student){
-        cy.visit(baseUrl+'?appMode=qa&fakeClass='+fakeClass+'&fakeUser=student:'+student+'&problem='+problem);
-        cy.waitForSpinner();
+    function setup(student, alreadyInGroup=false){
+        cy.visit('?appMode=qa&fakeClass='+fakeClass+'&fakeUser=student:'+student+'&problem='+problem);
+        if (alreadyInGroup) {
+          // This is looking for the version div in the header
+          cy.waitForLoad();
+        } else {
+          // If the student is not in a group already the header will not show up
+          // instead only a group chooser dialog is shown. The timeout of 60s is the same
+          // used by waitForLoad and gives the app extra time to load
+          cy.get('.join-title', {timeout: 60000});
+        }
     }
 
     it('Student 1 will join and will verify Join Group Dialog comes up with welcome message to correct student', function(){
@@ -88,7 +95,7 @@ describe('Test student join a group', function(){
     });
     it('will verify cancel of leave group dialog',function(){
         //have student leave first group and join second group
-        setup(student5);
+        setup(student5, true);
         cy.get('.app .group > .name').contains('Group '+group1).click();
         cy.get('#cancelButton').should('contain','No').click();
         clueHeader.getGroupName().should('contain','Group '+group1);
@@ -98,7 +105,7 @@ describe('Test student join a group', function(){
     });
     it('will verify a student can switch groups',function(){
         //have student leave first group and join second group
-        setup(student5);
+        setup(student5, true);
         cy.get('.app .group > .name').contains('Group '+group1).click();
         cy.get("#okButton").should('contain','Yes').click();
         cy.get('.groups > .group-list > .group').contains('Group '+group2).click();

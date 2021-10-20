@@ -28,7 +28,7 @@ context("Teacher Space", () => {
         cy.login("https://learn.concord.org", clueTeacher);
         // insert offering number for your activity below
         cy.launchReport('https://learn.concord.org/portal/offerings/40557/external_report/25');
-        cy.waitForSpinner();
+        cy.waitForLoad();
 
         dashboard.switchWorkView('Published');
         dashboard.clearAllStarsFromPublishedWork();
@@ -95,7 +95,7 @@ context("Teacher Space", () => {
                         dashboard.getProblemList().should('have.class','show');
                         dashboard.getProblemList().find('.list-item').contains(problems[tempProblemIndex].problemTitle).click({ force: true });
                         // cy.wait(1000)
-                        cy.waitForSpinner();
+                        cy.waitForLoad();
                         tempProblemIndex += 1;
                     });
                     dashboard.getProblemDropdown().should('contain', problems[tempProblemIndex].problemTitle);
@@ -105,7 +105,7 @@ context("Teacher Space", () => {
                     dashboard.getProblemDropdown().click({force:true});
                     dashboard.getProblemList().find('.list-item').contains(problems[initProblemIndex].problemTitle).click({ force: true });
                     // cy.wait(1000)
-                    cy.waitForSpinner();
+                    cy.waitForLoad();
                 });
             });
             it('verify selected class is shown in class dropdown', () => {
@@ -130,7 +130,7 @@ context("Teacher Space", () => {
                     dashboard.getClassDropdown().click({ force: true }).then(() => {
                         dashboard.getClassList().contains(className).click({ force: true });
                         // cy.wait(1000)
-                        cy.waitForSpinner();
+                        cy.waitForLoad();
                     });
                     dashboard.getClassDropdown().should('contain', className);
                     dashboard.getGroups().should('have.length',0);
@@ -139,7 +139,7 @@ context("Teacher Space", () => {
                     dashboard.getClassDropdown().click({force:true});
                     dashboard.getClassList().find('.list-item').contains(initClassName).click({ force: true });
                     // cy.wait(1000)
-                    cy.waitForSpinner();
+                    cy.waitForLoad();
                 });
             });
         });

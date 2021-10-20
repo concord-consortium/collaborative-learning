@@ -15,12 +15,11 @@ const ptsDoc = 'Points';
 const polyDoc = 'Polygon';
 
 before(function(){
-    const baseUrl = `${Cypress.config("baseUrl")}`;
     const queryParams = `${Cypress.config("queryParams")}`;
     cy.clearQAData('all');
 
-    cy.visit(baseUrl+queryParams);
-    cy.waitForSpinner();
+    cy.visit(queryParams);
+    cy.waitForLoad();
 });
 context('Test graph tool functionalities', function(){
     describe('adding points and polygons to a graph', function(){

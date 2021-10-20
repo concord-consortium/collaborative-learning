@@ -10,12 +10,11 @@ let student = '5',
     group = '5';
 
     before(function(){
-        const baseUrl = `${Cypress.config("baseUrl")}`;
         const queryParams = `${Cypress.config("queryParams")}`;
 
         cy.clearQAData('all');
-        cy.visit(baseUrl+queryParams);
-        cy.waitForSpinner();
+        cy.visit(queryParams);
+        cy.waitForLoad();
     });
 describe('Check header area for correctness', function(){
     it('will verify if class name is correct', function(){

@@ -31,12 +31,11 @@ context('Test Canvas', function () {
   // 3. drag image from resourcesPanel to canvas
   // 5. drag a tool from tool bar to canvas
   before(function () {
-    const baseUrl = `${Cypress.config("baseUrl")}`;
     const queryParams = `${Cypress.config("queryParams")}`;
     cy.clearQAData('all');
 
-    cy.visit(baseUrl + queryParams);
-    cy.waitForSpinner();
+    cy.visit(queryParams);
+    cy.waitForLoad();
     clueCanvas.getInvestigationCanvasTitle().text().as('title');
   });
 
