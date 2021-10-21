@@ -22,7 +22,7 @@ interface IProps {
 export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument, focusTileId, onCloseChatPanel }) => {
   const document = useDocumentOrCurriculumMetadata(focusDocument);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { isLoading, data: comments } = useDocumentComments(focusDocument);
+  const { data: comments } = useDocumentComments(focusDocument);
   const { data: unreadComments } = useUnreadDocumentComments(focusDocument);
   const documentComments = comments?.filter(comment => comment.tileId == null);
   const tileComments = comments?.filter(comment => comment.tileId === focusTileId);
@@ -31,7 +31,6 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   const focusStoreDocument = useDocumentFromStore(focusDocument);
 
   const focusDocumentRef = useCurrent(focusDocument);
-  const focusStoreDocumentRef = useCurrent(focusStoreDocument);
   const focusTileIdRef = useCurrent(focusTileId);
 
   const postComment = useCallback((comment: string) => {
