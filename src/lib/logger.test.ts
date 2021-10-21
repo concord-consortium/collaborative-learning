@@ -229,7 +229,7 @@ describe("authed logger", () => {
 
       mockXhr.post(/.*/, (req, res) => {
         const addCommentRequest = JSON.parse(req.body());
-        expect(addCommentRequest.event).toBe("CHAT_PANEL_ADD_RESPONSE_COMMENT_FOR_TILE");
+        expect(addCommentRequest.event).toBe("ADD_RESPONSE_COMMENT_FOR_TILE");
         expect(addCommentRequest.parameters.tileId).toBe(tileId);
         expect(addCommentRequest.parameters.commentText).toBe(commentText);
         expect(addCommentRequest.parameters.documentKey).toBe(documentKey);
@@ -264,7 +264,7 @@ describe("authed logger", () => {
 
       mockXhr.post(/.*/, (req, res) => {
         const deleteCommentRequest = JSON.parse(req.body());
-        expect(deleteCommentRequest.event).toBe("CHAT_PANEL_DELETE_COMMENT_FOR_TILE");
+        expect(deleteCommentRequest.event).toBe("DELETE_COMMENT_FOR_TILE");
         expect(deleteCommentRequest.parameters.tileId).toBe(tileId);
         expect(deleteCommentRequest.parameters.commentText).toBe(commentText);
         expect(deleteCommentRequest.parameters.documentKey).toBe(documentKey);

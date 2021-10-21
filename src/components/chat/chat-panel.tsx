@@ -59,7 +59,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
     if (focusDocumentRef.current) {
       const eventPayload = {
         focusDocumentId: focusDocumentRef.current,
-        focusTileId: (focusTileIdRef && focusTileIdRef.current) || undefined,
+        focusTileId: focusTileIdRef.current,
         commentText,
         isAdding: false
       };
