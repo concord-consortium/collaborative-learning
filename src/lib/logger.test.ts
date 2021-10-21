@@ -205,6 +205,75 @@ describe("authed logger", () => {
       Logger.logTileEvent(LogEventName.CREATE_TILE, tile);
     });
 
+    it("can log an ADD comment event", (done) => {
+      const document = DocumentModel.create({
+        type: ProblemDocument,
+        uid: "1",
+        key: "source-document",
+        createdAt: 1,
+        content: {},
+        visibility: "public"
+      });
+      stores.documents.add(document);
+      const tile = ToolTileModel.create({ content: defaultTextContent() });
+      const tileId = tile.id;
+      const documentKey = document.key;
+      const commentText = "TeSt";
+      const addEventPayload = {
+        focusDocumentId: document.key,
+        focusTileId: tile.id,
+        isFirst: false,
+        commentText: "TeSt",
+        isAdding: true
+      };
+
+      mockXhr.post(/.*/, (req, res) => {
+        const addCommentRequest = JSON.parse(req.body());
+        expect(addCommentRequest.event).toBe("ADD_RESPONSE_COMMENT_FOR_TILE");
+        expect(addCommentRequest.parameters.tileId).toBe(tileId);
+        expect(addCommentRequest.parameters.commentText).toBe(commentText);
+        expect(addCommentRequest.parameters.documentKey).toBe(documentKey);
+        done();
+        return res.status(201);
+      });
+
+      Logger.logCommentEvent(addEventPayload);
+    });
+
+    it("can log a DELETE comment event", (done) => {
+      const document = DocumentModel.create({
+        type: ProblemDocument,
+        uid: "1",
+        key: "source-document",
+        createdAt: 1,
+        content: {},
+        visibility: "public"
+      });
+      stores.documents.add(document);
+      const tile = ToolTileModel.create({ content: defaultTextContent() });
+      const tileId = tile.id;
+      const documentKey = document.key;
+      const commentText = "TeSt";
+      const deleteEventPayload = {
+        focusDocumentId: document.key,
+        focusTileId: tile.id,
+        isFirst: false,
+        commentText: "TeSt",
+        isAdding: false
+      };
+
+      mockXhr.post(/.*/, (req, res) => {
+        const deleteCommentRequest = JSON.parse(req.body());
+        expect(deleteCommentRequest.event).toBe("DELETE_COMMENT_FOR_TILE");
+        expect(deleteCommentRequest.parameters.tileId).toBe(tileId);
+        expect(deleteCommentRequest.parameters.commentText).toBe(commentText);
+        expect(deleteCommentRequest.parameters.documentKey).toBe(documentKey);
+        done();
+        return res.status(201);
+      });
+      Logger.logCommentEvent(deleteEventPayload);
+    });
+
     it("can log tile creation in a document", (done) => {
       const document = DocumentModel.create({
         type: ProblemDocument,

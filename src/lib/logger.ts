@@ -12,6 +12,7 @@ import { DrawingToolChange } from "../models/tools/drawing/drawing-types";
 import { ITableChange } from "../models/tools/table/table-change";
 import { ENavTab } from "../models/view/nav-tabs";
 import { DEBUG_LOGGER } from "../lib/debug";
+import { isSectionPath } from "../../functions/src/shared";
 
 type LoggerEnvironment = "dev" | "production";
 
@@ -95,12 +96,12 @@ export enum LogEventName {
   CLOSE_STICKY_NOTES,
   OPEN_STICKY_NOTES,
 
-  CHAT_PANEL_ADD_INITIAL_COMMENT_FOR_DOCUMENT,
-  CHAT_PANEL_ADD_INITIAL_COMMENT_FOR_TILE,
-  CHAT_PANEL_ADD_RESPONSE_COMMENT_FOR_DOCUMENT,
-  CHAT_PANEL_ADD_RESPONSE_COMMENT_FOR_TILE,
-  CHAT_PANEL_DELETE_COMMENT_FOR_DOCUMENT,
-  CHAT_PANEL_DELETE_COMMENT_FOR_TILE,
+  ADD_INITIAL_COMMENT_FOR_DOCUMENT,
+  ADD_INITIAL_COMMENT_FOR_TILE,
+  ADD_RESPONSE_COMMENT_FOR_DOCUMENT,
+  ADD_RESPONSE_COMMENT_FOR_TILE,
+  DELETE_COMMENT_FOR_DOCUMENT,
+  DELETE_COMMENT_FOR_TILE,
   CHAT_PANEL_HIDE,
   CHAT_PANEL_SHOW,
 
@@ -140,6 +141,14 @@ interface IDocumentInfo {
 interface ITeacherNetworkInfo {
   networkClassHash?: string;
   networkUsername?: string;
+}
+
+interface ILogComment {
+  focusDocumentId: string;
+  focusTileId?: string;
+  isFirst?: boolean; // actual argument is ignored, when isAdding is falsey
+  commentText: string;
+  isAdding: boolean
 }
 
 export class Logger {
@@ -212,7 +221,12 @@ export class Logger {
     Logger.log(event, parameters);
   }
 
-  public static logDocumentEvent(event: LogEventName, document: DocumentModelType, commentText?: string) {
+  public static logCurriculumEvent(event: LogEventName, curriculum: string, params?: Record<string, any>) {
+    const parameters = { curriculum, ...params };
+    Logger.log(event, parameters);
+  }
+
+  public static logDocumentEvent(event: LogEventName, document: DocumentModelType, params?: Record<string, any>) {
     const teacherNetworkInfo: ITeacherNetworkInfo | undefined = document.isRemote
         ? { networkClassHash: document.remoteContext,
             networkUsername: `${document.uid}@${this._instance.stores.user.portal}`}
@@ -226,11 +240,49 @@ export class Logger {
       documentProperties: document.properties?.toJSON() || {},
       documentVisibility: document.visibility,
       documentChanges: document.changeCount,
-      commentText,
+      ...params,
       ...teacherNetworkInfo
     };
     Logger.log(event, parameters);
+  }
 
+  public static logCommentEvent({
+    focusDocumentId,
+    focusTileId,
+    isFirst,
+    commentText,
+    isAdding
+    }: ILogComment) {
+    let event: LogEventName;
+
+    if (isAdding) {
+      event = focusTileId
+        ? isFirst
+          ? LogEventName.ADD_INITIAL_COMMENT_FOR_TILE
+          : LogEventName.ADD_RESPONSE_COMMENT_FOR_TILE
+        : isFirst
+          ? LogEventName.ADD_INITIAL_COMMENT_FOR_DOCUMENT
+          : LogEventName.ADD_RESPONSE_COMMENT_FOR_DOCUMENT;
+    } else {
+      event = focusTileId
+        ? LogEventName.DELETE_COMMENT_FOR_TILE
+        : LogEventName.DELETE_COMMENT_FOR_DOCUMENT;
+    }
+
+    if (isSectionPath(focusDocumentId)) {
+      Logger.logCurriculumEvent(event, focusDocumentId, { tileId: focusTileId, commentText });
+    }
+    else {
+      const document = this._instance.stores.documents.getDocument(focusDocumentId)
+                        || this._instance.stores.networkDocuments.getDocument(focusDocumentId);
+      if (document) {
+        Logger.logDocumentEvent(event,
+          document, { tileId: focusTileId, commentText });
+      }
+      else {
+        console.warn("Warning: couldn't log comment event for document:", focusDocumentId);
+      }
+    }
   }
 
   public static logToolChange(
