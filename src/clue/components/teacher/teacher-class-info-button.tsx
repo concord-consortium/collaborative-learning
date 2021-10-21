@@ -117,10 +117,10 @@ export class ClassInfoButton extends BaseComponent <IProps> {
 
   private exportCSV = (csv: string, fileName: string) => {
     const csvBlob = new Blob([csv], {type: "text/csv;charset=utf-8;"});
-    if (navigator.msSaveBlob) {
-      navigator.msSaveBlob(csvBlob, fileName);
-    }
-    else {
+    // if (navigator.msSaveBlob) {
+    //   navigator.msSaveBlob(csvBlob, fileName);
+    // }
+    // else {
       const link = document.createElement("a");
       link.href = window.URL.createObjectURL(csvBlob);
       link.setAttribute("download", fileName);
@@ -128,6 +128,6 @@ export class ClassInfoButton extends BaseComponent <IProps> {
 
       link.click();
       document.body.removeChild(link);
-    }
+    // }
   }
 }
