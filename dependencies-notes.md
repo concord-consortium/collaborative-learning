@@ -15,6 +15,8 @@ Updating to `npm 7` worked locally but failed in CI due to GitHub actions still 
 |@types/react-dom|16.9.14|17.0.10|React 17/Enzyme tests|
 |copy-webpack-plugin|6.4.1|9.0.1|Webpack 5|
 |css-loader|5.2.7|6.4.0|Webpack 5|
+|cypress|8.2.0|8.6.0|Updating to 8.3 broke the cypress tests.|
+|cypress-commands|1.1.0|2.0.1|Updating to cypress 8.3 broke the cypress tests.|
 |eslint|7.32.0|8.0.1|Not all plugins (e.g. eslint-plugin-react-hooks) have been updated to support v8.|
 |eslint-webpack-plugin|2.5.4|3.0.1|Webpack 5|
 |firebase-admin|9.12.0|10.0.0|Major version update not attempted|
