@@ -12,7 +12,7 @@ import { DrawingToolChange } from "../models/tools/drawing/drawing-types";
 import { ITableChange } from "../models/tools/table/table-change";
 import { ENavTab } from "../models/view/nav-tabs";
 import { DEBUG_LOGGER } from "../lib/debug";
-import { isSectionPath } from "../../functions/src/shared";
+import { isSectionPath, parseSectionPath } from "../../functions/src/shared";
 
 type LoggerEnvironment = "dev" | "production";
 
@@ -222,7 +222,11 @@ export class Logger {
   }
 
   public static logCurriculumEvent(event: LogEventName, curriculum: string, params?: Record<string, any>) {
-    const parameters = { curriculum, ...params };
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [unit, facet, investigation, problem, section] = parseSectionPath(curriculum) || [];
+    // unit, investigation, and problem are already being logged as part of the common log params
+    // log the facet and section separately; they're embedded in the path, but could be useful independently
+    const parameters = { curriculum, curriculumFacet: facet, curriculumSection: section, ...params };
     Logger.log(event, parameters);
   }
 
