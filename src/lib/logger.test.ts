@@ -1,5 +1,5 @@
 import mockXhr from "xhr-mock";
-import { Logger, LogEventName } from "./logger";
+import { Logger, LogEventName, ILogComment } from "./logger";
 import { DocumentModel, DocumentModelType } from "../models/document/document";
 import { ProblemDocument } from "../models/document/document-types";
 import { AppConfigModel } from "../models/stores/app-config-model";
@@ -222,12 +222,12 @@ describe("authed logger", () => {
       const tileId = tile.id;
       const documentKey = document.key;
       const commentText = "TeSt";
-      const addEventPayload = {
+      const addEventPayload: ILogComment = {
         focusDocumentId: document.key,
         focusTileId: tile.id,
         isFirst: false,
-        commentText: "TeSt",
-        isAdding: true
+        commentText,
+        action: "add"
       };
 
       mockXhr.post(/.*/, (req, res) => {
@@ -257,12 +257,12 @@ describe("authed logger", () => {
       const tileId = tile.id;
       const documentKey = document.key;
       const commentText = "TeSt";
-      const deleteEventPayload = {
+      const deleteEventPayload: ILogComment = {
         focusDocumentId: document.key,
         focusTileId: tile.id,
         isFirst: false,
-        commentText: "TeSt",
-        isAdding: false
+        commentText,
+        action: "delete"
       };
 
       mockXhr.post(/.*/, (req, res) => {
