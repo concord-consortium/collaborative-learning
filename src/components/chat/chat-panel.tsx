@@ -7,8 +7,7 @@ import {
   useCommentsCollectionPath, useDocumentComments, usePostDocumentComment, useUnreadDocumentComments
 } from "../../hooks/document-comment-hooks";
 import { useDeleteDocument } from "../../hooks/firestore-hooks";
-import { useDocumentOrCurriculumMetadata, useDocumentFromStore } from "../../hooks/use-stores";
-import { useCurrent } from "../../hooks/use-current";
+import { useDocumentOrCurriculumMetadata } from "../../hooks/use-stores";
 import "./chat-panel.scss";
 
 interface IProps {
@@ -21,17 +20,12 @@ interface IProps {
 
 export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument, focusTileId, onCloseChatPanel }) => {
   const document = useDocumentOrCurriculumMetadata(focusDocument);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { data: comments } = useDocumentComments(focusDocument);
   const { data: unreadComments } = useUnreadDocumentComments(focusDocument);
   const documentComments = comments?.filter(comment => comment.tileId == null);
   const tileComments = comments?.filter(comment => comment.tileId === focusTileId);
   const postedComments = focusTileId ? tileComments : documentComments;
   const postCommentMutation = usePostDocumentComment();
-  const focusStoreDocument = useDocumentFromStore(focusDocument);
-
-  const focusDocumentRef = useCurrent(focusDocument);
-  const focusTileIdRef = useCurrent(focusTileId);
 
   const postComment = useCallback((comment: string) => {
     if (focusDocument) {
@@ -52,23 +46,24 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
       : undefined;
   }, [document, focusDocument, focusTileId, postCommentMutation, postedComments]);
 
-  const commentsPathRef = useCurrent(useCommentsCollectionPath(focusDocument || ""));
+  const commentsPath = useCommentsCollectionPath(focusDocument || "");
+  // the "Document" in "useDeleteDocument" refers to a Firestore document (not a CLUE document)
   const deleteCommentMutation = useDeleteDocument();
 
   const deleteComment = useCallback((commentId: string, commentText: string) => {
-    if (focusDocumentRef.current) {
+    if (focusDocument) {
       const eventPayload = {
-        focusDocumentId: focusDocumentRef.current,
-        focusTileId: focusTileIdRef.current,
+        focusDocumentId: focusDocument,
+        focusTileId,
         commentText,
         isAdding: false
       };
       Logger.logCommentEvent(eventPayload);
     }
-    return commentsPathRef.current
-      ? deleteCommentMutation.mutate(`${commentsPathRef.current}/${commentId}`)
+    return commentsPath
+      ? deleteCommentMutation.mutate(`${commentsPath}/${commentId}`)
       : undefined;
-  }, [commentsPathRef, deleteCommentMutation, focusDocumentRef, focusTileIdRef]);
+  }, [commentsPath, deleteCommentMutation, focusDocument, focusTileId]);
 
   const newCommentCount = unreadComments?.length || 0;
 

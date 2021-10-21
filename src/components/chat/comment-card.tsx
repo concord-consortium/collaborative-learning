@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useCallback, useRef } from "react";
 import { UserModelType } from "../../models/stores/user";
 import { CommentTextBox } from "./comment-textbox";
 import { WithId } from "../../hooks/firestore-hooks";
@@ -35,12 +35,17 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
       </>
     );
   };
+
+  const handleConfirm = useCallback(() => {
+    commentIdRef.current && onDeleteComment?.(commentIdRef.current, commentContentRef.current);
+  }, [onDeleteComment]);
+
   const [showConfirmDeleteAlert] = useCautionAlert({
     className: "confirm-delete-alert",
     title: "Delete Comment",
     content: alertContent,
     confirmLabel: "Delete",
-    onConfirm: () => commentIdRef.current && onDeleteComment?.(commentIdRef.current, commentContentRef.current)
+    onConfirm: handleConfirm
   });
 
   const handleDeleteComment = (commentId: string, commentContent: string) => {

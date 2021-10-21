@@ -30,10 +30,6 @@ export const useCautionAlert = ({
                     : content;
   const contentProps = typeof content === "string" ? { content } : {};
 
-  const handleConfirm = () => {
-    onConfirm();
-  };
-
   const [showAlert, hideAlert] = useCustomModal({
     className: `error-alert ${className || ""}`,
     title: title || "",
@@ -42,10 +38,10 @@ export const useCautionAlert = ({
     contentProps,
     buttons: [
       { label: cancelLabel || "Cancel" },
-      { label: confirmLabel || "OK", isDefault: true, onClick: handleConfirm }
+      { label: confirmLabel || "OK", isDefault: true, onClick: onConfirm }
     ],
     onClose
-  });
+  }, [onClose, onConfirm]);
 
   return [showAlert, hideAlert];
 };
