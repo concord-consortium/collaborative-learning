@@ -146,9 +146,9 @@ interface ITeacherNetworkInfo {
 interface ILogComment {
   focusDocumentId: string;
   focusTileId?: string;
-  isFirst: boolean; // actual argument is ignored, when isAddingAComment is falsey
+  isFirst?: boolean; // actual argument is ignored, when isAdding is falsey
   commentText: string;
-  isAddingAComment: boolean;
+  isAdding: boolean
 }
 
 export class Logger {
@@ -251,11 +251,11 @@ export class Logger {
     focusTileId,
     isFirst,
     commentText,
-    isAddingAComment
+    isAdding
     }: ILogComment) {
     let event: LogEventName;
 
-    if (isAddingAComment) {
+    if (isAdding) {
       event = focusTileId
         ? isFirst
           ? LogEventName.CHAT_PANEL_ADD_INITIAL_COMMENT_FOR_TILE

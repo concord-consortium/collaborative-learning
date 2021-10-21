@@ -43,7 +43,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
         focusTileId,
         isFirst: (numComments < 1),
         commentText: comment,
-        isAddingAComment: true
+        isAdding: true
       };
       Logger.logCommentEvent(eventPayload);
     }
@@ -61,9 +61,8 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
       const eventPayload = {
         focusDocumentId: focusDocumentRef.current,
         focusTileId: (focusTileIdRef && focusTileIdRef.current) || undefined,
-        isFirst: true, // NO-OP
         commentText,
-        isAddingAComment: false
+        isAdding: false
       };
       Logger.logCommentEvent(eventPayload);
     }
