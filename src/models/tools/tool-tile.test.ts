@@ -1,21 +1,28 @@
 import { getSnapshot } from "mobx-state-tree";
 import { kDefaultMinWidth, ToolTileModel } from "./tool-tile";
 import { kUnknownToolID, UnknownContentModelType } from "./unknown-content";
-import { _private } from "./tool-types";
-import { each } from "lodash";
+import { getToolIds, getToolContentInfoById } from "./tool-content-info";
 
 describe("ToolTileModel", () => {
 
-  it("supports each tool type", () => {
-    each(_private.toolMap, (ToolContentModel, toolID) => {
+  // TODO this should really be explicit at least for the built in types so we can
+  // make sure any dynamic registration is working
+  getToolIds().forEach(toolID => {
+    it(`supports the tool: ${toolID}`, () => {
+      const SpecificToolContentModel = getToolContentInfoById(toolID).modelClass;
+
       // can create a model with each type of tool
       const content: any = { type: toolID };
+
+      // TODO: currently the UnkownToolModel is not registered so it
+      // doesn't have an id in getToolIds
+
       // UnknownToolModel has required property
       if (toolID === kUnknownToolID) {
         content.originalType = "foo";
       }
       let toolTile = ToolTileModel.create({
-                      content: ToolContentModel.create(content)
+                      content: SpecificToolContentModel.create(content)
                     });
       expect(toolTile.content.type).toBe(toolID);
 

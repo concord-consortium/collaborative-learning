@@ -4,6 +4,7 @@ import { types, IAnyStateTreeNode, Instance, SnapshotIn, SnapshotOut } from "mob
 import { exportTableContentAsJson } from "./table-export";
 import { getRowLabel, kSerializedXKey, canonicalizeValue, isLinkableValue } from "./table-model-types";
 import { IDocumentExportOptions, registerToolContentInfo } from "../tool-content-info";
+import { ToolMetadataModel, ToolContentModel } from "../tool-types";
 import { addLinkedTable, removeLinkedTable } from "../table-links";
 import { IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
 import { canonicalizeExpression } from "../../../components/tools/table-tool/expression-utils";
@@ -88,9 +89,9 @@ export interface TableContentTableImport {
   columns?:TableContentColumnImport[];
 }
 
-export const TableMetadataModel = types
-  .model("TableMetadata", {
-    id: types.string,
+export const TableMetadataModel = ToolMetadataModel
+  .named("TableMetadata")
+  .props({
     linkedGeometries: types.array(types.string),
     expressions: types.map(types.string),
     rawExpressions: types.map(types.string)
@@ -160,8 +161,9 @@ export const TableMetadataModel = types
   }));
 export type TableMetadataModelType = Instance<typeof TableMetadataModel>;
 
-export const TableContentModel = types
-  .model("TableContent", {
+export const TableContentModel = ToolContentModel
+  .named("TableContent")
+  .props({
     type: types.optional(types.literal(kTableToolID), kTableToolID),
     isImported: false,
     changes: types.array(types.string)

@@ -6,6 +6,15 @@ import { findMetadata, ToolContentUnion } from "./tool-types";
 import { DisplayUserTypeEnum } from "../stores/user-types";
 import { uniqueId } from "../../utilities/js-utils";
 
+// import all tools so they are registered
+import "./geometry/geometry-content";
+import "./image/image-content";
+import "./placeholder/placeholder-content";
+import "./table/table-content";
+import "./text/text-content";
+import "./unknown-content";
+import "./drawing/drawing-content";
+
 // generally negotiated with app, e.g. single column width for table
 export const kDefaultMinWidth = 60;
 
@@ -40,6 +49,7 @@ export const ToolTileModel = types
     // whether to restrict display to certain users
     display: DisplayUserTypeEnum,
     // e.g. "GeometryContentModel", "ImageContentModel", "TableContentModel", "TextContentModel"
+    // What we want to do is generate this at runtime or at least late
     content: ToolContentUnion
   })
   .views(self => ({

@@ -1,53 +1,33 @@
-import { IAnyType, Instance, SnapshotOut, types } from "mobx-state-tree";
-import { kGeometryToolID, GeometryContentModel, GeometryContentModelType,
-          GeometryMetadataModel, GeometryMetadataModelType } from "./geometry/geometry-content";
-import { kImageToolID, ImageContentModel, ImageContentModelType } from "./image/image-content";
-import { kPlaceholderToolID, PlaceholderContentModel, PlaceholderContentModelType
-      } from "./placeholder/placeholder-content";
-import { kTableToolID, TableContentModel, TableContentModelType,
-          TableMetadataModel, TableMetadataModelType } from "./table/table-content";
-import { kTextToolID, TextContentModel, TextContentModelType } from "./text/text-content";
-import { kUnknownToolID, UnknownContentModel, UnknownContentModelType } from "./unknown-content";
-import { DrawingContentModelType, DrawingContentModel,
-          DrawingToolMetadataModel, DrawingToolMetadataModelType } from "./drawing/drawing-content";
-import { kDrawingToolID } from "./drawing/drawing-types";
+import { Instance, SnapshotOut, types } from "mobx-state-tree";
+import { kUnknownToolID, UnknownContentModel } from "./unknown-content";
+import { getToolContentModels, getToolContentInfoById } from "./tool-content-info";
 
-export const ToolTypeEnum = types.enumeration(
-                              "ToolTypes",
-                              [
-                                kPlaceholderToolID,
-                                kGeometryToolID,
-                                kImageToolID,
-                                kTableToolID,
-                                kTextToolID,
-                                kDrawingToolID,
-                                kUnknownToolID
-                              ]);
-export const ToolContentUnion = types.union(
-                                  { dispatcher: toolFactory },
-                                  PlaceholderContentModel,
-                                  GeometryContentModel,
-                                  ImageContentModel,
-                                  TableContentModel,
-                                  TextContentModel,
-                                  DrawingContentModel,
-                                  UnknownContentModel);
+// It isn't clear when 'late' is run. Hopefully it will be run after all of
+// the content models have been registered. If we remove the content model imports above,
+// then these registrations will not happen until something else imports the content model,
+// if the code is split into different modules and the tool modules are loaded dynamically
+// we'd need to see if late will be delayed until after this dynamic loading
+export const ToolContentUnion = types.late(() => {
+  const contentModels = getToolContentModels();
+  return types.union({ dispatcher: toolFactory }, ...contentModels);
+});
 
-export type ToolContentUnionType = PlaceholderContentModelType |
-                                    GeometryContentModelType |
-                                    ImageContentModelType |
-                                    TableContentModelType |
-                                    TextContentModelType |
-                                    DrawingContentModelType |
-                                    UnknownContentModelType;
+// Generic super class of all tool content models
+export const ToolContentModel = types.model("ToolContentModel",
+  {
+    // TODO need to check this use of optional and unknownToolID here
+    // The type value needs to be optional so it can also be optional by sub types
+    // But I don't understand the rules of MST composition yet when the properties overlap
+    type: types.optional(types.string, kUnknownToolID)
+  });
 
-export type ToolMetadataUnionType = GeometryMetadataModelType |
-                                    TableMetadataModelType |
-                                    DrawingToolMetadataModelType;
+export type ToolContentModelType = Instance<typeof ToolContentModel>;
 
-interface IToolMap {
-  [id: string]: IAnyType;
-}
+export const ToolMetadataModel = types.model("ToolMetadataModel",
+  {
+    id: types.string
+  });
+export type ToolMetadataModelType = Instance<typeof ToolMetadataModel>;
 
 export const ToolButtonModel = types.model("ToolButton", {
   name: types.string,
@@ -60,42 +40,24 @@ export type ToolButtonModelType = Instance<typeof ToolButtonModel>;
 export type ToolButtonSnapshot = SnapshotOut<typeof ToolButtonModel>;
 
 interface IPrivate {
-  toolMap: IToolMap;
-  metadataMap: IToolMap;
-  metadata: { [id: string]: ToolMetadataUnionType };
+  metadata: { [id: string]: ToolMetadataModelType };
 }
 
 export const _private: IPrivate = {
-  toolMap: {
-    [kPlaceholderToolID]: PlaceholderContentModel,
-    [kGeometryToolID]: GeometryContentModel,
-    [kImageToolID]: ImageContentModel,
-    [kTableToolID]: TableContentModel,
-    [kTextToolID]: TextContentModel,
-    [kDrawingToolID]: DrawingContentModel,
-    [kUnknownToolID]: UnknownContentModel
-  },
-
-  metadataMap: {
-    [kGeometryToolID]: GeometryMetadataModel,
-    [kTableToolID]: TableMetadataModel,
-    [kDrawingToolID]: DrawingToolMetadataModel
-  },
-
   metadata: {}
 };
 
 export function isToolType(type: string) {
-  return !!(type && _private.toolMap[type]);
+  return !!(type && getToolContentInfoById(type));
 }
 
 export function toolFactory(snapshot: any) {
   const toolType: string | undefined = snapshot && snapshot.type;
-  return toolType && _private.toolMap[toolType] || UnknownContentModel;
+  return toolType && getToolContentInfoById(toolType)?.modelClass || UnknownContentModel;
 }
 
 export function findMetadata(type: string, id: string) {
-  const MetadataType = _private.metadataMap[type];
+  const MetadataType = getToolContentInfoById(type).metadataClass;
   if (!MetadataType) return;
 
   if (!_private.metadata[id]) {
