@@ -1,6 +1,6 @@
 import { types, Instance, SnapshotOut } from "mobx-state-tree";
 import { registerToolContentInfo } from "../tool-content-info";
-import { ToolContentModel } from "../tool-types"
+import { ToolContentModel } from "../tool-types";
 
 export const kPlaceholderToolID = "Placeholder";
 

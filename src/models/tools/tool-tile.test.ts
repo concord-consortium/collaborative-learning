@@ -1,6 +1,6 @@
 import { getSnapshot } from "mobx-state-tree";
 import { kDefaultMinWidth, ToolTileModel } from "./tool-tile";
-import { kUnknownToolID, UnknownContentModelType } from "./unknown-content";
+import { kUnknownToolID, UnknownContentModelType } from "./tool-types";
 import { getToolIds, getToolContentInfoById } from "./tool-content-info";
 
 describe("ToolTileModel", () => {

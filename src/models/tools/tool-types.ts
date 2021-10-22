@@ -1,5 +1,4 @@
 import { Instance, SnapshotOut, types } from "mobx-state-tree";
-import { kUnknownToolID, UnknownContentModel } from "./unknown-content";
 import { getToolContentModels, getToolContentInfoById } from "./tool-content-info";
 
 // It isn't clear when 'late' is run. Hopefully it will be run after all of
@@ -12,11 +11,14 @@ export const ToolContentUnion = types.late(() => {
   return types.union({ dispatcher: toolFactory }, ...contentModels);
 });
 
+export const kUnknownToolID = "Unknown";
+
 // Generic super class of all tool content models
 export const ToolContentModel = types.model("ToolContentModel",
   {
     // TODO need to check this use of optional and unknownToolID here
-    // The type value needs to be optional so it can also be optional by sub types
+    // I think the type value needs to be optional so code that working with ToolContentModelType
+    // is allowed to create model instances without providing a type, but I need to confirm that.
     // But I don't understand the rules of MST composition yet when the properties overlap
     type: types.optional(types.string, kUnknownToolID)
   });
@@ -65,3 +67,26 @@ export function findMetadata(type: string, id: string) {
   }
   return _private.metadata[id];
 }
+
+// The Unknown content model has to be defined here because it is "extends" ToolContentModel
+// so it depends on ToolContentModel but the toolFactory function also depends on UnknownContentModel
+// so this is a circular dependency. If they are in the same module then this isn't a problem
+// There is a still a "uknown-content" module it can be registered later to avoid another
+// circular dependency.
+export const UnknownContentModel = ToolContentModel
+  .named("UnknownTool")
+  .props({
+    type: types.optional(types.literal(kUnknownToolID), kUnknownToolID),
+    original: types.maybe(types.string)
+  })
+  .preProcessSnapshot(snapshot => {
+    const type = snapshot && snapshot.type;
+    return type && (type !== kUnknownToolID)
+            ? {
+              type: kUnknownToolID,
+              original: JSON.stringify(snapshot)
+            }
+            : snapshot;
+  });
+
+export type UnknownContentModelType = Instance<typeof UnknownContentModel>;
