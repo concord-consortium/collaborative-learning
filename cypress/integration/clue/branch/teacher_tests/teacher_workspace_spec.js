@@ -157,11 +157,12 @@ describe('Chat panel for networked teacher', () => {
     cy.get(".comment-text").last().should("contain", "Send this comment after enter.");
   });
   it('verify user can delete a post', () => {
-    cy.get("[data-testid=delete-message-button]").last().click();
+    const msgToDelete = "Send this comment after enter.";
+    cy.contains(".comment-thread", msgToDelete).find("[data-testid=delete-message-button]").click();
     cy.get(".confirm-delete-alert .modal-button").contains("Delete").click();
     cy.wait(1000);
     cy.get(".comment-text").should("have.length", 1);
-    cy.get(".comment-text").last().should("not.contain", "Send this comment after enter.");
+    cy.get(".comment-text").last().should("not.contain", msgToDelete);
   });
   it("verify commenting on document only shows document comment, and tile only shows tile comments", () => {
     //setup
