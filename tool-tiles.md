@@ -152,7 +152,7 @@ Only a couple of the tool api functions are supported:
 Currently the `"layout"` facet is used by `useToolBarToolApi` and `useFloatingToolbarLocation`.
 
 ## Floating Toolbar
-Most tools tiles have a floating toolbar.
+Most tool tiles have a floating toolbar.
 
 This is implemented by a child component of the tool component.
 This child component creates a React Portal in the main document div, and sets the location of the portal using `useFloatingToolbarLocation`.
@@ -162,10 +162,10 @@ Functional tool components call `useToolbarToolApi` to setup properties to pass 
 Class tool components setup the the properties themselves without the hook.
 
 ## Linked Tiles
-Some tool tiles can be linked together, so they can provide multiple views of the same data.
+Some tool tiles can be linked together, so they can provide multiple views of the same data. Currently this is limited to the table and geometry tiles and the means of linking them is rather ad hoc.
 
 ### Shared Selection
-When tiles are linked they use the `selection` MST store to synchronize their selection. Currently only the Table and Geometry tools support this.
+When tiles are linked they use the `selection` MST store to synchronize their selection. Currently only the Table and Geometry tools support this because they're the only ones that have a shared selection state.
 
 The selection store is a map with keys of toolId and values of type `DataSetSelectionModel`. The `DataSetSelectionModel` is a map of booleans. For a table tool the ids in this map are the row ids.
 
@@ -177,7 +177,7 @@ When a table is linked to the geometry tool using the `addTableLink` action, the
 
 ## Tool Components
 Tool components are React components that are built for each tool tile type and are conditionally rendered by `ToolTileComponent`.
-Each Tool Component is passed its content through a model property by the `ToolTileComponent` which wraps it.
+Each Tool component is passed its content through a model property by the `ToolTileComponent` which wraps it.
 The `content` is a MST model that is part of a document in the `documents` store.
 
 The following tool components are defined in CLUE:
@@ -222,7 +222,7 @@ IGeometryProps // same as IToolTileProps
 - uses inject/observer pattern: **no**
 - stores accessed:
     - `useUIStore` hook
-    - `this.stores.selection` in child component `GeometryContentComponent`
+    - `this.stores.selection` in child component `GeometryContentComponent` (class component)
 - floating toolbar: `GeometryToolbar`, setup with `useToolbarToolApi`
 
 ### ImageToolComponent
