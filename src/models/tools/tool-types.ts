@@ -13,13 +13,30 @@ export const ToolContentUnion = types.late(() => {
 
 export const kUnknownToolID = "Unknown";
 
-// Generic super class of all tool content models
+// Generic "super class" of all tool content models
 export const ToolContentModel = types.model("ToolContentModel",
   {
-    // TODO need to check this use of optional and unknownToolID here
-    // I think the type value needs to be optional so code that working with ToolContentModelType
-    // is allowed to create model instances without providing a type, but I need to confirm that.
-    // But I don't understand the rules of MST composition yet when the properties overlap
+    // This has to be optional because the typescript type created from the sub models
+    // has an `&` of this model and the sub model.  If this was just:
+    //   type: types.string
+    // then typescript has errors because we create tool content models without passing a
+    // type value.
+    //
+    // It could be changed to
+    //   type: types.maybe(types.string)
+    // But that implies the wrong thing.
+    // What it should imply is that all tool content model instances need to have a type.
+    //
+    // Since this is optional, it needs a default value, and Unknown seems like the
+    // best option for this.
+    // I verified that a tool content model could not be constructed with:
+    //   ImageContentModel.create({ type: "Unknown" }).
+    // This kind of create causes a typescript error.
+    // I think it is because the image content type is more specific with its use of
+    // types.literal so that overrides this less specific use of types.string
+    //
+    // Perhaps there is some better way to define this so that there would be an error
+    // if a sub type does not override it.
     type: types.optional(types.string, kUnknownToolID)
   });
 
