@@ -26,7 +26,7 @@ beforeEach(() => {
 });
 
 describe('Chat panel for networked teacher', () => {
-  it('verify chat panel is accessible is teacher is in network (via url params)', () => {
+  it('verify chat panel is accessible if teacher is in network (via url params)', () => {
     cy.visit("/?appMode=qa&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=msa&network=foo");
     cy.waitForLoad();
     dashboard.switchView("Workspace & Resources");
