@@ -185,6 +185,23 @@ Cypress.Commands.add("openDocumentWithTitle", (tab, section, title) => {
   cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer').contains(title).parent().parent().siblings('.scaled-list-item-container').click({force:true});
   cy.get('.edit-button').click();
 });
+Cypress.Commands.add("openDocumentWithIndex", (tab, section, docIndex) => {
+  cy.openSection(tab,section);
+  cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer').eq(docIndex).siblings('.scaled-list-item-container').click({force:true});
+  cy.get('.edit-button').click();
+});
+Cypress.Commands.add("clickProblemResourceTile", (subsection, tileIndex = 0) => {
+  cy.get('[data-focus-section='+subsection+'] .problem-panel .document-content .tile-row').eq(tileIndex).click();
+});
+Cypress.Commands.add("getToolTile", (tileIndex = 0) => {
+  cy.get('.problem-panel .document-content .tile-row .tool-tile').eq(tileIndex);
+});
+Cypress.Commands.add("clickDocumentResourceTile", (tileIndex = 0) => {
+  cy.get('.documents-panel .editable-document-content .tile-row').eq(tileIndex).click();
+});
+Cypress.Commands.add("getDocumentToolTile", (tileIndex = 0) => {
+  cy.get('.documents-panel .editable-document-content .tile-row tool-tile').eq(tileIndex).click();
+});
 Cypress.Commands.add('closeTabs', () => {
   cy.get('.drag-left-handle').click();
 });

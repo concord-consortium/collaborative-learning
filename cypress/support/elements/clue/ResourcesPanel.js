@@ -17,6 +17,10 @@ class ResourcesPanel{
         cy.wait(1000);
     }
 
+    getCollapsedResourcesTab() {
+      return cy.get('.collapsed-resources-tab');
+    }
+
     getCanvasItemTitle(tab, section){
         return cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer');
     }
