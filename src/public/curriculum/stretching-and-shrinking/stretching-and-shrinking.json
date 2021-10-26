@@ -2694,7 +2694,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Situation A. Finding Scale Factors</h3>Marta, Zack, and Jacob make claims. For each claim, decide if it is correct? Explain why. \n<strong>Marta and Zack's claims</strong> Marta and Zack agree that rectangles J and I are similar. Marta says the lengths are growing by a factor of 2. Zack says the scale factor is ½. Who is correct?"
+                        "<h3>Situation A. Finding Scale Factors</h3>Marta, Zack, and Jacob make claims. For each claim, decide if it is correct? Explain why. \n<strong>Marta and Zack's claims</strong> Marta and Zack agree that rectangles J and L are similar. Marta says the lengths are growing by a factor of 2. Zack says the scale factor is ½. Who is correct?"
                       ]
                     }
                   },
@@ -2713,7 +2713,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Zack's Claim</strong> To determine if two rectangles are similar, you can use ratios to show that the scale factor is the same for corresponding side lengths. For example, if the ratio of original side to corresponding side in two similar rectangles is 3:4, then the scale factor from the original to similar rectangle is 3/4."
+                        "<strong>Mia's Claim</strong> To determine if two rectangles are similar, you can use ratios to show that the scale factor is the same for corresponding side lengths. For example, if the ratio of original side to corresponding side in two similar rectangles is 3 units for every 4 units, then the scale factor from the original to similar rectangle is 3/."
                       ]
                     }
                   },
@@ -2724,9 +2724,10 @@
                       "format": "html",
                       "text": [
                         "<p>Not correct. To increase an original side of 3 to a corresponding side of 4, ou would use a multiplier of 1 \u2153. The scale factor is the same as the multiplier. So, the scale factor is 1 \u2153, not 3/4 as Zack thought.</p>",
-                        "To find the multiplier, you can use the relationship between the sides. You can scale the ratio of the sides to a unit rate. For every 3 units on the original there are 4 units on the image. So, for every",
-                        "<strong>\u2938 \u00f7 3                                     \u2938 \u00f7 3</strong>",
-                        "1 unit on the original there are 1 \u2153 units on the image.",
+                        "To find the multiplier, you can use the relationship between the sides. You can scale the ratio of the sides to a unit rate. ",
+                        "For every 3 units on the original there are 4 units on the image. ",
+                        "<strong>\u2938 \u00f7 3                                           \u2938 \u00f7 3</strong>",
+                        "So, for every 1 unit on the original there are 1 \u2153 units on the image.",
                         "Note that students have often found it easier to think of the scale factor as a multiplier rather than a ratio."
                       ]
                     }
@@ -2736,7 +2737,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Jacob's Claim</strong> I also think that if two triangles are similar, you can use ratios to show that the scale factor is the same for corresponding sides. "
+                        "<strong>Jacob's Claim</strong> I also think that if two triangles are similar, you can use ratios to show that the scale factor is the same for corresponding sides.  "
                       ]
                     }
                   },
@@ -2756,7 +2757,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Marta's Claim</strong> If you know the perimeter of one shape, you can predict the perimeter of a similar shape. "
+                        "<strong>Sam's Claim</strong> If you know the perimeter of one shape, you can predict the perimeter of a similar shape. "
                       ]
                     }
                   },
@@ -2766,7 +2767,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Correct. As you can see in the similar rectangles J and L, when the width and length of rectangles grow by 2, the perimeters also grow by 2. So, if you know the perimeter of one shape and if you know the scale factor of the similar shape, then you can predict the perimeter of the similar shape. The perimeter is a length, so it behaves like the width and length. Some might say that the perimeter , and if the scale factor is 2, then the new perimeter is 2 times each length or  . This is just double of the original perimeter.</p>"
+                        "<p>Correct. As you can see in the similar rectangles J and L, when the width and length of rectangles grow by 2, the perimeters also grow by 2. So, if you know the perimeter of one shape and if you know the scale factor of the similar shape, then you can predict the perimeter of the similar shape. The perimeter is a length, so it behaves like the width and length. Some might say that the perimeter scales, and if the scale factor is 2, then the new perimeter is 2 times each length or width. This is just double the original perimeter.</p>"
                       ]
                     }
                   }
@@ -2876,7 +2877,7 @@
                   {
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/SS_3_1_In_21_squares_350w.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SS_3_1_Intro_scale3.jpg"
                     }
                   },
                   {
@@ -2884,7 +2885,22 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "We can also put four small squares together to make a four-tile square. This four-tile square is similar to both the large nine-tile square and the small single-tile square. The scale factor from the single-tile square to the four-tile square is 2. The scale factor from the four-tile square to the single-tile square is 1/2."
+                        "We can also put four small squares together to make a four-tile square. This four-tile square is similar to both the large nine-tile square and the small single-tile square."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/SS_3_1_Intro_scale2.jpg"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "The scale factor from the single-tile square to the four-tile square is 2. The scale factor from the four-tile square to the single-tile square is 1/2."
                       ]
                     }
                   },
@@ -2899,10 +2915,16 @@
                   },
                   {
                     "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/SS_3_1_Intro_hexagons.jpg"
+                    }
+                  },
+                  {
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "A shape is a <em>rep-tile</em> if you can put together copies that are the same size and shape (congruent) copies of the shape to make a larger, similar shape. The copies may be rotated in order to fit together. A square is a rep-tile. \n\nIn this problem we will investigate which rectangles and triangles are rep-tiles."
+                        "A shape is a <strong>rep-tile</strong> if you can put together copies that are the same size and shape (congruent) copies of the shape to make a larger, similar shape. The copies may be rotated in order to fit together. A square is a rep-tile. \n\nIn this problem we will investigate which rectangles and triangles are rep-tiles."
                       ]
                     }
                   }
@@ -2944,12 +2966,13 @@
                     "display": "teacher",
                     "content": {
                       "type": "Text",
-                      "format": "html",
+                      "format": "markdown",
                       "text": [
-                        "<p>To determine is two shapes are similar:</p>",
-                        "<ul><li>Corresponding angles must have the same measure.</li><li>Corresponding sides must change by the same multiplier. The name of the multiplier is “scale factor”. </li></ul>",
-                        "<p>Scale factor can be determined by measuring and comparing corresponding lengths between two figures. This done using proportional reasoning. For every unit of length in the original there are x times as many units in the corresponding side length. </p>",
-                        "<p>We have seen scale factor as the number of rubber bands used, the percent increase on a copy machine, or the coefficient relationship of the x and y coordinates. </p>"
+                        "Student answers will vary.",
+                        "Quadrilaterals",
+                        "All rectangles and parallelograms have copies that can fit together to make a larger shape that is similar to the original. Also, there are some trapezoids that have copies that can fit together to make a larger, similar shape. Not every trapezoid is a rep-tile. Possible sketches are below. ",
+                        "Triangles",
+                        "All triangles have copies that can fit together to make a larger, similar triangle. Possible sketches shown below."
                       ]
                     }
                   },
@@ -3171,36 +3194,6 @@
                             }
                           ]
                         }
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "1. Which of these quadrilaterals make a rep-tile? Make a sketch to show how the copies fit together."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "2. Which of these triangles make a rep-tile? Make a sketch to show how the copies fit together."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "markdown",
-                      "text": [
-                        "For the shapes that rep-tile,",
-                        "3. What is the scale factor from the original figure to the image? Explain your reasoning.",
-                        "4. How does the perimeter of the larger figure relate to the perimeter of the original figure?",
-                        "5. How does the area of the larger figure relate to the area of the original figure?"
                       ]
                     }
                   }
@@ -3434,6 +3427,12 @@
                     }
                   },
                   {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/SS_3_1_similar.jpg"
+                    }
+                  },
+                  {
                     "display": "teacher",
                     "content": {
                       "type": "Text",
@@ -3455,12 +3454,6 @@
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/3-1_What_If_Situation_C_2.png"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/SS_3_1_similar.jpg"
                     }
                   }
                 ]
@@ -3616,9 +3609,13 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "html",
+                      "format": "markdown",
                       "text": [
-                        "The scale factor that compares one figure to another gives us information about how side lengths, perimeters and areas of the figures are related. The scale factor is the ratio of corresponding side lengths. It is the multiplier that connects the original length to the image length.  It tells us how one length grows or shrinks by a certain factor.\n\nIn Problem 3.2, we will apply what we learned to draw scale drawings."
+                        "The scale factor provides information about how side lengths, perimeters and areas of the figures are related. It",
+                        "* is the ratio of an image side length to the corresponding side length of the original. ",
+                        "is the multiplier that connects the original length to the image length. ",
+                        "tells us how one length grows or shrinks by a certain factor.",
+                        "In Problem 3.2, we will apply what we learned to draw scale drawings to make similar shapes given a set of constraints (criteria)."
                       ]
                     }
                   }
@@ -3654,7 +3651,7 @@
                       "type": "Text",
                       "format": "markdown",
                       "text": [
-                        "To make the new Rectangle P that is similar to A, multiply the scale factor, 2.5, by each side length of rectangle A. The size of rectangle A is 4 x 8. So, you can get 4 x 2.5 = 10, 8 x 2.5 =20, which becomes a 10 x 20 rectangle."
+                        "To make the new Rectangle P that is similar to A, multiply the scale factor, 2.5, by each side length of rectangle A. The size of rectangle A is 4 x 8. So, you can get 4 x 2.5 = 10, 8 x 2.5 =20, which becomes a 10 x 20 rectangle. The lengths are 2.5 times larger. The perimeter increases from 24 units to 60 units. This is an increase of 2.5 times. 24 • 2.5 = 60. The area increases from 32 square units to 200 square units. This is an increase of 6.25 times. 32 • 6.25 = 200. Using the Commutative Property, we can see that the area of P is (2.5 • 4) • (2.5 • 8) = 2.5 • 2.5 • 4 • 8 = 6.25 • 32."
                       ]
                     }
                   },
@@ -3854,6 +3851,13 @@
                     }
                   },
                   {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/3-2_Initial_Challenge_5.png"
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
                       "format": "markdown",
@@ -3876,7 +3880,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/3-2_Initial_Challenge_5.png"
+                      "url": "curriculum/stretching-and-shrinking/images/3-2_Initial_Challenge_6.png"
                     }
                   }
                 ]
@@ -3904,6 +3908,12 @@
                       "text": [
                         "<h3>Situation A. Similar Rectangles</h3>These two rectangles are similar. Is it possible to find the length of side AD? Explain your reasoning."
                       ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/SS_3_2_WI_24_Q1_500w.png"
                     }
                   },
                   {
@@ -3939,21 +3949,6 @@
                       "format": "markdown",
                       "text": [
                         "The scale factor from one figure to the other is 7.5 ÷ 6, or 1.25. Side DF is 3.75 cm since 3 × 1.25 is 3.75. Side FE is 6.25 cm (5 × 1.25 = 6.25). Because the triangles are similar, the corresponding angle measures are the same. So, the measure of angle F is 94°. Angle B and corresponding angle E are each 30° since 180 – (94 + 56) = 30. Note: Students will need to use the fact that the sum of the interior angles of a triangle is 180°."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/SS_3_2_WI_24_Q1_500w.png"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "2. Find all the missing side lengths and angles. Explain your reasoning."
                       ]
                     }
                   },
@@ -4032,7 +4027,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In this problem we will use similar triangles to find the distance across a river."
+                        "In this problem we will use similar triangles to find the distance across a river from Stake 1 to Tree 1."
                       ]
                     }
                   }
@@ -4101,7 +4096,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Situation A. Durrell's Claim</h3>Examine Durrell’s claim. Is he correct? Explain. \n<strong>Durrell's Claim</strong> I can use rep-tiles to show that the smaller right triangle is similar to the larger right triangle. Is he correct? Explain."
+                        "<h3>Situation A. Durrell's Claim</h3> Durrell claims he can use unit rep-tiles to show that the smaller right triangle is similar to the larger right triangle. Is he correct? Explain."
                       ]
                     }
                   },
@@ -4156,7 +4151,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "How can you use similar triangles to find a distance that is difficult to measure directly?"
+                        "How can you use similar triangles to find a distance that is difficult to measure?"
                       ]
                     }
                   },
@@ -4166,9 +4161,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>SOLUTION</strong></p>",
-                        "<p>Students should express which attributes change and which stay the same when one figure is scaled to make an image:  </p>",
-                        "<ul><li>corresponding angles of two similar figures are the same measure while angles of non-similar figures may not be.</li><li>corresponding side lengths and perimeter of the similar figure increases or decreases by the scale factor (multiplier).  </li><li>area of similar figures increases or decreases by the scale factor squared (multiplier squared) </li></ul>"
+                        "To find a distance that you cannot measure directly, you can use similar figures. Draw a diagram that includes a pair of similar nested triangles. One of the sides of the similar triangles should be the distance that you are having trouble measuring. You can multiply (or divide) one side length in a triangle by the scale factor to find the corresponding side length (the missing length) in a similar triangle."
                       ]
                     }
                   }
@@ -4514,6 +4507,12 @@
                     }
                   },
                   {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/SS_4_1_DYK.jpg"
+                    }
+                  },
+                  {
                     "display": "teacher",
                     "content": {
                       "type": "Text",
@@ -4589,9 +4588,32 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Yes, the triangles are scaled. The angles located at the mirror are congruent. If we imagined flipping the triangle created by the distance from the mirror to Ashton, we can see the triangles are similar. These triangles look like the ones that we created with the rep-tiles and with measuring the river distance.</p>",
+                        "<p>Yes, the triangles are scaled. The angles located at the mirror are congruent. If we imagined flipping the triangle created by the distance from the mirror to Ashton, we can see the triangles are similar. These triangles look like the ones that we created with the rep-tiles and with measuring the river distance.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/SS_4_2_Initial_Challenge_2.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
                         "It is 72 inches from the floor to the principal’s eyes."
                       ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/SS_4_2_Initial_Challenge_3.png"
                     }
                   }
                 ]
@@ -4668,6 +4690,13 @@
                     }
                   },
                   {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/SS_4_2_WhatIf_B_Ans.jpg"
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_4_2_Camera.png"
@@ -4737,25 +4766,6 @@
                         "<p>For areas, you can use the scale factor. When the scale factor from figure A to figure B is , the area of the figure B will be a times a, or a2 times the area of the figure A.</p>",
                         "<p>For angle measures, you can use the fact that the corresponding angles measures in two similar figures are equal. You can find missing angle measures by looking at corresponding angle measures in the similar figure.  </p>"
                       ]
-                    }
-                  },
-                  {
-                    "content":
-                    {
-                      "type": "Text",
-                      "format": "markdown",
-                      "text": [
-                        "### Did you know?",
-                        "Special cameras on satellites, airplanes, and ships take images of large areas on earth. They use the images to calculate lengths and areas of shapes. This process is called remote sensing. Some use of remote sensing is tracking forest fires, erupting volcanoes, ocean floor, growth of cities or forests.",
-                        "Georeferencing means that the internal coordinate system of a digital map or aerial photo can be related to a ground system of geographic coordinates. A georeferenced digital map or image has been tied to a known Earth coordinate system, so users can determine where every point on the map or aerial photo is located on the Earth's surface. ",
-                        "The relevant coordinate transforms are typically stored within the image file (GeoPDF and GeoTIFF are examples of georeferenced file formats), though there are many possible mechanisms for implementing georeferencing.  Georeferencing in the digital file allows basic map analysis to be done, such as pointing and clicking on the map to determine the coordinates of a point, to calculate distances and areas, and to determine other information."
-                      ]
-                    }
-                  },
-                  { 
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/SS_4_2_Camera_Georef.png"
                     }
                   }
                 ]
@@ -4843,7 +4853,40 @@
                       "format": "html",
                       "text": [
                         "<p>For measurements, see Teaching Aid 4.3.</p>",
-                        "<p>Rectangles 2 and 3 are similar</p>",
+                        "<p>Rectangles 2 and 3 are similar</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_6.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Ratio reasoning</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_7.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
                         "<p>Possible Reasoning:</p>",
                         "<p>Rectangle #1 is not similar to the #2 or #3.</p>",
                         "<p>From #1 to #2, corresponding sides grow by 2 (short side) or 3 (long side).</p>",
@@ -4865,7 +4908,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Rectangles# 2 and # 3 are similar</p>",
+                        "<p>Rectangles #2 and #3 are similar</p>",
                         "<p>Corresponding angles are equivalent. All angles are 90˚ in rectangles.</p>",
                         "<p>Comparing rectangle #2 to rectangle #3</p>",
                         "<p>Scale Reasoning:</p>",
@@ -4966,10 +5009,33 @@
                   {
                     "display": "teacher",
                     "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_11.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Squares – all squares are similar to other squares</p>",
+                        "<p>Squares – all squares are similar to other squares</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_11.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
                         "<p>Possible Reasoning:</p>",
                         "<p>The corresponding angles will be 90˚. </p>",
                         "<p>Scale Reasoning:</p>",
@@ -5034,6 +5100,19 @@
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_18.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "Corresponding lengths of similar figures increase by the scale factor.",
+                        "Corresponding angles of similar figures have the same measure.",
+                        "Perimeters are lengths, so they increase by the scale factor.",
+                        "Areas increase by the scale factor • scale factor because the length has a scale factor increase in two dimensions."
+                      ]
                     }
                   }
                 ]
@@ -5100,7 +5179,6 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>SOLUTION:</strong></p>",
                         "<p>No. All of the following shapes are quadrilaterals. None of them are similar to the other. </p>"
                       ]
                     }
@@ -5153,9 +5231,8 @@
                       "format": "html",
                       "text": [
                         "<h3>Situation B. Creating More Sets</h3>José challenges his group to create another set of shapes that contains an imposter. He suggests that they use coordinate rules to create the set. ",
-                        "<p>1.  Show your reasoning with sketches of the shapes. </p>",
-                        "<p>2.  Include enough information to show which shapes are similar and which one is the imposter. </p>",
-                        "<p>3. What are strategies for identifying if shapes have been scaled (similar figures) or if the shapes are imposters? </p>"
+                        "<p>1. Is this possible? Show your reasoning with sketches of the shapes.</p>",
+                        "<p>2.  Include enough information to show which shapes are similar and which one is the imposter. </p>"
                       ]
                     }
                   },
@@ -5185,6 +5262,12 @@
                       "text": [
                         "What are strategies for identifying if shapes have been scaled (similar figures) or if the shapes are imposters?"
                       ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/SS_4_3_NWDYK.png"
                     }
                   },
                   {
@@ -5266,6 +5349,20 @@
                         "In this unit, we used proportional reasoning to investigate reasoning to investigate similar figures also called scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
                       ]
                     }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "text",
+                      "format": "markdown",
+                      "text": [
+                        "With similar figures, some attributes of the shape change and some stay the same: ",
+                        "* corresponding angles of two similar figures are the same measure while angles of non-similar figures may not be.",
+                        "* corresponding side lengths of similar figures increase or decrease by the scale factor used to create an image.",
+                        "* perimeter of a new similar figure, as compared to the original figure, changes in size by the scale factor between the original and the new image.",
+                        "**The relationship between corresponding sides of similar figures can be expressed as a ratio. This ratio can help us find the scale factor.**"
+                      ]
+                    }
                   }
                 ]
               },
@@ -5283,6 +5380,19 @@
                         "In this unit, we used proportional reasoning to investigate reasoning to investigate similar figures also called scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
                       ]
                     }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "text",
+                      "format": "markdown",
+                      "text": [
+                        "Students should express which attributes change and which stay the same when one figure is scaled to make an image: ",
+                        "* corresponding angles of two similar figures are the same measure while angles of non-similar figures may not be.",
+                        "* corresponding side lengths and perimeter of the similar figure increases or decreases by the scale factor (multiplier). ",
+                        "* area of similar figures increases or decreases by the scale factor squared (multiplier squared)"
+                      ]
+                    }
                   }
                 ]
               },
@@ -5298,6 +5408,16 @@
                       "format": "html",
                       "text": [
                         "In this unit, we used proportional reasoning to investigate reasoning to investigate similar figures also called scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "text",
+                      "format": "markdown",
+                      "text": [
+                        ""
                       ]
                     }
                   }
