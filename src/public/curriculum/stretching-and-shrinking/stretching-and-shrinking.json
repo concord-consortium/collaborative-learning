@@ -2009,8 +2009,9 @@
                       "format": "markdown",
                       "text": [
                         "### Situation A. Writing New Hat Rules",
-                        "What if you wanted to create a hat that is similar to Mug’s hat? What rule would you write if:",
-                        "1. The side lengths are one third as long as Mug’s hat?"
+                        "Mr. Smith challenged his class to create a design for a similar hat. Then the designs were handed out to different groups to write a rule for the design. Below are a sample of the designs.",
+                        "What rule would you write for each design?",
+                        "**Syrah’s Design:** The side lengths are one third as long as Mug’s hat?"
                       ]
                     }
                   },
@@ -2029,7 +2030,7 @@
                       "type": "Text",
                       "format": "markdown",
                       "text": [
-                        "2. The side lengths are 1.5 times as long as Mug’s hat?"
+                        "**Joe’s Design:** The side lengths are 1.5 times as long as Mug’s hat?"
                       ]
                     }
                   },
@@ -2048,7 +2049,7 @@
                       "type": "Text",
                       "format": "markdown",
                       "text": [
-                        "3.The hat is the same size as Mug’s hat, but has moved right 1 unit and up 5 units?"
+                        "**Viola’s Design:**The hat is the same size as Mug’s hat but has moved right 1 unit and up 5 units?"
                       ]
                     }
                   },
@@ -2067,7 +2068,7 @@
                       "type": "Text",
                       "format": "markdown",
                       "text": [
-                        "4. The image is in another quadrant of the graph?"
+                        "**Kathy's Design:** The image is in another quadrant of the graph?"
                       ]
                     }
                   },
@@ -2089,7 +2090,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Situation B. Negative Numbers and Rules</strong>\nWhat if you multiply each coordinate by a negative number? What happens to the image? Is the image similar to the original figure?"
+                        "<strong>Situation B. Raymond's Claim about Negative Numbers and Rules</strong>\nRaymond claims that if you multiplied each coordinate by a negative number the image is similar but smaller. Is he correct? Explain."
                       ]
                     }
                   },
@@ -2149,6 +2150,26 @@
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_2_2_MughatOnMug.jpg"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "name": "Mug's Hat on Mug",
+                      "columns": [
+                        {"name":"x","values":["0","8","5","5","3","3","0"]},
+                        {"name":"y","values":["7","7","8","9","9","8","7"]}
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "name": "Mug's Hat on Mug",
+                      "columns": [
+                        {"name":"x","values":["0","8","5","5","3","3","0"]},
+                        {"name":"y","values":["7","7","8","9","9","8","7"]}
+                      ]
                     }
                   }
                 ]
