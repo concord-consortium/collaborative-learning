@@ -398,15 +398,6 @@
                     }
                   },
                   {
-                    "content": {
-                      "type": "Text",
-                      "format": "markdown",
-                      "text": [
-                        "Complete Daphne’s reasoning to estimate the height of the teacher."
-                      ]
-                    }
-                  },
-                  {
                     "display": "teacher",
                     "content":
                     {
@@ -423,7 +414,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
                         "**Situation B. What’s Different?**",
                         "1. How does the real-life teacher differ from the teacher in the photo?"
@@ -444,7 +435,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
                         "2. Can you think of some other times you could use a photo to estimate the size of something?"
                       ]
@@ -483,18 +474,6 @@
                     "display": "teacher",
                     "content": 
                     {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Answers will vary. Possible answers:</p>",
-                        "<ul><li>You might want to use a photograph to estimate the size of a large item you plan to buy, such as a large bookshelf. Estimating its size can help you determine whether or not it will fit in its designated spot. </li><li>You could also take a close-up shot of something small, like an insect, next to an object with a standard size, like a penny. Then you can compare the features of the insect, such as its size, to pictures in a reference book. </li></ul>"
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": 
-                    {
                         "type": "Text",
                         "format": "html",
                         "text": [
@@ -502,7 +481,13 @@
                           "<p>As the introduction to the Unit, students might have general rather than mathematically specific answers. Students should begin to informally recognize that proportional relationships between quantities can be used to estimate the relationships between the lengths.</p>"
                         ]
                       }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/SS_1_1_NW_07_did_you_know_350w.png"
                     }
+                  }
                 ],
                 "supports": []
               }
@@ -532,7 +517,8 @@
                         "**or**",
                         "* 1 PI magazine: 7 PI magazines",
                         "**or**",
-                        "* 10 in: 70 in"
+                        "* 10 in: 70 in",
+                        "Recall that using ratio relationships to solve problems is also called proportional reasoning."
                       ]
                     }
                   }
@@ -544,12 +530,28 @@
               "type": "initialChallenge",
               "content": {
                 "tiles": [
+                   {
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "Michelle, Daphne, and Mukesh are officers of the Mystery Club. Mukesh designs a flier to attract new members.",
+                        "Daphne is making a large poster to publicize the next meeting. She wants to redraw the club’s logo, “Super Sleuth,” in a larger size. Michelle shows her a clever way to enlarge the figure by using rubber bands."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/SS_1_2_In_08_flyer_350w.png"
+                    }
+                  },
                   {
                     "content": {
                       "type": "Text",
                       "format": "markdown",
                       "text": [
-                        "##Equipment",
+                        "## Equipment",
                         "* Rubber bands – identical size, bands about 3 inches long work well",
                         "* Learning Aid – with a shape to enlarge and anchor point",
                         "* Blank paper",
@@ -760,9 +762,9 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "html",
+                      "format": "markdown",
                       "text": [
-                        "<strong>Situation B. Changing the Anchor Point and Number of Bands</strong>",
+                        "### Situation B. Changing the Anchor Point and Number of Bands",
                         "Several students had questions about the anchor point and the number of rubber bands. What is your response to each question?",
                         "DaShawn’s Question: What if we change the position of the anchor point? How does this affect the image?",
                         "Sunyoung’s Question: What if we use three rubber bands? We would still trace the figure using the knot closest to the anchor point. How will this affect the image?  ",
@@ -786,16 +788,7 @@
                     "content": 
                     {
                       "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/1-2_What_If_Situation_B.png"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "text",
-                      "text": [
-                        "2. What if you used three rubber bands and traced the figure using the knot closest to the anchor point? How does this affect the image?"
-                      ]
+                      "url": "curriculum/stretching-and-shrinking/images/1-2_What_if_Situation_B.png"
                     }
                   },
                   {
@@ -805,7 +798,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Note that there are two possible interpretations of this question. Most students will use the knot closer to the anchor point to trace the original figure. Some students may use the knot closer to the pencil. </p>",
+                        "<p>Note that there are two possible interpretations of Sunyoung’s question. Most students will use the knot closer to the anchor point to trace the original figure. Some students may use the knot closer to the pencil. </p>",
                         "<p>Answers for the knots closer to the anchor point:</p>",
                         "<ul><li>The shapes are similar to each other. </li><li>The lengths in the image figure are about 3 times as long as the lengths in the original figure.  </li></ul>"
                       ]
@@ -889,22 +882,13 @@
                       }
                   },
                   {
-                    "content": {
-                      "type": "Text",
-                      "format": "text",
-                      "text": [
-                        "3. Amy says the rubber bands are multipliers. They have a multiplying effect. Use the language of ratios to restate Amy’s idea mathematically."
-                      ]
-                    }
-                  },
-                  {
                     "display": "teacher",
                     "content": 
                     {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>If the distances of each figure from the anchor point P have a 2 to 1 ratio, like the 2 rubber band stretcher, then the side length of the image figure is 2 times the side length of the original figure. </p>",
+                        "<p>In Amy's Question, if the distances of each figure from the anchor point P have a 2 to 1 ratio, like the 2 rubber band stretcher, then the side length of the image figure is 2 times the side length of the original figure. </p>",
                         "<p>Using three rubber bands the ratio of the side length in figure 1 to the side length of corresponding side length in the image is 1 to 3 or 1 : 3.</p>"
                       ]
                     }
@@ -1348,17 +1332,14 @@
                     {
                       "content": {
                         "type": "Text",
-                        "text": "Zack and Marta want to design a computer game that involves several animated characters. They ask Marta’s uncle, Carlos, a programmer for a video game company, about computer animation."
-                      }
-                    },
-                    {
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                         "Carlos explains that the computer screen can be thought of as a grid made up of thousands of tiny points, called pixels. To animate a figure, we need to enter the coordinates of key points on the figure. The computer uses these points to draw the figure in different positions. \n\nSometimes the figures in a computer game need to change size. A change in the code can make a figure larger or smaller. We can give it a rule for finding key points from the original figure. In this Investigation, we will explore answers to these questions.\n\n<em>Do the rules create scale drawings? That is, are the two figures similar?</em>",
-                         "<p>Zack and Marta’s computer game involves a family called the Wumps. The members of the Wump family are various sizes, but they all have the same shape. They are similar. Mug Wump is the game’s main character. By enlarging or reducing Mug, a player can transform him into other Wump family members.</p>"
-                          ]
+                        "format": "markdown",
+                        "text": [ 
+                          "Zack and Marta want to design a computer game that involves several animated characters. They ask Marta’s uncle Carlos, a programmer for a video game company, about computer animation.",
+                          "Carlos explains that the computer screen can be thought of as a grid made up of thousands of tiny points, called pixels. To animate a figure, we need to enter the coordinates of key points on the figure. The computer uses these points to draw the figure in different positions.",
+                          "Sometimes the figures in a computer game need to change size. A change in the code can make a figure larger or smaller. We can give it a rule for finding key points from the original figure. In this Investigation, we will explore answers to these questions.",
+                          "Do the rules create scale drawings? That is, are the two figures similar?",
+                          "The following problems will help us answer these questions"
+                        ]
                       }
                     }
                 ]
@@ -1688,7 +1669,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Billie’s Claim</stong> The rule (x, y) creates a figure that is exactly the same as the original."
+                        "<strong>Billie’s Claim</strong> The rule (x, y) creates a figure that is exactly the same as the original."
                       ]
                     }
                   },
@@ -1706,9 +1687,9 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "### Situation B. New Rules",
+                        "<h3>Situation B. New Rules</h3>",
                         "1.  Make a rule that would create a figure similar to Lug."
                       ]
                     }
@@ -1727,7 +1708,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
                         "2. Describe how the corresponding angle measures and side lengths change."
                       ]
@@ -1773,6 +1754,12 @@
                         "* corresponding angles of two similar figures are the same measure while angles of non-similar figures may not be.",
                         "* corresponding side lengths from the original shape to the similar figure increase by the multiplier used to create a new rule. "
                       ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/SS_2_1_In_13_did_you_know_350w.png"
                     }
                   }
                 ]
@@ -3997,8 +3984,8 @@
                       "text": [
                         "With lengths of similar figures, you can multiply each length of the original figure by the scale factor to get the corresponding length on the image. Keeping all the angle measures the same as the original, you can draw the similar figures. ",
                           "To find missing information about angles, you do not need to use scale factors because the corresponding angle measures of similar figures stay the same as the original. ",
-                          "To find missing information about area, you can use scale factors. When the scale factor from the original to the similar figure is , the area of the similar figure will be  times the area of the original.",
-                          "Perimeter is the sum of lengths. So, every relationship for length and scale factor is the same for perimeter and scale factor. To find missing information about perimeter, you can use scale factors. When the scale factor from the original to the similar figure is , the perimeter of the similar figure will be  times the perimeter of the original perimeter. "
+                          "To find missing information about area, you can use scale factors. When the scale factor from the original to the similar figure is *x*, the area of the similar figure will be *x* times *x* or *x^2* times the area of the original.",
+                          "Perimeter is the sum of lengths. So, every relationship for length and scale factor is the same for perimeter and scale factor. To find missing information about perimeter, you can use scale factors. When the scale factor from the original to the similar figure is *x*, the perimeter of the similar figure will be *x* times the perimeter of the original perimeter. "
                       ]
                     }
                   }
@@ -5220,6 +5207,25 @@
                       "format": "html",
                       "text": [
                         "In this unit, we used proportional reasoning to investigate reasoning to investigate similar figures also called scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "markdown",
+                      "text": [
+                        "Proportional reasoning can be used to compare lengths, angles, and areas of similar figures. Students may discuss some of the ratio relationships between the shapes in the Investigation.",
+                        "For figures with the same basic shape (similar figures), student should begin to realize that some measurement change and some stay the same.",
+                        "Students should begin to use and articulate relationships between attributes, such as: ",
+                        "Stay the same: ",
+                        "* same basic look to the shape, ",
+                        "* corresponding angles of an enlargement or reduction of an original figure stay the same,",
+                        "Changes by the multiplier: *  side lengths of an enlargement or reduction figure, as compared to the original figure, change in size by the multiplier used with the original,",
+                        "* perimeter of an enlargement or reduction figure, as compared to the original figure, change in size by the multiplier used with the original, ",
+                        "Changes in some way:",
+                        "* area of an enlarged or reduced figure, as compared to the original figure, changed but not by the multiplier used on the original figure. "
                       ]
                     }
                   }
