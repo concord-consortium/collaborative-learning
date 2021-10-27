@@ -39,8 +39,8 @@ class ChatPanel{
     getUsernameFromCommentHeader() {
       return cy.get('.comment-text-header .user-name');
     }
-    getDeleteMessageButton() {
-      return cy.get("[data-testid=delete-message-button]").last();
+    getDeleteMessageButton(msgToDelete) {
+      return cy.contains(".comment-thread", msgToDelete).find("[data-testid=delete-message-button]");
     }
     getDeleteConfirmModalButton() {
       return cy.get(".confirm-delete-alert .modal-button");

@@ -102,11 +102,12 @@ describe('Chat panel for networked teacher', () => {
     chatPanel.verifyCommentThreadContains("Send this comment after enter.");
   });
   it('verify user can delete a post', () => {
-    chatPanel.getDeleteMessageButton().click();
+    const msgToDelete = "Send this comment after enter.";
+    chatPanel.getDeleteMessageButton(msgToDelete).click();
     chatPanel.getDeleteConfirmModalButton().contains("Delete").click();
     cy.wait(1000);
     chatPanel.verifyCommentThreadLength(1);
-    chatPanel.verifyCommentThreadDoesNotContain("Send this comment after enter.");
+    chatPanel.verifyCommentThreadDoesNotContain(msgToDelete);
   });
   it("verify commenting on document only shows document comment", () => {
     cy.openTopTab("problems");
