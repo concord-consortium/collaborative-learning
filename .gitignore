@@ -12,3 +12,4 @@ yalc.lock
 coverage-cypress
 cypress/screenshots
 *debug.log
+stats.json

@@ -1,5 +1,5 @@
 import initials from "initials";
-import jwt from "jsonwebtoken";
+import jwt_decode from "jwt-decode";
 import superagent from "superagent";
 import { AppMode } from "../models/stores/store-types";
 import { QueryParams, urlParams as pageUrlParams } from "../utilities/url-params";
@@ -114,7 +114,7 @@ export const getPortalJWTWithBearerToken = (basePortalUrl: string, type: string,
           reject("No token found in JWT request response");
         } else {
           const rawJWT = res.body.token;
-          const portalJWT = jwt.decode(rawJWT);
+          const portalJWT = jwt_decode(rawJWT);
           if (portalJWT) {
             resolve([rawJWT, portalJWT as PortalJWT]);
           } else {
@@ -145,7 +145,7 @@ export const getFirebaseJWTWithBearerToken = (basePortalUrl: string, type: strin
         }
         else {
           const {token} = res.body;
-          const firebaseJWT = jwt.decode(token);
+          const firebaseJWT = jwt_decode(token);
           if (firebaseJWT) {
             resolve([token, firebaseJWT as PortalFirebaseJWT]);
           }
