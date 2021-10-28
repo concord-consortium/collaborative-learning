@@ -1384,7 +1384,7 @@
                       ]
                     }
                   },
-                  {
+                  [{
                     "display": "teacher",
                     "content": {
                       "type": "Table",
@@ -1405,8 +1405,8 @@
                         {"name":"2y","values":["2","2","0","0","2","2","0","0","2","2","14","14","2","4","4","6","6","4","8","10","8","8","10","10"]}
                       ]
                     }
-                  },
-                  {
+                  }],
+                  [{
                     "display": "teacher",
                     "content": {
                       "type": "Table",
@@ -1427,7 +1427,7 @@
                         {"name":"3y","values":["3","3","0","0","3","3","0","0","3","3","21","21","3","6","6","9","9","6","12","15","12","12","15","15"]}
                       ]
                     }
-                  },
+                  }],
                   {
                     "display": "teacher",
                     "content": {
@@ -1436,15 +1436,6 @@
                       "columns": [
                         {"name":"x","values":["0","2","2","3","3","5","5","6","6","8","6","2","0","2","6","6","2","2","3","4","5","3","2","6"]},
                         {"name":"3y","values":["3","3","0","0","3","3","0","0","3","3","21","21","3","6","6","9","9","6","12","15","12","12","15","15"]}
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "markdown",
-                      "text": [
-                        "* Plot the other Wump characters – Plot and connect the points from A to X for each Wump character, just as you did for Mug. Put each shape on separate axes."
                       ]
                     }
                   },
@@ -1497,6 +1488,161 @@
                     }
                   },
                   {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Geometry",
+                      "title": "Zug",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-2.186, -1.093],
+                          "axisRange": [26.23, 17.486]
+                        }
+                      },
+                      "objects": [
+                        { "type": "point", "parents": [0, 1.9672131147540983], "properties": {"id":"prgm_04PkwM20ZiB","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [4, 2], "properties": {"id":"Gidu_GI6cLi51YuT","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [4, 0], "properties": {"id":"vsnyFl4R7yFSqico","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [6, 0], "properties": {"id":"dl_R4mXBTAs1na1s","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [6, 2], "properties": {"id":"j0N-5NMf94idfW_k","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [10, 2], "properties": {"id":"rHPdb7ebg8BTEnau","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [10, 0], "properties": {"id":"r6SIbDu5RGYuEmte","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [12, 0], "properties": {"id":"ZeT9bRk8xBrIVFWv","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [12, 2], "properties": {"id":"OhnKFgV7v4ZnqsSX","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [16, 2], "properties": {"id":"7hbdKGt5fmP4COiy","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [12, 14], "properties": {"id":"HCE5ggSH-zjV2UzZ","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [4.043715846994536, 14.043715846994536], "properties": {"id":"ZWngor_99oRQpcTp","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "polygon", "parents": ["prgm_04PkwM20ZiB", "Gidu_GI6cLi51YuT", "vsnyFl4R7yFSqico", "dl_R4mXBTAs1na1s", "j0N-5NMf94idfW_k", "rHPdb7ebg8BTEnau", "r6SIbDu5RGYuEmte", "ZeT9bRk8xBrIVFWv", "OhnKFgV7v4ZnqsSX", "7hbdKGt5fmP4COiy", "HCE5ggSH-zjV2UzZ", "ZWngor_99oRQpcTp"],"properties": {"id":"rTecntACjfGBs4Qe"} },
+                        { "type": "point", "parents": [4, 4], "properties": {"id":"F1BW_A7MgEqyihqQ","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [12, 4], "properties": {"id":"EohbIRXKgTIPoieB","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [12, 6], "properties": {"id":"a5iwQhGjFi-UUSro","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [4, 6], "properties": {"id":"9SWSBKHflaZYVjaB","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "polygon", "parents": ["F1BW_A7MgEqyihqQ", "EohbIRXKgTIPoieB", "a5iwQhGjFi-UUSro", "9SWSBKHflaZYVjaB"],"properties": {"id":"O9g96dSZdBdCQ_Cw"} },
+                        { "type": "point", "parents": [6, 8], "properties": {"id":"8XGWAWqnm-LmTzME","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [8, 10], "properties": {"id":"L0B6h_yJGbOvhboJ","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [10, 8], "properties": {"id":"wwJx0cMCloVenQw3","     snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "polygon", "parents": ["8XGWAWqnm-LmTzME", "L0B6h_yJGbOvhboJ", "wwJx0cMCloVenQw3"],"properties": {"id":"ZoutCN-fiZLrGGOg"} },
+                        { "type": "point", "parents": [4, 10], "properties": {"id":"X3QYLeMmc-Blve1C","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [12, 10], "properties": {"id":"8Q9LhOGj5mzLGtS_","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} }
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Geometry",
+                      "title": "Lug",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-2.186, -1.093],
+                          "axisRange": [26.23, 17.486]
+                        }
+                      },
+                      "objects": [
+                        { "type": "point", "parents": [0, 1], "properties": {"id":"U45DrvU866bWD0KW","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [6.0109289617486334, 1.0382513661202186], "properties": {"id":"GRkNaljOWDikvO-e","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [6, 0], "properties": {"id":"5u2N3v-PoJUPjUSs","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [9, 0], "properties": {"id":"ajoKUGi9X8veVbci","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [9, 1], "properties": {"id":"rsc0OZOVaKvso_i9","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [15, 1], "properties": {"id":"aG1KA1neizwbFLvN","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [15, 0], "properties": {"id":"fbdOONrdZb_mMfiQ","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [18.0327868852459, 0], "properties": {"id":"LKbd8M3u-9KSU42B","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [18, 1], "properties": {"id":"QG9Mq8XEDD7hWqEF","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [24, 1], "properties": {"id":"MYixFHAW063q1XdG","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [18, 7], "properties": {"id":"7rvUpdnQ-gIc879J","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [5.956284153005464, 7.049180327868852], "properties": {"id":"OfVzbIXTApnltQTl","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "polygon", "parents": ["U45DrvU866bWD0KW", "GRkNaljOWDikvO-e", "5u2N3v-PoJUPjUSs", "ajoKUGi9X8veVbci", "rsc0OZOVaKvso_i9", "aG1KA1neizwbFLvN", "fbdOONrdZb_mMfiQ", "LKbd8M3u-9KSU42B", "QG9Mq8XEDD7hWqEF", "MYixFHAW063q1XdG", "7rvUpdnQ-gIc879J", "OfVzbIXTApnltQTl"],"properties": {"id":"5VEKeULWklws-DfL"} },
+                        { "type": "point", "parents": [6, 2], "properties": {"id":"kLA16xx_oVh9S6lo","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [18, 2], "properties": {"id":"Ua9fQuD1CV0rK87V","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [18, 3], "properties": {"id":"hNNWmGDZgjnOt74Z","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [6, 3], "properties": {"id":"Lbj9qfbmLmQAeWED","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "polygon", "parents": ["kLA16xx_oVh9S6lo", "Ua9fQuD1CV0rK87V", "hNNWmGDZgjnOt74Z", "Lbj9qfbmLmQAeWED"],"properties": {"id":"JxlfBp8ktsWMyVQR"} },
+                        { "type": "point", "parents": [9, 4], "properties": {"id":"wBD4vYdM7QFRNJj9","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [12, 5], "properties": {"id":"l2GH6F_3x4EwTFib","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [15, 4], "properties": {"id":"eOXHXB-hFYXQuvcM","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "polygon", "parents": ["wBD4vYdM7QFRNJj9", "l2GH6F_3x4EwTFib", "eOXHXB-hFYXQuvcM"],"properties": {"id":"LKKc3WbSYZcAKu7Y"} },
+                        { "type": "point", "parents": [6, 5], "properties": {"id":"oKettVHETLdZ_McC","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [18, 5], "properties": {"id":"fEQE4G4rscGb9fWw","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} }
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Geometry",
+                      "title": "Bug",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-2.186, -1.093],
+                          "axisRange": [26.23, 17.486]
+                        }
+                      },
+                      "objects": [
+                        { "type": "point", "parents": [0, 3], "properties": {"id":"94zvvX3mSwnnqJFk","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [5.956284153005464, 3.0054644808743167], "properties": {"id":"XvfjoNa0iSHr9R0M","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [6, 0], "properties": {"id":"hBtc6VVkxfMYbzjE","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [9.01639344262295, 0], "properties": {"id":"2oOLdZziNHNAuFSn","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [9.01639344262295, 2.9508196721311473], "properties": {"id":"aovKKsazNwXDTwDc","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [14.972677595628415, 3.0054644808743167], "properties": {"id":"ioctEkd5nk0mbDEN","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [15, 0], "properties": {"id":"VFYQpWC_kkKs7kRd","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [18, 0], "properties": {"id":"JMTRA4_VKOtUSiZm","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [17.97814207650273, 3.0054644808743167], "properties": {"id":"1Mj1hjgx7YVgRW2j","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [24, 3], "properties": {"id":"3LOfbt5VCvGDnq6g","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [18, 21], "properties": {"id":"H5V9CQWwB2awQ5fM","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [6, 21], "properties": {"id":"zQkKDVaLYSHNJ8Q7","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "polygon", "parents": ["94zvvX3mSwnnqJFk", "XvfjoNa0iSHr9R0M", "hBtc6VVkxfMYbzjE", "2oOLdZziNHNAuFSn", "aovKKsazNwXDTwDc", "ioctEkd5nk0mbDEN", "VFYQpWC_kkKs7kRd", "JMTRA4_VKOtUSiZm", "1Mj1hjgx7YVgRW2j", "3LOfbt5VCvGDnq6g", "H5V9CQWwB2awQ5fM", "zQkKDVaLYSHNJ8Q7"],"properties": {"id":"E3Tp7DBr9-aQ9NKh"} },
+                        { "type": "point", "parents": [6, 6], "properties": {"id":"O11hPKsUHOvqpM1w","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [18, 6], "properties": {"id":"ynhlraIxLSRXztmn","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [18, 9], "properties": {"id":"GZpPgSKnrCzjtFFY","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [6, 9], "properties": {"id":"Au8iCY5WS0Z1yOYb","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "polygon", "parents": ["O11hPKsUHOvqpM1w", "ynhlraIxLSRXztmn", "GZpPgSKnrCzjtFFY", "Au8iCY5WS0Z1yOYb"],"properties": {"id":"mawA89VafTtJo1sq"} },
+                        { "type": "point", "parents": [9, 12], "properties": {"id":"orfiJy1LZGhY6WB0","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [12.000000000000002, 15], "properties": {"id":"eMHm4UNof5i6upNJ","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [15.000000000000002, 12], "properties": {"id":"pE7p2IT9xPPJxY9z","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "polygon", "parents": ["orfiJy1LZGhY6WB0", "eMHm4UNof5i6upNJ", "pE7p2IT9xPPJxY9z"],"properties": {"id":"N84D0s2mNTvzmKaW"} },
+                        { "type": "point", "parents": [6, 15], "properties": {"id":"I5tc_58gnM87dAPR","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [18, 15], "properties": {"id":"GPWC83jgOpFDAxB7","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} }
+                      ]
+                    }
+                  },
+                  {
+                    "layout": {
+                      "height": 400
+                    },
+                    "display": "teacher",
+                    "content": {
+                      "type": "Geometry",
+                      "title": "Glug",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-2.186, -1.093],
+                          "axisRange": [26.23, 17.486]
+                        }
+                      },
+                      "objects": [
+                        { "type": "point", "parents": [0, 3], "properties": {"id":"qL4yPB6xXWTANPXb","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [2, 3], "properties": {"id":"hXdXlRMlMPMKd5hN","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [2, 0], "properties": {"id":"XpeLjlt0gebApaRZ","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [3, 0], "properties": {"id":"YPJvQwx-qO0GN4kF","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [3, 3], "properties": {"id":"pDNK_W9N-CC84jD-","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [5, 3], "properties": {"id":"_IafN23QsPL59dGl","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [4.972677595628415, 6.2123955039134425e-15], "properties": {"id":"M7vDxQxzxoC6s37o","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [6, 0], "properties": {"id":"9QrbxWhpmz7SBCZJ","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [6, 3], "properties": {"id":"tb8VxwqahhUWof3M","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [8, 3], "properties": {"id":"k_gjiU-1kCqqnnO0","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [6, 21], "properties": {"id":"6nq-jhqGOSjT6llv","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [2, 21], "properties": {"id":"AduPWZtULcwGkCaz","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "polygon", "parents": ["qL4yPB6xXWTANPXb", "hXdXlRMlMPMKd5hN", "XpeLjlt0gebApaRZ", "YPJvQwx-qO0GN4kF", "pDNK_W9N-CC84jD-", "_IafN23QsPL59dGl", "M7vDxQxzxoC6s37o", "9QrbxWhpmz7SBCZJ", "tb8VxwqahhUWof3M", "k_gjiU-1kCqqnnO0", "6nq-jhqGOSjT6llv", "AduPWZtULcwGkCaz"],"properties": {"id":"x1s0yDh5eoWJ_6w5"} },
+                        { "type": "point", "parents": [2, 6], "properties": {"id":"eydx-20I8ufJ8-5b","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [6, 6], "properties": {"id":"7VVLe6L2Y9k6PL3e","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [6, 9], "properties": {"id":"d6R8Isxip2vHsTYq","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [2, 9], "properties": {"id":"xgKl3hMRqmnmA2_s","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "polygon", "parents": ["eydx-20I8ufJ8-5b", "7VVLe6L2Y9k6PL3e", "d6R8Isxip2vHsTYq", "xgKl3hMRqmnmA2_s"],"properties": {"id":"RGQIgT65Cp22dvGH"} },
+                        { "type": "point", "parents": [2, 15], "properties": {"id":"yOFIHJEm2BklRs6c","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [6, 15], "properties": {"id":"jZt_Q1wfxzVyNUAP","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} }
+                      ]
+                    }
+                  },
+                {
                     "content": {
                       "type": "Table",
                       "name": "Mug Wump",
@@ -1923,7 +2069,7 @@
                       ]
                     }
                   },
-                  {
+                  [{
                     "display": "teacher",
                     "layout": {
                       "height": 200
@@ -1987,7 +2133,119 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Geometry",
+                      "title": "Hat 1",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-2.186, -1.093],
+                          "axisRange": [26.23, 17.486]
+                        }
+                      },
+                      "objects": [
+                        { "type": "point", "parents": [3, 4.1000000000000005], "properties": {"id":"CKZsETthyV76sI63","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [11, 4], "properties": {"id":"XVgLFUmtZZRp6XR7","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [8, 5], "properties": {"id":"1zt_o2C8_NO7jgdU","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [8, 6], "properties": {"id":"sgL9jiY3sEHLTDLw","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [6, 6], "properties": {"id":"CejYRi5zciQV1SsJ","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [6, 5], "properties": {"id":"nfCP5Vs119FDWjK0","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "polygon", "parents": ["CKZsETthyV76sI63", "XVgLFUmtZZRp6XR7", "1zt_o2C8_NO7jgdU", "sgL9jiY3sEHLTDLw", "CejYRi5zciQV1SsJ", "nfCP5Vs119FDWjK0"],"properties": {"id":"UWTq-bMbU0dC2ud_"} }
+                      ]
+                    }
+                  }],
+                  [{
+                    "display": "teacher",
+                    "content": {
+                      "type": "Geometry",
+                      "title": "Hat 2",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-2.186, -1.093],
+                          "axisRange": [26.23, 17.486]
+                        }
+                      },
+                      "objects": [
+                        { "type": "point", "parents": [0, 5], "properties": {"id":"EWwmGMykqI3EAfmJ","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [8, 5], "properties": {"id":"SA5Uo1SRsw64HI-o","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [5, 6], "properties": {"id":"NW3dnnZJt74VMb8_","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [5, 7], "properties": {"id":"nflYISZovV1bWrYC","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [3, 7], "properties": {"id":"7PemD2FkWhS387Sr","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [3, 6], "properties": {"id":"RNvBCcnVQBdah8ue","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "polygon", "parents": ["EWwmGMykqI3EAfmJ", "SA5Uo1SRsw64HI-o", "NW3dnnZJt74VMb8_", "nflYISZovV1bWrYC", "7PemD2FkWhS387Sr", "RNvBCcnVQBdah8ue"],"properties": {"id":"ugV7bOncUuZNn_WH"} }
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Geometry",
+                      "title": "Hat 3",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-2.186, -1.093],
+                          "axisRange": [26.23, 17.486]
+                        }
+                      },
+                      "objects": [
+                        { "type": "point", "parents": [2.9508196721311473, 3.0054644808743194], "properties": {"id":"OEly5WN6_YCdEJgj","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [11, 3], "properties": {"id":"Mqye7QHgnIRpgokl","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [7.978142076502732, 5.956284153005466], "properties": {"id":"hqajRtfZi5G3XId9","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [8, 9], "properties": {"id":"kXay8UaR7h4c5vZP","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [6, 9], "properties": {"id":"3_sBOLAQMamD60lk","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [6, 6], "properties": {"id":"k4Fy8YnkcfQN9VtX","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "polygon", "parents": ["OEly5WN6_YCdEJgj", "Mqye7QHgnIRpgokl", "hqajRtfZi5G3XId9", "kXay8UaR7h4c5vZP", "3_sBOLAQMamD60lk", "k4Fy8YnkcfQN9VtX"],"properties": {"id":"qu3-4pPyMgaN6U_H"} }
+                      ]
+                    }
+                  }],
+                  [
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Geometry",
+                        "title": "Hat 4",
+                        "board": {
+                          "properties": {
+                            "axisMin": [-2.186, -1.093],
+                            "axisRange": [26.23, 17.486]
+                          }
+                        },
+                        "objects": [
+                          { "type": "point", "parents": [0.5, 0.5], "properties": {"id":"D3diq-xIS8sWwPgN","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [4.48087431693989, 0.5464480874316969], "properties": {"id":"ITD9jGE5DKQBBZ05","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [3, 1], "properties": {"id":"hrg0GrlvJ5B3cdFW","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [3, 1.5], "properties": {"id":"_rmZutpv-I_TFPsE","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [2, 1.5], "properties": {"id":"XLjFFqoXMQOeoXHe","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [2, 1], "properties": {"id":"f0qh7hBuA8pj5ksD","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "polygon", "parents": ["D3diq-xIS8sWwPgN", "ITD9jGE5DKQBBZ05", "hrg0GrlvJ5B3cdFW", "_rmZutpv-I_TFPsE", "XLjFFqoXMQOeoXHe", "f0qh7hBuA8pj5ksD"],"properties": {"id":"m7LQmMcwz-y2AC_J"} }
+                        ]
+                      }
+                    },
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Geometry",
+                        "title": "Hat 5",
+                        "board": {
+                          "properties": {
+                            "axisMin": [-2.186, -1.093],
+                            "axisRange": [26.23, 17.486]
+                          }
+                        },
+                        "objects": [
+                          { "type": "point", "parents": [2, 3], "properties": {"id":"CxvwoD441FDOurrq","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [17.97814207650273, 3.0054644808743194], "properties": {"id":"l2cuZc5MkvZdbpua","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [12, 6], "properties": {"id":"PQ2v83foCQO-aUD6","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [12, 9], "properties": {"id":"HlTMZnInmez7o57i","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [7.978142076502732, 9.016393442622952], "properties": {"id":"1W9MKKR3tdYI9VJV","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [8, 6], "properties": {"id":"oiPQtV7kirzjQMD9","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "polygon", "parents": ["CxvwoD441FDOurrq", "l2cuZc5MkvZdbpua", "PQ2v83foCQO-aUD6", "HlTMZnInmez7o57i", "1W9MKKR3tdYI9VJV", "oiPQtV7kirzjQMD9"],"properties": {"id":"e9gzLZ1M3pJ-h_pr"} }
+                        ]
+                      }
+                    }
+                  ]
                 ]
               },
               "supports": [
@@ -2211,6 +2469,13 @@
                         "<h3>x1.5\u2938      \u2938 x1.5</h3>",
                         "Bug              (3x, 3y)"
                       ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/SS_2_2_NWDYK_Mug.jpg"
                     }
                   }
                 ]
@@ -3882,6 +4147,37 @@
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/3-2_Initial_Challenge_6.png"
                     }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Geometry",
+                      "title": "Graph 1",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-2.186, -1.093],
+                          "axisRange": [26.23, 17.486]
+                        }
+                      },
+                      "objects": [
+                        { "type": "point", "parents": [0, 1], "properties": {"id":"QoOAajSwGtewNljd","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [7, 1], "properties": {"id":"E00UkT6YShwP1x7q","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [3, 5], "properties": {"id":"6QU_u1IHGMOYAv2M","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "polygon", "parents": ["QoOAajSwGtewNljd", "E00UkT6YShwP1x7q", "6QU_u1IHGMOYAv2M"],"properties": {"id":"ICTe18smsApCkgdg","labelOption":"length"} },
+                        { "type": "point", "parents": [3, 5], "properties": {"id":"F3X8bOdjJf4Rvvvj","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [3, 1], "properties": {"id":"Ru3MItvlhpMzOH1p","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "polygon", "parents": ["F3X8bOdjJf4Rvvvj", "Ru3MItvlhpMzOH1p"],"properties": {"id":"5DcUuvDmqMhSTEIb","labelOption":"length"} },
+                        { "type": "point", "parents": [10, 1], "properties": {"id":"MS_KgxqRz4vcVZ9h","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [20.5, 1], "properties": {"id":"DzrA2plNu4bFwCHX","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [14, 7], "properties": {"id":"eIK-HXiWEtyYezVT","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "polygon", "parents": ["MS_KgxqRz4vcVZ9h", "DzrA2plNu4bFwCHX", "eIK-HXiWEtyYezVT"],"properties": {"id":"_rY6pH8VyuAe2Q28","labelOption":"length"} },
+                        { "type": "point", "parents": [14, 7], "properties": {"id":"BGBYM4-gz88cDBDt","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [14, 1], "properties": {"id":"jhGA1rxEmVpKmK9j","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "polygon", "parents": ["BGBYM4-gz88cDBDt", "jhGA1rxEmVpKmK9j"],"properties": {"id":"n67iYfC51QOWzPHx","labelOption":"length"} },
+                        { "type": "comment", "parents": [2.383879781420765, 2.021857923497268], "properties": {"id":"KKFBBLX33FiutNQW","anchor":"_rY6pH8VyuAe2Q28","text":"Z"} },
+                        { "type": "comment", "parents": [2.1338797814207653, 1.196721311475411], "properties": {"id":"hcv6VkwAgO53mFDN","anchor":"ICTe18smsApCkgdg","text":"B"} }
+                      ]
+                    }
                   }
                 ]
               },
@@ -5353,7 +5649,7 @@
                   {
                     "display": "teacher",
                     "content": {
-                      "type": "text",
+                      "type": "Text",
                       "format": "markdown",
                       "text": [
                         "With similar figures, some attributes of the shape change and some stay the same: ",
@@ -5384,7 +5680,7 @@
                   {
                     "display": "teacher",
                     "content": {
-                      "type": "text",
+                      "type": "Text",
                       "format": "markdown",
                       "text": [
                         "Students should express which attributes change and which stay the same when one figure is scaled to make an image: ",
@@ -5414,10 +5710,16 @@
                   {
                     "display": "teacher",
                     "content": {
-                      "type": "text",
+                      "type": "Text",
                       "format": "markdown",
                       "text": [
-                        ""
+                        "When scaling figures, some attributes change and some stay the same.",
+                        "* corresponding angles of two similar figures are the same measure while angles of non-similar figures may not be.",
+                        "*  corresponding side lengths, including perimeter, of the similar figure increases or decreases by the scale factor (multiplier). If the scale factor is larger than 1, the shape gets larger. If the scale factor is 1, the shape stays the same size. If the scale factor is smaller than 1, the shape gets smaller.",
+                        "* area of similar figures increases or decreases by the scale factor squared (multiplier squared)",
+                        "* ratios of corresponding adjacent side lengths within two similar figures are equal ",
+                        "* Proportional relationships exist between corresponding lengths of similar figures. We use the quantities within the shapes and quantities across the shapes to describe the scaling.",
+                        "We use the proportional relationships to create similar figures in many ways. Some include using; pictures, rubber bands, copy machine, coordinate grid, nested triangles formed across spaces, shadows, and mirror reflections."
                       ]
                     }
                   }
