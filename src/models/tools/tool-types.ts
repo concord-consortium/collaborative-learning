@@ -2,7 +2,7 @@ import { Instance, SnapshotOut, types } from "mobx-state-tree";
 import { getToolContentModels, getToolContentInfoById } from "./tool-content-info";
 
 // It isn't clear when 'late' is run. Currently it works.  It is running
-// after all of the content models have been registered. That registartion happens when
+// after all of the content models have been registered. That registration happens when
 // the tool-tile.ts module is imported. This import happens in many places right now.
 // If we switch to dynamic loading of tools we will have to see if late runs after this
 // loading has completed.
@@ -14,8 +14,7 @@ export const ToolContentUnion = types.late(() => {
 export const kUnknownToolID = "Unknown";
 
 // Generic "super class" of all tool content models
-export const ToolContentModel = types.model("ToolContentModel",
-  {
+export const ToolContentModel = types.model("ToolContentModel", {
     // The type field has to be optional because the typescript type created from the sub models
     // is an intersection ('&') of this ToolContentModel and the sub model.  If this was just:
     //   type: types.string
@@ -27,7 +26,7 @@ export const ToolContentModel = types.model("ToolContentModel",
     //   type: types.maybe(types.string)
     // Because of the intersection it would still mean the sub models would do the right thing,
     // but if someone looks at this definition of ToolContentModel, it implies the wrong thing.
-    // It might also cause problems when code is working with an generic of ToolContentModel
+    // It might also cause problems when code is working with a generic of ToolContentModel
     // that code couldn't assume that `model.type` is defined.
     //
     // Since this is optional, it needs a default value, and Unknown seems like the
@@ -45,11 +44,10 @@ export const ToolContentModel = types.model("ToolContentModel",
 
 export type ToolContentModelType = Instance<typeof ToolContentModel>;
 
-export const ToolMetadataModel = types.model("ToolMetadataModel",
-  {
+export const ToolMetadataModel = types.model("ToolMetadataModel", {
     id: types.string
   });
-export type ToolMetadataModelType = Instance<typeof ToolMetadataModel>;
+export interface ToolMetadataModelType extends Instance<typeof ToolMetadataModel> {};
 
 export const ToolButtonModel = types.model("ToolButton", {
   name: types.string,
@@ -62,7 +60,7 @@ export type ToolButtonModelType = Instance<typeof ToolButtonModel>;
 export type ToolButtonSnapshot = SnapshotOut<typeof ToolButtonModel>;
 
 interface IPrivate {
-  metadata: { [id: string]: ToolMetadataModelType };
+  metadata: Record<string, ToolMetadataModelType>;
 }
 
 export const _private: IPrivate = {
@@ -74,7 +72,7 @@ export function isToolType(type: string) {
 }
 
 export function toolFactory(snapshot: any) {
-  const toolType: string | undefined = snapshot && snapshot.type;
+  const toolType: string | undefined = snapshot?.type;
   return toolType && getToolContentInfoById(toolType)?.modelClass || UnknownContentModel;
 }
 
@@ -90,11 +88,11 @@ export function findMetadata(type: string, id: string) {
 
 // The UnknownContentModel has to be defined in this tool-types module because it both
 // "extends" ToolContentModel and UnknownContentModel is used by the toolFactory function
-// above. Because of this is a kind of circular dependency.
+// above. Because of this it is a kind of circular dependency.
 // If UnknownContentModel is moved to its own module this circular dependency causes an error.
 // If they are in the same module then this isn't a problem.
 //
-// There is a still a "uknown-content" module, so that module can
+// There is a still an "unknown-content" module, so that module can
 // register the tool without adding a circular dependency on tool-content-info here.
 export const UnknownContentModel = ToolContentModel
   .named("UnknownTool")
@@ -103,7 +101,7 @@ export const UnknownContentModel = ToolContentModel
     original: types.maybe(types.string)
   })
   .preProcessSnapshot(snapshot => {
-    const type = snapshot && snapshot.type;
+    const type = snapshot?.type;
     return type && (type !== kUnknownToolID)
             ? {
               type: kUnknownToolID,
@@ -112,4 +110,4 @@ export const UnknownContentModel = ToolContentModel
             : snapshot;
   });
 
-export type UnknownContentModelType = Instance<typeof UnknownContentModel>;
+export interface UnknownContentModelType extends Instance<typeof UnknownContentModel> {};

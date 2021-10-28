@@ -9,7 +9,7 @@ describe("ToolTileModel", () => {
   // Strings are used because importing the tool id constant could trigger a
   // registration of the tool. The tools should all be registered due to the
   // tool-tile import above.
-  // The tools are listed instead of just using getToolIds (see below) inorder to
+  // The tools are listed instead of just using getToolIds (see below) in order to
   // make sure all of these built in tools get registered correctly as expected.
   const builtInToolIds = [
     "Unknown",
@@ -56,7 +56,7 @@ describe("ToolTileModel", () => {
     });
 
     // If we have more tests verifying that Tools follow the right patterns this test
-    // should be moved to next to them.
+    // should be moved next to them.
     it(`${toolID} content models can be created without the type`, () => {
       const SpecificToolContentModel = getToolContentInfoById(toolID).modelClass;
 

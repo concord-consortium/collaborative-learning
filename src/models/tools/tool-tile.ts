@@ -47,7 +47,7 @@ export const ToolTileModel = types
     id: types.optional(types.identifier, () => uniqueId()),
     // whether to restrict display to certain users
     display: DisplayUserTypeEnum,
-    // e.g. "GeometryContentModel", "ImageContentModel", "TableContentModel", "TextContentModel"...
+    // e.g. "GeometryContentModel", "ImageContentModel", "TableContentModel", "TextContentModel", ...
     content: ToolContentUnion
   })
   .views(self => ({
