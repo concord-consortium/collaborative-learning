@@ -1,4 +1,4 @@
-import { IAnyStateTreeNode, getParent, getType } from "mobx-state-tree";
+import { IAnyStateTreeNode, getParent, getType, hasParent } from "mobx-state-tree";
 import { DocumentContentModelType } from "../models/document/document-content";
 
 /**
@@ -7,11 +7,12 @@ import { DocumentContentModelType } from "../models/document/document-content";
  * parent type, which can cause circular reference errors in MST.
  */
 export function getParentWithTypeName(target: IAnyStateTreeNode, typeName: string): IAnyStateTreeNode | undefined {
-  let parent: IAnyStateTreeNode | null = getParent(target);
-  while (parent) {
+  let current = target;
+  while (hasParent(current)) {
+      const parent = getParent(current);
       const type = getType(parent);
       if (type.name === typeName) return parent;
-      parent = getParent(parent);
+      current = parent;
   }
   return undefined;
 }

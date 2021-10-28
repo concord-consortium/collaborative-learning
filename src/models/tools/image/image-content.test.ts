@@ -21,7 +21,7 @@ describe("ImageContent", () => {
   });
 
   it("should support default non-placeholder content", () => {
-    const content = defaultImageContent("my/image/url");
+    const content = defaultImageContent({ url: "my/image/url" });
     expect(content.isUserResizable).toBe(true);
     expect(content.changeCount).toBe(1);
     expect(content.filename).toBeUndefined();

@@ -9,8 +9,8 @@ import placeholderImage from "../../../assets/image_placeholder.png";
 
 export const kImageToolID = "Image";
 
-export function defaultImageContent(url?: string) {
-  const change = createChange(url || placeholderImage);
+export function defaultImageContent(options?: {url?: string}) {
+  const change = createChange(options?.url || placeholderImage);
   return ImageContentModel.create({
                             type: "Image",
                             changes: [change]

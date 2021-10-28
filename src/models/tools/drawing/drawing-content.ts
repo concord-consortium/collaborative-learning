@@ -1,4 +1,4 @@
-import { types, Instance } from "mobx-state-tree";
+import { types, getSnapshot, Instance } from "mobx-state-tree";
 import { exportDrawingTileSpec } from "./drawing-export";
 import { importDrawingTileSpec, isDrawingTileImportSpec } from "./drawing-import";
 import { DrawingObjectDataType } from "./drawing-objects";
@@ -10,6 +10,7 @@ import {
   DefaultToolbarSettings, DrawingToolChange, DrawingToolCreateChange, DrawingToolDeleteChange, DrawingToolMoveChange,
   DrawingToolUpdate, DrawingToolUpdateChange, kDrawingDefaultHeight, kDrawingToolID, ToolbarModalButton, ToolbarSettings
 } from "./drawing-types";
+import { UnitModelType } from "../../curriculum/unit";
 
 export const computeStrokeDashArray = (type?: string, strokeWidth?: string|number) => {
   const dotted = isFinite(Number(strokeWidth)) ? Number(strokeWidth) : 0;
@@ -78,10 +79,14 @@ export const DrawingToolMetadataModel = ToolMetadataModel
   }));
 export type DrawingToolMetadataModelType = Instance<typeof DrawingToolMetadataModel>;
 
-export function defaultDrawingContent(options?: {stamps: StampModelType[]}) {
+export function defaultDrawingContent(options?: {unit?: UnitModelType}) {
+  let stamps: StampModelType[] = [];
+  if (options?.unit) {
+    stamps = getSnapshot(options.unit.defaultStamps);
+  }
   return DrawingContentModel.create({
     type: kDrawingToolID,
-    stamps: options?.stamps || [],
+    stamps,
     changes: []
   });
 }

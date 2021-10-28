@@ -20,6 +20,7 @@ export interface IDocumentAddTileOptions {
   title?: string;
   addSidecarNotes?: boolean;
   url?: string;
+  text?: string;
 }
 
 export const DocumentToolEnum = types.enumeration("tool",

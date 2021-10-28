@@ -1,13 +1,8 @@
 import { cloneDeep, each } from "lodash";
 import { types, getSnapshot, Instance, SnapshotIn } from "mobx-state-tree";
-import { StampModelType } from "../tools/drawing/drawing-content";
-import { kDrawingToolID } from "../tools/drawing/drawing-types";
-import { kGeometryToolID } from "../tools/geometry/geometry-content";
-import { kImageToolID } from "../tools/image/image-content";
 import { kPlaceholderToolID } from "../tools/placeholder/placeholder-content";
-import { kTableToolID } from "../tools/table/table-content";
 import { kTextToolID } from "../tools/text/text-content";
-import { getToolContentInfoById, IDocumentExportOptions } from "../tools/tool-content-info";
+import { getToolContentInfoById, getToolContentInfoByTool, IDocumentExportOptions } from "../tools/tool-content-info";
 import { ToolContentModelType } from "../tools/tool-types";
 import {
   ToolTileModel, ToolTileModelType, ToolTileSnapshotInType, ToolTileSnapshotOutType
@@ -513,50 +508,6 @@ export const DocumentContentModel = types
       const content = placeholderContentInfo?.defaultContent(sectionId);
       return self.addTileContentInNewRow(content, { rowIndex: self.rowCount });
     },
-    addGeometryTile(options?: INewGeometryTileOptions) {
-      const geometryContentInfo = getToolContentInfoById(kGeometryToolID);
-      const result = self.addTileContentInNewRow(
-                            geometryContentInfo?.defaultContent({ title: options?.title }),
-                            { rowHeight: geometryContentInfo?.defaultHeight, ...options });
-      if (options?.addSidecarNotes) {
-        const { rowId } = result;
-        const row = self.rowMap.get(rowId);
-        const textContentInfo = getToolContentInfoById(kTextToolID);
-        if (row && textContentInfo) {
-          const tile = ToolTileModel.create({ content: textContentInfo.defaultContent() });
-          self.insertNewTileInRow(tile, row, 1);
-          result.additionalTileIds = [ tile.id ];
-        }
-      }
-      return result;
-    },
-    addTableTile(options?: INewTitledTileOptions) {
-      const tableContentInfo = getToolContentInfoById(kTableToolID);
-      return self.addTileContentInNewRow(
-                    tableContentInfo?.defaultContent({ title: options?.title }),
-                    { rowHeight: tableContentInfo?.defaultHeight, ...options });
-    },
-    addTextTile(options?: INewTextTileOptions) {
-      const textContentInfo = getToolContentInfoById(kTextToolID);
-      return self.addTileContentInNewRow(textContentInfo?.defaultContent(options?.text), options);
-    },
-    addImageTile(options?: INewImageTileOptions) {
-      const imageContentInfo = getToolContentInfoById(kImageToolID);
-      return self.addTileContentInNewRow(imageContentInfo?.defaultContent(options?.url), options);
-    },
-    addDrawingTile(options?: INewTileOptions) {
-      let defaultStamps: StampModelType[];
-      const documents = getParentWithTypeName(self, "Documents") as DocumentsModelType;
-      if (documents && documents.unit) {
-        defaultStamps = getSnapshot(documents.unit.defaultStamps);
-      } else {
-        defaultStamps = [];
-      }
-      const drawingContentInfo = getToolContentInfoById(kDrawingToolID);
-      return self.addTileContentInNewRow(
-                    drawingContentInfo?.defaultContent({stamps: defaultStamps}),
-                    { rowHeight: drawingContentInfo.defaultHeight, ...options });
-    },
     copyTilesIntoExistingRow(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
       const results: NewRowTileArray = [];
       if (tiles.length > 0) {
@@ -730,27 +681,38 @@ export const DocumentContentModel = types
         }
       },
       addTile(tool: DocumentTool, options?: IDocumentContentAddTileOptions) {
-        const { title, addSidecarNotes, url, insertRowInfo } = options || {};
+        const { title, addSidecarNotes, url, text, insertRowInfo } = options || {};
         // for historical reasons, this function initially places new rows at
         // the end of the content and then moves them to the desired location.
         const addTileOptions = { rowIndex: self.rowCount };
-        let tileInfo;
-        switch (tool) {
-          case "text":
-            tileInfo = self.addTextTile(addTileOptions);
-            break;
-          case "table":
-            tileInfo = self.addTableTile({ title, ...addTileOptions });
-            break;
-          case "geometry":
-            tileInfo = self.addGeometryTile({ title, addSidecarNotes, ...addTileOptions });
-            break;
-          case "image":
-            tileInfo = self.addImageTile({ url, ...addTileOptions });
-            break;
-          case "drawing":
-            tileInfo = self.addDrawingTile(addTileOptions);
-            break;
+        const contentInfo = getToolContentInfoByTool(tool);
+        const documents = getParentWithTypeName(self, "Documents") as DocumentsModelType;
+        const unit = documents?.unit;
+
+        // FIXME: the geometry content model just passes these options through
+        // as a set of changes viea defaultGeometryBoardChange
+        // only the title is handled specifically, so the url, text, and unit might
+        // cause problems.
+        // FIXME: The default methods are exported by content models so they can be used
+        // by tests (it seems).
+        const newContent = contentInfo?.defaultContent({
+          title,
+          url,
+          text,
+          unit
+        });
+        const tileInfo = self.addTileContentInNewRow(
+                              newContent,
+                              { rowHeight: contentInfo?.defaultHeight, ...addTileOptions });
+        if (addSidecarNotes) {
+          const { rowId } = tileInfo;
+          const row = self.rowMap.get(rowId);
+          const textContentInfo = getToolContentInfoById(kTextToolID);
+          if (row && textContentInfo) {
+            const tile = ToolTileModel.create({ content: textContentInfo.defaultContent() });
+            self.insertNewTileInRow(tile, row, 1);
+            tileInfo.additionalTileIds = [ tile.id ];
+          }
         }
 
         // TODO: For historical reasons, this function initially places new rows at the end of the content
