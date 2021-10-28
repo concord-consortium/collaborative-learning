@@ -4,7 +4,7 @@ import { Lambda } from "mobx";
 import { Optional } from "utility-types";
 import { SelectionStoreModelType } from "../../stores/selection";
 import { addLinkedTable, removeLinkedTable } from "../table-links";
-import { ITileExportOptions, registerToolContentInfo } from "../tool-content-info";
+import { ITileExportOptions, registerToolContentInfo, IDefaultContentOptions } from "../tool-content-info";
 import { ToolContentModel, ToolMetadataModel } from "../tool-types";
 import {
   getRowLabelFromLinkProps, IColumnProperties, ICreateRowsProperties, IRowProperties,
@@ -46,14 +46,15 @@ export interface IAxesParams {
   yMax: number;
 }
 
-export function defaultGeometryContent(overrides?: JXGProperties): GeometryContentModelType {
-  const { title, ...boardProps } = overrides || {};
+// This is only used directly by tests
+export function defaultGeometryContent(options?: IDefaultContentOptions): GeometryContentModelType {
+  const { title } = options || {};
   const changes: string[] = [];
   if (title) {
     const titleChange: JXGChange = { operation: "update", target: "metadata", properties: { title } };
     changes.push(JSON.stringify(titleChange));
   }
-  const boardChange = defaultGeometryBoardChange(boardProps);
+  const boardChange = defaultGeometryBoardChange();
   changes.push(JSON.stringify(boardChange));
   return GeometryContentModel.create({ changes });
 }

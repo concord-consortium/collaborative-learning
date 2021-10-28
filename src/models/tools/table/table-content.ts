@@ -3,7 +3,7 @@ import { castArray, each } from "lodash";
 import { types, IAnyStateTreeNode, Instance, SnapshotIn, SnapshotOut } from "mobx-state-tree";
 import { exportTableContentAsJson } from "./table-export";
 import { getRowLabel, kSerializedXKey, canonicalizeValue, isLinkableValue } from "./table-model-types";
-import { IDocumentExportOptions, registerToolContentInfo } from "../tool-content-info";
+import { IDocumentExportOptions, registerToolContentInfo, IDefaultContentOptions } from "../tool-content-info";
 import { ToolMetadataModel, ToolContentModel } from "../tool-types";
 import { addLinkedTable, removeLinkedTable } from "../table-links";
 import { IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
@@ -23,14 +23,16 @@ export const kLabelAttrName = "__label__";
 
 export const kTableDefaultHeight = 160;
 
-export function defaultTableContent(props?: { title?: string }) {
+// This is only used directly by tests
+export function defaultTableContent(props?: IDefaultContentOptions) {
   return TableContentModel.create({
-                            type: "Table",
                             name: props?.title,
                             columns: [
                               { name: "x" },
                               { name: "y" }
                             ]
+                          // This type cast could probably go away if MST was upgraded and
+                          // types.snapshotProcessor(TableContentModel, ...) was used
                           } as SnapshotIn<typeof TableContentModel>);
 }
 

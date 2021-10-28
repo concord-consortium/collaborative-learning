@@ -1,6 +1,6 @@
 import { cloneDeep, each } from "lodash";
 import { types, getSnapshot, Instance, SnapshotIn } from "mobx-state-tree";
-import { kPlaceholderToolID } from "../tools/placeholder/placeholder-content";
+import { kPlaceholderToolID, PlaceholderContentModel } from "../tools/placeholder/placeholder-content";
 import { kTextToolID } from "../tools/text/text-content";
 import { getToolContentInfoById, getToolContentInfoByTool, IDocumentExportOptions } from "../tools/tool-content-info";
 import { ToolContentModelType } from "../tools/tool-types";
@@ -430,8 +430,8 @@ export const DocumentContentModel = types
       const afterRow = (rowIndex < self.rowCount) && self.getRowByIndex(rowIndex);
       if ((beforeRow && beforeRow.isSectionHeader) && (!afterRow || afterRow.isSectionHeader)) {
         const beforeSectionId = beforeRow.sectionId;
-        const placeholderContentInfo = getToolContentInfoById(kPlaceholderToolID);
-        const tile = ToolTileModel.create({ content: placeholderContentInfo?.defaultContent(beforeSectionId) });
+        const content = PlaceholderContentModel.create({sectionId: beforeSectionId});
+        const tile = ToolTileModel.create({ content });
         self.addNewTileInNewRowAtIndex(tile, rowIndex);
       }
     },
@@ -504,8 +504,7 @@ export const DocumentContentModel = types
   }))
   .actions((self) => ({
     addPlaceholderTile(sectionId?: string) {
-      const placeholderContentInfo = getToolContentInfoById(kPlaceholderToolID);
-      const content = placeholderContentInfo?.defaultContent(sectionId);
+      const content = PlaceholderContentModel.create({ sectionId });
       return self.addTileContentInNewRow(content, { rowIndex: self.rowCount });
     },
     copyTilesIntoExistingRow(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
@@ -689,12 +688,6 @@ export const DocumentContentModel = types
         const documents = getParentWithTypeName(self, "Documents") as DocumentsModelType;
         const unit = documents?.unit;
 
-        // FIXME: the geometry content model just passes these options through
-        // as a set of changes viea defaultGeometryBoardChange
-        // only the title is handled specifically, so the url, text, and unit might
-        // cause problems.
-        // FIXME: The default methods are exported by content models so they can be used
-        // by tests (it seems).
         const newContent = contentInfo?.defaultContent({
           title,
           url,
