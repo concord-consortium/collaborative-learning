@@ -42,12 +42,12 @@ export const ToolContentModel = types.model("ToolContentModel", {
     type: types.optional(types.string, kUnknownToolID)
   });
 
-export type ToolContentModelType = Instance<typeof ToolContentModel>;
+export interface ToolContentModelType extends Instance<typeof ToolContentModel> {}
 
 export const ToolMetadataModel = types.model("ToolMetadataModel", {
     id: types.string
   });
-export interface ToolMetadataModelType extends Instance<typeof ToolMetadataModel> {};
+export interface ToolMetadataModelType extends Instance<typeof ToolMetadataModel> {}
 
 export const ToolButtonModel = types.model("ToolButton", {
   name: types.string,
@@ -56,8 +56,8 @@ export const ToolButtonModel = types.model("ToolButton", {
   isDefault: false,
   isTileTool: false
 });
-export type ToolButtonModelType = Instance<typeof ToolButtonModel>;
-export type ToolButtonSnapshot = SnapshotOut<typeof ToolButtonModel>;
+export interface ToolButtonModelType extends Instance<typeof ToolButtonModel> {}
+export interface ToolButtonSnapshot extends SnapshotOut<typeof ToolButtonModel> {}
 
 interface IPrivate {
   metadata: Record<string, ToolMetadataModelType>;
@@ -110,4 +110,4 @@ export const UnknownContentModel = ToolContentModel
             : snapshot;
   });
 
-export interface UnknownContentModelType extends Instance<typeof UnknownContentModel> {};
+export interface UnknownContentModelType extends Instance<typeof UnknownContentModel> {}
