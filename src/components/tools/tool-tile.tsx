@@ -179,8 +179,9 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
   }
 
   public componentDidMount() {
-    this.domElement?.addEventListener("touchstart", this.handlePointerDown, true);
-    this.domElement?.addEventListener("mousedown", this.handlePointerDown, true);
+    const options = { capture: true, passive: true };
+    this.domElement?.addEventListener("touchstart", this.handlePointerDown, options);
+    this.domElement?.addEventListener("mousedown", this.handlePointerDown, options);
   }
 
   public componentDidUpdate() {
@@ -202,8 +203,9 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
   public componentWillUnmount() {
     this.resizeObserver?.disconnect();
 
-    this.domElement?.removeEventListener("mousedown", this.handlePointerDown, true);
-    this.domElement?.removeEventListener("touchstart", this.handlePointerDown, true);
+    const options = { capture: true, passive: true };
+    this.domElement?.removeEventListener("mousedown", this.handlePointerDown, options);
+    this.domElement?.removeEventListener("touchstart", this.handlePointerDown, options);
   }
 
   public render() {
