@@ -7,6 +7,9 @@
     &.my-classes {
       background-color: rgba(255, 193, 138, 0.1);
     }
+    &.my-network {
+      background-color: rgba(250, 236, 141, 0.1);
+    }
   }
 }
 
@@ -15,6 +18,9 @@
   padding: 10px;
   &.my-classes {
     background-color: rgba(255, 193, 138, 0.1);
+  }
+  &.my-network {
+    background-color: rgba(250, 236, 141, 0.1);
   }
 }
 
@@ -29,6 +35,10 @@
     margin-top: 15px;
     background-color: rgba(255, 193, 138, 0.1);
   }
+  &.my-network {
+    margin-top: 15px;
+    background-color: rgba(250, 236, 141, 0.1);
+  }
   .network-divider-label {
     display: flex;
     position: relative;
@@ -42,6 +52,9 @@
     height: 26px;
     &.my-classes {
       background-color: $problem-orange-light-4;
+    }
+    &.my-network {
+      background-color: $network-yellow;
     }
   }
 

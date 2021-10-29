@@ -50,7 +50,9 @@ export const NetworkDocumentsSection: React.FC<IProps> = ({ currentClassHash, cu
     const sectionName = networkSectionType === NetworkSectionType.myClasses
       ? "My Classes"
       : networkSectionType === NetworkSectionType.myNetwork ? "My Network" : "";
-    const sectionClass = networkSectionType === NetworkSectionType.myClasses ? "my-classes" : "";
+    const sectionClass = networkSectionType === NetworkSectionType.myClasses
+      ? "my-classes"
+      : networkSectionType === NetworkSectionType.myNetwork ? "my-network" : "";
 
     return (
       <div className={`network-container ${sectionClass}`}>
