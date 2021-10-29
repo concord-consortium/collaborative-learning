@@ -490,7 +490,6 @@
                     }
                   },
                   {
-                    "id": "n64HrxB1wW1q1lb8",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SASTG_1-2_presenting_the_challenge.png"
@@ -522,14 +521,14 @@
                     "id": "DPMOfLD2PxQ3Lz_t",
                     "content": {
                       "type": "Image",
-                      "url": "SASTG_1-2_presenting_the_challenge_2.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SASTG_1-2_presenting_the_challenge_2.png"
                     }
                   },
                   {
                     "id": "DPMOfLD2PxQ3Lz_t",
                     "content": {
                       "type": "Image",
-                      "url": "SASTG_1-2_presenting_the_challenge_3.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SASTG_1-2_presenting_the_challenge_3.png"
                     }
                   },
                   {
@@ -550,7 +549,6 @@
               "content": {
                 "tiles": [
                   {
-                    "id": "O-OSwQ9E6TqFdZYq",
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -637,15 +635,16 @@
                     }
                   },
                   {
-                    "id": "YVPZcOE8329ItYfd",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Suggested Questions</strong></p>",
-                        "<ul><li>How do the lengths of the line segments compare between the two figures? (The image’s line segments are twice as long.)</li><li>How do the angles of the two figures compare? (They didn’t change.)</li><li>Which comparison statements in What If Situation A can be written as ratio statements?  (Comparison 1—1:2 for original side length to image side length. Comparison 4—1:1/4  for original area to image area)</li></ul>",
+                        "<ul><li>How do the lengths of the line segments compare between the two figures? (The image’s line segments are twice as long.)</li><li>How do the angles of the two figures compare? (They didn’t change.)</li><li>Which comparison statements in What If Situation A can be written as ratio statements?  (Comparison 1—1:2 for original side length to image side length. Comparison 4—1:   for original area to image area)</li></ul>",
                         "<p>Blank transparency film is helpful in showing how the angles compare. Copy one angle of a figure and then place it on top of the corresponding angle of the second figure. Or have both figures on transparencies and place one on top of the other.</p>",
-                        "<ul><li>How does the area change from the original to the image? (Students can informally compare the areas. They may use transparent grids or show informally how four of the smaller figures cover the larger figure. Or they may focus on the hat, which has a rectangular shape.)</li><li>The original and the image are similar figures. What do you think “mathematically similar” means? (Answers will vary.)</li></ul>"
+                        "<ul><li> How does the area change from the original to the image? (Students can informally compare the areas. They may use transparent grids or show informally how four of the smaller figures cover the larger figure. Or they may focus on the hat, which has a rectangular shape.)</li></ul>",
+                        "<p>Students may mention things other than that the side lengths have doubled. Do not be too concerned about the exactness of their observations at this stage, as long as their answers are reasonable for their drawings.</p><p>Students are often amazed at the result of using a rubber-band stretcher. It is helpful to have in mind that what makes the stretcher work is really similarity. In the first figure below, you can see that when we knot two same-size rubber bands together and the knot travels on a segment of the original figure, the drawing of a segment in the image will be twice the length of the segment in the original. The scale factor between the original and the image is 2.</p>",
+                        "<ul><li>The original and the image are similar figures. What do you think “mathematically similar” means? (Answers will vary.)</li></ul>"
                       ]
                     }
                   },
@@ -1250,14 +1249,12 @@
                     }
                   },
                   {
-                    "id": "FKwLn_Fo2Zo18bBg",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/TG_8.jpg"
                     }
                   },
                   {
-                    "id": "Zi_WxgY4T-6MPQ--",
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -2126,20 +2123,20 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                                      "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#RevisionComments'>Revision Comments</a></strong></p>",
-                                      "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#StemProblemFormat'>CMP STEM Problem Format</a></strong></p>",
-                                      "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#StemProblemFormat'>Unit Descriptions</a></strong></p>",
-                                      "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitGoals'>Goals of the Units</a></strong></p>",
-                                      "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAlignment'>Unit Alignments</a></strong></p>",
-                                      "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#GeneralAoL'>General Arc of Learning </a></strong></p>",
-                                      "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAoL'>Unit Arc of Learning</a></strong></p>",
-                                      "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#MathOverview'>Mathematical Overview</a></strong></p>",
-                                      "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#LearningAids'>Learning Aids</a></strong></p>",
-                                      "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#TeachingAids'>Teaching Aids</a></strong></p>",
-                                      "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#FamilyLetters'>Family Letters </a></strong></p>",
-                                      "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#Assessments'>Assessments</a></strong></p>",
-                                      "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#ACEHomework'>ACE Homework</a></strong></p>"
-                                    ]
+                                "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#RevisionComments'>Revision Comments</a></strong></p>",
+                                "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#StemProblemFormat'>CMP STEM Problem Format</a></strong></p>",
+                                "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#StemProblemFormat'>Unit Descriptions</a></strong></p>",
+                                "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitGoals'>Goals of the Units</a></strong></p>",
+                                "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAlignment'>Unit Alignments</a></strong></p>",
+                                "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#GeneralAoL'>General Arc of Learning </a></strong></p>",
+                                "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAoL'>Unit Arc of Learning</a></strong></p>",
+                                "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#MathOverview'>Mathematical Overview</a></strong></p>",
+                                "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#LearningAids'>Learning Aids</a></strong></p>",
+                                "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#TeachingAids'>Teaching Aids</a></strong></p>",
+                                "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#FamilyLetters'>Family Letters </a></strong></p>",
+                                "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#Assessments'>Assessments</a></strong></p>",
+                                "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#ACEHomework'>ACE Homework</a></strong></p>"
+                              ]
                     }
                   },
                   {
@@ -2281,7 +2278,7 @@
                     "id": "_Vs89RdradVhHR7E",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/SASTG_3-1_making_mathematics_explicit_1.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SASTG_2-1_providing_for_individual_needs_1.png"
                     }
                   },
                   {
@@ -2472,7 +2469,7 @@
                     "id": "JYGjynwmL1tZB17j",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/SASTG_3-2_check_for_understanding_1.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SASTG_3-1_making_mathematics_explicit_1.png"
                     }
                   },
                   {
@@ -2802,7 +2799,7 @@
                     "id": "0VqM0_xYDymLs8-4",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/SASTG_3-3_connecting_to_prioir_knowledge_1.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SASTG_3-2_check_for_understanding_1.png"
                     }
                   },
                   {
