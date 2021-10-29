@@ -110,13 +110,13 @@ $section-padding: 6px;
 
 .my-network {
   .collapsible-documents-section {
-    background-color: rgba(255, 193, 138, 0.1);
+    background-color: rgba(250, 236, 141, 0.1);
     .section-collapse-toggle {
       &:hover {
-        background-color: rgba(255, 193, 138, 0.5);
+        background-color: rgba(250, 236, 141, 0.5);
       }
       &:active {
-        background-color: rgba(255, 193, 138, 1.0);
+        background-color: rgba(250, 236, 141, 1.0);
       }
     }
   }
