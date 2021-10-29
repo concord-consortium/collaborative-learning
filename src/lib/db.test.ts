@@ -8,6 +8,10 @@ import { TextContentModelType } from "../models/tools/text/text-content";
 import { createSingleTileContent } from "../utilities/test-utils";
 import { ToolTileModelType } from "../models/tools/tool-tile";
 import * as UrlParams from "../utilities/url-params";
+
+// This is needed so MST can deserialize snapshots referring to tools
+import "../register-tools";
+
 type QueryParams = UrlParams.QueryParams;
 
 describe("db", () => {

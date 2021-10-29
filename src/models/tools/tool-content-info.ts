@@ -1,5 +1,6 @@
 import { ToolContentModel, ToolContentModelType, ToolMetadataModel } from "./tool-types";
 import { UnitModelType } from "../curriculum/unit";
+import { IToolTileProps } from "../../components/tools/tool-tile";
 
 export interface IDMap {
   [id: string]: string;
@@ -18,16 +19,25 @@ export interface IDefaultContentOptions {
   unit?: UnitModelType;
 }
 
+type ToolComponentType = React.ComponentType<IToolTileProps> & {
+  tileHandlesSelection?: boolean;
+  // This doesn't seem to be implemented anywhere, but perhaps it is added by a
+  // 3rd party library
+  getDragImageNode?: (dragElt: HTMLElement) => HTMLElement;
+};
+
 export interface IToolContentInfo {
   id: string;
   tool: string;
-  titleBase?: string;
   modelClass: typeof ToolContentModel;
+  defaultContent: (options?: IDefaultContentOptions) => ToolContentModelType;
+  Component: ToolComponentType;
+  toolTileClass: string;
+  titleBase?: string;
   metadataClass?: typeof ToolMetadataModel;
   addSidecarNotes?: boolean;
   defaultHeight?: number;
   exportNonDefaultHeight?: boolean;
-  defaultContent: (options?: IDefaultContentOptions) => ToolContentModelType;
   snapshotPostProcessor?: ToolTileModelContentSnapshotPostProcessor;
 }
 

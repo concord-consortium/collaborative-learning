@@ -3,7 +3,7 @@ import { castArray, each } from "lodash";
 import { types, IAnyStateTreeNode, Instance, SnapshotIn, SnapshotOut } from "mobx-state-tree";
 import { exportTableContentAsJson } from "./table-export";
 import { getRowLabel, kSerializedXKey, canonicalizeValue, isLinkableValue } from "./table-model-types";
-import { IDocumentExportOptions, registerToolContentInfo, IDefaultContentOptions } from "../tool-content-info";
+import { IDocumentExportOptions, IDefaultContentOptions } from "../tool-content-info";
 import { ToolMetadataModel, ToolContentModel } from "../tool-types";
 import { addLinkedTable, removeLinkedTable } from "../table-links";
 import { IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
@@ -720,14 +720,3 @@ export function mapTileIdsInTableSnapshot(snapshot: SnapshotOut<TableContentMode
   });
   return snapshot;
 }
-
-registerToolContentInfo({
-  id: kTableToolID,
-  tool: "table",
-  titleBase: "Table",
-  modelClass: TableContentModel,
-  metadataClass: TableMetadataModel,
-  defaultHeight: kTableDefaultHeight,
-  defaultContent: defaultTableContent,
-  snapshotPostProcessor: mapTileIdsInTableSnapshot
-});

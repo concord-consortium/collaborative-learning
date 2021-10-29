@@ -3,6 +3,9 @@ import { kDefaultMinWidth, ToolTileModel } from "./tool-tile";
 import { kUnknownToolID, UnknownContentModelType } from "./tool-types";
 import { getToolIds, getToolContentInfoById } from "./tool-content-info";
 
+// This is needed so we can check which tools are registered below
+import "../../register-tools";
+
 describe("ToolTileModel", () => {
 
   // Define the built in tool ids explicitly as strings.

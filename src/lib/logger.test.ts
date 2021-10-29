@@ -17,6 +17,9 @@ import { ProblemModelType } from "../models/curriculum/problem";
 import { UIModel } from "../models/stores/ui";
 import { ENavTab } from "../models/view/nav-tabs";
 
+// This is needed so MST can deserialize snapshots referring to tools
+import "../register-tools";
+
 const investigation = InvestigationModel.create({
   ordinal: 1,
   title: "Investigation 1",

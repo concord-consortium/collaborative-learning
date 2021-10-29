@@ -1,7 +1,7 @@
 import { types, Instance, SnapshotOut } from "mobx-state-tree";
 import { createChange, ImageToolChange } from "./image-change";
 import { exportImageTileSpec, importImageTileSpec, isImageTileImportSpec } from "./image-import-export";
-import { ITileExportOptions, registerToolContentInfo, IDefaultContentOptions } from "../tool-content-info";
+import { ITileExportOptions, IDefaultContentOptions } from "../tool-content-info";
 import { ToolContentModel } from "../tool-types";
 import { isPlaceholderImage } from "../../../utilities/image-utils";
 import { safeJsonParse } from "../../../utilities/js-utils";
@@ -83,10 +83,3 @@ export const ImageContentModel = ToolContentModel
 
 export type ImageContentModelType = Instance<typeof ImageContentModel>;
 export type ImageContentSnapshotOutType = SnapshotOut<typeof ImageContentModel>;
-
-registerToolContentInfo({
-  id: kImageToolID,
-  tool: "image",
-  modelClass: ImageContentModel,
-  defaultContent: defaultImageContent
-});

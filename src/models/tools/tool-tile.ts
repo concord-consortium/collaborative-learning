@@ -5,14 +5,7 @@ import { findMetadata, ToolContentUnion } from "./tool-types";
 import { DisplayUserTypeEnum } from "../stores/user-types";
 import { uniqueId } from "../../utilities/js-utils";
 
-// import all tools so they are registered
-import "./unknown-content";
 import { kPlaceholderToolID } from "./placeholder/placeholder-content";
-import "./geometry/geometry-content";
-import "./image/image-content";
-import "./table/table-content";
-import "./text/text-content";
-import "./drawing/drawing-content";
 
 // generally negotiated with app, e.g. single column width for table
 export const kDefaultMinWidth = 60;
