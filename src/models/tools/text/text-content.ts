@@ -2,16 +2,15 @@ import { types, Instance } from "mobx-state-tree";
 import { Value } from "slate";
 import Plain from "slate-plain-serializer";
 import Markdown from "slate-md-serializer";
-import { ITileExportOptions, registerToolContentInfo, IDefaultContentOptions } from "../tool-content-info";
+import { ITileExportOptions, registerToolContentInfo } from "../tool-content-info";
 import {
   deserializeValueFromLegacy, htmlToSlate, serializeValueToLegacy, slateToHtml, textToSlate
 } from "@concord-consortium/slate-editor";
 
 export const kTextToolID = "Text";
 
-// This is only used directly by tests.
-export function defaultTextContent(options?: IDefaultContentOptions) {
-  return TextContentModel.create({ text: options?.text });
+function defaultTextContent() {
+  return TextContentModel.create();
 }
 
 const MarkdownSerializer = new Markdown();

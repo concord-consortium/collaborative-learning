@@ -13,10 +13,6 @@ export interface IDefaultContentOptions {
   // url is added so the CLUE core can add a image tile to the document when a user
   // drops an image on the document.
   url?: string;
-  // text is really only added to help with tests so the tests can use this
-  // code: `content.addTile("text", { text: "foo" });`
-  // Perhaps we can remove this.`
-  text?: string;
   // unit is added so the drawing tool can use a default set of stamps defined in
   // the unit
   unit?: UnitModelType;

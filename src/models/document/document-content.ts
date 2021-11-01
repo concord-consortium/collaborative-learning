@@ -1,6 +1,6 @@
 import { cloneDeep, each } from "lodash";
 import { types, getSnapshot, Instance, SnapshotIn } from "mobx-state-tree";
-import { kPlaceholderToolID, PlaceholderContentModel } from "../tools/placeholder/placeholder-content";
+import { PlaceholderContentModel } from "../tools/placeholder/placeholder-content";
 import { kTextToolID } from "../tools/text/text-content";
 import { getToolContentInfoById, getToolContentInfoByTool, IDocumentExportOptions } from "../tools/tool-content-info";
 import { ToolContentModelType } from "../tools/tool-types";
@@ -24,22 +24,6 @@ export interface INewTileOptions {
   rowHeight?: number;
   rowIndex?: number;
   locationInRow?: string;
-}
-
-export interface INewTitledTileOptions extends INewTileOptions {
-  title?: string;
-}
-
-export interface INewGeometryTileOptions extends INewTitledTileOptions {
-  addSidecarNotes?: boolean;
-}
-
-export interface INewTextTileOptions extends INewTileOptions {
-  text?: string;
-}
-
-export interface INewImageTileOptions extends INewTileOptions {
-  url?: string;
 }
 
 export interface INewRowTile {
@@ -680,7 +664,7 @@ export const DocumentContentModel = types
         }
       },
       addTile(tool: DocumentTool, options?: IDocumentContentAddTileOptions) {
-        const { title, addSidecarNotes, url, text, insertRowInfo } = options || {};
+        const { title, addSidecarNotes, url, insertRowInfo } = options || {};
         // for historical reasons, this function initially places new rows at
         // the end of the content and then moves them to the desired location.
         const addTileOptions = { rowIndex: self.rowCount };
@@ -688,12 +672,7 @@ export const DocumentContentModel = types
         const documents = getParentWithTypeName(self, "Documents") as DocumentsModelType;
         const unit = documents?.unit;
 
-        const newContent = contentInfo?.defaultContent({
-          title,
-          url,
-          text,
-          unit
-        });
+        const newContent = contentInfo?.defaultContent({ title, url, unit });
         const tileInfo = self.addTileContentInNewRow(
                               newContent,
                               { rowHeight: contentInfo?.defaultHeight, ...addTileOptions });
