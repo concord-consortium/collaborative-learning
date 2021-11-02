@@ -56,7 +56,7 @@ interface IToolTileBaseProps {
   docId: string;  // ephemeral contentId for the DocumentContent
   documentContent: HTMLElement | null;
   isUserResizable: boolean;
-  scale?: number;
+  scale?: number; // This isn't used anymore as far as I can tell
   widthPct?: number;
   height?: number;
   model: ToolTileModelType;
@@ -363,7 +363,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
       }
     }
     // set the drag data
-    const { model, docId, scale } = this.props;
+    const { model, docId } = this.props;
     const ToolComponent = getToolContentInfoById(model.content.type).Component;
     // can't drag placeholder tiles
     if (ToolComponent === PlaceholderToolComponent) {
@@ -412,17 +412,9 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     // TODO: should we create an array of drag images here?
 
     // set the drag image
-    const dragElt = e.target as HTMLElement;
-    // tool components can provide alternate dom node for drag image
-    // use default drag image for all tiles that don't specify drag image
-    const useToolDragImage = !!(ToolComponent && ToolComponent.getDragImageNode);
-    const dragImage = useToolDragImage
-                        ? ToolComponent!.getDragImageNode!(dragElt)
-                        : defaultDragImage;
-    const clientRect = dragElt.getBoundingClientRect();
-    const offsetX = useToolDragImage ? (e.clientX - clientRect.left) / (scale || 1): kDefaultDragImageWidth;
-    const offsetY = useToolDragImage ? (e.clientY - clientRect.top) / (scale || 1) : 0;
-    e.dataTransfer.setDragImage(dragImage, offsetX, offsetY);
+    const offsetX = kDefaultDragImageWidth;
+    const offsetY = 0;
+    e.dataTransfer.setDragImage(defaultDragImage, offsetX, offsetY);
   }
 
   private getDragTileItems(dragSrcContentId: string, tileIds: string[]) {

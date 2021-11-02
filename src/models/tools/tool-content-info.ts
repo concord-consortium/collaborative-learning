@@ -21,9 +21,6 @@ export interface IDefaultContentOptions {
 
 type ToolComponentType = React.ComponentType<IToolTileProps> & {
   tileHandlesSelection?: boolean;
-  // This doesn't seem to be implemented anywhere, but perhaps it is added by a
-  // 3rd party library
-  getDragImageNode?: (dragElt: HTMLElement) => HTMLElement;
 };
 
 export interface IToolContentInfo {
