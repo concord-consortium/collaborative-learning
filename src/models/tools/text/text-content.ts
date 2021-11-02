@@ -10,7 +10,7 @@ import {
 
 export const kTextToolID = "Text";
 
-function defaultTextContent() {
+export function defaultTextContent() {
   return TextContentModel.create();
 }
 
