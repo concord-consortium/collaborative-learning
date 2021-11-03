@@ -16,9 +16,10 @@ jobs:
       - name: Run Tests
         run: npm run test:coverage -- --runInBand
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v2
         with:
           flags: jest
+          token: ${{ secrets.CODECOV_TOKEN }}
   cypress:
     runs-on: ubuntu-latest
     strategy:
@@ -55,9 +56,10 @@ jobs:
           # should be much faster
           CODE_COVERAGE: true
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v2
         with:
           flags: cypress
+          token: ${{ secrets.CODECOV_TOKEN }}
   s3-deploy:
     name: S3 Deploy
     needs:
