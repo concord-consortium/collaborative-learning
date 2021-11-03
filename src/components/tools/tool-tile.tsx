@@ -304,8 +304,12 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
       return;
     }
 
-    const ToolComponent = getToolContentInfoById(model.content.type).Component;
-    if (ToolComponent?.tileHandlesSelection) {
+    // Only select the tile if the tool doesn't handle it
+    // The name tileHandlesSelection is deceiving here it, it means the 
+    // tool doesn't handle it, so let the tile wrapper (this) handle 
+    // it.
+    const toolContentInfo = getToolContentInfoById(model.content.type);
+    if (toolContentInfo.tileHandlesSelection) {
       ui.setSelectedTile(model, {append: hasSelectionModifier(e)});
     }
   }

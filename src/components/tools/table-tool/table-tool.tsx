@@ -144,7 +144,6 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   );
 });
 export default TableToolComponent;
-(TableToolComponent as any).tileHandlesSelection = true;
 
 // import { observer, inject } from "mobx-react";
 // import { Alert, Intent } from "@blueprintjs/core";

@@ -14,5 +14,6 @@ registerToolContentInfo({
   defaultContent: defaultTableContent,
   snapshotPostProcessor: mapTileIdsInTableSnapshot,
   Component: TableToolComponent,
-  toolTileClass: "table-tool-tile"
+  toolTileClass: "table-tool-tile",
+  tileHandlesSelection: true
 });
