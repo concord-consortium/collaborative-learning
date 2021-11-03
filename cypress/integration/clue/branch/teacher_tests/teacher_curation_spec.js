@@ -9,14 +9,12 @@ import ClueCanvas from "../../../../support/elements/clue/cCanvas";
     let resourcesPanel = new ResourcesPanel();
     let clueCanvas = new ClueCanvas;
 
-    const baseUrl = `${Cypress.config("baseUrl")}`;
-
     before(function() {
         const queryParams = "?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:6";
         cy.clearQAData('all');
 
-        cy.visit(baseUrl+queryParams);
-        cy.waitForSpinner();
+        cy.visit(queryParams);
+        cy.waitForLoad();
         dashboard.switchView("Workspace & Resources");
         cy.wait(2000);
         clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');

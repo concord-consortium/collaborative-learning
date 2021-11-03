@@ -3,6 +3,7 @@ import React from "react";
 import { BaseComponent, IBaseProps } from "../base";
 import { InvestigationModelType } from "../../models/curriculum/investigation";
 import { ProblemModelType } from "../../models/curriculum/problem";
+import { parseUrl, stringify } from "query-string";
 
 import "./demo-creator.sass";
 
@@ -19,6 +20,21 @@ interface IProblemOption {
   title: string;
   ordinal: string;
 }
+
+// Parse incoming URL for pass-through query parameters.
+// Pass through any that are not in the exclusion list.
+// Emit non-excluded ones as a URL query string (with an ampersand prepended if not empty).
+export const passThroughQueryItemsFromUrl = (href: string) => {
+  const excludeList = ["demo", "demoName", "unit", "fakeClass", "fakeUser", "problem"];
+  const incomingUrlQueryPairs = parseUrl(href).query;
+  excludeList.forEach((keyToExclude) => {
+    delete incomingUrlQueryPairs[keyToExclude];
+  });
+  const passThroughQueryItems = (Object.keys(incomingUrlQueryPairs).length > 0)
+    ? `&${stringify(incomingUrlQueryPairs)}`
+    : '';
+  return passThroughQueryItems;
+};
 
 /* istanbul ignore next */
 @inject("stores")
@@ -55,6 +71,8 @@ export class DemoCreatorComponent extends BaseComponent<IProps> {
     const classes: JSX.Element[] = [];
     const selectedProblem = this.problemOptions[demo.problemIndex];
 
+    const passThroughQueryItems = passThroughQueryItemsFromUrl(location.href);
+
     const problems = this.problemOptions.map((problem) => {
       return <option key={problem.ordinal} value={problem.ordinal}>{problem.title}</option>;
     });
@@ -64,11 +82,11 @@ export class DemoCreatorComponent extends BaseComponent<IProps> {
     }
 
     for (let studentIndex = 1; studentIndex <= NUM_FAKE_STUDENTS_VISIBLE; studentIndex++) {
-      studentLinks.push(this.createLink("student", studentIndex));
+      studentLinks.push(this.createLink("student", studentIndex, passThroughQueryItems));
     }
 
     for (let teacherIndex = 1; teacherIndex <= NUM_FAKE_TEACHERS; teacherIndex++) {
-      teacherLinks.push(this.createLink("teacher", teacherIndex));
+      teacherLinks.push(this.createLink("teacher", teacherIndex, passThroughQueryItems));
     }
 
     return (
@@ -94,13 +112,13 @@ export class DemoCreatorComponent extends BaseComponent<IProps> {
     );
   }
 
-  private createLink(userType: string, userIndex: number) {
+  private createLink(userType: string, userIndex: number, passThroughQueryItems: string) {
     const { demo, unit } = this.stores;
     const demoNameParam = demo.name ? `&demoName=${demo.name}` : "";
     const fakeUser = `${userType}:${userIndex}`;
     const unitStr = unit.code ? `&unit=${unit.code}` : "";
     // eslint-disable-next-line max-len
-    const href = `?appMode=demo${demoNameParam}&fakeClass=${demo.class.id}&fakeUser=${fakeUser}${unitStr}&problem=${demo.problemOrdinal}`;
+    const href = `?appMode=demo${demoNameParam}&fakeClass=${demo.class.id}&fakeUser=${fakeUser}${unitStr}&problem=${demo.problemOrdinal}${passThroughQueryItems}`;
     return (
       <li key={userIndex}>
         <a href={href} target="_blank" rel="noreferrer">{userType} {userIndex}</a>

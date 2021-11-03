@@ -109,6 +109,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
                                      "comment-select" : documentSelectedForComment});
     return (
       <div className={documentClass}
+        data-testid="document-content"
         onScroll={this.handleScroll}
         onClick={this.handleClick}
         onDragOver={this.handleDragOver}

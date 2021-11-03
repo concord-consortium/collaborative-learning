@@ -14,7 +14,14 @@ import { DocumentsModelType, DocumentsModel } from "../models/stores/documents";
 
 configure({ adapter: new Adapter() });
 
-describe.skip("Four Up Component", () => {
+var mockGetQueryState = jest.fn();
+jest.mock("react-query", () => ({
+  useQueryClient: () => ({
+    getQueryState: mockGetQueryState
+  })
+}));
+
+describe("Four Up Component", () => {
   let documents: DocumentsModelType;
   let document: DocumentModelType;
 

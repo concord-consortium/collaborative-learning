@@ -32,8 +32,6 @@ import 'cypress-commands';
 import ResourcesPanel from "./elements/clue/ResourcesPanel";
 
 Cypress.Commands.add("setupGroup", (students, group) => {
-    const baseUrl = `${Cypress.config("baseUrl")}`;
-
     let qaClass = 10,
         problem = 2.3;
 
@@ -41,12 +39,13 @@ Cypress.Commands.add("setupGroup", (students, group) => {
     let i=0, j=0;
 
     for (i=0;i<students.length;i++) {
-        cy.wait(2000);
-        cy.visit(baseUrl+'?appMode=qa&qaGroup='+group+'&fakeClass='+qaClass+'&fakeUser=student:'+students[i]+'&problem='+problem);
-        // cy.waitForSpinner(); // using this wait does not set up the groups
-        cy.wait(3000);
+        cy.visit('?appMode=qa&qaGroup='+group+'&fakeClass='+qaClass+'&fakeUser=student:'+students[i]+'&problem='+problem);
+        // These checks are here to make sure the workspace has loaded enough to create
+        // the student
+        header.getGroupName().should('contain','Group '+group);
+        header.getGroupMembers().find('div.member').should('contain','S'+students[i]);
     }
-    //verify Group num and there are 4 students in the group
+    // Verify Group num and the correct 4 students are listed, now that all 4 are loaded
     header.getGroupName().should('contain','Group '+group);
     for (j=0; j<students.length; j++) {
         header.getGroupMembers().find('div.member').should('contain','S'+students[j]);
@@ -74,22 +73,69 @@ Cypress.Commands.add("uploadFile",(selector, filename, type="")=>{
     });
 });
 Cypress.Commands.add("clearQAData", (data)=>{ //clears data from Firebase (currently data='all' is the only one supported)
-    const baseUrl = `${Cypress.config("baseUrl")}`;
     if (data==='all') {
-        cy.visit(baseUrl + '?appMode=qa&qaClear=' + data + '&fakeClass=5&fakeUser=student:5');
-        cy.waitForSpinner();
-        cy.get('span').should('contain','QA Cleared: OK');
+        cy.visit('?appMode=qa&qaClear=' + data + '&fakeClass=5&fakeUser=student:5');
+        cy.get('span', {timeout: 60000}).should('contain','QA Cleared: OK');
+        // According to the firebase documentation and our implementation we shouldn't be showing
+        // QA Cleared: OK until the removal of the node in firebase is complete.
+        // However there are some randomly failing tests which could be explained if this
+        // removal on the firebase server happens later and triggers an event after the next
+        // visit command.
+        // So to be safe there is a wait here to give firebase more of a chance to process.
+        cy.wait(1000);
     }
 });
+
+// Login using cy.request, this is faster than using visit, and it makes it possible
+// to visit a local domain after logging in
 Cypress.Commands.add("login", (baseUrl, testTeacher) => {
-    cy.visit(baseUrl + "/users/sign_in");
-    cy.get("input#user_login").type(testTeacher.username);
-    cy.get("input#user_password").type(testTeacher.password);
-    cy.get("form").submit();
+    /*
+      Cookies should be cleared automatically, but that doesn't seem to happen
+      with cy.request to other domains.
+      The use of {domain: null} is an undocumented feature that I found here:
+      https://github.com/cypress-io/cypress/issues/408
+      Without this, the tests will typically pass, but if you leave your cypress browser
+      open long enough, then an invalid cookie will be sent when the test is run and
+      the login will fail in a strange way. It returns success, but doesn't set a valid
+      cookie.
+    */
+    cy.clearCookies({domain: null});
+
+    cy.request({
+        url: `${baseUrl}/api/v1/users/sign_in`,
+        method: "POST",
+        body: {
+          "user[login]": testTeacher.username,
+          "user[password]": testTeacher.password
+        },
+        form: true
+    })
+    .its("status").should("equal", 200);
 });
-Cypress.Commands.add("waitForSpinner", () => {
-    cy.wait(2000);
-    cy.get('.progress', { timeout: 60000 }).should('not.exist');
+
+// Launch a local report, this uses cy.request to first launch the portal report
+// this returns a redirect to a released version of CLUE
+// the URL is modified to strip off the domain and path
+// this way the same url parameters are passed to the localhost CLUE server
+// The portal was not visited with cy.visit, so cypress will allow us to visit a different
+// second level domain (localhost)
+Cypress.Commands.add("launchReport", (reportUrl) => {
+    cy.request({
+        url: reportUrl,
+        method: "GET",
+        followRedirect: false
+    })
+    .then((resp) => {
+        expect(resp.status).to.eq(302);
+        expect(resp.redirectedToUrl).to.match(/^https:\/\/collaborative-learning\.concord\.org/);
+        const realReportUrl = resp.redirectedToUrl;
+        const localReportUrl = new URL(realReportUrl).search;
+        // cy.visit resolves urls relative to the baseUrl
+        cy.visit(localReportUrl);
+    });
+});
+Cypress.Commands.add("waitForLoad", () => {
+  cy.get('.version', {timeout: 60000});
 });
 Cypress.Commands.add("deleteWorkspaces",(baseUrl,queryParams)=>{
     let primaryWorkspace = new PrimaryWorkspace;
@@ -98,7 +144,7 @@ Cypress.Commands.add("deleteWorkspaces",(baseUrl,queryParams)=>{
     let dashboard = new TeacherDashboard();
 
     cy.visit(baseUrl+queryParams);
-    cy.waitForSpinner();
+    cy.waitForLoad();
     dashboard.switchView("Workspace & Resources");
     cy.wait(2000);
     resourcesPanel.openPrimaryWorkspaceTab("my-work");
@@ -138,6 +184,23 @@ Cypress.Commands.add("openDocumentWithTitle", (tab, section, title) => {
   cy.openSection(tab,section);
   cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer').contains(title).parent().parent().siblings('.scaled-list-item-container').click({force:true});
   cy.get('.edit-button').click();
+});
+Cypress.Commands.add("openDocumentWithIndex", (tab, section, docIndex) => {
+  cy.openSection(tab,section);
+  cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer').eq(docIndex).siblings('.scaled-list-item-container').click({force:true});
+  cy.get('.edit-button').click();
+});
+Cypress.Commands.add("clickProblemResourceTile", (subsection, tileIndex = 0) => {
+  cy.get('[data-focus-section='+subsection+'] .problem-panel .document-content .tile-row').eq(tileIndex).click();
+});
+Cypress.Commands.add("getToolTile", (tileIndex = 0) => {
+  cy.get('.problem-panel .document-content .tile-row .tool-tile').eq(tileIndex);
+});
+Cypress.Commands.add("clickDocumentResourceTile", (tileIndex = 0) => {
+  cy.get('.documents-panel .editable-document-content .tile-row').eq(tileIndex).click();
+});
+Cypress.Commands.add("getDocumentToolTile", (tileIndex = 0) => {
+  cy.get('.documents-panel .editable-document-content .tile-row tool-tile').eq(tileIndex).click();
 });
 Cypress.Commands.add('closeTabs', () => {
   cy.get('.drag-left-handle').click();

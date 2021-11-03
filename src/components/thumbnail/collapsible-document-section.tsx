@@ -9,15 +9,16 @@ import { ISubTabSpec } from "../navigation/document-tab-panel";
 import { useNetworkDocuments } from "../../hooks/use-stores";
 import { TabPanelDocumentsSubSectionPanel } from "./tab-panel-documents-subsection-panel";
 import { NavTabSectionModelType } from "../../models/view/nav-tabs";
-// import NotSharedIcon from "../../assets/icons/share/not-share.svg";
-// import { DocumentCaption } from "./document-caption";
+import { Logger, LogEventName } from "../../lib/logger";
 
 import "./tab-panel-documents-section.sass";
 import "./collapsible-document-section.scss";
 
 interface IProps {
   userName: string;
+  userId: string;
   classNameStr: string;
+  classHash: string;
   stores: IStores;
   scale: number;
   selectedDocument?: string;
@@ -29,9 +30,15 @@ interface IProps {
 
 export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
   ({userName, classNameStr, stores, scale, selectedDocument, onSelectDocument, subTab,
-    networkResource}) => {
+    networkResource, userId, classHash}) => {
   const [isOpen, setIsOpen] = useState(false);
   const handleSectionToggle = () => {
+    Logger.log(isOpen
+      ? LogEventName.TEACHER_NETWORK_COLLAPSE_DOCUMENT_SECTION
+      : LogEventName.TEACHER_NETWORK_EXPAND_DOCUMENT_SECTION, {
+      networkClassHash: classHash,
+      networkUsername: `${userId}@${stores.user.portal}`
+    });
     setIsOpen(!isOpen);
   };
 
@@ -83,7 +90,6 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
       </div>
       { isOpen &&
         <div className="list">
-
           {hasDocuments
             ? documentKeys.map((key, i) => {
               const document = networkDocuments.getDocument(key);
@@ -93,51 +99,15 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
                 <DocumentContextReact.Provider key={document.key} value={documentContext}>
                   <TabPanelDocumentsSubSectionPanel section={currentSection} sectionDocument={document}
                     tab={subTab.label} stores={stores} scale={scale} selectedDocument={selectedDocument}
-                    onSelectDocument={onSelectDocument}
+                    onSelectDocument={() => onSelectDocument?.(document)}
                   />
                 </DocumentContextReact.Provider>
               );
             })
             : <div style={{padding: "5px 10px"}}>No Documents Found</div>
           }
-          {/* {sectionDocs.map(document => {
-            const documentContext = getDocumentContext(document);
-            const docNotShared = document.visibility === "private";
-            const docLabel = document?.title || "Untitled";
-            return (
-              <DocumentContextReact.Provider key={document.key} value={documentContext}>
-                { docNotShared
-                  ? <DocumentNoSharedThumbnail label={docLabel} notShared={docNotShared} />
-                  : <TabPanelDocumentsSubSectionPanel section={section} sectionDocument={document} tab={tab}
-                      stores={stores} scale={scale} selectedDocument={selectedDocument}
-                      onSelectDocument={onSelectDocument}
-                    />
-                }
-              </DocumentContextReact.Provider>
-            );
-          })} */}
         </div>
       }
     </div>
   );
 });
-
-// interface IDocumentNotSharedProps {
-//   label: string;
-//   notShared?: boolean;
-// }
-// const DocumentNoSharedThumbnail: React.FC<IDocumentNotSharedProps> = ({ label, notShared }) => {
-//   return (
-//     <div className="list-item not-shared" data-test="my-work-new-document" >
-//       { notShared
-//           ? <div className="not-shared">
-//               <NotSharedIcon className="not-shared-icon" />
-//             </div>
-//           : <div className="scaled-list-item-container new-document-button" >
-//               <div className="scaled-list-item"></div>
-//             </div>
-//       }
-//       <DocumentCaption captionText={label} />
-//     </div>
-//   );
-// };

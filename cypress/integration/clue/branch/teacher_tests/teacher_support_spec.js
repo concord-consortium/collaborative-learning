@@ -15,7 +15,7 @@ import ResourcesPanel from "../../../../support/elements/clue/ResourcesPanel";
         cy.clearQAData('all');
 
         cy.visit(queryParams);
-        cy.waitForSpinner();
+        cy.waitForLoad();
         dashboard.switchView("Workspace & Resources");
         cy.wait(2000);
     });
@@ -36,7 +36,7 @@ import ResourcesPanel from "../../../../support/elements/clue/ResourcesPanel";
               const queryParams = `${Cypress.config("queryParams")}`;
 
               cy.visit(queryParams);
-              cy.waitForSpinner();
+              cy.waitForLoad();
               cy.openResourceTabs();
               cy.openTopTab("supports");
               cy.get('.support-badge').should('be.visible');
@@ -49,6 +49,6 @@ after(function(){
         const queryParams = `${Cypress.config("teacherQueryParams")}`;
 
         cy.visit(queryParams);
-        cy.waitForSpinner();
+        cy.waitForLoad();
         cy.clearQAData('all');
 });

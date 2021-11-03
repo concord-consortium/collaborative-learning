@@ -50,7 +50,9 @@ export const NetworkDocumentsSection: React.FC<IProps> = ({ currentClassHash, cu
     const sectionName = networkSectionType === NetworkSectionType.myClasses
       ? "My Classes"
       : networkSectionType === NetworkSectionType.myNetwork ? "My Network" : "";
-    const sectionClass = networkSectionType === NetworkSectionType.myClasses ? "my-classes" : "";
+    const sectionClass = networkSectionType === NetworkSectionType.myClasses
+      ? "my-classes"
+      : networkSectionType === NetworkSectionType.myNetwork ? "my-network" : "";
 
     return (
       <div className={`network-container ${sectionClass}`}>
@@ -63,10 +65,16 @@ export const NetworkDocumentsSection: React.FC<IProps> = ({ currentClassHash, cu
               const userName = networkSectionType === NetworkSectionType.myClasses
                 ? currentTeacherName
                 : c.teacher || "unknown teacher";
+              const userId = networkSectionType === NetworkSectionType.myClasses
+                ? currentTeacherId
+                : c.id || "unknown teacher";
+              const classHash = c.context_id;
               return <CollapsibleDocumentsSection
                 key={index}
                 userName={userName}
+                userId={userId}
                 classNameStr={c.name || "unknown class"}
+                classHash={classHash}
                 subTab={subTab}
                 networkResource={c}
                 problemTitle={problemTitle}

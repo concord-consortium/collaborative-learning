@@ -58,6 +58,9 @@ jest.mock("../../hooks/use-stores", () => ({
   useDocumentOrCurriculumMetadata: (documentKey: string) => ({
     uid: "1", key: documentKey, type: "problem"
   }),
+  useDocumentFromStore: () => ({
+    getDocument: () => ({ undefined })
+  }),
   useUIStore: () => ({
     showChatPanel: true,
     selectedTileIds: []

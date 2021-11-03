@@ -30,6 +30,7 @@ import { getContentIdFromNode, getDocumentContentFromNode } from "../../utilitie
 import TileDragHandle from "../../assets/icons/drag-tile/move.svg";
 import TileResizeHandle from "../../assets/icons/resize-tile/expand-handle.svg";
 import "../../utilities/dom-utils";
+import dragPlaceholderImage from "../../assets/image_drag.png";
 
 import "./tool-tile.sass";
 
@@ -43,6 +44,7 @@ export const kDragTileCreate = "org.concord.clue.tile.create";
 // allows source compatibility to be checked in dragOver
 export const dragTileSrcDocId = (id: string) => `org.concord.clue.src.${id.toLowerCase()}`;
 export const dragTileType = (type: string) => `org.concord.clue.tile.type.${type}`;
+const kDefaultDragImageWidth = 300;
 
 export function extractDragTileSrcDocId(dataTransfer: DataTransfer) {
   for (const type of dataTransfer.types) {
@@ -141,6 +143,9 @@ interface IState {
   hoverTile: boolean;
 }
 
+const defaultDragImage = document.createElement("img");
+defaultDragImage.src = dragPlaceholderImage;
+
 @inject("stores")
 @observer
 export class ToolTileComponent extends BaseComponent<IProps, IState> {
@@ -168,14 +173,15 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     model.setDisabledFeatures(getDisabledFeaturesOfTile(this.stores, type));
 
     this.hotKeys.register({
-      "cmd-option-e": this.handleCopyImportJson,
+      "cmd-option-e": this.handleCopyImportJsonToClipboard,
       "cmd-shift-c": this.handleCopyModelJson
     });
   }
 
   public componentDidMount() {
-    this.domElement?.addEventListener("touchstart", this.handlePointerDown, true);
-    this.domElement?.addEventListener("mousedown", this.handlePointerDown, true);
+    const options = { capture: true, passive: true };
+    this.domElement?.addEventListener("touchstart", this.handlePointerDown, options);
+    this.domElement?.addEventListener("mousedown", this.handlePointerDown, options);
   }
 
   public componentDidUpdate() {
@@ -197,8 +203,9 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
   public componentWillUnmount() {
     this.resizeObserver?.disconnect();
 
-    this.domElement?.removeEventListener("mousedown", this.handlePointerDown, true);
-    this.domElement?.removeEventListener("touchstart", this.handlePointerDown, true);
+    const options = { capture: true, passive: true };
+    this.domElement?.removeEventListener("mousedown", this.handlePointerDown, options);
+    this.domElement?.removeEventListener("touchstart", this.handlePointerDown, options);
   }
 
   public render() {
@@ -330,7 +337,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private handleCopyImportJson = () => {
+  private handleCopyImportJsonToClipboard = () => {
     const { appConfig, unit } = this.stores;
     const unitBasePath = appConfig.getUnitBasePath(unit.code);
     const transformImageUrl = (url: string, filename?: string) => {
@@ -338,8 +345,17 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     };
     const toolApiInterface = this.context;
     const toolApi = toolApiInterface?.getToolApi(this.modelId);
-    const importJson = toolApi?.exportContentAsTileJson?.({ transformImageUrl });
-    importJson && navigator.clipboard.writeText(importJson);
+    let tileJsonString = toolApi?.exportContentAsTileJson?.({ transformImageUrl });
+    if (tileJsonString) {
+      // Put all exported content in a top-level object, under key: "content",
+      // but _preserve_ existing formatting (which collapses some elements
+      // into a single line; no: indent). But DO indent w.r.t. the new key.
+      tileJsonString = (tileJsonString.slice(-1) === "\n")
+        ? tileJsonString.slice(0, -1) // Remove trailing new line char.
+        : tileJsonString;
+      tileJsonString = `{\n  "content": ${tileJsonString.replace(/\n/g, "\n  ")}\n}\n`;
+    }
+    tileJsonString && navigator.clipboard.writeText(tileJsonString);
     return true;
   }
 
@@ -425,12 +441,14 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     // set the drag image
     const dragElt = e.target as HTMLElement;
     // tool components can provide alternate dom node for drag image
-    const dragImage = ToolComponent && ToolComponent.getDragImageNode
+    // use default drag image for all tiles that don't specify drag image
+    const useToolDragImage = !!(ToolComponent && ToolComponent.getDragImageNode);
+    const dragImage = useToolDragImage
                         ? ToolComponent.getDragImageNode(dragElt)
-                        : dragElt;
+                        : defaultDragImage;
     const clientRect = dragElt.getBoundingClientRect();
-    const offsetX = (e.clientX - clientRect.left) / (scale || 1);
-    const offsetY = (e.clientY - clientRect.top) / (scale || 1);
+    const offsetX = useToolDragImage ? (e.clientX - clientRect.left) / (scale || 1): kDefaultDragImageWidth;
+    const offsetY = useToolDragImage ? (e.clientY - clientRect.top) / (scale || 1) : 0;
     e.dataTransfer.setDragImage(dragImage, offsetX, offsetY);
   }
 

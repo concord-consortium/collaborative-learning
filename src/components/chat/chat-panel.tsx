@@ -1,4 +1,5 @@
 import React, { useCallback } from "react";
+import {  Logger } from "../../lib/logger";
 import { UserModelType } from "../../models/stores/user";
 import { ChatPanelHeader } from "./chat-panel-header";
 import { CommentCard } from "./comment-card";
@@ -19,25 +20,50 @@ interface IProps {
 
 export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument, focusTileId, onCloseChatPanel }) => {
   const document = useDocumentOrCurriculumMetadata(focusDocument);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { isLoading, data: comments } = useDocumentComments(focusDocument);
+  const { data: comments } = useDocumentComments(focusDocument);
   const { data: unreadComments } = useUnreadDocumentComments(focusDocument);
   const documentComments = comments?.filter(comment => comment.tileId == null);
   const tileComments = comments?.filter(comment => comment.tileId === focusTileId);
   const postedComments = focusTileId ? tileComments : documentComments;
   const postCommentMutation = usePostDocumentComment();
+
   const postComment = useCallback((comment: string) => {
+    if (focusDocument) {
+      const numComments = postedComments ? postedComments.length : 0;
+      const focusDocumentId = focusDocument;
+      const eventPayload = {
+        focusDocumentId,
+        focusTileId,
+        isFirst: (numComments < 1),
+        commentText: comment,
+        isAdding: true
+      };
+      Logger.logCommentEvent(eventPayload);
+    }
+
     return document
-            ? postCommentMutation.mutate({ document, comment: { content: comment, tileId: focusTileId } })
-            : undefined;
-  }, [document, focusTileId, postCommentMutation]);
+      ? postCommentMutation.mutate({ document, comment: { content: comment, tileId: focusTileId } })
+      : undefined;
+  }, [document, focusDocument, focusTileId, postCommentMutation, postedComments]);
+
   const commentsPath = useCommentsCollectionPath(focusDocument || "");
+  // the "Document" in "useDeleteDocument" refers to a Firestore document (not a CLUE document)
   const deleteCommentMutation = useDeleteDocument();
-  const deleteComment = useCallback((commentId: string) => {
-    return document
+
+  const deleteComment = useCallback((commentId: string, commentText: string) => {
+    if (focusDocument) {
+      const eventPayload = {
+        focusDocumentId: focusDocument,
+        focusTileId,
+        commentText,
+        isAdding: false
+      };
+      Logger.logCommentEvent(eventPayload);
+    }
+    return commentsPath
       ? deleteCommentMutation.mutate(`${commentsPath}/${commentId}`)
       : undefined;
-  }, [document, deleteCommentMutation, commentsPath]);
+  }, [commentsPath, deleteCommentMutation, focusDocument, focusTileId]);
 
   const newCommentCount = unreadComments?.length || 0;
 

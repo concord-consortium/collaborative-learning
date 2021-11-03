@@ -1,5 +1,7 @@
 import { sortByCreation, kReverse, getObjectById, syncLinkedPoints } from "./jxg-board";
-import { ITableLinkProperties, JXGChangeAgent, JXGProperties, JXGCoordPair, JXGUnsafeCoordPair } from "./jxg-changes";
+import {
+  ITableLinkProperties, JXGChangeAgent, JXGCoordPair, JXGPositionProperty, JXGProperties
+} from "./jxg-changes";
 import { isLinkedPoint, isText } from "./jxg-types";
 import { castArrayCopy } from "../../../utilities/js-utils";
 import { castArray, size } from "lodash";
@@ -11,11 +13,22 @@ function validateTransformations(elt: JXG.GeometryElement) {
   elt.transformations = (elt.transformations || []).filter(t => t != null);
 }
 
-export function isPositionGraphable(pos: JXGUnsafeCoordPair) {
-  return pos[0] != null && pos[1] != null && isFinite(pos[0]) && isFinite(pos[1]);
+export function isPositionGraphable(pos: JXGPositionProperty) {
+  let xPos: number | undefined;
+  let yPos: number | undefined;
+  // some operations used normalized coordinates, which take the form [1, x, y]
+  if (pos.length === 3) {
+    [, xPos, yPos] = pos;
+  }
+  else {
+    [xPos, yPos] = pos;
+  }
+  return xPos != null && yPos != null && isFinite(xPos) && isFinite(yPos);
 }
 
-export function getGraphablePosition(pos: JXGUnsafeCoordPair) {
+export function getGraphablePosition(position: JXGPositionProperty) {
+  // some operations used normalized coordinates, which take the form [1, x, y]
+  const pos = position.length === 3 ? position.slice(1) : position;
   return pos.map(val => {
     if (val == null) return 0;
     const num = Number(val);

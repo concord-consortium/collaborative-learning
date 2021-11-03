@@ -2364,6 +2364,46 @@
               "supports": []
             }
           ]
+        },
+        {
+          "description": "Problem 3.4",
+          "ordinal": 4,
+          "title": "CAS 3.3 Leaky Faucet Experiment",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                ]
+              },
+              "supports": []
+            }
+          ]
         }
       ],
       "supports": []

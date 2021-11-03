@@ -1,7 +1,6 @@
 import ClueCanvas from '../../../../support/elements/clue/cCanvas';
 import TextToolTile from '../../../../support/elements/clue/TextToolTile';
 
-const baseUrl = `${Cypress.config("baseUrl")}`;
 const queryParams = `${Cypress.config("queryParams")}`;
 let clueCanvas = new ClueCanvas,
     textToolTile = new TextToolTile;
@@ -9,8 +8,8 @@ let clueCanvas = new ClueCanvas,
 before(function () {
   cy.clearQAData('all');
 
-  cy.visit(baseUrl + queryParams);
-  cy.waitForSpinner();
+  cy.visit(queryParams);
+  cy.waitForLoad();
 });
 context('Test the overall workspace', function () {
   describe('Desktop functionalities', function () {
@@ -56,21 +55,21 @@ context('Test the overall workspace', function () {
         problem2 = '2.1';
       let tab1 = 'Introduction';
 
-      cy.visit(baseUrl + '?appMode=qa&fakeClass=5&fakeUser=student:1&qaGroup=1&problem=' + problem1);
-      cy.waitForSpinner();
+      cy.visit('?appMode=qa&fakeClass=5&fakeUser=student:1&qaGroup=1&problem=' + problem1);
+      cy.waitForLoad();
 
       clueCanvas.addTile('text');
       textToolTile.enterText('This is the ' + tab1 + ' in Problem ' + problem1 + '{enter}');
       textToolTile.getTextTile().last().should('contain', 'Problem ' + problem1);
 
-      cy.visit(baseUrl + '?appMode=qa&fakeClass=5&fakeUser=student:1&qaGroup=1&problem=' + problem2);
-      cy.waitForSpinner();
+      cy.visit('?appMode=qa&fakeClass=5&fakeUser=student:1&qaGroup=1&problem=' + problem2);
+      cy.waitForLoad();
       // cy.wait(1000);
       textToolTile.getTextTile().should('not.exist');
 
       //Shows student as disconnected and will not load the introduction canvas
-      cy.visit(baseUrl + '?appMode=qa&fakeClass=5&fakeUser=student:1&qaGroup=1&problem=' + problem1);
-      cy.waitForSpinner();
+      cy.visit('?appMode=qa&fakeClass=5&fakeUser=student:1&qaGroup=1&problem=' + problem1);
+      cy.waitForLoad();
       // cy.wait(2000);
       textToolTile.getTextTile().last().should('contain', 'Problem ' + problem1);
       clueCanvas.deleteTile('text');//clean up
