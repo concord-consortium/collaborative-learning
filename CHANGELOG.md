@@ -1,5 +1,32 @@
 # Changelog
 
+## Version 2.0.0 - released November 2, 2021
+
+### Features/Improvements
+- Resources/Workspace sections can be expanded to use all available space [#178762398] [#178762390]
+- Improved styling in resources section [#178797434] [#178952901]
+- New planning document for each problem for teachers [#178762434] [#179427590]
+- Networked teachers can
+  - view list of their own and other teachers' classes in the network [#179154344] [#179185017] [#179755300]
+  - view teacher documents in their own and other teachers' classes in the network [#179154370] [#178762441] [#179346951] [#179154386]
+  - view published student documents in their own and other teachers' classes in the network [#179154370] [#179298013] [#178762452] [#179154386]
+  - comment on their own and other teachers' documents in the network [#178762407] [#178762418] [#179652167]
+  - comment on curriculum materials with others teachers in the network [#179346905] [#179361057]
+  - comment on individual tiles of curriculum materials or teachers' documents in the network [#179458436] [#178762420]
+  - delete their own comments from comment threads [#179599780]
+
+### Bugs Fixed
+- Preview launch from portal works as expected [#179152641]
+- Drag preview image when dragging tiles is now a thumbnail image of appropriate size [#179030964]
+- Non-production versions of CLUE log to staging log server [#179924872]
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 438,136 bytes | -3.1% |
+| index.js | 4,167,820 bytes | -13.3% |
+
 ## Version 2.0.0-pre.1 - released October 8, 2021
 
 ### Features/Improvements
