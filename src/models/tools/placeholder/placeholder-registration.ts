@@ -12,5 +12,6 @@ registerToolContentInfo({
   modelClass: PlaceholderContentModel,
   defaultContent: defaultPlaceholderContent,
   Component: PlaceholderToolComponent,
-  toolTileClass: "placeholder-tile"
+  toolTileClass: "placeholder-tile",
+  tileHandlesOwnSelection: true
 });

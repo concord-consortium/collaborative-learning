@@ -16,5 +16,6 @@ registerToolContentInfo({
   defaultContent: defaultGeometryContent,
   snapshotPostProcessor: mapTileIdsInGeometrySnapshot,
   Component: GeometryToolComponent,
-  toolTileClass: "geometry-tool-tile"
+  toolTileClass: "geometry-tool-tile",
+  tileHandlesOwnSelection: true
 });

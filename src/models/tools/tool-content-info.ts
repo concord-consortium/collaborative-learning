@@ -35,17 +35,14 @@ export interface IToolContentInfo {
   exportNonDefaultHeight?: boolean;
   snapshotPostProcessor?: ToolTileModelContentSnapshotPostProcessor;
   /**
-   * If the tile component doesn't call ui.setSelectedTile itself, then it can
-   * add  tileHandlesSelection: true and the tool-tile wrapper will handle the
-   * selection instead
-   * I think the name of this property is referring to ToolTileComponent as the "tile".
-   * So a tool is saying I don't handle my selection let my "tile" do it for me.
-   * Currently this is used by the table and drawing tools.
+   * By default the tool tile wrapper ToolTileComponent will handle the selection of the
+   * the tile when it gets a mouse down or touch start.
    *
-   * This approach was first added in the commit below, this helps clarify its purpose:
-   * https://github.com/concord-consortium/collaborative-learning/commit/d19b201dfd2c635aae2f30672c50610f90ba07a5
+   * If the tool wants to manage its own selection by calling ui.setSelectedTile,
+   * it should set tileHandlesOwnSelection to true. This will prevent ToolTileComponent
+   * from trying to set the selection.
    */
-  tileHandlesSelection?: boolean;
+  tileHandlesOwnSelection?: boolean;
 }
 
 interface IToolContentInfoMap {

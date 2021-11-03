@@ -8,5 +8,6 @@ registerToolContentInfo({
   modelClass: ImageContentModel,
   defaultContent: defaultImageContent,
   Component: ImageToolComponent,
-  toolTileClass: "image-tool-tile"
+  toolTileClass: "image-tool-tile",
+  tileHandlesOwnSelection: true
 });

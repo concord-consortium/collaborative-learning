@@ -13,5 +13,6 @@ registerToolContentInfo({
   defaultContent,
   // TODO: should really have a separate unknown tool that shows an "unknown tile" message
   Component: PlaceholderToolComponent,
-  toolTileClass: "placeholder-tile"
+  toolTileClass: "placeholder-tile",
+  tileHandlesOwnSelection: true
 });

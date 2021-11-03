@@ -50,13 +50,17 @@ export function extractDragTileType(dataTransfer: DataTransfer) {
   }
 }
 
+/**
+ * These props are used both by the ToolTileComponent and the components provided by the
+ * individual tools.
+ */
 interface IToolTileBaseProps {
   context: string;
   documentId?: string;  // permanent id (key) of the containing document
   docId: string;  // ephemeral contentId for the DocumentContent
   documentContent: HTMLElement | null;
   isUserResizable: boolean;
-  scale?: number; // This isn't used anymore as far as I can tell
+  scale?: number;
   widthPct?: number;
   height?: number;
   model: ToolTileModelType;
@@ -304,12 +308,9 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
       return;
     }
 
-    // Only select the tile if the tool doesn't handle it
-    // The name tileHandlesSelection is deceiving here it, it means the 
-    // tool doesn't handle it, so let the tile wrapper (this) handle 
-    // it.
+    // Select the tile if the tool doesn't handle the selection itself
     const toolContentInfo = getToolContentInfoById(model.content.type);
-    if (toolContentInfo.tileHandlesSelection) {
+    if (!toolContentInfo.tileHandlesOwnSelection) {
       ui.setSelectedTile(model, {append: hasSelectionModifier(e)});
     }
   }

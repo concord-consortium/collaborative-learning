@@ -12,6 +12,5 @@ registerToolContentInfo({
   exportNonDefaultHeight: true,
   defaultContent: defaultDrawingContent,
   Component: DrawingToolComponent,
-  toolTileClass: "drawing-tool-tile",
-  tileHandlesSelection: true
+  toolTileClass: "drawing-tool-tile"
 });

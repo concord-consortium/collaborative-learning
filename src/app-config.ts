@@ -9,4 +9,5 @@ export const AppContentComponent = ClueAppContentComponent;
 export { appIcons } from "./clue/app-icons";
 import "./clue/clue.sass";
 
+// register the tools built into the application
 import "./register-tools";

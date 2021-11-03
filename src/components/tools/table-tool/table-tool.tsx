@@ -186,7 +186,7 @@ export default TableToolComponent;
 // @observer
 // export default class TableToolComponent extends BaseComponent<IToolTileProps, IState> {
 
-//   public static tileHandlesSelection = true;
+//   public static tileHandlesOwnSelection = false;
 
 //   public state: IState = {
 //                   dataSet: DataSet.create()
