@@ -8,7 +8,7 @@ import { kPlaceholderToolID } from "../tools/placeholder/placeholder-content";
 import { kTableToolID } from "../tools/table/table-content";
 import { kTextToolID } from "../tools/text/text-content";
 import { getToolContentInfoById, IDocumentExportOptions } from "../tools/tool-content-info";
-import { ToolContentUnionType } from "../tools/tool-types";
+import { ToolContentModelType } from "../tools/tool-types";
 import {
   ToolTileModel, ToolTileModelType, ToolTileSnapshotInType, ToolTileSnapshotOutType
 } from "../tools/tool-tile";
@@ -120,7 +120,7 @@ export const DocumentContentModel = types
       getTile(tileId: string) {
         return tileId ? self.tileMap.get(tileId) : undefined;
       },
-      getTileContent(tileId: string): ToolContentUnionType | undefined {
+      getTileContent(tileId: string): ToolContentModelType | undefined {
         return self.tileMap.get(tileId)?.content;
       },
       getTileType(tileId: string) {
@@ -473,7 +473,7 @@ export const DocumentContentModel = types
     }
   }))
   .actions(self => ({
-    addTileContentInNewRow(content: ToolContentUnionType, options?: INewTileOptions): INewRowTile {
+    addTileContentInNewRow(content: ToolContentModelType, options?: INewTileOptions): INewRowTile {
       return self.addTileInNewRow(ToolTileModel.create({ content }), options);
     },
     addTileSnapshotInNewRow(snapshot: ToolTileSnapshotInType, options?: INewTileOptions): INewRowTile {

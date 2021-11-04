@@ -5,6 +5,7 @@ import { Optional } from "utility-types";
 import { SelectionStoreModelType } from "../../stores/selection";
 import { addLinkedTable, removeLinkedTable } from "../table-links";
 import { ITileExportOptions, registerToolContentInfo } from "../tool-content-info";
+import { ToolContentModel, ToolMetadataModel } from "../tool-types";
 import {
   getRowLabelFromLinkProps, IColumnProperties, ICreateRowsProperties, IRowProperties,
   ITableChange, ITableLinkProperties
@@ -76,9 +77,9 @@ const LinkedTableEntryModel = types
 
 // track selection in metadata object so it is not saved to firebase but
 // also is preserved across document/content reloads
-export const GeometryMetadataModel = types
-  .model("GeometryMetadata", {
-    id: types.string,
+export const GeometryMetadataModel = ToolMetadataModel
+  .named("GeometryMetadata")
+  .props({
     title: types.maybe(types.string),
     disabled: types.array(types.string),
     selection: types.map(types.boolean),
@@ -212,8 +213,9 @@ function isUndoableChange(change: JXGChange) {
   return true;
 }
 
-export const GeometryContentModel = types
-  .model("GeometryContent", {
+export const GeometryContentModel = ToolContentModel
+  .named("GeometryContent")
+  .props({
     type: types.optional(types.literal(kGeometryToolID), kGeometryToolID),
     changes: types.array(types.string)
   })

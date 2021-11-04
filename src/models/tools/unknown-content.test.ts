@@ -1,5 +1,5 @@
 import { getSnapshot } from "mobx-state-tree";
-import { kUnknownToolID, UnknownContentModel } from "./unknown-content";
+import { kUnknownToolID, UnknownContentModel } from "./tool-types";
 
 describe("UnknownContentModel", () => {
 

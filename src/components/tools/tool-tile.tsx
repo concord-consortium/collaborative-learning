@@ -11,7 +11,7 @@ import { kTextToolID } from "../../models/tools/text/text-content";
 import { kImageToolID } from "../../models/tools/image/image-content";
 import { transformCurriculumImageUrl } from "../../models/tools/image/image-import-export";
 import { kPlaceholderToolID } from "../../models/tools/placeholder/placeholder-content";
-import { kUnknownToolID } from "../../models/tools/unknown-content";
+import { kUnknownToolID } from "../../models/tools/tool-types";
 import { getToolContentInfoById } from "../../models/tools/tool-content-info";
 import { BaseComponent } from "../base";
 import GeometryToolComponent from "./geometry-tool/geometry-tool";

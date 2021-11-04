@@ -1,3 +1,5 @@
+import { ToolContentModel, ToolContentModelType, ToolMetadataModel } from "./tool-types";
+
 export interface IDMap {
   [id: string]: string;
 }
@@ -8,12 +10,12 @@ export interface IToolContentInfo {
   id: string;
   tool: string;
   titleBase?: string;
-  modelClass: any;
-  metadataClass?: any;
+  modelClass: typeof ToolContentModel;
+  metadataClass?: typeof ToolMetadataModel;
   addSidecarNotes?: boolean;
   defaultHeight?: number;
   exportNonDefaultHeight?: boolean;
-  defaultContent: (input?: any) => any;
+  defaultContent: (input?: any) => ToolContentModelType;
   snapshotPostProcessor?: ToolTileModelContentSnapshotPostProcessor;
 }
 
@@ -37,6 +39,15 @@ export function getToolContentInfoById(id: string) {
 export function getToolContentInfoByTool(tool: string) {
   return gToolContentInfoMapByTool[tool];
 }
+
+export function getToolContentModels() {
+  return Object.values(gToolContentInfoMapById).map(info => info.modelClass);
+}
+
+export function getToolIds() {
+  return Object.keys(gToolContentInfoMapById);
+}
+
 
 export interface ITileExportOptions {
   rowHeight?: number;

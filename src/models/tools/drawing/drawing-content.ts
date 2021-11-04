@@ -3,6 +3,7 @@ import { exportDrawingTileSpec } from "./drawing-export";
 import { importDrawingTileSpec, isDrawingTileImportSpec } from "./drawing-import";
 import { DrawingObjectDataType } from "./drawing-objects";
 import { ITileExportOptions, registerToolContentInfo } from "../tool-content-info";
+import { ToolMetadataModel, ToolContentModel } from "../tool-types";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
 import {
@@ -57,9 +58,9 @@ export type StampModelType = Instance<typeof StampModel>;
 
 // track selection in metadata object so it is not saved to firebase but
 // also is preserved across document/content reloads
-export const DrawingToolMetadataModel = types
-  .model("DrawingToolMetadata", {
-    id: types.string,
+export const DrawingToolMetadataModel = ToolMetadataModel
+  .named("DrawingToolMetadata")
+  .props({
     selectedButton: "select",
     selection: types.array(types.string)
   })
@@ -85,8 +86,9 @@ export function defaultDrawingContent(options?: {stamps: StampModelType[]}) {
   });
 }
 
-export const DrawingContentModel = types
-  .model("DrawingTool", {
+export const DrawingContentModel = ToolContentModel
+  .named("DrawingTool")
+  .props({
     type: types.optional(types.literal(kDrawingToolID), kDrawingToolID),
     changes: types.array(types.string),
     stroke: DefaultToolbarSettings.stroke,
@@ -263,6 +265,7 @@ registerToolContentInfo({
   id: kDrawingToolID,
   tool: "drawing",
   modelClass: DrawingContentModel,
+  metadataClass: DrawingToolMetadataModel,
   defaultHeight: kDrawingDefaultHeight,
   exportNonDefaultHeight: true,
   defaultContent: defaultDrawingContent

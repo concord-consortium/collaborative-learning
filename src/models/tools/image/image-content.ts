@@ -2,6 +2,7 @@ import { types, Instance, SnapshotOut } from "mobx-state-tree";
 import { createChange, ImageToolChange } from "./image-change";
 import { exportImageTileSpec, importImageTileSpec, isImageTileImportSpec } from "./image-import-export";
 import { ITileExportOptions, registerToolContentInfo } from "../tool-content-info";
+import { ToolContentModel } from "../tool-types";
 import { isPlaceholderImage } from "../../../utilities/image-utils";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import placeholderImage from "../../../assets/image_placeholder.png";
@@ -16,8 +17,9 @@ export function defaultImageContent(url?: string) {
                           });
 }
 
-export const ImageContentModel = types
-  .model("ImageTool", {
+export const ImageContentModel = ToolContentModel
+  .named("ImageTool")
+  .props({
     type: types.optional(types.literal(kImageToolID), kImageToolID),
     changes: types.array(types.string)
   })
