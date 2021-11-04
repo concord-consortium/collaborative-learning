@@ -20,14 +20,12 @@ export const appIcons: Record<string, FunctionComponent<SVGProps<SVGSVGElement>>
   "icon-delete-workspace": DeleteWorkspaceIcon,
   "icon-new-workspace": OpenWorkspaceIcon,
   "icon-open-workspace": OpenWorkspaceIcon,
-  // tool icons
+  
+  // built in tool action icons
   "icon-delete-tool": DeleteToolIcon,
-  "icon-drawing-tool": DrawingToolIcon,
-  "icon-geometry-tool": GeometryToolIcon,
-  "icon-image-tool": ImageToolIcon,
   "icon-redo-tool": RedoToolIcon,
   "icon-select-tool": SelectToolIcon,
-  "icon-table-tool": TableToolIcon,
-  "icon-text-tool": TextToolIcon,
   "icon-undo-tool": UndoToolIcon
+
+  // icons for tool tiles are added by registerToolContentInfo
 };

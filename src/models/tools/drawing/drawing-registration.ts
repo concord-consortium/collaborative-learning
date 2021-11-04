@@ -2,6 +2,7 @@ import { registerToolContentInfo } from "../tool-content-info";
 import { DrawingContentModel, DrawingToolMetadataModel, defaultDrawingContent } from "./drawing-content";
 import { kDrawingToolID, kDrawingDefaultHeight } from "./drawing-types";
 import DrawingToolComponent from "../../../components/tools/drawing-tool/drawing-tool";
+import DrawingToolIcon from "../../../clue/assets/icons/draw-tool.svg";
 
 registerToolContentInfo({
   id: kDrawingToolID,
@@ -12,5 +13,6 @@ registerToolContentInfo({
   exportNonDefaultHeight: true,
   defaultContent: defaultDrawingContent,
   Component: DrawingToolComponent,
-  toolTileClass: "drawing-tool-tile"
+  toolTileClass: "drawing-tool-tile",
+  icon: DrawingToolIcon
 });
