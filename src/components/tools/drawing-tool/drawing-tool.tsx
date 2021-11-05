@@ -43,5 +43,4 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
     </div>
   );
 };
-(DrawingToolComponent as any).tileHandlesSelection = true;
 export default DrawingToolComponent;

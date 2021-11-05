@@ -4,6 +4,7 @@ import {
 } from "./drawing-content";
 import { IDrawingTileImportSpec } from "./drawing-import";
 import { DefaultToolbarSettings, DrawingToolChange, kDrawingToolID } from "./drawing-types";
+import { UnitModel } from "../../curriculum/unit";
 
 // mock Logger calls
 jest.mock("../../../lib/logger", () => {
@@ -49,7 +50,11 @@ describe('defaultDrawingContent', () => {
   });
   it('should return content with optional stamps', () => {
     const myStamps = [{ url: "my/stamp/url", width: 10, height: 10 }];
-    const content = defaultDrawingContent({ stamps: myStamps });
+    const unit = UnitModel.create({
+      title: "fake title",
+      defaultStamps: myStamps
+    });
+    const content = defaultDrawingContent({ unit });
     expect(content.type).toBe(kDrawingToolID);
     expect(content.stamps).toEqual(myStamps);
     expect(content.changes).toEqual([]);

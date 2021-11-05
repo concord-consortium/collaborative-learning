@@ -8,6 +8,9 @@ import { ProblemDocument } from "../../models/document/document-types";
 import { createStores } from "../../models/stores/stores";
 import { createSingleTileContent } from "../../utilities/test-utils";
 
+// This is needed so MST can deserialize snapshots referring to tools
+import "../../register-tools";
+
 var mockGetQueryState = jest.fn();
 jest.mock("react-query", () => ({
   useQueryClient: () => ({

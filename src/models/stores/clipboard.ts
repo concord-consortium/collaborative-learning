@@ -1,6 +1,6 @@
 import { types, Instance } from "mobx-state-tree";
 import { IStores } from "./stores";
-import { ToolContentUnionType } from "../tools/tool-types";
+import { ToolContentModelType } from "../tools/tool-types";
 import { v4 as uuid } from "uuid";
 
 export const kTypeText = "text";
@@ -85,7 +85,7 @@ export const ClipboardModel = types
       });
       self.content.set(clipType, entry);
     },
-    addJsonTileContent(tileId: string, content: ToolContentUnionType, stores: IStores) {
+    addJsonTileContent(tileId: string, content: ToolContentModelType, stores: IStores) {
       const document = stores.documents.findDocumentOfTile(tileId);
       const entry = ClipboardEntryModel.create({
         userId: document ? document.uid : "",

@@ -10,12 +10,15 @@ import { UserModel } from "../models/stores/user";
 import { WorkspaceModel, ProblemWorkspace, WorkspaceModelType, LearningLogWorkspace } from "../models/stores/workspace";
 import { defaultGeometryContent } from "../models/tools/geometry/geometry-content";
 import { JXGChange } from "../models/tools/geometry/jxg-changes";
-import { defaultTextContent } from "../models/tools/text/text-content";
+import { TextContentModel } from "../models/tools/text/text-content";
 import { IDragTileItem, ToolTileModel } from "../models/tools/tool-tile";
 import { createSingleTileContent } from "../utilities/test-utils";
 import { ProblemModelType } from "../models/curriculum/problem";
 import { UIModel } from "../models/stores/ui";
 import { ENavTab } from "../models/view/nav-tabs";
+
+// This is needed so MST can deserialize snapshots referring to tools
+import "../register-tools";
 
 const investigation = InvestigationModel.create({
   ordinal: 1,
@@ -184,7 +187,7 @@ describe("authed logger", () => {
     });
 
     it("can log tile creation", (done) => {
-      const tile = ToolTileModel.create({ content: defaultTextContent() });
+      const tile = ToolTileModel.create({ content: TextContentModel.create() });
 
       mockXhr.post(/.*/, (req, res) => {
         const request = JSON.parse(req.body());
@@ -215,7 +218,7 @@ describe("authed logger", () => {
         visibility: "public"
       });
       stores.documents.add(document);
-      const tile = ToolTileModel.create({ content: defaultTextContent() });
+      const tile = ToolTileModel.create({ content: TextContentModel.create() });
       const tileId = tile.id;
       const documentKey = document.key;
       const commentText = "TeSt";
@@ -250,7 +253,7 @@ describe("authed logger", () => {
         visibility: "public"
       });
       stores.documents.add(document);
-      const tile = ToolTileModel.create({ content: defaultTextContent() });
+      const tile = ToolTileModel.create({ content: TextContentModel.create() });
       const tileId = tile.id;
       const documentKey = document.key;
       const commentText = "TeSt";

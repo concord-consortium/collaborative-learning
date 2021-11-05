@@ -1,20 +1,48 @@
+import { ToolContentModel, ToolContentModelType, ToolMetadataModel } from "./tool-types";
+import { UnitModelType } from "../curriculum/unit";
+import { IToolTileProps } from "../../components/tools/tool-tile";
+
 export interface IDMap {
   [id: string]: string;
 }
 export type ToolTileModelContentSnapshotPostProcessor =
               (content: any, idMap: IDMap, asTemplate?: boolean) => any;
 
+export interface IDefaultContentOptions {
+  // title is only currently used by the Geometry and Table tiles
+  title?: string;
+  // url is added so the CLUE core can add an image tile to the document when a user
+  // drops an image on the document.
+  url?: string;
+  // unit is added so the drawing tool can use a default set of stamps defined in
+  // the unit
+  unit?: UnitModelType;
+}
+
+type ToolComponentType = React.ComponentType<IToolTileProps>;
+
 export interface IToolContentInfo {
   id: string;
   tool: string;
+  modelClass: typeof ToolContentModel;
+  defaultContent: (options?: IDefaultContentOptions) => ToolContentModelType;
+  Component: ToolComponentType;
+  toolTileClass: string;
   titleBase?: string;
-  modelClass: any;
-  metadataClass?: any;
+  metadataClass?: typeof ToolMetadataModel;
   addSidecarNotes?: boolean;
   defaultHeight?: number;
   exportNonDefaultHeight?: boolean;
-  defaultContent: (input?: any) => any;
   snapshotPostProcessor?: ToolTileModelContentSnapshotPostProcessor;
+  /**
+   * By default the tool tile wrapper ToolTileComponent will handle the selection of the
+   * the tile when it gets a mouse down or touch start.
+   *
+   * If the tool wants to manage its own selection by calling ui.setSelectedTile,
+   * it should set tileHandlesOwnSelection to true. This will prevent ToolTileComponent
+   * from trying to set the selection.
+   */
+  tileHandlesOwnSelection?: boolean;
 }
 
 interface IToolContentInfoMap {
@@ -37,6 +65,15 @@ export function getToolContentInfoById(id: string) {
 export function getToolContentInfoByTool(tool: string) {
   return gToolContentInfoMapByTool[tool];
 }
+
+export function getToolContentModels() {
+  return Object.values(gToolContentInfoMapById).map(info => info.modelClass);
+}
+
+export function getToolIds() {
+  return Object.keys(gToolContentInfoMapById);
+}
+
 
 export interface ITileExportOptions {
   rowHeight?: number;

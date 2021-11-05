@@ -5,10 +5,13 @@ import {
 import { SectionModel, SectionModelType } from "../curriculum/section";
 import { IDropRowInfo } from "../../models/document/document-content";
 import { cloneTileSnapshotWithoutId, IDragTileItem } from "../../models/tools/tool-tile";
-import { defaultTextContent } from "../tools/text/text-content";
+import { TextContentModel } from "../tools/text/text-content";
 import { IDocumentExportOptions } from "../tools/tool-content-info";
 import { safeJsonParse } from "../../utilities/js-utils";
 import placeholderImage from "../../assets/image_placeholder.png";
+
+// This is needed so MST can deserialize snapshots referring to tools
+import "../../register-tools";
 
 // mock uniqueId so we can recognize auto-generated IDs
 jest.mock("../../utilities/js-utils", () => {
@@ -359,7 +362,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
 
   it("will remove placeholder tiles when adding a new tile in the last section", () => {
     // [Header:A, Placeholder, Header:B, Placeholder]
-    content.addTextTile({ text: "foo", rowIndex: content.rowCount });
+    content.addTile("text");
     // [Header:A, Placeholder, Header:B, Text]
     expect(content.rowCount).toBe(4);
     expect(isPlaceholderSection("A")).toBe(true);
@@ -367,14 +370,14 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.defaultInsertRow).toBe(4);
     expect(parsedContentExport()).toEqual({
       tiles: [
-        { content: { type: "Text", format: "html", text: ["<p>foo</p>"] } }
+        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
   });
 
   it("will remove placeholder tiles when adding a new tile in an interior section", () => {
     // [Header:A, Placeholder, Header:B, Text]
-    content.addTileContentInNewRow(defaultTextContent("foo"), { rowIndex: 1 });
+    content.addTileContentInNewRow(TextContentModel.create({ text: "foo" }), { rowIndex: 1 });
     // [Header:A, Text, Header:B, Text]
     expect(content.rowCount).toBe(4);
     expect(isContentSection("A")).toBe(true);
@@ -383,7 +386,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(parsedContentExport()).toEqual({
       tiles: [
         { content: { type: "Text", format: "html", text: ["<p>foo</p>"] } },
-        { content: { type: "Text", format: "html", text: ["<p>foo</p>"] } }
+        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
   });
@@ -399,7 +402,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.defaultInsertRow).toBe(4);
     expect(parsedContentExport()).toEqual({
       tiles: [
-        { content: { type: "Text", format: "html", text: ["<p>foo</p>"] } }
+        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
 });
@@ -418,7 +421,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
 
   it("will add/remove placeholder rows when moving entire rows (3 => 1)", () => {
     // [Header:A, Placeholder, Header:B, Placeholder]
-    content.addTextTile({ text: "foo", rowIndex: content.rowCount });
+    content.addTile("text");
     // [Header:A, Placeholder, Header:B, Text]
     content.moveRowToIndex(3, 1);
     // [Header:A, Text, Header:B, Placeholder]
@@ -430,7 +433,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.defaultInsertRow).toBe(2);
     expect(parsedContentExport()).toEqual({
       tiles: [
-        { content: { type: "Text", format: "html", text: ["<p>foo</p>"] } }
+        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
   });
@@ -445,7 +448,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.defaultInsertRow).toBe(4);
     expect(parsedContentExport()).toEqual({
       tiles: [
-        { content: { type: "Text", format: "html", text: ["<p>foo</p>"] } }
+        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
   });
@@ -461,7 +464,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.defaultInsertRow).toBe(2);
     expect(parsedContentExport()).toEqual({
       tiles: [
-        { content: { type: "Text", format: "html", text: ["<p>foo</p>"] } }
+        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
   });
@@ -477,7 +480,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.defaultInsertRow).toBe(4);
     expect(parsedContentExport()).toEqual({
       tiles: [
-        { content: { type: "Text", format: "html", text: ["<p>foo</p>"] } }
+        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
   });
@@ -493,7 +496,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.defaultInsertRow).toBe(2);
     expect(parsedContentExport()).toEqual({
       tiles: [
-        { content: { type: "Text", format: "html", text: ["<p>foo</p>"] } }
+        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
   });
@@ -508,7 +511,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isContentSection("B")).toBe(true);
     expect(parsedContentExport()).toEqual({
       tiles: [
-        { content: { type: "Text", format: "html", text: ["<p>foo</p>"] } }
+        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
   });
@@ -673,7 +676,7 @@ describe("DocumentContentModel", () => {
 
   it("can cloneWithUniqueIds()", () => {
     const content = DocumentContentModel.create({});
-    content.addTextTile({ text: "foo" });
+    content.addTile("text");
     const srcTileId = content.getRowByIndex(0)!.getTileIdAtIndex(0);
 
     const copy = cloneContentWithUniqueIds(content);

@@ -285,13 +285,9 @@ interface IProps {
     - Child components access stores too `hub`, `ui`, `appMode`.
 
 ## Adding a tool tile
-New tool tiles are added to a document using an action in the `DocumentContentModel` such as `addPlaceholderTile` or `addGeometryTile`. For example:
+New tool tiles can be added to a document using the `DocumentContentModel#addTile` action. For example:
 ```typescript
-addPlaceholderTile(sectionId?: string) {
-  const placeholderContentInfo = getToolContentInfoById(kPlaceholderToolID);
-  const content = placeholderContentInfo?.defaultContent(sectionId);
-  return self.addTileContentInNewRow(content, { rowIndex: self.rowCount });
-}
+content.addTile("text")
 ```
 
-A new action must be created when a tool tile is added to the project.
+The implementation of `addTile` looks up the tool content info registered by the Tool. Then uses the `defaultContent` function of the tool content info to create a content model for the tile. And finally wraps the content model in a `ToolTileModel` and adds that to the document.
