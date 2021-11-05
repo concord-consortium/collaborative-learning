@@ -1,5 +1,5 @@
 import { types, Instance } from "mobx-state-tree";
-import { IMapDidChange } from "mobx";
+import { IObjectDidChange, observe } from "mobx";
 
 export const DataSetSelectionModel = types
   .model("DataSetSelection", {
@@ -26,8 +26,8 @@ export const DataSetSelectionModel = types
     toggleSelected(id: string) {
       self.selection.set(id, !self.isSelected(id));
     },
-    observe(listener: (change: IMapDidChange<string, boolean>) => void) {
-      return self.selection.observe(listener);
+    observe(listener: (change: IObjectDidChange<boolean>) => void) {
+      return observe(self.selection, listener);
     }
   }))
   .actions(self => ({
@@ -77,7 +77,7 @@ export const SelectionStoreModel = types
     setSelected(setId: string, ids: string[]) {
       self.require(setId).setSelected(ids);
     },
-    observe(setId: string, listener: (changes: IMapDidChange<string, boolean>) => void) {
+    observe(setId: string, listener: (changes: IObjectDidChange<boolean>) => void) {
       return self.require(setId).observe(listener);
     }
   }));

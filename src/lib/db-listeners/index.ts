@@ -1,5 +1,5 @@
 import firebase from "firebase/app";
-import { observable } from "mobx";
+import { observable, makeObservable } from "mobx";
 import { IDisposer, onSnapshot } from "mobx-state-tree";
 
 import { DB, Monitor } from "../db";
@@ -57,6 +57,7 @@ export class DBListeners extends BaseListener {
 
   constructor(db: DB) {
     super("DBListeners");
+    makeObservable(this);
     this.db = db;
     this.latestGroupIdListener = new DBLatestGroupIdListener(db);
     this.groupsListener = new DBGroupsListener(db);

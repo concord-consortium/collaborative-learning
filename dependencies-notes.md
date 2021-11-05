@@ -37,9 +37,6 @@ Updating to `npm 7` worked locally but failed in CI due to GitHub actions still 
 |escape-string-regexp|4.0.0|5.0.0|[ESM Module](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c)|
 |firebase|8.10.0|9.1.3|v9 contains substantial API changes|
 |immutable|3.8.2|4.0.0|Major version update not attempted|
-|mobx|5.15.7|6.3.5|MobX 6 ([migration guide](https://mobx.js.org/migrating-from-4-or-5.html))|
-|mobx-react|6.3.1|7.2.1|MobX 6|
-|mobx-state-tree|3.17.3|5.0.3|MobX 6|
 |react|16.14.0|17.0.2|React 17/Enzyme tests|
 |react-data-grid|7.0.0-canary.34|7.0.0-canary.49|Canary.35 changed the styling implementation so that some of our CSS overrides no longer work. Need to figure out how to achieve the same results in the new system, e.g. inline editing styles.|
 |react-dom|16.14.0|17.0.2|React 17/Enzyme tests|

@@ -159,7 +159,7 @@ export const GeometryMetadataModel = ToolMetadataModel
     addTableLink(tableId: string, axes: IAxisLabels) {
       if (self.linkedTables.findIndex(entry => entry.id === tableId) < 0) {
         const disposer = self.sharedSelection.observe(tableId, change => {
-          const id = change.name;
+          const id = change.name as string;
           self.setSelection(id, self.sharedSelection.isSelected(tableId, id));
         });
         disposer && (self.tableLinkDisposers[tableId] = disposer);

@@ -46,7 +46,7 @@ import placeholderImage from "../../../assets/image_placeholder.png";
 import { LinkTableButton } from "./link-table-button";
 import ErrorAlert from "../../utilities/error-alert";
 import SingleStringDialog from "../../utilities/single-string-dialog";
-import { autorun } from "mobx";
+import { autorun, observe } from "mobx";
 
 import "./geometry-tool.sass";
 
@@ -1438,7 +1438,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       });
 
     // synchronize selection changes
-    this.disposers.push(content.metadata.selection.observe((change: any) => {
+    this.disposers.push(observe(content.metadata.selection, (change: any) => {
       const { board: _board } = this.state;
       if (_board) {
         // this may be a shared selection change; get all points associated with it

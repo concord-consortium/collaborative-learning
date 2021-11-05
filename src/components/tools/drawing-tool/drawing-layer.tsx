@@ -49,7 +49,7 @@ abstract class DrawingObject {
 }
 
 class LineObject extends DrawingObject {
-  public model: LineDrawingObjectData;
+  declare model: LineDrawingObjectData;
 
   constructor(model: LineDrawingObjectData) {
     super(model);
@@ -99,7 +99,7 @@ class LineObject extends DrawingObject {
 }
 
 class VectorObject extends DrawingObject {
-  public model: VectorDrawingObjectData;
+  declare model: VectorDrawingObjectData;
 
   constructor(model: VectorDrawingObjectData) {
     super(model);
@@ -131,7 +131,7 @@ class VectorObject extends DrawingObject {
 }
 
 class RectangleObject extends DrawingObject {
-  public model: RectangleDrawingObjectData;
+  declare model: RectangleDrawingObjectData;
 
   constructor(model: RectangleDrawingObjectData) {
     super(model);
@@ -163,7 +163,7 @@ class RectangleObject extends DrawingObject {
 }
 
 class EllipseObject extends DrawingObject {
-  public model: EllipseDrawingObjectData;
+  declare model: EllipseDrawingObjectData;
 
   constructor(model: EllipseDrawingObjectData) {
     super(model);
@@ -196,7 +196,7 @@ class EllipseObject extends DrawingObject {
 }
 
 class ImageObject extends DrawingObject {
-  public model: ImageDrawingObjectData;
+  declare model: ImageDrawingObjectData;
 
   constructor(model: ImageDrawingObjectData) {
     super(model);
@@ -675,7 +675,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     ));
 
     this.disposers.push(reaction(
-      () => this.getContent().metadata.selection.toJS(),
+      () => this.getContent().metadata.selection.toJSON(),
       selectedIds => {
         const selectedObjects = selectedIds.map(id => this.objects[id]).filter(obj => !!obj) as DrawingObject[];
         this.setState({ selectedObjects });
