@@ -3,22 +3,10 @@ import { observer, inject } from "mobx-react";
 import React from "react";
 import ResizeObserver from "resize-observer-polyfill";
 import { getDisabledFeaturesOfTile } from "../../models/stores/stores";
-import { kDrawingToolID } from "../../models/tools/drawing/drawing-types";
 import { cloneTileSnapshotWithNewId, IDragTileItem, IDragTiles, ToolTileModelType } from "../../models/tools/tool-tile";
-import { kGeometryToolID } from "../../models/tools/geometry/geometry-content";
-import { kTableToolID } from "../../models/tools/table/table-content";
-import { kTextToolID } from "../../models/tools/text/text-content";
-import { kImageToolID } from "../../models/tools/image/image-content";
 import { transformCurriculumImageUrl } from "../../models/tools/image/image-import-export";
-import { kPlaceholderToolID } from "../../models/tools/placeholder/placeholder-content";
-import { kUnknownToolID } from "../../models/tools/tool-types";
 import { getToolContentInfoById } from "../../models/tools/tool-content-info";
 import { BaseComponent } from "../base";
-import GeometryToolComponent from "./geometry-tool/geometry-tool";
-import TableToolComponent from "./table-tool/table-tool";
-import TextToolComponent from "./text-tool";
-import ImageToolComponent from "./image-tool";
-import DrawingToolComponent from "./drawing-tool/drawing-tool";
 import PlaceholderToolComponent from "./placeholder-tool/placeholder-tool";
 import { IToolApi, TileResizeEntry, ToolApiInterfaceContext } from "./tool-api";
 import { HotKeys } from "../../utilities/hot-keys";
@@ -62,6 +50,10 @@ export function extractDragTileType(dataTransfer: DataTransfer) {
   }
 }
 
+/**
+ * These props are used both by the ToolTileComponent and the components provided by the
+ * individual tools.
+ */
 interface IToolTileBaseProps {
   context: string;
   documentId?: string;  // permanent id (key) of the containing document
@@ -91,21 +83,6 @@ export interface IToolTileProps extends IToolTileBaseProps, IRegisterToolApiProp
 
 interface IProps extends IToolTileBaseProps {
 }
-
-interface ToolComponentInfo {
-  ToolComponent: any;
-  toolTileClass: string;
-}
-const kToolComponentMap: Record<string, ToolComponentInfo> = {
-        [kPlaceholderToolID]: { ToolComponent: PlaceholderToolComponent, toolTileClass: "placeholder-tile" },
-        [kDrawingToolID]: { ToolComponent: DrawingToolComponent, toolTileClass: "drawing-tool-tile" },
-        [kGeometryToolID]: { ToolComponent: GeometryToolComponent, toolTileClass: "geometry-tool-tile" },
-        [kImageToolID]: { ToolComponent: ImageToolComponent, toolTileClass: "image-tool-tile" },
-        [kTableToolID]: { ToolComponent: TableToolComponent, toolTileClass: "table-tool-tile" },
-        [kTextToolID]: { ToolComponent: TextToolComponent, toolTileClass: "text-tool-tile" },
-        // TODO: should really have a separate unknown tool that shows an "unknown tile" message
-        [kUnknownToolID]: { ToolComponent: PlaceholderToolComponent, toolTileClass: "placeholder-tile" }
-      };
 
 interface IDragTileButtonProps {
   divRef: (instance: HTMLDivElement | null) => void;
@@ -212,7 +189,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     const { model, readOnly, isUserResizable, widthPct } = this.props;
     const { hoverTile } = this.state;
     const { appConfig, ui } = this.stores;
-    const { ToolComponent, toolTileClass } = kToolComponentMap[model.content.type];
+    const { Component: ToolComponent, toolTileClass } = getToolContentInfoById(model.content.type);
     const isPlaceholderTile = ToolComponent === PlaceholderToolComponent;
     const isTileSelected = ui.isSelectedTile(model);
     const tileSelectedForComment = isTileSelected && ui.showChatPanel;
@@ -331,8 +308,9 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
       return;
     }
 
-    const ToolComponent = kToolComponentMap[model.content.type].ToolComponent;
-    if (ToolComponent?.tileHandlesSelection) {
+    // Select the tile if the tool doesn't handle the selection itself
+    const toolContentInfo = getToolContentInfoById(model.content.type);
+    if (!toolContentInfo.tileHandlesOwnSelection) {
       ui.setSelectedTile(model, {append: hasSelectionModifier(e)});
     }
   }
@@ -390,8 +368,8 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
       }
     }
     // set the drag data
-    const { model, docId, scale } = this.props;
-    const ToolComponent = kToolComponentMap[model.content.type].ToolComponent;
+    const { model, docId } = this.props;
+    const ToolComponent = getToolContentInfoById(model.content.type).Component;
     // can't drag placeholder tiles
     if (ToolComponent === PlaceholderToolComponent) {
       e.preventDefault();
@@ -439,17 +417,9 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     // TODO: should we create an array of drag images here?
 
     // set the drag image
-    const dragElt = e.target as HTMLElement;
-    // tool components can provide alternate dom node for drag image
-    // use default drag image for all tiles that don't specify drag image
-    const useToolDragImage = !!(ToolComponent && ToolComponent.getDragImageNode);
-    const dragImage = useToolDragImage
-                        ? ToolComponent.getDragImageNode(dragElt)
-                        : defaultDragImage;
-    const clientRect = dragElt.getBoundingClientRect();
-    const offsetX = useToolDragImage ? (e.clientX - clientRect.left) / (scale || 1): kDefaultDragImageWidth;
-    const offsetY = useToolDragImage ? (e.clientY - clientRect.top) / (scale || 1) : 0;
-    e.dataTransfer.setDragImage(dragImage, offsetX, offsetY);
+    const offsetX = kDefaultDragImageWidth;
+    const offsetY = 0;
+    e.dataTransfer.setDragImage(defaultDragImage, offsetX, offsetY);
   }
 
   private getDragTileItems(dragSrcContentId: string, tileIds: string[]) {

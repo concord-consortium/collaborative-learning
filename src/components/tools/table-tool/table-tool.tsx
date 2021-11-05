@@ -144,7 +144,6 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   );
 });
 export default TableToolComponent;
-(TableToolComponent as any).tileHandlesSelection = true;
 
 // import { observer, inject } from "mobx-react";
 // import { Alert, Intent } from "@blueprintjs/core";
@@ -187,7 +186,7 @@ export default TableToolComponent;
 // @observer
 // export default class TableToolComponent extends BaseComponent<IToolTileProps, IState> {
 
-//   public static tileHandlesSelection = true;
+//   public static tileHandlesOwnSelection = false;
 
 //   public state: IState = {
 //                   dataSet: DataSet.create()

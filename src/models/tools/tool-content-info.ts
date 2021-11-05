@@ -1,5 +1,6 @@
 import { ToolContentModel, ToolContentModelType, ToolMetadataModel } from "./tool-types";
 import { UnitModelType } from "../curriculum/unit";
+import { IToolTileProps } from "../../components/tools/tool-tile";
 
 export interface IDMap {
   [id: string]: string;
@@ -18,17 +19,30 @@ export interface IDefaultContentOptions {
   unit?: UnitModelType;
 }
 
+type ToolComponentType = React.ComponentType<IToolTileProps>;
+
 export interface IToolContentInfo {
   id: string;
   tool: string;
-  titleBase?: string;
   modelClass: typeof ToolContentModel;
+  defaultContent: (options?: IDefaultContentOptions) => ToolContentModelType;
+  Component: ToolComponentType;
+  toolTileClass: string;
+  titleBase?: string;
   metadataClass?: typeof ToolMetadataModel;
   addSidecarNotes?: boolean;
   defaultHeight?: number;
   exportNonDefaultHeight?: boolean;
-  defaultContent: (options?: IDefaultContentOptions) => ToolContentModelType;
   snapshotPostProcessor?: ToolTileModelContentSnapshotPostProcessor;
+  /**
+   * By default the tool tile wrapper ToolTileComponent will handle the selection of the
+   * the tile when it gets a mouse down or touch start.
+   *
+   * If the tool wants to manage its own selection by calling ui.setSelectedTile,
+   * it should set tileHandlesOwnSelection to true. This will prevent ToolTileComponent
+   * from trying to set the selection.
+   */
+  tileHandlesOwnSelection?: boolean;
 }
 
 interface IToolContentInfoMap {

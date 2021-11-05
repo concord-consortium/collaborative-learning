@@ -2,14 +2,15 @@ import { types, getSnapshot, Instance } from "mobx-state-tree";
 import { exportDrawingTileSpec } from "./drawing-export";
 import { importDrawingTileSpec, isDrawingTileImportSpec } from "./drawing-import";
 import { DrawingObjectDataType } from "./drawing-objects";
-import { ITileExportOptions, registerToolContentInfo, IDefaultContentOptions } from "../tool-content-info";
+import { ITileExportOptions, IDefaultContentOptions } from "../tool-content-info";
 import { ToolMetadataModel, ToolContentModel } from "../tool-types";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
 import {
   DefaultToolbarSettings, DrawingToolChange, DrawingToolCreateChange, DrawingToolDeleteChange, DrawingToolMoveChange,
-  DrawingToolUpdate, DrawingToolUpdateChange, kDrawingDefaultHeight, kDrawingToolID, ToolbarModalButton, ToolbarSettings
+  DrawingToolUpdate, DrawingToolUpdateChange, kDrawingToolID, ToolbarModalButton, ToolbarSettings
 } from "./drawing-types";
+
 
 export const computeStrokeDashArray = (type?: string, strokeWidth?: string|number) => {
   const dotted = isFinite(Number(strokeWidth)) ? Number(strokeWidth) : 0;
@@ -78,7 +79,6 @@ export const DrawingToolMetadataModel = ToolMetadataModel
   }));
 export type DrawingToolMetadataModelType = Instance<typeof DrawingToolMetadataModel>;
 
-// This is only used directly by tests.
 export function defaultDrawingContent(options?: IDefaultContentOptions) {
   let stamps: StampModelType[] = [];
   if (options?.unit) {
@@ -264,13 +264,3 @@ export const DrawingContentModel = ToolContentModel
   });
 
 export type DrawingContentModelType = Instance<typeof DrawingContentModel>;
-
-registerToolContentInfo({
-  id: kDrawingToolID,
-  tool: "drawing",
-  modelClass: DrawingContentModel,
-  metadataClass: DrawingToolMetadataModel,
-  defaultHeight: kDrawingDefaultHeight,
-  exportNonDefaultHeight: true,
-  defaultContent: defaultDrawingContent
-});

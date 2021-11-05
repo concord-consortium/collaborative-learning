@@ -8,6 +8,9 @@ import { DocumentContentModel } from "../models/document/document-content";
 import { createStores } from "../models/stores/stores";
 import { ToolbarComponent, ToolbarConfig } from "./toolbar";
 
+// This is needed so MST can deserialize snapshots referring to tools
+import "../register-tools";
+
 describe("ToolbarComponent", () => {
 
   const stores = createStores();

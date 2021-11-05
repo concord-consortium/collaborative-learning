@@ -10,6 +10,9 @@ import { IDocumentExportOptions } from "../tools/tool-content-info";
 import { safeJsonParse } from "../../utilities/js-utils";
 import placeholderImage from "../../assets/image_placeholder.png";
 
+// This is needed so MST can deserialize snapshots referring to tools
+import "../../register-tools";
+
 // mock uniqueId so we can recognize auto-generated IDs
 jest.mock("../../utilities/js-utils", () => {
   const { uniqueId, ...others } = jest.requireActual("../../utilities/js-utils");

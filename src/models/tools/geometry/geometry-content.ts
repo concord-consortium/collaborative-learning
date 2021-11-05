@@ -4,7 +4,7 @@ import { Lambda } from "mobx";
 import { Optional } from "utility-types";
 import { SelectionStoreModelType } from "../../stores/selection";
 import { addLinkedTable, removeLinkedTable } from "../table-links";
-import { ITileExportOptions, registerToolContentInfo, IDefaultContentOptions } from "../tool-content-info";
+import { ITileExportOptions, IDefaultContentOptions } from "../tool-content-info";
 import { ToolContentModel, ToolMetadataModel } from "../tool-types";
 import {
   getRowLabelFromLinkProps, IColumnProperties, ICreateRowsProperties, IRowProperties,
@@ -24,7 +24,7 @@ import { prepareToDeleteObjects } from "./jxg-polygon";
 import { getTableIdFromLinkChange } from "./jxg-table-link";
 import {
   isAxisArray, isBoard, isComment, isFreePoint, isImage, isLinkedPoint, isMovableLine, isPoint, isPointArray,
-  isPolygon, isVertexAngle, isVisibleEdge, kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, toObj
+  isPolygon, isVertexAngle, isVisibleEdge, kGeometryDefaultPixelsPerUnit, toObj
 } from "./jxg-types";
 import { IDataSet } from "../../data/data-set";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
@@ -1335,16 +1335,3 @@ export function getImageUrl(change?: JXGChange): string[] | undefined {
     return [change.properties.url, change.properties.filename];
   }
 }
-
-registerToolContentInfo({
-  id: kGeometryToolID,
-  tool: "geometry",
-  titleBase: "Graph",
-  modelClass: GeometryContentModel,
-  metadataClass: GeometryMetadataModel,
-  addSidecarNotes: true,
-  defaultHeight: kGeometryDefaultHeight,
-  exportNonDefaultHeight: true,
-  defaultContent: defaultGeometryContent,
-  snapshotPostProcessor: mapTileIdsInGeometrySnapshot
-});

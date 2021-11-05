@@ -2,14 +2,15 @@ import { types, Instance } from "mobx-state-tree";
 import { Value } from "slate";
 import Plain from "slate-plain-serializer";
 import Markdown from "slate-md-serializer";
-import { ITileExportOptions, registerToolContentInfo } from "../tool-content-info";
+import { ITileExportOptions } from "../tool-content-info";
 import {
   deserializeValueFromLegacy, htmlToSlate, serializeValueToLegacy, slateToHtml, textToSlate
 } from "@concord-consortium/slate-editor";
 
+
 export const kTextToolID = "Text";
 
-function defaultTextContent() {
+export function defaultTextContent() {
   return TextContentModel.create();
 }
 
@@ -85,10 +86,3 @@ export const TextContentModel = types
   }));
 
 export type TextContentModelType = Instance<typeof TextContentModel>;
-
-registerToolContentInfo({
-  id: kTextToolID,
-  tool: "text",
-  modelClass: TextContentModel,
-  defaultContent: defaultTextContent
-});
