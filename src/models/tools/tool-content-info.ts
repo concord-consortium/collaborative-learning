@@ -1,6 +1,7 @@
 import { ToolContentModel, ToolContentModelType, ToolMetadataModel } from "./tool-types";
 import { UnitModelType } from "../curriculum/unit";
 import { IToolTileProps } from "../../components/tools/tool-tile";
+import { FunctionComponent, SVGProps } from "react";
 
 export interface IDMap {
   [id: string]: string;
@@ -28,6 +29,7 @@ export interface IToolContentInfo {
   defaultContent: (options?: IDefaultContentOptions) => ToolContentModelType;
   Component: ToolComponentType;
   toolTileClass: string;
+  Icon?: FunctionComponent<SVGProps<SVGSVGElement>>;
   titleBase?: string;
   metadataClass?: typeof ToolMetadataModel;
   addSidecarNotes?: boolean;

@@ -49,15 +49,27 @@ export const ToolMetadataModel = types.model("ToolMetadataModel", {
   });
 export interface ToolMetadataModelType extends Instance<typeof ToolMetadataModel> {}
 
-export const ToolButtonModel = types.model("ToolButton", {
+const BaseToolButtonModel = types.model("BaseToolButton", {
   name: types.string,
   title: types.string,
-  iconId: types.string,
   isDefault: false,
-  isTileTool: false
 });
-export interface ToolButtonModelType extends Instance<typeof ToolButtonModel> {}
-export interface ToolButtonSnapshot extends SnapshotOut<typeof ToolButtonModel> {}
+
+const AppToolButtonModel = BaseToolButtonModel.named("AppToolButtonModel")
+  .props({
+    iconId: types.string,
+    isTileTool: types.literal(false)
+  });
+
+const TileToolButtonModel = BaseToolButtonModel.named("TileToolButtonModel")
+  .props({
+    isTileTool: types.literal(true)
+  });
+export const ToolButtonModel = types.union(AppToolButtonModel, TileToolButtonModel);
+
+// This can't be an interface because the type is a union which is not supported
+// by typescript interfaces
+export type ToolButtonSnapshot = SnapshotOut<typeof ToolButtonModel>;
 
 interface IPrivate {
   metadata: Record<string, ToolMetadataModelType>;

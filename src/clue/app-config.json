@@ -220,42 +220,39 @@
       "name": "select",
       "title": "Select",
       "iconId": "icon-select-tool",
+      "isTileTool": false,
       "isDefault": true
     },
     {
       "name": "text",
       "title": "Text",
-      "iconId": "icon-text-tool",
       "isTileTool": true
     },
     {
       "name": "table",
       "title": "Table",
-      "iconId": "icon-table-tool",
       "isTileTool": true
     },
     {
       "name": "geometry",
       "title": "Geometry",
-      "iconId": "icon-geometry-tool",
       "isTileTool": true
     },
     {
       "name": "image",
       "title": "Image",
-      "iconId": "icon-image-tool",
       "isTileTool": true
     },
     {
       "name": "drawing",
       "title": "Drawing",
-      "iconId": "icon-drawing-tool",
       "isTileTool": true
     },
     {
       "name": "delete",
       "title": "Delete",
-      "iconId": "icon-delete-tool"
+      "iconId": "icon-delete-tool",
+      "isTileTool": false
     }
   ]
 }
