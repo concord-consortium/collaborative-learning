@@ -1,5 +1,12 @@
 import { getParentWithTypeName } from "./mst-utils";
-import { types, unprotect } from "mobx-state-tree";
+import { getParent, types, unprotect } from "mobx-state-tree";
+
+// reduce mobx strictness just for this test so we can use unprotect 
+// without seeing a warning
+// I'd note that the MST jest tests themselves have this same problem and they 
+// have not disabled the warning. An example test is here:
+//   https://github.com/mobxjs/mobx-state-tree/blob/master/packages/mobx-state-tree/__tests__/core/node.test.ts#L35
+import {configure} from "mobx"; configure({ enforceActions: "never" });
 
 describe("getParentWithTypeName", () => {
 
