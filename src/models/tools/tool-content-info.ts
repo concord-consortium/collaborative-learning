@@ -29,7 +29,7 @@ export interface IToolContentInfo {
   defaultContent: (options?: IDefaultContentOptions) => ToolContentModelType;
   Component: ToolComponentType;
   toolTileClass: string;
-  icon?: FunctionComponent<SVGProps<SVGSVGElement>>;
+  Icon?: FunctionComponent<SVGProps<SVGSVGElement>>;
   titleBase?: string;
   metadataClass?: typeof ToolMetadataModel;
   addSidecarNotes?: boolean;

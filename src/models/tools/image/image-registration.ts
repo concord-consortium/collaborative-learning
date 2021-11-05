@@ -11,5 +11,5 @@ registerToolContentInfo({
   Component: ImageToolComponent,
   toolTileClass: "image-tool-tile",
   tileHandlesOwnSelection: true,
-  icon: ImageToolIcon
+  Icon: ImageToolIcon
 });

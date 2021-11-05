@@ -14,5 +14,5 @@ registerToolContentInfo({
   defaultContent: defaultDrawingContent,
   Component: DrawingToolComponent,
   toolTileClass: "drawing-tool-tile",
-  icon: DrawingToolIcon
+  Icon: DrawingToolIcon
 });

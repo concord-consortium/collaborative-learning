@@ -19,5 +19,5 @@ registerToolContentInfo({
   Component: GeometryToolComponent,
   toolTileClass: "geometry-tool-tile",
   tileHandlesOwnSelection: true,
-  icon: GeometryToolIcon
+  Icon: GeometryToolIcon
 });

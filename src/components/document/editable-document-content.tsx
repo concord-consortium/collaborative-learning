@@ -11,10 +11,10 @@ import { EditableToolApiInterfaceRef, EditableToolApiInterfaceRefContext } from 
 import { DocumentModelType } from "../../models/document/document";
 import { ProblemDocument } from "../../models/document/document-types";
 import { WorkspaceMode } from "../../models/stores/workspace";
-
-import "./editable-document-content.scss";
 import { getToolContentInfoByTool } from "../../models/tools/tool-content-info";
 import { IToolButtonConfig } from "../tool-button";
+
+import "./editable-document-content.scss";
 
 interface IToolbarProps {
   document: DocumentModelType;
@@ -23,7 +23,7 @@ interface IToolbarProps {
 
 function getToolbarIcon(tool: IToolButtonConfig, appConfig: IAppConfigContext) {
   if (tool.isTileTool) {
-    return getToolContentInfoByTool(tool.name).icon;
+    return getToolContentInfoByTool(tool.name).Icon;
   } else {
     return appConfig.appIcons?.[tool.iconId];
   }

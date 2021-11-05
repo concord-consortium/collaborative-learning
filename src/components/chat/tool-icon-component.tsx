@@ -10,6 +10,6 @@ interface IProps {
 
 export const ToolIconComponent: React.FC<IProps> = ({documentKey, tileId}) => {
   const tileType = useTypeOfTileInDocumentOrCurriculum(documentKey, tileId);
-  const Icon = getToolContentInfoById(tileType)?.icon;
+  const Icon = getToolContentInfoById(tileType)?.Icon;
   return Icon ? <Icon/> : <DocumentIcon/>;
 };

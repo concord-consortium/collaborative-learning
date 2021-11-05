@@ -11,5 +11,5 @@ registerToolContentInfo({
   Component: TextToolComponent,
   toolTileClass: "text-tool-tile",
   tileHandlesOwnSelection: true,
-  icon: TextToolIcon
+  Icon: TextToolIcon
 });

@@ -15,5 +15,5 @@ registerToolContentInfo({
   snapshotPostProcessor: mapTileIdsInTableSnapshot,
   Component: TableToolComponent,
   toolTileClass: "table-tool-tile",
-  icon: TableToolIcon
+  Icon: TableToolIcon
 });
