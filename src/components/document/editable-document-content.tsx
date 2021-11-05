@@ -1,6 +1,6 @@
 import React, { useContext, useRef } from "react";
 import classNames from "classnames";
-import { AppConfigContext } from "../../app-config-context";
+import { AppConfigContext, IAppConfigContext } from "../../app-config-context";
 import { CanvasComponent } from "./canvas";
 import { DocumentContextReact } from "./document-context";
 import { FourUpComponent } from "../four-up";
@@ -13,14 +13,25 @@ import { ProblemDocument } from "../../models/document/document-types";
 import { WorkspaceMode } from "../../models/stores/workspace";
 
 import "./editable-document-content.scss";
+import { getToolContentInfoByTool } from "../../models/tools/tool-content-info";
+import { IToolButtonConfig } from "../tool-button";
 
 interface IToolbarProps {
   document: DocumentModelType;
   toolbar?: ToolbarConfig;
 }
+
+function getToolbarIcon(tool: IToolButtonConfig, appConfig: IAppConfigContext) {
+  if (tool.isTileTool) {
+    return getToolContentInfoByTool(tool.name).icon;
+  } else {
+    return appConfig.appIcons?.[tool.iconId];
+  }
+}
+
 const DocumentToolbar: React.FC<IToolbarProps> = ({ toolbar, ...others }) => {
   const appConfig = useContext(AppConfigContext);
-  const toolbarConfig = toolbar?.map(tool => ({ icon: appConfig.appIcons?.[tool.iconId], ...tool }));
+  const toolbarConfig = toolbar?.map(tool => ({ icon: getToolbarIcon(tool, appConfig), ...tool }));
   return toolbarConfig
           ? <ToolbarComponent key="toolbar" config={toolbarConfig} {...others} />
           : null;

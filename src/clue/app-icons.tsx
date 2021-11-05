@@ -22,5 +22,6 @@ export const appIcons: Record<string, FunctionComponent<SVGProps<SVGSVGElement>>
   "icon-select-tool": SelectToolIcon,
   "icon-undo-tool": UndoToolIcon
 
-  // icons for tool tiles are added by registerToolContentInfo
+  // Icons for tool tiles are not stored here.
+  // Components that need them should get them from the tool content info.
 };

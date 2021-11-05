@@ -1,7 +1,6 @@
 import { ToolContentModel, ToolContentModelType, ToolMetadataModel } from "./tool-types";
 import { UnitModelType } from "../curriculum/unit";
 import { IToolTileProps } from "../../components/tools/tool-tile";
-import { appIcons } from "../../clue/app-icons";
 import { FunctionComponent, SVGProps } from "react";
 
 export interface IDMap {
@@ -57,10 +56,6 @@ const gToolContentInfoMapByTool: IToolContentInfoMap = {};
 export function registerToolContentInfo(toolContentInfo: IToolContentInfo) {
   gToolContentInfoMapById[toolContentInfo.id] = toolContentInfo;
   gToolContentInfoMapByTool[toolContentInfo.tool] = toolContentInfo;
-  const { icon } = toolContentInfo;
-  if (icon) {
-    appIcons[`icon-${toolContentInfo.tool}-tool`] = icon;
-  }
 }
 
 // ToolContent id, e.g. kDrawingToolID, kGeometryToolID, etc.

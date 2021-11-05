@@ -34,7 +34,6 @@ describe("ToolbarComponent", () => {
     {
       name: "text",
       title: "Text",
-      iconId: "icon-text-tool",
       isDefault: false,
       isTileTool: true
     },

@@ -4,9 +4,9 @@ import { IconComponent } from "../app-config-context";
 import { DocumentTool } from "../models/document/document";
 import { ToolButtonSnapshot } from "../models/tools/tool-types";
 
-export interface IToolButtonConfig extends ToolButtonSnapshot {
+export type IToolButtonConfig = ToolButtonSnapshot & {
   icon?: IconComponent;
-}
+};
 
 export interface IButtonProps {
   config: IToolButtonConfig;
