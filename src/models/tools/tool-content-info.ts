@@ -1,10 +1,22 @@
 import { ToolContentModel, ToolContentModelType, ToolMetadataModel } from "./tool-types";
+import { UnitModelType } from "../curriculum/unit";
 
 export interface IDMap {
   [id: string]: string;
 }
 export type ToolTileModelContentSnapshotPostProcessor =
               (content: any, idMap: IDMap, asTemplate?: boolean) => any;
+
+export interface IDefaultContentOptions {
+  // title is only currently used by the Geometry and Table tiles
+  title?: string;
+  // url is added so the CLUE core can add an image tile to the document when a user
+  // drops an image on the document.
+  url?: string;
+  // unit is added so the drawing tool can use a default set of stamps defined in
+  // the unit
+  unit?: UnitModelType;
+}
 
 export interface IToolContentInfo {
   id: string;
@@ -15,7 +27,7 @@ export interface IToolContentInfo {
   addSidecarNotes?: boolean;
   defaultHeight?: number;
   exportNonDefaultHeight?: boolean;
-  defaultContent: (input?: any) => ToolContentModelType;
+  defaultContent: (options?: IDefaultContentOptions) => ToolContentModelType;
   snapshotPostProcessor?: ToolTileModelContentSnapshotPostProcessor;
 }
 

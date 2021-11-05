@@ -1,8 +1,8 @@
-import { types, Instance } from "mobx-state-tree";
+import { types, getSnapshot, Instance } from "mobx-state-tree";
 import { exportDrawingTileSpec } from "./drawing-export";
 import { importDrawingTileSpec, isDrawingTileImportSpec } from "./drawing-import";
 import { DrawingObjectDataType } from "./drawing-objects";
-import { ITileExportOptions, registerToolContentInfo } from "../tool-content-info";
+import { ITileExportOptions, registerToolContentInfo, IDefaultContentOptions } from "../tool-content-info";
 import { ToolMetadataModel, ToolContentModel } from "../tool-types";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
@@ -78,10 +78,14 @@ export const DrawingToolMetadataModel = ToolMetadataModel
   }));
 export type DrawingToolMetadataModelType = Instance<typeof DrawingToolMetadataModel>;
 
-export function defaultDrawingContent(options?: {stamps: StampModelType[]}) {
+// This is only used directly by tests.
+export function defaultDrawingContent(options?: IDefaultContentOptions) {
+  let stamps: StampModelType[] = [];
+  if (options?.unit) {
+    stamps = getSnapshot(options.unit.defaultStamps);
+  }
   return DrawingContentModel.create({
-    type: kDrawingToolID,
-    stamps: options?.stamps || [],
+    stamps,
     changes: []
   });
 }

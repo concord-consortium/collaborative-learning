@@ -9,8 +9,8 @@ import {
 
 export const kTextToolID = "Text";
 
-export function defaultTextContent(initialText?: string) {
-  return TextContentModel.create({ text: initialText || "" });
+function defaultTextContent() {
+  return TextContentModel.create();
 }
 
 const MarkdownSerializer = new Markdown();

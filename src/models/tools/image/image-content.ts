@@ -1,7 +1,7 @@
 import { types, Instance, SnapshotOut } from "mobx-state-tree";
 import { createChange, ImageToolChange } from "./image-change";
 import { exportImageTileSpec, importImageTileSpec, isImageTileImportSpec } from "./image-import-export";
-import { ITileExportOptions, registerToolContentInfo } from "../tool-content-info";
+import { ITileExportOptions, registerToolContentInfo, IDefaultContentOptions } from "../tool-content-info";
 import { ToolContentModel } from "../tool-types";
 import { isPlaceholderImage } from "../../../utilities/image-utils";
 import { safeJsonParse } from "../../../utilities/js-utils";
@@ -9,12 +9,10 @@ import placeholderImage from "../../../assets/image_placeholder.png";
 
 export const kImageToolID = "Image";
 
-export function defaultImageContent(url?: string) {
-  const change = createChange(url || placeholderImage);
-  return ImageContentModel.create({
-                            type: "Image",
-                            changes: [change]
-                          });
+// This is only used directly by tests
+export function defaultImageContent(options?: IDefaultContentOptions) {
+  const change = createChange(options?.url || placeholderImage);
+  return ImageContentModel.create({ changes: [change] });
 }
 
 export const ImageContentModel = ToolContentModel

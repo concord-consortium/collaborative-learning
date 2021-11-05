@@ -4,11 +4,8 @@ import { ToolContentModel } from "../tool-types";
 
 export const kPlaceholderToolID = "Placeholder";
 
-export function defaultPlaceholderContent(sectionId = "") {
-  return PlaceholderContentModel.create({
-    type: kPlaceholderToolID,
-    sectionId
-  });
+function defaultPlaceholderContent() {
+  return PlaceholderContentModel.create();
 }
 
 export const PlaceholderContentModel = ToolContentModel
