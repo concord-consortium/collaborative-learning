@@ -2,7 +2,7 @@ import classNames from "classnames";
 import React from "react";
 import { IconComponent } from "../app-config-context";
 import { DocumentTool } from "../models/document/document";
-import { ToolButtonSnapshot } from "../models/tools/tool-types";
+import { ToolButtonSnapshot } from "../models/tools/tool-button";
 
 export type IToolButtonConfig = ToolButtonSnapshot & {
   icon?: IconComponent;

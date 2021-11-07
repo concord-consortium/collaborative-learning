@@ -1,7 +1,7 @@
 import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import { DocumentContentModel, DocumentContentModelType, cloneContentWithUniqueIds
       } from "../document/document-content";
-import { ToolButtonModel } from "../tools/tool-types";
+import { ToolButtonModel } from "../tools/tool-button";
 import { ENavTab, NavTabModel, NavTabSpec } from "../view/nav-tabs";
 import { SettingsMstType } from "./settings";
 
@@ -47,6 +47,12 @@ const DocumentLabelModel = types
               : self.getUpperLabel(num);
     }
   }));
+
+// Probably this should be changed to something more complex
+export const ToolbarModel = types.array(ToolButtonModel);
+export interface ToolbarModelType extends Instance<typeof ToolbarModel> {}
+export type ToolbarModelSnapshot = SnapshotIn<typeof ToolbarModel>;
+
 export const AppConfigModel = types
   .model("AppConfig", {
     appName: "",
@@ -77,7 +83,7 @@ export const AppConfigModel = types
     showPublishedDocsInPrimaryWorkspace: false,
     comparisonPlaceholderContent: types.optional(types.union(types.string, types.array(types.string)), ""),
     navTabs: types.optional(NavTabsAppConfigModel, () => NavTabsAppConfigModel.create()),
-    toolbar: types.array(ToolButtonModel),
+    toolbar: ToolbarModel,
     settings: types.maybe(SettingsMstType)
   })
   .views(self => ({

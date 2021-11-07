@@ -1,4 +1,4 @@
-import React, { useContext, useRef } from "react";
+import React, { useContext, useRef, useState } from "react";
 import classNames from "classnames";
 import { AppConfigContext, IAppConfigContext } from "../../app-config-context";
 import { CanvasComponent } from "./canvas";
@@ -6,34 +6,41 @@ import { DocumentContextReact } from "./document-context";
 import { FourUpComponent } from "../four-up";
 import { useDocumentContext } from "../../hooks/use-document-context";
 import { useGroupsStore, useUIStore, useUserStore } from "../../hooks/use-stores";
-import { ToolbarComponent, ToolbarConfig } from "../toolbar";
+import { ToolbarComponent } from "../toolbar";
 import { EditableToolApiInterfaceRef, EditableToolApiInterfaceRefContext } from "../tools/tool-api";
 import { DocumentModelType } from "../../models/document/document";
 import { ProblemDocument } from "../../models/document/document-types";
 import { WorkspaceMode } from "../../models/stores/workspace";
 import { getToolContentInfoByTool } from "../../models/tools/tool-content-info";
 import { IToolButtonConfig } from "../tool-button";
+import { clone } from "mobx-state-tree";
+import { ToolbarModelType } from "../../models/stores/app-config-model";
 
 import "./editable-document-content.scss";
 
 interface IToolbarProps {
   document: DocumentModelType;
-  toolbar?: ToolbarConfig;
-}
-
-function getToolbarIcon(tool: IToolButtonConfig, appConfig: IAppConfigContext) {
-  if (tool.isTileTool) {
-    return getToolContentInfoByTool(tool.name).Icon;
-  } else {
-    return appConfig.appIcons?.[tool.iconId];
-  }
+  toolbar?: ToolbarModelType;
 }
 
 const DocumentToolbar: React.FC<IToolbarProps> = ({ toolbar, ...others }) => {
   const appConfig = useContext(AppConfigContext);
-  const toolbarConfig = toolbar?.map(tool => ({ icon: getToolbarIcon(tool, appConfig), ...tool }));
-  return toolbarConfig
-          ? <ToolbarComponent key="toolbar" config={toolbarConfig} {...others} />
+  // cloning the workspace level toolbar model and adding in the appIcons into its
+  // environment is a way to make this more MST based
+  // However being a functional component, it means this clone will happen each time
+  // the component is re-rendered. One way to do this is to put computed using 
+  // const [toolbarModel] = useState(() => { // clone initial toolbar })
+  // that approach means it will only be computed once.
+  // I looked at moving this up a level and it doesn't seem good. Putting it here means the 
+  // clone will only happen the DocumentToolbar is added to a document.
+  const [toolbarModel] = useState<ToolbarModelType | undefined>(() => {
+      // We clone the global toolbar configuration to make a model for each document
+      // this way the ToolbarComponent can modify its toolbar model without affecting 
+      // other documents
+      return clone(toolbar, { appIcons: appConfig.appIcons });
+  });
+  return toolbarModel
+          ? <ToolbarComponent key="toolbar" toolbarModel={toolbarModel} {...others} />
           : null;
 };
 
@@ -80,7 +87,7 @@ export interface IProps {
   mode: WorkspaceMode;
   isPrimary: boolean;
   document: DocumentModelType;
-  toolbar?: ToolbarConfig;
+  toolbar?: ToolbarModelType;
   readOnly?: boolean;
 }
 export const EditableDocumentContent: React.FC<IProps> = props => {

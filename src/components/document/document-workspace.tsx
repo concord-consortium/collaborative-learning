@@ -1,5 +1,4 @@
 import { inject, observer } from "mobx-react";
-import { getSnapshot } from "mobx-state-tree";
 import React from "react";
 import { DocumentComponent, WorkspaceSide } from "../../components/document/document";
 import { GroupVirtualDocumentComponent } from "../../components/document/group-virtual-document";
@@ -135,7 +134,8 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     const groupVirtualDocument = comparisonDocumentKey
       && groups.virtualDocumentForGroup(comparisonDocumentKey);
 
-    const toolbar = appConfig && getSnapshot(appConfig.toolbar);
+    // Switched to be the toolbar model object (which is really just a types.array)
+    const toolbar = appConfig.toolbar;
 
     if (!primaryDocument) {
       return this.renderDocument("single-workspace", "primary");

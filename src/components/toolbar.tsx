@@ -9,6 +9,7 @@ import { DeleteButton } from "./delete-button";
 import { IToolButtonConfig, IToolButtonProps, ToolButtonComponent } from "./tool-button";
 import { EditableToolApiInterfaceRefContext } from "./tools/tool-api";
 import { kDragTileCreate  } from "./tools/tool-tile";
+import { ToolbarModelType } from "../models/stores/app-config-model";
 
 import "./toolbar.sass";
 
@@ -16,7 +17,7 @@ export type ToolbarConfig = IToolButtonConfig[];
 
 interface IProps extends IBaseProps {
   document: DocumentModelType;
-  config: ToolbarConfig;
+  toolbarModel: ToolbarModelType;
 }
 
 interface IState {
@@ -39,7 +40,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   }
 
   public componentDidMount() {
-    const defaultTool = this.props.config.find(item => item.isDefault);
+    const defaultTool = this.props.toolbarModel.find(item => item.isDefault);
     if (defaultTool) {
       this.setState({ defaultTool: defaultTool.name, activeTool: defaultTool.name });
     }
@@ -66,23 +67,23 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const handleDragTool = (e: React.DragEvent<HTMLDivElement>, tool: DocumentTool) => {
       this.handleDragNewToolTile(tool, e);
     };
-    const renderToolButtons = (toolbarConfig: ToolbarConfig) => {
+    const renderToolButtons = (toolbarModel: ToolbarModelType) => {
       const { ui: { selectedTileIds } } = this.stores;
-      return toolbarConfig.map(config => {
+      return toolbarModel.map(toolButton => {
         const buttonProps: IToolButtonProps = {
-          config,
-          ToolIcon: config.icon,
-          isActive: config.name === this.state.activeTool,
-          isDisabled: config.name === "delete" && !selectedTileIds.length,
+          config: toolButton,
+          ToolIcon: toolButton.Icon,
+          isActive: toolButton.name === this.state.activeTool,
+          isDisabled: toolButton.name === "delete" && !selectedTileIds.length,
           onSetToolActive: handleSetActiveTool,
           onClick: handleClickTool,
           onDragStart: handleDragTool,
           onShowDropHighlight: this.showDropRowHighlight,
           onHideDropHighlight: this.removeDropRowHighlight
         };
-        return config.name !== "delete"
-                ? <ToolButtonComponent key={config.name} {...buttonProps} />
-                : <DeleteButton key={config.name}
+        return toolButton.name !== "delete"
+                ? <ToolButtonComponent key={toolButton.name} {...buttonProps} />
+                : <DeleteButton key={toolButton.name}
                                 onSetShowDeleteTilesConfirmationAlert={this.setShowDeleteTilesConfirmationAlert}
                                 onDeleteSelectedTiles={this.handleDeleteSelectedTiles}
                                 {...buttonProps} />;
@@ -90,7 +91,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     };
     return (
       <div className="toolbar" data-testid="toolbar">
-        {renderToolButtons(this.props.config)}
+        {renderToolButtons(this.props.toolbarModel)}
       </div>
     );
   }

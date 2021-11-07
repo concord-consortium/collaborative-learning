@@ -1,4 +1,4 @@
-import { Instance, SnapshotOut, types } from "mobx-state-tree";
+import { Instance, types } from "mobx-state-tree";
 import { getToolContentModels, getToolContentInfoById } from "./tool-content-info";
 
 // It isn't clear when 'late' is run. Currently it works.  It is running
@@ -48,28 +48,6 @@ export const ToolMetadataModel = types.model("ToolMetadataModel", {
     id: types.string
   });
 export interface ToolMetadataModelType extends Instance<typeof ToolMetadataModel> {}
-
-const BaseToolButtonModel = types.model("BaseToolButton", {
-  name: types.string,
-  title: types.string,
-  isDefault: false,
-});
-
-const AppToolButtonModel = BaseToolButtonModel.named("AppToolButtonModel")
-  .props({
-    iconId: types.string,
-    isTileTool: types.literal(false)
-  });
-
-const TileToolButtonModel = BaseToolButtonModel.named("TileToolButtonModel")
-  .props({
-    isTileTool: types.literal(true)
-  });
-export const ToolButtonModel = types.union(AppToolButtonModel, TileToolButtonModel);
-
-// This can't be an interface because the type is a union which is not supported
-// by typescript interfaces
-export type ToolButtonSnapshot = SnapshotOut<typeof ToolButtonModel>;
 
 interface IPrivate {
   metadata: Record<string, ToolMetadataModelType>;
