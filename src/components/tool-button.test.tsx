@@ -4,6 +4,9 @@ import React from "react";
 import { ToolButtonModel } from "../models/tools/tool-button";
 import { ToolButtonComponent } from "./tool-button";
 
+// This is needed so the icon for the text tool can be found
+import "../register-tools";
+
 describe("ToolButtonComponent", () => {
 
   const onSetToolActive = jest.fn();
