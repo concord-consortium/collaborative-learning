@@ -1,6 +1,14 @@
 const DOCUMENT_COMMENT_CLASS = 'comment-select';
 const TILE_COMMENT_CLASS = 'selected-for-comment';
 
+import TeacherDashboard from "./TeacherDashboard";
+import ClueCanvas from "./cCanvas";
+import ResourcesPanel from "./ResourcesPanel";
+
+let dashboard = new TeacherDashboard;
+let clueCanvas = new ClueCanvas;
+let resourcesPanel = new ResourcesPanel;
+
 class ChatPanel{
 
     getChatPanelToggle() {
@@ -100,6 +108,17 @@ class ChatPanel{
     }
     verifyCommentThreadDoesNotExist() {
       this.getCommentFromThread().should("not.exist");
+    }
+
+    openTeacherChat(portalUrl, teacher, reportUrl) {
+      cy.login(portalUrl, teacher);
+      cy.launchReport(reportUrl);
+      cy.waitForLoad();
+      dashboard.switchView("Workspace & Resources");
+      cy.wait(4000);
+      clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
+      resourcesPanel.getCollapsedResourcesTab().click();
+      this.getChatPanelToggle().click();
     }
 }
 export default ChatPanel;

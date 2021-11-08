@@ -2,7 +2,7 @@ import TeacherDashboard from "../../../../support/elements/clue/TeacherDashboard
 import ClueCanvas from "../../../../support/elements/clue/cCanvas";
 import TeacherNetwork from "../../../../support/elements/clue/TeacherNetwork";
 
-let dashboard = new TeacherDashboard();
+let dashboard = new TeacherDashboard;
 let clueCanvas = new ClueCanvas;
 let teacherNetwork = new TeacherNetwork;
 
@@ -33,42 +33,42 @@ describe('Networked dividers for networked teacher', () => {
     cy.openTopTab("my-work");
     cy.openSection('my-work', 'workspaces');
     teacherNetwork.verifyMyClassesDividerLabel('workspaces');
-    // teacherNetwork.verifyMyNetworkDividerLabel('workspaces');
+    teacherNetwork.verifyMyNetworkDividerLabel('workspaces');
 
     cy.openSection('my-work', 'starred');
     teacherNetwork.verifyMyClassesDividerLabel('starred');
-    // teacherNetwork.verifyMyNetworkDividerLabel('starred');
+    teacherNetwork.verifyMyNetworkDividerLabel('starred');
 
     cy.openSection('my-work', 'learning-log');
     teacherNetwork.verifyMyClassesDividerLabel('learning-log');
-    // teacherNetwork.verifyMyNetworkDividerLabel('learning-log');
+    teacherNetwork.verifyMyNetworkDividerLabel('learning-log');
   });
   it('verify network dividers in \'Class Work\' tab for teacher in network', () => {
     cy.openTopTab("class-work");
     cy.openSection('class-work', 'problem-workspaces');
     teacherNetwork.verifyMyClassesDividerLabel('problem-workspaces');
-    // teacherNetwork.verifyMyNetworkDividerLabel('problem-workspaces');
+    teacherNetwork.verifyMyNetworkDividerLabel('problem-workspaces');
 
     cy.openSection('class-work', 'extra-workspaces');
     teacherNetwork.verifyMyClassesDividerLabel('extra-workspaces');
-    // teacherNetwork.verifyMyNetworkDividerLabel('extra-workspaces');
+    teacherNetwork.verifyMyNetworkDividerLabel('extra-workspaces');
 
     cy.openSection('class-work', 'learning-logs');
     teacherNetwork.verifyMyClassesDividerLabel('learning-logs');
-    // teacherNetwork.verifyMyNetworkDividerLabel('learning-logs');
+    teacherNetwork.verifyMyNetworkDividerLabel('learning-logs');
 
     cy.openSection('class-work', 'starred');
     teacherNetwork.verifyMyClassesDividerLabel('starred');
-    // teacherNetwork.verifyMyNetworkDividerLabel('starred');
+    teacherNetwork.verifyMyNetworkDividerLabel('starred');
   });
   it('verify network dividers in \'Supports\' tab for teacher in network', () => {
     cy.openTopTab("supports");
     cy.openSection('supports', 'problem-supports');
     teacherNetwork.verifyMyClassesDividerLabel('problem-supports');
-    // teacherNetwork.verifyMyNetworkDividerLabel('problem-supports');
+    teacherNetwork.verifyMyNetworkDividerLabel('problem-supports');
 
     cy.openSection('supports', 'teacher-supports');
     teacherNetwork.verifyMyClassesDividerLabel('teacher-supports');
-    // teacherNetwork.verifyMyNetworkDividerLabel('teacher-supports');
+    teacherNetwork.verifyMyNetworkDividerLabel('teacher-supports');
   });
 });
