@@ -15,7 +15,7 @@ import ResourcesPanel from "../../../../support/elements/clue/ResourcesPanel";
  *    all of the students in the dashboard's current view
  */
 
-let dashboard = new TeacherDashboard();
+let dashboard = new TeacherDashboard;
 let clueCanvas = new ClueCanvas;
 let chatPanel = new ChatPanel;
 let resourcesPanel = new ResourcesPanel;
