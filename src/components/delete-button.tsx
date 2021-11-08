@@ -10,18 +10,18 @@ interface IProps extends IButtonProps {
 }
 
 export const DeleteButton: React.FC<IProps> =
-  ({ config, ToolIcon, isActive, isDisabled, onSetToolActive, onClick,
+  ({ toolButton, isActive, isDisabled, onSetToolActive, onClick,
       onSetShowDeleteTilesConfirmationAlert, onDeleteSelectedTiles }) => {
 
-  const { name, title } = config;
+  const { name, title, Icon } = toolButton;
   const toolName = name as DocumentTool;
 
   const handleMouseDown = () => {
-    !isDisabled && onSetToolActive(toolName, true);
+    !isDisabled && onSetToolActive(toolButton, true);
   };
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    !isDisabled && onClick(e, toolName);
+    !isDisabled && onClick(e, toolButton);
   };
 
   const AlertContent = () => {
@@ -43,7 +43,7 @@ export const DeleteButton: React.FC<IProps> =
         title={title}
         onMouseDown={handleMouseDown}
         onClick={handleClick}>
-      {ToolIcon && <ToolIcon />}
+      {Icon && <Icon />}
     </div>
   );
 };

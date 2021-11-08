@@ -1,6 +1,6 @@
 import React, { useContext, useRef, useState } from "react";
 import classNames from "classnames";
-import { AppConfigContext, IAppConfigContext } from "../../app-config-context";
+import { AppConfigContext } from "../../app-config-context";
 import { CanvasComponent } from "./canvas";
 import { DocumentContextReact } from "./document-context";
 import { FourUpComponent } from "../four-up";
@@ -11,8 +11,6 @@ import { EditableToolApiInterfaceRef, EditableToolApiInterfaceRefContext } from 
 import { DocumentModelType } from "../../models/document/document";
 import { ProblemDocument } from "../../models/document/document-types";
 import { WorkspaceMode } from "../../models/stores/workspace";
-import { getToolContentInfoByTool } from "../../models/tools/tool-content-info";
-import { IToolButtonConfig } from "../tool-button";
 import { clone } from "mobx-state-tree";
 import { ToolbarModelType } from "../../models/stores/app-config-model";
 

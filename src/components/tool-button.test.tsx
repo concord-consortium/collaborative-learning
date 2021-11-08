@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
+import { ToolButtonModel } from "../models/tools/tool-button";
 import { ToolButtonComponent } from "./tool-button";
 
 describe("ToolButtonComponent", () => {
@@ -20,15 +21,17 @@ describe("ToolButtonComponent", () => {
   });
 
   it("renders disabled select tool", () => {
+    const toolButton = ToolButtonModel.create({
+      name: "select",
+      title: "Select",
+      iconId: "icon-select-tool",
+      isDefault: true,
+      isTileTool: false
+    });
+
     render(
       <ToolButtonComponent
-        config={{
-          name: "select",
-          title: "Select",
-          iconId: "icon-select-tool",
-          isDefault: true,
-          isTileTool: false
-        }}
+        toolButton={toolButton}
         isActive={false}
         isDisabled={true}
         onSetToolActive={onSetToolActive}
@@ -47,15 +50,16 @@ describe("ToolButtonComponent", () => {
   });
 
   it("renders enabled text tool", () => {
+    const toolButton = ToolButtonModel.create({
+      name: "text",
+      title: "Text",
+      isDefault: false,
+      isTileTool: true
+    });
+
     render(
       <ToolButtonComponent
-        config={{
-          name: "text",
-          title: "Text",
-          isDefault: false,
-          isTileTool: true
-        }}
-        ToolIcon={() => null}
+        toolButton={toolButton}
         isActive={false}
         isDisabled={false}
         onSetToolActive={onSetToolActive}

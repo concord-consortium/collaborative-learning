@@ -1,4 +1,4 @@
-import { getEnv, SnapshotOut, types } from "mobx-state-tree";
+import { getEnv, Instance, SnapshotOut, types } from "mobx-state-tree";
 import { getToolContentInfoByTool } from "./tool-content-info";
 
 const BaseToolButtonModel = types.model("BaseToolButton", {
@@ -36,4 +36,5 @@ export const ToolButtonModel = types.union(AppToolButtonModel, TileToolButtonMod
 
 // This can't be an interface because the type is a union which is not supported
 // by typescript interfaces
+export type ToolButtonModelType = Instance<typeof ToolButtonModel>;
 export type ToolButtonSnapshot = SnapshotOut<typeof ToolButtonModel>;
