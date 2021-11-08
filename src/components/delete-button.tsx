@@ -1,6 +1,5 @@
 import classNames from "classnames";
 import React from "react";
-import { DocumentTool } from "../models/document/document";
 import { IButtonProps } from "./tool-button";
 import { useCautionAlert } from "./utilities/use-caution-alert";
 
@@ -14,7 +13,6 @@ export const DeleteButton: React.FC<IProps> =
       onSetShowDeleteTilesConfirmationAlert, onDeleteSelectedTiles }) => {
 
   const { name, title, Icon } = toolButton;
-  const toolName = name as DocumentTool;
 
   const handleMouseDown = () => {
     !isDisabled && onSetToolActive(toolButton, true);
@@ -35,7 +33,7 @@ export const DeleteButton: React.FC<IProps> =
   });
   onSetShowDeleteTilesConfirmationAlert(showAlert);
 
-  const classes = classNames("tool", "delete-button", toolName,
+  const classes = classNames("tool", "delete-button", name,
                             { active: isActive }, isDisabled ? "disabled" : "enabled");
   return (
     <div className={classes} data-testid="delete-button"

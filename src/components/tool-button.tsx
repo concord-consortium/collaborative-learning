@@ -1,6 +1,5 @@
 import classNames from "classnames";
 import React from "react";
-import { DocumentTool } from "../models/document/document";
 import { ToolButtonModelType } from "../models/tools/tool-button";
 
 export interface IButtonProps {
@@ -22,7 +21,6 @@ export const ToolButtonComponent: React.FC<IToolButtonProps> =
       onShowDropHighlight, onHideDropHighlight }) => {
 
   const { name, title, isTileTool, Icon } = toolButton;
-  const toolName = name as DocumentTool;
 
   const handleMouseDown = () => {
     if (isDisabled) return;
@@ -48,8 +46,8 @@ export const ToolButtonComponent: React.FC<IToolButtonProps> =
   };
 
   return (
-    <div className={classNames("tool", toolName, { active: isActive }, isDisabled ? "disabled" : "enabled")}
-        data-testid={`tool-${toolName}`}
+    <div className={classNames("tool", name, { active: isActive }, isDisabled ? "disabled" : "enabled")}
+        data-testid={`tool-${name}`}
         key={name}
         title={title}
         onMouseDown={handleMouseDown}
