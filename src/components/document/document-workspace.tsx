@@ -134,7 +134,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     const groupVirtualDocument = comparisonDocumentKey
       && groups.virtualDocumentForGroup(comparisonDocumentKey);
 
-    // Switched to be the toolbar model object (which is really just a types.array)
     const toolbar = appConfig.toolbar;
 
     if (!primaryDocument) {

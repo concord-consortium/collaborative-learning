@@ -23,18 +23,15 @@ interface IToolbarProps {
 
 const DocumentToolbar: React.FC<IToolbarProps> = ({ toolbar, ...others }) => {
   const appConfig = useContext(AppConfigContext);
-  // cloning the workspace level toolbar model and adding in the appIcons into its
-  // environment is a way to make this more MST based
-  // However being a functional component, it means this clone will happen each time
-  // the component is re-rendered. One way to do this is to put computed using 
-  // const [toolbarModel] = useState(() => { // clone initial toolbar })
-  // that approach means it will only be computed once.
-  // I looked at moving this up a level and it doesn't seem good. Putting it here means the 
-  // clone will only happen the DocumentToolbar is added to a document.
+
+  // The toolbar prop represents the app's configuration of the toolbar
+  // It is cloned here in the document so changes to one document's toolbar
+  // to not effect another document's toolbar.
+  // Currently the toolbar model is not modified, but it seems safer to do this.
+  // The cloned model is stored in state so it isn't recreated on each render
   const [toolbarModel] = useState<ToolbarModelType | undefined>(() => {
-      // We clone the global toolbar configuration to make a model for each document
-      // this way the ToolbarComponent can modify its toolbar model without affecting 
-      // other documents
+      // The new model is passed the appIcons as its environment, so the model
+      // can lookup an app level Icon if needed.
       return clone(toolbar, { appIcons: appConfig.appIcons });
   });
   return toolbarModel
