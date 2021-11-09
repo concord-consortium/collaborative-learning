@@ -1,7 +1,4 @@
-import TeacherDashboard from "../../../../support/elements/clue/TeacherDashboard";
-import ClueCanvas from "../../../../support/elements/clue/cCanvas";
 import ChatPanel from "../../../../support/elements/clue/ChatPanel";
-import ResourcesPanel from "../../../../support/elements/clue/ResourcesPanel";
 /**
  * Notes:
  *
@@ -15,14 +12,13 @@ import ResourcesPanel from "../../../../support/elements/clue/ResourcesPanel";
  *    all of the students in the dashboard's current view
  */
 
-let dashboard = new TeacherDashboard;
-let clueCanvas = new ClueCanvas;
 let chatPanel = new ChatPanel;
-let resourcesPanel = new ResourcesPanel;
 
-
+const portalUrl = "https://learn.staging.concord.org";
 const offeringId1 = "2000";
 const offeringId2 = "2004";
+const reportUrl1 = "https://learn.staging.concord.org/portal/offerings/" + offeringId1 + "/external_report/49";
+const reportUrl2 = "https://learn.staging.concord.org/portal/offerings/" + offeringId2 + "/external_report/49";
 const clueTeacher1 = {
   username: "TejalTeacher1",
   password: "ccpassword"
@@ -34,17 +30,9 @@ const clueTeacher2 = {
 
 describe('Teachers can communicate back and forth in chat panel', () => {
   it("login teacher1 and setup clue chat", () => {
-    cy.login("https://learn.staging.concord.org", clueTeacher1);
-    cy.launchReport('https://learn.staging.concord.org/portal/offerings/' + offeringId1 + '/external_report/49');
-    cy.waitForLoad();
-    dashboard.switchView("Workspace & Resources");
-    cy.wait(4000);
-    clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
-    cy.fixture("teacher-dash-data.json").as("clueData");
-    resourcesPanel.getCollapsedResourcesTab().click();
+    chatPanel.openTeacherChat(portalUrl, clueTeacher1, reportUrl1);
     cy.openTopTab("problems");
     cy.openProblemSection("Introduction");
-    chatPanel.getChatPanelToggle().click();
   });
   it("verify teacher1 can post document and tile comments", () => {
     // Teacher 1 document comment
@@ -55,17 +43,9 @@ describe('Teachers can communicate back and forth in chat panel', () => {
     chatPanel.addCommentAndVerify("This is a teacher1 tile comment");
   });
   it("login teacher2 and setup clue chat", () => {
-    cy.login("https://learn.staging.concord.org", clueTeacher2);
-    cy.launchReport('https://learn.staging.concord.org/portal/offerings/' + offeringId2 + '/external_report/49');
-    cy.waitForLoad();
-    dashboard.switchView("Workspace & Resources");
-    cy.wait(4000);
-    clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
-    cy.fixture("teacher-dash-data.json").as("clueData");
-    resourcesPanel.getCollapsedResourcesTab().click();
+    chatPanel.openTeacherChat(portalUrl, clueTeacher2, reportUrl2);
     cy.openTopTab("problems");
     cy.openProblemSection("Introduction");
-    chatPanel.getChatPanelToggle().click();
   });
   it("verify teacher2 can view teacher1's comments and add more comments", () => {
     // Teacher 2 document comment
@@ -78,18 +58,9 @@ describe('Teachers can communicate back and forth in chat panel', () => {
     chatPanel.addCommentAndVerify("This is a teacher2 tile comment");
   });
   it("verify reopening teacher1's clue chat in the same network", () => {
-    // Open clue chat for Teacher 1
-    cy.login("https://learn.staging.concord.org", clueTeacher1);
-    cy.launchReport('https://learn.staging.concord.org/portal/offerings/' + offeringId1 + '/external_report/49');
-    cy.waitForLoad();
-    dashboard.switchView("Workspace & Resources");
-    cy.wait(4000);
-    clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
-    cy.fixture("teacher-dash-data.json").as("clueData");
-    resourcesPanel.getCollapsedResourcesTab().click();
+    chatPanel.openTeacherChat(portalUrl, clueTeacher1, reportUrl1);
     cy.openTopTab("problems");
     cy.openProblemSection("Introduction");
-    chatPanel.getChatPanelToggle().click();
   });
   it("verify teacher1 can view teacher2's comments", () => {
     // Teacher 1 document comment
