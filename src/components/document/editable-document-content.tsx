@@ -1,5 +1,6 @@
 import React, { useContext, useRef, useState } from "react";
 import classNames from "classnames";
+import { clone } from "mobx-state-tree";
 import { AppConfigContext } from "../../app-config-context";
 import { CanvasComponent } from "./canvas";
 import { DocumentContextReact } from "./document-context";
@@ -11,7 +12,6 @@ import { EditableToolApiInterfaceRef, EditableToolApiInterfaceRefContext } from 
 import { DocumentModelType } from "../../models/document/document";
 import { ProblemDocument } from "../../models/document/document-types";
 import { WorkspaceMode } from "../../models/stores/workspace";
-import { clone } from "mobx-state-tree";
 import { ToolbarModelType } from "../../models/stores/app-config-model";
 
 import "./editable-document-content.scss";

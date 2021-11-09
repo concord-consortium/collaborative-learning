@@ -10,9 +10,9 @@ import { IToolButtonProps, ToolButtonComponent } from "./tool-button";
 import { EditableToolApiInterfaceRefContext } from "./tools/tool-api";
 import { kDragTileCreate  } from "./tools/tool-tile";
 import { ToolbarModelType } from "../models/stores/app-config-model";
+import { ToolButtonModelType } from "../models/tools/tool-button";
 
 import "./toolbar.sass";
-import { ToolButtonModelType } from "../models/tools/tool-button";
 
 interface IProps extends IBaseProps {
   document: DocumentModelType;

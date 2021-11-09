@@ -7,10 +7,10 @@ import { DocumentModel } from "../models/document/document";
 import { DocumentContentModel } from "../models/document/document-content";
 import { createStores } from "../models/stores/stores";
 import { ToolbarComponent } from "./toolbar";
+import { ToolbarModel, ToolbarModelSnapshot } from "../models/stores/app-config-model";
 
 // This is needed so MST can deserialize snapshots referring to tools
 import "../register-tools";
-import { ToolbarModel, ToolbarModelSnapshot } from "../models/stores/app-config-model";
 
 describe("ToolbarComponent", () => {
 
