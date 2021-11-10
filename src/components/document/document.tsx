@@ -6,7 +6,7 @@ import FileSaver from "file-saver";
 import { DocumentFileMenu } from "./document-file-menu";
 import { MyWorkDocumentOrBrowser } from "./document-or-browser";
 import { BaseComponent, IBaseProps } from "../base";
-import { ToolbarConfig } from "../toolbar";
+import { ToolbarModelType } from "../../models/stores/app-config-model";
 import { DocumentModelType } from "../../models/document/document";
 import { LearningLogDocument, LearningLogPublication } from "../../models/document/document-types";
 import { SupportType, TeacherSupportModelType, AudienceEnum } from "../../models/stores/supports";
@@ -32,7 +32,7 @@ interface IProps extends IBaseProps {
   onDeleteDocument?: (document: DocumentModelType) => void;
   onPublishSupport?: (document: DocumentModelType) => void;
   onPublishDocument?: (document: DocumentModelType) => void;
-  toolbar?: ToolbarConfig;
+  toolbar?: ToolbarModelType;
   side: WorkspaceSide;
   readOnly?: boolean;
 }

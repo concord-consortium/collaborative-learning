@@ -1,40 +1,40 @@
-import React, { useContext, useRef } from "react";
+import React, { useContext, useRef, useState } from "react";
 import classNames from "classnames";
-import { AppConfigContext, IAppConfigContext } from "../../app-config-context";
+import { clone } from "mobx-state-tree";
+import { AppConfigContext } from "../../app-config-context";
 import { CanvasComponent } from "./canvas";
 import { DocumentContextReact } from "./document-context";
 import { FourUpComponent } from "../four-up";
 import { useDocumentContext } from "../../hooks/use-document-context";
 import { useGroupsStore, useUIStore, useUserStore } from "../../hooks/use-stores";
-import { ToolbarComponent, ToolbarConfig } from "../toolbar";
+import { ToolbarComponent } from "../toolbar";
 import { EditableToolApiInterfaceRef, EditableToolApiInterfaceRefContext } from "../tools/tool-api";
 import { DocumentModelType } from "../../models/document/document";
 import { ProblemDocument } from "../../models/document/document-types";
 import { WorkspaceMode } from "../../models/stores/workspace";
-import { getToolContentInfoByTool } from "../../models/tools/tool-content-info";
-import { IToolButtonConfig } from "../tool-button";
+import { ToolbarModelType } from "../../models/stores/app-config-model";
 
 import "./editable-document-content.scss";
 
 interface IToolbarProps {
   document: DocumentModelType;
-  toolbar?: ToolbarConfig;
-}
-
-function getToolbarIcon(tool: IToolButtonConfig, appConfig: IAppConfigContext) {
-  if (tool.isTileTool) {
-    return getToolContentInfoByTool(tool.name).Icon;
-  } else {
-    return appConfig.appIcons?.[tool.iconId];
-  }
+  toolbar: ToolbarModelType;
 }
 
 const DocumentToolbar: React.FC<IToolbarProps> = ({ toolbar, ...others }) => {
   const appConfig = useContext(AppConfigContext);
-  const toolbarConfig = toolbar?.map(tool => ({ icon: getToolbarIcon(tool, appConfig), ...tool }));
-  return toolbarConfig
-          ? <ToolbarComponent key="toolbar" config={toolbarConfig} {...others} />
-          : null;
+
+  // The toolbar prop represents the app's configuration of the toolbar
+  // It is cloned here in the document so changes to one document's toolbar
+  // do not effect another document's toolbar.
+  // Currently the toolbar model is not modified, but it seems safer to do this.
+  // The cloned model is stored in state so it isn't recreated on each render
+  const [toolbarModel] = useState<ToolbarModelType>(() => {
+      // The new model is passed the appIcons as its environment, so the model
+      // can lookup an app level Icon if needed.
+      return clone(toolbar, { appIcons: appConfig.appIcons });
+  });
+  return <ToolbarComponent key="toolbar" toolbarModel={toolbarModel} {...others} />;
 };
 
 interface IOneUpCanvasProps {
@@ -80,7 +80,7 @@ export interface IProps {
   mode: WorkspaceMode;
   isPrimary: boolean;
   document: DocumentModelType;
-  toolbar?: ToolbarConfig;
+  toolbar?: ToolbarModelType;
   readOnly?: boolean;
 }
 export const EditableDocumentContent: React.FC<IProps> = props => {

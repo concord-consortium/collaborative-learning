@@ -1,5 +1,5 @@
 import { getParentWithTypeName } from "./mst-utils";
-import { getParent, types, unprotect } from "mobx-state-tree";
+import { types, unprotect } from "mobx-state-tree";
 
 // reduce mobx strictness just for this test so we can use unprotect 
 // without seeing a warning
