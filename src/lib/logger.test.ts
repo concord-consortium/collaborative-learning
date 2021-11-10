@@ -1,5 +1,5 @@
 import mockXhr from "xhr-mock";
-import { Logger, LogEventName } from "./logger";
+import { Logger, LogEventName, ILogComment } from "./logger";
 import { DocumentModel, DocumentModelType } from "../models/document/document";
 import { ProblemDocument } from "../models/document/document-types";
 import { AppConfigModel } from "../models/stores/app-config-model";
@@ -208,7 +208,69 @@ describe("authed logger", () => {
       Logger.logTileEvent(LogEventName.CREATE_TILE, tile);
     });
 
-    it("can log an ADD comment event", (done) => {
+    it("can log an ADD a document initial comment event", (done) => {
+      const document = DocumentModel.create({
+        type: ProblemDocument,
+        uid: "1",
+        key: "source-document",
+        createdAt: 1,
+        content: {},
+        visibility: "public"
+      });
+      stores.documents.add(document);
+      const documentKey = document.key;
+      const commentText = "TeSt";
+      const addEventPayload: ILogComment = {
+        focusDocumentId: document.key,
+        isFirst: true,
+        commentText,
+        action: "add"
+      };
+
+      mockXhr.post(/.*/, (req, res) => {
+        const addCommentRequest = JSON.parse(req.body());
+        expect(addCommentRequest.event).toBe("ADD_INITIAL_COMMENT_FOR_DOCUMENT");
+        expect(addCommentRequest.parameters.commentText).toBe(commentText);
+        expect(addCommentRequest.parameters.documentKey).toBe(documentKey);
+        done();
+        return res.status(201);
+      });
+
+      Logger.logCommentEvent(addEventPayload);
+    });
+
+    it("can log an ADD a document response comment event", (done) => {
+      const document = DocumentModel.create({
+        type: ProblemDocument,
+        uid: "1",
+        key: "source-document",
+        createdAt: 1,
+        content: {},
+        visibility: "public"
+      });
+      stores.documents.add(document);
+      const documentKey = document.key;
+      const commentText = "TeSt";
+      const addEventPayload: ILogComment = {
+        focusDocumentId: document.key,
+        isFirst: false,
+        commentText,
+        action: "add"
+      };
+
+      mockXhr.post(/.*/, (req, res) => {
+        const addCommentRequest = JSON.parse(req.body());
+        expect(addCommentRequest.event).toBe("ADD_RESPONSE_COMMENT_FOR_DOCUMENT");
+        expect(addCommentRequest.parameters.commentText).toBe(commentText);
+        expect(addCommentRequest.parameters.documentKey).toBe(documentKey);
+        done();
+        return res.status(201);
+      });
+
+      Logger.logCommentEvent(addEventPayload);
+    });
+
+    it("can log an ADD a tile comment event", (done) => {
       const document = DocumentModel.create({
         type: ProblemDocument,
         uid: "1",
@@ -222,12 +284,12 @@ describe("authed logger", () => {
       const tileId = tile.id;
       const documentKey = document.key;
       const commentText = "TeSt";
-      const addEventPayload = {
+      const addEventPayload: ILogComment = {
         focusDocumentId: document.key,
         focusTileId: tile.id,
         isFirst: false,
-        commentText: "TeSt",
-        isAdding: true
+        commentText,
+        action: "add"
       };
 
       mockXhr.post(/.*/, (req, res) => {
@@ -243,7 +305,37 @@ describe("authed logger", () => {
       Logger.logCommentEvent(addEventPayload);
     });
 
-    it("can log a DELETE comment event", (done) => {
+    it("can log a DELETE document comment event", (done) => {
+      const document = DocumentModel.create({
+        type: ProblemDocument,
+        uid: "1",
+        key: "source-document",
+        createdAt: 1,
+        content: {},
+        visibility: "public"
+      });
+      stores.documents.add(document);
+      const documentKey = document.key;
+      const commentText = "TeSt";
+      const deleteEventPayload: ILogComment = {
+        focusDocumentId: document.key,
+        isFirst: false,
+        commentText,
+        action: "delete"
+      };
+
+      mockXhr.post(/.*/, (req, res) => {
+        const deleteCommentRequest = JSON.parse(req.body());
+        expect(deleteCommentRequest.event).toBe("DELETE_COMMENT_FOR_DOCUMENT");
+        expect(deleteCommentRequest.parameters.commentText).toBe(commentText);
+        expect(deleteCommentRequest.parameters.documentKey).toBe(documentKey);
+        done();
+        return res.status(201);
+      });
+      Logger.logCommentEvent(deleteEventPayload);
+    });
+
+    it("can log a DELETE tile comment event", (done) => {
       const document = DocumentModel.create({
         type: ProblemDocument,
         uid: "1",
@@ -257,12 +349,12 @@ describe("authed logger", () => {
       const tileId = tile.id;
       const documentKey = document.key;
       const commentText = "TeSt";
-      const deleteEventPayload = {
+      const deleteEventPayload: ILogComment = {
         focusDocumentId: document.key,
         focusTileId: tile.id,
         isFirst: false,
-        commentText: "TeSt",
-        isAdding: false
+        commentText,
+        action: "delete"
       };
 
       mockXhr.post(/.*/, (req, res) => {

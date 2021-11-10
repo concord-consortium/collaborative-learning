@@ -143,12 +143,13 @@ interface ITeacherNetworkInfo {
   networkUsername?: string;
 }
 
-interface ILogComment {
+type CommentAction = "add" | "delete";  // | "edit"
+export interface ILogComment {
   focusDocumentId: string;
   focusTileId?: string;
-  isFirst?: boolean; // actual argument is ignored, when isAdding is falsey
+  isFirst?: boolean; // only used with "add"
   commentText: string;
-  isAdding: boolean
+  action: CommentAction;
 }
 
 export class Logger {
@@ -250,28 +251,20 @@ export class Logger {
     Logger.log(event, parameters);
   }
 
-  public static logCommentEvent({
-    focusDocumentId,
-    focusTileId,
-    isFirst,
-    commentText,
-    isAdding
-    }: ILogComment) {
-    let event: LogEventName;
-
-    if (isAdding) {
-      event = focusTileId
-        ? isFirst
-          ? LogEventName.ADD_INITIAL_COMMENT_FOR_TILE
-          : LogEventName.ADD_RESPONSE_COMMENT_FOR_TILE
-        : isFirst
-          ? LogEventName.ADD_INITIAL_COMMENT_FOR_DOCUMENT
-          : LogEventName.ADD_RESPONSE_COMMENT_FOR_DOCUMENT;
-    } else {
-      event = focusTileId
-        ? LogEventName.DELETE_COMMENT_FOR_TILE
-        : LogEventName.DELETE_COMMENT_FOR_DOCUMENT;
-    }
+  public static logCommentEvent({ focusDocumentId, focusTileId, isFirst, commentText, action }: ILogComment) {
+    const eventMap: Record<CommentAction, LogEventName> = {
+      add: focusTileId
+            ? isFirst
+                ? LogEventName.ADD_INITIAL_COMMENT_FOR_TILE
+                : LogEventName.ADD_RESPONSE_COMMENT_FOR_TILE
+            : isFirst
+                ? LogEventName.ADD_INITIAL_COMMENT_FOR_DOCUMENT
+                : LogEventName.ADD_RESPONSE_COMMENT_FOR_DOCUMENT,
+      delete: focusTileId
+                ? LogEventName.DELETE_COMMENT_FOR_TILE
+                : LogEventName.DELETE_COMMENT_FOR_DOCUMENT
+    };
+    const event = eventMap[action];
 
     if (isSectionPath(focusDocumentId)) {
       Logger.logCurriculumEvent(event, focusDocumentId, { tileId: focusTileId, commentText });
