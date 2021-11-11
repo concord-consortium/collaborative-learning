@@ -1,0 +1,183 @@
+{
+  "code": "cas",
+  "abbrevTitle": "CAS",
+  "title": "Comparing and Scaling",
+  "subtitle": "Understanding Similarity",
+  "placeholderText": "Enter notes here",
+  "settings": {
+    "table": {
+      "numFormat": ".2~f"
+    }
+  },
+  "sections": {
+    "overview": {
+      "initials": "OV",
+      "title": "Overview",
+      "placeholder": "Work area for\nOverview section"
+    },
+    "launch": {
+      "initials": "LC",
+      "title": "Launch",
+      "placeholder": "Work area for\nLaunch section"
+    },
+    "explore": {
+      "initials": "EX",
+      "title": "Explore",
+      "placeholder": "Work area for\nExplore section"
+    },
+    "summarize": {
+      "initials": "SM",
+      "title": "Summarize",
+      "placeholder": "Work area for\nSummarize section"
+    }
+  },
+  "defaultStamps": [
+    {
+      "url": "curriculum/moving-straight-ahead/stamps/plus.png",
+      "width": 25,
+      "height": 25
+    },
+    {
+      "url": "curriculum/moving-straight-ahead/stamps/equals.png",
+      "width": 25,
+      "height": 25
+    },
+    {
+      "url": "curriculum/moving-straight-ahead/stamps/lparen.png",
+      "width": 25,
+      "height": 25
+    },
+    {
+      "url": "curriculum/moving-straight-ahead/stamps/rparen.png",
+      "width": 25,
+      "height": 25
+    }
+  ],
+  "investigations": [
+    {
+      "description": "Investigation 1",
+      "ordinal": 1,
+      "title": "SAS Investigation 1 Enlarging and Reducing Shapes",
+      "problems": [
+        {
+          "description": "Problem 1.1",
+          "ordinal": 1,
+          "title": "CAS 1.1 Mixing Juice",
+          "subtitle": "Choosing a Comparing Strategy",
+          "sections": [
+            {
+              "type": "overview",
+              "content":
+              {
+                "tiles": [
+                ]
+              }
+            },
+            {
+              "type": "launch",
+              "content": {
+                "tiles": [
+                ]
+              }
+            },
+            {
+              "type": "explore",
+              "content": {
+                "tiles": [
+                ]
+              }
+            },
+            {
+              "type": "summarize",
+              "content": {
+                "tiles": [
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "description": "Problem 1.1",
+          "ordinal": 2,
+          "title": "CAS 1.2 Time to Concentrate",
+          "subtitle": "Scaling Ratios",
+          "sections": [
+            {
+              "type": "overview",
+              "content":
+              {
+                "tiles": [
+                ]
+              }
+            },
+            {
+              "type": "launch",
+              "content": {
+                "tiles": [
+                ]
+              }
+            },
+            {
+              "type": "explore",
+              "content": {
+                "tiles": [
+                ]
+              }
+            },
+            {
+              "type": "summarize",
+              "content": {
+                "tiles": [
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "description": "Problem 1.3",
+          "ordinal": 2,
+          "title": "CAS 1.3 Teeping Things in Proportione",
+          "subtitle": "Using Proportions",
+          "sections": [
+            {
+              "type": "overview",
+              "content":
+              {
+                "tiles": [
+                ]
+              }
+            },
+            {
+              "type": "launch",
+              "content": {
+                "tiles": [
+                ]
+              }
+            },
+            {
+              "type": "explore",
+              "content": {
+                "tiles": [
+                ]
+              }
+            },
+            {
+              "type": "summarize",
+              "content": {
+                "tiles": [
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Mathematical Reflections",
+      "ordinal": 5,
+      "title": "SAS MR1 - MR4",
+      "problems": [
+      ]
+    }
+  ]
+}

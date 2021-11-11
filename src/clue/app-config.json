@@ -6,7 +6,8 @@
       "content": "curriculum/completely-rational/completely-rational.json"
     },
     "cas": {
-      "content": "curriculum/comparing-and-scaling/comparing-and-scaling.json"
+      "content": "curriculum/comparing-and-scaling/comparing-and-scaling.json",
+      "guide": "curriculum/comparing-and-scaling/cas-teacher-guide.json"
     },
     "faw": {
       "content": "curriculum/filling-and-wrapping/filling-and-wrapping.json"
