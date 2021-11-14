@@ -129,15 +129,15 @@ export class DemoCreatorComponent extends BaseComponent<IProps> {
   private handleSelectProblem = (e: React.ChangeEvent<HTMLSelectElement>) => {
     this.stores.demo.setProblemOrdinal(e.target.value);
     this.stores.demo.setProblemIndex(e.target.selectedIndex);
-  }
+  };
 
   private handleSelectClass = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const id = `${e.target.value}`;
     this.stores.demo.setClass(id, `Class ${id}`);
-  }
+  };
 
   private handleSetName = (e: React.ChangeEvent<HTMLInputElement>) => {
     const name = `${e.target.value}`;
     this.stores.demo.setName(name);
-  }
+  };
 }

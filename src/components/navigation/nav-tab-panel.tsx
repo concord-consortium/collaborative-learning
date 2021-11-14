@@ -125,13 +125,13 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
       default:
         return null;
     }
-  }
+  };
 
   private renderDocuments = (tabSpec: NavTabSpec) => {
     return (
       <DocumentTabContent tabSpec={tabSpec} />
     );
-  }
+  };
 
   private renderProblem = () => {
     const { user: { isTeacher }, problem: { sections } } = this.stores;
@@ -140,7 +140,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
         sections={sections}
         showSolutionsSwitch={isTeacher}/>
     );
-  }
+  };
 
   private renderTeacherGuide = () => {
     const { user: { isTeacher }, teacherGuide } = this.stores;
@@ -151,7 +151,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
         sections={sections}
         showSolutionsSwitch={false}/>
     );
-  }
+  };
 
   private handleSelectTab = (tabIndex: number) => {
     const { tabs } = this.props;
@@ -168,22 +168,22 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
         logEvent();
       }
     }
-  }
+  };
 
   private selectStudentGroup = (groupId: string) => {
     const { ui } = this.stores;
     ui.setActiveStudentGroup(groupId);
-  }
+  };
 
   private handleShowChatColumn = () => {
     const { ui } = this.stores;
     const event = ui.showChatPanel ? LogEventName.CHAT_PANEL_HIDE : LogEventName.CHAT_PANEL_SHOW;
     Logger.log(event);
     ui.toggleShowChatPanel(!ui.showChatPanel);
-  }
+  };
 
   private handleCloseResources = () => {
     const { ui } = this.stores;
     ui.setDividerPosition(kDividerMin);
-  }
+  };
 }

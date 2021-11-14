@@ -332,19 +332,19 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
         </div>
       </div>
     );
-  }
+  };
 
   private handleHSplitter = (e: React.MouseEvent<HTMLDivElement>) => {
     this.handleSplitters(e, true, false);
-  }
+  };
 
   private handleVSplitter = (e: React.MouseEvent<HTMLDivElement>) => {
     this.handleSplitters(e, false, true);
-  }
+  };
 
   private handleCenter = (e: React.MouseEvent<HTMLDivElement>) => {
     this.handleSplitters(e, true, true);
-  }
+  };
 
   private handleSplitters = (e: React.MouseEvent<HTMLDivElement>, allowHorizontal: boolean, allowVertical: boolean) => {
     const start = {
@@ -368,7 +368,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
 
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseup", handleMouseUp);
-  }
+  };
 
   private handleOverlayClicked = (context: string) => {
     const { groupId, setFocusedGroupUser } = this.props;
@@ -384,5 +384,5 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       const focusedGroupUser = toggledContext ? groupUser?.user : undefined;
       setFocusedGroupUser(focusedGroupUser);
     }
-  }
+  };
 }

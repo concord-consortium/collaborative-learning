@@ -57,5 +57,5 @@ export class DBCommentsListener extends BaseListener {
         });
       }
     }
-  }
+  };
 }

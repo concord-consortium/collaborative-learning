@@ -72,7 +72,7 @@ class LabelSegmentDialog extends React.Component<IProps, IState> {
 
   private handleLabelOptionChange = (evt: React.FormEvent<HTMLInputElement>) => {
     this.setState({labelOption: (evt.target as HTMLInputElement).value as ESegmentLabelOption });
-  }
+  };
 
   private handleAccept = () => {
     const { polygon, points, onAccept } = this.props;
@@ -82,13 +82,13 @@ class LabelSegmentDialog extends React.Component<IProps, IState> {
     } else {
       this.handleCancel();
     }
-  }
+  };
 
   private handleCancel = () => {
     if (this.props.onClose) {
       this.props.onClose();
     }
-  }
+  };
 
   private handleKeyDown = (evt: React.KeyboardEvent<HTMLInputElement>) => {
     evt.stopPropagation();
@@ -97,6 +97,6 @@ class LabelSegmentDialog extends React.Component<IProps, IState> {
     } else if (evt.keyCode === 27) {
       this.handleCancel();
     }
-  }
+  };
 
 }

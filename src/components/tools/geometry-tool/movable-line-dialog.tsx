@@ -70,11 +70,11 @@ class MovableLineDialog extends React.Component<IProps, IState> {
 
   private handleSlopeChange = (evt: React.FormEvent<HTMLInputElement>) => {
     this.setState({slope: (evt.target as HTMLInputElement).value });
-  }
+  };
 
   private handleInterceptChange = (evt: React.FormEvent<HTMLInputElement>) => {
     this.setState({intercept: (evt.target as HTMLInputElement).value });
-  }
+  };
 
   private getValidationError = () => {
     const { line } = this.props;
@@ -87,7 +87,7 @@ class MovableLineDialog extends React.Component<IProps, IState> {
     if (intersections.length < 2) {
       return "Please change the graph axes scale to make the line visible, and try again.";
     }
-  }
+  };
 
   private getLineControlPoints = () => {
     const { line } = this.props;
@@ -118,7 +118,7 @@ class MovableLineDialog extends React.Component<IProps, IState> {
     } else {
       return undefined;
     }
-  }
+  };
 
   private handleAccept = () => {
     const { line, onAccept } = this.props;
@@ -128,13 +128,13 @@ class MovableLineDialog extends React.Component<IProps, IState> {
     } else {
       this.handleCancel();
     }
-  }
+  };
 
   private handleCancel = () => {
     if (this.props.onClose) {
       this.props.onClose();
     }
-  }
+  };
 
   private handleKeyDown = (evt: React.KeyboardEvent<HTMLInputElement>) => {
     evt.stopPropagation();
@@ -143,6 +143,6 @@ class MovableLineDialog extends React.Component<IProps, IState> {
     } else if (evt.keyCode === 27) {
       this.handleCancel();
     }
-  }
+  };
 
 }

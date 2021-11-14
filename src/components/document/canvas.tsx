@@ -136,7 +136,7 @@ export class CanvasComponent extends BaseComponent<IProps> {
 
   private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     this.hotKeys.dispatch(e);
-  }
+  };
 
   private handleCopyDocumentJson = () => {
     const {content, document } = this.props;
@@ -148,5 +148,5 @@ export class CanvasComponent extends BaseComponent<IProps> {
     };
     const json = documentContent?.exportAsJson({ includeTileIds: true, transformImageUrl });
     json && navigator.clipboard.writeText(json);
-  }
+  };
 }

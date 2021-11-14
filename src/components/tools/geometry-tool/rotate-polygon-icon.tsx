@@ -24,7 +24,7 @@ export class RotatePolygonIcon extends React.Component<IProps, IState> {
     return (!nextProps.polygon || (nextProps.polygon.id !== prevState.polygonId))
             ? { polygonId: nextProps.polygon ? nextProps.polygon.id : undefined, iconAnchor: undefined }
             : {};
-  }
+  };
 
   public state: IState = {};
 
@@ -118,7 +118,7 @@ export class RotatePolygonIcon extends React.Component<IProps, IState> {
     document.addEventListener("mousemove", this.handleMouseMove);
     document.addEventListener("mouseup", this.handleMouseUp);
     this.setState({ iconAnchor: this.initialIconAnchor });
-  }
+  };
 
   private handleMouseMove = (e: MouseEvent) => {
     e.preventDefault();
@@ -136,7 +136,7 @@ export class RotatePolygonIcon extends React.Component<IProps, IState> {
     this.setState({ iconAnchor });
 
     this.rotateVertices(polygon, deltaAngle, false);
-  }
+  };
 
   private handleMouseUp = (e: MouseEvent) => {
     e.preventDefault();
@@ -152,5 +152,5 @@ export class RotatePolygonIcon extends React.Component<IProps, IState> {
 
     document.removeEventListener("mousemove", this.handleMouseMove);
     document.removeEventListener("mouseup", this.handleMouseUp);
-  }
+  };
 }

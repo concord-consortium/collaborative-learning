@@ -58,11 +58,11 @@ export class ClassLogsComponent extends BaseComponent<IProps> {
     return (e: React.MouseEvent<HTMLDivElement>) => {
       this.stores.ui.rightNavDocumentSelected(appConfig, publication);
     };
-  }
+  };
 
   private handlePublicationDragStart = (document: DocumentModelType) => {
     return (e: React.DragEvent<HTMLDivElement>) => {
       e.dataTransfer.setData(DocumentDragKey, document.key);
     };
-  }
+  };
 }

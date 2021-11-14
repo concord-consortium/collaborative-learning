@@ -33,5 +33,5 @@ export default class PlaceholderToolComponent extends BaseComponent<IToolTilePro
 
   private handleMouseDown = (e: React.MouseEvent) => {
     this.stores.ui.setSelectedTile();
-  }
+  };
 }

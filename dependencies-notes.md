@@ -15,7 +15,6 @@ Updating to `npm 7` worked locally but failed in CI due to GitHub actions still 
 |@types/react-dom|16.9.14|17.0.10|React 17/Enzyme tests|
 |copy-webpack-plugin|6.4.1|9.1.0|Webpack 5|
 |css-loader|5.2.7|6.5.1|Webpack 5|
-|eslint|7.32.0|8.2.0|Not all plugins (e.g. eslint-plugin-react-hooks) have been updated to support v8.|
 |eslint-webpack-plugin|2.6.0|3.1.1|Webpack 5|
 |firebase-admin|9.12.0|10.0.0|Major version update not attempted|
 |html-webpack-plugin|4.5.2|5.5.0|Webpack 5|

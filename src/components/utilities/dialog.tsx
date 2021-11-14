@@ -131,24 +131,24 @@ export class DialogComponent extends BaseComponent<IProps, IState> {
 
   private handleConfirmDialogYes = (e: React.MouseEvent<HTMLButtonElement>) => {
     this.stores.ui.resolveDialog(true);
-  }
+  };
 
   private handleConfirmDialogNo = (e: React.MouseEvent<HTMLButtonElement>) => {
     this.stores.ui.resolveDialog(false);
-  }
+  };
 
   private handlePromptValueChanged = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (this.input) {
       this.setState({promptValue: this.input.value});
     }
-  }
+  };
 
   private handlePromptKeyUp = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     // listen for enter key
     if (e.keyCode === 13) {
       this.handlePromptDialogOk();
     }
-  }
+  };
 
   private get promptValue() {
     return (this.state.promptValue || "").trim();
@@ -159,17 +159,17 @@ export class DialogComponent extends BaseComponent<IProps, IState> {
     if (promptValue.length > 0) {
       this.stores.ui.resolveDialog(promptValue);
     }
-  }
+  };
 
   private handleCancelDialog = (e?: React.MouseEvent<HTMLButtonElement>) => {
     this.stores.ui.closeDialog();
-  }
+  };
 
   private handleWindowKeyUp = (e: KeyboardEvent) => {
     // listen for escape key when dialog is visible
     if (this.stores.ui.dialog && (e.keyCode === 27)) {
       this.handleCancelDialog();
     }
-  }
+  };
 
 }

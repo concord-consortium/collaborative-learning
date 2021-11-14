@@ -62,35 +62,35 @@ export class TileCommentsComponent extends BaseComponent<IProps> {
         </svg>
       </div>
     );
-  }
+  };
 
   private handleHover = (selectionInfo?: string) => () => {
     const { model } = this.props;
     const toolApiInterface = this.context;
     const toolApi = toolApiInterface?.getToolApi(model.tileId);
     selectionInfo && toolApi?.setSelectionHighlight?.(selectionInfo, true);
-  }
+  };
 
   private handleLeave = (selectionInfo?: string) => () => {
     const { model } = this.props;
     const toolApiInterface = this.context;
     const toolApi = toolApiInterface?.getToolApi(model.tileId);
     selectionInfo && toolApi?.setSelectionHighlight?.(selectionInfo, false);
-  }
+  };
 
   private handleDelete = (comment: TileCommentModelType) => () => {
     comment.delete();
-  }
+  };
 
   private closeComments = () => {
     const { model } = this.props;
     model.setVisible(false);
-  }
+  };
 
   private openComments = () => {
     const { model } = this.props;
     model.setVisible(true);
-  }
+  };
 
   private renderClosed() {
     return (

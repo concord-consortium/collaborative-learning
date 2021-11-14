@@ -275,7 +275,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     const toolApiInterface = this.context;
     return toolApiInterface?.getToolApi(`${model.id}[layout]`)?.handleTileResize ||
             toolApiInterface?.getToolApi(model.id)?.handleTileResize;
-  }
+  };
 
   private handleRegisterToolApi = (toolApi: IToolApi, facet?: string) => {
     const id = facet ? `${this.modelId}[${facet}]` : this.modelId;
@@ -283,17 +283,17 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     toolApiInterface?.register(id, toolApi);
     // trigger initial render
     this.forceUpdate();
-  }
+  };
 
   private handleUnregisterToolApi = (facet?: string) => {
     const id = facet ? `${this.modelId}[${facet}]` : this.modelId;
     const toolApiInterface = this.context;
     toolApiInterface?.unregister(id);
-  }
+  };
 
   private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     this.hotKeys.dispatch(e);
-  }
+  };
 
   private handlePointerDown = (e: MouseEvent | TouchEvent) => {
     const { model } = this.props;
@@ -313,7 +313,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     if (!toolContentInfo.tileHandlesOwnSelection) {
       ui.setSelectedTile(model, {append: hasSelectionModifier(e)});
     }
-  }
+  };
 
   private handleCopyImportJsonToClipboard = () => {
     const { appConfig, unit } = this.stores;
@@ -335,7 +335,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     }
     tileJsonString && navigator.clipboard.writeText(tileJsonString);
     return true;
-  }
+  };
 
   private handleCopyModelJson = () => {
     const { content } = this.props.model;
@@ -343,7 +343,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     clipboard.clear();
     clipboard.addJsonTileContent(this.props.model.id, content, this.stores);
     return true;
-  }
+  };
 
   private handleToolDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     // tile dragging can be disabled globally via appConfig
@@ -420,7 +420,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     const offsetX = kDefaultDragImageWidth;
     const offsetY = 0;
     e.dataTransfer.setDragImage(defaultDragImage, offsetX, offsetY);
-  }
+  };
 
   private getDragTileItems(dragSrcContentId: string, tileIds: string[]) {
     const { model } = this.props;
@@ -476,5 +476,5 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
       // calling the resize handler triggers a re-render
       handler(entry);
     }
-  }
+  };
 }

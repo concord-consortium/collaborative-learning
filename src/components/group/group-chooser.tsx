@@ -109,7 +109,7 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
     this.stores.db.joinGroup(groupId)
       .then(() => { if (this._isMounted) this.setState({error: undefined}); })
       .catch((err) => { if (this._isMounted) this.setState({error: err.toString()}); });
-  }
+  };
 
   private handleChooseExistingGroup = (group: GroupModelType) => {
     return (e: React.MouseEvent<HTMLElement>) => {
@@ -121,12 +121,12 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
         this.selectGroup(group.id);
       }
     };
-  }
+  };
 
   private handleChooseGroup = (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (this.groupSelect) {
       this.selectGroup(this.groupSelect.value);
     }
-  }
+  };
 }
