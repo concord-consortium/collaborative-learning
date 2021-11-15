@@ -1090,6 +1090,52 @@
               "type": "introduction",
               "content": {
                 "tiles": [
+                  {
+                    "id": "mh4SXT-lrxxjjLuE",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>In Investigation 1, we explored strategies for comparing quantities. We used ratios, scaling, proportions, percents, and differences. Knowing several methods of comparison is not enough. We also need to be able to recognize when a situation is proportional and which method of comparison is appropriate to solve the problem. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "3lG9fMaV-VwrcFDI",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Consider the following comparisons:</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "4rTaCcks-UHgN-uT",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>What is being compared in each statement above?</em></p>",
+                        "<p><em>What is the unit of measure for each quantity?</em></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "yQZfi5IdP1PmayPT",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Each statement can be written as a ratio, such as,</p>",
+                        "<p>                                                                               5.5 dollars to 1 hour</p>",
+                        "<p>                                                                                                    or</p>",
+                        "<p>                                     18 grams of protein for every 6 pieces of chicken nuggets</p>",
+                        "<p></p>",
+                        "<p>Since each ratio is a comparison of two quantities measured in different units, they are called rates.</p>"
+                      ]
+                    }
+                  }
                 ]
               },
               "supports": []
@@ -1098,6 +1144,184 @@
               "type": "initialChallenge",
               "content": {
                 "tiles": [
+                   {
+                      "id": "Gu-ZtmTmKynTAE_j",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>The dining room at a camp has two sizes of tables. A large table seats ten people, and a small table seats eight people. When the campers come for dinner one night, there are four pizzas on each large table and three pizzas on each small table. The campers at each table share the pizzas equally.  </p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "SOM-WGtBsbO4SQRE",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<ul><li>Does a person sitting at a small table get the same amount of pizza as a person sitting at a large table? Explain your reasoning and conclusion.</li></ul>"
+                        ]
+                      }
+                    },
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "No. Possible strategies include scaling up or down."
+                        ]
+                      }
+                    },
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Possible explanation scaling up to 40 people:</p>",
+                          "<p>Large Table</p>",
+                          "<p>4 pizzas for every 10 people (4 : 10) is equivalent to </p>",
+                          "<p>16 pizzas for every 40 people (16 : 40)</p>",
+                          "<p>Small Table</p>",
+                          "<p>3 pizzas for every 8 people (3 : 8) is equivalent to</p>",
+                          "<p>15 pizzas for every 40 people (15 : 40). </p>",
+                          "<p>Therefore, a person sitting at the large table gets more pizza since 16 pizzas for 40 people is greater than 15 pizzas for 40 people.  </p>"
+                        ]
+                      }
+                    },
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Possible explanation scaling up to 12 pizzas:</p>",
+                          "<p>Students might make equivalent ratios with the same number of pizzas, for example, </p>"
+                        ]
+                      }
+                    },
+                    [
+                      {
+                        "display": "teacher",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p>Large</p>",
+                            "<p>4 pizzas for every 10 people </p>",
+                            "<p>12 pizzas : 30 people </p>"
+                          ]
+                        }
+                      },
+                      {
+                        "display": "teacher",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p>Small</p>",
+                            "<p>3 pizzas for every 8 people</p>",
+                            "<p>12 pizzas : 32 people  </p>"
+                          ]
+                        }
+                      }
+                    ],
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>If more people share the same number of pizzas, each person gets a smaller share.  </p>"
+                        ]
+                      }
+                    },
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Possible explanation scaling down to one person (unit rate of amount of pizza per person):</p>"
+                        ]
+                      }
+                    },
+                    [
+                      {
+                       "display": "teacher",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p>Large</p>",
+                            "<p>4 pizzas for every 10 people </p>",
+                            "<p>Each gets 4/10 or 0.4 of a pizza per person</p>"
+                          ]
+                        }
+                      },
+                      {
+                        "display": "teacher",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p>Small</p>",
+                            "<p>3 pizzas for every 8 people</p>",
+                            "<p>Each gets 3/8 or 0.375 of a pizza per person</p>"
+                          ]
+                        }
+                      }
+                    ],
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Therefore, each person at a large table will get more pizza than each person at a small table.</p>",
+                          "<p></p>",
+                          "<p>Possible explanation scaling down to one people per pizza ( unit rate of amount people per pizza):</p>"
+                        ]
+                      }
+                    },
+                    [
+                      {
+                        "display": "teacher",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p>Large</p>",
+                            "<p>4 pizzas for every 10 people </p>",
+                            "<p>21/2 people per pizza</p>"
+                          ]
+                        }
+                      },
+                      {
+                        "display": "teacher",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p>Small</p>",
+                            "<p>3 pizzas for every 8 people</p>",
+                            "<p>22/3 people per pizza</p>"
+                          ]
+                        }
+                      }
+                    ],
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Therefore, each person at a large table will get more pizza than each person at a small table.</p>"
+                        ]
+                      }
+                    }
                 ]
               }
             },
@@ -1105,6 +1329,357 @@
               "type": "whatIf",
               "content": {
                 "tiles": [
+                  {
+                    "id": "WE-4c47fi8kBtCze",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation A. Three Strategies</strong>",
+                        "<p>Selma, Tony, and Terry came up with different ways to solve the problem. Who is correct? Explain. </p>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "vEab0G_bG7wOnupH",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Selma’s Strategy</p>",
+                          "<p>For each table, I found the amount of pizza each person would get. </p>",
+                          "<p>Large Table</p>",
+                          "<p>4 pizzas for 10 people =</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "HMWDg4LnCKwaJxo_",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Tony’s Strategy</p>",
+                          "<p>For each table, I found the number of people that would share one pizza.</p>",
+                          "<p>Large Table</p>",
+                          "<p>10 people for every 4 pizzas =</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "PUxoc1B769vulEp6",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Terry’s Strategy</p>",
+                          "<p>For the large table, there are 10 people for 4 pizzas. The difference is 6. </p>",
+                          "<p>For the small table there are 8 people for 3 pizzas. The difference is 5. </p>"
+                        ]
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "7jghecf_FZEoydsc",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>↓   ÷ 10             ↓   ÷ 10</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "YRJ2Wv3tfxRg6bmV",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>↓   ÷ 4                                 ↓   ÷ 4</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "wZ1sC46pdlW2xgQo",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>  </p>"
+                        ]
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "6jisjW9hSSFJFPf_",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>4/10 pizza for 1 person</p>",
+                          "<p>Small Table</p>",
+                          "<p>3 pizzas for 8 people = </p>",
+                          "<p></p>",
+                          "<p>3/8 pizza for 1 person</p>",
+                          "<p>The people at the large table get more pizza. </p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "gKvsHsCb5Y5dBQf6",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>(x people for every 1 pizza = )</p>",
+                          "<p></p>",
+                          "<p>2.5 people for every 1 pizza</p>",
+                          "<p>Small Table</p>",
+                          "<p>8 people for every 3 pizzas = </p>",
+                          "<p></p>",
+                          "<p>x people for every 1 pizza =</p>",
+                          "<p></p>",
+                          "<p>2 2/3 people for every 1 pizza</p>",
+                          "<p>The people at the small table get more pizza since 2 2/3 or 2.666…is greater than 2.5.</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "ZzvhnPIH5Ix7tint",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Large Table</p>",
+                          "<p>10 people - 4 pizzas = 6</p>",
+                          "<p>Small Table</p>",
+                          "<p>8 people - 3 pizzas = 5</p>",
+                          "<p>So, the people at the small table get more pizza. </p>",
+                          "<p></p>"
+                        ]
+                      }
+                    }
+                  ],
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Selma is correct.  (10 people)/(4 pizzas) =  (1 person)/(4/10 pizza) </p>",
+                        "<p>                                          (8 people)/(3 pizzas) = (1 person)/(3/8 pizza)</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Tony scales the ratio correctly.   (10 people)/(4 pizzas ) = (2.5 people)/(1 pizza) </p>",
+                        "<p>                                                                           (8 people)/(3 pizzas) = (2 2/3  people)/(1 pizza) </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>But Tony does not correctly interpret the numbers. 2 2/3 is greater than 2.5. But that means that more people are sharing a pizza at the small table.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Terry is not correct.  </p>",
+                        "<p>The difference does not have a meaning. It is not meaningful to subtract pizza from people.</p>",
+                        "<p>Even though there are six more people than pizzas at the large table and only five more people than pizzas at the small table, each person at the large table will get a greater share of pizza than each person at the small table.  </p>",
+                        "<p>Note: Some students might agree with Terry. For them, the comparison implied by a ratio is defined by the difference between the ratio parts. They think about how many extra people there are compared to the number of pizzas (six at the large table and five at the small table).  </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "wxtNCpiqEwHaE16_",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation B. Pizza for all the Campers</strong>",
+                        "<p>If there are 210 campers, how many pizzas are needed </p>",
+                        "<ul><li>If only large tables are used?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Proportions as a Strategy</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>              x21</h2>",
+                        "10 people = 210 people",
+                        "<h2>____________________________</h2>",
+                        "4 pizzas = 84 pizzas",
+                        "<h2>             ⤻</h2>",
+                        "<h2>           x21</h2>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                      
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Unit Rate as a Strategy</p>",
+                        "<p>A way to find missing values in a proportional situation is to build a rate table of equivalent ratios using the unit rate. Some students will notice that even though the math is correct, 5/2 of a person is not possible. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Table",
+                      "name": "Table 1",
+                      "columns": [
+                        {"name":"Number of People","values":["5/2","5","10","20","30","40","50","blank","210","blank"]},
+                        {"name":"Number of Pizzas","values":["1","2","4","8","12","16","20","","84",""]}
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>If only small tables are used?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "                  x26.25",
+                        "                       ⃕",
+                        "8 people = 210 people",
+                        "___________________________",
+                        "<p>3 pizzas = 78.75 pizzas</p>",
+                         "<p>                 ⤻</p>",
+                        "<p>             x26.25</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Unit Rate as a Strategy</p>",
+                        "<p>A way to find missing values in a proportional situation is to build a rate table of equivalent ratios using the unit rate. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Table",
+                      "name": "Table 2",
+                      "columns": [
+                        {"name":"Number of people","values":["8/3","8","80","160","208","210"]},
+                        {"name":"Number of pizzas","values":["1","3","30","60","78","78 3/4"]}
+                      ]
+                    }
+                  },
+                  {
+                    "id": "ZdcxH3JV3J7GuG_a",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation C. Considering Extra-large Tables</strong>",
+                        "<p>The camp decides to use only extra-large tables that seat 25 people. </p>",
+                        "<ul><li>How many pizzas should be put on an extra-large table? </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Answers will vary. If students use the same unit rate that was at the large table, they may solve it with a proportion and scale factor.  </p>",
+                        "<ul><li> (10 people)/(4 pizzas) =(1 person)/(4/10 pizza) = (25 people)/(10 pizzas)</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Students may create a different ratio for an extra-large table. One example from a classroom was from a group that wanted the amount of pizza per person at the extra-large table to be more than at the large table. They found that 25 people and 10 pizzas was the exact same amount per person, so they said if you put 11 pizzas it would be more than 4/10 per person. They showed it with this proportion:</p>",
+                        "<ul><li> (25 people)/(11 pizzas) = (1 person )/(44/100  pizza)</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "NM4TxZ9MMRA4GKqA",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>How many pizzas would be used to serve 210 campers if they sit at extra-large tables?  </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>If students use the ratio from Situation C #1 it would be</p>",
+                        "<p>(25 people)/(10 pizzas)= (210 campers)/(84 pizzas)</p>",
+                        "<p>Or if they used (25 people)/(11 pizzas) = (210 campers)/(92.4 pizzas)   (In classrooms that used this idea most students said 93 pizzas.)</p>"
+                      ]
+                    }
+                  }
                 ]
               },
               "supports": []
@@ -1113,6 +1688,30 @@
               "type": "nowWhatDoYouKnow",
               "content": {
                 "tiles": [
+                   {
+                    "id": "UEfwkIdZKj-7EzHT",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>We have used several strategies for solving problems that involve ratios. How do you decide which method to use?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Answers will vary.</p>",
+                        "<p>Some students will have a preferred strategy that they always use. Other students will decide based on the quantities given in the ratio and what they need to scale to.</p>",
+                        "<p>Students may mention:</p>",
+                        "<p>Writing the ratio in words and scaling up to equivalent ratios, using rate/ratio tables, writing proportions, and using percents (although students might not bring up percents until Investigation 3.)</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  }
                 ]
               },
               "supports": []
