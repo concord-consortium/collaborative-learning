@@ -232,17 +232,17 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     return (
       <>
         <div
-          className="horizontal splitter"
+          className="horizontal splitter" data-test="4up-horizontal-splitter"
           style={{top: this.grid.hSplitter, height: this.grid.splitterSize}}
           onMouseDown={this.handleHSplitter}
         />
         <div
-          className="vertical splitter"
+          className="vertical splitter" data-test="4up-vertical-splitter"
           style={{left: this.grid.vSplitter, width: this.grid.splitterSize}}
           onMouseDown={this.handleVSplitter}
         />
         <div
-          className="center"
+          className="center" data-test="4up-center"
           style={{
             height: this.grid.splitterSize * 3,
             left: this.grid.vSplitter - this.grid.splitterSize,

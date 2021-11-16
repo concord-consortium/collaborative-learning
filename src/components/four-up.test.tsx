@@ -1,18 +1,15 @@
-import Adapter from "enzyme-adapter-react-16";
+import { configure, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
-
-import { configure, mount } from "enzyme";
-
 import { FourUpComponent } from "./four-up";
 import { GroupsModel, GroupModel, GroupUserModel } from "../models/stores/groups";
 import { DocumentModel, DocumentModelType } from "../models/document/document";
 import { ProblemDocument } from "../models/document/document-types";
 import { createStores } from "../models/stores/stores";
-import { CanvasComponent } from "./document/canvas";
 import { UserModel } from "../models/stores/user";
 import { DocumentsModelType, DocumentsModel } from "../models/stores/documents";
 
-configure({ adapter: new Adapter() });
+configure({testIdAttribute: "data-test"});
 
 var mockGetQueryState = jest.fn();
 jest.mock("react-query", () => ({
@@ -56,9 +53,9 @@ describe("Four Up Component", () => {
     });
 
     const stores = createStores({ groups, documents });
-    const comp = mount(<FourUpComponent userId={document.uid} groupId={document.groupId} stores={stores}/>);
-    expect(comp.find(CanvasComponent)).toHaveLength(4);
-    expect(comp.find(".member")).toHaveLength(1);
+    const { container } = render(<FourUpComponent userId={document.uid} groupId={document.groupId} stores={stores}/>);
+    expect(screen.queryAllByTestId("canvas")).toHaveLength(4);
+    expect(container.querySelectorAll(".member")).toHaveLength(1);
   });
 
   it("renders group members", () => {
@@ -102,26 +99,22 @@ describe("Four Up Component", () => {
       documents
     });
 
-    const comp = mount(<FourUpComponent userId={user.id} groupId={group.id} stores={stores}/>);
+    const { container } = render(<FourUpComponent userId={user.id} groupId={group.id} stores={stores}/>);
     // A canvas will be rendered unless an "unshared document" message is displayed.
     // User 2 has no document, so it will display an "unshared document" message.
     // User 1 has a shared document, User 3 is the main user, and there is no fourth user. All of those show canvases.
-    expect(comp.find(CanvasComponent)).toHaveLength(3);
+    expect(screen.queryAllByTestId("canvas")).toHaveLength(3);
     // Users 1, 2 and 3 should be labelled
-    expect(comp.find(".member")).toHaveLength(3);
+    const memberList = container.querySelectorAll(".member");
+    expect(memberList).toHaveLength(3);
     // First member is the current user, followed by group members
-    expect(comp.find(".member").at(0).text()).toBe("U3");
-    expect(comp.find(".member").at(1).text()).toBe("U1");
-    expect(comp.find(".member").at(2).text()).toBe("U2");
+    expect(memberList[0].textContent).toBe("U3");
+    expect(memberList[1].textContent).toBe("U1");
+    expect(memberList[2].textContent).toBe("U2");
 
-    // TODO: figure out how to add coverage for window mouse events setup by the spliiter handlers
-    comp.find(".horizontal").simulate("mouseDown");
-    comp.find(".horizontal").simulate("mouseUp");
-
-    comp.find(".vertical").simulate("mouseDown");
-    comp.find(".vertical").simulate("mouseUp");
-
-    comp.find(".center").simulate("mouseDown");
-    comp.find(".center").simulate("mouseUp");
+    // TODO: figure out how to add coverage for window mouse events setup by the splitter handlers
+    userEvent.click(screen.getByTestId("4up-horizontal-splitter"));
+    userEvent.click(screen.getByTestId("4up-vertical-splitter"));
+    userEvent.click(screen.getByTestId("4up-center"));
   });
 });

@@ -93,13 +93,20 @@ export class DemoCreatorComponent extends BaseComponent<IProps> {
       <div className="demo">
         <h1>Demo Creator</h1>
         <div>
-          <label>Name:</label> <input type="text" onChange={this.handleSetName} defaultValue={demo.name} />
+          <label>Name:</label>
+          <input type="text" onChange={this.handleSetName} defaultValue={demo.name} />
         </div>
         <div>
-          <label>Class:</label> <select className="classes" onChange={this.handleSelectClass}>{classes}</select>
+          <label>Class:</label>
+          <select className="classes" data-test="class-select" onChange={this.handleSelectClass}>
+            {classes}
+          </select>
         </div>
         <div>
-          <label>Problem:</label> <select className="problems" onChange={this.handleSelectProblem}>{problems}</select>
+          <label>Problem:</label>
+          <select className="problems" data-test="problem-select" onChange={this.handleSelectProblem}>
+            {problems}
+          </select>
         </div>
         <h2>Links for {demo.class.name}: {selectedProblem.title}</h2>
         <ul className="student-links">
