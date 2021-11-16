@@ -195,7 +195,7 @@
     "nanoid": "^3.1.30",
     "query-string": "7.0.1",
     "react": "^16.14.0",
-    "react-data-grid": "^7.0.0-canary.34",
+    "react-data-grid": "^7.0.0-canary.46",
     "react-dom": "^16.14.0",
     "react-dom-factories": "^1.0.2",
     "react-modal": "^3.14.4",

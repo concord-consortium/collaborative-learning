@@ -7,14 +7,23 @@ $column-header-padding: 10px;
   width: 100%;
   height: 100%;
 
+  &.show-expression {
+    .flex-container {
+      .editable-header-cell {
+        height: calc(var(--header-row-height) / 2);
+        line-height: calc(var(--header-row-height) / 2); // https://tutorialdeep.com/knowhow/align-text-vertically-center-css/
+      }
+    }
+  }
+
   .flex-container {
     display: flex;
     flex-direction: column;
 
     .editable-header-cell {
       width: 100%;
-      height: var(--row-height);
-      line-height: var(--row-height); // https://tutorialdeep.com/knowhow/align-text-vertically-center-css/
+      height: var(--header-row-height);
+      line-height: var(--header-row-height); // https://tutorialdeep.com/knowhow/align-text-vertically-center-css/
 
       &.table-title-editing {
         padding: 0 !important;
@@ -32,8 +41,8 @@ $column-header-padding: 10px;
 
     .expression-cell {
       width: 100%;
-      height: var(--row-height);
-      line-height: var(--row-height); // https://tutorialdeep.com/knowhow/align-text-vertically-center-css/
+      height: calc(var(--header-row-height) / 2);
+      line-height: calc(var(--header-row-height) / 2); // https://tutorialdeep.com/knowhow/align-text-vertically-center-css/
       font-style: italic;
       white-space: nowrap;
       overflow: hidden;
@@ -72,7 +81,7 @@ $column-header-padding: 10px;
     position: absolute;
     left: -$column-header-padding;
     right: -$column-header-padding;
-    top: var(--row-height);
+    top: calc(var(--header-row-height) / 2);
     height: 1px;
     background-color: white;
   }

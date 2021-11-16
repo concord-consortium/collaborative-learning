@@ -33,5 +33,5 @@ Notes on dependencies and in particular on what's keeping particular dependencie
 |firebase|8.10.0|9.4.1|v9 contains substantial API changes|
 |immutable|3.8.2|4.0.0|Major version update not attempted|
 |react|16.14.0|17.0.2|React 17/Library dependencies: slate-editor, blueprintjs|
-|react-data-grid|7.0.0-canary.34|7.0.0-canary.49|Canary.35 changed the styling implementation so that some of our CSS overrides no longer work. Need to figure out how to achieve the same results in the new system, e.g. inline editing styles.|
+|react-data-grid|7.0.0-canary.46|7.0.0-beta.7|Canary.47 changed the RowFormatter props requiring some additional refactoring.|
 |react-dom|16.14.0|17.0.2|React 17/Library dependencies: slate-editor, blueprintjs|

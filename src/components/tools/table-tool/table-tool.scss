@@ -145,6 +145,9 @@ $controls-hover-background: #c0dfe7;
         &.selected-column {
           background-color: var(--header-selected-background-color);
         }
+        &.rdg-cell-editing {
+          padding: 0;
+        }
         input {
           background-color: inherit;
         }
