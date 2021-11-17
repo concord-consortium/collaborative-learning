@@ -143,6 +143,28 @@
                       ]
                     }
                   },
+                  [
+                    {
+                      "id": "kctEO63ySdDAahLm",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/comparing-and-scaling/images/C&S_1-1_RecipieList.png"
+                      }
+                    },
+                    {
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/comparing-and-scaling/images/C&S_1-1_OrangeJuice.png"
+                      }
+                    },
+                    {
+                      "id": "hK2W-WY8sM4QYscA",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/comparing-and-scaling/images/C&S_1-1_1Cup.jpg"
+                      }
+                    }
+                  ],
                   {
                     "id": "XuhiPmKVHgwVEHWc",
                     "content": {
@@ -177,11 +199,25 @@
                   {
                     "display": "teacher",
                     "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/C&S_1-1_SolutionMixA_350w.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p>Mix B, we have 1 4/5 cups of water for each cup of concentrate.</p>"
                       ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/C&S_1-1_SolutionMixB_350w.png"
                     }
                   },
                   {
@@ -197,11 +233,25 @@
                   {
                     "display": "teacher",
                     "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/C&S_1-1_SolutionMixC_350w.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p>Mix D, we have 1 2/3 cups of water for each cup of concentrate.</p>"
                       ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/C&S_1-1_SolutionMixD_350w.png"
                     }
                   }
                 ]
@@ -213,15 +263,74 @@
               "content": {
                 "tiles": [
                   {
-                    "id": "hfv4ezAK4nHdS5MP",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><u>Situation A. Mr. Zhoa’s Students’ Strategies</u></p>",
+                        "<strong>Situation A. Mr. Zhoa’s Students’ Strategies</strong>",
                         "<p>Mr. Zhoa’s class had some interesting strategies for answering the questions about the orange juice recipes which they displayed on posters. Examine the work of each group.</p>",
                         "<ol><li>Do you agree with the students’ strategies? Can you use the strategy to decide which recipe is the most orangey? Explain.</li><li>How are the strategies alike? Different? </li></ol>"
                       ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Moja's Group"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/C&S_1-1_MojasGroup.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Lima's Group"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/C&S_1-1_LimasGroup_350w.jpg"
+                    }
+                  },
+                   {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Tatu's Group"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/C&S_1-1_TatusGroup_350w.png"
+                    }
+                  },
+                   {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Sanji's Group"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/C&S_1-1_SanjisGroup.png"
                     }
                   },
                   {
@@ -328,7 +437,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><u>Situation B. More Student Strategies</u></p>",
+                        "<strong>Situation B. More Student Strategies</strong>",
                         "<p>Examine the strategies below and answer the question. </p>"
                       ]
                     }
@@ -344,6 +453,20 @@
                       ]
                     }
                   },
+                  [
+                    {
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/comparing-and-scaling/images/C&S_1-1_MaxsStrategyRecipieA.png"
+                      }
+                    },
+                    {
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/comparing-and-scaling/images/C&S_1-1_MaxsStrategyRecipieC.png"
+                      }
+                    }
+                  ],
                   {
                     "display": "teacher",
                     "content": {
@@ -1723,7 +1846,7 @@
           "description": "Problem 2.2",
           "ordinal": 2,
           "title": "CAS 2.2 Comparing Pizza Prices",
-          "subtitle": "Scaling Rates",
+          "subtitle": "How Do We Know It Is Proportional?",
           "sections": [
             {
               "type": "introduction",
@@ -1745,6 +1868,205 @@
               "type": "whatIf",
               "content": {
                 "tiles": [
+                  {
+                    "id": "K9CVJalFoYbOpwwR",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation A. Another Three Strategies</strong>",
+                        "<p>Students in Ms. Bennett’s classroom used a variety of strategies to determine the price of pizzas. Examine each strategy. Are they correct? Explain why or why not. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "K_D8KHseRlJzUy-E",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Amit’s Strategy</strong>",
+                        "<p>I saw that at Royal, 5 pizzas cost $65. I wanted to compare the prices for 5 pizzas at each restaurant. So, I scaled down the pizza and price at Howdy’s by dividing each quantity by 3.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Amit’s strategy is not correct. He forgot that part of the $195 is the $30 delivery charge. He needs to subtract the delivery charge before he scales the pizzas.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "F0XeU_weVVjm8o0E",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Eun Mi’s Strategy</strong>",
+                        "<p></p>",
+                        "<p>I tried to use proportions, but that did not work. So, I used a graph to determine the costs. I noticed that the graph of Howdy’s Pizza did not go through the origin. I wonder if that is why proportions did not work.</p>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "content": {
+                        "type": "Geometry",
+                        "title": "Howdy Pizza",
+                        "board": {
+                          "properties": {
+                            "axisMin": [-1.1, 0],
+                            "axisRange": [19.704, 140.351],
+                            "axisNames": ["x", "y"],
+                            "axisLabels": ["Number of Pizzas", "Cost in Dollars"]
+                          }
+                        },
+                        "objects": [
+                          { "type": "point", "parents": [1, 42.00000000000001], "properties": {"id":"ZfmEiftXc7XsDAyo","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [2, 52], "properties": {"id":"vo_WEMFMeo-Rt8SG","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [3.1, 64.00000000000001], "properties": {"id":"Wt7595slDPkbjGhC","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [4, 73.99999999999993], "properties": {"id":"zZRFMvBCkEAd5SXj","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [5, 84.99999999999994], "properties": {"id":"zbDELqB1i_IMk32B","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [10, 140.00000000000003], "properties": {"id":"b_ZJMhiV8ggpQNBz","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [15, 195], "properties": {"id":"bEzTiGORjXpUifWX","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "polygon", "parents": ["ZfmEiftXc7XsDAyo", "vo_WEMFMeo-Rt8SG", "Wt7595slDPkbjGhC", "zZRFMvBCkEAd5SXj", "zbDELqB1i_IMk32B", "b_ZJMhiV8ggpQNBz", "bEzTiGORjXpUifWX"],"properties": {"id":"Aw0ovQjdAqlVu8uF"} }
+                        ]
+                      }
+                    },
+                    {
+                      "content": {
+                        "type": "Geometry",
+                        "title": "Royal Pizza",
+                        "board": {
+                          "properties": {
+                            "axisMin": [-1.1, 0],
+                            "axisRange": [15.035, 105.263],
+                            "axisNames": ["x", "y"],
+                            "axisLabels": ["Number of Pizzas", "Cost in Dollars"]
+                          }
+                        },
+                        "objects": [
+                          { "type": "point", "parents": [1, 13], "properties": {"id":"vdPP8NOTFYfI1GTg","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [2, 26], "properties": {"id":"LMzVgWMVEKmbF-kU","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [3, 39.00000000000001], "properties": {"id":"x22MrSCZPA0zRuho","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [4, 52.000000000000014], "properties": {"id":"Mo7aKsGENkhQjvgr","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [5, 64.99999999999996], "properties": {"id":"ZegQZ7s9BlBHCsxX","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [10, 130.00000000000003], "properties": {"id":"Nr-yMYMwTJxK40aS","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "polygon", "parents": ["vdPP8NOTFYfI1GTg", "LMzVgWMVEKmbF-kU", "x22MrSCZPA0zRuho", "Mo7aKsGENkhQjvgr", "ZegQZ7s9BlBHCsxX", "Nr-yMYMwTJxK40aS"],"properties": {"id":"iUcAVIQeavifTl1Y"} }
+                        ]
+                      }
+                    }
+                  ],
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Eun Mi is correct. The costs for Howdy’s Pizza is not proportional. We can take two points from Royal Pizza and write a proportion. We cannot take two points from the graph of Howdy’s and write a proportion.</p>",
+                        "<p>Royal 1/13=  10/130   Howdy 1/41≠  10/140</p>",
+                        "<p>The graph of Howdy’s Pizza costs does not go through (0,0). Proportional situations will have graphs that go through the origin. Also, with a proportional situation, the point (1, ?) will identify the unit rate.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Note: These graphs relate to the Stretching and Shrinking Problem 2.2 about Mug Hats. Students saw that adding to the rules moved the hats. It did not stretch or shrink them. Adding does not create similar figures because similarity is proportional, which means it is multiplicative.</p>",
+                          "<p>Here, adding the $30 delivery fee slides the line up. </p>",
+                          "<p>If we removed the $30 delivery fee, the graph would slide down. (See the red points.) And the costs would be proportional 1/11=  2/22=  10/110.</p>",
+                          "<p>Note: In the next Unit, we will revisit both proportional and non-proportional graphs.</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Geometry",
+                        "title": "Howdy Pizza",
+                        "board": {
+                          "properties": {
+                            "axisMin": [-2.186, -1.093],
+                            "axisRange": [295.543, 2587.934]
+                          }
+                        },
+                        "objects": [
+                        ]
+                      }
+                    }
+                  ],
+                  {
+                    "id": "Bk5loIa2APnEbij3",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Meredith’s Strategy</p>",
+                        "<p></p>",
+                        "<p>I found the unit rate of the cost for one pizza for each company. Then I scaled up to find the total cost for pizzas. </p>",
+                        "<p></p>",
+                        "<p>However, with Howdy’s, after finding the cost of one pizza, I had to add the $30 delivery charge.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Meredith’s strategy is correct.  </p>",
+                        "<p></p>",
+                        "<p>To find the unit rate for Howdy’s, the delivery charge must be removed.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "0z61es1cB18-bPlg",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Mary’s Strategy</strong>",
+                        "<p></p>",
+                        "<p>I used the unit rate to write equations.  </p>",
+                        "<p>C is the total cost of the pizza and n is the number of pizzas. </p>",
+                        "<p>For Royal: CR = 13n</p>",
+                        "<p>For Howdy’s: CH = 11n and then added $30 for delivery</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Mary’s strategy is correct. </p>",
+                        "<p>The unit rate is shown as the multiplier (coefficient). At Royal’s for 1 pizza, you pay $13.</p>",
+                        "<p>Note: This is an introduction to an equation that is not proportional. In the next Unit, we will look more closely at both proportional and non-proportional equations.</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  }
                 ]
               },
               "supports": []
@@ -1753,6 +2075,30 @@
               "type": "nowWhatDoYouKnow",
               "content": {
                 "tiles": [
+                  {
+                    "id": "PhdFoU_NQZLhPVmO",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>How can you determine if a situation is proportional? </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Possible answer:</p>",
+                        "<p>We have seen proportional situations in Royal’s Pizza, Sharing Pizzas at the Tables, the Orange Juice Recipes, and with similar figures.</p>",
+                        "<p>A proportional situation is multiplicative. It involves using factors or multiples of the quantities in a ratio. </p>",
+                        "<p>With proportional situations, we can:</p>",
+                        "<ul><li>Scale ratios by multiplying or dividing both quantities to find equivalent ratios. </li><li>Show the equivalent ratios in many ways including tables and proportions.</li><li>Use the unit rate to write equations, like Mary did for Royal’s, CR = 13n.</li><li>Make graphs that go through the origin.</li></ul>"
+                      ]
+                    }
+                  }
                 ]
               },
               "supports": []
