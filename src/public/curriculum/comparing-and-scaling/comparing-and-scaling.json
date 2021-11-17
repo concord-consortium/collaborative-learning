@@ -776,13 +776,73 @@
                   {
                     "display": "teacher",
                     "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/C&S_1-2_RecipeA_350w.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/C&S_1-2_RecipeB_350w.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/C&S_1-2_RecipeC_350w.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/C&S_1-2_RecipeD_350w.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p>Students may make sense of this in table format. (It is similar to how they compared making popcorn in Comparing Quantities.)</p>"
                       ]
                     }
-                  }
+                  },
+                  [
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/comparing-and-scaling/images/C&S_1-2_RecipeA2_350w.png"
+                      }
+                    },
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/comparing-and-scaling/images/C&S_1-2_RecipeB2_350w.png"
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/comparing-and-scaling/images/C&S_1-2_RecipeC2_350w.png"
+                      }
+                    },
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/comparing-and-scaling/images/C&S_1-2_RecipeD2_350w.png"
+                      }
+                    }
+                  ]
                 ]
               },
               "supports": [
@@ -798,7 +858,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><u>Situation A. Table and Equation Strategies</u></p>",
+                        "<strong>Situation A. Table and Equation Strategies</strong>",
                         "<p>Students in Ms. Lopez’s class used different strategies to find the number of recipes needed for 210 campers. Examine each strategy. How are the two strategies the same? Different?</p>"
                       ]
                     }
@@ -812,6 +872,12 @@
                         "<strong>Adia’s Strategy</strong>",
                         "<p>I used a rate table to find the number of batches of Recipe A to serve 210 campers.</p>"
                       ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/C&S_1-2_AdiasStrategy_350w.png"
                     }
                   },
                   {
@@ -846,6 +912,19 @@
                         "<p>After the camp, Cece went home and made lemonade for her family. She uses the unit rate of one cup of concentrate to three cups of cold water. She needs 160 ounces of juice. </p>",
                         "<p>1.  How much concentrate will she need?</p>",
                         "<p>2.  How much water will she need?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "name": "Cece's Lemonade",
+                      "columns": [
+                        {"name":"Recipe","values":["Concentrate","Water","Total Lemonade"]},
+                        {"name":"Cups","values":["1","3","4"]},
+                        {"name":"Oz","values":["8","24","32"]},
+                        {"name":"x 5","values":["40","120","160"]},
+                        {"name":"x 5 Cups","values":["5","15","20"]}
                       ]
                     }
                   }
@@ -907,6 +986,16 @@
                         }
                       },
                       {
+                        "content": {
+                          "type": "Table",
+                          "name": "Table 1",
+                          "columns": [
+                            {"name":"Batches of A","values":["1","2","3","4","5","10","20","40","41","x"]},
+                            {"name":"1 cup Servings","values":["5","10","15","20","25","50","100","200","205","210"]}
+                          ]
+                        }
+                      },
+                      {
                         "id": "vauIDhVz0C1Bqv-N",
                         "content": {
                           "type": "Text",
@@ -914,6 +1003,12 @@
                           "text": [
                             "<p>Otis wrote the original ratio and an equivalent ratio in fraction form. He scaled the quantities in the ratio to find the number of batches needed for 210 cups of juice. He wrote the following equation:</p>"
                           ]
+                        }
+                      },
+                      {
+                        "content": {
+                          "type": "Image",
+                          "url": "curriculum/comparing-and-scaling/images/C&S_1-3_Intro2_350w.png"
                         }
                       },
                       {
@@ -959,6 +1054,19 @@
                     }
                   },
                   {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/C&S_1-3_SmoothieBar.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/C&S_1-3_SmoothieSolution_350w.png"
+                    }
+                  },
+                  {
                     "id": "sm2hnZD2H05KPpab",
                     "content": {
                       "type": "Text",
@@ -971,6 +1079,13 @@
                     }
                   },
                   {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/C&S_1-3_ReadingSpeedsSolution_350w.png"
+                    }
+                  },
+                  {
                     "id": "KBwsVGW_xmCL6Jm2",
                     "content": {
                       "type": "Text",
@@ -980,6 +1095,19 @@
                         "<p>The triangles in this picture are similar. </p>",
                         "<ul><li>Find the height of the tallest tree.</li></ul>"
                       ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/C&S_1-3_HeightOfTrees.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/C&S_1-3_HeightOfTreesSolution_350w.png"
                     }
                   },
                   {
@@ -1054,6 +1182,38 @@
                         ]
                       }
                     },
+                    [
+                      {
+                        "display": "teacher",
+                        "content": {
+                          "type": "Image",
+                          "url": "curriculum/comparing-and-scaling/images/C&S_1-3_WhatIf_SitASolution1_350w.png"
+                        }
+                      },
+                      {
+                        "display": "teacher",
+                        "content": {
+                          "type": "Image",
+                          "url": "curriculum/comparing-and-scaling/images/C&S_1-3_WhatIf_SitASolution2_350w.png"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "display": "teacher",
+                        "content": {
+                          "type": "Image",
+                          "url": "curriculum/comparing-and-scaling/images/C&S_1-3_WhatIf_SitASolution3_350w.png"
+                        }
+                      },
+                      {
+                        "display": "teacher",
+                        "content": {
+                          "type": "Image",
+                          "url": "curriculum/comparing-and-scaling/images/C&S_1-3_WhatIf_SitASolution4_350w.png"
+                        }
+                      }
+                    ],
                     {
                       "display": "teacher",
                       "content": {
@@ -1123,6 +1283,12 @@
                       }
                     },
                     {
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/comparing-and-scaling/images/C&S_1-3_HeightOfTrees.png"
+                      }
+                    },
+                    {
                       "display": "teacher",
                       "content": {
                         "type": "Text",
@@ -1130,6 +1296,13 @@
                         "text": [
                           "<p>Yes.  When you match up corresponding sides the scale factor will be 6: </p>"
                         ]
+                      }
+                    },
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/comparing-and-scaling/images/C&S_1-3_TarensReasoningSolution_350w.png"
                       }
                     },
                     {
@@ -1233,6 +1406,42 @@
                       ]
                     }
                   },
+                  [
+                    {
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<em>We need two sandwiches for each person at the picnic</em>"]
+                      }
+                    },
+                    {
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<em>I earn $5.50 per hour when I babysit for my neighbor.</em>"]
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<em>A 6-piece serving of chicken nuggets will provide 18 grams of protein.</em>"]
+                      }
+                    },
+                    {
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<em>Akira's top running rate is 8.5 kilometers per hour.</em>"]
+                      }
+                    }
+                  ],
                   {
                     "id": "4rTaCcks-UHgN-uT",
                     "content": {
@@ -1277,6 +1486,20 @@
                         ]
                       }
                     },
+                    [
+                      {
+                        "content": {
+                          "type": "Image",
+                          "url": "curriculum/comparing-and-scaling/images/C&S_2-1_LargeTable.png"
+                        }
+                      },
+                      {
+                        "content": {
+                          "type": "Image",
+                          "url": "curriculum/comparing-and-scaling/images/C&S_2-1_SmallTable.png"
+                        }
+                      }
+                    ],
                     {
                       "id": "SOM-WGtBsbO4SQRE",
                       "content": {
@@ -1860,6 +2083,145 @@
               "type": "initialChallenge",
               "content": {
                 "tiles": [
+                   {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Julia is in charge of ordering pizzas for a camp dinner. There are two pizza companies nearby. Both allow customers to use the same pricing rate for fewer or more pizzas than the listed number.</p>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/comparing-and-scaling/images/C&S_2-2_RoyalPizzaFlyer.png"
+                      }
+                    },
+                    {
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/comparing-and-scaling/images/C&S_2-2_HowdysPizzaFlyer.png"
+                      }
+                    }
+                  ],
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Julia wonders which company to use. The cost is a deciding factor. She uses tables to determine the cost of the pizzas. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "name": "Pizza Price of Royal Pizza",
+                      "columns": [
+                        {"name":"Number of Pizzas","values":["1","2","3","4","5","10","15","20","100","150","200"]},
+                        {"name":"Total Cost in Dollars","values":["--","--","--","--","$65","--","--","--","--","--","--"]}
+                      ]
+                    }
+                  },
+                  {
+                    "id": "t-cIVNG003HLLzWX",
+                    "content": {
+                      "type": "Table",
+                      "name": "Pizza Price of Howdy's Pizza",
+                      "columns": [
+                        {"name":"Number of Pizzas","values":["1","2","3","4","5","10","15","20","100","150","200"]},
+                        {"name":"Total Cost of Pizza in Dollars","values":["--","--","--","--","--","--","$195","--","--","--","--"]}
+                      ]
+                    }
+                  },
+                  {
+                    "id": "wehSEgZb6ZDW6Vu9",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>On a copy of the tables, fill in the total costs for each number of pizzas shown. </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "zN_Ac2lOzCS7nEni",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>How can Julia use the tables to make her choice? Which company should she choose and why?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Table",
+                      "name": "Pizza Price of Royal Pizza- Solution",
+                      "columns": [
+                        {"name":"Number of Pizzas","values":["1","2","3","4","5","10","15","20","100","150","200"]},
+                        {"name":"Total Cost in Dollars","values":["13","26","39","52","65","130","195","260","1300","1950","2600"]}
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Students might work the table forward or backwards looking for equivalent ratios to fill in the table. Some students might start with 5 for $65 then find 10 for $130 and 20 for $260, etc.  Some students may find how much it is for 1 pizza and then use that to scale up and fill in the rest of the table. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Table",
+                      "name": "Pizza Prices for Howdys Pizza- Solution",
+                      "columns": [
+                        {"name":"No. of Pizzas","values":["1","2","3","4","5","10","15","20","100","150","200"]},
+                        {"name":"Total Cost in $","values":["41","52","63","74","85","140","195","250","1130","1680","2230"]},
+                        {"name":"Cost w/o Delivery in $","values":["11","22","33","44","55","110","165","220","1100","1650","2200"]}
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Students need to recognize that the $195 for 15 pizzas also includes the $30 delivery charge.  They need to subtract that and then use the $165 to either scale up or down to find the other values in the table.  </p>",
+                        "<p>Some students may create another row to the table to find the cost of the pizzas without delivery.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "4oQSvIbf2dm41Gcy",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>How can Julia use the tables to make her choice? Which company should she choose and why?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Some students won’t find the exact amount but they will notice that for 15 pizzas it is the same cost for each company. After 15 pizzas, the price at Howdy’s Pizza is always cheaper than Royal Pizza. Since 84  pizzas (which is the needed number of pizzas from the previous problem) is more than 15 pizzas, Howdy’s Pizza will be cheaper.  </p>",
+                        "<p>At Royal Pizza the price for 210 campers or 84 pizzas is $1,092. Students might use the unit rate and then find the cost with $13 x 84= $1,092. Students might also use values on the table to add up to 84 pizzas: one example is 20 pizzas are $260 and 4 groups of that would be 80 pizzas for $1,040 then we need 4 more pizzas, which are $52. So, $1,040 + $52 = $1,092.   </p>",
+                        "<p>At Howdy’s Pizza the price for 210 campers or 84 pizzas is $954. Students need to find that the price of the pizzas is $11 each and then add a $30 delivery charge. So for 84 pizzas it would be $84 x 11 = $924, then add the delivery charge: $924 + 30 = $954.  </p>"
+                      ]
+                    }
+                  }
                 ]
               },
               "supports": []
@@ -1887,6 +2249,16 @@
                       "text": [
                         "<strong>Amit’s Strategy</strong>",
                         "<p>I saw that at Royal, 5 pizzas cost $65. I wanted to compare the prices for 5 pizzas at each restaurant. So, I scaled down the pizza and price at Howdy’s by dividing each quantity by 3.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "name": "Pizza Price of Howdy's Pizza",
+                      "columns": [
+                        {"name":"Number of Pizzas","values":["1","2","3","4","5","10","15","20","100","150","200"]},
+                        {"name":"Total Cost ($)","values":["","","","","divide 15 by 3","","195","","","",""]}
                       ]
                     }
                   },
@@ -1973,16 +2345,6 @@
                       ]
                     }
                   },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p></p>"
-                      ]
-                    }
-                  },
                   [
                     {
                       "display": "teacher",
@@ -2004,11 +2366,21 @@
                         "title": "Howdy Pizza",
                         "board": {
                           "properties": {
-                            "axisMin": [-2.186, -1.093],
-                            "axisRange": [295.543, 2587.934]
+                            "axisMin": [-1.1, 0],
+                            "axisRange": [19.704, 140.351],
+                            "axisNames": ["x", "y"],
+                            "axisLabels": ["Number of Pizzas", "Cost in Dollars"]
                           }
                         },
                         "objects": [
+                          { "type": "point", "parents": [1, 42.00000000000001], "properties": {"id":"ZfmEiftXc7XsDAyo","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [2, 52], "properties": {"id":"vo_WEMFMeo-Rt8SG","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [3.1, 64.00000000000001], "properties": {"id":"Wt7595slDPkbjGhC","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [4, 73.99999999999993], "properties": {"id":"zZRFMvBCkEAd5SXj","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [5, 84.99999999999994], "properties": {"id":"zbDELqB1i_IMk32B","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [10, 140.00000000000003], "properties": {"id":"b_ZJMhiV8ggpQNBz","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [15, 195], "properties": {"id":"bEzTiGORjXpUifWX","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "polygon", "parents": ["ZfmEiftXc7XsDAyo", "vo_WEMFMeo-Rt8SG", "Wt7595slDPkbjGhC", "zZRFMvBCkEAd5SXj", "zbDELqB1i_IMk32B", "b_ZJMhiV8ggpQNBz", "bEzTiGORjXpUifWX"],"properties": {"id":"Aw0ovQjdAqlVu8uF"} }
                         ]
                       }
                     }
@@ -2116,6 +2488,60 @@
               "type": "introduction",
               "content": {
                 "tiles": [
+                  {
+                    "id": "StDJGTIiommfYvQv",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>In a proportional relationship the multiplicative relationship between the quantities is always the same. The unit rate or constant of proportionality tells us about the multiplicative relationship between the two quantities. The unit rate for the cost of one pizza at Royal’s is $13. </p>",
+                        "<p>For example,</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "ClNpnLccfxYgj354",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>5 pizzas for $65</p>",
+                        "<p>              or</p>",
+                        "<p>1 pizza for $13</p>",
+                        "<p>             or</p>",
+                        "<p>Cost C for N pizzas is 13N</p>",
+                        "<p>              or</p>",
+                        "<p>C = 13N</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "7MgYzWCYj6RcAfZy",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The equation C = 13N relates cost of pizza and number of pizzas. This equation represents a proportional relationship because we multiply one variable by a constant number to get the value of the other variable. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "hY7w8AOKvLjaMzDf",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>C = 13N</p>",
+                        "<p>13 is the unit rate or constant of proportionality  </p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p>What is the other constant of proportionality? Is it useful in this situation?</p>",
+                        "<p></p>",
+                        "<p>In this Problem we will look at tables, equations, and graphs of proportional relationships. </p>"
+                      ]
+                    }
+                  }
                 ]
               },
               "supports": []
@@ -2124,6 +2550,190 @@
               "type": "initialChallenge",
               "content": {
                 "tiles": [
+                   {
+                    "id": "CW7Qv9YGBf7UpukZ",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Foodfresh has oranges on sale at 10 for $2. Mia represents the sale with a table, proportions, equations, and graphs.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "AWlXAxQ9YoN4Eqfv",
+                    "content": {
+                      "type": "Table",
+                      "name": "Mia's Table",
+                      "columns": [
+                        {"name":"Number of Oranges, N","values":["10","5","1","2","3"]},
+                        {"name":"Total Cost in Dollars, C","values":["2","1","0.20","0.4","0.6"]}
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "nr6jQM1_fxkZM7Ey",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>10/$2 = 5/$1</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "aZCAuB5YB4_u6f78",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>10/$2 = 1/$0.20</p>"
+                        ]
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "EHwI5HWX0JRuK7vE",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>N = 5C</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "Faofgx6PzHDnG_UP",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>C = 0.20N</p>"
+                        ]
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "ICU9ok0vViqCLRGq",
+                      "content": {
+                        "type": "Geometry",
+                        "title": "Mia's Graph 1",
+                        "board": {
+                          "properties": {
+                            "axisMin": [-2.186, -1.093],
+                            "axisRange": [29.409, 20.021]
+                          }
+                        },
+                        "objects": [
+                          { "type": "point", "parents": [1, 0.19999999999999996], "properties": {"id":"-AcHcoWyclD2qnyd","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [2, 0.4], "properties": {"id":"UglMrORVuaOHbAv5","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [3, 0.6000000000000001], "properties": {"id":"h96yZCoIYEZBA4fI","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [5, 1], "properties": {"id":"VDW9cUQVNtNKWuyJ","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "polygon", "parents": ["-AcHcoWyclD2qnyd", "UglMrORVuaOHbAv5", "h96yZCoIYEZBA4fI", "VDW9cUQVNtNKWuyJ"],"properties": {"id":"V7Dx__MeGCQ_YZ9f"} },
+                          { "type": "point", "parents": [10.001655903295246, 2.035321137245585], "properties": {"id":"IWQ-OjbKWHUZHKqZ","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} }
+                        ]
+                      }
+                    },
+                    {
+                      "id": "FsbAd_dVFJLACSWJ",
+                      "content": {
+                        "type": "Geometry",
+                        "title": "Mia's Graph 2",
+                        "board": {
+                          "properties": {
+                            "axisMin": [-3.411, -2.344],
+                            "axisRange": [32.974, 22.922]
+                          }
+                        },
+                        "objects": [
+                          { "type": "point", "parents": [0.2, 1], "properties": {"id":"qgBfU-zoRh9RvZV2","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [0.4, 2], "properties": {"id":"G3yeFOCF0NI3J3R0","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [0.6000000000000001, 3], "properties": {"id":"vuashVnxJgfvre3r","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [1, 5], "properties": {"id":"UjEq195QXrdAFTF3","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [1.9686948973089071, 10.043263285598034], "properties": {"id":"WdCUIH5tEsYfCB0x","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "polygon", "parents": ["qgBfU-zoRh9RvZV2", "G3yeFOCF0NI3J3R0", "vuashVnxJgfvre3r", "UjEq195QXrdAFTF3", "WdCUIH5tEsYfCB0x"],"properties": {"id":"Yk5buYiqIGZ1gpIq"} }
+                        ]
+                      }
+                    }
+                  ],
+                  {
+                    "id": "-bPA08BB6JYwAULU",
+                    "content": {
+                      "type": "Table",
+                      "name": "Table 2",
+                      "columns": [
+                        {"name":"Total Cost in Dollars, C","values":["2","1",".2",".4",".6"]},
+                        {"name":"Number of Oranges, N","values":["10","5","1","2","3"]}
+                      ]
+                    }
+                  },
+                  {
+                    "id": "RbDSMo9NZdH9ZqwD",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Is each representation correct? Explain.</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Yes. Each one accurately represents the cost for buying different amounts of oranges. The proportion, equation, and graph on the left show how many oranges you get for different increments of 20¢. The proportion, equation, and graph on the right show the cost for different numbers of oranges.</p>",
+                        "<p>There is only one table, because both unit rates can be shown on the table.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "4AQmPHFUTShHnnrD",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>What does each representation tell you about the rate? </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>On the table, we see the unit rate when one of the quantities is 1.</p>",
+                        "<p>In the proportions, we can scale the rate, so one of the quantities is 1.</p>",
+                        "<p>In the equations, the multiplier (coefficient) is the unit rate.</p>",
+                        "<p>In the graph, we can find the unit rate by finding the point where x = 1, y = unit rate. Or we can look at how much the graph increases for every increment of 1.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "QGGxvzF6QRS2aiae",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>How is the constant of proportionality represented in each representation</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The same way the rate is represented. In a proportional situation, the unit rate and constant of proportionality are the same thing.</p>"
+                      ]
+                    }
+                  }
                 ]
               },
               "supports": []
@@ -2132,6 +2742,298 @@
               "type": "whatIf",
               "content": {
                 "tiles": [
+                  {
+                    "id": "IuCyW0R_HGM8H0HK",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation A. Buying Tickets</strong>",
+                        "<p>Noralie is buying tickets for a concert online. The cost of the tickets is represented in a table, graph, and equation.</p>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "_Z8h3VYWUbxcXd4P",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/comparing-and-scaling/images/C&S_2-3_BoxOfficeTicketsTable_350w.jpg"
+                      }
+                    },
+                    {
+                      "id": "GRJjpe07QzPACiT_",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/comparing-and-scaling/images/C&S_2-3_BoxOfficeTicketsGraph_350w.jpg"
+                      }
+                    }
+                  ],
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>C</em> is the cost of the tickets</p>",
+                        "<p><em>N</em> is the number of tickets</p>",
+                        "<p><em>C = 30N</em></p>",
+                        "<p><em>120 = 30N</em></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "WHa2OXqPVTld1uOG",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>How is the constant of proportionality (or unit rate) represented in each?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The constant of proportionality is represented:</p>",
+                        "<p>In the table when one quantity is 1.</p>",
+                        "<p>In the graph by the amount of increase in the total cost (y value) each time the number of tickets (x value) increases by 1.  </p>",
+                        "<p>In the equation by the number being multiplied by N (number of tickets).</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "L5kUqYJEbXrNFnVY",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>How does this information help us answer questions about proportional situations?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>If we know one of the quantities is 1, we can scale to any amount to answer a question.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "LK0TQpCSeT5OE8OC",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>How many tickets could you buy for $120. How did you determine your answer?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>(4,120)  or 4 tickets.</p>",
+                        "<p>  To find the number of tickets, see blue notations on the representations above.</p>",
+                        "<p>With the table, scale the $30 up to $120.</p>",
+                        "<p>With the graph, find the point (x, 120).</p>",
+                        "<p>With the equation we can substitute 120 for C and then solve for the number of tickets.  </p>",
+                        "<p>120 = 30N.  </p>",
+                        "<p>N = 4.  </p>",
+                        "<p>Note: Students have not worked on formal strategies for solving equations at this point. They will use strategies on their knowledge of operations and/or fact families to solve the problem. For example, they may say that the equation is asking them to find what number (N) times 30 will result in the product of 120. So, they need to use division: 120 ÷ 30 = N, so N =4. This will be developed further in Moving Straight Ahead.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "crfvyzDO8jCkd_Tk",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>The concert organizers decide to add processing fee of $10. How does this affect the representations? Is this still a proportional situation? Explain.</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>It is no longer proportional if you add in a processing fee. </p>",
+                        "<p>See the change in red to the representations below.</p>",
+                        "<p>Table – $10 is added to the cost </p>",
+                        "<p>Graph – the line slides up 10</p>",
+                        "<p>Equation – the $10 is added to the cost</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "8wNumeHY5uIHLIoU",
+                    "content": {
+                      "type": "Table",
+                      "name": "Cost of Ticket from the Box Office",
+                      "columns": [
+                        {"name":"Number of Tickets","values":["0","1","2"]},
+                        {"name":"Total Cost of Tickets","values":["0","30","60"]},
+                        {"name":"Cost with Process Fee","values":["10","40","70"]}
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "zA9-i1YEdlv6Ohq8",
+                      "content": {
+                        "type": "Geometry",
+                        "title": "Ticket Cost",
+                        "board": {
+                          "properties": {
+                            "axisMin": [-1, -1],
+                            "axisRange": [5.322, 93.913],
+                            "axisNames": ["N", "C"],
+                            "axisLabels": ["", ""]
+                          }
+                        },
+                        "objects": [
+                          { "type": "point", "parents": [0, 0], "properties": {"id":"Ihr5BjKOynTl0c2A","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [1, 30], "properties": {"id":"aS5Ew5Rwy5tdn8ch","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [2, 60], "properties": {"id":"GGcrdtotKoPYP-uP","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "polygon", "parents": ["Ihr5BjKOynTl0c2A", "aS5Ew5Rwy5tdn8ch", "GGcrdtotKoPYP-uP"],"properties": {"id":"g1vwVrUCfVpRRuke"} },
+                          { "type": "point", "parents": [2, 70], "properties": {"id":"vn-OfinQf3FDj2yu","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [1, 40], "properties": {"id":"6E5sNTUokvEsW4-i","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [0, 10], "properties": {"id":"ujmL3sAA0FcGouDh","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "polygon", "parents": ["vn-OfinQf3FDj2yu", "6E5sNTUokvEsW4-i", "ujmL3sAA0FcGouDh"],"properties": {"id":"5w8yzNODx5N45pNA"} }
+                        ]
+                      }
+                    },
+                    {
+                      "id": "zF5T6wcEh8fiUUtl",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>C is cost of the tickets</p>",
+                          "<p></p>",
+                          "<p>N is the number of tickets</p>",
+                          "<p></p>",
+                          "<p></p>",
+                          "<p>C = 30N </p>",
+                          "<p></p>",
+                          "<p>C = 30N + 10</p>",
+                          "<p></p>"
+                        ]
+                      }
+                    }
+                  ],
+                  {
+                    "id": "dzxJqbjSmQuAYNXd",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Note that 0 tickets for $10 does not make sense in the real world.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "GeqrPrMDBg2kxvhG",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation B. Using the Constant of Proportionality: Best Buy for Pasta</strong>",
+                        "<p>Mia is shopping for pasta. She sees two advertisements:</p>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "km896IPq4ZfTT2bj",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Little Giant Store</p>",
+                          "<p>7 boxes of pasta for $6</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "pZpxWg9qhehUapRM",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Foodfresh Store</p>",
+                          "<p>6 boxes of pasta for $5</p>"
+                        ]
+                      }
+                    }
+                  ],
+                  {
+                    "id": "uX0CPq4WUgNIMlL1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>She claims that she can use the constant of proportionality to decide which store has the better price. Is she correct? Explain. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Yes. The constant of proportionality is the same as the unit rate. It will tell you how the prices relate when one of the quantities is 1.</p>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Little Giant Store</p>",
+                          "<p>7 boxes of pasta for $6</p>",
+                          "<p></p>",
+                          "<p>1 box of pasta about $0.86</p>",
+                          "<p></p>",
+                          "<p>OR</p>",
+                          "<p></p>",
+                          "<p>For $1 you get about 1.16 boxes</p>",
+                          "<p></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Foodfresh Store</p>",
+                          "<p>6 boxes of pasta for $5</p>",
+                          "<p></p>",
+                          "<p>1 box of pasta about $0.83</p>",
+                          "<p></p>",
+                          "<p>OR</p>",
+                          "<p></p>",
+                          "<p>For $1 you get about 1.2 boxes</p>"
+                        ]
+                      }
+                    }
+                  ]
                 ]
               },
               "supports": []
@@ -2140,6 +3042,33 @@
               "type": "nowWhatDoYouKnow",
               "content": {
                 "tiles": [
+                  {
+                    "id": "yu-X2bwhB1khEa7T",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Describe how you can determine a unit rate, or constant of proportionality, in a description, rate table, equation, or graph. In what ways is a unit rate or the constant of proportionality helpful for solving a problem?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The constant of proportionality or unit rate is represented:</p>",
+                        "<p></p>",
+                        "<p>In a description as a ratio when one of the quantities is 1.</p>",
+                        "<p>In the table when one quantity is 1.</p>",
+                        "<p>In the graph by the amount of increase in the cost (y value) each time the number of tickets (x value) increases by 1. It is also at the point (1, ?).</p>",
+                        "<p>In the equation by the number being multiplied by N (number of tickets).</p>",
+                        "<p></p>",
+                        "<p>Knowing both quantities when one quantity in a ratio is equal to 1 makes it easy to scale the ratio. So, this makes it helpful to answer questions.</p>"
+                      ]
+                    }
+                  }
                 ]
               }
             }
