@@ -1,7 +1,6 @@
-import Adapter from "enzyme-adapter-react-16";
+import { act, configure, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
-
-import { configure, mount } from "enzyme";
 import { DemoCreatorComponent, passThroughQueryItemsFromUrl } from "./demo-creator";
 import { createStores, IStores } from "../../models/stores/stores";
 import { DemoModel } from "../../models/stores/demo";
@@ -22,9 +21,24 @@ const demoUnitJson = {
       },
       problems: [
         {
-          description: "Demo Creator Problem",
+          description: "Demo Creator Problem 1",
           ordinal: 1,
-          title: "Demo Creator Test",
+          title: "Demo Creator Test 1",
+          subtitle: "",
+          sections: [
+            {
+              type: "introduction",
+              content: {
+                tiles: [
+                ]
+              }
+            }
+          ]
+        },
+        {
+          description: "Demo Creator Problem 2",
+          ordinal: 2,
+          title: "Demo Creator Test 2",
           subtitle: "",
           sections: [
             {
@@ -62,8 +76,7 @@ test("Mix of excluded/OK params yields a (pre-pended) query string with only OK 
   expect(passThroughQueryItemsFromUrl(href)).toEqual("&passKeyPlusValue=fred");
 });
 
-
-configure({ adapter: new Adapter() });
+configure({ testIdAttribute: "data-test" });
 
 describe("DemoCreator Component", () => {
   let stores: IStores;
@@ -80,26 +93,28 @@ describe("DemoCreator Component", () => {
     });
   });
 
-  it("can render", () => {
-    const wrapper = mount(<DemoCreatorComponent stores={stores} />);
-    expect(wrapper.contains(<h1>Demo Creator</h1>)).toEqual(true);
+  it("can render", async () => {
+    render(<DemoCreatorComponent stores={stores} />);
+    expect(screen.getAllByRole("heading")[0]).toHaveTextContent("Demo Creator");
+  });
+
+  it("can change classes and problems", () => {
+    render(<DemoCreatorComponent stores={stores} />);
 
     // test changing classes
-    expect(wrapper.find("ul.student-links").first().contains(
-      // eslint-disable-next-line max-len
-      <a href="?appMode=demo&amp;fakeClass=1&amp;fakeUser=student:1&amp;unit=test&amp;problem=1.1" target="_blank" rel="noreferrer">student 1</a>
-    )).toBe(true);
-    wrapper.find("select.classes").simulate("change", {target: {value: 2}});
-    expect(wrapper.find("ul.student-links").first().contains(
-      // eslint-disable-next-line max-len
-      <a href="?appMode=demo&amp;fakeClass=2&amp;fakeUser=student:1&amp;unit=test&amp;problem=1.1" target="_blank" rel="noreferrer">student 1</a>
-    )).toBe(true);
+    expect(screen.getAllByRole("link")[0])
+      .toHaveAttribute("href", "?appMode=demo&fakeClass=1&fakeUser=student:1&unit=test&problem=1.1");
+    act(() => {
+      userEvent.selectOptions(screen.getByTestId("class-select"), "2");
+    });
+    expect(screen.getAllByRole("link")[0])
+      .toHaveAttribute("href", "?appMode=demo&fakeClass=2&fakeUser=student:1&unit=test&problem=1.1");
 
-    // test changing classes
-    wrapper.find("select.problems").simulate("change", {target: {value: "1.2"}});
-    expect(wrapper.find("ul.student-links").first().contains(
-      // eslint-disable-next-line max-len
-      <a href="?appMode=demo&amp;fakeClass=2&amp;fakeUser=student:1&amp;unit=test&amp;problem=1.2" target="_blank" rel="noreferrer">student 1</a>
-    )).toBe(true);
+    // test changing problems
+    act(() => {
+      userEvent.selectOptions(screen.getByTestId("problem-select"), "1.2");
+    });
+    expect(screen.getAllByRole("link")[0])
+      .toHaveAttribute("href", "?appMode=demo&fakeClass=2&fakeUser=student:1&unit=test&problem=1.2");
   });
 });

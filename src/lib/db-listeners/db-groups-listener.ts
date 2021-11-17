@@ -130,5 +130,5 @@ export class DBGroupsListener extends BaseListener {
         }
       });
     }
-  }
+  };
 }

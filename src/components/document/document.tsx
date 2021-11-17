@@ -142,7 +142,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   state = {
     showBrowser: false,
     stickyNotesVisible: false
-  }
+  };
 
   public componentDidMount() {
     this.configureDeleteHandler();
@@ -408,20 +408,20 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private handleToggleWorkspaceMode = () => {
     this.props.workspace.toggleMode();
-  }
+  };
 
   private handleToggleVisibility = () => {
     const doc = this.props.document;
     doc.toggleVisibility();
     Logger.logDocumentEvent(LogEventName.SHOW_WORK, doc);
-  }
+  };
 
   private handleShowTwoUp = () => {
     this.props.workspace.toggleComparisonVisible({override: true});
-  }
+  };
   private handleHideTwoUp = () => {
     this.props.workspace.toggleComparisonVisible({override: false});
-  }
+  };
 
   private handleDownloadTileJson = () => {
     const { clipboard } = this.stores;
@@ -431,32 +431,32 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       FileSaver.saveAs(blobJson, "tile-content.json");
     }
     clipboard.clear();
-  }
+  };
 
   private handleSelectNewDocument = (type: string) => {
     const { onNewDocument } = this.props;
     onNewDocument?.(type);
-  }
+  };
 
   private handleOpenDocumentClick = () => {
     this.setState({ showBrowser: true });
-  }
+  };
 
   private handleCopyDocumentClick = () => {
     const { document, onCopyDocument } = this.props;
     onCopyDocument?.(document);
-  }
+  };
 
   private handleDeleteDocumentClick = () => {
     const { document, onDeleteDocument } = this.props;
     onDeleteDocument?.(document);
-  }
+  };
 
   private handleSelectDocument = (document: DocumentModelType) => {
     const { appConfig, ui } = this.stores;
     ui.rightNavDocumentSelected(appConfig, document);
     this.setState({ showBrowser: false });
-  }
+  };
 
   private handleDocumentRename = () => {
     const { document } = this.props;
@@ -469,17 +469,17 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           document.setTitle(title);
         }
       });
-  }
+  };
 
   private handlePublishSupport = () => {
     const { document, onPublishSupport } = this.props;
     onPublishSupport && onPublishSupport(document);
-  }
+  };
 
   private handlePublishDocument = () => {
     const { document, onPublishDocument } = this.props;
     onPublishDocument && onPublishDocument(document);
-  }
+  };
 
   private isPrimary() {
     return this.props.side === "primary";
@@ -488,17 +488,17 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private setStickyNotesVisible = (stickyNotesVisible: boolean) => {
     this.setState({stickyNotesVisible});
     this.stores.db.setLastStickyNoteViewTimestamp();
-  }
+  };
 
   // can't use single toggle handler here as the visibility state also depends on
   // new supports automatically making the notes show
   private handleViewStickyNoteOpen = () => {
     Logger.log(LogEventName.OPEN_STICKY_NOTES);
     this.setStickyNotesVisible(true);
-  }
+  };
   private handleViewStickyNoteClose = () => {
     Logger.log(LogEventName.CLOSE_STICKY_NOTES);
     this.setStickyNotesVisible(false);
-  }
+  };
 
 }

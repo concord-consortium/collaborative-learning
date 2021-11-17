@@ -184,7 +184,7 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
 
   private handleSetCanAcceptDrop = (tileId?: string) => {
     this.setState({ tileAcceptDrop: tileId });
-  }
+  };
 
   private handleRequestRowHeight = (tileId: string, height?: number, deltaHeight?: number) => {
     const rowHeight = this.props.model.height;
@@ -192,7 +192,7 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
                         ? rowHeight + deltaHeight
                         : height;
     (newHeight != null) && this.props.model.setRowHeight(newHeight);
-  }
+  };
 
   private handleStartResizeRow = (e: React.DragEvent<HTMLDivElement>) => {
     const { model, docId } = this.props;
@@ -208,5 +208,5 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
       const boundingBox = this.tileRowDiv.getBoundingClientRect();
       e.dataTransfer.setData(dragResizeRowDomHeight(boundingBox.height), String(boundingBox.height));
     }
-  }
+  };
 }

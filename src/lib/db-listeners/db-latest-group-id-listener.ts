@@ -39,5 +39,5 @@ export class DBLatestGroupIdListener extends BaseListener {
     const val = snapshot.val() || undefined;
     this.debugLogSnapshot("#handleLatestGroupIdRef", snapshot);
     this.db.stores.user.setLatestGroupId(val);
-  }
+  };
 }

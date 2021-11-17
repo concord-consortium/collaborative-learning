@@ -121,7 +121,7 @@ export class DBListeners extends BaseListener {
       });
     }));
     this.documentModelDisposers[document.key] = disposer;
-  }
+  };
 
   public monitorOtherDocument = (document: DocumentModelType, type: OtherDocumentType) => {
     const { user } = this.db.stores;
@@ -148,27 +148,27 @@ export class DBListeners extends BaseListener {
     }));
 
     return document;
-  }
+  };
 
   public monitorPersonalDocument = (document: DocumentModelType) => {
     return this.monitorOtherDocument(document, PersonalDocument);
-  }
+  };
 
   public monitorLearningLogDocument = (document: DocumentModelType) => {
     return this.monitorOtherDocument(document, LearningLogDocument);
-  }
+  };
 
   public monitorDocument = (document: DocumentModelType, monitor: Monitor) => {
     this.debugLog("#monitorDocument", `document: ${document.key} monitor: ${monitor}`);
     this.monitorDocumentRef(document, monitor);
     this.monitorDocumentModel(document, monitor);
-  }
+  };
 
   public unmonitorDocument = (document: DocumentModelType, monitor: Monitor) => {
     this.debugLog("#unmonitorDocument", `document: ${document.key} monitor: ${monitor}`);
     this.unmonitorDocumentRef(document);
     this.unmonitorDocumentModel(document);
-  }
+  };
 
   public syncDocumentProperties = (document: DocumentModelType, dbType: DatabaseType, path?: string) => {
     const { user } = this.db.stores;
@@ -189,7 +189,7 @@ export class DBListeners extends BaseListener {
         docRef.update({ properties: newProperties });
       });
     }
-  }
+  };
 
   private monitorDocumentRef = (document: DocumentModelType, monitor: Monitor) => {
     const { user, documents } = this.db.stores;
@@ -220,14 +220,14 @@ export class DBListeners extends BaseListener {
         }
       }
     });
-  }
+  };
 
   private unmonitorDocumentRef = (document: DocumentModelType) => {
     const docListener = this.modelListeners[`document:${document.key}`];
     if (docListener && docListener.ref) {
       docListener.ref.off("value");
     }
-  }
+  };
 
   private monitorDocumentModel = (document: DocumentModelType, monitor: Monitor) => {
     // skip if not monitoring local changes
@@ -270,7 +270,7 @@ export class DBListeners extends BaseListener {
                                     });
                                   });
     }
-  }
+  };
 
   private unmonitorDocumentModel = (document: DocumentModelType) => {
     // This is currently only called for unmonitoring remote documents as a result of group changes, but
@@ -282,7 +282,7 @@ export class DBListeners extends BaseListener {
     }
     const docListener = this.modelListeners[`document:${document.key}`];
     docListener?.modelDisposer?.();
-  }
+  };
 
   private stopModelListeners() {
     Object.keys(this.modelListeners).forEach((docKey) => {

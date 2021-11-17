@@ -87,7 +87,7 @@ export class CustomSelect extends React.PureComponent<IProps, IState> {
         <ArrowIcon className={`arrow ${showListClass} ${disabled}`} />
       </div>
     );
-  }
+  };
 
   private renderItemIcon = (item: ICustomDropdownItem) => {
     const { showItemIcons } = this.props;
@@ -124,7 +124,7 @@ export class CustomSelect extends React.PureComponent<IProps, IState> {
         }) }
       </div>
     );
-  }
+  };
 
   private handleDown = (e: MouseEvent | TouchEvent) => {
     if (this.divRef.current && e.target && !this.divRef.current.contains(e.target as Node)) {
@@ -132,11 +132,11 @@ export class CustomSelect extends React.PureComponent<IProps, IState> {
         showList: false
       });
     }
-  }
+  };
 
   private handleHeaderClick = () => {
     this.setState(state => ({ showList: !state.showList }));
-  }
+  };
 
   private handleListClick = (item: IDropdownItem) => () => {
     const { onClick } = item;
@@ -145,5 +145,5 @@ export class CustomSelect extends React.PureComponent<IProps, IState> {
       selected: item.text,
       showList: false
     });
-  }
+  };
 }

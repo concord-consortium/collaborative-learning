@@ -208,7 +208,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     return !readOnly &&
             (ui?.selectedTileIds.length === 1) &&
             (ui?.selectedTileIds.includes(id));
-  }
+  };
 
   private getDesiredHeight() {
     const kMarginsAndBorders = 26;
@@ -245,7 +245,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
           }
         });
     });
-  }
+  };
 
   private handleUrlChange = (url: string, filename?: string, context?: IDocumentContext) => {
     this.setState({
@@ -254,11 +254,11 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
       imageFilename: filename,
       documentContext: context
     });
-  }
+  };
 
   private handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     debouncedSelectTile(this.stores.ui, this.props.model, hasSelectionModifier(e));
-  }
+  };
 
   private storeNewImageUrl(newUrl: string) {
     const { imageEntry } = this.state;
@@ -290,11 +290,11 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
       }
     }
     return false;
-  }
+  };
 
   private handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     this.imageDragDrop.dragOver(e);
-  }
+  };
 
   private handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     this.imageDragDrop.drop(e)
@@ -304,5 +304,5 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
       .catch((err) => {
         this.stores.ui.alert(err.toString());
       });
-  }
+  };
 }

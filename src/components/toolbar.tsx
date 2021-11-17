@@ -94,12 +94,12 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   private showDropRowHighlight = () => {
     const { document } = this.props;
     document.content?.showPendingInsertHighlight(true);
-  }
+  };
 
   private removeDropRowHighlight = () => {
     const { document } = this.props;
     document.content?.showPendingInsertHighlight(false);
-  }
+  };
 
   private getUniqueTitle(toolContentInfo: IToolContentInfo) {
     const toolApiInterface = this.context?.current;
@@ -151,7 +151,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
   private setShowDeleteTilesConfirmationAlert = (showAlert: () => void) => {
     this.showDeleteTilesConfirmationAlert = showAlert;
-  }
+  };
 
   private handleDeleteSelectedTiles = () => {
     const { ui } = this.stores;
@@ -160,7 +160,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       ui.removeTileIdFromSelection(tileId);
       document.deleteTile(tileId);
     });
-  }
+  };
 
   private handleDragNewToolTile = (tool: ToolButtonModelType, e: React.DragEvent<HTMLDivElement>) => {
     // remove hover-insert highlight when we start a tile drag
@@ -170,5 +170,5 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const dragInfo: IDragToolCreateInfo = 
       { tool: tool.name as DocumentTool, title: this.getUniqueTitle(toolContentInfo) };
     e.dataTransfer.setData(kDragTileCreate, JSON.stringify(dragInfo));
-  }
+  };
 }

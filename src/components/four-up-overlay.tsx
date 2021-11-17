@@ -52,7 +52,7 @@ export class FourUpOverlayComponent extends BaseComponent<IProps> {
     if (this.props.document) {
       this.props.onClick(this.props.context);
     }
-  }
+  };
 
   private handleStarClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const {user} = this.stores;
@@ -62,6 +62,6 @@ export class FourUpOverlayComponent extends BaseComponent<IProps> {
     if (document) {
       document.toggleUserStar(user.id);
     }
-  }
+  };
 
 }

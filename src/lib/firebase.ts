@@ -350,6 +350,6 @@ export class Firebase {
       }
       this.db.stores.user.setIsFirebaseConnected(connected);
     }
-  }
+  };
 
 }

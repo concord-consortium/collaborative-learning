@@ -60,7 +60,7 @@ export class DBProblemDocumentsListener extends BaseListener {
         this.handleOfferingUser(user);
       }
     });
-  }
+  };
 
   private handleLoadOfferingUserAddedOrChanged = (eventType: string) => (snapshot: firebase.database.DataSnapshot) => {
     const user: DBOfferingUser = snapshot.val();
@@ -68,7 +68,7 @@ export class DBProblemDocumentsListener extends BaseListener {
     if (user) {
       this.handleOfferingUser(user);
     }
-  }
+  };
 
   private handleOfferingUser = (user: DBOfferingUser) => {
     if (!user?.self?.uid) return;
@@ -111,5 +111,5 @@ export class DBProblemDocumentsListener extends BaseListener {
           .then(documents.add);
       }
     });
-  }
+  };
 }

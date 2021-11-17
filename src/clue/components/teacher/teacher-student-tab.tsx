@@ -96,5 +96,5 @@ export class TeacherStudentTabComponent extends BaseComponent<IProps, IState> {
     return (e: React.MouseEvent<HTMLElement>) => {
       this.setState({selectedUserId: user.id});
     };
-  }
+  };
 }

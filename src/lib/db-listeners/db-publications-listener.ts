@@ -49,13 +49,13 @@ export class DBPublicationsListener extends BaseListener {
         this.handlePublication(publication);
       });
     }
-  }
+  };
 
   private handlePublicationChildAdded = (snapshot: firebase.database.DataSnapshot) => {
     const publication: DBPublication|null = snapshot.val();
     this.debugLogSnapshot("#handlePublicationChildAdded", snapshot);
     this.handlePublication(publication);
-  }
+  };
 
   private handlePublication = (publication: DBPublication|null) => {
     const {documents} = this.db.stores;
@@ -85,5 +85,5 @@ export class DBPublicationsListener extends BaseListener {
           });
         });
     }
-  }
+  };
 }

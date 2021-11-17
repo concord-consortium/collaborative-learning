@@ -30,6 +30,6 @@ export class ProgressWidgetItem extends React.Component<IProps, IState> {
   private handleClicked = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
     this.props.setSelectedSectionId(this.props.item.label);
-  }
+  };
 
 }

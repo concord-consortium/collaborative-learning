@@ -66,5 +66,5 @@ export class ClueAppContentComponent extends BaseComponent<IProps> {
         Logger.log(LogEventName.DASHBOARD_TOGGLE_TO_DASHBOARD);
       }
     }
-  }
+  };
 }

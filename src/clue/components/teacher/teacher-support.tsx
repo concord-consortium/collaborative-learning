@@ -98,17 +98,17 @@ export class TeacherSupport extends BaseComponent<IProps, IState> {
       db.createSupport(createTextSupport(content), sectionTarget, audience);
       this.inputElem.value = "";
     }
-  }
+  };
 
   private handleEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.keyCode === ENTER_KEY_CODE) {
       this.handleSubmit();
     }
-  }
+  };
 
   private handleDelete = (support: TeacherSupportModelType) => () => {
     const { db } = this.stores;
     db.deleteSupport(support);
-  }
+  };
 
 }
