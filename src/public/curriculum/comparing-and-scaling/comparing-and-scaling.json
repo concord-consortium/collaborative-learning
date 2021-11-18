@@ -3093,6 +3093,33 @@
               "type": "introduction",
               "content": {
                 "tiles": [
+                  {
+                    "id": "jbURrd7lsC92A01y",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>In the Comparing Quantities Unit, we looked at proportional situations that involved percents. We also used percents to solve some of the problems in this Unit, for example, Problem 1.1 Mixing Juice.</p>",
+                        "<p>Recall that if a part-to-whole ratio can be scaled so that the whole is 100, then the ratio is a percent. The word percent means “out of 100.” We used percent to investigate survey results, test scores, and the number of people most likely to have dimples. Representing ratios or comparisons as percents is also useful in other situations. Percentages can help us with comparisons because we have the same size whole. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "9KMwvsNvc9I6JHue",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>When we buy something in a store, we often pay sales tax on the purchase price. For the sales tax, we might see percents such as 5%, 6.2%, or 8%. These are the rates by which the sales price is increased. </p>",
+                        "<p>A sales tax of 6% means that for every dollar an item costs, a person needs to pay an additional 6 cents. That is, 6 cents for every 100 cents of an item purchased, or $0.06 for every dollar, is added to the cost. This is tax money collected by states. For example, with 6% tax:</p>",
+                        "<p>Item purchased for $1.00 </p>",
+                        "<p>Sales tax is 6% of $1.00 or $0.06</p>",
+                        "<p>Total cost $1.06</p>",
+                        "<p>Note: When a percent calculation for sales tax does not come out to a whole number of cents, the standard practice is to round up the tax to the next penny. </p>",
+                        "<p>Understanding how to compute and use percents can make us smarter consumers. </p>"
+                      ]
+                    }
+                  }
                 ]
               },
               "supports": []
@@ -3101,6 +3128,158 @@
               "type": "initialChallenge",
               "content": {
                 "tiles": [
+                  {
+                    "id": "PHowZ-dbpxYySpvD",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Skylar picked up several items he needed for school. He had $25 in cash. As he was nearing the checkout counter he wondered if he had enough cash to pay the bill. The sales tax is 5%. In the basket he has: </p>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "Hewa3STsJe0rdeZW",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Notepad: $8.95</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "yr0gKiCW7QneEfPk",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Markers: $6.75</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "QoKFTXKfh_ri1Knq",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Pencils: $3.80</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "JBiceTMkBKUK1tIj",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Sticky notes: $4.25</p>"
+                        ]
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "thzd5hEmw35Ax_-R",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/comparing-and-scaling/images/C&S_3-1_Notepad.png"
+                      }
+                    },
+                    {
+                      "id": "sNmCCYHXPkmleVnC",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/comparing-and-scaling/images/C&S_3-1_Markers.png"
+                      }
+                    },
+                    {
+                      "id": "3UJlgyI8YWVB3PyT",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/comparing-and-scaling/images/C&S_3-1_Pencils.png"
+                      }
+                    },
+                    {
+                      "id": "9uKrABz1s66-ZgXy",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/comparing-and-scaling/images/C&S_3-1_StickyNotes.png"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "OaMcRjmrPwlxilaS",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>What is a good estimate for the total cost of the four items?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Answers will vary.  </p>",
+                        "<p>Notepad ~ $9</p>",
+                        "<p>Markers~ $7</p>",
+                        "<p>Pencils ~4</p>",
+                        "<p>Sticky Notes ~4</p>",
+                        "<p>$9 + $7 + $4 + $4 = $24</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "I46ZJG0JviVxnVnU",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>What is a good estimate for the total bill with tax?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Answers will vary.</p>",
+                        "<p>Using the above estimate of $24, many students will find 5% of 24 and then add that amount into the original $24.  </p>",
+                        "<p>  0.05 x 24 = $1.2</p>",
+                        "<p>  24 + 1.2 = $25.20</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "_dNaZZOHhg6BJI3a",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Does Skylar have enough money? Make your reasoning and conclusion visible to others.</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Answers will vary.</p>",
+                        "<p>Using the above estimates students might say yes because we overestimated most of the prices and with our estimate being only $0.20 over the $25, he should have enough money. Others might say no because our estimate is over the $25. Students should be able to describe how they estimated and whether they used overestimates or underestimates.  </p>"
+                      ]
+                    }
+                  }
+
                 ]
               },
               "supports": []
@@ -3109,6 +3288,235 @@
               "type": "whatIf",
               "content": {
                 "tiles": [
+                  {
+                    "id": "0NFCprTRxNWtCY5d",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation A. Student Strategies</strong>",
+                        "<p>After working on the Initial Challenge, students in Mr. Gomez’s class used various strategies. </p>",
+                        "<p>Examine each strategy. Which ones are correct? Explain.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Possible Answers:</p>",
+                        "<p>All of the strategies are correct. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Casey’s Strategy</p>",
+                        "<p>To compute the total cost of an item that costs $8.95 with a 5% sales tax, I multiply $8.95 by 0.05 and then add the tax to the $8.95.</p>",
+                        "<p>  8.95 • 0.05 + 8.95</p>",
+                        "<p>Casey is using the Distributive Property finding the cost • the % tax + the cost • 100%. </p>",
+                        "<p>8.95 • 0.05 + 8.95 •1</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Sammi’s Strategy</p>",
+                        "<p>Multiply $8.95 by 1.05. </p>",
+                        "<p>That will get the whole amount (100% or 1) and the tax (5% or 0.05).</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "   x 1.05        ",
+                        "            ⃕",
+                        "8.95 = x",
+                        "____________",
+                        "100 = 105",
+                        "         ⤻",
+                        "   x 1.05"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Sammi is using a proportion to scale from 100% to 105% to find the price with tax included.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Vanessa’s Strategy</p>",
+                        "<p>I used the Distributive Property. I think this strategy will work for any bill.</p>",
+                        "             0.05 • 8.95 + 1 • 8.95 = ",
+                        "                         (0.05 + 1) • 8.95",
+                        "                                 or",
+                        "      1.05 • 8.95 to find the total bill.",
+                        "<p>Vanessa is using a combination of what Casey and Sammi do. Vanessa uses the Distributive Property which results in multiplying by 1.05 (like Sammi did).</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Alex’s Strategy</strong></p>",
+                        "<p>I first find 1%. Then I can find any percent, like the 105% needed for this question.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>   ÷ 100         x 105\n           ⃕                     ⃕   \n8.95 = 0.0895 = x\n_______________________\n100   =        1       =  105\n         ⤻               ⤻ \n     ÷ 100         x 105 </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Ash’s Strategy</strong>",
+                        "<p>I used a percent bar or tape diagram. Extend the bar to find 105%.</p>",
+                        "<p>Ash uses a percent bar/tape diagram. (Students learned this strategy in Comparing Quantities.) Ash extends the bar past the 100% mark to find the 105% mark. Using the amount of money for 1%, Ash can scale up to 105%. This is like Alex’s strategy with a different representation – a bar diagram rather than a proportion.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/C&S_3-1_AshsStrategy.png"
+                    }
+                  },
+                  {
+                    "id": "mmoZyLGmPB0DMDQu",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation B. Student Wonderings</strong>",
+                        "<p>Below are students’ discussions about percents and ratios. Examine each discussion.</p>",
+                        "<p>Who is correct? Explain.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "0mQOVBzftENMoDQY",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Sam and Will</strong>",
+                        "<p>Sam says that percents are a lot like fractions.  </p>",
+                        "<p>Will disagrees. He said that percents are more like ratios.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "0nTdoz7aOHB91s8c",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Nicky and Marta</strong>",
+                        "<p>Depending on what strategy you use, Nicky thinks that you can get two different answers when finding the tax on multiple items. </p>",
+                        "<p>First Strategy: Find the cost of each item with the tax. Then add to find the total price. For example:</p>",
+                        "<p>    ($9 + 5% tax) + ($7 + 5% tax) + ($4 + 5% tax) + ($4 + 5% tax) = </p>",
+                        "<p>($9 + 0.05•9) + ($7 + 0.05•7) + ($4 + 0.05•4) + ($4 + 0.05•4)</p>",
+                        "<p>     = one total price</p>",
+                        "<p>Second Strategy: Add up the prices of each individual item. </p>",
+                        "<p>Then find the tax and total.</p>",
+                        "<p> $9 + $7 + $4 + $4 = total amount for all the items</p>",
+                        "<p>Total amount for all the items + 5% tax = a different total price</p>",
+                        "<p>Marta disagrees with Nicky. She claims the answers are the same because of the Distributive Property. And the total prices are the same.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>This discussion holds a subtle point that should be discussed with your students.  </p>",
+                        "<p>Percents are rates. Fractions are numbers. </p>",
+                        "<p>But we use fractions or decimals to compute with percents. Sam is thinking of the fraction form and the way that the ratios/rates scale like finding equivalent fractions. Percents are a ratio because they compare two quantities – some number to 100 with 100 representing one whole.  </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Marta is correct. For example, when the sales tax is 5%:  </p>",
+                        "<p>1.05(9 + 7 + 4 + 4) = 1.05(9) + 1.05(7) + 1.05(4) + 1.05(4)</p>",
+                        "<p>For each of these numbers when you multiply by 1.05 that is the price plus the tax that Nicky describes above.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "M6gBCgltYO0NenU8",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation C. Working Backward</strong>",
+                        "<p>Funda bought a used gaming system. She does not remember the price before tax. She does know that the 6% sales tax came to $4.80. What was the price of the used gaming system before tax? How do you know?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>$80 </p>",
+                        "<p>$4.80/(6%)=  $0.80/(1%)=  $80/(100%)  </p>",
+                        "<p>Students might also use a percent bar. If the original price is 100% and 6% is $4.80, the percent bar would be divided into equal groups and when those are all totaled it would be $80.  </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/C&S_3-1_SituationCSolution.png"
+                    }
+                  }
                 ]
               },
               "supports": []
@@ -3117,6 +3525,30 @@
               "type": "nowWhatDoYouKnow",
               "content": {
                 "tiles": [
+                  {
+                    "id": "OxPUj6RVlgdBeUZ4",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>How are percent problems like ratio and rate problems? </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Possible answers:</p>",
+                        "<p>Percent problems are proportional reasoning problems, just like ratios and rates are. </p>",
+                        "<p>Percents are a new representation of a part to ratio. </p>",
+                        "<p>Percent problems require finding equivalent ratios and/or scaling up quantities, just like ratio and rates.</p>",
+                        "<p>Percents set one of the quantities equal, so we can think about the size of the other quantity. So, in some ways, they act like a unit rate does.</p>"
+                      ]
+                    }
+                  }
                 ],
                 "supports": []
               }
