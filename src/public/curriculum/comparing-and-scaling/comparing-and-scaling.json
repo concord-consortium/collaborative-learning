@@ -3566,6 +3566,16 @@
               "type": "introduction",
               "content": {
                 "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>At most restaurants, customers pay their server a tip for providing good service. A typical tip is 15% to 20% of the price of the meal.   </p>",
+                        "<p>What is the tip on a restaurant bill of $14? </p>"
+                      ]
+                    }
+                  }
                 ],
                 "supports": []
               }
@@ -3574,6 +3584,48 @@
               "type": "initialChallenge",
               "content": {
                 "tiles": [
+                  {
+                    "id": "3JVJXDtR0a7Wd_UL",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Mr. Gomez’s class will stop at Larry’s Lunch Place on their field trip. He gives the class a menu so that they can anticipate the cost of their lunch ahead of the trip. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "9O0KDB8Crjz7g0VD",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/C&S_3-2_LarrysLunchPlace.png"
+                    }
+                  },
+                  {
+                    "id": "rc65nIFrj5aerEKk",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>In your group use the menu to make up a lunch order. Write a list of all the items ordered by your group. </p>",
+                        "<ul><li>Find the total bill for food including the 6% sales tax for your group. </li><li>How much will you leave as a tip (between 15% and 20% of the total bill)? </li><li>Your group members will share the cost of the meal equally. What is each person’s share of the cost, including tip? </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Answers will vary. Look for how the students find the total bill: Do they add up all the original prices and then put in the sales tax? Do they find the 6% sales tax on each item and then find the total?  </p>",
+                        "<p>How are they using the 6%: Do they multiply an amount by $0.06 and then add it onto the original price? Do they multiply by 1.06? Do they create percent bars? Do they use proportions?</p>",
+                        "<p>How did the students decide the total after the tip? Did they use percent bars? Did they use multiplication?</p>",
+                        "<p>How did the students find the cost for each person? Did they find the total with tax and tip and then divide? Did they find each portion of the costs, divide those, and then add those quotients?</p>",
+                        "<p>Note: Students may use strategies that are unique. A CMP student in the past said, “Multiply the 6% tax amount by 3 to get an approximation for an 18% tip.” </p>"
+                      ]
+                    }
+                  }
                 ]
               },
               "supports": []
@@ -3582,6 +3634,232 @@
               "type": "whatIf",
               "content": {
                 "tiles": [
+                  {
+                    "id": "yn43WbHFWOewmRmQ",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation A. Benchmarks</strong>",
+                        "<p>Many people use benchmarks for determining tips. </p>",
+                        "<p>Gil explains his strategy: “I always figure out 10% of the bill, and then I use this information to calculate a 15% or 20% tip.” </p>",
+                        "<ul><li>Explain why Gil’s method works. </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Once you find 10% you can take that amount and divide it in half to get 5%. Add together the amount for 10% and 5% and you will have the 15% tip.  </p>",
+                        "<p>Once you have 10% you can take that amount and double it to get the amount for a 20% tip.  </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "xubn6Vg3Y-JMw21J",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Use his method to compute a 15% tip and a 20% tip if the final bill is:</li></ul>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Final Bill of $24.50</p>",
+                          "<p></p>",
+                          "<p></p>",
+                          "<p></p>",
+                          "<p>10% of $24.50 is $2.45  </p>",
+                          "<p></p>",
+                          "<p>5% would be about $1.23  </p>",
+                          "<p></p>",
+                          "<p>15% would be $2.45 + $1.23 = $3.68</p>",
+                          "<p></p>",
+                          "<p>20% would be $2.45 + $2.45 = $4.90</p>",
+                          "<p></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p></p>",
+                          "<p>Final Bill of $17.35</p>",
+                          "<p></p>",
+                          "<p></p>",
+                          "<p></p>",
+                          "<p>10% of $17.35 is about $1.74  </p>",
+                          "<p></p>",
+                          "<p>5% would be $0.87  </p>",
+                          "<p></p>",
+                          "<p>15% would be $1.74 + $0.87 = $2.61</p>",
+                          "<p></p>",
+                          "<p>20% would be $1.74 + $1.74 = $3.48</p>",
+                          "<p></p>"
+                        ]
+                      }
+                    }
+                  ],
+                  {
+                    "id": "Aq_miGm0El57rzON",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Situation B. Working Backward</strong></p>",
+                        "<p></p>",
+                        "<p>A customer left Jerome $2.50 as a tip for service. That tip is 20% of the total bill for the food. </p>",
+                        "<p>How much is the food bill? Explain your reasoning.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>$12.50</p>",
+                        "<p></p>",
+                        "<p>20% of the original price is $2.50</p>",
+                        "<p>0.20 x original price = $2.50</p>",
+                        "<p>Find how many 0.20 are in $2.50</p>",
+                        "<p>$2.50 ÷ 0.20 = 12.50</p>",
+                        "<p></p>",
+                        "<p>OR</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "           x 5 ",
+                        "                ⃕",
+                        "$2.50 = $12.50",
+                        "_____________________",
+                        "  20% = 100%",
+                        "           ⤻",
+                        "            x5"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "U3vTBteC_DkbLyof",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Situation C. Another Meal at Larry’s</strong></p>",
+                        "<p></p>",
+                        "<p>Sandy has a 10% discount off the total price before tax is added for Larry’s Lunch Place. If the cost of the meal is $18.50,</p>",
+                        "<ul><li>What is the cost of the meal after the discount?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                   "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>$16.65</p>",
+                        "<p>10% of $18.50 is $1.85</p>",
+                        "<p>$18.50 - $1.85 = $16.65</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "b8UXPpWWSQiewzEw",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>What is the total cost with a 6% tax and a 15% tip?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>$20.42</p>",
+                        "<p>$16.65 x $0.06 = ~$1.00 (amount of sales tax)</p>",
+                        "<p>$16.65 + $1.00 = $17.75 (amount of bill with sales tax)</p>",
+                        "<p>10% of $17.75 = $1.78  5% would be $0.89.  15% tip would be $1.78 + $0.89 = $2.67 </p>",
+                        "<p>$17.75 + $2.67 = $20.42</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "UBXo7X_VvrGzpqpW",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation D. Discount After Discount</strong>",
+                        "<p>Aladar has a 20% discount coupon to buy new headphones priced at $95. When he got to the telecom store, he learned that they were having a 30% off sale.</p>",
+                        "<p>The clerk calculated the 30% discount first and then applied the 20% off coupon to the discounted amount. </p>",
+                        "<ul><li>What should be the final price (without sales tax)? </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>30% of $95 is $28.50 (30% discount)</p>",
+                        "<p>  $95 - $28.50 = $66.50 (Subtract the 30% discount from the headphone price)</p>",
+                        "<p>  20% of $66.50 is $13.30 (20% discount off the discounted price)</p>",
+                        "<p>  $66.50 - $13.30 = $53.20 (Subtract the 20% discount off the discounted price)</p>",
+                        "<p>  Note: Students might find the discounts each time by finding it in groups of 10% and  subtracting those. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "Sbz_cTdBcaebGZU_",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Is that final price the same as a 50% discount? Explain. </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>  No </p>",
+                        "<p>  $95 x 0.50 = $47.50</p>",
+                        "<p>Note: Some students might answer this without doing the calculation. They might reason that it would be a bigger discount if you took 50% of the $95 because the total is more so the discount you’d subtract would be greater.  </p>",
+                        "<p>OR</p>",
+                        "<p>With the way that the clerk did the discount (which is the typical way to do it), 30% is taken off of the total price, then 20% is taken off of the discounted price, not the whole price. So, in this case, the total changes. You begin with the whole total, then you reduce it to a discounted total.</p>",
+                        "<p>If you take 50% off, you would be taking the discount on the total amount. </p>"
+                      ]
+                    }
+                  }
                 ]
               },
               "supports": []
@@ -3590,6 +3868,28 @@
               "type": "nowWhatDoYouKnow",
               "content": {
                 "tiles": [
+                  {
+                    "id": "vuytCdWjVFY5a_bM",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Describe some strategies you used to solve percent problems. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Strategies will vary.</p>",
+                        "<p>Students might use percent bar/tape diagrams, proportions, tables with equivalent percentage amounts, multiplying by the fraction, or decimal form of the percent.</p>",
+                        "<p>Students should mention that you scale percents like you do with other proportional relationships.</p>"
+                      ]
+                    }
+                  }
                 ]
               },
               "supports": []
