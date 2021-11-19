@@ -174,7 +174,7 @@
     },
     {
       "description": "Investigation 2",
-      "ordinal": 1,
+      "ordinal": 2,
       "title": "CAS Investigation 1 Proportional Reasoning Using Ratio Comparisons",
       "problems": [
         {
@@ -215,9 +215,9 @@
           ]
         },
         {
-          "description": "Problem 2.1",
+          "description": "Problem 2.2",
           "ordinal": 2,
-          "title": "CAS 2.2 Comparing Pizza Prices",
+           "title": "CAS 2.2 Comparing Pizza Prices",
           "subtitle": "How Do We Know It Is Proportional?",
           "sections": [
             {
@@ -254,8 +254,163 @@
         {
           "description": "Problem 2.3",
           "ordinal": 3,
-          "title": "CAS 1.3 Teeping Things in Proportione",
-          "subtitle": "Using Proportions",
+          "title": "CAS 2.3 Finding Costs",
+          "subtitle": "Unit Rates and the Constant of Proportionality",
+          "sections": [
+            {
+              "type": "overview",
+              "content":
+              {
+                "tiles": [
+                ]
+              }
+            },
+            {
+              "type": "launch",
+              "content": {
+                "tiles": [
+                ]
+              }
+            },
+            {
+              "type": "explore",
+              "content": {
+                "tiles": [
+                ]
+              }
+            },
+            {
+              "type": "summarize",
+              "content": {
+                "tiles": [
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+        {
+      "description": "Investigation 3",
+      "ordinal": 3,
+      "title": "CAS Investigation 3 Pulling it all Together: Ratios, Rates, and Percents",
+      "problems": [
+        {
+          "description": "Problem 3.1",
+          "ordinal": 1,
+          "title": "CAS 3.1 Using Percents",
+          "subtitle": "What is the Tax?",
+          "sections": [
+            {
+              "type": "overview",
+              "content":
+              {
+                "tiles": [
+                ]
+              }
+            },
+            {
+              "type": "launch",
+              "content": {
+                "tiles": [
+                ]
+              }
+            },
+            {
+              "type": "explore",
+              "content": {
+                "tiles": [
+                ]
+              }
+            },
+            {
+              "type": "summarize",
+              "content": {
+                "tiles": [
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "description": "Problem 3.2",
+          "ordinal": 2,
+          "title": "CAS 3.2 Using Percents",
+          "subtitle": "What is the Tip?",
+          "sections": [
+            {
+              "type": "overview",
+              "content":
+              {
+                "tiles": [
+                ]
+              }
+            },
+            {
+              "type": "launch",
+              "content": {
+                "tiles": [
+                ]
+              }
+            },
+            {
+              "type": "explore",
+              "content": {
+                "tiles": [
+                ]
+              }
+            },
+            {
+              "type": "summarize",
+              "content": {
+                "tiles": [
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "description": "Problem 3.3",
+          "ordinal": 3,
+          "title": "CAS 3.3 Free Throws and Feeding Chimps",
+          "subtitle": "The Percent Connection",
+          "sections": [
+            {
+              "type": "overview",
+              "content":
+              {
+                "tiles": [
+                ]
+              }
+            },
+            {
+              "type": "launch",
+              "content": {
+                "tiles": [
+                ]
+              }
+            },
+            {
+              "type": "explore",
+              "content": {
+                "tiles": [
+                ]
+              }
+            },
+            {
+              "type": "summarize",
+              "content": {
+                "tiles": [
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "description": "Problem 3.4",
+          "ordinal": 4,
+          "title": "CAS 3.4 The Leaky Faucet Experiment",
+          "subtitle": "",
           "sections": [
             {
               "type": "overview",

@@ -3676,17 +3676,10 @@
                         "format": "html",
                         "text": [
                           "<p>Final Bill of $24.50</p>",
-                          "<p></p>",
-                          "<p></p>",
-                          "<p></p>",
                           "<p>10% of $24.50 is $2.45  </p>",
-                          "<p></p>",
                           "<p>5% would be about $1.23  </p>",
-                          "<p></p>",
                           "<p>15% would be $2.45 + $1.23 = $3.68</p>",
-                          "<p></p>",
-                          "<p>20% would be $2.45 + $2.45 = $4.90</p>",
-                          "<p></p>"
+                          "<p>20% would be $2.45 + $2.45 = $4.90</p>"
                         ]
                       }
                     },
@@ -3696,19 +3689,11 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p></p>",
                           "<p>Final Bill of $17.35</p>",
-                          "<p></p>",
-                          "<p></p>",
-                          "<p></p>",
                           "<p>10% of $17.35 is about $1.74  </p>",
-                          "<p></p>",
                           "<p>5% would be $0.87  </p>",
-                          "<p></p>",
                           "<p>15% would be $1.74 + $0.87 = $2.61</p>",
-                          "<p></p>",
-                          "<p>20% would be $1.74 + $1.74 = $3.48</p>",
-                          "<p></p>"
+                          "<p>20% would be $1.74 + $1.74 = $3.48</p>"
                         ]
                       }
                     }
@@ -3720,7 +3705,6 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Situation B. Working Backward</strong></p>",
-                        "<p></p>",
                         "<p>A customer left Jerome $2.50 as a tip for service. That tip is 20% of the total bill for the food. </p>",
                         "<p>How much is the food bill? Explain your reasoning.</p>"
                       ]
@@ -3749,7 +3733,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "           x 5 ",
+                        " \u00a0           x 5  ",
                         "                ⃕",
                         "$2.50 = $12.50",
                         "_____________________",
@@ -3907,6 +3891,16 @@
               "type": "introduction",
               "content": {
                 "tiles": [
+                  {
+                    "id": "n1eRbaltuaIkaDzb",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>So far in our exploration of proportional reasoning over the past two years, we have become familiar with deciding which problems represent proportional situations and developing a variety of strategies for solving these problems. In this Investigation we have worked with percents as rates. In this Problem we will explore percent problems that do not involve money.</p>"
+                      ]
+                    }
+                  }
                 ]
               },
               "supports": []
@@ -3915,6 +3909,91 @@
               "type": "initialChallenge",
               "content": {
                 "tiles": [
+                   {
+                    "id": "gC1NBOhDbcysZhRB",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Ming works at the zoo. She mixes food for the chimpanzees. Ming mixes up large batches of food from sacks of high fiber food and sacks of high protein food. She uses a standard scoop and the following recipes.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "3NBo-q49rqcb1a_2",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/C&S_3-3_ChimpFoodRecipies.png"
+                    }
+                  },
+                  {
+                    "id": "FeEBfm6qAJDibd5C",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Ming asks a group of visiting middle school students to help her figure out the quantities she needs to mix for the baby chimps.  </p>",
+                        "<ul><li>The recipe calls for 40% high fiber and 60% high protein. She needs a total of 225 scoops altogether. How many scoops of each should she use?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/C&S_3-3_FiberandProteinScoops.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>OR</p>",
+                        "<p></p>",
+                        "<p>60% of high protein 🡲 0.60 x 225 = 135 scoops</p>",
+                        "<p>40% of high fiber 🡲 0.40 x 225 =  90 scoops</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "lB2LdPhr7SL6pzvA",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>After mixing the baby chimp food, Ming only has 30 scoops of high protein food left.</p>",
+                        "<ul><li>She knows that high protein food has to be 40% of the adult chimp mix total. What is the total amount of food she can prepare for the adult chimps? </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "\u00a0                             ÷40    <strong> ⃕                   x30</strong>    <strong> ⃕</strong>",
+                        "40 High Fiber              1 Scoop                 30 Scoops",
+                        "_______________     =    ____________    =   _______________   ",
+                        "    100 total                   2.5 Scoops             75 Scoops",
+                        "                            ÷40   <strong>⤻                 x30</strong> <strong> ⤻</strong>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>OR</p>",
+                        "<p>0.40 x total amount of food = 30 scoops</p>",
+                        "<p>30 ÷ 0.40 = 75</p>"
+                      ]
+                    }
+                  }
                 ]
               },
               "supports": []
@@ -3923,6 +4002,349 @@
               "type": "whatIf",
               "content": {
                 "tiles": [
+                  {
+                    "id": "o-vNsa_352FdfLM1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation A. Baby Chimp Recipes </strong>",
+                        "<p>Some students in Ms. Stewart’s class used unit rates to prepare the recipes for the baby chimp recipe. Examine each strategy and then answer the question. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "L0ku64lSVw7fJHlL",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Ahmed’s Strategy: A Table</strong>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "nxs0dunxywsScOSV",
+                    "content": {
+                      "type": "Table",
+                      "name": "Ahmed's Strategy",
+                      "columns": [
+                        {"name":"Fiber","values":["40","?"]},
+                        {"name":"Protein","values":["60","?"]},
+                        {"name":"Total","values":["100","?"]}
+                      ]
+                    }
+                  },
+                  {
+                    "id": "luDwnZb9x0-U0zNQ",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>How will the unit rate in the table help Ming mix up any amount she wants? </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Ahmed’s Strategy</strong>",
+                        "<p>When he has the unit rate, he can then scale that up using multiplication when he knows the total amount needed.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "4ClLUSyaCIA5HrKz",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Michelle’s  Strategy: Equations</strong></p>",
+                        "<p>She writes two equations. </p>",
+                        "<ol><li>relating the Total amount of food to the amount of Protein, and </li><li>relating the Total amount of food to the amount of Fiber. </li></ol>",
+                        "<p>What equations did she write? How do these equations use unit rates? </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Michelle’s Strategy</p>",
+                        "<p>0.4 x total amount of food = amount of high fiber </p>",
+                        "<p>  0.4<em>T=F</em></p>",
+                        "<p>0.6 x total amount of food = amount of high protein</p>",
+                        "<p>  0.6<em>T=P</em></p>",
+                        "<p>The unit rates are what is multiplied by the total amount of food in each equation</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "_l01a28zGNAf9w9p",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Concetta’s Strategy: Graphs</strong>",
+                        "<p></p>",
+                        "<p>Concetta used two graphs to show the relationships.</p>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "010GIqeMrTuRBgHG",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Relationship between the Total Amount of Food and the Amount of Protein</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "N9MHgn8Pb4emX2Mk",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Relationship between the Total Amount of Food and the Amount of Fiber</p>"
+                        ]
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "-HusAyiyl3O028XH",
+                      "content": {
+                        "type": "Geometry",
+                        "title": "Food vs. Protein",
+                        "board": {
+                          "properties": {
+                            "axisMin": [-1.1, -1.1],
+                            "axisRange": [13.189, 7.072],
+                            "axisNames": ["x", "y"],
+                            "axisLabels": ["", ""]
+                          }
+                        },
+                        "objects": [
+                          { "type": "point", "parents": [1, 0.6000000000000001], "properties": {"id":"HmPxmSwCZ59tX3KS","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [2, 1.2000000000000002], "properties": {"id":"cspugXnS5242Cdtt","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [3, 1.8], "properties": {"id":"PxthDRQKRqB-IgwE","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [4, 2.4000000000000004], "properties": {"id":"E3nE4Wcyu_78aZGM","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} }
+                        ]
+                      }
+                    },
+                    {
+                      "id": "svf81en6E8Niadzs",
+                      "content": {
+                        "type": "Geometry",
+                        "title": "Food vs. Fiber",
+                        "board": {
+                          "properties": {
+                            "axisMin": [-1.5, -1.1],
+                            "axisRange": [20.541, 7.072],
+                            "axisNames": ["x", "y"],
+                            "axisLabels": ["", ""]
+                          }
+                        },
+                        "objects": [
+                          { "type": "point", "parents": [1, 0.4], "properties": {"id":"aSiMBc88DySPHvdU","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [2, 0.8], "properties": {"id":"tClBoznRbwH6klbg","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [3, 1.2000000000000002], "properties": {"id":"bWuF8GGYBZJMXH0Q","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [4, 1.6], "properties": {"id":"Yl4nJXHF0wgKwevR","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [5, 2], "properties": {"id":"tYE5nL9a6D2vK--l","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [6, 2.4000000000000004], "properties": {"id":"3P21do1cNoqdiUCP","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} }
+                        ]
+                      }
+                    }
+                  ],
+                  {
+                    "id": "dSgHcUzRM8-lOMgb",
+                    "content": {
+                      "type": "Table",
+                      "name": "Relationship between the Total Amount of Food and the Amount of Protein",
+                      "columns": [
+                        {"name":"x","values":["1","2","3","4"]},
+                        {"name":"y","values":[".6","1.2","1.8","2.4"]}
+                      ]
+                    }
+                  },
+                  {
+                    "id": "ymOmr3NgMbC7bQiD",
+                    "content": {
+                      "type": "Table",
+                      "name": "Relationship between the Total Amount of Food and the Amount of Fiber",
+                      "columns": [
+                        {"name":"x","values":["1","2","3","4","5","6"]},
+                        {"name":"y","values":[".4",".8","1.2","1.6","2","2.4"]}
+                      ]
+                    }
+                  },
+                  {
+                    "id": "wH5kxZ-_TkFHlDfZ",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>How do the graphs show the unit rate? How do they help Ming mix up any amount she needs? </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Concetta’s Strategy</strong></p>",
+                        "<p>The unit rates show up on the graph in that each time the x value (amount of food) increases by 1 the y value (amount of high protein or high fiber) increases by the unit rate. Concetta could use her graph by finding the total number of cups of food needed on the x and then find the total amount of high fiber or high protein by finding the corresponding y value.  </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "vVs2EKX0bSvN2TpB",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Situation B. Adult Chimp Recipes</strong></p>",
+                        "<p>Some students in Ms. Stewart’s class used the following strategies to prepare adult chimp recipes. Examine each strategy. Explain how they make sense. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "_FLfmbaXGMBLRK3u",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Sze’s Strategy</p>",
+                        "<p>He says you can use a proportion. </p>",
+                        "<p> He wrote:</p>",
+                        "<p>(x scoops of high fiber)/(30 scoops of high protein )=   (60%)/(40%)</p>",
+                        "<p>                          or</p>",
+                        "<p>(T scoops of total mix)/(30 scoops of high protein )=   (100%)/(40%)</p>",
+                        "<p>He says you can use either proportion. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Sze’s Strategy</strong></p>",
+                        "<p>Sze is looking at the ratios in two ways as a percent ratio or as a scoops ratio.  His way of thinking about it is similar to the rate table that Ahmed used.  </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "p_1g-dux_aF_WlqW",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Emily’s Strategy</strong>",
+                        "<p></p>",
+                        "<p>She uses a graph for mixing the Adult Chimp Recipe.  </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "nuyyMHSVprobNBG_",
+                    "content": {
+                      "type": "Geometry",
+                      "title": "Emily's Strategy",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-2.186, -1.093],
+                          "axisRange": [26.23, 17.486]
+                        }
+                      },
+                      "objects": [
+                        { "type": "point", "parents": [5, 2], "properties": {"id":"AwBZwSPBmOOwQamW","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [10, 4], "properties": {"id":"EF5FG8e0t7sLohK-","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [15, 6], "properties": {"id":"IEPt31HJy-0SoQaC","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [20.01223905810967, 8.032786885245907], "properties": {"id":"4jGMRnx2WXLxt78h","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [25, 10], "properties": {"id":"L4888lAgfFsn3jo_","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [30, 12], "properties": {"id":"dXCobtuaS84X1f4H","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [35, 14], "properties": {"id":"TMWLpoX4j4QbUrVv","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} }
+                      ]
+                    },
+                    "layout": { "height": 412 }
+                  },
+                  {
+                    "id": "f25bcpjBuFEuyMFO",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>She says you just have to find the point you need on the graph. </p>"
+                      ]
+                    }
+                  },
+                  {
+                   "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Emily’s Strategy</p>",
+                        "<p>The point on the graph tells you the total amount of food and the cups of protein. Then you can subtract those amounts to get the cups of fiber.  </p>",
+                        "<p>For example (15,6):  </p>",
+                        "<p>The 15 is the total amount of food.  </p>",
+                        "<p>The 6 is the number of cups that are protein.  15 – 6 = 9 which would be the number of cups of fiber that are needed. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "lDpk7VmOZclFWcHE",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation C. Population Growth</strong>",
+                        "<p>Chimpanzees are an endangered species. They are extinct in several of their original countries. They are extensively studied in biomedical research to gain an understanding of various diseases that result in substantial sickness. </p>",
+                        "<p>A research team was recording the growth of chimpanzees in two remote areas. In one year, the population in Area Amber grew from 15 to 19 chimpanzees. The population in Area Blue grew from 11 to 16 chimpanzees. Which area has the greatest growth in one year? Explain why.</p>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Area Amber grew from 15 to 19</p>",
+                          "<p>The increase is 4 chimpanzees for every 15.</p>",
+                          "<p>4/15=  (0.26666..)/1=  (26.6666….)/100</p>",
+                          "<p>About 26% increase.</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Area Blue grew from 11 to 16 chimpanzees</p>",
+                          "<p>The increase is 11chimpanzees for every 16.</p>",
+                          "<p>11/16=  0.6875/1=  (68.75.)/100</p>",
+                          "<p>68.75% increase</p>",
+                          "<p>This is a greater growth.</p>"
+                        ]
+                      }
+                    }
+                  ]
                 ]
               },
               "supports": []
@@ -3931,6 +4353,27 @@
               "type": "nowWhatDoYouKnow",
               "content": {
                 "tiles": [
+                  {
+                    "id": "s6yTBWDIv3SYN9hL",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>How are percents useful to solve problems?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Percents are ratios/rates where one of the quantities in the comparison is equal to 100. Because one of the quantities is the same, it allows you to easily compare two different percents.</p>",
+                        "<p>Percents also give us a way to discuss and solve problems that involve tax, tip, markups, and changes in something like population.</p>"
+                      ]
+                    }
+                  }
                 ]
               },
               "supports": []
@@ -3940,13 +4383,32 @@
         {
           "description": "Problem 3.4",
           "ordinal": 4,
-          "title": "CAS 3.3 Leaky Faucet Experiment",
+          "title": "CAS 3.4 Leaky Faucet Experiment",
           "subtitle": "",
           "sections": [
             {
               "type": "introduction",
               "content": {
                 "tiles": [
+                  {
+                    "id": "ndbN07ileQuFzfYR",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Did You Know?</p>",
+                        "<p>The average household&#x27;s leaks can account for nearly 10,000 gallons of water wasted every year and ten percent of homes have leaks that waste 90 gallons or more per day. Common types of leaks found in the home are worn toilet flappers, dripping faucets, and other leaking valves. </p>",
+                        "<p>https://www.epa.gov/watersense/fix-leak-week</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "aSedHJ_NN2MhZAhM",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/C&S_3.4_AnnualHouseholdLeaksWaste.png"
+                    }
+                  }
                 ]
               },
               "supports": []
@@ -3955,6 +4417,152 @@
               "type": "initialChallenge",
               "content": {
                 "tiles": [
+                  {
+                    "id": "lGO2bAi7SlykQCkJ",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>In this experiment we will simulate a leaking faucet and collect data about the volume of water lost at five-second intervals. We will use our results to make predictions.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "UIcyXR3I63VlbOSk",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Equipment</p>",
+                        "<p></p>",
+                        "<ul><li> A timer, such as a watch, clock with a second hand, or smart phone</li><li>A Styrofoam or paper cup</li><li>A paper clip</li><li>A clear measuring container that measures milliliters (such as a graduated cylinder)</li></ul>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "pkwpk-jitiZjS7k7",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Experiment Directions</p>",
+                          "<ol><li>Make a table with columns for recording time (in five-second intervals) and the amount of water lost (in ml). </li><li>Use the paper clip to punch a hole in the bottom of the paper cup. Cover the hole with your finger.</li><li>Fill the cup with water.</li><li>Hold the paper cup over the measuring container.</li><li>When you are ready to begin timing, uncover the hole so that the water drips into the measuring container.</li><li>Record the amount of water in the measuring container at five-second intervals for one minute. </li></ol>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "w-Dfow057CJIDb0a",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/comparing-and-scaling/images/C&S_3-4_InitialChallenge.png"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "y8YjCiaT8g_eFdwr",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>What is the rate of water dripping in ml per minute? </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Answers will vary based on the size of the hole in the cup.</p>",
+                        "<p></p>",
+                        "<p>A good approximation of the drip rate is about 8 ml of water every 10 seconds.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "kyvwHThOTxWE0tqH",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>At this rate how much water is lost in a day? A year?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Answers will vary. Example shown for 8 ml of water every 10 seconds.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>8 ml of water every 10 seconds</p>",
+                        "<p>⤸ x6                                   ⤸ x6</p>",
+                        "<p>48 ml of water every 1 minute</p>",
+                        "<p>⤸ x60                                ⤸ x60</p>",
+                        "<p>2880 ml of water every 1 hour</p>",
+                        "<p>⤸ x24                                   ⤸ x24</p>",
+                        "<p>69210 ml of water every 1 day</p>",
+                        "<p>⤸ x365                                   ⤸ x365</p>",
+                        "<p>25,228,800 ml of water every 1 year</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "IjN0rU8aShAwlkT4",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>One gallon of water is approximately 3,785 ml. How many gallons of water are wasted as a result of leaks in a year?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>25,228,800 ml of water every 1 year</p>",
+                        "<p>⤸ ÷ 3,785</p>",
+                        "<p>6,665.5 gallon of water every 1 year</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "hBYozQ7ltKZgnGD8",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>An average shower uses about 17gallons of water. How many showers could be taken in a year if there were no leaky showerhead?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>6,665.5 gallon of water every 1 year</p>",
+                        "<p>    ⤸ ÷ 17</p>",
+                        "<p>392 showers of water every 1 year</p>"
+                      ]
+                    }
+                  }
                 ]
               },
               "supports": []
@@ -3962,7 +4570,230 @@
             {
               "type": "whatIf",
               "content": {
-                "tiles": [
+              "tiles": 
+                [
+                  {
+                    "id": "gZgxPJBgPhWNcMOV",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation A. Ratios, Ratios, and More Ratios!</strong>",
+                        "<p>Examine each ratio application and answer the questions for each.</p>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "NqhOGv9ivwicA9Wc",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Free Throws</p>",
+                          "<p>Two basketball teams recently competed in free throw attempts. Team A made 108 out of 126 attempts. Team B made 195 out of 257 attempts. It is difficult to tell which team was better by looking at the raw numbers. Sid thought it would help to express the raw numbers as percents.</p>",
+                          "<ol><li>Describe how Sid could use percents to decide which team has the best free throw average.</li><li>Describe another strategy for deciding which team has the best free throw average. </li></ol>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "BxN0xGnkgpy1MoIP",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>2020 Census Population Data</p>",
+                          "<p>The 2020 Census data shows that the population of people in the USA under the age of 18 was 73.1 million in 2020. That is a decline of 1.4% from the 2010 Census.</p>",
+                          "<ol><li>What was the population of people under the age of 18 in 2010?</li><li>If the decline of people under the age of 18 continued at this rate, what will be the population in 2030? 2040?</li></ol>"
+                        ]
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>1.                        Team A                       </p>",
+                          "<p>                     108/126≈ 86%</p>",
+                          "<p>                          Team B</p>",
+                          "<p>              195/257 ≈ 76%</p>",
+                          "<p>2.   Students could find a unit rate or make one      </p>",
+                          "<p>        quantity common to both ratios.  </p>",
+                          "<p>Unit Rates: </p>",
+                          "<p>Team A-</p>",
+                          "<p>108/126  ≈ 0.86/1 or 108/126≈1/1.17 </p>",
+                          "<p>Team B-</p>",
+                          "<p>195/257 ≈ 0.76/1 or 195/257≈ 1/1.32</p>",
+                          "<p>One possible common quantity is the number of attempts made: 108   </p>",
+                          "<p>Team A-</p>",
+                          "<p>108/126</p>",
+                          "<p>Team B-</p>",
+                          "<p>195/257 ≈ 108/143</p>",
+                          "<p>One possible common quantity is the number of total free throws:126 </p>",
+                          "<p>Team A-</p>",
+                          "<p>108/126</p>",
+                          "<p>Team B-</p>",
+                          "<p>195/257 ≈ 96/126</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>1. (73.1 million)/(98.6 %)≈  (0.74138 m)/(1 %)=  (74.14 million)/(100%)</p>",
+                          "<p>2. 2030</p>",
+                          "<p>(0.74138 m)/(1 %)≈  (72.06 million)/(97.2%)</p>",
+                          "<p>2040</p>",
+                          "<p>(0.74138 m)/(1 %)≈  (71.02 million)/(95.8%)</p>",
+                          "<p>You can also think of this as  </p>",
+                          "<p> 73.1 million (the 2020 Census data) x 98.6% = 72.08 million in 2030.</p>"
+                        ]
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "ltpiVDQzBrj71fIQ",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Rising Ocean Levels and Erosion</p>",
+                          "<p></p>",
+                          "<p>It is reported that approximately 20 square miles of dry land and wetland were converted to water along the Atlantic Coast between 1996 and 2011. </p>",
+                          "<ol><li>At this rate how much land will be lost between 2011 and 2022?</li><li>A small unpopulated island in the Atlantic Ocean is 2000 ft wide by 9,380 feet long. At this rate, how long before the island is submerged? </li></ol>",
+                          "<p>       (Photo credit: https://www.nps.gov/)</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "dEZbe_rY-sonkgCs",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Puffins in Alaska</p>",
+                          "<p>Puffins are a black and white seabird with a flat brightly colored bill. A biologist studies puffins on a remote island off Alaska. </p>",
+                          "<p>Last summer she trapped 20 puffins, tagged them, and then released them. </p>",
+                          "<p>This summer she trapped 50 puffins and found that 2 of them were tagged. </p>",
+                          "<ol><li>What percent of the puffins caught this summer were tagged?</li><li>Use the biologist’s information to estimate the number of puffins on the island.  </li></ol>",
+                          "<p>(Photo credit: https://www.istockphoto.com/search/2/image?phrase=puffin)</p>"
+                        ]
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "_DorjUf6UgmNC6yO",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/comparing-and-scaling/images/C&S_3-4_RisingOceanLevelsandErosion.jpg"
+                      }
+                    },
+                    {
+                      "id": "6xoUFL_ernZEQBPM",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/comparing-and-scaling/images/C&S_3-4_PuffinsinAlaska.png"
+                      }
+                    }
+                  ],
+                 [
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>2011 – 1996 = 15 years </p>",
+                        "<ol><li>2022 – 2011 = 11 years</li></ol>",
+                        "<p>(15 years)/(20 sq.miles)≈  (11 years)/(14.6666… sq.miles)</p>",
+                        "<p>Students might wright this with sq. miles in the denominator or square miles per year.</p>",
+                        "<p>2.  2,000 ft • 9,380 ft needs to be changed to miles</p>",
+                        "<p>0.3787878 miles • 1.7765 miles ≈ 0.67 sq mi</p>",
+                        "<p>(15 years)/(20 sq.miles)≈  (0.5 years)/(0.67 sq.miles)</p>"
+                      ]
+                    }
+                  },
+                  {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>1. 4%</p>",
+                          "<p>(2 tagged)/(50 total)≈  (4 tagged)/(100 total)</p>",
+                          "<p>2. About 500 puffins</p>",
+                          "<p>(4% tagged)/(20 puffins)≈  (100% tagged)/(500 puffins)</p>"
+                        ]
+                      }
+                    }
+                  ],
+                  {
+                    "id": "F_sIBA9zela_gQrU",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Situation B. What is the Question?</strong>",
+                        "<p>Make up a situation and question that could be solved with each of the following representations.</p>",
+                        "<p>Make up a situation and question that could be solved with each of the following representations.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "VFqJlDMpISePftmA",
+                    "content": {
+                      "type": "Geometry",
+                      "title": "Proportion: 16/120 = x/40",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-2.186, -1.093],
+                          "axisRange": [26.23, 17.486]
+                        }
+                      },
+                      "objects": [
+                        { "type": "point", "parents": [0, 0], "properties": {"id":"66o_jvI9coXzx2dS","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "movableLine", "parents": [{ "type": "point", "parents": [15.027322404371585, 9.94535519125683] }, { "type": "point", "parents": [30, 19.89071038251366] }],"properties": {"id":"aRUePMFm7YT6ucUG"} }
+                      ]
+                    },
+                    "layout": { "height": 250 }
+                  },
+                  {
+                    "id": "Uklotw3WymGXRtW3",
+                    "content": {
+                      "type": "Table",
+                      "name": "Equation: Y = 0.60x",
+                      "columns": [
+                        {"name":"x","values":["1","5","10","15"]},
+                        {"name":"y","values":["12","60","120","180"]}
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Answers will vary.</p>",
+                        "<p>For the proportion the situation and question should reflect that the original ratio is 16 to 120 and that the 120 is being scaled down to 40 so they are finding the x that would scale down the 16 the same way.  </p>",
+                        "<p>  One example: The recipe for a trail mix is 16 cups of cranberries and 120 cups of   granola. If I only have 40 cups of granola how many cups of cranberries do I  need? </p>",
+                        "<p>For the graph their situation and question should relate the ratios 15/10 and 30/20.</p>",
+                        "<p>  One example: If I know that I paid $15 for 10 candy bars and $30 for 20 candy   bars, how can I figure out how much it would be for any number of candy bars?</p>",
+                        "<p>For the table the situation and question should relate at least two of the ratios in the table.  </p>",
+                        "<p>  One example: This table represents the number of hours that I worked (top row)  and how much money (bottom row) I was paid at my job at the zoo. If I work 28   hours next week how much will I be paid?</p>",
+                        "<p>For the equation the situation and question should involve a unit rate of .6.</p>",
+                        "<p>  One example: This equation represents how much it costs to buy apples at the  local food market. The x is the number of apples, and the y is the total cost. How much would it cost for 20 apples?</p>"
+                      ]
+                    }
+                  }
                 ]
               },
               "supports": []
@@ -3971,6 +4802,16 @@
               "type": "nowWhatDoYouKnow",
               "content": {
                 "tiles": [
+                  {
+                    "id": "BGqRYOTnagr9eTo0",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Describe some situations that you encounter in your daily life that require proportional reasoning?</p>"
+                      ]
+                    }
+                  }
                 ]
               },
               "supports": []
@@ -3996,11 +4837,32 @@
               "content": {
                 "tiles": [
                   {
+                    "id": "FB9kQRUgi8BXPUV4",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong><em>What does it mean to reason proportionally to solve problems?</em></strong>"
+                        "<p>In this Unit and in prior Units we have been exploring problem situations that require proportional reasoning. </p>",
+                        "<p>What does it mean to reason proportionally? </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "OkPcVr6a8UGKCMNb",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Reflections on the Mathematical Practices</strong></p>",
+                        "<p>As we worked on the Problems in this Investigation, we used prior mathematical knowledge to make sense of them. We also applied Mathematical Practices to solve the Problems. For example, </p>",
+                        "<p>Jayden described his group’s strategy for Problem 1.1 in the following way: </p>",
+                        "<p>Our group scaled down each recipe to find how much water is needed for 1 cup of concentrate. </p>",
+                        "<p>                 For A, we need 1 cup concentrate for 3/2 cups of water. </p>",
+                        "<p>                 For B, we need 1 cup concentrate for 9/5 cups of water.  </p>",
+                        "<p>                 For C, we need 1 cup concentrate for 2 cups of water. </p>",
+                        "<p>                 For D, we need 1 cup concentrate for 5/3 cups of water.  </p>",
+                        "<p>The recipe with the least amount of water for 1 cup of concentrate is the most orangey. It is Recipe A. </p>",
+                        "<ul><li>What mathematical practice(s) did Jayden’s group use to solve this Problem?</li><li>What other Mathematical Practices did you use to solve Problems in this Investigation?</li><li>In what ways is the mathematics in this Problem connected to prior mathematics?</li></ul>"
                       ]
                     }
                   }
@@ -4013,11 +4875,81 @@
               "content": {
                 "tiles": [
                   {
+                    "id": "AiO4MFTlQtT9guF3",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong><em>What does it mean to reason proportionally to solve problems?</em></strong>"
+                        "<p>In this Unit and in prior Units we have been exploring problem situations that require proportional reasoning. </p>",
+                        "<p>What does it mean to reason proportionally? </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "uH29JbhCKLNV7ybj",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Reflections on the Mathematical Practices</strong></p>",
+                        "<p>As we worked on the Problems in this Investigation, we used prior mathematical knowledge to make sense of them. We also applied Mathematical Practices to solve the Problems. Think back over your work, the ways you thought about the Problems, and how you used Mathematical Practices. </p>",
+                        "<p>In Problem 2.1, our group used two different methods. In the first method we doubled the cost of 10 pizzas to find the cost of 20 pizzas at Royal Pizza. In the second method we found the cost of 1 pizza at Royal. Then we multiplied that unit rate by 20 to find the cost of 20 pizzas. Both methods gave  the same answer. We agreed that both methods work and both used ratios. </p>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "meQEaB-vfJt6q3Pl",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>1st Strategy:</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "5KcrV7fz9iVJUS3A",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>2nd Strategy.</p>"
+                        ]
+                      }
+                    }
+                  ],
+                  [
+                   {
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "\u00a0 10              10 × 2              20",
+                          "______ = ___________ = _______",
+                          "$120       $120 × 2       $240 "
+                        ]
+                      }
+                    },
+                    {
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "\u00a0  10              1               1 × 20              20",
+                          "_______ =  ____  = ____________ = ________",
+                          "$120          $12       $12 × 20        $240 "
+                        ]
+                      }
+                    }
+                  ],
+                  {
+                    "id": "63f4llCTMkeiq7mr",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>What Mathematical Practice(s) did the group use to solve this Problem?</li><li>What other Mathematical Practices did you use to solve Problems in this Investigation?</li><li>In what ways is the mathematics in this Problem connected to prior mathematics?</li></ul>"
                       ]
                     }
                   }
@@ -4030,11 +4962,27 @@
               "content": {
                 "tiles": [
                   {
+                    "id": "-0Qn_kvP5giDFU4e",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong><em>What does it mean to reason proportionally to solve problems?</em></strong>"
+                        "<p>In this Unit and in prior Units we have been exploring problem situations that require proportional reasoning. </p>",
+                        "<p>What does it mean to reason proportionally? </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "Cxjgv2YQQCXEnBwu",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Reflections on the Mathematical Practices</strong></p>",
+                        "<p>As we worked on the Problems in this Investigation, we used prior mathematical knowledge to make sense of them. We also applied Mathematical Practices to solve the Problems. Think back over your work, the ways you thought about the Problems, and how you used Mathematical Practices. </p>",
+                        "<p>Bill made a rate table and a graph for the adult chimp mix in Problem 3.3. He said that the information in the table matched the information in the graph. Mary claimed that 2/3  was the unit rate for the mix according to the graph. She said that the mix contained 2/3 cup of high-protein food or a ratio of 40 cups of high-protein food : 60 cups of high-fiber food.</p>",
+                        "<p>Both claimed that the graph shows pairs that fit this proportional relationship. </p>",
+                        "<ul><li>What Mathematical Practice(s) did the Bill and Mary use to solve this Problem?</li><li>What other Mathematical Practices did you use to solve Problems in this Investigation?</li><li>In what ways is the mathematics in this Problem connected to prior mathematics?</li></ul>"
                       ]
                     }
                   }
