@@ -3328,6 +3328,20 @@
               "content":
               {
                 "tiles": [
+                  {
+                    "id": "rNGRNxQWpSmVPyex",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>This Problem builds on students’ understandings of percent that begin in the Grade 6 Comparing Quantities Unit. A percent is a part to whole comparison of two quantities where the whole of one of the quantities is 100. This Problem explores the use of percent proportional relationships to solve problems about tax.</p>",
+                        "<p></p>",
+                        "<p><strong>Implementation Note</strong>: Be sure to hold a discussion after the Initial Challenge before moving on to the What If. This will allow you to highlight your students’ strategies before analyzing the strategies of other students that are presented in the What If. You can use the strategies in the What If to connect to how your students thought about the proportional reasoning in the tax situation. If students aren’t interested in the context of buying school supplies in the Initial Challenge you could use items from a local store’s weekly sales advertisement.</p>",
+                        "<p></p>",
+                        "<p>Have students work on the Initial Challenge. As a class, discuss the strategies and solutions for the determining the total cost with tax. After the discussion, have students work on the What If questions. For Situation A, you might have students think about and discuss as a class the strategies not already presented by your students. This may allow a discussion of strategies different from students’ own thinking for solving the Initial Challenge. Situation C offers an opportunity to work backward to find the cost of an item when we know the tax amount.</p>"
+                      ]
+                    }
+                  }
                 ]
               }
             },
@@ -3335,6 +3349,58 @@
               "type": "launch",
               "content": {
                 "tiles": [
+                  {
+                    "id": "8QKWQK3ydBWuNauh",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><u><strong>Launch (Getting Started</strong></u>)</p>",
+                        "<p><u>Connecting to Prior Knowledge</u></p>",
+                        "<p></p>",
+                        "<p>Use <strong>Teaching Aid 3.1: Introduction</strong> to begin the Problem with students. This will allow you to have students keep their books closed or not look at the Problem for the Introduction. Explain the use of percentages for discounts and taxes. It is important for students to understand that discounts take a percentage off of an amount and that taxes add a percentage to an amount. Some students may be familiar with this use of percentages.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "9_YME9MJPn2IwYRY",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Another way to think about this is to remember that $1.00 is 100 pennies.</p>",
+                        "<p>100 pennies + (6% of 100) = 100 pennies + 6 pennies</p>",
+                        "<p>                                           = 106 pennies</p>",
+                        "<p>                                           = $1.06</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "pshmipmc3fd1GVBv",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><u>Presenting the Challenge</u></p>",
+                        "<p></p>",
+                        "<p>For the Initial Challenge, have students keep their books closed or look only at the Initial Challenge. The What If portion of the Problem presents student strategies that you may not want students to see until after working on the estimate and total bill with tax.</p>",
+                        "<p></p>",
+                        "<p>Introduce the Jason’s school items with tax using <strong>Learning Aid 3.1A: Cost of Skylar’s School Items</strong>. You can use one Learning Aid per partner group. Although estimating is a common strategy when shopping, many students will resist doing an estimate. You may have to encourage them to do the estimate before finding the actual amount of the bill with tax.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "xPJgrwCencd53a_6",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<p></p>",
+                        "<ul><li>Why is it important to estimate? (Sometimes in a situation like this one, an estimate is all you need to do. Jason just needs to know if he has enough money. Estimates also tell us if our actual answer is reasonable.)</li><li>How do we find estimates? (We change the numbers, often by rounding slightly up or down, to make them easier to compute with.)</li><li>What is an estimate for the price of the sticky notes? ($4.)</li></ul>"
+                      ]
+                    }
+                  }
                 ]
               }
             },
@@ -3342,13 +3408,412 @@
               "type": "explore",
               "content": {
                 "tiles": [
+                  {
+                    "id": "m-A2BWwMxF9d565X",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><u><strong>Explore (Digging In)</strong></u>          </p>",
+                        "<p><u>Providing for Individual Needs</u></p>",
+                        "<p></p>",
+                        "<p>As you move around the room, listen to students discuss the Problem. Find appropriate opportunities to ask students about connections among percents, ratios, and rates.</p>",
+                        "<p></p>",
+                        "<p>Encourage students to make their reasoning and conclusion visible to others.</p>",
+                        "<p></p>",
+                        "<p>Keep notes on these multiple ways to solve problems. Be sure to discuss and compare these strategies in the Summarize.</p>",
+                        "<p></p>",
+                        "<p>Students may have various strategies for solving percent problems. In Grade 6 Comparing Quantities, students used strategies such as drawing tape diagrams or percent bars, double number lines, rate tables, and informal proportions.</p>",
+                        "<p></p>",
+                        "<p>Below is an example of the strategies that students analyzed in Comparing Quantities (computing the percent for 136 out of 400) and how that strategy may transfer to the current question (computing 5% tax on $24). </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "-tCH2orEQCRcRQt-",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Possible Strategy Connecting to Work in Comparing Quantities: Percent Bar or Tape Diagram</em></p>",
+                        "<p>For computing the percent for 136 out of 400</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "b9WmGoNP-Klup8yi",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  },
+                  {
+                    "id": "DuZrEqKFYdhunGBw",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>How this strategy might be used to find the total bill of $23.75 with 5% tax.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "TSiu71rHmEXu3f5L",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  },
+                  {
+                    "id": "4jmjcGcgj0UhDAmX",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Possible Strategy Connecting to Work in Comparing Quantities: Double Number Lines</em></p>",
+                        "<p>For computing the percent for 136 out of 400</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "MYpi4MtsSfUsZcEf",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  },
+                  {
+                    "id": "Iu4sCwQNxR41MB6L",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>How this strategy might be used to find the total bill of $23.75 with 5% tax.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "WcGHtJahPlTxAGo1",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  },
+                  {
+                    "id": "XXX7oUSrnAKTWmeN",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Possible Strategy Connecting to Work in Comparing Quantities: Rate Table</em></p>",
+                        "<p>For computing the percent for 136 out of 400</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "veM-AS4OzsHcTb-3",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  },
+                  {
+                    "id": "siol2OIrawlQ7IX1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>How this strategy might be used to find the total bill of $23.75 with 5% tax.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "sZCW4-BMJ1Nhomxs",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  },
+                  {
+                    "id": "bC7GGv76e9zz1MZp",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Possible Strategy Connecting to Work in Comparing Quantities: Informal Proportion</em></p>",
+                        "<p>For computing the percent for 136 out of 400</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "v4o0ERRz6fpQBQQw",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  },
+                  {
+                    "id": "8wI7qsyVkVdz5rKc",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>How this strategy might be used to find the total bill of $23.75 with 5% tax.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "cS9XsNeVfrq7kgUa",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  },
+                  {
+                    "id": "xjZWaTKkcc1Py2Bj",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Possible Strategy from This Unit: Proportion</em></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "KEXF8L_Jh29sae5Q",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  },
+                  {
+                    "id": "XdJxIlCE6MqoOPpP",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>[START Green Box]</p>",
+                        "<p><u>Planning for the Summary</u></p>",
+                        "<p></p>",
+                        "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence?</p>",
+                        "<p>{End Green Box]</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "T-HbbFjEI0CPSgcS",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Now What Do You Know?</em></p>",
+                        "<p><em>How are percent problems like ratio and rate problems?</em></p>"
+                      ]
+                    }
+                  }
                 ]
               }
             },
             {
               "type": "summarize",
               "content": {
-                "tiles": [
+                "tiles": [    
+                  {
+                    "id": "TNzSPQHw_B0wecjy",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><u><strong>Summarize (Orchestrating the Discussion)   </strong></u></p>",
+                        "<p><u>Solutions and Strategies </u></p>",
+                        "<p></p>",
+                        "<p>As a class, discuss the strategies and solutions for the determining total cost with tax.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "xec2EsTCnNkH4z-u",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<ul><li>Does the estimate for the total bill with tax allow us to answer if Skylar will have enough money? (No. It is so close to $25 that it is difficult to say if he has enough money or not.)</li><li>What are some ways that we can find the actual cost with tax? (Students should have various ways of finding the total of $24.94. See some examples in the Explore section.)</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "WFHSjSCxrXZj3r30",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>After the discussion, have student work on the What If questions. For Situation A, <strong>Learning Aid 3.1B: Student Strategies</strong> is available. You might have students think about and discuss as a class the strategies not already presented by your students. This may allow a discussion of strategies different from students’ own thinking for solving the Initial Challenge. Situation B connects mathematical ideas to previous learning. Situation C offers an opportunity to work backward to find the cost of an item when we know the tax amount.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "l1osEggJQcOzaKiD",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><u>Making the Mathematics Explicit </u></p>",
+                        "<p><em>Situation A</em></p>",
+                        "<p>Give students an opportunity to discuss how the five strategies are alike and how they compare to strategies that your students used to answer the questions.</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "SmZVLFimv9I-38xT",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<ul><li>What strategy shows thinking like you did on the Initial Challenge? (Answers will vary based on students’ reasoning in the Initial Challenge.)</li><li>Is there a strategy that you like and might use to answer questions in the future? (Answers will vary based on student preferences.)</li><li>Whose strategies look different but are really using the same type of reasoning? (PORTRAYAL) (Example student responses might include: Casey and Vanessa both show $8.95 as the 100% and then needing to add the 5% more. Sammi and Alex both show scaling the percent in proportion form to find 105%. Sammi did it in one step and Alex did it in two steps. Ash is like Alex – find 1%, then scale to 105%.)</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "8jqEPA_Jx7Q4GHFk",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Situation B</em></p>",
+                        "<p>The student wonderings in this situation push students to connect their current thinking to previous mathematical ideas. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "rIkUuIHaymuNLA5p",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<ul><li>Do you agree with Nicky or Marta? Is there more than one price with tax? Or is it the same to find tax on each item and the tax on the total of the items? (Marta is correct. The Distributive Property shows how both ways of determining the total with tax are the same.)</li><li>Do you agree with Sam or Will? (Will. Sam could be thinking that percents are like fractions because both are part to whole. However, fractions are one quantity. A fraction is a number. A percent is a comparison statement with two quantities: an amount for every 100. A percent is a rate.) </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "cFf4PMcIVoslsA8p",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Situation C</em></p>",
+                        "<p>Given the tax amount and percentage, students have to determine the whole. Push students to relate this to previous strategies discussed in class.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "ZkIYjU1u8vA8CqUv",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<ul><li>How could I use a (choose some strategy, such as rate table) to find out how much Funda paid for the used gaming system? (Answers will depend on the strategies that you decide to have students focus on.)</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "mY3GjYbHr4TiNujz",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p></p>",
+                        "<p>Some possible strategies include:</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "6bq0jzT8vJ87ZOV8",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Rate Table</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "3teHW485BnmmPU3Y",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  },
+                  {
+                    "id": "3x2pUISPYyIbc1pV",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Proportion</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "infU52s0aCyf8k8K",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  },
+                  {
+                    "id": "EL2fmwPvZX95QdyK",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Tape Diagram/Percent Bar</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "YvJBj2hffEXEMfgz",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  },
+                  {
+                    "id": "lqy-CoF3W0dQhXxw",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>[Start Green Box]</p>",
+                        "<p><u>Now What Do Students Know</u></p>",
+                        "<p><u></u></p>",
+                        "<p>Ask students to reflect on the discussion and answer the Now What Do You Know.</p>",
+                        "<p></p>",
+                        "<p><em>How are percent problems like ratio and rate problems?</em></p>",
+                        "<p><em></em></p>",
+                        "<p>See answers for more information about the strategies and embedded mathematics.</p>",
+                        "<p>[End Green Box]</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "TxcWAEKxUGdulsaZ",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Reflecting on Student Learning  </strong></p>",
+                        "<p>Use the following questions to assess student understanding at the end of the lesson.  </p>",
+                        "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li></ul>",
+                        "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
+                        "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
+                      ]
+                    }
+                  }
                 ]
               }
             }
