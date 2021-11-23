@@ -2,6 +2,9 @@
   "appName": "CLUE",
   "pageTitle": "CLUE: %problemTitle%",
   "units": {
+    "bio": {
+      "content": "curriculum/bio4community/bio4community.json"
+    },
     "cr": {
       "content": "curriculum/completely-rational/completely-rational.json"
     },
@@ -27,12 +30,15 @@
     "lfp": {
       "content": "curriculum/looking-for-pythagoras/looking-for-pythagoras.json"
     },
+     "m2s": {
+      "content": "curriculum/m2studio/m2studio.json"
+    },
+     "moth": {
+      "content": "curriculum/mothed/mothed.json"
+    },
     "msa": {
       "content": "curriculum/moving-straight-ahead/moving-straight-ahead.json",
       "guide": "curriculum/moving-straight-ahead/msa-teacher-guide.json"
-    },
-    "moth": {
-      "content": "curriculum/mothed/mothed.json"
     },
     "pc": {
       "content": "curriculum/pc2/pc2.json"

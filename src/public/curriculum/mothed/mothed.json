@@ -1,0 +1,103 @@
+{
+  "code": "moth",
+  "abbrevTitle": "MothEd",
+  "title": "MothEd Identifying Moths",
+  "subtitle": "Wings, Spots, and Legs",
+  "placeholderText": "Type in me!",
+  "settings": {
+    "table": {
+      "numFormat": ".2~f"
+    }
+  },
+  "sections": {
+    "reference": {
+      "initials": "REF",
+      "title": "Reference",
+      "placeholder": "Reference Images and Descriptions"
+    },
+    "initialChallenge": {
+      "initials": "IC",
+      "title": "Initial Challenge",
+      "placeholder": "Student Images of Moths and Data"
+    },
+    "design": {
+      "initials": "DS",
+      "title": "Design",
+      "placeholder": "Discuss your Findings or \nDesign an Experiment"
+    }
+  },
+  "planningDocument": {
+    "enable": "teacher",
+    "default": true,
+    "sectionInfo": {
+      "overview": {
+        "initials": "OV",
+        "title": "Overview",
+        "placeholder": "Add some tiles here"
+      },
+      "launch": {
+        "initials": "LC",
+        "title": "Launch",
+        "placeholder": "Add some tiles here"
+      },
+      "explore": {
+        "initials": "EX",
+        "title": "Explore",
+        "placeholder": "Add some tiles here"
+      },
+      "summarize": {
+        "initials": "SM",
+        "title": "Summarize",
+        "placeholder": "Add some tiles here"
+      }
+    },
+    "sections": [
+      { "type": "overview" },
+      { "type": "launch" },
+      { "type": "explore" },
+      { "type": "summarize" }
+    ]
+  },
+  "defaultStamps": [
+  ],
+  "investigations": [
+    {
+      "description": "Investigation 1",
+      "ordinal": 1,
+      "title": "MothEd Sample Curriculum",
+      "problems": [
+        {
+          "description": "Activity 1.1",
+          "ordinal": 1,
+          "title": "MothEd 1.1 Identifying Moths",
+          "subtitle": "",
+          "disabled": [],
+          "sections": 
+          [
+            {
+            "type": "reference",
+            "content": {
+              "tiles": [
+              ]
+              }
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                ]
+              }
+            },
+            {
+              "type": "design",
+              "content": {
+                "tiles": [
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
