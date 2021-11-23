@@ -70,6 +70,17 @@
               "content":
               {
                 "tiles": [
+                  {
+                    "id": "fAUujJQ_5DaSNnTP",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Students encounter an open-ended situation in which they need to make a decision using a comparison. In this Problem, students are challenged to compare drink recipes. They use proportional reasoning to figure out which recipe will create the most “orangey” tasting juice. Posing the Problem in an open way allows students to find many different ways to think about the situation. Students have experience with ratios and unit rates from the sixth grade Comparing Quantities Unit. This Problem gives you an opportunity to see what students recall from that Unit and how they will apply it in a new situation. A discussion about ratios and strategies for comparing ratios is effective after students have their own ideas about the Problem.</p>",
+                        "<p><strong>Implementation Note</strong>: Be sure to hold a discussion after the Initial Challenge before moving on to the What If. This will allow you to highlight your students’ strategies before analyzing the strategies of other students. You can use the strategies presented in the What If to connect to how your students thought about the proportional reasoning in the juice recipes. This Problem will take two days.</p>"
+                      ]
+                    }
+                  }
                 ]
               }
             },
@@ -77,6 +88,160 @@
               "type": "launch",
               "content": {
                 "tiles": [
+                      {
+                        "id": "kYpSQFXkhmW0QpEY",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><u><strong>Launch (Getting Started)</strong></u>  </p>",
+                            "<p><u>Connecting to Prior Knowledge</u></p>",
+                            "<p>Use the Introduction to Investigation 1 to remind students of the mathematics in the Grade 6 Comparing Quantities Unit, including ratios, equivalent ratios, and unit rate. Review the definition of a ratio and the many ways that ratios can be written. (PROBLEM SOLVING)</p>",
+                            "<p>Writing a ratio in fraction form notation is new to students. Fraction form notation was not used in Grade 6, in order to scaffold student understanding as they learn to separate the differences between ratios and fractions. </p>",
+                            "<p>Discuss and show examples of ratio statements as a comparison between two quantities. Discuss the various notations of ratios.</p>"
+                          ]
+                        }
+                      },
+                      {
+                        "id": "SNKqFyPMkhBi4_7k",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><strong>Suggested Questions</strong></p>",
+                            "<ul><li>How is this fraction form of ratio the same as or different from fractions? (Students may not be familiar thinking about the differences. Students may need to revisit the question as they progress through the Unit. Possible answers at this time might include:</li></ul>",
+                            "<p>The ratio shown is a part-to-part comparison of two quantities. Fractions are always part-to-whole. Ratios can be either part-to-part or part-to-whole.</p>",
+                            "<p>As long as the labeling matches the quantities, ratios can be written in any order. Fractions cannot. For example, 2 green for every 3 white can be written as </p>",
+                            "<p>(2 green)/(3 white) or (3 white)/(2 green).  The fraction 2/(3 ) cannot be written as 3/(2 ).</p>",
+                            "<p>A fraction is a number. A ratio is a comparison between two quantities.)</p>",
+                            "<ul><li>What patterns do you see among the equivalent ratios comparison statements of green and white cupcakes? (The equivalent ratios are multiples of the two quantities.)</li></ul>"
+                          ]
+                        }
+                      },
+                      {
+                        "id": "AtF0n3Thj8KghQgK",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p>2 green cupcakes and 3 white cupcakes</p>"
+                          ]
+                        }
+                      },
+                      {
+                        "id": "4vsAM1tnGN4lb4xz",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p>⤸ x2                                       ⤸ x2</p>"
+                          ]
+                        }
+                      },
+                      {
+                        "id": "dxL9mzvDdchTTgO3",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p>4 green cupcakes and 6 white cupcakes</p>"
+                          ]
+                        }
+                      },
+                      {
+                        "id": "m-aCa1BCk3ReCL0V",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p>⤸ x3                                       ⤸ x 3</p>"
+                          ]
+                        }
+                      },
+                      {
+                        "id": "3scIIJ6b5VvPIerV",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p>12 green cupcakes and 18 white cupcakes</p>"
+                          ]
+                        }
+                      },
+                      {
+                        "id": "PLlIKkDo1RcO7w_O",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p>Tell students the story of going to camp and sharing the work of cooking and cleaning up. Also, review the context with students to make sure that they know what concentrate is.</p>"
+                          ]
+                        }
+                      },
+                      {
+                        "id": "PWDMj6tI0npniQjG",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><strong>Suggested Questions</strong></p>",
+                            "<ul><li>Have you ever been in a situation where you had to share work with other people? (Student answers will vary. Some may mention home; some may mention other places.)</li><li>We are going to look at two students on a camping trip who have to make orange juice. They have to share this task. Have you ever made orange juice or any kind of drink from a mix? (Student answers will vary. Some may have made juice or used the concentrated mix that squirts into water to flavor it.)</li><li>Arvin and Mariah do not have a lot of experience making orange juice. They have to use orange juice concentrate and water. What is a drink concentrate? (Students may say that it is a something that is a strong flavor and has to be mixed with water so you can drink it. Some students may not have any experience with using a concentrate.)</li></ul>"
+                          ]
+                        }
+                      },
+                      {
+                        "id": "x5KGghbtncS9RcQL",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><u>Presenting the Challenge</u></p>",
+                            "<p></p>",
+                            "<p>For the Initial Challenge, present the challenge without letting students look at the What If. The What If presents student strategies that you may not want students to see until after working on the orange juice recipes in the Initial Challenge.</p>",
+                            "<p></p>",
+                            "<p>Introduce the orange juice recipes using Teaching Aid 1.1: Orange Juice Recipes. Tell students that Arvin and Mariah ask four people for help making the juice and each person gives them a different recipe.</p>"
+                          ]
+                        }
+                      },
+                      {
+                        "id": "noFqByuMypwFZLt2",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><strong>Suggested Questions</strong></p>",
+                            "<ul><li>What do you notice about the orange juice recipes? What do you wonder? (Students may notice general things about the recipes, for instance, all four have different amounts of concentrate and water. Some students may begin to think about the recipes, commenting that some may taste different and some may taste the same.)</li><li>Have you ever had juice or some other drink that tastes different depending on who makes it? (Student answers will vary. They may mention some adult “watering down” juice or tea, or people making the juice or tea stronger or sweeter.)</li></ul>",
+                            "<p></p>",
+                            "<p>Help students connect prior learning to the recipes. Do not push for the comparison statements to be in any one form or another. Students may keep the recipe in part-to-part or change the recipe to part-to-whole. (TIME) The comparison statements may help the students access the relationships in the recipes.</p>",
+                            "<p></p>",
+                            "<ul><li>How can you change each recipe into a comparison statement? (Answers will vary. Possible answers might include: For every 2 cups of concentrate, you pour in 3 cups of water for Recipe A or Recipe A uses 2 cups of concentrate for every 5 cups of juice.)</li></ul>"
+                          ]
+                        }
+                      },
+                      {
+                        "id": "LPBpeRLwNTM2MQS1",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p>Let students know that they will be analyzing the recipes to decide which is the most orangey tasting and which is the least orangey tasting.</p>",
+                            "<p></p>",
+                            "<p>Have students work on the Initial Challenge in groups of two or three students. Have them show their thinking on large paper to use in a Gallery Walk for the discussion on the first day and to use to compare their thinking with the What If situations on Day 2.</p>"
+                          ]
+                        }
+                      },
+                      {
+                        "id": "LSv2GYKpRXJmhjKf",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><em>To Launch Day 2</em></p>",
+                            "<p></p>",
+                            "<p>You might have students think about and discuss as a class the strategies not already presented by your students. Alternately, you can have different groups work on the different strategies in the What If Situations. This would allow you to assign groups to use strategies very different from their own for solving the Initial Challenge. This is an opportunity to provide for individual needs by have students work on strategies that can push their thinking in new directions. (PORTRAYAL) Also, the strategies in the What If review some of the concepts that students studied in the Grade 6 <em>Comparing Quantities</em> Unit. <strong>Learning Aid 1.1: Strategies</strong> can be used when students are working on the What If Situations.</p>"
+                          ]
+                        }
+                      }
                 ]
               }
             },
@@ -84,6 +249,83 @@
               "type": "explore",
               "content": {
                 "tiles": [
+                {
+                  "id": "ZhAXtCzS7ijLv6Ho",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><u><strong>Explore (Digging In) </strong></u>       </p>",
+                      "<p><u>Providing for Individual Needs</u></p>",
+                      "<p></p>",
+                      "<p>Initial Challenge Questions:</p>",
+                      "<p></p>",
+                      "<p>As students work on the Initial Challenge, circulate and ask them questions. If a group has a conjecture about most and least orangey, ask them to explain why.</p>",
+                      "<p></p>",
+                      "<p>Some students will puzzle over how to begin. After giving students some time to try a few ideas, you might suggest that students just begin by comparing two recipes rather than all four at once. </p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "cbUrvIex7w9QshD3",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Suggested Questions</strong></p>",
+                      "<ul><li>Let’s take a look at Recipe A and Recipe B. Which do you think would be the most orangey? (Students might answer that Recipe A would be more orangey because there is almost the same amount of concentrate as water.)</li><li>How does the amount of water for Recipe A compare to the water for Recipe B? (Recipe B has three times the amount of water.)</li><li>So, if we were looking at just water, how many batches of Recipe A would it take to get the same amount of water in Recipe B? (3 batches)</li><li>If we made three batches of Recipe A, how much concentrate would it take? (6 cups of concentrate)</li><li>So, the new amounts for Recipe A would be 6 cups concentrate to 9 cups water. How would that taste have compared to Recipe B? (Recipe A would be more orangey, because there is more concentrate for the same amount of water.)</li></ul>",
+                      "<p></p>",
+                      "<p>Some students will use naïve strategies such as simply focusing on the number of cups of concentrate and ignoring the water. Ask questions to challenge students’ ideas.</p>",
+                      "<ul><li>How can we keep adding cups of water without making the juice less orangey? (Students might suggest that for each cup of water, a certain amount of concentrate will be required.)</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "id": "SpwSp1BZvpm0q6S-",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>You might have students focus on one particular mixture first to develop an answer to the above question. Recipe A, for example consists of 2 cups of concentrate and 3 cups of water. Students may propose that for every cup of water added, an additional 2/3 of a cup of concentrate will be required to not change the taste of the juice.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "TvmsrQeswFvPsNV6",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><em>What If Questions</em></p>",
+                      "<p></p>",
+                      "<p>As groups analyze the student thinking in the What If, circulate and listen to the justification for agreeing with the strategies. Also, note how students are seeing the connections between the mathematical thinking in the strategies.</p>",
+                      "<ul><li>Begin by asking students, What do you notice and wonder about the strategies in the What If?</li><li>Is this group using a part to part or part to whole way of thinking about the recipes?</li><li>Is this group using a strategy similar to something we talked about yesterday?</li><li>Is this group using a strategy similar to something you did in Stretching and Shrinking or from the Grade 6 Comparing Quantities Unit?</li></ul>",
+                      "<p></p>"
+                    ]
+                  }
+                },
+                {
+                    "display": "teacher",
+                    "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><u>Planning for the Summary</u></p>",
+                      "<p>What evidence will you use in the summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence?</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "5c0VakJIMluFveIk",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><em>Now What Do You Know?</em></p>",
+                      "<p><em>Describe some strategies for solving problems that involve ratios.</em></p>"
+                    ]
+                  }
+                }
                 ]
               }
             },
@@ -91,6 +333,283 @@
               "type": "summarize",
               "content": {
                 "tiles": [
+                  {
+                    "id": "HV3VFRZ02x4U-ZVE",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><u><strong>Summarize (Orchestrating the Discussion) </strong></u></p>",
+                        "<p><u>Solutions and Strategies</u></p>",
+                        "<p></p>",
+                        "<p>Have groups display their work. Then have students do a Gallery Walk to look at all of the work from other groups. Ask them what they notice and wonder about the strategies used by their classmates.</p>",
+                        "<p></p>",
+                        "<p>The summary on the first day should be a time for students to share their ideas and to tell why they think their ideas make sense as they answered the Initial Challenge. (AGENCY, IDENTITY, OWNERSHIP) As a class, discuss the strategies and solutions for the determining which juice is the most orangey flavor.</p>",
+                        "<p></p>",
+                        "<p>You want the students to leave this Problem having experienced several problem-solving strategies, including an emphasis on ratios. The suggested questions will help students think about what they’ve learned.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "iV4wjur89XdIHz8J",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<ul><li>What does it mean to be the most orangey tasting? To be the least orangey tasting? (Students might have a variety of ways to reason about the questions in this Problem.)</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "YSI4aGVJ_uzuka4P",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Students may find many ways to represent their thinking. Their strategies will vary based on their use of part to part ratios or part to whole ratios. Students’ strategies may include the following:</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "THfZgeLNMg2Eu4WU",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Strategies for Part to Part Ratios</strong></p>",
+                        "<p><strong></strong></p>",
+                        "<ul><li>Scaling up each ratio to the same number of parts for one of the quantities. This would look very much like “Common Denominator” or “Common Numerator” thinking.</li><li>Unit Rate – scaling each ratio to have one of the quantities equal to 1. For example, 1 concentrate to x water or x concentrate to 1 water.</li><li>Drawing pictures to show how much water for each cup of concentrate is in each mix. The goal is to partition the water so that each cup of concentrate gets the same amount of water.</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "NcFSNQH19Edof2IX",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>For example, with Mix A, we have 1 ½ cups of water for each cup of concentrate.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "PLgiuNAJawP6ccTs",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  },
+                  {
+                    "id": "ab4gaBhWQ1jqXX0o",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>For Mix B, we have 1 4/5 cups of water for each cup of concentrate. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "StztPqniplE7h5D5",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  },
+                  {
+                    "id": "03-AjqcvOf6uss6G",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>For Mix C, we have 2 cups of water for each cup of concentrate.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "nQFQQzF2giX2nSIH",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  },
+                  {
+                    "id": "2s7HIcRObXGms_SR",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>For Mix D, we have 1 2/3 cups of water for each cup of concentrate.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "h6uyBJCZhZgZqlfl",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  },
+                  {
+                    "id": "dqC890bDVCkBBu38",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>A common misconception to watch for is the part-to-part ratio represented in percent form. For example, 2 cups concentrate: 3 cups water interpreted as 2/3 or 66% of the mix is concentrate.</p>",
+                        "<ul><li>If there are 3 cups concentrate and 3 cups water is that 3/3 or 100% concentrate?  (no)</li><li>If there is 1 cup concentrate to 2 cups water, then how would the fraction 1/2 or the percent 50% be used to describe the situation? (concentrate is 1/2 of the water, not 1/2 of the mix)</li><li>What would 66% represent in the recipe with 2 cups concentrate: 3 cups water?  (concentrate is 2/3 or 66% of the water, not the full mix)</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "rOaH0s0QTp98NvdX",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Strategies Part to Whole Ratios</strong></p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<ul><li>Scaling up each ratio to the same number of parts for one of the quantities. This would look very much like “Common Denominator” or “Common Numerator” thinking.</li><li>Percent of water and/or concentrate in mixes – scaling each ratio to have one of the quantities equal to 100.</li><li>Unit Rate – scaling each ratio to have one of the quantities equal to 1.</li></ul>",
+                        "<p>For example, 1 concentrate to x total cups. </p>",
+                        "<p></p>",
+                        "<ul><li>Expressing the ratios as a fraction or as decimal amounts of the mix.</li></ul>",
+                        "<p></p>",
+                        "<p>Give students time to justify their strategies to the class. As students analyze the strategies of others, continue to ask them how the strategies compare. It is important for students to see that different representations can convey similar types of mathematical thinking. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "iMSDuJje1xkNH_gI",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<ul><li>How are your strategies alike? How are they different?</li></ul>",
+                        "<p></p>",
+                        "<p><em>Check for Understanding</em> </p>",
+                        "<ul><li>Which of the following will taste most orangey: 2 cups of concentrate and 3 cups of water, 4 cups of concentrate and 6 cups of water, or 10 cups of concentrate and 15 cups of water? Explain your reasoning. (The recipes will all taste the same. Despite having more liquid, each recipe will have the same ratio of concentrate to juice.)</li></ul>",
+                        "<p></p>",
+                        "<p><em>Going Beyond</em></p>",
+                        "<ul><li>If you combined all four recipes would the new recipe be the most orangey recipe? (No. 11 cups concentrate and 19 cups water would “water down” the most orangey recipe.)</li><li>Would the new recipe be the least orangey of the recipes? (No. Since we have combined some more orangey ratios with the least orangey, this new recipe will be more orangey than Recipe C. We would be averaging-out the recipes, so the orangey flavor will be in between the most and the least.)</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                   "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><u>Making the Mathematics Explicit </u></p>",
+                        "<p>As students explain, justify, and discuss the strategies in the What If? to the whole class, ask questions to analyze the strategies. Also, compare the strategies to each other and to the strategies that your students used in the Initial Challenge.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "onsqodFhqsTEvbVR",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><u>What If Situation A</u></p>",
+                        "<p></p>",
+                        "<p><em>Moja’s Group</em></p>",
+                        "<p>In the Stretching and Shrinking Unit, students used scale factor as a way to scale sides of shapes to create scale drawings/similar figures.  </p>",
+                        "<ul><li>How did Moja’s group think about this problem? (Answers will vary. They kept it as a part-to-part relationship and scaled up each recipe to have 90 cups of water.)</li><li>Is their thinking correct? (yes)</li><li>How is this similar to or different from what groups did in our class?  (Answers will vary.)</li></ul>",
+                        "<p><em>Lima’s Group</em></p>",
+                        "<ul><li>What do the arrows represent in this picture? (how the concentrate is spread out over (shared among) the water)</li><li>How did Lima’s group think about this problem? (Answers will vary. They show the unit rate of how much water per cup of concentrate is in each recipe.)</li><li>Is their thinking correct? (yes)</li><li>How is this similar to or different from what groups did in our class? (Answers will vary.)</li></ul>",
+                        "<p><em>Tatu’s Group</em></p>",
+                        "<ul><li>How did Tatu’s group think about this problem? (They used part to whole percents)</li><li>Is their thinking correct? (yes)</li><li>How is this similar to or different from what groups did in our class? (Answers will vary.)</li></ul>",
+                        "<p><em>Sanji’s Group</em></p>",
+                        "<ul><li>How did Sanji’s group think about this problem? (Answers will vary. They changed the part to part ratio to a part to whole relationship and then scaled the concentrates all to 15.)</li><li>Is their thinking correct? (yes)</li><li>How is this similar to or different from what groups did in our class? (Answers will vary.)</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "LeXyz_v1SE1qLCVf",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Max’s Strategy</em></p>",
+                        "<p>In the Grade 6 Comparing Quantities Unit, students were introduced to additive reasoning (differences as a comparison) and multiplicative reasoning (ratios as a comparison).</p>",
+                        "<p></p>",
+                        "<p>Suggested Questions</p>",
+                        "<ul><li>Why is Max’s strategy not a ratio? (It is a difference, which is additive thinking. Ratios and proportional reasoning are multiplicate thinking. Max is not considering both quantities in his strategy.) What information is missing? (When you subtract, you lose the two quantities. A ratio is a comparison of two quantities.)</li><li>Is this additive reasoning or multiplicative (ratio) reasoning? Or, is addition/subtraction used or multiplication/division used? (Additive)"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "k127x4JfR_WW_pLh",
+                      "content": {
+                        "type": "Image",
+                        "url": "assets/images/image_placeholder.png"
+                      }
+                    },
+                    {
+                      "id": "XXPOPixjDcfuSCaN",
+                      "content": {
+                        "type": "Image",
+                        "url": "assets/images/image_placeholder.png"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "oy8cZxYw--5It3_-",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>How would Recipe X compare to Recipe C with 1 cup of concentrate and 2 cups of water? (Recipe X has almost equal parts water and concentrate. Recipe C has twice the amount of water as concentrate.)</li><li>Would they have the same amount of orangey taste? (No. Recipe C would be more orangey.)</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "I7Bnit9IYj0ibyAW",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><u>Strategy 4: Stella, Elise, and Dan</u></p>",
+                        "<p>Stella, Elise, and Dan scale the ratios to unit rates. Stella and Elise begin with part-to-part ratios. Dan begins with the part to whole ratio. </p>",
+                        "<p></p>",
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<ul><li>Why do they have different unit rates? (Each person chose a different quantity to scale to 1. Stella scaled the water to 1 in her part-to-part ratio. Elise scaled the concentrate to 1 in her part-to-part ratio. Dan scaled the concentrate to 1 in his part to whole ratio.)</li><li>Can any sets of rates help to make comparisons? (Yes. It depends on what quantity you want to compare. It is important that when comparing, you choose the same type of ratio (part to part or part to whole) and choose the same quantity, e.g., concentrate, water, or total cups, to scale to 1.)</li><li>Is there any other unit rate that a student could have written? (Yes. Dan scaled the concentrate to 1. He could have scaled the total cups to 1. He would have the unit rate of 2/5 cups of concentrate for every 1 cup of juice.)</li><li>How are unit rates different from percentages? (Unit rates can be found from part to part or part to whole ratios. Percentages always have to be part to whole comparisons.)</li><li>How are unit rates like percentages? (In each case, one of the quantities is scaled up or down to 1 (for a unit rate) or 100 (for a percentage), making it easy to do a comparison between ratios. This makes it easy to do a comparison between ratios.)</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><u>Now What Do Students Know</u></p>",
+                        "<p>Ask students to reflect on the discussion and answer the Now What Do You Know.</p>",
+                        "<p></p>",
+                        "<p>See answers for more information about the strategies and embedded mathematics.</p>",
+                        "<p>[End Green Box]</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "5XxYIHdazoO1ll-9",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Reflecting on Student Learning  </strong></p>",
+                        "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
+                        "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li></ul>",
+                        "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
+                        "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
+                      ]
+                    }
+                  }
                 ]
               }
             }
@@ -107,6 +626,20 @@
               "content":
               {
                 "tiles": [
+                  {
+                    "id": "Fs1nyJ4_4u0edaGh",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>This Problem gives students the opportunity to practice the scaling strategies they explored earlier. They choose part-to-part or part-to-whole ratios, as appropriate. The scaling strategies solve proportions, foreshadowing the next Problem, where proportions are defined and solving proportions is dealt with directly.</p>",
+                        "<p></p>",
+                        "<p>Note: This Problem is a review of <em>Comparing Quantities,</em> except for the new format of writing ratios in fraction form. Be sure to emphasize the difference between a ratio (2:3) and a fraction (2/3).</p>",
+                        "<p></p>",
+                        "<p><strong>Implementation Note</strong>: You may want to use <strong>Teaching Aid 1.2: Ratio Type Notation</strong> and <strong>Learning Aid 1.2A: Recipes</strong> to introduce the Problem and have students work on the Initial Challenge. The What If section shows strategies and solutions to the Initial Challenge. Keeping students’ books closed (or only viewing the Initial Challenge) by using the learning aids will allow students to do the Initial Challenge without influence from the What If.</p>"
+                      ]
+                    }
+                  }
                 ]
               }
             },
@@ -114,6 +647,199 @@
               "type": "launch",
               "content": {
                 "tiles": [
+                    {
+                      "id": "fCim1fRIxKFU4Bze",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><u><strong>Launch (Getting Started)</strong></u>          </p>",
+                          "<p><u>Connecting to Prior Knowledge</u></p>",
+                          "<p></p>",
+                          "<p>If students are not using the term “scaling ratios” from <em>Stretching and Shrinking</em> or Grade 6 <em>Comparing Quantities</em>, now is the time to encourage that vocabulary. (TIME) <strong>Teaching Aid 1.2: Ratio Type Notation</strong> may be used to emphasize the scaling.</p>",
+                          "<p></p>",
+                          "<p>If you did not discuss part to part and part to whole ratios in the Summarize of Problem 1.1, discuss the two forms of a ratio with your students now. Students learned about part to part and part to whole ratios in <em>Comparing Quantities</em>. (TIME) <strong>Teaching Aid 1.2: Ratio Type Notation</strong> may be used to emphasize part to part and part to whole relationships.</p>",
+                          "<p></p>",
+                          "<p>Students were introduced to writing ratios in fraction form in <em>Stretching and Shrinking</em>. This Problem brings the form back, so students have flexibility in the notation used for expressing ratios. It is important for students to begin to differentiate between fractions and ratios written in fraction form. For example, (2c.concentrate)/(3c.water) is not the same as saying 2/3 of the mix is concentrate.  However, (2c.concentrate)/(5c.juice) can be thought of as saying 2/5  of the juice is concentrate. A part to whole situation can be a ratio if we are looking at the relationship between the two quantities – there are 2 cups of concentrate in every 5 cups of juice. It can be a fraction if we are looking at the portion of the juice that is concentrate 2/5  of the juice is concentrate.</p>",
+                          "<p></p>",
+                          "<p>Also, finding equivalence for fractions and ratios can have very different results.</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "0Ow8WI7w_lHYB3uH",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><em>Equivalent Fractions</em></p>",
+                          "<p>To find equivalent fractions, we change how many pieces in the whole (denominator) and how many pieces in the part (the numerator). When finding equivalent fractions, we multiply by a form of one, a fraction equivalent to 1. The size of the whole stays the same. With equivalent fractions, students need to find portions of the whole that are the same amount.</p>",
+                          "<p></p>",
+                          "<p>2/3 of the whole is the same amount as 6/9 of the whole.</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "3TSlr2OaAI5Bs7g3",
+                      "content": {
+                        "type": "Image",
+                        "url": "assets/images/image_placeholder.png"
+                      }
+                    },
+                    {
+                      "id": "u_NZ38Y6AjJIMS7a",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><em>Equivalent Ratios</em></p>",
+                          "<p>When finding equivalent ratios, we scale the quantities to find two quantities with the same multiplicative relationship.</p>",
+                          "<p></p>",
+                          "<p>Here we find the 3rd multiple of 2 and the 3rd multiple of 3. For every 2 of one quantity we have 3 of the other quantity.</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "qR7SH7s_7iLvN0iW",
+                      "content": {
+                        "type": "Image",
+                        "url": "assets/images/image_placeholder.png"
+                      }
+                    },
+                    {
+                      "id": "XVECoTM6IriNRQqo",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Depending on the ratio situation, the size of the whole amount can change.</p>",
+                          "<p></p>",
+                          "<p>Students used this thinking in Stretching and Shrinking to find scale drawings. The size of the shape changes, but the relationship between the two quantities of length stays the same. The length of the larger side remains 1.5 times the size of the smaller side.</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "58inAcv6DHGRYSS8",
+                      "content": {
+                        "type": "Image",
+                        "url": "assets/images/image_placeholder.png"
+                      }
+                    },
+                    {
+                      "id": "ekydjqErVPv3--k2",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>For the orange juice recipes, students might think about the whole increasing when making batches of the recipes. To make three batches, students need three of the 2 to 3 ratios. The amount of the juice changes, the amount of each component of the recipe changes. We have three times as much.</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "8P7RAW-4XzVezgO_",
+                      "content": {
+                        "type": "Image",
+                        "url": "assets/images/image_placeholder.png"
+                      }
+                    },
+                    {
+                      "id": "PXYWHRWeGGV0fGXC",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>To study the relationship between the two quantities in a ratio, students may keep the size of the whole the same. We can compare 2 for every 3 as the same relationship as 6 for every 9.</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "6dgjvZlkKwxVvadu",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>2 for every 3</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "Nj7msMv-AyVMghOo",
+                      "content": {
+                        "type": "Image",
+                        "url": "assets/images/image_placeholder.png"
+                      }
+                    },
+                    {
+                      "id": "pEcyFyWQrbFIEg8g",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>6 for every 9</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "LtFs9ZJUnmpMqrMA",
+                      "content": {
+                        "type": "Image",
+                        "url": "assets/images/image_placeholder.png"
+                      }
+                    },
+                    {
+                      "id": "dgUxHlclXLmWPGmC",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Have students look at the two ratios written in fraction form and consider how fractions and ratios compare.</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "Rv2ZmTZNOOP4jeiv",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>Suggested Questions</strong></p>",
+                          "<ul><li>How are these fraction forms of ratios the same as or different from fractions? (Student  answers might include: Same: The form looks the same with one number over another number. Both are multiplicative relationships. Finding equivalent fractions and scaling ratios seems a lot the same. Different: Fractions are numbers and ratios are a comparison of two numbers. Fractions are always part to whole relationships of a quantity while ratios can be part to part or part to whole comparisons of two quantities. When we find equivalent fractions, we find different names for the same amount. When we find equivalent ratios, the amount may change but the relationship between the amounts stays the same.)</li></ul>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "7ZLgmN01kuLspcpZ",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><u>Presenting the Challenge</u></p>",
+                          "<p></p>",
+                          "<p>Use <strong>Learning Aid 1.2: Recipes</strong> to shift students’ attention back to the orange juice recipes. Have students consider making batches of each recipe for 210 campers.</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "8A73x89cIL4nCLvT",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>Suggested Questions</strong></p>",
+                          "<ul><li>Arvin and Mariah are thinking about the supplies they need to make batches of juice. Does each recipe serve the same number of people? (No. Recipe A serves 5 people. Recipe B serves 14 people. Recipe C serves 3 people. Recipe D serves 8 people.)</li><li>Does this change how you will find the number of batches for each recipe? (Answers will vary. Some students may change strategies based on the numbers in the recipe. This is something to revisit in the Summary.)</li></ul>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "Iu1zYNIWL8td-yZq",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Have students work with a partner on this Problem using <strong>Learning Aid 1.2: Recipes</strong>.</p>"
+                        ]
+                      }
+                    }
                 ]
               }
             },
@@ -121,6 +847,73 @@
               "type": "explore",
               "content": {
                 "tiles": [
+                      {
+                    "id": "lpFKpmEceYDAw2oa",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><u><strong>Explore (Digging In)   </strong></u>     </p>",
+                        "<p><u>Providing for Individual Needs</u></p>",
+                        "<p></p>",
+                        "<p>As you move around the room listening to students discuss the Problem, these are some questions you might ask for the Initial Challenge.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "N41JHH0lKmpCaMtp",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<ul><li>Are you using the recipe as part-to-part or part-to-whole comparison? How did you decide? (Answers will vary depending on which question of the Problem you are looking at.)</li><li>Did you scale up a ratio? How did you decide what to multiply by? How do you know that the relationship between the ingredients is still correct? (Answers may vary, depending on the recipe. The relationship should still be correct since you are taking multiples of a recipe. Doing this will maintain the relationship between the quantities.)</li><li>How can you tell if two ratios are equivalent? (Two ratios are equivalent if you can get one ratio from the other by multiplying [or dividing] by a scale factor).</li><li>How could scaling help solve a problem? How can you decide on a scale factor to use? (Scaling could give you easier numbers to work with. You can decide on a scale factor by finding a common factor or common multiple.)</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "GhCCymwiIg-xSanE",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>As you move around the room listening to students discuss the Problem, these are some questions you might ask for the What If.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "l97TcqS7ikmNphNv",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<ul><li>How did each student find equivalent ratios? (Adia used a rate table. Otis made an equation to help him think about scaling the ratio.)</li><li>For Otis, what does each number in the equation represent? (1 represents 1 batch of Recipe A, 5 represents 5 cups of juice in one batch of Recipe A, 210 represents how many total cups of juice we need, x represents the number of Recipe A batches needed to make juice for all the campers.)</li><li>Adia said that her method is like Otis’s because she also used scaling. “I scaled the ratio — 1 recipe per 5 cups of juice, 2 recipes for 10 cups of juice, etc. and put them into a table.” Is she correct? Why?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><u>Planning for the Summary</u></p>",
+                        "<p>What evidence will you use in the summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "O2mBpPnU2-Myfe_w",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Now What Do You Know?</em></p>",
+                        "<p><em>How do the strategies you used in this problem compare to those used in Problem 1.1?</em> </p>"
+                      ]
+                    }
+                  }
                 ]
               }
             },
@@ -128,6 +921,170 @@
               "type": "summarize",
               "content": {
                 "tiles": [
+                      {
+                        "id": "g43USg5DaXRQQDJT",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><u><strong>Summarize (Orchestrating the Discussion) </strong></u> </p>",
+                            "<p><u>Solutions and Strategies </u></p>",
+                            "<p></p>",
+                            "<p>The beginning of the Summary should be a time for students to share their strategies for finding the amount of supplies needed for making juice for 210 campers.</p>",
+                            "<p></p>",
+                            "<p>Choose groups of students who used different strategies. Have them explain why they think their ideas make sense and answer the questions. You want students to leave this Problem having experienced several problem-solving strategies and making connections between them.</p>"
+                          ]
+                        }
+                      },
+                      {
+                        "id": "ANnJ-DEOhpIIMMem",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><strong>Suggested Questions</strong></p>",
+                            "<ul><li>How are the strategies used in our classroom similar to and different from each other? (Answers will vary.)</li></ul>"
+                          ]
+                        }
+                      },
+                      {
+                        "id": "l7qmReAxHQLpodpQ",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p>Students may use rate tables (like Adia in the What If), equations to scale (like Otis in the What If), or other more unique strategies. (PORTRAYAL) One possibility includes drawing pictures to show all of the relationships in the recipe.</p>"
+                          ]
+                        }
+                      },
+                      {
+                        "id": "YrXXlAMqExFdnKkH",
+                        "content": {
+                          "type": "Image",
+                          "url": "assets/images/image_placeholder.png"
+                        }
+                      },
+                      {
+                        "id": "mtwHBpceRGevZrFS",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<ul><li>Do you have What If questions? (Answers will vary.)</li></ul>"
+                          ]
+                        }
+                      },
+                      {
+                        "display": "teacher",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><u>Making the Mathematics Explicit </u></p>",
+                            "<p></p>",
+                            "<p>Have students analyze and critique Adia’s and Otis’s strategies.</p>"
+                          ]
+                        }
+                      },
+                      {
+                        "id": "UIPgwxdrjSUJ02iN",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><strong>Suggested Questions</strong></p>",
+                            "<ul><li>How are Adia’s and Otis’s strategies alike? Different? (Answers will vary. Students may say that Otis shows one pair of equivalent ratios while Adia shows many. Or Otis scales up to 210 cups of juice right away while Adia uses multiples of the two quantities to scale up.)</li></ul>"
+                          ]
+                        }
+                      },
+                      {
+                        "id": "U6Bj6RlFxVO8yZz2",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p></p>",
+                            "<p>Make sure that someone points out that looking at Adia’s ratio table, we can see multiple proportions. Some examples are shown below.</p>"
+                          ]
+                        }
+                      },
+                      {
+                        "id": "wMJAuYlkA9cWB7mh",
+                        "content": {
+                          "type": "Image",
+                          "url": "assets/images/image_placeholder.png"
+                        }
+                      },
+                      {
+                        "id": "DJfbnjwn6o2ZR4rT",
+                        "content": {
+                          "type": "Image",
+                          "url": "assets/images/image_placeholder.png"
+                        }
+                      },
+                      {
+                        "id": "qt95oY59Z92b9Y6P",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p>To relate the table to the proportions, it is important to have students label the quantities shown by the ratios written in fraction from.</p>"
+                          ]
+                        }
+                      },
+                      {
+                        "id": "5aeM-Cn6pxB4ESiJ",
+                        "content": {
+                          "type": "Image",
+                          "url": "assets/images/image_placeholder.png"
+                        }
+                      },
+                      {
+                        "id": "bfRLlg8q3trAx9H4",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p>It will be important for students to see how the scaling for the ratio in fraction form can be represented on the ratio table. (PORTRAYAL)</p>"
+                          ]
+                        }
+                      },
+                      {
+                        "id": "JZkJqtiLtp2ITCQZ",
+                        "content": {
+                          "type": "Image",
+                          "url": "assets/images/image_placeholder.png"
+                        }
+                      },
+                      {
+                        "display": "teacher",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><u>Now What Do Students Know</u></p>",
+                            "<p></p>",
+                            "<p>Ask students to reflect on the discussion and answer the Now What Do You Know questions.</p>",
+                            "<p><em>How do the strategies you used in this problem compare to those used in Problem 1.1?</em> </p>",
+                            "<p></p>",
+                            "<p>See answers for more information about the strategies and embedded mathematics. </p>"
+                          ]
+                        }
+                      },
+                      {
+                        "id": "2iiJtIqrcJrtY0tJ",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><strong>Reflecting on Student Learning</strong></p>",
+                            "<p>Use the following questions to assess student understanding at the end of the lesson.  </p>",
+                            "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li></ul>",
+                            "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
+                            "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit? </li></ul>"
+                          ]
+                        }
+                      }
                 ]
               }
             }
@@ -136,7 +1093,7 @@
         {
           "description": "Problem 1.3",
           "ordinal": 3,
-          "title": "CAS 1.3 Teeping Things in Proportione",
+          "title": "CAS 1.3 Keeping Things in Proportion",
           "subtitle": "Using Proportions",
           "sections": [
             {
@@ -144,6 +1101,16 @@
               "content":
               {
                 "tiles": [
+                  {
+                    "id": "wkqHr2mRx4Rg6ib5",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>In this Problem, students encounter a variety of situations that require setting up proportions and solving for unknown values. Students should start to formalize the process of setting up equivalent ratios that make similar comparisons of quantities. In particular, scaling one ratio to find an unknown value in an equivalent ratio is highlighted as one strategy to help find unknown values.</p>"
+                      ]
+                    }
+                  }
                 ]
               }
             },
@@ -151,6 +1118,34 @@
               "type": "launch",
               "content": {
                 "tiles": [
+                  {
+                    "id": "pQBlwIlKb4iBRoG5",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><u><strong>Launch (Getting Started)</strong></u></p>",
+                        "<p><u>Connecting to Prior Knowledge</u></p>",
+                        "<p>In the first two Problems of Investigation 1, students analyzed statements comparing quantities in various forms and made claims about how these ratios compared to each other. In Problems 1.1 and 1.2, students used a variety of strategies to scale ratios while solving contextual problems. In Problem 1.3, students formalize what they learned by setting up proportions and using the scaling up or scaling down strategy to find unknown values.</p>",
+                        "<p>Introduce the vocabulary of proportions and proportional reasoning.  Revisit Adia’s and Otis’s strategies to introduce the terms from Problem 1.2. Note that students have been solving proportions since the third Unit of Grade 6: <em>Comparing Quantities.</em> And students were solving proportions when they were finding missing side lengths on scale drawings in Stretching and Shrinking. Ask students for examples of finding a missing quantity from their prior Units. <strong>Teaching Aid 1.3 Proportional Reasoning Examples </strong>can be used to show a couple of examples from prior Units.</p>",
+                        "<p>It is important that students understand that when setting up a proportion, the ratios are relating the same two quantities. Labeling the quantities will help students make sure that they are comparing.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "pQDD7HyzQ2wd1Ug5",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><u>Presenting the Challenge</u></p>",
+                        "<p></p>",
+                        "<p>Challenge students to answer the questions for each situation in the Initial Challenge. Make sure students know to show their work so strategies can be discussed in the Summarize.</p>",
+                        "<p></p>",
+                        "<p>Tell students that they are going to be working on a variety of situations where they need to find unknown values. Emphasize that they should find the unknown values using strategies you have discussed as a class (such as using equivalent ratios, rate tables, scaling, and writing proportions) and other strategies that make sense to them.</p>"
+                      ]
+                    }
+                  }
                 ]
               }
             },
@@ -158,6 +1153,54 @@
               "type": "explore",
               "content": {
                 "tiles": [
+                    {
+                      "id": "B-QCmUA38YT1mf6m",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><u><strong>Explore (Digging In)</strong></u>          </p>",
+                          "<p><u>Providing for Individual Needs</u></p>",
+                          "<p>As students are working on the Initial Challenge and What If, check to see if students are using a variety of strategies to represent and solve the questions. Have students think about other ways to compare the quantities. Look for interesting strategies and have students present these in the Summarize.</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "fN61YdGT1yj0AmH7",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>Suggested Questions</strong></p>",
+                          "<ul><li>For the various Situations and questions, are the ratios you are writing part-to-part or part-to-whole? (Answers will vary. Students are likely to answer that all are part to part. The Smoothie Bar scenario could be either. In the Reading Speed scenario, it does not make sense to find a whole because it is a rate. Height of Trees are two similar figures, and students will probably keep the parts of height and base. With Student Council Representation students are likely to discuss part-to-whole.)    </li><li>What are some strategies that you have heard for finding two equivalent ratios? (Answers might include: scaling ratios, drawing pictures, using scale factors, ratio tables, unit rate, and proportions.)</li><li>For What If Situation A, what strategies are you using to solve for x? (Answers will vary. Students may use strategies like those mentioned above.)</li><li>For Situation B, what would a proportion look like for that situation?  (Answers will vary.)</li></ul>"
+                        ]
+                      }
+                    },
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><u>Planning for the Summary</u></p>",
+                          "<p></p>",
+                          "<p>As you walk around the room, take note of groups that have different strategies for the same situation. This will allow you to have groups present many ways of thinking about the proportions. Also, you will be able to help connect how the strategies connect mathematically with different representations. (PORTRAYAL)</p>",
+                          "<p></p>",
+                          "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence?</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "55TB_1zaRc-D0FFm",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><em>Now What Do You Know?</em></p>",
+                          "<p><em>How are proportions like other strategies that you have used to solve ratio problems? How are they different?</em></p>"
+                        ]
+                      }
+                    }
                 ]
               }
             },
@@ -165,6 +1208,105 @@
               "type": "summarize",
               "content": {
                 "tiles": [
+                {
+                  "id": "I9q6PuYdrDuIlAos",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Summarize (Orchestrating the Discussion)</strong>   </p>",
+                      "<p><u>Solutions and Strategies</u></p>",
+                      "<p></p>",
+                      "<p>Select different groups to represent different strategies that you observed during the exploration. Consider taking one specific Situation (or all, if you have time) and have students show multiple ways of solving the questions, such as using equivalent ratios, ratio tables, unit rates, and proportions. Encourage groups to explain how they got the answer and why the answer makes sense. Invite other students to question or challenge the solutions presented, to make connections between strategies, or to offer an alternative strategy. (AGENCY, IDENTITY, OWNERSHIP)</p>",
+                      "<p></p>",
+                      "<p>Guide students’ thinking by asking them to think of other ways to set up the relationship. Help make explicit how the strategies for answering the questions are connected and how the proportions can be notated.</p>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><u>Making the Mathematics Explicit </u></p>",
+                      "<p></p>",
+                      "<p>What If part A gives you the opportunity to discuss the various ways that proportions (or equivalent ratios) can be written. It is important for students to recognize that equivalent ratios must compare one quantity to a multiple or factor of the same quantity.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "IGcg_UBWEnCV9sm5",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Suggested Questions</strong></p>",
+                      "<ul><li>Do you agree with the way that Nic wrote the proportions in the What If Situation A? (Yes. In each proportion, they are comparing one quantity to a factor or multiple of the same quantity, miles to miles and calories to calories.)</li><li>Are there other ways of writing the same proportional situation? (Yes. Since ratios can be written in different orders, we could have the following for the Reading Speeds situation:)</li></ul>",
+                      "<p></p>",
+                      "<p>(3 minutes )/(480 words )=  (x minutes)/(20,000 words)  OR  (3 minutes )/(x minutes )=  (480 words)/(20,000 words)  </p>",
+                      "<p>OR (480 words )/(3 minutes)=  (20,000 words)/(x minutes)  OR   (x minutes )/(3 minutes )=  (20,000 words)/(480 words)</p>",
+                      "<p>Have students focus on the number relationships by asking about the various ways to write the same proportion. (PORTRAYAL)</p>",
+                      "<p></p>",
+                      "<ul><li>Which way of writing the proportion helps you to see the relationship between the quantities? (Student preferences will vary. Some preferences will vary based on the values of the quantities.)</li></ul>",
+                      "<p></p>",
+                      "<p>Students may benefit from seeing the how the proportions connect to the tables of ratios that they have used since the beginning of Grade 6. (LANGUAGE)</p>",
+                      "<p></p>",
+                      "<ul><li> If we were to make a table for Reading Speeds, what might it look like? (Answers will vary. The following is one possibility.) Where are the proportions in the table? (See graphic below.)</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "id": "BRo_3iDYbGoMlhhs",
+                  "content": {
+                    "type": "Table",
+                    "name": "Table 1",
+                    "columns": [
+                      {"name":"Minutes","values":["3","30","60","90","120","125"]},
+                      {"name":"Words","values":["480","4800","9600","14400","19200","20000"]}
+                    ]
+                  }
+                },
+                {
+                  "id": "olIg1tghDFsmiz44",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>What If Situation B gives you the opportunity to discuss the common error made when looking at scale drawings that are nested in each other. This revisits Stretching and Shrinking and connects the work to proportions. Some students might see the proportion as 5/8=  h/(40 ) rather than 5/8=  h/(48 ).</p>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><u>Now What Do Students Know</u></p>",
+                      "<p></p>",
+                      "<p>Ask students to reflect on the discussion and answer the Now What Do You Know questions.</p>",
+                      "<p></p>",
+                      "<p><em>How are proportions like other strategies that you have used to solve ratio problems? How are they different?</em></p>",
+                      "<p></p>",
+                      "<p>See answers for more information about the strategies and embedded mathematics. </p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "3dsbRrQf7znh9qEU",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Reflecting on Student Learning  </p>",
+                      "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
+                      "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li></ul>",
+                      "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
+                      "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
+                    ]
+                  }
+                }
                 ]
               }
             }
@@ -175,7 +1317,7 @@
     {
       "description": "Investigation 2",
       "ordinal": 2,
-      "title": "CAS Investigation 1 Proportional Reasoning Using Ratio Comparisons",
+      "title": "CAS Investigation 2 Proportional Reasoning Using Rate Comparisons",
       "problems": [
         {
           "description": "Problem 2.1",
@@ -188,6 +1330,20 @@
               "content":
               {
                 "tiles": [
+                  {
+                    "id": "2C8NZA9ty8kT0uOQ",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>In this Problem, two different numbers of pizzas are placed at tables that seat two different numbers of people. Students must determine whether this situation is fair. They do this by finding how much pizza each person gets at the different tables, or how many people share a pizza. The numbers are small, so the comparison can be the central focus. The Problem is also designed to surface and challenge any incorrect ideas that students have about difference as a comparison strategy.</p>",
+                        "<p></p>",
+                        "<p><strong>Implementation Note</strong>: Be sure to hold a discussion after the Initial Challenge before moving on to the What If. This will allow you to highlight your students’ strategies before analyzing the strategies of other students that are presented in the What If. You can use the strategies in the What If to connect to how your students engaged in proportional reasoning in the sharing pizzas situation.</p>",
+                        "<p></p>",
+                        "<p>Have students work on the Initial Challenge in partners. As a class, discuss the strategies and solutions for the determining which camp table will give students a chance for more pizza. After the discussion, have students work on the What If questions. For Situation A, you might have students think about and discuss as a class the strategies not already presented by your students. This may allow a discussion of strategies different from students’ own thinking for solving the Initial Challenge. Situations B and C offer more opportunities to use proportional reasoning.</p>"
+                      ]
+                    }
+                  }
                 ]
               }
             },
@@ -195,43 +1351,56 @@
               "type": "launch",
               "content": {
                 "tiles": [
-                ]
-              }
-            },
-            {
-              "type": "explore",
-              "content": {
-                "tiles": [
-                ]
-              }
-            },
-            {
-              "type": "summarize",
-              "content": {
-                "tiles": [
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "description": "Problem 2.2",
-          "ordinal": 2,
-           "title": "CAS 2.2 Comparing Pizza Prices",
-          "subtitle": "How Do We Know It Is Proportional?",
-          "sections": [
-            {
-              "type": "overview",
-              "content":
+                  {
+                    "id": "ts7G_4L2-EVJ4b-z",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong><u>Launch (Getting Started)</u></strong></p>",
+                        "<p><u>Connecting to Prior Knowledge</u></p>",
+                        "<p></p>",
+                        "<p>Remind students of the story about Arvin and Mariah making orange juice for campers in Problem 1.2. Let students know that you are going to consider another situation at the camp.</p>",
+                        "<p></p>",
+                        "<p>If you have the time, you may want to review some of the strategies that students used in Investigation 1 to solve problems, such as ratio tables and proportions.</p>"
+                      ]
+                    }
+                  },
               {
-                "tiles": [
-                ]
+                "id": "86iv3_KGEzBTWrvN",
+                "content": {
+                  "type": "Text",
+                  "format": "html",
+                  "text": [
+                    "<p><u>Presenting the Challenge</u></p>",
+                    "<p>For the Initial Challenge, have students keep their books closed or do not let them see the What If to start out. The What If presents student strategies that you may not want students to see until after working on the tables with pizzas.</p>",
+                    "<p>Introduce the Problem using <strong>Learning Aid 2.1A: Pizzas and Tables</strong>. You can use one Learning Aid per group. Tell students that the camp has a large table and a small table setup when campers come into the cafeteria. They need to understand that the pizzas will be shared equally by everyone at the table and that a camper will be sitting at each plate.</p>"
+                  ]
+                }
+              },
+              {
+                "id": "DyXQzLXTJTfQsU_P",
+                "content": {
+                  "type": "Text",
+                  "format": "html",
+                  "text": [
+                    "<p><strong>Suggested Questions</strong></p>",
+                    "<ul><li>What do you notice about the tables and pizzas? What do you wonder? (Notice: The tables have different numbers of pizzas and different numbers of seats. More people sit in the middle at the large table. With more plates, there is also more pizza. Wonder: Where will I want to sit? Where will my friends sit? Where will I get the most pizza?)</li></ul>",
+                    "<p></p>"
+                  ]
+                }
+              },
+              {
+                "id": "abaXxKH6_vGlYlz2",
+                "content": {
+                  "type": "Text",
+                  "format": "html",
+                  "text": [
+                    "<p>Remind students that the campers’ only motivation in choosing a table is to get the greatest amount of pizza. Ask the following questions, but do not analyze students’ answers. Leave the analysis for the Summarize.</p>",
+                    "<ul><li>What quantities are being compared?</li><li>Will any of the strategies you used in Investigation 1 work for this situation?</li></ul>"
+                  ]
+                }
               }
-            },
-            {
-              "type": "launch",
-              "content": {
-                "tiles": [
                 ]
               }
             },
@@ -239,6 +1408,93 @@
               "type": "explore",
               "content": {
                 "tiles": [
+                   {
+                    "id": "9N0sYoxH-vdzoEex",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><u><strong>Explore (Digging In) </strong></u>       </p>",
+                        "<p><u>Providing for Individual Needs</u></p>",
+                        "<p></p>",
+                        "<p>For the Initial Challenge</p>",
+                        "<p></p>",
+                        "<p>This is an example of a ratio that relates quantities with different units, people and pizzas. After working through Investigation 1, most students should answer the Initial Challenge without too much difficulty, although some students may find it challenging to express their solutions in the language of ratios. It is possible to reason about the quantities and answer the question without finding specific numerical answers.</p>",
+                        "<p></p>",
+                        "<p>As you walk around observing groups, push students to make their reasoning and conclusion visible to others.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "3VGr0y-GjiqsAmsq",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<ul><li>Do you think that your diagram, notations, and explanation will show another group how you are making sense of the question? (Answers will vary.) </li><li>Can you think of another strategy to solve the Initial Challenge? Are your two strategies related? If so, how? (Leave the analysis for the Summarize.)</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "YG_ulRpe-LQ4Yf4w",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>For the What If:</em></p>",
+                        "<p></p>",
+                        "<p>Situation A requires students to analyze the reasoning of three other students and decide whether their methods are appropriate comparisons. The broader consideration is whether finding the difference between number of people and number of pizzas is useful in determining how much pizza each person gets.</p>",
+                        "<p></p>",
+                        "<p>In Situation B, students use what they learned to set up equivalent ratios and solve for an unknown value.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "easIJu-YxgbBdE1A",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<ul><li>How do you know that you set up the proportion correctly? (Possible answer: I made sure that the single table’s information was on one side of the equation and the full camp’s information was on the other side. I also made sure to match up the units.)</li></ul>",
+                        "<p></p>",
+                        "<p>Not all students will use proportions to answer these questions. Have students who use other methods share their strategies as well.</p>",
+                        "<p></p>",
+                        "<p>For Situation C, students might consider a fair number of pizzas to be somewhere between 3/8 and 4/10  of a pizza per person. Or students may choose to go with the amount on the large table because that had the most pizza for each person.</p>",
+                        "<p></p>",
+                        "<p>Students can set up proportions to solve for the unknown. For example, students may write.    3/8  = x/25 or 4/(10 )  =  x/25. If students are having difficulty with Situation C, ask,</p>",
+                        "<ul><li>What does the 4/(10 )  represent? (It represents how much of a pizza each person is getting at the large table. It is also the ratio of pizzas to people at the table.)</li></ul>",
+                        "<p></p>",
+                        "<p>Calling attention to this reasoning may help students to write a proportion by making a similar comparison.</p>",
+                        "<p></p>",
+                        "<p>For both the large table and the small table, the number used to scale to 25 seats is not a whole number. Students might have an easier time scaling 4/(10  )  by 2.5. Starting with 3/8 provides the opportunity to estimate, however. The scale factor in this case is a little more than 3 (exactly 3.125).</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><u>Planning for the Summary</u></p>",
+                        "<p></p>",
+                        "<p>What evidence will you use in the summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "7V_p9pJHfsZVMUn_",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Now What Do You Know?</em></p>",
+                        "<p><em>We have used several strategies for solving problems that involve ratios. How do you decide which method to use?</em></p>"
+                      ]
+                    }
+                  }
                 ]
               }
             },
@@ -246,11 +1502,1332 @@
               "type": "summarize",
               "content": {
                 "tiles": [
-                ]
-              }
+                  {
+                  "id": "BHhgULHApjtBsryF",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><u><strong>Summarize (Orchestrating the Discussion)</strong></u><strong>  </strong> </p>",
+                      "<p><u>Solutions and Strategies </u></p>",
+                      "<p></p>",
+                      "<p><em>For the Initial Challenge</em></p>",
+                      "<p></p>",
+                      "<p>Students will come up with a variety of ways to reason about this Problem. Let them present their strategies to one another and justify the validity of their approaches.</p>",
+                      "<p></p>",
+                      "<p>As students share their strategies, it is important to be clear about what comparisons are being made by the ratios. You can do this either by showing students directly or by asking them to be clearer in their explanations.</p>",
+                      "<p></p>",
+                      "<p>It is important that when students use certain strategies, such as scaling a ratio to an equivalent ratio, you explicitly call attention to that strategy for the class. Also, with unit rates, it is important for students to see how scaling a ratio so that one quantity is 1 connects to dividing to find a unit rate. (PORTRAYAL)</p>",
+                      "<p></p>",
+                      "<p>There are basically two ways to reason about pizzas and people. Those ways are related to the two unit rates, how much pizza for every 1 person or how many people share 1 pizza. Using pictures, students may use estimation. The basic notion is that to compare ratios, we need one of the two quantities to be constant, so we can reason about the multiplicative comparison.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "MG4UB2IYHhL7qndQ",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><em>Example Student Strategies and Reasoning</em></p>",
+                      "<p></p>",
+                      "<p> <em>Strategy 1: Reasoning with Pictures and Estimation</em></p>",
+                      "<p></p>",
+                      "<p>Some students will use the pictures to reason about the quantities. They often discuss how the pizza is shared without doing exact numerical calculations.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "2za7x3B8rwN-ly9M",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><em>Group 1: Groups of 2 and Groups of 3 People</em></p>",
+                      "<p>The people at the large table get more pizza. We know this because there are more groups of two people sharing a pizza. At the small table, you have two groups of 3 people and only one group of 2 people sharing the pizza. This means that there is more pizza for each person at the large table.</p>"
+                    ]
+                  }
+                },
+                [
+                  {
+                    "id": "lZzMVPIQlHGNKNI4",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  },
+                  {
+                    "id": "cF7EL9S7l6pLy7IC",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  }
+                ],
+                {
+                  "id": "eQf3BYVy7A7rr3fi",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Note: This is a version of how many people share every 1 pizza.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "emi-PV0uryCSzeGl",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><em>Group 2: Groups of 2 Share with the Extra People</em></p>",
+                      "<p>We looked at each pizza being shared with 2 people. </p>"
+                    ]
+                  }
+                },
+                [
+                  {
+                    "id": "c4M0UpgTasB0uTj4",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  },
+                  {
+                    "id": "EE9xKvJ_GINm9bO6",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  }
+                ],
+                {
+                  "id": "QlxIIAVy7yyB4YUG",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Then we thought about sharing the pizza with the “extra” people. At the large table, we can see people get more pizza because the “extra” people (at the ends of the table) get some of two pizzas. At the small table, the “extra” people get some of 1½ pizza. So at the small table, people get less.</p>"
+                    ]
+                  }
+                },
+                [
+                  {
+                    "id": "-IGLo1mgp0W--YAy",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  },
+                  {
+                    "id": "95VOMmmqBBfN3PvJ",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  }
+                ],
+                {
+                  "id": "d9hIjlauLHNMKUfF",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Note: This is a version of how much pizza is available for every 1 person.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "-Y5n6B_wHT-RdVCv",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><em>Group 3: Handing out Slices</em></p>",
+                      "<p></p>",
+                      "<p>We cut each pizza into 8 slices. Then we thought about passing out slices to each person at the table. We gave away slices in a clockwise order.</p>",
+                      "<p></p>"
+                    ]
+                  }
+                },
+                [
+                  {
+                    "id": "3nTHvYaRlbCex1i5",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Small Table</p>",
+                        "<p></p>",
+                        "<p>We gave a slice to each of the 8 people from each pizza.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "sW4NLq-qrUYQa6cm",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Large Table</p>",
+                        "<p></p>",
+                        "<p>1st pizza – we gave a slice to people 1-8. </p>",
+                        "<p></p>"
+                      ]
+                    }
+                  }
+                ],
+                [
+                  {
+                    "id": "SrrU5yU-fdtM6Yi7",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  },
+                  {
+                    "id": "j8dhTU7Zk4cUXLEk",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  }
+                ],
+                [
+                  {
+                    "id": "hcBSsj6VdilkO7V7",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Each person got 3 slices and there was no pizza left.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "RKJKgyFHD4VYLpA6",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>2nd pizza – we gave a slice to persons 9 and 10, then we had enough to give a piece to 1-6.</p>"
+                      ]
+                    }
+                  }
+                ],
+                [
+                  {
+                    "id": "DjSqp8u9vJ_60AIM",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "_MdYhg2ssHbsLPi-",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  }
+                ],
+                [
+                  {
+                    "id": "hTaDy1_e1s-JGBJO",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "UqYnFrsaFa6cjUrO",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>3rd pizza – we gave a slice to 7, 8, 9, and 10, then still had enough to give 1-4 another slice.</p>"
+                      ]
+                    }
+                  }
+                ],
+                [
+                  {
+                    "id": "TDa8wkmqgVIQUSTS",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "yMHPpaDgzLzETAa3",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  }
+                ],
+                [
+                  {
+                    "id": "8UCr2WaWA7-kYfjc",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "UD30-L3wXtkN-Xu2",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>4th pizza – we gave a slice to people 5-10.</p>"
+                      ]
+                    }
+                  }
+                ],
+                [
+                  {
+                    "id": "LA1e2PO8pYTOGEpQ",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "P1kEZWx9JAIgEO6q",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  }
+                ],
+                [
+                  {
+                    "id": "ATWWbTjPW9QcIQKK",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "B3JeGP7UjBJjaVrH",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Each person got 3 slices and there were 2 pieces left over.</p>"
+                      ]
+                    }
+                  }
+                ],
+                {
+                  "id": "cFQGT8ih1FsJ-SLS",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>At each table, the people got 3 slices. But at the large table, there is more to share. So you would get more pizza at the large table.</p>",
+                      "<p></p>",
+                      "<p>Note: This is a version of how much pizza is available for every 1 person.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "d0UztBq8b3Mk_RcE",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><em>Strategy 2: How Much Pizza for a Fixed Number of People</em></p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "5pgQxtVbU7rrb5VX",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Group 4: Unit Rate (How much pizza for every 1 person)</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "Pp4kfbosYfLAniaS",
+                  "content": {
+                    "type": "Image",
+                    "url": "assets/images/image_placeholder.png"
+                  }
+                },
+                {
+                  "id": "kJj4wtnWngqob0JJ",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Note that some students will lose track of the meaning of the numbers when dividing. To help, have other students show labeling and scaling quantities in the rate.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "jsETUBZJHs3fZLHK",
+                  "content": {
+                    "type": "Image",
+                    "url": "assets/images/image_placeholder.png"
+                  }
+                },
+                {
+                  "id": "aDXPRXp6MerqO9qy",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><em>Group 5: Equal Numbers of People</em></p>",
+                      "<p>We found how much pizza there would be for the same number of people. We found that the number of people could easily be scaled to 40 people, because 40 is the least common multiple of 10 and 8.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "vU2oIyB-CcMBLAGc",
+                  "content": {
+                    "type": "Image",
+                    "url": "assets/images/image_placeholder.png"
+                  }
+                },
+                {
+                  "id": "F2VSzKi7b5amd0EP",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>The larger table is better, because there is more pizza (first quantity) for the same amount of people (second quantity). It shows having an extra pizza for the 40 people. So there will be more pizza per person.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "raVeI-cICwYBcVrR",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><em>Group 6: Percentage of Pizza</em></p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "D8g0eoWLYx4cowha",
+                  "content": {
+                    "type": "Image",
+                    "url": "assets/images/image_placeholder.png"
+                  }
+                },
+                {
+                  "id": "Yz-XjnXjn3tyvJKl",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Note that some students lose track of the meaning of the numbers when dividing then multiplying. To help, have other students show labeling and scaling quantities out of 100.</p>"
+                    ]
+                  }
+                },
+                [
+                  {
+                    "id": "AlrNhgeN-02TfS6d",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  },
+                  {
+                    "id": "ZCsIKcCTWRXkiAiS",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  }
+                ],
+                {
+                  "id": "Lx5jU0XVyGvK5kzE",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>The percentage strategy connects to both the unit rate and the “equal number of people.” The percent strategy is like having an “equal number of people” of 100. The unit rate strategy shows a scaled down version of the percentages, which are a rate per 100.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "Zd3-QYguWUL5acrQ",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Group 7: Finding Slices Per Person</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "8uEZKoukxO1Z_WOR",
+                  "content": {
+                    "type": "Image",
+                    "url": "assets/images/image_placeholder.png"
+                  }
+                },
+                {
+                  "id": "a1mlNJG07MTRhRbo",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Group 8: Slicing Pizza to Share a Fraction of the Pizza</p>",
+                      "<p>We split each pizza into the number of people at the table.</p>"
+                    ]
+                  }
+                },
+                [
+                  {
+                    "id": "p-nWEe6fmFr6yD-3",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Large Table</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "5MUPf7JyGL1l8CY0",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Small Table</p>"
+                      ]
+                    }
+                  }
+                ],
+                [
+                  {
+                    "id": "tjIC_4JTDVYGmlCK",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  },
+                  {
+                    "id": "w4IpojoW8OyNOtqV",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  }
+                ],
+                [
+                  {
+                    "id": "7z0pGwvSVggGPQF2",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Each person gets 4 of the 1/10 slices or</p>",
+                        "<p>4/10 of a pizza.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "ELoLsqSpzhda5Y4x",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Each person gets 3 of the 1/8 slices or </p>",
+                        "<p>3/8 of a pizza.</p>"
+                      ]
+                    }
+                  }
+                ],
+                {
+                  "id": "iYB0pL2r5jN9d0jJ",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>4/10  (0.4) of a pizza is more than 3/8 (0.375) of a pizza. So the large table gets more.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "5UFnFy_OXxHVcbWE",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><em>Strategy 3: How Many People for a Fixed Number of Pizzas</em></p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "xLgcv95c7HPBTQAk",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><em>Group 9: Equal Numbers of Pizza</em></p>",
+                      "<p>Step 1: We found a common number of pizzas. </p>",
+                      "<p></p>",
+                      "<p>       4 pizzas/ 10 people  =   12 pizzas/30 people                              </p>",
+                      "<p>       3 pizzas/ 8 people =  12 pizzas/32 people             </p>",
+                      "<p>Step 2: See which is greater.</p>",
+                      "<p>         12/30      &gt;      12/32                     </p>",
+                      "<p></p>",
+                      "<p>The larger table is better, because the amount of pizza (first quantity) is the same for a smaller amount of people (second quantity). So there will be more pizza per person.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "LDXzjLpii-dCw5ax",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><em>Group 10: Unit Rate (How many people for every 1 pizza)</em></p>"
+                    ]
+                  }
+                },
+                [
+                  {
+                    "id": "otWk5GQcotHH8Uz8",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Large Table</p>",
+                        "<p></p>",
+                        "<p>10 people need to share 4 pizzas.</p>",
+                        "<p></p>",
+                        "<p>10 ÷ 4 = 2.5 number of people per pizza</p>",
+                        "<p> </p>",
+                        "<p>OR</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "W_tl0jRCGibznHYe",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Small Table</p>",
+                        "<p></p>",
+                        "<p>8 people need to share 3 pizzas.</p>",
+                        "<p></p>",
+                        "<p>8 ÷ 3 = 2 2/3 number of people per pizza</p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p>OR</p>"
+                      ]
+                    }
+                  }
+                ],
+                [
+                  {
+                    "id": "h9G4YdAe65yZebLc",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  },
+                  {
+                    "id": "KLw2FGBCP2kqBODW",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  }
+                ],
+                {
+                  "id": "-tlqwrMWiJ-SZB5q",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>The people at the large table would get a bit more pizza than at the small table.</p>",
+                      "<p></p>",
+                      "<p>                                 2.5 &lt; 2.6</p>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><u>Making the Mathematics Explicit </u></p>",
+                      "<p>For the Initial Challenge</p>",
+                      "<p>During the discussion of strategies, have students begin sorting their work into similar kinds of thinking. They should begin to see that there are two ways to think about this situation: </p>",
+                      "<ul><li>How much pizza for a fixed number of people.</li><li>How many people share a fixed number of pizzas.</li></ul>",
+                      "<p></p>",
+                      "<p>After sorting the student work, lay the foundation for the next Problem by discussing rates.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "Wcz0RgJNt2JPQ5aL",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Suggested Questions</strong></p>",
+                      "<ul><li>I noticed that most of you did a part-to-part ratio. Did anyone do a part to whole ratio? (No. It would not make sense to combine the pizza and people into a whole.)</li><li>What quantities are you comparing? Do they have the same units of measure? (They are different types of quantities: pizza and people.)</li><li>Since each ratio is a comparison of two quantities measured in different units (pizza and tables), they are called rates. Can you think of other rates (comparisons with different units that would not combine to a part to whole ratio) that we have used? (Answers will vary. Investigation 1 examples include number of batches and number of 1 cup servings, miles jogged to calories burned, time and miles jogged. In Grade 6 Comparing Quantities examples included, students looked at; cupcakes and cost, Chewy Fruit Worm sold and amount of money collected, ounces of kernels and cups of popcorn, time and distance traveled.)</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "id": "pcxnw3YnJJ6nxfT5",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><em>For the What If</em></p>",
+                      "<p></p>",
+                      "<p><strong>Suggested Questions for Situation A </strong></p>",
+                      "<ul><li>How did Selma find the amount of pizza per person? (She scaled down each quantity. For the Large Table, she divided each quantity by 10 to find the amount for 1 person. For the Small Table, she divided each quantity by 8 to find the amount for 1 person.)</li><li>Do you agree with her conclusion that the Large Table would get more pizza? (Yes. That is what we found in the Initial Challenge.)</li><li>How did Tony find the number of people sharing one pizza? (He scaled down each quantity. For the Large Table, he divided each quantity by 4 to find the amount for 1 pizza. For the Small Table, she divided each quantity by 3 to find the amount for 1 pizza.)</li><li>Do you agree with his conclusion that the Small Table would get more pizza? (No. He did the correct calculations. But his conclusion is incorrect. 2.5 &lt; 2 2/3. So, at the Large Table you have less people (2.5) eating the pizza which means everyone gets more pizza.)</li><li>How did Terry make his conclusion? (He subtracted. The difference of 6 at the Large Table has no meaning. You cannot subtract pizza from people. Also, you cannot find ratio equivalence by subtracting.)</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "id": "5klZMtKe_R6x-he5",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>In Grade 6 in the <em>Comparing Quantities</em> unit, students learned that ratios are multiplicative reasoning. So additive reasoning is not the way to ratio equivalence.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "3Q6mC29w-Z1oEimA",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Suggested Questions for Situation  B </strong></p>",
+                      "<ul><li>What strategies did you use to find how many pizzas are needed? (Answers will vary.)</li><li>Would a unit rate be helpful?  (Yes.  A rate table may be used by some students to find and use the unit rate:</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "id": "sJt6QA9e_J7-1RsC",
+                  "content": {
+                    "type": "Image",
+                    "url": "assets/images/image_placeholder.png"
+                  }
+                },
+                {
+                  "id": "F8CsWnEK39bAGr7u",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<ul><li>Would setting up a proportion be helpful? (Yes.)</li><li>How would the proportion be set-up? (Possible Answers.</li></ul>",
+                      "<p>        Small Table: (8 people)/(3 pizzas )=  (210 people)/(x pizzas) </p>",
+                      "<p></p>",
+                      "<p>  Large Table: : (10 people)/(4 pizzas )=  (210 people)/(x pizzas) </p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "WDrthInYqdsEXLjT",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Suggested Questions for Situation C</strong></p>",
+                      "<p>Students have to think about how many pizzas make sense for an extra-large table. Then they have to figure out what to do with the fact that at least one table will not be full, since 25 is not a factor of 210.</p>",
+                      "<ul><li>How many pizzas make sense for the extra-large table? (Answers will vary. Possible reasoning may include: 25 is about 3 times 8, so there could be 3 x 3 or 9 pizzas at an extra-large table. Or 25 is 2.5 times 10, so there could be 2.5 x 4 or 10 pizzas at an extra-large table. Or somewhere between 3/8 and 4/10 of a pizza per person. Or just use the amount on the large table because that had the most pizza for each person.)</li><li>What strategies did you use to find the number of pizzas? (Answers will vary. Possible answers may include proportions, equivalent ratios, or scaling up.)</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><u>Now What Do Students Know</u></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p>Ask students to reflect on the discussion and answer the Now What Do You Know.</p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p>Students used proportions in Investigation 1, but probably not in this Problem. They may have compared ratios or scaled up or down. Investigation 1 had part to part and part to whole comparisons. Problem 2.1 is all part-to-part ratios.</p>",
+                      "<p></p>",
+                      "<p>See answers for more information about the strategies and embedded mathematics.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "GwC8YVmuD9_HbVMS",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Reflecting on Student Learning</strong></p>",
+                      "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
+                      "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li></ul>",
+                      "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
+                      "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?  </li></ul>"
+                    ]
+                  }
+                }
+              ]
             }
-          ]
-        },
+          }
+        ]
+      },
+      {
+        "description": "Problem 2.2",
+        "ordinal": 2,
+         "title": "CAS 2.2 Comparing Pizza Prices",
+        "subtitle": "How Do We Know It Is Proportional?",
+        "sections": [
+          {
+            "type": "overview",
+            "content":
+            {
+              "tiles": [
+                {
+                  "id": "4f2OyGvQkj7omGLf",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>In Problem 2.2, students scale ratios to solve problems. The ratios in Problem 2.2 are rates. Each ratio/rate compares two quantities measured in different units, number of pizzas and price in dollars. This is not the first time students have used rates, but it is the first time the word has been explicitly defined. Student also used rate tables in the Grade 6 unit, Comparing Quantities.</p>",
+                      "<p></p>",
+                      "<p>While using rate tables to compare pizza prices at two different pizzerias.   The pizza prices foreshadow the introduction of the “constant of proportionality,” which is introduced in Problem 2.3. Students find patterns within a rate table contrasting two different situations, one of which is proportional and the other is not. Students will need to determine the impact of a delivery charge being added to the price of pizzas from one company. Presenting students with a non-proportional situation allows students to compare and contrast to a proportional situation. This makes it more explicit how to describe a proportional relationship.</p>",
+                      "<p><strong>Implementation Note</strong>: Be sure to hold a discussion after the Initial Challenge before moving on to the What If. This will allow you to highlight your students’ strategies before analyzing the strategies of other students that are presented in the What If. You can use the strategies in the What If to connect to how your students thought about the proportional and non-proportional costs when making the tables.</p>",
+                      "<p>Have students work on the Initial Challenge. As the groups finish, have them look at the What If questions and compare their thinking and strategies to the students in the What If. This may allow a discussion of strategies different from students’ own thinking for solving the Initial Challenge.</p>"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "type": "launch",
+            "content": {
+              "tiles": [
+                {
+                  "id": "pMun37ewcnwz9EVr",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><u><strong>Launch (Getting Started)</strong></u></p>",
+                      "<p><u>Connecting to Prior Knowledge</u></p>",
+                      "<p>Use <strong>Learning Aid 2.2</strong>: Royal and Howdy’s Pizza Costs to discuss the comparison statements in the Introduction.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "czJ1ukE_CHhM_B0T",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Suggested Questions</strong></p>",
+                      "<ul><li>Comparisons have two quantities. What are the two quantities in each statement? (number of pizzas and cost)</li></ul>",
+                      "<p>If you did not introduce the term and description of a rate in the Summarize of Problem 2.1, introduce the term now.</p>",
+                      "<ul><li>Since each ratio is a comparison of two quantities measured in different units (pizza and tables), they are called rates. Can you think of other rates (comparisons with different units that would not combine to a part to whole ratio) that we have used? (Answers will vary. Investigation 1 examples include number of batches and number of 1 cup servings, or the words Mitch can read in hour. In Grade 6 Comparing Quantities examples included cupcakes and cost, Chewy Fruit Worms sold and amount of money collected, ounces of kernels and cups of popcorn, time and distance traveled.)</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "id": "x1CYnzHv3xWcuB2u",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Use <strong>Teaching Aid 2.2</strong>: Introduction to review the rate table and proportion strategies in the Introduction. These strategies review finding the number of pizzas for 210 people in the previous Problem.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "vp9SZS1P_3r_RE5G",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><em>Tony’s Rate Table: To find the number of pizzas for 210 people</em>.</p>",
+                      "<p>Students might use what they know about multiples and scale up from 30 people to 210 people.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "N8ujiuxvF0u53GMX",
+                  "content": {
+                    "type": "Image",
+                    "url": "assets/images/image_placeholder.png"
+                  }
+                },
+                {
+                  "id": "2joGn7u_IenLUDhA",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Students might combine the ratios of 200 people get 80 pizzas and 10 people get 4 pizzas to find that 210 people get 84 pizzas.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "oy2bl6hQtuqXnImu",
+                  "content": {
+                    "type": "Image",
+                    "url": "assets/images/image_placeholder.png"
+                  }
+                },
+                {
+                  "id": "zwwonQtazRMA3_4V",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Students might use what they know about multiples and scale up from 10 people to 210 people.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "TmkQvK91VFGYSic6",
+                  "content": {
+                    "type": "Image",
+                    "url": "assets/images/image_placeholder.png"
+                  }
+                },
+                {
+                  "id": "3TrsLvz-GQlJMSPV",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><em>Selma’s Proportion: To find the number of pizzas for 210 people.</em></p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "8MAaGdjloCyTjtmW",
+                  "content": {
+                    "type": "Image",
+                    "url": "assets/images/image_placeholder.png"
+                  }
+                },
+                {
+                  "id": "wJ_piwDMEqPhUs9A",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><u>Presenting the Challenge</u></p>",
+                      "<p></p>",
+                      "<p>For the Initial Challenge, have students keep their books closed or keep them from looking at the What If. The What If presents student strategies that you may not want students to see until after working on the tables with pizzas.</p>",
+                      "<p>Introduce the Royal Pizza and Howdy’s Pizza deals using <strong>Learning Aid 2.2: Royal and Howdy’s Pizza Costs</strong>. You will want one Learning Aid per student to optimize class time. Tell students that Royal Pizza and Howdy’s Pizza are advertising their prices. Students need to notice the different costs for the different amounts of pizza.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "Szmkqp-ZfMgfBG8F",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Suggested Questions</strong></p>",
+                      "<ul><li>We are considering buying pizza for a class celebration. I found adds from two pizzerias. What do you notice and what do you wonder? (Answer will vary. Students may wonder and notice things about the names of the pizzerias, the quality of the pizzas, the price for different numbers of pizzas, what the toppings might be or cost, and the delivery charges.)</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "id": "Ly0_kxp2HywofOwf",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Have students work with a partner on this Problem.  </p>"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "type": "explore",
+            "content": {
+              "tiles": [
+                {
+                  "id": "ga5Z7td9ii6drV7f",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><u><strong>Explore (Digging In)</strong></u></p>",
+                      "<p><u>Providing for Individual Needs</u></p>",
+                      "<p></p>",
+                      "<p><em>Initial Challenge Questions</em></p>",
+                      "<p></p>",
+                      "<p>As students work on the Initial Challenge, circulate and ask them questions. </p>",
+                      "<p>Use questions to have students consider ways to think about filling the quantities in the table.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "vIP0GY3I4-6pvP3A",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Suggested Questions</strong></p>",
+                      "<ul><li>If we consider Royal Pizza, what do we know about the pizza costs there? (5 pizzas cost $65.)</li><li>How might we draw a picture to represent that?</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "id": "LjcMdqM9i-6UbkFa",
+                  "content": {
+                    "type": "Image",
+                    "url": "assets/images/image_placeholder.png"
+                  }
+                },
+                {
+                  "id": "eB1H1kes8JA0BPFa",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<ul><li>What does that mean for how the $65 relates to the 5 pizzas? (The cost of the 5 pizzas was added up to $65 or the cost per pizza is multiplied to get $65.)</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "id": "0XCwM8r-rAw8INlG",
+                  "content": {
+                    "type": "Image",
+                    "url": "assets/images/image_placeholder.png"
+                  }
+                },
+                {
+                  "id": "0U9cMVVYKpq7jhJk",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<ul><li>How can we determine the cost of one of the pizzas? (We can break the $65 into 5 groups to find the cost of 1 pizza.)</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "id": "RDVZBV79R_ELgW0B",
+                  "content": {
+                    "type": "Image",
+                    "url": "assets/images/image_placeholder.png"
+                  }
+                },
+                {
+                  "id": "X6igKy8j2XEj4GFx",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<ul><li>Now that we know the cost for each pizza, how can we find the cost for 2 pizzas? Or 3 pizzas? Or 4 pizzas? (We can add that many groups of $13 dollars.)</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "id": "yqscCb1S2y3_L6Ss",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>When you know that students understand that this is a multiplicative relationship, that is, how the cost of the pizza is shared equally among the pizzas, you can ask questions to encourage students to use proportional reasoning. </p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "jYN6KXeYJU2sLojS",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Suggested Questions</strong></p>",
+                      "<ul><li>For Royal, we know the cost for 5 pizzas. How can we find the cost for 10 pizzas? (If you double the pizzas, you double the cost.) You may want help students see the connection between their words and mathematical notation. When they verbally describe a proportion, link it to the mathematical equation that shows the proportion.</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "id": "xjY7xvHNGQKDeQzY",
+                  "content": {
+                    "type": "Image",
+                    "url": "assets/images/image_placeholder.png"
+                  }
+                },
+                {
+                  "id": "-7L9nwo53Yl7Ovro",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<ul><li>How can we find the cost for 15 pizzas? (Combine the cost for 5 and 10 pizzas. $65 + $130 = $195 Or, scale both quantities by 3.)</li><li>For Royal, we know the cost for 5 pizzas. How can we find the cost for 20 pizzas? (Since we are scaling the number of pizzas by 4, we can scale the price by 4.)</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "id": "TNLC-882X1CqfgQf",
+                  "content": {
+                    "type": "Image",
+                    "url": "assets/images/image_placeholder.png"
+                  }
+                },
+                {
+                  "id": "GrEs1tjJKGw43tfY",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Students need to be aware that there is a delivery charge for Howdy’s. You can use questions to draw their attention to the added fee. Do not push too much at how to add in the $30 charge. Leave some of that conversation until the Summarize. </p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "fP8BsH2QliRU_Jsm",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Suggested Questions</strong></p>",
+                      "<ul><li>For Howdy’s Pizza, if I look at the ad, it says that 15 pizzas cost $165. Why does the table show $195 for 15 pizzas? (Students may or may not be able to answer that the amount in the table has the delivery charge added in.)</li><li>If students don’t recognize why the amounts are different, direct them back to the ad. What do you notice on the ad for Howdy’s Pizza for any money added to the cost? (It says that there is a price for 15 pizzas and a $30 delivery charge.)</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "id": "JT3M4rkDBMH4AM-o",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>This is an inequality situation. Groups should have different answers depending on the number of pizzas being considered. Push students to consider when the price is better.  </p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "vTee5BL3xFnOCxRI",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Suggested Questions</strong></p>",
+                      "<ul><li>Who has the cheaper price for pizza? (Students may answer either pizzeria, because it depends on how many pizzas are being ordered.)</li><li>Will that pizzeria always be the cheapest? (No. Order from Royal when the number of pizzas, N, ≤ 15. Order from Howdy’s when N ≥ 15.)</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "id": "En9QfV7yC16wZEKE",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>As groups finish, you can have them look at the What If to compare their thinking and strategies to the students in the What If. </p>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><u>Planning for the Summary</u></p>",
+                      "<p></p>",
+                      "<p>What evidence will you use in the summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence? </p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "6_c7ptqmp1n5lqeb",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><em>Now What Do You Know?</em></p>",
+                      "<p><em>How can you determine if a situation is proportional? </em></p>"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "type": "summarize",
+            "content": {
+              "tiles": [
+                {
+                  "id": "lUigUrFnbRFburql",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><u><strong>Summarize (Orchestrating the Discussion)</strong></u>    </p>",
+                      "<p><u>Solutions and Strategies </u></p>",
+                      "<p></p>",
+                      "<p>Begin with a discussion of which pizzeria Julia should choose.</p>",
+                      "<p></p>",
+                      "<p>This is an inequality situation. Groups should have different answers depending on the number of pizzas being considered. Push the students to consider when the price is better.  </p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "ceIEWL5yHDPD_Fwx",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Suggested Questions</strong></p>",
+                      "<ul><li>Which company should Julia buy the pizza from? (It depends on how many pizzas she wants to get.)</li><li>What recommendation would you give her? (Order from Royal Pizza when the number of pizzas, N, ≤ 15. Order from Howdy’s Pizza  when N ≥ 15.)</li><li>How can you describe the pattern between the variables for Royal Pizza? (As the number of pizzas increase by 1, the price increases by $13.)</li><li>How can you describe the pattern between the variables for Howdy’s Pizza? (As the number of pizzas increases by 1, the price increases by varying amounts. There is not a constant increase.)</li><li>If we were to make a graph for both tables, what would happen at 15 pizzas? (The two graphs would share the same point at 15 pizzas because the price of $195 is the same for each company.) Note: You may want to use technology or quickly sketch the graphs to demonstrate this to students, if they have not looked at the graphs before this time.</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><u>Making the Mathematics Explicit </u></p>",
+                      "<p></p>",
+                      "<p>Have students share their strategies for finding the values on the tables. As students discuss their proportional reasoning with the tables, make sure to connect the various ways of notating their thinking.</p>",
+                      "<p></p>",
+                      "<p>By the end of the discussion, students should connect finding the values in the tables to writing proportions. Students need to see that Royal’s rates are proportional and Howdy’s rates are not proportional. With Howdy’s, you cannot scale the two quantities because there is an amount added in. This changes the multiplicative nature of the two quantities.</p>",
+                      "<p></p>",
+                      "<p>Amit’s Strategy is introduced in the What If to help make this non-proportional relationship evident to students.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "zHXpReZRNYVhr90j",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Suggested Questions</strong></p>",
+                      "<ul><li>Does the scaling in Amit’s table work? Will 5 pizzas cost $65 at Howdy’s? (No. Scaling will not work. Because we are adding the delivery charge, it changes the multiplicative relationship.)</li><li>What do you think about Eun Mi’s claim in Situation A, do proportions work for Royal, but not for Howdy’s? (Yes. From the table for Royal, we can look at any two sets of values and write a proportion. We cannot do that for Howdy’s. The $30 delivery charge makes it additive and multiplicative, so it is not proportional.)</li></ul>",
+                      "<p></p>",
+                      "<p>Examples are shown below. </p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "9XdclT3sClizHTm3",
+                  "content": {
+                    "type": "Image",
+                    "url": "assets/images/image_placeholder.png"
+                  }
+                },
+                {
+                  "id": "zF8Cmwc8GTutsr9g",
+                  "content": {
+                    "type": "Image",
+                    "url": "assets/images/image_placeholder.png"
+                  }
+                },
+                {
+                  "id": "nQy0_T8Va21tYUiq",
+                  "content": {
+                    "type": "Image",
+                    "url": "assets/images/image_placeholder.png"
+                  }
+                },
+                {
+                  "id": "Yd-WRhXZx30rh4If",
+                  "content": {
+                    "type": "Image",
+                    "url": "assets/images/image_placeholder.png"
+                  }
+                },
+                {
+                  "id": "rHGFrw7Wtm9hIHwF",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<ul><li>How do we find the unit rate? (Royal: It is in the pattern between the variables. As the number of pizzas increase by 1, the price increases by $13.Howdy’s: Some students will discuss that the cost for each pizza changes, so there is no unit rate. For example, 1 pizza costs $41, 2 pizzas cost $52 or $26 each, 3 pizzas cost $63 or $21 each. Other students will say that the unit rate is $11 for each pizza, but then you have to add in the delivery charge.) Note that because there is an amount added for Howdy’s, 11 is not considered a unit rate. Students will learn in the next Unit that the 11 is the rate of change.</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "id": "tGFFa7-jd2JLfCuy",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>You can introduce the vocabulary of “constant of proportionality” now or wait until the Introduction of Problem 2.3. Since the quantities for Royal are proportional, the constant of proportionality is 13. Since the quantities for Howdy’s are not proportional, there is no constant of proportionality.</p>",
+                      "<p></p>",
+                      "<ul><li>How is this Problem similar to and/or different from previous Problems? (In this Problem Royal is proportional and you can scale up or down, which is like all the previous Problems. Howdy’s is not proportional, so you can’t use a proportion or rate table to scale it up or down.)</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><u>Now What Do Students Know</u></p>",
+                      "<p></p>",
+                      "<p>Ask students to reflect on the discussion and answer the Now What Do You Know question.</p>",
+                      "<p></p>",
+                      "<p><em>How can you determine if a situation is proportional?</em></p>",
+                      "<p></p>",
+                      "<p>See answers for more information about the strategies and embedded mathematics. Students’ answers may be limited at this time. They will have a chance to build on this idea later in this Unit and in the next Unit, <em>Moving Straight Ahead.</em></p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "ddaNIz8Cf4KNyjdV",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Reflecting on Student Learning</strong></p>",
+                      "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
+                      "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li></ul>",
+                      "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
+                      "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
         {
           "description": "Problem 2.3",
           "ordinal": 3,
@@ -262,6 +2839,16 @@
               "content":
               {
                 "tiles": [
+                  {
+                    "id": "pXrpNiK6YKAmqCnP",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>This Problem focuses on how unit rate, or constant of proportionality, is helpful to solve problems. Students also look at the role of unit rate in different representations of tables, graphs, and equations.</p>"
+                      ]
+                    }
+                  }
                 ]
               }
             },
@@ -269,6 +2856,70 @@
               "type": "launch",
               "content": {
                 "tiles": [
+                  {
+                    "id": "Ce0ddFqDIekcTc0W",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>If we let C represent the cost of a pizza and N represent the number of pizzas,</p>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "aOBBfjAILB8J9wsO",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Royal Pizza</p>",
+                          "<p>Proportion    OR    Linear </p>",
+                          "<p>Equation                      Equation</p>",
+                          "<p>C/N  = 13/1             OR      C = 13N</p>",
+                          "<p>With the proportional situation, both equations are equivalent. You can multiply one variable by a constant number to get the value of the other variable. </p>",
+                          "<p></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "VLndSuMeVRsGUjqc",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Howdy’s Pizza</p>",
+                          "<p></p>",
+                          "<p>Linear Equation</p>",
+                          "<p></p>",
+                          "<p>C = 11N + 30</p>",
+                          "<p></p>",
+                          "<p>You cannot write C = 11N + 30 as a proportion. The add-on changes the unit rate with each N. So there is no constant of proportionality. You cannot multiply one variable by a constant number to get the value of the other variable. </p>"
+                        ]
+                      }
+                    }
+                  ],
+                  {
+                    "id": "zUaaoxdPbicBpQ-C",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Note:  The unit rate,  (5 pizzas)/$65=  (5/65)/$1  or 5/65 pizza for $1, exists but it might not be as useful depending on the situation.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "F77Bc8AeJUqG1cOM",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><u>Presenting the Challenge</u></p>",
+                        "<p>Students will be analyzing the proportionality in descriptions, tables, graphs, and equations.  Let students know that the situation involves a sale on oranges where they are 10 oranges for $2.  Students will analyze how they can use this information to think about buying any number of oranges. Have students begin this work independently for a few minutes and then work with a partner.</p>"
+                      ]
+                    }
+                  }
                 ]
               }
             },
@@ -276,6 +2927,350 @@
               "type": "explore",
               "content": {
                 "tiles": [
+                  {
+                    "id": "9vggRGaUkA3LPVYy",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong><u>Explore (Digging In</u></strong>)</p>",
+                        "<p><u>Providing for Individual Needs</u></p>",
+                        "<p></p>",
+                        "<p>As groups work on this Problem, make sure that students are relating the two quantities in the rate table to the variables in the equations and graphs.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "WV8OKLgHJmAo_mdw",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<ul><li>What does the N stand for in the equations? (number of oranges)</li><li>Where do you see number of oranges in the table? (top row) In the graph? (In one graph it is the dependent variable. In the other graph it is the independent variable.)</li><li>What does the C stand for in the equations? (total cost in dollars)</li><li>Where do you see total cost in dollars in the table? (bottom row) In the graph? (In one graph it is the dependent variable. In the other graph it is the independent variable.)</li><li>In What if Situation A, what does the table, graph, or equation say to you? (Answers will vary. Get students to discuss how each relates to Noralie buying tickets for the concert.)</li><li>For What if Situation B, is there a previous strategy that could help you? (Answers will vary. Students may suggest a table, graph, unit rate, equation, scaling, etc.)</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><u>Planning for the Summary</u></p>",
+                        "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "d-tu-6qCU9CXdlby",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Now What Do You Know?</em></p>",
+                        "<p><em>Describe how you can determine a unit rate, or constant of proportionality, in a description, rate table, equation, or graph. In what ways is a unit rate or the constant of proportionality helpful for solving a problem?</em></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "c2UhywuTocMSzac5",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Begin by having students discuss why Mia has only one table while she has two equations and two graphs.</p>",
+                        "<p></p>",
+                        "<p><strong>Note:</strong> One table works for both unit rates. With a table, the variables can be put in either row (or column, if you have a vertical table). There is no mathematical convention for setting up a table in a certain way. However, each unit rate has a unique graph and equation. For the graph and equation, you must identify which variable is independent and which is dependent. For the situation of buying oranges, it depends on which unit rate you want to focus on.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "rAPZ1tcy1gNOBn4k",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<ul><li>Why does Mia have only one table when she has two equations and two graphs? (Both unit rates are in the table. The equation and graph represent just one of the two unit rates.)</li></ul>",
+                        "<p></p>",
+                        "<p>Extend the conversation to look at how the unit rate appears in the equations and graphs.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "kvhamCCLw3N-yGVL",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<ul><li>What do Mia’s equations tell us? C = 0.20N? (Total Cost C for any number of oranges, N) N = 5C? (Number of Oranges for the cost in dollars, C)</li><li>With the equation C = 0.20N, what is the independent variable? (number of oranges) Dependent variable? (cost in dollars)</li><li>What is the unit rate? ($0.20 for each orange)</li><li>Where do you see the unit rate in the table? (When the amount of oranges is 1.) Equation? (The coefficient of N.) Graph? (The value of the dependent variable when the independent variable is 1. The coordinate pair (1, 0.2).)</li><li>With the equation N = 5C, what is the independent variable? (cost in dollars) Dependent variable? (number of oranges)</li><li>What is the unit rate? (5 for each dollar)</li><li>Where do you see the unit rate in the table? (When the total cost is 1.) Equation? (The coefficient of N.) Graph? (The value of the dependent variable when the independent variable is 1. The coordinate pair (1, 5).)</li><li>Which unit rate would you use to answer the following questions?</li></ul>",
+                        "<p>How many oranges can you buy for $5? (5 oranges for every 1 dollar or N = 5C)</p>",
+                        "<p>How much do 25 oranges cost? ($0.20 for every orange or C = 0.20N)</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "l1JspeufbRaMHS_S",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><u>Making the Mathematics Explicit </u></p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "n2T5P1JnW8YBrAI3",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>What If Situation A. Buying Tickets </em></p>",
+                        "<p></p>",
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<ul><li>What is the unit rate or constant of proportionality for Noralie’s concert ticket? ($30)</li><li>Where do you see the constant of proportionality in the graph and the equation? (In the graph it is when the independent variable is 1 at the point (1, 30). In the equation, it is the coefficient of N.)  </li><li>If I know that this is a proportional situation and 2 tickets cost $60, how can I find how many tickets I can buy with $120? (Since it is proportional, if the money is doubled then the tickets will be doubled. So 4 tickets will cost $120.)</li><li>If we start at the origin, then go over and up to draw a triangle to each of those points, what is the relationship between the 2 triangles?  (They are similar or scale drawings. We doubled the base and height of the original triangle by doubling each quantity in the rate.) </li></ul>",
+                        "<p><strong>Note</strong>: This should be a review from their work with scaled drawing/similar figures in the Stretching and Shrinking Unit. Show students the triangles on the graph. </p>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "8Aw8BaM9M_525njZ",
+                      "content": {
+                        "type": "Image",
+                        "url": "assets/images/image_placeholder.png"
+                      }
+                    },
+                    {
+                      "id": "pBbdzco9ABtEHby8",
+                      "content": {
+                        "type": "Image",
+                        "url": "assets/images/image_placeholder.png"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "LB1K3rCIfifTSIbU",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>What If Situation A question 4 gives another counter-example to proportional relationships. By analyzing non-proportional relationships, students can gain a deeper understanding of what it means to be proportional. Ask students questions to push them to compare and contrast. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "W39SaySMpAfn9ThT",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>How are the representations (description, equation, graph, table) the same and different with a $10 processing fee?</li></ul>",
+                        "<p></p>",
+                        "<p>Answers should include a discussion of:</p>",
+                        "<p>Description: There is a $10 fee added in.</p>",
+                        "<p>Equation: The equation has the 10 added in. P = 30N + 10</p>",
+                        "<p>Table: Every amount would have $10 added to the cost.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "tayl-OrtkhILuTAI",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  },
+                  {
+                    "id": "qgA56nv2aHCNsKAb",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Graph: The line has slid up. Students may mention that this is like what happened with Mug’s hats in <em>Stretching and Shrinking</em> Problem 2.2. When you added to the rule for a hat, it slid the figure.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "R5wTnoqijLr12E_L",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  },
+                  {
+                    "id": "B3qxrQ9nx1aIyhit",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>With question 4, we can help students understand proportionality by contrasting to this non-proportional relationship.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "kVJ6xjwQBPR0R2S4",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Suggested Questions</strong> </p>",
+                        "<ul><li>How can we tell whether or not this is a proportional relationship? (It is not proportional. We cannot scale the amount on the table to make proportions. Possible student reasoning may include the following:</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "W7HYfE9bdKBjQ7EA",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Table Reasoning:</em></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "tZIbjzd9TpG8VgjQ",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  },
+                  {
+                    "id": "T_yum0Emr_trAbui",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Proportion Reasoning:</em></p>",
+                        "<p>1/$35  ≠  4/$130</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "vuDL6YH53j49s-Rc",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Unit Rate/Constant of Proportionality Reasoning: </em> </p>",
+                        "<p>There is no unit rate. If I buy 1 ticket, it costs $40. If I but 2 tickets, each ticket costs $35 (70 ÷ 2). If I buy 4 tickets, each ticket costs $32.50 (130 ÷ 4). The rate per ticket is not constant. This is because as I buy more tickets, the $10 processing fee gets spread out among more tickets. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "Dug4CN7ocgCTWnY_",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Graph Reasoning:</em></p>",
+                        "<p>This might be the first time that students notice that non-proportional relationships do not go through (0, 0).</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "1lXZOfDQYcGz6_DO",
+                    "content": {
+                      "type": "Image",
+                      "url": "assets/images/image_placeholder.png"
+                    }
+                  },
+                  {
+                    "id": "NBdjYlKW4WXrhlRf",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Situation B</em></p>",
+                        "<p></p>",
+                        "<p>This situation gives students a chance to synthesize their thinking about unit rates.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "bCR53lHcMQz4Mlty",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Suggested Question</strong></p>",
+                        "<ul><li>For each store what if Mia did two divisions? 6 ÷ 7 = 0.857 and 7 ÷ 6 = 1.16666. What do the numbers tell us about the pasta at that store? (These numbers are the unit rates.</li></ul>",
+                        "<p>                              For Little Giant store:  6 ÷ 7 = 0.857 and 7 ÷ 6 = 1.16666…</p>",
+                        "<p>                              0.857 tells us how much money for 1 box. </p>",
+                        "<p>                              1.16666… tells us how many boxes you get for $1.</p>",
+                        "<p></p>",
+                        "<p>                               For Foodfresh Store:  5 ÷ 6 = 0.833…. and 6 ÷ 5 = 1.2</p>",
+                        "<p>                               0.833…. tells us how much money for 1 box</p>",
+                        "<p>                               1.2 tells us how many boxes you get for $1.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "N6bHsSxaj0xZKd-e",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Some students will need to see the division in relation to a proportion to make sense of the question. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "TUN2Wpa6CM5XQnTm",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Little Giant Store</em></p>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "hLX-yEKDcR36QXif",
+                      "content": {
+                        "type": "Image",
+                        "url": "assets/images/image_placeholder.png"
+                      }
+                    },
+                    {
+                      "id": "ZZXAbF4pFSNVn6l5",
+                      "content": {
+                        "type": "Image",
+                        "url": "assets/images/image_placeholder.png"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "9D2bcPZkIwzRmDuE",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Foodfresh Store</p>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "UfjyujhivqFFk_2-",
+                      "content": {
+                        "type": "Image",
+                        "url": "assets/images/image_placeholder.png"
+                      }
+                    },
+                    {
+                      "id": "Xgz8CJ9rdaSSZ6HL",
+                      "content": {
+                        "type": "Image",
+                        "url": "assets/images/image_placeholder.png"
+                      }
+                    }
+                  ]
                 ]
               }
             },
@@ -283,6 +3278,33 @@
               "type": "summarize",
               "content": {
                 "tiles": [
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><u>Now What Do Students Know</u></p>",
+                        "<p>Ask students to reflect on the discussion and answer the Now What Do You Know.</p>",
+                        "<p>Describe how you can determine a unit rate, or constant of proportionality, in a description, rate table, equation, or graph? In what ways is a unit rate or the constant of proportionality helpful for solving a problem?</p>",
+                        "<p>See answers for more information about the strategies and embedded mathematics. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "lecF_qpm9gn-kVrX",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Reflecting on Student Learning  </strong></p>",
+                        "<p>Use the following questions to assess student understanding at the end of the lesson.  </p>",
+                        "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li></ul>",
+                        "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
+                        "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
+                      ]
+                    }
+                  }
                 ]
               }
             }
@@ -290,7 +3312,7 @@
         }
       ]
     },
-        {
+    {
       "description": "Investigation 3",
       "ordinal": 3,
       "title": "CAS Investigation 3 Pulling it all Together: Ratios, Rates, and Percents",
