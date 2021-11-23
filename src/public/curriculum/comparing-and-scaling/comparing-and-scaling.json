@@ -916,6 +916,7 @@
                     }
                   },
                   {
+                    "display": "teacher",
                     "content": {
                       "type": "Table",
                       "name": "Cece's Lemonade",
@@ -1037,7 +1038,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>For each scenario answer the questions. Explain your reasoning. </p>"
+                        "For each scenario answer the questions. Explain your reasoning."
                       ]
                     }
                   },
@@ -1693,7 +1694,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>Selma’s Strategy</p>",
+                          "<strong>Selma’s Strategy</strong>",
                           "<p>For each table, I found the amount of pizza each person would get. </p>",
                           "<p>Large Table</p>",
                           "<p>4 pizzas for 10 people =</p>"
@@ -1706,7 +1707,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>Tony’s Strategy</p>",
+                          "<strong>Tony’s Strategy</strong>",
                           "<p>For each table, I found the number of people that would share one pizza.</p>",
                           "<p>Large Table</p>",
                           "<p>10 people for every 4 pizzas =</p>"
@@ -1719,7 +1720,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>Terry’s Strategy</p>",
+                          "<strong>Terry’s Strategy</strong>",
                           "<p>For the large table, there are 10 people for 4 pizzas. The difference is 6. </p>",
                           "<p>For the small table there are 8 people for 3 pizzas. The difference is 5. </p>"
                         ]
@@ -1785,7 +1786,7 @@
                           "<p>2.5 people for every 1 pizza</p>",
                           "<p>Small Table</p>",
                           "<p>8 people for every 3 pizzas = </p>",
-                          "<p></p>",
+                          "<p>↓   ÷ 3                              ↓   ÷ 3</p>",
                           "<p>x people for every 1 pizza =</p>",
                           "<p></p>",
                           "<p>2 2/3 people for every 1 pizza</p>",
@@ -1872,22 +1873,14 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Proportions as a Strategy</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<h2>              x21</h2>",
+                        "<p><strong>Proportions as a Strategy</strong></p>",
+                        "\u00a0                    x 21",
+                        "\u00a0                     ⃕",
                         "10 people = 210 people",
-                        "<h2>____________________________</h2>",
-                        "4 pizzas = 84 pizzas",
-                        "<h2>             ⤻</h2>",
-                        "<h2>           x21</h2>"
+                        "____________________________",
+                        "\u00a0    4 pizzas = 84 pizzas",
+                        "\u00a0                 ⤻",
+                        "\u00a0               x 21"
                       ]
                     }
                   },
@@ -1897,17 +1890,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                      
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Unit Rate as a Strategy</p>",
+                        "<p><strong>Unit Rate as a Strategy</strong></p>",
                         "<p>A way to find missing values in a proportional situation is to build a rate table of equivalent ratios using the unit rate. Some students will notice that even though the math is correct, 5/2 of a person is not possible. </p>"
                       ]
                     }
@@ -1928,6 +1911,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
+                        "<p><strong>Unit Rate as a Strategy</strong></p>",
                         "<ul><li>If only small tables are used?</li></ul>"
                       ]
                     }
@@ -1938,13 +1922,13 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "                  x26.25",
+                        "\u00a0                x 26.25",
                         "                       ⃕",
                         "8 people = 210 people",
                         "___________________________",
-                        "<p>3 pizzas = 78.75 pizzas</p>",
-                         "<p>                 ⤻</p>",
-                        "<p>             x26.25</p>"
+                        "3 pizzas = 78.75 pizzas",
+                         "                 ⤻",
+                        "\u00a0             x26.25"
                       ]
                     }
                   },
@@ -2197,16 +2181,6 @@
                       "text": [
                         "<p>Students need to recognize that the $195 for 15 pizzas also includes the $30 delivery charge.  They need to subtract that and then use the $165 to either scale up or down to find the other values in the table.  </p>",
                         "<p>Some students may create another row to the table to find the cost of the pizzas without delivery.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "4oQSvIbf2dm41Gcy",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<ul><li>How can Julia use the tables to make her choice? Which company should she choose and why?</li></ul>"
                       ]
                     }
                   },
@@ -2533,11 +2507,7 @@
                       "text": [
                         "<p>C = 13N</p>",
                         "<p>13 is the unit rate or constant of proportionality  </p>",
-                        "<p></p>",
-                        "<p></p>",
-                        "<p></p>",
                         "<p>What is the other constant of proportionality? Is it useful in this situation?</p>",
-                        "<p></p>",
                         "<p>In this Problem we will look at tables, equations, and graphs of proportional relationships. </p>"
                       ]
                     }
@@ -2659,17 +2629,6 @@
                       }
                     }
                   ],
-                  {
-                    "id": "-bPA08BB6JYwAULU",
-                    "content": {
-                      "type": "Table",
-                      "name": "Table 2",
-                      "columns": [
-                        {"name":"Total Cost in Dollars, C","values":["2","1",".2",".4",".6"]},
-                        {"name":"Number of Oranges, N","values":["10","5","1","2","3"]}
-                      ]
-                    }
-                  },
                   {
                     "id": "RbDSMo9NZdH9ZqwD",
                     "content": {
@@ -2876,7 +2835,7 @@
                     }
                   },
                   {
-                    "id": "8wNumeHY5uIHLIoU",
+                    "display": "teacher",
                     "content": {
                       "type": "Table",
                       "name": "Cost of Ticket from the Box Office",
@@ -2889,7 +2848,7 @@
                   },
                   [
                     {
-                      "id": "zA9-i1YEdlv6Ohq8",
+                       "display": "teacher",
                       "content": {
                         "type": "Geometry",
                         "title": "Ticket Cost",
@@ -2914,7 +2873,7 @@
                       }
                     },
                     {
-                      "id": "zF5T6wcEh8fiUUtl",
+                       "display": "teacher",
                       "content": {
                         "type": "Text",
                         "format": "html",
@@ -2933,7 +2892,7 @@
                     }
                   ],
                   {
-                    "id": "dzxJqbjSmQuAYNXd",
+                    "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -2960,7 +2919,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>Little Giant Store</p>",
+                          "<strong>Little Giant Store</strong>",
                           "<p>7 boxes of pasta for $6</p>"
                         ]
                       }
@@ -2971,7 +2930,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>Foodfresh Store</p>",
+                          "<strong>Foodfresh Store</strong>",
                           "<p>6 boxes of pasta for $5</p>"
                         ]
                       }
@@ -3264,7 +3223,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<ul><li>Does Skylar have enough money? Make your reasoning and conclusion visible to others.</li></ul>"
+                        "<ul><li>Does Skylar have enough money?  Explain your reasoning.</li></ul>"
                       ]
                     }
                   },
@@ -3312,7 +3271,6 @@
                     }
                   },
                   {
-                    "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -3331,6 +3289,16 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
+                       "<p>Casey is using the Distributive Property finding the cost • the % tax + the cost • 100%. </p>",
+                        "<p>8.95 • 0.05 + 8.95 •1</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
                         "<p>Sammi’s Strategy</p>",
                         "<p>Multiply $8.95 by 1.05. </p>",
                         "<p>That will get the whole amount (100% or 1) and the tax (5% or 0.05).</p>"
@@ -3338,7 +3306,6 @@
                     }
                   },
                   {
-                    "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -3364,7 +3331,6 @@
                     }
                   },
                   {
-                    "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -3374,13 +3340,21 @@
                         "             0.05 • 8.95 + 1 • 8.95 = ",
                         "                         (0.05 + 1) • 8.95",
                         "                                 or",
-                        "      1.05 • 8.95 to find the total bill.",
-                        "<p>Vanessa is using a combination of what Casey and Sammi do. Vanessa uses the Distributive Property which results in multiplying by 1.05 (like Sammi did).</p>"
+                        "      1.05 • 8.95 to find the total bill."
                       ]
                     }
                   },
                   {
                     "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                       "<p>Vanessa is using a combination of what Casey and Sammi do. Vanessa uses the Distributive Property which results in multiplying by 1.05 (like Sammi did).</p>"
+                      ]
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -3391,7 +3365,6 @@
                     }
                   },
                   {
-                    "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -3406,6 +3379,15 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
+                       "<p>Alex scales the ratio down to find the unit rate (the amount of money for 1%). Then he scales the rate up to 105 to find the amount of money for 105%.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
                         "<strong>Ash’s Strategy</strong>",
                         "<p>I used a percent bar or tape diagram. Extend the bar to find 105%.</p>",
                         "<p>Ash uses a percent bar/tape diagram. (Students learned this strategy in Comparing Quantities.) Ash extends the bar past the 100% mark to find the 105% mark. Using the amount of money for 1%, Ash can scale up to 105%. This is like Alex’s strategy with a different representation – a bar diagram rather than a proportion.</p>"
@@ -3413,10 +3395,19 @@
                     }
                   },
                   {
-                    "display": "teacher",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/C&S_3-1_AshsStrategy.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                       "<p>Ash uses a percent bar/tape diagram. (Students learned this strategy in Comparing Quantities.) Ash extends the bar past the 100% mark to find the 105% mark. Using the amount of money for 1%, Ash can scale up to 105%. This is like Alex’s strategy with a different representation – a bar diagram rather than a proportion.</p>"
+                      ]
                     }
                   },
                   {
@@ -3670,12 +3661,31 @@
                   },
                   [
                     {
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>\u00a0    Final Bill of $24.50</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Final Bill of $17.35</p>"
+                        ]
+                      }
+                    }
+                  ],
+                  [
+                    {
                       "display": "teacher",
                       "content": {
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>Final Bill of $24.50</p>",
                           "<p>10% of $24.50 is $2.45  </p>",
                           "<p>5% would be about $1.23  </p>",
                           "<p>15% would be $2.45 + $1.23 = $3.68</p>",
@@ -3689,7 +3699,6 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>Final Bill of $17.35</p>",
                           "<p>10% of $17.35 is about $1.74  </p>",
                           "<p>5% would be $0.87  </p>",
                           "<p>15% would be $1.74 + $0.87 = $2.61</p>",
@@ -4165,28 +4174,6 @@
                     }
                   ],
                   {
-                    "id": "dSgHcUzRM8-lOMgb",
-                    "content": {
-                      "type": "Table",
-                      "name": "Relationship between the Total Amount of Food and the Amount of Protein",
-                      "columns": [
-                        {"name":"x","values":["1","2","3","4"]},
-                        {"name":"y","values":[".6","1.2","1.8","2.4"]}
-                      ]
-                    }
-                  },
-                  {
-                    "id": "ymOmr3NgMbC7bQiD",
-                    "content": {
-                      "type": "Table",
-                      "name": "Relationship between the Total Amount of Food and the Amount of Fiber",
-                      "columns": [
-                        {"name":"x","values":["1","2","3","4","5","6"]},
-                        {"name":"y","values":[".4",".8","1.2","1.6","2","2.4"]}
-                      ]
-                    }
-                  },
-                  {
                     "id": "wH5kxZ-_TkFHlDfZ",
                     "content": {
                       "type": "Text",
@@ -4354,12 +4341,11 @@
               "content": {
                 "tiles": [
                   {
-                    "id": "s6yTBWDIv3SYN9hL",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>How are percents useful to solve problems?</p>"
+                        "How are percents useful to solve problems?"
                       ]
                     }
                   },
@@ -4371,6 +4357,39 @@
                       "text": [
                         "<p>Percents are ratios/rates where one of the quantities in the comparison is equal to 100. Because one of the quantities is the same, it allows you to easily compare two different percents.</p>",
                         "<p>Percents also give us a way to discuss and solve problems that involve tax, tip, markups, and changes in something like population.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Did you know?</strong>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/CS_LA_O1_monkey_350w.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Chimpanzee, gorillas, orangutans, and bonobos are types of apes.</p>",
+                        "<p>Wild chimpanzees live only in Africa.</p>",
+                        "<p>Biologically, chimpanzees are more closely related to humans than they are to gorillas. We share about 95% – 98% of the same DNA.</p>",
+                        "<p>Chimpanzees make and use tools. For a long time, scientists thought human beings were the only ones who made tools. Other animals make tools, too. </p>",
+                        "<p>Chimpanzees in captivity have been taught sign language. Washoe, a female chimp, knew more than 240 signs.</p>",
+                        "<p>Chimpanzees are omnivores. They eat fruits, nuts, seeds, flowers, leaves, and many types of insects. They sometimes hunt and eat small mammals. </p>",
+                        "<p>Chimpanzees laugh. And, when frightened or angry, their hair will stand on its end.</p>",
+                        "<p>An adult chimpanzees have 5 or 6 times the strength of a human.</p>",
+                        "<p>Baby chimpanzees receive 24-hour attention from their mothers. The mothers will sleep with one hand on the baby to keep in constant contact.</p>",
+                        "<p>Information from: https://www.janegoodall.org.uk/</p>"
                       ]
                     }
                   }
@@ -4847,6 +4866,20 @@
                       ]
                     }
                   },
+                                    {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Emerging Mathematical Ideas</strong>",
+                        "<p>Understand that proportional reasoning is about making comparisons, using multiplicative thinking instead of additive thinking.</p>", 
+                        "<p>Identify strategies for comparing quantities: ratio tables, equivalent ratios, scaling, and percent.</p>", 
+                        "<p>Begin to formalize the process of setting up proportions and solving for an unknown value. </p>",
+                        "<p>Understand that to compare ratios you must relate the same two quantities in the same order: part-to-part or part-to-whole.</p>"
+                      ]
+                    }
+                  },
                   {
                     "id": "OkPcVr6a8UGKCMNb",
                     "content": {
@@ -4882,6 +4915,20 @@
                       "text": [
                         "<p>In this Unit and in prior Units we have been exploring problem situations that require proportional reasoning. </p>",
                         "<p>What does it mean to reason proportionally? </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Emerging Mathematical Ideas</strong></p>",
+                        "<p>Recognize and analyze proportional statements.</p>",
+                        "<p>Broaden understanding that proportional reasoning uses multiplicative thinking instead of additive thinking, and can be used to make decisions and solve problems.</p>",
+                        "<p>Notice that:</p>",
+                        "<ul><li>proportional reasoning is about making comparisons: part-to-part and part-to-whole</li><li>Rates are a type of ratio</li><li>Unit rates can be helpful in solving problems</li><li>Unit rate or constant of proportionality can be found in tables, graphs, and equations</li></ul>"
                       ]
                     }
                   },

@@ -78,6 +78,10 @@
             "type": "reference",
             "content": {
               "tiles": [
+                {
+                  "type": "Image",
+                  "url": "curriculum/mothed/images/mothtypes.jpg"
+                }
               ]
               }
             },
