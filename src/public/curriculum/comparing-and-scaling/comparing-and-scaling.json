@@ -4761,7 +4761,6 @@
                       "format": "html",
                       "text": [
                         "<strong>Situation B. What is the Question?</strong>",
-                        "<p>Make up a situation and question that could be solved with each of the following representations.</p>",
                         "<p>Make up a situation and question that could be solved with each of the following representations.</p>"
                       ]
                     }
@@ -4828,6 +4827,16 @@
                       "format": "html",
                       "text": [
                         "<p>Describe some situations that you encounter in your daily life that require proportional reasoning?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Answers will vary based on students’ experiences.</p>"
                       ]
                     }
                   }
@@ -5030,6 +5039,21 @@
                         "<p>Bill made a rate table and a graph for the adult chimp mix in Problem 3.3. He said that the information in the table matched the information in the graph. Mary claimed that 2/3  was the unit rate for the mix according to the graph. She said that the mix contained 2/3 cup of high-protein food or a ratio of 40 cups of high-protein food : 60 cups of high-fiber food.</p>",
                         "<p>Both claimed that the graph shows pairs that fit this proportional relationship. </p>",
                         "<ul><li>What Mathematical Practice(s) did the Bill and Mary use to solve this Problem?</li><li>What other Mathematical Practices did you use to solve Problems in this Investigation?</li><li>In what ways is the mathematics in this Problem connected to prior mathematics?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Emerging Mathematical Ideas</strong></p>",
+                        "<p>Recognize and analyze proportional statements.</p>",
+                        "<p>Notice that:</p>",
+                        "<ul><li>proportional reasoning is about making comparisons: part-to-part and part-to-whole</li><li>Rates are a type of ratio</li><li>Unit rates can be helpful in solving problems</li><li>Unit rate or constant of proportionality can be found in tables, graphs, and equations</li></ul>",
+                        "<p>Consolidate understanding that proportional reasoning uses multiplicative thinking instead of additive thinking, and can be used to make decisions and solve problems.</p>",
+                        "<p>Look for and make connections among representations of proportional relationships and solution strategies.</p>"
                       ]
                     }
                   }
