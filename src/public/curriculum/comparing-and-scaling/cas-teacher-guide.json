@@ -80,6 +80,61 @@
                         "<p><strong>Implementation Note</strong>: Be sure to hold a discussion after the Initial Challenge before moving on to the What If. This will allow you to highlight your students’ strategies before analyzing the strategies of other students. You can use the strategies presented in the What If to connect to how your students thought about the proportional reasoning in the juice recipes. This Problem will take two days.</p>"
                       ]
                     }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>AoL: Introduction, Explore, Analysis</p>",
+                        "<p>CCSSM: 7.RP.A.1, 7.RP.A.2</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Emerging Mathematical Ideas</strong> </p>",
+                        "<p>Expand understanding of mathematical characteristics that define ratios. Strengthen understanding of ratio and scaling up or down to find equivalent ratios.</p>",
+                        "<p>Notice, use, and articulate that: </p>",
+                        "<ul><li>ratios are comparisons of two quantities</li><li>ratios may use either part-to-part or part-to-whole comparisons</li><li>ratios describe the multiplicative relationship between the quantities </li><li>ratios are NOT comparisons that describe the difference between two values</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>NWDYK </p>",
+                        "<p>Describe some strategies for solving problems that involve ratios. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#RevisionComments'><strong>Revision Comments</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#StemProblemFormat'><strong>Stem Problem Format</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher</a>guide/stretching-and-shrinking/#UnitDescriptions'><strong>Unit Descriptions</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#SummaryInvestigations'><strong>Summary Investigations</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitGoals'><strong>Unit Goals</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAlignment'><strong>Unit Alignment</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#GeneralAoL'><strong>General AoL</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAoL'><strong>Unit AoL</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#MathOverview'><strong>Math Overview</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#LearningAids'><strong>Learning Aids</strong></a> </p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#TeachingAids'><strong>Teaching Aids</strong></a> </p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#FamilyLetters'><strong>Family Letters</strong></a> </p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#Assessments'><strong>Assessments</strong></a> </p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#ACEHomework'><strong>ACE Homework</strong></a> </p>"
+                      ]
+                    }
                   }
                 ]
               }
@@ -397,7 +452,7 @@
                     "id": "PLgiuNAJawP6ccTs",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/TG_1-1_WaterConcentrateMixA.png"
                     }
                   },
                   {
@@ -414,7 +469,7 @@
                     "id": "StztPqniplE7h5D5",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/TG_1-1_WaterConcentrateMixB.png"
                     }
                   },
                   {
@@ -431,7 +486,7 @@
                     "id": "nQFQQzF2giX2nSIH",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/TG_1-1_WaterConcentrateMixC.png"
                     }
                   },
                   {
@@ -448,7 +503,7 @@
                     "id": "h6uyBJCZhZgZqlfl",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/TG_1-1_WaterConcentrateMixD.png"
                     }
                   },
                   {
@@ -547,14 +602,14 @@
                       "id": "k127x4JfR_WW_pLh",
                       "content": {
                         "type": "Image",
-                        "url": "assets/images/image_placeholder.png"
+                        "url": "curriculum/comparing-and-scaling/images/TG_1-1_RecipeC.png"
                       }
                     },
                     {
                       "id": "XXPOPixjDcfuSCaN",
                       "content": {
                         "type": "Image",
-                        "url": "assets/images/image_placeholder.png"
+                        "url": "curriculum/comparing-and-scaling/images/TG_1-1_RecipeX.png"
                       }
                     }
                   ],
@@ -616,7 +671,7 @@
           ]
         },
         {
-          "description": "Problem 1.1",
+          "description": "Problem 1.2",
           "ordinal": 2,
           "title": "CAS 1.2 Time to Concentrate",
           "subtitle": "Scaling Ratios",
@@ -637,6 +692,63 @@
                         "<p>Note: This Problem is a review of <em>Comparing Quantities,</em> except for the new format of writing ratios in fraction form. Be sure to emphasize the difference between a ratio (2:3) and a fraction (2/3).</p>",
                         "<p></p>",
                         "<p><strong>Implementation Note</strong>: You may want to use <strong>Teaching Aid 1.2: Ratio Type Notation</strong> and <strong>Learning Aid 1.2A: Recipes</strong> to introduce the Problem and have students work on the Initial Challenge. The What If section shows strategies and solutions to the Initial Challenge. Keeping students’ books closed (or only viewing the Initial Challenge) by using the learning aids will allow students to do the Initial Challenge without influence from the What If.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>AoL: Analysis </p>",
+                        "<p>CCSSM: 7.RP.A.1, 7.RP. A.2, 7.RP. A.2.A, 7.RP. A.2.C, 7.RP.A.3</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Emerging Mathematical Ideas</p>",
+                        "<p>Explore ratios with a focus on finding and using equivalent ratios to solve problems.</p>",
+                        "<p></p>",
+                        "<p>  Notice and use:  </p>",
+                        "<ul><li>equivalent ratios written in fraction form</li><li>equivalent ratios are related by a common multiplicative factor </li><li>equivalent ratios can be found by “scaling ratios”: scaling-up (multiplying) a given ratio or scaling-down (dividing) from the given ratio</li><li>using ratio relationships to solve problems is referred to as reasoning with ratios and can be a quick and powerful tool for problem solving</li></ul>",
+                        "<p>Explore connections between ratio table, equivalent ratios, scaling, and an equation."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>NWDYK </p>",
+                        "<p>How do the strategies in this Problem compare to those in Problem 1.1?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#RevisionComments'><strong>Revision Comments</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#StemProblemFormat'><strong>Stem Problem Format</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher</a>guide/stretching-and-shrinking/#UnitDescriptions'><strong>Unit Descriptions</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#SummaryInvestigations'><strong>Summary Investigations</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitGoals'><strong>Unit Goals</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAlignment'><strong>Unit Alignment</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#GeneralAoL'><strong>General AoL</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAoL'><strong>Unit AoL</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#MathOverview'><strong>Math Overview</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#LearningAids'><strong>Learning Aids</strong></a> </p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#TeachingAids'><strong>Teaching Aids</strong></a> </p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#FamilyLetters'><strong>Family Letters</strong></a> </p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#Assessments'><strong>Assessments</strong></a> </p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#ACEHomework'><strong>ACE Homework</strong></a> </p>"
                       ]
                     }
                   }
@@ -683,7 +795,7 @@
                       "id": "3TSlr2OaAI5Bs7g3",
                       "content": {
                         "type": "Image",
-                        "url": "assets/images/image_placeholder.png"
+                        "url": "curriculum/comparing-and-scaling/images/TG_1-2_EquivalentFractions.png"
                       }
                     },
                     {
@@ -703,7 +815,7 @@
                       "id": "qR7SH7s_7iLvN0iW",
                       "content": {
                         "type": "Image",
-                        "url": "assets/images/image_placeholder.png"
+                        "url": "curriculum/comparing-and-scaling/images/TG_1-2_EquivalentRatios.png"
                       }
                     },
                     {
@@ -722,7 +834,7 @@
                       "id": "58inAcv6DHGRYSS8",
                       "content": {
                         "type": "Image",
-                        "url": "assets/images/image_placeholder.png"
+                        "url": "curriculum/comparing-and-scaling/images/TG_1-2_EquivalentRatios2.png"
                       }
                     },
                     {
@@ -739,7 +851,7 @@
                       "id": "8P7RAW-4XzVezgO_",
                       "content": {
                         "type": "Image",
-                        "url": "assets/images/image_placeholder.png"
+                        "url": "curriculum/comparing-and-scaling/images/TG_1-2_EquivalentRatios3.png"
                       }
                     },
                     {
@@ -766,7 +878,7 @@
                       "id": "Nj7msMv-AyVMghOo",
                       "content": {
                         "type": "Image",
-                        "url": "assets/images/image_placeholder.png"
+                        "url": "curriculum/comparing-and-scaling/images/TG_1-2_EquivalentRatios4.png"
                       }
                     },
                     {
@@ -783,7 +895,7 @@
                       "id": "LtFs9ZJUnmpMqrMA",
                       "content": {
                         "type": "Image",
-                        "url": "assets/images/image_placeholder.png"
+                        "url": "curriculum/comparing-and-scaling/images/TG_1-2_EquivalentRatios5.png"
                       }
                     },
                     {
@@ -961,7 +1073,7 @@
                         "id": "YrXXlAMqExFdnKkH",
                         "content": {
                           "type": "Image",
-                          "url": "assets/images/image_placeholder.png"
+                          "url": "curriculum/comparing-and-scaling/images/TG_1-2_SummarizeRecipeA.png"
                         }
                       },
                       {
@@ -1012,14 +1124,14 @@
                         "id": "wMJAuYlkA9cWB7mh",
                         "content": {
                           "type": "Image",
-                          "url": "assets/images/image_placeholder.png"
+                          "url": "curriculum/comparing-and-scaling/images/TG_1-2_Adia1_350w.jpg"
                         }
                       },
                       {
                         "id": "DJfbnjwn6o2ZR4rT",
                         "content": {
                           "type": "Image",
-                          "url": "assets/images/image_placeholder.png"
+                          "url": "curriculum/comparing-and-scaling/images/TG_1-2_Adia2_350w.jpg"
                         }
                       },
                       {
@@ -1036,7 +1148,7 @@
                         "id": "5aeM-Cn6pxB4ESiJ",
                         "content": {
                           "type": "Image",
-                          "url": "assets/images/image_placeholder.png"
+                          "url": "curriculum/comparing-and-scaling/images/TG_1-2_Adia3_350w.jpg"
                         }
                       },
                       {
@@ -1053,7 +1165,7 @@
                         "id": "JZkJqtiLtp2ITCQZ",
                         "content": {
                           "type": "Image",
-                          "url": "assets/images/image_placeholder.png"
+                          "url": "curriculum/comparing-and-scaling/images/TG_1-2_Adia3_350w.jpg"
                         }
                       },
                       {
@@ -1108,6 +1220,61 @@
                       "format": "html",
                       "text": [
                         "<p>In this Problem, students encounter a variety of situations that require setting up proportions and solving for unknown values. Students should start to formalize the process of setting up equivalent ratios that make similar comparisons of quantities. In particular, scaling one ratio to find an unknown value in an equivalent ratio is highlighted as one strategy to help find unknown values.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>AoL: Analysis, Synthesis</p>",
+                        "<p>CCSSM: 7.RP.A.1, 7.RP. A.2, 7.RP. A.2.A, 7.RP. A.2.C, 7.RP.A.3</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Emerging Mathematical Ideas</strong></p>",
+                        "<p>Understand the need to compare ratios that relate the same two quantities in the same order: part-to-part, part-to-whole.</p>",
+                        "<p>Notice and use:  </p>",
+                        "<ul><li>ratios with a focus on finding and using equivalent ratios to solve problems</li><li>begin to formalize the process of setting up proportions and solving for an unknow value</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>NWDYK</p>",
+                        "<p>How are proportions like other strategies that you have used to solve ratio problems?  How are they different?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#RevisionComments'><strong>Revision Comments</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#StemProblemFormat'><strong>Stem Problem Format</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher</a>guide/stretching-and-shrinking/#UnitDescriptions'><strong>Unit Descriptions</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#SummaryInvestigations'><strong>Summary Investigations</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitGoals'><strong>Unit Goals</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAlignment'><strong>Unit Alignment</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#GeneralAoL'><strong>General AoL</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAoL'><strong>Unit AoL</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#MathOverview'><strong>Math Overview</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#LearningAids'><strong>Learning Aids</strong></a> </p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#TeachingAids'><strong>Teaching Aids</strong></a> </p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#FamilyLetters'><strong>Family Letters</strong></a> </p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#Assessments'><strong>Assessments</strong></a> </p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#ACEHomework'><strong>ACE Homework</strong></a> </p>"
                       ]
                     }
                   }
@@ -1299,7 +1466,7 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p>Reflecting on Student Learning  </p>",
+                      "<strong>Reflecting on Student Learning  </strong>",
                       "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
                       "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li></ul>",
                       "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
@@ -1341,6 +1508,65 @@
                         "<p><strong>Implementation Note</strong>: Be sure to hold a discussion after the Initial Challenge before moving on to the What If. This will allow you to highlight your students’ strategies before analyzing the strategies of other students that are presented in the What If. You can use the strategies in the What If to connect to how your students engaged in proportional reasoning in the sharing pizzas situation.</p>",
                         "<p></p>",
                         "<p>Have students work on the Initial Challenge in partners. As a class, discuss the strategies and solutions for the determining which camp table will give students a chance for more pizza. After the discussion, have students work on the What If questions. For Situation A, you might have students think about and discuss as a class the strategies not already presented by your students. This may allow a discussion of strategies different from students’ own thinking for solving the Initial Challenge. Situations B and C offer more opportunities to use proportional reasoning.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>AoL:  Analysis</p>",
+                        "<p>CCSSM: 7.RP. A.1, 7.RP. A.2, 7.RP. A.2.A, 7.RP.A.2.C</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Emerging Mathematical Ideas</strong></p>",
+                        "<p>Expand understanding of ratios and why differences are not comparisons.</p>",
+                        "<p></p>",
+                        "<p>Expand understanding of multiplicative reasons to determine which methods of comparison are appropriate to a problem: part-to-part and/or part-to-whole.</p>",
+                        "<p></p>",
+                        "<p>Explore situations that require recognizing and analyzing proportional relationships to solve problems. Find and use unit rates, scaling, and equivalent ratios.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>[Start Green Box]</p>",
+                        "<p>NWDYK</p>",
+                        "<p>We have used several strategies for solving problems that involve ratios. How do you decide which method to use?</p>",
+                        "<p>[End Green Box]</p>"
+                      ]
+                    }
+                  },
+                   {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#RevisionComments'><strong>Revision Comments</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#StemProblemFormat'><strong>Stem Problem Format</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher</a>guide/stretching-and-shrinking/#UnitDescriptions'><strong>Unit Descriptions</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#SummaryInvestigations'><strong>Summary Investigations</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitGoals'><strong>Unit Goals</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAlignment'><strong>Unit Alignment</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#GeneralAoL'><strong>General AoL</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAoL'><strong>Unit AoL</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#MathOverview'><strong>Math Overview</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#LearningAids'><strong>Learning Aids</strong></a> </p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#TeachingAids'><strong>Teaching Aids</strong></a> </p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#FamilyLetters'><strong>Family Letters</strong></a> </p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#Assessments'><strong>Assessments</strong></a> </p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#ACEHomework'><strong>ACE Homework</strong></a> </p>"
                       ]
                     }
                   }
@@ -1553,14 +1779,14 @@
                     "id": "lZzMVPIQlHGNKNI4",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group1LargeTable.png"
                     }
                   },
                   {
                     "id": "cF7EL9S7l6pLy7IC",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group1SmallTable.png"
                     }
                   }
                 ],
@@ -1590,14 +1816,14 @@
                     "id": "c4M0UpgTasB0uTj4",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group2LargeTable.png"
                     }
                   },
                   {
                     "id": "EE9xKvJ_GINm9bO6",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group2SmallTable.png"
                     }
                   }
                 ],
@@ -1613,17 +1839,17 @@
                 },
                 [
                   {
-                    "id": "-IGLo1mgp0W--YAy",
+                    "id": "c4M0UpgTasB0uTj4",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group2LargeTable2.png"
                     }
                   },
                   {
-                    "id": "95VOMmmqBBfN3PvJ",
+                    "id": "EE9xKvJ_GINm9bO6",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group2SmallTable2.png"
                     }
                   }
                 ],
@@ -1682,14 +1908,14 @@
                     "id": "SrrU5yU-fdtM6Yi7",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group3SmallTable.png"
                     }
                   },
                   {
                     "id": "j8dhTU7Zk4cUXLEk",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group3LargeTable1st.png"
                     }
                   }
                 ],
@@ -1722,7 +1948,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p></p>"
+                        "\u00a0"
                       ]
                     }
                   },
@@ -1730,7 +1956,7 @@
                     "id": "_MdYhg2ssHbsLPi-",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group3LargeTable2nd.png"
                     }
                   }
                 ],
@@ -1741,7 +1967,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p></p>"
+                        "<p>\u00a0</p>"
                       ]
                     }
                   },
@@ -1763,7 +1989,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p></p>"
+                        "<p>\u00a0</p>"
                       ]
                     }
                   },
@@ -1771,7 +1997,7 @@
                     "id": "yMHPpaDgzLzETAa3",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group3LargeTable3rd.png"
                     }
                   }
                 ],
@@ -1782,7 +2008,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p></p>"
+                        "<p\u00a0</p>"
                       ]
                     }
                   },
@@ -1804,7 +2030,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p></p>"
+                        "<p>\u00a0</p>"
                       ]
                     }
                   },
@@ -1812,7 +2038,7 @@
                     "id": "P1kEZWx9JAIgEO6q",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group3LargeTable4th.png"
                     }
                   }
                 ],
@@ -1823,7 +2049,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p></p>"
+                        "<p>\u00a0</p>"
                       ]
                     }
                   },
@@ -1874,7 +2100,7 @@
                   "id": "Pp4kfbosYfLAniaS",
                   "content": {
                     "type": "Image",
-                    "url": "assets/images/image_placeholder.png"
+                    "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group4.png"
                   }
                 },
                 {
@@ -1891,7 +2117,7 @@
                   "id": "jsETUBZJHs3fZLHK",
                   "content": {
                     "type": "Image",
-                    "url": "assets/images/image_placeholder.png"
+                    "url": "curriculum/comparing-and-scaling/images/TG_2-1_Strategy2Group4.png"
                   }
                 },
                 {
@@ -1909,7 +2135,7 @@
                   "id": "vU2oIyB-CcMBLAGc",
                   "content": {
                     "type": "Image",
-                    "url": "assets/images/image_placeholder.png"
+                    "url": "curriculum/comparing-and-scaling/images/TG_2-1_Strategy2Group5.png"
                   }
                 },
                 {
@@ -1936,7 +2162,7 @@
                   "id": "D8g0eoWLYx4cowha",
                   "content": {
                     "type": "Image",
-                    "url": "assets/images/image_placeholder.png"
+                    "url": "curriculum/comparing-and-scaling/images/TG_2-1_GROUP6.png"
                   }
                 },
                 {
@@ -1954,14 +2180,14 @@
                     "id": "AlrNhgeN-02TfS6d",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/TG_2-1_Strategy2Group6_1.png"
                     }
                   },
                   {
                     "id": "ZCsIKcCTWRXkiAiS",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/TG_2-1_Strategy2Group6_2.png"
                     }
                   }
                 ],
@@ -1989,7 +2215,7 @@
                   "id": "8uEZKoukxO1Z_WOR",
                   "content": {
                     "type": "Image",
-                    "url": "assets/images/image_placeholder.png"
+                    "url": "curriculum/comparing-and-scaling/images/TG_2-1_GROUP7.png"
                   }
                 },
                 {
@@ -2030,14 +2256,14 @@
                     "id": "tjIC_4JTDVYGmlCK",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group8_LargeTable.png"
                     }
                   },
                   {
                     "id": "w4IpojoW8OyNOtqV",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group8_SmallTable.png"
                     }
                   }
                 ],
@@ -2121,11 +2347,9 @@
                       "format": "html",
                       "text": [
                         "<p>Large Table</p>",
-                        "<p></p>",
                         "<p>10 people need to share 4 pizzas.</p>",
                         "<p></p>",
                         "<p>10 ÷ 4 = 2.5 number of people per pizza</p>",
-                        "<p> </p>",
                         "<p>OR</p>"
                       ]
                     }
@@ -2141,9 +2365,6 @@
                         "<p>8 people need to share 3 pizzas.</p>",
                         "<p></p>",
                         "<p>8 ÷ 3 = 2 2/3 number of people per pizza</p>",
-                        "<p></p>",
-                        "<p></p>",
-                        "<p></p>",
                         "<p>OR</p>"
                       ]
                     }
@@ -2154,14 +2375,14 @@
                     "id": "h9G4YdAe65yZebLc",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/TG_2-1_Strategy3Group10_1.png"
                     }
                   },
                   {
                     "id": "KLw2FGBCP2kqBODW",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/TG_2-1_Strategy3Group10_2.png"
                     }
                   }
                 ],
@@ -2238,10 +2459,13 @@
                   }
                 },
                 {
-                  "id": "sJt6QA9e_J7-1RsC",
                   "content": {
-                    "type": "Image",
-                    "url": "assets/images/image_placeholder.png"
+                    "type": "Table",
+                    "name": "Rate Table",
+                    "columns": [
+                      {"name":"No. People","values":["5/2","5","10","20","30","40","50","","210"]},
+                      {"name":"No. Pizzas","values":["1","2","4","8","12","16","20"," ","84"]}
+                    ]
                   }
                 },
                 {
@@ -2276,13 +2500,8 @@
                     "format": "html",
                     "text": [
                       "<p><u>Now What Do Students Know</u></p>",
-                      "<p></p>",
-                      "<p></p>",
                       "<p>Ask students to reflect on the discussion and answer the Now What Do You Know.</p>",
-                      "<p></p>",
-                      "<p></p>",
                       "<p>Students used proportions in Investigation 1, but probably not in this Problem. They may have compared ratios or scaled up or down. Investigation 1 had part to part and part to whole comparisons. Problem 2.1 is all part-to-part ratios.</p>",
-                      "<p></p>",
                       "<p>See answers for more information about the strategies and embedded mathematics.</p>"
                     ]
                   }
@@ -2330,7 +2549,29 @@
                       "<p>Have students work on the Initial Challenge. As the groups finish, have them look at the What If questions and compare their thinking and strategies to the students in the What If. This may allow a discussion of strategies different from students’ own thinking for solving the Initial Challenge.</p>"
                     ]
                   }
-                }
+                },
+                {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#RevisionComments'><strong>Revision Comments</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#StemProblemFormat'><strong>Stem Problem Format</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher</a>guide/stretching-and-shrinking/#UnitDescriptions'><strong>Unit Descriptions</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#SummaryInvestigations'><strong>Summary Investigations</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitGoals'><strong>Unit Goals</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAlignment'><strong>Unit Alignment</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#GeneralAoL'><strong>General AoL</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAoL'><strong>Unit AoL</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#MathOverview'><strong>Math Overview</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#LearningAids'><strong>Learning Aids</strong></a> </p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#TeachingAids'><strong>Teaching Aids</strong></a> </p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#FamilyLetters'><strong>Family Letters</strong></a> </p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#Assessments'><strong>Assessments</strong></a> </p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#ACEHomework'><strong>ACE Homework</strong></a> </p>"
+                      ]
+                    }
+                  }
               ]
             }
           },
@@ -2388,7 +2629,7 @@
                   "id": "N8ujiuxvF0u53GMX",
                   "content": {
                     "type": "Image",
-                    "url": "assets/images/image_placeholder.png"
+                    "url": "curriculum/comparing-and-scaling/images/"
                   }
                 },
                 {
@@ -2405,7 +2646,7 @@
                   "id": "oy2bl6hQtuqXnImu",
                   "content": {
                     "type": "Image",
-                    "url": "assets/images/image_placeholder.png"
+                    "url": "curriculum/comparing-and-scaling/images/"
                   }
                 },
                 {
@@ -2422,7 +2663,7 @@
                   "id": "TmkQvK91VFGYSic6",
                   "content": {
                     "type": "Image",
-                    "url": "assets/images/image_placeholder.png"
+                    "url": "curriculum/comparing-and-scaling/images/"
                   }
                 },
                 {
@@ -2439,7 +2680,7 @@
                   "id": "8MAaGdjloCyTjtmW",
                   "content": {
                     "type": "Image",
-                    "url": "assets/images/image_placeholder.png"
+                    "url": "curriculum/comparing-and-scaling/images/"
                   }
                 },
                 {
@@ -2514,7 +2755,7 @@
                   "id": "LjcMdqM9i-6UbkFa",
                   "content": {
                     "type": "Image",
-                    "url": "assets/images/image_placeholder.png"
+                    "url": "curriculum/comparing-and-scaling/images/"
                   }
                 },
                 {
@@ -2531,7 +2772,7 @@
                   "id": "0XCwM8r-rAw8INlG",
                   "content": {
                     "type": "Image",
-                    "url": "assets/images/image_placeholder.png"
+                    "url": "curriculum/comparing-and-scaling/images/"
                   }
                 },
                 {
@@ -2548,7 +2789,7 @@
                   "id": "RDVZBV79R_ELgW0B",
                   "content": {
                     "type": "Image",
-                    "url": "assets/images/image_placeholder.png"
+                    "url": "curriculum/comparing-and-scaling/images/"
                   }
                 },
                 {
@@ -2586,7 +2827,7 @@
                   "id": "xjY7xvHNGQKDeQzY",
                   "content": {
                     "type": "Image",
-                    "url": "assets/images/image_placeholder.png"
+                    "url": "curriculum/comparing-and-scaling/images/"
                   }
                 },
                 {
@@ -2603,7 +2844,7 @@
                   "id": "TNLC-882X1CqfgQf",
                   "content": {
                     "type": "Image",
-                    "url": "assets/images/image_placeholder.png"
+                    "url": "curriculum/comparing-and-scaling/images/"
                   }
                 },
                 {
@@ -2747,28 +2988,28 @@
                   "id": "9XdclT3sClizHTm3",
                   "content": {
                     "type": "Image",
-                    "url": "assets/images/image_placeholder.png"
+                    "url": "curriculum/comparing-and-scaling/images/"
                   }
                 },
                 {
                   "id": "zF8Cmwc8GTutsr9g",
                   "content": {
                     "type": "Image",
-                    "url": "assets/images/image_placeholder.png"
+                    "url": "curriculum/comparing-and-scaling/images/"
                   }
                 },
                 {
                   "id": "nQy0_T8Va21tYUiq",
                   "content": {
                     "type": "Image",
-                    "url": "assets/images/image_placeholder.png"
+                    "url": "curriculum/comparing-and-scaling/images/"
                   }
                 },
                 {
                   "id": "Yd-WRhXZx30rh4If",
                   "content": {
                     "type": "Image",
-                    "url": "assets/images/image_placeholder.png"
+                    "url": "curriculum/comparing-and-scaling/images/"
                   }
                 },
                 {
@@ -2846,6 +3087,28 @@
                       "format": "html",
                       "text": [
                         "<p>This Problem focuses on how unit rate, or constant of proportionality, is helpful to solve problems. Students also look at the role of unit rate in different representations of tables, graphs, and equations.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#RevisionComments'><strong>Revision Comments</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#StemProblemFormat'><strong>Stem Problem Format</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher</a>guide/stretching-and-shrinking/#UnitDescriptions'><strong>Unit Descriptions</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#SummaryInvestigations'><strong>Summary Investigations</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitGoals'><strong>Unit Goals</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAlignment'><strong>Unit Alignment</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#GeneralAoL'><strong>General AoL</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAoL'><strong>Unit AoL</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#MathOverview'><strong>Math Overview</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#LearningAids'><strong>Learning Aids</strong></a> </p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#TeachingAids'><strong>Teaching Aids</strong></a> </p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#FamilyLetters'><strong>Family Letters</strong></a> </p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#Assessments'><strong>Assessments</strong></a> </p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#ACEHomework'><strong>ACE Homework</strong></a> </p>"
                       ]
                     }
                   }
@@ -3041,14 +3304,14 @@
                       "id": "8Aw8BaM9M_525njZ",
                       "content": {
                         "type": "Image",
-                        "url": "assets/images/image_placeholder.png"
+                        "url": "curriculum/comparing-and-scaling/images/"
                       }
                     },
                     {
                       "id": "pBbdzco9ABtEHby8",
                       "content": {
                         "type": "Image",
-                        "url": "assets/images/image_placeholder.png"
+                        "url": "curriculum/comparing-and-scaling/images/"
                       }
                     }
                   ],
@@ -3081,7 +3344,7 @@
                     "id": "tayl-OrtkhILuTAI",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/"
                     }
                   },
                   {
@@ -3098,7 +3361,7 @@
                     "id": "R5wTnoqijLr12E_L",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/"
                     }
                   },
                   {
@@ -3136,7 +3399,7 @@
                     "id": "tZIbjzd9TpG8VgjQ",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/"
                     }
                   },
                   {
@@ -3176,7 +3439,7 @@
                     "id": "1lXZOfDQYcGz6_DO",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/"
                     }
                   },
                   {
@@ -3234,14 +3497,14 @@
                       "id": "hLX-yEKDcR36QXif",
                       "content": {
                         "type": "Image",
-                        "url": "assets/images/image_placeholder.png"
+                        "url": "curriculum/comparing-and-scaling/images/"
                       }
                     },
                     {
                       "id": "ZZXAbF4pFSNVn6l5",
                       "content": {
                         "type": "Image",
-                        "url": "assets/images/image_placeholder.png"
+                        "url": "curriculum/comparing-and-scaling/images/"
                       }
                     }
                   ],
@@ -3260,14 +3523,14 @@
                       "id": "UfjyujhivqFFk_2-",
                       "content": {
                         "type": "Image",
-                        "url": "assets/images/image_placeholder.png"
+                        "url": "curriculum/comparing-and-scaling/images/"
                       }
                     },
                     {
                       "id": "Xgz8CJ9rdaSSZ6HL",
                       "content": {
                         "type": "Image",
-                        "url": "assets/images/image_placeholder.png"
+                        "url": "curriculum/comparing-and-scaling/images/"
                       }
                     }
                   ]
@@ -3339,6 +3602,28 @@
                         "<p><strong>Implementation Note</strong>: Be sure to hold a discussion after the Initial Challenge before moving on to the What If. This will allow you to highlight your students’ strategies before analyzing the strategies of other students that are presented in the What If. You can use the strategies in the What If to connect to how your students thought about the proportional reasoning in the tax situation. If students aren’t interested in the context of buying school supplies in the Initial Challenge you could use items from a local store’s weekly sales advertisement.</p>",
                         "<p></p>",
                         "<p>Have students work on the Initial Challenge. As a class, discuss the strategies and solutions for the determining the total cost with tax. After the discussion, have students work on the What If questions. For Situation A, you might have students think about and discuss as a class the strategies not already presented by your students. This may allow a discussion of strategies different from students’ own thinking for solving the Initial Challenge. Situation C offers an opportunity to work backward to find the cost of an item when we know the tax amount.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#RevisionComments'><strong>Revision Comments</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#StemProblemFormat'><strong>Stem Problem Format</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher</a>guide/stretching-and-shrinking/#UnitDescriptions'><strong>Unit Descriptions</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#SummaryInvestigations'><strong>Summary Investigations</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitGoals'><strong>Unit Goals</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAlignment'><strong>Unit Alignment</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#GeneralAoL'><strong>General AoL</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAoL'><strong>Unit AoL</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#MathOverview'><strong>Math Overview</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#LearningAids'><strong>Learning Aids</strong></a> </p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#TeachingAids'><strong>Teaching Aids</strong></a> </p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#FamilyLetters'><strong>Family Letters</strong></a> </p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#Assessments'><strong>Assessments</strong></a> </p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#ACEHomework'><strong>ACE Homework</strong></a> </p>"
                       ]
                     }
                   }
@@ -3444,7 +3729,7 @@
                     "id": "b9WmGoNP-Klup8yi",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/"
                     }
                   },
                   {
@@ -3461,7 +3746,7 @@
                     "id": "TSiu71rHmEXu3f5L",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/"
                     }
                   },
                   {
@@ -3479,7 +3764,7 @@
                     "id": "MYpi4MtsSfUsZcEf",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/"
                     }
                   },
                   {
@@ -3496,7 +3781,7 @@
                     "id": "WcGHtJahPlTxAGo1",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/"
                     }
                   },
                   {
@@ -3514,7 +3799,7 @@
                     "id": "veM-AS4OzsHcTb-3",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/"
                     }
                   },
                   {
@@ -3531,7 +3816,7 @@
                     "id": "sZCW4-BMJ1Nhomxs",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/"
                     }
                   },
                   {
@@ -3549,7 +3834,7 @@
                     "id": "v4o0ERRz6fpQBQQw",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/"
                     }
                   },
                   {
@@ -3566,7 +3851,7 @@
                     "id": "cS9XsNeVfrq7kgUa",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/"
                     }
                   },
                   {
@@ -3583,7 +3868,7 @@
                     "id": "KEXF8L_Jh29sae5Q",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/"
                     }
                   },
                   {
@@ -3745,7 +4030,7 @@
                     "id": "3teHW485BnmmPU3Y",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/"
                     }
                   },
                   {
@@ -3762,7 +4047,7 @@
                     "id": "infU52s0aCyf8k8K",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/"
                     }
                   },
                   {
@@ -3779,7 +4064,7 @@
                     "id": "YvJBj2hffEXEMfgz",
                     "content": {
                       "type": "Image",
-                      "url": "assets/images/image_placeholder.png"
+                      "url": "curriculum/comparing-and-scaling/images/"
                     }
                   },
                   {
