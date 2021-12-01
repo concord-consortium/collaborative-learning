@@ -21,7 +21,6 @@ import { useMeasureText } from "../hooks/use-measure-text";
 import { useToolbarToolApi } from "../hooks/use-toolbar-tool-api";
 import { lightenColor } from "../../../utilities/color-utils";
 
-import "react-data-grid/dist/react-data-grid.css";
 import "./table-tool.scss";
 
 // observes row selection from shared selection store
