@@ -1541,10 +1541,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>[Start Green Box]</p>",
                         "<p>NWDYK</p>",
-                        "<p>We have used several strategies for solving problems that involve ratios. How do you decide which method to use?</p>",
-                        "<p>[End Green Box]</p>"
+                        "<p>We have used several strategies for solving problems that involve ratios. How do you decide which method to use?</p>"
                       ]
                     }
                   },
@@ -3152,15 +3150,14 @@
                     }
                   },
                   {
+                    "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>[Start Green Box]</p>",
                         "<p>NWDYK</p>",
                         "<p>Describe how you can determine a unit rate, or constant of proportionality, in a description, rate table, equation, or graph? </p>",
-                        "<p>In what ways is a unit rate or the constant of proportionality helpful for solving a problem?</p>",
-                        "<p>[End Green Box]</p>"
+                        "<p>In what ways is a unit rate or the constant of proportionality helpful for solving a problem?</p>"
                       ]
                     }
                   },
@@ -3375,17 +3372,111 @@
                   },
                   [
                     {
-                      "id": "8Aw8BaM9M_525njZ",
                       "content": {
-                        "type": "Image",
-                        "url": "curriculum/comparing-and-scaling/images/"
+                        "type": "Geometry",
+                        "title": "Ticket Cost",
+                        "board": {
+                          "properties": {
+                            "axisMin": [-0.5, -5],
+                            "axisRange": [10, 200],
+                            "axisNames": ["x", "y"],
+                            "axisLabels": ["Number of Tickets", "Cost"]
+                          }
+                        },
+                        "objects": [
+                          { "type": "movableLine", "parents": [{ "type": "point", "parents": [0, 0] }, { "type": "point", "parents": [2, 60] }],
+                            "properties": {"id":"VZcS9PetlmRLtU_h"} 
+                          },
+                          { "type": "point", "parents": [1, 30], 
+                            "properties": 
+                            {
+                              "name":"(1, 30)",
+                              "snapToGrid":true,
+                              "snapSizeX":0.1,
+                              "snapSizeY":0.1
+                            } 
+                          },
+                          { "type": "point", "parents": [2, 60], 
+                            "properties": 
+                            {
+                              "id": "myvertex1",
+                              "name": "(2, 60)",
+                              "snapToGrid":true,
+                              "snapSizeX":0.1,
+                              "snapSizeY":0.1
+                            } 
+                          },
+                          { "type": "point", "parents": [2, 0], 
+                            "properties": 
+                            {
+                              "name": "",
+                              "id": "myvertex2",
+                              "snapToGrid":true,
+                              "snapSizeX":0.1,
+                              "snapSizeY":0.1
+                            } 
+                          },
+                          { 
+                            "type": "point", "parents": [0, 0], 
+                            "properties": 
+                            {
+                              "id": "myvertex3",
+                              "name": "(0, 0)",
+                              "snapToGrid":true,
+                              "snapSizeX":0.1,
+                              "snapSizeY":0.1
+                            } 
+                          },
+                          { "type": "polygon", "parents": ["myvertex1", "myvertex2", "myvertex3"],"properties": {"id":"RzDRwOXZcBunyfdG"} }
+                        ]
                       }
                     },
                     {
-                      "id": "pBbdzco9ABtEHby8",
                       "content": {
-                        "type": "Image",
-                        "url": "curriculum/comparing-and-scaling/images/"
+                        "type": "Geometry",
+                        "title": "Ticket Cost 2",
+                        "board": {
+                          "properties": {
+                            "axisMin": [-0.5, -5],
+                            "axisRange": [10, 200],
+                            "axisNames": ["x", "y"],
+                            "axisLabels": ["Number of Tickets", "Total Cost of Tickets"]
+                          }
+                        },
+                        "objects": [
+                          { 
+                            "type": "point", "parents": [2, 60], 
+                            "properties": {"id":"htshVg-g-9oyuH-2","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1,"name":"(2, 60)"} 
+                          },
+                          { 
+                            "type": "point", "parents": [2, 0], 
+                            "properties": {"id":"wZWVSjdEdNMJL0LX","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1,"name":""} 
+                          },
+                          { 
+                            "type": "point", "parents": [0, 0], 
+                            "properties": {"id":"N_VPhTYvkf4Jn2wK","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1,"name":"(0, 0)"} 
+                          },
+                          { "type": "polygon", "parents": ["htshVg-g-9oyuH-2", "wZWVSjdEdNMJL0LX", "N_VPhTYvkf4Jn2wK"],"properties": {"id":"MLYdUp1BzA6QkYdD"} },
+                          { 
+                            "type": "point", "parents": [4, 120], 
+                            "properties": {"name": "(4, 120)", "id":"nT9wRK-ENMZGOUeW","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { 
+                            "type": "point", "parents": [4, 0], 
+                            "properties": 
+                            {"name": "", "id":"ps3v8Dw5qO-hBHD9","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} 
+                          },
+                          { 
+                            "type": "point", "parents": [0, 0], 
+                            "properties": {"name": "", "id":"00xdez3uyHEDwEl8","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { 
+                            "type": "polygon", "parents": ["nT9wRK-ENMZGOUeW", "ps3v8Dw5qO-hBHD9", "00xdez3uyHEDwEl8"],"properties": {"id":"6joamvcLbnXD6kwg"} },
+                          { 
+                            "type": "movableLine", 
+                            "parents": [
+                              { "type": "point", "parents": [0, 0] }, 
+                              { "type": "point", "parents": [3, 90] }],"properties": {"id":"CUglZNyyWEFktb3v"} 
+                          }
+                        ]
                       }
                     }
                   ],
@@ -3415,10 +3506,14 @@
                     }
                   },
                   {
-                    "id": "tayl-OrtkhILuTAI",
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/"
+                      "type": "Table",
+                      "name": "Cost of Ticket from Box Office",
+                      "columns": [
+                        {"name":"No. Tickets","values":["0","1","2"]},
+                        {"name":"Total Cost ","values":["1","30","40"]},
+                        {"name":"Cost with Fee","values":["10","40","70"]}
+                      ]
                     }
                   },
                   {
@@ -3432,10 +3527,26 @@
                     }
                   },
                   {
-                    "id": "R5wTnoqijLr12E_L",
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/"
+                      "type": "Geometry",
+                      "title": "Cost of Tickets from Box Office",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-0.5, -5],
+                          "axisRange": [6.094, 168.153],
+                          "axisNames": ["x", "y"],
+                          "axisLabels": ["Number of Tickets", "Cost"]
+                        }
+                      },
+                      "objects": [
+                        { "type": "movableLine", "parents": [{ "type": "point", "parents": [0, 0] }, { "type": "point", "parents": [2, 60] }],"properties": {"id":"CoHfUHot7WXIJmLy"} },
+                        { "type": "movableLine", "parents": [{ "type": "point", "parents": [0, 10] }, { "type": "point", "parents": [2, 70] }],"properties": {"id":"r-IQhXBhfEdAxNdj"} },
+                        { "type": "point", "parents": [0, 0], "properties": {"name":"(0, 0)","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [1, 30], 
+                          "properties": {"name":"(1, 30)","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [2, 60], 
+                          "properties": {"name":"(2, 60)","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} }
+                      ]
                     }
                   },
                   {
@@ -3473,7 +3584,7 @@
                     "id": "tZIbjzd9TpG8VgjQ",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/"
+                      "url": "curriculum/comparing-and-scaling/images/TG_2-3_TableReasoning.png"
                     }
                   },
                   {
@@ -3510,10 +3621,26 @@
                     }
                   },
                   {
-                    "id": "1lXZOfDQYcGz6_DO",
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/"
+                      "type": "Geometry",
+                      "title": "Cost of Tickets from Box Office",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-0.5, -5],
+                          "axisRange": [6.094, 168.153],
+                          "axisNames": ["x", "y"],
+                          "axisLabels": ["Number of Tickets", "Cost"]
+                        }
+                      },
+                      "objects": [
+                        { "type": "movableLine", "parents": [{ "type": "point", "parents": [0, 0] }, { "type": "point", "parents": [2, 60] }],"properties": {"id":"CoHfUHot7WXIJmLy"} },
+                        { "type": "movableLine", "parents": [{ "type": "point", "parents": [0, 10] }, { "type": "point", "parents": [2, 70] }],"properties": {"id":"r-IQhXBhfEdAxNdj"} },
+                        { "type": "point", "parents": [0, 0], "properties": {"name":"(0, 0)","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [1, 30], 
+                          "properties": {"name":"(1, 30)","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [2, 60], 
+                          "properties": {"name":"(2, 60)","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} }
+                      ]
                     }
                   },
                   {
@@ -3571,14 +3698,14 @@
                       "id": "hLX-yEKDcR36QXif",
                       "content": {
                         "type": "Image",
-                        "url": "curriculum/comparing-and-scaling/images/"
+                        "url": "curriculum/comparing-and-scaling/images/TG_2-3_LittleGiantStore_1.png"
                       }
                     },
                     {
                       "id": "ZZXAbF4pFSNVn6l5",
                       "content": {
                         "type": "Image",
-                        "url": "curriculum/comparing-and-scaling/images/"
+                        "url": "curriculum/comparing-and-scaling/images/TG_2-3_LittleGiantStore_2.png"
                       }
                     }
                   ],
@@ -3597,14 +3724,14 @@
                       "id": "UfjyujhivqFFk_2-",
                       "content": {
                         "type": "Image",
-                        "url": "curriculum/comparing-and-scaling/images/"
+                        "url": "curriculum/comparing-and-scaling/images/TG_2-3_FoodFreshStore_1.png"
                       }
                     },
                     {
                       "id": "Xgz8CJ9rdaSSZ6HL",
                       "content": {
                         "type": "Image",
-                        "url": "curriculum/comparing-and-scaling/images/"
+                        "url": "curriculum/comparing-and-scaling/images/TG_2-3_FoodFreshStore_2.png"
                       }
                     }
                   ]
@@ -3676,6 +3803,41 @@
                         "<p><strong>Implementation Note</strong>: Be sure to hold a discussion after the Initial Challenge before moving on to the What If. This will allow you to highlight your students’ strategies before analyzing the strategies of other students that are presented in the What If. You can use the strategies in the What If to connect to how your students thought about the proportional reasoning in the tax situation. If students aren’t interested in the context of buying school supplies in the Initial Challenge you could use items from a local store’s weekly sales advertisement.</p>",
                         "<p></p>",
                         "<p>Have students work on the Initial Challenge. As a class, discuss the strategies and solutions for the determining the total cost with tax. After the discussion, have students work on the What If questions. For Situation A, you might have students think about and discuss as a class the strategies not already presented by your students. This may allow a discussion of strategies different from students’ own thinking for solving the Initial Challenge. Situation C offers an opportunity to work backward to find the cost of an item when we know the tax amount.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>AoL:  Analysis, Synthesis</p>",
+                        "<p>CCSSM: 7.RP. A.1, 7.RP. A.2, 7.RP. 2.A, 7.RP.2.B, 7.RP. A.2.C, 7.RP.A.2.D, 7.RP.A.3, 7.EE.A.2</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Emerging Mathematical Ideas</strong></p>",
+                        "<p>Expand understanding, use, and representation of proportions to include percents</p>",
+                        "<ul><li>Find the percent of a number</li><li>Find the base when given the percent and percent of a number</li></ul>",
+                        "<p></p>",
+                        "<p>Deepen ability to make and use comparisons of quantities to include percents.</p>",
+                        "<p>Consider multiple strategies to solve problems, including a tape diagram.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>NWDYK</p>",
+                        "<p>How are percent problems like ratio and rate problems?</p>"
                       ]
                     }
                   },
@@ -3803,7 +3965,7 @@
                     "id": "b9WmGoNP-Klup8yi",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/"
+                      "url": "curriculum/comparing-and-scaling/images/TG_3-1_Strategy1_Suri.png"
                     }
                   },
                   {
@@ -3820,7 +3982,7 @@
                     "id": "TSiu71rHmEXu3f5L",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/"
+                      "url": "curriculum/comparing-and-scaling/images/TG_3-1_Strategy1_Suri_2.png"
                     }
                   },
                   {
@@ -3838,7 +4000,7 @@
                     "id": "MYpi4MtsSfUsZcEf",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/"
+                      "url": "curriculum/comparing-and-scaling/images/TG_3-1_Strategy2_Zane.png"
                     }
                   },
                   {
@@ -3855,7 +4017,7 @@
                     "id": "WcGHtJahPlTxAGo1",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/"
+                      "url": "curriculum/comparing-and-scaling/images/TG_3-1_Strategy2_Zane_2.png"
                     }
                   },
                   {
@@ -3873,7 +4035,7 @@
                     "id": "veM-AS4OzsHcTb-3",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/"
+                      "url": "curriculum/comparing-and-scaling/images/TG_3-1_Strategy3_Julia.png"
                     }
                   },
                   {
@@ -3890,7 +4052,7 @@
                     "id": "sZCW4-BMJ1Nhomxs",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/"
+                      "url": "curriculum/comparing-and-scaling/images/TG_3-1_Strategy3_Julia_2.png"
                     }
                   },
                   {
@@ -3908,7 +4070,7 @@
                     "id": "v4o0ERRz6fpQBQQw",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/"
+                      "url": "curriculum/comparing-and-scaling/images/TG_3-1_Strategy4_Kelly.png"
                     }
                   },
                   {
@@ -3925,7 +4087,7 @@
                     "id": "cS9XsNeVfrq7kgUa",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/"
+                      "url": "curriculum/comparing-and-scaling/images/TG_3-1_Strategy4_Kelly_2.png"
                     }
                   },
                   {
@@ -3942,20 +4104,18 @@
                     "id": "KEXF8L_Jh29sae5Q",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/"
+                      "url": "curriculum/comparing-and-scaling/images/TG_3-1_PossibleStrategy_Proportions.png"
                     }
                   },
                   {
-                    "id": "XdJxIlCE6MqoOPpP",
+                    "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>[START Green Box]</p>",
                         "<p><u>Planning for the Summary</u></p>",
                         "<p></p>",
-                        "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence?</p>",
-                        "<p>{End Green Box]</p>"
+                        "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence?</p>"
                       ]
                     }
                   },
@@ -4101,10 +4261,13 @@
                     }
                   },
                   {
-                    "id": "3teHW485BnmmPU3Y",
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/"
+                      "type": "Table",
+                      "name": "Rate Table",
+                      "columns": [
+                        {"name":"Percent","values":["6%","1%","100%"]},
+                        {"name":"Amount ($)","values":["4.8","0.80","80.00"]}
+                      ]
                     }
                   },
                   {
@@ -4121,7 +4284,7 @@
                     "id": "infU52s0aCyf8k8K",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/"
+                      "url": "curriculum/comparing-and-scaling/images/TG_3-1_SituationC_Proportion.png"
                     }
                   },
                   {
@@ -4138,24 +4301,22 @@
                     "id": "YvJBj2hffEXEMfgz",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/"
+                      "url": "curriculum/comparing-and-scaling/images/TG_3-1_SituationC_TapeDiagram.png"
                     }
                   },
                   {
-                    "id": "lqy-CoF3W0dQhXxw",
+                    "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>[Start Green Box]</p>",
                         "<p><u>Now What Do Students Know</u></p>",
                         "<p><u></u></p>",
                         "<p>Ask students to reflect on the discussion and answer the Now What Do You Know.</p>",
                         "<p></p>",
                         "<p><em>How are percent problems like ratio and rate problems?</em></p>",
                         "<p><em></em></p>",
-                        "<p>See answers for more information about the strategies and embedded mathematics.</p>",
-                        "<p>[End Green Box]</p>"
+                        "<p>See answers for more information about the strategies and embedded mathematics.</p>"
                       ]
                     }
                   },
@@ -4189,6 +4350,75 @@
               "content":
               {
                 "tiles": [
+                   {
+                    "id": "7RNqWY6UScTT6Ew4",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The goal of this Problem is to give students more practice in solving the standard family of percent problems. The context is calculating tax, tips (or service charges), and discounts on restaurant meals.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "yNuRc-2LumP9yJJY",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>AoL:, Synthesis</p>",
+                        "<p>CCSSM: 7.RP. A.1, 7.RP. A.2, 7.RP. 2.A, 7.RP.2.B, 7.RP. A.2.C, 7.RP.A.2.D, 7.RP.A.3</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "2ul3hzkap27To3UR",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Emerging Mathematical Ideas</strong></p>",
+                        "<p>Expand understanding of proportions to include sale prices and taxes.</p>",
+                        "<ul><li>Find the percent of a number</li><li>Find the base when given the percent and percent of a number</li></ul>",
+                        "<p></p>",
+                        "<p>Use percents, fractions, decimals, ratios, proportions, unit rate, and /or rate tables to solve problems.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display ": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>NWDYK</p>",
+                        "<p>Describe some strategies you used to solve percent problems.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "XDLer2iZNKVpz2PP",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Revision Comments</strong>- https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#RevisionComments</p>",
+                        "<p><strong>Stem Problem Format</strong>- https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#StemProblemFormat</p>",
+                        "<p><strong>Unit Descriptions</strong>- https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitDescriptions</p>",
+                        "<p><strong>Summary Investigations</strong>- https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#SummaryInvestigations</p>",
+                        "<p><strong>Unit Goals</strong>- https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitGoals</p>",
+                        "<p><strong>Unit Alignment</strong>- https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAlignment</p>",
+                        "<p><strong>General AoL</strong>- https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#GeneralAoL</p>",
+                        "<p><strong>Unit AoL</strong>- https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAoL</p>",
+                        "<p><strong>Math Overview</strong>- https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#MathOverview</p>",
+                        "<p><strong>Learning Aids</strong>- https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#LearningAids</p>",
+                        "<p><strong>Teaching Aids</strong>- https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#TeachingAids</p>",
+                        "<p><strong>Family Letters</strong>- https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#FamilyLetters</p>",
+                        "<p><strong>Assessments</strong>- https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#Assessments</p>",
+                        "<p><strong>ACE Homework</strong>- https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#ACEHomework</p>"
+                      ]
+                    }
+                  }
                 ]
               }
             },
@@ -4196,6 +4426,166 @@
               "type": "launch",
               "content": {
                 "tiles": [
+                  {
+                    "id": "pEuaS8LKXoDJKPDC",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><u><strong>Launch (Getting Started) </strong></u></p>",
+                        "<p></p>",
+                        "<p><u>Connecting to Prior Knowledge</u></p>",
+                        "<p>If students do not eat out or usually eat out only at fast food restaurants, they might not be familiar with tipping. It might be useful to explain how that system works and even to work out one simple example as a whole class.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "BwszCqwPNsVJ0rP4",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Suggested Questions </strong></p>",
+                        "<ul><li>Suppose you eat at a restaurant and the bill comes to $14. What would a tip of 10% be? A tip of 20%? A tip of 15%? ($1.40; $2.80; $2.10)</li></ul>",
+                        "<p>Following up on the strategies from Problem 3.1, you might ask:</p>",
+                        "<ul><li>Can you show how to work out these tips on a percent bar? ((Step 1) A percent bar could be marked for 10%. (Step 2) Students can reason proportionally that 10% of $14 is $1.40 and (Step 3) then double this for 20%. (Step 4) Halfway between 10% and 20% is 15%. So, halfway between $1.40 and $2.80 is $2.10.)</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "etD2lZ4vSNmuS704",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Step 1</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "_GDIYqnL4Opzrtzx",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/TG_3-2_Launch_Step1.png"
+                    }
+                  },
+                  {
+                    "id": "SRHTZVpOsjePIBk6",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Step 2</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "DM7s_mNu--q2aQ-1",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/TG_3-2_Launch_Step2.png"
+                    }
+                  },
+                  {
+                    "id": "f-b4-UNB_y52CPe1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Step 3</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "dr5MgrJIRuoCD8F4",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/TG_3-2_Launch_Step3.png"
+                    }
+                  },
+                  {
+                    "id": "KYdsYdNJnXyPZvcw",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Step 4</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "0zgk5-dTYXL2oflt",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/TG_3-2_Launch_Step4.png"
+                    }
+                  },
+                  {
+                    "id": "5mvKBczMeUAlUHWO",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Can you show how to work out these tips on a rate table?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "bGmUTApuFbSKsBR8",
+                    "content": {
+                      "type": "Table",
+                      "name": "Table 1",
+                      "columns": [
+                        {"name":"Amount","values":["$14","$1.40","$2.80","$0.70","$2.10"]},
+                        {"name":"Percent","values":["100%","10%","20%","5%","15%"]}
+                      ]
+                    }
+                  },
+                  {
+                    "id": "yU4kmdb-QaW5eIbh",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Can you show how to work out these tips by writing a proportion?</li></ul>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "U6r2Kp0XHeF5sofL",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/comparing-and-scaling/images/TG_3-2_TipProportion_1.png"
+                      }
+                    },
+                    {
+                      "id": "I8U5wfHeicIyas5H",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/comparing-and-scaling/images/TG_3-2_TipProportion_2.png"
+                      }
+                    },
+                    {
+                      "id": "qF0h0Z7ObVk9arNv",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/comparing-and-scaling/images/TG_3-2_TipProportion_3.png"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "dpcbktYb5AefJCVR",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><u>Presenting the Challenge</u></p>",
+                        "<p>Alert students that the questions here are about tips and discounts, but the same kind of reasoning as in Problem 3.1 will apply. Encourage them to use tape diagrams, rate tables, or proportions.</p>",
+                        "<p>To optimize the use of class time, Learning Aid 3.2: Larry’s Lunch Place Menu provides a menu and workspace for students to do the Initial Challenge. Have students work in groups of 3-4 students to complete this Problem. The openness of the Initial Challenge is an inviting opportunity for students to make their own choices. Time will be a factor in when sharing their work in the summary. You may want to have groups do a Gallery Walk. Have each group put their work on large chart paper to use in a Gallery Walk in the Summary.</p>"
+                      ]
+                    }
+                  }
                 ]
               }
             },
@@ -4203,6 +4593,70 @@
               "type": "explore",
               "content": {
                 "tiles": [
+                  {
+                    "id": "PE6cMANgRWof5wU7",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><u><strong>Explore (Digging In)   </strong></u>     </p>",
+                        "<p><u>Providing for Individual Needs</u></p>",
+                        "<p></p>",
+                        "<p>As you observe students, watch for strategies that are helpful to share in the whole class discussion.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "mjijcvOdV8Mq0-Ia",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Suggested Questions </strong></p>",
+                        "<p>• How did you calculate the bill + tax? (Bill + 6% of the bill. Be on the lookout for students who use 1.06 * bill. Make sure students understand that this is proportional reasoning.)</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "JB2043G8nQQEbgca",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/TG_3-2_ExplorePicture.png"
+                    }
+                  },
+                  {
+                    "id": "jXDK6lFTspRjYXVP",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>How did you calculate your share of the bill? (There are 4 people in the group. Divide the total + tax + tip by 4.)</li><li>Would it have given you the same answer if you divided the total bill by 4, then divided the tip by 4, and then added? (Yes; this is the Distributive Property in action.)</li><li>You found it pretty easy to find 10%, 20%, and 15% in Situation A. Why is this? Does your shortcut work for other percents like 22% or 7%? (It is easy to scale from 100 to 10 by moving the decimal one place value. 20 is a multiple of 10 and 5 is a factor of 10, so those can be easily scaled. Since 22 and 7 are not multiples or factors of 10, so in those cases, we would probably want to start by scaling from 100% to 1%. 22 and 7 are multiples of 1.)</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><u>Planning for the Summary</u></p>",
+                        "<p></p>",
+                        "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know question? What will you do if you do not have evidence? </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "oIQnJaZKDlrRlTha",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Now What Do You Know?</em></p>",
+                        "<p><em>Describe some strategies you used to solve percent problems.</em></p>"
+                      ]
+                    }
+                  }
                 ]
               }
             },
@@ -4210,6 +4664,346 @@
               "type": "summarize",
               "content": {
                 "tiles": [
+                  {
+                    "id": "kS598ws856iX5wV9",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><u><strong>Summarize (Orchestrating the Discussion) </strong></u><strong> </strong></p>",
+                        "<p><u>Solutions and Strategies </u></p>",
+                        "<p>The openness of the Initial Challenge will make it somewhat difficult to compare results from the different groups. However, the very openness makes this an inviting opportunity for groups to share their individual choices. Time will be a factor in the summary when you share their choices and work. You may want to have groups do a Gallery Walk. During the Gallery Walk, you can have groups rotate to at least two other groups’ work. Students can check the work and give feedback on sticky notes.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "cahJrFF3yiFh4xvv",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Suggested Questions </strong></p>",
+                        "<ul><li>Some groups found the sub-total for the food items and then added 6% of that amount to the bill. How else might you calculate the total amount? (You could scale from 1% to 106%. Or you could multiply bill by 1.06 to get total + tax.)</li></ul>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "DU7w7KybXd0ux2KS",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/comparing-and-scaling/images/TG_3-2_Summarize1.png"
+                      }
+                    },
+                    {
+                      "id": "wn12QDHVTUut9BRc",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>OR</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "GyY6h5bOdIZUgYyf",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/comparing-and-scaling/images/TG_3-2_Summarize2.png"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "1sH6w6eCkTJb2XBl",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><u>Making the Mathematics Explicit </u></p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p><em>Situations A and C</em></p>",
+                        "<p>Use the Situations to make sure that all students have strategies for finding percents such as tax, tips, and discounts.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "3F5SBTlp-DuiNLAo",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<p></p>",
+                        "<ul><li>What happens when we find 10% of a number? (When we scale from 100% to 10%, the number is divided into 10 equal pieces. Dividing by 10 moves the decimal to the left, because we are changing the place value.)</li><li>How can I use the 10% rate to find the 20% rate? (If we scale from 10% to 20%, we double the percent. So, we would double the number, too.)</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "yDOJy2t-3zyqAbtp",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/TG_3-2_Summarize_SitA&C.png"
+                    }
+                  },
+                  {
+                    "id": "8SrgE0N5QDA9jbqk",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>How can I use the 10% rate to find the 15% rate? (Students might ½ the 10% then scale by 3. Another strategy might be to find ½ between 10% and 20%. A third strategy would be to take the 10% find ½ of it, then combine the two.)</li><li>In Situation C, did you use the same strategy or did you change your strategy when finding the 6% tax then finding the 15% tip? (Student answers will vary. Some students may tend to use the same strategy for both, such as finding 1% then scaling to the percent needed. Some students may use different strategies. For example, a student might find the 15% using a benchmarking strategy and find the 6% by using the 1% and scale strategy.)</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "1CyYXEdQMDHG1y1s",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Situation B</em></p>",
+                        "<p>Use the situations to make sure that all students have strategies for finding the quantity of 100% when a percentage and quantity are given.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "aUSo4nM1RK1tqGOJ",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<p></p>",
+                        "<ul><li>If we know the percent and the amount, how do we find the total food bill? (Students will have various strategies that may include the following.)</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "iN4JfJYmIUk-vqYs",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Rate Table</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "1Gr4kEtOXE8iPFEC",
+                    "content": {
+                      "type": "Table",
+                      "name": "Table 2",
+                      "columns": [
+                        {"name":"Amount","values":["$2.50","$1.25","$12.50"]},
+                        {"name":"Percent","values":["20%","10%","100%"]}
+                      ]
+                    }
+                  },
+                  {
+                    "id": "HHABOoygUXOipGEQ",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Proportion</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "FoWp2yufrzAMznkp",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/TG_3-2_Summarize_SitB_Proportion.png"
+                    }
+                  },
+                  {
+                    "id": "7MDGknhGkWCbaPci",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Percent Bar/Tape Diagram</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "aWL7pSpUxoo6Ehhr",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/TG_3-2_Summarize_SitB_BarPercent1.png"
+                    }
+                  },
+                  {
+                    "id": "PEOfIgK5h1amazjf",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>While this strategy is the same mathematical reasoning as the proportion shown above, seeing the 5 groups of 20% helps to explain why the scaling works. (PROTRAYAL)  Each partition of 20% is $2.50. We have 5 groups of 20% and 5 groups of $2.50 in the whole (100%) bar.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "wWIRAkXSv8cgH3Py",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/TG_3-2_Summarize_SitB_BarPercent2.png"
+                    }
+                  },
+                  {
+                    "id": "j-3HplzvuHmQZE-r",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Situation D</em></p>",
+                        "<p>This situation explores what happens when you have discounts on top of discounts. This is often counterintuitive for students. Many will think that this is an application of the Distributive Property, but it is not.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "9RQRslNmHhqeZYnP",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<p></p>",
+                        "<ul><li>What was the cost of the headphones after a 30% discount, then a 20% coupon? ($53.20)</li><li>Is this the same as a 50% coupon? Why or why not? (No. 50% off of $95 is $47.50. When you do the 30% discount, you are taking that off the total amount. When you take the 20% discount, you are taking that off less than the total amount.)</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "b7qVd-Ha36MkIYjy",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Going Further</em></p>",
+                        "<ul><li>If the clerk had done the discounts in the reverse order (20% discount, then 30% discount), would the price be the same? (Yes. In either case, we would get a 44% discount. We pay 70% of 80% or 80% of 70%. Because this is multiplicative, the order of the multiplication does not matter. Students may notice that this looks like fraction multiplication that they did with brownie pans in Grade 6: Let’s Be Rational 2.)</li></ul>",
+                        "<p></p>",
+                        "<p>We can use a 100 grid to show the numerical relationships. (PROTRAYAL) The shaded portions represent the discounts off and the white portions represent what we would pay.</p>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "fDQ-MCssqFyCeyjh",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>50% OFF </p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "aELrELCTUPgG-SbA",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>30% OFF then 20% OFF</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "yWbLYZk6lre3Jzlz",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>20% OFF then 30% OFF</p>"
+                        ]
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "e0DbxJc9u4ej6ASr",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/comparing-and-scaling/images/TG_3-2_GoingFurther_1.png"
+                      }
+                    },
+                    {
+                      "id": "g3iPZEaqRBa1hW92",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/comparing-and-scaling/images/TG_3-2_GoingFurther_2.png"
+                      }
+                    },
+                    {
+                      "id": "72102I-xitQja2Y0",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/comparing-and-scaling/images/TG_3-2_GoingFurther_3.png"
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "collpiX8v9RihZzP",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Pay 50% </p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "jna61TeHJIxedGHG",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Pay 56%</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "me6WihEokc_CeBhD",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Pay 56%</p>"
+                        ]
+                      }
+                    }
+                  ],
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><u>Now What Do Students Know</u></p>",
+                        "<p><u></u></p>",
+                        "<p>Ask students to reflect on the discussion and answer the Now What Do You Know question.</p>",
+                        "<p></p>",
+                        "<p><em>Describe some strategies you used to solve percent problems.</em></p>",
+                        "<p></p>",
+                        "<p>See answers for more information about the strategies and embedded mathematics.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "lhDkjks1d3_NTbmj",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Reflecting on Student Learning  </strong></p>",
+                        "<p>Use the following questions to assess student understanding at the end of the lesson.  </p>",
+                        "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li></ul>",
+                        "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
+                        "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
+                      ]
+                    }
+                  }
                 ]
               }
             }
