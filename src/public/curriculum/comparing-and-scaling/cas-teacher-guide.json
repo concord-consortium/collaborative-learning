@@ -2551,6 +2551,42 @@
                   }
                 },
                 {
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>AoL: Analysis, Synthesis</p>",
+                      "<p>CCSSM: 7.RP. A.1, 7.RP. A.2, 7.RP.A.2.A, 7.RP.A.2.B,  7.RP.A.2.C, 7.EE.B.3, 7.EE.B.4, 7.EE.B.4.A</p>"
+                    ]
+                  }
+                },
+                {
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Emerging Mathematical Ideas</strong></p>",
+                      "<p>Build on understanding of ratios and their usefulness to make comparisons. Deepen understanding that a rate is the comparison of two quantities measured in different units.</p>",
+                      "<p></p>",
+                      "<p>Explore situations that require recognizing and analyzing proportional relationships to solve problems. Find and use unit rates, scaling, and equivalent ratios.</p>",
+                      "<p></p>",
+                      "<p>Begin to think about when a situation is not proportional, e.g. cannot be represented by equivalent ratios.</p>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>NWDYK</p>",
+                      "<p>How can you determine if a situation is proportional?</p>"
+                    ]
+                  }
+                },
+
+                {
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -2629,7 +2665,7 @@
                   "id": "N8ujiuxvF0u53GMX",
                   "content": {
                     "type": "Image",
-                    "url": "curriculum/comparing-and-scaling/images/"
+                    "url": "curriculum/comparing-and-scaling/images/TG_2-2_TonysRateGreen.png"
                   }
                 },
                 {
@@ -2646,7 +2682,7 @@
                   "id": "oy2bl6hQtuqXnImu",
                   "content": {
                     "type": "Image",
-                    "url": "curriculum/comparing-and-scaling/images/"
+                    "url": "curriculum/comparing-and-scaling/images/TG_2-2_TonysRateRed.png"
                   }
                 },
                 {
@@ -2663,7 +2699,7 @@
                   "id": "TmkQvK91VFGYSic6",
                   "content": {
                     "type": "Image",
-                    "url": "curriculum/comparing-and-scaling/images/"
+                    "url": "curriculum/comparing-and-scaling/images/TG_2-2_TonysRatePurple.png"
                   }
                 },
                 {
@@ -2680,7 +2716,7 @@
                   "id": "8MAaGdjloCyTjtmW",
                   "content": {
                     "type": "Image",
-                    "url": "curriculum/comparing-and-scaling/images/"
+                    "url": "curriculum/comparing-and-scaling/images/TG_2-2_SelmasProportion.png"
                   }
                 },
                 {
@@ -2755,7 +2791,7 @@
                   "id": "LjcMdqM9i-6UbkFa",
                   "content": {
                     "type": "Image",
-                    "url": "curriculum/comparing-and-scaling/images/"
+                    "url": "curriculum/comparing-and-scaling/images/TG_2-2_RoyalsPizza_1.png"
                   }
                 },
                 {
@@ -2772,7 +2808,7 @@
                   "id": "0XCwM8r-rAw8INlG",
                   "content": {
                     "type": "Image",
-                    "url": "curriculum/comparing-and-scaling/images/"
+                    "url": "curriculum/comparing-and-scaling/images/TG_2-2_RoyalsPizza_2.png"
                   }
                 },
                 {
@@ -2789,7 +2825,7 @@
                   "id": "RDVZBV79R_ELgW0B",
                   "content": {
                     "type": "Image",
-                    "url": "curriculum/comparing-and-scaling/images/"
+                    "url": "curriculum/comparing-and-scaling/images/TG_2-2_RoyalsPizza_3.png"
                   }
                 },
                 {
@@ -2827,7 +2863,7 @@
                   "id": "xjY7xvHNGQKDeQzY",
                   "content": {
                     "type": "Image",
-                    "url": "curriculum/comparing-and-scaling/images/"
+                    "url": "curriculum/comparing-and-scaling/images/TG_2-2_RoyalPizzaProportion_1.png"
                   }
                 },
                 {
@@ -2844,7 +2880,7 @@
                   "id": "TNLC-882X1CqfgQf",
                   "content": {
                     "type": "Image",
-                    "url": "curriculum/comparing-and-scaling/images/"
+                    "url": "curriculum/comparing-and-scaling/images/TG_2-2_RoyalPizzaProportion_2.png"
                   }
                 },
                 {
@@ -2988,28 +3024,28 @@
                   "id": "9XdclT3sClizHTm3",
                   "content": {
                     "type": "Image",
-                    "url": "curriculum/comparing-and-scaling/images/"
+                    "url": "curriculum/comparing-and-scaling/images/TG_2-2_Example1.png"
                   }
                 },
                 {
                   "id": "zF8Cmwc8GTutsr9g",
                   "content": {
                     "type": "Image",
-                    "url": "curriculum/comparing-and-scaling/images/"
+                    "url": "curriculum/comparing-and-scaling/images/TG_2-2_Example2.png"
                   }
                 },
                 {
                   "id": "nQy0_T8Va21tYUiq",
                   "content": {
                     "type": "Image",
-                    "url": "curriculum/comparing-and-scaling/images/"
+                    "url": "curriculum/comparing-and-scaling/images/TG_2-2_Example3.png"
                   }
                 },
                 {
                   "id": "Yd-WRhXZx30rh4If",
                   "content": {
                     "type": "Image",
-                    "url": "curriculum/comparing-and-scaling/images/"
+                    "url": "curriculum/comparing-and-scaling/images/TG_2-2_Example4.png"
                   }
                 },
                 {
@@ -3087,6 +3123,44 @@
                       "format": "html",
                       "text": [
                         "<p>This Problem focuses on how unit rate, or constant of proportionality, is helpful to solve problems. Students also look at the role of unit rate in different representations of tables, graphs, and equations.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>AoL: Synthesis</p>",
+                        "<p>CCSSM: 7RP. A.1, 7.RP. A.2, 7.RP.A.2.A, 7.RP.A.2.B,  7.RP.A.2.C, 7.RP.A.2.D, 7.EE.A.2,7.EE.B.3, 7.EE.B.4, 7.EE.B.4.A</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Emerging Mathematical Ideas</strong></p>",
+                        "<p>Introduce the term constant of proportionality and connect it to unit rate.</p>",
+                        "<p></p>",
+                        "<p>Use unit rates to solve problems.</p>",
+                        "<p></p>",
+                        "<p>Begin to identify and use the constant of proportionality in tables, graphs, and equations and understand how it makes it easy to compare different rates and solve problems.</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>[Start Green Box]</p>",
+                        "<p>NWDYK</p>",
+                        "<p>Describe how you can determine a unit rate, or constant of proportionality, in a description, rate table, equation, or graph? </p>",
+                        "<p>In what ways is a unit rate or the constant of proportionality helpful for solving a problem?</p>",
+                        "<p>[End Green Box]</p>"
                       ]
                     }
                   },
