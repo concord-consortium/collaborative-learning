@@ -17,11 +17,12 @@ module.exports = (env, argv) => {
   return {
     context: __dirname, // to automatically find tsconfig.json
     // https://survivejs.com/webpack/building/source-maps/
-    devtool: devMode ? 'cheap-module-eval-source-map' : 'source-map',
+    devtool: devMode ? 'eval-source-map' : 'source-map',
     entry: ['whatwg-fetch', './src/index.tsx'],
     mode: devMode ? 'development' : 'production',
     output: {
-      filename: 'index.[hash].js'
+      clean: true,
+      filename: 'index.[contenthash].js'
     },
     performance: { hints: false },
     externals: {
@@ -106,10 +107,9 @@ module.exports = (env, argv) => {
             {
               // Do not apply SVGR import in CSS files.
               issuer: /\.(sa|sc|le|c)ss$/i,
-              loader: 'url-loader',
-              options: {
-                limit: 8192,
-                name: 'assets/images/[name].[hash:6].[ext]'
+              type: 'asset',
+              generator: {
+                filename: 'assets/images/[name].[contenthash:6][ext]'
               }
             }
           ]
@@ -124,7 +124,8 @@ module.exports = (env, argv) => {
                 modules: {
                   // required for :import from scss files
                   // cf. https://github.com/webpack-contrib/css-loader#separating-interoperable-css-only-and-css-module-features
-                  compileType: 'icss'
+                  // v6 changed from `compileType` to `mode`
+                  mode: 'icss'
                 }
               }
             },
@@ -134,33 +135,35 @@ module.exports = (env, argv) => {
         },
         {
           test: /\.(woff|woff2|eot|ttf)$/i,
-          loader: 'url-loader',
-          options: {
-            limit: 8192,
-            name: 'assets/fonts/[name].[hash:6].[ext]'
+          type: 'asset',
+          generator: {
+            filename: 'assets/fonts/[name].[contenthash:6][ext]'
           }
         },
         {
           // store placeholder image as file not data URI
           test: /image_placeholder\.png$/,
-          loader: 'file-loader',
-          options: {
-            name: 'assets/images/[name].[ext]'
+          type: 'asset/resource',
+          generator: {
+            filename: 'assets/images/[name][ext]'
           }
         },
         {
           test: /\.png$/i,
           // don't convert placeholder image to a data URI
           exclude: /image_placeholder\.png$/,
-          loader: 'url-loader',
-          options: {
-            limit: 8192,
-            name: 'assets/images/[name].[hash:6].[ext]'
+          type: 'asset',
+          generator: {
+            filename: 'assets/images/[name].[contenthash:6][ext]'
           }
         }
       ]
     },
     resolve: {
+      alias: {
+        // cf. https://github.com/facebook/react/issues/20235#issuecomment-732205073
+        'react/jsx-runtime': require.resolve('react/jsx-runtime')
+      },
       extensions: [ '.ts', '.tsx', '.js', '.jsx' ]
     },
     stats: {
@@ -170,7 +173,7 @@ module.exports = (env, argv) => {
     plugins: [
       new ESLintPlugin(),
       new MiniCssExtractPlugin({
-        filename: devMode ? 'index.css' : 'index.[hash].css'
+        filename: devMode ? 'index.css' : 'index.[contenthash].css'
       }),
       new HtmlWebpackPlugin({
         filename: 'index.html',
