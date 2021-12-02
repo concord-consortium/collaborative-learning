@@ -1,9 +1,8 @@
 import React from "react";
 import { ThumbnailDocumentItem } from "./thumbnail-document-item";
 import { DocumentModelType } from "../../models/document/document";
-import {
-  isPlanningType, isProblemType, isPublishedType, SupportPublication
-} from "../../models/document/document-types";
+import { isPublishedType, SupportPublication } from "../../models/document/document-types";
+import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import { IStores } from "../../models/stores/stores";
 import { NavTabSectionModelType } from "../../models/view/nav-tabs";
 
@@ -26,14 +25,11 @@ function getDocumentCaption(stores: IStores, document: DocumentModelType) {
   const { appConfig, problem, class: _class } = stores;
   const { type, uid } = document;
   if (type === SupportPublication) return document.getProperty("caption") || "Support";
-  const user = _class?.getUserById(uid);
-  const userName = user?.displayName;
+  const userName = document.isRemote
+                    ? "Network User"
+                    : _class?.getUserById(uid)?.displayName || "Unknown User";
   const namePrefix = isPublishedType(type) ? `${userName}: ` : "";
-  const title = isProblemType(type)
-                  ? problem.title
-                  : isPlanningType(type)
-                      ? `${problem.title}: Planning`
-                      : document.getDisplayTitle(appConfig);
+  const title = getDocumentDisplayTitle(document, appConfig, problem);
   return `${namePrefix}${title}`;
 }
 
