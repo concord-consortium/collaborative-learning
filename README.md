@@ -24,14 +24,14 @@ You *do not* need to build to deploy the code, that is automatic.  See more info
 
 ## Deployment
 
-Production releases to S3 are based on the contents of the /dist folder and are built automatically by Travis
+Production releases to S3 are based on the contents of the /dist folder and are built automatically by GitHub Actions
 for each branch pushed to GitHub and each merge into production.
 
 Merges into production are deployed to http://collaborative-learning.concord.org.
 
-Other branches are deployed to http://collaborative-learning.concord.org/branch/<name>.
+Other branches are deployed to http://collaborative-learning.concord.org/branch/<name>/.
 
-You can view the status of all the branch deploys [here](https://travis-ci.com/concord-consortium/collaborative-learning/branches).
+You can view the status of all the branch deploys [here](https://github.com/concord-consortium/collaborative-learning/actions).
 
 To deploy a production release:
 
@@ -39,7 +39,7 @@ To deploy a production release:
     - `npm version --no-git-tag-version [patch|minor|major]`
 1. Update the `CHANGELOG.md` with a description of the new version
 1. Verify that everything builds correctly
-    - `npm run lint && npm run test && npm run build`
+    - `npm run lint && npm run build && npm run test`
 1. Copy asset size markdown table from previous release and change sizes to match new sizes in `dist`
 1. Create `release-<version>` branch and commit changes, push to GitHub, create PR and merge
 1. Checkout master and pull
