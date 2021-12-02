@@ -10,10 +10,10 @@
     }
   },
   "sections": {
-    "introduction": {
-      "initials": "IN",
-      "title": "Introduction",
-      "placeholder": "Work area for\nIntroduction section"
+    "firstinsight": {
+      "initials": "FI",
+      "title": "First Insight",
+      "placeholder": "Work area for\nFirst Insight section"
     },
     "initialChallenge": {
       "initials": "IC",
@@ -74,16 +74,82 @@
           "disabled": [],
           "sections": [
                         {
-                        "type": "introduction",
+                        "type": "firstinsight",
                         "content": {
-                        "tiles": []
+                        "tiles": [
+                          {
+                            "content": {
+                              "type": "Text",
+                              "format": "html",
+                              "text": [
+                                "<p> Your class may have visited a nearby coastal area that is vulnerable to erosion. If you haven&#x27;t, take a peek at this video on coastal erosion. Then answer these questions with your group. </p>",
+                                "<p> You can drag images out of this activity, or upload them from your computer, or draw pictures to support your point of view. </p>" 
+                              ]
+                            }
+                          },
+                          {
+                            "content": {
+                              "type": "Image",
+                              "url": "curriculum/pc2/images/polarfield.jpg"
+                            }
+                          },
+                          {
+                            "content": {
+                              "type": "Text",
+                              "format": "html",
+                              "text": [
+                                "<p>Cultural Stories and pictures: </p>",
+                                "<p><a href='http://storymap.systemsecology.org/'>Barrow Systems Ecology</a> </p>",
+                                "<p><a href='http://www.yupikscience.org/index.html'>Hooper Bay - Yup&#x27;ik Science</a></p>"
+                              ]
+                            }
+                          },
+                          {
+                            "content": {
+                              "type": "Text",
+                              "format": "html",
+                              "text": [
+                                "<ol><li>What do you think is important to know about or from this place? Why do you think it is important to know these things about this place?</li><li>How do you think we can learn about this place? Why do you think these are good ways to learn about this place?</li><li>Do you think people are a part of this place? If yes, how do you think people are a part of this place? If no, why do you think people are separate from this place?</li><li>What do you think peoples’ role in this place should be? For example, how should people act in this place? How should people treat this place?</li><li>What do you think an elder might think or say or do about coastal erosion? </li><li>How has the coastline changed over time and how has it affected your life?</li><p></p></ol>"
+                              ]
+                            }
+                          }
+                        ]
                         },
                         "supports": []
                         },
                         {
                           "type": "initialChallenge",
                           "content": {
-                            "tiles": []
+                            "tiles": [
+                              {
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "One of the ways scientists measure erosion is by comparing changes in coastline from year to year."
+                                  ]
+                                }
+                              },
+                              {
+                                "content": {
+                                  "type": "Table",
+                                  "name": "Erosion",
+                                  "columns": [
+                                    {"name":"Year","values":["1995","1996","1998","1999","2000","2004","2005"]},
+                                    {"name":"inches of coastline","values":[".1",".1",".2",".7",".4","1.2","2.9"]}
+                                  ]
+                                }
+                              },
+                              {
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<ol><li>Now that you’ve learned different ways to consider this issue, is there anything you’d like to add or change in your answers? You can use any ideas that you want: Native Hawaiian/Alaskan ideas, Western science ideas, and/or your own ideas.</li></ol>"
+                                  ]
+                                }
+                              }
+                            ]
                           },
                           "supports": []
                         },
