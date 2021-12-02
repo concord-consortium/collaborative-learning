@@ -25,8 +25,9 @@ function getDocumentCaption(stores: IStores, document: DocumentModelType) {
   const { appConfig, problem, class: _class } = stores;
   const { type, uid } = document;
   if (type === SupportPublication) return document.getProperty("caption") || "Support";
-  const user = _class?.getUserById(uid);
-  const userName = user?.displayName;
+  const userName = document.isRemote
+                    ? "Network User"
+                    : _class?.getUserById(uid)?.displayName || "Unknown User";
   const namePrefix = isPublishedType(type) ? `${userName}: ` : "";
   const title = getDocumentDisplayTitle(document, appConfig, problem);
   return `${namePrefix}${title}`;
