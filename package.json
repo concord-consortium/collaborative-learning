@@ -95,10 +95,10 @@
   "homepage": "https://github.com/concord-consortium/collaborative-learning#readme",
   "devDependencies": {
     "@babel/core": "^7.16.0",
-    "@babel/preset-env": "^7.16.0",
-    "@cypress/code-coverage": "^3.9.11",
+    "@babel/preset-env": "^7.16.4",
+    "@cypress/code-coverage": "^3.9.12",
     "@cypress/webpack-preprocessor": "^5.10.0",
-    "@firebase/app-compat": "^0.1.10",
+    "@firebase/app-compat": "^0.1.9",
     "@firebase/app-types": "^0.7.0",
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
     "@svgr/webpack": "^6.1.0",
