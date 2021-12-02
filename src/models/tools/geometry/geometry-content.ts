@@ -700,7 +700,7 @@ export const GeometryContentModel = ToolContentModel
         const x = xAttr ? Number(dataSet.getValue(caseId, xAttr.id)) : undefined;
         for (let attrIndex = 1; attrIndex < dataSet.attributes.length; ++attrIndex) {
           const yAttr = dataSet.attributes[attrIndex];
-          if (caseId && yAttr) {
+          if (caseId && yAttr && (yAttr.id !== labelAttr?.id)) {
             const y = yAttr ? Number(dataSet.getValue(caseId, yAttr.id)) : undefined;
             ids.push(`${caseId}:${yAttr.id}`);
             points.push({ label, coords: [x, y] });
