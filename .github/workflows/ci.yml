@@ -56,7 +56,7 @@ jobs:
           # so far we've been using a webpack istanbul-instrumenter-loader for this
           # but there has been work on building code coverage into node itself, which
           # should be much faster
-          CODE_COVERAGE: true
+          CODE_COVERAGE: false
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
