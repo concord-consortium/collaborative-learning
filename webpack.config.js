@@ -91,15 +91,23 @@ module.exports = (env, argv) => {
               options: {
                 svgoConfig: {
                   plugins: [
-                    // leave <line>s, <rect>s and <circle>s alone
-                    // https://github.com/svg/svgo/blob/master/plugins/convertShapeToPath.js
-                    { convertShapeToPath: false },
-                    // leave "class"es and "id"s alone
-                    // https://github.com/svg/svgo/blob/master/plugins/prefixIds.js
-                    { prefixIds: false },
-                    // leave "stroke"s and "fill"s alone
-                    // https://github.com/svg/svgo/blob/master/plugins/removeUnknownsAndDefaults.js
-                    { removeUnknownsAndDefaults: { defaultAttrs: false } }
+                    {
+                      // cf. https://github.com/svg/svgo/releases/tag/v2.4.0
+                      name: "preset-default",
+                      params: {
+                        overrides: {
+                          // leave <line>s, <rect>s and <circle>s alone
+                          // https://github.com/svg/svgo/blob/master/plugins/convertShapeToPath.js
+                          convertShapeToPath: false,
+                          // leave "class"es and "id"s alone
+                          // https://github.com/svg/svgo/blob/master/plugins/prefixIds.js
+                          prefixIds: false,
+                          // leave "stroke"s and "fill"s alone
+                          // https://github.com/svg/svgo/blob/master/plugins/removeUnknownsAndDefaults.js
+                          removeUnknownsAndDefaults: { defaultAttrs: false }
+                        }
+                      }
+                    }
                   ]
                 }
               }

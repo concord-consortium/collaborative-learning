@@ -101,7 +101,7 @@
     "@firebase/app-compat": "^0.1.10",
     "@firebase/app-types": "^0.7.0",
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
-    "@svgr/webpack": "^5.5.0",
+    "@svgr/webpack": "^6.1.0",
     "@testing-library/jest-dom": "^5.15.1",
     "@testing-library/react": "^12.1.2",
     "@testing-library/react-hooks": "^7.0.2",

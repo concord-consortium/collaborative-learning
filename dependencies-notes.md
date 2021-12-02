@@ -6,7 +6,6 @@ Notes on dependencies and in particular on what's keeping particular dependencie
 
 |Dependency          |Current Version|Latest Version|Notes                                                                              |
 |--------------------|---------------|--------------|-----------------------------------------------------------------------------------|
-|@svgr/webpack       |5.5.0          |6.1.0         |v6 generated errors which I did not pursue                                         |
 |@types/d3-format    |2.0.2          |3.0.1         |[ESM Module](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c)|
 |@types/react        |16.14.21       |17.0.35       |React 17/Library dependencies: slate-editor, blueprintjs                           |
 |@types/react-dom    |16.9.14        |17.0.11       |React 17/Library dependencies: slate-editor, blueprintjs                           |
