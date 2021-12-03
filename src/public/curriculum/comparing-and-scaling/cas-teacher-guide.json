@@ -96,10 +96,10 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Emerging Mathematical Ideas</strong> </p>",
+                        "<p><strong>Emerging Mathematical Ideas</strong></p>",
                         "<p>Expand understanding of mathematical characteristics that define ratios. Strengthen understanding of ratio and scaling up or down to find equivalent ratios.</p>",
-                        "<p>Notice, use, and articulate that: </p>",
-                        "<ul><li>ratios are comparisons of two quantities</li><li>ratios may use either part-to-part or part-to-whole comparisons</li><li>ratios describe the multiplicative relationship between the quantities </li><li>ratios are NOT comparisons that describe the difference between two values</li></ul>"
+                        "<p>Notice, use, and articulate that:</p>",
+                        "<ul><li>ratios are comparisons of two quantities</li><li>ratios may use either part-to-part or part-to-whole comparisons</li><li>ratios describe the multiplicative relationship between the quantities</li><li>ratios are NOT comparisons that describe the difference between two values</li></ul>"
                       ]
                     }
                   },
@@ -109,8 +109,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>NWDYK </p>",
-                        "<p>Describe some strategies for solving problems that involve ratios. </p>"
+                        "<p>NWDYK</p>",
+                        "<p>Describe some strategies for solving problems that involve ratios.</p>"
                       ]
                     }
                   },
@@ -128,11 +128,11 @@
                         "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#GeneralAoL'><strong>General AoL</strong></a></p>",
                         "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#UnitAoL'><strong>Unit AoL</strong></a></p>",
                         "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#MathOverview'><strong>Math Overview</strong></a></p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#LearningAids'><strong>Learning Aids</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#TeachingAids'><strong>Teaching Aids</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#FamilyLetters'><strong>Family Letters</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#Assessments'><strong>Assessments</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#ACEHomework'><strong>ACE Homework</strong></a> </p>"
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#LearningAids'><strong>Learning Aids</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#TeachingAids'><strong>Teaching Aids</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#FamilyLetters'><strong>Family Letters</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#Assessments'><strong>Assessments</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#ACEHomework'><strong>ACE Homework</strong></a></p>"
                       ]
                     }
                   }
@@ -149,10 +149,10 @@
                           "type": "Text",
                           "format": "html",
                           "text": [
-                            "<p><u><strong>Launch (Getting Started)</strong></u>  </p>",
+                            "<p><u><strong>Launch (Getting Started)</strong></u></p>",
                             "<p><u>Connecting to Prior Knowledge</u></p>",
                             "<p>Use the Introduction to Investigation 1 to remind students of the mathematics in the Grade 6 Comparing Quantities Unit, including ratios, equivalent ratios, and unit rate. Review the definition of a ratio and the many ways that ratios can be written. (PROBLEM SOLVING)</p>",
-                            "<p>Writing a ratio in fraction form notation is new to students. Fraction form notation was not used in Grade 6, in order to scaffold student understanding as they learn to separate the differences between ratios and fractions. </p>",
+                            "<p>Writing a ratio in fraction form notation is new to students. Fraction form notation was not used in Grade 6, in order to scaffold student understanding as they learn to separate the differences between ratios and fractions.</p>",
                             "<p>Discuss and show examples of ratio statements as a comparison between two quantities. Discuss the various notations of ratios.</p>"
                           ]
                         }
@@ -166,7 +166,7 @@
                             "<p><strong>Suggested Questions</strong></p>",
                             "<ul><li>How is this fraction form of ratio the same as or different from fractions? (Students may not be familiar thinking about the differences. Students may need to revisit the question as they progress through the Unit. Possible answers at this time might include:</li></ul>",
                             "<p>The ratio shown is a part-to-part comparison of two quantities. Fractions are always part-to-whole. Ratios can be either part-to-part or part-to-whole.</p>",
-                            "<p>As long as the labeling matches the quantities, ratios can be written in any order. Fractions cannot. For example, 2 green for every 3 white can be written as </p>",
+                            "<p>As long as the labeling matches the quantities, ratios can be written in any order. Fractions cannot. For example, 2 green for every 3 white can be written as</p>",
                             "<p>(2 green)/(3 white) or (3 white)/(2 green).  The fraction 2/(3 ) cannot be written as 3/(2 ).</p>",
                             "<p>A fraction is a number. A ratio is a comparison between two quantities.)</p>",
                             "<ul><li>What patterns do you see among the equivalent ratios comparison statements of green and white cupcakes? (The equivalent ratios are multiples of the two quantities.)</li></ul>"
@@ -310,14 +310,14 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p><u><strong>Explore (Digging In) </strong></u>       </p>",
+                      "<p><u><strong>Explore (Digging In)</strong></u></p>",
                       "<p><u>Providing for Individual Needs</u></p>",
                       "<p></p>",
                       "<p>Initial Challenge Questions:</p>",
                       "<p></p>",
                       "<p>As students work on the Initial Challenge, circulate and ask them questions. If a group has a conjecture about most and least orangey, ask them to explain why.</p>",
                       "<p></p>",
-                      "<p>Some students will puzzle over how to begin. After giving students some time to try a few ideas, you might suggest that students just begin by comparing two recipes rather than all four at once. </p>"
+                      "<p>Some students will puzzle over how to begin. After giving students some time to try a few ideas, you might suggest that students just begin by comparing two recipes rather than all four at once.</p>"
                     ]
                   }
                 },
@@ -394,7 +394,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><u><strong>Summarize (Orchestrating the Discussion) </strong></u></p>",
+                        "<p><u><strong>Summarize (Orchestrating the Discussion)</strong></u></p>",
                         "<p><u>Solutions and Strategies</u></p>",
                         "<p></p>",
                         "<p>Have groups display their work. Then have students do a Gallery Walk to look at all of the work from other groups. Ask them what they notice and wonder about the strategies used by their classmates.</p>",
@@ -461,7 +461,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>For Mix B, we have 1 4/5 cups of water for each cup of concentrate. </p>"
+                        "<p>For Mix B, we have 1 4/5 cups of water for each cup of concentrate.</p>"
                       ]
                     }
                   },
@@ -527,11 +527,11 @@
                         "<p></p>",
                         "<p></p>",
                         "<ul><li>Scaling up each ratio to the same number of parts for one of the quantities. This would look very much like “Common Denominator” or “Common Numerator” thinking.</li><li>Percent of water and/or concentrate in mixes – scaling each ratio to have one of the quantities equal to 100.</li><li>Unit Rate – scaling each ratio to have one of the quantities equal to 1.</li></ul>",
-                        "<p>For example, 1 concentrate to x total cups. </p>",
+                        "<p>For example, 1 concentrate to x total cups.</p>",
                         "<p></p>",
                         "<ul><li>Expressing the ratios as a fraction or as decimal amounts of the mix.</li></ul>",
                         "<p></p>",
-                        "<p>Give students time to justify their strategies to the class. As students analyze the strategies of others, continue to ask them how the strategies compare. It is important for students to see that different representations can convey similar types of mathematical thinking. </p>"
+                        "<p>Give students time to justify their strategies to the class. As students analyze the strategies of others, continue to ask them how the strategies compare. It is important for students to see that different representations can convey similar types of mathematical thinking.</p>"
                       ]
                     }
                   },
@@ -544,7 +544,7 @@
                         "<p><strong>Suggested Questions</strong></p>",
                         "<ul><li>How are your strategies alike? How are they different?</li></ul>",
                         "<p></p>",
-                        "<p><em>Check for Understanding</em> </p>",
+                        "<p><em>Check for Understanding</em></p>",
                         "<ul><li>Which of the following will taste most orangey: 2 cups of concentrate and 3 cups of water, 4 cups of concentrate and 6 cups of water, or 10 cups of concentrate and 15 cups of water? Explain your reasoning. (The recipes will all taste the same. Despite having more liquid, each recipe will have the same ratio of concentrate to juice.)</li></ul>",
                         "<p></p>",
                         "<p><em>Going Beyond</em></p>",
@@ -558,7 +558,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><u>Making the Mathematics Explicit </u></p>",
+                        "<p><u>Making the Mathematics Explicit</u></p>",
                         "<p>As students explain, justify, and discuss the strategies in the What If? to the whole class, ask questions to analyze the strategies. Also, compare the strategies to each other and to the strategies that your students used in the Initial Challenge.</p>"
                       ]
                     }
@@ -572,7 +572,7 @@
                         "<p><u>What If Situation A</u></p>",
                         "<p></p>",
                         "<p><em>Moja’s Group</em></p>",
-                        "<p>In the Stretching and Shrinking Unit, students used scale factor as a way to scale sides of shapes to create scale drawings/similar figures.  </p>",
+                        "<p>In the Stretching and Shrinking Unit, students used scale factor as a way to scale sides of shapes to create scale drawings/similar figures.</p>",
                         "<ul><li>How did Moja’s group think about this problem? (Answers will vary. They kept it as a part-to-part relationship and scaled up each recipe to have 90 cups of water.)</li><li>Is their thinking correct? (yes)</li><li>How is this similar to or different from what groups did in our class?  (Answers will vary.)</li></ul>",
                         "<p><em>Lima’s Group</em></p>",
                         "<ul><li>What do the arrows represent in this picture? (how the concentrate is spread out over (shared among) the water)</li><li>How did Lima’s group think about this problem? (Answers will vary. They show the unit rate of how much water per cup of concentrate is in each recipe.)</li><li>Is their thinking correct? (yes)</li><li>How is this similar to or different from what groups did in our class? (Answers will vary.)</li></ul>",
@@ -630,7 +630,7 @@
                       "format": "html",
                       "text": [
                         "<p><u>Strategy 4: Stella, Elise, and Dan</u></p>",
-                        "<p>Stella, Elise, and Dan scale the ratios to unit rates. Stella and Elise begin with part-to-part ratios. Dan begins with the part to whole ratio. </p>",
+                        "<p>Stella, Elise, and Dan scale the ratios to unit rates. Stella and Elise begin with part-to-part ratios. Dan begins with the part to whole ratio.</p>",
                         "<p></p>",
                         "<p><strong>Suggested Questions</strong></p>",
                         "<ul><li>Why do they have different unit rates? (Each person chose a different quantity to scale to 1. Stella scaled the water to 1 in her part-to-part ratio. Elise scaled the concentrate to 1 in her part-to-part ratio. Dan scaled the concentrate to 1 in his part to whole ratio.)</li><li>Can any sets of rates help to make comparisons? (Yes. It depends on what quantity you want to compare. It is important that when comparing, you choose the same type of ratio (part to part or part to whole) and choose the same quantity, e.g., concentrate, water, or total cups, to scale to 1.)</li><li>Is there any other unit rate that a student could have written? (Yes. Dan scaled the concentrate to 1. He could have scaled the total cups to 1. He would have the unit rate of 2/5 cups of concentrate for every 1 cup of juice.)</li><li>How are unit rates different from percentages? (Unit rates can be found from part to part or part to whole ratios. Percentages always have to be part to whole comparisons.)</li><li>How are unit rates like percentages? (In each case, one of the quantities is scaled up or down to 1 (for a unit rate) or 100 (for a percentage), making it easy to do a comparison between ratios. This makes it easy to do a comparison between ratios.)</li></ul>"
@@ -657,7 +657,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Reflecting on Student Learning  </strong></p>",
+                        "<p><strong>Reflecting on Student Learning</strong></p>",
                         "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
                         "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li></ul>",
                         "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
@@ -700,7 +700,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>AoL: Analysis </p>",
+                        "<p>AoL: Analysis</p>",
                         "<p>CCSSM: 7.RP.A.1, 7.RP. A.2, 7.RP. A.2.A, 7.RP. A.2.C, 7.RP.A.3</p>"
                       ]
                     }
@@ -713,8 +713,8 @@
                         "<p>Emerging Mathematical Ideas</p>",
                         "<p>Explore ratios with a focus on finding and using equivalent ratios to solve problems.</p>",
                         "<p></p>",
-                        "<p>  Notice and use:  </p>",
-                        "<ul><li>equivalent ratios written in fraction form</li><li>equivalent ratios are related by a common multiplicative factor </li><li>equivalent ratios can be found by “scaling ratios”: scaling-up (multiplying) a given ratio or scaling-down (dividing) from the given ratio</li><li>using ratio relationships to solve problems is referred to as reasoning with ratios and can be a quick and powerful tool for problem solving</li></ul>",
+                        "<p>  Notice and use:</p>",
+                        "<ul><li>equivalent ratios written in fraction form</li><li>equivalent ratios are related by a common multiplicative factor</li><li>equivalent ratios can be found by “scaling ratios”: scaling-up (multiplying) a given ratio or scaling-down (dividing) from the given ratio</li><li>using ratio relationships to solve problems is referred to as reasoning with ratios and can be a quick and powerful tool for problem solving</li></ul>",
                         "<p>Explore connections between ratio table, equivalent ratios, scaling, and an equation."
                       ]
                     }
@@ -725,7 +725,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>NWDYK </p>",
+                        "<p>NWDYK</p>",
                         "<p>How do the strategies in this Problem compare to those in Problem 1.1?</p>"
                       ]
                     }
@@ -744,11 +744,11 @@
                         "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#GeneralAoL'><strong>General AoL</strong></a></p>",
                         "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#UnitAoL'><strong>Unit AoL</strong></a></p>",
                         "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#MathOverview'><strong>Math Overview</strong></a></p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#LearningAids'><strong>Learning Aids</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#TeachingAids'><strong>Teaching Aids</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#FamilyLetters'><strong>Family Letters</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#Assessments'><strong>Assessments</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#ACEHomework'><strong>ACE Homework</strong></a> </p>"
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#LearningAids'><strong>Learning Aids</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#TeachingAids'><strong>Teaching Aids</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#FamilyLetters'><strong>Family Letters</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#Assessments'><strong>Assessments</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#ACEHomework'><strong>ACE Homework</strong></a></p>"
                       ]
                     }
                   }
@@ -765,7 +765,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p><u><strong>Launch (Getting Started)</strong></u>          </p>",
+                          "<p><u><strong>Launch (Getting Started)</strong></u></p>",
                           "<p><u>Connecting to Prior Knowledge</u></p>",
                           "<p></p>",
                           "<p>If students are not using the term “scaling ratios” from <em>Stretching and Shrinking</em> or Grade 6 <em>Comparing Quantities</em>, now is the time to encourage that vocabulary. (TIME) <strong>Teaching Aid 1.2: Ratio Type Notation</strong> may be used to emphasize the scaling.</p>",
@@ -965,7 +965,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><u><strong>Explore (Digging In)   </strong></u>     </p>",
+                        "<p><u><strong>Explore (Digging In)</strong></u></p>",
                         "<p><u>Providing for Individual Needs</u></p>",
                         "<p></p>",
                         "<p>As you move around the room listening to students discuss the Problem, these are some questions you might ask for the Initial Challenge.</p>"
@@ -1022,7 +1022,7 @@
                       "format": "html",
                       "text": [
                         "<p><em>Now What Do You Know?</em></p>",
-                        "<p><em>How do the strategies you used in this problem compare to those used in Problem 1.1?</em> </p>"
+                        "<p><em>How do the strategies you used in this problem compare to those used in Problem 1.1?</em></p>"
                       ]
                     }
                   }
@@ -1039,8 +1039,8 @@
                           "type": "Text",
                           "format": "html",
                           "text": [
-                            "<p><u><strong>Summarize (Orchestrating the Discussion) </strong></u> </p>",
-                            "<p><u>Solutions and Strategies </u></p>",
+                            "<p><u><strong>Summarize (Orchestrating the Discussion)</strong></u></p>",
+                            "<p><u>Solutions and Strategies</u></p>",
                             "<p></p>",
                             "<p>The beginning of the Summary should be a time for students to share their strategies for finding the amount of supplies needed for making juice for 210 campers.</p>",
                             "<p></p>",
@@ -1092,7 +1092,7 @@
                           "type": "Text",
                           "format": "html",
                           "text": [
-                            "<p><u>Making the Mathematics Explicit </u></p>",
+                            "<p><u>Making the Mathematics Explicit</u></p>",
                             "<p></p>",
                             "<p>Have students analyze and critique Adia’s and Otis’s strategies.</p>"
                           ]
@@ -1157,7 +1157,7 @@
                           "type": "Text",
                           "format": "html",
                           "text": [
-                            "<p>It will be important for students to see how the scaling for the ratio in fraction form can be represented on the ratio table. </p>"
+                            "<p>It will be important for students to see how the scaling for the ratio in fraction form can be represented on the ratio table.</p>"
                           ]
                         }
                       },
@@ -1184,9 +1184,9 @@
                             "<p><u>Now What Do Students Know</u></p>",
                             "<p></p>",
                             "<p>Ask students to reflect on the discussion and answer the Now What Do You Know questions.</p>",
-                            "<p><em>How do the strategies you used in this problem compare to those used in Problem 1.1?</em> </p>",
+                            "<p><em>How do the strategies you used in this problem compare to those used in Problem 1.1?</em></p>",
                             "<p></p>",
-                            "<p>See answers for more information about the strategies and embedded mathematics. </p>"
+                            "<p>See answers for more information about the strategies and embedded mathematics.</p>"
                           ]
                         }
                       },
@@ -1197,10 +1197,10 @@
                           "format": "html",
                           "text": [
                             "<p><strong>Reflecting on Student Learning</strong></p>",
-                            "<p>Use the following questions to assess student understanding at the end of the lesson.  </p>",
+                            "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
                             "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li></ul>",
                             "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
-                            "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit? </li></ul>"
+                            "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
                           ]
                         }
                       }
@@ -1247,7 +1247,7 @@
                       "text": [
                         "<p><strong>Emerging Mathematical Ideas</strong></p>",
                         "<p>Understand the need to compare ratios that relate the same two quantities in the same order: part-to-part, part-to-whole.</p>",
-                        "<p>Notice and use:  </p>",
+                        "<p>Notice and use:</p>",
                         "<ul><li>ratios with a focus on finding and using equivalent ratios to solve problems</li><li>begin to formalize the process of setting up proportions and solving for an unknow value</li></ul>"
                       ]
                     }
@@ -1277,11 +1277,11 @@
                         "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#GeneralAoL'><strong>General AoL</strong></a></p>",
                         "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#UnitAoL'><strong>Unit AoL</strong></a></p>",
                         "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#MathOverview'><strong>Math Overview</strong></a></p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#LearningAids'><strong>Learning Aids</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#TeachingAids'><strong>Teaching Aids</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#FamilyLetters'><strong>Family Letters</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#Assessments'><strong>Assessments</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#ACEHomework'><strong>ACE Homework</strong></a> </p>"
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#LearningAids'><strong>Learning Aids</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#TeachingAids'><strong>Teaching Aids</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#FamilyLetters'><strong>Family Letters</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#Assessments'><strong>Assessments</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#ACEHomework'><strong>ACE Homework</strong></a></p>"
                       ]
                     }
                   }
@@ -1301,7 +1301,7 @@
                         "<p><u><strong>Launch (Getting Started)</strong></u></p>",
                         "<p><u>Connecting to Prior Knowledge</u></p>",
                         "<p>In the first two Problems of Investigation 1, students analyzed statements comparing quantities in various forms and made claims about how these ratios compared to each other. In Problems 1.1 and 1.2, students used a variety of strategies to scale ratios while solving contextual problems. In Problem 1.3, students formalize what they learned by setting up proportions and using the scaling up or scaling down strategy to find unknown values.</p>",
-                        "<p>Introduce the vocabulary of proportions and proportional reasoning.  Revisit Adia’s and Otis’s strategies to introduce the terms from Problem 1.2. Note that students have been solving proportions since the third Unit of Grade 6: <em>Comparing Quantities.</em> And students were solving proportions when they were finding missing side lengths on scale drawings in Stretching and Shrinking. Ask students for examples of finding a missing quantity from their prior Units. <strong>Teaching Aid 1.3 Proportional Reasoning Examples </strong>can be used to show a couple of examples from prior Units.</p>",
+                        "<p>Introduce the vocabulary of proportions and proportional reasoning.  Revisit Adia’s and Otis’s strategies to introduce the terms from Problem 1.2. Note that students have been solving proportions since the third Unit of Grade 6: <em>Comparing Quantities.</em> And students were solving proportions when they were finding missing side lengths on scale drawings in Stretching and Shrinking. Ask students for examples of finding a missing quantity from their prior Units. <strong>Teaching Aid 1.3 Proportional Reasoning Examples</strong> can be used to show a couple of examples from prior Units.</p>",
                         "<p>It is important that students understand that when setting up a proportion, the ratios are relating the same two quantities. Labeling the quantities will help students make sure that they are comparing.</p>"
                       ]
                     }
@@ -1333,7 +1333,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p><u><strong>Explore (Digging In)</strong></u>          </p>",
+                          "<p><u><strong>Explore (Digging In)</strong></u></p>",
                           "<p><u>Providing for Individual Needs</u></p>",
                           "<p>As students are working on the Initial Challenge and What If, check to see if students are using a variety of strategies to represent and solve the questions. Have students think about other ways to compare the quantities. Look for interesting strategies and have students present these in the Summarize.</p>"
                         ]
@@ -1346,7 +1346,7 @@
                         "format": "html",
                         "text": [
                           "<p><strong>Suggested Questions</strong></p>",
-                          "<ul><li>For the various Situations and questions, are the ratios you are writing part-to-part or part-to-whole? (Answers will vary. Students are likely to answer that all are part to part. The Smoothie Bar scenario could be either. In the Reading Speed scenario, it does not make sense to find a whole because it is a rate. Height of Trees are two similar figures, and students will probably keep the parts of height and base. With Student Council Representation students are likely to discuss part-to-whole.)    </li><li>What are some strategies that you have heard for finding two equivalent ratios? (Answers might include: scaling ratios, drawing pictures, using scale factors, ratio tables, unit rate, and proportions.)</li><li>For What If Situation A, what strategies are you using to solve for x? (Answers will vary. Students may use strategies like those mentioned above.)</li><li>For Situation B, what would a proportion look like for that situation?  (Answers will vary.)</li></ul>"
+                          "<ul><li>For the various Situations and questions, are the ratios you are writing part-to-part or part-to-whole? (Answers will vary. Students are likely to answer that all are part to part. The Smoothie Bar scenario could be either. In the Reading Speed scenario, it does not make sense to find a whole because it is a rate. Height of Trees are two similar figures, and students will probably keep the parts of height and base. With Student Council Representation students are likely to discuss part-to-whole.)</li><li>What are some strategies that you have heard for finding two equivalent ratios? (Answers might include: scaling ratios, drawing pictures, using scale factors, ratio tables, unit rate, and proportions.)</li><li>For What If Situation A, what strategies are you using to solve for x? (Answers will vary. Students may use strategies like those mentioned above.)</li><li>For Situation B, what would a proportion look like for that situation?  (Answers will vary.)</li></ul>"
                         ]
                       }
                     },
@@ -1358,7 +1358,7 @@
                         "text": [
                           "<p><u>Planning for the Summary</u></p>",
                           "<p></p>",
-                          "<p>As you walk around the room, take note of groups that have different strategies for the same situation. This will allow you to have groups present many ways of thinking about the proportions. Also, you will be able to help connect how the strategies connect mathematically with different representations. </p>",
+                          "<p>As you walk around the room, take note of groups that have different strategies for the same situation. This will allow you to have groups present many ways of thinking about the proportions. Also, you will be able to help connect how the strategies connect mathematically with different representations.</p>",
                           "<p></p>",
                           "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence?</p>"
                         ]
@@ -1388,7 +1388,7 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p><strong>Summarize (Orchestrating the Discussion)</strong>   </p>",
+                      "<p><strong>Summarize (Orchestrating the Discussion)</strong></p>",
                       "<p><u>Solutions and Strategies</u></p>",
                       "<p></p>",
                       "<p>Select different groups to represent different strategies that you observed during the exploration. Consider taking one specific Situation (or all, if you have time) and have students show multiple ways of solving the questions, such as using equivalent ratios, ratio tables, unit rates, and proportions. Encourage groups to explain how they got the answer and why the answer makes sense. Invite other students to question or challenge the solutions presented, to make connections between strategies, or to offer an alternative strategy. (AGENCY, IDENTITY, OWNERSHIP)</p>",
@@ -1403,7 +1403,7 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p><u>Making the Mathematics Explicit </u></p>",
+                      "<p><u>Making the Mathematics Explicit</u></p>",
                       "<p></p>",
                       "<p>What If part A gives you the opportunity to discuss the various ways that proportions (or equivalent ratios) can be written. It is important for students to recognize that equivalent ratios must compare one quantity to a multiple or factor of the same quantity.</p>"
                     ]
@@ -1418,9 +1418,9 @@
                       "<p><strong>Suggested Questions</strong></p>",
                       "<ul><li>Do you agree with the way that Nic wrote the proportions in the What If Situation A? (Yes. In each proportion, they are comparing one quantity to a factor or multiple of the same quantity, miles to miles and calories to calories.)</li><li>Are there other ways of writing the same proportional situation? (Yes. Since ratios can be written in different orders, we could have the following for the Reading Speeds situation:)</li></ul>",
                       "<p></p>",
-                      "<p>(3 minutes )/(480 words )=  (x minutes)/(20,000 words)  OR  (3 minutes )/(x minutes )=  (480 words)/(20,000 words)  </p>",
+                      "<p>(3 minutes )/(480 words )=  (x minutes)/(20,000 words)  OR  (3 minutes )/(x minutes )=  (480 words)/(20,000 words)</p>",
                       "<p>OR (480 words )/(3 minutes)=  (20,000 words)/(x minutes)  OR   (x minutes )/(3 minutes )=  (20,000 words)/(480 words)</p>",
-                      "<p>Have students focus on the number relationships by asking about the various ways to write the same proportion. </p>",
+                      "<p>Have students focus on the number relationships by asking about the various ways to write the same proportion.</p>",
                       "<p></p>",
                       "<ul><li>Which way of writing the proportion helps you to see the relationship between the quantities? (Student preferences will vary. Some preferences will vary based on the values of the quantities.)</li></ul>",
                       "<p></p>",
@@ -1463,7 +1463,7 @@
                       "<p></p>",
                       "<p><em>How are proportions like other strategies that you have used to solve ratio problems? How are they different?</em></p>",
                       "<p></p>",
-                      "<p>See answers for more information about the strategies and embedded mathematics. </p>"
+                      "<p>See answers for more information about the strategies and embedded mathematics.</p>"
                     ]
                   }
                 },
@@ -1473,7 +1473,7 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<strong>Reflecting on Student Learning  </strong>",
+                      "<p><strong>Reflecting on Student Learning</strong></p>",
                       "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
                       "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li></ul>",
                       "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
@@ -1567,11 +1567,11 @@
                         "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#GeneralAoL'><strong>General AoL</strong></a></p>",
                         "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#UnitAoL'><strong>Unit AoL</strong></a></p>",
                         "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#MathOverview'><strong>Math Overview</strong></a></p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#LearningAids'><strong>Learning Aids</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#TeachingAids'><strong>Teaching Aids</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#FamilyLetters'><strong>Family Letters</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#Assessments'><strong>Assessments</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#ACEHomework'><strong>ACE Homework</strong></a> </p>"
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#LearningAids'><strong>Learning Aids</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#TeachingAids'><strong>Teaching Aids</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#FamilyLetters'><strong>Family Letters</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#Assessments'><strong>Assessments</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#ACEHomework'><strong>ACE Homework</strong></a></p>"
                       ]
                     }
                   }
@@ -1645,7 +1645,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><u><strong>Explore (Digging In) </strong></u>       </p>",
+                        "<p><u><strong>Explore (Digging In)</strong></u></p>",
                         "<p><u>Providing for Individual Needs</u></p>",
                         "<p></p>",
                         "<p>For the Initial Challenge</p>",
@@ -1663,7 +1663,7 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Suggested Questions</strong></p>",
-                        "<ul><li>Do you think that your diagram, notations, and explanation will show another group how you are making sense of the question? (Answers will vary.) </li><li>Can you think of another strategy to solve the Initial Challenge? Are your two strategies related? If so, how? (Leave the analysis for the Summarize.)</li></ul>"
+                        "<ul><li>Do you think that your diagram, notations, and explanation will show another group how you are making sense of the question? (Answers will vary.)</li><li>Can you think of another strategy to solve the Initial Challenge? Are your two strategies related? If so, how? (Leave the analysis for the Summarize.)</li></ul>"
                       ]
                     }
                   },
@@ -1739,8 +1739,8 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p><u><strong>Summarize (Orchestrating the Discussion)</strong></u><strong>  </strong> </p>",
-                      "<p><u>Solutions and Strategies </u></p>",
+                      "<p><u><strong>Summarize (Orchestrating the Discussion)</strong></u></p>",
+                      "<p><u>Solutions and Strategies</u></p>",
                       "<p></p>",
                       "<p><em>For the Initial Challenge</em></p>",
                       "<p></p>",
@@ -1748,7 +1748,7 @@
                       "<p></p>",
                       "<p>As students share their strategies, it is important to be clear about what comparisons are being made by the ratios. You can do this either by showing students directly or by asking them to be clearer in their explanations.</p>",
                       "<p></p>",
-                      "<p>It is important that when students use certain strategies, such as scaling a ratio to an equivalent ratio, you explicitly call attention to that strategy for the class. Also, with unit rates, it is important for students to see how scaling a ratio so that one quantity is 1 connects to dividing to find a unit rate. </p>",
+                      "<p>It is important that when students use certain strategies, such as scaling a ratio to an equivalent ratio, you explicitly call attention to that strategy for the class. Also, with unit rates, it is important for students to see how scaling a ratio so that one quantity is 1 connects to dividing to find a unit rate.</p>",
                       "<p></p>",
                       "<p>There are basically two ways to reason about pizzas and people. Those ways are related to the two unit rates, how much pizza for every 1 person or how many people share 1 pizza. Using pictures, students may use estimation. The basic notion is that to compare ratios, we need one of the two quantities to be constant, so we can reason about the multiplicative comparison.</p>"
                     ]
@@ -1812,7 +1812,7 @@
                     "format": "html",
                     "text": [
                       "<p><em>Group 2: Groups of 2 Share with the Extra People</em></p>",
-                      "<p>We looked at each pizza being shared with 2 people. </p>"
+                      "<p>We looked at each pizza being shared with 2 people.</p>"
                     ]
                   }
                 },
@@ -1902,7 +1902,7 @@
                       "text": [
                         "<p>Large Table</p>",
                         "<p></p>",
-                        "<p>1st pizza – we gave a slice to people 1-8. </p>",
+                        "<p>1st pizza – we gave a slice to people 1-8.</p>",
                         "<p></p>"
                       ]
                     }
@@ -2290,7 +2290,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Each person gets 3 of the 1/8 slices or </p>",
+                        "<p>Each person gets 3 of the 1/8 slices or</p>",
                         "<p>3/8 of a pizza.</p>"
                       ]
                     }
@@ -2323,12 +2323,12 @@
                     "format": "html",
                     "text": [
                       "<p><em>Group 9: Equal Numbers of Pizza</em></p>",
-                      "<p>Step 1: We found a common number of pizzas. </p>",
+                      "<p>Step 1: We found a common number of pizzas.</p>",
                       "<p></p>",
-                      "<p>       4 pizzas/ 10 people  =   12 pizzas/30 people                              </p>",
-                      "<p>       3 pizzas/ 8 people =  12 pizzas/32 people             </p>",
+                      "<p>       4 pizzas/ 10 people  =   12 pizzas/30 people</p>",
+                      "<p>       3 pizzas/ 8 people =  12 pizzas/32 people</p>",
                       "<p>Step 2: See which is greater.</p>",
-                      "<p>         12/30      &gt;      12/32                     </p>",
+                      "<p>         12/30      &gt;      12/32</p>",
                       "<p></p>",
                       "<p>The larger table is better, because the amount of pizza (first quantity) is the same for a smaller amount of people (second quantity). So there will be more pizza per person.</p>"
                     ]
@@ -2409,9 +2409,9 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p><u>Making the Mathematics Explicit </u></p>",
+                      "<p><u>Making the Mathematics Explicit</u></p>",
                       "<p>For the Initial Challenge</p>",
-                      "<p>During the discussion of strategies, have students begin sorting their work into similar kinds of thinking. They should begin to see that there are two ways to think about this situation: </p>",
+                      "<p>During the discussion of strategies, have students begin sorting their work into similar kinds of thinking. They should begin to see that there are two ways to think about this situation:</p>",
                       "<ul><li>How much pizza for a fixed number of people.</li><li>How many people share a fixed number of pizzas.</li></ul>",
                       "<p></p>",
                       "<p>After sorting the student work, lay the foundation for the next Problem by discussing rates.</p>"
@@ -2437,7 +2437,7 @@
                     "text": [
                       "<p><em>For the What If</em></p>",
                       "<p></p>",
-                      "<p><strong>Suggested Questions for Situation A </strong></p>",
+                      "<p><strong>Suggested Questions for Situation A</strong></p>",
                       "<ul><li>How did Selma find the amount of pizza per person? (She scaled down each quantity. For the Large Table, she divided each quantity by 10 to find the amount for 1 person. For the Small Table, she divided each quantity by 8 to find the amount for 1 person.)</li><li>Do you agree with her conclusion that the Large Table would get more pizza? (Yes. That is what we found in the Initial Challenge.)</li><li>How did Tony find the number of people sharing one pizza? (He scaled down each quantity. For the Large Table, he divided each quantity by 4 to find the amount for 1 pizza. For the Small Table, she divided each quantity by 3 to find the amount for 1 pizza.)</li><li>Do you agree with his conclusion that the Small Table would get more pizza? (No. He did the correct calculations. But his conclusion is incorrect. 2.5 &lt; 2 2/3. So, at the Large Table you have less people (2.5) eating the pizza which means everyone gets more pizza.)</li><li>How did Terry make his conclusion? (He subtracted. The difference of 6 at the Large Table has no meaning. You cannot subtract pizza from people. Also, you cannot find ratio equivalence by subtracting.)</li></ul>"
                     ]
                   }
@@ -2458,7 +2458,7 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p><strong>Suggested Questions for Situation  B </strong></p>",
+                      "<p><strong>Suggested Questions for Situation  B</strong></p>",
                       "<ul><li>What strategies did you use to find how many pizzas are needed? (Answers will vary.)</li><li>Would a unit rate be helpful?  (Yes.  A rate table may be used by some students to find and use the unit rate:</li></ul>"
                     ]
                   }
@@ -2480,9 +2480,9 @@
                     "format": "html",
                     "text": [
                       "<ul><li>Would setting up a proportion be helpful? (Yes.)</li><li>How would the proportion be set-up? (Possible Answers.</li></ul>",
-                      "<p>        Small Table: (8 people)/(3 pizzas )=  (210 people)/(x pizzas) </p>",
+                      "<p>        Small Table: (8 people)/(3 pizzas)=  (210 people)/(x pizzas)</p>",
                       "<p></p>",
-                      "<p>  Large Table: : (10 people)/(4 pizzas )=  (210 people)/(x pizzas) </p>"
+                      "<p>  Large Table: : (10 people)/(4 pizzas)=  (210 people)/(x pizzas)</p>"
                     ]
                   }
                 },
@@ -2521,7 +2521,7 @@
                       "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
                       "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li></ul>",
                       "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
-                      "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?  </li></ul>"
+                      "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
                     ]
                   }
                 }
@@ -2605,11 +2605,11 @@
                         "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#GeneralAoL'><strong>General AoL</strong></a></p>",
                         "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#UnitAoL'><strong>Unit AoL</strong></a></p>",
                         "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#MathOverview'><strong>Math Overview</strong></a></p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#LearningAids'><strong>Learning Aids</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#TeachingAids'><strong>Teaching Aids</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#FamilyLetters'><strong>Family Letters</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#Assessments'><strong>Assessments</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#ACEHomework'><strong>ACE Homework</strong></a> </p>"
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#LearningAids'><strong>Learning Aids</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#TeachingAids'><strong>Teaching Aids</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#FamilyLetters'><strong>Family Letters</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#Assessments'><strong>Assessments</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#ACEHomework'><strong>ACE Homework</strong></a></p>"
                       ]
                     }
                   }
@@ -2754,7 +2754,7 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p>Have students work with a partner on this Problem.  </p>"
+                      "<p>Have students work with a partner on this Problem.</p>"
                     ]
                   }
                 }
@@ -2776,7 +2776,7 @@
                       "<p></p>",
                       "<p><em>Initial Challenge Questions</em></p>",
                       "<p></p>",
-                      "<p>As students work on the Initial Challenge, circulate and ask them questions. </p>",
+                      "<p>As students work on the Initial Challenge, circulate and ask them questions.</p>",
                       "<p>Use questions to have students consider ways to think about filling the quantities in the table.</p>"
                     ]
                   }
@@ -2849,7 +2849,7 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p>When you know that students understand that this is a multiplicative relationship, that is, how the cost of the pizza is shared equally among the pizzas, you can ask questions to encourage students to use proportional reasoning. </p>"
+                      "<p>When you know that students understand that this is a multiplicative relationship, that is, how the cost of the pizza is shared equally among the pizzas, you can ask questions to encourage students to use proportional reasoning.</p>"
                     ]
                   }
                 },
@@ -2894,7 +2894,7 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p>Students need to be aware that there is a delivery charge for Howdy’s. You can use questions to draw their attention to the added fee. Do not push too much at how to add in the $30 charge. Leave some of that conversation until the Summarize. </p>"
+                      "<p>Students need to be aware that there is a delivery charge for Howdy’s. You can use questions to draw their attention to the added fee. Do not push too much at how to add in the $30 charge. Leave some of that conversation until the Summarize.</p>"
                     ]
                   }
                 },
@@ -2915,7 +2915,7 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p>This is an inequality situation. Groups should have different answers depending on the number of pizzas being considered. Push students to consider when the price is better.  </p>"
+                      "<p>This is an inequality situation. Groups should have different answers depending on the number of pizzas being considered. Push students to consider when the price is better.</p>"
                     ]
                   }
                 },
@@ -2936,7 +2936,7 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p>As groups finish, you can have them look at the What If to compare their thinking and strategies to the students in the What If. </p>"
+                      "<p>As groups finish, you can have them look at the What If to compare their thinking and strategies to the students in the What If.</p>"
                     ]
                   }
                 },
@@ -2948,7 +2948,7 @@
                     "text": [
                       "<p><u>Planning for the Summary</u></p>",
                       "<p></p>",
-                      "<p>What evidence will you use in the summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence? </p>"
+                      "<p>What evidence will you use in the summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence?</p>"
                     ]
                   }
                 },
@@ -2959,7 +2959,7 @@
                     "format": "html",
                     "text": [
                       "<p><em>Now What Do You Know?</em></p>",
-                      "<p><em>How can you determine if a situation is proportional? </em></p>"
+                      "<p><em>How can you determine if a situation is proportional?</em></p>"
                     ]
                   }
                 }
@@ -2976,12 +2976,12 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p><u><strong>Summarize (Orchestrating the Discussion)</strong></u>    </p>",
-                      "<p><u>Solutions and Strategies </u></p>",
+                      "<p><u><strong>Summarize (Orchestrating the Discussion)</strong></u></p>",
+                      "<p><u>Solutions and Strategies</u></p>",
                       "<p></p>",
                       "<p>Begin with a discussion of which pizzeria Julia should choose.</p>",
                       "<p></p>",
-                      "<p>This is an inequality situation. Groups should have different answers depending on the number of pizzas being considered. Push the students to consider when the price is better.  </p>"
+                      "<p>This is an inequality situation. Groups should have different answers depending on the number of pizzas being considered. Push the students to consider when the price is better.</p>"
                     ]
                   }
                 },
@@ -3002,7 +3002,7 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p><u>Making the Mathematics Explicit </u></p>",
+                      "<p><u>Making the Mathematics Explicit</u></p>",
                       "<p></p>",
                       "<p>Have students share their strategies for finding the values on the tables. As students discuss their proportional reasoning with the tables, make sure to connect the various ways of notating their thinking.</p>",
                       "<p></p>",
@@ -3021,7 +3021,7 @@
                       "<p><strong>Suggested Questions</strong></p>",
                       "<ul><li>Does the scaling in Amit’s table work? Will 5 pizzas cost $65 at Howdy’s? (No. Scaling will not work. Because we are adding the delivery charge, it changes the multiplicative relationship.)</li><li>What do you think about Eun Mi’s claim in Situation A, do proportions work for Royal, but not for Howdy’s? (Yes. From the table for Royal, we can look at any two sets of values and write a proportion. We cannot do that for Howdy’s. The $30 delivery charge makes it additive and multiplicative, so it is not proportional.)</li></ul>",
                       "<p></p>",
-                      "<p>Examples are shown below. </p>"
+                      "<p>Examples are shown below.</p>"
                     ]
                   }
                 },
@@ -3163,7 +3163,7 @@
                       "format": "html",
                       "text": [
                         "<p>NWDYK</p>",
-                        "<p>Describe how you can determine a unit rate, or constant of proportionality, in a description, rate table, equation, or graph? </p>",
+                        "<p>Describe how you can determine a unit rate, or constant of proportionality, in a description, rate table, equation, or graph?</p>",
                         "<p>In what ways is a unit rate or the constant of proportionality helpful for solving a problem?</p>"
                       ]
                     }
@@ -3182,11 +3182,11 @@
                         "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#GeneralAoL'><strong>General AoL</strong></a></p>",
                         "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#UnitAoL'><strong>Unit AoL</strong></a></p>",
                         "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#MathOverview'><strong>Math Overview</strong></a></p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#LearningAids'><strong>Learning Aids</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#TeachingAids'><strong>Teaching Aids</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#FamilyLetters'><strong>Family Letters</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#Assessments'><strong>Assessments</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#ACEHomework'><strong>ACE Homework</strong></a> </p>"
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#LearningAids'><strong>Learning Aids</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#TeachingAids'><strong>Teaching Aids</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#FamilyLetters'><strong>Family Letters</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#Assessments'><strong>Assessments</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#ACEHomework'><strong>ACE Homework</strong></a></p>"
                       ]
                     }
                   }
@@ -3215,10 +3215,10 @@
                         "format": "html",
                         "text": [
                           "<p>Royal Pizza</p>",
-                          "<p>Proportion    OR    Linear </p>",
+                          "<p>Proportion    OR    Linear</p>",
                           "<p>Equation                      Equation</p>",
                           "<p>C/N  = 13/1             OR      C = 13N</p>",
-                          "<p>With the proportional situation, both equations are equivalent. You can multiply one variable by a constant number to get the value of the other variable. </p>",
+                          "<p>With the proportional situation, both equations are equivalent. You can multiply one variable by a constant number to get the value of the other variable.</p>",
                           "<p></p>"
                         ]
                       }
@@ -3235,7 +3235,7 @@
                           "<p></p>",
                           "<p>C = 11N + 30</p>",
                           "<p></p>",
-                          "<p>You cannot write C = 11N + 30 as a proportion. The add-on changes the unit rate with each N. So there is no constant of proportionality. You cannot multiply one variable by a constant number to get the value of the other variable. </p>"
+                          "<p>You cannot write C = 11N + 30 as a proportion. The add-on changes the unit rate with each N. So there is no constant of proportionality. You cannot multiply one variable by a constant number to get the value of the other variable.</p>"
                         ]
                       }
                     }
@@ -3358,7 +3358,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><u>Making the Mathematics Explicit </u></p>",
+                        "<p><u>Making the Mathematics Explicit</u></p>",
                         "<p></p>"
                       ]
                     }
@@ -3369,11 +3369,11 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><em>What If Situation A. Buying Tickets </em></p>",
+                        "<p><em>What If Situation A. Buying Tickets</em></p>",
                         "<p></p>",
                         "<p><strong>Suggested Questions</strong></p>",
-                        "<ul><li>What is the unit rate or constant of proportionality for Noralie’s concert ticket? ($30)</li><li>Where do you see the constant of proportionality in the graph and the equation? (In the graph it is when the independent variable is 1 at the point (1, 30). In the equation, it is the coefficient of N.)  </li><li>If I know that this is a proportional situation and 2 tickets cost $60, how can I find how many tickets I can buy with $120? (Since it is proportional, if the money is doubled then the tickets will be doubled. So 4 tickets will cost $120.)</li><li>If we start at the origin, then go over and up to draw a triangle to each of those points, what is the relationship between the 2 triangles?  (They are similar or scale drawings. We doubled the base and height of the original triangle by doubling each quantity in the rate.) </li></ul>",
-                        "<p><strong>Note</strong>: This should be a review from their work with scaled drawing/similar figures in the Stretching and Shrinking Unit. Show students the triangles on the graph. </p>"
+                        "<ul><li>What is the unit rate or constant of proportionality for Noralie’s concert ticket? ($30)</li><li>Where do you see the constant of proportionality in the graph and the equation? (In the graph it is when the independent variable is 1 at the point (1, 30). In the equation, it is the coefficient of N.)</li><li>If I know that this is a proportional situation and 2 tickets cost $60, how can I find how many tickets I can buy with $120? (Since it is proportional, if the money is doubled then the tickets will be doubled. So 4 tickets will cost $120.)</li><li>If we start at the origin, then go over and up to draw a triangle to each of those points, what is the relationship between the 2 triangles?  (They are similar or scale drawings. We doubled the base and height of the original triangle by doubling each quantity in the rate.)</li></ul>",
+                        "<p><strong>Note</strong>: This should be a review from their work with scaled drawing/similar figures in the Stretching and Shrinking Unit. Show students the triangles on the graph.</p>"
                       ]
                     }
                   },
@@ -3392,47 +3392,47 @@
                         },
                         "objects": [
                           { "type": "movableLine", "parents": [{ "type": "point", "parents": [0, 0] }, { "type": "point", "parents": [2, 60] }],
-                            "properties": {"id":"VZcS9PetlmRLtU_h"} 
+                            "properties": {"id":"VZcS9PetlmRLtU_h"}
                           },
-                          { "type": "point", "parents": [1, 30], 
-                            "properties": 
+                          { "type": "point", "parents": [1, 30],
+                            "properties":
                             {
                               "name":"(1, 30)",
                               "snapToGrid":true,
                               "snapSizeX":0.1,
                               "snapSizeY":0.1
-                            } 
+                            }
                           },
-                          { "type": "point", "parents": [2, 60], 
-                            "properties": 
+                          { "type": "point", "parents": [2, 60],
+                            "properties":
                             {
                               "id": "myvertex1",
                               "name": "(2, 60)",
                               "snapToGrid":true,
                               "snapSizeX":0.1,
                               "snapSizeY":0.1
-                            } 
+                            }
                           },
-                          { "type": "point", "parents": [2, 0], 
-                            "properties": 
+                          { "type": "point", "parents": [2, 0],
+                            "properties":
                             {
                               "name": "",
                               "id": "myvertex2",
                               "snapToGrid":true,
                               "snapSizeX":0.1,
                               "snapSizeY":0.1
-                            } 
+                            }
                           },
-                          { 
-                            "type": "point", "parents": [0, 0], 
-                            "properties": 
+                          {
+                            "type": "point", "parents": [0, 0],
+                            "properties":
                             {
                               "id": "myvertex3",
                               "name": "(0, 0)",
                               "snapToGrid":true,
                               "snapSizeX":0.1,
                               "snapSizeY":0.1
-                            } 
+                            }
                           },
                           { "type": "polygon", "parents": ["myvertex1", "myvertex2", "myvertex3"],"properties": {"id":"RzDRwOXZcBunyfdG"} }
                         ]
@@ -3451,37 +3451,37 @@
                           }
                         },
                         "objects": [
-                          { 
-                            "type": "point", "parents": [2, 60], 
-                            "properties": {"id":"htshVg-g-9oyuH-2","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1,"name":"(2, 60)"} 
+                          {
+                            "type": "point", "parents": [2, 60],
+                            "properties": {"id":"htshVg-g-9oyuH-2","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1,"name":"(2, 60)"}
                           },
-                          { 
-                            "type": "point", "parents": [2, 0], 
-                            "properties": {"id":"wZWVSjdEdNMJL0LX","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1,"name":""} 
+                          {
+                            "type": "point", "parents": [2, 0],
+                            "properties": {"id":"wZWVSjdEdNMJL0LX","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1,"name":""}
                           },
-                          { 
-                            "type": "point", "parents": [0, 0], 
-                            "properties": {"id":"N_VPhTYvkf4Jn2wK","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1,"name":"(0, 0)"} 
+                          {
+                            "type": "point", "parents": [0, 0],
+                            "properties": {"id":"N_VPhTYvkf4Jn2wK","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1,"name":"(0, 0)"}
                           },
                           { "type": "polygon", "parents": ["htshVg-g-9oyuH-2", "wZWVSjdEdNMJL0LX", "N_VPhTYvkf4Jn2wK"],"properties": {"id":"MLYdUp1BzA6QkYdD"} },
-                          { 
-                            "type": "point", "parents": [4, 120], 
+                          {
+                            "type": "point", "parents": [4, 120],
                             "properties": {"name": "(4, 120)", "id":"nT9wRK-ENMZGOUeW","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                          { 
-                            "type": "point", "parents": [4, 0], 
-                            "properties": 
-                            {"name": "", "id":"ps3v8Dw5qO-hBHD9","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} 
+                          {
+                            "type": "point", "parents": [4, 0],
+                            "properties":
+                            {"name": "", "id":"ps3v8Dw5qO-hBHD9","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1}
                           },
-                          { 
-                            "type": "point", "parents": [0, 0], 
+                          {
+                            "type": "point", "parents": [0, 0],
                             "properties": {"name": "", "id":"00xdez3uyHEDwEl8","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                          { 
+                          {
                             "type": "polygon", "parents": ["nT9wRK-ENMZGOUeW", "ps3v8Dw5qO-hBHD9", "00xdez3uyHEDwEl8"],"properties": {"id":"6joamvcLbnXD6kwg"} },
-                          { 
-                            "type": "movableLine", 
+                          {
+                            "type": "movableLine",
                             "parents": [
-                              { "type": "point", "parents": [0, 0] }, 
-                              { "type": "point", "parents": [3, 90] }],"properties": {"id":"CUglZNyyWEFktb3v"} 
+                              { "type": "point", "parents": [0, 0] },
+                              { "type": "point", "parents": [3, 90] }],"properties": {"id":"CUglZNyyWEFktb3v"}
                           }
                         ]
                       }
@@ -3493,7 +3493,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>What If Situation A question 4 gives another counter-example to proportional relationships. By analyzing non-proportional relationships, students can gain a deeper understanding of what it means to be proportional. Ask students questions to push them to compare and contrast. </p>"
+                        "<p>What If Situation A question 4 gives another counter-example to proportional relationships. By analyzing non-proportional relationships, students can gain a deeper understanding of what it means to be proportional. Ask students questions to push them to compare and contrast.</p>"
                       ]
                     }
                   },
@@ -3549,9 +3549,9 @@
                         { "type": "movableLine", "parents": [{ "type": "point", "parents": [0, 0] }, { "type": "point", "parents": [2, 60] }],"properties": {"id":"CoHfUHot7WXIJmLy"} },
                         { "type": "movableLine", "parents": [{ "type": "point", "parents": [0, 10] }, { "type": "point", "parents": [2, 70] }],"properties": {"id":"r-IQhXBhfEdAxNdj"} },
                         { "type": "point", "parents": [0, 0], "properties": {"name":"(0, 0)","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                        { "type": "point", "parents": [1, 30], 
+                        { "type": "point", "parents": [1, 30],
                           "properties": {"name":"(1, 30)","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                        { "type": "point", "parents": [2, 60], 
+                        { "type": "point", "parents": [2, 60],
                           "properties": {"name":"(2, 60)","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} }
                       ]
                     }
@@ -3572,7 +3572,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Suggested Questions</strong> </p>",
+                        "<p><strong>Suggested Questions</strong></p>",
                         "<ul><li>How can we tell whether or not this is a proportional relationship? (It is not proportional. We cannot scale the amount on the table to make proportions. Possible student reasoning may include the following:</li></ul>"
                       ]
                     }
@@ -3611,8 +3611,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><em>Unit Rate/Constant of Proportionality Reasoning: </em> </p>",
-                        "<p>There is no unit rate. If I buy 1 ticket, it costs $40. If I but 2 tickets, each ticket costs $35 (70 ÷ 2). If I buy 4 tickets, each ticket costs $32.50 (130 ÷ 4). The rate per ticket is not constant. This is because as I buy more tickets, the $10 processing fee gets spread out among more tickets. </p>"
+                        "<p><em>Unit Rate/Constant of Proportionality Reasoning:</em></p>",
+                        "<p>There is no unit rate. If I buy 1 ticket, it costs $40. If I but 2 tickets, each ticket costs $35 (70 ÷ 2). If I buy 4 tickets, each ticket costs $32.50 (130 ÷ 4). The rate per ticket is not constant. This is because as I buy more tickets, the $10 processing fee gets spread out among more tickets.</p>"
                       ]
                     }
                   },
@@ -3643,9 +3643,9 @@
                         { "type": "movableLine", "parents": [{ "type": "point", "parents": [0, 0] }, { "type": "point", "parents": [2, 60] }],"properties": {"id":"CoHfUHot7WXIJmLy"} },
                         { "type": "movableLine", "parents": [{ "type": "point", "parents": [0, 10] }, { "type": "point", "parents": [2, 70] }],"properties": {"id":"r-IQhXBhfEdAxNdj"} },
                         { "type": "point", "parents": [0, 0], "properties": {"name":"(0, 0)","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                        { "type": "point", "parents": [1, 30], 
+                        { "type": "point", "parents": [1, 30],
                           "properties": {"name":"(1, 30)","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                        { "type": "point", "parents": [2, 60], 
+                        { "type": "point", "parents": [2, 60],
                           "properties": {"name":"(2, 60)","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} }
                       ]
                     }
@@ -3671,7 +3671,7 @@
                         "<p><strong>Suggested Question</strong></p>",
                         "<ul><li>For each store what if Mia did two divisions? 6 ÷ 7 = 0.857 and 7 ÷ 6 = 1.16666. What do the numbers tell us about the pasta at that store? (These numbers are the unit rates.</li></ul>",
                         "<p>                              For Little Giant store:  6 ÷ 7 = 0.857 and 7 ÷ 6 = 1.16666…</p>",
-                        "<p>                              0.857 tells us how much money for 1 box. </p>",
+                        "<p>                              0.857 tells us how much money for 1 box.</p>",
                         "<p>                              1.16666… tells us how many boxes you get for $1.</p>",
                         "<p></p>",
                         "<p>                               For Foodfresh Store:  5 ÷ 6 = 0.833…. and 6 ÷ 5 = 1.2</p>",
@@ -3686,7 +3686,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Some students will need to see the division in relation to a proportion to make sense of the question. </p>"
+                        "<p>Some students will need to see the division in relation to a proportion to make sense of the question.</p>"
                       ]
                     }
                   },
@@ -3758,7 +3758,7 @@
                         "<p><u>Now What Do Students Know</u></p>",
                         "<p>Ask students to reflect on the discussion and answer the Now What Do You Know.</p>",
                         "<p>Describe how you can determine a unit rate, or constant of proportionality, in a description, rate table, equation, or graph? In what ways is a unit rate or the constant of proportionality helpful for solving a problem?</p>",
-                        "<p>See answers for more information about the strategies and embedded mathematics. </p>"
+                        "<p>See answers for more information about the strategies and embedded mathematics.</p>"
                       ]
                     }
                   },
@@ -3768,8 +3768,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Reflecting on Student Learning  </strong></p>",
-                        "<p>Use the following questions to assess student understanding at the end of the lesson.  </p>",
+                        "<p><strong>Reflecting on Student Learning</strong></p>",
+                        "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
                         "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li></ul>",
                         "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
                         "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
@@ -3862,11 +3862,11 @@
                         "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#GeneralAoL'><strong>General AoL</strong></a></p>",
                         "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#UnitAoL'><strong>Unit AoL</strong></a></p>",
                         "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#MathOverview'><strong>Math Overview</strong></a></p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#LearningAids'><strong>Learning Aids</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#TeachingAids'><strong>Teaching Aids</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#FamilyLetters'><strong>Family Letters</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#Assessments'><strong>Assessments</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#ACEHomework'><strong>ACE Homework</strong></a> </p>"
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#LearningAids'><strong>Learning Aids</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#TeachingAids'><strong>Teaching Aids</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#FamilyLetters'><strong>Family Letters</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#Assessments'><strong>Assessments</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#ACEHomework'><strong>ACE Homework</strong></a></p>"
                       ]
                     }
                   }
@@ -3942,7 +3942,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><u><strong>Explore (Digging In)</strong></u>          </p>",
+                        "<p><u><strong>Explore (Digging In)</strong></u></p>",
                         "<p><u>Providing for Individual Needs</u></p>",
                         "<p></p>",
                         "<p>As you move around the room, listen to students discuss the Problem. Find appropriate opportunities to ask students about connections among percents, ratios, and rates.</p>",
@@ -3953,7 +3953,7 @@
                         "<p></p>",
                         "<p>Students may have various strategies for solving percent problems. In Grade 6 Comparing Quantities, students used strategies such as drawing tape diagrams or percent bars, double number lines, rate tables, and informal proportions.</p>",
                         "<p></p>",
-                        "<p>Below is an example of the strategies that students analyzed in Comparing Quantities (computing the percent for 136 out of 400) and how that strategy may transfer to the current question (computing 5% tax on $24). </p>"
+                        "<p>Below is an example of the strategies that students analyzed in Comparing Quantities (computing the percent for 136 out of 400) and how that strategy may transfer to the current question (computing 5% tax on $24).</p>"
                       ]
                     }
                   },
@@ -4143,15 +4143,15 @@
             {
               "type": "summarize",
               "content": {
-                "tiles": [    
+                "tiles": [
                   {
                     "id": "TNzSPQHw_B0wecjy",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><u><strong>Summarize (Orchestrating the Discussion)   </strong></u></p>",
-                        "<p><u>Solutions and Strategies </u></p>",
+                        "<p><u><strong>Summarize (Orchestrating the Discussion)</strong></u></p>",
+                        "<p><u>Solutions and Strategies</u></p>",
                         "<p></p>",
                         "<p>As a class, discuss the strategies and solutions for the determining total cost with tax.</p>"
                       ]
@@ -4184,7 +4184,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><u>Making the Mathematics Explicit </u></p>",
+                        "<p><u>Making the Mathematics Explicit</u></p>",
                         "<p><em>Situation A</em></p>",
                         "<p>Give students an opportunity to discuss how the five strategies are alike and how they compare to strategies that your students used to answer the questions.</p>",
                         "<p></p>"
@@ -4209,7 +4209,7 @@
                       "format": "html",
                       "text": [
                         "<p><em>Situation B</em></p>",
-                        "<p>The student wonderings in this situation push students to connect their current thinking to previous mathematical ideas. </p>"
+                        "<p>The student wonderings in this situation push students to connect their current thinking to previous mathematical ideas.</p>"
                       ]
                     }
                   },
@@ -4220,7 +4220,7 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Suggested Questions</strong></p>",
-                        "<ul><li>Do you agree with Nicky or Marta? Is there more than one price with tax? Or is it the same to find tax on each item and the tax on the total of the items? (Marta is correct. The Distributive Property shows how both ways of determining the total with tax are the same.)</li><li>Do you agree with Sam or Will? (Will. Sam could be thinking that percents are like fractions because both are part to whole. However, fractions are one quantity. A fraction is a number. A percent is a comparison statement with two quantities: an amount for every 100. A percent is a rate.) </li></ul>"
+                        "<ul><li>Do you agree with Nicky or Marta? Is there more than one price with tax? Or is it the same to find tax on each item and the tax on the total of the items? (Marta is correct. The Distributive Property shows how both ways of determining the total with tax are the same.)</li><li>Do you agree with Sam or Will? (Will. Sam could be thinking that percents are like fractions because both are part to whole. However, fractions are one quantity. A fraction is a number. A percent is a comparison statement with two quantities: an amount for every 100. A percent is a rate.)</li></ul>"
                       ]
                     }
                   },
@@ -4333,8 +4333,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Reflecting on Student Learning  </strong></p>",
-                        "<p>Use the following questions to assess student understanding at the end of the lesson.  </p>",
+                        "<p><strong>Reflecting on Student Learning</strong></p>",
+                        "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
                         "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li></ul>",
                         "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
                         "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
@@ -4439,7 +4439,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><u><strong>Launch (Getting Started) </strong></u></p>",
+                        "<p><u><strong>Launch (Getting Started)</strong></u></p>",
                         "<p></p>",
                         "<p><u>Connecting to Prior Knowledge</u></p>",
                         "<p>If students do not eat out or usually eat out only at fast food restaurants, they might not be familiar with tipping. It might be useful to explain how that system works and even to work out one simple example as a whole class.</p>"
@@ -4452,7 +4452,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Suggested Questions </strong></p>",
+                        "<p><strong>Suggested Questions</strong></p>",
                         "<ul><li>Suppose you eat at a restaurant and the bill comes to $14. What would a tip of 10% be? A tip of 20%? A tip of 15%? ($1.40; $2.80; $2.10)</li></ul>",
                         "<p>Following up on the strategies from Problem 3.1, you might ask:</p>",
                         "<ul><li>Can you show how to work out these tips on a percent bar? ((Step 1) A percent bar could be marked for 10%. (Step 2) Students can reason proportionally that 10% of $14 is $1.40 and (Step 3) then double this for 20%. (Step 4) Halfway between 10% and 20% is 15%. So, halfway between $1.40 and $2.80 is $2.10.)</li></ul>"
@@ -4606,7 +4606,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><u><strong>Explore (Digging In)   </strong></u>     </p>",
+                        "<p><u><strong>Explore (Digging In)</strong></u></p>",
                         "<p><u>Providing for Individual Needs</u></p>",
                         "<p></p>",
                         "<p>As you observe students, watch for strategies that are helpful to share in the whole class discussion.</p>"
@@ -4619,7 +4619,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Suggested Questions </strong></p>",
+                        "<p><strong>Suggested Questions</strong></p>",
                         "<p>• How did you calculate the bill + tax? (Bill + 6% of the bill. Be on the lookout for students who use 1.06 * bill. Make sure students understand that this is proportional reasoning.)</p>"
                       ]
                     }
@@ -4649,7 +4649,7 @@
                       "text": [
                         "<p><u>Planning for the Summary</u></p>",
                         "<p></p>",
-                        "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know question? What will you do if you do not have evidence? </p>"
+                        "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know question? What will you do if you do not have evidence?</p>"
                       ]
                     }
                   },
@@ -4677,8 +4677,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><u><strong>Summarize (Orchestrating the Discussion) </strong></u><strong> </strong></p>",
-                        "<p><u>Solutions and Strategies </u></p>",
+                        "<p><u><strong>Summarize (Orchestrating the Discussion)</strong></u></p>",
+                        "<p><u>Solutions and Strategies</u></p>",
                         "<p>The openness of the Initial Challenge will make it somewhat difficult to compare results from the different groups. However, the very openness makes this an inviting opportunity for groups to share their individual choices. Time will be a factor in the summary when you share their choices and work. You may want to have groups do a Gallery Walk. During the Gallery Walk, you can have groups rotate to at least two other groups’ work. Students can check the work and give feedback on sticky notes.</p>"
                       ]
                     }
@@ -4689,7 +4689,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Suggested Questions </strong></p>",
+                        "<p><strong>Suggested Questions</strong></p>",
                         "<ul><li>Some groups found the sub-total for the food items and then added 6% of that amount to the bill. How else might you calculate the total amount? (You could scale from 1% to 106%. Or you could multiply bill by 1.06 to get total + tax.)</li></ul>"
                       ]
                     }
@@ -4726,7 +4726,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><u>Making the Mathematics Explicit </u></p>",
+                        "<p><u>Making the Mathematics Explicit</u></p>",
                         "<p></p>",
                         "<p></p>",
                         "<p><em>Situations A and C</em></p>",
@@ -4901,7 +4901,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>50% OFF </p>"
+                          "<p>50% OFF</p>"
                         ]
                       }
                     },
@@ -4956,7 +4956,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>Pay 50% </p>"
+                          "<p>Pay 50%</p>"
                         ]
                       }
                     },
@@ -5003,8 +5003,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Reflecting on Student Learning  </strong></p>",
-                        "<p>Use the following questions to assess student understanding at the end of the lesson.  </p>",
+                        "<p><strong>Reflecting on Student Learning</strong></p>",
+                        "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
                         "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li></ul>",
                         "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
                         "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
@@ -5089,11 +5089,11 @@
                         "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#GeneralAoL'><strong>General AoL</strong></a></p>",
                         "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#UnitAoL'><strong>Unit AoL</strong></a></p>",
                         "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#MathOverview'><strong>Math Overview</strong></a></p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#LearningAids'><strong>Learning Aids</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#TeachingAids'><strong>Teaching Aids</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#FamilyLetters'><strong>Family Letters</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#Assessments'><strong>Assessments</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#ACEHomework'><strong>ACE Homework</strong></a> </p>"
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#LearningAids'><strong>Learning Aids</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#TeachingAids'><strong>Teaching Aids</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#FamilyLetters'><strong>Family Letters</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#Assessments'><strong>Assessments</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#ACEHomework'><strong>ACE Homework</strong></a></p>"
                       ]
                     }
                   }
@@ -5155,7 +5155,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><u><strong>Explore (Digging In) </strong></u>       </p>",
+                        "<p><u><strong>Explore (Digging In)</strong></u></p>",
                         "<p><u>Providing for Individual Needs</u></p>"
                       ]
                     }
@@ -5179,7 +5179,7 @@
                       "text": [
                         "<p><u>Planning for the Summary</u></p>",
                         "<p></p>",
-                        "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence? </p>"
+                        "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence?</p>"
                       ]
                     }
                   },
@@ -5207,15 +5207,15 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><u><strong>Summarize (Orchestrating the Discussion) </strong></u> </p>",
+                        "<p><u><strong>Summarize (Orchestrating the Discussion)</strong></u></p>",
                         "<p></p>",
-                        "<p><u>Solutions and Strategies</u> </p>",
+                        "<p><u>Solutions and Strategies</u></p>",
                         "<p></p>",
                         "<p>Have students show and discuss their strategies for answering the chimp recipe questions. Students’ strategies might include:</p>",
                         "<p></p>",
-                        "<p>Strategies – 1st bullet – This asks for the part given the total and the %. </p>",
+                        "<p>Strategies – 1st bullet – This asks for the part given the total and the %.</p>",
                         "<ul><li>This can be done with a percent bar, unit rate 1% of total, a table, or proportion.</li><li>Unit rates would be 0.4 scoops fiber/1 scoop total and 0.6 scoops protein/1 cup total.</li><li>Equations are P = 0.6T and F = 0.4T.</li><li>Proportion would be (Fiber scoops)/(225 )=40/(100  )  or  (Fiber scoops)/(40  ) = 225/(100  ).</li></ul>",
-                        "<p>Strategies – 2nd bullet – In this situation, we are given a part (30 scoops of protein) and must find the total amount of food. </p>",
+                        "<p>Strategies – 2nd bullet – In this situation, we are given a part (30 scoops of protein) and must find the total amount of food.</p>",
                         "<ul><li>This can be done using bars (tape diagrams), a table, a proportion, a graph of relationship between total and protein for adult chimps, or an equation P = 0.4T. (Some students might write T = 2.5P.)</li></ul>"
                       ]
                     }
@@ -5227,10 +5227,10 @@
                       "format": "html",
                       "text": [
                         "<p></p>",
-                        "<p><u>Making the Mathematics Explicit </u></p>",
+                        "<p><u>Making the Mathematics Explicit</u></p>",
                         "<p><u></u></p>",
                         "<p><u></u></p>",
-                        "<p><em>Situation A </em></p>",
+                        "<p><em>Situation A</em></p>",
                         "<p></p>",
                         "<p>Help students connect the way they chose to answer the questions to other strategies.</p>",
                         "<p>Choose a strategy that connects to the strategies that your students used in class.</p>"
@@ -5297,7 +5297,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Reflecting on Student Learning  </strong></p>",
+                        "<p><strong>Reflecting on Student Learning</strong></p>",
                         "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
                         "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li></ul>",
                         "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
@@ -5320,7 +5320,7 @@
               "type": "overview",
               "content":
               {
-                "tiles": 
+                "tiles":
                 [
                   {
                     "content": {
@@ -5384,11 +5384,11 @@
                         "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#GeneralAoL'><strong>General AoL</strong></a></p>",
                         "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#UnitAoL'><strong>Unit AoL</strong></a></p>",
                         "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#MathOverview'><strong>Math Overview</strong></a></p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#LearningAids'><strong>Learning Aids</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#TeachingAids'><strong>Teaching Aids</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#FamilyLetters'><strong>Family Letters</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#Assessments'><strong>Assessments</strong></a> </p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#ACEHomework'><strong>ACE Homework</strong></a> </p>"
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#LearningAids'><strong>Learning Aids</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#TeachingAids'><strong>Teaching Aids</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#FamilyLetters'><strong>Family Letters</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#Assessments'><strong>Assessments</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#ACEHomework'><strong>ACE Homework</strong></a></p>"
                       ]
                     }
                   }
@@ -5398,7 +5398,7 @@
             {
               "type": "launch",
               "content": {
-                "tiles": 
+                "tiles":
                 [
                   {
                     "id": "fQ0MCp1PFeb_CG59",
@@ -5406,7 +5406,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><u><strong>Launch (Getting Started)</strong></u>  </p>",
+                        "<p><u><strong>Launch (Getting Started)</strong></u></p>",
                         "<p><u>Connecting to Prior Knowledge</u></p>",
                         "<p>Discuss their work in this Unit using rates, rate tables, and unit rates.</p>"
                       ]
@@ -5434,7 +5434,7 @@
                         "<p>Explain the situation using the Introduction in about leaky faucets wasting water every year.</p>",
                         "<p>Introduce the directions for the simulation using Teaching Aid 3.4: Leaky Faucet Experiment Directions or the Student Edition.</p>",
                         "<p></p>",
-                        "<p>Have students work in groups of 3-4 to collect their data and then complete the Problem.  Distribute <strong>Learning Aid 3.4: Leaky Faucet Data </strong>for students to record their data from the simulation.</p>",
+                        "<p>Have students work in groups of 3-4 to collect their data and then complete the Problem.  Distribute <strong>Learning Aid 3.4: Leaky Faucet Data</strong> for students to record their data from the simulation.</p>",
                         "<p><em>Day 2:</em></p>",
                         "<p>You may want to give each group two of the situations from What If Situation A to differentiate based on needs of each group. (Agency, Identity, Ownership)</p>",
                         "<p>Have groups do What If Situation B on large paper so that it can be used in a Gallery Walk in the Summary. (Portrayal)</p>",
@@ -5450,7 +5450,7 @@
             {
               "type": "explore",
               "content": {
-                "tiles": 
+                "tiles":
                 [
                  {
                   "id": "k21YgGcKrENCFuvK",
@@ -5458,7 +5458,7 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p><u><strong>Explore (Digging In)   </strong></u>     </p>",
+                      "<p><u><strong>Explore (Digging In)</strong></u></p>",
                       "<p><u>Providing for Individual Needs</u></p>",
                       "<p></p>",
                       "<p>As groups are working on the leaky faucet simulation, monitor that they are following the directions to get adequate data.</p>",
@@ -5506,10 +5506,10 @@
                   "content": {
                     "type": "Text",
                     "format": "html",
-                    "text": [ 
+                    "text": [
                       "<p><u>Planning for the Summary</u></p>",
                       "<p></p>",
-                      "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence?</p>" 
+                      "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence?</p>"
                     ]
                   }
                 },
@@ -5530,7 +5530,7 @@
             {
               "type": "summarize",
               "content": {
-                "tiles": 
+                "tiles":
                 [
                   {
                     "id": "voW2u98X8aQKW2vz",
@@ -5538,7 +5538,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><u><strong>Summarize (Orchestrating the Discussion)   </strong></u></p>",
+                        "<p><u><strong>Summarize (Orchestrating the Discussion)</strong></u></p>",
                         "<p><u>Solutions and Strategies</u></p>",
                         "<p><em>Day 1:</em></p>",
                         "<p>Have students share their results from the Leaky Faucet Experiment. Have students share how they used this data to make predictions in the Initial Challenge.</p>",
@@ -5554,7 +5554,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><u>Making the Mathematics Explicit </u></p>",
+                        "<p><u>Making the Mathematics Explicit</u></p>",
                         "<p><em>Day 1:</em></p>",
                         "<p><strong>Suggested Questions</strong></p>",
                         "<ul><li>How did you use your data to make predictions in the Initial Challenge? (Answers will vary. Focus the conversations on their use of rates.)</li></ul>",
@@ -5718,7 +5718,7 @@
                         "<p><u>Now What Do Students Know</u></p>",
                         "<p>Ask students to reflect on the discussion and answer the Now What Do You Know.</p>",
                         "<p></p>",
-                        "<p>See answers for more information about the strategies and embedded mathematics. </p>"
+                        "<p>See answers for more information about the strategies and embedded mathematics.</p>"
                       ]
                     }
                   },
@@ -5728,11 +5728,11 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Reflecting on Student Learning</strong>  </p>",
-                        "<p>Use the following questions to assess student understanding at the end of the lesson.  </p>",
+                        "<p><strong>Reflecting on Student Learning</strong></p>",
+                        "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
                         "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li></ul>",
                         "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
-                        "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?  </li></ul>"
+                        "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
                       ]
                     }
                   }
@@ -5748,7 +5748,7 @@
       "ordinal": 4,
       "title": "CAS MR1 - MR3",
       "problems": [
-        {     
+        {
         "description": "Problem 4.1",
         "ordinal": 1,
         "title": "Comparing and Scaling Mathematical Reflections",
@@ -5758,7 +5758,7 @@
               "type": "MathReflection1",
               "content":
               {
-                "tiles": 
+                "tiles":
                 [
                    {
                     "id": "_Nue-H8iWupkEo0j",
@@ -5793,7 +5793,7 @@
                         "<p></p>",
                         "<p>Identify strategies for comparing quantities: ratio tables, equivalent ratios, scaling, and percent.</p>",
                         "<p></p>",
-                        "<p>Begin to formalize the process of setting up <em>proportions</em> and solving for an unknown value. </p>",
+                        "<p>Begin to formalize the process of setting up <em>proportions</em> and solving for an unknown value.</p>",
                         "<p></p>",
                         "<p>Understand that to compare ratios you must relate the same two quantities in the same order: part-to-part or part-to-whole.</p>",
                         "<p></p>",
@@ -5806,10 +5806,10 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": [ 
+                      "text": [
                         "<p>Mathematical Reflection</p>",
                         "<p></p>",
-                        "<p>What does it mean to reason proportionally?</p>" 
+                        "<p>What does it mean to reason proportionally?</p>"
                       ]
                     }
                   },
@@ -5819,7 +5819,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>The Mathematical Reflection question provides an opportunity to discuss the goals of the Investigation. Students can pull together their reasoning from the Now What Do You Know? questions to summarize their learning over time. </p>",
+                        "<p>The Mathematical Reflection question provides an opportunity to discuss the goals of the Investigation. Students can pull together their reasoning from the Now What Do You Know? questions to summarize their learning over time.</p>",
                         "<p></p>",
                         "<p>After the class discussion, students can record their responses to the Mathematical Reflection to create a record of their current understandings of the big ideas of the Unit.</p>",
                         "<p></p>",
@@ -5858,8 +5858,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Reflecting on Student Learning</strong>   </p>",
-                        "<p>Use the following questions to assess student understanding at the end of the lesson.  </p>",
+                        "<p><strong>Reflecting on Student Learning</strong></p>",
+                        "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
                         "<ul><li>What in evidence in students’ work shows an understanding of the ideas in this Unit?</li><li>What mathematical ideas will still need emphasis?</li><li>What opportunities exist in the rest of the Unit, or in future Units, to extend and connect the students’ learning?</li></ul>"
                       ]
                     }
@@ -5871,7 +5871,7 @@
               "type": "MathReflection2",
               "content":
               {
-                "tiles": 
+                "tiles":
                 [
                   {
                     "id": "NP_-kl4UsHIJf1vb",
@@ -5937,11 +5937,11 @@
                         "<p></p>",
                         "<p><em>What does it mean to reason proportionally?</em></p>",
                         "<p></p>",
-                        "<p>Students should be able to discuss recognizing and analyzing proportional statements. </p>",
+                        "<p>Students should be able to discuss recognizing and analyzing proportional statements.</p>",
                         "<p>Students will have broadened their understanding that proportional reasoning uses multiplicative thinking instead of additive thinking. And proportional reasoning can be used to make decisions and solve problems.</p>",
                         "<p></p>",
                         "<p>Notice that:</p>",
-                        "<ul><li>Proportional reasoning is about making comparisons: part-to-part and part-to-whole                 </li><li>Rates are a type of ratio</li><li>Unit rates can be helpful in solving problems</li><li>Unit rates or constant of proportionality can be found in tables, graphs, and equations</li></ul>"
+                        "<ul><li>Proportional reasoning is about making comparisons: part-to-part and part-to-whole</li><li>Rates are a type of ratio</li><li>Unit rates can be helpful in solving problems</li><li>Unit rates or constant of proportionality can be found in tables, graphs, and equations</li></ul>"
                       ]
                     }
                   },
@@ -5971,7 +5971,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Reflecting on Student Learning   </strong></p>",
+                        "<p><strong>Reflecting on Student Learning</strong></p>",
                         "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
                         "<ul><li>What evidence in students’ work shows an understanding of the ideas in this Unit?</li><li>What mathematical ideas will still need emphasis?</li><li>What opportunities exist in the rest of the Unit, or in future Units, to extend and connect the students’ learning?</li></ul>"
                       ]
@@ -6024,7 +6024,7 @@
               "type": "MathReflection3",
               "content":
               {
-                "tiles": 
+                "tiles":
                 [
                   {
                     "id": "PeucERxCxzGcC9eo",
@@ -6082,8 +6082,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Reflecting on Student Learning   </strong></p>",
-                        "<p>Use the following questions to assess student understanding at the end of the lesson.  </p>",
+                        "<p><strong>Reflecting on Student Learning</strong></p>",
+                        "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
                         "<ul><li>What evidence in students’ work shows an understanding of the ideas in this Unit?</li><li>What mathematical ideas will still need emphasis?</li><li>What opportunities exist in the rest of the Unit, or in future Units, to extend and connect the students’ learning?</li></ul>"
                       ]
                     }
