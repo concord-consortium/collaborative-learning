@@ -130,7 +130,7 @@
     "copy-webpack-plugin": "^10.0.0",
     "cross-env": "^7.0.3",
     "css-loader": "^6.5.1",
-    "cypress": "^9.1.0",
+    "cypress": "9.0.0",
     "cypress-commands": "2.0.1",
     "cypress-file-upload": "^5.0.8",
     "eslint": "^8.3.0",
