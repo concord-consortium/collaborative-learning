@@ -1,0 +1,177 @@
+{
+  "code": "moth",
+  "abbrevTitle": "MothEd",
+  "title": "MothEd Identifying Moths",
+  "subtitle": "Wings, Spots, and Legs",
+  "placeholderText": "Type in me!",
+  "settings": {
+    "table": {
+      "numFormat": ".2~f"
+    }
+  },
+  "sections": {
+    "reference": {
+      "initials": "REF",
+      "title": "Reference",
+      "placeholder": "Reference Images and Descriptions"
+    },
+    "practice": {
+      "initials": "PR",
+      "title": "Practice",
+      "placeholder": "Student Images of Moths and Data"
+    },
+    "experiment": {
+      "initials": "EX",
+      "title": "Experiment",
+      "placeholder": "Discuss your Findings or \nDesign an Experiment"
+    }
+  },
+  "planningDocument": {
+    "enable": "teacher",
+    "default": true,
+    "sectionInfo": {
+      "overview": {
+        "initials": "OV",
+        "title": "Overview",
+        "placeholder": "Add some tiles here"
+      },
+      "launch": {
+        "initials": "LC",
+        "title": "Launch",
+        "placeholder": "Add some tiles here"
+      },
+      "explore": {
+        "initials": "EX",
+        "title": "Explore",
+        "placeholder": "Add some tiles here"
+      },
+      "summarize": {
+        "initials": "SM",
+        "title": "Summarize",
+        "placeholder": "Add some tiles here"
+      }
+    },
+    "sections": [
+      { "type": "overview" },
+      { "type": "launch" },
+      { "type": "explore" },
+      { "type": "summarize" }
+    ]
+  },
+  "defaultStamps": [
+  ],
+  "investigations": [
+    {
+      "description": "Investigation 1",
+      "ordinal": 1,
+      "title": "MothEd Sample Curriculum",
+      "problems": [
+        {
+          "description": "Activity 1.1",
+          "ordinal": 1,
+          "title": "MothEd 1.1 Identifying Moths",
+          "subtitle": "",
+          "disabled": [],
+          "sections": 
+          [
+            {
+            "type": "reference",
+            "content": {
+              "tiles": [
+                {
+                  "content":
+                  {
+                    "type": "Image",
+                    "url": "curriculum/mothed/images/mothtypes.jpg"
+                  }
+                }
+              ]
+              }
+            },
+            {
+              "type": "practice",
+              "content": {
+                "tiles": [
+                  [
+                    {
+                      "content":
+                      {
+                        "type": "Image",
+                        "url": "curriculum/mothed/images/tigerMoth.jpg"
+                      }
+                    },
+                    {
+                      "content":
+                      {
+                        "type": "Image",
+                        "url": "curriculum/mothed/images/gypsyMoth.jpg"
+                      }
+                    },
+                    {
+                      "content":
+                      {
+                        "type": "Image",
+                        "url": "curriculum/mothed/images/flannelMoth.jpg"
+                      }
+                    }
+                  ],
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Take these three images of Moths and identify them according to the Reference guide. Images can be dragged into your document.</p>",
+                        "<p>Be sure to identify using these characteristics</p>",
+                        "<ul><li>spots and other markings,</li><li>antennae,</li><li>color,</li><li>wings open or closed at rest,</li><li>size.</li></ul>",
+                        "<p>Describe, next to each image, the kind of moth you think it is and the reason you chose that type.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The moths pictured are</p>",
+                        "<ul><li>a tiger moth, identifyable by it's xxx</li><li>a gypsy moth, identifyable by it's xxx</li><li>a flannel moth, identifyable by it's xxx</li><li>size.</li></ul>",
+                        "<p>Look for student descriptions of antenna, spots, resting state.</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "experiment",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Here is a table that one of your classmates designed for collecting data about a moth experiment. Copy this table by dragging into your workspace, or make a new one and design your own experiment.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "name": "Moth Collection Data",
+                      "columns": [
+                        {"name":"time","values":["8:54pm"]},
+                        {"name":"Temp ( °C)","values":["12"]},
+                        {"name":"number","values":[""]}
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -25,11 +25,6 @@
       "title": "Now What Do You Know?",
       "placeholder": "Work area for\nNow What Do You Know? section"
     },
-    "didYouKnow": {
-      "initials": "DY",
-      "title": "Did You Know?",
-      "placeholder": "Work area for\nDid You Know? section"
-    },
      "MathReflection1": {
       "initials": "R1",
       "title": "Math Reflection 1",
@@ -125,35 +120,151 @@
               "content": {
                 "tiles": [
                   {
+                    "id": "y5zjsg_GUnvZhNqs",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "When you launch a problem, there are up to four standard tabs corresponding to the curriculum:<ul><li>Introduction</li><li>Initial Challenge</li><li>What If ...?</li><li>Now What Do You Know?</li></ul>"
+                        "<p><strong>Welcome to CLUE!</strong></p>",
+                        "<p>CLUE is short for <em>Collaborative Learning User Environment.</em></p>",
+                        "<p>It has been designed to help you do math <strong>together</strong> with your classmates.</p>"
                       ]
                     }
                   },
                   {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "You will find text, graphs, images and other kinds of content in the tabs. These can be dragged into your workspace. Try to drag this text into your workspace now. You can drag any kind of content found in tabs on either side of the workspace. This will let you use useful parts from problems, supports from your teacher, and work you share with your fellow students."
-                      ]
-                    }
-                  },
-                  {
+                    "id": "0JPeZra2cygU7GLQ",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/workspaceHelp.png"
+                      "url": "curriculum/stretching-and-shrinking/images/inscriptions3_450w.png"
                     }
                   },
                   {
+                    "id": "D7AsUAaGeFf_Ie6y",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Images are handy for recording work you do on paper. You can make an image either by choosing the image tool and choosing a file from your computer, or you can drag an image from your file list or desktop on to the browser window. Try this now."
+                        "<p></p>",
+                        "<p></p>",
+                        "<p>In CLUE, everyone works in a group with up to four people. When you start an activity, CLUE drops you into a group randomly. <strong>You can change groups by clicking on the group number in the upper right corner.</strong> Then, you can either join an existing group that has fewer than four students, or start a new group. Your teacher may ask you to join a specific group. When you change groups, your work moves with you.</p>",
+                        "<p><strong>Groups are important in CLUE.</strong> You can learn from classmates in your group and they can learn from you. Many features of CLUE are designed to help you share information and learn from others in your group and in your class.</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>This activity is designed to acquaint your students with the features of the CLUE platform. In the first two sections — <strong>Introduction</strong> and <strong>Initial Challenge </strong>— students get a chance to try out the features of their individual workspaces and the tools that are available for solving problems. The latter two sections — <strong>What If…? </strong>and <strong>Now What Do you Know? </strong>— present the collaboration tools, so students learn how to share their work with their group members and with the class.</p>",
+                        "<p></p>",
+                        "<p>To get the most out of this activity or any activity, seat students in groups of four, if possible, and have these students work in the same group.  As students work, encourage them to share their questions and their findings and help each other. At the end, you may want to use student-published work to pull together the major discoveries that students have made about the CLUE platform.</p>",
+                        "<p></p>",
+                        "<p>Finally, CLUE has been developed for use with the Chrome browser, and we recommend using it. With other browsers, certain functions may work differently than described here.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "_8Nu2YdbHROomEJl",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Each problem has three or four parts. The tabs above display each part. Try clicking on the tabs listed below, then click back to the Introduction.</p>",
+                        "<ul><li>Introduction</li><li>Initial Challenge</li><li>What If…?</li><li>Now What Do You Know?</li></ul>",
+                        "<p></p>",
+                        "<p>(Note: Not all lessons have an Introduction.)</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "OYfq9GEX6n-Ou1OX",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Problems are made of little chunks called <strong><em>tiles</em></strong> that contain the following:</p>",
+                        "<ul><li>text</li><li>tables</li><li>graphs</li><li>drawings</li><li>images</li></ul>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p>Try hovering your mouse over the text or other features. You’ll see a gray box around each “tile.”</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "CDZFE7LhsHxWLbJR",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>On the right is <strong>your</strong> workspace. To edit your workspace, you must first add a <strong>tile</strong>. You get a tile in your workspace by either</p>",
+                        "<ul><li><strong>Dragging a tile from the problem (on the left) or any other document into your workspace.</strong></li><li><strong>Dragging a new (empty) tile from the menu on the left of your workspace.</strong></li><p></p></ul>",
+                        "<p>All tiles have a <strong>waffle</strong> (gray box with six dots) in the upper right corner if you hover over it. To drag the tile, click the waffle and hold it down as you drag it to your workspace. As you drag the tile into the workspace, a blue line shows where the tile will go when you let go.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "f0dyLiCTH4GL1_wC",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Your workspace has dividers for each section of the problem. Put your answers in the same section as that of the question. For instance, drag the tile below into the Introduction section and try writing your own haiku below it.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "SMQKjznYrvdUDvUu",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Here is an example haiku:</p>",
+                        "<p></p>",
+                        "<p><em>Answers, thoughtfully</em></p>",
+                        "<p><em>Arranged, enlighten ideas,</em></p>",
+                        "<p><em>Adding clarity.</em></p>",
+                        "<p></p>",
+                        "<p>(The usual haiku has three lines, a total of 17 syllables with lines of 5, 7, and 5 syllables.)</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "ehDLW25Ta6qvOWJ9",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Drag the tiles that you need to help you answer the questions from the problem into the appropriate section of your workspace. Drag them around to arrange them as you like. Once a tile is in your workspace, you can edit it, delete it, or move it around. Use the tiles from the problem and the ones you add to describe how you arrived at your answers by showing your work along with the answers.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "ybfm3JWN0NdL4LEp",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>You can arrange the screen to show My Resources or My Workspace or to have the screen split.</strong> Hover over the three vertical dots on the divider between your Resources and your Workspace and click the arrows to change the screen. You can also close the Resources view by clicking the “X” on the upper right corner of the Resources panel.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "85R9h791ebdw1NbA",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/WholeScreen-400w.png"
+                    }
+                  },
+                  {
+                    "id": "fQmDj6IwaKzYdwhP",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>When your working session is over, just close the browser window. Your workspace is saved automatically. (There is no Save button.) If you are on a shared computer, be sure to log out of the STEM Resource Finder. Now, click the Initial Challenge tab to continue.</p>"
                       ]
                     }
                   }
@@ -165,39 +276,363 @@
               "type": "initialChallenge",
               "content": {
                 "tiles": [
-                   {
+                  [
+                    {
+                      "id": "IubDD3qrjJw8Uhb9",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>Using CLUE’s Tools</strong></p>",
+                          "<p></p>",
+                          "<p>It’s time  to try out each of CLUE’s tools. You’ll decide which tools to use to solve a problem. Knowing how the tools work will help you present your mathematical answers in a way that makes sense to you, whether that’s in words or a graph or table. To use a tool, just click it. You can then move it to a particular section or above or below another tile. Or to position it precisely, drag it from the toolbar into your workspace, moving to where you want it (the drop zone is indicated by a blue vertical bar), then let go.</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "_acGcUoGuBg5sXvL",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/stretching-and-shrinking/images/AllToolsToolBar-labeled.png"
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "jVu0lyX6VmWRgOhY",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>Text</strong></p>",
+                          "<p>When you click into a text tile in your workspace, a tray with icons for editing options appears below it. Hover your mouse over the items in the tray for more information (and a keyboard shortcut) about each.</p>",
+                          "<p></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "kKGmMgSxgJId6zJW",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/stretching-and-shrinking/images/TextTray.png"
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "I8j7wDtsSN4g6NYH",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>The text tool is like many other editors, but some options may work slightly differently.</p>",
+                          "<ol><li>To select text, click in the text tile, then drag over the text or use the arrow keys with the Shift key to select by character or Command-Shift for larger selections. (On a PC, use the Ctrl key instead of the Command key.) Note: Dragging where there is no text moves the whole text tile.</li><li>To use an editing tool, select the text you want to format (e.g., bold, italicize, etc.), then click the tool, which will turn blue. Or click the tool first, and start typing formatted text. Be sure to click the tool again to deselect it when you’re done.</li></ol>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "HBgEN4_UdhlzQST_",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Drag this tile into the Initial Challenge section in your workspace, and format the text below as described.</p>",
+                          "<p></p>",
+                          "<p>Bold</p>",
+                          "<p>Italic</p>",
+                          "<p>Underline</p>",
+                          "<p>Subscript</p>",
+                          "<p>Superscript</p>",
+                          "<p></p>",
+                          "<p>This is a</p>",
+                          "<p>Numbered</p>",
+                          "<p>List</p>",
+                          "<p></p>",
+                          "<p>This is a</p>",
+                          "<p>Bulleted</p>",
+                          "<p>List</p>"
+                        ]
+                      }
+                    }
+                  ],
+                  {
+                    "id": "T7Nf4eiuSzITUz7L",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Click on <strong>tool buttons</strong> on the side of the workspace to <em>create a new tile</em>. Tiles let you make content to solve problems and record your ideas. You can also <strong>drag tools</strong> onto the workspace if you want to place them more precisely. You can drag tiles from one place to another in your workspace to organize your work. The tile will land wherever the blue highlight shows up."
+                        "<p><strong>A few more things about text tiles:</strong></p>",
+                        "<p>When text is selected, you can use the usual keyboard shortcuts:</p>",
+                        "<ul><li>Cut: Command-X</li><li>Copy: Command-C</li><li>Paste: Command-V</li><li>Undo: Command-Z</li><li>Redo: Command-Shift-Z</li><li>Select all text in a tile: Command-A</li></ul>"
                       ]
                     }
                   },
                   {
+                    "id": "WWbw94aRpUIoXhPw",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "To <strong>delete tiles</strong>, select one or more tiles and click the delete tool.  Try creating, moving and deleting tiles."
+                        "<p><strong>Table</strong></p>",
+                        "<p></p>",
+                        "<p>Use a table to relate two or more quantities. Tables can hold numbers or text. You can edit the table <strong>title</strong> or <strong>column labels </strong>by double-clicking. You can move from cell to cell with the <strong>tab</strong> key. Below are some example tables. Drag each one into the <strong>Initial Challenge </strong>section and make the suggested edits.</p>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "a_B3E01X00sg3_kO",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Explore the table functions. See if you can add another column and label it Height (ft.), then fill the column with heights. You can make up the numbers (or research them, if you want). Also, add another dinosaur or two and fill out the columns with numbers.</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "-ZoJoDESMoYPKL7H",
+                      "content": {
+                        "type": "Table",
+                        "name": "Dinosaur Characteristics",
+                        "columns": [
+                          {"name":"Dinosaur","values":["Velociraptor","Coelophysis","Triceratops","Allosaurus"]},
+                          {"name":"Length (ft.)","values":["6.5","10","26","32"]}
+                        ]
+                      }
+                    }
+                  ],
+                  {
+                    "id": "FMm-bEHPbtoLSJd2",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Tables can help you see patterns. Here is a table that shows the number of ways points (not on a line) can be connected with straight lines. Put this in the <strong>Initial Challenge </strong>workspace and add a row or two. Can you continue the pattern for 6 and 7 points or more? Add a text tile to describe how you solved it.</p>"
                       ]
                     }
                   },
                   {
+                    "id": "JU_PfL7clLhi5YKm",
                     "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "When you are ready to <strong>share work</strong> with your group, click the Group Share eye icon, and switch to the Group View. You will see your workspace next to the others in your group. You can drag tiles and individual shapes from your groups documents into your own."
+                      "type": "Table",
+                      "name": "Connections Between Points",
+                      "columns": [
+                        {"name":"Points","values":["1","2","3","4","5"]},
+                        {"name":"Connections","values":["0","1","3","6","10"]}
                       ]
                     }
                   },
                   {
+                    "id": "1O2b0WS9ShaqbaHv",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "When you are ready to share work with your whole class, click the <strong>publish</strong> icon. This will put your file into the Class Work tab. Your teacher may ask you to do this so your work can be shared. You can also copy or create tiles in your Learning Log. The Learning Log will be available in all problems so you can remember what you have done as you work through the lessons."
+                        "<p>Tables have other features that we’ll explore later in this activity.</p>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "bsVBeX_vC7orGn2k",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>Graph</strong></p>",
+                          "<p>The Graph tool allows you to work with both geometrical figures and number relationships on a graph. Many features are available from the graph tray that appears when a graph tile is selected.</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "8l7oyYGXkc9uVEps",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/stretching-and-shrinking/images/GraphTrayLabled.png"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "ig4n6NXWNFIqgugW",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Try out the geometrical features by dragging the Graph tile below into the <strong>Initial Challenge </strong>workspace. Drag this text tile in, too, and close out this panel (with the “X”) so you have more room to work. When you are done, click on My Resources and come back to the <strong>Initial Challenge</strong>.</p>",
+                        "<p></p>",
+                        "<ol><li>Double-click one of the points A, B, or C. Double-clicking a point connects all unconnected points together in the order they were created.</li><li>Click the middle of the triangle to select it. Now you can drag it around. When selected, there is a rotate icon. You can spin it.</li><li>You can select any part of a geometric figure, a point, an edge, or the whole thing. Try selecting these things; they turn red or are highlighted. Once they are selected, you can move them around.</li><li>Clicking on the graph creates a point. Make some points and then connect them into a shape.</li><li>If a point, line, or shape is not quite where you want it, you can select it, and move it with the arrow keys on your keyboard.</li><li>Select a shape and duplicate it. There are two ways to do so. Can you find them both?</li><li>Change the name and the maximum or minimum values of the graph axes by clicking on the “x” or the “y.” You can give the axes labels, too.</li></ol>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "50dFm8k1u_26729x",
+                      "content": {
+                        "type": "Geometry",
+                        "title": "Graph Play",
+                        "board": {
+                          "properties": {
+                            "axisMin": [-2.186, -1.093],
+                            "axisRange": [26.23, 17.486]
+                          }
+                        },
+                        "objects": [
+                          { "type": "point", "parents": [5.009165503307461, 4.9969649184597], "properties": {"id":"4LBSAZbwBSIZj8oe","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [10, 10.000000000000002], "properties": {"id":"CwvkuSfF5kvTyumD","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [15, 5.000000000000001], "properties": {"id":"1t6NY4AggtTSPW_H","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} }
+                        ]
+                      }
+                    },
+                    {
+                      "id": "tYv03K0SXNOBRbws",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>You can try out the remaining features and some tricks with the Graph tool later in this activity.</p>",
+                          "<p></p>"
+                        ]
+                      }
+                    }
+                  ],
+                  {
+                    "id": "V8HfULbj8W5hEh1x",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Image</strong></p>",
+                        "<p></p>",
+                        "<p>Use the image tool to add a picture or snapshot to your work. For example, you might want to do some of your work with a pencil and paper. You can take a picture of it with the computer’s camera or a cell phone camera and upload it to your workspace. Then, all your work is together and your teacher can easily see it.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "ldQbqn6TNXqeGSnU",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/ImageTool-StudentWork_450w.png"
+                    }
+                  },
+                  {
+                    "id": "MADDxE2jZiDIptpg",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>You can upload an image three ways: (1) Drag an image (JPG, PNG) from your computer directly into your workspace, (2) Drag and drop an image into a new image tool, or (3) Use the Upload Image option below the image tool to upload the file.</p>",
+                        "<p></p>",
+                        "<p>Of course, you can always drag an image from a problem into your workspace.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "SbbKDh_4RIFGF5Ig",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Draw</strong></p>",
+                        "<p>This simple draw tool can help you explain your answers when nothing else will. Drag a new Draw tool into the Initial Challenge workspace, and try it out.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "gOJ6rVNNfONMKs3K",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/DrawTrayLabeled_450w.png"
+                    }
+                  },
+                  {
+                    "id": "UmuJ2eGSIGvOpkwy",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>There are several features in the Draw tray.</p>",
+                        "<ul><li><strong>Select</strong> - Every mark you make in the draw tool is a separate element. When the Select arrow is highlighted, just click on an element to select it. Then you can move it or delete it. Select multiple elements by dragging over them or clicking.</li><li><strong>Freehand</strong> - Draw with the mouse. The color can be changed.</li><li><strong>Line</strong> - Draw straight lines. The color can be changed.</li><li><strong>Rectangle</strong> - Draw a four-sided figure. To get a perfect square, hold down the shift key when dragging.</li><li><strong>Ellipse</strong> - Draw a round figure. To get a perfect circle, hold down the shift key when dragging.</li><li><strong>Line/border color </strong>- Change the color of Freehand, Line, or the outlines of Rectangles or Ellipses.</li><li><strong>Fill color </strong>- Change the color of the inside of Rectangles or Ellipses.</li><li><strong>Delete </strong>- Delete the selected elements.</li></ul>",
+                        "<p></p>",
+                        "<p>Note: In some activities, the Draw tool has an extra feature called <strong>Stamp</strong> with small icons you can use to solve the questions for that problem.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "9WCoe166uaNJlt_1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Using the Table and Graph Tool Together</strong></p>",
+                        "<p></p>",
+                        "<p>The Table and Graph tools can be linked together. Try this:</p>",
+                        "<ol><li>Drag the table labeled <em>Dog</em> into your workspace.</li><li>Drag a new graph next to it.</li><li>Drag the Dog table on top of the graph.</li><li>Double-click one of the points on the graph.</li></ol>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "xW3a8ImrCr37XGef",
+                    "content": {
+                      "type": "Table",
+                      "name": "Dog",
+                      "columns": [
+                        {"name":"x","values":["6","8","8.5","10","11","15","19","20","19","18","18","16","14","12","10","10","9","9","7"]},
+                        {"name":"y","values":["8.5","10","11","11","9","9.5","9","11","5","5","7","6.5","6","6.5","7","5","5","8.5","8"]}
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>When the Dog table is linked to the Graph, and a point has been double-clicked, it will look like this. The label can be added by students. Linked graph points cannot be changed on the graph, but changed points on the table will be updated  on the graph. Students will need to Select and Duplicate the dog to move it or change the shape of it.</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "KAPEI9GiXIWnPiz9",
+                      "content": {
+                        "type": "Geometry",
+                        "title": "Dog Graph",
+                        "board": {
+                          "properties": {
+                            "axisMin": [-2.183, -1.093],
+                            "axisRange": [32.537, 20.021]
+                          }
+                        },
+                        "objects": [
+                        ]
+                      }
+                    }
+                  ],
+                  {
+                    "id": "DoQmgg9mbQ_KfaHb",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Once you can see a dog, what can you do with it? Try selecting the whole figure and then different elements of it--points and lines. Then test the different tools in the graph tray. For instance,</p>",
+                        "<p></p>",
+                        "<ol><li>What can you move with the mouse, and what won&#x27;t move?</li><li>Can you duplicate the figure (make a copy)?</li><li>If you can make a copy, try doing things with the copy.</li><li>Can you move it? Rotate it?  Stretch it?</li><li>Can you measure an angle using the graph tools?</li><li>Can you measure a length of one segment?</li></ol>",
+                        "<p></p>",
+                        "<p>See if you can <em>unlink</em> the graph. What happens?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "Zl70Im62cFEh239k",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Uploading an Image to a Graph</strong></p>",
+                        "<p></p>",
+                        "<p>The Graph tool can measure the lengths of line segments using the Line Label feature. It also can be used to make measurements on images that can be uploaded to the graph. Start a new graph in the Initial Challenge section and find an image on your computer that you’d like to share. You can make points and shapes on top of the image. Is there anything in the image that you can measure? Add a label with a measurement.</p>"
                       ]
                     }
                   }
@@ -209,45 +644,100 @@
               "type": "whatIf",
               "content": {
                 "tiles": [
+                {
+                  "id": "fp7a21OoNiE-UeWm",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Sharing Work in Your Group</strong></p>",
+                      "<p>CLUE is designed so that you can learn with others in your group and in your class. Discussing and sharing your work is an important part of the learning process.</p>",
+                      "<p></p>",
+                      "<p>Sharing your work with your group is controlled with the button and slider switch in the upper right corner of your workspace. The button on the left toggles your workspace view from your individual view to a group view. In the group view, your work is always in the upper left corner. You can see the initials of your group members in each window pane.</p>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Once students get started with the mathematical activities, feel free to direct them in the use of sharing. Some teachers prefer students to work independently initially, and have students share their work with their group after their first attempts at problem-solving. For each student, sharing to the group is off by default, but it is controlled by the student. However, students who have trouble getting started often get a lift from their peers by seeing how others are tackling the problems. Think of group sharing as a tool that you can use flexibly by directing your students according to their needs.</p>"
+                    ]
+                  }
+                },
+                [
                   {
+                    "id": "xNSvm1tfNTblOYgf",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Click the <strong>Geometry</strong> tool icon to create a geometry graph tile. Note that a Text tile will be created to the right of the graph at the same time. (Select and delete the Text tile if you would like the graph to extend full width, showing more of the x axis.) Drag the bottom of the tile lower if you want to show more on the y axis. To create shapes on the graph, first click to create single points. Then double-click the final point to connect all points (e.g., the third point in a triangle)."
+                        "<p>The Share slider makes your work visible to your group members.</p>",
+                        "<p></p>",
+                        "<p>Your group members cannot change your work and you can’t change theirs. However, you can drag tiles from your group members’ workspaces and they can drag tiles from your workspace.</p>",
+                        "<p>Switch to group view and turn on sharing. Ask your group members to do the same. You can zoom into each window by placing your cursor at the center of the four windows, and dragging the window panes to see more detail.</p>",
+                        "<p></p>"
                       ]
                     }
                   },
                   {
+                    "id": "9xpInLKuRpI_mMhg",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/graphdoc.png"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "Note: Points are connected in the order they were made, which can lead, for example, to an unexpected hourglass shape as in the example above. If this is not the intended shape, simply drag the points to the desired shape."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/SS_LA_04_city_spoon_350w.png"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "Images can be dragged into your workspace from the curriculum or from your desktop. They can also be dragged in back of graphs. Try to <em>drop this image on your graph</em> now."
-                      ]
+                      "url": "curriculum/stretching-and-shrinking/images/GroupSharingControls.png"
                     }
                   }
+                ],
+                {
+                  "id": "P1hcXvW95DxVMbMF",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Look at your group members’ work in the <strong>Introduction</strong>. Did they write a <em>haiku</em>? In the <strong>Initial Challenge </strong>did they do something fun with the dog graph?</p>",
+                      "<p></p>",
+                      "<p>If you like something from your group members’ work, copy it by dragging your neighbor’s tile and placing it in your <strong>What if...? </strong>Section, for example. Then you can edit it and expand on it. Your neighbor may want to copy it back after your changes.</p>",
+                      "<p></p>",
+                      "<p>Why is this useful when doing math? Imagine that you’re working on a problem and your neighbor finds a different way to solve it. You can trade your solutions. Or, maybe you are stuck on how to start a problem. Perhaps your neighbors can help you get going.</p>"
+                    ]
+                  }
+                },
+                [
+                  {
+                    "id": "DJ3fk5n11tBp0bfX",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Publishing</strong></p>",
+                        "<p></p>",
+                        "<p>To share your work with others in your class, publish it by clicking the button at the top left of your workspace. Others can find the published documents by clicking the Class Work tab. You may update your work by publishing it again. Only the most recent version is visible to your class.</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "07QJRxughLLyUbJf",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/PublishFileIcons-Labled.png"
+                    }
+                  }
+                ],
+                {
+                  "id": "k3Nnn7IHqtKk_dmT",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Create or Edit Files</strong></p>",
+                      "<p>To create new files for your personal use or to edit existing files, use the File dropdown menu. You might create files to try something out or take notes. Below are the things you can do. Try them out.</p>",
+                      "<ul><li><strong>Make a copy </strong>copies your present workspace. This copy is not shared with your group (there is no share icon while you are working on it). Give it a new name. It is your private copy, although you can publish it to the class.</li><li><strong>Open</strong> allows you to create a new document by clicking the <strong>New Workspace</strong> icon. You can also access documents that are associated with the problem you are working on. The <strong>Workspaces</strong> tab shows your current problem document on top and any new documents that you may have created below the divider line. With the <strong>Learning Log </strong>tab you can create files that you can see and edit throughout the entire Unit. This is a good place to summarize your learning. The <strong>Starred</strong> tab shows documents that you may have highlighted as important from <strong>My Work </strong>or <strong>Class Work </strong>on the My Resources page.</li></ul>"
+                    ]
+                  }
+                }
                 ],
                 "supports": []
               }
@@ -257,11 +747,37 @@
               "content": {
                 "tiles": [
                   {
+                    "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "All of the tile types have their own tools that allow you to do things like copy, label, comment, change color, etc. Create one of each tile type and look at the kinds of things you can do with them. Ready to try one last trick? Drag a table on to a graph. This will create the points you listed in the table on the graph."
+                        "<p>This section shows students how they can use their past work or published class work to synthesize their learning. Students can access published work, either from other students or from you, and incorporate them into their documents.</p>",
+                        "<p></p>",
+                        "<p>Editing and updating the Learning Log is a particularly powerful way for students to reflect on their learning. Learning Log files are visible in each problem of the Unit. Encourage students to take notes on the Unit content and incorporate it into their Learning Logs.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "HD-HSkIEvbn-KvrN",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Accessing Class and Personal Documents</strong></p>",
+                        "<p>So far, you have been only using the <strong>Problem</strong> tab on the left side of the screen. Now try using the three remaining tabs to access saved personal documents or class documents while editing another document on the right side of the screen. Explore the tabs to find a document and click the icon of the document. It will appear on the left. If you have a document on the right, you can drag tiles into it just as you would from the Problems tab. The files are sorted by the tabs:</p>",
+                        "<ul><li><strong>My Work</strong> holds your present workspace and any extra documents you may have created.</li><li><strong>Class Work</strong> holds all published work from your teacher or from other students.</li><li><strong>Supports</strong> are documents created by the lesson authors (Problem Supports) or your teacher (Teacher Supports) to enhance your learning.</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "Qeav9ni5gHG2WzoY",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Under <strong>My Work</strong> and <strong>Class Work</strong>, you also have access to sub-tabs:</p>",
+                        "<ul><li><strong>Learning Logs</strong> are documents that you can access throughout the Unit. They are designed for you to take notes and reflect on your learning over time. Your own Learning Logs are located under My Work and Learning Logs shared from other students in your class are under Class Work.</li><li><strong>Starred</strong> documents are documents that you have highlighted as important and want to find easily. You can highlight any document by clicking on the light gray star on the document’s thumbnail icon.</li><li><strong>Workspaces</strong> contain your present workspace document and any extra workspace that you may have created.</li></ul>"
                       ]
                     }
                   }
@@ -351,7 +867,7 @@
                       "text": [
                         "<p>Daphne’s claim is correct. In her picture, we can measure both the height of the P.I. magazine and the height of the teacher and then compare two values. Knowing the P.I. magazine is 10 inches high in real life, you can estimate the teacher’s real height.</p>",
                         "<p> Possible student strategies:</p>",
-                        "<ul><li>Students can use rulers or edges of a piece of paper to make informal estimates of various measurements. Do not push for precise measurement at this time. Pay attention, though, to which students measure naturally and easily and which struggle with measurement. This will help you to plan your teaching in later Problems in the Unit where careful measurement is important. </li><li>Some students will measure the height in inches on the magazine and of the mystery teacher. They will then divide the height of the teacher by the height of the magazine to find how many magazines tall the teacher is. This is a more precise version of the first strategy. Make sure students are clear about the comparisons that they are making. They may compare the real magazine to the magazine in the picture or the magazine in the picture to the teacher in the picture. </li><li>The magazine is 10 inches tall. The teacher is about 7 magazines, or 70 inches, tall. </li><li>In the picture, the height of the P.I. Monthly is 0.5 in. We know that the height of the real magazine is 10 in. So, the real magazine is 10 \u00f7 0.5=20 times larger than in the picture. The teacher should also be 20 times larger in real life than he/she is in the picture. The teacher’s height in the picture is about  in. So, the actual height is about 20  =72.5 in. </li><li>Students may use ratio or “for every” statements, such as “The ratio of the teacher’s height in the picture to her height in real life is about 1 to 20.” Or “For every inch in height of the magazine in the picture there are 20 inches in height for the real magazine.”</li><li>Students may also compare the magazine in the picture to the teacher in the picture. In this case, the teacher is / = 7 times as tall as the magazine. Students may say that the teacher is 7 magazines tall. This should be true in real life as well. Since the height of the magazine is 10 in., the teacher is 10x7=72.5 in. tall. </li></ul>"
+                        "<ul><li>Students can use rulers or edges of a piece of paper to make informal estimates of various measurements. Do not push for precise measurement at this time. Pay attention, though, to which students measure naturally and easily and which struggle with measurement. This will help you to plan your teaching in later Problems in the Unit where careful measurement is important.</li><li>Some students will measure the height in inches on the magazine and of the mystery teacher. They will then divide the height of the teacher by the height of the magazine to find how many magazines tall the teacher is. This is a more precise version of the first strategy. Make sure students are clear about the comparisons that they are making. They may compare the real magazine to the magazine in the picture or the magazine in the picture to the teacher in the picture.</li><li>The magazine is 10 inches tall. The teacher is about 7 magazines, or 70 inches, tall.</li><li>In the picture, the height of the P.I. Monthly is 0.5 in. We know that the height of the real magazine is 10 in. So, the real magazine is 10 \u00f7 0.5=20 times larger than in the picture. The teacher should also be 20 times larger in real life than he/she is in the picture. The teacher’s height in the picture is about  in. So, the actual height is about 20  =72.5 in.</li><li>Students may use ratio or “for every” statements, such as “The ratio of the teacher’s height in the picture to her height in real life is about 1 to 20.” Or “For every inch in height of the magazine in the picture there are 20 inches in height for the real magazine.”</li><li>Students may also compare the magazine in the picture to the teacher in the picture. In this case, the teacher is / = 7 times as tall as the magazine. Students may say that the teacher is 7 magazines tall. This should be true in real life as well. Since the height of the magazine is 10 in., the teacher is 10x7=72.5 in. tall.</li></ul>"
                       ]
                     }
                   },
@@ -366,13 +882,13 @@
                   },
                   {
                     "display": "teacher",
-                    "content": 
+                    "content":
                       {
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>Answers will vary. Possible answers: </p>",
-                          "<ul><li>Yes. Instead of the height of the magazine, I could have measured the height of the actual bookshelf shown in the picture and used it to figure out the teacher’s height.  </li><li>No. If I do not know the real height of the magazine is 10 inches, I would not be able to find the real height of the teacher. I only know the teacher is 7.25 times taller than the magazine.  </li></ul>",
+                          "<p>Answers will vary. Possible answers:</p>",
+                          "<ul><li>Yes. Instead of the height of the magazine, I could have measured the height of the actual bookshelf shown in the picture and used it to figure out the teacher’s height.</li><li>No. If I do not know the real height of the magazine is 10 inches, I would not be able to find the real height of the teacher. I only know the teacher is 7.25 times taller than the magazine.</li></ul>",
                       "<p>Students will think about the proportional relationship of heights between the picture and the reality. <strong></strong></p>"
                         ]
                       }
@@ -472,12 +988,12 @@
                   },
                   {
                     "display": "teacher",
-                    "content": 
+                    "content":
                     {
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>By similar, the advisor might mean that the figures in the picture look the same as the original shapes in the actual scene, except in size. The photo represents the actual scene in real life in a smaller version. </p>",
+                          "<p>By similar, the advisor might mean that the figures in the picture look the same as the original shapes in the actual scene, except in size. The photo represents the actual scene in real life in a smaller version.</p>",
                           "<p>As the introduction to the Unit, students might have general rather than mathematically specific answers. Students should begin to informally recognize that proportional relationships between quantities can be used to estimate the relationships between the lengths.</p>"
                         ]
                       }
@@ -607,7 +1123,7 @@
                       "format": "html",
                       "text": [
                         "<p>Students may compare the general shapes of two figures, the lengths of line segments in the hats and bodies, the areas or the perimeters of the hats and bodies, the angles in the hats and bodies, or the distance of corresponding points on each figure from the anchor point P. Because the tool does provide exact replicas, the answers will be estimates at this time.</p>",
-                        "<ul><li>The general shapes of the two figures are the same.</li><li>The angles in the image are the same as the corresponding angles in the original. </li><li>The lengths of the corresponding line segments are different. The lengths in the image seem to be twice as long as the corresponding lengths in the original.</li><li>The perimeters of the body and the hat in the image seem to be twice as long as those in the original. Students may reason that since each line segment doubles, the perimeter, which is the sum of these doubled line segments, will also double. (Doubling each side individually then finding the perimeter is the same as finding the perimeter and then doubling it. This is intuitively the Distributive Property: 2L + 2L + 2w + 2w = 2(L + L + w + w).) </li><li>The areas of the body and hat in the image seem to be 4 times as large as those in the original. Students may see that approximately 4 of the original rectangles (hats) can fit into the enlarged rectangle (hat). If students say the areas are three or four times as large, this is fine at this stage. The important idea is that the area is more than twice as large. </li><li>The distances of each figure from the anchor point P also have a 2 to 1 ratio. That is, each point on the image is twice the distance from P as the original corresponding point is from P. </li></ul>",
+                        "<ul><li>The general shapes of the two figures are the same.</li><li>The angles in the image are the same as the corresponding angles in the original.</li><li>The lengths of the corresponding line segments are different. The lengths in the image seem to be twice as long as the corresponding lengths in the original.</li><li>The perimeters of the body and the hat in the image seem to be twice as long as those in the original. Students may reason that since each line segment doubles, the perimeter, which is the sum of these doubled line segments, will also double. (Doubling each side individually then finding the perimeter is the same as finding the perimeter and then doubling it. This is intuitively the Distributive Property: 2L + 2L + 2w + 2w = 2(L + L + w + w).)</li><li>The areas of the body and hat in the image seem to be 4 times as large as those in the original. Students may see that approximately 4 of the original rectangles (hats) can fit into the enlarged rectangle (hat). If students say the areas are three or four times as large, this is fine at this stage. The important idea is that the area is more than twice as large.</li><li>The distances of each figure from the anchor point P also have a 2 to 1 ratio. That is, each point on the image is twice the distance from P as the original corresponding point is from P.</li></ul>",
                         "<p>Note that the answers above are true in the ideal case. In practice, the 2 to 1 ratio of the lengths (and the 4 to 1 ratio of the areas) will not always be observed. This is because of the imperfection of the bands and some differences in the application of the method. The result is more accurate if the end of the rubber band on point P is fixed by holding a pin instead of holding by hand directly; if the image end of the band is held as close to the page as possible using the pencil; if the pencil chosen is as thin as possible since its thickness might cause the band in the image end to be shorter than it is supposed to be; if the bands are not stretched too much.</p>"
                       ]
                     }
@@ -692,7 +1208,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Ashley’s Comparison is not true. The distance from the P to a point on the image is twice as long as the distance from the P to a point on the original. The distance between points on the image and original is equal to the distance between P to the original. A comparison statement that would be true might be: For every unit of measure going from P to the original, the image will have twice that distance. </p>"
+                        "<p>Ashley’s Comparison is not true. The distance from the P to a point on the image is twice as long as the distance from the P to a point on the original. The distance between points on the image and original is equal to the distance between P to the original. A comparison statement that would be true might be: For every unit of measure going from P to the original, the image will have twice that distance.</p>"
                       ]
                     }
                   },
@@ -711,7 +1227,7 @@
                       "text": [
                         "<p>Ashley’s Comparison: (Re-written to be true.) The distance from the point P to a point on the image is twice the distance from a point on the original. Or, the distance from the point P to the original compares to the distance from the point P the image by a ratio of 1 to 2.</p>"
                       ]
-                    } 
+                    }
                   },
                   {
                     "display": "teacher",
@@ -719,8 +1235,8 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p>Eli's Comparison is true. We can place copies of the original angles on the image to see this relationship. The angle ratios from the original to the image will always be 1 to 1. </p>"
-                      ] 
+                      "<p>Eli's Comparison is true. We can place copies of the original angles on the image to see this relationship. The angle ratios from the original to the image will always be 1 to 1.</p>"
+                      ]
                     }
                   },
                   {
@@ -778,14 +1294,14 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>If the location of P is changed, the location of the image will also change. However, the location of P does not affect the size or shape of the image. </p>",
+                        "<p>If the location of P is changed, the location of the image will also change. However, the location of P does not affect the size or shape of the image.</p>",
                         "<p>For example, the darker blue triangle below is the original. Moving the location of P moves the image (lighter blue triangle). It does not change the shape or size. The length of the distances away from P remain proportional. If we look at corresponding right angles, on the image the right angle is always twice the distance from P while the right angle on the original is always one distance away from P.</p>"
                       ]
                     }
                   },
                   {
                     "display": "teacher",
-                    "content": 
+                    "content":
                     {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/1-2_What_if_Situation_B.png"
@@ -793,21 +1309,21 @@
                   },
                   {
                     "display": "teacher",
-                    "content": 
+                    "content":
                     {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Note that there are two possible interpretations of Sunyoung’s question. Most students will use the knot closer to the anchor point to trace the original figure. Some students may use the knot closer to the pencil. </p>",
+                        "<p>Note that there are two possible interpretations of Sunyoung’s question. Most students will use the knot closer to the anchor point to trace the original figure. Some students may use the knot closer to the pencil.</p>",
                         "<p>Answers for the knots closer to the anchor point:</p>",
-                        "<ul><li>The shapes are similar to each other. </li><li>The lengths in the image figure are about 3 times as long as the lengths in the original figure.  </li></ul>"
+                        "<ul><li>The shapes are similar to each other.</li><li>The lengths in the image figure are about 3 times as long as the lengths in the original figure.</li></ul>"
                       ]
                     }
                   },
-                  
+
                   {
                     "display": "teacher",
-                    "content": 
+                    "content":
                     {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/1-2_What_If_Situation_B_Sunyoungs_Question_1.png"
@@ -815,18 +1331,18 @@
                   },
                   {
                     "display": "teacher",
-                    "content": 
+                    "content":
                      {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<ul><li>The areas in the image figure are about 9 times as big as the areas in the original figure. </li><li>Each point on the image is about 3 times as far from P as its corresponding point on the original figure.</li></ul>"
+                        "<ul><li>The areas in the image figure are about 9 times as big as the areas in the original figure.</li><li>Each point on the image is about 3 times as far from P as its corresponding point on the original figure.</li></ul>"
                       ]
                     }
                   },
                   {
                     "display": "teacher",
-                    "content": 
+                    "content":
                     {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/1-2_What_If_Situation_B_Sunyoungs_Question_2.png"
@@ -834,7 +1350,7 @@
                   },
                   {
                     "display": "teacher",
-                    "content": 
+                    "content":
                      {
                       "type": "Text",
                       "format": "html",
@@ -845,7 +1361,7 @@
                   },
                   {
                     "display": "teacher",
-                    "content": 
+                    "content":
                     {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/1-2_What_If_Situation_B_Sunyoungs_Question_3.png"
@@ -853,7 +1369,7 @@
                   },
                    {
                     "display": "teacher",
-                    "content": 
+                    "content":
                      {
                       "type": "Text",
                       "format": "html",
@@ -864,7 +1380,7 @@
                   },
                   {
                     "display": "teacher",
-                    "content": 
+                    "content":
                     {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/1-2_What_If_Situation_B_Sunyoungs_Question_4.png"
@@ -872,23 +1388,23 @@
                   },
                   {
                     "display": "teacher",
-                    "content": 
+                    "content":
                      {
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<ul><li>The areas in the image figure are about 2.25 times as big as the areas in the original figure. Students may estimate and say that the areas in the image are a little more than twice those in the original. </li><li>Each point on the image is about 1.5 times as far from P as its corresponding point on the original figure. </li></ul>"
+                          "<ul><li>The areas in the image figure are about 2.25 times as big as the areas in the original figure. Students may estimate and say that the areas in the image are a little more than twice those in the original.</li><li>Each point on the image is about 1.5 times as far from P as its corresponding point on the original figure.</li></ul>"
                         ]
                       }
                   },
                   {
                     "display": "teacher",
-                    "content": 
+                    "content":
                     {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>In Amy's Question, if the distances of each figure from the anchor point P have a 2 to 1 ratio, like the 2 rubber band stretcher, then the side length of the image figure is 2 times the side length of the original figure. </p>",
+                        "<p>In Amy's Question, if the distances of each figure from the anchor point P have a 2 to 1 ratio, like the 2 rubber band stretcher, then the side length of the image figure is 2 times the side length of the original figure.</p>",
                         "<p>Using three rubber bands the ratio of the side length in figure 1 to the side length of corresponding side length in the image is 1 to 3 or 1 : 3.</p>"
                       ]
                     }
@@ -918,8 +1434,8 @@
                       "format": "html",
                       "text": [
                         "<p>Informally students should see that when enlarging a geometric figure some attributes of shape change and some stay the same:</p>",
-                        "<ul><li>angles of the two figures appear to be the same, </li><li>side lengths of the enlarged figure are longer, </li><li>area of the enlarged figure is bigger. </li></ul>",
-                        "<p>Note that as the Unit continues, students will revisit these questions and add more specific mathematical detail to them. </p>"
+                        "<ul><li>angles of the two figures appear to be the same,</li><li>side lengths of the enlarged figure are longer,</li><li>area of the enlarged figure is bigger.</li></ul>",
+                        "<p>Note that as the Unit continues, students will revisit these questions and add more specific mathematical detail to them.</p>"
                       ]
                     }
                   }
@@ -992,7 +1508,7 @@
                         { "type": "vertexAngle", "parents": ["fD4BT7J3op3pVQtK", "gIZaiLYMyd1FrE5x", "Kn7fkbmzBqjMA32K"],"properties": {"id":"Z8sxCfZoi_i7aA7U","radius":1} }
                       ]
                     }
-                  },   
+                  },
                   {
                     "content": {
                       "type": "Text",
@@ -1102,7 +1618,7 @@
                   },
                   {
                     "display": "teacher",
-                    "content": 
+                    "content":
                     {
                       "type": "Text",
                       "format": "html",
@@ -1110,7 +1626,7 @@
                         "<p><strong>SOLUTION</strong></p>",
                         "<p>Alike: The original and the copies have the same basic shapes and their corresponding angle measures are the same.</p>",
                         "<p>Different: The corresponding side lengths change and the areas change from the original to the copies. The corresponding side lengths in Copy 1 are ¾ the size of the corresponding side lengths in the original. For every length of 1 in the original, the copy has ¾ of the length. The area is smaller from the original to Copy 1. The corresponding side lengths in Copy 2 are 1.5 times the size of the corresponding side lengths in the original. For every length of 1 in the original, the copy has 150% of the length. The area is larger from the original to Copy 1, but it is not 1.5 times larger.</p>",
-                        "<p>The ratios are also different. For Copy 1, the ratio in length from the original is 1 to ¾. For Copy 2 the ratio in length from the original is 1 to 1 ½. </p>"
+                        "<p>The ratios are also different. For Copy 1, the ratio in length from the original is 1 to ¾. For Copy 2 the ratio in length from the original is 1 to 1 ½.</p>"
                       ]
                     }
                   }
@@ -1142,7 +1658,7 @@
                   },
                   {
                     "display": "teacher",
-                    "content": 
+                    "content":
                     {
                       "type": "Text",
                       "format": "html",
@@ -1207,9 +1723,9 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>The area of the figure of Copy 1 gets little more than half the area of the original image.  </p>",
+                        "<p>The area of the figure of Copy 1 gets little more than half the area of the original image.</p>",
                         "<p>For the rectangular part of the design, students may reason that since both the length and width are changed by a factor, the area is changed by a product of the factor and itself. (Note: The area comparison factor is the squares of the copier size factor: 0.75 x 0.75 = 0.5625. In the next Investigation, the copier size factor is named the scale factor and student will look more in-depth at how the area changes.)</p>",
-                        "<p>The area of the figure of Copy 2 gets little more than double the area of the original image. (Note: The area comparison factor is the squares of the copier size factor: 1.5 x 1.5 = 2.25. The area relationship will be formalized in Investigation 3.) </p>"
+                        "<p>The area of the figure of Copy 2 gets little more than double the area of the original image. (Note: The area comparison factor is the squares of the copier size factor: 1.5 x 1.5 = 2.25. The area relationship will be formalized in Investigation 3.)</p>"
                       ]
                     }
                   },
@@ -1224,12 +1740,12 @@
                   },
                   {
                     "display": "teacher",
-                    "content": 
+                    "content":
                     {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>If the percent setting is greater than 100%, such as 150% or 125%, then the figure of the copy will be larger than the original figure. If the percent setting is less than 100%, such as 75% or 50%, then the figure of the copy will be smaller than the original figure. You can predict the side lengths of the copy by multiplying the side lengths of the original by the percent setting. </p>"
+                        "<p>If the percent setting is greater than 100%, such as 150% or 125%, then the figure of the copy will be larger than the original figure. If the percent setting is less than 100%, such as 75% or 50%, then the figure of the copy will be smaller than the original figure. You can predict the side lengths of the copy by multiplying the side lengths of the original by the percent setting.</p>"
                       ]
                     }
                   },
@@ -1249,7 +1765,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>To increase a figure’s size by twice the length, you would want to make each side length 2 times as long as the side length of the original. The percent setting of 200% on the copier would make the side length of image 2 times longer than in the original.  </p>"
+                        "<p>To increase a figure’s size by twice the length, you would want to make each side length 2 times as long as the side length of the original. The percent setting of 200% on the copier would make the side length of image 2 times longer than in the original.</p>"
                       ]
                     }
                   },
@@ -1270,7 +1786,7 @@
                       "format": "html",
                       "text": [
                         "<p>Agree. The copier creates a more accurate image, but the relationships stay the same.</p>",
-                        "<p>When you want to create an image twice bigger than the original, you would use two rubber bands. You can also use the copier with 200% percent setting. If you want to make an image three times bigger than the original, you would use three rubber bands. It is the same as when you use the copier with 300% percent setting. You can use both the rubber bands and the copier when you want to make a similar image.  </p>"
+                        "<p>When you want to create an image twice bigger than the original, you would use two rubber bands. You can also use the copier with 200% percent setting. If you want to make an image three times bigger than the original, you would use three rubber bands. It is the same as when you use the copier with 300% percent setting. You can use both the rubber bands and the copier when you want to make a similar image.</p>"
                       ]
                     }
                   }
@@ -1333,7 +1849,7 @@
                       "content": {
                         "type": "Text",
                         "format": "markdown",
-                        "text": [ 
+                        "text": [
                           "Zack and Marta want to design a computer game that involves several animated characters. They ask Marta’s uncle Carlos, a programmer for a video game company, about computer animation.",
                           "Carlos explains that the computer screen can be thought of as a grid made up of thousands of tiny points, called pixels. To animate a figure, we need to enter the coordinates of key points on the figure. The computer uses these points to draw the figure in different positions.",
                           "Sometimes the figures in a computer game need to change size. A change in the code can make a figure larger or smaller. We can give it a rule for finding key points from the original figure. In this Investigation, we will explore answers to these questions.",
@@ -1729,8 +2245,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Zug and Bug are bigger versions of and have the same shape as Mug, so they are the other Wumps. From Mug to Zug and Bug, the angles and the general shape stayed the same. From Mug to Zug, the lengths doubled and from Mug to Bug, the lengths tripled. </p>",
-                        "<p>On the other hand, Lug is too wide, and Glug is too tall to be the Wumps family. From Mug to Lug and Glug, corresponding lengths did not grow by the same factor. Lug is the same height as Mug but three times as wide. Lug is stretched on the x-axis values, but not the y-axis values. Glug is the same width as Mug but three times as tall. Glug is stretched on the y-axis values, but not the x-axis values. Many of Lug’s and Glug’s angles differ from Mug’s. So, Lug and Glug are impostors. </p>"
+                        "<p>Zug and Bug are bigger versions of and have the same shape as Mug, so they are the other Wumps. From Mug to Zug and Bug, the angles and the general shape stayed the same. From Mug to Zug, the lengths doubled and from Mug to Bug, the lengths tripled.</p>",
+                        "<p>On the other hand, Lug is too wide, and Glug is too tall to be the Wumps family. From Mug to Lug and Glug, corresponding lengths did not grow by the same factor. Lug is the same height as Mug but three times as wide. Lug is stretched on the x-axis values, but not the y-axis values. Glug is the same width as Mug but three times as tall. Glug is stretched on the y-axis values, but not the x-axis values. Many of Lug’s and Glug’s angles differ from Mug’s. So, Lug and Glug are impostors.</p>"
                       ]
                     }
                   }
@@ -1761,7 +2277,7 @@
                   },
                   {
                     "display": "teacher",
-                    "content": 
+                    "content":
                     {
                       "type": "Text",
                       "format": "html",
@@ -1781,7 +2297,7 @@
                   },
                   {
                     "display": "teacher",
-                    "content": 
+                    "content":
                     {
                       "type": "Text",
                       "format": "html",
@@ -1801,7 +2317,7 @@
                   },
                   {
                     "display": "teacher",
-                    "content": 
+                    "content":
                     {
                       "type": "Text",
                       "format": "html",
@@ -1821,7 +2337,7 @@
                   },
                   {
                     "display": "teacher",
-                    "content": 
+                    "content":
                     {
                       "type": "Text",
                       "format": "html",
@@ -1842,7 +2358,7 @@
                   },
                   {
                     "display": "teacher",
-                    "content": 
+                    "content":
                     {
                       "type": "Text",
                       "format": "html",
@@ -1862,7 +2378,7 @@
                   },
                   {
                     "display": "teacher",
-                    "content": 
+                    "content":
                     {
                       "type": "Text",
                       "format": "html",
@@ -1889,7 +2405,7 @@
                   },
                   {
                     "display": "teacher",
-                    "content": 
+                    "content":
                     {
                       "type": "Text",
                       "format": "markdown",
@@ -2336,9 +2852,9 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Answers will vary. </p>",
-                        "<p>To move the image to the second quadrant, you should move it left more than 9 units and up more than 0: possible answers are (x-9, y), (x-10, y+1), (x-12, y+3).  </p>",
-                        "<p>To move the image to the third quadrant, you should move it left more than 9 units and down more than 3 units: possible answers are (x-9, y-3), (x-9, y-4), (x-11, y-4). </p>",
+                        "<p>Answers will vary.</p>",
+                        "<p>To move the image to the second quadrant, you should move it left more than 9 units and up more than 0: possible answers are (x-9, y), (x-10, y+1), (x-12, y+3).</p>",
+                        "<p>To move the image to the third quadrant, you should move it left more than 9 units and down more than 3 units: possible answers are (x-9, y-3), (x-9, y-4), (x-11, y-4).</p>",
                         "<p>To move the image to the fourth quadrant, you should move it down more than 3 units and right more than 0 units: possible answers are (x, y-3), (x, y-5), (x+2, y-5).</p>"
                       ]
                     }
@@ -2399,7 +2915,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>It is possible. Because you can move the hat upwards on the coordinate plane by adding numbers to the y-coordinate, you can put the hat on Mug. One possible rule for a hat that student can come up with is (x-1, y+6). Students might struggle with making a rule for the move at first. Students can first draw the hat on Mug and make a table for the coordinates of moved hat. Then they can compare the coordinates of the original (points A, B, …, G) with the new coordinates. For the corresponding coordinates, students may count units that moves from the original position to the new position. </p>"
+                        "<p>It is possible. Because you can move the hat upwards on the coordinate plane by adding numbers to the y-coordinate, you can put the hat on Mug. One possible rule for a hat that student can come up with is (x-1, y+6). Students might struggle with making a rule for the move at first. Students can first draw the hat on Mug and make a table for the coordinates of moved hat. Then they can compare the coordinates of the original (points A, B, …, G) with the new coordinates. For the corresponding coordinates, students may count units that moves from the original position to the new position.</p>"
                       ]
                     }
                   },
@@ -2463,7 +2979,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>For the coordinates (x, y) of the original figure, if you make the coordinate rules by multiplying each coordinate by the same number, k, then the new image with the coordinates (kx, ky) is similar to the original figure. For example, if you multiply (x, y) by 2, then you will have new coordinates (2x, 2y). It makes the side lengths of the new image 2 times longer than the side lengths of the original figure. This rule has the same effect as both a rubber band with two-band stretcher and a copy machine setting with 200%. </p>",
+                        "<p>For the coordinates (x, y) of the original figure, if you make the coordinate rules by multiplying each coordinate by the same number, k, then the new image with the coordinates (kx, ky) is similar to the original figure. For example, if you multiply (x, y) by 2, then you will have new coordinates (2x, 2y). It makes the side lengths of the new image 2 times longer than the side lengths of the original figure. This rule has the same effect as both a rubber band with two-band stretcher and a copy machine setting with 200%.</p>",
                         "<p>You can use the rule to predict what will happen to the lengths of corresponding sides. When looking at the coordinate rules, the multiplier from one coordinate to the next will tell how much the side lengths change from one figure to another. For example, if we think of Zug as the original and Bug as the image, each coordinate in the rule multiplies by 1.5. So, the lengths of Zug will grow 1.5 times to make the lengths of Bug. Zug’s nose is 2 units tall and Bug’s nose is 2 • 1.5 = 3 units tall. Zug’s forehead is 8 units long and Bug’s forehead is 8 • 1.5 = 12 units long</p>",
                         "Zug             (2x, 2y)",
                         "<h3>x1.5\u2938      \u2938 x1.5</h3>",
@@ -2533,7 +3049,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "The <strong>scale factor</strong> is the number that the side lengths of one figure can be multiplied by to give the corresponding side lengths of a similar figure. <ul><li>What is the multiplier or scale factor when you use two rubber bands to enlarge a figure? </li><li>What is the multiplier or scale factor when you use a copier setting of <em>150%</em>? <em>75%</em>?</li><ul>"
+                        "The <strong>scale factor</strong> is the number that the side lengths of one figure can be multiplied by to give the corresponding side lengths of a similar figure. <ul><li>What is the multiplier or scale factor when you use two rubber bands to enlarge a figure?</li><li>What is the multiplier or scale factor when you use a copier setting of <em>150%</em>? <em>75%</em>?</li><ul>"
                       ]
                     }
                   },
@@ -2915,11 +3431,11 @@
                         "<p>Rectangles</p>",
                         "<p>Rectangles (mouths) J, L, and N are similar to each other. Students should point out that since these are all rectangles, the angles are all right angles and hence congruent, or the same size. For rectangles, it is then only necessary to check side lengths.</p>",
                         "<p>L to J is 2; L to N is 3; J to N is 3/2</p>",
-                        "<p>J to L is 1/2 (reciprocal of 2); N to L is 1/3  (reciprocal of 3); N to J is   2/3 (reciprocal of 3/2 ). </p>",
+                        "<p>J to L is 1/2 (reciprocal of 2); N to L is 1/3  (reciprocal of 3); N to J is   2/3 (reciprocal of 3/2 ).</p>",
                         "<p>Triangles</p>",
                         "<p>Triangles (noses) O, R, and S are similar to each other.</p>",
-                        "<p>O to R is 2; O to S is 3; and R to S is 3/2 .  </p>",
-                        "<p>R to O is 1/2 (reciprocal of 2); S to O is 1/3  (reciprocal of 3); S to R is 2/3  (reciprocal of 3/2 ). </p>"
+                        "<p>O to R is 2; O to S is 3; and R to S is 3/2 .</p>",
+                        "<p>R to O is 1/2 (reciprocal of 2); S to O is 1/3  (reciprocal of 3); S to R is 2/3  (reciprocal of 3/2 ).</p>"
                       ]
                     }
                   },
@@ -3065,8 +3581,8 @@
                         "<p><strong>SOLUTION</strong></p>",
                         "<p>To determine is two shapes are similar:</p>",
                         "<ul><li>Corresponding angles must have the same measure.</li><li>Corresponding sides must change by the same multiplier. The name of the multiplier is “scale factor”.</li></ul>",
-                        "<p>Scale factor can be determined by measuring and comparing corresponding lengths between two figures. This done using proportional reasoning. For every unit of length in the original there are x times as many units in the corresponding side length. </p>",
-                        "<p>We have seen scale factor as the number of rubber bands used, the percent increase on a copy machine, or the coefficient relationship of the x and y coordinates.  </p>"
+                        "<p>Scale factor can be determined by measuring and comparing corresponding lengths between two figures. This done using proportional reasoning. For every unit of length in the original there are x times as many units in the corresponding side length.</p>",
+                        "<p>We have seen scale factor as the number of rubber bands used, the percent increase on a copy machine, or the coefficient relationship of the x and y coordinates.</p>"
                       ]
                     }
                   },
@@ -3486,12 +4002,12 @@
                       "format": "html",
                       "text": [
                         "<p><strong>SOLUTION</strong></p>",
-                        "<p>See the chart above for answers.  </p>",
-                        "<p>The side lengths and perimeter of the larger figure are the scale factor times the side lengths of the smaller figure. Note: The perimeter change can be explained by the Distributive Property. The scale factor multiplies by every length. </p>",
-                        "<p>So, if we have a rectangle with length of L, width of W, and scale factor of s, then the perimeter change is s(L) + s(L) + s(W) +  s(W) = s(L + L + S + S). </p>",
+                        "<p>See the chart above for answers.</p>",
+                        "<p>The side lengths and perimeter of the larger figure are the scale factor times the side lengths of the smaller figure. Note: The perimeter change can be explained by the Distributive Property. The scale factor multiplies by every length.</p>",
+                        "<p>So, if we have a rectangle with length of L, width of W, and scale factor of s, then the perimeter change is s(L) + s(L) + s(W) +  s(W) = s(L + L + S + S).</p>",
                         "<p>The angle measures don’t change since corresponding angles</p>",
-                        "<p>The corresponding angles would all have equal measures. </p>",
-                        "<p>The area of the larger figure is the square of the scale factor, or scale factor time scale factor, times the area of the smaller figure. For example, if you have a scale factor of 5, each length would be 5 times larger. To make the reptile, you would need 25 copies of the original. The area grows by the square of the scale factor, or 52, so you need 25 copies. If we consider a rectangle with a scale factor of 5, then the area of the image would be 5L. </p>",
+                        "<p>The corresponding angles would all have equal measures.</p>",
+                        "<p>The area of the larger figure is the square of the scale factor, or scale factor time scale factor, times the area of the smaller figure. For example, if you have a scale factor of 5, each length would be 5 times larger. To make the reptile, you would need 25 copies of the original. The area grows by the square of the scale factor, or 52, so you need 25 copies. If we consider a rectangle with a scale factor of 5, then the area of the image would be 5L.</p>",
                         "<p>Original rectangle:                                           L・W</p>",
                         "<p>Image with scale factor of 5:                      5(L)・5(W) =</p>",
                         "<p>Using associative property:                        5・5・L・W =</p>",
@@ -3655,10 +4171,10 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Not correct. If we consider a rectangle, both the length and the width will increase by a factor of 5. You will need 25 copies of the original. The area grows by the scale factor times the scale factor, or square of the scale factor, so you need 25 copies. </p>",
-                        "<p>A<sub>original </sub>= L • W </p>",
-                        "<p>A<sub>scale factor</sub> <sub>5</sub> = 5 • L • 5 • W </p>",
-                        "<p>                              =  5 • 5 •L • W  or  </p>",
+                        "<p>Not correct. If we consider a rectangle, both the length and the width will increase by a factor of 5. You will need 25 copies of the original. The area grows by the scale factor times the scale factor, or square of the scale factor, so you need 25 copies.</p>",
+                        "<p>A<sub>original</sub>= L • W</p>",
+                        "<p>A<sub>scale factor</sub> <sub>5</sub> = 5 • L • 5 • W</p>",
+                        "<p>                              =  5 • 5 •L • W  or</p>",
                         "<p>                               = 5<sup>2</sup> • L • W</p>"
                       ]
                     }
@@ -3838,12 +4354,12 @@
                       "format": "html",
                       "text": [
                         "<p>When rep-tiling, we can use multiple tiles of a shape to make a larger or smaller similar shape. Rep-tiles keep the corresponding angles the same measure. This lets us focus on the relationships in the other measures, like lengths and area.</p>",
-                        "<p>If you make a rep-tile using four same copies, then the area of a rep-tile is four times the area of the original copy. And the scale factor is 2, because the side length of a rep-tile will be twice the side length of the original copy. </p>",
-                        "<p>If the scale factor is k, then the side lengths of the image will be  times the side lengths of the original copy. Each dimension of the shape is stretched or shrunk by the scale factor. Since we find area by multiplying both dimensions, we also multiply the scale factor times the scale factor on the image. The area of the rep-tile will be times larger. If </p>",
-                        "<p>A<sub>original</sub> = L • W , then </p>",
-                        "<p>A <sub>scale factor k</sub> = K • L • K• W =  </p>",
-                        "<p>                                  K • K • L • W = </p>",
-                        "<p>                                        K<sup>2</sup> • L • W </p>",
+                        "<p>If you make a rep-tile using four same copies, then the area of a rep-tile is four times the area of the original copy. And the scale factor is 2, because the side length of a rep-tile will be twice the side length of the original copy.</p>",
+                        "<p>If the scale factor is k, then the side lengths of the image will be  times the side lengths of the original copy. Each dimension of the shape is stretched or shrunk by the scale factor. Since we find area by multiplying both dimensions, we also multiply the scale factor times the scale factor on the image. The area of the rep-tile will be times larger. If</p>",
+                        "<p>A<sub>original</sub> = L • W , then</p>",
+                        "<p>A <sub>scale factor k</sub> = K • L • K• W =</p>",
+                        "<p>                                  K • K • L • W =</p>",
+                        "<p>                                        K<sup>2</sup> • L • W</p>",
                         "<p>Note that students will need to use their knowledge of the Commutative Property from the previous unit.</p>"
                       ]
                     }
@@ -4402,8 +4918,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Durrell’s Claim is not correct. </p>",
-                        "<p>Students may refer back to Problem 3.1 Kazuko’s Claim. The scale factor is not a whole number. So, we cannot consider the smaller triangle as a unit rep-tile. The distance from Stake 1 to Stake 2 in smaller triangle is 80ft. The corresponding distance in larger triangle is 140ft (from Tree 1 to Tree 2). If you put two small triangles, it will be 160 ft long, which is longer than 140 ft. You cannot fit whole amounts of the small triangles in the large triangle. Therefore, you cannot use rep-tiles to show the similarity. </p>"
+                        "<p>Durrell’s Claim is not correct.</p>",
+                        "<p>Students may refer back to Problem 3.1 Kazuko’s Claim. The scale factor is not a whole number. So, we cannot consider the smaller triangle as a unit rep-tile. The distance from Stake 1 to Stake 2 in smaller triangle is 80ft. The corresponding distance in larger triangle is 140ft (from Tree 1 to Tree 2). If you put two small triangles, it will be 160 ft long, which is longer than 140 ft. You cannot fit whole amounts of the small triangles in the large triangle. Therefore, you cannot use rep-tiles to show the similarity.</p>"
                       ]
                     }
                   },
@@ -4428,7 +4944,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Yes, the distance will be the same. The scale factor from the small to the large triangle is 4. This gives the distance between Stake 3 and Tree 1 as 120 ft. From this, we subtract the 30 ft from Stake 3 to Stake 1 to get 90 ft across the river. In this case, you can use rep-tiles because you can fit 16 small triangles into the large triangle. </p>"
+                        "<p>Yes, the distance will be the same. The scale factor from the small to the large triangle is 4. This gives the distance between Stake 3 and Tree 1 as 120 ft. From this, we subtract the 30 ft from Stake 3 to Stake 1 to get 90 ft across the river. In this case, you can use rep-tiles because you can fit 16 small triangles into the large triangle.</p>"
                       ]
                     }
                   }
@@ -4573,31 +5089,31 @@
                         "If two figures are similar, how does the ratio of <strong>adjacent</strong> side lengths in one shape compare to the corresponding ratio of <strong>adjacent</strong> side lengths in another shape?"
                       ]
                     }
-                  }, 
+                  },
                   {
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_4_1_IC_32_rectangles_350w.png"
                     }
-                  }, 
+                  },
                   {
                     "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Rectangles: A, B, and C are similar.  </p>",
-                        "<p>Possible explanation:   </p>",
-                        "<p>Because the shapes are rectangles, all the angles will be 90˚. So, corresponding angles will have the same measures.  </p>",
-                        "<p>To determine similarity of these rectangles, students may use scale factors or ratios.  </p>",
-                        "<p>Ratio of adjacent side lengths:  </p>",
-                        "<p>Rectangle A: 12/20 = 0.6  </p>",
-                        "<p>Rectangle B: 6/10 = 0.6 </p>",
-                        "<p>Rectangle C: 9/15 = 0.6   </p>",
-                        "<p>Rectangle D: 6/20 = 0.3  </p>",
-                        "<p>The ratio of the length of the short side to the length of the long side is the same for all three similar rectangles. The rectangle that is not similar to the others has a different ratio.  </p>",
-                        "<p>If the scale factors for both length and width are equivalent, two rectangles are similar.  </p>",
-                        "<p>The scale factors are:  </p>"
+                        "<p>Rectangles: A, B, and C are similar.</p>",
+                        "<p>Possible explanation:</p>",
+                        "<p>Because the shapes are rectangles, all the angles will be 90˚. So, corresponding angles will have the same measures.</p>",
+                        "<p>To determine similarity of these rectangles, students may use scale factors or ratios.</p>",
+                        "<p>Ratio of adjacent side lengths:</p>",
+                        "<p>Rectangle A: 12/20 = 0.6</p>",
+                        "<p>Rectangle B: 6/10 = 0.6</p>",
+                        "<p>Rectangle C: 9/15 = 0.6</p>",
+                        "<p>Rectangle D: 6/20 = 0.3</p>",
+                        "<p>The ratio of the length of the short side to the length of the long side is the same for all three similar rectangles. The rectangle that is not similar to the others has a different ratio.</p>",
+                        "<p>If the scale factors for both length and width are equivalent, two rectangles are similar.</p>",
+                        "<p>The scale factors are:</p>"
                       ]
                     }
                   },
@@ -4613,7 +5129,7 @@
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_4_1_IC_33_triangles_350w.png"
                     }
-                  }, 
+                  },
                   {
                     "display": "teacher",
                     "content": {
@@ -4621,12 +5137,12 @@
                       "format": "html",
                       "text": [
                         "<p>Triangles: A, C, and D are similar. The corresponding angle measures of those triangles are congruent. (Note: Students have to use the fact that the sum of the angle measures in a triangle is 180˚. More exact measures of the angles for the triangles are 29.99˚, 61.02˚, and 88.98˚.)",
-                        "<p>Ratio of adjacent side lengths – longest side to short side lengths:  </p>",
-                        "<p>Triangle A: 8 to 4 = 2 to 1  </p>",
-                        "<p>Triangle C: 12 to 6 = 2 to 1 </p>",
-                        "<p>Triangle D: 20 to 10 = 2 to 1  </p>",
-                        "<p>Triangle B: 12 to 9 = 1 1/3 to 1  </p>",
-                        "<p>The unit rate of the length of one side to the length of an adjacent side is equivalent for all three similar triangles. The triangle that is not similar to the others has a different rate.   </p>",
+                        "<p>Ratio of adjacent side lengths – longest side to short side lengths:</p>",
+                        "<p>Triangle A: 8 to 4 = 2 to 1</p>",
+                        "<p>Triangle C: 12 to 6 = 2 to 1</p>",
+                        "<p>Triangle D: 20 to 10 = 2 to 1</p>",
+                        "<p>Triangle B: 12 to 9 = 1 1/3 to 1</p>",
+                        "<p>The unit rate of the length of one side to the length of an adjacent side is equivalent for all three similar triangles. The triangle that is not similar to the others has a different rate.</p>",
                         "<p>The scale factors are:</p>"
                       ]
                     }
@@ -4651,12 +5167,12 @@
                       "format": "html",
                       "text": [
                         "<p>F and G are similar. The corresponding angles have the same measure, the scale factors of each corresponding side lengths are the same and the ratio of the side lengths are equivalent.</p>",
-                        "<p>Ratio of side lengths – short side to long side lengths:   </p>",
-                        "<p>Triangle E: 8 to 10 = 0.8 to 1  </p>",
-                        "<p>Triangle F: 6 to 7.5 = 0.8 to 1 </p>",
-                        "<p>Triangle G: 4.8 to 6 = 0.8 to 1 </p>",
-                        "<p>For this example, all three parallelograms have equivalent ratios of the side lengths. It reminds us that we also need to check corresponding angles. </p>",
-                        "<p>The scale factors are:  </p>"
+                        "<p>Ratio of side lengths – short side to long side lengths:</p>",
+                        "<p>Triangle E: 8 to 10 = 0.8 to 1</p>",
+                        "<p>Triangle F: 6 to 7.5 = 0.8 to 1</p>",
+                        "<p>Triangle G: 4.8 to 6 = 0.8 to 1</p>",
+                        "<p>For this example, all three parallelograms have equivalent ratios of the side lengths. It reminds us that we also need to check corresponding angles.</p>",
+                        "<p>The scale factors are:</p>"
                         ]
                       }
                     },
@@ -4673,7 +5189,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>If figures are similar, their ratios of corresponding side lengths will be equivalent. The ratio of adjacent side lengths within a figure gives an indication of the shape of the original figure (and image), since it compares measures within one figure. The ratio of side lengths is not enough to know of a figure is scaled, corresponding angles measures must be equivalent, as shown in Set 3. </p>",
+                          "<p>If figures are similar, their ratios of corresponding side lengths will be equivalent. The ratio of adjacent side lengths within a figure gives an indication of the shape of the original figure (and image), since it compares measures within one figure. The ratio of side lengths is not enough to know of a figure is scaled, corresponding angles measures must be equivalent, as shown in Set 3.</p>",
                           "<p>After finding these scale factors, many students will discuss the advantages of finding the ratio of the adjacent side lengths for measurements like these.</p>"
                         ]
                       }
@@ -4760,7 +5276,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Yes. I proportion can be solved to find the distance from Stake 3 to Tree 1. </p>"
+                        "<p>Yes. I proportion can be solved to find the distance from Stake 3 to Tree 1.</p>"
                       ]
                     }
                   },
@@ -4815,7 +5331,7 @@
                       "format": "html",
                       "text": [
                         "<p>If two shapes have corresponding angles with the same measure and the ratios of adjacent side lengths are equivalent, the shapes are similar. If the ratios of corresponding adjacent side lengths are equal, the multiplicative relationship is the same which means the shape lengths are scaled in the same way.</p>",
-                        "<p>These ratios are helpful when you find missing side lengths related to two similar figures. </p>"
+                        "<p>These ratios are helpful when you find missing side lengths related to two similar figures.</p>"
                       ]
                     }
                   }
@@ -4824,7 +5340,7 @@
               "supports" : []
             }
           ]
-        }, 
+        },
         {
           "description": "Problem 4.2",
           "ordinal": 2,
@@ -4874,10 +5390,10 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<ol><li>Does this method work? Why?</li><li>What estimate should Ashton give for the principal’s height?</li><li>Try this method on an object in or near your school. </li></ol>"
+                        "<ol><li>Does this method work? Why?</li><li>What estimate should Ashton give for the principal’s height?</li><li>Try this method on an object in or near your school.</li></ol>"
                       ]
                     }
-                  }, 
+                  },
                   {
                     "display": "teacher",
                     "content": {
@@ -4927,8 +5443,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Situation A. Using Shadows to Find Height </h3>On sunny days, you can use shadows to estimate outdoor heights that are difficult to measure directly. The diagram shows how the method works. ",
-                        "<p>On a sunny day, any upright object casts a shadow. The diagram shows two triangles The triangles sides are the height of the object, the length of the objects shadow,  and the side connecting these two points. </p>"
+                        "<h3>Situation A. Using Shadows to Find Height</h3> On sunny days, you can use shadows to estimate outdoor heights that are difficult to measure directly. The diagram shows how the method works. ",
+                        "<p>On a sunny day, any upright object casts a shadow. The diagram shows two triangles The triangles sides are the height of the object, the length of the objects shadow,  and the side connecting these two points.</p>"
                       ]
                     }
                   },
@@ -4937,7 +5453,7 @@
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_4_2_IC_39_statue_liberty_500w.png"
                     }
-                  }, 
+                  },
                   {
                     "content": {
                       "type": "Text",
@@ -4946,7 +5462,7 @@
                         "1. Why are the measures of the corresponding angles of the large triangle and the small triangle equal? "
                       ]
                     }
-                  }, 
+                  },
                   {
                     "display": "teacher",
                     "content": {
@@ -4965,14 +5481,14 @@
                         "2.  How can we use this method to find the height of the Statue of Liberty? "
                       ]
                     }
-                  }, 
+                  },
                   {
                     "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>The length of the shadow depends on the height of the object. The shadow of the taller object will be longer. The stick and its shadow are two legs of the right triangle, and the statue and its shadow also form a right triangle. These two triangles are similar. You can compare the lengths of shadows, and then you will get the scale factor. Then you can find the height of the statue using the scale factor and the length of the stick. </p>"
+                        "<p>The length of the shadow depends on the height of the object. The shadow of the taller object will be longer. The stick and its shadow are two legs of the right triangle, and the statue and its shadow also form a right triangle. These two triangles are similar. You can compare the lengths of shadows, and then you will get the scale factor. Then you can find the height of the statue using the scale factor and the length of the stick.</p>"
                       ]
                     }
                   },
@@ -5008,7 +5524,7 @@
                       ]
                     }
                   },
-                  { 
+                  {
                     "display": "teacher",
                     "content": {
                       "type": "Image",
@@ -5025,7 +5541,7 @@
                       ]
                     }
                   },
-                  { 
+                  {
                     "display": "teacher",
                     "content": {
                       "type": "Image",
@@ -5038,7 +5554,7 @@
                 { "text": "Are the two triangles similar? Why?"},
                 { "text": "What are  the corresponding side lengths and corresponding angles?"}
               ]
-            }, 
+            },
             {
               "type": "nowWhatDoYouKnow",
               "content": {
@@ -5058,9 +5574,9 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>For lengths and perimeters, you can use the scale factor and/or the ratio of adjacent side lengths. When two figures are similar, the ratios of corresponding adjacent side lengths will be equal. Also, when two figures are similar, the ratio of corresponding side lengths across two figures will be equal.  </p>",
+                        "<p>For lengths and perimeters, you can use the scale factor and/or the ratio of adjacent side lengths. When two figures are similar, the ratios of corresponding adjacent side lengths will be equal. Also, when two figures are similar, the ratio of corresponding side lengths across two figures will be equal.</p>",
                         "<p>For areas, you can use the scale factor. When the scale factor from figure A to figure B is , the area of the figure B will be a times a, or a2 times the area of the figure A.</p>",
-                        "<p>For angle measures, you can use the fact that the corresponding angles measures in two similar figures are equal. You can find missing angle measures by looking at corresponding angle measures in the similar figure.  </p>"
+                        "<p>For angle measures, you can use the fact that the corresponding angles measures in two similar figures are equal. You can find missing angle measures by looking at corresponding angle measures in the similar figure.</p>"
                       ]
                     }
                   }
@@ -5084,13 +5600,13 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Earlier in this unit we looked at several shapes of Wumps to see which one was an imposter. In this problem, we will look to see which shape is the imposter.    </p>"
+                        "<p>Earlier in this unit we looked at several shapes of Wumps to see which one was an imposter. In this problem, we will look to see which shape is the imposter.</p>"
                       ]
                     }
                   }
                 ]
               }
-            }, 
+            },
             {
               "type": "initialChallenge",
               "content": {
@@ -5100,9 +5616,9 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Students in Ms. Cho’s class created sets of figures, some of which had an imposter.  </p>",
-                        "<p>For each set,  </p>",
-                        "<ul><li>Which shapes are similar? That is, which one is the imposter? Give reasons for your choice.   </li><li>For those that are similar how do the lengths, angles, perimeter, and area compare?</li></ul>"
+                        "<p>Students in Ms. Cho’s class created sets of figures, some of which had an imposter.</p>",
+                        "<p>For each set,</p>",
+                        "<ul><li>Which shapes are similar? That is, which one is the imposter? Give reasons for your choice.</li><li>For those that are similar how do the lengths, angles, perimeter, and area compare?</li></ul>"
                       ]
                     }
                   },
@@ -5111,7 +5627,7 @@
                         "type": "Image",
                         "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_1.png"
                       }
-                    }, 
+                    },
                     {
                       "content": {
                         "type": "Image",
@@ -5333,9 +5849,9 @@
                       "format": "html",
                       "text": [
                         "<p>Possible Reasoning:</p>",
-                        "<p>The corresponding angles will be 90˚. </p>",
+                        "<p>The corresponding angles will be 90˚.</p>",
                         "<p>Scale Reasoning:</p>",
-                        "<p>For corresponding side lengths, you can always find a scale factor. </p>",
+                        "<p>For corresponding side lengths, you can always find a scale factor.</p>",
                         "<p>Ratio Reasoning:</p>",
                         "<p>Adjacent sides will always be equivalent ratios of side to side.</p>"
                       ]
@@ -5347,7 +5863,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Hats 1 and 3 are similar </p>",
+                        "<p>Hats 1 and 3 are similar</p>",
                         "<p>Possible Reasoning:</p>",
                         "<p>Why Shape #2 is not a scale drawing:</p>"
                       ]
@@ -5366,7 +5882,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Hats #1 and #3 are similar </p>",
+                        "<p>Hats #1 and #3 are similar</p>",
                         "<p>Corresponding angles are equivalent</p>",
                         "<p>Scale Reasoning:</p>",
                         "<p>Shape #1 to Shape# 2 is scale factor = 2.</p>",
@@ -5415,7 +5931,7 @@
               },
               "supports" : [
               ]
-            }, 
+            },
             {
               "type": "whatIf",
               "content": {
@@ -5430,7 +5946,7 @@
                         "**Mitch’s Claim** All squares are similar."
                       ]
                     }
-                  }, 
+                  },
                   {
                     "display": "teacher",
                     "content": {
@@ -5449,7 +5965,7 @@
                         "**Freda’s Claim** All circles are similar."
                       ]
                     }
-                  }, 
+                  },
                   {
                     "display": "teacher",
                     "content": {
@@ -5468,14 +5984,14 @@
                         "**Juan’s Claim** All quadrilaterals are similar."
                       ]
                     }
-                  }, 
+                  },
                   {
                     "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>No. All of the following shapes are quadrilaterals. None of them are similar to the other. </p>"
+                        "<p>No. All of the following shapes are quadrilaterals. None of them are similar to the other.</p>"
                       ]
                     }
                   },
@@ -5487,15 +6003,15 @@
                         "**Sze’s Claim** All triangles are similar if their corresponding angles are equal."
                       ]
                     }
-                  }, 
+                  },
                   {
                     "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Yes. If all of the angles have equivalent measures, the triangles will have the same basic shape. The corresponding side lengths can be scaled to form a similar triangle. </p>",
-                        "<p>We saw this idea when we had reptiles. </p>",
+                        "<p>Yes. If all of the angles have equivalent measures, the triangles will have the same basic shape. The corresponding side lengths can be scaled to form a similar triangle.</p>",
+                        "<p>We saw this idea when we had reptiles.</p>",
                         "<p>And we used this idea when   measuring the river.</p>"
                       ]
                     }
@@ -5508,7 +6024,7 @@
                         "**Matt’s Claim** Circles are not similar since the do not have angles or side lengths."
                       ]
                     }
-                  }, 
+                  },
                   {
                     "display": "teacher",
                     "content": {
@@ -5528,7 +6044,7 @@
                       "text": [
                         "<h3>Situation B. Creating More Sets</h3>José challenges his group to create another set of shapes that contains an imposter. He suggests that they use coordinate rules to create the set. ",
                         "<p>1. Is this possible? Show your reasoning with sketches of the shapes.</p>",
-                        "<p>2.  Include enough information to show which shapes are similar and which one is the imposter. </p>"
+                        "<p>2.  Include enough information to show which shapes are similar and which one is the imposter.</p>"
                       ]
                     }
                   },
@@ -5538,7 +6054,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Answers will vary.  There are many possible solutions. Some possible answers: </p>",
+                        "<p>Answers will vary.  There are many possible solutions. Some possible answers:</p>",
                         "Students may elect to use draw tiles, table tiles, or graph tiles, or a combination, to answer this question. Note that students can also elect to work this on paper, take a picture, and load that into an image tile to capture the work in the platform."
                       ]
                     }
@@ -5546,7 +6062,7 @@
                 ]
               },
               "supports": []
-            }, 
+            },
             {
               "type": "nowWhatDoYouKnow",
               "content": {
@@ -5572,8 +6088,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Answers will vary.  There are many possible solutions. Some possible answers: </p>",
-                        "<ul><li>There is a scale factor for corresponding sides.</li><li>Equivalent ratios of adjacent side lengths in one shape and the corresponding ratio of adjacent side lengths of the other shape are equivalent. </li><li>One shape is a rep-tile of the other. </li><li>Corresponding angles are equal. This is not enough to determine similar figures. There must also be a relationship among corresponding lengths. This is mentioned above. </li></ul>"
+                        "<p>Answers will vary.  There are many possible solutions. Some possible answers:</p>",
+                        "<ul><li>There is a scale factor for corresponding sides.</li><li>Equivalent ratios of adjacent side lengths in one shape and the corresponding ratio of adjacent side lengths of the other shape are equivalent.</li><li>One shape is a rep-tile of the other.</li><li>Corresponding angles are equal. This is not enough to determine similar figures. There must also be a relationship among corresponding lengths. This is mentioned above.</li></ul>"
                       ]
                     }
                   }
@@ -5582,7 +6098,7 @@
             }
           ],
           "supports": [
-           
+
           ]
         }
       ]
