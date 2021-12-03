@@ -2,7 +2,7 @@ import { inject, observer } from "mobx-react";
 import React from "react";
 
 import { BaseComponent, IBaseProps } from "./base";
-import { DocumentModelType, DocumentTool } from "../models/document/document";
+import { DocumentModelType } from "../models/document/document";
 import { IDocumentContentAddTileOptions, IDragToolCreateInfo } from "../models/document/document-content";
 import { ToolbarModelType } from "../models/stores/problem-configuration";
 import { ToolButtonModelType } from "../models/tools/tool-button";
@@ -119,7 +119,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
             addSidecarNotes: !!toolContentInfo?.addSidecarNotes,
             insertRowInfo: { rowInsertIndex: document.content?.defaultInsertRow ?? 0 }
           };
-    const rowTile = document.addTile(tool.name as DocumentTool, newTileOptions);
+    const rowTile = document.addTile(tool.name, newTileOptions);
     if (rowTile && rowTile.tileId) {
       ui.setSelectedTileId(rowTile.tileId);
       this.setState(state => ({ activeTool: state.defaultTool }));
@@ -168,7 +168,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
     const toolContentInfo = getToolContentInfoByTool(tool.name);
     const dragInfo: IDragToolCreateInfo =
-      { tool: tool.name as DocumentTool, title: this.getUniqueTitle(toolContentInfo) };
+      { tool: tool.name, title: this.getUniqueTitle(toolContentInfo) };
     e.dataTransfer.setData(kDragTileCreate, JSON.stringify(dragInfo));
   };
 }

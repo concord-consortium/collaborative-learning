@@ -18,7 +18,7 @@ import { DisplayUserType } from "../stores/user-types";
 import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
 import { getParentWithTypeName } from "../../utilities/mst-utils";
 import { comma, StringBuilder } from "../../utilities/string-builder";
-import { DocumentTool, IDocumentAddTileOptions } from "./document";
+import { IDocumentAddTileOptions } from "./document";
 
 export interface INewTileOptions {
   rowHeight?: number;
@@ -45,7 +45,7 @@ export interface IDocumentContentAddTileOptions extends IDocumentAddTileOptions 
 }
 
 export interface IDragToolCreateInfo {
-  tool: DocumentTool;
+  tool: string;
   title?: string;
 }
 
@@ -672,7 +672,7 @@ export const DocumentContentModel = types
           }
         }
       },
-      addTile(tool: DocumentTool, options?: IDocumentContentAddTileOptions) {
+      addTile(tool: string, options?: IDocumentContentAddTileOptions) {
         const { title, addSidecarNotes, url, insertRowInfo } = options || {};
         // for historical reasons, this function initially places new rows at
         // the end of the content and then moves them to the desired location.
@@ -814,7 +814,7 @@ export const DocumentContentModel = types
     }
   }))
   .actions(self => ({
-    userAddTile(tool: DocumentTool, options?: IDocumentContentAddTileOptions) {
+    userAddTile(tool: string, options?: IDocumentContentAddTileOptions) {
       const result = self.addTile(tool, options);
       const newTile = result?.tileId && self.getTile(result.tileId);
       if (newTile) {

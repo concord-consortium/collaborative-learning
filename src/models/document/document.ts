@@ -22,10 +22,6 @@ export interface IDocumentAddTileOptions {
   url?: string;
 }
 
-export const DocumentToolEnum = types.enumeration("tool",
-                                ["delete", "drawing", "geometry", "image", "select", "table", "text", "placeholder"]);
-export type DocumentTool = typeof DocumentToolEnum.Type;
-
 export const DocumentModel = types
   .model("Document", {
     uid: types.string,
@@ -188,7 +184,7 @@ export const DocumentModel = types
       self.visibility = visibility;
     },
 
-    addTile(tool: DocumentTool, options?: IDocumentAddTileOptions) {
+    addTile(tool: string, options?: IDocumentAddTileOptions) {
       return self.content?.userAddTile(tool, options);
     },
 
