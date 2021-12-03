@@ -157,8 +157,8 @@ export class Logger {
 
   public static initializeLogger(stores: IStores, investigation?: InvestigationModelType, problem?: ProblemModelType) {
     const { appMode } = stores;
-    const noLogModes: Array<typeof appMode> = ["dev", "qa", "test"];
-    this.isLoggingEnabled = !noLogModes.includes(appMode) || DEBUG_LOGGER;
+    const logModes: Array<typeof appMode> = ["authed"];
+    this.isLoggingEnabled = logModes.includes(appMode) || DEBUG_LOGGER;
 
     if (DEBUG_LOGGER) {
       // eslint-disable-next-line no-console

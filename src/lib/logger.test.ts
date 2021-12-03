@@ -122,6 +122,55 @@ describe("dev/qa/test logger with DEBUG_LOGGER false", () => {
 
 });
 
+describe("demo logger with DEBUG_LOGGER false", () => {
+  let stores: IStores;
+
+  beforeEach(() => {
+    mockXhr.setup();
+    stores = createStores({
+      appMode: "demo",
+      appConfig: AppConfigModel.create({ appName: "TestLogger"}),
+      ui: UIModel.create({
+        activeNavTab: ENavTab.kStudentWork,
+        problemWorkspace: {
+          type: ProblemWorkspace,
+          mode: "1-up"
+        },
+        learningLogWorkspace: {
+          type: LearningLogWorkspace,
+          mode: "1-up"
+        },
+      }),
+      user: UserModel.create({id: "0", type: "teacher", portal: "test"})
+    });
+
+    Logger.initializeLogger(stores, investigation, problem);
+  });
+
+  afterEach(() => {
+    mockXhr.reset();
+    mockXhr.teardown();
+  });
+
+  it("does not log in demo mode", (done) => {
+    const TEST_LOG_MESSAGE = 999;
+    const mockPostHandler = jest.fn((req, res) => {
+      expect(mockPostHandler).toHaveBeenCalledTimes(1);
+      done();
+      return res.status(201);
+    });
+    mockXhr.use(mockPostHandler);
+
+    // should not be logged due to mode
+    Logger.log(TEST_LOG_MESSAGE);
+
+    // should be logged
+    Logger.isLoggingEnabled = true;
+    Logger.log(TEST_LOG_MESSAGE);
+  });
+
+});
+
 describe("authed logger", () => {
   let stores: IStores;
 
