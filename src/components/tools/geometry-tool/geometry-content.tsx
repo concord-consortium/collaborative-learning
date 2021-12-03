@@ -548,17 +548,17 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private renderTitle() {
     const getTitle = () => this.getContent().title || "";
-    const { measureText, size, scale } = this.props;
+    const { measureText, readOnly, size, scale } = this.props;
     return (
       <EditableGeometryTitle key="geometry-title" size={size} scale={scale} getTitle={getTitle}
-                              measureText={measureText}
+                              readOnly={readOnly} measureText={measureText}
                               onBeginEdit={this.handleBeginEditTitle} onEndEdit={this.handleTitleChange} />
     );
   }
 
   private renderTableLinkButton() {
     const { isLinkButtonEnabled, onLinkTableButtonClick } = this.props;
-    return (!this.state.isEditingTitle &&
+    return (!this.state.isEditingTitle && !this.props.readOnly &&
       <LinkTableButton key="link-button" isEnabled={isLinkButtonEnabled} onClick={onLinkTableButtonClick}/>
     );
   }
