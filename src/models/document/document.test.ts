@@ -1,6 +1,5 @@
 import { getSnapshot } from "mobx-state-tree";
 import { DocumentModel, DocumentModelType } from "./document";
-import { DocumentContentModel } from "./document-content";
 import { PersonalDocument, ProblemDocument } from "./document-types";
 import { createSingleTileContent } from "../../utilities/test-utils";
 import { TextContentModelType } from "../tools/text/text-content";
@@ -112,8 +111,7 @@ describe("document model", () => {
   });
 
   it("can set content", () => {
-    const content = createSingleTileContent({ type: "Text", text: "test" });
-    document.setContent(DocumentContentModel.create(content));
+    document.setContent(createSingleTileContent({ type: "Text", text: "test" }));
     expect(document.content!.tileMap.size).toBe(1);
     document.content!.tileMap.forEach(tile => {
       const textContent = tile.content as TextContentModelType;

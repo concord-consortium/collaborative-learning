@@ -3,7 +3,6 @@ import { Logger, LogEventName, ILogComment } from "./logger";
 import { DocumentModel, DocumentModelType } from "../models/document/document";
 import { ProblemDocument } from "../models/document/document-types";
 import { AppConfigModel } from "../models/stores/app-config-model";
-import { DocumentContentModel } from "../models/document/document-content";
 import { InvestigationModel } from "../models/curriculum/investigation";
 import { IStores, createStores } from "../models/stores/stores";
 import { UserModel } from "../models/stores/user";
@@ -458,8 +457,7 @@ describe("authed logger", () => {
         content: {},
         visibility: "public"
       });
-      const content = createSingleTileContent({ type: "Text", text: "test" });
-      sourceDocument.setContent(DocumentContentModel.create(content));
+      sourceDocument.setContent(createSingleTileContent({ type: "Text", text: "test" }));
 
       const destinationDocument = DocumentModel.create({
         type: ProblemDocument,
