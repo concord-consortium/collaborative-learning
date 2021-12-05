@@ -1,3 +1,4 @@
+import { destroy, getSnapshot } from "mobx-state-tree";
 import { UnitModel, isDifferentUnitAndProblem } from "./unit";
 import { IStores } from "../stores/stores";
 
@@ -15,6 +16,26 @@ describe("UnitModel", () => {
                 title: "Unit 1",
                 investigations: [ inInvestigation1, inInvestigation2 ]
               });
+
+  it("installs user listener and calls reaction with true for teachers", () => {
+    const isTeacherFn = jest.fn(() => true);
+    const reactionFn = jest.fn();
+    const unit2 = UnitModel.create(getSnapshot(unit));
+    unit2.installUserListener(isTeacherFn, reactionFn);
+    expect(isTeacherFn).toHaveBeenCalled();
+    expect(reactionFn.mock.calls[0][0]).toBe(true);
+    destroy(unit2);
+  });
+
+  it("installs user listener and calls reaction with false for students", () => {
+    const isTeacherFn = jest.fn(() => false);
+    const reactionFn = jest.fn();
+    const unit2 = UnitModel.create(getSnapshot(unit));
+    unit2.installUserListener(isTeacherFn, reactionFn);
+    expect(isTeacherFn).toHaveBeenCalled();
+    expect(reactionFn.mock.calls[0][0]).toBe(false);
+    destroy(unit2);
+  });
 
   it("getInvestigation() should work as expected", () => {
     expect(unit.getInvestigation(0)).toBeUndefined();
