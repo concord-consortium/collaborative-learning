@@ -37,6 +37,7 @@ var mockQueryClient = {
 
 describe("document model", () => {
   let document: DocumentModelType;
+  let documentWithoutContent: DocumentModelType;
 
   beforeEach(() => {
     document = DocumentModel.create({
@@ -45,6 +46,13 @@ describe("document model", () => {
       key: "test",
       createdAt: 1,
       content: {},
+      visibility: "public"
+    });
+    documentWithoutContent = DocumentModel.create({
+      type: ProblemDocument,
+      uid: "1",
+      key: "test",
+      createdAt: 1,
       visibility: "public"
     });
   });
@@ -96,6 +104,12 @@ describe("document model", () => {
       },
       changeCount: 0
     });
+  });
+
+  it("can create documents without content and set the content later", () => {
+    expect(documentWithoutContent.content).toBeUndefined();
+    documentWithoutContent.setContent({});
+    expect(documentWithoutContent.content).toBeDefined();
   });
 
   it("can set creation date/time", () => {
