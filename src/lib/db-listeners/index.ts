@@ -10,7 +10,6 @@ import { DBOtherDocumentsListener } from "./db-other-docs-listener";
 import { DBProblemDocumentsListener } from "./db-problem-documents-listener";
 import { DBPublicationsListener } from "./db-publications-listener";
 import { DocumentModelType } from "../../models/document/document";
-import { DocumentContentModel } from "../../models/document/document-content";
 import { LearningLogDocument, OtherDocumentType, PersonalDocument } from "../../models/document/document-types";
 import { DBDocument, DatabaseType } from "../db-types";
 import { DBSupportsListener } from "./db-supports-listener";
@@ -215,7 +214,7 @@ export class DBListeners extends BaseListener {
         const updatedContent = this.db.parseDocumentContent(updatedDoc);
         const documentModel = documents.getDocument(documentKey);
         if (documentModel) {
-          documentModel.setContent(DocumentContentModel.create(updatedContent || {}));
+          documentModel.setContent(updatedContent || {});
           this.monitorDocumentModel(documentModel, monitor);
         }
       }
