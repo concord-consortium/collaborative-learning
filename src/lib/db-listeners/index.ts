@@ -206,19 +206,26 @@ export class DBListeners extends BaseListener {
     }
     docListener.ref = documentRef;
 
-    // for remote documents keep the local document in sync with Firebase but local documents
-    // just load it once and then sync local changes to Firebase
-    documentRef[monitor === Monitor.Remote ? "on" : "once"]("value", (snapshot) => {
-      if (snapshot && snapshot.val()) {
-        const updatedDoc: DBDocument = snapshot.val();
-        const updatedContent = this.db.parseDocumentContent(updatedDoc);
-        const documentModel = documents.getDocument(documentKey);
-        if (documentModel) {
-          documentModel.setContent(updatedContent || {});
-          this.monitorDocumentModel(documentModel, monitor);
-        }
+    // for local documents, sync local document => firebase
+    if (monitor === Monitor.Local) {
+      const documentModel = documents.getDocument(documentKey);
+      if (documentModel) {
+        this.monitorDocumentModel(documentModel, monitor);
       }
-    });
+    }
+    // for remote documents, sync firebase => local document
+    else if (monitor === Monitor.Remote) {
+      documentRef.on("value", snapshot => {
+        if (snapshot?.val()) {
+          const updatedDoc: DBDocument = snapshot.val();
+          const updatedContent = this.db.parseDocumentContent(updatedDoc);
+          const documentModel = documents.getDocument(documentKey);
+          if (documentModel) {
+            documentModel.setContent(updatedContent || {});
+          }
+        }
+      });
+    }
   };
 
   private unmonitorDocumentRef = (document: DocumentModelType) => {
