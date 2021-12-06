@@ -595,19 +595,10 @@
                       }
                     },
                     {
-                      "id": "KAPEI9GiXIWnPiz9",
                       "display": "teacher",
                       "content": {
-                        "type": "Geometry",
-                        "title": "Dog Graph",
-                        "board": {
-                          "properties": {
-                            "axisMin": [-2.183, -1.093],
-                            "axisRange": [32.537, 20.021]
-                          }
-                        },
-                        "objects": [
-                        ]
+                        "type": "Image",
+                        "url": "curriculum/stretching-and-shrinking/images/DogGraphTeacherImage_350w.png"
                       }
                     }
                   ],
