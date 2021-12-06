@@ -1,5 +1,29 @@
 # Changelog
 
+## Version 2.1.0 - released December 6, 2021
+
+### Features/Improvements
+- Comparing and Scaling content updates and new teacher guide #1133
+- Stretching and Shrinking content updates #1133
+- Under-the-hood: update dependencies #1100 #1128 #1129 #1131 #1137
+- Under-the-hood: refactor tool code #1113 #1115 #1118 #1125 #1127
+
+### Bugs Fixed
+- Show planning document title in Resources [#180463778] #1130
+- Show "Network User" for caption of published documents viewed via teacher network [#180484449] #1130
+- Extra points on a graph are created on duplication of a figure created from a linked table [#180496888] #1132
+- Don't log in demo mode [#180522053] #1134
+- Deserialize document content rather than recreating it #1138
+- Eliminate redundant loading of local document contents #1139
+- Only load teacher guide content for teachers #1141
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 420,985 bytes | -3.9% |
+| index.js | 4,029,134 bytes | -3.3% |
+
 ## Version 2.0.0 - released November 2, 2021
 
 ### Features/Improvements
