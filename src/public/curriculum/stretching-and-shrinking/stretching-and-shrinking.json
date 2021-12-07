@@ -300,6 +300,9 @@
                   [
                     {
                       "id": "jVu0lyX6VmWRgOhY",
+                      "layout": {
+                        "height": 120
+                      },
                       "content": {
                         "type": "Text",
                         "format": "html",
@@ -662,6 +665,9 @@
                 [
                   {
                     "id": "xNSvm1tfNTblOYgf",
+                    "layout": {
+                      "height": 250
+                    },
                     "content": {
                       "type": "Text",
                       "format": "html",
