@@ -16,6 +16,7 @@
 - Deserialize document content rather than recreating it #1138
 - Eliminate redundant loading of local document contents #1139
 - Only load teacher guide content for teachers #1141
+- Fix height of multi-tile rows with image tiles #1143
 
 ### Asset Sizes
 
