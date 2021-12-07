@@ -187,8 +187,7 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleRequestRowHeight = (tileId: string, height?: number, deltaHeight?: number) => {
-    const { height: modelHeight, tileCount, setRowHeight } = this.props.model;
-    const rowHeight = modelHeight;
+    const { height: rowHeight, tileCount, setRowHeight } = this.props.model;
     const newHeight = rowHeight != null && deltaHeight != null
                         ? rowHeight + deltaHeight
                         : height;
