@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 2.1.0 - released December 6, 2021
+## Version 2.1.0 - released December 8, 2021
 
 ### Features/Improvements
 - Comparing and Scaling content updates and new teacher guide #1133
@@ -23,7 +23,7 @@
 | File | Size | % Change from Previous Release |
 |---|---|---|
 | index.css | 420,985 bytes | -3.9% |
-| index.js | 4,029,134 bytes | -3.3% |
+| index.js | 4,029,162 bytes | -3.3% |
 
 ## Version 2.0.0 - released November 2, 2021
 
