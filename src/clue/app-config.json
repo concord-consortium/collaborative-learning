@@ -2,11 +2,15 @@
   "appName": "CLUE",
   "pageTitle": "CLUE: %problemTitle%",
   "units": {
+    "bio": {
+      "content": "curriculum/bio4community/bio4community.json"
+    },
     "cr": {
       "content": "curriculum/completely-rational/completely-rational.json"
     },
     "cas": {
-      "content": "curriculum/comparing-and-scaling/comparing-and-scaling.json"
+      "content": "curriculum/comparing-and-scaling/comparing-and-scaling.json",
+      "guide": "curriculum/comparing-and-scaling/cas-teacher-guide.json"
     },
     "faw": {
       "content": "curriculum/filling-and-wrapping/filling-and-wrapping.json"
@@ -26,9 +30,18 @@
     "lfp": {
       "content": "curriculum/looking-for-pythagoras/looking-for-pythagoras.json"
     },
+     "m2s": {
+      "content": "curriculum/m2studio/m2studio.json"
+    },
+     "moth": {
+      "content": "curriculum/mothed/mothed.json"
+    },
     "msa": {
       "content": "curriculum/moving-straight-ahead/moving-straight-ahead.json",
       "guide": "curriculum/moving-straight-ahead/msa-teacher-guide.json"
+    },
+    "pc": {
+      "content": "curriculum/pc2/pc2.json"
     },
     "sad": {
       "content": "curriculum/shapes-and-designs/shapes-and-designs.json"
@@ -220,42 +233,39 @@
       "name": "select",
       "title": "Select",
       "iconId": "icon-select-tool",
+      "isTileTool": false,
       "isDefault": true
     },
     {
       "name": "text",
       "title": "Text",
-      "iconId": "icon-text-tool",
       "isTileTool": true
     },
     {
       "name": "table",
       "title": "Table",
-      "iconId": "icon-table-tool",
       "isTileTool": true
     },
     {
       "name": "geometry",
       "title": "Geometry",
-      "iconId": "icon-geometry-tool",
       "isTileTool": true
     },
     {
       "name": "image",
       "title": "Image",
-      "iconId": "icon-image-tool",
       "isTileTool": true
     },
     {
       "name": "drawing",
       "title": "Drawing",
-      "iconId": "icon-drawing-tool",
       "isTileTool": true
     },
     {
       "name": "delete",
       "title": "Delete",
-      "iconId": "icon-delete-tool"
+      "iconId": "icon-delete-tool",
+      "isTileTool": false
     }
   ]
 }

@@ -3,7 +3,8 @@ import { castArray, each } from "lodash";
 import { types, IAnyStateTreeNode, Instance, SnapshotIn, SnapshotOut } from "mobx-state-tree";
 import { exportTableContentAsJson } from "./table-export";
 import { getRowLabel, kSerializedXKey, canonicalizeValue, isLinkableValue } from "./table-model-types";
-import { IDocumentExportOptions, registerToolContentInfo } from "../tool-content-info";
+import { IDocumentExportOptions, IDefaultContentOptions } from "../tool-content-info";
+import { ToolMetadataModel, ToolContentModel } from "../tool-types";
 import { addLinkedTable, removeLinkedTable } from "../table-links";
 import { IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
 import { canonicalizeExpression } from "../../../components/tools/table-tool/expression-utils";
@@ -22,14 +23,16 @@ export const kLabelAttrName = "__label__";
 
 export const kTableDefaultHeight = 160;
 
-export function defaultTableContent(props?: { title?: string }) {
+// This is only used directly by tests
+export function defaultTableContent(props?: IDefaultContentOptions) {
   return TableContentModel.create({
-                            type: "Table",
                             name: props?.title,
                             columns: [
                               { name: "x" },
                               { name: "y" }
                             ]
+                          // This type cast could probably go away if MST was upgraded and
+                          // types.snapshotProcessor(TableContentModel, ...) was used
                           } as SnapshotIn<typeof TableContentModel>);
 }
 
@@ -88,9 +91,9 @@ export interface TableContentTableImport {
   columns?:TableContentColumnImport[];
 }
 
-export const TableMetadataModel = types
-  .model("TableMetadata", {
-    id: types.string,
+export const TableMetadataModel = ToolMetadataModel
+  .named("TableMetadata")
+  .props({
     linkedGeometries: types.array(types.string),
     expressions: types.map(types.string),
     rawExpressions: types.map(types.string)
@@ -160,8 +163,9 @@ export const TableMetadataModel = types
   }));
 export type TableMetadataModelType = Instance<typeof TableMetadataModel>;
 
-export const TableContentModel = types
-  .model("TableContent", {
+export const TableContentModel = ToolContentModel
+  .named("TableContent")
+  .props({
     type: types.optional(types.literal(kTableToolID), kTableToolID),
     isImported: false,
     changes: types.array(types.string)
@@ -716,14 +720,3 @@ export function mapTileIdsInTableSnapshot(snapshot: SnapshotOut<TableContentMode
   });
   return snapshot;
 }
-
-registerToolContentInfo({
-  id: kTableToolID,
-  tool: "table",
-  titleBase: "Table",
-  modelClass: TableContentModel,
-  metadataClass: TableMetadataModel,
-  defaultHeight: kTableDefaultHeight,
-  defaultContent: defaultTableContent,
-  snapshotPostProcessor: mapTileIdsInTableSnapshot
-});

@@ -2,6 +2,9 @@ import { UIModel, UIModelType, UIDialogModelType } from "./ui";
 import { ProblemWorkspace, LearningLogWorkspace } from "./workspace";
 import { ToolTileModel } from "../tools/tool-tile";
 
+// This is needed so MST can deserialize snapshots referring to tools
+import "../../register-tools";
+
 describe("ui model", () => {
   let ui: UIModelType;
 

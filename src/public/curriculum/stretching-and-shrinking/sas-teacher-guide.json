@@ -72,6 +72,16 @@
               "type": "overview",
               "content": {
                 "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem Overview</strong></p>",
+                        "<p>This Problem is intended to help both educators and students to learn how software features work in CLUE. There is no extended teacher guide. You will find teacher guides in other problems.</p>"
+                      ]
+                    }
+                  }
                 ]
               },
               "supports": [ ]
@@ -80,6 +90,16 @@
               "type": "launch",
               "content": {
                 "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem Launch</strong></p>",
+                        "<p>This Problem is intended to help both educators and students to learn how software features work in CLUE. There is no extended teacher guide. You will find teacher guides in other problems.</p>"
+                      ]
+                    }
+                  }
                 ]
               },
               "supports": []
@@ -88,14 +108,34 @@
               "type": "explore",
               "content": {
                 "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem Exploration</strong></p>",
+                        "<p>This Problem is intended to help both educators and students to learn how software features work in CLUE. There is no extended teacher guide. You will find teacher guides in other problems.</p>"
+                      ]
+                    }
+                  }
                 ],
                 "supports": []
               }
             },
             {
-              "type": "summary",
+              "type": "summarize",
               "content": {
                 "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem Summary</strong></p>",
+                        "<p>This Problem is intended to help both educators and students to learn how software features work in CLUE. There is no extended teacher guide. You will find teacher guides in other problems.</p>"
+                      ]
+                    }
+                  }
                 ]
               }
             }
@@ -518,14 +558,12 @@
                     }
                   },
                   {
-                    "id": "DPMOfLD2PxQ3Lz_t",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SASTG_1-2_presenting_the_challenge_2.png"
                     }
                   },
                   {
-                    "id": "DPMOfLD2PxQ3Lz_t",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SASTG_1-2_presenting_the_challenge_3.png"

@@ -49,7 +49,7 @@ abstract class DrawingObject {
 }
 
 class LineObject extends DrawingObject {
-  public model: LineDrawingObjectData;
+  declare model: LineDrawingObjectData;
 
   constructor(model: LineDrawingObjectData) {
     super(model);
@@ -99,7 +99,7 @@ class LineObject extends DrawingObject {
 }
 
 class VectorObject extends DrawingObject {
-  public model: VectorDrawingObjectData;
+  declare model: VectorDrawingObjectData;
 
   constructor(model: VectorDrawingObjectData) {
     super(model);
@@ -131,7 +131,7 @@ class VectorObject extends DrawingObject {
 }
 
 class RectangleObject extends DrawingObject {
-  public model: RectangleDrawingObjectData;
+  declare model: RectangleDrawingObjectData;
 
   constructor(model: RectangleDrawingObjectData) {
     super(model);
@@ -163,7 +163,7 @@ class RectangleObject extends DrawingObject {
 }
 
 class EllipseObject extends DrawingObject {
-  public model: EllipseDrawingObjectData;
+  declare model: EllipseDrawingObjectData;
 
   constructor(model: EllipseDrawingObjectData) {
     super(model);
@@ -196,7 +196,7 @@ class EllipseObject extends DrawingObject {
 }
 
 class ImageObject extends DrawingObject {
-  public model: ImageDrawingObjectData;
+  declare model: ImageDrawingObjectData;
 
   constructor(model: ImageDrawingObjectData) {
     super(model);
@@ -675,7 +675,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     ));
 
     this.disposers.push(reaction(
-      () => this.getContent().metadata.selection.toJS(),
+      () => this.getContent().metadata.selection.toJSON(),
       selectedIds => {
         const selectedObjects = selectedIds.map(id => this.objects[id]).filter(obj => !!obj) as DrawingObject[];
         this.setState({ selectedObjects });
@@ -779,19 +779,19 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     if (!this.props.readOnly && this.currentTool) {
       this.currentTool.handleMouseDown(e);
     }
-  }
+  };
 
   public handleObjectClick = (e: MouseEvent|React.MouseEvent<any>, obj: DrawingObject) => {
     if (!this.props.readOnly && this.currentTool) {
       this.currentTool.handleObjectClick(e, obj);
     }
-  }
+  };
 
   public handleObjectHover = (e: MouseEvent|React.MouseEvent<any>, obj: DrawingObject, hovering: boolean) => {
     if (!this.props.readOnly && this.currentTool === this.tools.selection) {
       this.setState({hoverObject: hovering ? obj : null});
     }
-  }
+  };
 
   // handles dragging of selected/hovered objects
   public handleSelectedObjectMouseDown = (e: React.MouseEvent<any>, obj: DrawingObject) => {
@@ -856,7 +856,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseup", handleMouseUp);
-  }
+  };
 
   public startSelectionBox(p: Point) {
     this.setState({selectionBox: new SelectionBox(p)});
@@ -936,7 +936,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       };
     }
     return null;
-  }
+  };
 
   public render() {
     const hoveringOverAlreadySelectedObject =
@@ -999,7 +999,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       .catch(() => {
         this.setState({ isLoading: false });
       });
-  }
+  };
 
   private getContent() {
     return this.props.model.content as DrawingContentModelType;
@@ -1022,7 +1022,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       }
     }
     return false;
-  }
+  };
 
   private handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     const isAcceptableDrag = this.isAcceptableImageDrag(e);
@@ -1031,11 +1031,11 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       e.dataTransfer.dropEffect = "copy";
       e.preventDefault();
     }
-  }
+  };
 
   private handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
     this.props.onSetCanAcceptDrop();
-  }
+  };
 
   private handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     if (this.isAcceptableImageDrag(e)) {
@@ -1051,7 +1051,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         e.stopPropagation();
       }
     }
-  }
+  };
 
   private handleImageDrop(url: string) {
     gImageMap.getImage(url)

@@ -1,5 +1,5 @@
 import firebase from "firebase/app";
-import { observable } from "mobx";
+import { observable, makeObservable } from "mobx";
 import { IDisposer, onSnapshot } from "mobx-state-tree";
 
 import { DB, Monitor } from "../db";
@@ -10,7 +10,6 @@ import { DBOtherDocumentsListener } from "./db-other-docs-listener";
 import { DBProblemDocumentsListener } from "./db-problem-documents-listener";
 import { DBPublicationsListener } from "./db-publications-listener";
 import { DocumentModelType } from "../../models/document/document";
-import { DocumentContentModel } from "../../models/document/document-content";
 import { LearningLogDocument, OtherDocumentType, PersonalDocument } from "../../models/document/document-types";
 import { DBDocument, DatabaseType } from "../db-types";
 import { DBSupportsListener } from "./db-supports-listener";
@@ -57,6 +56,7 @@ export class DBListeners extends BaseListener {
 
   constructor(db: DB) {
     super("DBListeners");
+    makeObservable(this);
     this.db = db;
     this.latestGroupIdListener = new DBLatestGroupIdListener(db);
     this.groupsListener = new DBGroupsListener(db);
@@ -120,7 +120,7 @@ export class DBListeners extends BaseListener {
       });
     }));
     this.documentModelDisposers[document.key] = disposer;
-  }
+  };
 
   public monitorOtherDocument = (document: DocumentModelType, type: OtherDocumentType) => {
     const { user } = this.db.stores;
@@ -147,27 +147,27 @@ export class DBListeners extends BaseListener {
     }));
 
     return document;
-  }
+  };
 
   public monitorPersonalDocument = (document: DocumentModelType) => {
     return this.monitorOtherDocument(document, PersonalDocument);
-  }
+  };
 
   public monitorLearningLogDocument = (document: DocumentModelType) => {
     return this.monitorOtherDocument(document, LearningLogDocument);
-  }
+  };
 
   public monitorDocument = (document: DocumentModelType, monitor: Monitor) => {
     this.debugLog("#monitorDocument", `document: ${document.key} monitor: ${monitor}`);
     this.monitorDocumentRef(document, monitor);
     this.monitorDocumentModel(document, monitor);
-  }
+  };
 
   public unmonitorDocument = (document: DocumentModelType, monitor: Monitor) => {
     this.debugLog("#unmonitorDocument", `document: ${document.key} monitor: ${monitor}`);
     this.unmonitorDocumentRef(document);
     this.unmonitorDocumentModel(document);
-  }
+  };
 
   public syncDocumentProperties = (document: DocumentModelType, dbType: DatabaseType, path?: string) => {
     const { user } = this.db.stores;
@@ -188,7 +188,7 @@ export class DBListeners extends BaseListener {
         docRef.update({ properties: newProperties });
       });
     }
-  }
+  };
 
   private monitorDocumentRef = (document: DocumentModelType, monitor: Monitor) => {
     const { user, documents } = this.db.stores;
@@ -206,27 +206,34 @@ export class DBListeners extends BaseListener {
     }
     docListener.ref = documentRef;
 
-    // for remote documents keep the local document in sync with Firebase but local documents
-    // just load it once and then sync local changes to Firebase
-    documentRef[monitor === Monitor.Remote ? "on" : "once"]("value", (snapshot) => {
-      if (snapshot && snapshot.val()) {
-        const updatedDoc: DBDocument = snapshot.val();
-        const updatedContent = this.db.parseDocumentContent(updatedDoc);
-        const documentModel = documents.getDocument(documentKey);
-        if (documentModel) {
-          documentModel.setContent(DocumentContentModel.create(updatedContent || {}));
-          this.monitorDocumentModel(documentModel, monitor);
-        }
+    // for local documents, sync local document => firebase
+    if (monitor === Monitor.Local) {
+      const documentModel = documents.getDocument(documentKey);
+      if (documentModel) {
+        this.monitorDocumentModel(documentModel, monitor);
       }
-    });
-  }
+    }
+    // for remote documents, sync firebase => local document
+    else if (monitor === Monitor.Remote) {
+      documentRef.on("value", snapshot => {
+        if (snapshot?.val()) {
+          const updatedDoc: DBDocument = snapshot.val();
+          const updatedContent = this.db.parseDocumentContent(updatedDoc);
+          const documentModel = documents.getDocument(documentKey);
+          if (documentModel) {
+            documentModel.setContent(updatedContent || {});
+          }
+        }
+      });
+    }
+  };
 
   private unmonitorDocumentRef = (document: DocumentModelType) => {
     const docListener = this.modelListeners[`document:${document.key}`];
     if (docListener && docListener.ref) {
       docListener.ref.off("value");
     }
-  }
+  };
 
   private monitorDocumentModel = (document: DocumentModelType, monitor: Monitor) => {
     // skip if not monitoring local changes
@@ -269,7 +276,7 @@ export class DBListeners extends BaseListener {
                                     });
                                   });
     }
-  }
+  };
 
   private unmonitorDocumentModel = (document: DocumentModelType) => {
     // This is currently only called for unmonitoring remote documents as a result of group changes, but
@@ -281,7 +288,7 @@ export class DBListeners extends BaseListener {
     }
     const docListener = this.modelListeners[`document:${document.key}`];
     docListener?.modelDisposer?.();
-  }
+  };
 
   private stopModelListeners() {
     Object.keys(this.modelListeners).forEach((docKey) => {

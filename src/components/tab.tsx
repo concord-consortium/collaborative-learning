@@ -48,15 +48,15 @@ export class TabComponent extends React.Component<IProps, IState> {
     if (this.props.onClick) {
       this.props.onClick(e);
     }
-  }
+  };
 
   // manual hover state is maintained so that we can set a class to override
   // a child element's style - the :hover pseudo class won't work in this case
   private handleMouseOver = (e: React.MouseEvent<HTMLDivElement>) => {
     this.setState({hovering: true});
-  }
+  };
 
   private handleMouseOut = (e: React.MouseEvent<HTMLDivElement>) => {
     this.setState({hovering: false});
-  }
+  };
 }

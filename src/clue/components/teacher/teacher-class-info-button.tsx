@@ -113,7 +113,7 @@ export class ClassInfoButton extends BaseComponent <IProps> {
 
       this.exportCSV(csv.join("\n"), `teacherId-${user.id}-classHash-${user.classHash}-studentGroups.csv`);
     }
-  }
+  };
 
   private exportCSV = (csv: string, fileName: string) => {
     const csvBlob = new Blob([csv], {type: "text/csv;charset=utf-8;"});
@@ -129,5 +129,5 @@ export class ClassInfoButton extends BaseComponent <IProps> {
       link.click();
       document.body.removeChild(link);
     // }
-  }
+  };
 }

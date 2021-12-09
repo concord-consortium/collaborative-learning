@@ -21,7 +21,6 @@ import { useMeasureText } from "../hooks/use-measure-text";
 import { useToolbarToolApi } from "../hooks/use-toolbar-tool-api";
 import { lightenColor } from "../../../utilities/color-utils";
 
-import "react-data-grid/dist/react-data-grid.css";
 import "./table-tool.scss";
 
 // observes row selection from shared selection store
@@ -144,7 +143,6 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   );
 });
 export default TableToolComponent;
-(TableToolComponent as any).tileHandlesSelection = true;
 
 // import { observer, inject } from "mobx-react";
 // import { Alert, Intent } from "@blueprintjs/core";
@@ -187,7 +185,7 @@ export default TableToolComponent;
 // @observer
 // export default class TableToolComponent extends BaseComponent<IToolTileProps, IState> {
 
-//   public static tileHandlesSelection = true;
+//   public static tileHandlesOwnSelection = false;
 
 //   public state: IState = {
 //                   dataSet: DataSet.create()

@@ -1,14 +1,16 @@
-import { types, Instance } from "mobx-state-tree";
+import { types, getSnapshot, Instance } from "mobx-state-tree";
 import { exportDrawingTileSpec } from "./drawing-export";
 import { importDrawingTileSpec, isDrawingTileImportSpec } from "./drawing-import";
 import { DrawingObjectDataType } from "./drawing-objects";
-import { ITileExportOptions, registerToolContentInfo } from "../tool-content-info";
+import { ITileExportOptions, IDefaultContentOptions } from "../tool-content-info";
+import { ToolMetadataModel, ToolContentModel } from "../tool-types";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
 import {
   DefaultToolbarSettings, DrawingToolChange, DrawingToolCreateChange, DrawingToolDeleteChange, DrawingToolMoveChange,
-  DrawingToolUpdate, DrawingToolUpdateChange, kDrawingDefaultHeight, kDrawingToolID, ToolbarModalButton, ToolbarSettings
+  DrawingToolUpdate, DrawingToolUpdateChange, kDrawingToolID, ToolbarModalButton, ToolbarSettings
 } from "./drawing-types";
+
 
 export const computeStrokeDashArray = (type?: string, strokeWidth?: string|number) => {
   const dotted = isFinite(Number(strokeWidth)) ? Number(strokeWidth) : 0;
@@ -57,9 +59,9 @@ export type StampModelType = Instance<typeof StampModel>;
 
 // track selection in metadata object so it is not saved to firebase but
 // also is preserved across document/content reloads
-export const DrawingToolMetadataModel = types
-  .model("DrawingToolMetadata", {
-    id: types.string,
+export const DrawingToolMetadataModel = ToolMetadataModel
+  .named("DrawingToolMetadata")
+  .props({
     selectedButton: "select",
     selection: types.array(types.string)
   })
@@ -77,16 +79,20 @@ export const DrawingToolMetadataModel = types
   }));
 export type DrawingToolMetadataModelType = Instance<typeof DrawingToolMetadataModel>;
 
-export function defaultDrawingContent(options?: {stamps: StampModelType[]}) {
+export function defaultDrawingContent(options?: IDefaultContentOptions) {
+  let stamps: StampModelType[] = [];
+  if (options?.unit) {
+    stamps = getSnapshot(options.unit.defaultStamps);
+  }
   return DrawingContentModel.create({
-    type: kDrawingToolID,
-    stamps: options?.stamps || [],
+    stamps,
     changes: []
   });
 }
 
-export const DrawingContentModel = types
-  .model("DrawingTool", {
+export const DrawingContentModel = ToolContentModel
+  .named("DrawingTool")
+  .props({
     type: types.optional(types.literal(kDrawingToolID), kDrawingToolID),
     changes: types.array(types.string),
     stroke: DefaultToolbarSettings.stroke,
@@ -258,12 +264,3 @@ export const DrawingContentModel = types
   });
 
 export type DrawingContentModelType = Instance<typeof DrawingContentModel>;
-
-registerToolContentInfo({
-  id: kDrawingToolID,
-  tool: "drawing",
-  modelClass: DrawingContentModel,
-  defaultHeight: kDrawingDefaultHeight,
-  exportNonDefaultHeight: true,
-  defaultContent: defaultDrawingContent
-});

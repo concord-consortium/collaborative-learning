@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import { useQueryClient } from 'react-query';
 import { DocumentModelType } from "../../models/document/document";
-import { isProblemType } from "../../models/document/document-types";
-import { AppConfigModelType } from "../../models/stores/app-config-model";
-import { ProblemModelType } from "../../models/curriculum/problem";
+import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import { ENavTabSectionType, NavTabSpec } from "../../models/view/nav-tabs";
 import { DocumentTabPanel } from "./document-tab-panel";
 import { EditableDocumentContent } from "../document/editable-document-content";
@@ -49,13 +47,6 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
     await document.fetchRemoteContent(queryClient, context);
   };
 
-  const documentTitle = (document: DocumentModelType, appConfig: AppConfigModelType, problem: ProblemModelType) => {
-    const { type } = document;
-    return document.isSupport
-      ? document.getProperty("caption") || "Support"
-      : isProblemType(type) ? problem.title : document.getDisplayTitle(appConfig);
-  };
-
   function handleEditClick(document: DocumentModelType) {
     ui.problemWorkspace.setPrimaryDocument(document);
   }
@@ -78,7 +69,7 @@ export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
     <div>
       <div className={`document-header ${tabSpec.tab} ${sectionClass}`} onClick={() => ui.setSelectedTile()}>
         <div className={`document-title`}>
-          {documentTitle(referenceDocument, appConfigStore, problemStore)}
+          {getDocumentDisplayTitle(referenceDocument, appConfigStore, problemStore)}
         </div>
         {!referenceDocument.isRemote && editButton(tabSpec.tab, sectionClass, referenceDocument)}
       </div>

@@ -63,9 +63,9 @@ export class  TeacherGroupTabComponent extends BaseComponent<IProps, IState> {
 
   private setDocumentViewMode = (documentViewMode: DocumentViewMode) => {
     this.setState({documentViewMode});
-  }
+  };
 
   private setSelectedSectionId = (selectedSectionId: string) => {
     this.setState({selectedSectionId});
-  }
+  };
 }

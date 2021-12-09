@@ -4,7 +4,8 @@ import { Lambda } from "mobx";
 import { Optional } from "utility-types";
 import { SelectionStoreModelType } from "../../stores/selection";
 import { addLinkedTable, removeLinkedTable } from "../table-links";
-import { ITileExportOptions, registerToolContentInfo } from "../tool-content-info";
+import { ITileExportOptions, IDefaultContentOptions } from "../tool-content-info";
+import { ToolContentModel, ToolMetadataModel } from "../tool-types";
 import {
   getRowLabelFromLinkProps, IColumnProperties, ICreateRowsProperties, IRowProperties,
   ITableChange, ITableLinkProperties
@@ -23,7 +24,7 @@ import { prepareToDeleteObjects } from "./jxg-polygon";
 import { getTableIdFromLinkChange } from "./jxg-table-link";
 import {
   isAxisArray, isBoard, isComment, isFreePoint, isImage, isLinkedPoint, isMovableLine, isPoint, isPointArray,
-  isPolygon, isVertexAngle, isVisibleEdge, kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, toObj
+  isPolygon, isVertexAngle, isVisibleEdge, kGeometryDefaultPixelsPerUnit, toObj
 } from "./jxg-types";
 import { IDataSet } from "../../data/data-set";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
@@ -45,14 +46,15 @@ export interface IAxesParams {
   yMax: number;
 }
 
-export function defaultGeometryContent(overrides?: JXGProperties): GeometryContentModelType {
-  const { title, ...boardProps } = overrides || {};
+// This is only used directly by tests
+export function defaultGeometryContent(options?: IDefaultContentOptions): GeometryContentModelType {
+  const { title } = options || {};
   const changes: string[] = [];
   if (title) {
     const titleChange: JXGChange = { operation: "update", target: "metadata", properties: { title } };
     changes.push(JSON.stringify(titleChange));
   }
-  const boardChange = defaultGeometryBoardChange(boardProps);
+  const boardChange = defaultGeometryBoardChange();
   changes.push(JSON.stringify(boardChange));
   return GeometryContentModel.create({ changes });
 }
@@ -76,9 +78,9 @@ const LinkedTableEntryModel = types
 
 // track selection in metadata object so it is not saved to firebase but
 // also is preserved across document/content reloads
-export const GeometryMetadataModel = types
-  .model("GeometryMetadata", {
-    id: types.string,
+export const GeometryMetadataModel = ToolMetadataModel
+  .named("GeometryMetadata")
+  .props({
     title: types.maybe(types.string),
     disabled: types.array(types.string),
     selection: types.map(types.boolean),
@@ -157,7 +159,7 @@ export const GeometryMetadataModel = types
     addTableLink(tableId: string, axes: IAxisLabels) {
       if (self.linkedTables.findIndex(entry => entry.id === tableId) < 0) {
         const disposer = self.sharedSelection.observe(tableId, change => {
-          const id = change.name;
+          const id = change.name as string;
           self.setSelection(id, self.sharedSelection.isSelected(tableId, id));
         });
         disposer && (self.tableLinkDisposers[tableId] = disposer);
@@ -212,8 +214,9 @@ function isUndoableChange(change: JXGChange) {
   return true;
 }
 
-export const GeometryContentModel = types
-  .model("GeometryContent", {
+export const GeometryContentModel = ToolContentModel
+  .named("GeometryContent")
+  .props({
     type: types.optional(types.literal(kGeometryToolID), kGeometryToolID),
     changes: types.array(types.string)
   })
@@ -697,7 +700,7 @@ export const GeometryContentModel = types
         const x = xAttr ? Number(dataSet.getValue(caseId, xAttr.id)) : undefined;
         for (let attrIndex = 1; attrIndex < dataSet.attributes.length; ++attrIndex) {
           const yAttr = dataSet.attributes[attrIndex];
-          if (caseId && yAttr) {
+          if (caseId && yAttr && (yAttr.id !== labelAttr?.id)) {
             const y = yAttr ? Number(dataSet.getValue(caseId, yAttr.id)) : undefined;
             ids.push(`${caseId}:${yAttr.id}`);
             points.push({ label, coords: [x, y] });
@@ -1332,16 +1335,3 @@ export function getImageUrl(change?: JXGChange): string[] | undefined {
     return [change.properties.url, change.properties.filename];
   }
 }
-
-registerToolContentInfo({
-  id: kGeometryToolID,
-  tool: "geometry",
-  titleBase: "Graph",
-  modelClass: GeometryContentModel,
-  metadataClass: GeometryMetadataModel,
-  addSidecarNotes: true,
-  defaultHeight: kGeometryDefaultHeight,
-  exportNonDefaultHeight: true,
-  defaultContent: defaultGeometryContent,
-  snapshotPostProcessor: mapTileIdsInGeometrySnapshot
-});

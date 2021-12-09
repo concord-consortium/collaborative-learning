@@ -233,5 +233,5 @@ export class AppComponent extends BaseComponent<IProps, IState> {
 
   private handlePortalLoginRedirect = () => {
     window.location.href = urlParams.domain || "https://learn.concord.org";
-  }
+  };
 }

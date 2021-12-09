@@ -1,10 +1,11 @@
 import { cloneDeep } from "lodash";
 import { getSnapshot, Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree";
-import { kPlaceholderToolID } from "./placeholder/placeholder-content";
 import { ITileExportOptions } from "./tool-content-info";
 import { findMetadata, ToolContentUnion } from "./tool-types";
 import { DisplayUserTypeEnum } from "../stores/user-types";
 import { uniqueId } from "../../utilities/js-utils";
+
+import { kPlaceholderToolID } from "./placeholder/placeholder-content";
 
 // generally negotiated with app, e.g. single column width for table
 export const kDefaultMinWidth = 60;
@@ -39,7 +40,7 @@ export const ToolTileModel = types
     id: types.optional(types.identifier, () => uniqueId()),
     // whether to restrict display to certain users
     display: DisplayUserTypeEnum,
-    // e.g. "GeometryContentModel", "ImageContentModel", "TableContentModel", "TextContentModel"
+    // e.g. "GeometryContentModel", "ImageContentModel", "TableContentModel", "TextContentModel", ...
     content: ToolContentUnion
   })
   .views(self => ({

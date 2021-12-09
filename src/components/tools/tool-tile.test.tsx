@@ -4,7 +4,7 @@ import { act, createEvent, fireEvent, render, screen } from "@testing-library/re
 import { IToolApiInterface, ToolApiInterfaceContext } from "./tool-api";
 import { ToolTileComponent } from "./tool-tile";
 import { ToolTileModel } from "../../models/tools/tool-tile";
-import { UnknownContentModel } from "../../models/tools/unknown-content";
+import { UnknownContentModel } from "../../models/tools/tool-types";
 import { createStores } from "../../app-config";
 
 describe("ToolTile Component", () => {

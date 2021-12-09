@@ -116,12 +116,12 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
 
   private handleDocumentDragStart = (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => {
     e.dataTransfer.setData(DocumentDragKey, document.key);
-  }
+  };
 
   private handleDocumentStarClick = (document: DocumentModelType) => {
     const { user } = this.stores;
     document?.toggleUserStar(user.id);
-  }
+  };
 
   private handleDocumentDeleteClick = (document: DocumentModelType) => {
     const { ui } = this.stores;
@@ -134,12 +134,12 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
           }
         }
       });
-  }
+  };
 
   private handleTabSelect = (tabIndex: number) => {
     this.setState({ tabIndex });
     this.stores.ui.updateFocusDocument();
-  }
+  };
 
   private handleDocumentSelect = (document: DocumentModelType) => {
     const { onSelectDocument } = this.props;
@@ -149,7 +149,7 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
     Logger.logDocumentEvent(logEvent, document);
 
     onSelectDocument?.(document);
-  }
+  };
 
   private renderSubSections(subTab: any) {
     const { selectedDocument, onSelectNewDocument, showNetworkDocuments } = this.props;

@@ -148,7 +148,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       }
     });
     content.setVisibleRows(visibleRowIds);
-  }
+  };
 
   private getRowHeight(rowId: string) {
     const { content } = this.props;
@@ -202,14 +202,14 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   private renderSpacer = () => {
     return !this.props.readOnly &&
             <div className="spacer" onClick={this.handleClick} />;
-  }
+  };
 
   private handleScroll = throttle((e: React.UIEvent<HTMLDivElement>) => {
     const toolApiInterface = this.context;
     const xScroll = this.domElement?.scrollLeft || 0;
     const yScroll = this.domElement?.scrollTop || 0;
     toolApiInterface?.forEach(api => api.handleDocumentScroll?.(xScroll, yScroll));
-  }, 50)
+  }, 50);
 
   private handleRequestTilesOfType = (tileType: string) => {
     const { content } = this.props;
@@ -217,7 +217,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     if (!content || !tileType || !toolApiInterface) return [];
     const tilesOfType = content.getTilesOfType(tileType);
     return tilesOfType.map(id => ({ id, title: toolApiInterface.getToolApi(id)?.getTitle?.() }));
-  }
+  };
 
   private handleRequestUniqueTitle = (tileId: string) => {
     const { content } = this.props;
@@ -226,7 +226,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const titleBase = tileType && getToolContentInfoById(tileType)?.titleBase;
     const getTileTitle = (_tileId: string) => toolApiInterface?.getToolApi?.(_tileId)?.getTitle?.();
     return tileType && titleBase && content?.getUniqueTitle(tileType, titleBase, getTileTitle);
-  }
+  };
 
   private handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const { ui } = this.stores;
@@ -235,7 +235,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     if (e.target === e.currentTarget) {
       ui.setSelectedTile();
     }
-  }
+  };
 
   private handleRowElementsChanged = (mutationsList: MutationRecord[], mutationsObserver: MutationObserver) => {
     if (!this.domElement) return;
@@ -266,7 +266,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
         }
       }
     }
-  }
+  };
 
   private hasDragType(dataTransfer: DataTransfer, type: string) {
     return dataTransfer.types.findIndex(t => t === type) >= 0;
@@ -316,11 +316,11 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       e.dataTransfer.dropEffect = "move";
       e.preventDefault();
     }
-  }
+  };
 
   private handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
     this.clearDropRowInfo();
-  }
+  };
 
   private isPointInRect(x: number, y: number, rect: ClientRect | DOMRect) {
     if ((x == null) || !isFinite(x) || (y == null) || !isFinite(y)) return false;
@@ -380,7 +380,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     }
     dropInfo.updateTimestamp = new Date().getTime();
     return dropInfo;
-  }
+  };
 
   private clearDropRowInfo() {
     if (this.state.dropRowInfo) {
@@ -396,15 +396,15 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       row?.setRowHeight(dragResizeRow.newHeight);
       this.setState({ dragResizeRow: undefined });
     }
-  }
+  };
 
   private handleMoveTilesDrop = (e: React.DragEvent<HTMLDivElement>, dragTiles: IDragTiles) => {
     this.props.content?.userMoveTiles(dragTiles.items, this.getDropRowInfo(e));
-  }
+  };
 
   private handleCopyTilesDrop = (e: React.DragEvent<HTMLDivElement>, dragTiles: IDragTiles) => {
     this.props.content?.userCopyTiles(dragTiles.items, this.getDropRowInfo(e));
-  }
+  };
 
   private handleInsertNewTile = (e: React.DragEvent<HTMLDivElement>) => {
     const { content } = this.props;
@@ -424,7 +424,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     if (rowTile?.tileId) {
       ui.setSelectedTileId(rowTile.tileId);
     }
-  }
+  };
 
   private handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     const { content, readOnly } = this.props;
@@ -465,7 +465,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     }
 
     this.clearDropRowInfo();
-  }
+  };
 
   private scrollToSection(sectionId: string | null | undefined ) {
     if (!sectionId || !this.domElement) {

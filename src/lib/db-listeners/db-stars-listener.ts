@@ -46,5 +46,5 @@ export class DBStarsListener extends BaseListener {
         });
       }
     }
-  }
+  };
 }

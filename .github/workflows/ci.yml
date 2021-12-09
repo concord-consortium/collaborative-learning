@@ -9,6 +9,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
+        with:
+          node-version: '16'
       - name: Install Dependencies
         run: npm ci
       - name: Build
@@ -16,9 +18,10 @@ jobs:
       - name: Run Tests
         run: npm run test:coverage -- --runInBand
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v2
         with:
           flags: jest
+          token: ${{ secrets.CODECOV_TOKEN }}
   cypress:
     runs-on: ubuntu-latest
     strategy:
@@ -55,9 +58,10 @@ jobs:
           # should be much faster
           CODE_COVERAGE: true
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v2
         with:
           flags: cypress
+          token: ${{ secrets.CODECOV_TOKEN }}
   s3-deploy:
     name: S3 Deploy
     needs:
@@ -67,6 +71,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
+        with:
+          node-version: '16'
       - name: Setup Ruby
         uses: actions/setup-ruby@v1
         with:

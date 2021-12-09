@@ -1,3 +1,4 @@
+import { IReactionDisposer, reaction } from "mobx";
 import { Instance, types } from "mobx-state-tree";
 import { DocumentContentModel } from "../document/document-content";
 import { InvestigationModel } from "./investigation";
@@ -41,12 +42,21 @@ export const UnitModel = types
     defaultStamps: types.array(StampModel),
     settings: types.maybe(SettingsMstType)
   })
+  .volatile(self => ({
+    userListenerDisposer: null as IReactionDisposer | null
+  }))
   .actions(self => ({
     afterCreate() {
       registerSectionInfo(self.sections);
       if (self.planningDocument?.sectionInfo) {
         registerSectionInfo(self.planningDocument.sectionInfo);
       }
+    },
+    beforeDestroy() {
+      self.userListenerDisposer?.();
+    },
+    installUserListener(isTeacherFn: () => boolean, reactionFn: (isTeacher: boolean) => Promise<void>) {
+      self.userListenerDisposer = reaction(isTeacherFn, reactionFn, { fireImmediately: true });
     }
   }))
   .views(self => ({

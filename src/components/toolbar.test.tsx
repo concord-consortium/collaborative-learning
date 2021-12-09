@@ -6,7 +6,11 @@ import { ModalProvider } from "react-modal-hook";
 import { DocumentModel } from "../models/document/document";
 import { DocumentContentModel } from "../models/document/document-content";
 import { createStores } from "../models/stores/stores";
-import { ToolbarComponent, ToolbarConfig } from "./toolbar";
+import { ToolbarComponent } from "./toolbar";
+import { ToolbarModel, ToolbarModelSnapshot } from "../models/stores/app-config-model";
+
+// This is needed so MST can deserialize snapshots referring to tools
+import "../register-tools";
 
 describe("ToolbarComponent", () => {
 
@@ -20,7 +24,7 @@ describe("ToolbarComponent", () => {
                     content: content as any
                   });
 
-  const config: ToolbarConfig = [
+  const config: ToolbarModelSnapshot = [
     {
       name: "select",
       title: "Select",
@@ -31,7 +35,6 @@ describe("ToolbarComponent", () => {
     {
       name: "text",
       title: "Text",
-      iconId: "icon-text-tool",
       isDefault: false,
       isTileTool: true
     },
@@ -48,7 +51,7 @@ describe("ToolbarComponent", () => {
     render(
       <ModalProvider>
         <Provider stores={stores}>
-          <ToolbarComponent config={config} document={document}/>
+          <ToolbarComponent toolbarModel={ToolbarModel.create(config)} document={document}/>
         </Provider>
       </ModalProvider>
     );

@@ -129,5 +129,5 @@ export class TeacherGroupSixPackFourUp extends BaseComponent<IProps, IState> {
 
   private setFocusedGroupUser = (focusedGroupUser?: GroupUserModelType) => {
     this.setState({focusedGroupUser});
-  }
+  };
 }

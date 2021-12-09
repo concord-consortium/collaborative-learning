@@ -422,8 +422,8 @@
         {
           "description": "Problem 1.2",
           "ordinal": 2,
-          "title": "MSA 1.2 Walking Rates and Linear Relationships",
-          "subtitle": "Tables, Graphs, and Equations",
+          "title": "MSA 1.2 Walking Rates",
+          "subtitle": "Exploring Linear Relationships with Tables, Graphs, and Equations",
           "sections": [
             {
               "type": "introduction",
@@ -993,7 +993,7 @@
           "description": "Problem 1.3",
           "ordinal": 3,
           "title": "MSA 1.3 Raising Money",
-          "subtitle": "Using Linear Relationships to Solve Equations",
+          "subtitle": "Using Linear Relationships to Solve Problems",
           "sections": [{
               "type": "introduction",
               "content": {
@@ -2361,7 +2361,7 @@
           "description": "Problem 2.2",
           "ordinal": 2,
           "title": "MSA 2.2 Comparing Cost Relationships",
-          "subtitle": "Using Tables and Graphs to Find Solutions to Equations",
+          "subtitle": "Using Tables and Graphs to Solve Problems",
           "sections": [
             {
               "type": "introduction",
@@ -4577,7 +4577,7 @@
           "description": "Problem 4.1",
           "ordinal": 1,
           "title": "MSA 4.1 Climbing Stairs",
-          "subtitle": "Using the Ratio of Rise and Run",
+          "subtitle": "Using the Ratio of Rise to Run",
           "sections": [
             {
               "type": "introduction",

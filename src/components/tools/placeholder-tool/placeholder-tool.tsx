@@ -2,15 +2,11 @@ import React from "react";
 import { BaseComponent } from "../../base";
 import { getSectionPlaceholder } from "../../../models/curriculum/section";
 import { PlaceholderContentModelType } from "../../../models/tools/placeholder/placeholder-content";
-import { ToolTileModelType } from "../../../models/tools/tool-tile";
+import { IToolTileProps } from "../tool-tile";
 
 import "./placeholder-tool.sass";
 
-interface IProps {
-  model: ToolTileModelType;
-}
-
-export default class PlaceholderToolComponent extends BaseComponent<IProps> {
+export default class PlaceholderToolComponent extends BaseComponent<IToolTileProps> {
   public render() {
     return (
       <div className="placeholder-tool" onMouseDown={this.handleMouseDown} >
@@ -37,5 +33,5 @@ export default class PlaceholderToolComponent extends BaseComponent<IProps> {
 
   private handleMouseDown = (e: React.MouseEvent) => {
     this.stores.ui.setSelectedTile();
-  }
+  };
 }

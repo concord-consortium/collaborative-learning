@@ -37,7 +37,7 @@ export const GeometryToolbar: React.FC<IProps> = observer(({
                     ...others
                   });
   // reference the entire selection map so selection changes trigger observable render
-  content.metadata.selection.toJS();
+  content.metadata.selection.toJSON();
   const selectedObjects = board && content.selectedObjects(board);
   const selectedPoints = selectedObjects?.filter(isPoint);
   const selectedPoint = selectedPoints?.length === 1 ? selectedPoints[0] : undefined;

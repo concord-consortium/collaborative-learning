@@ -115,7 +115,7 @@ export class DBSupportsListener extends BaseListener {
         }
       });
     }
-  }
+  };
 
   private createSupportModel(uid: string,
                              sectionTarget: string | undefined,
@@ -192,11 +192,11 @@ export class DBSupportsListener extends BaseListener {
     const val = snapshot.val() || undefined;
     this.debugLogSnapshot("#handleLastSupportViewTimestampRef", snapshot);
     this.db.stores.user.setLastSupportViewTimestamp(val);
-  }
+  };
 
   private handleLastStickyNoteViewTimestampRef = (snapshot: firebase.database.DataSnapshot) => {
     const val = snapshot.val() || undefined;
     this.debugLogSnapshot("#handleLastStickyNoteViewTimestampRef", snapshot);
     this.db.stores.user.setLastStickyNoteViewTimestamp(val);
-  }
+  };
 }

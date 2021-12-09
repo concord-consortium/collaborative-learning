@@ -28,7 +28,7 @@ export class ProblemMenuContainer extends BaseComponent <IProps> {
       parameters: {text, link}
     };
     Logger.log(logItem.event, logItem.parameters, LogEventMethod.DO);
-  }
+  };
 
   private showUnassignedLinkAlert(problemName: string) {
     const { ui } = this.stores;

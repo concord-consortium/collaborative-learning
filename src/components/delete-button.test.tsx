@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import Modal from "react-modal";
 import { ModalProvider } from "react-modal-hook";
+import { ToolButtonModel } from "../models/tools/tool-button";
 import { DeleteButton } from "./delete-button";
 
 describe("DeleteButton", () => {
@@ -27,6 +28,7 @@ describe("DeleteButton", () => {
           isDefault: false,
           isTileTool: false
         };
+  const toolButton = ToolButtonModel.create(buttonConfig);
 
   it("renders when disabled", () => {
     render(
@@ -34,7 +36,7 @@ describe("DeleteButton", () => {
         <div className="app"/>
         <ModalProvider>
           <DeleteButton
-            config={buttonConfig}
+            toolButton={toolButton}
             isActive={false} isDisabled={true}
             onSetToolActive={onSetToolActive}
             onClick={onClick}
@@ -60,8 +62,7 @@ describe("DeleteButton", () => {
         <div className="app"/>
         <ModalProvider>
           <DeleteButton
-            config={buttonConfig}
-            ToolIcon={() => null}
+            toolButton={toolButton}
             isActive={false} isDisabled={false}
             onSetToolActive={onSetToolActive}
             onClick={onClick}
@@ -97,7 +98,7 @@ describe("DeleteButton", () => {
         <div className="app"/>
         <ModalProvider>
           <DeleteButton
-            config={buttonConfig}
+            toolButton={toolButton}
             isActive={false} isDisabled={false}
             onSetToolActive={onSetToolActive}
             onClick={handleClick}

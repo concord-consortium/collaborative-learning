@@ -205,25 +205,33 @@ class ClueCanvas {
             });
     }
 
+    selectLastTileOfType(tileType) {
+      let tileElement = null;
+
+      switch (tileType) {
+          case 'text':
+              textToolTile.getTextTile().last().focus();
+              tileElement = cy.get('.text-tool-wrapper').parent();
+              break;
+          case 'graph':
+              tileElement = graphToolTile.getGraphTile().last().click({ force: true }).parent();
+              break;
+          case 'image':
+              tileElement = imageToolTile.getImageTile().last().click({ force: true }).parent();
+              break;
+          case 'draw':
+              // For some reason the getDrawTile returns the tool tile component
+              tileElement = drawToolTile.getDrawTile().last().click({ force: true });
+              break;
+          case 'table':
+              tileElement = tableToolTile.getTableTile().last().click({ force: true }).parent();
+              break;
+      }
+      tileElement.should('have.class','selected');
+    }
+
     deleteTile(tile) {
-        switch (tile) {
-            case 'text':
-                textToolTile.getTextTile().last().focus();
-                cy.get('.text-tool-wrapper').parent().should('have.class','selected');
-                break;
-            case 'graph':
-                graphToolTile.getGraphTile().last().click({ force: true });
-                break;
-            case 'image':
-                imageToolTile.getImageTile().last().click({ force: true });
-                break;
-            case 'draw':
-                drawToolTile.getDrawTile().last().click({ force: true });
-                break;
-            case 'table':
-                tableToolTile.getTableTile().last().click({ force: true });
-                break;
-        }
+        this.selectLastTileOfType(tile);
         this.getDeleteTool().click({ force: true });
         cy.get('.ReactModalPortal .modal-footer .modal-button.default').click();
     }

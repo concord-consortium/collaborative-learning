@@ -1,7 +1,7 @@
-import { types, Instance, SnapshotIn } from "mobx-state-tree";
+import { applySnapshot, types, Instance, SnapshotIn } from "mobx-state-tree";
 import { forEach } from "lodash";
 import { QueryClient, UseQueryResult } from "react-query";
-import { DocumentContentModel, DocumentContentModelType } from "./document-content";
+import { DocumentContentModel, DocumentContentSnapshotType } from "./document-content";
 import {
   DocumentType, DocumentTypeEnum, IDocumentContext, ISetProperties, LearningLogDocument, LearningLogPublication,
   PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemPublication,
@@ -169,8 +169,13 @@ export const DocumentModel = types
       }
     },
 
-    setContent(content: DocumentContentModelType) {
-      self.content = content;
+    setContent(snapshot: DocumentContentSnapshotType) {
+      if (self.content) {
+        applySnapshot(self.content, snapshot);
+      }
+      else {
+        self.content = DocumentContentModel.create(snapshot);
+      }
     },
 
     toggleVisibility(visibility?: "public" | "private") {
@@ -233,7 +238,7 @@ export const DocumentModel = types
             const networkDocument = await getNetworkDocument({ context, context_id, uid, key });
             const { content, metadata } = networkDocument.data as IGetNetworkDocumentResponse;
             const _content = safeJsonParse(content.content);
-            _content && self.setContent(DocumentContentModel.create(_content));
+            _content && self.setContent(_content);
             self.setCreatedAt(metadata.createdAt);
             return { content, metadata };
           });

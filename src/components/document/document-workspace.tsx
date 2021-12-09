@@ -1,5 +1,4 @@
 import { inject, observer } from "mobx-react";
-import { getSnapshot } from "mobx-state-tree";
 import React from "react";
 import { DocumentComponent, WorkspaceSide } from "../../components/document/document";
 import { GroupVirtualDocumentComponent } from "../../components/document/group-virtual-document";
@@ -135,7 +134,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     const groupVirtualDocument = comparisonDocumentKey
       && groups.virtualDocumentForGroup(comparisonDocumentKey);
 
-    const toolbar = appConfig && getSnapshot(appConfig.toolbar);
+    const toolbar = appConfig.toolbar;
 
     if (!primaryDocument) {
       return this.renderDocument("single-workspace", "primary");
@@ -232,17 +231,17 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   private isAcceptableImageDrag = (e: React.DragEvent<HTMLDivElement>) => {
     // make sure we have a primary document to drop onto
     return !!this.getPrimaryDocument(this.stores.ui.problemWorkspace.primaryDocumentKey);
-  }
+  };
 
   private handleDragOverWorkspace = (e: React.DragEvent<HTMLDivElement>) => {
     this.imageDragDrop.dragOver(e);
-  }
+  };
 
   private handleDragOverSide = (e: React.DragEvent<HTMLDivElement>) => {
     if (this.imageDragDrop.dragOver(e) || e.dataTransfer.types.find((type) => type === DocumentDragKey)) {
       e.preventDefault();
     }
-  }
+  };
 
   private handleDropSide = (side: WorkspaceSide) => {
     return (e: React.DragEvent<HTMLDivElement>) => {
@@ -270,7 +269,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         this.handleImageDrop(e, rowId);
       }
     };
-  }
+  };
 
   private handleImageDrop = (e: React.DragEvent<HTMLDivElement>, rowId?: string) => {
     const {ui} = this.stores;
@@ -292,11 +291,11 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
       .catch((err) => {
         ui.alert(err.toString());
       });
-  }
+  };
 
   private handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // placeholder
-  }
+  };
 
   private handleNewDocument = (type: string) => {
     const { appConfig, documents, ui, user } = this.stores;
@@ -318,7 +317,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         this.handleNewDocumentOpen(docType, title)
         .catch(error => ui.setError(error));
       });
-  }
+  };
 
   private handleNewDocumentOpen = async (type: OtherDocumentType, title: string) => {
     const { appConfig, db, ui: { problemWorkspace } } = this.stores;
@@ -328,7 +327,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     if (newDocument) {
       problemWorkspace.setPrimaryDocument(newDocument);
     }
-  }
+  };
 
   private handleCopyDocument = (document: DocumentModelType) => {
     const { appConfig, ui } = this.stores;
@@ -344,7 +343,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         this.handleCopyDocumentOpen(document, title)
         .catch(error => ui.setError(error));
       });
-  }
+  };
 
   private handleCopyDocumentOpen = async (document: DocumentModelType, title: string) => {
     const { db, ui: { problemWorkspace } } = this.stores;
@@ -352,7 +351,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     if (copyDocument) {
       problemWorkspace.setPrimaryDocument(copyDocument);
     }
-  }
+  };
 
   private handleDeleteDocument = (document: DocumentModelType) => {
     const { appConfig } = this.stores;
@@ -365,7 +364,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         this.handleDeleteOpenPrimaryDocument();
       }
     });
-  }
+  };
 
   private handleDeleteOpenPrimaryDocument = async () => {
     const { appConfig: { defaultDocumentType, defaultDocumentContent },
@@ -374,7 +373,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     if (defaultDocument) {
       problemWorkspace.setPrimaryDocument(defaultDocument);
     }
-  }
+  };
 
   private getProblemBaseTitle(title: string) {
     const match = /[\d.]*[\s]*(.+)/.exec(title);
@@ -398,7 +397,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         ui.alert(`Your support was published to ${classes.length} ${classWord}.`, "Support Published");
       })
       .catch((reason) => ui.alert(`Your support failed to publish: ${reason}`, "Error"));
-  }
+  };
 
   private handlePublishDocument = (document: DocumentModelType) => {
     const { appConfig, db, ui } = this.stores;
@@ -415,7 +414,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
             .catch((reason) => ui.alert(`Your document failed to publish: ${reason}`, "Error"));
         }
       });
-  }
+  };
 
   private getPrimaryDocument(documentKey?: string) {
     if (documentKey) {
@@ -430,7 +429,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     } else if (ui.dividerPosition === kDividerHalf) {
       ui.setDividerPosition(kDividerMin);
     }
-  }
+  };
 
   private toggleExpandResources = () => {
     const { ui } = this.stores;
@@ -439,5 +438,5 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     } else if (ui.dividerPosition === kDividerHalf) {
       ui.setDividerPosition(kDividerMax);
     }
-  }
+  };
 }

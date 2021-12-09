@@ -209,5 +209,5 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
           db.leaveGroup();
         }
       });
-  }
+  };
 }

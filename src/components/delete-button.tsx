@@ -1,6 +1,5 @@
 import classNames from "classnames";
 import React from "react";
-import { DocumentTool } from "../models/document/document";
 import { IButtonProps } from "./tool-button";
 import { useCautionAlert } from "./utilities/use-caution-alert";
 
@@ -10,18 +9,17 @@ interface IProps extends IButtonProps {
 }
 
 export const DeleteButton: React.FC<IProps> =
-  ({ config, ToolIcon, isActive, isDisabled, onSetToolActive, onClick,
+  ({ toolButton, isActive, isDisabled, onSetToolActive, onClick,
       onSetShowDeleteTilesConfirmationAlert, onDeleteSelectedTiles }) => {
 
-  const { name, title } = config;
-  const toolName = name as DocumentTool;
+  const { name, title, Icon } = toolButton;
 
   const handleMouseDown = () => {
-    !isDisabled && onSetToolActive(toolName, true);
+    !isDisabled && onSetToolActive(toolButton, true);
   };
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    !isDisabled && onClick(e, toolName);
+    !isDisabled && onClick(e, toolButton);
   };
 
   const AlertContent = () => {
@@ -35,7 +33,7 @@ export const DeleteButton: React.FC<IProps> =
   });
   onSetShowDeleteTilesConfirmationAlert(showAlert);
 
-  const classes = classNames("tool", "delete-button", toolName,
+  const classes = classNames("tool", "delete-button", name,
                             { active: isActive }, isDisabled ? "disabled" : "enabled");
   return (
     <div className={classes} data-testid="delete-button"
@@ -43,7 +41,7 @@ export const DeleteButton: React.FC<IProps> =
         title={title}
         onMouseDown={handleMouseDown}
         onClick={handleClick}>
-      {ToolIcon && <ToolIcon />}
+      {Icon && <Icon />}
     </div>
   );
 };

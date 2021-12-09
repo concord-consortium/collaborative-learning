@@ -240,16 +240,16 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
     const { toolTile } = this.props;
     toolTile && this.tileContentRect &&
       this.toolbarToolApi?.handleTileResize?.({ target: toolTile, contentRect: this.tileContentRect });
-  }
+  };
 
   private handleUnregisterToolApi = () => {
     this.toolbarToolApi = undefined;
-  }
+  };
 
   private handleIsEnabled = () => {
     // text toolbar is based on editor focus rather than tile selection
     return !!this.state.value?.selection.isFocused;
-  }
+  };
 
   private handleChange = (value: EditorValue) => {
     const { readOnly, model } = this.props;
@@ -267,7 +267,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
         selectedButtons: this.getSelectedIcons(value).sort()
       });
     }
-  }
+  };
 
   private getSelectedIcons(value: EditorValue): string[] {
     const listOfMarks = value.activeMarks;
@@ -308,7 +308,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
       ui.setSelectedTile(model, { append: isExtendingSelection });
       e.preventDefault();
     }
-  }
+  };
 
   private getContent() {
     return this.props.model.content as TextContentModelType;

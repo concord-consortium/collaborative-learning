@@ -1,21 +1,23 @@
 import mockXhr from "xhr-mock";
-import { Logger, LogEventName } from "./logger";
+import { Logger, LogEventName, ILogComment } from "./logger";
 import { DocumentModel, DocumentModelType } from "../models/document/document";
 import { ProblemDocument } from "../models/document/document-types";
 import { AppConfigModel } from "../models/stores/app-config-model";
-import { DocumentContentModel } from "../models/document/document-content";
 import { InvestigationModel } from "../models/curriculum/investigation";
 import { IStores, createStores } from "../models/stores/stores";
 import { UserModel } from "../models/stores/user";
 import { WorkspaceModel, ProblemWorkspace, WorkspaceModelType, LearningLogWorkspace } from "../models/stores/workspace";
 import { defaultGeometryContent } from "../models/tools/geometry/geometry-content";
 import { JXGChange } from "../models/tools/geometry/jxg-changes";
-import { defaultTextContent } from "../models/tools/text/text-content";
+import { TextContentModel } from "../models/tools/text/text-content";
 import { IDragTileItem, ToolTileModel } from "../models/tools/tool-tile";
 import { createSingleTileContent } from "../utilities/test-utils";
 import { ProblemModelType } from "../models/curriculum/problem";
 import { UIModel } from "../models/stores/ui";
 import { ENavTab } from "../models/view/nav-tabs";
+
+// This is needed so MST can deserialize snapshots referring to tools
+import "../register-tools";
 
 const investigation = InvestigationModel.create({
   ordinal: 1,
@@ -119,6 +121,55 @@ describe("dev/qa/test logger with DEBUG_LOGGER false", () => {
 
 });
 
+describe("demo logger with DEBUG_LOGGER false", () => {
+  let stores: IStores;
+
+  beforeEach(() => {
+    mockXhr.setup();
+    stores = createStores({
+      appMode: "demo",
+      appConfig: AppConfigModel.create({ appName: "TestLogger"}),
+      ui: UIModel.create({
+        activeNavTab: ENavTab.kStudentWork,
+        problemWorkspace: {
+          type: ProblemWorkspace,
+          mode: "1-up"
+        },
+        learningLogWorkspace: {
+          type: LearningLogWorkspace,
+          mode: "1-up"
+        },
+      }),
+      user: UserModel.create({id: "0", type: "teacher", portal: "test"})
+    });
+
+    Logger.initializeLogger(stores, investigation, problem);
+  });
+
+  afterEach(() => {
+    mockXhr.reset();
+    mockXhr.teardown();
+  });
+
+  it("does not log in demo mode", (done) => {
+    const TEST_LOG_MESSAGE = 999;
+    const mockPostHandler = jest.fn((req, res) => {
+      expect(mockPostHandler).toHaveBeenCalledTimes(1);
+      done();
+      return res.status(201);
+    });
+    mockXhr.use(mockPostHandler);
+
+    // should not be logged due to mode
+    Logger.log(TEST_LOG_MESSAGE);
+
+    // should be logged
+    Logger.isLoggingEnabled = true;
+    Logger.log(TEST_LOG_MESSAGE);
+  });
+
+});
+
 describe("authed logger", () => {
   let stores: IStores;
 
@@ -184,7 +235,7 @@ describe("authed logger", () => {
     });
 
     it("can log tile creation", (done) => {
-      const tile = ToolTileModel.create({ content: defaultTextContent() });
+      const tile = ToolTileModel.create({ content: TextContentModel.create() });
 
       mockXhr.post(/.*/, (req, res) => {
         const request = JSON.parse(req.body());
@@ -205,7 +256,7 @@ describe("authed logger", () => {
       Logger.logTileEvent(LogEventName.CREATE_TILE, tile);
     });
 
-    it("can log an ADD comment event", (done) => {
+    it("can log an ADD a document initial comment event", (done) => {
       const document = DocumentModel.create({
         type: ProblemDocument,
         uid: "1",
@@ -215,16 +266,78 @@ describe("authed logger", () => {
         visibility: "public"
       });
       stores.documents.add(document);
-      const tile = ToolTileModel.create({ content: defaultTextContent() });
+      const documentKey = document.key;
+      const commentText = "TeSt";
+      const addEventPayload: ILogComment = {
+        focusDocumentId: document.key,
+        isFirst: true,
+        commentText,
+        action: "add"
+      };
+
+      mockXhr.post(/.*/, (req, res) => {
+        const addCommentRequest = JSON.parse(req.body());
+        expect(addCommentRequest.event).toBe("ADD_INITIAL_COMMENT_FOR_DOCUMENT");
+        expect(addCommentRequest.parameters.commentText).toBe(commentText);
+        expect(addCommentRequest.parameters.documentKey).toBe(documentKey);
+        done();
+        return res.status(201);
+      });
+
+      Logger.logCommentEvent(addEventPayload);
+    });
+
+    it("can log an ADD a document response comment event", (done) => {
+      const document = DocumentModel.create({
+        type: ProblemDocument,
+        uid: "1",
+        key: "source-document",
+        createdAt: 1,
+        content: {},
+        visibility: "public"
+      });
+      stores.documents.add(document);
+      const documentKey = document.key;
+      const commentText = "TeSt";
+      const addEventPayload: ILogComment = {
+        focusDocumentId: document.key,
+        isFirst: false,
+        commentText,
+        action: "add"
+      };
+
+      mockXhr.post(/.*/, (req, res) => {
+        const addCommentRequest = JSON.parse(req.body());
+        expect(addCommentRequest.event).toBe("ADD_RESPONSE_COMMENT_FOR_DOCUMENT");
+        expect(addCommentRequest.parameters.commentText).toBe(commentText);
+        expect(addCommentRequest.parameters.documentKey).toBe(documentKey);
+        done();
+        return res.status(201);
+      });
+
+      Logger.logCommentEvent(addEventPayload);
+    });
+
+    it("can log an ADD a tile comment event", (done) => {
+      const document = DocumentModel.create({
+        type: ProblemDocument,
+        uid: "1",
+        key: "source-document",
+        createdAt: 1,
+        content: {},
+        visibility: "public"
+      });
+      stores.documents.add(document);
+      const tile = ToolTileModel.create({ content: TextContentModel.create() });
       const tileId = tile.id;
       const documentKey = document.key;
       const commentText = "TeSt";
-      const addEventPayload = {
+      const addEventPayload: ILogComment = {
         focusDocumentId: document.key,
         focusTileId: tile.id,
         isFirst: false,
-        commentText: "TeSt",
-        isAdding: true
+        commentText,
+        action: "add"
       };
 
       mockXhr.post(/.*/, (req, res) => {
@@ -240,7 +353,7 @@ describe("authed logger", () => {
       Logger.logCommentEvent(addEventPayload);
     });
 
-    it("can log a DELETE comment event", (done) => {
+    it("can log a DELETE document comment event", (done) => {
       const document = DocumentModel.create({
         type: ProblemDocument,
         uid: "1",
@@ -250,16 +363,46 @@ describe("authed logger", () => {
         visibility: "public"
       });
       stores.documents.add(document);
-      const tile = ToolTileModel.create({ content: defaultTextContent() });
+      const documentKey = document.key;
+      const commentText = "TeSt";
+      const deleteEventPayload: ILogComment = {
+        focusDocumentId: document.key,
+        isFirst: false,
+        commentText,
+        action: "delete"
+      };
+
+      mockXhr.post(/.*/, (req, res) => {
+        const deleteCommentRequest = JSON.parse(req.body());
+        expect(deleteCommentRequest.event).toBe("DELETE_COMMENT_FOR_DOCUMENT");
+        expect(deleteCommentRequest.parameters.commentText).toBe(commentText);
+        expect(deleteCommentRequest.parameters.documentKey).toBe(documentKey);
+        done();
+        return res.status(201);
+      });
+      Logger.logCommentEvent(deleteEventPayload);
+    });
+
+    it("can log a DELETE tile comment event", (done) => {
+      const document = DocumentModel.create({
+        type: ProblemDocument,
+        uid: "1",
+        key: "source-document",
+        createdAt: 1,
+        content: {},
+        visibility: "public"
+      });
+      stores.documents.add(document);
+      const tile = ToolTileModel.create({ content: TextContentModel.create() });
       const tileId = tile.id;
       const documentKey = document.key;
       const commentText = "TeSt";
-      const deleteEventPayload = {
+      const deleteEventPayload: ILogComment = {
         focusDocumentId: document.key,
         focusTileId: tile.id,
         isFirst: false,
-        commentText: "TeSt",
-        isAdding: false
+        commentText,
+        action: "delete"
       };
 
       mockXhr.post(/.*/, (req, res) => {
@@ -314,8 +457,7 @@ describe("authed logger", () => {
         content: {},
         visibility: "public"
       });
-      const content = createSingleTileContent({ type: "Text", text: "test" });
-      sourceDocument.setContent(DocumentContentModel.create(content));
+      sourceDocument.setContent(createSingleTileContent({ type: "Text", text: "test" }));
 
       const destinationDocument = DocumentModel.create({
         type: ProblemDocument,

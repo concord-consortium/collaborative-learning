@@ -75,7 +75,7 @@ export class DBOtherDocumentsListener extends BaseListener {
         })
         .then(documents.add);
     }
-  }
+  };
 
   private handlePublicationAdded = (snapshot: firebase.database.DataSnapshot) => {
     const {documents} = this.db.stores;
@@ -85,7 +85,7 @@ export class DBOtherDocumentsListener extends BaseListener {
       this.db.createDocumentModelFromOtherPublication(dbDoc, this.publicationType)
         .then(documents.add);
     }
-  }
+  };
 
   private handleDocumentChanged = (snapshot: firebase.database.DataSnapshot) => {
     const {documents} = this.db.stores;
@@ -97,7 +97,7 @@ export class DBOtherDocumentsListener extends BaseListener {
         documentModel.setTitle(dbDoc.title);
       }
     }
-  }
+  };
 
   private handleDocumentRemoved = (snapshot: firebase.database.DataSnapshot) => {
     const {documents} = this.db.stores;
@@ -110,5 +110,5 @@ export class DBOtherDocumentsListener extends BaseListener {
         // TODO: still need UI story for delete
       }
     }
-  }
+  };
 }

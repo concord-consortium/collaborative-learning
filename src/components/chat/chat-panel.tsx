@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import {  Logger } from "../../lib/logger";
+import { ILogComment, Logger } from "../../lib/logger";
 import { UserModelType } from "../../models/stores/user";
 import { ChatPanelHeader } from "./chat-panel-header";
 import { CommentCard } from "./comment-card";
@@ -31,12 +31,12 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
     if (focusDocument) {
       const numComments = postedComments ? postedComments.length : 0;
       const focusDocumentId = focusDocument;
-      const eventPayload = {
+      const eventPayload: ILogComment = {
         focusDocumentId,
         focusTileId,
         isFirst: (numComments < 1),
         commentText: comment,
-        isAdding: true
+        action: "add"
       };
       Logger.logCommentEvent(eventPayload);
     }
@@ -52,11 +52,11 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
 
   const deleteComment = useCallback((commentId: string, commentText: string) => {
     if (focusDocument) {
-      const eventPayload = {
+      const eventPayload: ILogComment = {
         focusDocumentId: focusDocument,
         focusTileId,
         commentText,
-        isAdding: false
+        action: "delete"
       };
       Logger.logCommentEvent(eventPayload);
     }
