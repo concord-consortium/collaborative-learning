@@ -360,16 +360,24 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       y: e.clientY,
     };
 
+    const getSplittersFromEvent = (event: MouseEvent) => {
+      return {
+        hSplitter: allowHorizontal ? start.hSplitter + (event.clientY - start.y) : start.hSplitter,
+        vSplitter: allowVertical ? start.vSplitter + (event.clientX - start.x) : start.vSplitter,
+      };
+    };
+
     const handleMouseMove = (moveE: MouseEvent) => {
-      this.grid.update({
-        hSplitter: allowHorizontal ? start.hSplitter + (moveE.clientY - start.y) : start.hSplitter,
-        vSplitter: allowVertical ? start.vSplitter + (moveE.clientX - start.x) : start.vSplitter,
-      });
+      this.grid.update(getSplittersFromEvent(moveE));
     };
 
     const handleMouseUp = (upE: MouseEvent) => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
+
+      const _start = { hSplitter: start.hSplitter, vSplitter: start.vSplitter };
+      const end = getSplittersFromEvent(upE);
+      Logger.log(LogEventName.VIEW_FOUR_UP_RESIZED, { start: _start, end });
     };
 
     window.addEventListener("mousemove", handleMouseMove);
