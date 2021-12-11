@@ -1,5 +1,5 @@
 import firebase from "firebase/app";
-import { debounce } from "lodash";
+import { throttle } from "lodash";
 import { observable, makeObservable } from "mobx";
 import { getSnapshot, IDisposer, onPatch, onSnapshot } from "mobx-state-tree";
 
@@ -235,7 +235,7 @@ export class DBListeners extends BaseListener {
     }
   };
 
-  private debouncedSaveDocument = debounce((document: DocumentModelType) => {
+  private throttledSaveDocument = throttle((document: DocumentModelType) => {
     const { user } = this.db.stores;
     const { key, changeCount, content } = document;
     if (content) {
@@ -251,8 +251,9 @@ export class DBListeners extends BaseListener {
           console.warn("Failed save!", "document:", key, "changeCount:", changeCount);
         });
     }
-    // two-second debounce so that, for instance, we save when the user pauses while typing
-  }, 2000);
+    // two-second throttle on the trailing edge so that with continued changes we save
+    // at least and at most once every two seconds
+  }, 2000, { trailing: true });
 
   private monitorDocumentModel = (document: DocumentModelType, monitor: Monitor) => {
     // skip if not monitoring local changes
@@ -270,7 +271,7 @@ export class DBListeners extends BaseListener {
     if (content) {
       docListener.modelDisposer = onPatch(content, (patch) => {
         document.incChangeCount();
-        this.debouncedSaveDocument(document);
+        this.throttledSaveDocument(document);
       });
     }
   };
