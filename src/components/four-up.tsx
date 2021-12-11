@@ -1,3 +1,4 @@
+import { debounce } from "lodash";
 import { observer, inject } from "mobx-react";
 import React from "react";
 import ResizeObserver from "resize-observer-polyfill";
@@ -67,16 +68,8 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     this.resizeObserver = new ResizeObserver(entries => {
       for (const entry of entries) {
         if (entry.target === this.container) {
-          const {width, height} = entry.contentRect;
-          if (width > 0 && height > 0) {
-            this.grid.update({
-              height: height - BORDER_SIZE,
-              initSplitters: !this.roIsInitialized,
-              resizeSplitters: this.roIsInitialized,
-              width
-            });
-            this.roIsInitialized = true;
-          }
+          // debounce to prevent resize loops
+          this.handleResizeDebounced(entry);
         }
       }
     });
@@ -333,6 +326,19 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       </div>
     );
   };
+
+  private handleResizeDebounced = debounce((entry: ResizeObserverEntry) => {
+    const {width, height} = entry.contentRect;
+    if (width > 0 && height > 0) {
+      this.grid.update({
+        height: height - BORDER_SIZE,
+        initSplitters: !this.roIsInitialized,
+        resizeSplitters: this.roIsInitialized,
+        width
+      });
+      this.roIsInitialized = true;
+    }
+  }, 100);
 
   private handleHSplitter = (e: React.MouseEvent<HTMLDivElement>) => {
     this.handleSplitters(e, true, false);

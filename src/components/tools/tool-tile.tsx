@@ -1,4 +1,5 @@
 import classNames from "classnames";
+import { debounce } from "lodash";
 import { observer, inject } from "mobx-react";
 import React from "react";
 import ResizeObserver from "resize-observer-polyfill";
@@ -164,12 +165,9 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
   public componentDidUpdate() {
     if (this.domElement && !this.resizeObserver) {
       this.resizeObserver = new ResizeObserver((entries: ResizeObserverEntry[]) => {
-        const handler = this.getToolResizeHandler();
-        if (handler) {
-          for (const entry of entries) {
-            if (entry.target === this.domElement) {
-              handler(entry);
-            }
+        for (const entry of entries) {
+          if (entry.target === this.domElement) {
+            this.handleResizeDebounced(entry);
           }
         }
       });
@@ -290,6 +288,10 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     const toolApiInterface = this.context;
     toolApiInterface?.unregister(id);
   };
+
+  private handleResizeDebounced = debounce((entry: ResizeObserverEntry) => {
+    this.getToolResizeHandler()?.(entry);
+  }, 100);
 
   private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     this.hotKeys.dispatch(e);
