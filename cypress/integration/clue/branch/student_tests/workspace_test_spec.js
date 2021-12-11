@@ -61,6 +61,8 @@ context('Test the overall workspace', function () {
       clueCanvas.addTile('text');
       textToolTile.enterText('This is the ' + tab1 + ' in Problem ' + problem1 + '{enter}');
       textToolTile.getTextTile().last().should('contain', 'Problem ' + problem1);
+      // the save to firebase is debounced, so we need to wait for it to complete
+      cy.wait(3000);
 
       cy.visit('?appMode=qa&fakeClass=5&fakeUser=student:1&qaGroup=1&problem=' + problem2);
       cy.waitForLoad();
