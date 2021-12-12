@@ -9,7 +9,8 @@ import { ClassModel, ClassModelType } from "./class";
 import { DB } from "../../lib/db";
 import { DemoModelType, DemoModel } from "./demo";
 import { SupportsModel, SupportsModelType } from "./supports";
-import { DocumentsModelType, DocumentsModel } from "./documents";
+import { DocumentsModelType, DocumentsModel, createDocumentsModelWithRequiredDocuments } from "./documents";
+import { LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument } from "../document/document-types";
 import { LearningLogWorkspace, ProblemWorkspace } from "./workspace";
 import { ClipboardModel, ClipboardModelType } from "./clipboard";
 import { SelectionStoreModel, SelectionStoreModelType } from "./selection";
@@ -47,6 +48,9 @@ interface ICreateStores extends Partial<IStores> {
   demoName?: string;
 }
 
+// all possible required document types; not all applications/instances require all documents
+const requiredDocumentTypes = [PersonalDocument, PlanningDocument, ProblemDocument, LearningLogDocument];
+
 export function createStores(params?: ICreateStores): IStores {
   const user = params?.user || UserModel.create({ id: "0" });
   const appConfig = params?.appConfig || AppConfigModel.create();
@@ -73,7 +77,7 @@ export function createStores(params?: ICreateStores): IStores {
     groups: params?.groups || GroupsModel.create({ acceptUnknownStudents: params?.isPreviewing }),
     class: params?.class || ClassModel.create({ name: "Null Class", classHash: "" }),
     db: params?.db || new DB(),
-    documents: params?.documents || DocumentsModel.create({}),
+    documents: params?.documents || createDocumentsModelWithRequiredDocuments(requiredDocumentTypes),
     networkDocuments: params?.networkDocuments || DocumentsModel.create({}),
     unit: params?.unit || UnitModel.create({code: "NULL", title: "Null Unit"}),
     demo: params?.demo || DemoModel.create({name: demoName, class: {id: "0", name: "Null Class"}}),

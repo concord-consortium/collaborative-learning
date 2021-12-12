@@ -1,5 +1,5 @@
 import firebase from "firebase/app";
-import { forEach } from "lodash";
+import { forEach, size } from "lodash";
 import { DB, Monitor } from "../db";
 import { DBOfferingUser, DBOfferingUserMap } from "../db-types";
 import { PlanningDocument, ProblemDocument } from "../../models/document/document-types";
@@ -53,6 +53,7 @@ export class DBProblemDocumentsListener extends BaseListener {
   }
 
   private handleLoadOfferingUsersProblemDocuments = (snapshot: firebase.database.DataSnapshot) => {
+    const { user: { id: selfUserId }, documents } = this.db.stores;
     const users: DBOfferingUserMap = snapshot.val();
     this.debugLogSnapshot("#handleLoadOfferingUsersProblemDocuments", snapshot);
     forEach(users, (user: DBOfferingUser) => {
@@ -60,6 +61,8 @@ export class DBProblemDocumentsListener extends BaseListener {
         this.handleOfferingUser(user);
       }
     });
+    // if the user doesn't exist in the DB, then there can't be any documents
+    !users?.[selfUserId] && documents.resolveAllRequiredDocumentPromisesWithNull();
   };
 
   private handleLoadOfferingUserAddedOrChanged = (eventType: string) => (snapshot: firebase.database.DataSnapshot) => {
@@ -74,6 +77,9 @@ export class DBProblemDocumentsListener extends BaseListener {
     if (!user?.self?.uid) return;
     const { documents, user: currentUser, groups } = this.db.stores;
     // monitor problem documents
+    if (size(user.documents) === 0) {
+      documents.resolveRequiredDocumentPromise(null, ProblemDocument);
+    }
     forEach(user.documents, document => {
       if (!document?.documentKey || !document?.self?.uid) return;
       const existingDoc = documents.getDocument(document.documentKey);
@@ -93,16 +99,20 @@ export class DBProblemDocumentsListener extends BaseListener {
                             : Monitor.None;
         this.db.createDocumentModelFromProblemMetadata(ProblemDocument, document.self.uid, document, monitor)
           .then((doc) => {
+            documents.add(doc);
             if (isOwnDocument) {
+              documents.resolveRequiredDocumentPromise(doc);
               syncStars(doc, this.db);
               this.db.listeners.monitorDocumentVisibility(doc);
             }
             return doc;
-          })
-          .then(documents.add);
+          });
       }
     });
     // monitor planning documents
+    if (size(user.planning) === 0) {
+      documents.resolveRequiredDocumentPromise(null, PlanningDocument);
+    }
     forEach(user.planning, document => {
       if (!document?.documentKey || !document?.self?.uid) return;
       const existingDoc = documents.getDocument(document.documentKey);

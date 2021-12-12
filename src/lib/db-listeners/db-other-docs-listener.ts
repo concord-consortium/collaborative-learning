@@ -1,4 +1,5 @@
 import firebase from "firebase/app";
+import { size } from "lodash";
 import { DB } from "../db";
 import { DBOtherDocument, DBOtherPublication } from "../db-types";
 import {
@@ -34,11 +35,17 @@ export class DBOtherDocumentsListener extends BaseListener {
       this.publicationsPath = this.db.firebase.getClassPublicationsPath(this.db.stores.user);
     }
 
-    this.documentsRef = this.db.firebase.ref(this.documentsPath);
-    this.debugLogHandlers("#start", "adding", ["child_added", "child_changed", "child_removed"], this.documentsRef);
-    this.documentsRef.on("child_added", this.handleDocumentAdded);
-    this.documentsRef.on("child_changed", this.handleDocumentChanged);
-    this.documentsRef.on("child_removed", this.handleDocumentRemoved);
+    const documentsRef = this.db.firebase.ref(this.documentsPath);
+    this.documentsRef = documentsRef;
+    documentsRef.once("value", snapshot => {
+      if (size(snapshot.val()) === 0) {
+        this.db.stores.documents.resolveRequiredDocumentPromise(null, this.documentType);
+      }
+      this.debugLogHandlers("#start", "adding", ["child_added", "child_changed", "child_removed"], documentsRef);
+      documentsRef.on("child_added", this.handleDocumentAdded);
+      documentsRef.on("child_changed", this.handleDocumentChanged);
+      documentsRef.on("child_removed", this.handleDocumentRemoved);
+    });
 
     this.publicationsRef = this.db.firebase.ref(this.publicationsPath);
     this.debugLogHandler("#start", "adding", "child_added", this.publicationsRef);
@@ -68,12 +75,13 @@ export class DBOtherDocumentsListener extends BaseListener {
                 ? this.db.listeners.monitorPersonalDocument
                 : this.db.listeners.monitorLearningLogDocument)
         .then(doc => {
-          if ((doc.type === PersonalDocument) && (doc.uid === user.id)) {
-            syncStars(doc, this.db);
+          documents.add(doc);
+          if (doc.uid === user.id) {
+            !doc.getProperty("isDeleted") && documents.resolveRequiredDocumentPromise(doc);
+            (doc.type === PersonalDocument) && syncStars(doc, this.db);
           }
           return doc;
-        })
-        .then(documents.add);
+        });
     }
   };
 

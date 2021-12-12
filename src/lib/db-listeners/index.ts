@@ -241,7 +241,6 @@ export class DBListeners extends BaseListener {
     if (content) {
       const updatePath = this.db.firebase.getUserDocumentPath(user, key, document.uid);
       this.db.firebase.ref(updatePath)
-        // convert undefined values to null before sending to firebase
         .update({ changeCount, content: JSON.stringify(getSnapshot(content)) })
         .then(() => {
           // console.log("Successful save", "document:", key, "changeCount:", changeCount);
@@ -265,6 +264,8 @@ export class DBListeners extends BaseListener {
 
     const docListener = this.db.listeners.getOrCreateModelListener(`document:${key}`);
     if (docListener.modelDisposer) {
+      console.warn("Warning: monitorDocumentModel is monitoring a document that was already being monitored!",
+                    "key:", key, "contentId:", content?.contentId);
       docListener.modelDisposer();
     }
 

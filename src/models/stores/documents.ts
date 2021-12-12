@@ -1,3 +1,4 @@
+import { forEach } from "lodash";
 import { types } from "mobx-state-tree";
 import { DocumentModel, DocumentModelType } from "../document/document";
 import {
@@ -22,11 +23,20 @@ const extractLatestPublications = (publications: DocumentModelType[], attr: "uid
   return latestPublications;
 };
 
+export interface IRequiredDocumentPromise {
+  promise: Promise<DocumentModelType | null>;
+  resolve: (document: DocumentModelType | null) => void;
+  isResolved: boolean;
+}
+
 export const DocumentsModel = types
   .model("Documents", {
     all: types.array(DocumentModel),
     unit: types.maybe(UnitModel)
   })
+  .volatile(self => ({
+    requiredDocuments: {} as Record<string, IRequiredDocumentPromise>
+  }))
   .views(self => ({
     getDocument(documentKey: string) {
       return self.all.find((document) => document.key === documentKey);
@@ -174,6 +184,33 @@ export const DocumentsModel = types
       }
     };
 
+    const addRequiredDocumentPromises = (requiredTypes: string[]) => {
+      requiredTypes.forEach(type => {
+        const wrapper: Partial<IRequiredDocumentPromise> = { isResolved: false };
+        wrapper.promise = new Promise(resolve => {
+          wrapper.resolve = (document: DocumentModelType | null) => {
+            resolve(document);
+            wrapper.isResolved = true;
+          };
+        });
+        self.requiredDocuments[type] = wrapper as IRequiredDocumentPromise;
+      });
+    };
+
+    const resolveRequiredDocumentPromise = (document: DocumentModelType | null, typeToNull?: string) => {
+      const type = document?.type || typeToNull;
+      if (type) {
+        const promise = self.requiredDocuments[type];
+        !promise.isResolved && promise.resolve(document);
+      }
+    };
+
+    const resolveAllRequiredDocumentPromisesWithNull = () => {
+      forEach(self.requiredDocuments, (wrapper, type) => {
+        resolveRequiredDocumentPromise(null, type);
+      });
+    };
+
     const findDocumentOfTile = (tileId: string): DocumentModelType | null => {
       const parentDocument = self.all.find(document => !!document.content?.tileMap.get(tileId));
       return parentDocument || null;
@@ -187,9 +224,18 @@ export const DocumentsModel = types
       add,
       remove,
       update,
+      addRequiredDocumentPromises,
+      resolveRequiredDocumentPromise,
+      resolveAllRequiredDocumentPromisesWithNull,
       findDocumentOfTile,
       setUnit
     };
   });
 
 export type DocumentsModelType = typeof DocumentsModel.Type;
+
+export function createDocumentsModelWithRequiredDocuments(requiredTypes: string[]) {
+  const documents = DocumentsModel.create();
+  documents.addRequiredDocumentPromises(requiredTypes);
+  return documents;
+}

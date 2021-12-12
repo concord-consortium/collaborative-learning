@@ -277,72 +277,93 @@ export class DB {
 
     // problem document
     if (documentType === ProblemDocument) {
-      const problemDocument = documents.getProblemDocument(user.id);
-      if (problemDocument) return problemDocument;
+      const requiredProblemDocument = documents.requiredDocuments[ProblemDocument];
+      if (requiredProblemDocument) {
+        const problemDocument = await requiredProblemDocument.promise;
+        if (problemDocument) return problemDocument;
 
-      const problemDocumentsRef = this.firebase.ref(this.firebase.getProblemDocumentsPath(user));
-      const problemDocumentsSnapshot = await problemDocumentsRef.once("value");
-      const problemDocuments: DBOfferingUserProblemDocumentMap = problemDocumentsSnapshot?.val();
-      const lastProblemDocument = findLast(problemDocuments, () => true);
-      return lastProblemDocument?.documentKey
-              ? this.openProblemOrPlanningDocument(ProblemDocument, lastProblemDocument.documentKey)
-              : this.createProblemOrPlanningDocument(ProblemDocument, defaultContent);
+        const problemDocumentsRef = this.firebase.ref(this.firebase.getProblemDocumentsPath(user));
+        const problemDocumentsSnapshot = await problemDocumentsRef.once("value");
+        const problemDocuments: DBOfferingUserProblemDocumentMap = problemDocumentsSnapshot?.val();
+        const lastProblemDocument = findLast(problemDocuments, () => true);
+        return lastProblemDocument?.documentKey
+                ? this.openProblemOrPlanningDocument(ProblemDocument, lastProblemDocument.documentKey)
+                : this.createProblemOrPlanningDocument(ProblemDocument, defaultContent);
+      }
+      else {
+        console.error("ERROR: Can't create required problem document without an appropriate promise!");
+      }
     }
 
     // personal document
-    // if we've already loaded it into our model documents then simply return it
-    const personalDocument = documents.getPersonalDocument(user.id);
-    if (personalDocument && !personalDocument.getProperty("isDeleted")) return personalDocument;
+    const requiredPersonalDocument = documents.requiredDocuments[ProblemDocument];
+    if (requiredPersonalDocument) {
+      // The promise is resolved with the first non-deleted personal document. More work will be
+      // required if we are to, for instance, return the most recently created/modified document.
+      const personalDocument = await requiredPersonalDocument.promise;
+      if (personalDocument) return personalDocument;
 
-    // retrieve metadata for any personal documents and return the most recently created one
-    const personalDocumentsRef = this.firebase.ref(this.firebase.getUserPersonalDocPath(user));
-    const personalDocumentsSnapshot = await personalDocumentsRef.once("value");
-    const personalDocuments: DBOtherDocumentMap = personalDocumentsSnapshot &&
-                                                  personalDocumentsSnapshot.val();
-    const lastPersonalDocument = findLast(personalDocuments, (pd) => !pd.properties || !pd.properties.isDeleted);
-    return lastPersonalDocument?.self?.documentKey
-      ? this.openOtherDocument(PersonalDocument, lastPersonalDocument.self.documentKey)
-      // if we didn't find one then create a new one
-      : this.createPersonalDocument({ content: defaultContent });
+      // retrieve metadata for any personal documents and return the most recently created one
+      const personalDocumentsRef = this.firebase.ref(this.firebase.getUserPersonalDocPath(user));
+      const personalDocumentsSnapshot = await personalDocumentsRef.once("value");
+      const personalDocuments: DBOtherDocumentMap = personalDocumentsSnapshot &&
+                                                    personalDocumentsSnapshot.val();
+      const lastPersonalDocument = findLast(personalDocuments, (pd) => !pd.properties || !pd.properties.isDeleted);
+      return lastPersonalDocument?.self?.documentKey
+        ? this.openOtherDocument(PersonalDocument, lastPersonalDocument.self.documentKey)
+        // if we didn't find one then create a new one
+        : this.createPersonalDocument({ content: defaultContent });
+    }
   }
 
   public async guaranteePlanningDocument(sections: SectionModelType[]) {
     const {user, documents} = this.stores;
 
-    // if we've already loaded it into our model documents then simply return it
-    const planningDocument = documents.getPlanningDocument(user.id);
-    if (planningDocument) return planningDocument;
+    const requiredPlanningDocument = documents.requiredDocuments[PlanningDocument];
+    if (requiredPlanningDocument) {
+      const planningDocument = await requiredPlanningDocument.promise;
+      if (planningDocument) return planningDocument;
 
-    // retrieve metadata for any planning documents and return the most recently created one
-    const planningDocumentsRef = this.firebase.ref(this.firebase.getPlanningDocumentsPath(user));
-    const planningDocumentSnapshot = await planningDocumentsRef.once("value");
-    // planning documents share a metadata type with problem documents
-    const planningDocuments: DBOfferingUserProblemDocumentMap = planningDocumentSnapshot?.val();
-    const lastPlanningDocument = findLast(planningDocuments, () => true);
-    // if we found metadata for a planning document, open its contents; otherwise create one
-    return lastPlanningDocument?.documentKey
-            ? this.openProblemOrPlanningDocument(PlanningDocument, lastPlanningDocument.documentKey)
-            : this.createProblemOrPlanningDocument(PlanningDocument, createDefaultSectionedContent(sections));
+      // retrieve metadata for any planning documents and return the most recently created one
+      const planningDocumentsRef = this.firebase.ref(this.firebase.getPlanningDocumentsPath(user));
+      const planningDocumentSnapshot = await planningDocumentsRef.once("value");
+      // planning documents share a metadata type with problem documents
+      const planningDocuments: DBOfferingUserProblemDocumentMap = planningDocumentSnapshot?.val();
+      const lastPlanningDocument = findLast(planningDocuments, () => true);
+      // if we found metadata for a planning document, open its contents; otherwise create one
+      return lastPlanningDocument?.documentKey
+              ? this.openProblemOrPlanningDocument(PlanningDocument, lastPlanningDocument.documentKey)
+              : this.createProblemOrPlanningDocument(PlanningDocument, createDefaultSectionedContent(sections));
+    }
+    else {
+      console.error("ERROR: Can't determine required planning document without an appropriate promise!");
+    }
   }
 
   public async guaranteeLearningLog(initialTitle?: string, defaultContent?: DocumentContentModelType) {
     const {user, documents} = this.stores;
 
-    const learningLogDocument = documents.getLearningLogDocument(user.id);
-    if (learningLogDocument) return learningLogDocument;
+    const requiredLearningLogDocument = documents.requiredDocuments[LearningLogDocument];
+    if (requiredLearningLogDocument) {
+      const learningLogDocument = await requiredLearningLogDocument.promise;
+      if (learningLogDocument) return learningLogDocument;
 
-    const learningLogDocumentsRef = this.firebase.ref(this.firebase.getLearningLogPath(user));
-    const learningLogDocumentsSnapshot = await learningLogDocumentsRef.once("value");
-    const learningLogDocuments: DBOtherDocumentMap = learningLogDocumentsSnapshot &&
-                                                  learningLogDocumentsSnapshot.val();
-    const lastLearningLogDocument = findLast(learningLogDocuments, () => true);
-    return lastLearningLogDocument?.self?.documentKey
-      ? this.openOtherDocument(LearningLogDocument, lastLearningLogDocument.self.documentKey)
-      : this.createOtherDocument(LearningLogDocument, { title: initialTitle, content: defaultContent });
+      const learningLogDocumentsRef = this.firebase.ref(this.firebase.getLearningLogPath(user));
+      const learningLogDocumentsSnapshot = await learningLogDocumentsRef.once("value");
+      const learningLogDocuments: DBOtherDocumentMap = learningLogDocumentsSnapshot &&
+                                                    learningLogDocumentsSnapshot.val();
+      const lastLearningLogDocument = findLast(learningLogDocuments, () => true);
+      return lastLearningLogDocument?.self?.documentKey
+        ? this.openOtherDocument(LearningLogDocument, lastLearningLogDocument.self.documentKey)
+        : this.createOtherDocument(LearningLogDocument, { title: initialTitle, content: defaultContent });
+    }
+    else {
+      console.error("ERROR: Can't determine required learning log document without an appropriate promise!");
+    }
   }
 
   public createProblemOrPlanningDocument(type: ProblemOrPlanningDocumentType, content?: DocumentContentModelType) {
-    return new Promise<DocumentModelType>((resolve, reject) => {
+    return new Promise<DocumentModelType | null>((resolve, reject) => {
       const {user, documents} = this.stores;
       const offeringUserRef = this.firebase.ref(this.firebase.getOfferingUserPath(user));
 
@@ -383,11 +404,10 @@ export class DB {
             });
         })
         .then((newDocument) => {
-          return this.openProblemOrPlanningDocument(type, newDocument.documentKey);
-        })
-        .then((newDocument) => {
-          documents.add(newDocument);
-          return newDocument;
+          // reset the (presumably null) promise for this document type
+          documents.addRequiredDocumentPromises([ProblemDocument]);
+          // return the promise, which will be resolved by the DB listener
+          return documents.requiredDocuments[ProblemDocument].promise;
         })
         .then(resolve)
         .catch(reject);
@@ -470,7 +490,7 @@ export class DB {
     if (!content) {
       throw new Error("Could not publish the specified document because its content is not available.");
     }
-  return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
+    return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
       this.createDocument({ type: ProblemPublication, content }).then(({document, metadata}) => {
         const publicationRef = this.firebase.ref(this.firebase.getPublicationsPath(user)).push();
         const userGroup = groups.groupForUser(user.id)!;
@@ -621,7 +641,7 @@ export class DB {
                         : appConfig.defaultLearningLogTitle;
     const docTitle = title || documents.getNextOtherDocumentTitle(user, documentType, baseTitle);
 
-    return new Promise<DocumentModelType>((resolve, reject) => {
+    return new Promise<DocumentModelType | null>((resolve, reject) => {
       return this.createDocument({ type: documentType, content: JSON.stringify(content) })
         .then(({document, metadata}) => {
           const {documentKey} = document.self;
@@ -646,8 +666,10 @@ export class DB {
           Logger.log(logEventName, {
             title: newDocument.title
           });
-          return documents.getDocument(newDocument.self.documentKey) ||
-                  (await this.createDocumentModelFromOtherDocument(newDocument, documentType));
+          // reset the (presumably null) promise for this document type
+          documents.addRequiredDocumentPromises([documentType]);
+          // return the promise, which will be resolved by the DB listener
+          return documents.requiredDocuments[documentType].promise;
         })
         .then(resolve)
         .catch(reject);
