@@ -16,6 +16,9 @@ import { IDocumentProperties } from "../../lib/db-types";
 import { getLocalTimeStamp } from "../../utilities/time";
 import { safeJsonParse } from "../../utilities/js-utils";
 
+// how long before we start worrying that saves aren't happening?
+const kSaveTimerInterval = 30000;
+
 export interface IDocumentAddTileOptions {
   title?: string;
   addSidecarNotes?: boolean;
@@ -45,6 +48,12 @@ export const DocumentModel = types
     changeCount: types.optional(types.number, 0)
   })
   .volatile(self => ({
+    logChangeCount: 0,
+    logChangeTime: 0,
+    saveChangeCount: 0,
+    saveChangeTime: 0,
+    saveTimer: 0,
+    saveProblemNotifier: undefined as (() => void) | undefined,
     queryPromise: undefined as Promise<UseQueryResult<IGetNetworkDocumentResponse>> | undefined
   }))
   .views(self => ({
@@ -225,6 +234,35 @@ export const DocumentModel = types
 
     setGroupId(groupId?: string) {
       self.groupId = groupId;
+    },
+
+    recordLogEvent(changeCount: number, notifier: () => void) {
+      self.logChangeCount = changeCount;
+      self.logChangeTime = performance.now();
+      self.saveProblemNotifier = notifier;
+
+      if (!self.saveTimer) {
+        // start the timer so we'll know if these changes aren't saved
+        self.saveTimer = window.setTimeout(() => {
+          self.saveProblemNotifier?.();
+        }, kSaveTimerInterval);
+      }
+    },
+
+    recordSaveEvent(changeCount: number) {
+      self.saveChangeCount = changeCount;
+      self.saveChangeTime = performance.now();
+
+      if (self.saveTimer) {
+        window.clearTimeout(self.saveTimer);
+      }
+
+      // if we still have unsaved changes, reset the timer
+      if (changeCount < self.logChangeCount) {
+        self.saveTimer = window.setTimeout(() => {
+          self.saveProblemNotifier?.();
+        }, kSaveTimerInterval);
+      }
     }
   }))
   .actions(self => ({

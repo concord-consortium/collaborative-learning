@@ -814,8 +814,9 @@ export const DocumentContentModel = types
       return result;
     },
     userDeleteTile(tileId: string) {
-      if (self.getTile(tileId)) {
-        Logger.logTileEvent(LogEventName.DELETE_TILE, self.getTile(tileId));
+      const tile = self.getTile(tileId);
+      if (tile) {
+        Logger.logTileEvent(LogEventName.DELETE_TILE, tile);
         self.deleteTile(tileId);
       }
     },

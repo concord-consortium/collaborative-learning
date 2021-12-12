@@ -110,6 +110,7 @@ export enum LogEventName {
   INTERNAL_ERROR_ENCOUNTERED,
   INTERNAL_FIREBASE_DISCONNECTED,
   INTERNAL_NETWORK_STATUS_ALERTED,
+  INTERNAL_SAVE_STATUS_ALERTED,
   INTERNAL_MONITOR_DOCUMENT,
   INTERNAL_UNMONITOR_DOCUMENT,
 
@@ -136,6 +137,11 @@ interface IDocumentInfo {
   properties?: { [prop: string]: string };
   changeCount?: number;
   remoteContext?: string;
+}
+
+export interface ILogOptions {
+  method?: LogEventMethod;
+  changeDocInfo?: IDocumentInfo;
 }
 
 interface ITeacherNetworkInfo {
@@ -172,22 +178,31 @@ export class Logger {
     this._instance.investigationTitle = investigation.title;
   }
 
-  public static log(event: LogEventName, parameters?: Record<string, unknown>, method?: LogEventMethod) {
+  public static notifySavingDocumentProblem() {
+    Logger.Instance.stores.user.setIsSavingDocuments(false);
+  }
+
+  public static log(event: LogEventName, parameters?: Record<string, unknown>, options?: ILogOptions) {
     if (!this._instance) return;
 
+    if (options?.changeDocInfo?.key) {
+      const document = Logger.Instance.getDocumentForKey(options.changeDocInfo.key);
+      document?.recordLogEvent(document.changeCount, this.notifySavingDocumentProblem);
+    }
+
     const eventString = LogEventName[event];
-    const logMessage = Logger.Instance.createLogMessage(eventString, parameters, method);
+    const logMessage = Logger.Instance.createLogMessage(eventString, parameters, options?.method);
     sendToLoggingService(logMessage, this._instance.stores.user);
   }
 
-  public static logTileEvent(event: LogEventName, tile?: ToolTileModelType, metaData?: TileLoggingMetadata,
-    commentText?: string) {
+  public static logTileEvent(event: LogEventName, tile?: ToolTileModelType, metaData?: TileLoggingMetadata) {
     if (!this._instance) return;
 
     let parameters = {};
+    let document: IDocumentInfo | undefined;
 
     if (tile) {
-      const document = Logger.Instance.getDocumentForTile(tile.id);
+      document = Logger.Instance.getDocumentInfoForTile(tile.id);
       const teacherNetworkInfo: ITeacherNetworkInfo | undefined = document.remoteContext
       ? { networkClassHash: document.remoteContext,
           networkUsername: `${document.uid}@${this._instance.stores.user.portal}`}
@@ -201,12 +216,11 @@ export class Logger {
         documentKey: document.key,
         documentType: document.type,
         documentChanges: document.changeCount,
-        commentText,
         ...teacherNetworkInfo
       };
 
       if (event === LogEventName.COPY_TILE && metaData && metaData.originalTileId) {
-        const sourceDocument = Logger.Instance.getDocumentForTile(metaData.originalTileId);
+        const sourceDocument = Logger.Instance.getDocumentInfoForTile(metaData.originalTileId);
         parameters = {
           ...parameters,
           sourceUsername: sourceDocument.uid,
@@ -219,7 +233,7 @@ export class Logger {
       }
     }
 
-    Logger.log(event, parameters);
+    Logger.log(event, parameters, { changeDocInfo: document });
   }
 
   public static logCurriculumEvent(event: LogEventName, curriculum: string, params?: Record<string, any>) {
@@ -270,8 +284,7 @@ export class Logger {
       Logger.logCurriculumEvent(event, focusDocumentId, { tileId: focusTileId, commentText });
     }
     else {
-      const document = this._instance.stores.documents.getDocument(focusDocumentId)
-                        || this._instance.stores.networkDocuments.getDocument(focusDocumentId);
+      const document = Logger.Instance.getDocumentForKey(focusDocumentId);
       if (document) {
         Logger.logDocumentEvent(event,
           document, { tileId: focusTileId, commentText });
@@ -289,7 +302,7 @@ export class Logger {
     toolId: string,
     method?: LogEventMethod)
   {
-    const document = Logger.Instance.getDocumentForTile(toolId);
+    const document = Logger.Instance.getDocumentInfoForTile(toolId);
     const parameters: {[k: string]: any} = {
       toolId,
       operation,
@@ -300,7 +313,7 @@ export class Logger {
       documentChanges: document.changeCount
     };
 
-    Logger.log(eventName, parameters, method);
+    Logger.log(eventName, parameters, { method, changeDocInfo: document });
   }
 
   private static _instance: Logger;
@@ -367,7 +380,12 @@ export class Logger {
     return logMessage;
   }
 
-  private getDocumentForTile(tileId: string): IDocumentInfo {
+  private getDocumentForKey(documentKey: string) {
+    return this.stores.documents.getDocument(documentKey) ||
+            this.stores.networkDocuments.getDocument(documentKey);
+  }
+
+  private getDocumentInfoForTile(tileId: string): IDocumentInfo {
     const document = this.stores.documents.findDocumentOfTile(tileId)
       || this.stores.networkDocuments.findDocumentOfTile(tileId);
     if (document) {
