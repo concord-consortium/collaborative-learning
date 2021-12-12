@@ -105,7 +105,6 @@ export class DBProblemDocumentsListener extends BaseListener {
               syncStars(doc, this.db);
               this.db.listeners.monitorDocumentVisibility(doc);
             }
-            return doc;
           });
       }
     });
@@ -117,8 +116,12 @@ export class DBProblemDocumentsListener extends BaseListener {
       if (!document?.documentKey || !document?.self?.uid) return;
       const existingDoc = documents.getDocument(document.documentKey);
       if (!existingDoc) {
+        const isOwnDocument = user.self.uid === currentUser.id;
         this.db.createDocumentModelFromProblemMetadata(PlanningDocument, document.self.uid, document, Monitor.Local)
-          .then(documents.add);
+          .then(doc => {
+            documents.add(doc);
+            isOwnDocument && documents.resolveRequiredDocumentPromise(doc);
+          });
       }
     });
   };
