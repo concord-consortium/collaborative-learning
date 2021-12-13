@@ -260,13 +260,14 @@ export class DBListeners extends BaseListener {
       return;
     }
 
-    const { key, content } = document;
+    const { type, key, content } = document;
 
     const docListener = this.db.listeners.getOrCreateModelListener(`document:${key}`);
     if (docListener.modelDisposer) {
       console.warn("Warning: monitorDocumentModel is monitoring a document that was already being monitored!",
-                    "key:", key, "contentId:", content?.contentId);
+                    "type:", type, "key:", key, "contentId:", content?.contentId);
       docListener.modelDisposer();
+      docListener.modelDisposer = undefined;
     }
 
     if (content) {
