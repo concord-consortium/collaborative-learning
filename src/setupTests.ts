@@ -21,17 +21,21 @@ enableFetchMocks();
 
  */
 type ConsoleMethod = "log" | "warn" | "error";
-(global as any).jestSpyConsole = (method: ConsoleMethod, fn: (spyFn: jest.SpyInstance) => void) => {
+type JestSpyConsoleFn = (spyFn: jest.SpyInstance, mockRestore: () => void) => void;
+interface IJestSpyConsoleOptions {
+  asyncRestore?: boolean;
+}
+(global as any).jestSpyConsole = (method: ConsoleMethod, fn: JestSpyConsoleFn, options?: IJestSpyConsoleOptions) => {
   // intercept and suppress console methods
   const mockConsoleFn = jest.spyOn(global.console, method).mockImplementation(() => null);
 
   // call the client's code
-  fn(mockConsoleFn);
+  fn(mockConsoleFn, () => mockConsoleFn.mockRestore());
 
   // restore console behavior
-  mockConsoleFn.mockRestore();
+  !options?.asyncRestore && mockConsoleFn.mockRestore();
 };
 
 declare global {
-  function jestSpyConsole(method: ConsoleMethod, fn: (spyFn: jest.SpyInstance) => void): void;
+  function jestSpyConsole(method: ConsoleMethod, fn: JestSpyConsoleFn, options?: IJestSpyConsoleOptions): void;
 }
