@@ -75,18 +75,30 @@ export function useNetworkResources() {
         offering.teachers?.forEach(teacher => {
           keys = [];
           each(teacher.problemDocuments, (metadata: DBOfferingUserProblemDocument) => {
-            const { self: { uid }, documentKey: key, visibility } = metadata;
+            const { self: { uid } = { uid: null }, documentKey: key, visibility } = metadata || {};
             const type = ProblemDocument;
-            documents.add(DocumentModel.create({ uid, type, key, remoteContext, visibility }));
-            keys.push(key);
+            if (uid && key) {
+              documents.add(DocumentModel.create({ uid, type, key, remoteContext, visibility }));
+              keys.push(key);
+            }
+            else {
+              console.warn("Warning: useNetworkResources encountered invalid problem document metadata:",
+                            JSON.stringify(metadata));
+            }
           });
           teacher.problemDocuments && (teacher.problemDocuments = keys);
           keys = [];
           each(teacher.planningDocuments, (metadata: DBOfferingUserProblemDocument) => {
-            const { self: { uid }, documentKey: key, visibility } = metadata;
+            const { self: { uid } = { uid: null }, documentKey: key, visibility } = metadata;
             const type = PlanningDocument;
-            documents.add(DocumentModel.create({ uid, type, key, remoteContext, visibility }));
-            keys.push(key);
+            if (uid && key) {
+              documents.add(DocumentModel.create({ uid, type, key, remoteContext, visibility }));
+              keys.push(key);
+            }
+            else {
+              console.warn("Warning: useNetworkResources encountered invalid problem document metadata:",
+                            JSON.stringify(metadata));
+            }
           });
           teacher.planningDocuments && (teacher.planningDocuments = keys);
         });
