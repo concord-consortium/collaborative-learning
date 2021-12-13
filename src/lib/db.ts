@@ -292,11 +292,12 @@ export class DB {
       }
       else {
         console.error("ERROR: Can't create required problem document without an appropriate promise!");
+        return Promise.resolve(null);
       }
     }
 
     // personal document
-    const requiredPersonalDocument = documents.requiredDocuments[ProblemDocument];
+    const requiredPersonalDocument = documents.requiredDocuments[PersonalDocument];
     if (requiredPersonalDocument) {
       // The promise is resolved with the first non-deleted personal document. More work will be
       // required if we are to, for instance, return the most recently created/modified document.
@@ -313,6 +314,10 @@ export class DB {
         ? this.openOtherDocument(PersonalDocument, lastPersonalDocument.self.documentKey)
         // if we didn't find one then create a new one
         : this.createPersonalDocument({ content: defaultContent });
+    }
+    else {
+      console.error("ERROR: Can't create required personal document without an appropriate promise!");
+      return Promise.resolve(null);
     }
   }
 

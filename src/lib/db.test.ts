@@ -1,12 +1,15 @@
 import firebase from "firebase/app";
 import { DB } from "./db";
+import { createDocumentsModelWithRequiredDocuments, DocumentsModel } from "../models/stores/documents";
 import { IStores, createStores } from "../models/stores/stores";
 import { UserModel } from "../models/stores/user";
 import { DBDocument } from "./db-types";
+import { DocumentModel } from "../models/document/document";
 import { DocumentContentModel } from "../models/document/document-content";
+import { PersonalDocument, ProblemDocument } from "../models/document/document-types";
 import { TextContentModelType } from "../models/tools/text/text-content";
-import { createSingleTileContent } from "../utilities/test-utils";
 import { ToolTileModelType } from "../models/tools/tool-tile";
+import { createSingleTileContent } from "../utilities/test-utils";
 import * as UrlParams from "../utilities/url-params";
 
 // This is needed so MST can deserialize snapshots referring to tools
@@ -25,8 +28,9 @@ describe("db", () => {
   beforeEach(() => {
     setUrlParams(originalUrlParams);
     stores = createStores({
-      user: UserModel.create({id: "1", portal: "example.com"}),
       appMode: "test",
+      documents: DocumentsModel.create(),
+      user: UserModel.create({id: "1", portal: "example.com"})
     });
     db = new DB();
   });
@@ -113,6 +117,30 @@ describe("db", () => {
       expect(tileContent.format).toBeUndefined();
       expect(tileContent.text).toBe("Testing");
     });
+  });
+
+  it("creates required personal document from promise", async () => {
+    const personalDocument = DocumentModel.create({ uid: "1", type: PersonalDocument, key: "doc-1" });
+    stores.documents = createDocumentsModelWithRequiredDocuments([PersonalDocument]);
+    stores.documents.resolveRequiredDocumentPromise(personalDocument);
+    await db.connect({appMode: "test", stores, dontStartListeners: true});
+    expect(await db.guaranteeOpenDefaultDocument(PersonalDocument)).toBe(personalDocument);
+  });
+
+  it("logs errors when asked to open default documents without required document promises", async () => {
+    await db.connect({appMode: "test", stores, dontStartListeners: true});
+
+    jestSpyConsole("error", async (mockConsole, mockRestore) => {
+      await db.guaranteeOpenDefaultDocument(ProblemDocument);
+      expect(mockConsole).toHaveBeenCalledTimes(1);
+      await db.guaranteeOpenDefaultDocument(PersonalDocument);
+      expect(mockConsole).toHaveBeenCalledTimes(2);
+      await db.guaranteePlanningDocument([]);
+      expect(mockConsole).toHaveBeenCalledTimes(3);
+      await db.guaranteeLearningLog();
+      expect(mockConsole).toHaveBeenCalledTimes(4);
+      mockRestore();
+    }, { asyncRestore: true });
   });
 
 });
