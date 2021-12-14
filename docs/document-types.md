@@ -104,6 +104,9 @@ Type-specific metadata for published problem documents is stored at `/{classPath
 
 ### Published Personal Documents
 
-getClassPersonalPublicationsPath(user)
+Type-specific metadata for published personal documents is stored at `/{classPath}/offerings/{offeringId}/personalPublications`.
 
-Type-specific metadata for published personal documents is stored at
+### Published Learning Log Documents
+
+Type-specific metadata for published learning log documents is stored at `/{classPath}/offerings/{offeringId}/publications`.
+
