@@ -1,5 +1,5 @@
 import firebase from "firebase/app";
-import { forEach } from "lodash";
+import { forEach, size } from "lodash";
 import { DB, Monitor } from "../db";
 import { DBOfferingUser, DBOfferingUserMap } from "../db-types";
 import { PlanningDocument, ProblemDocument } from "../../models/document/document-types";
@@ -53,6 +53,7 @@ export class DBProblemDocumentsListener extends BaseListener {
   }
 
   private handleLoadOfferingUsersProblemDocuments = (snapshot: firebase.database.DataSnapshot) => {
+    const { user: { id: selfUserId }, documents } = this.db.stores;
     const users: DBOfferingUserMap = snapshot.val();
     this.debugLogSnapshot("#handleLoadOfferingUsersProblemDocuments", snapshot);
     forEach(users, (user: DBOfferingUser) => {
@@ -60,6 +61,8 @@ export class DBProblemDocumentsListener extends BaseListener {
         this.handleOfferingUser(user);
       }
     });
+    // if the user doesn't exist in the DB, then there can't be any documents
+    !users?.[selfUserId] && documents.resolveAllRequiredDocumentPromisesWithNull();
   };
 
   private handleLoadOfferingUserAddedOrChanged = (eventType: string) => (snapshot: firebase.database.DataSnapshot) => {
@@ -73,7 +76,11 @@ export class DBProblemDocumentsListener extends BaseListener {
   private handleOfferingUser = (user: DBOfferingUser) => {
     if (!user?.self?.uid) return;
     const { documents, user: currentUser, groups } = this.db.stores;
+    const isOwnDocument = user.self.uid === currentUser.id;
     // monitor problem documents
+    if (isOwnDocument && (size(user.documents) === 0)) {
+      documents.resolveRequiredDocumentPromise(null, ProblemDocument);
+    }
     forEach(user.documents, document => {
       if (!document?.documentKey || !document?.self?.uid) return;
       const existingDoc = documents.getDocument(document.documentKey);
@@ -83,7 +90,6 @@ export class DBProblemDocumentsListener extends BaseListener {
         // both teachers and students listen to all problem documents
         // but only teachers listen to all content.  students only listen
         // to content of users in their group to reduce network traffic
-        const isOwnDocument = user.self.uid === currentUser.id;
         const userInGroup = groups.userInGroup(document.self.uid, currentUser.latestGroupId);
         // Local changes take precedence over remote changes
         const monitor = isOwnDocument
@@ -93,22 +99,28 @@ export class DBProblemDocumentsListener extends BaseListener {
                             : Monitor.None;
         this.db.createDocumentModelFromProblemMetadata(ProblemDocument, document.self.uid, document, monitor)
           .then((doc) => {
+            documents.add(doc);
             if (isOwnDocument) {
+              documents.resolveRequiredDocumentPromise(doc);
               syncStars(doc, this.db);
               this.db.listeners.monitorDocumentVisibility(doc);
             }
-            return doc;
-          })
-          .then(documents.add);
+          });
       }
     });
     // monitor planning documents
+    if (isOwnDocument && (size(user.planning) === 0)) {
+      documents.resolveRequiredDocumentPromise(null, PlanningDocument);
+    }
     forEach(user.planning, document => {
       if (!document?.documentKey || !document?.self?.uid) return;
       const existingDoc = documents.getDocument(document.documentKey);
       if (!existingDoc) {
         this.db.createDocumentModelFromProblemMetadata(PlanningDocument, document.self.uid, document, Monitor.Local)
-          .then(documents.add);
+          .then(doc => {
+            documents.add(doc);
+            isOwnDocument && documents.resolveRequiredDocumentPromise(doc);
+          });
       }
     });
   };

@@ -1,9 +1,9 @@
 import firebase from "firebase/app";
+import { throttle } from "lodash";
 import { observable, makeObservable } from "mobx";
-import { IDisposer, onSnapshot } from "mobx-state-tree";
+import { getSnapshot, IDisposer, onPatch, onSnapshot } from "mobx-state-tree";
 
 import { DB, Monitor } from "../db";
-// import { LogEventName, Logger } from "../logger";
 import { DBLatestGroupIdListener } from "./db-latest-group-id-listener";
 import { DBGroupsListener } from "./db-groups-listener";
 import { DBOtherDocumentsListener } from "./db-other-docs-listener";
@@ -235,57 +235,52 @@ export class DBListeners extends BaseListener {
     }
   };
 
+  private throttledSaveDocument = throttle((document: DocumentModelType) => {
+    const { user } = this.db.stores;
+    const { key, changeCount, content } = document;
+    if (content) {
+      const updatePath = this.db.firebase.getUserDocumentPath(user, key, document.uid);
+      this.db.firebase.ref(updatePath)
+        .update({ changeCount, content: JSON.stringify(getSnapshot(content)) })
+        .then(() => {
+          // console.log("Successful save", "document:", key, "changeCount:", changeCount);
+        })
+        .catch(() => {
+          user.setIsFirebaseConnected(false);
+          console.warn("Failed save!", "document:", key, "changeCount:", changeCount);
+        });
+    }
+    // two-second throttle on the trailing edge so that with continued changes we save
+    // at least and at most once every two seconds
+  }, 2000, { trailing: true });
+
   private monitorDocumentModel = (document: DocumentModelType, monitor: Monitor) => {
     // skip if not monitoring local changes
     if (monitor !== Monitor.Local) {
       return;
     }
 
-    const { user } = this.db.stores;
-    const { key, content } = document;
+    const { type, key, content } = document;
 
     const docListener = this.db.listeners.getOrCreateModelListener(`document:${key}`);
     if (docListener.modelDisposer) {
+      console.warn("Warning: monitorDocumentModel is monitoring a document that was already being monitored!",
+                    "type:", type, "key:", key, "contentId:", content?.contentId);
       docListener.modelDisposer();
-    }
-    else {
-      // Only log the first time we monitor the document. We generally monitor/unmonitor/remonitor
-      // several times during startup, but this function always adds monitoring as the last step,
-      // so logging the first instance is sufficient for our purposes.
-      // Logger.log(LogEventName.INTERNAL_MONITOR_DOCUMENT,
-      //           { type: document.type, key: document.key, uid: document.uid, groupId: document.groupId });
+      docListener.modelDisposer = undefined;
     }
 
-    const updatePath = this.db.firebase.getUserDocumentPath(user, key, document.uid);
-    const updateRef = this.db.firebase.ref(updatePath);
     if (content) {
-      docListener.modelDisposer = onSnapshot(content, (newContent) => {
-                                    document.incChangeCount();
-                                    updateRef.update({
-                                      content: JSON.stringify(newContent),
-                                      changeCount: document.changeCount
-                                    })
-                                    .then(() => {
-                                      // console.log("Successful save", "document:", document.key,
-                                      //             "changeCount:", document.changeCount);
-                                    })
-                                    .catch(() => {
-                                      user.setIsFirebaseConnected(false);
-                                      // console.warn("Failed save!", "document:", document.key,
-                                      //             "changeCount:", document.changeCount);
-                                    });
-                                  });
+      docListener.modelDisposer = onPatch(content, (patch) => {
+        document.incChangeCount();
+        this.throttledSaveDocument(document);
+      });
     }
   };
 
   private unmonitorDocumentModel = (document: DocumentModelType) => {
     // This is currently only called for unmonitoring remote documents as a result of group changes, but
     // if it were to be called for a user's own document the result would be not saving the user's work.
-    const { user } = this.db.stores;
-    if (user.id === document.uid) {
-      // Logger.log(LogEventName.INTERNAL_UNMONITOR_DOCUMENT,
-      //           { type: document.type, key: document.key, uid: document.uid, groupId: document.groupId });
-    }
     const docListener = this.modelListeners[`document:${document.key}`];
     docListener?.modelDisposer?.();
   };

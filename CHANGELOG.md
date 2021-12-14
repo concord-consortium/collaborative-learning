@@ -1,5 +1,18 @@
 # Changelog
 
+## Version 2.1.1 - released December 13, 2021
+
+### Bugs Fixed
+- Fixed bug which could prevent some documents from saving correctly in some circumstances #1148
+- Other stability improvements #1147
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 420,985 bytes | 0.0% |
+| index.js | 4,032,012 bytes | 0.0% |
+
 ## Version 2.1.0 - released December 8, 2021
 
 ### Features/Improvements

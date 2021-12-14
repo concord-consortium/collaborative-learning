@@ -117,10 +117,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
       for (const entry of entries) {
         if (entry.target === this.imageElt) {
           // debounce to prevent resize loops
-          debounce(() => {
-            const {width, height} = entry.contentRect;
-            this.setState({ imageEltWidth: Math.ceil(width), imageEltHeight: Math.ceil(height) });
-          }, 100);
+          this.handleResizeDebounced(entry);
         }
       }
     });
@@ -209,6 +206,11 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
             (ui?.selectedTileIds.length === 1) &&
             (ui?.selectedTileIds.includes(id));
   };
+
+  private handleResizeDebounced = debounce((entry: ResizeObserverEntry) => {
+    const {width, height} = entry.contentRect;
+    this.setState({ imageEltWidth: Math.ceil(width), imageEltHeight: Math.ceil(height) });
+  }, 100);
 
   private getDesiredHeight() {
     const kMarginsAndBorders = 26;

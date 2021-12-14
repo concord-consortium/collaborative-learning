@@ -1,3 +1,4 @@
+import { debounce } from "lodash";
 import { observer, inject } from "mobx-react";
 import React from "react";
 import ResizeObserver from "resize-observer-polyfill";
@@ -67,16 +68,8 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     this.resizeObserver = new ResizeObserver(entries => {
       for (const entry of entries) {
         if (entry.target === this.container) {
-          const {width, height} = entry.contentRect;
-          if (width > 0 && height > 0) {
-            this.grid.update({
-              height: height - BORDER_SIZE,
-              initSplitters: !this.roIsInitialized,
-              resizeSplitters: this.roIsInitialized,
-              width
-            });
-            this.roIsInitialized = true;
-          }
+          // debounce to prevent resize loops
+          this.handleResizeDebounced(entry);
         }
       }
     });
@@ -334,6 +327,19 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     );
   };
 
+  private handleResizeDebounced = debounce((entry: ResizeObserverEntry) => {
+    const {width, height} = entry.contentRect;
+    if (width > 0 && height > 0) {
+      this.grid.update({
+        height: height - BORDER_SIZE,
+        initSplitters: !this.roIsInitialized,
+        resizeSplitters: this.roIsInitialized,
+        width
+      });
+      this.roIsInitialized = true;
+    }
+  }, 100);
+
   private handleHSplitter = (e: React.MouseEvent<HTMLDivElement>) => {
     this.handleSplitters(e, true, false);
   };
@@ -354,16 +360,24 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       y: e.clientY,
     };
 
+    const getSplittersFromEvent = (event: MouseEvent) => {
+      return {
+        hSplitter: allowHorizontal ? start.hSplitter + (event.clientY - start.y) : start.hSplitter,
+        vSplitter: allowVertical ? start.vSplitter + (event.clientX - start.x) : start.vSplitter,
+      };
+    };
+
     const handleMouseMove = (moveE: MouseEvent) => {
-      this.grid.update({
-        hSplitter: allowHorizontal ? start.hSplitter + (moveE.clientY - start.y) : start.hSplitter,
-        vSplitter: allowVertical ? start.vSplitter + (moveE.clientX - start.x) : start.vSplitter,
-      });
+      this.grid.update(getSplittersFromEvent(moveE));
     };
 
     const handleMouseUp = (upE: MouseEvent) => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
+
+      const _start = { hSplitter: start.hSplitter, vSplitter: start.vSplitter };
+      const end = getSplittersFromEvent(upE);
+      Logger.log(LogEventName.VIEW_FOUR_UP_RESIZED, { start: _start, end });
     };
 
     window.addEventListener("mousemove", handleMouseMove);

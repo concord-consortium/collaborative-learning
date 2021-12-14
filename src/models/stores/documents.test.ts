@@ -1,18 +1,47 @@
 import { DocumentModel, DocumentModelType } from "../document/document";
-import { ProblemDocument, DocumentType} from "../document/document-types";
+import {
+  DocumentType, LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
+} from "../document/document-types";
 import { DocumentsModelType, DocumentsModel } from "./documents";
 import { ClassModelType, ClassModel, ClassUserModel } from "./class";
+
+const kUserId = "1";
 
 describe("documents model", () => {
   let documents: DocumentsModelType;
   let document: DocumentModelType;
+  let personalDocument: DocumentModelType;
+  let planningDocument: DocumentModelType;
+  let learningLog: DocumentModelType;
 
   beforeEach(() => {
     document = DocumentModel.create({
       type: ProblemDocument,
-      title: "test",
-      uid: "1",
+      uid: kUserId,
       key: "test",
+      createdAt: 1,
+      content: {}
+    });
+    personalDocument = DocumentModel.create({
+      type: PersonalDocument,
+      title: "Personal",
+      uid: kUserId,
+      key: "test-personal",
+      createdAt: 1,
+      content: {}
+    });
+    planningDocument = DocumentModel.create({
+      type: PlanningDocument,
+      uid: kUserId,
+      key: "test-planning",
+      createdAt: 1,
+      content: {}
+    });
+    learningLog = DocumentModel.create({
+      type: LearningLogDocument,
+      title: "LearningLog",
+      uid: kUserId,
+      key: "test-learning-log",
       createdAt: 1,
       content: {}
     });
@@ -23,9 +52,37 @@ describe("documents model", () => {
     expect(documents.all.length).toBe(0);
   });
 
-  it("allows documents to be added", () => {
+  it("allows documents to be added and retrieved by key", () => {
     documents.add(document);
+    documents.add(personalDocument);
+    documents.add(planningDocument);
+    documents.add(learningLog);
     expect(documents.getDocument("test")).toBe(document);
+    expect(documents.getDocument("test-personal")).toBe(personalDocument);
+    expect(documents.getDocument("test-planning")).toBe(planningDocument);
+    expect(documents.getDocument("test-learning-log")).toBe(learningLog);
+  });
+
+  it("allows documents to be added and retrieved by type", () => {
+    documents.add(document);
+    documents.add(personalDocument);
+    documents.add(planningDocument);
+    documents.add(learningLog);
+    expect(documents.getProblemDocument(kUserId)).toBe(document);
+    expect(documents.getPersonalDocument(kUserId)).toBe(personalDocument);
+    expect(documents.getPlanningDocument(kUserId)).toBe(planningDocument);
+    expect(documents.getLearningLogDocument(kUserId)).toBe(learningLog);
+  });
+
+  it("allows documents to be added and filtered by type", () => {
+    documents.add(document);
+    documents.add(personalDocument);
+    documents.add(planningDocument);
+    documents.add(learningLog);
+    expect(documents.byTypeForUser(ProblemDocument, kUserId)).toEqual([document]);
+    expect(documents.byTypeForUser(PersonalDocument, kUserId)).toEqual([personalDocument]);
+    expect(documents.byTypeForUser(PlanningDocument, kUserId)).toEqual([planningDocument]);
+    expect(documents.byTypeForUser(LearningLogDocument, kUserId)).toEqual([learningLog]);
   });
 
   it("does not allow duplicate documents to be added", () => {
