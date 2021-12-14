@@ -86,13 +86,25 @@ describe("Network resources hooks", () => {
                   planningDocuments: {
                     "planning-1": { self: { uid: "user-1" }, documentKey: "planning-1", visibility: "private" }
                   }
+                }, {  // should handle documents with invalid metadata
+                  uid: "user-2",
+                  problemDocuments: {
+                    "problem-2": { visibility: "public" }
+                  },
+                  planningDocuments: {
+                    "planning-2": { visibility: "private" }
+                  }
                 }]
               }]
             }]
           }
         });
       });
-      renderHook(() => useNetworkResources());
+      jestSpyConsole("warn", async (mockConsoleFn, mockRestore) => {
+        await renderHook(() => useNetworkResources());
+        expect(mockConsoleFn).toHaveBeenCalledTimes(2);
+        mockRestore();
+      }, { asyncRestore: true });
       expect(mockGetNetworkResources).toHaveBeenCalled();
     });
   });
