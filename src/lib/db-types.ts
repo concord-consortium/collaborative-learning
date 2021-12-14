@@ -138,8 +138,8 @@ export interface DBPublication {
   groupUserConnections?: DBGroupUserConnections;
 }
 
-// metadata written to {classHash}/offerings/{offeringId}/personalPublications for published personal documents
-// and to {classHash}/offerings/{offeringId}/publications for learning logs ¯\_(ツ)_/¯
+// metadata written to {classHash}/personalPublications for published personal documents
+// and to {classHash}/publications for learning logs ¯\_(ツ)_/¯
 export interface DBOtherPublication {
   version: "1.0";
   self: {
