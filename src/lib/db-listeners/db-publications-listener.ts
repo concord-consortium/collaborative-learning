@@ -58,11 +58,9 @@ export class DBPublicationsListener extends BaseListener {
   };
 
   private handlePublication = (publication: DBPublication|null) => {
-    const {documents} = this.db.stores;
     if (publication) {
       this.db.createDocumentFromPublication(publication)
         .then(doc => {
-          documents.add(doc);
           syncStars(doc, this.db);
           onPatch(doc.comments, patch => {
             const [, tileId, , index, replaceKey] = patch.path.split("/");

@@ -99,7 +99,6 @@ export class DBProblemDocumentsListener extends BaseListener {
                             : Monitor.None;
         this.db.createDocumentModelFromProblemMetadata(ProblemDocument, document.self.uid, document, monitor)
           .then((doc) => {
-            documents.add(doc);
             if (isOwnDocument) {
               documents.resolveRequiredDocumentPromise(doc);
               syncStars(doc, this.db);
@@ -118,7 +117,6 @@ export class DBProblemDocumentsListener extends BaseListener {
       if (!existingDoc) {
         this.db.createDocumentModelFromProblemMetadata(PlanningDocument, document.self.uid, document, Monitor.Local)
           .then(doc => {
-            documents.add(doc);
             isOwnDocument && documents.resolveRequiredDocumentPromise(doc);
           });
       }
