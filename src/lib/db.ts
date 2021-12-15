@@ -607,8 +607,21 @@ export class DB {
         .then(([documentSnapshot, metadataSnapshot]) => {
           const document: DBDocument|null = documentSnapshot.val();
           const metadata: DBDocumentMetadata|null = metadataSnapshot.val();
-          if (!document || !metadata) {
-            throw new Error("Unable to open document");
+          if (!metadata) {
+            // if we have no metadata, there's nothing we can do
+            const msg = `Error retrieving metadata for ` +
+                        `document '${documentKey}' of type '${type}' for user '${userId}'`;
+            throw new Error(msg);
+          }
+          if (!document) {
+            // If we have metadata but no document content, we can return a valid empty document.
+            // This has been seen to occur in the wild, presumably as a result of a prior bug.
+            const msg = "Warning: Reconstituting empty contents for " +
+                        `document '${documentKey}' of type '${type}' for user '${userId}'`;
+            console.warn(msg);
+            return DocumentModel.create({
+                                  type, title, properties, groupId, visibility, uid: userId, originDoc,
+                                  key: documentKey, createdAt: metadata.createdAt, content: {}, changeCount: 0 });
           }
 
           const content = this.parseDocumentContent(document);
