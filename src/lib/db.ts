@@ -595,6 +595,7 @@ export class DB {
   }
 
   public openDocument(options: OpenDocumentOptions) {
+    const { documents } = this.stores;
     const {documentKey, type, title, properties, userId, groupId, visibility, originDoc} = options;
     return new Promise<DocumentModelType>((resolve, reject) => {
       const {user} = this.stores;
@@ -640,6 +641,7 @@ export class DB {
           });
         })
         .then((document) => {
+          documents.add(document);
           resolve(document);
         })
         .catch(reject);
@@ -798,10 +800,7 @@ export class DB {
     const {title, properties, uid, originDoc, self: {documentKey}} = publication;
     const group = this.stores.groups.groupForUser(uid);
     const groupId = group && group.id;
-    return this.openDocument({type, userId: uid, documentKey, groupId, title, properties, originDoc})
-      .then((document) => {
-        return document;
-      });
+    return this.openDocument({type, userId: uid, documentKey, groupId, title, properties, originDoc});
   }
 
   public createDocumentFromPublication(publication: DBPublication) {

@@ -75,7 +75,6 @@ export class DBOtherDocumentsListener extends BaseListener {
                 ? this.db.listeners.monitorPersonalDocument
                 : this.db.listeners.monitorLearningLogDocument)
         .then(doc => {
-          documents.add(doc);
           if (doc.uid === user.id) {
             !doc.getProperty("isDeleted") && documents.resolveRequiredDocumentPromise(doc);
             (doc.type === PersonalDocument) && syncStars(doc, this.db);
@@ -86,12 +85,10 @@ export class DBOtherDocumentsListener extends BaseListener {
   };
 
   private handlePublicationAdded = (snapshot: firebase.database.DataSnapshot) => {
-    const {documents} = this.db.stores;
     const dbDoc: DBOtherPublication|null = snapshot.val();
     this.debugLogSnapshot("#handlePublicationAdded", snapshot);
     if (dbDoc) {
-      this.db.createDocumentModelFromOtherPublication(dbDoc, this.publicationType)
-        .then(documents.add);
+      this.db.createDocumentModelFromOtherPublication(dbDoc, this.publicationType);
     }
   };
 
