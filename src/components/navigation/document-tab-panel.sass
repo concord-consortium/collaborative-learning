@@ -45,9 +45,15 @@
       border-radius: 5px 5px 0 0
       background-color: $problem-orange-light-7
       &:first-of-type
-          margin-left: 2px
+        margin-left: 2px
       &:last-of-type
-          margin-right: 0
+        margin-right: 0
+      &.my-work
+        background-color: $workspace-teal-light-6
+      &.class-work  // !important to override learning log color
+        background-color: $classwork-purple-light-7 !important
+      &.supports
+        background-color: $support-blue-light-7
       &.learning-logs
         background-color: $learninglog-green-light-7
       &:hover

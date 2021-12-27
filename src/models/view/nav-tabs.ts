@@ -26,7 +26,7 @@ export enum ENavTabSectionType {
   kPublishedLearningLogs = "published-learning-logs",
   kStarredPersonalDocuments = "starred-personal-documents",
   kStarredProblemDocuments = "starred-problem-documents",
-  kStarredLearingLogs = "starred-learning-logs",
+  kStarredLearningLogs = "starred-learning-logs",
   kCurricularSupports = "curricular-supports",
   kTeacherSupports = "teacher-supports"
 }
