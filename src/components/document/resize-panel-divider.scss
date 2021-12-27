@@ -9,11 +9,18 @@
     height: calc(100vh - (#{$header-height} + #{$workspace-content-margin} * 2));
     transition-duration: .5s;
 
+    &.divider-min {
+      align-items: flex-start;
+    }
+    &.divider-max {
+      align-items: flex-end;
+    }
+
     .divider {
       position: absolute;
       width: 4px;
       height: 100%;
-      margin: 10px 2px 0;
+      margin: 4px 2px 0;
       border-radius: 2px;
       background-color: $charcoal-light-4;
       z-index: 1;
@@ -26,6 +33,18 @@
       margin-top: 9px;
       top: 50%;
     }
+
+    &.divider-min {
+      .drag-thumbnail {
+        margin-left: 2px;
+      }
+    }
+    &.divider-max {
+      .drag-thumbnail {
+        margin-right: 2px;
+      }
+    }
+
     .drag-handles {
       display: flex;
       flex-direction: row;
@@ -38,10 +57,11 @@
       opacity: 0.01%;
       &:hover {
         opacity: 50%;
+      }
       &:active {
         opacity: 100%;
       }
-    }
+
       .drag-left-handle {
         position: absolute;
         width: 21px;
@@ -63,6 +83,12 @@
         &.disabled {
           visibility: hidden;
         }
+      }
+    }
+
+    &.divider-min, &.divider-max {
+      .drag-handles {
+        width: 26px;
       }
     }
   }
