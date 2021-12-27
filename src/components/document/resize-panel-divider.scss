@@ -56,9 +56,6 @@
       top: 50%;
       opacity: 0.01%;
       &:hover {
-        opacity: 50%;
-      }
-      &:active {
         opacity: 100%;
       }
 
@@ -69,6 +66,9 @@
         left: 0;
         z-index: 3;
         cursor: pointer;
+        &:not(:active) {
+          opacity: 50%;
+        }
         &.disabled {
           visibility: hidden;
         }
@@ -80,6 +80,9 @@
         right: 0;
         z-index: 3;
         cursor: pointer;
+        &:not(:active) {
+          opacity: 50%;
+        }
         &.disabled {
           visibility: hidden;
         }
