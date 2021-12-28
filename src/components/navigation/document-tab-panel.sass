@@ -50,22 +50,22 @@
         margin-right: 0
       &.my-work
         background-color: $workspace-teal-light-6
-      &.class-work  // !important to override learning log color
-        background-color: $classwork-purple-light-7 !important
-      &.supports
-        background-color: $support-blue-light-7
       &.learning-logs
         background-color: $learninglog-green-light-7
+      &.class-work
+        background-color: $classwork-purple-light-7
+      &.supports
+        background-color: $support-blue-light-7
       &:hover
         background-color: $charcoal-light-9
         &.my-work
-          background-color: $workspace-teal-light-5
+          background-color: $workspace-teal-light-4
+        &.learning-logs
+          background-color: $learninglog-green-light-5
         &.class-work
           background-color: $classwork-purple-light-5
         &.supports
           background-color: $support-blue-light-5
-        &.learning-logs
-          background-color: $learninglog-green-light-5
       &:active, &.selected
         background-color: $charcoal-light-8
         font-weight: bold
@@ -73,12 +73,12 @@
         z-index: 2
         &.my-work
           background-color: $workspace-teal-light-3
-        &.class-work
-          background-color: $classwork-purple-light-3
-        &.supports
-          background-color: $support-blue-light-3
         &.learning-logs
           background-color: $learninglog-green-light-4
+        &.class-work
+          background-color: $classwork-purple-light-4
+        &.supports
+          background-color: $support-blue-light-3
   .documents-panel
     height: calc(100vh - (#{$header-height} + #{$workspace-content-margin} * 2 + #{$nav-tab-height} * 2 + #{$tab-section-border-width} * 2))
     margin-top: $document-margin
