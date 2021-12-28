@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import React from "react";
 import DragThumbnailIcon from "../../assets/drag-thumb-icon.svg";
 import LeftDragIcon from "../../assets/left-drag.svg";
@@ -13,16 +14,21 @@ interface IProps {
 }
 
 export const ResizePanelDivider: React.FC <IProps> =
-  ({isResourceExpanded, dividerPosition, onExpandWorkspace, onExpandResources}) => {
-    const dividerLeftOffset = 22;
+  ({dividerPosition, onExpandWorkspace, onExpandResources}) => {
+    const dividerMinLeftOffset = 39.5;
+    const dividerMidLeftOffset = 21;
+    const dividerMaxLeftOffset = 22;
     const tabWidth = 45;
     const dividerPositionStyle = dividerPosition  === kDividerMin
-                                  ? {left: dividerLeftOffset}
+                                  ? {left: dividerMinLeftOffset}
                                   : dividerPosition === kDividerMax
-                                      ? {left: `calc(${dividerPosition}% - ${tabWidth}px - ${dividerLeftOffset}px)`}
-                                      : {left: `calc(${dividerPosition}% - ${dividerLeftOffset}px)`};
+                                      ? {left: `calc(${dividerPosition}% - ${tabWidth}px - ${dividerMaxLeftOffset}px)`}
+                                      : {left: `calc(${dividerPosition}% - ${dividerMidLeftOffset}px)`};
+    const classes = classNames("resize-panel-divider", {
+                                "divider-min": dividerPosition  === kDividerMin,
+                                "divider-max": dividerPosition === kDividerMax });
   return (
-    <div className="resize-panel-divider" style={dividerPositionStyle}>
+    <div className={classes} style={dividerPositionStyle}>
       <div className="divider" />
       <div className="drag-handles">
         {!(dividerPosition === kDividerMin) &&
