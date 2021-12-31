@@ -866,7 +866,7 @@
                     ]
                   }
                 },
-                        {
+                {
                     "layout": {
                       "height": 320
                     },
@@ -1228,27 +1228,25 @@
           "ordinal": 3,
           "title": "MSA 1.3 Raising Money",
           "subtitle": "Using Linear Relationships to Solve Problems",
-          "sections": [{
+          "sections": [
+            {
               "type": "introduction",
               "content": {
                 "tiles": [
                   {
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": [
-                      "In Problems 1.1 and 1.2, the distance walked depended on the time. This tells you that distance is the dependent variable and time is the independent variable. In this Problem, you will look at relationships between two other variables in a walkathon. \n\nThe students in Ms. Chang’s class are trying to estimate how much money they might be able to raise for charity by doing a walkathon. Several questions come up in their discussions: <ul><li><em> What variables can affect the amount of money that is collected?</em></li><li> How can you use these variables to estimate the amount of money each student will collect? </em></li><li> <em>Will the amount of money collected be the same for each walker? </em></li></ul>"
-                    ]
-                  }
-                  },
-                  {
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": [
-                      "Each participant in the walkathon must find sponsors to pledge a certain amount of money for each kilometer he or she walks. The class refers to these as <em>pledge plans</em>."
-                    ]
-                  }
+                    "id": "DB66Kx1ZakizoIdv",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>In Problems 1.1 and 1.2, the distance walked depended on the time. This tells us that distance is the <em>dependent variable </em>and time is the <em>independent variable</em>. In this Problem, we will look at relationships between two other variables in a walkathon.</p>",
+                        "<p>The students in Ms. Chang’s class are trying to estimate how much money they might raise for charity by doing a walkathon. Several questions come up in their discussions:</p>",
+                        "<p><em>What variables can affect the amount of money that is collected?</em></p>",
+                        "<p><em>How can we use these variables to estimate the amount of money each student will collect?</em></p>",
+                        "<p><em>Will the amount of money collected be the same for each walker?</em></p>",
+                        "<p>Each participant in the walkathon must find sponsors to pledge a certain amount of money for each kilometer he or she walks. The class refers to these as <em>pledge plans</em>.</p>"
+                      ]
+                    }
                   }
                 ]
               },
@@ -1258,34 +1256,35 @@
               "type": "initialChallenge",
               "content": {
                 "tiles": [
-                  {
+                 {
+                    "id": "dKQP1eR0mZBQGhrP",
                     "content": {
                       "type": "Text",
-                      "text": "Each student found sponsors who will pledge to donate money according to the following descriptions."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Table",
-                      "columns": [
-                        {
-                          "name": "Name",
-                          "type": "string",
-                          "values": [" Leanne", "Gilberto ", "Alana"]
-                        },
-                         {
-                          "name": "Pledge Plan",
-                          "type": "string",
-                          "values": ["$10 regardless of how far she walks", "$2 per kilometer (km)", "$5 donation plus 50¢ per kilometer"]
-                        }
+                      "format": "html",
+                      "text": [
+                        "<p>Each student found sponsors who pledge to donate money according to the following descriptions.</p>"
                       ]
                     }
                   },
                   {
+                    "id": "FEPsgdNhJcXTe8P3",
+                    "content": {
+                      "type": "Table",
+                      "name": "Table 1",
+                      "columns": [
+                        {"name":"Name","values":["Leanne","Gilberto","Alana"]},
+                        {"name":"Pledge Plan                                                              ","values":["$10 regardless of how far she walks","$2 per kilometer (km)","$5 donation plus 50¢  per kilometer"]}
+                      ]
+                    }
+                  },
+                  {
+                    "id": "7DsMlAExe_OF7epL",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<ul><li>Who will raise the most money? Explain.</li><ul>"]
+                      "text": [
+                        "<ul><li>Who will raise the most money? Explain.</li></ul>"
+                      ]
                     }
                   },
                   {
@@ -1293,77 +1292,31 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "The answer depends on how long the walkathon is. \nLeanne will raise the most money if the walkathon is shorter than 5 kilometers; Gilberto will “catch up” to Leanne when he walks 5 kilometers because he raises $2 per kilometer.\nGilberto will raise the most money if the walkathon is longer than 5 kilometers.\nAlana will never raise the most money because she has a smaller starting donation than Leanne and a smaller per-kilometer-walked donation than Gilberto."
+                      "text": [
+                        "<p>The answer depends on how long the walkathon is. </p>",
+                        "<p>Leanne will raise the most money if the walkathon is shorter than 5 kilometers; Gilberto will “catch up” to Leanne when he walks 5 kilometers because he raises $2 per kilometer.</p>",
+                        "<p>Gilberto will raise the most money if the walkathon is longer than 5 kilometers.</p>",
+                        "<p>Alana will never raise the most money because she has a smaller starting donation than Leanne and a smaller per-kilometer-walked donation than Gilberto.</p>"
+                      ]
                     }
                   },
                   {
-                    "layout": {
-                      "height": 330
-                    },
                     "display": "teacher",
                     "content": {
-                      "title": "Comparing Walking Rates",
                       "type": "Geometry",
+                      "title": "Comparing Walking Rates",
                       "board": {
                         "properties": {
-                          "axisNames": ["t, D"],
-                          "axisLabels": ["Time (seconds)", "Distance (meters)"],
                           "axisMin": [-1, -2],
-                          "axisRange": [12, 15]
+                          "axisRange": [12, 15],
+                          "axisNames": ["t, D"],
+                          "axisLabels": ["Time (seconds)", "Distance (meters)"]
                         }
                       },
                       "objects": [
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [0, 10],
-                              "properties": {
-                                "name": "Leanne"
-                              }
-                            },
-                            {
-                              "type": "point",
-                              "parents": [10, 10],
-                              "properties": {
-                                "name": ""
-                              }
-                            }
-                          ]
-                        },
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [0, 0]
-                            },
-                            {
-                              "type": "point",
-                              "parents": [6, 12],
-                              "properties": {
-                                "name": "Gilberto"
-                              }
-                            }
-                          ]
-                        },
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [0, 5]
-                            },
-                            {
-                              "type": "point",
-                              "parents": [16, 10],
-                              "properties": {
-                                "name": "Alana"
-                              }
-                            }
-                          ]
-                        }
+                        { "type": "movableLine", "parents": [{ "type": "point", "parents": [0, 10] }, { "type": "point", "parents": [10, 10] }],"properties": {"id":"7BSe6ALwMMVtOm8K","pt1":{"name":"Leanne"},"pt2":{"name":""}} },
+                        { "type": "movableLine", "parents": [{ "type": "point", "parents": [0, 0] }, { "type": "point", "parents": [6, 12] }],"properties": {"id":"SXE84DeblInqB2JO","pt1":{"name":"Gilberto"}} },
+                        { "type": "movableLine", "parents": [{ "type": "point", "parents": [0, 5] }, { "type": "point", "parents": [16, 10] }],"properties": {"id":"zDNbTObCK6X41amc","pt1":{"name":"Alana"}} }
                       ]
                     }
                   },
@@ -1373,34 +1326,21 @@
                       "type": "Table",
                       "name": "Donations",
                       "columns": [
-                          {
-                            "name": "Distance (km)",
-                            "type": "number",
-                            "values": [0, 1, 2, 3, 4, 5, 6]
-                          },
-                          {
-                            "name": "Leanne's ($)",
-                            "type": "number",
-                            "values": [10, 10, 10, 10, 10, 10]
-                          },
-                          {
-                            "name": "Gilbero's ($)",
-                            "type": "number",
-                            "values": [0, 2, 4, 6, 8, 10]
-                          },
-                          {
-                            "name": "Alana's ($)",
-                            "type": "number",
-                            "values": [0, 2, 4, 6, 8, 10]
-                          }
-                        ]
+                        {"name":"Distance (km)","values":[0,1,2,3,4,5,6]},
+                        {"name":"Leanne's ($)","values":[10,10,10,10,10,10,"10"]},
+                        {"name":"Gilbero's ($)","values":[0,2,4,6,8,10,"12"]},
+                        {"name":"Alana's ($)","values":["5","5.50","6","6.50","7","7.50","8"]}
+                      ]
                     }
                   },
                   {
+                    "id": "JGwIZil77XYLTD76",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<ul><li>How does the relationship between dollars and kilometers represent a linear relationship? </li><ul>"]
+                      "text": [
+                        "<ul><li>Explain why the relationship between dollars and kilometers represent a linear relationship? </li></ul>"
+                      ]
                     }
                   },
                   {
@@ -1408,22 +1348,9 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "They are linear relationships because the students all raise a constant rate of money for each kilometer walked. Leanne raises $0 per kilometer, Gilberto raises $2 per kilometer, and Alana raises $0.50 per kilometer. This will form a straight line as each increase in 1 km leads to a constant increase in the donation monies."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["<ul><li>How do these relationships compare to those in Problem 1.2? Explain.</li><ul>"]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "Gilberto’s relationship is exactly like those in Problem 1.2 because when he has walked 0 km, he will earn $0. But Leanne’s and Alana’s relationships are different from those in Problem 1.2 because they have an extra amount of money added at the start of the walkathon. So, when they have walked 0 km, they will have raised $10 and $5, respectively. After that their plans have a constant rate of change."
+                      "text": [
+                        "<p>They are linear relationships because the students all raise a constant rate of money for each kilometer walked. Leanne raises $0 per kilometer, Gilberto raises $2 per kilometer, and Alana raises $0.50 per kilometer. This will form a straight line as each increase in 1 km leads to a constant increase in the donation monies.</p>"
+                      ]
                     }
                   }
                 ]
@@ -1441,251 +1368,272 @@
               "type": "whatIf",
               "content": {
                 "tiles": [
-                  {
+                {
+                  "id": "pE7_dVF0GQke6_Ok",
                   "content": {
                     "type": "Text",
                     "format": "html",
-                    "text":[
-                      "<strong>Situation A. Using the Data</strong>\n1. In Alana’s plan, how is the fixed $5 donation represented in a table? A graph? An equation? How is the rate of change shown in the table, graph, and equation?"
+                    "text": [
+                      "<p><em>Situation A. Using Representations to Solve Problems</em></p>",
+                      "<ul><li>In Alana’s plan, how is the fixed $5 donation represented in a table? A graph? An equation? How is the rate of change shown in the table, graph, and equation?</li></ul>"
                     ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "The fixed $5 donation represents the amount of money she raises by walking 0 kilometers. In the table, it is the amount of the donation when the distance is 0. (0,5) is the point where Alana’s graph intersects the y-axis; it is the point on the line for her plan with an x-coordinate of 0. In the equation, 5 is the term that is added to 0.50d where d represents the distance walked."
-                    }
-                  },
-                  {
-                    "layout": {
-                      "height": 330
-                    },
-                    "display": "teacher",
-                    "content": {
-                      "title": "Comparing Walking Rates",
-                      "type": "Geometry",
-                      "board": {
-                        "properties": {
-                          "axisNames": ["t, D"],
-                          "axisLabels": ["Time (seconds)", "Distance (meters)"],
-                          "axisMin": [-1, -2],
-                          "axisRange": [12, 15]
-                        }
-                      },
-                      "objects": [
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [0, 10],
-                              "properties": {
-                                "name": "Leanne's fixed donation = y-intercept"
-                              }
-                            },
-                            {
-                              "type": "point",
-                              "parents": [10, 10],
-                              "properties": {
-                                "name": ""
-                              }
-                            }
-                          ]
-                        },
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [0, 0]
-                            },
-                            {
-                              "type": "point",
-                              "parents": [6, 12],
-                              "properties": {
-                                "name": "Gilberto"
-                              }
-                            }
-                          ]
-                        },
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [0, 5]
-                            },
-                            {
-                              "type": "point",
-                              "parents": [16, 10],
-                              "properties": {
-                                "name": "Alana"
-                              }
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Table",
-                      "name": "Donation Table",
-                      "columns": [
-                          {
-                            "name": "Distance (km)",
-                            "type": "string",
-                            "values": ["0*", 1, 2, 3, 4, 5, 6]
-                          },
-                          {
-                            "name": "Alana's Donation ($)",
-                            "type": "number",
-                            "values": ["5*", 5.50, 6, 6.50, 7, 7.50, 8]
-                          }
-                        ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "\u00a0\u00a0\u00a0 <em>m = 5 + 0.50 d</em>, where 5 is the fixed donation that is the 'amount added into' the equation. \n\nThe rate of change for Alana is $0.50 per kilometer. In the table, this is shown by the amount that the donation increases for every 1 kilometer or the amount each row of the y-variable increases for every increase of 1 km. The graph shows the rate of change as how much the line rises for every kilometer. In the equation, we see the rate of change in the coefficient, or the amount that is multiplied by the x-variable."
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Table",
-                      "name": "Donation Table",
-                      "columns": [
-                          {
-                            "name": "Distance (km)",
-                            "type": "string",
-                            "values": ["0*", 1, 2, 3, 4, 5, 6]
-                          },
-                          {
-                            "name": "Alana's Donation ($)",
-                            "type": "number",
-                            "values": [5, 5.50, 6, 6.50, 7, 7.50, 8]
-                          }
-                        ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "\u00a0\u00a0\u00a0 <em>m = 5 + 0.50 d</em>, where 0.50 is the rate of change which is the multiplier or coefficient of the variable d. \n\nThe rate of change for Alana is $0.50 per kilometer. In the table, this is shown by the amount that the donation increases for every 1 kilometer or the amount each row of the y-variable increases for every increase of 1 km. The graph shows the rate of change as how much the line rises for every kilometer. In the equation, we see the rate of change in the coefficient, or the amount that is multiplied by the x-variable."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text":[
-                        "2. Suppose each student walks 8 kilometers in the walkathon. How much money does each sponsor donate? Explain how you found your answer."
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "Leanne: Each sponsor donates $10 because they donate $10 regardless of how far she walks.\nGilberto: Each sponsor donates $2 • 8 = $16 because they donate $2 per kilometer he walks.\nAlana: Each sponsor donates $5 + $0.50 • 8 = $5 + $4 = $9 because they donate $5 plus $0.50 per kilometer she walks. "
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text":[
-                        "3. Suppose each student raises $10 from a sponsor. How many kilometers does each student walk? Explain."
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "Leanne: We cannot determine how far she walks since the amount of money she raises does not depend on how many kilometers she walks.\nGilberto: 5 kilometers because $2 x 5 = 10 or 10 ÷ 2 = 5.\nAlana: 10 kilometers because $10 - $5 = $5 so she has to raise $5 by walking; since she raises $0.50 per kilometer walked, she must walk $5 / $0.50 = 10 kilometers."
-                    }
-                  },
-                  {
+                  }
+                },
+                {
+                  "display": "teacher",
                   "content": {
                     "type": "Text",
                     "format": "html",
-                    "text":[
-                      "4. On which graph does the point (12, 11) lie? What information does this point represent?"
+                    "text": [
+                      "<p>The fixed $5 donation represents the amount of money she raises by walking 0 kilometers. In the table, it is the amount of the donation when the distance is 0. (0,5) is the point where Alana’s graph intersects the y-axis; it is the point on the line for her plan with an x-coordinate of 0. In the equation, 5 is the term that is added to 0.50d where d represents the distance walked.</p>"
                     ]
+                  }
+                },
+                [
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/MSA_1-3_SitAGraph_1.png"
                     }
                   },
                   {
                     "display": "teacher",
                     "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "The point (12,11) lies on Alana’s graph since $5 + $0.50 x 12 = $5 + $6 = $11. This point means that if Alana walks 12 kilometers, each sponsor will donate $11."
-                    }
-                  },
-                  {
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text":[
-                      "5. Yvonne claims that the relationships for Alana, Gilberto, and Leanne pledge plans are linear and proportional. Is she correct?"
-                    ]
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/MSA_1-3_SitATable_1.png"
                     }
                   },
                   {
                     "display": "teacher",
                     "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "Leanne’s, Gilberto’s, and Alana’s plans are linear because they all show a constant rate of money raised per kilometer walked. Only Gilberto’s pledge plan is proportional because his plan doesn’t involve raising any money without walking any kilometers."
-                    }
-                  },
-                  {
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text":[
-                      "<strong> Situation B. Gilberto Gives T-shirts</strong>\n\nGilberto decides to give a T-shirt to each of his sponsors. Each shirt costs him $4.75. He plans to pay for each shirt with some of the money he raises from each sponsor.\n\n1. Write an expression that represents the amount of money Gilberto raises after paying for the T-shirts."
-                    ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "For each sponsor, Gilberto will earn $2 per kilometer walked and pay $4.75 regardless of how far he walks. The expression that represents the amount of money Gilberto will raise with this plan is 2*d – 4.75, where d represents the distance walked."
-                    }
-                  },
-                  {
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text":[
-                      "2. How does this additional cost affect the amount of money he has raised reflected in a table, graph, and equation?"
-                    ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "When he has walked 0 km, he will have earned -$4.75, so (0,-4.75) will be a value on the table and will be the spot where Gilberto’s graph intersects the y-axis. After that, for each kilometer he walks, the money he raises will increase by $2. So (1,-2.75) will be a value on the table and the graph. In the equation, we subtract -$4.75 to represent this extra cost, so his profits are always decreased by $4.75, no matter how many kilometers he walks."
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/MSA_1-3_SitAEquation_1.png"
                     }
                   }
-              ]
+                ],
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>The rate of change for Alana is $0.50 per kilometer. In the table, this is shown by the amount that the donation increases for every 1 kilometer or the amount each row of the y-variable increases for every increase of 1 km. The graph shows the rate of change as how much the line rises for every kilometer. In the equation, we see the rate of change in the coefficient, or the amount that is multiplied by the x-variable.</p>"
+                    ]
+                  }
+                },
+                [
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/MSA_1-3_SitAGraph_2.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/MSA_1-3_SitATable_2.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/MSA_1-3_SitAEquation_2.png"
+                    }
+                  }
+                ],
+                {
+                  "id": "AK3I20tmZHseg3v1",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<ul><li>On which graph does the point (12, 11) lie? What information does this point represent?</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>The point (12,11) lies on Alana’s graph since $5 + $0.50 x 12 = $5 + $6 = $11. This point means that if Alana walks 12 kilometers, each sponsor will donate $11. </p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "ZJ724yj8v4yxXkgw",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<ul><li>On which table can you find the entry (5,10)?</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Both, Gilberto, and Leanne  They both will collect $10 if they walk 5 km.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "KhF153fmby2U6u9Z",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>4.  Which equation has the point (4,8) as a solution?</p>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Gilberto  m = 2d</p>",
+                      "<p>8 = 2(4) </p>",
+                      "<p>8 = 8</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "h02Esikf3goOgiog",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<ul><li>Suppose each student walks 8 kilometers in the walkathon. How much money does each sponsor donate? Explain how you found your answer.</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Leanne: Each sponsor donates $10 because they donate $10 regardless of how far she walks.</p>",
+                      "<p>Gilberto: Each sponsor donates $2 • 8 = $16 because they donate $2 per kilometer he walks.</p>",
+                      "<p>Alana: Each sponsor donates $5 + $0.50 • 8 = $5 + $4 = $9 because they donate $5 plus $0.50 per kilometer she walks. </p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "D3zeRlC-b-Nkz4Op",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<ul><li>Suppose each student raises $10 from a sponsor. How many kilometers does each student walk? Explain.</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Leanne: We cannot determine how far she walks since the amount of money she raises does not depend on how many kilometers she walks.</p>",
+                      "<p>Gilberto: 5 kilometers because $2 x 5 = 10 or 10 ÷ 2 = 5.</p>",
+                      "<p>Alana: 10 kilometers because $10 - $5 = $5 so she has to raise $5 by walking; since she raises $0.50 per kilometer walked, she must walk $5 / $0.50 = 10 kilometers.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "O0h31TTIdfokbVi9",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><em>Situation B. Yvonne’s Conjecture about Proportionality</em></p>",
+                       "<p>The relationships for Alana, Gilberto, and Leanne pledge plans are linear and proportional. </p>",
+                       "<p>Is Yvonne’s conjecture correct? Explain. </p>"
+
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Leanne’s, Gilberto’s, and Alana’s plans are linear because they all show a constant rate of money raised per kilometer walked. </p>",
+                      "<p>Only Gilberto’s pledge plan is proportional because his plan doesn’t involve raising any money without walking any kilometers. The graph goes through the origin. And values from the table can be made into proportions.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "6duUv-01dAU6hQNP",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><em>Situation C. Gilberto Gives Away T-shirts</em></p>",
+                      "<p>Gilberto decides to give a T-shirt to each of his sponsors. Each shirt costs him $4.75. He plans to pay for each shirt with some of the money he raises from each sponsor. </p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "EywBSXMdkpUDMqIP",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<ul><li>Write an expression that represents the amount of money Gilberto raises after paying for the T-shirts?</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>For each sponsor, Gilberto will earn $2 per kilometer walked and pay $4.75 regardless of how far he walks. The expression that represents the amount of money Gilberto will raise with this plan is 2*d – 4.75, where d represents the distance walked.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "4xIuTYt399OD4DfE",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<ul><li>How does this additional cost affect the amount of money he has raised reflected in a table? Graph? Equation?</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Every representation will be decreased 4.75. </p>",
+                      "<p>Table:</p>",
+                      "<p>When he has walked 0 km, he will have earned –$4.75, so (0, –4.75) will be a value on the table. After that, for each kilometer he walks, the money he raises will increase by $2. So (1, –2.75) will be the next value on the table. For each kilometer, the money raises will be $4.75 less than it was before.</p>",
+                      "<p>Graph:</p>",
+                      "<p>The whole line ‘slides down’. Instead of the y-axis being at the origin, the line will  intersect the y-axis at (0, –4.75). For each kilometer, the money raises will be $4.75 less than it was before.</p>",
+                      "<p>Equation:</p>",
+                      "<p>We subtract –$4.75 to represent this extra cost, so his profits are always decreased by $4.75, no matter how many kilometers he walks.</p>"
+                    ]
+                  }
+                }
+
+                ]
               },
               "supports": [{"text": "Which variable is the independent variable? Which is the dependent variable? "}]
             },
@@ -1693,10 +1641,25 @@
               "type": "nowWhatDoYouKnow",
               "content": {
                 "tiles": [
-                  {
+                {
+                  "id": "uWwYLPlAolzZnfAU",
                   "content": {
                     "type": "Text",
-                    "text": "How can you determine if a relationship is linear from a verbal  context, table, graph, or equation?"
+                    "format": "html",
+                    "text": [
+                      "<p>How can you predict where the graph of a linear relationship intersects the y-axis from a context, table, or equation that represent the relationship?</p>"
+                    ]
+                  }
+                },
+                [
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Context</p>"
+                      ]
                     }
                   },
                   {
@@ -1704,13 +1667,9 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "You can determine if a relationship is linear if there is a constant rate of change. That is, for every unit change in the independent variable there is a consistent change in the dependent variable. Another way to say this is “as the independent variable changes in equal increments, the dependent variable will change by a consistent amount.\n\nIn a table, as the independent variable increases by one unit the dependent variable will change by a consistent amount. The graph is a straight line. The equation is of the form y = ax + b. If b is 0 then the equation, y = ax is also proportional."
-                    }
-                  },
-                  {
-                  "content": {
-                    "type": "Text",
-                    "text": "If a relationship is linear, explain how you can tell if it is proportional."
+                      "text": [
+                        "<p>Table</p>"
+                      ]
                     }
                   },
                   {
@@ -1718,110 +1677,131 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "Table: Values from the table are proportional. You can use the values to write proportions or “for every” ratio statements. For example, in the table for Gilberto:"
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Table",
-                      "name": "Donation Table",
-                      "columns": [
-                          {
-                            "name": "Distance (km)",
-                            "type": "number",
-                            "values": [0, 1, 2, 3, 4, 5, 6]
-                          },
-                          {
-                            "name": "Gilberto's Donation ($)",
-                            "type": "number",
-                            "values": [0, 2, 4, 6, 8, 10, 12]
-                          }
-                        ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "Equation: The amount added into the equation is zero. Or the y-intercept is zero. For example, in the equation for Gilberto:\n\n \u00a0\u00a0\u00a0<em>m = 2d</em> or <em>m = 2d + 0</em>\n\nGraph: The graph of a proportional relationship is passes through the point (0,0). For example, in the graph for Gilberto:"
-                    }
-                  },
-                                    {
-                    "layout": {
-                      "height": 330
-                    },
-                    "display": "teacher",
-                    "content": {
-                      "type": "Geometry",
-                      "title": "Comparing Walking Rates",
-                      "board": {
-                        "properties": {
-                          "axisNames": ["t, D"],
-                          "axisLabels": ["Time (seconds)", "Distance (meters)"],
-                          "axisMin": [-1, -2],
-                          "axisRange": [12, 15]
-                        }
-                      },
-                      "objects": [
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [0, 10],
-                              "properties": {
-                                "name": "Leanne"
-                              }
-                            },
-                            {
-                              "type": "point",
-                              "parents": [10, 10],
-                              "properties": {
-                                "name": ""
-                              }
-                            }
-                          ]
-                        },
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [0, 0],
-                              "properties": {
-                                "name": "proportional line passes through (0, 0)"
-                              }
-                            },
-                            {
-                              "type": "point",
-                              "parents": [6, 12],
-                              "properties": {
-                                "name": "Gilberto"
-                              }
-                            }
-                          ]
-                        },
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [0, 5]
-                            },
-                            {
-                              "type": "point",
-                              "parents": [16, 10],
-                              "properties": {
-                                "name": "Alana"
-                              }
-                            }
-                          ]
-                        }
+                      "text": [
+                        "<p>Equation</p>"
                       ]
                     }
                   }
+                ],
+                [
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The y-intercept is the starting amount when the independent variable is 0.</p>",
+                        "<p>It might be some set cost, a fee, or some other amount added in or subtracted at the beginning.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>When the independent variable is 0, the y-intercept will be the value of the dependent variable.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>If the equation is of the form y = ax + b, the b value is where the line crosses the y-axis.</p>"
+                      ]
+                    }
+                  }
+                ],
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Table",
+                    "name": "Variables",
+                    "columns": [
+                      {"name":"Independent","values":["0","1","2"]},
+                      {"name":"Dependent","values":["5","6","7"]}
+                    ]
+                  }
+                },
+                {
+                  "id": "UVji5JgD8huF0JKg",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Describe how you can use a table, graph, or equation to solve a problem? </p>"
+                    ]
+                  }
+                },
+                [
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Table</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Graph</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Equation</p>"
+                      ]
+                    }
+                  }
+                ],
+                [
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Extend the table or find “in between” values on the table. You look for the variable value that you know to find the other variable value that will answer the question. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Find the point on the graph that answers the question. If you know the x-value, you can </p>",
+                        "<ul><li>follow the x-axis to that amount</li><li>see where that value “hits the line”</li><li>find the y-value of that point.</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Substitute the value that you know into the equation. Use the equation to find the unknown value.</p>"
+                      ]
+                    }
+                  }
+                ]
                 ]
               },
               "supports": [
@@ -1838,23 +1818,48 @@
           "sections": [{
               "type": "introduction",
               "content": {
-                "tiles": [{
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": ["In previous Problems, you noticed that as the independent variable changes by some consistent amount, there is a consistent pattern of change in the dependent variable. In the last Problem, the graph representing Alana’s pledge plan crossed the y-axis at point (0,5). Leanne’s crosses the y-axis at (0, 10). Gilberto’s pledge plan crossed the y-axis at (0,0). These points are called the <em>y-intercepts</em>. The <strong>y-intercept</strong> is the point where the line crosses the y-axis, or when x = 0. \n\nIn this Problem you will continue to explore linear relationships in new contexts. \n\n<em>What information does the y-intercept represent?\nIn what way does it help you solve the Problem?</em>"]
+                "tiles": [
+                  {
+                    "id": "MUT-Dkr3zL4rP4wK",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>We have noticed that, as the independent variable changes by a constant amount, there is a constant pattern of change in the dependent variable. In the last Problem, the graph representing Alana’s pledge plan crossed the y-axis at point at (0, 5). Leanne’s crosses the y-axis at point at (0, 10). Gilberto’s pledge plan crossed the y-axis at (0, 0). These points are called the y-intercepts. The y-intercept is the point where the line crosses the y-axis, or when x = 0. </p>",
+                        "<p></p>",
+                        "<p>In this Problem we will continue to explore linear relationships in new contexts. </p>",
+                        "<p><em>                                                                            What information does the y-intercept represent?</em></p>",
+                        "<p><em>                                                                                  How might it be useful in solving problems?</em></p>"
+                      ]
+                    }
                   }
-                }]
+                ]
               },
               "supports": []
             },
             {
               "type": "initialChallenge",
               "content": {
-                "tiles": [{
+                "tiles": [
+                    {
+                    "id": "pdY7cPk8P7vUv0qm",
                     "content": {
                       "type": "Text",
-                      "text": "Ms. Chang and Mr. Mamer’s classes decide to use their walkathon money for charity. They put their money in a bank account and withdraw a fixed amount each week. \n\nMs. Chang’s class provides books to the children’s ward at the hospital each week. To keep track of the money, Isabella makes a table of the amount of money in the account at the end of each week."
+                      "format": "html",
+                      "text": [
+                        "<p>Ms. Chang and Mr. Mamer’s classes decide to use their walkathon money for charity. They put their money in a bank account and withdraw a fixed amount each week. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "Dhmauo_cAldu4K9k",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Ms. Chang’s class provides books to the children’s ward at the hospital each week. </p>",
+                        "<p>To keep track of the money, Isabella makes a table of the amount of money in the account at the end of each week.</p>"
+                      ]
                     }
                   },
                   {
@@ -1862,154 +1867,55 @@
                       "type": "Table",
                       "name": "Donations",
                       "columns": [
-                        {
-                          "name": "week",
-                          "type": "number",
-                          "values": [0, 1, 2, 3, 4, 5]
-                        },
-                        {
-                          "name": "Amount of Money at the End of Each Week ($)",
-                          "type": "number",
-                          "values": [144, 132, 120, 108, 96, 84]
-                        }
+                        {"name":"Week","values":[0,1,2,3,4,5]},
+                        {"name":"Amount of Money at the End of Each Week ($)","values":[144,132,120,108,96,84]}
+                      ]
+                    }
+                  },
+                  {
+                    "id": "Bre6kiiFLuS_LdVb",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Mr. Mamer’s class buys games and puzzles for the children’s ward. Keenan uses a graph to keep track of the amount of money in the account at the end of each week.</p>"
                       ]
                     }
                   },
                   {
                     "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["Mr. Mamer’s class buys games and puzzles for the children’s ward. Keenan uses a graph to keep track of the amount of money in the account at the end of each week."]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["<strong>Money in Mr. Mamer's Class Account</strong>: Money in $ vs. week"]
-                    }
-                  },
-                  {
-                    "layout": {
-                      "height": 420
-                    },
-                    "content": {
                       "type": "Geometry",
-                      "title": "Money in Account",
+                      "title": "Money in Mr. Mamer's Class Account",
                       "board": {
                         "properties": {
-                          "axisNames": ["week", "$"],
                           "axisMin": [-5, -50],
-                          "axisRange": [55, 500]
+                          "axisRange": [55, 500],
+                          "axisNames": ["week", "$"]
                         }
                       },
                       "objects": [
-                        {
-                          "type": "point",
-                          "parents": [
-                            [0, 500]
-                          ],
-                          "properties": {
-                            "name": ""
-                          }
-                        },
-                        {
-                          "type": "point",
-                          "parents": [
-                            [5, 450]
-                          ],
-                          "properties": {
-                            "name": ""
-                          }
-                        },
-                        {
-                          "type": "point",
-                          "parents": [
-                            [10, 400]
-                          ],
-                          "properties": {
-                            "name": ""
-                          }
-                        },
-                        {
-                          "type": "point",
-                          "parents": [
-                            [15, 350]
-                          ],
-                          "properties": {
-                            "name": ""
-                          }
-                        },
-                        {
-                          "type": "point",
-                          "parents": [
-                            [20, 300]
-                          ],
-                          "properties": {
-                            "name": ""
-                          }
-                        },
-                        {
-                          "type": "point",
-                          "parents": [
-                            [25, 250]
-                          ],
-                          "properties": {
-                            "name": ""
-                          }
-                        },
-                        {
-                          "type": "point",
-                          "parents": [
-                            [30, 200]
-                          ],
-                          "properties": {
-                            "name": ""
-                          }
-                        },
-                        {
-                          "type": "point",
-                          "parents": [
-                            [35, 150]
-                          ],
-                          "properties": {
-                            "name": ""
-                          }
-                        },
-                        {
-                          "type": "point",
-                          "parents": [
-                            [40, 100]
-                          ],
-                          "properties": {
-                            "name": ""
-                          }
-                        },
-                        {
-                          "type": "point",
-                          "parents": [
-                            [45, 50]
-                          ],
-                          "properties": {
-                            "name": ""
-                          }
-                        },
-                        {
-                          "type": "point",
-                          "parents": [
-                            [50, 0]
-                          ],
-                          "properties": {
-                            "name": ""
-                          }
-                        }
+                        { "type": "point", "parents": [0,500], "properties": {"id":"7WzVImcV9NJTzYHL","name":""} },
+                        { "type": "point", "parents": [5,450], "properties": {"id":"tEiF_V8eoIiJFUu4","name":""} },
+                        { "type": "point", "parents": [10,400], "properties": {"id":"dNbWpVdLPlnRDLxh","name":""} },
+                        { "type": "point", "parents": [15,350], "properties": {"id":"jueXXG10JzOsmdu9","name":""} },
+                        { "type": "point", "parents": [20,300], "properties": {"id":"nw2BYO02sHgUeFg4","name":""} },
+                        { "type": "point", "parents": [25,250], "properties": {"id":"_eM-yYjBQaVEbl-M","name":""} },
+                        { "type": "point", "parents": [30,200], "properties": {"id":"t173HVcwM70y1IlV","name":""} },
+                        { "type": "point", "parents": [35,150], "properties": {"id":"ljSrKbQrgD9U2DyU","name":""} },
+                        { "type": "point", "parents": [40,100], "properties": {"id":"dXrGi8RkstgFH8QH","name":""} },
+                        { "type": "point", "parents": [45,50], "properties": {"id":"wpFqs8gbZLosRFNw","name":""} },
+                        { "type": "point", "parents": [50,0], "properties": {"id":"wi6DhNLOP9a8G27d","name":""} }
                       ]
                     }
                   },
                   {
+                    "id": "_GRgtJ0iIHHh22Q_",
                     "content": {
                       "type": "Text",
-                      "text": "For each class, what is the pattern of change for the relationship between the variables? Explain how you know. "
+                      "format": "html",
+                      "text": [
+                        "<ul><li>For each class, what is the pattern of change for the relationship between the variables? Explain how you know.</li></ul>"
+                      ]
                     }
                   },
                   {
@@ -2017,140 +1923,111 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "The pattern of change for Ms. Chang’s class is linear because the amount of money in the account decreases by a consistent amount of $12 each week. The pattern of change for Mr. Mamer’s class is linear because the data points on the graph form a straight line."
+                      "text": [
+                        "<p>The pattern of change for Ms. Chang’s class is linear because the amount of money in the account decreases by a consistent amount of $12 each week. The pattern of change for Mr. Mamer’s class is linear because the data points on the graph form a straight line.</p>"
+                      ]
                     }
-                  }
+                  },
+                  {
+                    "id": "5yMFfR3q57ND_6ZJ",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Are either of the relationships proportional? Explain.</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>No. Neither relationship is proportional.</p>",
+                        "<p>Possible Answers:</p>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Ms. Chang’s class</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Ms. Chang’s class Mr. Mamer’s class</p>"
+                        ]
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Looking at a proportion from the table of values (or 2 points on the graph).</p>",
+                          "<p>1/132≠  2/120  OR  1/2≠  132/120</p>",
+                          "<p>The graph does not pass through (0, 0). </p>",
+                          "<p></p>",
+                          "<p>This means that the y-intercept is not 0. So, ratios of the variables will not be related by a multiplicative relationship. There will also be an additive relationship between the variables.</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Looking at a proportion from 2 points on the graph (or the table of values).</p>",
+                          "<p>5/450≠  10/(400 )   OR  5/10≠  450/(400 )</p>",
+                          "<p>The graph does not pass through (0, 0)</p>",
+                          "<p></p>",
+                          "<p>This means that the y-intercept is not 0. So, ratios of the variables will not be related by a multiplicative relationship. There will also be an additive relationship between the variables.</p>"
+                        ]
+                      }
+                    }
+                  ]
                 ]
               },
-              "supports": [
-                {"text": "What is the independent variable? What is the dependent variable?"}
-              ]
+              "supports": [  ]
             },
             {
               "type": "whatIf",
               "content": {
                 "tiles": [
                   {
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": ["<strong>Situation A. Using the Data to Answer Questions</strong>\nFor each class: \n1. How much money is in the account at the start? Explain."]
-                  }
-                },
-                {
-                    "display": "teacher",
+                    "id": "bFYkiTJWvHHwCs9S",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "The pattern of change for Ms. Chang’s class is linear because the amount of money in the account decreases by a consistent amount of $12 each week. The pattern of change for Mr. Mamer’s class is linear because the data points on the graph form a straight line."
+                      "text": [
+                        "<p><em>Situation A. Using the Data to Answer Questions</em></p>",
+                        "<p>For each class: </p>"
+                      ]
                     }
-                },
-                {
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": ["2.  How much money is withdrawn each week?"]
-                  }
-                },
-                {
-                  "display": "teacher",
-                  "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "Ms. Chang: $144 because this is the amount of money in the account for week 0, or the start of keeping track of the money.\nMr. Mamer: $500 because this is the amount of money in the account for week 0, or the start of keeping track of the money."
-                    }
-                },
-                {
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": ["3. Write an equation that represents the relationship. Explain what information each number and variable represent."]
-                  }
-                },
-                {
-                  "display": "teacher",
-                  "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "Ms. Chang: A = 144 + –12n or 144 – 12n, where n represents the number of weeks and A represents the amount of money in the account after n weeks. The rate at which the amount of money in the account is changing is –$12 per week, and the starting amount of money in the club’s account is $144.\nMr. Mamer: A = 500 + –10n or 500 – 10n, where n represents the number of weeks and A represents the amount of money in the account after n weeks. The rate at which the amount of money in the account is changing is –$10 per week, and the starting amount of money in the club’s account is $500. "
-                    }
-                },
-                {
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": ["4. After 10 weeks, how much money was used to buy items for the children’s ward at the hospital? How much money was left? Explain how you found the answer."]
-                  }
-                },
-                {
-                  "display": "teacher",
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": "Ms. Chang: The rate at which the amount of money in the account is changing is -$12 per week, so after 10 weeks the club has donated $12(10) = $120. Since they started with $144, they now have $144-$120=$24 left in the account.\nMr. Mamer: The rate at which the amount of money in the account is changing is -$10 per week, so after 10 weeks the club has donated $10(10) = $100. Since they started with $500, they now have $500-$100=$400 left in the account."
-                    }
-                },
-                {
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": ["5. When is all the money spent? Where is this point on the graph?"]
-                  }
-                },
-                {
-                  "display": "teacher",
-                  "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "Ms. Chang: If they spent $12 per week and they had $144 at the beginning, then all the money would be spent after 144/12 = 12 weeks.\nMr. Mamer: If they spent $10 per week and they had $500 at the beginning, then all the money would be spent after 500/10 = 50 weeks. This is the point where the graph crosses the horizontal axis, since that represents A=0."
-                    }
-                },
-                {
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": ["6. How do the graphs of the data compare?"]
-                  }
-                },
-                {
-                  "display": "teacher",
-                  "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "Both of the relationships in this Problem have decreasing rates of change, though the graph of Ms. Chang’s club’s account has a larger decreasing rate of change. Mr. Mamer’s club started with a larger amount of money in their account, so the y-intercept is larger."
-                    }
-                },
-                {
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": ["<strong>Situation B. What’s the Question?</strong>\nOne of Mr. Mamer’s students wrote the following two statements to help her answer questions about their account\n\u00a0\u00a0\u00a0 500 - 10t = 100 \n\u00a0\u00a0\u00a0 500 - 10t < 100 \n\nWhat questions was she trying to answer?"]
-                  }
-
-                },
-                {
-                  "display": "teacher",
-                  "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "The first equation is setting the expression for how much money is left in the account after t weeks equal to 100, so she is trying to find how many weeks it will take for there to be $100 left in the account. The second equation is trying to find how many weeks it will take for there to be less than $100 left in the account."
-                    }
-                }
-              ]
-              },
-              "supports": [
-                {"text": "Are these relationships linear? "},
-                {"text": "Can you explain what the equations mean in your own words?"}
-              ]
-            },
-            {
-              "type": "nowWhatDoYouKnow",
-              "content": {
-                "tiles": [
+                  },
                   {
+                    "id": "f1J9w0u67dzvPTTp",
                     "content": {
                       "type": "Text",
-                      "text": "Compare the patterns of change for the linear relationships in this Problem to those in previous Problems in this Investigation. Do any of these represent proportional situations? Explain."
+                      "format": "html",
+                      "text": [
+                        "<ul><li>How much money is in the account at the start? Explain.</li></ul>"
+                      ]
                     }
                   },
                   {
@@ -2158,10 +2035,246 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": " Both of the relationships in this Problem have decreasing rates of changes. As the independent variable increases, the dependent variable decreases. This results in the graph of a line that decreases from left to right and an equation for which the independent variable has a negative coefficient. Neither situation is proportional since their graphs do not go through the origin nor can the equation that represents them be written in the form y = ax. And the values from the relationship cannot be written as a “for every” statement or to form proportions."
-                        }
+                      "text": [
+                        "<p>Ms. Chang: $144 because this is the amount of money in the account for week 0, or the start of keeping track of the money.</p>",
+                        "<p>Mr. Mamer: $500 because this is the amount of money in the account for week 0, or the start of keeping track of the money.</p>"
+                      ]
                     }
-                  ]
+                  },
+                  {
+                    "id": "JCy8ehKg9Q3WPVBo",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>How much money is withdrawn each week?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Ms. Chang: $12.</p>",
+                        "<p>Mr. Mamer: $10, $50 for every 5 weeks.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "1tSOBsvix9q03qRY",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Write an equation that represents the relationship. Explain what information each number and variable represent.</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Ms. Chang: A = 144 + –12n or 144 – 12n, where n represents the number of weeks and A represents the amount of money in the account after n weeks. The rate at which the amount of money in the account is changing is –$12 per week, and the starting amount of money in the club’s account is $144.</p>",
+                        "<p>Mr. Mamer: A = 500 + –10n or 500 – 10n, where n represents the number of weeks and A represents the amount of money in the account after n weeks. The rate at which the amount of money in the account is changing is –$10 per week, and the starting amount of money in the club’s account is $500. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "azrh2hDd9mKzvtTM",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>How do the graphs of the data compare?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Both of the relationships in this Problem have decreasing rates of change, though the graph of Ms. Chang’s club’s account has a larger decreasing rate of change. Mr. Mamer’s club started with a larger amount of money in their account, so the y-intercept is larger. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "XD55guwd3HqBfs8l",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>After 10 weeks, how much money was used to buy items for the children’s ward at the hospital?  How much money was left?  Explain how you found the answer. </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Ms. Chang: The rate at which the amount of money in the account is changing is -$12 per week, so after 10 weeks the club has donated $12(10) = $120. Since they started with $144, they now have $144-$120=$24 left in the account.</p>",
+                        "<p>Mr. Mamer: The rate at which the amount of money in the account is changing is -$10 per week, so after 10 weeks the club has donated $10(10) = $100. Since they started with $500, they now have $500-$100=$400 left in the account.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "92bb2hix50Pt2zGe",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>At what week will all the money be spent? Where is this point on the graph?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Ms. Chang: If they spent $12 per week and they had $144 at the beginning, then all the money would be spent after 144/12 = 12 weeks.</p>",
+                        "<p>Mr. Mamer: If they spent $10 per week and they had $500 at the beginning, then all the money would be spent after 500/10 = 50 weeks. This is the point where the graph crosses the horizontal axis, since that represents A=0.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "0DiP7qw21UkxOO9L",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Situation B. What’s the Question?</em></p>",
+                        "<p>One of Mr. Mamer’s students wrote the following two statements to help her answer questions about their account.</p>",
+                        "    500 - 10t = 100",  
+                        "    500 - 10t < 100 "
+                      ]
+                    }
+                  },
+                  {
+                    "id": "9GQ3EE8XezZf8euf",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>What questions was she trying to answer? </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The first equation is setting the expression for how much money is left in the account after t weeks equal to 100, so she is trying to find how many weeks it will take for there to be $100 left in the account. The second equation is trying to find how many weeks it will take for there to be less than $100 left in the account.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [
+                {"text": "Can a table help? Can a graph help?"},
+                {"text": "(2) What does it mean that one line is steeper than the other? How do you know it from a graph?"}
+              ]
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                {
+                  "id": "9aM1FDoxSHyT0utQ",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p></p>",
+                      "<p>How can you tell from an equation, table, or graph if the linear pattern of change is decreasing? </p>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Both of the relationships in this Problem have decreasing rates of changes. </p>",
+                      "<p>EQUATION</p>",
+                      "<p>The equation will be in the form of some initial amount then subtracting the constant for every increase in the independent variable. There will be a negative coefficient.</p>",
+                      "<p>y = c – mx OR y =  –mx + c</p>",
+                      "<p></p>",
+                      "<p>TABLE</p>",
+                      "<p>As the independent variable increases, the dependent variable decreases. </p>",
+                      "<p></p>",
+                      "<p>GRAPH</p>",
+                      "<p>The graph of the line will decrease (fall) from left to right.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "Uh4lj0fHd9vb74cS",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>If a relationship is linear, explain how you can tell if it is proportional?</p>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Table: Values from the table are proportional. You can use the values to write proportions or “for every” ratio statements. For example, in the table for Gilberto:</p>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Image",
+                    "url": "curriculum/moving-straight-ahead/images/MSA_1-4_NYDYK_1.png"
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Equation: The amount added into the equation is zero. Or the y-intercept is zero. For example, in the equation for Gilberto:</p>",
+                      "<p>m = 2d\n OR \nm = 2d + 0</p>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Graph: The graph of a proportional relationship is passes through the point (0,0). For example, in the graph for Gilberto:</p>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Image",
+                    "url": "curriculum/moving-straight-ahead/images/MSA_1-4_NYDYK_3.png"
+                  }
+                }
+                ]
               },
               "supports": []
             }
@@ -2186,31 +2299,53 @@
               "content": {
                 "tiles": [
                   {
+                    "id": "IWW1aeWYXOW-jPMK",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["In the last Investigation, you examined linear relationships. For example, the distance, <em>d</em>, a person walks at a rate depends on the amount of time, <em>t</em>, the person walks. Also, the amount of money, <em>A</em>, a person raises from each sponsor depends on the distance, <em>d</em>, walked in the walkathon. Both of these relationships are linear. You might have written the following equations to represent these two relationships for Alana. \n\u00a0\u00a0\u00a0 d = 1<em>t</em> \u00a0 or <em>d = t</em>\n \u00a0\u00a0\u00a0 and \n \u00a0\u00a0\u00a0 A = 5 + 0.5<em>d</em>"]
+                      "text": [
+                        "<p>In the last Investigation, we examined linear relationships. For example, the distance, d, a person walks at a rate depends on the amount of time, t, the person walks. Also, the amount of money, A, a person raises from each sponsor depends on the distance, d, walked in the walkathon. Both of these relationships are linear. You might have written the following equations to represent these two relationships for Alana.</p>"
+                      ]
                     }
                   },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["You looked at tables and graphs to represent these relationships. These representations are useful in answering questions about linear relationships. For example, <em>A =</em> 5 + 0.5<em>d</em> "]
+                  [
+                    {
+                      "id": "3ZkgT0pv6w977xXD",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Distance <em>d</em>, Alana walks at 1 meter per second for t seconds</p>",
+                          "<p></p>",
+                          "<p><em>d</em> = 1 x t or <em>d </em>= t</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "3VdUldCZrHqZWhIO",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>The amount of money A that Alana collects for walking d meters</p>",
+                          "<p></p>",
+                          "<p>A = 5 + 0.5<em>d</em></p>"
+                        ]
+                      }
                     }
-                  },
+                  ],
                   {
+                    "id": "gEp089mrQ3fbFpRV",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<em>If you know something about distance d, how can you find the corresponding value of A? \nIf you know something about A, how can you find the corresponding value of d?</em>"]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["In this Investigation, you will continue to solve problems involving walking rates and other linear relationships using tables, graphs, and equations. "]
+                      "text": [
+                        "<p>We used tables and graphs to represent these relationships. These representations are useful in answering questions about linear relationships. For example,</p>",
+                        "<p>                                                                                                      A = 5 + 0.5d</p>",
+                        "<p><em>If we know something about distance d, how can we find the corresponding value of A?</em></p>",
+                        "<p><em>If we know something about A, how can we find the corresponding value of d?</em></p>",
+                        "<p>In this Investigation, we will continue to solve problems involving walking rates and other linear relationships using tables, graphs, and equations.</p>"
+                      ]
                     }
                   }
                 ]
@@ -2222,24 +2357,33 @@
               "content": {
                 "tiles": [
                   {
+                    "id": "kUzgy3-aH01BdSWP",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": [ "In Ms. Chang’s class, Emile found out that his walking rate is 2.5 meters per second. That is, Emile walks 2.5 meters every 1 second. When he gets home from school, he helps his little brother Henri determine his walking rate. They find that Henri’s walking rate is 1 meter per second. \n\nHenri challenges Emile to a walking race. Because Emile’s walking rate is faster, Emile gives Henri a 45-meter head start. Emile knows his brother would enjoy winning the race, but he does not want to make the race so short that it is obvious his brother will win. " ]
+                      "text": [
+                        "<p>In Ms. Chang’s class, Emile found out that his walking rate is 2.5 meters per second. That is, Emile walks 2.5 meters for every 1 second. When he gets home from school, he helps his younger brother Henri determine his walking rate. They find that Henri’s walking rate is 1 meter per second. </p>"
+                      ]
                     }
                   },
                   {
+                    "id": "fbRAgYo6Wu-j8VGa",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": [ "Henri challenges Emile to a walking race. Because Emile’s walking rate is faster, Emile gives Henri a 45-meter head start. Emile knows his brother would enjoy winning the race, but he does not want to make the race so short that it is obvious his brother will win." ]
+                      "text": [
+                        "<p>Henri challenges Emile to a walking race. Because Emile’s walking rate is faster, Emile gives Henri a 45-meter head start. Emile knows his brother would enjoy winning the race, but he does not want to make the race so short that it is obvious his brother will win.</p>"
+                      ]
                     }
                   },
                   {
+                    "id": "Aro939sacZm_kjL4",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": [ "• How long should the race be so that Henri will win in a close race? Give evidence to support your answer. " ]
+                      "text": [
+                        "<ul><li>How long should the race be so that Henri will win in a close race? Give evidence to support your answer. </li></ul>"
+                      ]
                     }
                   },
                   {
@@ -2248,292 +2392,302 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "With a 45-meter head start, Emile will catch up to Henri after 30 seconds at the 75-meter mark. The race should be less than 30 seconds or 75 meters, depending on how they determine the length of the race.",
-                        "Possible student answers may include tables, graphs, words, and diagrams. Some examples include the following."
+                        "<p>With a 45-meter head start, Emile will catch up to Henri after 30 seconds at the 75-meter mark. The race should be less than 30 seconds or 75 meters, depending on how they determine the length of the race.</p>",
+                        "<p>Possible student answers may include tables, graphs, words, and diagrams. Some examples include the following. </p>"
                       ]
                     }
                   },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/HenriEmile-table-solution-teacher_350w.png"
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Table",
-                      "name": "Table: Meters and Brothers' Distances",
-                      "columns": [
-                        {
-                          "name": "Meters",
-                          "type": "number",
-                          "values": [ 0, 10, 20, 30, 40, 50 ]
-                        },
-                        {
-                          "name": "Henri",
-                          "type": "number",
-                          "values": [ 45, 55, 65, 75, 85, "" ]
-                        },
-                        {
-                          "name": "Emile",
-                          "type": "number",
-                          "values": [ 0, 25, 50, 75, 100, "" ]
-                        }
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/HenriEmile-guess-check-solution-teacher_350w.png"
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<strong>Guess and Check</strong>",
-                        "<strong>10 meters</strong><ul><li>Henri: 10 + 45 = 55</li><li>Emile: 2.5 * 10 = 25</li></ul>\n",
-                        "<strong>25 meters</strong><ul><li>Henri: 25 + 45 = 70</li><li>Emile: 2.5 * 25 = 62.5</li></ul>\n",
-                        "<strong>27 meters</strong><ul><li>Henri: 27 + 45 = 72</li><li>Emile: 2.5 * 27 = 67.5</li></ul>\n",
-                        "<strong>28 meters</strong><ul><li>Henri: 28 + 45 = 73</li><li>Emile: 2.5 * 28 = 70</li></ul>\n",
-                        "<strong>30 meters</strong><ul><li>Henri: 30 + 45 = 75</li><li>Emile: 2.5 * 30 = 75</li></ul>\n"
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/HenriEmile-graph-solution-teacher_350w.png"
-                    }
-                  },
-                  {
-                    "layout": {
-                      "height": 300
+                  [
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Table: Meters and Brothers’ Distances</p>"
+                        ]
+                      }
                     },
-                    "display": "teacher",
-                    "content": {
-                      "type": "Geometry",
-                      "title": "Graph: Meters and Brothers' Distances",
-                      "board": {
-                        "properties": {
-                          "axisNames": [ "seconds", "meters" ],
-                          "axisLabels": [ "time", "distance" ],
-                          "axisMin": [ -5, -10 ],
-                          "axisRange": [ 55, 110 ]
-                        }
-                      },
-                      "objects": [
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [ 0, 0 ],
-                              "properties": {
-                                "name": "y-intercept (0, 0)"
-                              }
-                            },
-                            {
-                              "type": "point",
-                              "parents": [ 30, 75 ]
-                            }
-                          ]
-                        },
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [ 0, 45 ],
-                              "properties": {
-                                "name": "y-intercept (0, 0)"
-                              }
-                            },
-                            {
-                              "type": "point",
-                              "parents": [ 30, 75 ]
-                            }
-                          ]
-                        }
-                      ]
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Guess and Check</p>",
+                          "<p></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Graph: Meters and Brothers’ Distances</p>"
+                        ]
+                      }
                     }
-                  }
+                  ],
+                  [
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/moving-straight-ahead/images/MSA_2-1_InitialChallenge_Table.png"
+                      }
+                    },
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/moving-straight-ahead/images/MSA_2-1_InitialChallenge_Guess&Check.png"
+                      }
+                    },
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/moving-straight-ahead/images/MSA_2-1_InitialChallenge_Graph.png"
+                      }
+                    }
+                  ]
                 ]
               },
-              "supports": [
-                {
-                  "text": "How might a table help? How might a graph help? Would an equation help?"
-                },
-                {
-                  "text": "Would a diagram or picture help?"
-                },
-                {
-                  "text": "What do we know about the race at the beginning?"
-                }
-              ]
+              "supports": [     ]
             },
             {
               "type": "whatIf",
               "content": {
                 "tiles": [
+                {
+                  "id": "w3hTOrjBCs10fga9",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><em>Situation A. Using Tables and Graphs</em></p>",
+                      "<p>In Ms. Kreuger’s class some students used tables and graphs to find the length of the race and other information about the race. </p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "Gc2iPo92pbgHhFaB",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<ul><li>How can a table or graph be used to find the length of the race? </li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>You can make a table for how far both brothers will walk in a given amount of time and see when they will be in the same place at the same time. By graphing the distance both brothers will walk in a given amount of time, you can see when they will be in the same place at the same time by seeing when the lines intersect.  </p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "TTOcNs1CzBBVh2nC",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<ul><li>How does the walking rate of each brother show up in the table and graph?</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>The walking rate shows up in the graph as the steepness of the line. In the table, it is the constant change in distance for each second of time. </p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "DZfoGtOPGK9Wo8wC",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<ul><li>What information does the y-intercept of each graph represent in terms of the race?</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>The y-intercept of each graph represents where the brothers start the race. At 0 seconds, Emile is at the starting line; at 0 seconds, Henri is already 45 meters past the starting line.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "5KbBgCUlbBlqQdP5",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<ul><li>After 20 seconds, how far apart are the brothers? How is this distance represented in the table and on the graph?</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>After 20 seconds, the brothers are 15 meters apart. At 20 seconds, Emile has walked 2.5(20) = 50 meters and Henri has walked 1(20) = 20 meters, which is 65 meters from the starting line (because he had a 45-meter head start). So, 65 meters – 50 meters = 15 meters. The distance is represented in the table by subtracting the positions of the brothers at 20 seconds, and the distance is represented in the graph by the vertical distance between the brothers’ graphs.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "L8bb2dC9iHAbqi-o",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<ul><li>Is the point (26, 70) on the graph or table of one of the brothers? If so, what information does it represent?</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>No. </p>",
+                      "<p>After 26 seconds, Henri is at the 45m + 1(26m) = 71-meter mark and Emile is at the 2.5(26) = 65-meter mark. </p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "GI6UW0-DtdEKAPA4",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<ul><li>Mary wrote the inequality: 45 + t &lt; 2.5t. What information was she looking for? </li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>The left side of the inequality shows Henri’s distance after t seconds and the right side of the inequality shows Emile’s distance after t seconds. So Mary is looking for when Henri’s distance from the starting line is less than Emile’s distance from the starting line.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "fQm5UR9BFXjWMsmT",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><em>Situation B. Using Equations</em></p>",
+                      "<p>Amit wrote equations to represent the relationships between time and distance. He wrote </p>",
+                      "<p></p>",
+                      "<p>D<sub>Emile </sub>= 2.5t for Emile    and   D<sub>Henri </sub>= 45 + 1t for Henri</p>",
+                      "<p></p>",
+                      "<p>He makes five claims. Are they correct? Explain.       </p>"
+                    ]
+                  }
+                },
+                [
                   {
+                    "id": "NF9_gp6zxXuoXPLX",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": [ "<strong>Situation A. Using Tables and Graphs</strong>\nIn Ms. Kreuger’s class some students used tables and graphs to find the length of the race and other information about the race." ]
+                      "text": [
+                        "<p>Claim #1</p>",
+                        "<p></p>",
+                        "<p>You can tell the walking rate and y-intercept from the equation.</p>"
+                      ]
                     }
                   },
                   {
+                    "id": "lKtJlX8124Y8Df2g",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": [ "1. How can a table or graph be used to find the length of the race?" ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "You can make a table for how far both brothers will walk in a given amount of time and see when they will be in the same place at the same time. By graphing the distance both brothers will walk in a given amount of time, you can see when they will be in the same place at the same time by seeing when the lines intersect." ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "2. How does the walking rate of each brother show up in the table and graph?" ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "The walking rate shows up in the graph as the steepness of the line. In the table, it is the constant change in distance for each second of time." ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "3. After 20 seconds, how far apart are the brothers? How is this distance represented in the table and on the graph?" ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "After 20 seconds, the brothers are 15 meters apart. At 20 seconds, Emile has walked 2.5(20) = 50 meters and Henri has walked 1(20) = 20 meters, which is 65 meters from the starting line (because he had a 45-meter head start). So, 65 meters – 50 meters = 15 meters. The distance is represented in the table by subtracting the positions of the brothers at 20 seconds, and the distance is represented in the graph by the vertical distance between the brothers’ graphs." ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "4. What information does the y-intercept of each graph represent in terms of the race?" ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "The y-intercept of each graph represents where the brothers start the race. At 0 seconds, Emile is at the starting line; at 0 seconds, Henri is already 45 meters past the starting line." ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "5. Is the point (26, 70) on the graph or table of one of the brothers? Explain." ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "No. After 26 seconds, Henri is at the 45m + 1(26m) = 71-meter mark and Emile is at the 2.5(26) = 65-meter mark." ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "6. Mary wrote the inequality: 45 + <em>t</em>\u00a0 < 2.5<em>t</em>. What information was she looking for?" ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "The left side of the inequality shows Henri’s distance after t seconds and the right side of the inequality shows Emile’s distance after t seconds. So Mary is looking for when Henri’s distance from the starting line is less than Emile’s distance from the starting line." ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "<strong>Situation B. Using Equations</strong>\nAmit wrote equations to represent the relationships between time and distance. He wrote: \n\n<em>d<sub>Emile<M</sub></em> = 2.5<em>t</em> \u00a0 for Emile \n<em>d<sub>Henri</sub> = 45 + 1<em>t</em> \u00a0for Henri \n\nHe makes five claims. Are they correct? Explain." ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "<strong>Claim #1</strong> You can tell the walking rate and <em>y</em>-intercept from the equation. \n<strong>Claim #2</strong> You can determine which of the two lines will be steeper from the equation. \n<strong>Claim #3</strong> Both equations represent linear relationships. But neither of them is proportional. \n<strong>Claim #4</strong> You can find the time when Emile catches Henri by setting the expressions for distance equal.\n \u00a0\u00a0\u00a0 <em>d<sub>Emile</sub>   =   d<sub>Henri</sub></em> \u00a0\u00a0 or  \u00a0\u00a0 2.5t  = 45 +1t. \nThen find the value for <em>t</em> that makes the equation true.\n<strong>Claim #5</strong> You can use the expression (45 – 1.5<em>t</em>) – 2.5<em>t</em>\u00a0 to find the distance the brothers are apart for any given second <em>t</em>. " ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "<strong>Claim 1 is true.</strong> The walking rate is the number that is multiplied by t in each equation and the y-intercept is the number that is added. So, Emile’s walking rate is 2.5 meters per second and Henri’s walking rate is 1 meter per second. Emile’s y-intercept is 0 m (because no extra amount gets added) and Henri’s y-intercept is 45 m." ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "<strong>Claim 2 is true.</strong> Since you can see their walking rates in the equation, the larger walking rate will result in a steeper line when graphed. So Emile’s graph will be steeper." ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "<strong>Claim 3 is false.</strong> Both equations do represent linear relationships, but Emile’s relationship is also proportional because at 0 seconds he has traveled 0 meters." ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "<strong>Claim 4 is true.</strong> By setting the expressions equal, we are finding the time when they are both the same distance from the starting line." ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "<strong>Claim 5 is true.</strong> That expression subtracts Emile’s distance past the starting line from Henri’s distance past the starting line, which will tell you how far apart they are." ]
+                      "text": [
+                        "<p>Claim #2</p>",
+                        "<p>You can determine which of the two lines will be steeper from the equation. </p>"
+                      ]
                     }
                   }
+                ],
+                [
+                  {
+                    "id": "GEQMh-PlSftrlZhg",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Claim #3</p>",
+                        "<p>Both equations represent linear relationships. </p>",
+                        "<p>But, neither of them are proportional. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "CooG6GCXtKjxNkHe",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Claim #4</p>",
+                        "<p>You can find the time when Emile catches Henri, by setting the expressions for distance equal.</p>",
+                        "<p>        D<sub>Emile</sub>   =   D<sub>Henri  </sub> </p>",
+                        "<p>          2.5t  = 45 +1t</p>",
+                        "<p>Then find the value for t that makes the equation true.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "GJLEPXQb2wiP1psm",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Claim #5</p>",
+                        "<p>You can use the expression </p>",
+                        "<p>      45 – (2.5t – 1t)</p>",
+                        "<p>to find the distance the brothers are apart for any given second t. </p>"
+                      ]
+                    }
+                  }
+                ],
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Claim 1 is true. The walking rate is the number that is multiplied by t in each equation and the y-intercept is the number that is added. So, Emile’s walking rate is 2.5 meters per second and Henri’s walking rate is 1 meter per second. Emile’s y-intercept is 0 m (because no extra amount gets added) and Henri’s y-intercept is 45 m.</p>",
+                      "<p>Claim 2 is true. Since you can see their walking rates in the equation, the larger walking rate will result in a steeper line when graphed. So Emile’s graph will be steeper.</p>",
+                      "<p>Claim 3 is false. Both equations do represent linear relationships, but Emile’s relationship is also proportional because at 0 seconds he has traveled 0 meters.</p>",
+                      "<p>Claim 4 is true. By setting the expressions equal, we are finding the time when they are both the same distance from the starting line.</p>",
+                      "<p>Claim 5 is true. The expression starts with them being 45 apart with the head start. Then subtracts the difference between their walking rates. The expression could be 45 – 1.5t which is the distance they start apart minus the difference in their walking rates for each measure of time.</p>"
+                    ]
+                  }
+                }
                 ]
               },
               "supports": [
@@ -2545,45 +2699,33 @@
               "type": "nowWhatDoYouKnow",
               "content": {
                 "tiles": [
-                  {
+                   {
+                    "id": "08KKH-CQnwHkozQx",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "How can a table, graph, and an equation that represents a linear relationship be used to answer questions about the linear relationship? What other strategies could you use?"
+                      "text": [
+                        "<p>Describe some strategies for solving problems that involve linear relationships. How can a table, graph, and an equation that represents a linear relationship be used to answer questions about the linear relationship? What other strategies could you use? </p>"
+                      ]
                     }
                   },
-                    {
-                      "display": "teacher",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": "<strong>Table:</strong> If you are given the value of one variable you can find the corresponding value of the other variable."
-                      }
-                    },
-                    {
-                      "display": "teacher",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [ "<strong>Graph:</strong> Find the known value on the axis. Then, follow that value up or over until you intercept the line. Look over to the other axis to find the corresponding value. You will get the coordinate pair (x,y). One value of the pair is the known value, the other is the solution." ]
-                      }
-                    },
-                    {
-                      "display": "teacher",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [ "<strong>Equation:</strong> You can find values for the y variable by substituting values for the x variable. Note that students will solve equations such as, 100 = 2x +45, symbolically in the next Investigation. Some students may use guess and check, numerical reasoning, fact families, tables, or graphs to solve equations at this time." ]
-                      }
-                    },
-                    {
-                      "display": "teacher",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [ "<strong>Numeric Reasoning:</strong> You can guess and check or use fact families to find values." ]
-                      }
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Table: If you are given the value of one variable you can find the corresponding value of the other variable. </p>",
+                        "<p>Graph: Find the known value on the axis. Then, follow that value up or over until you intercept the line. Look over the to other axis to find the corresponding value. You will get the coordinate pair (x,y). One value of the pair is the known value, the other is the solution.</p>",
+                        "<p></p>",
+                        "<p>Equation: You can find values for the y variable by substituting values for the x variable. </p>",
+                        "<p></p>",
+                        "<p>Note that students will solve equations such as, 100 = 2x +45, symbolically in the next Investigation. Some students may use guess and check, numerical reasoning, fact families, tables, or graphs to solve equations at this time. </p>",
+                        "<p></p>",
+                        "<p>Numeric Reasoning. You can guess and check or use fact families to find values.</p>"
+                      ]
                     }
+                  }
                 ]
               },
               "supports": []
