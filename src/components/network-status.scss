@@ -15,8 +15,9 @@
     background-color: #D50103;
     color: white;
     font-weight: bold;
+    line-height: 1.1;
 
-    &.connected {
+    &.saving.connected {
       background-color: #00d700;
       color: black;
       font-weight: normal;

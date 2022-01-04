@@ -1,7 +1,7 @@
 import firebase from "firebase/app";
 import { throttle } from "lodash";
 import { observable, makeObservable } from "mobx";
-import { getSnapshot, IDisposer, onPatch, onSnapshot } from "mobx-state-tree";
+import { getSnapshot, IDisposer, isAlive, onPatch, onSnapshot } from "mobx-state-tree";
 
 import { DB, Monitor } from "../db";
 import { DBLatestGroupIdListener } from "./db-latest-group-id-listener";
@@ -244,6 +244,8 @@ export class DBListeners extends BaseListener {
         .update({ changeCount, content: JSON.stringify(getSnapshot(content)) })
         .then(() => {
           // console.log("Successful save", "document:", key, "changeCount:", changeCount);
+          isAlive(document) && document.recordSaveEvent(changeCount);
+          this.db.stores.user.setIsSavingDocuments(true);
         })
         .catch(() => {
           user.setIsFirebaseConnected(false);

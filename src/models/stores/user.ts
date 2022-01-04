@@ -48,7 +48,8 @@ export const UserModel = types
   })
   .volatile(self => ({
     isFirebaseConnected: false,
-    isLoggingConnected: false
+    isLoggingConnected: false,
+    isSavingDocuments: true
   }))
   .actions((self) => ({
     setName(name: string) {
@@ -101,6 +102,9 @@ export const UserModel = types
     },
     setIsLoggingConnected(connected: boolean) {
       self.isLoggingConnected = connected;
+    },
+    setIsSavingDocuments(saving: boolean) {
+      self.isSavingDocuments = saving;
     },
     setLastSupportViewTimestamp(timestamp: number) {
       self.lastSupportViewTimestamp = timestamp;

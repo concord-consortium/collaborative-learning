@@ -2,7 +2,7 @@ import React from "react";
 import { uniq } from "lodash";
 import { inject, observer } from "mobx-react";
 import { BaseComponent, IBaseProps } from "./base";
-import { LogEventName, Logger, LogEventMethod } from "../lib/logger";
+import { LogEventName, Logger } from "../lib/logger";
 import { IDropdownItem } from "@concord-consortium/react-components";
 import { IUserPortalOffering } from "../models/stores/user";
 import { CustomSelect } from "../clue/components/custom-select";
@@ -48,7 +48,7 @@ export class ClassMenuContainer extends BaseComponent <IProps> {
           event: LogEventName.DASHBOARD_SWITCH_CLASS,
           parameters: {className, link: url}
         };
-        Logger.log(log.event, log.parameters, LogEventMethod.DO);
+        Logger.log(log.event, log.parameters);
         window.location.replace(url);
       };
 

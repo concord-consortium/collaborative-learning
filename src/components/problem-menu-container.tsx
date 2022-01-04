@@ -1,7 +1,7 @@
 import React from "react";
 import { IBaseProps, BaseComponent } from "./base";
 import { inject, observer } from "mobx-react";
-import { LogEventName, LogEventMethod, Logger } from "../lib/logger";
+import { LogEventName, Logger } from "../lib/logger";
 import { IDropdownItem } from "@concord-consortium/react-components";
 import { CustomSelect } from "../clue/components/custom-select";
 
@@ -27,7 +27,7 @@ export class ProblemMenuContainer extends BaseComponent <IProps> {
       event: LogEventName.DASHBOARD_SWITCH_CLASS,
       parameters: {text, link}
     };
-    Logger.log(logItem.event, logItem.parameters, LogEventMethod.DO);
+    Logger.log(logItem.event, logItem.parameters);
   };
 
   private showUnassignedLinkAlert(problemName: string) {
