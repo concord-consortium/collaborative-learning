@@ -1457,7 +1457,13 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private handleCreateAxis = (axis: JXG.Line) => {
     const handlePointerDown = (evt: any) => {
-      if (!this.props.readOnly) {
+      const { readOnly, scale } = this.props;
+      const { board } = this.state;
+      // Axis labels get the event preferentially even though we think of other potentially
+      // overlapping objects (like movable line labels) as being on top. Therefore, we only
+      // open the axis settings dialog if we consider the axis label to be the preferred
+      // clickable object at the position of the event.
+      if (board && !readOnly && (axis.label === getClickableObjectUnderMouse(board, evt, false, scale))) {
         this.handleOpenAxisSettings();
       }
     };
