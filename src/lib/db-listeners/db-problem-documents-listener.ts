@@ -76,7 +76,8 @@ export class DBProblemDocumentsListener extends BaseListener {
   private handleOfferingUser = (user: DBOfferingUser) => {
     if (!user?.self?.uid) return;
     const { documents, user: currentUser, groups } = this.db.stores;
-    const isOwnDocument = user.self.uid === currentUser.id;
+    // uid should always be a string, but demo users with numeric uids have been encountered
+    const isOwnDocument = String(user.self.uid) === currentUser.id;
     // monitor problem documents
     if (isOwnDocument && (size(user.documents) === 0)) {
       documents.resolveRequiredDocumentPromise(null, ProblemDocument);
