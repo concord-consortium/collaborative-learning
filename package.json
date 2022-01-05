@@ -1,6 +1,6 @@
 {
   "name": "collaborative-learning",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Collaborative Learning environment",
   "main": "index.js",
   "config": {
