@@ -1,7 +1,7 @@
 import { castArray } from "lodash";
 import { uniqueId } from "../../../utilities/js-utils";
 import { gImageMap } from "../../image-map";
-import { kAxisBuffer } from "./jxg-board";
+import { kAxisBuffer, kXAxisMinBuffer } from "./jxg-board";
 import { JXGChange, JXGCoordPair, JXGProperties, JXGStringPair } from "./jxg-changes";
 import {
   kGeometryDefaultAxisMin, kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj
@@ -157,9 +157,10 @@ export function defaultGeometryBoardChange(overrides?: JXGProperties) {
   const [xMin, yMax, xMax, yMin] = getBoardBounds();
   const unitX = kGeometryDefaultPixelsPerUnit;
   const unitY = kGeometryDefaultPixelsPerUnit;
-  const xBufferRange = kAxisBuffer / unitX;
+  const xMinBufferRange = kXAxisMinBuffer / unitX;
+  const xMaxBufferRange = kAxisBuffer / unitX;
   const yBufferRange = kAxisBuffer / unitY;
-  const boundingBox = [xMin - (xBufferRange * 2), yMax + yBufferRange, xMax + xBufferRange, yMin - yBufferRange];
+  const boundingBox = [xMin - xMinBufferRange, yMax + yBufferRange, xMax + xMaxBufferRange, yMin - yBufferRange];
   const change: JXGChange = {
     operation: "create",
     target: "board",
