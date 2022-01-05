@@ -10,6 +10,25 @@ import { ITableLinkProperties } from "../table/table-change";
 
 const kScalerClasses = ["canvas-scaler", "scaled-list-item"];
 
+export function suspendBoardUpdates(board: JXG.Board) {
+  if (board.suspendCount) {
+    ++board.suspendCount;
+  }
+  else {
+    board.suspendUpdate();
+    board.suspendCount = 1;
+  }
+}
+
+export function resumeBoardUpdates(board: JXG.Board) {
+  if (!board.suspendCount) {
+    console.warn("resumeBoardUpdates called for unsuspended board!");
+  }
+  else if (--board.suspendCount === 0) {
+    board.unsuspendUpdate();
+  }
+}
+
 export function getObjectById(board: JXG.Board, id: string): JXG.GeometryElement | undefined {
   let obj: JXG.GeometryElement | undefined = board.objects[id];
   if (!obj && id?.includes(":")) {
@@ -309,6 +328,7 @@ export const boardChangeAgent: JXGChangeAgent = {
           const xRange = width / unitX;
           const yRange = height / unitY;
           const bbox: JXG.BoundingBox = [xMin, yMin + yRange, xMin + xRange, yMin];
+          suspendBoardUpdates(board);
           // remove old axes before resetting bounding box
           board.objectsList.forEach(el => {
             if (el.elType === "axis") {
@@ -322,7 +342,7 @@ export const boardChangeAgent: JXGChangeAgent = {
                                 ...toObj("xName", xName), ...toObj("yName", yName),
                                 ...toObj("xAnnotation", xAnnotation), ...toObj("yAnnotation", yAnnotation)
                               });
-          board.update();
+          resumeBoardUpdates(board);
           return axes;
         }
       }
