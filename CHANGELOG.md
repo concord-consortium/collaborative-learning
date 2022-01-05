@@ -1,5 +1,21 @@
 # Changelog
 
+## Version 2.1.2 - released January 4, 2022
+
+### Bugs Fixed
+- Fix sub-tab colors [#180731966] #1158
+- Fix divider click behavior [#180731992] #1159
+- Text: Fix bugs with multiple editor instances on a page [#180648279]
+- Geometry: fix axis dialog contention [#180769939] #1161
+- Geometry: Fix axis ticks crash [#180805779] #1162
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 433,814 bytes | 3.0% |
+| index.js | 4,036,895 bytes | 0.1% |
+
 ## Version 2.1.1 - released December 13, 2021
 
 ### Bugs Fixed
