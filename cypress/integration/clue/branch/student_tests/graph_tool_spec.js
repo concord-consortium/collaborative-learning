@@ -155,9 +155,9 @@ context('Test graph tool functionalities', function(){
                     .trigger('mousedown',{dataTransfer, force:true})
                     .trigger('mousemove',{clientX:transX, clientY:transY, dataTransfer, force:true})
                     .trigger('mouseup',{dataTransfer, force:true});
-                graphToolTile.getGraphPointCoordinates(0).should('contain', '(12, 6)');
+                graphToolTile.getGraphPointCoordinates(0).should('contain', '(12, 5)');
                 graphToolTile.getGraphPointCoordinates(1).should('contain', '(18, 11)');
-                graphToolTile.getGraphPointCoordinates(2).should('contain', '(21, 6)');
+                graphToolTile.getGraphPointCoordinates(2).should('contain', '(21, 5)');
             });
             it('verify rotate tool is visible when polygon is selected', function(){
                 graphToolTile.getGraphPolygon().click({force:true});

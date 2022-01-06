@@ -73,7 +73,13 @@ export function syncLinkedPoints(board: JXG.Board, links: ITableLinkProperties) 
   }
 }
 
+// Buffer space in pixels around the plot for labels, etc.
 export const kAxisBuffer = 20;
+// twice as much buffer for left side of X axis for Y axis labels
+export const kXAxisMinBuffer = 2 * kAxisBuffer;
+export const kXAxisTotalBuffer = 3 * kAxisBuffer;
+export const kYAxisTotalBuffer = 2 * kAxisBuffer;
+
 export const getAxisType = (v: any) => {
   // stdform encodes orientation of axes
   const [ , stdFormY, stdFormX] = v.stdform;
@@ -181,10 +187,11 @@ export function guessUserDesiredBoundingBox(board: JXG.Board) {
   const [xMin, yMax, xMax, yMin] = board.getBoundingBox();
   const unitX = board.unitX;
   const unitY = board.unitY;
-  const xBufferRange = kAxisBuffer / unitX;
+  const xMinBufferRange = kXAxisMinBuffer / unitX;
+  const xMaxBufferRange = kAxisBuffer / unitX;
   const yBufferRange = kAxisBuffer / unitY;
 
-  return [xMin + xBufferRange, yMax - yBufferRange, xMax - xBufferRange, yMin + yBufferRange];
+  return [xMin + xMinBufferRange, yMax - yBufferRange, xMax - xMaxBufferRange, yMin + yBufferRange];
 }
 
 function getAxisLabelsFromProps(props: JXGProperties) {
@@ -314,11 +321,11 @@ export const boardChangeAgent: JXGChangeAgent = {
         const yAnnotation = yPropAnnotation ?? yClientAnnotation;
         const width = board.canvasWidth;
         const height = board.canvasHeight;
-        const widthMultiplier = (width - kAxisBuffer * 2) / canvasWidth;
-        const heightMultiplier = (height - kAxisBuffer * 2) / canvasHeight;
+        const widthMultiplier = (width - kXAxisTotalBuffer) / canvasWidth;
+        const heightMultiplier = (height - kYAxisTotalBuffer) / canvasHeight;
         const unitX = boardScale.unitX;
         const unitY = boardScale.unitY;
-        const xBuffer = kAxisBuffer / unitX;
+        const xBuffer = kXAxisMinBuffer / unitX;
         const yBuffer = kAxisBuffer / unitY;
         // The change might have been performed on a different-sized tile due to a 2-up switch or reload
         // In that case, we need to scale the min/max to preserve user-intended ratios
