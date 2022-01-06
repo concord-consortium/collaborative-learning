@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 2.1.2 - released January 4, 2022
+## Version 2.1.2 - released January 5, 2022
 
 ### Bugs Fixed
 - Fix sub-tab colors [#180731966] #1158
