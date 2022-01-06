@@ -54,7 +54,12 @@ export class ProgressWidget extends BaseComponent<IProps, IState> {
     const countsPerUser: {[key: string]: ITileCountsPerSection} = {};
     groups.allGroups.forEach(group => {
       documents.getProblemDocumentsForGroup(group.id).forEach(document => {
-        countsPerUser[document.uid] = document.content?.getTileCountsPerSection(sectionIds) || {};
+        // In the normal course of events there should only ever be one problem document per user,
+        // but we've had bugs in the past that resulted in writing additional spurious problem documents.
+        // Therefore, we only assign to countsPerUser for the first problem document we encounter for a user.
+        if (!countsPerUser[document.uid]) {
+          countsPerUser[document.uid] = document.content?.getTileCountsPerSection(sectionIds) || {};
+        }
       });
     });
 

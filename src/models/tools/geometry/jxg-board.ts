@@ -309,12 +309,14 @@ export const boardChangeAgent: JXGChangeAgent = {
           const xRange = width / unitX;
           const yRange = height / unitY;
           const bbox: JXG.BoundingBox = [xMin, yMin + yRange, xMin + xRange, yMin];
-          board.setBoundingBox(bbox);
+          // remove old axes before resetting bounding box
           board.objectsList.forEach(el => {
             if (el.elType === "axis") {
               board.removeObject(el);
             }
           });
+          // set new bounding box and then create new axes
+          board.setBoundingBox(bbox);
           const axes = addAxes(board, {
                                 unitX, unitY,
                                 ...toObj("xName", xName), ...toObj("yName", yName),
