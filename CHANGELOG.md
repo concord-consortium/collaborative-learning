@@ -14,7 +14,7 @@
 | File | Size | % Change from Previous Release |
 |---|---|---|
 | index.css | 433,814 bytes | 3.0% |
-| index.js | 4,036,895 bytes | 0.1% |
+| index.js | 4,035,502 bytes | 0.1% |
 
 ## Version 2.1.1 - released December 13, 2021
 
