@@ -1,6 +1,8 @@
 import { JXGChange, JXGChangeAgent, JXGChangeResult, JXGCreateHandler, JXGObjectType, IChangeContext
         } from "./jxg-changes";
-import { boardChangeAgent, getObjectById, kReverse, sortByCreation } from "./jxg-board";
+import {
+  boardChangeAgent, getObjectById, kReverse, resumeBoardUpdates, sortByCreation, suspendBoardUpdates
+} from "./jxg-board";
 import { commentChangeAgent } from "./jxg-comment";
 import { imageChangeAgent } from "./jxg-image";
 import { movableLineChangeAgent } from "./jxg-movable-line";
@@ -46,12 +48,12 @@ export function applyChanges(board: JXG.Board|string, changes: JXGChange[],
                     const resultBoard = castArray(result).find(isBoard);
                     if ((typeof board === "string") && resultBoard) {
                       _board = resultBoard;
-                      _board.suspendUpdate();
+                      suspendBoardUpdates(_board);
                     }
                     return result;
                   });
   if (_board) {
-    _board.unsuspendUpdate();
+    resumeBoardUpdates(_board);
   }
   return results;
 }

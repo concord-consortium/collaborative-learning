@@ -15,7 +15,7 @@ import { canonicalizeValue, linkedPointId } from "../table/table-model-types";
 import { exportGeometryJson } from "./geometry-export";
 import { defaultGeometryBoardChange, preprocessImportFormat } from "./geometry-import";
 import { getAxisAnnotations, getBaseAxisLabels, getObjectById, guessUserDesiredBoundingBox,
-          kAxisBuffer, syncAxisLabels } from "./jxg-board";
+          kAxisBuffer, resumeBoardUpdates, suspendBoardUpdates, syncAxisLabels } from "./jxg-board";
 import { ESegmentLabelOption, forEachNormalizedChange, ILinkProperties, JXGChange, JXGCoordPair,
           JXGProperties, JXGParentType, JXGUnsafeCoordPair } from "./jxg-changes";
 import { applyChange, applyChanges, IDispatcherChangeContext } from "./jxg-dispatcher";
@@ -429,7 +429,7 @@ export const GeometryContentModel = ToolContentModel
           changeElems.forEach(changeElem => {
             if (isBoard(changeElem)) {
               board = changeElem;
-              board.suspendUpdate();
+              suspendBoardUpdates(board);
             }
             else if (onCreate) {
               onCreate(changeElem);
@@ -437,7 +437,7 @@ export const GeometryContentModel = ToolContentModel
           });
         });
       if (board) {
-        board.unsuspendUpdate();
+        resumeBoardUpdates(board);
       }
       return board;
     }
