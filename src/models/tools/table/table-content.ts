@@ -413,7 +413,13 @@ export const TableContentModel = ToolContentModel
             if (xVal == null || xVal === "") {
               attr.setValue(i, undefined);
             } else {
-              const expressionVal = parsedExpression.evaluate({[kSerializedXKey]: xVal});
+              let expressionVal: number;
+              try {
+                expressionVal = parsedExpression.evaluate({[kSerializedXKey]: xVal});
+              }
+              catch(e) {
+                expressionVal = NaN;
+              }
               attr.setValue(i, isFinite(expressionVal) ? expressionVal : NaN);
             }
           }
