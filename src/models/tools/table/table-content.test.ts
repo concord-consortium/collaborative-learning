@@ -3,6 +3,7 @@ import {
   convertImportToChanges, defaultTableContent, kTableToolID,
   TableContentModel, TableContentTableImport, TableMetadataModel
 } from "./table-content";
+import { kSerializedXKey } from "./table-model-types";
 import { DataSet } from "../../data/data-set";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import omitDeep from "../../../utilities/omit-deep";
@@ -346,5 +347,51 @@ describe("TableContent", () => {
     table.applyChanges(dataSet2, 0);
     expect(dataSet2.attributes.length).toBe(2);
     expect(dataSet2.cases.length).toBe(3);
+  });
+
+  it("can apply changes with expressions to a DataSet", () => {
+    const changes = [
+            {
+              action: "create",
+              target: "columns",
+              ids: ["xCol", "y1Col", "y2Col"],
+              props: {
+                columns: [
+                  { name: "x" },
+                  { name: "y1" },
+                  { name: "y2" }
+                ]
+              }
+            },
+            {
+              action: "create",
+              target: "rows",
+              props: {
+                rows: [
+                  { __id__: "row1", xCol: 1 },
+                  { __id__: "row2", xCol: 2 },
+                  { __id__: "row3", xCol: 3 }
+                ]
+              }
+            }
+          ];
+    const snapshot = { changes: changes.map(change => JSON.stringify(change)) };
+    const table = TableContentModel.create(snapshot);
+    const metadata = TableMetadataModel.create({ id: "table-1" });
+    table.doPostCreate(metadata);
+    table.setExpression("y1Col", kSerializedXKey, "x");
+    table.setExpression("y2Col", "foo", "foo");
+
+    const dataSet = DataSet.create();
+    table.applyChanges(dataSet);
+    expect(dataSet.attributes.length).toBe(3);
+    expect(dataSet.cases.length).toBe(3);
+    table.updateDatasetByExpressions(dataSet);
+    expect(dataSet.getValue("row1", "y1Col")).toBe(1);
+    expect(dataSet.getValue("row2", "y1Col")).toBe(2);
+    expect(dataSet.getValue("row3", "y1Col")).toBe(3);
+    expect(dataSet.getValue("row1", "y2Col")).toBeNaN();
+    expect(dataSet.getValue("row2", "y2Col")).toBeNaN();
+    expect(dataSet.getValue("row3", "y2Col")).toBeNaN();
   });
 });
