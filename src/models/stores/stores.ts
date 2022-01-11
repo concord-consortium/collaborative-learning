@@ -110,11 +110,6 @@ export const setUnitAndProblem = async (stores: IStores, unitId: string | undefi
   const unit = UnitModel.create(unitJson);
   const {investigation, problem} = unit.getProblem(problemOrdinal || stores.appConfig.defaultProblemOrdinal);
 
-  // if unit changes, clear references to prior teacher guide
-  if (unit.code !== stores.unit.code) {
-    stores.teacherGuide = undefined;
-  }
-
   stores.unit = unit;
   stores.documents.setUnit(stores.unit);
   if (investigation && problem) {
@@ -126,13 +121,11 @@ export const setUnitAndProblem = async (stores: IStores, unitId: string | undefi
   // need to use a listener because user type can be determined after unit initialization
   unit.installUserListener(() => stores.user.isTeacher, async (isTeacher: boolean) => {
     // only load the teacher guide content for teachers
-    if (isTeacher && !stores.teacherGuide) {
+    if (isTeacher) {
       const guideJson = await getGuideJson(unitId, stores.appConfig);
       const unitGuide = guideJson && UnitModel.create(guideJson);
       const teacherGuide = unitGuide?.getProblem(problemOrdinal || stores.appConfig.defaultProblemOrdinal)?.problem;
-      if (teacherGuide) {
-        stores.teacherGuide = teacherGuide;
-      }
+      stores.teacherGuide = teacherGuide;
     }
   });
 };
