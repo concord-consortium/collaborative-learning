@@ -64,12 +64,12 @@
     {
       "description": "Investigation 1",
       "ordinal": 1,
-      "title": "MothEd Sample Curriculum",
+      "title": "MothEd Warmups",
       "problems": [
         {
           "description": "Activity 1.1",
           "ordinal": 1,
-          "title": "MothEd 1.1 Identifying Moths",
+          "title": "What lives in our schoolyard?",
           "subtitle": "",
           "disabled": [],
           "sections": 
@@ -77,13 +77,18 @@
             {
             "type": "reference",
             "content": {
-              "tiles": [
+              "tiles": 
+              [
                 {
-                  "content":
-                  {
-                    "type": "Image",
-                    "url": "curriculum/mothed/images/mothtypes.jpg"
-                  }
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Our town is part of the US Eastern deciduous forest region. What evidence of that can we observe outside?</p> ",
+                        "<strong>Activity</strong>: Work with your group and use a text box to make a list in your 'My Work: Reference' space of what you expect to find when you go look around your environment. What are your references? (view out the window, classroom/home/ library books, Ranger Rick magazines?) You can drag images on your computer onto your Reference space too.</p>",
+                        "Make a new text box by clicking the 'A' tool. You can drag text blocks and images from the lesson into your page too.</p>"
+                      ]
+                    }
                 }
               ]
               }
@@ -92,38 +97,13 @@
               "type": "practice",
               "content": {
                 "tiles": [
-                  [
-                    {
-                      "content":
-                      {
-                        "type": "Image",
-                        "url": "curriculum/mothed/images/tigerMoth.jpg"
-                      }
-                    },
-                    {
-                      "content":
-                      {
-                        "type": "Image",
-                        "url": "curriculum/mothed/images/gypsyMoth.jpg"
-                      }
-                    },
-                    {
-                      "content":
-                      {
-                        "type": "Image",
-                        "url": "curriculum/mothed/images/flannelMoth.jpg"
-                      }
-                    }
-                  ],
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Take these three images of Moths and identify them according to the Reference guide. Images can be dragged into your document.</p>",
-                        "<p>Be sure to identify using these characteristics</p>",
-                        "<ul><li>spots and other markings,</li><li>antennae,</li><li>color,</li><li>wings open or closed at rest,</li><li>size.</li></ul>",
-                        "<p>Describe, next to each image, the kind of moth you think it is and the reason you chose that type.</p>"
+                        "<p>Let’s go outside! Bring your science notebook to make notes and drawings of what you find. When you come back inside, add your top three observations to your Practice space on My Work.</p>",
+                        "You can make drawings of what you find by choosing the pencil tool in the Workspace. Try making a table of data with the number or type of different things you found."
                       ]
                     }
                   },
@@ -133,9 +113,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>The moths pictured are</p>",
-                        "<ul><li>a tiger moth, identifyable by it's xxx</li><li>a gypsy moth, identifyable by it's xxx</li><li>a flannel moth, identifyable by it's xxx</li><li>size.</li></ul>",
-                        "<p>Look for student descriptions of antenna, spots, resting state.</p>"
+                        "<p>Encourage your students to try making drawings of the leaves and plants they find. See if they can make a table with the kinds of data they take - sizes and types of leaves or trees, counts of different species, etc.</p>"
                       ]
                     }
                   }
@@ -151,18 +129,28 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Here is a table that one of your classmates designed for collecting data about a moth experiment. Copy this table by dragging into your workspace, or make a new one and design your own experiment.</p>"
+                        "<p>Compare notes with your groupmates! </p><ul><li>What different types of evidence of <strong>Eastern deciduous forest</strong> did you observe? What did you <strong>expect</strong> to see that you did not see? </li><li>What did you see that you <strong>didn't expect</strong> (didn’t list in Reference?)</li></ul><p> If you use <strong>time as a variable</time> that changes, what might you expect to see that would be <strong><em>different</em></strong> in four weeks? Why? How could you test your hypothesis? </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p> Work with your group and use a text box to list your findings and plan an experiment in your CLUE My Work Experiment space. Choose the Share switch to make your ideas show in the group view.</p>"
+
                       ]
                     }
                   },
                   {
                     "content": {
                       "type": "Table",
-                      "name": "Moth Collection Data",
+                      "name": "Moth Experiment Data",
                       "columns": [
-                        {"name":"time","values":["8:54pm"]},
-                        {"name":"Temp ( °C)","values":["12"]},
-                        {"name":"number","values":[""]}
+                        {"name":"Date","values":["9/12/22"]},
+                        {"name":"Temp (°F)","values":["76"]},
+                        {"name":"number (moths)","values":["12"]}
                       ]
                     }
                   }
