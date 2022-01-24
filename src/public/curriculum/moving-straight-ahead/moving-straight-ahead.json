@@ -2316,7 +2316,6 @@
                         "format": "html",
                         "text": [
                           "<p>Distance <em>d</em>, Alana walks at 1 meter per second for t seconds</p>",
-                          "<p></p>",
                           "<p><em>d</em> = 1 x t or <em>d </em>= t</p>"
                         ]
                       }
@@ -2328,7 +2327,6 @@
                         "format": "html",
                         "text": [
                           "<p>The amount of money A that Alana collects for walking d meters</p>",
-                          "<p></p>",
                           "<p>A = 5 + 0.5<em>d</em></p>"
                         ]
                       }
@@ -2341,7 +2339,7 @@
                       "format": "html",
                       "text": [
                         "<p>We used tables and graphs to represent these relationships. These representations are useful in answering questions about linear relationships. For example,</p>",
-                        "<p>                                                                                                      A = 5 + 0.5d</p>",
+                        "<p>                                                                              A = 5 + 0.5d</p>",
                         "<p><em>If we know something about distance d, how can we find the corresponding value of A?</em></p>",
                         "<p><em>If we know something about A, how can we find the corresponding value of d?</em></p>",
                         "<p>In this Investigation, we will continue to solve problems involving walking rates and other linear relationships using tables, graphs, and equations.</p>"
@@ -2616,7 +2614,6 @@
                       "format": "html",
                       "text": [
                         "<p>Claim #1</p>",
-                        "<p></p>",
                         "<p>You can tell the walking rate and y-intercept from the equation.</p>"
                       ]
                     }
@@ -2717,11 +2714,8 @@
                       "text": [
                         "<p>Table: If you are given the value of one variable you can find the corresponding value of the other variable. </p>",
                         "<p>Graph: Find the known value on the axis. Then, follow that value up or over until you intercept the line. Look over the to other axis to find the corresponding value. You will get the coordinate pair (x,y). One value of the pair is the known value, the other is the solution.</p>",
-                        "<p></p>",
                         "<p>Equation: You can find values for the y variable by substituting values for the x variable. </p>",
-                        "<p></p>",
                         "<p>Note that students will solve equations such as, 100 = 2x +45, symbolically in the next Investigation. Some students may use guess and check, numerical reasoning, fact families, tables, or graphs to solve equations at this time. </p>",
-                        "<p></p>",
                         "<p>Numeric Reasoning. You can guess and check or use fact families to find values.</p>"
                       ]
                     }
@@ -2744,107 +2738,126 @@
               "content": {
                 "tiles": [
                   {
+                    "id": "S28MfRRSUscz_CLZ",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["All of the linear relationships you have studied so far can be written in the form <em>y = ax + b</em>, or <em>y = b + ax</em>. In this equation, <em>y</em> depends on <em>x</em>."]
+                      "text": [
+                        "<p>All the linear relationships we have studied so far can be written in the form y = ax, y = ax + b, or y = b + ax. In these equations, y depends on x.</p>"
+                      ]
                     }
                   },
                   {
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_2_2_In_y=ax+b_350w.png"
+                      "type": "Geometry",
+                      "title": "Equation of a Line (example)",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-2, -5],
+                          "axisRange": [10, 12],
+                          "axisNames": ["x", "y"],
+                          "axisLabels": ["", ""]
+                        }
+                      },
+                      "objects": [
+                        { "type": "movableLine", "parents": [{ "type": "point", "parents": [0, 1] }, { "type": "point", "parents": [4, 6] }],"properties": {"id":"kILGROQtyFho-K6a","pt1":{"name":"y-intercept (0, 0)"}} },
+                        { "type": "comment", "parents": [6, -0.5108781250000005], "properties": {"id":"HcxNZ4YgdQvLL8gR","anchor":"kILGROQtyFho-K6a","text":"y = ax + b"} }
+                      ]
                     }
                   },
                   {
+                    "id": "eotnQV1KtiKGT3Ab",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["The point at which a graph crosses the y-axis is called the <em>y-intercept</em>. The coordinates of the y-intercept for the graph shown above are (0, <em>b</em>). To save time, we sometimes refer to the number <em>b</em>, rather than the coordinates of the point (0, b), as the <em>y</em>-intercept. \n\nA <strong>coefficient</strong> is the number that multiplies a variable in an equation. The <em>a</em> in <em>y = ax + b</em> is the coefficient of <em>x</em>, so <em>ax</em> means <em>a</em> times <em>x</em>.\n\nThe equation of distance <em>d<sub>Emile</sub></em> that Emile walks after t seconds is <em>d<sb>Emile</sub>  =</em> 2.5<em>t</em>."]
+                      "text": [
+                        "<p>The point at which a graph crosses the y-axis is called the y-intercept. The coordinates of the y-intercept for the graph shown above are (0, b). To save time, we sometimes refer to the number b, rather than the coordinates of the point (0, b), as the y-intercept. </p>",
+                        "<p>A coefficient is the number that multiplies a variable in an equation. The a in y = ax + b is the coefficient of x, so ax means a times x.</p>"
+                      ]
                     }
                   },
-                  {
-                    "layout": {
-                      "height": 300
+                  [
+                    {
+                      "id": "Ra283uaNhmErsWlg",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>The equation of distance d<sub>Emile</sub> the distance from the starting line that Emile walks after t seconds is d<sub>Emile</sub> = 2.5t. </p>",
+                          "<p>The coefficient is 2.5.</p>",
+                          "<p>The y-intercept is 0.</p>"
+                        ]
+                      }
                     },
+                    {
+                      "id": "7FxF94yDRmNyynxR",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>The equation of distance d<sub>Henri</sub> the distance from the starting line that Henri walks after t seconds is  d<sub>Henri</sub> = 45 + t.</p>",
+                          "<p>The coefficient is 1.</p>",
+                          "<p>The y-intercept is 45.</p>"
+                        ]
+                      }
+                    }
+                  ],
+                  [{
+                    "id": "sMr39tzygY-6G8_u",
                     "content": {
                       "type": "Geometry",
                       "title": "Emile",
                       "board": {
                         "properties": {
-                          "axisNames": [ "t", "d" ],
-                          "axisLabels": [ "time", "distance" ],
-                          "axisMin": [ -20, -40 ],
-                          "axisRange": [ 56, 130 ]
+                          "axisMin": [-5, -10],
+                          "axisRange": [40, 80],
+                          "axisNames": ["t", "d"],
+                          "axisLabels": ["time", "distance"]
                         }
                       },
                       "objects": [
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [ 0, 0 ],
-                              "properties": {
-                                "name": "y-intercept (0, 0)"
-                              }
-                            },
-                            {
-                              "type": "point",
-                              "parents": [ 5, 12.5 ]
-                            }
-                          ]
-                        }
+                        { "type": "movableLine", "parents": [{ "type": "point", "parents": [0, 0] }, { "type": "point", "parents": [5, 12.5] }],"properties": {"id":"sRrxTCEk0hSVi96n","pt1":{"name":"y-intercept (0, 0)"}} }
                       ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["The equation of distance <em>d<sub>Henri</sub></em> that Henri walks after t seconds is <em>d<sub>Henri</sub></em> = 45 + <em>t</em>."]
-                    }
-                  },
-                  {
-                    "layout": {
-                      "height": 300
                     },
+                    "layout": { "height": 383 }
+                  },
+                  {
+                    "id": "LAS_9_uJ42sP_T83",
                     "content": {
                       "type": "Geometry",
                       "title": "Henri",
                       "board": {
                         "properties": {
-                          "axisNames": [ "t", "d" ],
-                          "axisLabels": [ "time", "distance" ],
-                          "axisMin": [ -20, -40 ],
-                          "axisRange": [ 56, 130 ]
+                          "axisMin": [-5, -10],
+                          "axisRange": [40, 80],
+                          "axisNames": ["t", "d"],
+                          "axisLabels": ["time", "distance"]
                         }
                       },
                       "objects": [
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [ 0, 45 ],
-                              "properties": {
-                                "name": "y-intercept (0, 45)"
-                              }
-                            },
-                            {
-                              "type": "point",
-                              "parents": [ 5, 50 ]
-                            }
-                          ]
-                        }
+                        { "type": "movableLine", "parents": [{ "type": "point", "parents": [0, 45] }, { "type": "point", "parents": [5, 50] }],"properties": {"id":"k3dPkME7EDJHEd2Z","pt1":{"name":"y-intercept (0, 45)"}} }
                       ]
-                    }
-                  },
+                    },
+                    "layout": { "height": 383 }
+                  }],
                   {
+                    "id": "t3nCdyBZCTsKuyXD",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text":["A <strong>solution of an equation</strong> is an ordered pair that makes the equation true and lies on the graph of the line. For example, in the equation that represents the distance Henri walks <em>d<sub>Henri</sub> =</em> 45 + <em>t</em>, (0,45) is a solution to the equation. When the coordinate values are substituted into the equation it is a true statement; 45 = 45 + 0.\n \u00a0<em>What does the point (0,45) represent in the context of the race?</em>.\n\nIn the graphs for Emile and Henri:\n \u00a0<em>What would t be if (t, 48) are the coordinates of a point on the graph? Explain. \n  \u00a0What would d be if (10, d) are the coordinates of a point on the graph? Explain. </em>"]
+                      "text": [
+                        "<p>A <strong>solution of an equation</strong> is an ordered pair that makes the equation true and lies on the graph of the line. For example, in the equation that represents the distance Henri walks </p>",
+                        "<p>d<sub>Henri </sub>= 45 + t,</p>",
+                        "<p>(0,45) is a solution to the equation.</p>",
+                        "<p>When the coordinate values are substituted into the equation it is a true statement; </p>",
+                        "<p>(45) = 45 + (0).</p>",
+                        "<p>The point (0,45) lies on the graph of the equation.</p>",
+                        "<p>  <em>What does the point (0,45) represent in the context of the race?</em></p>",
+                        "<p></p>",
+                        "<p>In the graphs for Emile and Henri:</p>",
+                        "<p><em> If the coordinates of a point on the graph are (t, 48) on the graph, what is the value of t? </em></p>",
+                        "<p><em>If the coordinates of a point on the graph are (10, d), what is the value of d?</em></p>"
+                      ]
                     }
                   }
                 ]
@@ -2854,12 +2867,27 @@
             {
               "type": "initialChallenge",
               "content": {
-                "tiles": [
+                "tiles": [ 
                   {
+                    "id": "TE7Uy_8lncvMZAoB",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": [ "Ms. Chang’s class decides to give T-shirts to each person who participates in the walkathon. They obtain the cost of the T-shirts from two different companies. Mighty Tee charges $49 plus $1 per T-shirt. No-Shrink Tee charges $4.50 per T-shirt. Ms. Chang writes the following equations to represent the relationships relating cost to the number of T-shirts:\n\n <em>C<sub>Mighty</sub> = </em> 49 + <em>n</em>\n <em>C<sub>No-Shrink</sub> = </em> 4.5<em>n</em>\n\nThe number of T-shirts is <em>n</em>. \n<em>C<sub>Mighty</sub></em> is the cost in dollars for Mighty Tee. \n<em>C<sub>No-Shrink</sub></em> is the cost in dollars for No-Shrink Tee. \n\n • Which company should they choose? Give evidence for your answer. " ]
+                      "text": [
+                        "<p>Ms. Chang’s class decides to give T-shirts to each person who participates in the walkathon. They obtain the cost of the T-shirts from two different companies. Mighty Tee charges $49 plus $1 per T-shirt. No-Shrink Tee charges $4.50 per T-shirt. Ms. Chang writes the following equations to represent the relationships relating cost to the number of T-shirts: </p>", 
+                        "<p>C<sub>Mighty</sub> = 49 + n C<sub>No-Shrink</sub> = 4.5n</p>", 
+                        "<p>The number of T-shirts is <em>n</em>. C<sub>Mighty</sub> is the cost in dollars for Mighty Tee. C<sub>No-Shrink</sub> is the cost in dollars for No-Shrink Tee. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "UVCVkiZrQ1t3ZaOV",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Which company should they choose? Give evidence for your answer. </li></ul>"
+                      ]
                     }
                   },
                   {
@@ -2867,58 +2895,8 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": [ "The amount spent on t-shirts will be the same if the class buys 14 t-shirts. If they want to buy fewer than 14 t-shirts, they should choose No-Shrink Tee; if they want to buy more than 14 t-shirts, they should choose Mighty Tee." ]
-                    }
-                  },
-                  {
-                    "layout": {
-                      "height": 300
-                    },
-                    "display": "teacher",
-                    "content": {
-                      "type": "Geometry",
-                      "title": "Mighty vs. No-Shrink",
-                      "board": {
-                        "properties": {
-                          "axisNames": [ "t", "d" ],
-                          "axisLabels": [ "time", "distance" ],
-                          "axisMin": [ -20, -40 ],
-                          "axisRange": [ 56, 130 ]
-                        }
-                      },
-                      "objects": [
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [ 0, 0 ],
-                              "properties": {
-                                "name": "No-Shrink"
-                              }
-                            },
-                            {
-                              "type": "point",
-                              "parents": [ 14, 63 ]
-                            }
-                          ]
-                        },
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [ 0, 49 ],
-                              "properties": {
-                                "name": "Mighty"
-                              }
-                            },
-                            {
-                              "type": "point",
-                              "parents": [ 14, 63 ]
-                            }
-                          ]
-                        }
+                      "text": [
+                        "<p>The amount spent on t-shirts will be the same if the class buys 14 t-shirts. If they want to buy fewer than 14 t-shirts, they should choose No-Shrink Tee; if they want to buy more than 14 t-shirts, they should choose Mighty Tee.</p>"
                       ]
                     }
                   },
@@ -2926,25 +2904,35 @@
                     "display": "teacher",
                     "content": {
                       "type": "Table",
-                      "name": "Table: Mighty vs. No-Shrink",
+                      "name": "Intercept and Slope",
                       "columns": [
-                        {
-                          "name": "x",
-                          "type": "number",
-                          "values": [ 0, 2, 4, 6, 8, 10, 12, 14, 16 ]
-                        },
-                        {
-                          "name": "49 + x",
-                          "type": "number",
-                          "values": [ 49, 51, 53, 55, 57, 59, 61, 63, 65 ]
-                        },
-                        {
-                          "name": "4.5 * x",
-                          "type": "number",
-                          "values": [ 0, 9, 18, 27, 36, 45, 54, 63, 72 ]
-                        }
+                        {"name":"x","values":[0,2,4,6,8,10, 12, 16]},
+                        {"name":"Mighty","expression":"(49 + x)","rawExpression":"49+x"},
+                        {"name":"NoShrink","expression":"(4.5 * x)","rawExpression":"4.5*x"}
                       ]
-                    }
+                    },
+                    "layout": []
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Geometry",
+                      "title": "No-Shrink vs. Mighty-T",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-5.128, -3.922],
+                          "axisRange": [70.382, 68.897],
+                          "axisNames": ["x", "y"],
+                          "axisLabels": ["T Shirts", ""]
+                        }
+                      },
+                      "objects": [
+                        { "type": "movableLine", "parents": [{ "type": "point", "parents": [0, 49] }, { "type": "point", "parents": [10, 59] }],"properties": {"id":"-94mMi-np62wbQDb"} },
+                        { "type": "movableLine", "parents": [{ "type": "point", "parents": [0, 0] }, { "type": "point", "parents": [8, 36] }],"properties": {"id":"j0whRpfXEeqi2ph_"} },
+                        { "type": "point", "parents": [14, 63], "properties": {"id":"LNqnytBjQsSlnKvh", "name": "(14, 63)", "snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} }
+                      ]
+                    },
+                    "layout": { "height": 452 }
                   }
                 ]
               },
@@ -2959,237 +2947,44 @@
               "content": {
                 "tiles": [
                   {
+                    "id": "7CvODzD_652WI9sC",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": [ "<strong>Situation A. Using Tables and Graphs to Find a Solution</strong>\nSome students in Ms. Chang’s class used graphs to decide which company to use. Others used tables. " ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "1. Explain how a graph or a table could be helpful." ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "A graph or table would tell you how much you would spend on n t-shirts from each company. A graph would give a visual of the inequality that No-Shrink is cheaper until 14 shirts. Then after more than 14 shirts, Mighty would be cheaper with a line below the other company’s. On a table, you can see how the money amounts change for equal increments of change in the number of shirts. No-Shrink is cheaper until you get to 14 shirts, when the companies both would charge $63. For more than 14 shirts, Mighty would have a cheaper cost." ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "2. What if the class only had $120 to spend, how would this affect your answer?" ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "If the class only had $120 to spend, they should try to maximize the number of shirts they can buy.\n\nWe know that 14 t-shirts costs $63. And, after that amount, Mighty would be cheaper. So, they might go with Mighty for the whole order. 26 shirts for $4.50 each is $117.\n\nOr, they could order 14 t-shirts from No-Shrink and pay $63. Then order 12 from Mighty for $54. This would give them 26 shirts for $117.\n\nOr, to get the most shirts for their money, they could order 17 t-shirts from No-Shrink and pay $66. Then order 12 from Mighty for $54. This would give them 29 shirts for $120." ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "<strong>Situation B. Using Tables, Graphs, and Equations</strong>\nExplain how you could use a table, graph, or equation to answer each question: " ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "1. For each company, find the costs of 20 T-shirts?" ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "<strong>Table:</strong> Find 20 shirts on the table; the cost will be in the other column.\n\n<strong>Graph:</strong> Trace the lines to find out which y-coordinate corresponds with an x-coordinate of 20.\n\n<strong>Equation:</strong> Evaluate the equation for an independent value of 20 t-shirts.\n\n\nFor Mighty, 20 shirts cost $69.\n\nFor No-Shrink, 20 shirts cost $90." ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "2. For each company find the number of T-shirts you can buy for $135. How many T-shirts can you buy for less than $135? Greater than $135?" ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "<strong>Table:</strong> The cost closest to $135 without exceeding $135 will show how many t-shirts you can buy. Then all table entries with smaller numbers of t-shirts will cost less than $135, and all table entries with larger numbers of t-shirts will cost more than $135.\n\n<strong>Graph:</strong> Trace the lines to find out which x-coordinate corresponds with a y-coordinate of $135. Then all x-coordinates to the left of that point will be numbers of t-shirts that you could buy for less than $135, and all x-coordinates to the right of that point will be numbers of t-shirts that you could buy for more than $135.\n\n<strong>Equation:</strong> For a dependent value of $135, evaluate the number of t-shirts needed. Then all numbers of t-shirts less than that value would cost less than $135, and all numbers of t-shirts greater than that value would cost more than $135." ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "3. Find the number of T-shirts where the cost of buying shirts from the two companies is equal. What is the cost? " ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "We can accomplish this by setting the expressions for both companies’ cost equal to each other.\n\nMighty Tee: Cost = $49 + $<em>n</em>\nNo-Shrink Tee: Cost = $4.50<em>n</em>\n$49 + $<em>n</em> = $4.50<em>n</em> 🡪 $49 = $3.5<em>n</em> 🡪 <em>n</em> = $49 / $3.5 = 14\nThe cost is $4.50 * 14 = $63" ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "4. Find the number of T-shirts when <em>C<sub>Mighty</sub> < C<sub>No-Shrink</sub></em>." ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "We can accomplish this by putting each expression in the inequality shown and solving for n.\n\n$49 + $<em>n</em> < $4.50<em>n</em>\n$49 < $3.5<em>n</em>\n49 / 3.5 < <em>n</em>\n14 < <em>n</em>" ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "<strong>Situation C. More Competition</strong>\nThe following table represents the costs from another company, The Big Tee." ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Table",
-                      "name": "T-Shirt Costs",
-                      "columns": [
-                        {
-                          "name": "n",
-                          "type": "number",
-                          "values": [ 0, 3, 5, 8, 10 ]
-                        },
-                        {
-                          "name": "C",
-                          "type": "number",
-                          "values": [ 34, 41.5, 46.5, 54, 59 ]
-                        }
+                      "text": [
+                        "<p><em>Situation A. Using Tables and Graphs to Find a Solution</em></p>",
+                        "<p>To decide which company to use, Ms. Chang’s students use graphs and tables.</p>"
                       ]
                     }
                   },
                   {
+                    "id": "8J40YL3rPdSIe5-9",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": [ "1. Compare the cost for this company to the costs for the other two companies." ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "The cost for <em>n</em> t-shirts for The Big T is $34 + $2.5<em>n</em>. The cost per t-shirt for this company is $2.50 and the down payment (or cost for no t-shirts) is $34. The cost per t-shirt is less than No-Shrink Tee and greater than Mighty Tee." ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "2. Is this company a better deal? Explain why." ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "This company will not be a better deal. Because it has an initial fee of $34, it starts out more expensive than No-Shrink. After 14 t-shirts, Mighty is cheaper than No-Shrink. After 14 t-shirts, Big Tee will never be cheaper because the rate of change is larger than Mighty.\n\nWe can see this relationship on the graph because the line for Big Tee is never lower than the either of the other two lines." ]
-                    }
-                  },
-                  {
-                    "layout": {
-                      "height": 300
-                    },
-                    "display": "teacher",
-                    "content": {
-                      "type": "Geometry",
-                      "title": "T-Shirt Costs",
-                      "board": {
-                        "properties": {
-                          "axisNames": [ "n", "dollars" ],
-                          "axisLabels": [ "Number", "Cost ($)" ],
-                          "axisMin": [ -5, -10 ],
-                          "axisRange": [ 55, 120 ]
-                        }
-                      },
-                      "objects": [
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [ 0, 0 ],
-                              "properties": {
-                                "name": "No-Shrink"
-                              }
-                            },
-                            {
-                              "type": "point",
-                              "parents": [ 14, 63 ]
-                            }
-                          ]
-                        },
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [ 0, 34 ],
-                              "properties": {
-                                "name": "Big Tee"
-                              }
-                            },
-                            {
-                              "type": "point",
-                              "parents": [ 10, 59 ]
-                            }
-                          ]
-                        },
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [ 0, 49 ],
-                              "properties": {
-                                "name": "Mighty"
-                              }
-                            },
-                            {
-                              "type": "point",
-                              "parents": [ 14, 63 ]
-                            }
-                          ]
-                        }
+                      "text": [
+                        "<ul><li>Explain how a graph or a table could be helpful.</li></ul>"
                       ]
                     }
                   },
                   {
+                    "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": [ "3. Are any of the relationships represented by the three companies linear? Proportional?  Explain." ]
+                      "text": [
+                        "<p>A graph or table would tell you how much you would spend on n t-shirts from each company. A graph would give a visual of the inequality that No-Shrink is cheaper until 14 shirts. Then after more than 14 shirts, Mighty would be cheaper with a line below the other company’s. On a table, you can see how the money amounts change for equal increments of change in the number of shirts. No-Shrink is cheaper until you get to 14 shirts, when the companies both would charge $63. For more than 14 shirts, Mighty would have a cheaper cost.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "hnvaJI84J5udgyFa",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>A student labeled the point (50, 99) on one of the graphs for costs. Which graph was this? What information do the coordinates provide about the cost?  </li></ul>"
+                      ]
                     }
                   },
                   {
@@ -3197,10 +2992,249 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": [ "The relationships represented by the three companies are all linear because they involve constant rates of change. Only the No-Shrink Tee’s cost relationship is proportional because there is no down payment." ]
+                      "text": [
+                        "<p>This would be on the graph for Mighty. C<sub>Mighty</sub> = 49 + n = 49 + 50 = 99</p>",
+                        "<p>                                                                                                            (50, 99)</p>",
+                        "<p>                                                                                        50 Shirts🡵 🡴 Cost is $99</p>"
+                      ]
                     }
                   }
-
+                  ,
+                  {
+                    "id": "6j9bGb6hjTPSNivN",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>What if the class only had $120 to spend, how would this affect your answer?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>If the class only had $120 to spend, they should try to maximize the number of shirts they can buy.</p>",
+                        "<p></p>",
+                        "<p>We know that 14 t-shirts costs $63. And, after that amount, Mighty would be cheaper. So, they might go with Mighty for the whole order. 26 shirts for $4.50 each is $117.</p>",
+                        "<p></p>",
+                        "<p>Or, they could order 14 t-shirts from No-Shrink and pay $63. Then order 12 from Mighty for $54. This would give them 26 shirts for $117.</p>",
+                        "<p></p>",
+                        "<p>Or, to get the most shirts for their money, they could order 17 t-shirts from No-Shrink and pay $66. Then order 12 from Mighty for $54. This would give them 29 shirts for $120.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "Vu1SfyK5NMbYx6l_",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Situation B. Using Tables, Graphs, and Equations</em></p>",
+                        "<p>Explain how you could use a table, graph, or equation to answer each question: </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "_-x-6lASpYffYNXx",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>For each company, find the costs of 20 T-shirts?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Table: Find 20 shirts on the table; the cost will be in the other column.</p>",
+                        "<p>Graph: Trace the lines to find out which y-coordinate corresponds with an x-coordinate of 20.</p>",
+                        "<p>Equation: Evaluate the equation for an independent value of 20 t-shirts.</p>",
+                        "<p></p>",
+                        "<p>For Mighty, 20 shirts cost $69.</p>",
+                        "<p>For No-Shrink, 20 shirts cost $90.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "JYTXYr7V_IFlNF0f",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>For each company find the number of T-shirts you can buy for $135.  How many T-shirts can you buy for less than $135? Greater than $135?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Table: The cost closest to $135 without exceeding $135 will show how many t-shirts you can buy. Then all table entries with smaller numbers of t-shirts will cost less than $135, and all table entries with larger numbers of t-shirts will cost more than $135.</p>",
+                        "<p>Graph: Trace the lines to find out which x-coordinate corresponds with a y-coordinate of $135. Then all x-coordinates to the left of that point will be numbers of t-shirts that you could buy for less than $135, and all x-coordinates to the right of that point will be numbers of t-shirts that you could buy for more than $135.</p>",
+                        "<p>Equation: For a dependent value of $135, evaluate the number of t-shirts needed. Then all numbers of t-shirts less than that value would cost less than $135, and all numbers of t-shirts greater than that value would cost more than $135.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "RHrdYB4VBaBJdPB-",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Find the number of T-shirts where the cost of buying shirts from the two companies is equal. What is the cost? </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>We can accomplish this by setting the expressions for both companies’ cost equal to each other.</p>",
+                        "<p>Mighty Tee: Cost = $49 + $n</p>",
+                        "<p>No-Shrink Tee: Cost = $4.50n</p>",
+                        "<p>$49 + $n = $4.50n 🡪 $49 = $3.5n 🡪 n = $49 / $3.5 = 14</p>",
+                        "<p>The cost is $4.50(14) = $63 </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "qDruFkfCA0kjZT7H",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Find the number of T-shirts when C<sub>Mighty</sub> &lt; C<sub>No-Shrink</sub>?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>We can accomplish this by putting each expression in the inequality shown and solving for n.</p>",
+                        "<p>$49 + $n &lt; $4.50n</p>",
+                        "<p>$49 &lt; $3.5n</p>",
+                        "<p>49 / 3.5 &lt; n</p>",
+                        "<p>14 &lt; n</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "QA-swltNczSvU-lT",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Situation C. More Competition</em></p>",
+                        "<p>The following table represents the costs from another company, The Big Tee.</p>",
+                        "<ul><li>Compare the cost for this company to the costs for the other two companies.</li></ul>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The cost for n t-shirts for The Big T is $34 + $2.5n. The cost per t-shirt for this company is $2.50 and the down payment (or cost for no t-shirts) is $34. The cost per t-shirt is less than No-Shrink Tee and greater than Mighty Tee. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "4rjB2tKcbyXPGYmN",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>What is the cost of 12 T-shirts?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>$64</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/MSA_2-2_SitC_CostofTShirts_350.jpg"
+                    }
+                  },
+                  {
+                    "id": "3gv9MjPTHQBJYHzo",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Are any of the relationships represented by the three companies linear? Proportional?  Explain.</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The relationships represented by the three companies are all linear because they involve constant rates of change. </p>",
+                        "<p>Only the No-Shrink Tee’s cost relationship is proportional because there is no down payment.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>C<sub>Mighty</sub> = 49 + n              C<sub>no-Shrink</sub> = 4.5n                 C<sub>BigTee</sub> = 34 + 2.5n</p>",
+                        "<p>                                                 ^^^^^^^^^^^^^</p>"
+                      ]
+                    }
+                  },
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Geometry",
+                        "title": "Mighty vs. No-Shrink",
+                        "board": {
+                          "properties": {
+                            "axisMin": [-10.1, -5.9],
+                            "axisRange": [57.581, 75.382],
+                            "axisNames": ["n", "$"],
+                            "axisLabels": ["number shirts", "cost"]
+                          }
+                        },
+                        "objects": [
+                          { "type": "movableLine", "parents": [{ "type": "point", "parents": [0, 0] }, { "type": "point", "parents": [14, 63] }],"properties": {"id":"OeftjktzaL9uZqe-","pt1":{"name":"No-Shrink"}} },
+                          { "type": "movableLine", "parents": [{ "type": "point", "parents": [0, 49] }, { "type": "point", "parents": [14, 63] }],"properties": {"id":"rN52SdPt2jUKny2F","pt1":{"name":"Mighty"}} },
+                          { "type": "movableLine", "parents": [{ "type": "point", "parents": [0, 34] }, { "type": "point", "parents": [10, 59] }],"properties": {"id":"1yHTnMw0WGC30Gph", "pt1":{"name": "Big Tee"}} }
+                        ]
+                      },
+                      "layout": { "height": 536 }
+                    }
                 ]
               },
               "supports": [
@@ -3215,9 +3249,13 @@
               "content": {
                 "tiles": [
                   {
+                    "id": "n49qHktZL_BpkXtU",
                     "content": {
                       "type": "Text",
-                      "text": "How do you know if the ordered pair of numbers for a point on a graph is a solution to an equation? How can you use a table or graph to find a solution for an equation?"
+                      "format": "html",
+                      "text": [
+                        "<p>How do you know if the ordered pair of numbers for a point on a graph is a solution to an equation? How can you use a table or graph to find a solution for an equation?</p>"
+                      ]
                     }
                   },
                   {
@@ -3225,7 +3263,12 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": [ "An ordered pair is a solution to an equation if evaluating the equation for the first coordinate results in the second coordinate. For example, you try the x-value of the coordinate pair in the equation and see if you get the y-value.\n\nYou can use a graph to find a solution for an equation by selecting a point that lies on the line. You can check the solution by using the coordinate pair in the equation.\n\nYou can use a table to find a solution for an equation by choosing a row of the table.\n\nIf the equations are of the form y = ax or y = a + x then students can use what they learned in 6th grade to solve these using fact families, graphs, tables, or other numerical reasoning." ]
+                      "text": [
+                        "<p>An ordered pair is a solution to an equation if evaluating the equation for the first coordinate results in the second coordinate. For example, you try the x-value of the coordinate pair in the equation and see if you get the y-value. </p>",
+                        "<p>You can use a graph to find a solution for an equation by selecting a point that lies on the line. You can check the solution by using the coordinate pair in the equation.</p>",
+                        "<p>You can use a table to find a solution for an equation by choosing a row of the table. </p>",
+                        "<p>If the equations are of the form y = ax or y = a + x then students can use what they learned in 6th grade to solve these using fact families, graphs, tables, or other numerical reasoning.</p>"
+                      ]
                     }
                   }
                 ]
