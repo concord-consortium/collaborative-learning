@@ -3289,24 +3289,36 @@
             {
               "type": "introduction",
               "content": {
-                "tiles": [{
+                "tiles": [
+                  {
+                    "id": "mwMHYA2Rzm1wVZmu",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["Look again at Alana’s pledge plan from Problem 1.3. Suppose A represents the amount raised in dollars and d represents the distance walked in kilometers. You can express this plan with the equation <em>A</em> = 5 + 0.5<em>d</em>. "]
+                      "text": [
+                        "<p>Look again at Alana’s pledge plan from Problem 1.3. Suppose A represents the amount raised in dollars and d represents the distance walked in kilometers. We can express this plan with the equation A = 5 + 0.5d. </p>"
+                      ]
                     }
                   },
                   {
+                    "id": "WUUfZbhCKNxifUVj",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_2_4_In_alanas_plan_350w.png"
                     }
                   },
                   {
+                    "id": "2HMRLiffbMB7f3J8",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>Kilometers Walked</strong>\n <em>Explain why the point (14, 12) is on the graph of Alana’s pledge plan. \n Write a question you could answer by locating this point. \n How can you use the equation for Alana’s pledge plan to check the answer to the question you made up?\n How can you use a graph to find the number of kilometers that Alana walks if a sponsor donates $17? How could you use an equation to answer this question?</em>\n\n  In this Problem, you will investigate similar questions relating to pledge plans for a walkathon."]
+                      "text": [
+                        "<p><em>Is the point (14, 12) on the graph of Alana’s pledge plan?</em></p>",
+                        "<p><em>Write a question we could answer by locating this point. </em></p>",
+                        "<p><em>How can we use the equation for Alana’s pledge plan to check the answer to the question we made up? </em></p>",
+                        "<p><em>How can we use a graph to find the number of kilometers that Alana walks if a sponsor donates $17? How could we use an equation to answer this question?</em> </p>",
+                        "<p>In this Problem, we will investigate similar questions relating to pledge plans for a walkathon. </p>"
+                      ]
                     }
                   }
                 ]
@@ -3318,110 +3330,101 @@
               "content": {
                 "tiles": [
                   {
+                  "id": "FbcNrpNGrXdmw3gK",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Consider the following pledge plans. In each equation, y is the amount pledged in dollars by each sponsor and x is the distance walked in kilometers. </p>"
+                    ]
+                  }
+                },
+                [
+                  {
+                    "id": "Jdk6gI5wUuCyeTDr",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": [ "Consider the following pledge plans. In each equation, <em>y</em> is the amount pledged in dollars by each sponsor and <em>x</em> is the distance walked in kilometers.\n\n<strong>Plan 1</strong> <em>y</em> = 5<em>x</em> - 3\n<strong>Plan 2</strong> <em>y</em> = - <em>x</em> + 6\n<strong>Plan 3</strong> <em>y</em> = 2" ]
+                      "text": [
+                        "<p>Plan 1</p>",
+                        "<p>  y = 5x – 3</p>"
+                      ]
                     }
                   },
                   {
+                    "id": "zcHQyBQ9t51viU3X",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": [ "1. What information does the equation give about the pledge plan? Does the plan make sense? Explain why." ]
+                      "text": [
+                        "<p>Plan 2</p>",
+                        "<p>  y = –x + 6</p>"
+                      ]
                     }
                   },
                   {
-                    "display": "teacher",
+                    "id": "sYLLiCNUirAdgQ74",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": [ "<strong>Plan 1:</strong> A sponsor pays $5 for every kilometer walked, but you pay the sponsor $3 (or give the sponsor a t-shirt that costs $3). This makes sense because the sponsor is paying money for each kilometer walked, but you are only giving them one donation/t-shirt." ]
+                      "text": [
+                        "<p>Plan 3</p>",
+                        "<p>  y = 2</p>"
+                      ]
                     }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "<strong>Plan 2:</strong> A sponsor pays $6 and then you give the sponsor $1 for every kilometer you walk. Students will say that the negative rate does not make sense because you give back money. But some may suggest that the walker in Plan 2 collects $6 and promises to walk 15 kilometers. If she does not walk the 15 kilometers, then she pays back $1 for each kilometer not walked. In this case, it is necessary to change what x represents to the number of kilometers not walked." ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "<strong>Plan 3:</strong> A sponsor donates a fixed amount of $2 no matter how far you walk. This makes sense because it’s like a one-time donation" ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "2. How might a table or graph of the equation help answer questions about the pledge plans." ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "A table or graph of the equation could help answer questions about the pledge plans by giving you a visual of how much money students raise after walking various numbers of kilometers." ]
-                    }
-                  },
+                  }
+                ],
+                {
+                  "id": "Fh5g9pD9hkz_PQpV",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<ul><li>What information does the equation give about the pledge plan? Does the plan make sense? Explain why.</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Plan 1: A sponsor pays $5 for every kilometer walked, but you pay the sponsor $3 (or give the sponsor a t-shirt that costs $3). This makes sense because the sponsor is paying money for each kilometer walked, but you are only giving them one donation/t-shirt. </p>",
+                      "<p>Plan 2: A sponsor pays $6 and then you give the sponsor $1 for every kilometer you walk. Students will say that the negative rate does not make sense because you give back money. But some may suggest that the walker in Plan 2 collects $6 and promises to walk 15 kilometers. If she does not walk the 15 kilometers, then she pays back $1 for each kilometer not walked. In this case, it is necessary to change what x represents to the number of kilometers not walked. </p>",
+                      "<p>Plan 3: A sponsor donates a fixed amount of $2 no matter how far you walk. This makes sense because it’s like a one-time donation.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "bKrrzFlBiRbpyhEv",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<ul><li>How might a table or graph of the equation help answer questions about the pledge plans.</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>A table or graph of the equation could help answer questions about the pledge plans by giving you a visual of how much money students raise after walking various numbers of kilometers.</p>"
+                    ]
+                  }
+                },
+                [
                   {
                     "display": "teacher",
                     "content": {
                       "type": "Table",
                       "name": "Plan 1",
                       "columns": [
-                        {
-                          "name": "x",
-                          "type": "number",
-                          "values": [ 0, 1, 2, 3, 4, 5, 6 ]
-                        },
-                        {
-                          "name": "y",
-                          "type": "number",
-                          "values": [ -3, 2, 7, 12, 17, 22, 27 ]
-                        }
-                      ]
-                    }
-                  },
-                  {
-                    "layout": {
-                      "height": 300
-                    },
-                    "display": "teacher",
-                    "content": {
-                      "type": "Geometry",
-                      "title": "Plan 1",
-                      "board": {
-                        "properties": {
-                          "axisNames": [ "d", "A" ],
-                          "axisLabels": [ "Distance Walked (km)", "Amount Pledged ($)" ],
-                          "axisMin": [ -3, -4 ],
-                          "axisRange": [ 10, 12 ]
-                        }
-                      },
-                      "objects": [
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [ 0, -3 ]
-                            },
-                            {
-                              "type": "point",
-                              "parents": [ 1, 2 ],
-                              "properties": {
-                                "name": ""
-                              }
-                            }
-                          ]
-                        }
+                        {"name":"x","values":["0","1","2","3","4","5","6"]},
+                        {"name":"y","values":["-3","2","7","12","17","22","27"]}
                       ]
                     }
                   },
@@ -3431,52 +3434,8 @@
                       "type": "Table",
                       "name": "Plan 2",
                       "columns": [
-                        {
-                          "name": "x",
-                          "type": "number",
-                          "values": [ 0, 1, 2, 3, 4, 5, 6 ]
-                        },
-                        {
-                          "name": "y",
-                          "type": "number",
-                          "values": [ 6, 5, 4, 3, 2, 1, 0 ]
-                        }
-                      ]
-                    }
-                  },
-                  {
-                    "layout": {
-                      "height": 300
-                    },
-                    "display": "teacher",
-                    "content": {
-                      "type": "Geometry",
-                      "title": "Plan 2",
-                      "board": {
-                        "properties": {
-                          "axisNames": [ "d", "A" ],
-                          "axisLabels": [ "Distance Walked (km)", "Amount Pledged ($)" ],
-                          "axisMin": [ -2, -2 ],
-                          "axisRange": [ 9, 9 ]
-                        }
-                      },
-                      "objects": [
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [ 0, -3 ]
-                            },
-                            {
-                              "type": "point",
-                              "parents": [ 5, 0 ],
-                              "properties": {
-                                "name": ""
-                              }
-                            }
-                          ]
-                        }
+                        {"name":"x","values":["0","1","2","3","4","5","6"]},
+                        {"name":"y","values":["6","5","4","3","2","1","0"]}
                       ]
                     }
                   },
@@ -3486,55 +3445,77 @@
                       "type": "Table",
                       "name": "Plan 3",
                       "columns": [
-                        {
-                          "name": "x",
-                          "type": "number",
-                          "values": [ 0, 1, 2, 3, 4, 5, 6 ]
-                        },
-                        {
-                          "name": "y",
-                          "type": "number",
-                          "values": [ 2, 2, 2, 2, 2, 2, 2 ]
-                        }
+                        {"name":"x","values":["0","1","2","3","4","5","6"]},
+                        {"name":"y","values":["2","2","2","2","2","2","2"]}
                       ]
                     }
+                  }
+                ],
+                [
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Geometry",
+                      "title": "Plan 1",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-3, -4],
+                          "axisRange": [10, 12],
+                          "axisNames": ["d", "A"],
+                          "axisLabels": ["Distance Walked (km)", "Amount Pledged ($)"]
+                        }
+                      },
+                      "objects": [
+                        { "type": "movableLine", "parents": [{ "type": "point", "parents": [3.3306690738754696e-16, -3.0124999999999997] }, { "type": "point", "parents": [2, 6.949999999999997] }],"properties": {"id":"OnZ27E7A4vkARojI","pt2":{"name":""}} },
+                        { "type": "point", "parents": [1, 2], "properties": {"id":"fAnt0_aHYebVtoaD","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} }
+                      ]
+                    },
+                    "layout": { "height": 356 }
                   },
                   {
-                    "layout": {
-                      "height": 300
-                    },
                     "display": "teacher",
                     "content": {
                       "type": "Geometry",
                       "title": "Plan 3",
                       "board": {
                         "properties": {
-                          "axisNames": [ "d", "A" ],
-                          "axisLabels": [ "Distance Walked (km)", "Amount Pledged ($)" ],
-                          "axisMin": [ -2, -2 ],
-                          "axisRange": [ 9, 9 ]
+                          "axisMin": [-2, -2],
+                          "axisRange": [9, 9],
+                          "axisNames": ["d", "A"],
+                          "axisLabels": ["Distance Walked (km)", "Amount Pledged ($)"]
                         }
                       },
                       "objects": [
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [ 0, 2 ]
-                            },
-                            {
-                              "type": "point",
-                              "parents": [ 6, 2 ],
-                              "properties": {
-                                "name": ""
-                              }
-                            }
-                          ]
-                        }
+                        { "type": "movableLine", "parents": [{ "type": "point", "parents": [0, 2] }, { "type": "point", "parents": [6, 2] }],"properties": {"id":"NEX7g6XUlygns7o_","pt2":{"name":""}} }
                       ]
-                    }
+                    },
+                    "layout": { "height": 356 }
                   }
+                ],
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Geometry",
+                    "title": "Plan 2",
+                    "board": {
+                      "properties": {
+                        "axisMin": [-2, -2],
+                        "axisRange": [9, 9],
+                        "axisNames": ["d", "A"],
+                        "axisLabels": ["Distance Walked (km)", "Amount Pledged ($)"]
+                      }
+                    },
+                    "objects": [
+                      { "type": "movableLine", "parents": [{ "type": "point", "parents": [-5.342948306008566e-16, 6] }, { "type": "point", "parents": [5.9937499999999995, 0] }],"properties": {"id":"pWygr3w04hVUhh7N","pt2":{"name":""}} },
+                      { "type": "point", "parents": [1, 5], "properties": {"id":"E5TlDxmtYDEL9dYZ","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                      { "type": "point", "parents": [2, 4], "properties": {"id":"x2HOIndiSoYDBXdV","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                      { "type": "point", "parents": [3, 3], "properties": {"id":"FnaNZ7iBlrLTBS6j","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                      { "type": "point", "parents": [4, 2], "properties": {"id":"1aN33QOirvSQqV6O","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                      { "type": "point", "parents": [5, 1], "properties": {"id":"lprHZY2BiODzkbOB","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} }
+                    ]
+                  },
+                  "layout": { "height": 356 }
+                }
                 ]
               },
               "supports": [
@@ -3548,75 +3529,22 @@
               "content": {
                 "tiles": [
                   {
+                    "id": "W2x8zYFnqaqs-CUQ",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": [ "<strong>Situation A. Connecting Equations and Graphs</strong>" ,
-                      "1. Which plan has a graph that contains the point (2,4)?\nWhat question could you answer by locating this point?" ]
+                      "text": [
+                        "<em>Situation A. Connecting Equations and Graphs</em>"
+                      ]
                     }
                   },
                   {
-                    "display": "teacher",
+                    "id": "owjrpF1Ld_6WKcm7",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": [ "Plan 2 includes the point (2,4). Sample question: For Plan 2, how much money would you get if you walked 2 kilometers?" ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "2. Which plan has a graph that you can use to find the solution for 8 = 5x – 3?\nWhat would the coordinates of the point that represents the solution tell you about the situation?" ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "Plan 1. The coordinates of the point that represents the solution (2.2, 8) shows that the student raises $8 by walking 2.2 kilometers." ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "<strong>Situation B. Connecting Equations and Tables</strong>\nAll of the following coordinates are in the table of one plan. Two of coordinates have a missing value: \n(4, 2)    (1.2, ?)    (?, -4)" ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "1. Find the missing value. Explain how you found it."
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Table",
-                      "columns": [
-                        {
-                          "name": "Points",
-                          "type": "string",
-                          "values": [ "(4, 2)", "(1.2, ?)", "(?, -4)" ]
-                        },
-                        {
-                          "name": "Plan 1: y = 5x - 3",
-                          "type": "string",
-                          "values": [ "2 ≠ 5(4) + 3 no", "3 = 5(1.2) – 3 √", "–4 = 5(–0.2) – 3 √" ]
-                        },
-                        {
-                          "name": "Plan 2: y = -x + 6",
-                          "type": "string",
-                          "values": [ "2 = –4 + 6 √", "4.8 = –1.2 + 6 √", "–4 = –10 + 6 √" ]
-                        },
-                        {
-                          "name": "Plan 3: y = 2",
-                          "type": "string",
-                          "values": [ "2 = 2 √", "2 = 2 √", "– 4 ≠ 2  no" ]
-                        }
+                      "text": [
+                        "<ul><li>Which plan has a graph that contains the point (2,4)? </li></ul>"
                       ]
                     }
                   },
@@ -3625,29 +3553,19 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": [ "The ordered pair (?,-4) could not possibly satisfy the equation for Plan 3 (which would give y-values of 2 for every x-value). So, Plan 2 is the only plan that can have all three coordinate pairs." ]
+                      "text": [
+                        "<p>Plan 2 includes the point (2,4).</p>"
+                      ]
                     }
                   },
                   {
+                    "id": "GgyFjETlhCuZbUbZ",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "2. Write a question you could answer by finding the missing value."
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "Possible answer: For Plan 2, how much money does each sponsor pledge if you walk 1.2 kilometers? For Plan 2, how many kilometers does the walker need to walk to owe each sponsor $4?" ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "<strong>Situation C. Finding Solutions</strong>\nFor Plan 1, <em>y</em> = 5<em>x</em> - 3\n\n1. Find the value of <em>y</em> when <em>x</em> = 7" ]
+                      "text": [
+                        "<ul><li>What question could you answer by locating this point. </li></ul>"
+                      ]
                     }
                   },
                   {
@@ -3655,29 +3573,20 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": [ "y = 5(<strong>7</strong>) – 3\ny = 35 – 3\n<strong>y = 32</strong>" ]
+                      "text": [
+                        "<p>Answer will vary.</p>",
+                        "<p>Sample question: For Plan 2, how much money would you get if you walked 2 kilometers?</p>"
+                      ]
                     }
                   },
                   {
+                    "id": "qh9_cTI5MaUF3ywv",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": [ "2. Find the value of <em>x</em> when <em>y</em> = 32." ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "<strong>32</strong> = 5x – 3\n35 = 5x\n<strong>7 = x</strong>\nNote: Some students will just say that x = 7, because of question #1." ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [ "<strong>Situation D. Linear or Non Linear</strong>\n1. Sally is trying to figure out if the relationships represented by the three plans are linear. How can you help her decide by looking at the equations?" ]
+                      "text": [
+                        "<ul><li>Which plan has a graph that you can use to find the solution for 8 = 5x – 3?  </li></ul>"
+                      ]
                     }
                   },
                   {
@@ -3685,14 +3594,38 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": [ "All the relationships are linear because the y-values change by a constant amount when the x-values increase by 1. Even though the y-values increase, decrease, or stay the same depending on which plan you look at, the rate of change is always constant." ]
+                      "text": [
+                        "<p>Plan 1. The coordinates of the point that represents the solution (2.2, 8) shows that the student raises $8 by walking 2.2 kilometers.</p>"
+                      ]
                     }
                   },
                   {
+                    "id": "hkwPCuGOWWofvRPF",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": [ "2. Yvonne claims that only Plan 3 is proportional. Do you agree? Explain why." ]
+                      "text": [
+                        "<p><em>Situation B. Connecting Equations and Tables</em></p>",
+                        "<p>All of the following coordinates are in the table of one of the plans from the Initial Challenge. Two coordinates have a missing value: </p>",
+                        "<p>(4, 2)    (1.2, ■)      (■, –4)</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "CUSHKu7YWwVyG3dX",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Find the missing values. Explain how you find which plan has the coordinates.</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/MSA_2-3_SitBTable_350.jpg"
                     }
                   },
                   {
@@ -3700,21 +3633,155 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": [ "She is incorrect. None of the plans are proportional, because they all have non-zero y-intercepts. Also, you could not write a proportion from the table values." ]
+                      "text": [
+                        "<p>The ordered pair (?,-4) could not possibly satisfy the equation for Plan 3 (which would give y-values of 2 for every x-value). So, Plan 2 is the only plan that can have all three coordinate pairs.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "XeUSmutVSWSp4u9-",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Write a question you could answer by finding the missing value.</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Answers will vary.</p>",
+                        "<p>Possible answer: For Plan 2, how much money does each sponsor pledge if you walk 1.2 kilometers? For Plan 2, how many kilometers does the walker need to walk to owe each sponsor $4?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "mNxeY0ZoEceMdVzB",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Situation C. Finding Solutions</em></p>",
+                        "<p>For Plan 1, y = 5x - 3 </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "kNm-LkkzL9MXNq5N",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Find the value of y when x = 7?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>y = 5(7) – 3 </p>",
+                        "<p>y = 35 – 3 </p>",
+                        "<p>y = 32</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "I2BBn-bm-apGfHOo",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Find the value of x when y = 32? </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>32 = 5x – 3</p>",
+                        "<p>35 = 5x</p>",
+                        "<p>7 = x</p>",
+                        "<p>Note: Some students will just say that x = 7, because of question #1.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "IOLoITNvfgkqXwRs",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<em>Situation D. Linear or Non Linear</em>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "GnYJ76pb2qUFW1ID",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Sally is trying to figure out if the relationships represented by the three plans are linear. How can you help her decide by looking at the equations?  </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>All the relationships are linear because the y-values change by a constant amount when the x-values increase by 1. Even though the y-values increase, decrease, or stay the same depending on which plan you look at, the rate of change is always constant.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "DsgUZnsVxz9MFpdz",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Yvonne claims that only Plan 3 is proportional.  Do you agree? Explain why.</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>She is incorrect. None of the plans are proportional, because they all have non-zero y-intercepts. Also, you could not write a proportion from the table values.</p>"
+                      ]
                     }
                   }
                 ]
               },
-              "supports": [{"text": "Can you explain the meaning of (2, 4) in terms of dollars and distance?"}]
+              "supports": []
             },
             {
               "type": "nowWhatDoYouKnow",
               "content": {
-                "tiles": [
+                "tiles": 
+                [
                   {
+                    "id": "klqRY7yH_mUTz6M4",
                     "content": {
                       "type": "Text",
-                      "text": "Describe the advantages and disadvantages of using tables, graphs, aand symbolic methods to solve equations."
+                      "format": "html",
+                      "text": [
+                        "<p>Describe the advantages and disadvantages of using tables, graphs, and symbolic methods to solve equations.</p>"
+                      ]
                     }
                   },
                   {
@@ -3722,9 +3789,18 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": [ "A point on a graph represents a solution to an equation and a possible table entry.\n\nGraphs show all possible values that solve the equation to give you a visual way of looking at the pattern, but they often require you to estimate in order to find the solution.\n\n,Tables give you many values that solve the equation. And it is clear how the independent and dependent variables are paired in each solution. However, tables cannot show all of the solutions. Sometimes you have to extend the tables a long way or search to find a solution in-between values on your table.\n\nSymbolic methods can help you solve the equation for any value, but the calculations can be more time consuming." ]
+                      "text": [
+                        "<p>A point on a graph represents a solution to an equation and a possible table entry.</p>",
+                        "<p></p>",
+                        "<p>Graphs show all possible values that solve the equation to give you a visual way of looking at the pattern, but they often require you to estimate in order to find the solution. </p>",
+                        "<p></p>",
+                        "<p>Tables give you many of values that solve the equation. And it is clear how the independent and dependent variables are paired in each solution. However, tables cannot show all of the solutions. Sometimes you have to extend the tables a long way or search to find a solution in-between values on your table.</p>",
+                        "<p></p>",
+                        "<p>Symbolic methods can help you solve the equation for any value, but the calculations can be more time consuming.</p>"
+                      ]
                     }
                   }
+
                 ]
               },
               "supports": []
@@ -3750,85 +3826,208 @@
               "content": {
                 "tiles": [
                   {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["Throughout this Unit, you have been solving equations with two variables. Sometimes the value of one variable is known, and you want to find the value of the other variable. In this Investigation, you will continue to find the value of a variable without using a table or a graph or numeric reasoning. You will also learn to use <em>symbolic</em> methods to solve a linear equation. In the last Investigation, you examined the patterns in the table, graph, and equation for the relationship relating Alana’s distance <em>d</em> and money earned <em>A</em> in the walkathon.\n\n<strong>Alana's Walkathon Table</strong>"]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Table",
-                      "columns": [
-                        {
-                          "name": "d",
-                          "type": "number",
-                          "values": [0, 1, 2, 3, 4, 20, 25, 30]
-                        },
-                        {
-                          "name": "A",
-                          "type": "number",
-                          "values": [5, 5.5, 6, 6.5, 7, 15, 17.5, 20]
-                        }
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["<strong>Alana's Walkathon Earning Graphs</strong>"]
-                    }
-                  },
-                  {
-                    "layout": {
-                      "height": 320
-                    },
-                    "content": {
-                      "type": "Geometry",
-                      "board": {
-                        "properties": {
-                          "axisNames": ["d", "A"],
-                          "axisMin": [-4, -4],
-                          "axisRange": [55, 60]
-                        }
-                      },
-                      "objects": [
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [3, 6.5],
-                              "properties": {
-                                "name": "(3, 6.5)"
-                              }
-                            },
-                            {
-                              "type": "point",
-                              "parents": [30, 20],
-                              "properties": {
-                                "name": "(30, 20)"
-                              }
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["\n<strong>Alana's Walkathon Earning Equation:</strong> <em>A</em> \u00a0 = 5 + 0.5<em>d</em> \n\nThe graph of the relationship is a line that contains infinitely many points. The coordinates of each point can be substituted into the equation to make a true statement. The corresponding entries in the table are the coordinates of points on the line representing the equation, <em>A</em> = 5 + 0.5<em>d</em>. The coordinates of these points are <strong>solutions to the equation</strong>."]
-                    }
-                  },
-                  {
+                    "id": "N4RxATm4-GL2l5SP",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In a relationship between two variables, if you know the value of one variable, you can use a table or a graph to find the value of the other variable. For example, \n\nSuppose Alana raises $20 from a sponsor, how many kilometers did she walk? <ul><li>Using numeric reasoning: Subtract $5 from $20 to get $15. This is the amount earned for walking d kilometers. So 15 = 0.5<em>d</em> \u00a0 or 15/0.5 = 30 = <em>d</em>.</li><li>Using the graph: Locate the point with the value $20, which is (30,20). So she walked 30 kilometers.</li><li>Using the table: Find the coordinate that corresponds to $20 for the amount earned, which is 30 km. So she walked 30 kilometers. </li><li>Using the equation: This question can also be represented by the equation as 20 = 5 + 0.5<em>d</em> and then the properties of equality can be used to solve the equation, which is similar to numeric reasoning. </li></ul><em>How could you use an equation to find the distance that Alana walks if she earns $20?</em>\n\nIn this Investigation you will develop strategies for solving equations of the form <em>y = ax + b</em>\u00a0 symbolically."
+                        "<p>Throughout this Unit, you have been solving equations with two variables. Sometimes the value of one variable is known, and you want to find the value of the other variable. In this Investigation, you will continue to find the value of a variable without using a table or a graph or numeric reasoning. You will also learn to use <em>symbolic</em> methods to solve a linear equation.</p>",
+                        "<p>In the last Investigation, you examined the patterns in the table, graph, and equation for the relationship relating Alana’s distance <em>d</em> and money earned A in the walkathon.</p>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "OXdUMgJ7VfiXff8P",
+                      "content": {
+                        "type": "Table",
+                        "columns": [
+                          {"name":"d","values":[0,1,2,3,4,20,25,30]},
+                          {"name":"A","values":[5,5.5,6,6.5,7,15,17.5,20]}
+                        ]
+                      }
+                    },
+                    {
+                      "id": "dDsbbyqyf5MjUIK7",
+                      "content": {
+                        "type": "Geometry",
+                        "board": {
+                          "properties": {
+                            "axisMin": [-2.1, -0.2],
+                            "axisRange": [112.899, 20.033],
+                            "axisNames": ["d", "A"],
+                            "axisLabels": ["Distance (km)", "Amount Earned ($)"]
+                          }
+                        },
+                        "objects": [
+                          { "type": "movableLine", "parents": [{ "type": "point", "parents": [3, 6.5] }, { "type": "point", "parents": [30, 20] }],"properties": {"id":"Y3iF65RE-6Gc3hkn","pt1":{"name":"(3, 6.5)"},"pt2":{"name":"(30, 20)"}} },
+                          { "type": "point", "parents": [-2.7575000000000003, 49.79171842650103], "properties": {"id":"Hu0RD4k63AUKH3w9","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} }
+                        ]
+                      },
+                      "layout": { "height": 413 }
+                    }
+                  ],
+                  {
+                    "id": "gc4MuqYSXEpDboGN",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The graph of the relationship is a line that contains infinitely many points. The coordinates of each point can be substituted into the equation to make a true statement. The corresponding entries in the table are the coordinates of points on the line representing the equation, </p>",
+                        "<p>A = 5 + 0.5<em>d</em>. The coordinates of these points are <strong>solutions to the equation</strong>.</p>",
+                        "<p>In a relationship between two variables, if we know the value of one variable, we can use a table or a graph to find the value of the other variable. For example, </p>",
+                        "<p><em>Suppose Alana raises $20 from a sponsor, how many kilometers did she walk?</em></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "5q7RU4UmDktW9wKx",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Strategies:</p>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "LgGLiAMdR9p0N1fa",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Using the graph: </p>",
+                          "<p>Locate the point on the graph with the value $20 which is (30,20). </p>",
+                          "<p>So, she walked 30 kilometers.</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "VRPI9BFBcAX9AnCU",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>  Using the table: </p>",
+                          "<p>Find the coordinate in the table where $20 is the amount earned. This is at 30 km.</p>",
+                          "<p>So, she walked 30 kilometers.</p>"
+                        ]
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "A_IkZzn1J-1b8boa",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Using numeric reasoning:</p>",
+                          "<p>$5 plus some amount gives the $20.</p>",
+                          "<p>Subtract $5 from $20 to get $15. </p>",
+                          "<p>15 is the amount earned for walking d km. </p>",
+                          "<p>So, 15 = 0.5d or 15 ÷ 0.5 = 30 = d.</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "6luZOSssKx3trqE4",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Using the equation: </p>",
+                          "<p></p>",
+                          "<p>This question can also be represented by the equation as 20 = 5 + 0.5d. </p>"
+                        ]
+                      }
+                    }
+                  ],
+                  {
+                    "id": "hbDmlTY7Aj303jqs",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>How could we use an equation to find the distance that Alana walks if she earns $20?</em></p>",
+                        "<p>In this Investigation we will develop strategies for solving the equation of the form y = ax + b symbolically. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "phnsqbwZkOkROPan",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>END INVESTIGATION 3 INTRO</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "KiFm6w-4CQOPubnD",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>To raise more money, Ms. Chang’s class decides to hold a raffle. They put some gold coins into a pouch, and people will guess the number of coins in the pouch. At the end of the Walkathon the class will give the pouch to the person who guessed the exact number of gold coins. </p>",
+                        "<p>To make the contest interesting, they decide to add a code for the amount of money in the pouch. The code consists of an equation using gold coins and pouches. Each pouch has the same number of gold coins.  </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "YJt3Tari1R7x4ImX",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/MSA_3_1_coin_and_pouch_350w.png"
+                    }
+                  },
+                  {
+                    "id": "K_1CKFu2nKf75DO2",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The code below indicates that there is a total of $11 in gold coins in the pouches and in loose coins as shown on the left side of the equation. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Drawing",
+                      "layout": {"height": "120px"},
+                      "objects": [
+                        { "type": "image", "id": "rZuImlKt6JqUFTHL", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":139.5,"y":41.5,"width":25,"height":25 },
+                        { "type": "image", "id": "E7YroOukICpDTOpA", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":165.5,"y":40.5,"width":25,"height":25 },
+                        { "type": "image", "id": "QYStA6pAHhtDWFUr", "url":"curriculum/moving-straight-ahead/stamps/pouch.png","x":44,"y":32.5,"width":30,"height":37 },
+                        { "type": "image", "id": "O8Q_efTWx41A_ioU", "url":"curriculum/moving-straight-ahead/stamps/pouch.png","x":7,"y":33.5,"width":30,"height":37 },
+                        { "type": "image", "id": "Ggp6kpLxlqrj7_3c", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":79.5,"y":41.5,"width":25,"height":25 },
+                        { "type": "image", "id": "W7GcA0VUIo--DgEz", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":108.5,"y":41.5,"width":25,"height":25 },
+                        { "type": "image", "id": "ah7cjcJBUWHBHJnA", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":254.5,"y":20.5,"width":25,"height":25 },
+                        { "type": "image", "id": "Ym1sXpMrY6VvZKWJ", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":254.5,"y":56.5,"width":25,"height":25 },
+                        { "type": "image", "id": "FPW70f3CAYVkb-Xt", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":286.5,"y":21.5,"width":25,"height":25 },
+                        { "type": "image", "id": "Q8IdQCo2f3z6q9y8", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":287.5,"y":57.5,"width":25,"height":25 },
+                        { "type": "image", "id": "y6RuTdRrlynSkhpg", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":319.5,"y":20.5,"width":25,"height":25 },
+                        { "type": "image", "id": "6iNZDp4URdBBlai7", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":320.5,"y":58.5,"width":25,"height":25 },
+                        { "type": "image", "id": "USip0KKBJwQkU81e", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":350.5,"y":21.5,"width":25,"height":25 },
+                        { "type": "image", "id": "LY-ntvEI_CCvc8Sd", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":351.5,"y":58.5,"width":25,"height":25 },
+                        { "type": "image", "id": "haD-x5b7ZuFgwFPg", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":386.5,"y":21.5,"width":25,"height":25 },
+                        { "type": "image", "id": "nGk8r3HU9c01J1HP", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":385.5,"y":58.5,"width":25,"height":25 },
+                        { "type": "image", "id": "cxJqZbIG5329XtnY", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":419.5,"y":58.5,"width":25,"height":25 },
+                        { "type": "image", "id": "7oJ7FyNADjViWBhz", "url":"curriculum/moving-straight-ahead/stamps/equals.png","x":230.5,"y":36.5,"width":25,"height":25 },
+                        { "type": "image", "id": "eZSFSQBC2hF_GzK7", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":195.5,"y":41.5,"width":25,"height":25 }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "RrITrhncvTg1jZ14",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>How much money is in each pouch?</em></p>",
+                        "<p><em>How much money did </em><strong><em>the winner receive?</em></strong></p>"
                       ]
                     }
                   }
@@ -3841,44 +4040,29 @@
               "content": {
                 "tiles": [
                   {
+                    "id": "yN-u79Q6rCXJLDZa",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["To raise more money, Ms. Chang’s class decides to hold a raffle. They put some gold coins into a pouch, and people will guess the amount of coins in the pouch. At the end of the walkathon the class will give the pouch to the person who guessed the exact number of gold coins. \n\nTo make the contest interesting, they decide to add a code for the amount of money in the pouch. The code consists of an equation using gold coins and pouches. Each pouch has the same number of gold coins.  "]
+                      "text": [
+                        "<p>The class made up several other codes.  For each code, the total number of coins on each side of the equation is the same and each pouch contains the same number of coins.</p>",
+                        "<ul><li>What is the number of gold coins in each pouch? </li><li>How can you check your answer?</li></ul>",
+                        "<p>Write down your steps so that someone else could follow your steps to find the number of coins in a pouch.</p>"
+                      ]
                     }
                   },
                   {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_3_1_coin_and_pouch_350w.png"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "The code below indicates that there are $11 in gold coins in the pouches and in loose coins as shown on the left side of the equation."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_3_1_eleven_350w.png"
-                    }
-                  },
-                  {
+                    "id": "stdyxVgiFUK-PAON",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<em>How much money was in each pouch?\nHow much money did the winner receive?</em>\nThe class made up several other codes. For each code the total number of coins on each side of the equation is the same and each pouch contains the same number of coins.<ul><li>What is the number of gold coins in each pouch? </li><li>How can you check your answer?</li></ul>Write down your steps so that someone else could follow your steps to find the number of coins in a pouch. "]
+                      "text": [
+                        "<p>Code 1</p>"
+                      ]
                     }
                   },
                   {
-                    "content": {
-                      "type": "Text",
-                      "text": "1."
-                    }
-                  },
-                  {
+                    "id": "irpUUl3nrmN97Oxy",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_3_1_IC_coins_pouches_1_350w.png"
@@ -3890,20 +4074,25 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                         "Possible Student Answer:",
-                         "Original Code: <em>$10 = $4 + 3P</em>",
-                         "Crossed off 4 coins from each side: <em>$6 = 3P</em>",
-                         "Split the bags and coins equally and got 2 coin in a bag: <em>$2 = P</em>"
-                       ]
+                        "<p>Possible Student Answer:</p>",
+                        "<p>Original Code: $10 = $4 + 3P</p>",
+                        "<p>Crossed off 4 coins from each side: $6 = 3P</p>",
+                        "<p>Split the bags and coins equally and got 2 coins in a bag: $2 = P</p>"
+                      ]
                     }
                   },
                   {
+                    "id": "j7yGn0OTrO46ma4P",
                     "content": {
                       "type": "Text",
-                      "text": "\n2."
+                      "format": "html",
+                      "text": [
+                        "<p>Code 2</p>"
+                      ]
                     }
                   },
                   {
+                    "id": "2goPUFyRXRHVG2V5",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_3_1_IC_coins_pouches_2_350w.png"
@@ -3911,25 +4100,30 @@
                   },
                   {
                     "display": "teacher",
-                    "content":
-                      {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<p>Possible Student Answer:</p>",
-                          "<p>Original Code: <em>2(P + $2) = $12</em></p>",
-                          "<p>Split the amounts in 2: <em>P + $2 = $6</em></p>",
-                          "<p>Crossed off 2 coins from each side: <em>P = $4</em></p>"
-                        ]
-                      }
-                  },
-                  {
                     "content": {
                       "type": "Text",
-                      "text": "\n3."
+                      "format": "html",
+                      "text": [
+                        "<p>Possible Student Answer:</p>",
+                        "<p>Original Code: 2(P + $2) = $12</p>",
+                        "<p>Split the amounts in 2: P + $2 = $6</p>",
+                        "<p>Crossed off 2 coins from each side: P = $4</p>",
+                        "<p></p>"
+                      ]
                     }
                   },
                   {
+                    "id": "zyqi_E7amZBOrces",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Code 3</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "8PvS9pIJeiKCx-i5",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_3_1_IC_coins_pouches_3_350w.png"
@@ -3937,24 +4131,28 @@
                   },
                   {
                     "display": "teacher",
-                    "content":
-                    {
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p>Possible Student Answer:</p>",
-                        "<p>Original Code: <em>3P = 2P + $12</em></p>",
-                        "<p>Crossed off 12 coins from each side and got 12 coins in a bag: <em>P = $12</em></p>"
+                        "<p>Original Code: 3P = 2P + $12</p>",
+                        "<p>Crossed off 12 coins from each side and got 12 coins in a bag: P = $12</p>"
                       ]
                     }
                   },
                   {
+                    "id": "HfYIhTLfAdwWifT8",
                     "content": {
                       "type": "Text",
-                      "text": "\n4."
+                      "format": "html",
+                      "text": [
+                        "<p>Code 4</p>"
+                      ]
                     }
                   },
                   {
+                    "id": "ZKVw6-qddOOW8XOb",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_3_1_IC_coins_pouches_4_350w.png"
@@ -3967,19 +4165,24 @@
                       "format": "html",
                       "text": [
                         "<p>Possible Student Answer:</p>",
-                        "<p>Original Code: <em>3P + $3 = $30</em></p>",
-                        "<p>Crossed off 3 coins from each side: <em>3P = $27</em></p>",
-                        "<p>Split the bags and coins equally and got 9 coin in a bag<em> P = $9</em></p>"
+                        "<p>Original Code: 3P + $3 = $30</p>",
+                        "<p>Crossed off 3 coins from each side: 3P = $27</p>",
+                        "<p>Split the bags and coins equally and got 9 coins in a bag P = $9</p>"
                       ]
                     }
                   },
                   {
+                    "id": "Vp3RXVl2HAiEVwRZ",
                     "content": {
                       "type": "Text",
-                      "text": "\n5."
+                      "format": "html",
+                      "text": [
+                        "<p>Code 5</p>"
+                      ]
                     }
                   },
                   {
+                    "id": "Ope00Dy2bI1zUp1R",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_3_1_IC_coins_pouches_5_350w.png"
@@ -3992,44 +4195,46 @@
                       "format": "html",
                       "text": [
                         "<p>Possible Student Answer:</p>",
-                        "<p>Original Code: <em>3P + $3 = 2P + $12</em></p>",
-                        "<p>Crossed off 2 bags from each side: <em>P + $3 = $12</em></p>",
-                        "<p>Crossed off 3 coins from each side: <em>P = $9</em></p>"
+                        "<p>Original Code: 3P + $3 = 2P + $12</p>",
+                        "<p>Crossed off 2 bags from each side: P + $3 = $12</p>",
+                        "<p>Crossed off 3 coins from each side: P = $9</p>"
                       ]
                     }
                   },
                   {
+                    "id": "FwfA-jOpnStgWQs7",
                     "content": {
                       "type": "Text",
-                      "text": "\n6."
+                      "format": "html",
+                      "text": [
+                        "<p>Code 6</p>"
+                      ]
                     }
                   },
                   {
+                    "id": "BbELZEara1gN7pQi",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_3_1_IC_coins_pouches_6_350w.png"
+                      "url": "curriculum/moving-straight-ahead/images/MSA_3-1_Code6.png"
                     }
                   },
                   {
                     "display": "teacher",
-                    "content":
-                    {
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p>Possible Student Answer:</p>",
                         "<p>Original Code: 2P + $22 = 5P + $4</p>",
-                        "<p>Crossed off 2 bags from each side: <em>$22 = 3P + $4</em></p>",
-                        "<p>Crossed off 4 coins from each side: <em>$18 = 3P</em></p>",
-                        "<p>Split the amounts on each side equally and got 6 coins in a bag:<em> $6 = P</em></p>"
+                        "<p>Crossed off 2 bags from each side: $22 = 3P + $4</p>",
+                        "<p>Crossed off 4 coins from each side: $18 = 3P</p>",
+                        "<p>Split the amounts on each side equally and got 6 coins in a bag: $6 = P</p>"
                       ]
                     }
                   }
                 ]
               },
               "supports": [
-                {"text": "What does the sign “=” mean?"},
-                {"text": "Can you represent each clue in a different way?"}
               ]
             },
             {
@@ -4037,78 +4242,168 @@
               "content": {
                 "tiles": [
                   {
+                    "id": "okvApSKMXLRMjUOy",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>Situation A. Nicole’s Strategy</strong>\nIn Code 2, Nicole thought of the left-hand side of the equation as having two groups. Each group contained one pouch and two coins. She visualized the following steps to help her find the number of coins in a pouch. \n1.  What is Nicole’s strategy? Can her strategy be used for other coin and pouch situations?"]
+                      "text": [
+                        "<p><em>Situation A. Nicole’s Strategy</em></p>"
+                      ]
                     }
                   },
                   {
+                    "id": "CGNe8SXP7b6-LTdR",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>In Code 2, I thought of the left-hand side of the equation as having two groups. Each group contained one pouch and two coins. I visualized the following steps to help find the number of coins in a pouch. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "4wWfX7ISii13jUUF",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_3_1_WI_coins_pouches_350w.png"
                     }
                   },
                   {
-                    "display": "teacher",
-                    "content":
-                    {
+                    "id": "QpnxbdDsPkm-7P07",
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Her strategy involves removing equivalent amounts from both sides of the equation until she is left with “pouch = 4 gold coins.” Nicole’s method could work in other situations in which each side can be evenly divided into the same number of groups."
+                        "<ul><li>What is Nicole’s strategy? Can her strategy be used for other coin and pouch situations?</li></ul>"
                       ]
                     }
                   },
                   {
-                    "content": {
-                      "type": "Text",
-                      "text": "2. Noah looked at Nicole’s strategy and claimed that she was applying the Distributive Property. Is Noah’s claim correct? Explain."
-                    }
-                  },
-                  {
                     "display": "teacher",
-                    "content":
-                    {
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Yes, Noah is correct that Nicole is applying the Distributive Property. The left side of the equation can be thought of as 2(x+2), or two times a group of 1 pouch plus 2 coins. This situation can also be thought of as 2 pouches and 2 sets of 2 coins, or <em>2x + 2(2)</em>. The Distributive Property states that these two expressions are equivalent."
+                        "<p>Her strategy involves removing equivalent amounts from both sides of the equation until she is left with “pouch = 4 gold coins.” </p>"
                       ]
                     }
                   },
                   {
-                    "content": {
-                      "type": "Text",
-                      "text": "3. Yvonne thought that Nicole was just dividing both sides of the original equation by 2. Is she correct? Explain. "
-                    }
-                  },
-                  {
                     "display": "teacher",
-                    "content":
-                    {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "Yvonne is also correct because in order to solve the problem, Nicole did have to divide both sides by 2."
+                    "content": {
+                      "type": "Drawing",
+                      "objects": [
+                        { "type": "image", "id": "rZuImlKt6JqUFTHL", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":160.5,"y":7.5,"width":25,"height":25 },
+                        { "type": "image", "id": "E7YroOukICpDTOpA", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":162.5,"y":42.5,"width":25,"height":25 },
+                        { "type": "image", "id": "QYStA6pAHhtDWFUr", "url":"curriculum/moving-straight-ahead/stamps/pouch.png","x":44,"y":32.5,"width":30,"height":37 },
+                        { "type": "image", "id": "O8Q_efTWx41A_ioU", "url":"curriculum/moving-straight-ahead/stamps/pouch.png","x":120,"y":38.5,"width":30,"height":37 },
+                        { "type": "image", "id": "fzYVfasOW1NxQozh", "url":"curriculum/moving-straight-ahead/stamps/pouch.png","x":123,"y":94.5,"width":30,"height":37 },
+                        { "type": "image", "id": "Ggp6kpLxlqrj7_3c", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":79.5,"y":41.5,"width":25,"height":25 },
+                        { "type": "image", "id": "W7GcA0VUIo--DgEz", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":78.5,"y":8.5,"width":25,"height":25 },
+                        { "type": "image", "id": "ah7cjcJBUWHBHJnA", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":225.5,"y":8.5,"width":25,"height":25 },
+                        { "type": "image", "id": "Ym1sXpMrY6VvZKWJ", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":225.5,"y":44.5,"width":25,"height":25 },
+                        { "type": "image", "id": "FPW70f3CAYVkb-Xt", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":263.5,"y":7.5,"width":25,"height":25 },
+                        { "type": "image", "id": "Q8IdQCo2f3z6q9y8", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":263.5,"y":44.5,"width":25,"height":25 },
+                        { "type": "image", "id": "y6RuTdRrlynSkhpg", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":299.5,"y":-0.5,"width":25,"height":25 },
+                        { "type": "image", "id": "6iNZDp4URdBBlai7", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":298.5,"y":39.5,"width":25,"height":25 },
+                        { "type": "image", "id": "USip0KKBJwQkU81e", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":335.5,"y":9.5,"width":25,"height":25 },
+                        { "type": "image", "id": "LY-ntvEI_CCvc8Sd", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":335.5,"y":42.5,"width":25,"height":25 },
+                        { "type": "image", "id": "haD-x5b7ZuFgwFPg", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":372.5,"y":9.5,"width":25,"height":25 },
+                        { "type": "image", "id": "nGk8r3HU9c01J1HP", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":373.5,"y":44.5,"width":25,"height":25 },
+                        { "type": "image", "id": "O5YYJUUlKAByIaY-", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":405.5,"y":9.5,"width":25,"height":25 },
+                        { "type": "image", "id": "cxJqZbIG5329XtnY", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":404.5,"y":44.5,"width":25,"height":25 },
+                        { "type": "image", "id": "6qvIynGgXbWe0f6C", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":158.5,"y":84.5,"width":25,"height":25 },
+                        { "type": "image", "id": "gOeumg0nDd1dM79h", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":160.5,"y":117.5,"width":25,"height":25 },
+                        { "type": "image", "id": "BAyztxCIjydI7whu", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":212.5,"y":86.5,"width":25,"height":25 },
+                        { "type": "image", "id": "dwD6yfy9S9i579n-", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":211.5,"y":116.5,"width":25,"height":25 },
+                        { "type": "image", "id": "Hn5FHLsJrgy83fxg", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":252.5,"y":90.5,"width":25,"height":25 },
+                        { "type": "image", "id": "6aLM4WfTJyFowJ01", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":253.5,"y":119.5,"width":25,"height":25 },
+                        { "type": "image", "id": "3wFSd9tErDukB3oG", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":294.5,"y":88.5,"width":25,"height":25 },
+                        { "type": "image", "id": "dv5QKo3dMRDUJf_i", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":295.5,"y":116.5,"width":25,"height":25 },
+                        { "type": "image", "id": "7oJ7FyNADjViWBhz", "url":"curriculum/moving-straight-ahead/stamps/equals.png","x":201.5,"y":24.5,"width":25,"height":25 },
+                        { "type": "image", "id": "ppTyHvzZGJhhSvBV", "url":"curriculum/moving-straight-ahead/stamps/equals.png","x":186.5,"y":101.5,"width":25,"height":25 }
                       ]
                     }
                   },
                   {
+                    "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>Situation B. Aman’s Code</strong> \nAman made up another code, but then he forgot the number of coins he put in the pouches. But he did remember that there were 5 pouches and 10 coins with a total of 35 dollars.<ol><li>What might the pouches and coin picture look like? </li><li>How many dollars are in a pouch?</li></ol>"]
+                      "text": [
+                        "<p>Nicole’s method could work in other situations in which each side can be equally divided into the same number of groups.</p>"
+                      ]
+                    }
+                  },
+
+                  {
+                    "id": "FUfP_7tZOa8LC8Vo",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Noah looked at Nicole’s strategy and claimed that she was applying the Distributive Property. Is Noah’s claim correct? Explain.</li></ul>"
+                      ]
                     }
                   },
                   {
                     "display": "teacher",
-                    "content":
-                    {
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Answers will vary but should represent 5 pouches + 10 coins on one side of the equation and 35 coins on the other side. Such as the following."
+                        "<p>Yes, Noah is correct. Nicole is applying the Distributive Property. The left side of the equation can be thought of as 2(x+2), or two times a group of 1 pouch plus 2 coins. This situation can also be thought of as 2 pouches and 2 sets of 2 coins, or 2x+2(2). The Distributive Property states that these two expressions are equivalent.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "gEHfpmg0epVzsyQH",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Yvonne thought that Nicole was just dividing both sides of the original equation by 2. Is she correct? Explain. </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Yvonne is also correct because in order to solve the problem, Nicole did have to divide both sides by 2.</p>"
+                      ]
+                    }
+                  },
+                   {
+                    "id": "0kYsFOFD0Tq0ODfT",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Situation B. Aman’s Clue</em></p>",
+                        "<p>Aman made up another Clue, but then he forgot the number of coins he put in the pouches. But he did remember that there were 5 pouches and 10 coins with a total of 35 dollars.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "SxkFKEis0QqABCuN",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>What might the pouches and coin picture look like? </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Answers will vary but should represent 5 pouches + 10 coins on one side of the equation and 35 coins on the other side. Such as the following.</p>"
                       ]
                     }
                   },
@@ -4116,29 +4411,53 @@
                     "display": "teacher",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_3_1_WIcoinsSolution.png"
+                      "url": "curriculum/moving-straight-ahead/images/MSA_3-1_SitB_Prob1.png"
+                    }
+                  },
+                  {
+                    "id": "lSi8fUYSiqkyGV4N",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>How many dollars are in a pouch?</li></ul>"
+                      ]
                     }
                   },
                   {
                     "display": "teacher",
-                    "content":
-                      {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<p>There are $5 in coins in a pouch.</p>",
-                          "<p>5P + $10 = $35</p>",
-                          "<p>5P = $25</p>",
-                          "<p>P = $5</p>",
-                          "<p></p>"
-                        ]
-                      }
-                  },
-                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>Situation C. Another Donor</strong>\nA local merchant donates $200 for the Walkathon. 1. They suggested the following code:\n6P + $20 = $200. P represents a pouch. How much money is in each pouch?"]
+                      "text": [
+                        "<p>$5</p>",
+                        "<p></p>",
+                        "<p>5P + $10 = $35</p>",
+                        "<p>5P = $25</p>",
+                        "<p>P = $5</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "T6tAQnFHcNSxoYy3",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Situation C. Another Donor</em></p>",
+                        "<p>A local merchant donates $200 for the Walkathon. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "doQ_zUIJLheZ8ZRB",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>They suggested the following clue:</li></ul>",
+                        "<p>                             6P + $20 = $200. How much money is in each pouch?</p>"
+                      ]
                     }
                   },
                   {
@@ -4155,16 +4474,19 @@
                     }
                   },
                   {
+                    "id": "rLOSHV-5CM9_xDx-",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["2. Mateo wrote two different expressions that could be codes to represent the $200. For each expression how much money is in each pouch?\n2P + $45  \u00a0\u00a0    4P + $20"]
+                      "text": [
+                        "<ul><li>Mateo wrote two expressions that represent the $200. For each expression how much money is in each pouch.</li></ul>",
+                        "<p>                                          2P + $45      4P + $20</p>"
+                      ]
                     }
                   },
                   {
                     "display": "teacher",
-                    "content":
-                    {
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
@@ -4179,29 +4501,29 @@
                       ]
                     }
                   },
-                   {
+                  {
+                    "id": "oAeT0r1LgFJUXu6z",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["3. Design another code that the merchant could use. Give it to a classmate to solve. "]
+                      "text": [
+                        "<ul><li>Design another clue that the merchant could use. Give it to a classmate to solve. </li></ul>"
+                      ]
                     }
                   },
                   {
                     "display": "teacher",
-                    "content":
-                    {
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Student answers will vary. Example: For a clue with the expression, <em>9P + 20</em>. The equation would be 9P + 20 = 200. The solution would be <em>P = $20</em>. "
+                        "<p>Student answers will vary. Example: For a clue with the expression, 9P + 20. The equation would be 9P + 20 = 200. The solution would be P = $20. </p>"
                       ]
                     }
                   }
                 ]
               },
               "supports": [
-                {"text": "What information do we have? "},
-                {"text": "What are we trying to find? "}
               ]
             },
             {
@@ -4209,23 +4531,26 @@
               "content": {
                 "tiles": [
                   {
-                  "content": {
-                    "type": "Text",
-                    "text": "Pouches with an unknown number of coins and coins are represented with an equation. What strategies can you use to find the number of coins in each pouch? How do you know if your answer is correct?"
+                    "id": "FFsJsKbhUpFVDNO7",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Pouches with an unknown number of coins and coins are represented with an equation. What strategies can you use to find the number of coins in each pouch? How do you know if your answer is correct?</p>"
+                      ]
                     }
                   },
                   {
                     "display": "teacher",
-                    "content":
-                    {
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "You can do the same thing to both sides of the equation to find the number of coins in each pouch. You can check your answer by substituting the value you found back into your equation."
+                        "<p>You can do the same thing to both sides of the equation to find the number of coins in each pouch. You can check your answer by substituting the value you found back into the pouches and see if the clue comes out correctly.</p>"
                       ]
                     }
                   }
-              ]
+                ]
               },
               "supports": []
             }
@@ -4242,43 +4567,115 @@
               "type": "introduction",
               "content": {
                 "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "In the last Problem, you used pictures of pouches and gold coins to solve equations. Your solutions maintained the equality of coins on both sides of the equal sign. For example, you might have removed (or subtracted) the same number of coins on both sides of the equation. To better understand how to maintain equality, let’s look first at numerical statements."
-                    }
-                  },
-                  {
+                   {
+                    "id": "n6qNQRYmyAz08Q4p",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["The equation 85 = 70 + 15 states that the quantities 85 and 70 + 15 are equal. \n<em>What do you have to do to maintain equality if you:\n  • subtract 15 from the left-hand side of the original equation?\n  • add 10 to the right-hand side of the original equation?\n  • divide the left-hand side of the original equation by 5?\n  • multiply the right-hand side of the original equation by 4?</em>"]
+                      "text": [
+                        "<p>In the last Problem, we used pictures of pouches and gold coins to solve equations. Our solutions maintained the equality of coins on both sides of the equal sign. For example, we might have removed (or subtracted) the same number of coins on both sides of the equation. To better understand how to maintain equality, let’s look first at numerical statements. </p>"
+                      ]
                     }
                   },
                   {
+                    "id": "34oYiyWEVa1qPM3i",
                     "content": {
                       "type": "Text",
-                      "text": "The picture below shows a situation from Problem 3.1."
+                      "format": "html",
+                      "text": [
+                        "<p>The equation 85 = 70 + 15 states that the quantities 85 and 70 + 15 are equal. </p>",
+                        "<p><em>What do we have to do to maintain equality if we:</em></p>",
+                        "<ul><li><em>subtract 15 from the left-hand side of the original equation?</em></li><li><em>add 10 to the right-hand side of the original equation? </em></li><li><em>divide the left-hand side of the original equation by 5? </em></li><li><em>multiply the right-hand side of the original equation by 4?</em></li></ul>"
+                      ]
                     }
                   },
                   {
+                    "id": "-TpO5qzpPbJhqUHr",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The picture below shows a situation from Problem 3.1.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "MJaCuqStNPNs6PCo",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_3_2_In_coins_pouches_350w.png"
+                      "url": "curriculum/moving-straight-ahead/images/MSA_3_1_IC_coins_pouches_2_350w.png"
                     }
                   },
                   {
+                    "id": "mE3HPsGp7wpk-v8-",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["Because the number of gold coins in each pouch is unknown, you can let x represent the number of coins in one pouch. You can let 1 represent the value of one gold coin. Then this situation can be represented with one of the following equations:\n\n      2<em>x</em> + 4 = 12      or       2(<em>x</em> + 2) = 12       or       <em>x</em> + 2 + <em>x</em> + 2 = 12\n\nThe expressions 2<em>x</em> + 4, 2(<em>x</em> + 2), and <em>x</em> + 2 + <em>x</em> + 2 are equivalent expressions.  Note that you can apply the Distributive Property to the expression 2<em>x</em> + 4 to write 2(<em>x</em> + 2). So, \n\n \u00a0\u00a0\u00a0 2<em>x</em> + 4 = 2(<em>x</em> + 2)\n\n<em>What properties of operations could you use to show that \n\n \u00a0\u00a0\u00a0 x + 2 + x + 2 = 2(x + 2)?</em>"]
+                      "text": [
+                        "<p>Because the number of gold coins in each pouch is unknown, we can let x represent the number of coins in one pouch. We can let 1 represent the value of one gold coin. Then this situation can be represented with one of the following equations:</p>"
+                      ]
                     }
                   },
                   {
+                    "id": "YfXOzo4hZDhS8uT8",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["Two or more expressions are equivalent if they have the same value, regardless of what number is substituted for the variable. Recall that you have been solving linear equations of the form <em>y = ax</em>\u00a0 and <em>y = x + b</em>\u00a0 using fact families and numeric reasoning.  In this Problem, you will revisit problems that involve linear situations with pouches and coins, but you will use symbolic equations to represent your solution process to equations of the form <strong>y = ax + b where the value of y is given or ax + b = cx + d.</strong>"]
+                      "text": [
+                        "<p>2x + 4 = 12     or      2(x + 2) = 12      or      x + 2 + x + 2 = 12</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "JafavaO_hzvwpD54",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The expressions 2x + 4, 2(x + 2), and x + 2 + x + 2 are equivalent expressions. Note that you can apply the Distributive Property to the expression 2x +4 to write 2(x + 2). So,</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "VYCEouNee7C4mVr7",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>2x +4 = 2(x + 2)</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "hPHNjjUhTGKVK6zB",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>What properties of operations could you use to show that x + 2 + x + 2 = 2(x +4)?</em></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "lthvNWyaIP5FcQJ0",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Two or more expressions are equivalent if they have the same value, regardless of what number is substituted for the variable.</p>",
+                        "<p>Recall from several of the Connected Mathematics 6th grade units that we have been solving linear equations of the form y = ax and y = x + b. We used fact families and numeric reasoning. </p>",
+                        "<p>In this Problem, we will revisit problems that involve linear situations with pouches and coins, but we will use symbolic equations to represent our solution process to equations of the form, </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "QhagKb6PJ6mISBfg",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>y = ax + b     or     ax + b = cx + d.</p>"
+                      ]
                     }
                   }
                 ]
@@ -4289,20 +4686,29 @@
               "type": "initialChallenge",
               "content": {
                 "tiles": [
-                  {
+                   {
+                    "id": "xk38vcr4QnFc3k0U",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["Suppose <em>x</em> \u00a0 represents the number of coins in one pouch and 1 represents the value of one coin in the following situations. <ul><li>Write an equation to represent each situation. </li><li>Are there other possibilities for the equations that you could write? Explain.</li><li>Use your equation to find the number of gold coins in each pouch. Check your answers.</li></ul>"]
+                      "text": [
+                        "<p>Suppose x represents the number of coins in one pouch and 1 represents the value of one coin in the following situations. </p>",
+                        "<ul><li>Write an equation to represent each code. </li><li>Are there other possibilities for the equations that you could write? Explain.</li><li>Use your equation to find the number of gold coins in each pouch. Check your answers.</li></ul>"
+                      ]
                     }
                   },
                   {
+                    "id": "Y9oqYgZZTYK40nwQ",
                     "content": {
                       "type": "Text",
-                      "text": "\nEquation 1"
+                      "format": "html",
+                      "text": [
+                        "Code 7"
+                      ]
                     }
                   },
                   {
+                    "id": "ujX61bjVpifnSMsH",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_3_2_IC_coins_pouches_1_350w.png"
@@ -4314,21 +4720,25 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>4<em>x</em> +2 = 18    OR   2(2<em>x</em> + 1) =18</p>",
-                        "<p>4<em>x</em> +2 = 18                  2<em>x</em> + 1 = 9</p>",
-                        "<p>    4<em>x</em> = 16                         2<em>x</em> = 8</p>",
-                        "<p>       <em>x</em> = 4                              <em>x</em> = 4</p>",
-                        "<p></p>"
+                        "<p>4x +2 = 18    OR   2(2x + 1) =18</p>",
+                        "<p>4x +2 = 18                  2x + 1 = 9</p>",
+                        "<p>     4x = 16                        2x = 8</p>",
+                        "<p>       x = 4                            x = 4</p>"
                       ]
                     }
                   },
                   {
+                    "id": "ojrCYWyDno0cBzA1",
                     "content": {
                       "type": "Text",
-                      "text": "Equation 2"
+                      "format": "html",
+                      "text": [
+                        "<p>Code 8</p>"
+                      ]
                     }
                   },
                   {
+                    "id": "AtwkZQLJIgS4RPb6",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_3_2_IC_coins_pouches_2_350w.png"
@@ -4340,19 +4750,24 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>3(<em>x</em> + 2) = 12     OR    3<em>x</em> + 6 = 12</p>",
-                        "<p>    <em>x</em> + 2 = 4                              3x = 6</p>",
-                        "<p>            <em>x</em> = 2                                <em>x</em> = 2</p>"
+                        "<p>3(x+2) = 12     OR    3x+6=12</p>",
+                        "<p>   x + 2 = 4                   3x = 6</p>",
+                        "<p>         x = 2                     x = 2</p>"
                       ]
                     }
                   },
                   {
+                    "id": "liGKg4emrLkEDJxC",
                     "content": {
                       "type": "Text",
-                      "text": "Equation 3"
+                      "format": "html",
+                      "text": [
+                        "<p>Code 9</p>"
+                      ]
                     }
                   },
                   {
+                    "id": "mYPibY0xZuYaACVK",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_3_2_IC_coins_pouches_3_350w.png"
@@ -4364,10 +4779,10 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>3<em>x</em> + 3 = 2<em>x </em>+ 9        OR       3(<em>x </em>+ 1) = 2<em>x</em> + 9</p>",
-                        "<p>   <em>x</em> + 3 = 9                                    3<em>x</em> + 3 = 2<em>x</em> + 9        </p>",
-                        "<p>           <em>x</em> = 6                                             3<em>x</em> = 2<em>x</em> + 6</p>",
-                        "<p>                                                                    <em> x</em> = 6</p>"
+                        "<p>3x+3 = 2x+9        OR       3(x+1) = 2x+9</p>",
+                        "<p>x + 3 = 9                           3x+3 = 2x+9        </p>",
+                        "<p>      x = 6                               3x = 2x + 6</p>",
+                        "<p>                                               x = 6</p>"
                       ]
                     }
                   }
