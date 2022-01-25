@@ -106,7 +106,7 @@ export const AppConfigModel = types
     showPublishedDocsInPrimaryWorkspace: false,
     // comparison view placeholder content
     comparisonPlaceholderContent: types.optional(types.union(types.string, types.array(types.string)), ""),
-    // configuration of navigation tabs (left-side document navigation UI)
+    // configuration of navigation tabs (document navigation UI)
     navTabs: types.optional(NavTabsAppConfigModel, () => NavTabsAppConfigModel.create()),
     // configuration of document toolbar
     toolbar: ToolbarModel,
