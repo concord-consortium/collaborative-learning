@@ -10,20 +10,20 @@
     }
   },
   "sections": {
-    "reference": {
-      "initials": "REF",
-      "title": "Reference",
-      "placeholder": "Reference Images and Descriptions"
+    "getStarted": {
+      "initials": "GS",
+      "title": "Get Started",
+      "placeholder": "Add tiles here to get started on your Activity."
     },
-    "practice": {
-      "initials": "PR",
-      "title": "Practice",
-      "placeholder": "Student Images of Moths and Data"
+    "fieldNotes": {
+      "initials": "FN",
+      "title": "Field Notes",
+      "placeholder": "Describe your explorations in the field."
     },
-    "experiment": {
-      "initials": "EX",
-      "title": "Experiment",
-      "placeholder": "Discuss your Findings or \nDesign an Experiment"
+    "share": {
+      "initials": "SH",
+      "title": "Share",
+      "placeholder": "Discuss your Findings with your class."
     }
   },
   "planningDocument": {
@@ -69,13 +69,13 @@
         {
           "description": "Activity 1.1",
           "ordinal": 1,
-          "title": "What lives in our schoolyard?",
-          "subtitle": "",
+          "title": "What lives in our schoolyard? ",
+          "subtitle": "Making Observations",
           "disabled": [],
           "sections": 
           [
             {
-            "type": "reference",
+            "type": "getStarted",
             "content": {
               "tiles": 
               [
@@ -94,7 +94,7 @@
               }
             },
             {
-              "type": "practice",
+              "type": "fieldNotes",
               "content": {
                 "tiles": [
                   {
@@ -121,7 +121,7 @@
               }
             },
             {
-              "type": "experiment",
+              "type": "share",
               "content": {
                 "tiles": [
                   {

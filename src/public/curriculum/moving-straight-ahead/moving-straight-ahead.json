@@ -4795,60 +4795,47 @@
               "content": {
                 "tiles": [
                   {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["<strong>Situation A. More Pouches</strong>\nA messenger has 6 pouches and 27 coins. There is a total of $105. \n\n1. Write an equation to represent the situation. Then solve the equation to find the number of dollars in each pouch."]}
-                  },
-                  {
-                    "display": "teacher",
+                    "id": "JXnHZzp9h2Qbjce2",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>6<em>P</em> + $27 = $105</p>",
-                        "<p>            6<em>P</em> = $78</p>",
-                        "<p>              <em>P </em>= $13</p>"
+                        "<p><em>Situation A. More Pouches</em></p>",
+                        "<p>A messenger has 6 pouches and 27 coins. There is a total of $105. </p>"
                       ]
                     }
                   },
                   {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["2. AJ claims that there is more than one way to write the equation. Is he correct? Explain. "]}
-                  },
-                  {
-                    "display": "teacher",
+                    "id": "Qeo9xaEtLmD_3k6i",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "He is correct. For example, he could write 27 + 6</em>P</em> = 105."
-                        ]
-                      }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["3. Will the solution for each equation be the same? Explain."]}
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "Yes. For the example above, the Commutative Property of Addition tells you that the answer will be the same."
+                        "<ul><li>Write an equation to represent the situation. Then solve the equation to find the number of dollars in each pouch.</li></ul>"
                       ]
                     }
                   },
                   {
+                    "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>Situation B. Applying Your Strategies</strong>\nUse your strategies to solve each equation. Check your answer. <ol><li> 30 = 6 + 4<em>x</em></li><li> 7<em>x</em> = 6 + 5<em>x</em></li><li> 7<em>x</em> + 2 = 12 + 5<em>x</em> </li><li> 2(<em>x</em> + 4) = 16</li></ol>"]}
+                      "text": [
+                        "<p>6P + $27 = $105</p>",
+                        "<p>6P = $78</p>",
+                        "<p>P = $13</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "yLTtUx96Y__1XjwI",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>AJ claims that there is more than one way to write the equation. Is he correct? Explain.</li></ul>"
+                      ]
+                    }
                   },
                   {
                     "display": "teacher",
@@ -4856,40 +4843,96 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>1.   30 = 6 + 4<em>x</em></p>",
-                        "<p>       24 = 4<em>x</em></p>",
-                        "<p>          6 = <em>x</em></p>",
+                        "<p>He is correct. For example, he could write 27 + 6P = 105.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "EJhWYT767jQkyj4z",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>If there is more than one equation, will the solution for each equation be the same? Explain</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Yes. For the example above, the Commutative Property of Addition tells you that the answer will be the same.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "9Xacxm24Pfv8SUED",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Situation B.  Applying Your Strategies </em></p>",
+                        "<p>Use your strategies to solve each equation. Check your answer. </p>",
+                        "<ol><li>30 = 6 + 4x    </li><li>7x = 6 + 5x    </li><li>7x+ 2 = 12 + 5x    </li><li>2(x+4) = 16 </li></ol>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p></p>",
+                        "<p>1.  30 = 6 + 4x</p>",
+                        "<p>         24= 4x</p>",
+                        "<p>           6 = x</p>",
                         "<p>Check: 30 = 6 + 4(6)</p>",
                         "<p>    30 = 6 + 24</p>",
                         "<p>    30 = 30</p>",
-                        "<p>2.  7<em>x</em> = 6 + 5<em>x</em></p>",
-                        "<p>      2<em>x</em> = 6</p>",
-                        "<p>      x = 3</p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p>2.  7x = 6 + 5x</p>",
+                        "<p>        2x = 6</p>",
+                        "<p>           x = 3</p>",
                         "<p>Check: 7(3) = 6 + 5(3)</p>",
                         "<p>    21 = 6 + 15</p>",
                         "<p>    21 = 21</p>",
-                        "<p>3.  7<em>x</em> + 2 = 12 + 5x</p>",
-                        "<p>      2<em>x</em> + 2 = 12</p>",
-                        "<p>              2x = 10</p>",
-                        "<p>                  <em>x </em>= 5</p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p>3.  7x + 2 = 12 + 5x</p>",
+                        "<p>        2x + 2 = 12</p>",
+                        "<p>                2x = 10</p>",
+                        "<p>                  x = 5</p>",
                         "<p>Check: 7(5)+2 = 12 + 5(5)</p>",
                         "<p>    35 + 2 = 12 + 25</p>",
                         "<p>    37 = 37</p>",
-                        "<p>4.  2(<em>x</em> + 4) = 16</p>",
-                        "<p>         2<em>x </em>+ 8 = 16</p>",
-                        "<p>                 2<em>x</em> = 8</p>",
-                        "<p>                    <em>x</em> = 4</p>",
-                        "<p>Check: 2(4 + 4) = 16</p>",
-                        "<p>             2(8) = 16</p>",
-                        "<p>                16 = 16</p>"
+                        "<p></p>",
+                        "<p></p>",
+                        "<p>4.  2(x+4) = 16</p>",
+                        "<p>         2x + 8 = 16</p>",
+                        "<p>                 2x = 8</p>",
+                        "<p>                    x = 4</p>",
+                        "<p>Check: 2(4+4) = 16</p>",
+                        "<p>    2(8) = 16</p>",
+                        "<p>    16 = 16</p>",
+                        "<p></p>"
                       ]
                     }
                   },
                   {
+                    "id": "AR44QPAphWVYIlHN",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>Situation C. More or Less</strong>\nA messenger has 6 pouches and 30 coins. The total must be less than 102 coins. How would you <strong>write</strong> this inequality? What are some solutions?"]}
+                      "text": [
+                        "<p><em>Situation C. More or Less</em></p>",
+                        "<p>A messenger has 6 pouches and 30 coins. The total must be less than 102 coins</p>",
+                        "<p>How would you write this inequality? What are some solutions?</p>"
+                      ]
+                    }
                   },
                   {
                     "display": "teacher",
@@ -4897,12 +4940,13 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>The inequality is written 6<em>P</em> + 30 &lt; 102. </p>",
+                        "<p></p>",
+                        "<p>The inequality is written 6P + 30 &lt; 102. </p>",
                         "<p>We can solve the inequality by thinking of it as an equation:</p>",
-                        "<p>  6<em>P</em> + 30 = 102</p>",
-                        "<p>        6<em>P</em> = 72</p>",
-                        "<p>     <em>P</em> = 12</p>",
-                        "<p>Then, we can consider the solutions to <em>P</em> &lt; 12. So, there could be 1 coin in each pouch, 2 coins in each pouch, 3 coins in each pouch, or up to 11 coins in each pouch to make this inequality true.</p>",
+                        "<p>  6P + 30 = 102</p>",
+                        "<p>        6P = 72</p>",
+                        "<p>            P = 12</p>",
+                        "<p>Then, we can consider the solutions to P &lt; 12. So, there could be 1 coin in each pouch, 2 coins in each pouch, 3 coins in each pouch, or up to 11 coins in each pouch to make this inequality true.</p>",
                         "<p>We can check to make sure that this is correct by entering a value into the inequality </p>",
                         "<p>6(11) + 30 &lt; 102, then</p>",
                         "<p>66 + 30 &lt; 102 is true so the solutions are correct.</p>"
@@ -4923,14 +4967,16 @@
                   {
                     "content": {
                     "type": "Text",
-                    "text": "Describe a strategy for solving equations using what you know about equality. How do you know if your answer is correct?"
+                    "format": "html",
+                    "text": "<p>Describe a strategy for solving equations using what you know about equality. How do you know if your answer is correct?</p>"
                     }
                   },
                   {
                     "display": "teacher",
                     "content": {
                       "type": "Text",
-                      "text": "You can apply the principles of equality repeatedly to the equation until you have isolated the variable on one side and a number on the other side. Then you can check the solution by substituting the value of the variable into the original equation to see if the equation is true."
+                      "format": "html",
+                      "text": "<p>You can apply the principles of equality repeatedly to the equation until you have isolated the variable on one side and a number on the other side. Then you can check the solution by substituting the value of the variable into the original equation to see if the equation is true.</p>"
                     }
                   }
                 ]
@@ -4951,10 +4997,18 @@
               "content": {
                 "tiles": [
                   {
+                    "id": "tQsF3NiQPKJR8FKm",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["So far in this Investigation, all of the situations have involved positive whole numbers. \n\nTo maintain the equality of two expressions, you can add, subtract, multiply, or divide each side of the equality by the same number. These are called the <strong>properties of equality</strong>. In the last Problem, you applied properties of equality and properties of numbers to find a solution to an equation. \n\n<em>Does it make sense to think about negative numbers in a coin situation?\nDoes it make sense to think about fractions in a coin situation?\nWhat are some situations where it makes sense to use fractions or negative numbers?</em>"]
+                      "text": [
+                        "<p>So far in this Investigation, all of the situations have involved positive whole numbers. </p>",
+                        "<p>To maintain the equality of two expressions, we can add, subtract, multiply, or divide each side of the equality by the same number. These are called the properties of equality. In the last Problem, we applied properties of equality and numbers to find a solution to an equation. </p>",
+                        "<p><em>Does it make sense to think about negative numbers in a coin situation?</em></p>",
+                        "<p><em>Does it make sense to think about fractions in a coin situation?</em></p>",
+                        "<p><em>What are some situations where it makes sense to use fractions or negative </em></p>",
+                        "<p><em>numbers? </em></p>"
+                      ]
                     }
                   }
                 ]
@@ -4966,52 +5020,60 @@
               "content": {
                 "tiles": [
                   {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["For each equation:\n  • Find a solution.\n  • Record each step you take to find a solution.\n  • Then, check your answer.\n\nSet 1.\n a. 5<em>x</em>\u00a0 + 10 = 20 \u00a0\u00a0\u00a0\u00a0 b. 5<em>x</em>\u00a0 – 10 = 20 \u00a0\u00a0\u00a0 c. 5<em>x</em>\u00a0 + 10 = -20\n d. 5<em>x</em>\u00a0 – 10 = -20 \u00a0\u00a0\u00a0 e. 10 - 5<em>x</em>\u00a0 = 20 \u00a0\u00a0\u00a0 f. 10 – 5<em>x</em>\u00a0 = -20"]
-                    }
-                  },
-                  {
-                    "display": "teacher",
+                    "id": "ddnw7pMsC0eEqBzx",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>a.  5<em>x</em> = 10          b.  5<em>x</em> = 30        c.   5x = -30</p>",
-                        "<p>         <em>x</em> = 2                      <em>x</em> = 6                    <em>x </em>= -6</p>",
-                        "<p> </p>",
-                        "<p>d.  5<em>x</em> = -10         e. -5x = 10     f.   -5x= -30</p>",
-                        "<p><em>         x</em> = -2                     <em>x</em> = -2                 <em>x</em> = 6</p>"
+                        "<p>For each equation:</p>",
+                        "<ul><li>Find a solution.</li><li>Record each step you take to find a solution.</li><li>Then, check your answer.</li></ul>"
                       ]
                     }
                   },
                   {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["Set 2. \n a. <em>x</em>\u00a0/4 + 6 = 12 \u00a0\u00a0\u00a0 b. 3/5 = -<em>x</em>\u00a0 + 1 \u00a0\u00a0\u00a0 c. 3.5<em>x</em>\u00a0 = 130 + 10<em>x</em>"]
-                    }
-                  },
-                  {
-                    "display": "teacher",
+                    "id": "H43f2XEgCPNxcODS",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>a.  5<em>x</em> = 10          b.  5<em>x</em> = 30        c.   5x = -30</p>",
-                        "<p>         <em>x</em> = 2                      <em>x</em> = 6                    <em>x </em>= -6</p>",
-                        "<p> </p>",
-                        "<p>d.  5<em>x</em> = -10         e. -5x = 10     f.   -5x= -30</p>",
-                        "<p><em>         x</em> = -2                     <em>x</em> = -2                 <em>x</em> = 6</p>"
+                        "<p>Set 1.</p>",
+                        "<p>  a. 5x + 10 = 20   b. 5x – 10 = 20     c. 5x + 10 = -20</p>",
+                        "<p>  d. 5x – 10 = -20    e. 10 - 5x = 20     f. 10 – 5x = -20</p>"
                       ]
                     }
                   },
                   {
+                    "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["Set 3.  \n a. 3(<em>x</em>\u00a0 + 1) = 21  \u00a0\u00a0\u00a0   b. 2+3(<em>x</em>\u00a0 + 1) = 6x   \u00a0\u00a0\u00a0  c. -2(2<em>x</em>\u00a0 – 3) = -2"]
+                      "text": [
+                        "<p>Set 1:</p>",
+                        "<p>a.  5x = 10</p>",
+                        "<p>           x = 2</p>",
+                        "<p>b.  5x = 30</p>",
+                        "<p>           x = 6</p>",
+                        "<p>c.  5x = -30</p>",
+                        "<p>           x = -6</p>",
+                        "<p>d.  5x = -10</p>",
+                        "<p>           x = -2</p>",
+                        "<p>e.  -5x = 10</p>",
+                        "<p>            x = -2</p>",
+                        "<p>f.  -5x= -30</p>",
+                        "<p>            x = 6</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "2UqHvNFU2OBhoOsG",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Set 2. </p>",
+                        "<p>  a. 1/4 x + 6 = 12    b. 3/5 = -x + 1        c. 3.5x = 130 + 10x </p>"
+                      ]
                     }
                   },
                   {
@@ -5020,63 +5082,134 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>a.  ¼<em> x</em> = 6                 b.  -2/5 = -<em>x</em>           c.  -6.5<em>x</em> = 130</p>",
-                        "<p><em>         x</em> = 24                             <em>x</em> = 2/5                      x = -20</p>"
+                        "<p>Set 2:</p>",
+                        "<p>a.  ¼ x = 6</p>",
+                        "<p>            x = 24</p>",
+                        "<p>b.  -2/5 = -x</p>",
+                        "<p>               x = 2/5</p>",
+                        "<p>c.  -6.5x = 130</p>",
+                        "<p>                 x = -20</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "bszEgoe2EFO7oPK_",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Set 3. </p>",
+                        "<p>  a. 3(x + 1) = 21    b. 2+3(x + 1) = 6x    c. -2(2x – 3) = -2</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Set 3:</p>",
+                        "<p>a.  x + 1 = 7</p>",
+                        "<p>                x = 6</p>",
+                        "<p>b.  2 + 3x + 3 = 6x</p>",
+                        "<p>                          5 = 3x</p>",
+                        "<p>                          x = 5/3</p>",
+                        "<p>c.  2x – 3 = 1</p>",
+                        "<p>                2x = 4</p>",
+                        "<p>                  x = 2</p>"
                       ]
                     }
                   }
                 ]
               },
-              "supports": [{"text": "Would drawing a diagram help?"}]
+              "supports": []
             },
             {
               "type": "whatIf",
               "content": {
                 "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["<strong>Situation A. The Two Variable Connection</strong><ol><li>If 3<em>x</em>\u00a0 – 7 = <em>y</em>\u00a0, find y when <em>x</em>\u00a0 = -2/3.  </li><li>If 3<em>x</em>\u00a0 – 7 = <em>y</em>\u00a0, find <em>x</em>\u00a0 when <em>y</em>\u00a0 = -5.</li><li>Mary thinks you could solve these equations with a graph or table. Is she correct? Explain why?</li><li>Could you solve the equations in the Initial Challenge with a graph or table? Explain why?</li></ol>"]}
-                  },
-                  {
-                    "display": "teacher",
+                   {
+                    "id": "9psrlA6xcAg5fVTu",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>1. Using substitution, y = 3(–2/3) – 7 = –9.</p>",
-                        "<p>2. Using substitution, –5 = 3x – 7 </p>",
-                        "<p>                                                    2 = 3x </p>",
-                        "<p>                                                    x = 2/3.</p>",
-                        "<p>3. Yes, if you had a graph of these equations, you would find the point on the line with the x-value that you are looking for (by looking at the <em>x</em>-axis), and then get the corresponding <em>y</em>-value by looking at the<em> y</em>-axis. If you had a table of these equations, you would find the entry with the <em>x</em>-value that you are looking for, and then get the corresponding <em>y</em>-value by looking at the other column of the table. You could also start either of these methods with a <em>y</em>-value and get the corresponding <em>x</em>-value.</p>",
-                        "<p>4. You could solve these equations by using tables or graphs if you consider the expression on each side of the equation to be its own equation. So, you’d set <em>y1</em> equal to the left side of the equation and y2 equal to the right side of the equation. Then to find the solution, you’d need to find the point where <em>y1 = y2</em>. You could do this by making tables for each equation and looking for the points where <em>y1=y2</em>, or by graphing lines for each equation and looking for the points of intersection. For most cases in the Initial Challenge, <em>y2 </em> is equal to a constant value, but this method would also work when both <em>y1</em> and <em>y2</em> are equal to expressions involving <em>x</em>.</p>"
+                        "<p><em>Situation A. The Two Variable Connection</em></p>",
+                        "<ol><li>If 3x – 7 = y, find y when x = – 2/3   </li><li>If 3x – 7 = y, find x when y = – 5</li><li>Mary thinks you could solve these equations with a graph or table. Is she correct? Explain why?</li><li>Could you solve the equations in the Initial Challenge with a graph or table? Explain why.</li></ol>"
                       ]
                     }
                   },
                   {
+                    "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>Situation B. Solving a Mystery </strong>\nForensic scientists can estimate a person’s height by measuring the length of certain bones, including the femur, the tibia, the humerus, and the radius. The table below gives the equations for the relationships between the length of each bone and the estimated height of males and females. These relationships were found by scientists after much study and data collection. In the table, <em>F</em>\u00a0 represents the length of the femur, <em>T</em>\u00a0 the length of the tibia, <em>H</em>\u00a0 the length of the humerus, <em>R</em>\u00a0 the length of the radius, and <em>h</em>\u00a0 the person’s height. All measurements are in centimeters. "]}
+                      "text": [
+                        "<p>1.    Using substitution, y = 3(–2/3) – 7 = –9.</p>",
+                        "<p>2.  Using substitution, –5 = 3x – 7 </p>",
+                        "<p>                                      2 = 3x </p>",
+                        "<p>        x = 2/3.</p>",
+                        "<p>3.  Yes, if you had a graph of these equations, you would find the point on the line with the x-value that you are looking for         (by looking at the x-axis), and then get the corresponding y-value by looking at the y-axis. If you had a table of these equations, you would find the entry with the x-value that you are looking for, and then get the corresponding y-value by looking at the other column of the table. You could also start either of these methods with a y-value and get the corresponding x-value.</p>",
+                        "<p>4.  You could solve these equations by using tables or graphs if you consider the expression on each side of the equation to be its own equation. So, you’d set y1 equal to the left side of the equation and y2 equal to the right side of the equation. Then to find the solution, you’d need to find the point where y1=y2. You could do this by making tables for each equation and looking for the points where y1=y2, or by graphing lines for each equation and looking for the points of intersection. For most cases in the Initial Challenge, y2 is equal to a constant value, but this method would also work when both y1 and y2 are equal to expressions involving x.</p>"
+                      ]
+                    }
                   },
+                  [
+                    {
+                      "id": "ZAVI3NbVS17OHL9G",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><em>Situation B. Solving a Mystery </em></p>",
+                          "<p>Forensic scientists can estimate a person’s height by measuring the length of certain bones, including the femur, the tibia, the humerus, and the radius. The table below gives the equations for the relationships between the length of each bone and the estimated height of males and females. These relationships were found by scientists after much study and data collection. In the table, F represents the length of the femur, T the length of the tibia, H the length of the humerus, R the length of the radius, and h the person’s height. All measurements are in centimeters. </p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "WjfpcKKovfYENWde",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/moving-straight-ahead/images/MSA_3_3_WI_skeleton_350w.png"
+                      }
+                    }
+                  ],
                   {
+                    "id": "PoRgshaM_sbvYyuA",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_3_3_WI_bones_350w.png"
-                      }
+                    }
                   },
                   {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_3_3_WI_skeleton_350w.png"
-                      }
-                  },
-                  {
+                    "id": "tBha7RbaeWzD0Tfu",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<ol><li>Think of a question you could answer using this data. Explain how you would find the answer. </li><li>Do any of these equations represent linear relationships? </li><li>What does the solution to the equality 61.412 + 2.317F = 150 tell you? </li><li>What does the solution to the inequality 61.412 + 2.317F < 150 tell you?</li></ol>"]
+                      "text": [
+                        "<ul><li>Do any of these equations represent linear relationships?</li></ul>"
+                      ]
+                    }
+                  },
+                  { 
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>All of these represent linear relationships.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "JCdUfb_BRWAOEgVC",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Think of a question you could answer using this data. Explain how you would find the answer. </li></ul>"
+                      ]
                     }
                   },
                   {
@@ -5085,39 +5218,101 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<ol><li>Student answers will vary. For example: If a person is 1.8 meters tall, about how long will their tibia be? You could set the height to be 180 cm and then solve for T.</li><li>All of these represent linear relationships.</li><li>The solution to this equation will be the femur length for a female who is 150 cm tall.</li><li>The solutions to this inequality will be all possible femur lengths for a female who is less than 150 cm tall.</li></ol>"
+                        "<p>Student answers will vary. </p>",
+                        "<p>For example: If a person is 1.8 meters tall, about how long will their tibia be? You could set the height to be 180 cm and then solve for T.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "BgVK5XEY4adysukc",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>What does the solution to the equality 61.412 + 2.317F = 150 tell you?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The solution to this equation will be the femur length for a female who is 150 cm tall.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "VLUAqSfTPTbODJfF",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>What does the solution to the inequality 61.412 + 2.317F &lt; 150 tell you?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The solutions to this inequality will be all possible femur lengths for a female who is less than 150 cm tall.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "wrdJxLKvrkfhDyTz",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Describe the strategies you can use to solve linear equations using the properties of operations and equality. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>For symbolic methods, students’ explanations should include keeping expressions equivalent on both sides of the equal sign (e.g., adding 2 to each side, dividing each side by 3, etc.). Students should also include something about using order of operations correctly, although there are some exceptions (e.g., factoring as a first step). Students should also notice that if applying the Distributive Property is possible, then it may simplify the process.</p>",
+                        "<p>Tables and graphs can also be used to solve linear equations. For example, the equation 2x – 5 = x + 7 can be solved by finding the point of intersection of y1 = 2x – 5 and y2 = x + 7 on a graphing calculator. Sometimes it is quicker to use symbolic methods. However, if students are experienced with using technology to create tables and graphs, and if several questions of this type are being asked, then tables or graphs might be more efficient.</p>"
                       ]
                     }
                   }
                 ]
               },
               "supports": [
-                {"text": "What does 'h' mean in the equations?"},
-                {"text": "How do you know if a relationship is linear?"},
-                {"text": "Can you explain the meaning of each equation in your own words?"}
               ]
             },
             {
               "type": "nowWhatDoYouKnow",
               "content": {
                 "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "Describe the strategies you can use to solve linear equations using the properties of operations and equality. "
+                  [
+                    {
+                      "id": "yr_zQp5Pmkj0OL6C",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>Did You Know?</strong></p>",
+                          "<p>Ratios within the human body are also helpful for artists.  One common ratio used in drawing humans is a 1 to 8 for head to body, often called the 8 heads method.  This means when drawing you can use the length of 8 heads to draw the height of human.  Artists also use these head length markers to draw where other body parts are too.  For example, you can draw the knees two head lengths up from the ground and the waist five head lengths up from the ground.  These measurements are only averages and are not accurate for actual human measurements since we are all different.  Some artists even prefer slightly different proportions such as 7.5 head lengths for the human height.  However, this practice of using head length ratios is a common strategy for learning to draw humans.</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "Ot4RM9P_xD2o4LYs",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/moving-straight-ahead/images/MSA_3-3_DidYouKnow.jpg"
+                      }
                     }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>For symbolic methods, students’ explanations should include keeping expressions equivalent on both sides of the equal sign (e.g., adding 2 to each side, dividing each side by 3, etc.). Students should also include something about using order of operations correctly, although there are some exceptions (e.g., factoring as a first step). Students should also notice that if applying the Distributive Property is possible, then it may simplify the process.</p>",
-                        "<p>Tables and graphs can also be used to solve linear equations. For example, the equation <em>2x – 5 = x + 7</em> can be solved by finding the point of intersection of <em>y1 = 2x – 5</em> and <em>y2 = x + 7</em> on a graphing calculator. Sometimes it is quicker to use symbolic methods. However, if students are experienced with using technology to create tables and graphs, and if several questions of this type are being asked, then tables or graphs might be more efficient.</p>"
-                      ]
-                    }
-                  }
+                  ]
                 ]
               },
               "supports": []
