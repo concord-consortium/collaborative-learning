@@ -59,6 +59,36 @@
     ]
   },
   "defaultStamps": [
+    {
+      "url": "curriculum/mothed/stamps/acorn.png",
+      "width": 35,
+      "height": 35
+    },
+    {
+      "url": "curriculum/mothed/stamps/firneedles.png",
+      "width": 35,
+      "height": 29
+    },
+    {
+      "url": "curriculum/mothed/stamps/mapleleaf.png",
+      "width": 35,
+      "height": 38
+    },
+    {
+      "url": "curriculum/mothed/stamps/tree.png",
+      "width": 37,
+      "height": 35
+    },
+    {
+      "url": "curriculum/mothed/stamps/pine.png",
+      "width": 23,
+      "height": 40
+    },
+    {
+      "url": "curriculum/mothed/stamps/greenleaf.png",
+      "width": 35,
+      "height": 34
+    }
   ],
   "investigations": [
     {
