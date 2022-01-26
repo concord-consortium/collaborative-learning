@@ -132,6 +132,12 @@ interface IFirebaseFunctionBaseParams {
   context: IUserContext;
 }
 
+export interface IGetImageDataParams extends IFirebaseFunctionBaseParams {
+  url: string;
+}
+
+export type IGetImageDataUnionParams = IGetImageDataParams | IFirebaseFunctionWarmUpParams;
+
 export interface IClientCommentParams {
   tileId?: string;    // empty for document comments
   content: string;    // plain text for now; potentially html if we need rich text

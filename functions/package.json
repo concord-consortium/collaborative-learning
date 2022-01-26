@@ -9,6 +9,7 @@
     "start": "npm run shell",
     "deploy:all": "firebase deploy --only functions",
     "deploy:getImageData": "firebase deploy --only functions:getImageData",
+    "deploy:getImageData_v1": "firebase deploy --only functions:getImageData_v1",
     "deploy:getNetworkDocument": "firebase deploy --only functions:getNetworkDocument_v1",
     "deploy:getNetworkResources": "firebase deploy --only functions:getNetworkResources_v1",
     "deploy:postDocumentComment": "firebase deploy --only functions:postDocumentComment_v1",
@@ -16,6 +17,9 @@
     "logs": "firebase functions:log",
     "test": "ts-node node_modules/jest/bin/jest.js --detectOpenHandles",
     "test:coverage": "ts-node node_modules/jest/bin/jest.js --coverage --detectOpenHandles"
+  },
+  "engines": {
+    "node": "16"
   },
   "main": "lib/index.js",
   "dependencies": {

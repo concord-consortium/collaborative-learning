@@ -24,6 +24,7 @@ export const kTeacherName = "Jane Teacher";
 export const kOtherTeacherName = "John Teacher";
 export const kTeacherNetwork = "teacher-network";
 export const kOtherTeacherNetwork = "other-network";
+export const kStudentName = "Mary Student";
 export const kDocumentType = "problem";
 export const kDocumentKey = "document-key";
 export const kProblemPath = "abc/1/2";
@@ -47,6 +48,30 @@ export const specUserContext = (overrides?: Partial<IUserContext>, exclude?: str
     network: kTeacherNetwork,
     classHash,
     teachers: [kUserId],
+    // include argument overrides defaults
+    ...overrides
+  };
+  // exclude specified properties from result
+  exclude?.forEach(prop => {
+    delete (context as any)[prop];
+  });
+  return context;
+};
+
+export const specStudentContext = (overrides?: Partial<IUserContext>, exclude?: string[]): IUserContext => {
+  // default to authed mode unless another mode specified
+  const appMode = overrides?.appMode || "authed";
+  const demoName = overrides?.appMode === "demo" ? overrides?.demoName || kDemoName : undefined;
+  const portal = overrides?.portal || kPortal;
+  const classHash = overrides?.classHash || kClassHash;
+  const context: IUserContext = {
+    appMode,
+    demoName,
+    portal,
+    uid: kUserId,
+    type: "student",
+    name: kStudentName,
+    classHash,
     // include argument overrides defaults
     ...overrides
   };
