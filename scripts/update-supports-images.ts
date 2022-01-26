@@ -54,7 +54,8 @@ interface IFirestoreMultiClassImage {
 }
 
 interface IActiveImageMatch {
-  url: string;
+  url: string;  // content url; may be legacy or newer (with or without class hash)
+  legacyUrl: string;
   key: string;
   start: number;
   tileIndex: number;
@@ -111,9 +112,12 @@ const kImageTileRegex = /"type":"(Drawing|Geometry|Image)"/g;
 // capture group 3: image key (includes class hash for modern image urls)                 |-----|
 const kImageUrlRegex = /(\\"url\\":|\\"parents\\":\[)\\"(ccimg:\/\/fbrtdb\.concord\.org\/([^\\"]+))\\"/g;
 
-function getImageKeyFromUrl(url: string) {
+function parseImageUrl(url: string) {
   const match = /ccimg:\/\/fbrtdb\.concord\.org\/([^/]+)(\/([^/]+))?/.exec(url);
-  return match?.[3] || match?.[1];
+  const imageKey = match?.[3] || match?.[1];
+  const imageClassHash = match?.[3] ? match?.[1] : undefined;
+  const legacyUrl = imageClassHash ? url.replace(`/${imageClassHash}`, ""): url;
+  return { imageClassHash, imageKey, legacyUrl };
 }
 
 // possible paths are currently hard-coded; could be extended to script argument down the road
@@ -186,15 +190,14 @@ admin.firestore()
           const imageMatches = [...(content?.matchAll(kImageUrlRegex) || [])]
                                 .map(match => {
                                   const [ , , url, path] = match;
-                                  const urlParts = path.split("/");
-                                  const key = urlParts[urlParts.length - 1];
+                                  const { imageKey: key = path, legacyUrl } = parseImageUrl(url);
                                   const { index: start = 0 } = match;
                                   const tileIndex = getTileIndex(start);
                                   const tileType = imageTileMatches[tileIndex].tileType;
                                   // console.log(`Image match: tileIndex: ${tileIndex},`,
                                   //             `tileType: ${tileType}, ${JSON.stringify(match.slice(1))}`);
                                   ++imageCountsPerTileType[tileType];
-                                  return { url, key, path, start, tileIndex, tileType };
+                                  return { url, legacyUrl, key, path, start, tileIndex, tileType };
                                 });
           // filter out the "inactive" images, e.g. an image that has been replaced by a newer one in an image tile
           const activeImages = imageMatches.filter((match, i) => {
@@ -231,14 +234,14 @@ admin.firestore()
                 // build map of resolved image locations
                 supportImageResolutions[supportKey] = {};
                 Promise.all(imageDocs.map((imageDoc, imageDocIndex) => {
-                  const { url: _url, key: imageKey } = activeImages[imageDocIndex];
+                  const { url: _url, legacyUrl, key: imageKey } = activeImages[imageDocIndex];
                   _url && (imageDoc != null) && classHash && (supportImageResolutions[supportKey][_url] = classHash);
                   return new Promise((resolve, reject) => {
                     // resolve with the image contents found in the previous step, if available
                     if (imageDoc != null) {
                       imageKey && platform_id && classHash && !firestoreImages[imageKey] &&
                         (firestoreImages[imageKey] = {
-                          url: _url,
+                          url: legacyUrl,
                           classPath: _classPath,
                           platform_id,
                           context_id: classHash
@@ -275,7 +278,7 @@ admin.firestore()
                             _url && altClassHash && (supportImageResolutions[supportKey][_url] = altClassHash);
                             imageKey && platform_id && altClassHash && !firestoreImages[imageKey] &&
                               (firestoreImages[imageKey] = {
-                                url: _url,
+                                url: legacyUrl,
                                 classPath: _classPath,
                                 platform_id,
                                 context_id: altClassHash
@@ -366,11 +369,11 @@ admin.firestore()
                         `(Towle/Jones: ${isTowleJones})`, "has", foundInOtherClass, "displaced images!");
           }
           // generate the list of `mcimages` entries required by this support
-          multiClassImagesMap[supportKey] = activeImages.map(({ url, key }) => {
+          multiClassImagesMap[supportKey] = activeImages.map(({ url, legacyUrl, key }) => {
             const { classes = [], resource_link_id = "", resource_url = "" } = docData || {};
             const { classPath, context_id } = firestoreImages[key];
             return {
-              url, classes, classPath, supportKey, platform_id, context_id, resource_link_id, resource_url
+              url: legacyUrl, classes, classPath, supportKey, platform_id, context_id, resource_link_id, resource_url
             };
           });
         }
@@ -425,8 +428,9 @@ admin.firestore()
     await Promise.all(Object.keys(multiClassImagesMap).map(supportKey => {
       // promise for each mcimage within the support
       return Promise.all(multiClassImagesMap[supportKey].map(mcimage => {
+        const { imageKey } = parseImageUrl(mcimage.url);
         // compound key includes support key and image key
-        const key = `${supportKey}_${getImageKeyFromUrl(mcimage.url)}`;
+        const key = `${supportKey}_${imageKey}`;
         console.log(`${++mcimageIndex}: mcimages[${key}]: ${JSON.stringify(mcimage)}`);
         return kDryRun
                 ? Promise.resolve()
