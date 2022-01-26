@@ -5331,79 +5331,50 @@
               "content": {
                 "tiles": [
                   {
+                    "id": "g7ZqnWOmb5bNpXkA",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["In Problem 2.2, you used graphs and tables to find when the costs of two different plans for buying T-shirts were equal. The graphs of the two cost plans are shown below. C<sub>n</sub> represents the costs of the No-Shrink Tee. C<sub>m</sub> represents the costs of the Mighty Tee. The point of intersection of the two lines tells us when the costs for the two T-shirt plans are equal."]
-                    }
-                  },
-                  {
-                    "layout": {
-                      "height": 360
-                    },
-                    "content": {
-                      "type":"Geometry",
-                      "title": "Two T-Shirt Plans",
-                      "board": {
-                        "properties": {
-                          "axisNames": ["n", "Cn"],
-                          "axisLabels": ["Number of T-Shirts", "Total Cost"],
-                          "axisMin": [-2, -10],
-                          "axisRange": [20, 100]
-                        }
-                      },
-                      "objects": [
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [0, 0]
-                            },
-                            {
-                              "type": "point",
-                              "parents": [14, 63]
-                            }
-                          ]
-                        },
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [0, 49]
-                            },
-                            {
-                              "type": "point",
-                              "parents": [14, 63],
-                              "properties": {
-                                "name": "(14, 63)"
-                              }
-                            }
-                          ]
-                        }
+                      "text": [
+                        "<p>In Problem 2.2, we used graphs and tables to find when the costs of two different plans for buying T-shirts were equal. The graphs of the two cost plans are shown below. C<sub>No-Shrink</sub> represents the costs of the No-Shrink Tee. C<sub>Mighty </sub>represents the costs of the Mighty Tee. The point of intersection of the two lines tells us when the costs for the two t-shirt plans are equal.</p>"
                       ]
                     }
                   },
                   {
+                    "id": "MTKDKXSVEpOzM22W",
                     "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["What information do the coordinates of the point of intersection of the two lines give you about this situation? \n\nHow could you use the two equations to find the coordinates of the point of intersection of the two lines? That is, for what number of T-shirts n is <em>C<sub>m</sub> = C<sub>n</sub></em>\u00a0 or 49+<em>n</em>\u00a0 = 4.5<em>n</em>\u00a0? How could you use the equation or its graph or table to find the number of T-shirts where the cost is less than $60? That is, for values of n, is \n \u00a0 \u00a0 <em>C<sub>mighty</sub></em>\u00a0 < 60?   Or \u00a0 \u00a0 49 + <em>n</em>\u00a0 < $60"]
-                    }
+                      "type": "Geometry",
+                      "title": "Two T-Shirt Plans",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-2, -10],
+                          "axisRange": [20, 100],
+                          "axisNames": ["n", "Cn"],
+                          "axisLabels": ["Number of T-Shirts", "Total Cost"]
+                        }
+                      },
+                      "objects": [
+                        { "type": "movableLine", "parents": [{ "type": "point", "parents": [0, 0] }, { "type": "point", "parents": [14, 63] }],"properties": {"id":"aomPehRi8TZQR3Jh"} },
+                        { "type": "movableLine", "parents": [{ "type": "point", "parents": [0, 49] }, { "type": "point", "parents": [14, 63] }],"properties": {"id":"MWBGzgFC1ppHCEyG","pt2":{"name":"(14, 63)"}} }
+                      ]
+                    },
+                    "layout": { "height": 403 }
                   },
                   {
+                    "id": "DN4G4OTQJPyyO5QR",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<em>When either the value of x or y is known, what strategies do you have for solving  \n •  equations of the form y = ax+ b? \n • inequalities of the form  ax +b < y  or ax +b > y?</em>"]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["A local bakery, Fabulous Fabian’s Bakery, wants to set up a snack booth at the Walkathon. They will donate their profits to the school. To make a profit the business has to consider the expenses that might occur. For a T-shirt company, the expenses may include the cost of buying the shirts, costs for printing, costs to advertise, and labor charges. For a bakery the cost might include cost of ingredients, labor charges, advertising, etc."]
+                      "text": [
+                        "<p><em>What information do the coordinates of the point of intersection of the two lines give us about this situation?</em></p>",
+                        "<p><em></em></p>",
+                        "<p><em>How could we use the two equations to find the coordinates of the point of intersection of the two lines? That is, for what number of T-shirts n is C</em><em><sub>Mighty</sub></em><em> = C</em><em><sub>No-Shrink</sub></em><em> or 49+n = 4.5n?</em></p>",
+                        "<p><em></em></p>",
+                        "<p><em>How could we use the equation or its graph or table to find the number of T-shirts where the cost is less than $60? That is, for values of n is </em></p>",
+                        "<p><em>C</em><em><sub>Mighty</sub></em><em> &lt;60?   or  49 + n &lt; $60</em></p>",
+                        "<p><em>When either the value of x or y is known what strategies do we have for solving </em></p>",
+                        "<ul><li><em>equations of the form y = ax+ b? </em></li><li><em>inequalities of the form ax +b &lt; y or ax +b &gt; y?</em></li></ul>"
+                      ]
                     }
                   }
                 ]
@@ -5415,10 +5386,28 @@
               "content": {
                 "tiles": [
                   {
+                    "id": "HbDQA4T4VNHG3kRO",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["At Fabulous Fabian’s Bakery, the expenses <em>E</em>\u00a0 to make n cakes per month is given by the equation: \n\n \u00a0\u00a0\u00a0 <em>E</em>\u00a0 = 825 + 3.25<em>n</em>\n\nThe income <em>Inc</em>\u00a0 for selling <em>n</em> cakes is given by the equation: \n\n  \u00a0\u00a0\u00a0 <em>Inc</em>\u00a0 = 8.20 <em>n</em>\n\n \u0089\u00B7 What information do the numbers in each equation represent?"]
+                      "text": [
+                        "<p>A local bakery, Fabulous Fabian’s Bakery, wants to set up a snack booth at the Walkathon. They will donate their profits to the school. To make a profit the business has to consider the expenses that might occur. For a T-shirt company, the expenses may include the cost of buying the shirts, costs for printing, costs to advertise, and labor charges. For a bakery the cost might include cost of ingredients, labor charges, advertising, etc. </p>",
+                        "<p></p>",
+                        "<p>At Fabulous Fabian’s Bakery, the expenses <em>E</em> to make <em>n </em>cakes per month is given by the equation: </p>",
+                        "<p>                                                         <em>E</em> = 825 + 3.25<em>n</em></p>",
+                        "<p>The income <em>I </em>for selling <em>n</em> cakes is given by the equation: </p>",
+                        "<p>                                                            <em>I</em> = 8.20<em>n</em></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "qr3a7UHleFukYk6h",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>What information do the numbers in each equation represent?</li></ul>"
+                      ]
                     }
                   },
                   {
@@ -5426,15 +5415,19 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "The first equation tells us about Fabian’s expenses, which are $825 each month (regardless of how many cakes he makes) plus an additional $3.25 for each cake he makes. The second equation tells us about Fabian’s income, which is $8.20 for each cake he sells."
-
+                      "text": [
+                        "<p>The first equation tells us about Fabian’s expenses, which are $825 each month (regardless of how many cakes he makes) plus an additional $3.25 for each cake he makes. The second equation tells us about Fabian’s income, which is $8.20 for each cake he sells.</p>"
+                      ]
                     }
                   },
                   {
+                    "id": "ghHJuT7trMMdvT7w",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": [" \u0089\u00B7 How many cakes does Fabian need to sell in order to start making a profit?"]
+                      "text": [
+                        "<ul><li>How many cakes does Fabian need to sell in order to start making a profit?</li></ul>"
+                      ]
                     }
                   },
                   {
@@ -5444,11 +5437,11 @@
                       "format": "html",
                       "text": [
                         "<p>The profit is represented by I – E:</p>",
-                        "<p>  8.20n – (825 + 3.25n) ≤ 0</p>",
-                        "<p>  8.20n – 3.25n – 825 ≤ 0</p>",
-                        "<p>  4.95n – 825 ≤ 0</p>",
-                        "<p>  4.95n ≤ 825</p>",
-                        "<p>  n ≤ 166 2/3 </p>",
+                        "<p>  8.20n – (825 + 3.25<em>n</em>) ≤ 0</p>",
+                        "<p>  8.20<em>n</em> – 3.25<em>n</em> – 825 ≤ 0</p>",
+                        "<p>  4.95<em>n</em> – 825 ≤ 0</p>",
+                        "<p>  4.95<em>n</em> ≤ 825</p>",
+                        "<p>  <em>n</em> ≤ 166 2/3 </p>",
                         "<p>Fabian needs to sell 167 cakes in order to start making a profit.</p>"
                       ]
                     }
@@ -5466,108 +5459,232 @@
               "content": {
                 "tiles": [
                   {
-                    "content": {
-                    "type": "Image",
-                    "url": "curriculum/moving-straight-ahead/images/MSA_3_4_WI_bakery_350w.png"
-                    }
-                  },
-                  {
-                    "content": {
-                    "type": "Text",
-                    "format":"html",
-                    "text": ["<strong>Situation A. Kevin’s Graph</strong>\nKevin drew the graph above to help him find the number of cakes sold to make a profit. \n\n \u00891. Explain how Kevin could use his graph to determine Fabian’s profit. "]
-                    }
-                  },
-                  {
-                    "display": "teacher",
+                    "id": "wxCg_JlpBMiRLVFS",
                     "content": {
                       "type": "Text",
-                      "text": "Kevin can find when Fabian’s expenses and income are approximately equal. Where the lines intersect, we know that Fabian will make $0. After that, he will begin to make a profit."
+                      "format": "html",
+                      "text": [
+                        "<p><em>Situation A. Kevin’s Graph</em></p>",
+                        "<p>Kevin drew the following graph to help him find the number of cakes sold to make a profit. </p>"
+                      ]
                     }
                   },
                   {
-                    "content": {
-                    "type": "Text",
-                    "format":"html",
-                    "text": [" \u00892. Kevin highlighted the vertical distance 330 between the two lines on the graphs. What does the 330 represent on the graph? What does it represent in the real world?"]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "text": "The 330 shows that the value of E is higher than I. In the real world, this shows that Fabian will spend $330 more in expenses than he will earn when he sells 100 cakes."
-                    }
-                  },
-                  {
-                    "content": {
-                    "type": "Text",
-                    "format":"html",
-                    "text": [" \u00893. Adia claims she can find the coordinates of the point of intersection by solving the equation 8.20<em>n</em> = 825 + 3.25<em>n</em>. Is this possible? Explain. How does it help?</li></ol>"]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "text": "This is possible because (8.20n) represents the income and (825 + 3.25n) represents the expenses. So, by solving this equation, you are finding the point when income and expenses are equal, or where the two lines intersect."
-                    }
-                  },
-                  {
-                    "content": {
-                    "type": "Text",
-                    "format":"html",
-                    "text": ["<strong>Situation B. Fabian’s Profit Equation</strong>\n\n 5. Fabian uses the equation P = Income – Expenses to predict the profit. He wrote P = 8.20<em>n</em> – (825 + 3.25). Does this make sense? Explain. "]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "text": "Yes, since he wants to subtract expenses from income for a given number of cakes, he can subtract the expenses expression from the income expression to give an expression for overall profit."
-                    }
-                  },
-                  {
-                    "content": {
-                    "type": "Text",
-                    "format":"html",
-                    "text": ["6. Adia rewrites Fabian’s profit equation as P = 4.95<em>n</em> – 825. Is she correct? Explain."]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "text": "Yes, this equation will give the same result as Fabian’s. Her equation gives the profit for each cake and subtracts the fixed, monthly expenses."
-                    }
-                  },
-                  {
-                    "content": {
-                    "type": "Text",
-                    "format":"html",
-                    "text": ["<strong>Situation C. Fabian’s Profit Inequality</strong> \nFabian and his sister are looking for other ways to express how to find the number of cakes needed to make a profit. Explain why each representation does or does not make sense.",
-                      "\nFabian's representation: Inequality Statement P > 4.95<em>n</em> - 825",
-                      "\nHis Sister's representation: Number Line"]
-                    }
-                  },
-                  {
+                    "id": "-nRNz4sJX3Ih4Hu8",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_Fabian_Numberline.png"
+                      "url": "curriculum/moving-straight-ahead/images/MSA_3_4_WI_bakery_350w.png"
+                    }
+                  },
+                  {
+                    "id": "WKt0FPZUeYxEcCEA",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Explain how Kevin could use his graph to determine Fabian’s profit.</li></ul>"
+                      ]
                     }
                   },
                   {
                     "display": "teacher",
                     "content": {
                       "type": "Text",
-                      "text": "The inequality statement does make sense, because it says that they want their profit to be greater than their income – expenses. The number line does make sense because it shows all possible values of n for which they have a profit."
+                      "format": "html",
+                      "text": [
+                        "<p>Kevin can find when Fabian’s expenses and income are approximately equal. Where the lines intersect, we know that Fabian will make $0. After that, he will begin to make a profit.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "PLEey6yeStVdipp9",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Kevin highlighted the vertical distance –330 between the two graphs. What does the  –330 represent on the graph? What does it represent in the real world?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The 330 shows that the value of E is higher than I. In the real world, this shows that Fabian will spend $330 more in expenses than he will earn when he sells 100 cakes.  </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "DYX-urRgbgxC-iKk",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Adia claims she can find the coordinates of the point of intersection by solving the equation, 8.20n = 825 + 3.25n. Is this possible? Explain. How does it help?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>This is possible because (8.20n) represents the income and (825 + 3.25n) represents the expenses. So, by solving this equation, you are finding the point when income and expenses are equal, or where the two lines intersect.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "l908sg_Wy-tjWG-m",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>If Kevin sells 125 cakes, is he losing or making money? Explain why.</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p></p>",
+                        "<p>Losing. Looking at the graphs, Income (pink line) is lower than the Expenses (blue line) until after 150 cakes. So, he will lose money until he sells more than 150 cakes.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "HmXFtwvEp07_goVk",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Situation B. Fabian’s Profit Equation</em></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "R08wXrevYE-Boicy",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Fabian uses the equation P = Income – Expenses to predict the profit. He wrote \n              P = 8.20n – (825 + 3.25n). Does this make sense? Explain. </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Yes, since he wants to subtract expenses from income for a given number of cakes, he can subtract the expenses expression from the income expression to give an expression for overall profit.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "ri9SyS9WQDuMgsHG",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Adia rewrites Fabian’s profit equation as P = 4.95n – 825. Is she correct? Explain.</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Yes, this equation will give the same result as Fabian’s. Her equation gives the profit for each cake and subtracts the fixed, monthly expenses.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "Pm_0AaEwgRhGbTQi",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Situation C. Fabian’s Profit Inequality</em></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "dQ6CkYHHqIgNsury",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Fabian and Billie are looking for other ways express how to find the number of cakes needed to make a profit. Explain why each representation does or does not make sense.</li></ul>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "V7bUV819aYH8Cry6",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Fabian’s Representation</p>", 
+                          "<p>Inequality Statement</p>",
+                          "<p></p>",
+                          "<p>P &gt; 4.95n – 825</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "tVKwqBoEiT8rbyoG",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Billie’s Representation</p>", 
+                          "<p>Number Line</p>"
+                        ]
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "5ZoouTHV91zuHwFB",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>PLACE HOLDER</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "AbWQioteDcxCozXy",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/moving-straight-ahead/images/MSA_3-4_NumberLine.png"
+                      }
+                    }
+                  ],
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The inequality statement does make sense, because it says that they want their profit to be greater than their income – expenses. The number line does make sense because it shows all possible values of n for which they have a profit.</p>"
+                      ]
                     }
                   }
                 ]
               },
               "supports": [
-                {"text": "What are his expenses and his income for the month?"},
-                {"text": "What do the coefficients of n represent?"}
               ]
             },
             {
@@ -5575,17 +5692,28 @@
               "content": {
                 "tiles": [
                   {
+                    "id": "VcLndwxIJJF4foBt",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["Describe how you can solve an equation of the form ax + b  = y? \nDescribe how you can solve an inequality of the form <em>ax + b < c</em> or <em>ax + b > c</em>? "]
+                      "text": [
+                        "<p>Describe how you can solve an equation of the form ax + b  = y? </p>",
+                        "<p>Describe how you can solve an inequality of the form ax + b &lt; c or ax + b &gt; c?</p>"
+                      ]
                     }
                   },
                   {
                     "display": "teacher",
                     "content": {
                       "type": "Text",
-                      "text": "If you have an equation of the form y = ax+b and you know what the value of y is, you can find the solution using a table, graph, or equation. \nOn a table, you can find the needed value of y and look at the value of x. This is the same as finding the coordinate pair on the graph. \nUsing a graph, you can find the point of intersection of y1 = ax + b and y2 = y to solve the equation. \nYou can use the equation: subtract b from y and divide by a to solve for x. If you have an equation of the form y = ax+b and you know what the value of x is, you can substitute the value of x into the equation and compute the value of y. \nIf you have an inequality of that form, then you can use algebraic methods to solve the associated equation as before. Then check a few values greater or less than the equation’s solution in the original inequality to determine if the solutions to the inequality should be greater than or less than the solution to the associated equation."
+                      "format": "html",
+                      "text": [
+                        "<p>If you have an equation of the form y = ax+b and you know what the value of y is, you can find the solution using a table, graph, or equation. </p>",
+                        "<p>On a table, you can find the needed value of y and look at the value of x. This is the same as finding the coordinate pair on the graph. </p>",
+                        "<p>Using a graph, you can find the point of intersection of y1 = ax + b and y2 = y to solve the equation. </p>",
+                        "<p>You can use the equation: subtract b from y and divide by a to solve for x. If you have an equation of the form y = ax+b and you know what the value of x is, you can substitute the value of x into the equation and compute the value of y. </p>",
+                        "<p>If you have an inequality of that form, then you can use algebraic methods to solve the associated equation as before. Then check a few values greater or less than the equation’s solution in the original inequality to determine if the solutions to the inequality should be greater than or less than the solution to the associated equation.</p>"
+                      ]
                     }
                   }
                 ]
