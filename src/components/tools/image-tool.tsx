@@ -11,7 +11,7 @@ import { IToolApi, TileResizeEntry } from "./tool-api";
 import { IToolTileProps } from "./tool-tile";
 import { IDocumentContext } from "../../models/document/document-types";
 import { debouncedSelectTile } from "../../models/stores/ui";
-import { gImageMap, IImageContext, ImageMapEntryType } from "../../models/image-map";
+import { gImageMap, ImageMapEntryType } from "../../models/image-map";
 import { ImageContentModelType } from "../../models/tools/image/image-content";
 import { ITileExportOptions } from "../../models/tools/tool-content-info";
 import { hasSelectionModifier } from "../../utilities/event-utils";
@@ -51,11 +51,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   private imageElt: HTMLDivElement | null;
   private listenerDisposer: (() => void) | undefined;
   private debouncedUpdateImage = debounce((url: string, filename?: string) => {
-    const { documentContext } = this.state;
-    const imageContext: IImageContext | undefined = documentContext
-                                                      ? { type: documentContext?.type, key: documentContext?.key }
-                                                      : undefined;
-
     // Under some circumstances, notably when the image being requested has been copied from a multi-class support,
     // the call to getImage() below will fail initially, but the url being requested will later be cached by the
     // gImageMap once the multi-class support is loaded. To account for this, we register a listener which will be
@@ -70,7 +65,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
                                   this.listenerDisposer = undefined;
                                 }
                               });
-    gImageMap.getImage(url, { filename, context: imageContext })
+    gImageMap.getImage(url, { filename })
       .then(image => {
         if (!this._isMounted) return;
         // update react state

@@ -27,7 +27,6 @@ export interface IImageContext {
 }
 export interface IImageBaseOptions {
   filename?: string;
-  context?: IImageContext;
 }
 export interface IImageHandlerStoreOptions extends IImageBaseOptions{
   db?: DB;
@@ -369,14 +368,14 @@ export const firebaseRealTimeDBImagesHandler: IImageHandler = {
 
   store(url: string, options?: IImageHandlerStoreOptions) {
     return new Promise((resolve, reject) => {
-      const { context, db } = options || {};
+      const { db } = options || {};
       const { path, classHash, normalized } = parseFauxFirebaseRTDBUrl(url);
 
       if (db && path && normalized) {
         // In theory we could direct all firebase image requests to the cloud function,
         // but only cross-class supports require the use of the cloud function.
         const blobPromise = classHash !== db.stores.user.classHash
-                              ? db.getCloudImageBlob(path, context?.type, context?.key)
+                              ? db.getCloudImageBlob(url)
                               : db.getImageBlob(path);
         blobPromise.then(blobUrl => {
           resolve(blobUrl
