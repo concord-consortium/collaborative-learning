@@ -207,7 +207,7 @@ admin.firestore()
             // Handling this case would require more detailed parsing of Drawing content.
             if (match.tileType === "Drawing") return true;
             // Geometry and Image tiles only support a single image, so only the last is active
-            return i === imageMatches.length - 1;
+            return (i === imageMatches.length - 1) || (match.tileIndex !== imageMatches[i + 1].tileIndex);
           });
           activeImagesMap[supportKey] = activeImages;
 
