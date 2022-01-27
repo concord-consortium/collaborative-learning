@@ -13,6 +13,7 @@
     "deploy:getNetworkDocument": "firebase deploy --only functions:getNetworkDocument_v1",
     "deploy:getNetworkResources": "firebase deploy --only functions:getNetworkResources_v1",
     "deploy:postDocumentComment": "firebase deploy --only functions:postDocumentComment_v1",
+    "deploy:publishSupport": "firebase deploy --only functions:publishSupport_v1",
     "deploy:validateCommentableDocument": "firebase deploy --only functions:validateCommentableDocument_v1",
     "logs": "firebase functions:log",
     "test": "ts-node node_modules/jest/bin/jest.js --detectOpenHandles",
@@ -23,6 +24,7 @@
   },
   "main": "lib/index.js",
   "dependencies": {
+    "escape-string-regexp": "^4.0.0",
     "firebase-admin": "^9.12.0",
     "firebase-functions": "^3.16.0"
   },

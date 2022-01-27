@@ -222,8 +222,6 @@ describe("ImageMap", () => {
   });
 
   it("test firebaseRealTimeDBImagesHandler", () => {
-    const legacyParsedPath = urlParser.parse(kCCImgFBRTDB).path;
-    const legacyPath = legacyParsedPath?.startsWith("/") ? legacyParsedPath.slice(1) : legacyParsedPath;
     const parsedPath = urlParser.parse(kCCImgClassFBRTDB).path;
     const path = parsedPath?.startsWith("/") ? parsedPath.slice(1) : parsedPath;
     expectToMatch(firebaseRealTimeDBImagesHandler, [kCCImgOriginal, kCCImgFBRTDB, kCCImgClassFBRTDB]);

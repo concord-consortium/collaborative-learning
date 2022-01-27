@@ -5,6 +5,7 @@ import { getNetworkDocument } from "./get-network-document";
 import { getNetworkResources } from "./get-network-resources";
 import { PortalFirebaseJWTClaims } from "./portal-types";
 import { postDocumentComment } from "./post-document-comment";
+import { publishSupport } from "./publish-support";
 import { validateCommentableDocument } from "./validate-commentable-document";
 
 // set to true to enable additional logging
@@ -44,6 +45,14 @@ type IDecodedIdToken = admin.auth.DecodedIdToken & Partial<PortalFirebaseJWTClai
  * The _v1 suffix allows us to version the API if necessary moving forward.
  */
 export const getImageData_v1 = functions.https.onCall(getImageDataV1);
+
+/*
+ * publishSupport
+ *
+ * Publishes the provided document as a multi-class support.
+ * The _v1 suffix allows us to version the API if necessary moving forward.
+ */
+export const publishSupport_v1 = functions.https.onCall(publishSupport);
 
 /*
  * validateCommentableDocument

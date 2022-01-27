@@ -68,6 +68,21 @@ export const getCurriculumMetadata = (sectionPath?: string): ICurriculumMetadata
           : undefined;
 }
 
+export function buildFirebaseImageUrl(classHash: string, imageKey: string) {
+  return `ccimg://fbrtdb.concord.org/${classHash}/${imageKey}`;
+}
+
+/*
+ * Parses a firebase image url into its constituent parts.
+ */
+export function parseFirebaseImageUrl(url: string) {
+  const match = /ccimg:\/\/fbrtdb\.concord\.org\/([^/]+)(\/([^/]+))?/.exec(url);
+  const imageKey = match?.[3] || match?.[1];
+  const imageClassHash = match?.[3] ? match?.[1] : undefined;
+  const legacyUrl = imageClassHash ? url.replace(`/${imageClassHash}`, ""): url;
+  return { imageClassHash, imageKey, legacyUrl };
+}
+
 /*
  * Types that are shared between cloud functions and client code.
  */
@@ -135,8 +150,20 @@ interface IFirebaseFunctionBaseParams {
 export interface IGetImageDataParams extends IFirebaseFunctionBaseParams {
   url: string;
 }
-
 export type IGetImageDataUnionParams = IGetImageDataParams | IFirebaseFunctionWarmUpParams;
+
+export interface IPublishSupportParams extends IFirebaseFunctionBaseParams {
+  caption: string;
+  problem: string;
+  classes: string[];
+  content: string;
+  properties: Record<string, string>;
+  originDoc: string;
+  originDocType: string;
+  resource_link_id: string;
+  resource_url: string;
+}
+export type IPublishSupportUnionParams = IPublishSupportParams | IFirebaseFunctionWarmUpParams;
 
 export interface IClientCommentParams {
   tileId?: string;    // empty for document comments
