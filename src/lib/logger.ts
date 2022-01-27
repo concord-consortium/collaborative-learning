@@ -189,6 +189,7 @@ export class Logger {
 
     if (tile) {
       const document = Logger.Instance.getDocumentForTile(tile.id);
+      const section = Logger.Instance.getSectionForTile(tile.id);
       const teacherNetworkInfo: ITeacherNetworkInfo | undefined = document.remoteContext
       ? { networkClassHash: document.remoteContext,
           networkUsername: `${document.uid}@${this._instance.stores.user.portal}`}
@@ -202,6 +203,7 @@ export class Logger {
         documentKey: document.key,
         documentType: document.type,
         documentChanges: document.changeCount,
+        section,
         commentText,
         ...teacherNetworkInfo
       };
@@ -215,7 +217,7 @@ export class Logger {
           sourceDocumentKey: sourceDocument.key,
           sourceDocumentType: sourceDocument.type,
           sourceDocumentTitle: sourceDocument.title || "",
-          sourceDocumentProperties: sourceDocument.properties || {}
+          sourceDocumentProperties: sourceDocument.properties || {},
         };
       }
     }
@@ -291,6 +293,7 @@ export class Logger {
     method?: LogEventMethod)
   {
     const document = Logger.Instance.getDocumentForTile(toolId);
+    const section = Logger.Instance.getSectionForTile(toolId);
     const parameters: {[k: string]: any} = {
       toolId,
       operation,
@@ -298,9 +301,10 @@ export class Logger {
       documentUid: document.uid,
       documentKey: document.key,
       documentType: document.type,
-      documentChanges: document.changeCount
+      documentChanges: document.changeCount,
+      section
     };
-
+    console.log(eventName, parameters, method);
     Logger.log(eventName, parameters, method);
   }
 
@@ -366,6 +370,12 @@ export class Logger {
     }
 
     return logMessage;
+  }
+
+  private getSectionForTile(tileId: string) {
+    const document = this.stores.documents.findDocumentOfTile(tileId)
+      || this.stores.networkDocuments.findDocumentOfTile(tileId);
+    return document ? document.content?.getSectionIdForTile(tileId) : undefined;
   }
 
   private getDocumentForTile(tileId: string): IDocumentInfo {
