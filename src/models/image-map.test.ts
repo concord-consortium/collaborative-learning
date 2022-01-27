@@ -236,7 +236,7 @@ describe("ImageMap", () => {
       p1 = firebaseRealTimeDBImagesHandler.store(kCCImgOriginal, { db: mockDB })
         .then(imageResult => {
           // url doesn't include classHash, so we use the firebase function
-          expect(mockDB.getCloudImageBlob).toHaveBeenCalledWith(legacyPath, undefined, undefined);
+          expect(mockDB.getCloudImageBlob).toHaveBeenCalledWith(kCCImgFBRTDB);
           expect(imageResult.contentUrl).toBe(kCCImgFBRTDB);
           expect(imageResult.displayUrl).toMatch(/^blob:/);
         });
@@ -246,7 +246,7 @@ describe("ImageMap", () => {
       p2 = firebaseRealTimeDBImagesHandler.store(kCCImgFBRTDB, { db: mockDB })
         .then(imageResult => {
           // url doesn't include classHash, so we use the firebase function
-          expect(mockDB.getCloudImageBlob).toHaveBeenCalledWith(legacyPath, undefined, undefined);
+          expect(mockDB.getCloudImageBlob).toHaveBeenCalledWith(kCCImgFBRTDB);
           expect(imageResult.contentUrl).toBe(kCCImgFBRTDB);
           expect(imageResult.displayUrl).toMatch(/^blob:/);
         });

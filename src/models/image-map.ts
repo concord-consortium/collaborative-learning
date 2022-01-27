@@ -375,7 +375,7 @@ export const firebaseRealTimeDBImagesHandler: IImageHandler = {
         // In theory we could direct all firebase image requests to the cloud function,
         // but only cross-class supports require the use of the cloud function.
         const blobPromise = classHash !== db.stores.user.classHash
-                              ? db.getCloudImageBlob(url)
+                              ? db.getCloudImageBlob(normalized)
                               : db.getImageBlob(path);
         blobPromise.then(blobUrl => {
           resolve(blobUrl
