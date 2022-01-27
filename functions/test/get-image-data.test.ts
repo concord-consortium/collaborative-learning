@@ -89,7 +89,7 @@ async function writeMCImageRecordToFirestore(overrides?: any) {
   return await firestoreAdmin.doc(`${root}/mcimages/${kSupportKey}_${kImageKey}`).set(mcimage);
 }
 
-describe("getNetworkDocument", () => {
+describe("getImageData", () => {
 
   beforeEach(async () => {
     await clearFirestoreData({ projectId: kCLUEFirebaseProjectId });

@@ -22,7 +22,7 @@ export async function getImageData(
   const { context, url } = params || {};
   const { classHash: userClassHash } = context || {};
   const { isValid, uid, classPath: userClassPath, firestoreRoot } = validateUserContext(context, callableContext?.auth);
-  if (!isValid || !context?.classHash || !uid) {
+  if (!isValid || !userClassHash || !uid) {
     throw new functions.https.HttpsError("invalid-argument", "The provided user context is not valid.");
   };
   if (!url) {
