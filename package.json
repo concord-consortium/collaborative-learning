@@ -188,7 +188,7 @@
     "mobx": "^6.3.10",
     "mobx-react": "^7.2.1",
     "mobx-state-tree": "^5.1.0",
-    "nanoid": "^3.1.30",
+    "nanoid": "^3.1.31",
     "query-string": "7.0.1",
     "react": "^16.14.0",
     "react-data-grid": "^7.0.0-canary.46",
