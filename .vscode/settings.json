@@ -7,5 +7,14 @@
   },
   "files.watcherExclude": {
     "**/dist/**": true
-  }
+  },
+  "cSpell.words": [
+    "ccimg",
+    "democlass",
+    "fbrtdb",
+    "mcimage",
+    "mcimages",
+    "mcsupports",
+    "towle"
+  ]
 }
