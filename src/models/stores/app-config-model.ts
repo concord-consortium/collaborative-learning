@@ -5,25 +5,25 @@ import { ToolButtonModel } from "../tools/tool-button";
 import { ENavTab, NavTabModel, NavTabSpec } from "../view/nav-tabs";
 import { SettingsMstType } from "./settings";
 
-const UnitSpecModel = types
-  .model("UnitSpec", {
-    content: types.string,
-    guide: ""
-  });
-
 const DocumentSpecModel = types
   .model("DocumentSpec", {
     documentType: types.string,
     properties: types.array(types.string)
   });
 
-const NavTabsAppConfigModel = types
+export const NavTabsAppConfigModel = types
   .model("NavTabsAppConfig", {
     defaultExpanded: false,
     preventExpandCollapse: false,
     lazyLoadTabContents: false,
     tabSpecs: types.array(NavTabModel)
   });
+
+const UnitSpecModel = types
+  .model("UnitSpec", {
+    content: types.string,
+    guide: "",
+});
 
 const DocumentLabelModel = types
   .model("DocumentLabel", {

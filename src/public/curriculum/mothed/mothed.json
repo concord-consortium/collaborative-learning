@@ -9,6 +9,149 @@
       "numFormat": ".2~f"
     }
   },
+  "navTabs": {
+    "lazyLoadTabContents": true,
+    "tabSpecs": [
+      {
+        "tab": "problems",
+        "label": "Problem",
+        "sections": [
+          {
+            "initials": "REF",
+            "title": "Reference",
+            "type": "problem-documents"
+          },
+          {
+            "initials": "PR",
+            "title": "Practice",
+            "type": "problem-documents"
+          },
+          {
+            "initials": "EX",
+            "title": "Experiment",
+            "type": "problem-documents"
+          }
+        ]
+      },
+      {
+        "tab": "teacher-guide",
+        "label": "Teacher Guide",
+        "teacherOnly": true,
+        "sections": []
+      },
+      {
+        "tab": "student-work",
+        "label": "Student Workspaces",
+        "teacherOnly": true,
+        "groupsDisplay": true,
+        "sections": [
+          {
+            "title": "Group Workspaces",
+            "type": "problem-documents",
+            "dataTestHeader": "group-workspaces",
+            "dataTestItem": "group-list-items",
+            "showGroupWorkspaces": true
+          }
+        ]
+      },
+      {
+        "tab": "my-work",
+        "label": "My Work",
+        "sections": [
+          {
+            "title": "Workspaces",
+            "type": "problem-documents",
+            "dataTestHeader": "my-work-section-investigations",
+            "dataTestItem": "my-work-list-items",
+            "documentTypes": ["problem", "planning"],
+            "order": "original",
+            "showStars": ["student", "teacher"]
+          },
+          {
+            "title": "Workspaces",
+            "type": "personal-documents",
+            "dataTestHeader": "my-work-section-workspaces",
+            "dataTestItem": "my-work-list-items",
+            "documentTypes": ["personal"],
+            "properties": ["!isDeleted"],
+            "showStars": ["student", "teacher"],
+            "addDocument": true
+          },
+          {
+            "title": "Starred",
+            "type": "starred-problem-documents",
+            "dataTestHeader": "my-work-section-starred",
+            "documentTypes": ["personal", "problem"],
+            "properties": ["starred", "!isDeleted"],
+            "showStars": ["student", "teacher"]
+          },
+          {
+            "title": "Learning Log",
+            "type": "learning-logs",
+            "dataTestHeader": "learning-log-section",
+            "documentTypes": ["learningLog"],
+            "properties": ["!isDeleted"],
+            "addDocument": true
+          }
+        ]
+      },
+      {
+        "tab": "class-work",
+        "label": "Class Work",
+        "sections": [
+          {
+            "className": "section problem published",
+            "title": "Problem Workspaces",
+            "type": "published-problem-documents",
+            "dataTestHeader": "class-work-section-published",
+            "dataTestItem": "class-work-list-items",
+            "documentTypes": ["publication"],
+            "showStars": ["teacher"]
+          },
+          {
+            "className": "section personal published",
+            "title": "Extra Workspaces",
+            "type": "published-personal-documents",
+            "dataTestHeader": "class-work-section-personal",
+            "dataTestItem": "class-work-list-items",
+            "documentTypes": ["personalPublication"]
+          },
+          {
+            "className": "section problem starred",
+            "title": "Starred",
+            "type": "starred-problem-documents",
+            "dataTestHeader": "class-work-section-starred",
+            "documentTypes": ["publication"],
+            "properties": ["starred"],
+            "showStars": ["teacher"]
+          }
+        ]
+      },
+      {
+        "tab": "supports",
+        "label": "Supports",
+        "sections": [
+          {
+            "title": "Problem Supports",
+            "type": "curricular-supports",
+            "dataTestHeader": "supports-section-jit",
+            "dataTestItem": "supports-list-items",
+            "documentTypes": ["supportPublication"],
+            "order": "original",
+            "properties": ["curricularSupport"]
+          },
+          {
+            "title": "Teacher Supports",
+            "type": "teacher-supports",
+            "dataTestHeader": "supports-section-teacher-supports",
+            "dataTestItem": "supports-list-items",
+            "documentTypes": ["supportPublication"],
+            "properties": ["teacherSupport", "!isDeleted"]
+          }
+        ]
+      }
+    ]
+  },
   "sections": {
     "reference": {
       "initials": "REF",
@@ -72,7 +215,7 @@
           "title": "MothEd 1.1 Identifying Moths",
           "subtitle": "",
           "disabled": [],
-          "sections": 
+          "sections":
           [
             {
             "type": "reference",

@@ -72,7 +72,9 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
   public render() {
     const { documentView, tabSpec, onTabClick, isChatOpen } = this.props;
     const { tabIndex } = this.state;
-    const navTabSpecs = this.stores.appConfig.navTabs.tabSpecs;
+    const navTabSpecs = this.stores.unit.navTabs
+                          ? this.stores.unit.navTabs.tabSpecs
+                          : this.stores.appConfig.navTabs.tabSpecs;
     const navTabSpec = navTabSpecs.find(spec => spec.tab === tabSpec.tab);
     return (
       <Tabs
