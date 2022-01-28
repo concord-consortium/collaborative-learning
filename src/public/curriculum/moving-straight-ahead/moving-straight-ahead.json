@@ -7466,12 +7466,49 @@
               "type": "MathReflection1",
               "content": {
                 "tiles": [
-                  {
+                   {
+                    "id": "qaXmQo0dlVNqvSZI",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In this Unit you are continuing to explore patterns of change between two variables using linear situations. You use tables, graphs, expressions, equations, and inequalities to represent these linear patterns and solve problems. At the end of this Investigation, <em>what do you know about linear expressions, equations, inequalities, and relationships?</em>"
+                        "<p>In this unit we are continuing to explore patterns of change between two variables using linear situations. We use tables, graphs, expressions, equations, and inequalities to represent and these linear patterns and solve problems. At the end of this Investigation,</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "wEMd7OzxRHP2ce4U",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>What do you know about linear relationships, expressions, equations, and inequalities?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Main idea: In a linear relationship, as the independent variable increases in equal increments, the corresponding dependent variable increases (or decreases) by a consistent amount.  Students might describe this as the rate of change. They should realize that this could be zero (as with Leanne) or negative (as with Ms. Chang and Mr. Mamer). They may realize that the rate of change can be measured anywhere on the graph or table. A linear relationship can be represented by the equation y = ax + b. The point where the line crosses the y-axis is b, the y-intercept. The rate of change is represented by a. If b is 0, then the relationship is also proportional. In a linear and proportional relationship, the rate of change is also a unit rate that is the constant of proportionality. Inequalities appeared briefly as a contrast to equality in Problem 1.4. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "K0uoFSUIdQrIO5NR",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Reflections on the Mathematical Practices</strong></p>",
+                        "<p>As we worked on the Problems in this Investigation, we used prior mathematical knowledge to make sense of them. We also applied Mathematical Practices to solve the Problems. For example,</p>",
+                        "<p>At the end of Problem 1.3, Eli’s group noticed that the linear relationship with the greatest positive pattern of change had the steepest line. For example, A<sub>Gilberto</sub> = 2n and A<sub>Alana</sub> = 5 + 0.5n. The line of Gilberto’s equation is steeper since it has a greater rate of change. </p>",
+                        "<p>This makes sense since as the number of kilometers increases by one unit, the money each sponsor donates to Gilberto increases by $2. The money each sponsor donates to Alana increases by $0.50. </p>",
+                        "<p>For Leanne, the equation is A<sub>Leanne</sub> = 10, so the change is 0. As the number of kilometers increases by one unit, the money each sponsor donates to Leanne does not change. The graph is a horizontal line. </p>",
+                        "<p>We also noted that the amount of money that Gilberto raises represents a proportional situation. For every kilometer he walks he collects $2. The other two situations are not proportional.</p>",
+                        "<ul><li><em>What mathematical practice(s) did the Eli’s group use to solve this problem?</em></li><li><em>What other mathematical practices did you use to solve problems in this Investigation?</em></li><li><em>In what ways is the mathematics in this problem connected to prior mathematics?</em></li></ul>"
                       ]
                     }
                   }
@@ -7484,11 +7521,13 @@
               "content": {
                 "tiles": [
                   {
+                    "id": "RZiDu3CJ4LCJ0wlK",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In this Unit you are continuing to explore patterns of change between two variables using linear situations. You use tables, graphs, expressions, equations, and inequalities to represent these linear patterns and solve problems. At the end of this Investigation, <em>what do you know about linear expressions, equations, inequalities, and relationships?</em>"
+                        "<p>As we worked on the Problems in this Investigation, we used prior mathematical knowledge to make sense of them. We also applied Mathematical Practices to solve the Problems. For example,</p>",
+                        "<p>What do you know about linear relationships, expressions, equations, and inequalities? </p>"
                       ]
                     }
                   },
@@ -7497,8 +7536,29 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "The coefficient a in the equation y = ax + b that represents a linear relationship is the rate of change between the independent variable and the dependent variable. It controls the slant of the line that represents the relationship. Greater absolute values of a mean there is a greater rate of change in the situation, so the lines are steeper. Positive values of a give lines that slant up. Negative values of a give lines that slant down. The value of b gives the y-intercept of the line. It is represented as the point (0, b) on the line or the pair of values in a table. In a table, the y-intercept is the value where the x-value is 0, and the rate of change is the difference in consecutive values of the dependent variable for constant increments in the independent variable.\nAny ordered pair (point) that lies on the graph of a linear relationship can be used to find the solution to a problem. The ordered pair (x, y) represents specific values of the variables. If the value of one of the variables is known, then the graph can be traced to find the corresponding value of the other variable. Similarly, any ordered pair in a table for a linear relationship can be used to find the solution to a problem.\nTo find solutions to inequalities, we can consider the solution to the corresponding equality. Then consider the values that would make sense. Often the situation indicates the values to solve an inequality. For example, we often look at “When is one company less expensive than another company?” or “How many items do we need to sell to make a profit?”"
-                        }
+                      "text": [
+                        "<p>The coefficient a in the equation y = ax + b that represents a linear relationship is the rate of change between the independent variable and the dependent variable. It controls the slant of the line that represents the relationship. Greater absolute values of a mean there is a greater rate of change in the situation, so the lines are steeper. Positive values of a give lines that slant up. Negative values of a give lines that slant down. The value of b gives the y-intercept of the line. It is represented as the point (0, b) on the line or the pair of values in a table. In a table, the y-intercept is the value where the x-value is 0, and the rate of change is the difference in consecutive values of the dependent variable for constant increments in the independent variable.</p>",
+                        "<p>Any ordered pair (point) that lies on the graph of a linear relationship can be used to find the solution to a problem. The ordered pair (x, y) represents specific values of the variables. If the value of one of the variables is known, then the graph can be traced to find the corresponding value of the other variable. Similarly, any ordered pair in a table for a linear relationship can be used to find the solution to a problem.</p>",
+                        "<p></p>",
+                        "<p>To find solutions to inequalities, we can consider the solution to the corresponding equality. Then consider the values that would make sense. Often the situation indicates the values to solve an inequality. For example, we often look at “When is one company less expensive than another company?” or “How many items do we need to sell to make a profit?”</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "fHT98l8DomaC2_IH",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Reflections on the Mathematical Practices</strong></p>",
+                        "<p>As we worked on the Problems in this Investigation, we used prior mathematical knowledge to make sense of them. We also applied Mathematical Practices to solve the Problems. For example,</p>",
+                        "<p>In Problem 2.1, our group looked at how far apart the brothers were after t seconds. For example, at the start of the race, they are 45 meters apart. After 1 second, they are 45 - 1.5 = 43.5 meters apart. After 2 seconds, they are 42 meters apart. After 10 seconds, they are 30 meters apart. </p>",
+                        "<p>We made a table and found the time it took for Emile to catch up to Henri, or when the distance between them is 0, which is 30 seconds. We used this to choose the length of the race so that Henri wins the race. </p>",
+                        "<p>A third group member made a graph of the data (time, distance apart), and we saw that it is a line that is decreasing. It started at the y-intercept of 45 meters and crossed the x-axis at 30 seconds.  </p>",
+                        "<p>Another group wrote an equation and then use graphs of the equation to find the answer. </p>",
+                        "<ul><li>What mathematical practice(s) did the group use to solve this problem?</li><li>What other mathematical practices did you use to solve problems in this Investigation?</li><li>In what ways is the mathematics in this problem connected to prior mathematics</li></ul>"
+                      ]
+                    }
                   }
                 ]
               },
@@ -7508,24 +7568,98 @@
               "type": "MathReflection3",
               "content": {
                 "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "In this Unit you are continuing to explore patterns of change between two variables using linear situations. You use tables, graphs, expressions, equations, and inequalities to represent these linear patterns and solve problems. At the end of this Investigation, <em>what do you know about linear expressions, equations, inequalities, and relationships?</em>"
-                      ]
-                    }
-                  },
-                  {
-                      "display": "teacher",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text":
-                          "If you have an equation of the form y = ax + b and you know the value of x or y, you can substitute the value of the variable into the equation. Then, use the properties of equality to solve for the other variable. For example, if y = 3x + 4 and you want to find x when y = 10, then you substitute 10 in place of y: 10 = 3x + 4. Next, you can subtract 4 from both sides to get 6 = 3x. Now, divide both sides by 3 to get x = 2.\nFor the equation y = 3x + 4, to find the value of x when y = 10, you can graph the equation. Trace along the line to find the point whose y-coordinate is 10 and then read the corresponding x-value, which is 2. To use a table, construct a table of values for the equation either by hand or with graphing technology. Next, locate the pair of values in which y = 10 and find the corresponding x-value, which is 2.\nTo find the values that satisfy an inequality such as 3x + 4 < 10, you can solve the corresponding equation 3x + 4 = 10. The solution of this equation is x = 2. Then, test values less than and greater than 2 to determine the solution. In this case, x-values less than 2 make the inequality 3x + 4 < 10 true, so the solution is x < 2.\nTo find the values that satisfy an inequality such as 3x + 4 < 10, you can graph the corresponding linear relationship y = 3x + 4. Then, find the points on the line whose y-values are less than 10. You can also locate the x-values of these points on the x-axis or on a number line.\nIn Problem 3.2, Equation 1 two equivalent expressions for the number of pouches on the left side of the equation are 4x + 2 and 2(2x + 1). You can use the properties of operations to show that they are equivalent. Applying the Distributive Property to one of the expressions yields the other: 4x + 2 = 2(2x + 1). You can also argue that both of the expressions represent the number of pouches and coins in the picture.\nIn Problem 3.3, Set 3(a), two equivalent ways of writing the expression on the left side of the equation are 3(x + 1) and 3x + 3. You can tell they are equivalent because the equations 3(x + 1) = 21 and 3x + 3 = 21 have the same solution, even though you would take different steps when solving them. (To solve the first equation, you would divide each side by 3 and then subtract 1 from each side. To solve the second equation, you would subtract 3 from each side and then divide each side by 3. The solution for both equations is x = 6.)"
-                    }
+                 {
+                  "id": "0l21KVRc96YLtazP",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>In this unit we are continuing to explore patterns of change between two variables using linear situations. We use tables, graphs, expressions, equations, and inequalities to represent and these linear patterns and solve problems. At the end of this Investigation,</p>",
+                      "<p></p>",
+                      "<p><em>What do you know about linear relationships, expressions, equations, and inequalities? </em></p>"
+                    ]
                   }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>If you have an equation of the form y = ax + b and you know the value of x or y, you can substitute the value of the variable into the equation. Then, use the properties of equality to solve for the other variable. For example, if y = 3x + 4 and you want to find x when y = 10, then you substitute 10 in place of y: 10 = 3x + 4. Next, you can subtract 4 from both sides to get 6 = 3x. Now, divide both sides by 3 to get x = 2.</p>",
+                      "<p>For the equation y = 3x + 4, to find the value of x when y = 10, you can graph the equation. Trace along the line to find the point whose y-coordinate is 10 and then read the corresponding x-value, which is 2. To use a table, construct a table of values for the equation either by hand or with graphing technology. Next, locate the pair of values in which y = 10 and find the corresponding x-value, which is 2.</p>",
+                      "<p>To find the values that satisfy an inequality such as 3x + 4 &lt; 10, you can solve the corresponding equation 3x + 4 = 10. The solution of this equation is x = 2. Then, test values less than and greater than 2 to determine the solution. In this case, x-values less than 2 make the inequality 3x + 4 &lt; 10 true, so the solution is x &lt; 2.</p>",
+                      "<p>To find the values that satisfy an inequality such as 3x + 4 &lt; 10, you can graph the corresponding linear relationship y = 3x + 4. Then, find the points on the line whose y-values are less than 10. You can also locate the x-values of these points on the x-axis or on a number line.</p>",
+                      "<p>In Problem 3.2, Equation 1 two equivalent expressions for the number of pouches on the left side of the equation are 4x + 2 and 2(2x + 1). You can use the properties of operations to show that they are equivalent. Applying the Distributive Property to one of the expressions yields the other: 4x + 2 = 2(2x + 1). You can also argue that both of the expressions represent the number of pouches and coins in the picture.</p>",
+                      "<p>In Problem 3.3, Set 3(a), two equivalent ways of writing the expression on the left side of the equation are 3(x + 1) and 3x + 3. You can tell they are equivalent because the equations 3(x + 1) = 21 and 3x + 3 = 21 have the same solution, even though you would take different steps when solving them. (To solve the first equation, you would divide each side by 3 and then subtract 1 from each side. To solve the second equation, you would subtract 3 from each side and then divide each side by 3. The solution for both equations is x = 6.)</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "dJrgAtZSsmnaGIix",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Reflections on the Mathematical Practices</strong></p>",
+                      "<p>As we worked on the Problems in this Investigation, we used prior mathematical knowledge to make sense of them. We also applied Mathematical Practices to solve the Problems. For example,</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "0BrLBrRqRNRK0L_8",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>In Problem 3.1, <em>Initial Challenge,</em> for Code 5 Sze’s group first noted that there are 3 pouches and 3 coins on the left and 2 pouches and 12 coins on the left. We subtracted 3 coins from each side. We figured out that the 9 coins on the right equaled 1 pouch.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "eGZITKMewaHtp9kN",
+                  "content": {
+                    "type": "Image",
+                    "url": "curriculum/moving-straight-ahead/images/MSA_3-4_MR_1.png"
+                  }
+                },
+                {
+                  "id": "mqJPQRiKOuOSita3",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>But then another group showed us their method. They took 2 pouches off each side. This left them a pouch and 3 coins on the left and 12 coins on the right. They could see that if you put 9 coins in a pouch, then both sides are equal.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "mGdQYYBAQPC9Ajw7",
+                  "content": {
+                    "type": "Image",
+                    "url": "curriculum/moving-straight-ahead/images/MSA_3-4_MR_2.png"
+                  }
+                },
+                {
+                  "id": "i_jmVn3bJQJ530CB",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Both methods are correct.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "dBvcdMySWvA1XS6w",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<ul><li>What mathematical practice(s) did Sze’s group use to solve this problem?</li><li>What other mathematical practices did you use to solve problems in this Investigation?</li><li>In what ways is the mathematics in this problem connected to prior mathematics?</li></ul>"
+                    ]
+                  }
+                }
                 ]
               },
               "supports": [ ]
@@ -7535,21 +7669,37 @@
               "content": {
                 "tiles": [
                   {
+                    "id": "eG4T_G0r0K3RWrHG",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "In this Unit you are continuing to explore patterns of change between two variables using linear situations. You use tables, graphs, expressions, equations, and inequalities to represent these linear patterns and solve problems. At the end of this Investigation, <em>what do you know about linear expressions, equations, inequalities, and relationships?</em>"
+                        "<p>In this unit we are continuing to explore patterns of change between two variables using linear situations. We use tables, graphs, expressions, equations, and inequalities to represent and these linear patterns and solve problems. At the end of this Investigation,</p>",
+                        "<p><em>What do you know about linear relationships, expressions, equations, and inequalities? </em></p>"
                       ]
                     }
                   },
                   {
-                      "display": "teacher",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text":
-                          "Slope describes the steepness of a line. It is the ratio of vertical change to horizontal change. If it is positive, then the line is increasing from left to right. If it is negative, then it is decreasing from left to right. If the slope is zero, the line is horizontal. This is like walking on a flat surface as opposed to up or down a hill.\nFinding the slope is the same as finding the rate of change between two variables in a linear relationship. The horizontal distance change between two points is the same as the difference between two corresponding x-values of points in a table. The vertical change in distance is the same as the difference between two corresponding y-values of points in a table."
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Slope describes the steepness of a line. It is the ratio of vertical change to horizontal change. If it is positive, then the line is increasing from left to right. If it is negative, then it is decreasing from left to right. If the slope is zero, the line is horizontal. This is like walking on a flat surface as opposed to up or down a hill.</p>",
+                        "<p>Finding the slope is the same as finding the rate of change between two variables in a linear relationship. The horizontal distance change between two points is the same as the difference between two corresponding x-values of points in a table. The vertical change in distance is the same as the difference between two corresponding y-values of points in a table.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "J7pN8BZWjZe6mkdK",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Reflections on the Mathematical Practices</strong></p>",
+                        "<p>As you worked on the Problems in this Investigation, you used prior mathematical knowledge to make sense of them. You also applied Mathematical Practices to solve the Problems. Think back over your work, the ways you thought about the Problems, and how you used Mathematical Practices. </p>",
+                        "<ul><li>What mathematical practice(s) did the group use to solve this problem?</li><li>What other mathematical practices did you use to solve problems in this Investigation?</li><li>In what ways is the mathematics in this problem connected to prior mathematics?</li></ul>"
+                      ]
                     }
                   }
                 ]
