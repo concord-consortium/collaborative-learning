@@ -5,6 +5,12 @@ import { ToolButtonModel } from "../tools/tool-button";
 import { ENavTab, NavTabModel, NavTabSpec } from "../view/nav-tabs";
 import { SettingsMstType } from "./settings";
 
+const UnitSpecModel = types
+  .model("UnitSpec", {
+    content: types.string,
+    guide: "",
+});
+
 const DocumentSpecModel = types
   .model("DocumentSpec", {
     documentType: types.string,
@@ -18,12 +24,6 @@ export const NavTabsAppConfigModel = types
     lazyLoadTabContents: false,
     tabSpecs: types.array(NavTabModel)
   });
-
-const UnitSpecModel = types
-  .model("UnitSpec", {
-    content: types.string,
-    guide: "",
-});
 
 const DocumentLabelModel = types
   .model("DocumentLabel", {

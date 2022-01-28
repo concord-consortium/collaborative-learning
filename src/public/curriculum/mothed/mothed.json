@@ -84,14 +84,6 @@
             "documentTypes": ["personal", "problem"],
             "properties": ["starred", "!isDeleted"],
             "showStars": ["student", "teacher"]
-          },
-          {
-            "title": "Learning Log",
-            "type": "learning-logs",
-            "dataTestHeader": "learning-log-section",
-            "documentTypes": ["learningLog"],
-            "properties": ["!isDeleted"],
-            "addDocument": true
           }
         ]
       },
@@ -124,29 +116,6 @@
             "documentTypes": ["publication"],
             "properties": ["starred"],
             "showStars": ["teacher"]
-          }
-        ]
-      },
-      {
-        "tab": "supports",
-        "label": "Supports",
-        "sections": [
-          {
-            "title": "Problem Supports",
-            "type": "curricular-supports",
-            "dataTestHeader": "supports-section-jit",
-            "dataTestItem": "supports-list-items",
-            "documentTypes": ["supportPublication"],
-            "order": "original",
-            "properties": ["curricularSupport"]
-          },
-          {
-            "title": "Teacher Supports",
-            "type": "teacher-supports",
-            "dataTestHeader": "supports-section-teacher-supports",
-            "dataTestItem": "supports-list-items",
-            "documentTypes": ["supportPublication"],
-            "properties": ["teacherSupport", "!isDeleted"]
           }
         ]
       }

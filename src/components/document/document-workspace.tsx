@@ -16,6 +16,7 @@ import { CollapsedWorkspaceTab } from "./collapsed-workspace-tab";
 import { ResizePanelDivider } from "./resize-panel-divider";
 
 import "./document-workspace.sass";
+import { getNavTabSpecsFromStores } from "../../models/stores/stores";
 
 interface IProps extends IBaseProps {
 }
@@ -38,18 +39,18 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   public render() {
-    const { appConfig : { navTabs: { tabSpecs } },
-            teacherGuide,
-            user: { isTeacher },
-            ui: { problemWorkspace: { type },
-                  activeNavTab,
-                  navTabContentShown,
-                  workspaceShown,
-                  dividerPosition,
-                }
-          } = this.stores;
-    const studentTabs = tabSpecs.filter((t) => !t.teacherOnly);
-    const teacherTabs = tabSpecs.filter(t => (t.tab !== "teacher-guide") || teacherGuide);
+  const { teacherGuide,
+          user: { isTeacher },
+          ui: { problemWorkspace: { type },
+                activeNavTab,
+                navTabContentShown,
+                workspaceShown,
+                dividerPosition,
+              }
+        } = this.stores;
+    const navTabSpecs = getNavTabSpecsFromStores(this.stores);
+    const studentTabs = navTabSpecs?.filter((t) => !t.teacherOnly);
+    const teacherTabs = navTabSpecs?.filter(t => (t.tab !== "teacher-guide") || teacherGuide);
     const tabsToDisplay = isTeacher ? teacherTabs : studentTabs;
     // NOTE: the drag handlers are in three different divs because we cannot overlay
     // the renderDocuments() div otherwise the Cypress tests will fail because none
