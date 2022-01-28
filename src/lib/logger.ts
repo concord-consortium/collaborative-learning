@@ -217,7 +217,7 @@ export class Logger {
           sourceDocumentKey: sourceDocument.key,
           sourceDocumentType: sourceDocument.type,
           sourceDocumentTitle: sourceDocument.title || "",
-          sourceDocumentProperties: sourceDocument.properties || {},
+          sourceDocumentProperties: sourceDocument.properties || {}
         };
       }
     }
@@ -304,7 +304,6 @@ export class Logger {
       documentChanges: document.changeCount,
       section
     };
-    console.log(eventName, parameters, method);
     Logger.log(eventName, parameters, method);
   }
 
