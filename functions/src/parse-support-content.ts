@@ -1,5 +1,4 @@
-import { parseFirebaseImageUrl } from "./shared";
-import { matchAll, replaceAll } from "./shared-utils";
+import { matchAll, parseFirebaseImageUrl, replaceAll } from "./shared-utils";
 
 // regular expression for identifying tiles that can reference images in document content
 const kImageTileRegex = /"type":"(Drawing|Geometry|Image)"/g;

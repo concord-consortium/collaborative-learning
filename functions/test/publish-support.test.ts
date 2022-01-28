@@ -1,7 +1,7 @@
 import { apps, clearFirestoreData, initializeAdminApp, useEmulators } from "@firebase/rules-unit-testing";
 import { canonicalizeUrl, publishSupport } from "../src/publish-support";
-import { buildFirebaseImageUrl, IPublishSupportParams, parseFirebaseImageUrl } from "../src/shared";
-import { replaceAll } from "../src/shared-utils";
+import { IPublishSupportParams } from "../src/shared";
+import { buildFirebaseImageUrl, parseFirebaseImageUrl, replaceAll } from "../src/shared-utils";
 import { kCanonicalPortal, kClassHash, kOtherClassHash, kPortal, specAuth, specUserContext } from "./test-utils";
 
 useEmulators({

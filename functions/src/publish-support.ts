@@ -1,7 +1,8 @@
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
 import { parseSupportContent } from "./parse-support-content";
-import { buildFirebaseImageUrl, IPublishSupportUnionParams, isWarmUpParams, parseFirebaseImageUrl } from "./shared";
+import { IPublishSupportUnionParams, isWarmUpParams } from "./shared";
+import { buildFirebaseImageUrl, parseFirebaseImageUrl } from "./shared-utils";
 import { validateUserContext } from "./user-context";
 
 // update this when deploying updates to this function

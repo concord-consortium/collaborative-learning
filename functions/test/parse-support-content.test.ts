@@ -1,6 +1,5 @@
 import { parseSupportContent } from "../src/parse-support-content";
-import { buildFirebaseImageUrl, parseFirebaseImageUrl } from "../src/shared";
-import { replaceAll } from "../src/shared-utils";
+import { buildFirebaseImageUrl, parseFirebaseImageUrl, replaceAll } from "../src/shared-utils";
 
 describe("parseSupportContent", () => {
 
