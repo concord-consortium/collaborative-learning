@@ -5741,13 +5741,20 @@
               "content": {
                 "tiles": [
                   {
+                    "id": "kJWeyO9LsxG4nvx8",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["All of the patterns of change you have explored in this Unit involved rates of change. For example, you worked with walking rates expressed in meters per second and pledge rates expressed in dollars per kilometer. In these situations, you found that the rate a affects the following things in a linear relationship represented by <em>y = ax + b</em>:<ul><li>the steepness of the graph </li><li>if the linear situation is represented by the equation <em>y = ax</em>, then the situation is also proportional and a represents the constant of proportionality </li><li>how the y-values in the table change for each unit change in the <em>x</em>-values </li></ul>In this Investigation, you will explore another way to express the rates of change. "]
+                      "text": [
+                        "<p>All of the patterns of change you have explored in this Unit involved rates of change. For example, we worked with walking rates expressed in meters per second and pledge rates expressed in dollars per kilometer. In these situations, we found that the rate a affects the following in a linear relationship represented by y = ax + b: </p>",
+                        "<ul><li>the steepness of the graph </li><li>how the y-values in the table change for each unit change in the x-values </li><li>and if b = 0, then the relationship is also proportional</li></ul>",
+                        "<p></p>",
+                        "<p>In this Investigation, we will explore another way to express the rates of change. </p>"
+                      ]
                     }
                   },
                   {
+                    "id": "qYz0j9gWzYc96pkx",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_4_In_skiing_350w.png"
@@ -5760,24 +5767,37 @@
             {
               "type": "initialChallenge",
               "content": {
-                "tiles": [
-                   {
+                "tiles": [  
+                    {
+                    "id": "z2jvVtxah7s9Oz-r",
                     "content": {
-
                       "type": "Text",
-                      "text": "Climbing stairs is good exercise, so some athletes run up and down stairs as part of their training. The steepness of stairs determines how difficult they are to climb. By investigating the steepness of stairs, you can find another important way to describe the steepness of a line. \n\nCarpenters have developed the guidelines below to ensure that the stairs they build are relatively easy for a person to climb. Steps are measured in inches. \n\n  • Twice the rise plus the run for each step should be between 24 and 26 inches.\n  • The rise plus the run for each step should be between 17 and 19 inches.  \n\nThe steepness of stairs is determined by the ratio of the rise to the run for each step. The rise and run are labeled in the diagram below. "
+                      "format": "html",
+                      "text": [
+                        "<p>Climbing stairs is good exercise, so some athletes run up and down stairs as part of their training. The steepness of stairs determines how difficult they are to climb. By investigating the steepness of stairs, you can find another important way to describe the steepness of a line. </p>",
+                        "<p>Carpenters have developed the guidelines below to ensure that the stairs they build are relatively easy for a person to climb. Steps are measured in inches. </p>",
+                        "<ul><li>The run plus twice the rise should be between 24 and 26 inches.</li><li>The rise plus the run for each step should be between 17 and 19 inches.  </li></ul>",
+                        "<p></p>",
+                        "<p>The steepness of stairs is determined by the ratio of the rise to the run for each step. The rise and run are labeled in the photo below. </p>"
+                      ]
                     }
                   },
                   {
+                    "id": "qSHpcHrqzDSWA1GZ",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_4_1_In_running_stairs_350w.png"
                     }
                   },
                   {
+                    "id": "cUei1N-oslSAc6_F",
                     "content": {
                       "type": "Text",
-                      "text": "Determine the steepness of a set of stairs in your school or home. \n\n  • \u00a0 How can you describe the steepness of the stairs?\n  • \u00a0 Is the steepness the same between any two consecutive steps? \n  • \u00a0 How do the stairs you measured compare to the carpenters’ guidelines? "
+                      "format": "html",
+                      "text": [
+                        "<p>Determine the steepness of a set of stairs in your school or home. </p>",
+                        "<ul><li>How can you describe the steepness of the stairs?</li><li>Is the steepness the same between any two consecutive steps? </li><li>How do the stairs you measured compare to the carpenters’ guidelines? </li></ul>"
+                      ]
                     }
                   },
                   {
@@ -5785,15 +5805,222 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text":
-                        "Student answers will vary. Interesting situations to think about include: spiral staircases, school stairs, large steps (like at a museum), etc.\nExample: 7.25 in. to 11.25 inches for the rise to the run, or approximately 0.70 for the ratio of rise to run. This is the same for every step in the staircase. The ratio of rise to run is not within the carpenter’s guidelines."
+                      "text": [
+                        "<p>Student answers will vary. Interesting situations to think about include: spiral staircases, school stairs, large steps (like at a museum), etc.</p>",
+                        "<p>Example: 7.25 in. to 11.25 inches for the rise to the run, or approximately 0.70 for the ratio of rise to run. This is the same for every step in the staircase. The ratio of rise to run is not within the carpenter’s guidelines.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "PyPlVENfU4La5OMx",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Situation A. Arch Middle School Stairs</em></p>",
+                        "<p>A set of stairs is being built for the front of the new Arch Middle School. The ratio of rise to run is 7 to 11. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "spkM8ypzvF6gQu2H",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Is this ratio within the carpenters’ guidelines?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>2(rise) + run = 2(7) + 11 = 14 + 11 = 25, which is between 24 and 26 inches. </p>",
+                        "<p>Rise + run = 7 + 11 = 18, which is between 17 and 19 inches.</p>",
+                        "<p>Yes, these stairs meet the carpenters’ guidelines. Note that a scaled-up equivalent ratio of 14 to 22 would not meet the guidelines. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "qqbOsF2XTEkWceSR",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Make a sketch of a set of stairs that meet this ratio. Label the lengths of the rise and run of a step.</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Student answers will vary.</p>",
+                        "<p>Example: a set of stairs with a height of 3.5 inches and a depth of 5.5 inches.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "yH15ghwHscqY9MZF",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Does everyone in your class have the same sketch? Explain why.</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Not everyone in the class will have the same sketch because even the same ratio can be represented by different numbers.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "CiGxH-VR5XlQgXWm",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Write an equation that represents the relationship between rise and run.</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Student answers will vary based on their stairs.</p>",
+                        "<p>Example answer using the stairs at Arch Middle School, rise = (7/11)run.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "PlVFQOw68ifZi71o",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>How is the ratio of rise to run represented in the graph? Equation?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The ratio of rise to run is represented in the graph by the steepness of the line and in the equation by the coefficient of x.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "gXaieNGQbYSFVSgD",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Does your graph represent a proportional relationship? Explain why. </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The graph does represent a proportional relationship because it passes through the origin.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "tP5aEfy0NGf3UCLT",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Situation B. Anna’s Claim</em></p>",
+                        "<p>Anna’s Claim:</p>",
+                        "<p>The ratio of rise to run is another way to express the pattern of change between the two variables in a linear situation.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "8EBItouYoxO-Nrdn",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Is she correct? Explain why.</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Yes, she is correct. The ratio of rise to run describes how much one variable changes if you change the other variable by a specific amount. If the variables are always related in this way, then they have a constant rate of change, which gives a linear relationship.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "eMgUEc2Tr7aiXer7",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Is the ratio the same between any two steps? Explain.</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Yes, because each step on the staircase will have the same height (or rise) and depth (or run).</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "0vssf7ilObtFtDe2",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li> Does the ratio change if we take two steps at a time? Explain why.</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>No, because we’re rising twice as high and running twice as far.  So, the ratio will stay the same.</p>"
+                      ]
                     }
                   }
                 ]
               },
-              "supports": [
-                {"text": "How can you use rise and run to explain the steepness of stairs?"}
-              ]
+              "supports": []
             },
             {
               "type": "whatIf",
@@ -5937,8 +6164,6 @@
                 ]
               },
               "supports": [
-                {"text": "How do you know if a relationship is linear? "},
-                {"text": "How do you know if a relationship is proportional? "}
               ]
             },
             {
@@ -5946,9 +6171,15 @@
               "content": {
                 "tiles": [
                   {
+                    "id": "7WNR_CWQeSTl6wG4",
                     "content": {
                       "type": "Text",
-                      "text": "How does the steepness of stairs expressed as a ratio related to a straight-line graph? To a linear equation that represents the graph?"
+                      "format": "html",
+                      "text": [
+                        "<p>How does the steepness of stairs expressed as a ratio relate to a straight-line graph?  To the linear rate of change? To a linear equation that represents the graph?</p>",
+                        "<p></p>",
+                        "<p>How does the steepness of stairs expressed as a ratio relate to a straight-line graph? To a linear equation that represents the graph?</p>"
+                      ]
                     }
                   },
                   {
@@ -5956,8 +6187,11 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text":
-                        "The steepness of stairs is represented by the slope of a straight-line graph. In a linear equation that represents the graph, the steepness of the stairs is represented by the coefficient of x."
+                      "text": [
+                        "<p>The steepness of stairs is represented by the slope (ratio of the rise to run) of a straight-line graph. The ratio describes how much the line rises or falls for every change of 1 in the independent variable.</p>",
+                        "<p>The slope ratio is the linear rate of change.</p>",
+                        "<p>In a linear equation that represents the graph, the steepness of the stairs is represented by the coefficient of x.</p>"
+                      ]
                     }
                   }
                 ]
@@ -5978,143 +6212,87 @@
               "content": {
                 "tiles": [
                   {
+                    "id": "Hv_sfErIhv8jW5Gk",
                     "content": {
                       "type": "Text",
-                      "text": "The method for finding the steepness of stairs suggests a way to find the steepness of a line. A line drawn from the bottom step of a set of stairs to the top step touches each step at one point. The rise and the run of a step are the vertical and the horizontal changes, respectively, between two points on the line. "
+                      "format": "html",
+                      "text": [
+                        "<p>The method for finding the steepness of stairs suggests a way to find the steepness of a line. A line drawn from the bottom step of a set of stairs to the top step touches each step at one point. The rise and the run of a step are the vertical and the horizontal changes, respectively, between two points on the line. </p>"
+                      ]
                     }
                   },
                   {
+                    "id": "ZL91_xMcHp6S9Smy",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_4_2_In_stairs_350w.png"
                     }
                   },
                   {
+                    "id": "O5xlcT2t_fqOuvJT",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["The steepness of the line is the ratio of rise to run, or vertical change to horizontal change, for this step. We call this ratio the <strong>rate of change</strong> or <strong>slope</strong> of the line. "]
+                      "text": [
+                        "<p>The steepness of the line is the ratio of rise (vertical change) to run (horizontal change) for this step. We call this ratio the rate of change or slope of the line. </p>",
+                        "               vertical change       rise",
+                        "slope  =  __________________   = ______",
+                        "                horizontal change      run"
+                      ]
                     }
                   },
                   {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_4_2_In_slope_350w.png"
-                    }
-                  },
-                  {
+                    "id": "L2bwZ2UpG-Q901VX",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_4_2_stairgraph.png"
                     }
                   },
                   {
+                    "id": "9nINzYTa1Z_FAP5b",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/MSA_4-2_Intro_Pic4_350.jpg"
+                    }
+                  },
+                  {
+                    "id": "cXRMzyk4CMbBB-fP",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>Slope = (24-12)/(12-6) =  6/12  = ½</strong>",
-                        "\nUnlike the steepness of stairs, the rate of change of a line can be negative. To determine the rate of change of a line, you need to consider the direction, or sign, of the vertical and horizontal changes from one point to another. If vertical change is negative for positive horizontal change, the rate of change will be negative. Lines that slant <em>upward</em> from left to right have <em>positive rate of change</em>. Lines that slant <em>downward</em> from left to right have a <em>negative rate of change</em>. You will learn more about slopes of lines in the 8th grade <em>Thinking with Mathematical Models</em>.",
-                        "\nRecall that proportional relationships can be represented by a multiplicative comparison statement between two quantities <em>x</em> and <em>y</em>. It can also be represented by the equation <em>y = ax</em>. The graph of this equation is a straight line through the origin. The coefficient a in the equation <em>y = ax</em> is the <em>constant of proportionality</em>."
+                      "text": [
+                        "<p>Unlike the steepness of stairs, the rate of change of a line can be negative. To determine the rate of change of a line, we need to consider the direction, or sign, of the vertical and horizontal changes from one point to another. </p>",
+                        "<p></p>",
+                        "<p>If vertical change is negative for positive horizontal change, the rate of change will be negative. </p>",
+                        "<p></p>",
+                        "<p>Lines that slant upward from left to right have an increasing or positive rate of change. </p>",
+                        "<p>Lines that slant downward from left to right have a decreasing or negative rate of change.  </p>",
+                        "<p></p>",
+                        "<p>We will learn more about slopes of lines in the 8th grade <em>Thinking with Mathematical Models</em>.</p>",
+                        "<p></p>",
+                        "<p>Recall from the <em>Comparing Quantities and Comparing and Scaling</em> units, that proportional relationships can be represented by a multiplicative comparison statement between two quantities x and y. These special linear relationships can be represented by the equation y = ax. The graph of this equation is a straight line through the origin (0, 0). The coefficient a in the equation y = ax is the constant of proportionality.</p>"
                       ]
                     }
                   },
                   {
+                    "id": "Fh1vTBTfxtY7dW2i",
                     "content": {
                       "type": "Table",
+                      "name": "Table 1",
                       "columns": [
-                        {
-                          "name": "x",
-                          "type": "number",
-                          "values": [-2, -1, 0, 1, 2]
-                        },
-                        {
-                          "name": "y",
-                          "type": "number",
-                          "values": [6, 3, 0, -3, -6]
-                        }
+                        {"name":"x","values":["-2","-1","0","1","2","3"]},
+                        {"name":"y","values":["6","3","0","-3","-6","-9"]}
                       ]
                     }
                   },
                   {
-                    "layout": {
-                      "height": 200
-                    },
-                    "content": {
-                      "type":"Geometry",
-                      "board": {
-                        "properties": {
-                          "axisMin": [-0.2, -1],
-                          "axisRange": [5, 11]
-                        }
-                      },
-                      "objects": [
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [1, 4]
-                            },
-                            {
-                              "type": "point",
-                              "parents": [4,2]
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Table",
-                      "columns": [
-                        {
-                          "name": "x",
-                          "ordinal": 1,
-                          "values": [-2, -1, 0, 1, 2]
-                        },
-                        {
-                          "name": "y",
-                          "type": "number",
-                          "values": [-1, -0.5, 0, 0.5, 1]
-                        }
-                      ]
-                    }
-                  },
-                  {
-                    "layout": {
-                      "height": 200
-                    },
-                    "content": {
-                      "type":"Geometry",
-                      "board": {
-                        "properties": {
-                          "axisMin": [-0.2, -1],
-                          "axisRange": [5, 11]
-                        }
-                      },
-                      "objects": [
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [2, 2]
-                            },
-                            {
-                              "type": "point",
-                              "parents": [5, 4]
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  },
-                   {
+                    "id": "TGVLRj89FaUSuEvM",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<em>What is the constant of proportionality for the proportional relationship represented in the table?</em>"]
+                      "text": [
+                        "<p><em>What is the constant of proportionality for the proportional relationship represented in the table?</em></p>"
+                      ]
                     }
                   }
                 ]
@@ -6125,96 +6303,251 @@
               "type": "initialChallenge",
               "content": {
                 "tiles": [
+                {
+                  "id": "k9AK1ek-lgOdj2NU",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>The graphs, equations, tables, and contexts represent linear situations. </p>",
+                      "<ul><li>Sort the cards according to negative, positive, or zero rate of change (or slope).</li><li>Then sort each group (negative, positive or zero slope) into proportional or non-proportional.</li><li>For each linear situation that is proportional, state the constant of proportionality.</li></ul>"
+                    ]
+                  }
+                },
+                [
                   {
+                    "id": "45k6tn0IyQzZlR06",
+                    "content": {
+                      "type": "Geometry",
+                      "title": "Graph 1",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-0.5, -1],
+                          "axisRange": [11.946, 14.328],
+                          "axisNames": ["x", "y"],
+                          "axisLabels": ["", ""]
+                        }
+                      },
+                      "objects": [
+                        { "type": "movableLine", "parents": [{ "type": "point", "parents": [0.024691358024691884, 5.902564102564096] }, { "type": "point", "parents": [2.024691358024692, 0.05128205128204577] }],"properties": {"id":"bjHrfqujMcMvfnM7"} }
+                      ]
+                    },
+                    "layout": { "height": 245 }
+                  },
+                  {
+                    "id": "F4lZ6s6JByjQmwhs",
+                    "content": {
+                      "type": "Geometry",
+                      "title": "Graph 2",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-5, -1],
+                          "axisRange": [21.719, 18.462],
+                          "axisNames": ["x", "y"],
+                          "axisLabels": ["", ""]
+                        }
+                      },
+                      "objects": [
+                        { "type": "movableLine", "parents": [{ "type": "point", "parents": [-2.009049773755656, 0.13461538461538503] }, { "type": "point", "parents": [0.06334841628959298, 6.096153846153846] }],"properties": {"id":"XdZ8cR7qdYRTO2ZM"} }
+                      ]
+                    },
+                    "layout": { "height": 245 }
+                  },
+                  {
+                    "id": "Uevn5QnBn9rDMK40",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["The graphs and tables below represent proportional situations. For each Representation:<ul><li>What is the constant of proportionality?</li><li>How is rate of change related to the constant of proportionality?</li></ul>Pick one Situation and write an application or story that could be represented with this representation. "]
+                      "text": [
+                        "<p>Equation 1</p>",
+                        "<p></p>",
+                        "<p>y = x + 5</p>",
+                        "<p>Equation 2</p>",
+                        "<p></p>",
+                        "<p>y = 20 – 3x</p>",
+                        "<p></p>"
+                      ]
                     }
+                  }
+                ],
+                [
+                  {
+                    "id": "a8F2_E-ILOOMJxEf",
+                    "content": {
+                      "type": "Geometry",
+                      "title": "Graph 3",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-5, -7.3],
+                          "axisRange": [21.719, 15.318],
+                          "axisNames": ["x", "y"],
+                          "axisLabels": ["", ""]
+                        }
+                      },
+                      "objects": [
+                        { "type": "movableLine", "parents": [{ "type": "point", "parents": [-2.0361990950226243, -1.0101010101010102] }, { "type": "point", "parents": [2.002262443438914, 1.004863872510931] }],"properties": {"id":"XdZ8cR7qdYRTO2ZM"} }
+                      ]
+                    },
+                    "layout": { "height": 349 }
                   },
                   {
+                    "id": "jTMKZh3rnwC94Rg0",
+                    "content": {
+                      "type": "Geometry",
+                      "title": "Graph 4",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-5, -6],
+                          "axisRange": [21.719, 15.36],
+                          "axisNames": ["x", "y"],
+                          "axisLabels": ["", ""]
+                        }
+                      },
+                      "objects": [
+                        { "type": "movableLine", "parents": [{ "type": "point", "parents": [-0.9402714932126691, 2.9760000000000004] }, { "type": "point", "parents": [0.9497737556561093, -3.072] }],"properties": {"id":"bjHrfqujMcMvfnM7"} }
+                      ]
+                    },
+                    "layout": { "height": 349 }
+                  },
+                  {
+                    "id": "btlSHhdr8m_SSbMr",
                     "content": {
                       "type": "Text",
-                      "text": "\u0089Representation 1\u0089\u0089\u0089Representation 2"
+                      "format": "html",
+                      "text": [
+                        "<p>Equation 3</p>",
+                        "<p></p>",
+                        "<p>y = –x</p>",
+                        "<p>Equation 4</p>",
+                        "<p></p>",
+                        "<p>y = 0.5x</p>"
+                      ]
                     }
-                  },
-                  [
-                    {
-                      "layout": {
-                        "height": 200
-                      },
-                      "content": {
-                        "type":"Geometry",
-                        "title": "Representation 1",
-                        "board": {
-                          "properties": {
-                             "axisMin": [-5, -10],
-                             "axisRange": [10, 32]
-                          }
-                        },
-                        "objects": [
-                          {
-                            "type": "movableLine",
-                            "parents": [
-                              {
-                                "type": "point",
-                                "parents": [-2, 6]
-                              },
-                              {
-                                "type": "point",
-                                "parents": [2, -6]
-                              }
-                            ]
-                          }
-                        ]
-                      }
-                    },
-                    {
-                      "layout": {
-                        "height": 200
-                      },
-                      "content": {
-                        "type":"Geometry",
-                        "title": "Representation 2",
-                        "board": {
-                          "properties": {
-                            "axisMin": [-5, -3],
-                            "axisRange": [10, 10]
-                          }
-                        },
-                        "objects": [
-                          {
-                            "type": "movableLine",
-                            "parents": [
-                              {
-                                "type": "point",
-                                "parents": [-4, -2]
-                              },
-                              {
-                                "type": "point",
-                                "parents": [4, 2]
-                              }
-                            ]
-                          }
-                        ]
-                      }
-                    }
-                  ],
+                  }
+                ],
+                {
+                  "id": "EPe2tzkX0CCpatoG",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Equation 4</p>",
+                      "<p></p>",
+                      "<p>y = 0.5x</p>",
+                      "<p></p>",
+                      "<p></p>"
+                    ]
+                  }
+                },
+                [
                   {
+                    "id": "FUMmSiHIk89i_0_Z",
                     "content": {
                       "type": "Table",
-                      "name": "Representation 3",
+                      "name": "Table 1",
                       "columns": [
-                        {
-                          "name": "x",
-                          "type": "number",
-                          "values": [-2, -1, 0, 1, 2]
-                        },
-                        {
-                          "name": "y",
-                          "type": "number",
-                          "values": [-1, -0.5, 0, 0.5, 1]
-                        }
+                        {"name":"x","values":["-6","-4","-2","0","2","4"]},
+                        {"name":"y","values":["-10","-7","-4","-1","2","5"]}
+                      ]
+                    }
+                  },
+                  {
+                    "id": "VYh86F80XWoIavhd",
+                    "content": {
+                      "type": "Table",
+                      "name": "Table 2",
+                      "columns": [
+                        {"name":"x","values":["1","2","3","4","5","6"]},
+                        {"name":"y","values":["4.5","4.0","3.5","3","2.5","2"]}
+                      ]
+                    }
+                  }
+                ],
+                [
+                  {
+                    "id": "tEuoXhj497gpAvPi",
+                    "content": {
+                      "type": "Table",
+                      "name": "Table 3",
+                      "columns": [
+                        {"name":"x","values":["-2","-1","0","1","2"]},
+                        {"name":"y","values":["-1","-1","-1","-1","-1"]}
+                      ]
+                    }
+                  },
+                  {
+                    "id": "Zuy74tb_IAGlXBmY",
+                    "content": {
+                      "type": "Table",
+                      "name": "Table 4",
+                      "columns": [
+                        {"name":"x","values":["2","3","4","5","6","7"]},
+                        {"name":"y","values":["-5","-7.5","-10","-12.5","-15","-17.5"]}
+                      ]
+                    }
+                  }
+                ],
+                [
+                  {
+                    "id": "c4Pybz_UyEadyWdb",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Context 1</p>",
+                        "<p></p>",
+                        "<p>A fire in California is burning at a rate of 5 square miles per hour. How many square miles <em>n</em> have burned after <em>t</em> hours?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "rUQQWsKlLFzyIVMY",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Context 2</p>",
+                        "<p></p>",
+                        "<p>Mia borrows $500 from her uncle to buy a bike. Mia pays back $25 a week. How much money is left to pay off <em>A</em> after <em>w</em> weeks?</p>"
+                      ]
+                    }
+                  }
+                ],
+                [
+                  {
+                    "id": "2Zw8nxRu5mp5S3S2",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Context 3</p>",
+                        "<p></p>",
+                        "<p>You can estimate Fahrenheit F from Celsius <em>C</em> temperature. Multiply the Celsius temperature by 2 and add 30. What equation will estimate the temperature from one temperature system to the other? </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "ziv5l3u1UYUAl0A_",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Context 4</p>",
+                        "<p></p>",
+                        "<p>Will pays $79 a month for unlimited data. What equation would show Will’s cost <em>A</em>, as the amount of data x increases in a month?</p>"
+                      ]
+                    }
+                  }
+                ],
+                [
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Negative Rate of Change </p>",
+                        "<p>(Slope)</p>"
                       ]
                     }
                   },
@@ -6223,15 +6556,333 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text":
-                        "Representation 1: The constant of proportionality is -3, which is the same as the rate of change (-3/1).\nRepresentation 2: The constant of proportionality is 1/2, which is the same as the rate of change (1/2).\nRepresentation 3: The constant of proportionality is 0.5, which is the same as the rate of change (0.5/1).\nStudent answers will vary. Possible situation for representation 2: You place a bucket under a leaking faucet, which collects 1 cup of water every 2 hours."
+                      "text": [
+                        "<p>Positive Rate of Change</p>",
+                        "<p>(Slope)</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher","id": "zQvGp_SQpK-SiPAr",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Zero rate of Change</p>",
+                        "<p>(Slope)</p>"
+                      ]
+                    }
+                  }
+                ],
+                [
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Graph 1:</p>",
+                        "<p>Slope (-6)/2=(-3)/1  = –3</p>",
+                        "<p>Not Proportional</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Graph 2:</p>",
+                        "<p>Slope 6/2=3/1  = 3</p>",
+                        "<p>Not Proportional</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Table 3:</p>",
+                        "<p>Slope 0/1= 0</p>",
+                        "<p></p>",
+                        "<p>Not Proportional</p>"
+                      ]
+                    }
+                  }
+                ],
+                [
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Graph 4:</p>",
+                        "<p>Slope (-3)/1  = –3</p>",
+                        "<p>Constant of proportionality the same as the rate of change –3</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Graph 3:</p>",
+                        "<p>Slope 1/2</p>",
+                        "<p>Constant of proportionality the same as the rate of change ½ </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Context 4:</p>",
+                        "<p>Equation to represent this context: </p>",
+                        "<p>A = 79 + 0x or A = 79  </p>",
+                        "<p>Slope is 0</p>",
+                        "<p></p>",
+                        "<p>Not Proportional</p>"
+                      ]
+                    }
+                  }
+                ],
+                [
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Equation 2:</p>",
+                        "<p>Slope = –3</p>",
+                        "<p>Not Proportional</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Equation 1:</p>",
+                        "<p>Slope = 1</p>",
+                        "<p>Not Proportional</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>  </p>"
+                      ]
+                    }
+                  }
+                ],
+                [
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Equation 3:</p>",
+                        "<p>Slope = –1</p>",
+                        "<p>Constant of proportionality the same as the rate of change –1</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Equation 4:</p>",
+                        "<p>Slope = 0.5</p>",
+                        "<p>Constant of proportionality the same as the rate of change 0.5.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>  </p>"
+                      ]
+                    }
+                  }
+                ],
+                [
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Table 2:</p>",
+                        "<p>Slope (-0.5)/1  = –0.5</p>",
+                        "<p>Not Proportional</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Table 1:</p>",
+                        "<p>Slope 3/2=1.5/1  = 1.5</p>",
+                        "<p>Not Proportional</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>  </p>"
+                      ]
+                    }
+                  }
+                ],
+                [
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Table 4:</p>",
+                        "<p>Slope (-2.5)/1  = –0.5</p>",
+                        "<p>Constant of proportionality the same as the rate of change </p>",
+                        "<p>–0.5</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Context 1:</p>",
+                        "<p>Equation to represent this context:  n = 5t</p>",
+                        "<p>Slope = 5</p>",
+                        "<p>Constant of proportionality the same as the rate of change 5</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>  </p>"
+                      ]
+                    }
+                  }
+                ],
+                [
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Context 2:</p>",
+                        "<p>NOTE: Context 2 could vary. Some students may interpret the rate as negative. Other students may interpret the starting amount as negative.</p>",
+                        "<p>Equation to represent this context might be: </p>",
+                        "<p>550 – 25x = w </p>",
+                        "<p>Slope = –25</p>",
+                        "<p>Not Proportional</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Context 2:</p>",
+                        "<p>NOTE: Context 2 could vary. Some students may interpret the starting amount as negative. Other students may interpret rate the as negative.</p>",
+                        "<p>Equation to represent this context might be:</p>",
+                        "<p> –550 + 25x = w </p>",
+                        "<p>Slope = 25</p>",
+                        "<p>Not Proportional</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "tEDNNCZvXL0SbcoJ",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>  </p>"
+                      ]
+                    }
+                  }
+                ],
+                [
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p> </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Context 3:</p>",
+                        "<p>Equation to represent this context might be:</p>",
+                        "<p>2C + 30 = F</p>",
+                        "<p>OR</p>",
+                        "<p>C = (F – 30) ÷ 2 or </p>",
+                        "<p>C = ½ (F – 30)</p>",
+                        "<p>Not Proportional</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>  </p>"
+                      ]
                     }
                   }
                 ]
+                ]
               },
               "supports": [
-                {"text": "Would an equation help find the constant of proportionality?"},
-                {"text": "What is the rate of change in the graphs and the table? "}
               ]
             },
             {
@@ -6239,23 +6890,88 @@
               "content": {
                 "tiles": [
                   {
+                    "id": "1Baqb9i05TJD621l",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>Situation A. Representing Rates of Change</strong>\nThe graphs, tables, and equations represent linear relationships. "]
+                      "text": [
+                        "<p><em>Situation A. John and Maria’s Conjectures</em></p>",
+                        "<p>Examine each claim. Is it correct? Explain why.</p>"
+                      ]
                     }
                   },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_4_2_WI_graphs_and_tables_350w.png"
+                  [
+                    {
+                      "id": "LRl9HDwq9gPq9qM8",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>John’s Conjecture</p>",
+                          "<p>I noticed that if the points (0,0) and (1, a) are on a line, then the line represents a proportional relationship, and a is the constant of proportionality.</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "nLawF9NvyUqukpA2",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Maria’s Conjecture</p>",
+                          "<p></p>",
+                          "<p>The constant of proportionality is the unit rate.</p>",
+                          "<p></p>"
+                        ]
+                      }
                     }
-                  },
+                  ],
+                  [
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>He is correct because the line runs through the origin and, for every point on the line, the ratio of the x and y coordinates is equivalent to a.</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "display": "teacher",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>He is correct. The constant of proportionality a for this line means that each time the x-variable increases by 1, the y-variable increases by a. So, the ratio is a to 1, which is also a unit rate.</p>",
+                          "<p></p>",
+                          "<p>Note: The constant of proportionality and the unit rate are the same value.</p>",
+                          "<p>The rate of change is the same when the relationship is proportional.</p>",
+                          "<p>For non-proportional relationships, we only refer to the coefficient (or slope) as the rate of change.</p>",
+                          "<p></p>"
+                        ]
+                      }
+                    }
+                  ],
                   {
+                    "id": "OtrnuChdqIB0oZsF",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["1. What is the rate of change and y-intercept associated with each representation?"]
+                      "text": [
+                        "<p><em>Situation B. More Lines</em></p>",
+                        "<p>The points (3, 5) and (-2, 10) lie on a line.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "E2qZBKMmzH2EhiOf",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>What is the rate of change or slope of the line?</li></ul>"
+                      ]
                     }
                   },
                   {
@@ -6263,15 +6979,19 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text":
-                        "Graph 1: slope: -3, y-intercept: 6\nGraph 2: slope: 3, y-intercept: 6\nTable 1 : slope :1.5, y-intercept : -1\nTable 2 : slope : -0.5, y-intercept : 5\nquation 1 : slope : 2.5, y-intercept : 5\nEquation 2 : slope : -3, y-intercept : 0"
+                      "text": [
+                        "<p>The rate of change of the line is (10 – 5)/( –2 – 3)= (10 –5)/(–2 –3) = 5/(–5)  = –1</p>"
+                      ]
                     }
                   },
                   {
+                    "id": "FiM6ReLO4nLbQOYT",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["2.  Do any of the relationships represent a proportional relationship? If so, what is the constant of proportionality? "]
+                      "text": [
+                        "<ul><li>Find two more points that lie on this line. Explain your method.</li></ul>"
+                      ]
                     }
                   },
                   {
@@ -6279,15 +6999,20 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text":
-                        "The relationship shown by Equation 2 is proportional with a constant of proportionality of -3."
+                      "text": [
+                        "<p>Student answers will vary. </p>",
+                        "<p>For example, (–1,9) is on the line because you can increase the x-coordinate of (–2,10) by 1 and decrease the y-coordinate of (–2,10) by 1.</p>"
+                      ]
                     }
                   },
                   {
+                    "id": "efdPhg61OxCkYTIa",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>Situation B.  John’s Claims</strong>\n1. John noticed that if the points (0,0) and (1, a) are on a line, then the line represents a proportional relationship, and a is the constant of proportionality. Is he correct? Explain."]
+                      "text": [
+                        "<ul><li>Does this line represent a proportional relationship? Explain.</li></ul>"
+                      ]
                     }
                   },
                   {
@@ -6295,15 +7020,19 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text":
-                        "He is correct because the line runs through the origin and, for every point on the line, the ratio of the x- and y-coordinates is always a."
+                      "text": [
+                        "<p>This line does not represent a proportional situation because it does not pass through the origin.</p>"
+                      ]
                     }
                   },
                   {
+                    "id": "i7i1j5mLPC42xdGa",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["2.  John also claims that the constant of proportionality is the unit rate. Is he correct? Explain why. "]
+                      "text": [
+                        "<ul><li>What is the rate of change or slope of a horizontal line? A vertical line? Explain your reasoning.</li></ul>"
+                      ]
                     }
                   },
                   {
@@ -6311,72 +7040,9 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text":
-                        "He is correct. The constant of proportionality a for this line means that each time the x-variable increases by 1, the y-variable increases by a. So, the ratio is a to 1, which is also a unit rate."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["<strong>Situation C. More Lines</strong>\nThe points (3, 5) and (-2, 10) lie on a line.\n1. What is the rate of change or slope of the line?"]
-                    }
-                  },
-                  {
-                      "display": "teacher",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text":
-                          "The rate of change of the line is (10 – 5)/(-2 - 3) = 5/-5 = -1"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["2. Find two more points that lie on this line. Explain your method."]
-                    }
-                  },
-                  {
-                      "display": "teacher",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text":
-                          "Student answers will vary. \nFor example, (-1,9) is on the line because you can increase the x-coordinate of (-2,10) by 1 and decrease the y-coordinate of (-2,10) by 1."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["3. Does this line represent a proportional relationship? Explain."]
-                    }
-                  },
-                  {
-                      "display": "teacher",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text":
-                          "This line does not represent a proportional situation because it does not pass through the origin."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["<4. What is the rate of change or slope of a horizontal line? A vertical line? Explain your reasoning."]
-                    }
-                  },
-                  {
-                      "display": "teacher",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text":
-                          "The rate of change of a horizontal line is 0 because there is no “rise” no matter how far you “run.” The rate of change of a vertical line is undefined because there is no “run” no matter how far you “rise.”"
+                      "text": [
+                        "<p>The rate of change of a horizontal line is 0 because there is no “rise” no matter how far you “run.” The rate of change of a vertical line is undefined because there is no “run” no matter how far you “rise.”</p>"
+                      ]
                     }
                   }
                 ]
@@ -6391,18 +7057,25 @@
               "content": {
                 "tiles": [
                   {
+                    "id": "zXqPgxZaykxviEMx",
                     "content": {
                       "type": "Text",
-                      "text": "How is the rate of change of a linear relationship related to the constant of proportionality?"
+                      "format": "html",
+                      "text": [
+                        "<p>How is the rate of change of a linear relationship related to the constant of proportionality?</p>"
+                      ]
                     }
                   },
                   {
-                      "display": "teacher",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text":
-                          "Some linear relationships are proportional and some are not. The rate of change represents how one variable changes compared to the other. For a given relationship, the rate of change is constant for any x- and y-values you choose.\nWhen a linear situation is also proportional, the unit rate, constant of proportionality, and the rate of change are all the same."
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Some linear relationships are proportional and some are not. </p>",
+                        "<p>The rate of change represents how one variable changes compared to the other. It is a multiplicative comparison of the change. For a linear relationship, the rate of change is the ratio of the rise (vertical change) to the run (horizontal change).</p>",
+                        "<p>When a linear situation is also proportional, the unit rate, constant of proportionality, and the rate of change are all the same.</p>"
+                      ]
                     }
                   }
                 ]
@@ -6422,213 +7095,352 @@
               "type": "initialChallenge",
               "content": {
                 "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["The students did so well in organizing the walkathon that Ms. Chang organized a special field trip to watch a movie. \n\nSuppose that a movie company charges the school $4.50 per student. But the movie company does not want to lose money. The company’s operating expenses include $130 for the staff and a film rental fee of $1.25 per student. \n\n• How many students need to attend the movie so that the theater’s income will equal its operating expenses? "]
-                    }
-                  },
-                  {
-                      "display": "teacher",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text":
-                          "The movie company will “break even” if there are 40 students in attendance.\nStudent answers will vary. \n\nSample response finding when Expenses equal Income:\nWe can find when the expenses and incomes are equal.\n\u00894.50n = 130 + 1.25n\n\u00893.25n = 130\n\u0089n = 40\n\nSample response using the Profit equation:\nWe can write equations for the movie company’s income I, expenses E, and model profit P as income – expenses. For some number of students n.\n\u0089P = I – E \n\u0089P = 4.50n – (130 + 1.25n)\n\u0089P = 3.25n – 130\nThe point at which the movie company will “break even” is the point at which their profit equals zero, so we can solve for which value of n makes P=0.\n\u00890 = 3.25n – 130\n\u0089130 = 3.25n\n\u008940 = n"
-                    }
+                {
+                  "id": "9x1XedXWseRKvaiZ",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>The students did so well in organizing the walkathon that Ms. Chang organized a special field trip to watch a movie.</p>",
+                      "<p>A movie theatre offers a discounted rate of $4.50 per student to the school. However, at this low of a price, the movie theatre worries about losing money. The theatre’s operating expenses include $130 for the staff and a film rental fee of $1.25 per student. </p>",
+                      "<ul><li>How many students need to attend the movie so that the theater’s income will equal its operating expenses? </li></ul>"
+                    ]
                   }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>The movie company will “break even” if there are 40 students in attendance.</p>",
+                      "<p></p>",
+                      "<p>Student answers will vary. </p>",
+                      "<p></p>",
+                      "<p>Sample response finding when Expenses equal Income.</p>",
+                      "<p></p>",
+                      "<p>We can find when the expenses and incomes are equal.</p>",
+                      "<p>4.50n = 130 + 1.25n</p>",
+                      "<p>3.25n = 130</p>",
+                      "<p>        n = 40</p>",
+                      "<p></p>",
+                      "<p>Sample response using the Profit equation.</p>",
+                      "<p>We can write equations for the movie company’s income I, expenses E, and model profit P as income – expenses. For some number of students n,</p>",
+                      "<p>P = I – E </p>",
+                      "<p>P = 4.50n – (130 + 1.25n) </p>",
+                      "<p>P = 3.25n – 130</p>",
+                      "<p>The point at which the movie company will “break even” is the point at which their profit equals zero, so we can solve for which value of n makes P=0.</p>",
+                      "<p>     0 = 3.25n – 130</p>",
+                      "<p>130 = 3.25n  </p>",
+                      "<p>  40 = n</p>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Sample response using a graph.</p>",
+                      "<p>Graph both equations on the same axes. y = 4.50n and y = 130 + 1.25n</p>",
+                      "<p>Then find where the graphs intersect (using a tracing or some other strategy.) We see that the lines intersect when the number of students is 40.</p>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Geometry",
+                    "title": "Point of Intersection",
+                    "board": {
+                      "properties": {
+                        "axisMin": [-2, -2],
+                        "axisRange": [60, 350],
+                        "axisNames": ["n", "y"],
+                        "axisLabels": ["Number of Students", "Money ($)"]
+                      }
+                    },
+                    "objects": [
+                      { "type": "movableLine", "parents": [{ "type": "point", "parents": [0, 0] }, { "type": "point", "parents": [40, 180] }],"properties": {"id":"V_GeGBMiwMqIcKLb"} },
+                      { "type": "movableLine", "parents": [{ "type": "point", "parents": [0, 130] }, { "type": "point", "parents": [40, 180] }],"properties": {"id":"vGTRVCZN_OrCQQOh"} }
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Sample response using a table.</p>",
+                      "<p>Find the income made with the price for every student as the number of students increase.</p>",
+                      "<p>Find the expenses as the number of students increase.</p>",
+                      "<p>Look for the amount when the income and the expenses are the same ($180). This happens at 40 students.</p>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Table",
+                    "name": "Table 1",
+                    "columns": [
+                      {"name":"No Students, x","values":["0","10","20","30","40","50","60","70"]},
+                      {"name":"Income, I ($)","values":["0","45","90","1135","180","225","270","315"]},
+                      {"name":"Expenses, E ($)","values":["130","142.50","155","167.5","180","192.5","205","217.5"]}
+                    ]
+                  }
+                }
                 ]
               },
               "supports": [
-                {"text": "How much does the operating expense cost if 10 students watch the movie? "},
-                {"text": "How much does the school pay for the movie if 10 students watch the movie?"}
-              ]
+                ]
             },
             {
               "type": "whatIf",
               "content": {
                 "tiles": [
                   {
+                    "id": "ayTA6kEYFk698rsp",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>Situation A. Student Strategies</strong> \nThe following students used different strategies to answer the question in the <em>Initial Challenge</em>. Examine each strategy and describe how each could or could not be used to answer the question."]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["Geraldo’s Strategy: I made the following table:"]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Table",
-                      "name": "Theater Income",
-                      "columns": [
-                        {
-                          "name": "Number of Students, x",
-                          "type": "number",
-                          "values": [0, 10, 20, 30, 40, 50, 60, 70]
-                        },
-                        {
-                          "name": "Income, I ($)",
-                          "type": "number",
-                          "values": [ ]
-                        },
-                        {
-                          "name": "Expenses, E ($)",
-                          "type": "number",
-                          "values": [ ]
-                        }
+                      "text": [
+                        "<h2>Situation A. Student Strategies</h2>",
+                        "<p>The following students used different strategies to answer the question in the Initial Challenge.</p>",
+                        "<p>Examine each strategy and describe how each could or could not be used to answer the question. </p>"
                       ]
                     }
                   },
                   {
+                    "id": "pNU7YeuAJBCqlc7f",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["Anna’s Strategy: On the same set of axes, I graphed the theater’s income and operating expenses for any number of students from 0 to 100. "]
+                      "text": [
+                        "<p>Geraldo’s Strategy</p>",
+                        "<p>I made the following table:</p>"
+                      ]
                     }
                   },
                   {
+                    "id": "99rAuakSDncRfmOS",
                     "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["Sze’s Strategy: I wrote an expression that represents the theater’s profit. "]
+                      "type": "Table",
+                      "name": "Theater Income and Expenses",
+                      "columns": [
+                        {"name":"Number of Students, x","values":[0,10,20,30,40,50,60,70]},
+                        {"name":"Income, I ($)","values":["","","","","","","",""]},
+                        {"name":"Expenses, E ($)","values":["","","","","","","",""]}
+                      ]
                     }
                   },
-                  {
-                      "display": "teacher",
+                  [
+                    {
+                      "id": "2lGqFrk5FKEXBiYz",
                       "content": {
                         "type": "Text",
                         "format": "html",
-                        "text":
-                          "Geraldo’s strategy could be used by filling out the table and looking for the number of students when the income is the same as the expenses. \n\nAnna’s strategy could be used by graphing the line for income and the line for operating expenses and looking for the intersection point. \n\nSze’s strategy could be used by making his expression into an equation equal to a profit of 0."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["<strong>Situation B. Laneshia Uses Inequalities</strong> \nLaneshia wanted to find the number of students that make each of the following inequality statements true. <ul><li>Expenses < 255 or $1.25n + $130 < $255</li><li>Income  > 675 or $4.50n > $675</li></ul>\n1. Find the number of students that makes each inequality statement true."]
-                    }
-                  },
-                  {
-                      "display": "teacher",
+                        "text": [
+                          "<p>Anna’s Strategy</p>",
+                          "<p></p>",
+                          "<p>On the same set of axes, I graphed the theater’s income and operating expenses for any number of students from 0 to 50.</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "GEbwXPbgq4C6khlF",
                       "content": {
                         "type": "Text",
                         "format": "html",
-                        "text":
-                          "To find the number of students that will make expenses less than $255, we need to solve the associated equality. So 1.25n+130=255\n\u0089 1.25n = 125 \n\u0089 n = 100. So to make the inequality statement for expenses true, there need to be less than 100 students.\n\nTo find the number of students that will make the income greater than $675, we need to solve the associated equality. So 4.50n = 675 \n\u0089 n = 150. \nSo to make the inequality statement for income true, there need to be more than 150 students."
+                        "text": [
+                          "<p>Sze’s Strategy</p>",
+                          "<p></p>",
+                          "<p>I wrote an expression that represents the theater’s profit.</p>"
+                        ]
+                      }
                     }
-                  },
+                  ],
                   {
+                    "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["2. How might this information be helpful in making decisions about the showing of the film?"]
+                      "text": [
+                        "<p>Note: Each of these strategies is shown as a possible answer for the IC.</p>",
+                        "<p>Geraldo’s strategy could be used by filling out the table and looking for the number of students when the income is the same as the expenses. </p>",
+                        "<p>Anna’s strategy could be used by graphing the line for income and the line for operating expenses and looking for the intersection point. </p>",
+                        "<p>Sze’s strategy could be used by making his expression into an equation equal to a profit of 0.</p>"
+                      ]
                     }
                   },
                   {
-                      "display": "teacher",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text":
-                          "Student answers will vary. Sample answer: If you only have a fixed amount of money to spend on showing the movie, then the expenses inequality can keep you from going into debt. If you need to raise a certain amount of money from showing the movie, then the income inequality can help you calculate how many tickets to sell."
-                    }
-                  },
-                  {
+                    "id": "FHckNH81T2PMryng",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>Situation C. A Competing Company</strong> \nAt another theater, they used the equation, \n\u0089 <em>P</em>\u00a0 = 3<em>n</em>\u00a0 – 115 \nto find the profit P for the number of students n that attend the theater. What do the numbers 3 and 115 tell you about \n1. The relationship between the number of students and the theater’s profit? "]
+                      "text": [
+                        "<h2>Situation B. Laneshia Uses Inequalities</h2>",
+                        "<ul><li>Laneshia wanted to find the number of students that make each of the following inequality statements true. </li></ul>",
+                        "<p>         Expenses  &lt; 255                        Income  &gt;  675  </p>",
+                        "<p>                                or                                        or</p>",
+                        "<p>           $1.25n + $130 &lt; $255        $4.50n &gt;  $675</p>",
+                        "<ul><li>Find the number of students that makes each inequality statement true.</li></ul>"
+                      ]
                     }
                   },
                   {
-                      "display": "teacher",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text":
-                          "The number 3 tells you how much the theater’s profit will increase for each extra student who attends the theater. The number -115 tells you some expense or initial fee for using the theatre."
-                    }
-                  },
-                  {
+                    "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["2. the pattern of entries that would appear in a table of sample (students, profit) data? "]
+                      "text": [
+                        "<p>To find the number of students that will make expenses less than $255, we need to solve the associated equality. So 1.25n+130=255 ➔ 1.25n = 125 ➔ n = 100. So to make the inequality statement for expenses true, there need to be less than 100 students.</p>",
+                        "<p>To find the number of students that will make the income greater than $675, we need to solve the associated equality. So 4.50n = 675 ➔ n = 150. So to make the inequality statement for income true, there need to be more than 150 students.</p>"
+                      ]
                     }
                   },
                   {
-                      "display": "teacher",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text":
-                          "The number 3 tells you how much pattern of change. For every additional student, there is an increase of $3 between consecutive profit entries on the table. The number -115 tells you the profit entry that corresponds with zero students."
-                    }
-                  },
-                  {
+                    "id": "DGJvsJB9zWvXx_7u",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["3. a graph of the relationship between the number of students and the profit? "]
+                      "text": [
+                        "<ul><li>How might this information be helpful in making decisions about the showing of the film?</li></ul>"
+                      ]
                     }
                   },
                   {
-                      "display": "teacher",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text":
-                          "The number 3 tells you the rate of change, or slope, of the line (because profit increases by 3 every time the number of students increases by 1). The number -115 tells you the y-intercept of the line."
-                    }
-                  },
-                  {
+                    "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["Write and solve an equation you can use to find the number of students for which the theaters in Exercise 1 and Exercise 2 make the same profit. Then find the amount of that profit."]
+                      "text": [
+                        "<p>Student answers will vary. Sample answer: If you only have a fixed amount of money to spend on showing the movie, then the expenses inequality can keep you from going into debt. If you need to raise a certain amount of money from showing the movie, then the income inequality can help you calculate how many tickets to sell.</p>"
+                      ]
                     }
                   },
                   {
-                      "display": "teacher",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text":
-                          "The equation for profit for the theater in the initial challenge was P1 = I – E = 4.50n – (130 + 1.25n) = 3.25n – 130. The equation for profit for the theater in this problem is P2 = 3n – 115.  If they make the same profit, then we can set the expressions equal and solve for the number of students.\n\u00893.25n – 130 = 3n – 115\n\u0089 0.25n = 15\n\u0089 n = 60\nThis means that these two theaters will make the same profit for 60 students."
+                    "id": "aWVopBCzBgVnYAhH",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Situation C. Competing Company</em></p>",
+                        "<p></p>",
+                        "<p>At another theater, they used the equation, P = 3n – 115 to find the profit P for the number of students n that attend the theater. </p>",
+                        "<p></p>",
+                        "<ul><li>What do the numbers 3 and –115 tell you about the relationship between the number of students and the theater’s profit? </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The number 3 tells you how much the theater’s profit will increase for each extra student who attends the theater. The number -115 tells you some expense or initial fee for using the theatre.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "wWgS1fb4191UOz5F",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>What do the numbers 3 and –115 tell you about the pattern of entries that would appear in a table of sample (students, profit) data? </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The number 3 tells you how much pattern of change. For every additional student, there is an increase of $3 between consecutive profit entries on the table. The number -115 tells you the profit entry that corresponds with zero students.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "toA9fKqUIiPW9Dxp",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>What do the numbers 3 and –115 tell you about graph of the relationship between the number of students and the profit?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The number 3 tells you the rate of change, or slope, of the line (because profit increases by 3 every time the number of students increases by 1). The number -115 tells you the y-intercept of the line.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "Y8YvaUfkC1OMXDA2",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>Write and solve an equation you can use to find the number of students for which the theater in the Initial Challenge and theater in Situation C make the same profit. Then find the amount of that profit. </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The equation for profit for the theater in the initial challenge was </p>",
+                        "<p>                P1 = I – E = 4.50n – (130 + 1.25n) = 3.25n – 130. </p>",
+                        "<p>The equation for profit for the theater in this problem is </p>",
+                        "<p>                P2 = 3n – 115.  </p>",
+                        "<p>If they make the same profit, then we can set the expressions equal and solve for the number of students.</p>",
+                        "<p>3.25n – 130 = 3n – 115</p>",
+                        "<p>       0.25n = 15</p>",
+                        "<p>              n = 60</p>",
+                        "<p>This means that these two theaters will make the same profit for 60 students.</p>"
+                      ]
                     }
                   }
                 ]
               },
               "supports": [
-                {"text": "What information do you need to know if a situation is linear?"},
-                {"text": "How do you know your equation represents the linear situation?"}
               ]
             },
             {
               "type": "nowWhatDoYouKnow",
               "content": {
                 "tiles": [
-                  {
+                   {
+                    "id": "AJeCBlhGM5UAYEtk",
                     "content": {
                       "type": "Text",
-                      "text": "How do the situations in this problem compare to other problems in this unit? Do any of these represent proportional situations? Why? In what ways are tables, graphs, equations, and inequalities useful for solving problems?"
+                      "format": "html",
+                      "text": [
+                        "<p>How do the situations in this problem compare to other problems in the unit? In what ways are tables, graphs, equations, and inequalities useful for solving problems?</p>"
+                      ]
                     }
                   },
                   {
-                      "display": "teacher",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text":
-                          "Student answers will vary. Sample answer: The movie theater situations in this Problem have positive rates of change (like the staircases). Some of the other problems showed decreasing/negative rates of changes. The movie theater problems don’t make sense for fractions of students, but the staircase problems make sense for fraction or decimal measurements. None of the movie theater problems are proportional situations, because none of them would pass through the origin if graphed.\nTables are useful for solving problems because they show several numerical values for a given pattern. Graphs are useful because they give you a sense of the pattern’s behavior over a wide range of values, which is helpful for estimating. Equations are useful because you can use them to calculate any specific value and the coefficients give you information about the problem situation. Inequalities are useful if you are looking for a range of possible answers."
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Student answers will vary. Sample answer: The movie theater situations in this Problem have positive rates of change (like the staircases). Some of the other problems showed decreasing/negative rates of changes. The movie theater problems don’t make sense for fractions of students, but the staircase problems make sense for fraction or decimal measurements. None of the movie theater problems are proportional situations, because none of them would pass through the origin if graphed.</p>",
+                        "<p>Tables are useful for solving problems because they show several numerical values for a given pattern. Graphs are useful because they give you a sense of the pattern’s behavior over a wide range of values, which is helpful for estimating. Equations are useful because you can use them to calculate any specific value and the coefficients give you information about the problem situation. Inequalities are useful if you are looking for a range of possible answers.</p>"
+                      ]
                     }
                   }
                 ]
