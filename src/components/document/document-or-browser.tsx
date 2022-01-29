@@ -1,5 +1,5 @@
 import React from "react";
-import { useAppConfigStore, useStores } from "../../hooks/use-stores";
+import { useStores } from "../../hooks/use-stores";
 import { DocumentModelType } from "../../models/document/document";
 import { LearningLogDocument, PersonalDocument, ProblemDocument } from "../../models/document/document-types";
 import { getNavTabSpecsFromStores } from "../../models/stores/stores";

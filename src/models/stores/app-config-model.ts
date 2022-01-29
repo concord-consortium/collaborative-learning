@@ -8,8 +8,8 @@ import { SettingsMstType } from "./settings";
 const UnitSpecModel = types
   .model("UnitSpec", {
     content: types.string,
-    guide: "",
-});
+    guide: ""
+  });
 
 const DocumentSpecModel = types
   .model("DocumentSpec", {
