@@ -85,26 +85,9 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#Revision%20Comments'>Revision Comments</a></p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#StemProblemFormat'>CMP STEM Problem Format</a></p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitDescriptions'>Unit Descriptions</a></p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#SummaryInvestigations'>Summary of Investigations</a></p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitGoals'>Goals of the Units</a></p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAlignment'>Unit Alignments: Goals, CCSSM, Arc of Learning, Emerging Mathematics</a></p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#GeneralAoL'>General Arc of Learnsing</a></p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAoL'>Unit Arc of Learning</a></p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#MathOverview'>Mathematical Overview</a></p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#labsheets'>Labsheets</a></p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#TeachingAids'>Teaching Aids</a></p>",
-                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#FamilyLetters'>Family Letter</a></p>",
+                        "<h2>Problem Overview</h2>",
                         "This Problem introduces patterns of change between two variables in the context of a walkathon. Students determine their walking rates in meters per second as a ratio of distance to time. This Problem connects back to the rate work done in Comparing and Scaling while laying the foundation for using rate to look at patterns of change. Students answer questions about time and distance using their constant walking rates and write an equation that models the distance walked over time at their constant walking rates."
                       ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "1.1  Walking Marathons: Using Rates\nAoL:  Introduce & Introduce/Explore\nCCSSM: 7.RP.A.2, 7.RP.A.2a, 7.RP.A.2b, 7.RP.A.2c, 7.EE.B.4:"
                     }
                   },
                   {
@@ -120,8 +103,34 @@
                   {
                     "content": {
                       "type": "Text",
+                      "text": "AoL:  Introduce & Introduce/Explore\nCCSSM: 7.RP.A.2, 7.RP.A.2a, 7.RP.A.2b, 7.RP.A.2c, 7.EE.B.4"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
                       "format": "html",
                       "text": "<strong>Emerging Mathematical Ideas</strong>\nBegin making sense of a problem context that involves a proportional relationship between two variables (time, distance) described initially in words and connecting it to an equation and a graph of the relationship. \nBegin to notice/recognize:  <ul><li> rate is a way to describe how far you can travel in a fixed interval of time – e.g., in two seconds I can move 20 feet, and use phrases like “consistent rate” and “constant rate” to describe relationships like this one,</li><li> proportional relationships,</li><li> an understanding of rates can be connected to prior experiences with ratios and proportional reasoning (multiplicative reasoning), </li><li> the relationship between the length of time traveled and the distance covered at a particular rate can be described in words, e.g., if I walk at a rate of 5 meters per second, then I can find the distance I travel by multiplying the number of seconds I travel by 5 m/sec. (the unit rate),</li><li> the distance traveled (d) at a constant rate (r) for a period of time (t) can be described by the equation d = r x t, </li><li> the equation needed to describe the distance traveled for two different people will be the same except that the value for the rate will vary, and</li><li> when points for several different values of time and distance traveled (at a given rate) are graphed, the points will form a straight line.</li></ul>"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#Revision%20Comments'>Revision Comments</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#StemProblemFormat'>CMP STEM Problem Format</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitDescriptions'>Unit Descriptions</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#SummaryInvestigations'>Summary of Investigations</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitGoals'>Goals of the Units</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAlignment'>Unit Alignments: Goals, CCSSM, Arc of Learning, Emerging Mathematics</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#GeneralAoL'>General Arc of Learnsing</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAoL'>Unit Arc of Learning</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#MathOverview'>Mathematical Overview</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#labsheets'>Labsheets</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#TeachingAids'>Teaching Aids</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#FamilyLetters'>Family Letter</a></p>"
+                      ]
                     }
                   }
                 ]
@@ -136,7 +145,9 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong>Launch (Getting Started)</strong> Connecting to Prior Knowledge\n\nThe introduction to the Investigation revisits Adrian’s Bike Rental from Grade 6 Variables and Patterns. In that Unit, students used contextual situations, tables, graphs, and equations to represent patterns relating variables such as cost, income, and profit. They looked at both consistent relationships (such as linear patterns) and non-consistent relationships to explain the pattern of change between two variables.\n\nThe four questions in the introduction to the Investigation offer overarching questions that the students should explore throughout the unit. You may want to display these questions in the classroom in some way to help keep students focused on the big ideas in the Unit.<ul><li> How can you determine whether a relationship is linear by examining a table of data? A graph? An equation? A verbal context?</li><li> If the relationship is linear, how can you determine if it is a proportional relationship?</li><li> How do changes in one variable affect changes in a related variable? How are these changes represented in a table, graph, or equation?</li><li> If I know the value of one variable, how can I find the value of the other variable? </li></ul>After setting the scene for the Unit with the four questions, begin to introduce students to the context of the Problem."
+                      "text": [
+                        "<strong>Launch (Getting Started)</strong> \nConnecting to Prior Knowledge\n\nThe introduction to the Investigation revisits Adrian’s Bike Rental from Grade 6 Variables and Patterns. In that Unit, students used contextual situations, tables, graphs, and equations to represent patterns relating variables such as cost, income, and profit. They looked at both consistent relationships (such as linear patterns) and non-consistent relationships to explain the pattern of change between two variables.\n\nThe four questions in the introduction to the Investigation offer overarching questions that the students should explore throughout the unit. You may want to display these questions in the classroom in some way to help keep students focused on the big ideas in the Unit.<ul><li> How can you determine whether a relationship is linear by examining a table of data? A graph? An equation? A verbal context?</li><li> If the relationship is linear, how can you determine if it is a proportional relationship?</li><li> How do changes in one variable affect changes in a related variable? How are these changes represented in a table, graph, or equation?</li><li> If I know the value of one variable, how can I find the value of the other variable? </li></ul>After setting the scene for the Unit with the four questions, begin to introduce students to the context of the Problem.",
+                        "Ask students to describe if they are fast or slow walkers and to describe their evidence."]
                     }
                   },
                   {
@@ -144,18 +155,9 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Ask students to describe if they are fast or slow walkers and to describe their evidence.",
-                        "<strong>Suggested Questions</strong>",
-                        "<ol><li> Who is the slowest walker you know? Who is the fastest walker you know? (Various answers.)</li><li> Do you walk fast or slow? How do you know? (Various answers. Students should offer some reasoning for saying that they are fast or slow, such as, Teri always passes me in the hall because I walk slowly.)</li><li> What do you think your walking rate is in miles per hour? In meters per second? (Various answers. Students’ conjectures will help set up the Problem.)</li></ul>",
-                        "Student predictions will likely be much higher than their actual walking rates. They may have some knowledge about walking rates if they have used a treadmill. On a treadmill, a person might set the walking speed at 4 miles per hour. One interesting thing about treadmills is that the rate of 4 miles per hour may also be reported as 15 minutes per mile. You might discuss why both these rates are reported or why treadmills do not report the rate in miles per minute or meters per hour."
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<ul><li>In the 6th grade unit, <em>Comparing Quantities</em> you looked at a problem about a walking backwards race.  The average middle school student walks backwards ¼ of a mile in 6 minutes.  What does this rate mean? (Answers will vary.  Some students may suggest it would mean it would take 24 minutes to walk 1 mile)</li><li>Who is the slowest walker you know? Who is the fastest walker you know? (Various answers.)</li><li>Do you walk fast or slow? How do you know? (Various answers. Students should offer some reasoning for saying that they are fast or slow, such as, Teri always passes me in the hall because I walk slowly.) </li><li>What do you think your walking rate is in miles per hour? In meters per second? (Various answers. Students’ conjectures will help set up the Problem.)</li></ul>"
                       ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "<strong>Presenting the Challenge</strong>\n\nTell a story about walkathons. Students may have some experience with other “–athons.” The Launch Video animation depicts two characters discussing an upcoming walkathon and helping each other figure out their walking rates. You can use this animation to help students understand the context of the walkathon. You can also use it as a demonstration of the steps needed for students to find their walking rates. \n\nNow tell students that they will have a chance to check their guesses about their walking rates. Describe the experiment. \n\nGive each group access to meter sticks (or a pre-set measurement of 10 meters) and a timer or a clock with seconds. Students should do the experiment twice to get a more accurate walking rate. They can choose either the rate they want or the average of the two. Make sure there is a person checking the time in each group. As the groups finish collecting their data, they can work on the questions in the What If…? questions. "
                     }
                   },
                   {
@@ -163,14 +165,35 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Ask students to describe if they are fast or slow walkers and to describe their evidence.",
-                        "<strong>Suggested Questions</strong>",
-                        "<ul><li> What does meters per second mean? (A rate where we know how many meters in one second.)</li><li> How might meter sticks and a timer help? (Like the video explains, we can line-up 10 sticks and find how long it takes to walk 10 meters.)</li><li> What are the variables? (meters and seconds) What is the relationship between the variables? (The more distance I walk, the more time it will take.)</li></ul>"
+                        "<p>Student predictions will likely be much higher  than their actual walking rates. They may have some knowledge about walking rates if they have used a treadmill. On a treadmill, a person might set the walking speed at 4 miles per hour. One interesting thing about treadmills is that the rate of 4 miles per hour may also be reported as 15 minutes per mile. You might discuss why both these rates are reported or why treadmills do not report the rate in miles per minute or meters per hour. </p>"
                       ]
                     }
                   },
                   {
-                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Presenting the Challenge</strong></p>",
+                        "<p><strong></strong></p>",
+                        "<p>Tell a story about walkathons. Students may have some experience with other “–athons.” The Discuss the walkathon described in the student edition and that Ms. Chang’s class suggests finding their walking rates. Ask students what they think their walking rate is.</p>",
+                        "<p>Now tell students that they will have a chance to check their guesses about their walking rates. </p>",
+                        "<p>Describe the experiment. </p>",
+                        "<p>Have students work in groups of 4. Give each group access to meter sticks (or a pre-set measurement of 10 meters) and a timer or a clock with seconds. Students should do the experiment twice to get a more accurate walking rate. They can choose either the rate they want or the average of the two. Make sure there is a person checking the time in each group. As the groups finish collecting their data, they can work on the questions on the What If…? questions. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Suggested Questions</strong>",
+                        "<ul><li> What does meters per second mean? (A rate where we know how many meters in one second.)</li><li> How might meter sticks and a timer help? (We can line-up 10 sticks and find how long it takes to walk 10 meters.)</li><li> What are the variables? (meters and seconds) What is the relationship between the variables? (The more distance I walk, the more time it will take.)</li></ul>"
+                      ]
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -192,7 +215,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong>Explore (Digging In)</strong>  Providing for Individual Needs\n\nAllow students to problem solve how to find their walking rates. For groups that do not know how to begin, you can ask them questions to help them decide how to conduct the experiment.\n\n<strong>Suggested Questions</strong><ul><li> What are the variables that we need to collect data on? (meters and seconds)</li><li> How can we measure those? (meters using a meter stick and seconds with a timer)</li><li> So, if someone is walking, what do we need to measure to find the walking rate? (the distance in meters and the time that it takes to walk that distance)</li><li> How long would you need to walk for someone to get an idea of how fast or slow you walk? (Answers will vary, but students might say a general distance such as walking down the hallway.)</li><li> What is a convenient distance to use? (Answers will vary. You may want to push for a distance like 10 meters.)</li></ul>"
+                      "text": "<strong>Explore (Digging In)</strong>  \nProviding for Individual Needs\n\nAllow students to problem solve how to find their walking rates. For groups that do not know how to begin, you can ask them questions to help them decide how to conduct the experiment.\n\n<strong>Suggested Questions</strong><ul><li> What are the variables that we need to collect data on? (meters and seconds)</li><li> How can we measure those? (meters using a meter stick and seconds with a timer)</li><li> So, if someone is walking, what do we need to measure to find the walking rate? (the distance in meters and the time that it takes to walk that distance)</li><li> How long would you need to walk for someone to get an idea of how fast or slow you walk? (Answers will vary, but students might say a general distance such as walking down the hallway.)</li><li> What is a convenient distance to use? (Answers will vary. You may want to push for a distance like 10 meters.)</li></ul>"
                     }
                   },
                   {
@@ -200,7 +223,9 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "Look to see how students are recording their walking rates. Using the example from the Launch Video: 'Some may use unit rates, such as 2.5 meters per second, and some may use ratios, such as 2.5 m/1 sec. Some students will scale their results differently. There are two unit rates.'"
+                        "<p>Look to see how students are recording their walking rates. </p>",
+                        "<p>Example: Some may use unit rates, such as 2.5 meters per second, and some may use ratios, such as 2.5 m/1 sec.</p>",
+                        "<p>Some students will scale their results differently. There are two unit rates. </p>"
                       ]
                     }
                   },
@@ -210,7 +235,7 @@
                       "content": {
                         "type": "Text",
                         "format": "html",
-                        "text": "\u0089 Unit Rate #1:\n 10 meters in 4 seconds [ \u2926 +10 ]\n 1 meter in 0.4 seconds."
+                        "text": "Unit Rate #1:\n 10 meters in 4 seconds\n ÷ 10 \u2939               \u2938 ÷ 10 \n 1 meter in 0.4 seconds."
                         }
                     },
                     {
@@ -218,7 +243,7 @@
                       "content": {
                         "type": "Text",
                         "format": "html",
-                        "text": "\u0089 Unit Rate #2:\n 10 meters in 4 seconds [ \u2926 +4 ]\n 2.5 meters in 1 second."
+                        "text": "Unit Rate #2:\n 10 meters in 4 seconds\n ÷ 4 \u2939               \u2938 ÷ 4 \n 2.5 meters in 1 second."
                         }
                     }
                   ],
@@ -226,7 +251,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "Students may not know which one to use. While both are accurate unit rates, a specific rate is asked for in the Initial Challenge. You can use the “for every” language from Grade 6 Comparing Quantities to help students analyze which rate to use for this problem.\n\n<strong>Suggested Questions</strong><ul><li> Your walking rate was 10 meters for every 4 seconds. (Using the values from the student’s walking.) There are two unit rates. Do we need to find how many seconds for every 1 meter? Or how many meters for every 1 second?</li><li> Have the student or group look back at the question in the Initial Challenge to see that it asks for meters per second. Does meters per second mean for every 1 meter or for every 1 second? (“per second” means for every 1 second)</li></ul>Discuss these ideas in the Summarize. "
+                      "text": "Students may not know which one to use. While both are accurate unit rates, a specific rate is asked for in the Initial Challenge. You can use the “for every” language from Grade 6 <em>Comparing Quantities</em> to help students analyze which rate to use for this problem.\n\n<strong>Suggested Questions</strong><ul><li> Your walking rate was 10 meters for every 4 seconds. (Using the values from the student’s walking.) There are two unit rates. Do we need to find how many seconds for every 1 meter? Or how many meters for every 1 second?</li><li> Have the student or group look back at the question in the Initial Challenge to see that it asks for meters per second. Does meters per second mean for every 1 meter or for every 1 second? (“per second” means for every 1 second)</li></ul>Discuss these ideas in the Summarize. "
                     }
                   },
                   {
@@ -241,7 +266,17 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong>Planning for the Summary</strong>\n\nWhat evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence?\n\n <strong>Now What Do You Know?\nAssume you continue to walk at the rate determined in the Initial Challenge. Describe in words the distance you could walk in a given number of seconds. Then write an equation to represent this information.</strong> "
+                      "text": "<strong>Planning for the Summary</strong>\n\nWhat evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence?"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Now What Do You Know? </em></p>",
+                        "<p>fAssume you continue to walk at the rate determined in the Initial Challenge. Describe in words the distance you could walk in a given number of seconds. Then write an equation to represent this information. </p>"
+                      ]
                     }
                   }
                 ]
@@ -257,7 +292,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong>Summarize (Orchestrating the Discussion)</strong> Solutions and Strategies \nAsk for some rates. You will find that they range from about 1 meter per second to 3 or 4 meters per second. But most students will cluster around 2 to 2.5 meters per second. Use one or two of the more typical walking rates to answer the questions in the Problem. \n\nIf students record their walking rates as both a rate and a ratio, ask how they are the same. You might ask students to write their walking rates in seconds per meter. If so, you can then ask questions to relate back to concepts in Comparing and Scaling."
+                      "text": "<strong>Summarize (Orchestrating the Discussion)</strong> \nSolutions and Strategies \nAsk for some rates. You will find that they range from about 1 meter per second to 3 or 4 meters per second. But most students will cluster around 2 to 2.5 meters per second. Use one or two of the more typical walking rates to answer the questions in the Problem. \n\nIf students record their walking rates as both a rate and a ratio, ask how they are the same. You might ask students to write their walking rates in seconds per meter. If so, you can then ask questions to relate back to concepts in Comparing and Scaling."
                     }
                   },
                   {
@@ -279,7 +314,16 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong> Situation A Suggested Questions</strong> <ul><li> How do you find how long it takes to walk a given distance, like #1 asking about 500 meters? (Note that this is informally solving for T when D is given. Students will have informal ways to find the value, using numerical reasoning or proportional reasoning. Later in the Unit, students will work more on solving the equations symbolically.)</li><li> How do you find how far you can walk in a given time, like #2 asking about various times? (Note that this is informally solving for D when T is given. Students will have informal ways to find the values, using numerical reasoning or proportional reasoning. Later in the Unit, students will work more on solving the equations symbolically.)</li><li> How does the equation show the relationship between the two variables? (The equation shows that the distance is the product of the walkingrate and the time, or d = rt. The walking rate is the coefficient of the independent variable.) </li><li> Explain what information the numbers and variables in your equation represent. (Take this opportunity to see how students interpret the expression 2t. They should say something like “If my walking rate is 2 meters per second, this is the distance that I walked after t seconds.” Emphasize that 2t means 2 times the value of t.) </li><li> Which variable in your equation is the independent variable, and which is the dependent variable? (Time is the independent variable, and distance is the dependent variable.) </li><li>[If some students made graphs during the Explore, display them for the class.] How is the walking rate represented in these graphs? (The walking rate affects the steepness of the line. The person who walks fastest has the greatest walking rate and, therefore, the steepest line.) </li><li> [Pick a typical equation from the class and ask students to use this equation to make a table.] How does the walking rate show up in the table? (In the table, as the time increases by 1 second, the distance increases by a constant amount equal to the walking rate.) </li></ul>"
+                      "text": [
+                        "<p><em>What If Situation A</em></p>",
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<ul><li>How do you find how long it takes to walk a given distance, in particular, asking about 500 meters in situation A? (Note that this is informally solving for T when D is given. Students will have informal ways to find the value, using numerical reasoning or proportional reasoning. Later in the Unit, students will work more on solving the equations symbolically.)</li><li>How do you find how far you can walk in a given time?  Use the examples from What If Situation A for students to demonstrate their thinking.  (Note that this is informally solving for D when T is given. Students will have informal ways to find the values, using numerical reasoning or proportional reasoning. Later in the Unit, students will work more on solving the equations symbolically.)</li><li>How does the equation show the relationship between the two variables? (The equation shows that the distance is the product of the walking rate and the time, or d = rt. The walking rate is the coefficient of the independent variable.)  </li><li>Explain what information the numbers and variables in your equation represent. (Take this opportunity to see how students interpret the expression 2t. They should say something like “If my walking rate is 2 meters per second, this is the distance that I walked after t seconds.” Emphasize that 2t means 2 times the value of t.) </li><li>Which variable in your equation is the independent variable, and which is the dependent variable? (Time is the independent variable, and distance is the dependent variable.)  </li></ul>",
+                        "<p></p>",
+                        "<p>If some students made graphs during the Explore, display them for the class.  </p>",
+                        "<ul><li>How is the walking rate represented in these graphs? (The walking rate affects the steepness of the line. The person who walks fastest has the greatest walking rate and, therefore, the steepest line.)  </li></ul>",
+                        "<p>Pick a typical equation from the class and ask students to use this equation to make a table.  </p>",
+                        "<ul><li>How does the walking rate show up in the table? (In the table, as the time increases by 1 second, the distance increases by a constant amount equal to the walking rate.)  </li></ul>"
+                      ]
                     }
                   },
                   {
@@ -300,7 +344,7 @@
                         },
                         { "name": "Time (seconds)",
                           "type": "string",
-                          "values": ["1", "5", "10", "About 333"]
+                          "values": ["1", "5", "10", "about 333"]
                         }
                       ]
                     }
@@ -309,16 +353,25 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "\u0089•  Could we represent Liz’s claim with a “for every” statement? (Yes. Possible answer: I travel 1 ½ meters for every second I walk.)"
+                      "text": [
+                        "<ul><li>Could we represent Liz’s claim with a “for every” statement? (Yes. Possible answer: I travel 1 ½ meters for every second I walk.)</li><li>Can we represent Liz’s claim with a proportion? (Yes. Possible answers include: </li></ul>"
+                      ]
                     }
                   },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "\u0089•  Can we represent Liz’s claim with a proportion? Yes. Possible answers include:\n \u0089 1.5m /1 sec = 7.5 / 5 \u0089 1.5m / 1 sec = 15 / 10"
+                  [
+                    {
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/moving-straight-ahead/images/foo.png"
+                      }
+                    },
+                    {
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/moving-straight-ahead/images/foo.png"
+                      }
                     }
-                  },
+                  ],
                   {
                     "content": {
                       "type": "Text",
@@ -394,25 +447,46 @@
                     }
                   },
                   {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>How would you describe the pattern of change between the variables? (Possible answer: As the time increases by 1 second, the distance increases by 1.5 meters.)</li><li>What equation could Liz use to find other values for the table or graph? (Distance is found by multiplying 1.5 times the number of seconds that she walks. Or D = 1.5 T.)</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>General Summary Questions</strong>",
+                        "<p></p>",
+                        "<ul><li>Have students compare their equations. How do the equations compare? (Students should see that the equations are the same except for the walking rates.)</li><li>What information does the walking rate provide? (It gives the unit rate, or how far you can walk for every 1 second.)</li><li>What does it mean to walk at a constant rate? (It means that you always walk the same distance for a set amount of time.)  </li><li>Suppose you do not walk at a constant rate for the walkathon. Which of the questions in Problem 1.1 can you still answer? Why? (It would be difficult to answer any of the questions since they all assume a constant walking rate. For Question A, you can find the total time it took to walk 10 meters and then compute the average rate.) If some students made graphs during the Explore, display them for the class. </li><li>How is the walking rate represented in these graphs? (The walking rate affects the steepness of the line. The person who walks fastest has the greatest walking rate and, therefore, the steepest line.) Pick a typical equation from the class and ask students to use this equation to make a table.  </li></ul>",
+                        "<p>The above questions on graphs and tables can be used to launch the next Problem. </p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
                     "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong>Now What Do Students Know</strong>\nAsk students to reflect on the discussion and answer the Now What Do You Know.\n\n<strong>ssume you continue to walk at the rate determined in the Initial Challenge. Describe in words the distance you could walk in a given number of seconds. Then write an equation to represent this information. </strong>\n\nSee answers to the problem for more information about the strategies and embedded mathematics. "
+                      "text": "<strong>Now What Do Students Know</strong>\nAsk students to reflect on the discussion and answer the Now What Do You Know.\n\nAssume you continue to walk at the rate determined in the Initial Challenge. Describe in words the distance you could walk in a given number of seconds. Then write an equation to represent this information. \n\nSee answers to the problem for more information about the strategies and embedded mathematics. "
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong>Suggested Questions</strong><ul><li>Have students compare their equations. How do the equations compare? (Students should see that the equations are the same except for the walking rates.)</li><li> What information does the walking rate provide? (It gives the unit rate, or how far you can walk for every 1 second.)</li><li> What does it mean to walk at a constant rate? (It means that you always walk the same distance for a set amount of time.) </li><li> Suppose you do not walk at a constant rate for the walkathon. Which of the questions in Problem 1.1 can you still answer? Why? (It would be difficult to answer any of the questions since they all assume a constant walking rate. For Question A, you can find the total time it took to walk 10 meters and then compute the average rate.) If some students made graphs during the Explore, display them for the class. </li><li> How is the walking rate represented in these graphs? (The walking rate affects the steepness of the line. The person who walks fastest has the greatest walking rate and, therefore, the steepest line.) Pick a typical equation from the class and ask students to use this equation to make a table.</li></ui> The above questions on graphs and tables can be used to launch the next Problem. "
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "<strong>Reflecting on Student Learning </strong>\nUse the following questions to assess student understanding at the end of the lesson. <ul><li> What evidence do I have that students understand the Now What Do You Know question?</li><li> Where did my students get stuck?</li><li> What strategies did they use?</li><li> What breakthroughs did my students have today?</li><li> How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li> Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?"
+                      "text": [
+                        "<p><strong>Reflecting on Student Learning</strong>  </p>",
+                        "<p>Use the following questions to assess student understanding at the end of the lesson.  </p>",
+                        "<ul><li>What evidence do I have that students understand the Now What Do You Know question?</li></ul>",
+                        "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
+                        "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?  </li></ul>"
+                      ]
                     }
                   }
                 ]
@@ -437,14 +511,17 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "Students explore the walking rates of three students. They look at the walking rate and its effect on various representations of the relationship between distance and time. This Problem introduces ways to represent proportional linear relationships between two variables using tables, graphs, and equations. It is also the first time that students are asked to explain why a relationship is linear or to recognize a linear relationship from a table or an equation."
+                      "text": [
+                        "<h2>Problem Overview</h2>",
+                        "Students explore the walking rates of three students. They look at the walking rate and its effect on various representations of the relationship between distance and time. This Problem introduces ways to represent proportional linear relationships between two variables using tables, graphs, and equations. It is also the first time that students are asked to explain why a relationship is linear or to recognize a linear relationship from a table or an equation."
+                      ]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong>1.2  Walking Rates and Linear Relationships: Tables, Graphs and Equations\nAoL: Introduce & Explore\nCCSSM: 7.RP.A.2, 7.RP.A.2a, 7.RP.A.2b, 7.RP.A.2c, 7.RP.A.2d, 7.EE.B.4</strong>"
+                      "text": "AoL: Introduce & Explore\nCCSSM: 7.RP.A.2, 7.RP.A.2a, 7.RP.A.2b, 7.RP.A.2c, 7.RP.A.2d, 7.EE.B.4"
                     }
                   },
                   {
@@ -461,6 +538,26 @@
                       "format": "html",
                       "text": "<strong>Emerging Mathematical Ideas</strong>\nBegin to make sense of linear patterns of change such as distance, and time (for given rates) including how to identify them and how to represent them in words, in a table, in a graph, as equivalent expressions, and as an equation connecting to prior experiences with proportional relationships.\n\nBegin to notice: <ul><li> the connection between equivalent expressions and an equation, that is, an equation equates two or more equivalent expressions, </li><li> how a constant rate of change is represented in a verbal context, table, graph, and equation, </li><li> the ways different representations of linear patterns (tables, graphs, or equations) are more or less useful in easily answering questions depending on the nature of the question (e.g., you can quickly see the rate of change from an equation, but the graph of a relationship is a quick way to see if the relationship is linear), </li><li> the characteristics in a table, graph and equation that can be used to identify a proportional relationship and the constant of proportionality (unit rate), and  </li><li> how variations in the way axes of a coordinate graph are partitioned can make the graph of a relationship look very different e.g., steeper or flatter lines. </li></ul>"
                     }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#Revision%20Comments'>Revision Comments</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#StemProblemFormat'>CMP STEM Problem Format</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitDescriptions'>Unit Descriptions</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#SummaryInvestigations'>Summary of Investigations</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitGoals'>Goals of the Units</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAlignment'>Unit Alignments: Goals, CCSSM, Arc of Learning, Emerging Mathematics</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#GeneralAoL'>General Arc of Learnsing</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAoL'>Unit Arc of Learning</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#MathOverview'>Mathematical Overview</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#labsheets'>Labsheets</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#TeachingAids'>Teaching Aids</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#FamilyLetters'>Family Letter</a></p>"
+                      ]
+                    }
                   }
                 ]
               },
@@ -474,7 +571,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong>Launch (Getting Started)</strong>  Connecting to Prior Knowledge\n\nStudents first learned of expressions and equations in the Grade 6 Unit Variables and Patterns. The introduction to this Problem offers a chance to revisit the vocabulary while also introducing “equivalent expressions” and “rate of change.” Teaching Aid 1.2 can provide an example for the conversation. (PORTRAY)"
+                      "text": "<strong>Launch (Getting Started)</strong>  \nConnecting to Prior Knowledge\n\nStudents first learned of expressions and equations in the Grade 6 Unit Variables and Patterns. The introduction to this Problem offers a chance to revisit the vocabulary while also introducing “equivalent expressions” and “rate of change.” Both expressions and equations have variables, only equations show equality.  Expressions can implicitly imply another variable(s).  Teaching Aid 1.2: Walking Rate can provide an example for the conversation."
                     }
                   },
                   {
@@ -496,14 +593,29 @@
                       "display": "teacher",
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong>Presenting the Challenge</strong>\nIntroduce the three students and their walking rates. Let students know that they will be analyzing the progress of the three students. Encourage students to use different colors to represent each student. For example, put Alana’s data in red, Gilberto’s data in green, and Leanne’s data in blue."
+                      "text": "<strong>Presenting the Challenge</strong>\nIntroduce the three students, Alana, Gilberto, and Leanne and their walking rates. Let students know that they will be analyzing the progress of the three students. Encourage students to use different colors to represent each student. For example, put Alana’s data in red, Gilberto’s data in green, and Leanne’s data in blue."
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong>Suggested Questions</strong>\n\nIf you have graphs and tables from Problem 1.1 display them, or use the Teaching Aid 1.1, and ask:<ul><li>Make a conjecture. If you increased your walking rate, how would it change your equation, graph, and table? (Students may not be able to answer at this time. Possible answer includes: If you increase the rate at which you walk, you can cover more distance in a given time. The distance in the table would increase for each second walked, and the graph would be steeper. Similarly, if you walk faster, it takes less time to cover a certain distance. The equation would have a larger number that multiplies by the variable.)\n\nNote that students are introduced to the word “coefficient” in the Grade 6 Unit Variables and Patterns. Since they may not have used the vocabulary term often in 6th grade, they are reintroduced to the term in Problem 2.2. While you may want to use that vocabulary earlier than Problem 2.2, the vocabulary term now might be too early for students. It helps students to have more experiences with the idea before the formal vocabulary is introduced. </li></ul>Look for students to make conjectures at this time. Tell students that they will investigate the effect of the walking rate on the relationship between distance and time by looking at the walking rates of three students. They will be asked to make a table, graph, and write an equation for each of the walkers. Students will examine these representations to see how changing the walking rate affects each representation of the data. They will relate the walking rate to the rate of change, linearity, and proportionality.\nTo maximize class time, you may want to provide each student with Labsheet 1.2."
+                      "text": [
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<p>If you have graphs and tables from Problem 1.1 display them, or use the Teaching Aid 1.2:  Walking Rate, and ask:</p>",
+                        "<ul><li>Make a conjecture. If you increased your walking rate, how would it change your equation, graph, and table? (Students may not be able to answer at this time. Possible answer includes: If you increase the rate at which you walk, you can cover more distance in a given time. The distance in the table would increase for each second walked, and the graph would be steeper. Similarly, if you walk faster, it takes less time to cover a certain distance. The equation would have a larger number that multiplies by the variable.)</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Note</strong>: Students are introduced to the word “coefficient” in the Grade 6 Unit <em>Variables and Patterns</em>. Since they may not have used the vocabulary term often in 6th grade, they are reintroduced to the term in Problem 2.2. While you may want to use that vocabulary earlier than Problem 2.2, the vocabulary term now might be too early for students. It helps students to have more experiences with the idea before the formal vocabulary is introduced.    </p>",
+                        "<p>Look for students to make conjectures at this time. Tell students that they will investigate the effect of the walking rate on the relationship between distance and time by looking at the walking rates of three students. They will be asked to make a table, graph, and write an equation for each of the walkers. Students will examine these representations to see how changing the walking rate affects each representation of the data. They will relate the walking rate to the rate of change, linearity, and proportionality.  </p>",
+                        "<p>To maximize class time, you may want to provide each student with <strong>Learning Aid 1.2:  Three Students Walking Rates</strong>.  Have students being this problem independently and then discuss with a partner. </p>"
+                      ]
                     }
                   }
                 ]
@@ -519,22 +631,79 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong>Explore (Digging In)</strong> Providing for Individual Needs\n\nStudents should each make their own tables and graphs, but they can discuss the questions in pairs. This will give you an opportunity to examine students’ abilities to make tables and graphs. If a student is having trouble getting started, you can pair the student temporarily with another student who seems to be on target to get started. Some students may need to see the tables separately rather than collapsed into one table. Seeing the table collapsed helps some students to see the variable time as independent. \n\nNote that students first learned the terms independent variable and dependent variable in Grade 6 Variables and Patterns. Students are given informal experiences identifying the variables in this unit. Students are reintroduced to the vocabulary of independent variable and dependent variable in the Introduction of Problem 1.3.\n\n<strong>Suggested Questions </strong><ul><li> What are the two variables in the relationship? (time, distance)</li><li> Why do you think that there are four columns in the table? (Because all of the information is on one table.)</li></ui>\nStudents may need to see the tables separately to understand that the time column is the same for all three students."
+                      "text": [
+                        "<strong>Explore (Digging In)</strong> \nProviding for Individual Needs\n\nStudents should each make their own tables and graphs, but they can discuss the questions in pairs. This will give you an opportunity to examine students’ abilities to make tables and graphs. If a student is having trouble getting started, you can pair the student temporarily with another student who seems to be on target to get started. Some students may need to see the tables separately rather than collapsed into one table. Seeing the table collapsed helps some students to see the variable time as independent. ",
+                        "Students may need to see the tables separately to understand that the time column is the same for all three students."]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "name": "Table 1",
+                      "columns": [
+                        {"name":"Time (seconds)"},
+                        {"name":"Alana's Distance (meters)"}
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "name": "Table 2",
+                      "columns": [
+                        {"name":"Time (seconds)"},
+                        {"name":"Gilberto's Distance (meters)"}
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "name": "Table 3",
+                      "columns": [
+                        {"name":"Time (seconds)"},
+                        {"name":"Leanne's Distance (meters)"}
+                      ]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<ul><li>  Which axis should represent time? Which should represent distance? Explain. (The horizontal axis usually represents time [the independent variable], and the vertical axis represents distance.) </li></ul>Students may not see how the walking rate is represented in the table or graph. This conversation may be something that you leave students thinking about until the Summary.\n\nCheck to see if students are able to determine if a relationship is proportional (Situation A). Students should use the ideas from Comparing and Scaling (unit rate/constant of proportionality, proportions, scaling on rate tables) to determine if the relationships are proportional.\n\nCheck to see if students are noticing when the x-variable (time) is not increasing by 1. This occurs in both Situation B (Omar’s graph) and Situation C (Elizabeth Walkathon). Both are linear and proportional, but the rate of change is not obvious because the time is not increasing by 1 second."
+                      "text": [
+                        "<p>Note that students first learned the terms independent variable and dependent variable in Grade 6 Variables and Patterns. Students are given informal experiences identifying the variables in this unit. Students are reintroduced to≈ the vocabulary of independent variable and dependent variable in the Introduction of Problem 1.3.</p>"
+                      ]
                     }
                   },
                   {
                     "content": {
-                      "display": "teacher",
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong>Planning for the Summary</strong>\nWhat evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know question? What will you do if you do not have evidence? \n\n<strong>Now What Do You Know?</stromg>\nHow do you recognize a linear pattern of change in a verbal context, table, graph, expression, or equation?"
+                      "text": [
+                        "<p><strong>Suggested Questions </strong></p>",
+                        "<ul><li>What are the two variables in the relationship? (time, distance)</li><li>Why do you think that there are four columns in the table? (Because all of the information is on one table.)</li><li>Which axis should represent time? Which should represent distance? Explain. (The horizontal axis usually represents time [the independent variable], and the vertical axis represents distance.) </li></ul>",
+                        "<p>Students may not see how the walking rate is represented in the table or graph. This conversation may be something that you leave students thinking about until the Summary.</p>",
+                        "<p>Check to see if students are able to determine if a relationship is proportional (Situation A). Students should use the ideas from Comparing and Scaling (unit rate/constant of proportionality, proportions, scaling on rate tables) to determine if the relationships are proportional.</p>",
+                        "<p>Check to see if students are noticing when the x-variable (time) is not increasing by 1. This occurs in both Situation B (Omar’s graph) and Situation C (Elizabeth Walkathon). Both are linear and proportional, but the rate of change is not obvious because the time is not increasing by 1 second.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": "<strong>Planning for the Summary</strong>\nWhat evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know question? What will you do if you do not have evidence?"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Now What Do You Know?</strong></p>",
+                        "<p>How can you recognize a linear pattern of change in a verbal context, table, graph, expression, or equation? </p>"
+                      ]
                     }
                   }
                 ]
@@ -550,14 +719,32 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong>Summarize (Orchestrating the Discussion)</strong> Solutions and Strategies \n\n<strong>Suggested Questions </strong><ul><li> Who walks the fastest? (Leanne) Who walks the slowest? (Alana) How can you tell? (Graph: Leanne’s line is the highest or steepest or has the largest angle from the x-axis. Alana’s line is the lowest or least steep or has the smallest angle from the x-axis. Table: For any number of seconds, other than zero seconds, Leanne has traveled the greatest distance and Alana has traveled the least distance. For example, at 5 seconds Leanne has walked 12.5 meters when Alana has only walked 5 seconds. Equation: The number multiplied by the time is the larger for Leanne who is faster and smaller for Alana who walks slower.)</li><li> If my walking rate was 2.3 meters per second, where would the line of my data be on the graph? (Between Leanne’s and Gilberto’s, because for every one second that you walk, you would travel 2.3 meters, 2 seconds would be 4.6 meters, etc.)</li><li> What is the equation for Alana? (d = 1t) Gilberto? (d = 2t) Leanne? (d = 2.5t) How did you find it? (Various answers. For example, to find the distance we multiply by the walking rate.)</li><li> If you increased your walking rate, what effect would that have on your table or graph? (If you increase the rate at which you walk, you can cover more distance in a given time. The distance in each row of the table would increase, and the graph would be steeper. Similarly, if you walk faster, it takes less time to cover a certain distance.)</li><li> As you change your walking rate to a faster rate, what effect does this have on the original equation? (The number multiplying [the coefficient] by the time t will increase.)</li></ul>"
+                      "text": "<strong>Summarize (Orchestrating the Discussion)</strong> \nSolutions and Strategies \n\n<strong>Suggested Questions </strong><ul><li> Who walks the fastest? (Leanne) Who walks the slowest? (Alana) How can you tell? (Graph: Leanne’s line is the highest or steepest or has the largest angle from the x-axis. Alana’s line is the lowest or least steep or has the smallest angle from the x-axis. Table: For any number of seconds, other than zero seconds, Leanne has traveled the greatest distance and Alana has traveled the least distance. For example, at 5 seconds Leanne has walked 12.5 meters when Alana has only walked 5 seconds. Equation: The number multiplied by the time is the larger for Leanne who is faster and smaller for Alana who walks slower.)</li><li> If my walking rate was 2.3 meters per second, where would the line of my data be on the graph? (Between Leanne’s and Gilberto’s, because for every one second that you walk, you would travel 2.3 meters, 2 seconds would be 4.6 meters, etc.)</li><li> What is the equation for Alana? (d = 1t) Gilberto? (d = 2t) Leanne? (d = 2.5t) How did you find it? (Various answers. For example, to find the distance we multiply by the walking rate.)</li><li> If you increased your walking rate, what effect would that have on your table or graph? (If you increase the rate at which you walk, you can cover more distance in a given time. The distance in each row of the table would increase, and the graph would be steeper. Similarly, if you walk faster, it takes less time to cover a certain distance.)</li><li> As you change your walking rate to a faster rate, what effect does this have on the original equation? (The number multiplying [the coefficient] by the time t will increase.)</li></ul>"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Making the Mathematics Explicit </strong>",
+                        "During this portion of the Summary, you will want to focus on using the representations (verbal context, table, graph, expression, equation) to help students understand how to answer these questions:",
+                        "\u0089Is the relationship linear? ",
+                        "\u0089If so, what is the rate of change? ",
+                        "\u0089Is the relationship the proportional? ",
+                        "\u0089If so, what is the constant of proportionality? ",
+                        "\u0089Will the rate of change and the constant of proportionality always be the same?"
+                      ]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong>Making the Mathematics Explicit </strong> \n\nDuring this portion of the Summary, you will want to focus on using the representations (verbal context, table, graph, expression, equation) to help students understand how to answer these questions:\n\u0089Is the relationship linear? \n\u0089If so, what is the rate of change? \n\u0089Is the relationship the proportional? \n\u0089If so, what is the constant of proportionality? \n\u0089Will the rate of change and the constant of proportionality always be the same?\nYou may want to make anchor charts that can be used to display the representations. These can be marked up to display the big ideas in the problem. (PORTRAYAL) The following are examples of anchor charts generated in a classroom during the Summary conversation. "
+                      "text": [
+                        "<p>You may want to make anchor charts that can be used to display the representations. These can be marked up to display the big ideas in the problem. The following are examples of anchor charts generated in a classroom during the Summary conversation. </p>"
+                      ]
                     }
                   },
                   [
@@ -578,101 +765,91 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong>Suggested Questions</strong><ul><li>Is the relationship between the variables (time walked and distance) linear? (Yes. They are walking at a consistent rate, so the points line up to make a straight line on the graph.)</li><li> How does the walking rate/rate of change show up in the different representations? (In the word description, it is the walking rate. In the graph, it affects the steepness of the line. In the equation or expression, it is the number multiplied by t in the equation. In the table, it is the consistent change in distance as time changes by 1 second.) </li></ul>Recognizing the rate of change in tables is a bit more complex. See the following discussion as a model of how to help students see the patterns in a table. "
+                      "text": ["<strong>Suggested Questions</strong>",
+                        "<ul><li>Is the relationship between the variables (time walked and distance) linear? (Yes. They are walking at a consistent rate, so the points line up to make a straight line on the graph.)</li><li> How does the walking rate/rate of change show up in the different representations? (In the word description, it is the walking rate. In the graph, it affects the steepness of the line. In the equation or expression, it is the number multiplied by t in the equation. In the table, it is the consistent change in distance as time changes by 1 second.) </li></ul>",
+                        "Recognizing the rate of change in tables is a bit more complex. See the following discussion as a model of how to help students see the patterns in a table. "
+                      ]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong>Using a Table to Find the Rate of Change</strong>For each unit change in time, there is a constant change in distance for a linear relationship. This rate of change should be explored in the different representations. It may be difficult for students to recognize the effect of changing the rate of walking when they use a table. Students can draw on what they learned in the Unit Comparing and Scaling. <ul><li> Gilberto walks at a rate of 2 meters per second. As the number of seconds he walks increases from 1 second to 2 seconds then 2 seconds to 3 seconds, how does his distance change? (The distance increases by 2 meters from for every second that he walks.) \n\nShow students this thinking on a table.(LANGUAGE) </li></li> "
+                      "text": "<strong>Using a Table to Find the Rate of Change</strong>\nFor each unit change in time, there is a constant change in distance for a linear relationship. This rate of change should be explored in the different representations. It may be difficult for students to recognize the effect of changing the rate of walking when they use a table. Students can draw on what they learned in the Unit Comparing and Scaling. <ul><li> Gilberto walks at a rate of 2 meters per second. As the number of seconds he walks increases from 1 second to 2 seconds then 2 seconds to 3 seconds, how does his distance change? (The distance increases by 2 meters from for every second that he walks.) \n\nShow students this thinking on a table.</li></li> "
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "name": "Walking Rates - Distance (meters)",
+                      "columns": [
+                        {"name":"Time (s)","values":["0","1","2","3"]},
+                        {"name":"Alana","values":["0","1","2","3"]},
+                        {"name":"Gilberto","values":["0","2","4","6"]},
+                        {"name":"Leanne","values":["0","2.5","5","7.5"]}
+                      ]
+                    }
+                  },
+                  {
+  "content": {
+    "type": "Text",
+    "format": "html",
+    "text": [
+      
+    ]
+  }
+},
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>To find the rate of change, students may instead use proportional reasoning to determine that, if the time triples, then the distance should also triple. </p>",
+                        "  (1 sec / 2 m) x 3 = 3 sec / 6 m",
+                        "Similarly, if the distance value is twice the time value after 1 second, the distance should continue to be twice the time value. There is a multiplicative 2 to 1 relationship between distance and time. ",
+                        " 2 m / 1 sec = 10 m / 5 sec",
+                        "In this Problem, the relationship between the variables is both linear and proportional. So, the latter thinking using proportions works. However, students will be confronted with a non-proportional relationship in Problem 1.3. There, students will need to rely on finding the rate of change by looking at the change in the dependent variable as the independent variable increases by 1. ",
+                        "<strong>Note:</strong> Students tend to set up their tables using an interval of 1 second because that is what makes most sense to them. This means that they need to produce many pairs of data to get a sense of what is happening over a reasonable span of time. You may want to discuss the advantages and disadvantages of using other intervals, such as 2 seconds or 5 seconds. What If Situation B with Omar’s Walking Rate Graph and What If Situation C with Elizabeth’s Walkathon Table provide this opportunity."]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "To find the rate of change, students may instead use proportional reasoning to determine that, if the time triples, then the distance should also triple.\n\n 1 sec / 2 m  = x3 => 3 sec / 6 m\n\nSimilarly, if the distance value is twice the time value after 1 second, the distance should continue to be twice the time value. There is a multiplicative 2 to 1 relationship between distance and time. \n\n 2 m / 1 sec = 10 m / 5 sec\n\nIn this Problem, the relationship between the variables is both linear and proportional. So, the latter thinking using proportions works. However, students will be confronted with a non-proportional relationship in Problem 1.3. There, students will need to rely on finding the rate of change by looking at the change in the dependent variable as the independent variable increases by 1. \n\n<strong>Note:</strong> Students tend to set up their tables using an interval of 1 second because that is what makes most sense to them. This means that they need to produce many pairs of data to get a sense of what is happening over a reasonable span of time. You may want to discuss the advantages and disadvantages of using other intervals, such as 2 seconds or 5 seconds. Situation B with Omar’s Walking Rate Graph and Situation C with Elizabeth’s Walkathon Table provide this opportunity."
+                      "text": [
+                        "<strong>Using a Graph to Find the Rate of Change</strong>\nIt should be fairly easy for students to recognize the effect of changing the rate of walking when they use a graph—it changes the “steepness” of the line. Some students say that the line “goes up faster” or “has a larger angle from the x-axis.” These intuitive ideas are the goal at this time. <ul><li> What do you notice about the graphs when the walking rate increases? (“The graph gets steeper,” “it goes up faster”, or “it has a larger angle from the x-axis.”) </li><li> If I choose two points on the graph, how can I find the walking rate? (Find the change for an increase of 1 on the x-axis.)\n\n(PORTRAYAL) Pick two points on one of the graphs and ask students how the time and the distance change from one point to the next. This is an opportunity to connect the Problem to the unit rates in Comparing and Scaling. For example, for Leanne, two points are (3, 7.5) and (6, 15).",
+                        "\u0089 (3, 7.5) At 3 seconds she travels 7.5 meters",
+                        "\u0089 (6, 15) At 6 seconds she travels 15 meters",
+                        "\u0089 So, as the time increases by    3 seconds and distance increases by 7.5 meters",
+                        "\u0089 This means that every               1 second she increases her distance by 2.5 meters.",
+                        "Show the vertical and horizontal changes on the graph by drawing in dotted lines "]
                     }
                   },
                   {
                     "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "<strong>Using a Graph to Find the Rate of Change</strong>\nIt should be fairly easy for students to recognize the effect of changing the rate of walking when they use a graph—it changes the “steepness” of the line. Some students say that the line “goes up faster” or “has a larger angle from the x-axis.” These intuitive ideas are the goal at this time. <ul><li> What do you notice about the graphs when the walking rate increases? (“The graph gets steeper,” “it goes up faster”, or “it has a larger angle from the x-axis.”) </li><li> If I choose two points on the graph, how can I find the walking rate? (Find the change for an increase of 1 on the x-axis.)\n\n(PORTRAYAL) Pick two points on one of the graphs and ask students how the time and the distance change from one point to the next. This is an opportunity to connect the Problem to the unit rates in Comparing and Scaling. For example, for Leanne, two points are (3, 7.5) and (6, 15). \n\n\u0089 (3, 7.5) At 3 seconds she travels 7.5 meters\n\u0089 (6, 15) At 6 seconds she travels 15 meters\n\u0089  So, as the time increases by <em>3 seconds and distance increases by 7.5 meters</em>\n\u0089 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  \u2925 \u00F7 3\n\u0089 This means that every <em>1 second she increases her distance by 2.5 meters.</em> \nShow the vertical and horizontal changes on the graph by drawing in dotted lines. "
-                    }
-                  },
-                  {
-                    "layout": {
-                      "height": 320
-                    },
-                    "content": {
-                      "type":"Geometry",
+                      "type": "Geometry",
                       "title": "Demonstrating Rate of Change",
                       "board": {
                         "properties": {
-                          "axisNames": ["Time (seconds)", "Distance (meters)"],
                           "axisMin": [-0.5, -1],
-                          "axisRange": [10, 20]
+                          "axisRange": [10, 20],
+                          "axisNames": ["Time (seconds)", "Distance (meters)"]
                         }
                       },
                       "objects": [
-                        {
-                          "type": "point",
-                          "parents": [0, 0],
-                          "properties": {
-                                "name": ""
-                              }
-                        },
-                        {
-                          "type": "point",
-                          "parents": [1, 2.5],
-                          "properties": {
-                                "name": ""
-                              }
-                        },
-                        {
-                          "type": "point",
-                          "parents": [2, 5],
-                          "properties": {
-                                "name": ""
-                              }
-                        },
-                        {
-                          "type": "point",
-                          "parents": [3, 7.5],
-                          "properties": {
-                                "name": "+ 3"
-                              }
-                        },
-                        {
-                          "type": "point",
-                          "parents": [4, 10],
-                          "properties": {
-                                "name": ""
-                              }
-                        },
-                        {
-                          "type": "point",
-                          "parents": [5, 12.5],
-                          "properties": {
-                                "name": ""
-                              }
-                        },
-                        {
-                          "type": "point",
-                          "parents": [6, 15],
-                          "properties": {
-                                "name": "+ 7.5"
-                              }
-                        },
-                        {
-                          "type": "point",
-                          "parents": [7, 17.5],
-                          "properties": {
-                                "name": ""
-                              }
-                        }
+                        { "type": "point", "parents": [0, 0], "properties": {"id":"hx42QBoY5JhnH8Tg","name":""} },
+                        { "type": "point", "parents": [1, 2.5], "properties": {"id":"vzzauIM--ARfOCaF","name":""} },
+                        { "type": "point", "parents": [2, 5], "properties": {"id":"ga6uBDzItfByBfWk","name":""} },
+                        { "type": "point", "parents": [3, 7.5], "properties": {"id":"_4ZsIEujyFVdcbKg","name":"+ 3"} },
+                        { "type": "point", "parents": [4, 10], "properties": {"id":"BXMNp4_AGqWLmJgy","name":""} },
+                        { "type": "point", "parents": [5, 12.5], "properties": {"id":"Rdau88fCbq-zuVZO","name":""} },
+                        { "type": "point", "parents": [6, 15], "properties": {"id":"D-bNObEgsudY3bu3","name":"+ 7.5"} },
+                        { "type": "point", "parents": [7, 17.5], "properties": {"id":"7YQzIOJeDgZKC5Ri","name":""} },
+                        { "type": "polygon", "parents": ["hx42QBoY5JhnH8Tg", "vzzauIM--ARfOCaF", "ga6uBDzItfByBfWk", "_4ZsIEujyFVdcbKg", "BXMNp4_AGqWLmJgy", "Rdau88fCbq-zuVZO", "D-bNObEgsudY3bu3", "7YQzIOJeDgZKC5Ri"],"properties": {"id":"k5iaHQGylgrhtx_B"} },
+                        { "type": "point", "parents": [3, 7.5], "properties": {"name": "", "id":"i9_rnl6bP5Px0THN","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [6, 7.5], "properties": {"name": "","id":"SR-TnjeC2I4tjK1w","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [6, 15], "properties": {"name": "","id":"af604bQX39u1qt4x","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "polygon", "parents": ["i9_rnl6bP5Px0THN", "SR-TnjeC2I4tjK1w", "af604bQX39u1qt4x"],"properties": {"id":"L0vKQszuyAOcOY42","labelOption":"length"} }
                       ]
                     }
                   },
@@ -766,6 +943,26 @@
                       "format": "html",
                       "text": "<strong>Emerging Mathematical Ideas</strong>\nExpand understanding of linear and proportional relationships exploring a new context (miles walked, dollars raised) while using multiple representations to answer a variety of relevant questions.\n\nExplore the Walkathon Fundraising context working to:<ul><li> identify independent and dependent variables in a real-world situation, </li><li> represent linear relationships in tables, graphs, and equations give descriptions in words,</li><li>  make sense of an initial value in a linear relationship (a fixed donation) compared to a constant rate of change (dollars for each mile walked) and how each are represented in tables, graphs, equations and in the words describing the relationship, </li><li> distinguish between linear and proportional relationships described in words, tables, graphs and equations (e.g., proportional relationships have a constant rate of change and must contain the point (0,0), where-as linear relationships have a constant rate of change, but may or may not contain the point (0,0)),</li><li> interpret meaning of data points on graphs, in tables, and satisfying equations, and </li><li> use and compare multiple linear relationships to answer relevant questions.</li></ul>"
                     }
+                  },
+                                    {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#Revision%20Comments'>Revision Comments</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#StemProblemFormat'>CMP STEM Problem Format</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitDescriptions'>Unit Descriptions</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#SummaryInvestigations'>Summary of Investigations</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitGoals'>Goals of the Units</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAlignment'>Unit Alignments: Goals, CCSSM, Arc of Learning, Emerging Mathematics</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#GeneralAoL'>General Arc of Learnsing</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAoL'>Unit Arc of Learning</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#MathOverview'>Mathematical Overview</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#labsheets'>Labsheets</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#TeachingAids'>Teaching Aids</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#FamilyLetters'>Family Letter</a></p>"
+                      ]
+                    }
                   }
                 ]
               },
@@ -779,7 +976,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong>Launch (Getting Started)</strong> Connecting to Prior Knowledge\n\nIn the last two Problems, students looked at proportional, linear relationships that involved time as the independent variable and distance as the dependent variable. In this Problem, students will look at a relationship in which distance is the independent variable.\n\nStudents first learned the terms independent variable and dependent variable in Grade 6 Variables and Patterns. If you have not used the terms in this unit, reintroduce students to the vocabulary of independent variable and dependent variable in the introduction of Problem 1.3.\n\nPick one of the previous examples to review dependent variables and independent variables.\n\n<strong>Presenting the Challenge</strong>\nMany schools have walkathons or something similar to raise funds for charity. Ask students how they determined what to charge their patrons."
+                      "text": "<strong>Launch (Getting Started)</strong> \nConnecting to Prior Knowledge\n\nIn the last two Problems, students looked at proportional, linear relationships that involved time as the independent variable and distance as the dependent variable. In this Problem, students will look at a relationship in which distance is the independent variable.\n\nStudents first learned the terms independent variable and dependent variable in Grade 6 Variables and Patterns. If you have not used the terms in this unit, reintroduce students to the vocabulary of independent variable and dependent variable in the introduction of Problem 1.3.\n\nPick one of the previous examples to review dependent variables and independent variables.\n\n<strong>Presenting the Challenge</strong>\nMany schools have walkathons or something similar to raise funds for charity. Ask students how they determined what to charge their patrons."
                     }
                   },
                   {
@@ -809,7 +1006,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong>Explore (Digging In) </strong> Providing for Individual Needs\n\nAs you circulate, ask students for explanations. Look for students who have interesting ways to explain their thinking. Be sure to discuss these in the Summarize. \n\nStudents may or may not start by representing the pledge plans with tables and graphs. Without the representations, it may be difficult to answer the questions with specific values. Students may make broad statements, such as saying that Leanne starts out making the most. Push students to find a value for when others might make more.\n\n<strong>Suggested Questions</strong>\n• Who starts out making the most? (Leanne)\n• Will she always make the most? How much would each person raise if they walked 20 kilometers? (Leanne - $10, Gilberto - $20, Alana - $15)\n• When did it change? At what distance does Leanne raise less than Gilberto? Less than Alana? (Leave students to think about these detailed questions. Be sure to revisit them in the Summary.)\n\nBy this time in the unit, most students should have few problems making tables and graphs. Writing the equations may be difficult for some students. Encourage those students to write out the relationship in words. (LANGUAGE) Being able to write a verbal description of the relationship in each pledge plan is the first step to being able to write the same relationship algebraically. For example, use a plan to ask questions like the following. "
+                      "text": "<strong>Explore (Digging In) </strong> \nProviding for Individual Needs\n\nAs you circulate, ask students for explanations. Look for students who have interesting ways to explain their thinking. Be sure to discuss these in the Summarize. \n\nStudents may or may not start by representing the pledge plans with tables and graphs. Without the representations, it may be difficult to answer the questions with specific values. Students may make broad statements, such as saying that Leanne starts out making the most. Push students to find a value for when others might make more.\n\n<strong>Suggested Questions</strong>\n• Who starts out making the most? (Leanne)\n• Will she always make the most? How much would each person raise if they walked 20 kilometers? (Leanne - $10, Gilberto - $20, Alana - $15)\n• When did it change? At what distance does Leanne raise less than Gilberto? Less than Alana? (Leave students to think about these detailed questions. Be sure to revisit them in the Summary.)\n\nBy this time in the unit, most students should have few problems making tables and graphs. Writing the equations may be difficult for some students. Encourage those students to write out the relationship in words. (LANGUAGE) Being able to write a verbal description of the relationship in each pledge plan is the first step to being able to write the same relationship algebraically. For example, use a plan to ask questions like the following. "
                     }
                   },
                   {
@@ -839,7 +1036,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong>Summarize (Orchestrating the Discussion)</strong> Solutions and Strategies \n\nBegin by asking students: What “What If...?” questions do you have? (Students may or may not have any What If’s at this time.)\n\nYou may want to make anchor charts that can be used to display the representations. You can work with students to make the charts. Then, these can be marked up to display the big ideas in the problem, such as showing the rate of change in the table, graph, and equation. (PROBLEM SOLVING) The following are examples of anchors charts generated in a classroom during the Summary conversation. "
+                      "text": "<strong>Summarize (Orchestrating the Discussion)</strong> \nSolutions and Strategies \n\nBegin by asking students: What “What If...?” questions do you have? (Students may or may not have any What If’s at this time.)\n\nYou may want to make anchor charts that can be used to display the representations. You can work with students to make the charts. Then, these can be marked up to display the big ideas in the problem, such as showing the rate of change in the table, graph, and equation. (PROBLEM SOLVING) The following are examples of anchors charts generated in a classroom during the Summary conversation. "
                     }
                   },
                   {
@@ -1010,6 +1207,26 @@
               "type": "overview",
               "content": {
                 "tiles": [
+                                    {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#Revision%20Comments'>Revision Comments</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#StemProblemFormat'>CMP STEM Problem Format</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitDescriptions'>Unit Descriptions</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#SummaryInvestigations'>Summary of Investigations</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitGoals'>Goals of the Units</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAlignment'>Unit Alignments: Goals, CCSSM, Arc of Learning, Emerging Mathematics</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#GeneralAoL'>General Arc of Learnsing</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAoL'>Unit Arc of Learning</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#MathOverview'>Mathematical Overview</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#labsheets'>Labsheets</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#TeachingAids'>Teaching Aids</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#FamilyLetters'>Family Letter</a></p>"
+                      ]
+                    }
+                  }
                 ]
               },
               "supports": []
@@ -1096,6 +1313,26 @@
                       "format": "html",
                       "text": "<strong>Emerging Mathematical Ideas</strong>\nMake sense of a new problem context with two contrasting linear relationships and examine the use of tables, graphs, equations, and inequalities to find solutions.  \nLook for patterns in various representations that can be used to answer questions about rate of change for linear relationships such as: <ul><li> in tables, the rate of change is the difference between y values when the table values for x change at a constant rate of one,</li><li> the direction of the slant of the line in a graph lets you know if the rate of change is positive (lines where the y values are increasing) or negative (where the y values are decreasing), and </li><li> in the equation of a line the rate of change is the number that multiplies the independent variable (for example in Problem 2.1 it is the number of meters traveled each second with time as the independent variable), and  </li><li> identify and represent proportional relationships as tables, graphs, and equations and distinguish from non-proportional linear relationships.</li></ul> \nLook for patterns in various representations that can be used to find the value of one variable in a linear relationship when you have a value for the other variable such as: <ul><li> in a table, corresponding values for independent and dependent variable are side-by-side or above and below depending on the orientation of the table,</li><li> in a graph, the coordinates of points on the line provide the values of corresponding independent and dependent variables, and</li><li> in an equation or inequality, the value of the dependent variable can be found for any value of the independent variable by performing the indicated operations in the equation or inequality.</li></ul> \nNotice that informal guess and check strategies may allow students to answer questions about when two related linear relationships have the same value such as how much time has passed (t) for the distances traveled (d) to be the same for both brothers. \nNOTE: In an equation, it is not yet true that students will be able to find the value of the independent variable given a value for the dependent variable (e.g., solve 100 = 2x + 45)."
                     }
+                  },
+                                    {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#Revision%20Comments'>Revision Comments</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#StemProblemFormat'>CMP STEM Problem Format</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitDescriptions'>Unit Descriptions</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#SummaryInvestigations'>Summary of Investigations</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitGoals'>Goals of the Units</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAlignment'>Unit Alignments: Goals, CCSSM, Arc of Learning, Emerging Mathematics</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#GeneralAoL'>General Arc of Learnsing</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAoL'>Unit Arc of Learning</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#MathOverview'>Mathematical Overview</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#labsheets'>Labsheets</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#TeachingAids'>Teaching Aids</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#FamilyLetters'>Family Letter</a></p>"
+                      ]
+                    }
                   }
                 ]
               },
@@ -1109,7 +1346,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>Launch (Getting Started)</strong> Connecting to Prior Knowledge\n\nIf you did not pose the following questions at the end of the Summarize for Problem 1.4, ask them now. Begin by having students list several equations from Investigation 1 that represent linear relationships.\n<strong>Suggested Questions</strong>\n<ul><li>Which relationship has the greatest rate of change? (Answers will vary. Look for students to choose the relationship that when written in the form <em>y = b + ax</em> has the greatest value of <em>a</em>. At this time in the Unit, students are likely to mention the context of the problem rather than formal language of the value of <em>a</em>.)</li><li>Which relationship(s) has a graph that crosses the <em>y</em>-axis at a point with a positive <em>y</em>-coordinate? With a <em>y</em>-coordinate of zero? With a negative y-coordinate? (Answers will vary. At this time in the Unit, students are likely to mention the context of the problem rather than formal language of the value of <em>b</em>. Positive <em>y</em>-coordinate: Look for students to choose the relationship(s) that when written in the form <em>y = b + ax</em> has a positive value of <em>b</em>. Sample: The line that represents Alana’s pledge plan. Zero <em>y</em>-coordinate: Look for students to choose a proportional relationship. Sample: Gilberto’s pledge plan can be modeled by a line that passes through the origin. Negative <em>y</em>-coordinate: Look for students to choose the relationship(s) that when written in the form <em>y = b + mx</em> has a negative value of <em>b</em>. Sample: The line that represents Gilberto’s pledge plan after purchasing a T-shirt for each sponsor.) You can tell students that they will continue to look at linear relationships in this Problem.</li> "]
+                      "text": ["<strong>Launch (Getting Started)</strong> \nConnecting to Prior Knowledge\n\nIf you did not pose the following questions at the end of the Summarize for Problem 1.4, ask them now. Begin by having students list several equations from Investigation 1 that represent linear relationships.\n<strong>Suggested Questions</strong>\n<ul><li>Which relationship has the greatest rate of change? (Answers will vary. Look for students to choose the relationship that when written in the form <em>y = b + ax</em> has the greatest value of <em>a</em>. At this time in the Unit, students are likely to mention the context of the problem rather than formal language of the value of <em>a</em>.)</li><li>Which relationship(s) has a graph that crosses the <em>y</em>-axis at a point with a positive <em>y</em>-coordinate? With a <em>y</em>-coordinate of zero? With a negative y-coordinate? (Answers will vary. At this time in the Unit, students are likely to mention the context of the problem rather than formal language of the value of <em>b</em>. Positive <em>y</em>-coordinate: Look for students to choose the relationship(s) that when written in the form <em>y = b + ax</em> has a positive value of <em>b</em>. Sample: The line that represents Alana’s pledge plan. Zero <em>y</em>-coordinate: Look for students to choose a proportional relationship. Sample: Gilberto’s pledge plan can be modeled by a line that passes through the origin. Negative <em>y</em>-coordinate: Look for students to choose the relationship(s) that when written in the form <em>y = b + mx</em> has a negative value of <em>b</em>. Sample: The line that represents Gilberto’s pledge plan after purchasing a T-shirt for each sponsor.) You can tell students that they will continue to look at linear relationships in this Problem.</li> "]
                     }
                   },
                   {
@@ -1155,7 +1392,7 @@
                   "content": {
                     "type": "Text",
                     "format": "html",
-                    "text":["<strong>Explore (Digging In)</strong>  Providing for Individual Needs\n\nFor the Initial Challenge\n\nCirculate and ask groups to explain their thinking. Put the emphasis on what evidence the group will use to justify their conclusion. Encourage all groups to listen to each member in order to reach a consensus on a single answer or to agree that more than one choice is reasonable and explain why.\n\nIf students hesitate about how to begin, you might offer suggestions for how to represent the data of the race. Ask the questions, but do not look for answers at this time. The questions are to suggest representation strategies."]
+                    "text":["<strong>Explore (Digging In)</strong>  \nProviding for Individual Needs\n\nFor the Initial Challenge\n\nCirculate and ask groups to explain their thinking. Put the emphasis on what evidence the group will use to justify their conclusion. Encourage all groups to listen to each member in order to reach a consensus on a single answer or to agree that more than one choice is reasonable and explain why.\n\nIf students hesitate about how to begin, you might offer suggestions for how to represent the data of the race. Ask the questions, but do not look for answers at this time. The questions are to suggest representation strategies."]
                     }
                   },
                   {
@@ -2197,7 +2434,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["2.2 Comparing Cost Relationships: Using Tables and Graphs to Find Solutions to Equations\nAoL: Analysis & Analysis\nCCSSM: 7.RP.A.2, 7.RP.A.2a, 7.EE.A.1, 7.EE.A.2, 7.EE.B.3, 7.EE.B.4, 7.EE.B.4a, 7.EE.B.4b"]
+                      "text": ["AoL: Analysis & Analysis\nCCSSM: 7.RP.A.2, 7.RP.A.2a, 7.EE.A.1, 7.EE.A.2, 7.EE.B.3, 7.EE.B.4, 7.EE.B.4a, 7.EE.B.4b"]
                     }
                   },
                   {
@@ -2213,6 +2450,26 @@
                       "type": "Text",
                       "format": "html",
                       "text":["<strong>Emerging Mathematical Ideas</strong>\nContinue examining ways tables, graphs, equations, and inequalities can be used to find solutions, using a new problem context presented in the form of two contrasting linear equations.\n\nLook for patterns that can be used to find solutions to linear relationships including:<ul><li>using a completed table, look for the value of the dependent variable (<em>y</em>) that corresponds to the needed value of the independent variable (<em>x</em>),</li><li>using a table that is incomplete, substitute the value for the independent value (<em>n</em>) into the given equation and perform the indicated operations to find the corresponding value for the dependent variable (C<sub>M</sub>) (solution) (e.g., for C<sub>M</sub> = 49 + n, to find n = 100, the solution, C<sub>M</sub>, is equal to 49 + 100 = 149),</li><li>in a graph, the coordinates of the points (<em>a,b</em>) on the line represent all of the solutions to the equation of the line; to find the solution for a given value of the independent variable (first coordinate a), find the point on the line with the first coordinate and read the corresponding <em>b<em> value in the ordered pair, and</li><li>in an equation or inequality, the value of the dependent variable (<em>y</em>) can be found for any value of the independent variable (<em>x</em>) by substituting the needed value of <em>x</em> into the equation and performing the indicated operations in the equation to find the solution (<em>y</em>).</li></ul>Identify and represent proportional relationships as tables, graphs, and equations and distinguish from non-proportional linear relationships."]
+                    }
+                  },
+                                    {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#Revision%20Comments'>Revision Comments</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#StemProblemFormat'>CMP STEM Problem Format</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitDescriptions'>Unit Descriptions</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#SummaryInvestigations'>Summary of Investigations</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitGoals'>Goals of the Units</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAlignment'>Unit Alignments: Goals, CCSSM, Arc of Learning, Emerging Mathematics</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#GeneralAoL'>General Arc of Learnsing</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAoL'>Unit Arc of Learning</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#MathOverview'>Mathematical Overview</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#labsheets'>Labsheets</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#TeachingAids'>Teaching Aids</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#FamilyLetters'>Family Letter</a></p>"
+                      ]
                     }
                   }
                 ]
@@ -2368,7 +2625,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>2.3 Connecting Tables, Graphs, and Equations to Solutions\nAoL: Analysis & Analysis\nCCSSM: 7.RP.A.2, 7.RP.A.2a, 7.EE.A.1, 7.EE.A.2, 7.EE.B.3, 7.EE.B.4, 7.EE.B.4a, 7.EE.B.4b</strong>"]
+                      "text": ["AoL: Analysis & Analysis\nCCSSM: 7.RP.A.2, 7.RP.A.2a, 7.EE.A.1, 7.EE.A.2, 7.EE.B.3, 7.EE.B.4, 7.EE.B.4a, 7.EE.B.4b</strong>"]
                     }
                   },
                   {
@@ -2384,6 +2641,26 @@
                       "type": "Text",
                       "format": "html",
                       "text": ["<strong>Emerging Mathematical Ideas</strong>\nContinue working to develop strategies for finding solutions for linear relationships using multiple representations including: graphs, tables, equations, and inequalities. The focus of Problem 2.3 is to make connections between solutions found using one representation (e.g., graphs) to each of the other representations (e.g., tables and equations) where they are also visible.\n\nLook for patterns connecting solutions for a linear relationship found on a graph, table, equation, or inequality to solutions found using other representations including:<ul><li>the coordinates of a point (<em>a,b</em>) on the graph of a line is a solution for the linear relationship. The ordered pair (<em>a,b</em>) can also be found as a corresponding pair of values on a table representing solutions for the line, and when the equation is evaluated at <em>x = a</em>, the value found for <em>y</em> will be equal to <em>b</em>.</li></ul>\nNotice that answering some questions about a linear relationship can be easier or harder depending on the representation. For example,<ul><li>it can be harder to find rate of change for a linear relationship on a graph or table than it is to find it using an equation, or</li><li>it can be easier to find the solution (y value) for a linear relationship for a given value of the independent variable using a table or a graph</li></ul>\nIdentify and represent proportional relationships as tables, graphs, and equations and distinguish from non-proportional linear relationships."]
+                    }
+                  },
+                                    {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#Revision%20Comments'>Revision Comments</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#StemProblemFormat'>CMP STEM Problem Format</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitDescriptions'>Unit Descriptions</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#SummaryInvestigations'>Summary of Investigations</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitGoals'>Goals of the Units</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAlignment'>Unit Alignments: Goals, CCSSM, Arc of Learning, Emerging Mathematics</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#GeneralAoL'>General Arc of Learnsing</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAoL'>Unit Arc of Learning</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#MathOverview'>Mathematical Overview</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#labsheets'>Labsheets</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#TeachingAids'>Teaching Aids</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#FamilyLetters'>Family Letter</a></p>"
+                      ]
                     }
                   }
                 ]
@@ -2554,7 +2831,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>3.1 Mystery Pouches:  Exploring Equality\nAoL:  Explore & Explore\nCCSSM: 7.NS.A.2c, 7.EE.A, 7.EE.A.1, 7.EE.A.2, 7.EE.B, 7.EE.B.4, 7.EE.B.4a</strong>"]
+                      "text": ["AoL:  Explore & Explore\nCCSSM: 7.NS.A.2c, 7.EE.A, 7.EE.A.1, 7.EE.A.2, 7.EE.B, 7.EE.B.4, 7.EE.B.4a</strong>"]
                     }
                   },
                   {
@@ -2566,6 +2843,26 @@
                         "<p>Begin to make sense of algebraic equations presented as coins (numbers) and pouches (variables) and explore approaches to solving them.</p>",
                         "<p>Begin exploring algebraic strategies to solve equations modeled with pouches and coins by:</p>",
                         "<ul><li>making sense of equations modeled with pouches and coins as variables and numbers, </li><li>translating between algebraic representations of equations and models, </li><li>noticing that there may be multiple equivalent forms for an expression or equation, and </li><li>using prior experiences with the Distributive Property, fact families, and numeric reasoning to make sense of steps needed to solve equations represented by models.</li></ul>"
+                      ]
+                    }
+                  },
+                                    {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#Revision%20Comments'>Revision Comments</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#StemProblemFormat'>CMP STEM Problem Format</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitDescriptions'>Unit Descriptions</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#SummaryInvestigations'>Summary of Investigations</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitGoals'>Goals of the Units</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAlignment'>Unit Alignments: Goals, CCSSM, Arc of Learning, Emerging Mathematics</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#GeneralAoL'>General Arc of Learnsing</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAoL'>Unit Arc of Learning</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#MathOverview'>Mathematical Overview</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#labsheets'>Labsheets</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#TeachingAids'>Teaching Aids</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#FamilyLetters'>Family Letter</a></p>"
                       ]
                     }
                   }
@@ -2583,7 +2880,7 @@
                       "format": "html",
                       "text": [
                           "<p><strong>Launch (Getting Started)</strong></p>",
-                          "<p>Connecting to Prior Knowledge</p>",
+                          "Connecting to Prior Knowledge",
                           "<p>Display <strong>Teaching Aid 3.1</strong>. Tell students that the graph and table are for Alana’s pledge plan, which is represented by the equation <em>A</em> = 5 + 0.5<em>d</em>, where <em>A</em> is the amount of money Alana collects from each sponsor for walking <em>d</em> kilometers</p>"
                         ]
                     }
@@ -2932,6 +3229,26 @@
                         "<ul><li>noticing that the Distributive Property allows you to create multiple equivalent forms for an expression or equation, </li><li>applying the Distributive Property and fact families (composing/decomposing numbers) to justify steps needed to solve equations (find </li><li>applying the properties of operations and equality (subtract or divide both sides of an equation by the same number) and fact families to justify steps needed to solve equations.</li></ul>",
                         "<p>Notice that you can check to see if you have found the correct number of coins in a pouch (variable) by replacing each pouch (variable) in the original clue/equation with your answer and simplifying to see if the two sides are equal.</p>"]
                     }
+                  },
+                                    {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#Revision%20Comments'>Revision Comments</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#StemProblemFormat'>CMP STEM Problem Format</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitDescriptions'>Unit Descriptions</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#SummaryInvestigations'>Summary of Investigations</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitGoals'>Goals of the Units</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAlignment'>Unit Alignments: Goals, CCSSM, Arc of Learning, Emerging Mathematics</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#GeneralAoL'>General Arc of Learnsing</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAoL'>Unit Arc of Learning</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#MathOverview'>Mathematical Overview</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#labsheets'>Labsheets</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#TeachingAids'>Teaching Aids</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#FamilyLetters'>Family Letter</a></p>"
+                      ]
+                    }
                   }
                 ]
               },
@@ -3253,7 +3570,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>3.3Solving Linear Equations\nAoL: Analysis & Explore/Analysis\nCCSSM: 7.NS.A.2c, 7.EE.A, 7.EE.A.1, 7.EE.A.2, 7.EE.B, 7.EE.B.4, 7.EE.B.4a, 7.EE.B.4b</strong>"]
+                      "text": ["AoL: Analysis & Explore/Analysis\nCCSSM: 7.NS.A.2c, 7.EE.A, 7.EE.A.1, 7.EE.A.2, 7.EE.B, 7.EE.B.4, 7.EE.B.4a, 7.EE.B.4b"]
                     }
                   },
                   {
@@ -3266,6 +3583,26 @@
                         "<ul><li>identifying and applying needed operations to both sides (such as adding 10 to both sides or dividing both sides by 2.5) in order to keep the expressions on each side of the equation equal,</li><li>identifying when to apply the Distributive Property as needed to reach a solution efficiently (factored or expanded),</li><li>applying order of operations appropriately as needed to simplify equations, and <li>understanding the goal is to isolate the variable on one side of the equation.</li></ul>",
                         "<p>Connect newly developed symbolic methods for solving equations (answering questions about relationships) to prior experiences with solution strategies that use tables and graphs including:</p>",
                         "<ul><li>recognizing that equations with linear expressions on both sides of the equal sign (2<em>x</em> – 5 = x + 7) can be viewed as two equations (<em>y</em> = 2<em>x</em> - 5 and <em>y</em> = <em>x</em> + 7), where the solution to the original equation (2<em>x</em> – 5 = <em>x</em> + 7) is the point where the two lines intersect on the graph,</li><li>strategically selecting an efficient method to use for a given situation such as when a symbolic approach would be quick or when a calculator could be easily used to generate a graph or table to answer many questions about the relationship, and</li><li>generating questions for a given relationship and making sense of questions asked about variables for a given equation</li></ul>"
+                      ]
+                    }
+                  },
+                                    {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#Revision%20Comments'>Revision Comments</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#StemProblemFormat'>CMP STEM Problem Format</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitDescriptions'>Unit Descriptions</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#SummaryInvestigations'>Summary of Investigations</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitGoals'>Goals of the Units</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAlignment'>Unit Alignments: Goals, CCSSM, Arc of Learning, Emerging Mathematics</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#GeneralAoL'>General Arc of Learnsing</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAoL'>Unit Arc of Learning</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#MathOverview'>Mathematical Overview</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#labsheets'>Labsheets</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#TeachingAids'>Teaching Aids</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#FamilyLetters'>Family Letter</a></p>"
                       ]
                     }
                   }
@@ -3503,9 +3840,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>3.4 The Point of Intersection:  Using Equations and Inequalities</strong></p>",
-                        "<p><strong>AoL: Analysis &amp; Analysis</strong></p>",
-                        "<p><strong>CCSSM: 7.NS.A.2c, 7.EE.A, 7.EE.A.1, 7.EE.A.2, 7.EE.B, 7.EE.B.4, 7.EE.B.4a, 7.EE.B.4b</strong></p>"
+                        "<p>AoL: Analysis &amp; Analysis",
+                        "<p>CCSSM: 7.NS.A.2c, 7.EE.A, 7.EE.A.1, 7.EE.A.2, 7.EE.B, 7.EE.B.4, 7.EE.B.4a, 7.EE.B.4b</p>"
                       ]
                     }
                   },
@@ -3532,6 +3868,26 @@
                         "<p>Extend and apply strategies for solving equations using symbols and graphs to solve two related equations and to answer questions about the relationships.</p>",
                         "<p>Use symbolic and graphical strategies to answer questions about two linear relationships with the same independent variable including:</p>",
                         "<ul><li>using symbolic methods to find the value for <em>x</em> where the two equations are equal (that is have the same <em>y</em> value),</li><li>understanding the meaning of the point where the graphs of the two equations intersect for a given context, and</li><li>using graphs and equations to answer questions about the two related equations such as when one equation is greater or less than the other.</li></ul>"
+                      ]
+                    }
+                  },
+                                    {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#Revision%20Comments'>Revision Comments</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#StemProblemFormat'>CMP STEM Problem Format</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitDescriptions'>Unit Descriptions</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#SummaryInvestigations'>Summary of Investigations</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitGoals'>Goals of the Units</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAlignment'>Unit Alignments: Goals, CCSSM, Arc of Learning, Emerging Mathematics</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#GeneralAoL'>General Arc of Learnsing</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAoL'>Unit Arc of Learning</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#MathOverview'>Mathematical Overview</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#labsheets'>Labsheets</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#TeachingAids'>Teaching Aids</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#FamilyLetters'>Family Letter</a></p>"
                       ]
                     }
                   }
@@ -3909,9 +4265,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>4.1 Climbing Stairs: Using the Ratio of Rise to Run</strong></p>",
-                        "<p><strong>4AoL:  Analysis & Analysis</strong></p>",
-                        "<p><strong>CCSSM: 7.RP.A, 7.RP.A.2a, 7.RP.A.2b, 7.RP.A.2c</strong></p>"
+                        "4AoL:  Analysis & Analysis",
+                        "CCSSM: 7.RP.A, 7.RP.A.2a, 7.RP.A.2b, 7.RP.A.2c"
                       ]
                     }
                   },
@@ -3933,6 +4288,26 @@
                         "<p><strong>Emerging Mathematical Ideas</strong></p>",
                         "<p>Begin to analyze linear relationships (proportional and non-proportional) to understand how the constant rate of change can be understood and represented as a ratio.Notice that the:  </p>",
                         "<ul><li>ratio of the rise (height of each step) to the run (the depth of each step) is the same for each step along a staircase,</li><li>the steeper the staircase the bigger the ratio of rise to run for each step and vise-versa, and</li><li>the constant rate of change in every linear relationship (represented as graphs or equations) can be described as the ratio of the vertical change to the horizontal change for any section of the graph.</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#Revision%20Comments'>Revision Comments</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#StemProblemFormat'>CMP STEM Problem Format</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitDescriptions'>Unit Descriptions</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#SummaryInvestigations'>Summary of Investigations</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitGoals'>Goals of the Units</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAlignment'>Unit Alignments: Goals, CCSSM, Arc of Learning, Emerging Mathematics</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#GeneralAoL'>General Arc of Learnsing</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAoL'>Unit Arc of Learning</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#MathOverview'>Mathematical Overview</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#labsheets'>Labsheets</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#TeachingAids'>Teaching Aids</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#FamilyLetters'>Family Letter</a></p>"
                       ]
                     }
                   }
@@ -4129,9 +4504,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>4.2 A Constant of Proportionality</strong></p>",
-                        "<p><strong>AoL: Analysis/Synthesis & Analysis</strong></p>",
-                        "<p><strong>CCSSM: 7.RP.A, 7.RP.A.1, 7.RP.A.2a, 7.RP.A.2b, 7.RP.A.2c, 7.RP.A.2d</strong></p>"
+                        "AoL: Analysis/Synthesis & Analysis",
+                        "CCSSM: 7.RP.A, 7.RP.A.1, 7.RP.A.2a, 7.RP.A.2b, 7.RP.A.2c, 7.RP.A.2d"
                       ]
                     }
                   },
@@ -4153,6 +4527,26 @@
                         "<p><strong>Emerging Mathematical Ideas</strong></p>",
                         "<p>relationships, the constant of proportionality for proportions, and the constant ratio of the vertical change to horizontal change for linear relationships using a variety of representations.</p>",
                         "<p>Notice that: </p><ul><li>some linear relationships are proportional and others are not,</li><li>the rate of change describes how one variable in the relationship changes with respect to the other variable and can be found using a table of values, graph, or equation, </li><li>for linear relationships that are also proportional, the rate of change, the constant of proportionality, the ratio of vertical change to horizonal change, and the unit rate of change are all the same, and</li><li>the ordered pair (1, a) for a proportional relationship represents the unit rate of change for the relationship (that is a/1) where a is the constant of proportionality, and the equation of the line is <em>y = ax.</em> </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#Revision%20Comments'>Revision Comments</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#StemProblemFormat'>CMP STEM Problem Format</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitDescriptions'>Unit Descriptions</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#SummaryInvestigations'>Summary of Investigations</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitGoals'>Goals of the Units</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAlignment'>Unit Alignments: Goals, CCSSM, Arc of Learning, Emerging Mathematics</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#GeneralAoL'>General Arc of Learnsing</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAoL'>Unit Arc of Learning</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#MathOverview'>Mathematical Overview</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#labsheets'>Labsheets</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#TeachingAids'>Teaching Aids</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#FamilyLetters'>Family Letter</a></p>"
                       ]
                     }
                   }
@@ -4413,9 +4807,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>4.3 Putting It All Together</strong></p>",
-                        "<p><strong>4AoL: Synthesis & Synthesis</strong></p>",
-                        "<p><strong>CCSSM: 7.RP.A, 7.RP.A.1, 7.RP.A.2a, 7.RP.A.2b, 7.RP.A.2c, 7.RP.A.2d</strong></p>"
+                        "4AoL: Synthesis & Synthesis",
+                        "CCSSM: 7.RP.A, 7.RP.A.1, 7.RP.A.2a, 7.RP.A.2b, 7.RP.A.2c, 7.RP.A.2d"
                       ]
                     }
                   },
@@ -4439,6 +4832,26 @@
                         "<p>Work to consolidate and refine emerging key mathematical concepts associated with linear relationships, both proportional and non-proportional, into a coherent constellation of ideas.</p>",
                         "<p>Recognize that:</p>",
                         "<ul><li>linear relationships are identified by their constant rate of change that can be found using a problem context, table of values, graph, or equation, </li><li>some linear relationships are proportional, and others are not,</li><li>proportional relationships will always include the value (0,0), and will be of the form <em>y = ax</em> where a is the constant of proportionality, and</li><li>when given the value of one variable for a linear relationship you can find the value of the other variable strategically using a variety of representations including graphs, tables, and equations.</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#Revision%20Comments'>Revision Comments</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#StemProblemFormat'>CMP STEM Problem Format</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitDescriptions'>Unit Descriptions</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#SummaryInvestigations'>Summary of Investigations</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitGoals'>Goals of the Units</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAlignment'>Unit Alignments: Goals, CCSSM, Arc of Learning, Emerging Mathematics</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#GeneralAoL'>General Arc of Learnsing</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAoL'>Unit Arc of Learning</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#MathOverview'>Mathematical Overview</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#labsheets'>Labsheets</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#TeachingAids'>Teaching Aids</a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#FamilyLetters'>Family Letter</a></p>"
                       ]
                     }
                   }
