@@ -23,6 +23,22 @@ export function replaceAll(str: string, matchStr: string, replaceStr: string) {
 }
 
 /*
+ * safeJsonParse()
+ *
+ * returns undefined on error rather than throwing an exception
+ */
+export function safeJsonParse<T = any>(json?: string) {
+  let parsed;
+  try {
+    parsed = json ? JSON.parse(json) as T: undefined;
+  }
+  catch (e) {
+    // swallow errors
+  }
+  return parsed;
+}
+
+/*
  * Builds a canonical a firebase image url from its constituent parts
  */
 export function buildFirebaseImageUrl(classHash: string, imageKey: string) {

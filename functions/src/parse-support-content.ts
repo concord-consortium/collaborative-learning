@@ -1,7 +1,5 @@
-import { matchAll, parseFirebaseImageUrl, replaceAll } from "./shared-utils";
-
-// regular expression for identifying tiles that can reference images in document content
-const kImageTileRegex = /"type":"(Drawing|Geometry|Image)"/g;
+import { IDocumentContent } from "./shared";
+import { matchAll, parseFirebaseImageUrl, replaceAll, safeJsonParse } from "./shared-utils";
 
 // regular expression for identifying firebase image urls in document content
 // capture group 1: "url" (Drawing, Image) or "parents" (Geometry)
@@ -10,43 +8,48 @@ const kImageTileRegex = /"type":"(Drawing|Geometry|Image)"/g;
 // capture group 3: image key (includes class hash for modern image urls)                 |-----|
 const kImageUrlRegex = /(\\"url\\":|\\"parents\\":\[)\\"(ccimg:\/\/fbrtdb\.concord\.org\/([^\\"]+))\\"/g;
 
-export async function parseSupportContent(content: string, canonicalizeUrl: (url: string) => Promise<string>) {
+interface IImageInfo {
+  url: string;
+  legacyUrl: string;
+  key: string;
+}
+
+export async function parseSupportContent(contentJson: string, canonicalizeUrl: (url: string) => Promise<string>) {
+
+  const content = safeJsonParse<IDocumentContent>(contentJson);
 
   // find all image-supporting tiles (Drawing, Geometry, Image)
-  const imageTileMatches = matchAll(kImageTileRegex, content)
-                            .map(match => {
-                              const [ , tileType] = match;
-                              const { index: start = 0 } = match;
-                              return { tileType, start };
-                            });
-
-  // return the index of the tile containing the url reference
-  const getTileIndex = (urlStart: number) => imageTileMatches.findIndex((tileMatch, i) => {
-    const thisMatch = tileMatch.start < urlStart;
-    const nextMatch = (i < imageTileMatches.length - 1) && ((imageTileMatches[i + 1].start < urlStart));
-    return thisMatch && !nextMatch;
+  const imageTiles: Array<{ type: string, content: string }> = [];
+  content?.tileMap && Object.keys(content.tileMap).forEach(tileId => {
+    const { content: tileContent } = content.tileMap[tileId];
+    if (["Drawing", "Geometry", "Image"].indexOf(tileContent.type) >= 0) {
+      imageTiles.push({ type: tileContent.type, content: JSON.stringify(tileContent) });
+    }
   });
 
-  // find all the firebase image urls in the support content
-  const imageMatches = matchAll(kImageUrlRegex, content)
-                        .map(match => {
-                          const [ , , url, path] = match;
-                          const { imageKey: key = path, legacyUrl } = parseFirebaseImageUrl(url);
-                          const { index: start = 0 } = match;
-                          const tileIndex = getTileIndex(start);
-                          const tileType = imageTileMatches[tileIndex].tileType;
-                          return { url, legacyUrl, key, path, start, tileIndex, tileType };
-                        });
+  const activeImages: IImageInfo[] = [];
 
-  // filter out the "inactive" images, e.g. an image that has been replaced by a newer one in an image tile
-  const activeImages = imageMatches.filter((match, i) => {
-    // Drawing tiles support multiple images so all can be active.
-    // Note that this doesn't account for image objects that may have been subsequently deleted,
-    // so the image will continue to be shared after all objects that display it have been deleted.
-    // Handling this case would require more detailed parsing of Drawing content.
-    if (match.tileType === "Drawing") return true;
-    // Geometry and Image tiles only support a single image, so only the last is active
-    return (i === imageMatches.length - 1) || (match.tileIndex !== imageMatches[i + 1].tileIndex);
+  // find all the firebase image urls in the support content
+  imageTiles.forEach(({ type: tileType, content: tileContent }) => {
+    const imageMatches = matchAll(kImageUrlRegex, tileContent)
+                          .map(match => {
+                            const [ , , url, path] = match;
+                            const { imageKey: key = path, legacyUrl } = parseFirebaseImageUrl(url);
+                            return { url, legacyUrl, key };
+                          });
+    if (imageMatches.length) {
+      // Drawing tiles support multiple images so all can be active.
+      // Note that this doesn't account for image objects that may have been subsequently deleted,
+      // so the image will continue to be shared after all objects that display it have been deleted.
+      // Handling this case would require more detailed parsing of Drawing content.
+      if (tileType === "Drawing") {
+        activeImages.push(...imageMatches);
+      }
+      else {
+        // Geometry and Image tiles only support a single image, so only the last is active
+        activeImages.push(imageMatches[imageMatches.length - 1]);
+      }
+    }
   });
 
   // map from legacy url to canonical url
@@ -59,10 +62,10 @@ export async function parseSupportContent(content: string, canonicalizeUrl: (url
   });
 
   // canonicalize the url references in the content
-  let canonicalizedContent = content;
+  let canonicalizedJson = contentJson;
   for (const legacyUrl in uniqueImages) {
-    canonicalizedContent = replaceAll(canonicalizedContent, legacyUrl, uniqueImages[legacyUrl]);
+    canonicalizedJson = replaceAll(canonicalizedJson, legacyUrl, uniqueImages[legacyUrl]);
   }
 
-  return { content: canonicalizedContent, images: uniqueImages };
+  return { content: canonicalizedJson, images: uniqueImages };
 }

@@ -2,7 +2,9 @@ import { apps, clearFirestoreData, initializeAdminApp, useEmulators } from "@fir
 import { canonicalizeUrl, publishSupport } from "../src/publish-support";
 import { IPublishSupportParams } from "../src/shared";
 import { buildFirebaseImageUrl, parseFirebaseImageUrl, replaceAll } from "../src/shared-utils";
-import { kCanonicalPortal, kClassHash, kOtherClassHash, kPortal, specAuth, specUserContext } from "./test-utils";
+import {
+  kCanonicalPortal, kClassHash, kOtherClassHash, kPortal, specAuth, specDocumentContent, specUserContext
+} from "./test-utils";
 
 useEmulators({
   database: { host: "localhost", port: 9000 },
@@ -194,12 +196,10 @@ describe("publishSupport", () => {
     const context = specUserContext();
     const canonicalUrls = [1, 2, 3].map(i => buildFirebaseImageUrl(kClassHash, `image-${i}`));
     const legacyUrls = canonicalUrls.map(url => parseFirebaseImageUrl(url).legacyUrl);
-    const content = JSON.stringify({
-      tiles: [
-        { type: "Drawing", content: JSON.stringify([{ url: legacyUrls[0] }, { url: legacyUrls[1] }]) },
-        { type: "Image", content: JSON.stringify([{ url: legacyUrls[0] }, { url: legacyUrls[2] }]) }
-      ]
-    });
+    const content = specDocumentContent([
+      { type: "Drawing", changes: [{ url: legacyUrls[0] }, { url: legacyUrls[1] }] },
+      { type: "Image", changes: [{ url: legacyUrls[0] }, { url: legacyUrls[2] }] }
+    ]);
     const specSupportDoc = specPublicationRequest({ add: { content } });
     const params: IPublishSupportParams = { context, ...specSupportDoc };
     const result = await publishSupport(params, authWithTeacherClaims as any) as FirebaseFirestore.WriteResult[];
@@ -249,12 +249,10 @@ describe("publishSupport", () => {
       return writeImageRecordToFirestore({ imageKey, context_id })
     });
     await Promise.all(imagePromises);
-    const content = JSON.stringify({
-      tiles: [
-        { type: "Drawing", content: JSON.stringify([{ url: legacyUrls[0] }, { url: legacyUrls[1] }]) },
-        { type: "Image", content: JSON.stringify([{ url: legacyUrls[0] }, { url: legacyUrls[2] }]) }
-      ]
-    });
+    const content = specDocumentContent([
+        { type: "Drawing", changes: [{ url: legacyUrls[0] }, { url: legacyUrls[1] }] },
+        { type: "Image", changes: [{ url: legacyUrls[0] }, { url: legacyUrls[2] }] }
+      ]);
     const specSupportDoc = specPublicationRequest({ add: { content } });
     const params: IPublishSupportParams = { context, ...specSupportDoc };
     const result = await publishSupport(params, authWithTeacherClaims as any) as FirebaseFirestore.WriteResult[];

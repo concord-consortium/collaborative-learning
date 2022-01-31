@@ -1,6 +1,6 @@
 import { AuthData } from "firebase-functions/lib/common/providers/https";
 import { DeepPartial } from "utility-types";
-import { IUserContext } from "../src/shared";
+import { IRowMapEntry, ITileMapEntry, IUserContext } from "../src/shared";
 
 export const kPortal = "test.portal";
 export const kClaimPortal = "https://test.portal";
@@ -100,3 +100,20 @@ export const specAuth = (overrides?: DeepPartial<AuthData>, exclude?: string[]):
     } as any
   };
 };
+
+export function specDocumentContent(tiles: Array<{ type: string, changes: Object[] }> = []) {
+  const rowMap: Record<string, IRowMapEntry> = {};
+  const rowOrder: string[] = [];
+  const tileMap: Record<string, ITileMapEntry> = {};
+  tiles.forEach((tile, i) => {
+    // single tile per row for simplicity
+    const tileId = `tile-${i}`
+    const tileChanges = tile.changes.map(change => JSON.stringify(change));
+    const tileContent = { type: tile.type, changes: tileChanges };
+    const row: IRowMapEntry = { id: `row-${i}`, tiles: [{ tileId }]};
+    rowMap[row.id] = row;
+    rowOrder.push(row.id);
+    tileMap[tileId] = { id: tileId, content: tileContent };
+  });
+  return JSON.stringify({ rowMap, rowOrder, tileMap });
+}
