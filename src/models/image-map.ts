@@ -346,15 +346,17 @@ function extractPathFromFirebaseRTDBFauxUrl(url: string) {
   const match = kFirebaseRTDBFauxUrlRegex.exec(url);
   return match && match[2] || undefined;
 }
-function extractClassHashFromPath(path: string) {
-  const match = /([^/]+)\/[^/]+/.exec(path);
-  return match && match[1] || undefined;
+function parseImagePath(path: string) {
+  const match = /([^/]+)\/([^/]+)/.exec(path);
+  const classHash = match?.[1] || undefined;
+  const imageKey = match?.[2] || undefined;
+  return { classHash, imageKey };
 }
 function parseFauxFirebaseRTDBUrl(url: string) {
   const path = extractPathFromFirebaseRTDBFauxUrl(url) || undefined;
-  const classHash = path && extractClassHashFromPath(path);
+  const { classHash, imageKey } = path ? parseImagePath(path) : {} as any;
   const normalized = path && createFirebaseRTDBFauxUrl(path);
-  return { path, classHash, normalized };
+  return { path, classHash, imageKey, normalized };
 }
 
 export const firebaseRealTimeDBImagesHandler: IImageHandler = {
@@ -369,14 +371,14 @@ export const firebaseRealTimeDBImagesHandler: IImageHandler = {
   store(url: string, options?: IImageHandlerStoreOptions) {
     return new Promise((resolve, reject) => {
       const { db } = options || {};
-      const { path, classHash, normalized } = parseFauxFirebaseRTDBUrl(url);
+      const { path, classHash, imageKey, normalized } = parseFauxFirebaseRTDBUrl(url);
 
       if (db && path && normalized) {
         // In theory we could direct all firebase image requests to the cloud function,
         // but only cross-class supports require the use of the cloud function.
         const blobPromise = classHash !== db.stores.user.classHash
                               ? db.getCloudImageBlob(normalized)
-                              : db.getImageBlob(path);
+                              : db.getImageBlob(imageKey);
         blobPromise.then(blobUrl => {
           resolve(blobUrl
                     ? { filename: options?.filename, contentUrl: normalized, displayUrl: blobUrl }
