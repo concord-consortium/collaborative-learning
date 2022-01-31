@@ -189,21 +189,21 @@ export class Logger {
     let parameters = {};
 
     if (tile) {
-      const document = Logger.Instance.getTileContext(tile.id);
-      const teacherNetworkInfo: ITeacherNetworkInfo | undefined = document.remoteContext
-      ? { networkClassHash: document.remoteContext,
-          networkUsername: `${document.uid}@${this._instance.stores.user.portal}`}
+      const { uid, key, type, changeCount, sectionId, remoteContext } = Logger.Instance.getTileContext(tile.id);
+      const teacherNetworkInfo: ITeacherNetworkInfo | undefined = remoteContext
+      ? { networkClassHash: remoteContext,
+          networkUsername: `${uid}@${this._instance.stores.user.portal}`}
       : undefined;
 
       parameters = {
         objectId: tile.id,
         objectType: tile.content.type,
         serializedObject: getSnapshot(tile).content,
-        documentUid: document.uid,
-        documentKey: document.key,
-        documentType: document.type,
-        documentChanges: document.changeCount,
-        sectionId: document.sectionId,
+        documentUid: uid,
+        documentKey: key,
+        documentType: type,
+        documentChanges: changeCount,
+        sectionId,
         commentText,
         ...teacherNetworkInfo
       };
@@ -293,16 +293,16 @@ export class Logger {
     toolId: string,
     method?: LogEventMethod)
   {
-    const document = Logger.Instance.getTileContext(toolId);
+    const { uid, key, type, changeCount, sectionId } = Logger.Instance.getTileContext(toolId);
     const parameters: {[k: string]: any} = {
       toolId,
       operation,
       ...change,
-      documentUid: document.uid,
-      documentKey: document.key,
-      documentType: document.type,
-      documentChanges: document.changeCount,
-      sectionId: document.sectionId
+      documentUid: uid,
+      documentKey: key,
+      documentType: type,
+      documentChanges: changeCount,
+      sectionId
     };
     Logger.log(eventName, parameters, method);
   }
