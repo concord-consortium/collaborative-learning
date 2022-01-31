@@ -5,7 +5,8 @@ import { InvestigationModel } from "./investigation";
 import { ISectionInfoMap, SectionModel, registerSectionInfo } from "./section";
 import { SupportModel } from "./support";
 import { StampModel } from "../tools/drawing/drawing-content";
-import { AppConfigModelType, NavTabsAppConfigModel } from "../stores/app-config-model";
+import { AppConfigModelType } from "../stores/app-config-model";
+import { NavTabsConfigModel } from "../stores/nav-tabs";
 import { SettingsMstType } from "../stores/settings";
 import { IBaseStores } from "../stores/stores";
 
@@ -41,7 +42,7 @@ export const UnitModel = types
     supports: types.array(SupportModel),
     defaultStamps: types.array(StampModel),
     settings: types.maybe(SettingsMstType),
-    navTabs: types.optional(NavTabsAppConfigModel, () => NavTabsAppConfigModel.create())
+    navTabs: types.maybe(NavTabsConfigModel)
   })
   .volatile(self => ({
     userListenerDisposer: null as IReactionDisposer | null

@@ -2,7 +2,8 @@ import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import { DocumentContentModel, DocumentContentModelType, cloneContentWithUniqueIds
       } from "../document/document-content";
 import { ToolButtonModel } from "../tools/tool-button";
-import { ENavTab, NavTabModel, NavTabSpec } from "../view/nav-tabs";
+import { ENavTab, NavTabSpec } from "../view/nav-tabs";
+import { NavTabsConfigModel } from "./nav-tabs";
 import { SettingsMstType } from "./settings";
 
 const UnitSpecModel = types
@@ -15,14 +16,6 @@ const DocumentSpecModel = types
   .model("DocumentSpec", {
     documentType: types.string,
     properties: types.array(types.string)
-  });
-
-export const NavTabsAppConfigModel = types
-  .model("NavTabsAppConfig", {
-    defaultExpanded: false,
-    preventExpandCollapse: false,
-    lazyLoadTabContents: false,
-    tabSpecs: types.array(NavTabModel)
   });
 
 const DocumentLabelModel = types
@@ -107,7 +100,7 @@ export const AppConfigModel = types
     // comparison view placeholder content
     comparisonPlaceholderContent: types.optional(types.union(types.string, types.array(types.string)), ""),
     // configuration of navigation tabs (document navigation UI)
-    navTabs: types.optional(NavTabsAppConfigModel, () => NavTabsAppConfigModel.create()),
+    navTabs: types.optional(NavTabsConfigModel, () => NavTabsConfigModel.create()),
     // configuration of document toolbar
     toolbar: ToolbarModel,
     // configurable settings that can be overridden at problem, investigation, unit, or app-config levels
