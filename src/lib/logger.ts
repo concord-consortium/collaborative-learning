@@ -134,6 +134,7 @@ interface IDocumentInfo {
   key?: string;
   uid?: string;
   title?: string;
+  sectionId?: string;
   properties?: { [prop: string]: string };
   changeCount?: number;
   remoteContext?: string;
@@ -188,8 +189,7 @@ export class Logger {
     let parameters = {};
 
     if (tile) {
-      const document = Logger.Instance.getDocumentForTile(tile.id);
-      const section = Logger.Instance.getSectionForTile(tile.id);
+      const document = Logger.Instance.getTileContext(tile.id);
       const teacherNetworkInfo: ITeacherNetworkInfo | undefined = document.remoteContext
       ? { networkClassHash: document.remoteContext,
           networkUsername: `${document.uid}@${this._instance.stores.user.portal}`}
@@ -203,13 +203,13 @@ export class Logger {
         documentKey: document.key,
         documentType: document.type,
         documentChanges: document.changeCount,
-        section,
+        sectionId: document.sectionId,
         commentText,
         ...teacherNetworkInfo
       };
 
       if (event === LogEventName.COPY_TILE && metaData && metaData.originalTileId) {
-        const sourceDocument = Logger.Instance.getDocumentForTile(metaData.originalTileId);
+        const sourceDocument = Logger.Instance.getTileContext(metaData.originalTileId);
         parameters = {
           ...parameters,
           sourceUsername: sourceDocument.uid,
@@ -217,7 +217,8 @@ export class Logger {
           sourceDocumentKey: sourceDocument.key,
           sourceDocumentType: sourceDocument.type,
           sourceDocumentTitle: sourceDocument.title || "",
-          sourceDocumentProperties: sourceDocument.properties || {}
+          sourceDocumentProperties: sourceDocument.properties || {},
+          sourceSectionId: sourceDocument.sectionId
         };
       }
     }
@@ -292,8 +293,7 @@ export class Logger {
     toolId: string,
     method?: LogEventMethod)
   {
-    const document = Logger.Instance.getDocumentForTile(toolId);
-    const section = Logger.Instance.getSectionForTile(toolId);
+    const document = Logger.Instance.getTileContext(toolId);
     const parameters: {[k: string]: any} = {
       toolId,
       operation,
@@ -302,7 +302,7 @@ export class Logger {
       documentKey: document.key,
       documentType: document.type,
       documentChanges: document.changeCount,
-      section
+      sectionId: document.sectionId
     };
     Logger.log(eventName, parameters, method);
   }
@@ -371,18 +371,13 @@ export class Logger {
     return logMessage;
   }
 
-  private getSectionForTile(tileId: string) {
-    const document = this.stores.documents.findDocumentOfTile(tileId)
-      || this.stores.networkDocuments.findDocumentOfTile(tileId);
-    return document ? document.content?.getSectionIdForTile(tileId) : undefined;
-  }
-
-  private getDocumentForTile(tileId: string): IDocumentInfo {
+  private getTileContext(tileId: string): IDocumentInfo {
     const document = this.stores.documents.findDocumentOfTile(tileId)
       || this.stores.networkDocuments.findDocumentOfTile(tileId);
     if (document) {
-      const { type, key, uid, title, changeCount, remoteContext, properties } = document;
-      return { type, key, uid, title, changeCount, remoteContext, properties: properties?.toJSON() || {} };
+      const { type, key, uid, title, content, changeCount, remoteContext, properties } = document;
+      const sectionId = content?.getSectionIdForTile(tileId);
+      return { type, key, uid, title, sectionId, changeCount, remoteContext, properties: properties?.toJSON() || {} };
     } else {
       return {
         type: "Instructions"        // eventually we will need to include copying from supports
