@@ -10,6 +10,8 @@ export function matchAll(regex: RegExp, str: string) {
   let match: RegExpExecArray | null;
   while ((match = regex.exec(str)) !== null) {
     matches.push(match);
+    // without "g" flag loop never terminates
+    if (!regex.flags.includes("g")) break;
   }
   return matches;
 }
@@ -51,7 +53,7 @@ export function buildFirebaseImageUrl(classHash: string, imageKey: string) {
 export function parseFirebaseImageUrl(url: string) {
   const match = /ccimg:\/\/fbrtdb\.concord\.org\/([^/]+)(\/([^/]+))?/.exec(url);
   const imageKey = match?.[3] || match?.[1];
-  const imageClassHash = match?.[3] ? match?.[1] : undefined;
+  const imageClassHash = match?.[3] ? match[1] : undefined;
   const legacyUrl = imageClassHash ? url.replace(`/${imageClassHash}`, ""): url;
   return { imageClassHash, imageKey, legacyUrl };
 }
