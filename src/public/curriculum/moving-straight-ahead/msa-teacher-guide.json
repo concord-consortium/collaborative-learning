@@ -1155,7 +1155,7 @@
                     "id": "_bikHymSD4_M1Y-y",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/image/MSA_TG_1_3_GraphConstant.png"
+                      "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_3_GraphConstant.png"
                     }
                   },
                   {
@@ -1176,7 +1176,7 @@
                     "id": "yA0iXyWCYr9EqYuy",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/image/MSA_TG_1_3_Height.png"
+                      "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_3_Height.png"
                     }
                   },
                   {
@@ -1197,10 +1197,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>[start green box]</p>",
                         "<p>Making the Mathematics Explicit</p>",
-                        "<p>In <em>Comparing and Scaling</em>, students observed that the rate tables relating cost of pizza to number of pizzas worked differently if a constant delivery charge was added. They noticed that there is a constant of proportionality (unit rate) when there is no delivery charge, but not a constant of proportionality (no unit rate) when there is a delivery charge. Here, students are learning about the specific details of linear relationships, in particular when are they proportional or not proportional and the role of the y-intercept. </p>",
-                        "<p>[end green box]</p>"
+                        "<p>In <em>Comparing and Scaling</em>, students observed that the rate tables relating cost of pizza to number of pizzas worked differently if a constant delivery charge was added. They noticed that there is a constant of proportionality (unit rate) when there is no delivery charge, but not a constant of proportionality (no unit rate) when there is a delivery charge. Here, students are learning about the specific details of linear relationships, in particular when are they proportional or not proportional and the role of the y-intercept. </p>"
                       ]
                     }
                   },
@@ -1267,7 +1265,7 @@
                     "id": "LfpXP6eIrIhkg-3A",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/image/MSA_TG_1_3_TableCompare1.png"
+                      "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_3_TableCompare1.png"
                     }
                   },
                   {
@@ -1287,7 +1285,7 @@
                     "id": "7AXFTR6WBAXo-ol8",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/image/MSA_TG_1_3_TableCompare2.png"
+                      "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_3_TableCompare2.png"
                     }
                   },
                   {
@@ -1305,7 +1303,7 @@
                       "id": "Z8iAr5AHCmYcpU3i",
                       "content": {
                         "type": "Image",
-                        "url": "curriculum/moving-straight-ahead/image/MSA_TG_1_3_TableCompare3.png"
+                        "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_3_TableCompare3.png"
                       }
                     },
                   {
@@ -1329,7 +1327,7 @@
                     "id": "42Uir_Pkfklpy90M",
                     "content": {
                       "type": "Image",
-                      "url": "ccimg://fbrtdb.concord.org/-MsmIc07CWwvf2R-I3qq"
+                      "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_3_GraphConstant.png"
                     }
                   },
                   {
@@ -1497,7 +1495,55 @@
               "type": "overview",
               "content": {
                 "tiles": [
-                                    {
+                  {
+                    "id": "Nf1Es0nvLXz22jnY",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Problem Overview</p>",
+                        "<p>This Problem introduces negative rates of change (negative slope). It poses two situations involving a decreasing linear relationship. That is, for every unit change in the independent variable, the dependent variable decreases by a constant positive amount (which is equivalent to saying the dependent variable increases by a constant negative amount).</p>",
+                        "<p>One situation uses a graphical representation, and the other uses a tabular representation. Students interpret and compare information from different representations and build on skills recognizing linear relationships from various representations. The y-intercept is named and students begin to interpret it as a point on a line, an entry in a table, or as the constant b in the equation y = ax + b.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "tuR9XhHOfifNsktj",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>AoL: Explore &amp; Analysis</p>",
+                        "<p>CCSSM: 7.RP.A.2, 7.RP.A.2a, 7.RP.A.2b, 7.RP.A.2c, 7.RP.A.2d, 7.EE.A.2, 7.EE.B.4</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>NWDYK</p>",
+                        "<p>How can you tell from an equation, table, or graph if the linear pattern of change is decreasing? If a relationship is linear, explain how you can tell if it is proportional?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "PueEZe6ets6TGJxH",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Emerging Mathematical Ideas</strong></p>",
+                        "<p>Continue to explore and analyze linear relationships using a new decreasing context (week #, dollars withdrawn from account) that is initially presented with tabular, graphic, and symbolic representations.</p>",
+                        "<p>Make sense of two decreasing linear relationships initially presented in tabular and graphic forms working to:</p>",
+                        "<ul><li>recognize proportional and non-proportional linear relationships presented in tabular and graphic forms,</li><li>identify the decreasing rates of change from the table and graph,</li><li>identify the initial value of the relationship from the graph (y-intercept), and the table (y value when x = 0),</li><li>describe these relationships in words and with equations and inequalities using one or more equivalent forms, and</li><li>use the various representations to compare relationships and to efficiently answer relevant questions for each relationship.</li></ul>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -1525,16 +1571,130 @@
               "type": "launch",
               "content": {
                 "tiles": [
+                {
+                  "id": "gGM-ZzHwsFx6UXIK",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Launch (Getting Started)</strong>        </p>",
+                      "<p>Connecting to Prior Knowledge</p>",
+                      "<p>If you did not introduce the vocabulary term “y-intercept” in the Summary of Problem 1.3, the introduction of this Problem offers the opportunity.</p>",
+                      "<p>Tell students that they have been looking at linear relationships and determining whether the relationships are proportional.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "yO1ckvKvmJYsfO8_",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Suggested Questions </strong></p>",
+                      "<ul><li>How can you tell whether a relationship is linear? (Answers will vary and may not be polished at this point. Look for students to mention a rate of change and describe how to recognize a constant rate from different representations, including a table, graph, equation, or verbal description.)</li><li>Are all linear relationships proportional? (No. All have a rate of change. Some have a rate of change that is also the constant of proportionality/unit rate.)</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "id": "gAS0TX4EdvzS2aH4",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Presenting the Challenge</p>",
+                      "<p>In this Problem, students will continue to work with linear relationships that are modeled by tables and graphs. Tell the first story of how one class is going to use the money they raised from the walkathon. Display Teaching Aid 1.4A: Ms. Chang’s Class Account.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "x1gsp6j7Gi2wncGn",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Suggested Questions</strong></p>",
+                      "<ul><li>What do you notice and what do you wonder? (Various answer to set the scene for the rest of the Problem.)</li><li>Do you have any “What If…” questions? (Various answer to set the scene for the rest of the Problem.)</li><li>Would the graph of these data look like the pledge plan data? (Sample answer: No. The graph would look different from other graphs in this Investigation, because the dependent variable is decreasing.) </li></ul>",
+                      "<p>Use the above questions to help students visualize that as x is increasing, y is decreasing. Some students may already be good at recognizing this trend, but most students need a chance to think about the question before they begin to answer questions. Eventually, the goal is for students to have a rough idea of what a graph of a linear relationship will look like without actually graphing it.</p>",
+                      "<ul><li>Is this a linear relationship? (Answers may vary. Collect some conjectures and come back to them in the Summarize.)</li></ul>",
+                      "<p>Have students begin this problem independently and then work with a partner.</p>"
+                    ]
+                  }
+                }
                 ]
               },
-              "supports": [
-                {"text": "What is the independent variable? What is the dependent variable?"}
-              ]
+              "supports": [ ]
             },
             {
               "type": "explore",
               "content": {
                 "tiles": [
+                  {
+                  "id": "p1lM8wCrikt2mtXR",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Explore (Digging In)        </strong></p>",
+                      "<p>Providing for Individual Needs</p>",
+                      "<p>This is the first time that students have encountered negative rates of change or negative slope. You can ask students why the line slants down or is decreasing from left to right.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "NVIbzsbK0J6xeSdg",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Suggested Questions </strong></p>",
+                      "<ul><li>How can you represent this change in a table? (You can start with a row that shows the starting value is $144 and then for each new row, subtract $2 for each week.)</li></ul>",
+                      "<p>For Mr. Mamer’s data, students may need help finding the constant rate for the graph. Suggest that they make a table of values—this should help them find the constant rate. Be sure to have students share their strategies in the Summary.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "i7DqYr-UD2LMw6UF",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Suggested Questions</strong></p>",
+                      "<ul><li>How could you represent Mr. Mamer’s class data in a table? (The week in one column/row and the amount of money in the other column/row.)</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "content": {
+                    "type": "Table",
+                    "name": "Mr. Mamer's Class Data",
+                    "columns": [
+                      {"name":"Week","values":["0","5","10","15","20","25","30"]},
+                      {"name":"Amount of Money ($)","values":["500","450","400","350","300","250","200"]}
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Planning for the Summary</p>",
+                      "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know question? What will you do if you do not have evidence?</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "2P52eadUaAy1oH6k",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><em>Now What Do You Know?</em></p>",
+                      "<p>How can you tell from an equation, table, or graph if the linear patter of change is decreasing?  If a relationship is linear, explain how you can tell if it is proportional?</p>"
+                    ]
+                  }
+                }
                 ]
               },
               "supports": [
@@ -1544,6 +1704,173 @@
               "type": "summarize",
               "content": {
                 "tiles": [
+                {
+                  "id": "vfko5NOzJaFZ9eYL",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Summarize (Orchestrating the Discussion)</strong>  </p>",
+                      "<p>Solutions and Strategies</p>",
+                      "<p>Ask students a few general questions to see what they learned from exploring the data about the bank accounts. Students’ comments and questions can lead the discussion.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "gMGH6cObmk5zG_cf",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Suggested Questions</strong></p>",
+                      "<ul><li>Do the classes have the same thing happening in their bank accounts? (Answers may be general, such as both accounts are decreasing because the classes are using their money to donate items to the children’s ward. Or answers may be specific, such as Ms. Chang’s class uses more money a week than Mr. Mamer’s.)</li><li>What do you notice about the amount in the accounts for the two classes? (Students will have various answers that can guide how you proceed with asking other questions in the Summary.)</li></ul>",
+                      "<p>You may begin by asking a few questions about solutions when an amount is given to have students analyze specific instances in the relationship.</p>",
+                      "<p><strong>Suggested Questions</strong></p>",
+                      "<ul><li>What If Situation A asks about the amount of money at 10 weeks. We know the value of the x-variable (independent variable). How do we find the value of the other variable? (Various answers using the table, graph, and/or equations.) The basic idea is to see if given the value of x, students can find y.</li><li>What If Situation A asks about when the money is spent. Where would we see this in the table? (When the amount of money [y-variable or independent variable] is zero.) Where would we see this on the graph? (When the amount of money is zero, the line would hit the x-axis.) You could introduce the vocabulary of x-intercept at this time. But it is not necessary for all students to learn at this time.</li><li>In What if Situation B, what questions might the student have about the accounts? (In the equation, we know that the amount of money is $100. So the question asked would be: At what time does the account have $100? With the inequality, the question would be: When does the account have less than $100.) The basic idea is to see if given the value of y, can students make sense of finding x.</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Making the Mathematics Explicit </p>",
+                      "<p>This Problem is a chance to make sense of decreasing linear relationships. Question students to bring out all of your previous conversations about how to make sense of linear relationships in various representations, and how to determine if a linear relationship is proportional.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "i_z2qA_wfLAboJdy",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Suggested Questions</strong></p>",
+                      "<ul><li>For each class, how much money is being spent or withdrawn each week? (Ms. Chang’s class: $12; Mr. Mamer’s class: $10. For both classes, it is the constant rate of change or the difference in the amount of money between two consecutive weeks.)</li><li>Compare the rates of change in this Problem with other rates that we have studied in this Unit. How do the rates in this Problem show up in a table? In a graph? In an equation? (These rates are negative, and the previous rates were positive [or zero]. These tables show a constant decrease in the dependent variable as the independent variable increases. The graphs show lines that decrease from left to right, which is the opposite of the previous rates we studied. The coefficient of the independent variable in these equations is negative, while it was positive in previous Problems.]</li><li>What are the y-intercepts? Chang: (0, 144) and Mamer: (0, 500)</li><li>What do they tell you about the money in each class’s account? (How much money is in the account at the start.)</li><li>What is the pattern of change for the relationship between the variables? (Chang: The amount in the account decreases by $12 each week. Mamer: The amount in the account decreases by $50 every 5 weeks or by $10 each week.)</li><li>How do we see the pattern of change in the table? (Chang: As the weeks increase by 1, the amount of money in the account subtracts $12. Mamer: As the weeks increase by 5, the amount of money in the account subtracts $50. Or, thinking proportionally, as the weeks increase by 1, the amount of money in the account subtracts $10.)</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "id": "z8yG3uf1q9U5qciA",
+                  "content": {
+                    "type": "Image",
+                    "url": "curriculum/moving-straight-ahead/images/MSA_TG_4_3_table.jpg"
+                  }
+                },
+                {
+                  "id": "HrpPHG0E8CAapI5q",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>For Mr. Mamer’s data, some students may need to “zoom into” the table to see the way that the amount changes for every 1 week. </p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "7WgohnddJTbceX9f",
+                  "content": {
+                    "type": "Image",
+                    "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_4_table2.jpg"
+                  }
+                },
+                {
+                  "id": "NJxvposofL2A5jYT",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<ul><li>How do we see the pattern of change in the graph? (The data for both classrooms looks linear because they are taking out a consistent amount each week or set of weeks. The line “falls” or goes down because their monies are decreasing over time. Ms. Chang’s line falls faster because they take out more money each week, which means their rate of change is greater.)</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "content": {
+                    "type": "Geometry",
+                    "title": "Pattern of Change",
+                    "board": {
+                      "properties": {
+                        "axisMin": [-2.4, -10],
+                        "axisRange": [42.558, 591.304],
+                        "axisNames": ["x", "y"],
+                        "axisLabels": ["", ""]
+                      }
+                    },
+                    "objects": [
+                      { "type": "point", "parents": [0, 500], "properties": {"id":"ylKkI0dptrB59ZvY", "name": ""} },
+                      { "type": "point", "parents": [5, 450], "properties": {"id":"w8q6fYrJlpQ3QvhO", "name": ""} },
+                      { "type": "point", "parents": [10, 400], "properties": {"id":"C3GNS_3pv6oaqk92", "name": ""} },
+                      { "type": "point", "parents": [15, 350], "properties": {"id":"797AlgcobEZ0WUjM", "name": ""} },
+                      { "type": "point", "parents": [20, 300], "properties": {"id":"8PvW4IwHX9mq9X4k", "name": ""} },
+                      { "type": "point", "parents": [25, 250], "properties": {"id":"fioLU1MDRXUwP4OG", "name": ""} },
+                      { "type": "point", "parents": [30, 200], "properties": {"id":"puogR_UuiKnpktXE", "name": ""} },
+                      { "type": "point", "parents": [35, 150], "properties": {"id":"qbXM4KDsl4Wj2Z0l", "name": ""} },
+                      { "type": "point", "parents": [40, 100], "properties": {"id":"Me1Iyj_6qd92uQJG", "name": ""} },
+                      { "type": "point", "parents": [45, 50], "properties": {"id":"s0sLFZaTXdljarac", "name": ""} },
+                      { "type": "point", "parents": [50, 0], "properties": {"id":"SBU06C_KQv6Fb4o6", "name": ""} },
+                      { "type": "polygon", "parents": ["ylKkI0dptrB59ZvY", "w8q6fYrJlpQ3QvhO", "C3GNS_3pv6oaqk92", "797AlgcobEZ0WUjM", "8PvW4IwHX9mq9X4k", "fioLU1MDRXUwP4OG", "puogR_UuiKnpktXE", "qbXM4KDsl4Wj2Z0l", "Me1Iyj_6qd92uQJG", "s0sLFZaTXdljarac", "SBU06C_KQv6Fb4o6"],"properties": {"id":"p-z7ofxY628AhETT"} },
+                      { "type": "comment", "parents": [0, 85.8000000000000], "properties": {"id":"loFJUn23jkY4xKfm","anchor":"fioLU1MDRXUwP4OG","text":"Mr. Mamer's Account"} },
+                      { "type": "point", "parents": [0, 144], "properties": {"id":"2ATj_7N8vcAry641","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                      { "type": "point", "parents": [5, 84], "properties": {"id":"eqplRKZwih3V1GOO","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                      { "type": "point", "parents": [10, 24], "properties": {"id":"wtzKbSqt8qkme1gD","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                      { "type": "point", "parents": [12, 0], "properties": {"id":"DLi4ANTISn3dWITT","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                      { "type": "polygon", "parents": ["2ATj_7N8vcAry641", "eqplRKZwih3V1GOO", "wtzKbSqt8qkme1gD", "DLi4ANTISn3dWITT"],"properties": {"id":"jq6IH0JVLh4RDeMg"} },
+                      { "type": "comment", "parents": [5, 84], "properties": {"id":"_Yi3wHkCFUBbzbJ4","anchor":"eqplRKZwih3V1GOO","text":"Ms. Chang's Account"} }
+                    ]
+                  }
+                },
+                {
+                  "id": "Tlwl3TYg667gYSVP",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<ul><li>How can you describe what is happening with each account? (Chang: They start with $144 and they take out $12 every week. Mamer: They start with $500 and they take out $10 every week.)</li><li>How can we write this as a symbolic expression to represent the pattern in the data for each class? (See below.) How do we know that these expressions are all correct? (At this time, student will use various informal answers using number sense.)</li></ul>",
+                      "<p>                                                                Chang: 144 – 12x      or       144 + -12x    or     -12x + 144</p>",
+                      "<p>                                                              Mamer: 500 – 10x      or       500 + -10x    or    -10x + 500</p>",
+                      "<p>Note that some students may write: 100 – 50x for every 5 weeks</p>",
+                      "<ul><li>What is an equation to represent that data from each class?</li></ul>",
+                      "<p>                                                      Chang: A = 144 – 12x     or     A = 144 + -12x     or    A = -12x + 144</p>",
+                      "<p>                                                     Mamer: A = 500 – 10x    or      A = 500 + -10x    or    A = -10x + 500</p>",
+                      "<ul><li>How do we see the rate of change in the equation? (The rate of change is the number multiplied by the independent variable or the coefficient of x.)</li></ul>",
+                      "<p>                                                      Chang: A = 144 – 12x     or     A = 144 + -12x     or    A = -12x + 144</p>",
+                      "<p>                                                     Mamer: A = 500 – 10x    or      A = 500 + -10x    or    A = -10x + 500</p>",
+                      "<ul><li>How do we see the y-intercept in the equation? (It is the amount that they started with. That amount is added into the equation.)</li></ul>",
+                      "<p>                                                      Chang: A = 144 – 12x     or     A = 144 + -12x     or    A = -12x + 144</p>",
+                      "<p>                                                     Mamer: A = 500 – 10x    or      A = 500 + -10x    or    A = -10x + 500</p>",
+                      "<ul><li>Are either of these relationships proportional? (No. Table: We cannot scale values or make proportions. Graph: The line does not go through (0, 0). Equation: There is a non-zero amount added.)</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Now What Do Students Know</p>",
+                      "<p>Ask students to reflect on the discussion and answer the Now What Do You Know question.</p>",
+                      "<p><em>How can you tell from an equation, table, or graph if the linear pattern of change is decreasing?  If a relationship is linear, explain how you can tell if it is proportional?</em></p>",
+                      "<p>See answers to the Problem for more information about the strategies and embedded mathematics.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "lorqv1vXlafF-e4W",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Reflecting on Student Learning  </strong></p>",
+                      "<p>Use the following questions to assess student understanding at the end of the lesson.  </p>",
+                      "<ul><li>What evidence do I have that students understand the Now What Do You Know question?</li></ul>",
+                      "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
+                      "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?  </li></ul>"
+                    ]
+                  }
+                }
                 ]
               },
               "supports": []
