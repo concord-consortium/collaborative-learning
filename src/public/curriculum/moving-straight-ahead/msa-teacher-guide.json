@@ -1895,43 +1895,57 @@
               "type": "overview",
               "content": {
                 "tiles": [
+                {
+                  "id": "7oA_JvKNEoxx_bWB",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Students look at the context of a young boy challenging his older brother to a race. Students explore the question, “How long should the race be so that the younger brother wins in a close race?” This Problem introduces the idea of students finding the point of intersection of two linear relationships using a graph, a table, or numeric reasoning. The Problem also assesses what students have learned about linear relationships and their representations from Investigation 1. </p>",
+                      "<p><strong>Implementation Note:</strong> You might have a short summary after the Initial Challenge. This will give students a chance to share their strategies and how they made sense of the race question before going on to answer more detailed questions. You may want to use the What If...? questions to push the conversation during the Summarize. Ask the questions and pause for students to think about and record their answers, then engage the class in a discussion of ideas.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "iV_joP36DE4DXmUz",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>AoL:  Explore/Analysis &amp; Analysis</p>",
+                      "<p>CCSSM: 7.RP.A.2, 7.RP.A.2a, 7.RP.A.2c, 7.EE.A.1, 7.EE.A.2, 7.EE.B.3, 7.EE.B.4, 7.EE.B.4a, 7.EE.B.4b</p>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>NWDYK</strong></p>",
+                      "<p>Describe some strategies for solving problems that involve linear relationships. How can a table, graph, and an equation that represents a linear relationship be used to answer questions about the linear relationship? What other strategies could you use?</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "sr8aKyP8wYCLN_Qm",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Emerging Mathematical Ideas</strong></p>",
+                      "<p>Make sense of a new problem context with two contrasting linear relationships and examine the use of tables, graphs, equations, and inequalities to find solutions. </p>",
+                      "<p>Look for patterns in various representations that can be used to answer questions about rate of change for linear relationships such as:</p>",
+                      "<ul><li>in tables, the rate of change is the difference between y values when the table values for x change at a constant rate of one,</li><li>the direction of the slant of the line in a graph lets you know if the rate of change is positive (lines where the y values are increasing) or negative (where the y values are decreasing), and </li><li>the steepness of the line (going up or down) lets you know about the magnitude of the rate of change (e.g., a very steep line implies a large, positive or negative rate of change; where the line is barely increasing or decreasing, you would expect to see smaller values for the rate of change), </li><li>in the equation of a line the rate of change is the number that multiplies the independent variable (for example in Problem 2.1 it is the number of meters traveled each second with time as the independent variable), and </li><li>identify and represent proportional relationships as tables, graphs, and equations and distinguish from non-proportional linear relationships.</li></ul>",
+                      "<p>Look for patterns in various representations that can be used to find the value of one variable in a linear relationship when you have a value for the other variable such as:</p>",
+                      "<ul><li>in a table, corresponding values for independent and dependent variable are side-by-side or above and below depending on the orientation of the table,</li><li>in a graph, the coordinates of points on the line provide the values of corresponding independent and dependent variables, and</li><li>in an equation or inequality, the value of the dependent variable can be found for any value of the independent variable by performing the indicated operations in the equation or inequality.</li></ul>",
+                      "<p>Notice that informal guess and check strategies may allow students to answer questions about when two related linear relationships have the same value such as how much time has passed (t) for the distances traveled (d) to be the same for both brothers. </p>",
+                      "<p>NOTE: In an equation, it is not yet true that students will be able to find the value of the independent variable given a value for the dependent variable (e.g., solve 100 = 2x + 45).</p>"
+                    ]
+                  }
+                },
                   {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["Students look at the context of a young boy challenging his older brother to a race. Students explore the question, “How long should the race be so that the younger brother wins in a close race?” This Problem introduces the idea of students finding the point of intersection of two linear relationships using a graph, a table, or numeric reasoning. The Problem also assesses what students have learned about linear relationships and their representations from Investigation 1."]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["<strong>Implementation Note:</strong> You might have a short summary after the Initial Challenge. This will give students a chance to share their strategies and how they made sense of the race question before going on to answer more detailed questions. You may want to use the What If...? questions to push the conversation during the Summarize. Ask the questions and pause for students to think about and record their answers, then engage the class in a discussion of ideas."]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["2.1 Henri and Emile’s Race:  Developing Strategies to Find a Solution\nAoL:  Explore/Analysis & Analysis\nCCSSM: 7.RP.A.2, 7.RP.A.2a, 7.RP.A.2c, 7.EE.A.1, 7.EE.A.2, 7.EE.B.3, 7.EE.B.4, 7.EE.B.4a, 7.EE.B.4b"]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["<strong>NWDYK</strong>\nHow can a table, graph, and equation that represents a linear relationship be used to answer questions about the linear relationship? What other strategies could you use?"]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "<strong>Emerging Mathematical Ideas</strong>\nMake sense of a new problem context with two contrasting linear relationships and examine the use of tables, graphs, equations, and inequalities to find solutions.  \nLook for patterns in various representations that can be used to answer questions about rate of change for linear relationships such as: <ul><li> in tables, the rate of change is the difference between y values when the table values for x change at a constant rate of one,</li><li> the direction of the slant of the line in a graph lets you know if the rate of change is positive (lines where the y values are increasing) or negative (where the y values are decreasing), and </li><li> in the equation of a line the rate of change is the number that multiplies the independent variable (for example in Problem 2.1 it is the number of meters traveled each second with time as the independent variable), and  </li><li> identify and represent proportional relationships as tables, graphs, and equations and distinguish from non-proportional linear relationships.</li></ul> \nLook for patterns in various representations that can be used to find the value of one variable in a linear relationship when you have a value for the other variable such as: <ul><li> in a table, corresponding values for independent and dependent variable are side-by-side or above and below depending on the orientation of the table,</li><li> in a graph, the coordinates of points on the line provide the values of corresponding independent and dependent variables, and</li><li> in an equation or inequality, the value of the dependent variable can be found for any value of the independent variable by performing the indicated operations in the equation or inequality.</li></ul> \nNotice that informal guess and check strategies may allow students to answer questions about when two related linear relationships have the same value such as how much time has passed (t) for the distances traveled (d) to be the same for both brothers. \nNOTE: In an equation, it is not yet true that students will be able to find the value of the independent variable given a value for the dependent variable (e.g., solve 100 = 2x + 45)."
-                    }
-                  },
-                                    {
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -1959,85 +1973,138 @@
               "type": "launch",
               "content": {
                 "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["<strong>Launch (Getting Started)</strong> \nConnecting to Prior Knowledge\n\nIf you did not pose the following questions at the end of the Summarize for Problem 1.4, ask them now. Begin by having students list several equations from Investigation 1 that represent linear relationships.\n<strong>Suggested Questions</strong>\n<ul><li>Which relationship has the greatest rate of change? (Answers will vary. Look for students to choose the relationship that when written in the form <em>y = b + ax</em> has the greatest value of <em>a</em>. At this time in the Unit, students are likely to mention the context of the problem rather than formal language of the value of <em>a</em>.)</li><li>Which relationship(s) has a graph that crosses the <em>y</em>-axis at a point with a positive <em>y</em>-coordinate? With a <em>y</em>-coordinate of zero? With a negative y-coordinate? (Answers will vary. At this time in the Unit, students are likely to mention the context of the problem rather than formal language of the value of <em>b</em>. Positive <em>y</em>-coordinate: Look for students to choose the relationship(s) that when written in the form <em>y = b + ax</em> has a positive value of <em>b</em>. Sample: The line that represents Alana’s pledge plan. Zero <em>y</em>-coordinate: Look for students to choose a proportional relationship. Sample: Gilberto’s pledge plan can be modeled by a line that passes through the origin. Negative <em>y</em>-coordinate: Look for students to choose the relationship(s) that when written in the form <em>y = b + mx</em> has a negative value of <em>b</em>. Sample: The line that represents Gilberto’s pledge plan after purchasing a T-shirt for each sponsor.) You can tell students that they will continue to look at linear relationships in this Problem.</li> "]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["<strong>Presenting the Challenge</strong>\n\nTell the story of the race between Emile and his younger brother, Henri. This Problem is intended to show what knowledge students already have concerning linear relationships. \nBecause the Problem asks “how long” the race should be, some students will choose to focus on length and some will focus on time. \nStudents may suggest that once Emile is about to catch up to Henri, he can slow his walking rate so that Henri maintains the lead until the race is finished. If students give this suggestion, you can tell them to assume that each walking rate remains constant. There is a Launch Video to help students with the context of the race. \nHelp students imagine the race situation. (PROBLEM SOLVING)\n\n<strong>Suggested Questions</strong>\n<ul><li> What do we know about the race at the beginning? (Possible answer: The younger brother, Henri, has a head start. The brothers are not starting in the same spot.)</li><li> If you were watching this race, what would you see happening with the brothers? (Possible answer: The two brothers would start walking at the same time. The older brother, Emile, would be walking faster and would be catching up with each step. Some students may want to model what would happen with some physical movement.)</li></ul>Encourage students to think about how the race can be represented mathematically. Do not look for answers to these questions at this time. During the Explore and Summarize, listen and watch to see how students make sense of the situation.\n<ul><li> What data would you collect to document what happens in the race?</li><li> What are the variables that you would keep track of?</li><li> How could you represent the data to show what happens as they race?</li></ul>"]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["<strong>Suggested Questions</strong>\n<ul><li> What do we know about the race at the beginning? (Possible answer: The younger brother, Henri, has a head start. The brothers are not starting in the same spot.)</li><li> If you were watching this race, what would you see happening with the brothers? (Possible answer: The two brothers would start walking at the same time. The older brother, Emile, would be walking faster and would be catching up with each step. Some students may want to model what would happen with some physical movement.)</li></ul>Encourage students to think about how the race can be represented mathematically. Do not look for answers to these questions at this time. During the Explore and Summarize, listen and watch to see how students make sense of the situation.\n<ul><li> What data would you collect to document what happens in the race?</li><li> What are the variables that you would keep track of?</li><li> How could you represent the data to show what happens as they race?</li></ul>"]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["Encourage students to think about how the race can be represented mathematically. Do not look for answers to these questions at this time. During the Explore and Summarize, listen and watch to see how students make sense of the situation.\n<ul><li> What data would you collect to document what happens in the race?</li><li> What are the variables that you would keep track of?</li><li> How could you represent the data to show what happens as they race?</li></ul>"]
-                    }
+                {
+                  "id": "iO6rBnwh49-UXj2R",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong><u>Launch (Getting Started)</u></strong><u>         </u></p>",
+                      "<p><u>Connecting to Prior Knowledge</u></p>",
+                      "<p></p>",
+                      "<p>If you did not pose the following questions at the end of the Summarize for Problem 1.4, ask them now. Begin by having students list several equations from Investigation 1 that represent linear relationships. </p>"
+                    ]
                   }
+                },
+                {
+                  "id": "ENxs79eJ7_Fe87np",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Suggested Questions </strong></p>",
+                      "<ul><li>Which relationship has the greatest rate of change? (Answers will vary. Look for students to choose the relationship that when written in the form y = b + ax has the greatest value of a. At this time in the Unit, students are likely to mention the context of the problem rather than formal language of the value of a.)  </li><li>Which relationship(s) has a graph that crosses the y-axis at a point with a positive y-coordinate? With a y-coordinate of zero? With a negative y-coordinate? (Answers will vary. At this time in the Unit, students are likely to mention the context of the problem rather than formal language of the value of b. Positive y-coordinate: Look for students to choose the relationship(s) that when written in the form y = b + ax has a positive value of b. Sample: The line that represents Alana’s pledge plan. Zero y-coordinate: Look for students to choose a proportional relationship. Sample: Gilberto’s pledge plan can be modeled by a line that passes through the origin. Negative y-coordinate: Look for students to choose the relationship(s) that when written in the form y = b + mx has a negative value of b. Sample: The line that represents Gilberto’s pledge plan after purchasing a T-shirt for each sponsor.) You can tell students that they will continue to look at linear relationships in this Problem.  </li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "id": "R3UnV3WkJvYC98s8",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><u>Presenting the Challenge</u></p>",
+                      "<p></p>",
+                      "<p>Tell the story of the race between Emile and his younger brother, Henri. This Problem is intended to show what knowledge students already have concerning linear relationships. </p>",
+                      "<p></p>",
+                      "<p>Because the Problem asks “how long” the race should be, some students will choose to focus on length and some will focus on time. </p>",
+                      "<p></p>",
+                      "<p>Students may suggest that once Emile is about to catch up to Henri, he can slow his walking rate so that Henri maintains the lead until the race is finished. If students give this suggestion, you can tell them to assume that each walking rate remains constant. </p>",
+                      "<p></p>",
+                      "<p>Help students imagine the race situation. </p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "eDHRgCDgAAFzT_kq",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Suggested Questions</strong></p>",
+                      "<p></p>",
+                      "<ul><li>What do we know about the race at the beginning? (Possible answer: The younger brother, Henri, has a head start. The brothers are not starting in the same spot.)</li><li>If you were watching this race, what would you see happening with the brothers? (Possible answer: The two brothers would start walking at the same time. The older brother, Emile, would be walking faster and would be catching up with each step. Some students may want to model what would happen with some physical movement.)</li></ul>",
+                      "<p></p>",
+                      "<p>Encourage students to think about how the race can be represented mathematically. Do not look for answers to these questions at this time. During the Explore and Summarize, listen and watch to see how students make sense of the situation.</p>",
+                      "<p></p>",
+                      "<ul><li>What data would you collect to document what happens in the race?</li><li>What are the variables that you would keep track of?</li><li>How could you represent the data to show what happens as they race?</li></ul>",
+                      "<p>Have students work in groups of 4 as they investigate the brother’s walking race.</p>"
+                    ]
+                  }
+                }
                 ]
               },
-              "supports": [
-                {
-                  "text": "How might a table help? How might a graph help? Would an equation help?"
-                },
-                {
-                  "text": "Would a diagram or picture help?"
-                },
-                {
-                  "text": "What do we know about the race at the beginning?"
-                }
-              ]
+              "supports": [ ]
             },
             {
               "type": "explore",
               "content": {
                 "tiles": [
-                  {
+                {
+                  "id": "yGR3lFv3tpyFXjDs",
                   "content": {
                     "type": "Text",
                     "format": "html",
-                    "text":["<strong>Explore (Digging In)</strong>  \nProviding for Individual Needs\n\nFor the Initial Challenge\n\nCirculate and ask groups to explain their thinking. Put the emphasis on what evidence the group will use to justify their conclusion. Encourage all groups to listen to each member in order to reach a consensus on a single answer or to agree that more than one choice is reasonable and explain why.\n\nIf students hesitate about how to begin, you might offer suggestions for how to represent the data of the race. Ask the questions, but do not look for answers at this time. The questions are to suggest representation strategies."]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text":["<strong>Suggested Questions</strong>\n<ul><li>How might a table help?</li><li>How might a graph help?</li><li>Would an equation help?</li><li>Would a diagram or picture help?</li><li>What do we know about the race at the beginning?</li><li>If you were watching this race, what would you see happening with the brothers?</li><ul>"]
-                      }
-                    },
-                  {
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text":["For the What If... ?\n\nIf students did not make tables or graphs in the Initial Challenge, then have some students make tables and graphs for each or have them ready for display. Or you can hand out <strong>Teaching Aid 2.1A</strong> with the example tables, graphs, and equations.\n\nFor Situation B: Using Equations, the claims are available on <strong>Teaching Aid 2.1B</strong>. You might want to print and cut apart the Teaching Aid. After formatively assessing students during the Initial Challenge, you can decide which claims to assign to groups, pairs, or individual students. Also, you might want to display the claims for the class discussion."]
-                    }
-                  },
-                  {
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text":["Planning for the Summary\n\nWhat evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know questions? What will you do if you do not have evidence?\n\n<strong>Now What Do You Know?</strong>\nHow can a table, graph, and an equation that represents a linear relationship be used to answer questions about the linear relationship? What other strategies could you use?</strong>"]
-                    }
+                    "text": [
+                      "<p><strong>Explore (Digging In) </strong></p>",
+                      "<p><u>Providing for Individual Needs</u></p>",
+                      "<p>For the Initial Challenge</p>",
+                      "<p>Circulate and ask groups to explain their thinking. Put the emphasis on what evidence the group will use to justify their conclusion. Encourage all groups to listen to each member in order to reach a consensus on a single answer or to agree that more than one choice is reasonable and explain why. </p>",
+                      "<p>If students hesitate about how to begin, you might offer suggestions for how to represent the data of the race. Ask the questions, but do not look for answers at this time. The questions are to suggest representation strategies.</p>"
+                    ]
                   }
+                },
+                {
+                  "id": "eck7UQ0hOwibiDTB",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Suggested Questions</strong></p>",
+                      "<ul><li>How might a table help? </li><li>How might a graph help? </li><li>Would an equation help? </li><li>Would a diagram or picture help?</li><li>What do we know about the race at the beginning?</li><li>If you were watching this race, what would you see happening with the brothers?</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "id": "4Ik9jnpGsPbN87RJ",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>For the What If...?</p>",
+                      "<p></p>",
+                      "<p>If students did not make tables or graphs in the Initial Challenge, then have some students make tables and graphs for each or have them ready for display. Or you can hand out <strong>Teaching Aid 2.1A: Emile and Henri’s Race</strong> with the example tables, graphs, and equations.</p>",
+                      "<p></p>",
+                      "<p>For Situation B: Using Equations, the claims are available on<strong> Teaching Aid 2.1B:  Amit’s Claims</strong>. You might want to print and cut apart the Teaching Aid. After formatively assessing students during the Initial Challenge, you can decide which claims to assign to groups, pairs, or individual students.</p>",
+                      "<p>Also, you might want to display the claims for the class discussion.</p>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><u>Planning for the Summary</u></p>",
+                      "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know questions? What will you do if you do not have evidence? </p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "D5Mk1ojBe8RgoJKY",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><em>Now What Do You Know?</em></p>",
+                      "<p><em>Describe some strategies for solving problems that involve linear relationships. How can a table, graph, and an equation that represents a linear relationship be used to answer questions about the linear relationship? What other strategies could you use?</em></p>"
+                    ]
+                  }
+                }
                 ]
               },
               "supports": [
-                {"text": "Can a table help? Can a graph help?"},
-                {"text": "(2) What does it mean that one line is steeper than the other? How do you know it from a graph?"}
               ]
             },
             {
@@ -2045,984 +2112,740 @@
               "content":
               {
                 "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["<strong>Summarize (Orchestrating the Discussion)</strong>\nSolutions and Strategies\n\n<strong>Initial Challenge</strong>\nHave students share their ways of answering the question about the length of the race. Students may use some of the following strategies.\n<strong>Suggested Questions</strong>\n<ul><li> How did your group interpret the Initial Challenge? What strategy did you use? (Student answers and strategies for answering the question will vary. Possible strategies follow. Some students will answer with a distance. The brothers tie at 75 meters, so the race should be close to that distance. Some students will answer with a number of seconds for the lengths of the race. At 30 seconds, the brothers tie, so the race should last close to 30 seconds.)</li><ul>Students may have informal ways of thinking about the Problem. These informal methods can enhance their appreciation and understanding of what the more formal mathematical processes can tell them. This transition to using more formal processes should proceed slowly. Students need to develop their intuitions about the Problem. Encourage them to explain their reasons for the decisions they make. The process of making such decisions and being able to explain them is very important."]
-                    }
+                {
+                  "id": "ffkVaJaGLgKIWqja",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><u><strong>Summarize (Orchestrating the Discussion)   </strong></u></p>",
+                      "<p><u>Solutions and Strategies</u> </p>",
+                      "<p><em>Initial Challenge</em></p>",
+                      "<p>Have students share their ways of answering the question about the length of the race. Students may use some of the following strategies.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "23FNZEsRu_dy9LrK",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Suggested Questions</strong></p>",
+                      "<ul><li>How did your group interpret the Initial Challenge? What strategy did you use? (Student answers and strategies for answering the question will vary. Possible strategies follow. Some students will answer with a distance. The brothers tie at 75 meters, so the race should be close to that distance. Some students will answer with a number of seconds for the lengths of the </li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "id": "5RJSGoYAbHFhznlM",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Students may have informal ways of thinking about the Problem. These informal methods can enhance their appreciation and understanding of what the more formal mathematical processes can tell them. This transition to using more formal processes should proceed slowly. Students need to develop their intuitions about the Problem. Encourage them to explain their reasons for the decisions they make. The process of making such decisions and being able to explain them is very important. </p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "G1iLP3q8Us7Higt8",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><em>Possible Student Strategies:</em></p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "Og7n9HxD7YGalL3E",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Guess and Check</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "509wo9XoQ2kUMENh",
+                  "content": {
+                    "type": "Image",
+                    "url": "ccimg://fbrtdb.concord.org/-Msoze8QiYOSGtcsK4-_"
+                  }
+                },
+                {
+                  "id": "P_4-LHg9xl8nR4WD",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Double Number Lines</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "Mhg8PZkYGPikJNbN",
+                  "content": {
+                    "type": "Image",
+                    "url": "ccimg://fbrtdb.concord.org/-MsozfHxVtZiBpFM4A_J"
+                  }
+                },
+                {
+                  "id": "351Efz8-FvQnJxE1",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Table: Meters and Brothers’ Distances</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "jHIjRbywcZ-BP4dz",
+                  "content": {
+                    "type": "Image",
+                    "url": "ccimg://fbrtdb.concord.org/-Msp-0q7oOdyG-Fb0nZj"
+                  }
+                },
+                {
+                  "id": "4xmpf71EuZSqICVX",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Graph: Meters and Brothers’ Distances</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "WlCQ_QbLV9eCV9se",
+                  "content": {
+                    "type": "Image",
+                    "url": "ccimg://fbrtdb.concord.org/-Msp-3H8fn1Do6N-NpAt"
+                  }
+                },
+                {
+                  "id": "W-b6uwt5FZwHwaSX",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Graph and Table: Distance Apart for Every Meter the Brothers Walk</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "bnLBlvZONEWl3DZ1",
+                  "content": {
+                    "type": "Image",
+                    "url": "ccimg://fbrtdb.concord.org/-Msp-4iUd1DeAo_n7d4h"
+                  }
+                },
+                {
+                  "id": "e7lBer64aOIyNj7m",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p> Students might represent this as an equation with words and may or may not know how to write the equation with symbols.</p>",
+                      "<p>   (Henri’s distance) – (Emile’s distance) = when their distances tie</p>",
+                      "<p>                    (45 + t) – (2.5t) = 0</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "oMSnNOTaTVuE0p_8",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><em>Numeric Reasoning</em></p>",
+                      "<p>The difference between their walking rates is 1.5 meters for every second they walk. That means Emile is 1.5 meters per second faster. Emile has to make up for the 45 meter head start. For every second walked, Emile gains 1.5 meters on his brother.</p>",
+                      "<p>        45 ÷ 1.5 = 30</p>",
+                      "<p>So, after 30 meters of walking, Emile will make up the head start and the brothers will be tied.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "0UhjkjXkUOD4wHt7",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Note that this thinking represents the students informally solving a system of linear equations.</p>",
+                      "<p></p>",
+                      "<p>2.5<em>d</em> = 1<em>d</em> + 45  (Emile’s distance compared to Henri’s distance)</p>",
+                      "<p>1.5<em>d </em>= 45              (Emile making up the head start with how much faster he walks )</p>",
+                      "<p>     <em>d </em>= 30              (How long it takes Emile to make up for the head start)</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "20GqOKkfLWEDov26",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Be sure to have the class verify the lengths (or times) of the race if different lengths (or times) are suggested. For each suggested answer, ask: </p>",
+                      "<ul><li>How did you determine what the length (or time) of the race should be? (Sample answers: We found the distance (or time) when the race would be a tie, and then we made the race 1 meter (or 1 second) shorter. Henri will win this race.)  </li><li>Why is that distance (or time) reasonable? (We wanted Henri to win the race and for the race to be close. If the race is 29 seconds long, Henri will be a greater distance from the starting point than Emile will be.) If no group comes up with the strategy of looking at the distance between the brothers decreasing over time, use the following question to wrap up your discussion. </li><li>One group of students looked at the distance between the brothers at the start of the race and every 5 seconds. How might this method help them find the answer? (Sample answer: The distance between them is less as time passes. If you can find the number of seconds it takes Emile to catch up to Henri, you can make the time of the race less than that time.) </li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><u>Making the Mathematics Explicit </u></p>",
+                      "<p></p>",
+                      "<p>During the discussion of your students’ strategies, you may have already answered some of the What If…? questions. You may want to use some or all of the What If...? questions to push the Summary conversation.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "k3WtaBuQIN664M9V",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><em>For Situation A</em></p>",
+                      "<p></p>",
+                      "<p>If students did not make tables or graphs in the Initial Challenge, you could have students make tables and graphs now. Or you can hand out Teaching Aid 2.1A: Emile and Henri’s Race  with the example tables, graphs, and equations.</p>",
+                      "<p>Use the representation(s) to help students make sense of the questions and answers. </p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "cVT2hqWEqkF3196k",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Suggested Questions</strong></p>",
+                      "<ul><li>How do the table and graph representations help us answer questions about the length of the race? (In the graph, the brothers are at the same place at the point where the two lines cross. In the table, this is the row for which the times and distances are equal. The race needs to be to the left of the point of intersection on the graph, so it should be shorter than 30 seconds or 75 meters for Henri to win a close race.) </li><li>What does it mean when the graphs for the brothers intersect? (The brothers are tied at (30, 75), which represents 30 seconds and 75 meters.)</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "id": "fsK57aUDu1yaI8zh",
+                  "content": {
+                    "type": "Geometry",
+                    "title": "Henri and Emile's Race",
+                    "board": {
+                      "properties": {
+                        "axisMin": [-1.1, -5],
+                        "axisRange": [72.264, 118.31],
+                        "axisNames": ["x", "y"],
+                        "axisLabels": ["", ""]
+                      }
+                    },
+                    "objects": [
+                      { "type": "movableLine", "parents": [{ "type": "point", "parents": [0, 0] }, { "type": "point", "parents": [30.364330751215995, 76.5714230739629] }],"properties": {"id":"xb5js70pbFcYdfQV"} },
+                      { "type": "comment", "properties": {"id":"LriPrpc-Q7w3R9WV","anchor":"xb5js70pbFcYdfQV","text":"Emile"} },
+                      { "type": "movableLine", "parents": [{ "type": "point", "parents": [-0.04615384615384607, 44.91197183098591] }, { "type": "point", "parents": [30.364835164835164, 75.96830985915493] }],"properties": {"id":"ulZoZXvT3vr6oxsW"} },
+                      { "type": "comment", "parents": [-2.559340659340659, 10.091549295774655], "properties": {"id":"yJRkyQyvIvEXGMCX","anchor":"ulZoZXvT3vr6oxsW","text":"Henri"} }
+                    ]
                   },
+                  "layout": { "height": 328 }
+                },
+                {
+                  "id": "fSvMfRs475hprDk0",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<ul><li>How would I find the same information in the table? (When the dependent variable, distance, is the same for both brothers.)</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "id": "kTZUBSAcZifwtMGx",
+                  "content": {
+                    "type": "Table",
+                    "name": "Distance From Starting Line 1",
+                    "columns": [
+                      {"name":"Time (seconds)","values":["0","10","20","30","40"]},
+                      {"name":"Henri's Distance (m)","values":["45","55","65","75","85"]},
+                      {"name":"Emile's Distance (m)","values":["0","25","50","75","100"]}
+                    ]
+                  }
+                },
+                {
+                  "id": "RFO1qiaMz24sljHV",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<ul><li>Looking at the table, how can we find the walking rate for each brother? (Answers will vary. Using the example table below, students might make a proportion by using “for every” statement and scale it down to find the rate for each brother. For example, Henri travels 10 meters for every 10 seconds, which scales to 1 meter for every 1 second. That is his walking rate. Emile travels 25 meters for every 10 seconds, which scales to 2.5 meters for every 1 second. That is his walking rate.)</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "id": "6jTg9aMs-0oSGnEt",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<ul><li>Looking at the graph, how can we find the walking rate for each brother? (Answers will vary. Some students may only be able to discuss the graph shows that Emile is faster because his graph is steeper or has more of an angle from the x-axis. Other students may talk about the progress the brothers make in the same way they talked about the table. For example, Henri travels 5 meters for every 5 seconds, which scales to 1 meter for every 1 second. That is his walking rate. Emile travels 25 meters for every 10 seconds, which scales to 2.5 meters for every 1 second. That is his walking rate.)</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "id": "v1mo5UesoS4KKE9K",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<ul><li>How does the starting point of each brother in the race show up in the graph? (It is the y-intercept. 45 for Henri and 0 for Emile.)</li><li>How does the starting point of each brother in the race show up in the graph? (It is the y-intercept. 45 for Henri and 0 for Emile.)</li><li>What expression represents Emile’s race? Henri’s? (Students may need to use words first, then move to symbols. For Emile: He walks 2.5 meters every second. 2.5 x t, 2.5t, or 2.5t + 0. For Henri: He gets a 45-meter head start and walks 1 meter every second. 45 + 1t, 1t + 45, or 45 + t.)</li><li>What does the vertical (up and down) difference between the two lines on the graph tell you? (The vertical difference tells you how far apart the brothers are at that moment in time. It shows that the difference is 45 meters at t = 0 and that the distance between them gets smaller as Emile catches up to Henri. At 20 seconds, they are 15 meters apart.)  </li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "id": "DrPHHqgJsRkPnjZg",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<ul><li>How can I find if a specific point, like (26, 70), is in the table or graph of one of the brothers? (Answers will vary. Students may discuss estimating values on the graph or searching for values on the table. Students might also informally or formally determine the values using equations. Emile: 2.5 (26) = ? Henri: 1(26) + 45 = ?)</li><li>How can I look at the table or graph and know which brother is ahead in the race? (Answers will vary. Graph: Henri is ahead when the graph is “higher” or further up on y-values than Emile’s. Table: Henri is ahead when the dependent variable values are larger than Emile’s. This happens up to 30 seconds and 75 meters. After than point, it switches to Emile being ahead.)</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "id": "msQRrNQWWZsjSSMo",
+                  "content": {
+                    "type": "Image",
+                    "url": "ccimg://fbrtdb.concord.org/-Msp03RqYB85w0zAT7UP"
+                  }
+                },
+                {
+                  "id": "gZO2sCMQRgXO5Pbw",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<ul><li>At 30 seconds the boys have the same distance. This is when they are tied, so we can say that they are equal. When Mary wrote, 45 + t &lt; 2.5t, what does this inequality mean? (Henri &lt; Emile, when Henri’s distance is less than Emile’s, or when Emile is ahead.)</li><li>How long is Henri in the lead? (Various answers when time is more than 30 seconds.) How can we show the possible answers (solutions) to the inequality? </li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "id": "klcK_dlUyF7DruVB",
+                  "content": {
+                    "type": "Image",
+                    "url": "ccimg://fbrtdb.concord.org/-Msp0PlKOOcCFGu1gpvc"
+                  }
+                },
+                {
+                  "id": "NpqrEhtvBozvmDic",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>OR  t &gt; 30  OR</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "CH1X_RWPV2M4M0VU",
+                  "content": {
+                    "type": "Image",
+                    "url": "ccimg://fbrtdb.concord.org/-Msp03RqYB85w0zAT7UP"
+                  }
+                },
+                {
+                  "id": "BqLGaOxfwhd9rdRM",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<ul><li>What other inequality might we want to know about for the race? (When Henri was in the lead, 45 + t &gt; 2.5t ) How could we show this solution? (When time is less than 30 seconds.)</li></ul>",
+                      "<p>t  &lt; 30 OR</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "-FnztiXWRRUza8t7",
+                  "content": {
+                    "type": "Image",
+                    "url": "ccimg://fbrtdb.concord.org/-Msp03RqYB85w0zAT7UP"
+                  }
+                },
+                {
+                  "id": "dSFdp4600RGC4GWL",
+                  "content": {
+                    "type": "Image",
+                    "url": "ccimg://fbrtdb.concord.org/-Msp0RfdTbOV2CTQh7Sq"
+                  }
+                },
+                {
+                  "id": "0Uy0QJwdT6Ak--1U",
+                  "content": {
+                    "type": "Image",
+                    "url": "ccimg://fbrtdb.concord.org/-Msp0Uo9ASTlnt-2x0gB"
+                  }
+                },
+                {
+                  "id": "PZEU64kTq3p9tsb4",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><em>For Situation B</em></p>",
+                      "<p><em></em></p>",
+                      "<p>The claims are available on Teaching Aid 2.1B:  Amit’s Claims. You might want to print and cut apart the Teaching Aid. After formatively assessing students during the Initial Challenge and What If...? Situation A, you can decide which claims to assign to groups, pairs, or individual students.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "rFj_0cuUHpBJyeap",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Suggested Questions</strong></p>",
+                      "<ul><li>In Situation B, we see that Amit wrote equations to represent the relationships between time and distance. How do these equations represent the situation for each brother? (To find the distance that they travel, we multiply the time by the walking rate and add any head start.)</li></ul>"
+                    ]
+                  }
+                },
+                [
                   {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["Students may have informal ways of thinking about the Problem. These informal methods can enhance their appreciation and understanding of what the more formal mathematical processes can tell them. This transition to using more formal processes should proceed slowly. Students need to develop their intuitions about the Problem. Encourage them to explain their reasons for the decisions they make. The process of making such decisions and being able to explain them is very important."]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["<strong>Possible Student Strategies</strong>\nGuess and Check"]
-                    }
-                  },
-                  {
+                    "id": "7QOZ9vvL0j-dknNI",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<pre>",
-                          "    10 meters     Henri    10  + 45 = 55",
-                          "                  Emile    2.5 * 10 = 25",
-                          "",
-                          "    25 meters     Henri    25  + 45 = 70",
-                          "                  Emile    2.5 * 25 = 62.5",
-                          "",
-                          "    27 meters     Henri    27  + 45 = 72",
-                          "                  Emile    2.5 * 27 = 67.5",
-                          "",
-                          "    28 meters     Henri    28  + 45 = 73",
-                          "                  Emile    2.5 * 28 = 70",
-                          "",
-                          "    30 meters     Henri    30  + 45 = 75",
-                          "                  Emile    2.5 * 30 = 75",
-                        "</pre>"
+                        "<p>Emile </p>",
+                        "<p>D<sub>Emile</sub> = 2.5t  + 0</p>",
+                        "<p></p>",
+                        "<p>2.5 is the walking rate</p>",
+                        "<p>0 is the head start</p>",
+                        "<p></p>"
                       ]
                     }
                   },
                   {
+                    "id": "pRsvDOKSy1mAx0DW",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["Double Number Lines"]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_TG_2_1_double_number_line.png"
-                    },
-                    "layout": {
-                      "height": 200
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": ["Table: Meters and Brothers' Distances"]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Table",
-                      "columns": [
-                        { "name": "Meters",
-                          "type": "number",
-                          "values": [0,10,20,30,40,50]
-                        },
-                        { "name": "Henri",
-                          "type": "number",
-                          "values": [45,55,65,75,85]
-                        },
-                        { "name": "Emile",
-                          "type": "number",
-                          "values": [0,25,50,75,100]
-                        }
+                      "text": [
+                        "<p>Henri</p>",
+                        "<p>D<sub>Henri</sub> = 45 + 1t </p>",
+                        "<p></p>",
+                        "<p>1 is the walking rate</p>",
+                        "<p>45 is the head start</p>",
+                        "<p></p>"
                       ]
-                    },
-                    "layout": {
-                      "height": 300
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "Graph: Meters and Brothers' Distances"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Geometry",
-                      "board": {
-                        "properties": {
-                          "axisNames": ["t, D"],
-                          "axisLabels": ["Time (seconds)", "Distance (meters)"],
-                          "axisMin": [-1, -2],
-                          "axisRange": [40, 100]
-                        }
-                      },
-                      "objects": [
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [0, 0]
-                            },
-                            {
-                              "type": "point",
-                              "parents": [20, 50]
-                            }
-                          ],
-                          "properties": {
-                            "name": "Emile"
-                          }
-                        },
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [10, 55]
-                            },
-                            {
-                              "type": "point",
-                              "parents": [30, 75]
-                            }
-                          ],
-                          "properties": {
-                            "name": "Henri"
-                          }
-                        }
-                      ]
-                    },
-                    "layout": {
-                      "height": 300
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "Graph and Table: Distance Apart for Every Meter the Brothers Walk"
-                    }
-                  },
-                  [
-                    {
-                      "content": {
-                        "type": "Table",
-                        "columns": [
-                          { "name": "Meters",
-                            "type": "number",
-                            "values": [1,2,3,4,5,10,20,30]
-                          },
-                          { "name": "Distance",
-                            "type": "number",
-                            "values": [43.5,42,40.5,39,37.5,30,15,0]
-                          }
-                        ]
-                      },
-                      "layout": {
-                        "height": 370
-                      }
-                    },
-                    {
-                      "content": {
-                        "type": "Geometry",
-                        "board": {
-                          "properties": {
-                            "axisNames": ["m, m"],
-                            "axisLabels": ["Meters walked", "Distance apart (meters)"],
-                            "axisMin": [-1, -2],
-                            "axisRange": [50, 50]
-                          }
-                        },
-                        "objects": [
-                          {
-                            "type": "movableLine",
-                            "parents": [
-                              {
-                                "type": "point",
-                                "parents": [0, 45]
-                              },
-                              {
-                                "type": "point",
-                                "parents": [30, 0]
-                              }
-                            ]
-                          }
-                        ]
-                      },
-                      "layout": {
-                        "height": 300
-                      }
-                    }
-                  ],
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["Students might represent this as an equation with words and may or may not know how to write the equation with symbols.\n\u0009(Henri’s distance) – (Emile’s distance) = when their distances tie\n\u0009\u0009\u0009\u0009\u0009( 45 + <em>t</em> ) – ( 2.5<em>t</em> ) = 0"]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["Numeric Reasoning\nThe difference between their walking rates is 1.5 meters for every second they walk. That means Emile is 1.5 meters per second faster. Emile has to make up for the 45 meter head start. For every second walked, Emile gains 1.5 meters on his brother.\n\u000945 ÷ 1.5 = 30\nSo, after 30 meters of walking, Emile will make up the head start and the brothers will be tied."]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": ["Note that this thinking represents the students informally solving a system of linear equations.\n\n\u00092.5<em>d</em> = 1<em>d</em> + 45\u0009(Emile's distance compared to Henri's distance)\n\u00091.5<i>d</em> = 45\u0009\u0009\u0009(Emile making up the head start with how much faster he walks)\n\u0009\u0009<em>d</em> = 30\u0009\u0009\u0009(How long it takes Emile to make up for the head start)"]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "Be sure to have the class verify the lengths (or times) of the race if different lengths (or times) are suggested. For each suggested answer, ask: <ul><li> How did you determine what the length (or time) of the race should be? (Sample answers: We found the distance (or time) when the race would be a tie, and then we made the race 1 meter (or 1 second) shorter. Henri will win this race.)</li><li>Why is that distance (or time) reasonable? (We wanted Henri to win the race and for the race to be close. If the race is 29 seconds long, Henri will be a greater distance from the starting point than Emile will be.) If no group comes up with the strategy of looking at the distance between the brothers decreasing over time, use the following question to wrap up your discussion.</li><li> One group of students looked at the distance between the brothers at the start of the race and every 5 seconds. How might this method help them find the answer? (Sample answer: The distance between them is less as time passes. If you can find the number of seconds it takes Emile to catch up to Henri, you can make the time of the race less than that time.)</li></ul>"}
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "text": "Making the Mathematics Explicit\n\nDuring the discussion of your students’ strategies, you may have already answered some of the What If…? questions. You may want to use some or all of the What If...? questions to push the Summary conversation."}
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "For Situation A\n\nIf students did not make tables or graphs in the Initial Challenge, you could have students make tables and graphs now. Or you can hand out <strong>Teaching Aid 2.1A</strong> with the example tables, graphs, and equations.\nUse the representation(s) to help students make sense of the questions and answers. (PROTRAYAL)"}
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "<strong>Suggestion Questions</strong><ul><li> How do the table and graph representations help us answer questions about the length of the race? (In the graph, the brothers are at the same place at the point where the two lines cross. In the table, this is the row for which the times and distances are equal. The race needs to be to the left of the point of intersection on the graph, so it should be shorter than 30 seconds or 75 meters for Henri to win a close race.)</li>"}
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "\u0009<li> What does it mean when the graphs for the bothers intersect? (The brothers are tied at (30, 75), which represents 30 seconds and 75 meters.)</li>"}
-                  },
-                  {
-                    "content": {
-                      "type": "Geometry",
-                      "title": "Henri and Emile's Race",
-                      "board": {
-                        "properties": {
-                          "axisNames": ["t, D"],
-                          "axisLabels": ["Time (seconds)", "Distance (meters)"],
-                          "axisMin": [-1, -2],
-                          "axisRange": [40, 100]
-                        }
-                      },
-                      "objects": [
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [0, 0]
-                           },
-                            {
-                              "type": "point",
-                              "parents": [20, 50]
-                            }
-                          ],
-                          "properties": {
-                            "name": "Emile"
-                          }
-                        },
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [10, 55]
-                            },
-                            {
-                              "type": "point",
-                              "parents": [30, 75]
-                            }
-                           ],
-                         "properties": {
-                            "name": "Henri"
-                          }
-                        }
-                      ]
-                    },
-                    "layout": {
-                      "height": 300
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "\u0009<li>How would I find the same information in the table? (When the dependent variable, distance, is the same for both rothers.)</li>"}
-                   },
-                  {
-                    "content": {
-                      "type": "Table",
-                      "title": "Distance From Starting Line",
-                      "columns": [
-                        { "name": "Time (seconds)",
-                          "type": "number",
-                          "values": [0,10,20,30,40]
-                        },
-                        { "name": "Henri's Distance (meters)",
-                          "type": "number",
-                          "values": [45,55,65,75,85]
-                        },
-                        { "name": "Emile's Distance (meters)",
-                          "type": "number",
-                          "values": [0,25,50,75,100]
-                        }
-                      ]
-                    },
-                    "layout": {
-                      "height": 320
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "<li>Looking at the table, how can we find the walking rate for each brother? (Answers will vary. Using the example table below, students might make a proportion by using “for every” statement and scale it down to find the rate for each brother. For example, Henri travels 10 meters for every 10 seconds, which scales to 1 meter for every 1 second. That is his walking rate. Emile travels 25 meters for every 10 seconds, which scales to 2.5 meters for every 1 second. That is his walking rate.)</li>"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Table",
-                      "title": "Distance From Starting Line",
-                      "columns": [
-                        { "name": "Time (seconds)",
-                          "type": "number",
-                          "values": [0,10,20,30,40]
-                        },
-                        { "name": "Henri's Distance (meters)",
-                          "type": "number",
-                          "values": [45,55,65,75,85]
-                        },
-                        { "name": "Emile's Distance (meters)",
-                          "type": "number",
-                          "values": [0,25,50,75,100]
-                        }
-                      ]
-                    },
-                    "layout": {
-                      "height": 300
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "\u0009<li>Looking at the graph, how can we find the walking rate for each brother? (Answers will vary. Some students may only be able to discuss the graph shows that Emile is faster because his graph is steeper or has more of an angle from the x-axis. Other students may talk about the progress the brothers make in the same way they talked about the table. For example, Henri travels 5 meters for every 5 seconds, which scales to 1 meter for every 1 second. That is his walking rate. Emile travels 25 meters for every 10 seconds, which scales to 2.5 meters for every 1 second. That is his walking rate.)</li>"
-                  }
-                  },
-                  {
-                    "content": {
-                      "type": "Geometry",
-                      "title": "Henri and Emile's Race",
-                      "board": {
-                        "properties": {
-                          "axisNames": ["t, D"],
-                          "axisLabels": ["Time (seconds)", "Distance (meters)"],
-                          "axisMin": [-1, -2],
-                          "axisRange": [40, 100]
-                        }
-                      },
-                      "objects": [
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [0, 0]
-                            },
-                            {
-                              "type": "point",
-                              "parents": [20, 50]
-                            }
-                          ],
-                          "properties": {
-                            "name": "Emile"
-                          }
-                        },
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [10, 55]
-                            },
-                            {
-                              "type": "point",
-                              "parents": [30, 75]
-                            }
-                          ],
-                          "properties": {
-                            "name": "Henri"
-                          }
-                        }
-                      ]
-                    },
-                    "layout": {
-                      "height": 300
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "<li>How does the starting point of each brother in the race show up in the graph?\n(It is the y-intercept. 45 for Henri and 0 for Emile.)</li><li>How does the starting point of each brother in the race show up in the graph?\n(It is the y-intercept. 45 for Henri and 0 for Emile.)</li><li>What expression represents Emile’s race? Henri’s?\n(Students may need to use words first, then move to symbols. For Emile: He walks 2.5 meters every second. 2.5 x t, 2.5<em>t</em>, or 2.5<em>t</em> + 0. For Henri: He gets a 45-meter head start and walks 1 meter every second. 45 + 1<em>t</em>, 1<em>t</em> + 45, or 45 + <em>t</em>.)</li><li>What does the vertical (up and down) difference between the two lines on the graph tell you?\n(The vertical difference tells you how far apart the brothers are at that moment in time. It shows that the difference is 45 meters at t = 0 and that the distance between them gets smaller as Emile catches up to Henri. At 20 seconds, they are 15 meters apart.)</li>"}
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "<li>What does the vertical (up and down) difference between the two lines on the graph tell you?\n(The vertical difference tells you how far apart the brothers are at that moment in time. It shows that the difference is 45 meters at t = 0 and that the distance between them gets smaller as Emile catches up to Henri. At 20 seconds, they are 15 meters apart.)</li>"}
-                  },
-                  [
-                    {
-                      "content": {
-                        "type": "Geometry",
-                        "title": "Henri and Emile's Race",
-                        "board": {
-                          "properties": {
-                            "axisNames": ["t, D"],
-                            "axisLabels": ["Time (seconds)", "Distance (meters)"],
-                            "axisMin": [-1, -2],
-                            "axisRange": [50, 100]
-                          }
-                        },
-                        "objects": [
-                          {
-                            "type": "movableLine",
-                            "parents": [
-                              {
-                                "type": "point",
-                                "parents": [0, 0]
-                              },
-                              {
-                                "type": "point",
-                                "parents": [20, 50]
-                              }
-                            ],
-                            "properties": {
-                              "name": "Emile"
-                            }
-                          },
-                          {
-                            "type": "movableLine",
-                            "parents": [
-                              {
-                                "type": "point",
-                                "parents": [10, 55]
-                              },
-                              {
-                                "type": "point",
-                                "parents": [30, 75]
-                              }
-                            ],
-                            "properties": {
-                              "name": "Henri"
-                            }
-                          },
-                          {
-                            "type": "polygon",
-                            "parents": [
-                              {
-                                "type": "point",
-                                "parents": [0, 0]
-                              },
-                              {
-                                "type": "point",
-                                "parents": [0, 45]
-                              }
-                            ],
-                            "properties": {
-                              "name": "Difference in distance at t=0"
-                            }
-                          }
-                        ]
-                      },
-                      "layout": {
-                        "height": 300
-                      }
-                    },
-                    {
-                      "content": {
-                        "type": "Geometry",
-                        "title": "Henri and Emile's Race",
-                        "board": {
-                          "properties": {
-                            "axisNames": ["t, D"],
-                            "axisLabels": ["Time (seconds)", "Distance (meters)"],
-                            "axisMin": [-1, -2],
-                            "axisRange": [50, 100]
-                          }
-                        },
-                        "objects": [
-                          {
-                            "type": "movableLine",
-                            "parents": [
-                              {
-                                "type": "point",
-                                "parents": [0, 0]
-                              },
-                              {
-                                "type": "point",
-                                "parents": [20, 50]
-                              }
-                            ],
-                            "properties": {
-                              "name": "Emile"
-                            }
-                          },
-                          {
-                            "type": "movableLine",
-                            "parents": [
-                              {
-                                "type": "point",
-                                "parents": [10, 55]
-                              },
-                              {
-                                "type": "point",
-                                "parents": [30, 75]
-                              }
-                            ],
-                            "properties": {
-                              "name": "Henri"
-                            }
-                          },
-                          {
-                            "type": "polygon",
-                            "parents": [
-                              {
-                                "type": "point",
-                                "parents": [10, 25]
-                              },
-                              {
-                                "type": "point",
-                                "parents": [10, 55]
-                              }
-                            ],
-                            "properties": {
-                              "name": "Difference in distance at t=10"
-                            }
-                          }
-                        ]
-                      },
-                      "layout": {
-                        "height": 300
-                      }
-                    },                  {
-                      "content": {
-                        "type": "Geometry",
-                        "title": "Henri and Emile's Race",
-                        "board": {
-                          "properties": {
-                            "axisNames": ["t, D"],
-                            "axisLabels": ["Time (seconds)", "Distance (meters)"],
-                            "axisMin": [-1, -2],
-                            "axisRange": [50, 100]
-                          }
-                        },
-                        "objects": [
-                          {
-                            "type": "movableLine",
-                            "parents": [
-                              {
-                                "type": "point",
-                                "parents": [0, 0]
-                              },
-                              {
-                                "type": "point",
-                                "parents": [20, 50]
-                              }
-                            ],
-                            "properties": {
-                              "name": "Emile"
-                            }
-                          },
-                          {
-                            "type": "movableLine",
-                            "parents": [
-                              {
-                                "type": "point",
-                                "parents": [10, 55]
-                              },
-                              {
-                                "type": "point",
-                                "parents": [30, 75]
-                              }
-                            ],
-                            "properties": {
-                              "name": "Henri"
-                            }
-                          },
-                          {
-                            "type": "polygon",
-                            "parents": [
-                              {
-                                "type": "point",
-                                "parents": [20, 65]
-                              },
-                              {
-                                "type": "point",
-                                "parents": [20, 50]
-                              }
-                            ],
-                            "properties": {
-                              "name": "Difference in distance at t=20"
-                            }
-                          }
-                        ]
-                      },
-                      "layout": {
-                        "height": 300
-                      }
-                    }
-                  ],
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "<li>How can I find if a specific point, like (26, 70), is in the table or graph of one of the brothers?\n(Answers will vary. Students may discuss estimating values on the graph or searching for values on the table. Students might also informally or formally determine the values using equations. Emile: 2.5 (26) = ? Henri: 1(26) + 45 = ?)</li><li>How can I look at the table or graph and know which brother is ahead in the race?\n(Answers will vary. Graph: Henri is ahead when the graph is “higher” or further up on y-values than Emile’s. Table: Henri is ahead when the dependent variable values are larger than Emile’s. This happens up to 30 seconds and 75 meters. After than point, it switches to Emile being ahead.)</li>"}
-                  },
-                  [
-                    {
-                      "content": {
-                        "type": "Geometry",
-                        "title": "Henri and Emile's Race",
-                        "board": {
-                          "properties": {
-                            "axisNames": ["t, D"],
-                            "axisLabels": ["Time (seconds)", "Distance (meters)"],
-                            "axisMin": [-1, -2],
-                            "axisRange": [40, 100]
-                          }
-                        },
-                        "objects": [
-                          {
-                            "type": "movableLine",
-                            "parents": [
-                              {
-                                "type": "point",
-                                "parents": [0, 0]
-                              },
-                              {
-                                "type": "point",
-                                "parents": [20, 50]
-                              }
-                            ],
-                            "properties": {
-                              "name": "Emile"
-                            }
-                          },
-                          {
-                            "type": "movableLine",
-                            "parents": [
-                              {
-                                "type": "point",
-                                "parents": [10, 55]
-                              },
-                              {
-                                "type": "point",
-                                "parents": [30, 75]
-                              }
-                            ],
-                            "properties": {
-                              "name": "Henri"
-                            }
-                          }
-                        ]
-                      },
-                      "layout": {
-                        "height": 300
-                      }
-                    },
-                    {
-                      "content": {
-                        "type": "Table",
-                        "title": "Distance From Starting Line",
-                        "columns": [
-                          { "name": "Time (seconds)",
-                            "type": "number",
-                            "values": [0,10,20,30,40]
-                          },
-                          { "name": "Henri's Distance (meters)",
-                            "type": "number",
-                            "values": [45,55,65,75,85]
-                          },
-                          { "name": "Emile's Distance (meters)",
-                            "type": "number",
-                            "values": [0,25,50,75,100]
-                          }
-                        ]
-                      },
-                      "layout": {
-                        "height": 300
-                      }
-                    }
-                  ],
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "<li>At 30 seconds the boys have the same distance. This is when they are tied, so we can say that they are equal. When Mary wrote, 45 + <em>t</em> < 2.5<em>t</em>, what does this inequality mean?\n(Henri < Emile, when Henri’s distance is less than Emile’s, or when Emile is ahead.)</li><li>How long is Henri in the lead?\n(Various answers when time is more than 30 seconds.) How can we show the possible answers (solutions) to the inequality? </li>"}
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_TG_2_1_lead_time.png"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "<li>What other inequality might we want to know about for the race?\n(When Henri was in the lead, 45 + <em>t</em> > 2.5<em>t</em> ) How could we show this solution?\n(When time is less than 30 seconds.)</li>"}
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_TG_2_1_alt_lead_time.png"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "For Situation B\n\nThe claims are available on <strong>Teaching Aid 2.1B</strong>. You might want to print and cut apart the Teaching Aid. After formatively assessing students during the Initial Challenge and What If...? Situation A, you can decide which claims to assign to groups, pairs, or individual students."}
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "<strong>Suggestion Questons</strong><ul><li>In Situation B, we see that Amit wrote equations to represent the relationships between time and distance. How do these equations represent the situation for each brother? (To find the distance that they travel, we multiply the time by the walking rate and add any head start.)</li></ul>"}
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_TG_2_1_rate_eq.png"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "<ul><li>What information from the claims can you answer by looking at the equations? (See the following possible answer for each claim.)\n\n\u0009Claim #1: We can tell the walking rate and y-intercept (head start).</li></ul>"}
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "Problem 2.2 introduces the term \"coefficient\". You may want to introduce the term to your students in this Summary."}
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_TG_2_1_coefficient_eq.png"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "\u0009Claim #2: The walking rate will determine how fast a brother walks. The faster the walking rate, the steeper the line will be."}
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "Some students may think that Henri has the steeper line because it is “higher” than Emile’s in the beginning. It is important to reflect back on the pattern of change between the two variables that students first learned about in Grade 6 Variables and Patterns. Students discuss how the distance changes as the time changes."}
-                  },
-                  {
-                    "content": {
-                      "type": "Geometry",
-                      "board": {
-                        "properties": {
-                          "axisNames": ["t, D"],
-                          "axisLabels": ["Time (seconds)", "Distance (meters)"],
-                          "axisMin": [-1, -2],
-                          "axisRange": [40, 100]
-                        }
-                      },
-                      "objects": [
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [0, 0]
-                            },
-                            {
-                              "type": "point",
-                              "parents": [20, 50]
-                            }
-                          ],
-                          "properties": {
-                            "name": "Emile"
-                          }
-                        },
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [10, 55]
-                            },
-                            {
-                              "type": "point",
-                              "parents": [30, 75]
-                            }
-                          ],
-                          "properties": {
-                            "name": "Henri"
-                          }
-                        }
-                      ]
-                    },
-                    "layout": {
-                      "height": 300
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "\u0009Claim #3: Only one of the linear equations is proportional. Emile’s is proportional."}
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "This might be an introduction to how to determine a proportional linear equation for many students. They will need to verify the proportionality using the table, coordinate pairs, and the position of the line on the graph. Some students may remember Comparing and Scaling Problem 2.2 where the cost for Howdy’s pizza was not proportional because there was a delivery charge (non-zero y-intercept). And the cost for Royal’s pizza was proportional because there was no delivery charge (y-intercept of zero)."}
-                  },
-                  [
-                    {
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": "Emile: <strong>Linear and Proportional</strong>\nD<sub>Emile</sub> = 2.5<em>t</em>\nand\nHenri: <strong>Linear and Not Proportional</strong>\nD<sub>Henri</sub> = 45 + <em>t</em>"}
-                    },
-                    {
-                      "content": {
-                        "type": "Geometry",
-                        "board": {
-                          "properties": {
-                            "axisNames": ["t, D"],
-                            "axisLabels": ["Time (seconds)", "Distance (meters)"],
-                            "axisMin": [-1, -2],
-                            "axisRange": [40, 100]
-                          }
-                        },
-                        "objects": [
-                          {
-                            "type": "movableLine",
-                            "parents": [
-                              {
-                                "type": "point",
-                                "parents": [0, 0]
-                              },
-                              {
-                                "type": "point",
-                                "parents": [20, 50]
-                              }
-                            ],
-                            "properties": {
-                              "name": "Emile"
-                            }
-                          },
-                          {
-                            "type": "movableLine",
-                            "parents": [
-                              {
-                                "type": "point",
-                                "parents": [10, 55]
-                              },
-                              {
-                                "type": "point",
-                                "parents": [30, 75]
-                              }
-                            ],
-                            "properties": {
-                              "name": "Henri"
-                            }
-                          }
-                        ]
-                      },
-                      "layout": {
-                        "height": 300
-                      }
-                    },
-                    {
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": "Emile's line passes through (0, 0). For Every doubling or tripling, etc of the time, the distance grows by the same multiplicative amount"}
-                    }
-                  ],
-                  {
-                    "content": {
-                      "type": "Table",
-                      "title": "Distance From Starting Line",
-                      "columns": [
-                        { "name": "Time (seconds)",
-                          "type": "number",
-                          "values": [0,10,20,30,40]
-                        },
-                        { "name": "Henri's Distance (meters)",
-                          "type": "number",
-                          "values": [45,55,65,75,85]
-                        },
-                        { "name": "Emile's Distance (meters)",
-                          "type": "number",
-                          "values": [0,25,50,75,100]
-                        }
-                      ]
-                    },
-                    "layout": {
-                      "height": 300
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_TG_2_1_proportions.png"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "\u0009Claim #4: If we put the time when the brothers tie into each expression (2.5<em>t</em> or 2.5 x 30 or 75) and (45 + <em>t</em> or 45 + 30 or 75), we see that the equation is true/correct when the time is 30."
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "\u0009Claim #5: Using fact families, we can see that the equation is: 2.5<em>t</em> – 1<em>t</em> = 45. Using Distributive Property we can write 1.5<em>t</em> = 45"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "Now What Do Students Know\n\nAsk students to reflect on the discussion and answer the Now What Do You Know questions.\n\u0009<strong>How can a table, graph, and an equation that represents a linear relationship be used to answer questions about the linear relationship? What other strategies could you use?</strong>"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "<strong>Suggested Question</strong><ul><li>Would it help to look at examples where you used a table, graph, or equation to answer a question?</li></ul>\n\nSee answers to the Problem for more information about the strategies and embedded mathematics.\n\n\n"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "<strong>Reflecting on Student Learning</strong>Use the following questions to assess student understanding at the end of the lesson.<ul><li>What evidence do I have that students understand the Now What Do You Know questions?</li><ul><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ul><li>How will I use this to plan for tomorrow? For the next time I teach this leasson?</li><li>Where will I have the opportunity to reinforce thses ideas as I continue through this Unit? the next Unit</li></ul>"
                     }
                   }
+                ],
+                {
+                  "id": "QXWGCRoUKi89BVXx",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<ul><li>What information from the claims can you answer by looking at the equations? (See the following possible answer for each claim.)</li></ul>",
+                      "<p></p>",
+                      "<p>Claim #1: We can tell the walking rate and y-intercept (head start). </p>",
+                      "<p></p>",
+                      "<p>Problem 2.2 introduces the term “coefficient.” You may want to introduce the term to your students in this Summary.</p>"
+                    ]
+                  }
+                },
+                [
+                  {
+                    "id": "fZmWUeyqfXgxjP6n",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Emile </p>",
+                        "<p>D<sub>Emile</sub> = 2.5t  + 0</p>",
+                        "<p></p>",
+                        "<p>2.5 is the walking rate or <strong>coefficient </strong></p>",
+                        "<p>0 is the head start or <strong>y-intercept</strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "nxuLW0wHg4E-2aDR",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Henri</p>",
+                        "<p>D<sub>Henri</sub> = 45 + 1t </p>",
+                        "<p></p>",
+                        "<p>1 is the walking rate or <strong>coefficient </strong></p>",
+                        "<p>45 is the head start or <strong>y-intercept</strong></p>"
+                      ]
+                    }
+                  }
+                ],
+                {
+                  "id": "yusswuoIszNWAC68",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Claim #2: The walking rate will determine how fast a brother walks. The faster the walking rate, the steeper the line will be.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "FHzdywx1uMfP-PQX",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p></p>",
+                      "<p>Some students may think that Henri has the steeper line because it is “higher” than Emile’s in the beginning. It is important to reflect back on the pattern of change between the two variables that students first learned about in Grade 6 <em>Variables and Patterns</em>. Students discuss how the distance changes as the time changes. </p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "j9gAVT0SKi1mmQzS",
+                  "content": {
+                    "type": "Image",
+                    "url": "https://collaborative-learning.concord.org/assets/images/image_placeholder.png"
+                  }
+                },
+                {
+                  "id": "SPSjnk9XHSOPvWXD",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Claim #3: Only one of the linear equations is proportional. Emile’s is proportional. </p>",
+                      "<p></p>",
+                      "<p>This might be an introduction to how to determine a proportional linear equation for many students. They will need to verify the proportionality using the table, coordinate pairs, and the position of the line on the graph. Some students may remember Comparing and Scaling Problem 2.2 where the cost for Howdy’s pizza was not proportional because there was a delivery charge (non-zero y-intercept). And the cost for Royal’s pizza was proportional because there was no delivery charge (y-intercept of zero).</p>"
+                    ]
+                  }
+                },
+                [
+                  {
+                    "id": "IXQH3whVpCB4m6Pd",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Emile Linear and Proportional</p>",
+                        "<p>D<sub>Emile</sub> = 2.5t  + 0</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "htiWnpLCL21Yoy__",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Henri Linear and Not Proportional</p>",
+                        "<p>D<sub>Henri</sub> = 45 + 1t </p>"
+                      ]
+                    }
+                  }
+                ],
+                {
+                  "id": "9sDdRY_h7jOx8z_Y",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Graph</p>"
+                    ]
+                  }
+                },
+                [
+                  {
+                    "id": "mJHHhcNjiUM_uiZ8",
+                    "content": {
+                      "type": "Image",
+                      "url": "ccimg://fbrtdb.concord.org/-Msp0ZE4WlyWxH21ozPe"
+                    }
+                  },
+                  {
+                    "id": "Ocg60BVmbDjIg0QT",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Emilie&#x27;s line passes through (0,0). For every doubling or tripling, etc. of the time, the distance grows by the sam multiplicative amount. </p>"
+                      ]
+                    }
+                  }
+                ],
+                {
+                  "id": "uOOCYsv-v8AvQhum",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Table</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "zbAdT3NDg7FW5o7v",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Proportions</p>"
+                    ]
+                  }
+                },
+                [
+                  {
+                    "id": "4MTH-5u3T63TkaeN",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Emilie:</p>",
+                        "10 sec              20 sec",
+                        "________     =    ________",
+                        "   25m                   50m"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "fMxytkPL3jVOQhnq",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Henri:</p>",
+                        "10 sec               20 sec",
+                        "________     ≠        ________",
+                        "   55m                   65m"
+                      ]
+                    }
+                  }
+                ],
+                {
+                  "id": "DoLC_m6OQJ7Nc_BH",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Unit Rate is/is not the Rate of Change</p>"
+                    ]
+                  }
+                },
+                [
+                  {
+                    "id": "WXtZgdKVvgKisXgP",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Emilie:</p>",
+                        "  25m                   2.5m",
+                        "________     =    ________",
+                        "  10 sec                1 sec",
+                        "<p></p>",
+                        "  50m                   2.5m",
+                        "________     =    ________",
+                        "  20 sec                1 sec"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "sNDRRAFIdLSS38Ke",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Henri:</p>",
+                        "  55m                   5.5m",
+                        "________     =    ________",
+                        "  10 sec                1 sec",
+                        "<p></p>",
+                        "  65m                   3.25m",
+                        "________     =    ________",
+                        "  20 sec                1 sec"
+                      ]
+                    }
+                  }
+                ],
+                [
+                  {
+                    "id": "CO69n0RIEBjAG7ch",
+                    "content": {
+                      "type": "Image",
+                      "url": "ccimg://fbrtdb.concord.org/-Msp12AhriCeI-QXyYzy"
+                    }
+                  },
+                  {
+                    "id": "panouHceiXrz-oEJ",
+                    "content": {
+                      "type": "Image",
+                      "url": "ccimg://fbrtdb.concord.org/-Msp18ajMZ3S0yupGjdG"
+                    }
+                  }
+                ],
+                {
+                  "id": "G1_NjdNBkMLJkL-j",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Claim #4: If we put the time when the brothers tie into each expression (2.5t or 2.5 x 30 or 75) and (45 + t or 45 + 30 or 75), we see that the equation is true/correct when the time is 30.</p>",
+                      "<p>Claim #5: We know that they start 45 meters apart. Then for every second, Emile “catches-up” 1.5 meters. We can see the “catch-up amount” by finding the difference in their walking rates. </p>",
+                      "<p>  Emile’s rate – Henri’s rate or </p>",
+                      "<p>                         2.5<em>t </em>– 1<em>t</em> or 1.5<em>t</em>.</p>"
+                    ]
+                  }
+                },
+                {
+                  "display": "teacher",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><u>Now What Do Students Know</u></p>",
+                      "<p>Ask students to reflect on the discussion and answer the Now What Do You Know questions.</p>",
+                      "<p>Describe some strategies for solving problems that involve linear relationships. How can a table, graph, and an equation that represents a linear relationship be used to answer questions about the linear relationship? What other strategies could you use?</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "xnhohOOq-7F_aSv8",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Suggested Question</strong></p>",
+                      "<ul><li>Would it help to look at examples where you used a table, graph, or equation to answer a question?</li></ul>"
+                    ]
+                  }
+                },
+                {
+                  "id": "-3FM41LDn5ZZBNiH",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>See answers to the Problem for more information about the strategies and embedded mathematics. </p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "Wtd1tRKWGmxEp3By",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Reflecting on Student Learning  </p>",
+                      "<p>Use the following questions to assess student understanding at the end of the lesson.  </p>",
+                      "<ul><li>What evidence do I have that students understand the Now What Do You Know questions?</li></ul>",
+                      "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
+                      "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?  </li></ul>"
+                    ]
+                  }
+                }
                 ]
               },
               "supports": []
@@ -3292,23 +3115,28 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>Launch (Getting Started) Connecting Prior Knowledge</strong>\n\nRemind students about the three students and their pledge plans from Investigation 1. Display <strong>Teaching Aid 2.3A: Alana’s Pledge Plan</strong>.\n\n<strong>Suggested Questions</strong><ul><li>Write a question that could be answered using the point (14, 12). (Sample answers: How far did Alana walk if a sponsor donates 12 dollars? How much money would Alana raise from each sponsor if she walked 14 kilometers?)</li><li>How can you use the equation for Alana’s plan to check the answer to the question you wrote? (The equation for Alana’s plan is <em>A</em> = 5 + 0.5<em>d</em>. For the first question, if you substitute 12 for A in the equation and solve for d, you will find the number of kilometers. For the second question, if you substitute 14 for <em>d</em> in the equation and solve for <em>A</em>, you will find how much each sponsor pledges.)</li><li>How can you use a graph to find the number of kilometers that Alana walked if each sponsor donated $17? (You can find 17 on the <em>y</em>-axis and move horizontally until you reach a point on the line. Then, you move vertically down until you hit the <em>x</em>-axis. The value on the <em>x</em>-axis is the number of kilometers walked.)</li></ul>\nAsk the class to show how the questions relate to solving the equation A = 5 + 0.5d when the value of one variable is known. Students are substituting one value into the equation and solving for the other.\n\n\u0009<em>A</em> = 5 + 0.5(14) to solve for A if <em>d</em> = 14\n\u000912 = 5 + 0.5<em>d</em> to solve for <em>d</em> if <em>A</em> = 12.\n\nDiscuss how a graph or a table could be used to find solutions of these two equations.\n\nPick two or three other points on the line and repeat the preceding questions. Students should begin to see that there are an infinite number of coordinate pairs that are solutions of A = 5 + 0.5d. When they are solving a linear equation in one “unknown,” they are looking for the missing coordinate of an ordered pair that is a solution of the linear equation."]
+                      "text": [
+                        "<strong>Launch (Getting Started) </strong>",
+                        "Connecting Prior Knowledge",
+                        "Remind students about the three students and their pledge plans from Investigation 1. Display Teaching Aid 2.3A: Alana’s Pledge Plan</strong>.",
+                        "<strong>Suggested Questions</strong><ul><li>Write a question that could be answered using the point (14, 12). (Sample answers: How far did Alana walk if a sponsor donates 12 dollars? How much money would Alana raise from each sponsor if she walked 14 kilometers?)</li><li>How can you use the equation for Alana’s plan to check the answer to the question you wrote? (The equation for Alana’s plan is <em>A</em> = 5 + 0.5<em>d</em>. For the first question, if you substitute 12 for A in the equation and solve for d, you will find the number of kilometers. For the second question, if you substitute 14 for <em>d</em> in the equation and solve for <em>A</em>, you will find how much each sponsor pledges.)</li><li>How can you use a graph to find the number of kilometers that Alana walked if each sponsor donated $17? (You can find 17 on the <em>y</em>-axis and move horizontally until you reach a point on the line. Then, you move vertically down until you hit the <em>x</em>-axis. The value on the <em>x</em>-axis is the number of kilometers walked.)</li></ul>\nAsk the class to show how the questions relate to solving the equation A = 5 + 0.5d when the value of one variable is known. Students are substituting one value into the equation and solving for the other.\n\n\u0009<em>A</em> = 5 + 0.5(14) to solve for A if <em>d</em> = 14\n\u000912 = 5 + 0.5<em>d</em> to solve for <em>d</em> if <em>A</em> = 12.\n\nDiscuss how a graph or a table could be used to find solutions of these two equations.\n\nPick two or three other points on the line and repeat the preceding questions. Students should begin to see that there are an infinite number of coordinate pairs that are solutions of A = 5 + 0.5d. When they are solving a linear equation in one “unknown,” they are looking for the missing coordinate of an ordered pair that is a solution of the linear equation."]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["Presenting the Challenge\n\nNow pose the challenge in the Problem. Tell students they need to decide whether an equation represents a reasonable pledge plan for the walkathon if the idea is to raise money for charity. They will decide which points are solutions of the equation and whether the <em>y</em>-values increase, decrease, or stay the same as the <em>x</em>-values increase.\n\nYou might have students use a graphing calculator or <strong>Coordinate Grapher</strong> or <strong>Teaching Aid 2.3B</strong>.\n\nAsk questions to help students start thinking about the plans. Do not look for students to answer the questions yet. Let them explore the questions and return to them in the Summarize.\n\n<strong>Suggested Questions</strong><ul><li>What do you notice and what do you wonder about the three plans?</li><li>Consider how much you would raise if you walked one kilometer. Two kilometers? Three kilometers?</li></ul>\nOptional Launch\nUse <strong>Teaching Aid 2.3B</strong>, mix up the representations, and have students match the tables and graphs to the plans."]
+                      "text": ["Presenting the Challenge\n\nNow pose the challenge in the Problem. Tell students they need to decide whether an equation represents a reasonable pledge plan for the walkathon if the idea is to raise money for charity. They will decide which points are solutions of the equation and whether the <em>y</em>-values increase, decrease, or stay the same as the <em>x</em>-values increase.\n\nYou might have students use a graphing calculator or <strong>Coordinate Grapher</strong> or <strong>Teaching Aid 2.3B: New Pledge Plans</strong>.",
+                        "Ask questions to help students start thinking about the plans. Do not look for students to answer the questions yet. Let them explore the questions and return to them in the Summarize.\n\n<strong>Suggested Questions</strong><ul><li>What do you notice and what do you wonder about the three plans?</li><li>Consider how much you would raise if you walked one kilometer. Two kilometers? Three kilometers?</li></ul>",
+                        "<em>Optional Launch</em>",
+                        "Use <strong>Teaching Aid 2.3B: New Pledge Plans</strong>, mix up the representations, and have students match the tables and graphs to the plans.",
+                        "Have students work in groups of 3 on this problem."
+                      ]
                     }
                   }
                 ]
               },
-              "supports": [
-                {
-                  "text": "How much would you raise if you walked one kilometer? Two kilometers? Three kilometers?"
-                }
-              ]
+              "supports": []
             },
             {
               "type": "explore",
@@ -3318,14 +3146,21 @@
                   "content": {
                     "type": "Text",
                     "format": "html",
-                    "text": ["<strong>Explore (Digging In)</strong>\nProviding for Individual Needs\n\nAs you move from group to group, listen as students discuss strategies. Look for interesting explanations of what information each equation represents and discuss these in the Summarize.\n\nStudents may need help with the negative coefficient in the equation for Plan 2. You can ask students to explain why the line slants down or why the relationship is decreasing.\n<ul><li>Does the table help you decide whether the graph of the relationship is increasing or decreasing? (Yes. You can use the table to see how the dependent variable changes as the independent variable increases. If the dependent variable decreases, then the line will slant down. If the dependent variable increases, then the relationship is increasing and the line will slant up.)</li><li>Pick a point on this line. Can you find this point in the table? Explain. (Answers will vary. Sample answers: Yes, the point (2, 4) is also an entry in the table where the value of <em>x</em> is 2 and the value of <em>y</em> is 4. No, the point (6, 0) is not a row in the table that I made, but if I extended the table, it would be there.)</li><li>How do you know the ordered pair you picked is a solution to the equation? (It makes the equation <em>y</em> = -<em>x</em> + 6 true, because, for the point (2, 4), 4 = -2 + 6.)</li></ul>\n\nFor Situation A #4, some students may discard Plan 3 because the equation does not have a solution with a <em>y</em>-value of 8. Students may mistakenly reject Plan 2 for the same reason if they are only looking in the first quadrant. If they look in the second quadrant, they will find that the equation has a solution with a <em>y</em>-value of 8: (-2, 8). Although the equation for Plan 2 has the solution (-2, 8), remind students that the solution corresponds to walking -2 kilometers, which may not make sense in this real-world situation. Some students might find some interesting ways to interpret <em>y</em> = -<em>x</em> + 6 in this context. However, this equation can represent many situations, and (-2, 8) might well make sense for a different situation. It is a solution for this equation, but does not make sense within the context."]
+                    "text": [
+                      "<strong>Explore (Digging In)</strong>\nProviding for Individual Needs",
+                      "As you move from group to group, listen as students discuss strategies. Look for interesting explanations of what information each equation represents and discuss these in the Summarize.\n\nStudents may need help with the negative coefficient in the equation for Plan 2. You can ask students to explain why the line slants down or why the relationship is decreasing.\n<ul><li>Does the table help you decide whether the graph of the relationship is increasing or decreasing? (Yes. You can use the table to see how the dependent variable changes as the independent variable increases. If the dependent variable decreases, then the line will slant down. If the dependent variable increases, then the relationship is increasing and the line will slant up.)</li><li>Pick a point on this line. Can you find this point in the table? Explain. (Answers will vary. Sample answers: Yes, the point (2, 4) is also an entry in the table where the value of <em>x</em> is 2 and the value of <em>y</em> is 4. No, the point (6, 0) is not a row in the table that I made, but if I extended the table, it would be there.)</li><li>How do you know the ordered pair you picked is a solution to the equation? (It makes the equation <em>y</em> = -<em>x</em> + 6 true, because, for the point (2, 4), 4 = -2 + 6.)</li></ul>",
+                      "For Situation A, choosing the plan that could use 8 = 5x-3, some students may discard Plan 3 because the equation does not have a solution with a y-value of 8. Students may mistakenly reject Plan 2 for the same reason if they are only looking in the first quadrant. If they look in the second quadrant, they will find that the equation has a solution with a y-value of 8: (-2, 8). Although the equation for Plan 2 has the solution (-2, 8), remind students that the solution corresponds to walking -2 kilometers, which may not make sense in this real-world situation. Some students might find some interesting ways to interpret y = -x + 6 in this context. However, this equation can represent many situations, and (-2, 8) might well make sense for a different situation. It is a solution for this equation, but does not make sense within the context."
+                    ]
                   }
                 },
                 {
                   "content": {
                     "type": "Text",
                     "format": "html",
-                    "text": ["Planning for the Summary\n\nWhat evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence?\n\n<strong>Now What Do You Know?\nDescribe the advantages and disadvantages of using tables, graphs, and symbolic methods to solve equations.</strong>"]
+                    "text": [
+                      "<p>Planning for the Summary\n\nWhat evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence?</p>",
+                      "<strong>Now What Do You Know?</strong>\nDescribe the advantages and disadvantages of using tables, graphs, and symbolic methods to solve equations."
+                    ]
                   }
                 }
               ]
@@ -3340,7 +3175,18 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong>Summarize (Orchestrating the Discussion)</strong>\nSolutions and Strategies\n\nRevisit constant rate of change in the context of equations and connect the rate to tables and graphs of linear relationships.\n\n<strong>Suggested Questions</strong><ul><li>What is the amount raised per kilometer under each plan? (Plan 1: +5 dollars per kilometer; Plan 2: -1 dollar per kilometer; Plan 3: +0 dollars per kilometer)</li>How does each rate appear in a table? In a graph? In an equation? (In a table, the rate is the constant change in the amount of money raised when the number of kilometers increases by 1. In a graph, the rate is the steepness of the line. In an equation, the rate is the coefficient of <em>x</em>.)</li><li>What information does the <em>y</em>-intercept represent in each plan? (The <em>y</em>-intercept represents the amount of money a sponsor donates for0 kilometers walked. If the person did not walk at all, he or she would still raise an amount of money equal to the <em>y</em>-intercept.)</li><li>Do the plans make sense? Explain. (Answers may vary. Sample answers: Plan 1 makes sense because the walker is asking each sponsor to donate $5 per kilometer and then gives the sponsor something that costs $3, such as a T-shirt. Plan 2 does not make sense because the amount of money raised should not decrease as the number of kilometers walked increases. Plan 3 makes sense because the walker raises $2 from each sponsor regardless of the distance walked, which is similar to Leanne’s plan in Problem 1.3.)</li></ul>"
+                      "text": ["<strong>Summarize (Orchestrating the Discussion)</strong>\nSolutions and Strategies\n\nRevisit constant rate of change in the context of equations and connect the rate to tables and graphs of linear relationships."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Suggested Questions  </strong></p>",
+                        "<ul><li>What is the amount raised per kilometer under each plan? (Plan 1: +5 dollars per kilometer; Plan 2: -1 dollar per kilometer; Plan 3: +0 dollars per kilometer)   </li><li>How does each rate appear in a table? In a graph? In an equation? (In a table, the rate is the constant change in the amount of money raised when the number of kilometers increases by 1. In a graph, the rate is the steepness of the line. In an equation, the rate is the coefficient of x.)  </li><li>What information does the y-intercept represent in each plan? (The y-intercept represents the amount of money a sponsor donates for 0 kilometers walked. If the person did not walk at all, he or she would still raise an amount of money equal to the y-intercept.)   </li><li>Do the plans make sense? Explain. (Answers may vary. Sample answers: Plan 1 makes sense because the walker is asking each sponsor to donate $5 per kilometer and then gives the sponsor something that costs $3, such as a T-shirt. Plan 2 does not make sense because the amount of money raised should not decrease as the number of kilometers walked increases. Plan 3 makes sense because the walker raises $2 from each sponsor regardless of the distance walked, which is similar to Leanne’s plan in Problem 1.3.)  </li></ul>"
+                      ]
                     }
                   },
                   {
@@ -3351,10 +3197,23 @@
                     }
                   },
                   {
+                    "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "Making the Mathematics Explicit\n\nBe sure to go over the answers to Situations A, B, and C. Check to make sure students understand the relationship between the points on a line, values in a table, and the solutions of the equation for that line. Have students share their solutions and their strategies for each part of the Problem. Ask for explanations.\n\nStudents should be making the connection between a specific solution of an equation and the more general relationship between two variables for the related equation. They should see the relationship between equations, such as <em>y</em> = 5<em>x</em> - 3 and the following equations: 12 = 5<em>x</em> - 3, -8 = 5<em>x</em> - 3, and 27 = 5<em>x</em> - 3.\n<ul><li>How are the equations 12 = 5x - 3, -8 = 5x - 3, and 27 = 5x - 3 related to y = 5x - 3? (In each equation, you are given the value of y and are looking for the corresponding value of x for that solution.)</li><li>How can you find the missing value of x? (You can use a table or a graph to find the y-value of that row of the table or the y-coordinate of that point on the line.)\n\nIf needed, you can repeat some of the questions from the Explore that help students sort out the solutions of an equation."
+                      "text": "Making the Mathematics Explicit\n\nBe sure to go over the answers to Situations A, B, and C. Check to make sure students understand the relationship between the points on a line, values in a table, and the solutions of the equation for that line. Have students share their solutions and their strategies for each part of the Problem. Ask for explanations."
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Students should be making the connection between a specific solution of an equation and the more general relationship between two variables for the related equation. They should see the relationship between equations, such as y = 5x - 3 and the following equations: 12 = 5x - 3, -8 = 5x - 3, and 27 = 5x - 3.   </p>",
+                        "<ul><li>How are the equations 12 = 5x - 3, -8 = 5x - 3, and 27 = 5x - 3 related to y = 5x - 3? (In each equation, you are given the value of y and are looking for the corresponding value of x for that solution.)   </li><li>How can you find the missing value of x? (You can use a table or a graph to find the y-value of that row of the table or the y-coordinate of that point on the line.)   </li></ul>",
+                        "<p>If needed, you can repeat some of the questions from the Explore that help students sort out the solutions of an equation.   </p>",
+                        "<p>You may want to draw the line and then label several points with their coordinates. Make a table of values. Display Teaching Aid 2.3C: Graph of y = 5x -3. Put the corresponding equation next to the coordinates to show that it is a true statement for these particular values of x and y. This will help students see the connection between finding solutions using a graph, table, and equation. </p>"
+                      ]
                     }
                   },
                   {
@@ -3381,36 +3240,50 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong>Check for Understanding</strong>\n\n0Display <strong>Teaching Aid 2.3D</strong>. Troy is working with the equation <em>y</em> = 100 - 3<em>x</em>. He is trying to find a value of <em>x</em> that corresponds to <em>y</em> = 22. He writes the following question: “What is <em>x</em> if 100 - 3<em>x</em> = 22?”</li><li>Explain how Troy can use the following table or graph to answer this question.</li>"
+                      "text": [
+                        "<p><strong>Check for Understanding</strong></p>",
+                        "<p>Display Teaching Aid 2.3D: Troy’s Calculator. Troy is working with the equation y = 100 - 3x. He is trying to find a value of x that corresponds to y = 22. He writes the following question: “What is x if 100 - 3x = 22?”  </p>",
+                        "<ul><li>Explain how Troy can use the following table or graph to answer this question.   </li></ul>"
+                      ]
                     }
                   },
-                  [
-                    {
-                      "content": {
-                        "type": "Image",
-                        "url": "curriculum/moving-straight-ahead/images/MSA_TG_2_3_graphing_calc.png"
-                      }
-                    },
-                    {
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": "(He can trace the graph to find where it intersects the graph of <em>y</em> = 22. The corresponding <em>x</em>-value of the intersection point is the answer to his question. He can identify 22 in the <em>y</em>-column and see that the corresponding <em>x</em>-value is 26.)"
-                      }
-                    }
-                  ],
                   {
                     "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "Now What do Students Know\n\nAsk students to reflect on the discussion and answer the Now What Do You Know.\n\n<strong>Describe the advantages and disadvantages of using tables, graphs, and symbolic methods to solve equations.</strong>See answers to the Problem for more information about the strategies and embedded mathematics."
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/MSA_TG_2_3_graphing_calc.png"
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong>Reflecting on Student Learning </strong>\n\nUse the following questions to assess student understanding at the end of the lesson.<ul><li>What evidence do I have that students understand the Now What Do You Know question?<ul><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
+                      "text": "(He can trace the graph to find where it intersects the graph of <em>y</em> = 22. The corresponding <em>x</em>-value of the intersection point is the answer to his question. He can identify 22 in the <em>y</em>-column and see that the corresponding <em>x</em>-value is 26.)"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Now What do Students Know</strong>",
+                        "Ask students to reflect on the discussion and answer the Now What Do You Know.",
+                        "<p>Describe the advantages and disadvantages of using tables, graphs, and symbolic methods to solve equations.</p>",
+                        "See answers to the Problem for more information about the strategies and embedded mathematics."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Reflecting on Student Learning  </strong></p>",
+                        "<p>Use the following questions to assess student understanding at the end of the lesson.  </p>",
+                        "<ul><li>What evidence do I have that students understand the Now What Do You Know question?</li></ul>",
+                        "<ol><li>Where did my students get stuck? </li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
+                        "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?  </li></ul>"
+                      ]
                     }
                   }
                 ]
