@@ -13,6 +13,7 @@ import { ITableChange } from "../models/tools/table/table-change";
 import { ENavTab } from "../models/view/nav-tabs";
 import { DEBUG_LOGGER } from "../lib/debug";
 import { isSectionPath, parseSectionPath } from "../../functions/src/shared";
+import { timeZoneOffsetString } from "../utilities/js-utils";
 
 type LoggerEnvironment = "dev" | "production";
 
@@ -41,6 +42,7 @@ interface LogMessage {
   teacherPanel?: string;
   selectedGroupId?: string;
   time: number;
+  tzOffset: string;
   event: string;
   method: string;
   parameters: any;
@@ -348,6 +350,7 @@ export class Logger {
       navTabsOpen: ui.navTabContentShown,
       selectedNavTab: ui.activeNavTab,
       time: Date.now(),       // eventually we will want server skew (or to add this via FB directly)
+      tzOffset: timeZoneOffsetString(),
       event,
       method,
       parameters

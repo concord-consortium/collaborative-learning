@@ -2,12 +2,12 @@ const kGraphPixPerCoord = { x: 18.33, y: -18.33 };
 // determined by inspection
 const kGraphOriginCoordPix = { x: 40, y: 296 };
 
-function pointCoordsToPix(ptCoords, originPix) {
+export function pointCoordsToPix(ptCoords, originPix) {
     return { x: originPix.x + ptCoords.x * kGraphPixPerCoord.x,
              y: originPix.y + ptCoords.y * kGraphPixPerCoord.y };
 }
 
-function pointPixToCoords(ptPix, originPix) {
+export function pointPixToCoords(ptPix, originPix) {
     const x = Math.round((ptPix.x - originPix.x) / kGraphPixPerCoord.x);
     const y = Math.round((ptPix.y - originPix.y) / kGraphPixPerCoord.y);
     return { x: x === 0 ? 0 : x, y: y === 0 ? 0 : y }; // convert -0 to 0
