@@ -25,7 +25,7 @@ import { Firebase } from "./firebase";
 import { Firestore } from "./firestore";
 import { DBListeners } from "./db-listeners";
 import { Logger, LogEventName } from "./logger";
-import { IGetImageDataParams } from "../../functions/src/shared";
+import { IGetImageDataParams, IPublishSupportParams } from "../../functions/src/shared";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
 import { getUserContext } from "../hooks/use-user-context";
 import { IStores } from "../models/stores/stores";
@@ -507,34 +507,24 @@ export class DB {
   }
 
   public publishDocumentAsSupport(documentModel: DocumentModelType, caption: string) {
-    const { appMode, demo: { name: demoName }, user, problemPath } = this.stores;
+    const publishSupport = getFirebaseFunction<IPublishSupportParams>("publishSupport_v1");
+    const { problemPath, user } = this.stores;
+    const { offeringId: resource_link_id, activityUrl: resource_url = "" } = user;
     const content = documentModel.content?.publish();
     if (!content) {
       throw new Error("Could not publish the specified document because its content is not available.");
     }
-    const fs = this.firestore;
-    return fs.batch(batch => {
-      const rootRef = fs.documentRef(fs.getRootFolder());
-      batch.set(rootRef, { updatedAt: fs.timestamp() });
-      const docRef = fs.newDocumentRef(fs.getMulticlassSupportsPath());
-      batch.set(docRef, {
-        appMode,
-        demoName,
-        classPath: this.firebase.getFullClassPath(user),
-        uid: user.id,
-        type: "supportPublication",
-        createdAt: fs.timestamp(),
-        properties: { teacherSupport: "true", caption, ...documentModel.copyProperties() },
-        problem: problemPath,
-        classes: user.classHashesForProblemPath(problemPath),
-        originDoc: documentModel.key,
-        content,
-        // LTI fields
-        platform_id: user.portal,
-        context_id: user.classHash,
-        resource_link_id: user.offeringId,
-        resource_url: user.activityUrl || ""
-      });
+    return publishSupport?.({
+      context: getUserContext(this.stores),
+      caption,
+      problem: problemPath,
+      classes: user.classHashesForProblemPath(problemPath),
+      properties: documentModel.copyProperties(),
+      originDoc: documentModel.key,
+      originDocType: documentModel.type,
+      content,
+      resource_link_id,
+      resource_url
     });
   }
 

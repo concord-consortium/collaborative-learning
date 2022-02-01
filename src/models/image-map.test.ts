@@ -1,9 +1,9 @@
 import { externalUrlImagesHandler, localAssetsImagesHandler,
         firebaseRealTimeDBImagesHandler, firebaseStorageImagesHandler,
         IImageHandler, ImageMapEntry, ImageMapModel, ImageMapModelType } from "./image-map";
+import { parseFirebaseImageUrl } from "../../functions/src/shared-utils";
 import { DB } from "../lib/db";
 import * as ImageUtils from "../utilities/image-utils";
-import urlParser from "url";
 import placeholderImage from "../assets/image_placeholder.png";
 
 let sImageMap: ImageMapModelType;
@@ -222,10 +222,7 @@ describe("ImageMap", () => {
   });
 
   it("test firebaseRealTimeDBImagesHandler", () => {
-    const legacyParsedPath = urlParser.parse(kCCImgFBRTDB).path;
-    const legacyPath = legacyParsedPath?.startsWith("/") ? legacyParsedPath.slice(1) : legacyParsedPath;
-    const parsedPath = urlParser.parse(kCCImgClassFBRTDB).path;
-    const path = parsedPath?.startsWith("/") ? parsedPath.slice(1) : parsedPath;
+    const { imageKey } = parseFirebaseImageUrl(kCCImgClassFBRTDB);
     expectToMatch(firebaseRealTimeDBImagesHandler, [kCCImgOriginal, kCCImgFBRTDB, kCCImgClassFBRTDB]);
     let p1: any;
     let p2: any;
@@ -256,7 +253,7 @@ describe("ImageMap", () => {
       p3 = firebaseRealTimeDBImagesHandler.store(kCCImgClassFBRTDB, { db: mockDB })
         .then(imageResult => {
           // url does include classHash, so we can retrieve it locally
-          expect(mockDB.getImageBlob).toHaveBeenCalledWith(path);
+          expect(mockDB.getImageBlob).toHaveBeenCalledWith(imageKey);
           expect(imageResult.contentUrl).toBe(kCCImgClassFBRTDB);
           expect(imageResult.displayUrl).toMatch(/^blob:/);
         });

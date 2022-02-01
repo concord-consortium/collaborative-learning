@@ -121,6 +121,26 @@ export function isCurriculumMetadata(o: any): o is ICurriculumMetadata {
   return !!o?.unit && !!o.problem && !!o.section && !!o.path;
 }
 
+export interface IRowMapEntry {
+  id: string;
+  isSectionHeader?: boolean;
+  sectionId?: string;
+  tiles: Array<{ tileId: string }>;
+}
+export interface ITileContent {
+  type: string;
+  // ... other tile-specific properties
+}
+export interface ITileMapEntry {
+  id: string;
+  content: ITileContent;
+}
+export interface IDocumentContent {
+  rowMap: Record< string, IRowMapEntry>;
+  rowOrder: string[];
+  tileMap: Record<string, ITileMapEntry>;
+}
+
 interface IFirebaseFunctionWarmUpParams {
   warmUp: boolean;
 }
@@ -135,8 +155,20 @@ interface IFirebaseFunctionBaseParams {
 export interface IGetImageDataParams extends IFirebaseFunctionBaseParams {
   url: string;
 }
-
 export type IGetImageDataUnionParams = IGetImageDataParams | IFirebaseFunctionWarmUpParams;
+
+export interface IPublishSupportParams extends IFirebaseFunctionBaseParams {
+  caption: string;
+  problem: string;
+  classes: string[];
+  content: string;
+  properties: Record<string, string>;
+  originDoc: string;
+  originDocType: string;
+  resource_link_id: string;
+  resource_url: string;
+}
+export type IPublishSupportUnionParams = IPublishSupportParams | IFirebaseFunctionWarmUpParams;
 
 export interface IClientCommentParams {
   tileId?: string;    // empty for document comments

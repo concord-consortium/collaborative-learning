@@ -1,14 +1,7 @@
-import {
-  apps, clearFirestoreData, initializeAdminApp, useEmulators
-} from "@firebase/rules-unit-testing";
+import { apps, clearFirestoreData, initializeAdminApp, useEmulators } from "@firebase/rules-unit-testing";
 import { getImageData } from "../src/get-image-data";
 import { IGetImageDataParams } from "../src/shared";
-import {
-  kCanonicalPortal,
-  kClassHash,
-  kOtherClassHash,
-  specAuth, specStudentContext
-} from "./test-utils";
+import { kCanonicalPortal, kClassHash, kOtherClassHash, specAuth, specStudentContext } from "./test-utils";
 
 useEmulators({
   database: { host: "localhost", port: 9000 },
@@ -124,7 +117,24 @@ describe("getImageData", () => {
     await expect(getImageData(params, authWithStudentClaims as any)).rejects.toBeDefined();
   });
 
+  it("should fail with invalid image url", async () => {
+    const context = specStudentContext();
+    const params: IGetImageDataParams = { context, url: "bogus-url" } as any;
+    await expect(getImageData(params, authWithStudentClaims as any)).rejects.toBeDefined();
+  });
+
   it("should fail if asked to retrieve image that doesn't exist", async () => {
+    const context = specStudentContext();
+    const url = specImageUrl();
+    const params: IGetImageDataParams = { context, url };
+    const response = await getImageData(params, authWithStudentClaims as any);
+    expect(response).toBeFalsy();
+    expect(mockDatabaseGet).toHaveBeenCalledTimes(1);
+  });
+
+  it("should fail gracefully if firebase image data request rejects", async () => {
+    // all requests respond with rejected promise
+    mockDatabaseGet.mockImplementation((path: string) => Promise.reject());
     const context = specStudentContext();
     const url = specImageUrl();
     const params: IGetImageDataParams = { context, url };
