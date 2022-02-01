@@ -25,6 +25,9 @@ import { Firebase } from "./firebase";
 import { Firestore } from "./firestore";
 import { DBListeners } from "./db-listeners";
 import { Logger, LogEventName } from "./logger";
+import { IGetImageDataParams } from "../../functions/src/shared";
+import { getFirebaseFunction } from "../hooks/use-firebase-function";
+import { getUserContext } from "../hooks/use-user-context";
 import { IStores } from "../models/stores/stores";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
 import { safeJsonParse } from "../utilities/js-utils";
@@ -824,17 +827,15 @@ export class DB {
             .then(blob => URL.createObjectURL(blob));
   }
 
-  public async getCloudImage(url: string, type?: string, key?: string) {
-    const { appMode, demo: { name: demoName }, user } = this.stores;
-    const { portal, classHash } = user;
-    const classPath = this.firebase.getFullClassPath(user);
-    const getImageData = firebase.functions().httpsCallable("getImageData");
-    const result = await getImageData({ url, appMode, demoName, portal, classHash, classPath, type, key });
+  public async getCloudImage(url: string) {
+    const context = getUserContext(this.stores);
+    const getImageData = getFirebaseFunction<IGetImageDataParams>("getImageData_v1");
+    const result = await getImageData({ context, url });
     return result?.data;
   }
 
-  public getCloudImageBlob(url: string, type?: string, key?: string) {
-    return this.getCloudImage(url, type, key)
+  public getCloudImageBlob(url: string) {
+    return this.getCloudImage(url)
             .then(image => image && fetch(image.imageData))
             .then(response => response?.blob())
             .then(blob => blob && URL.createObjectURL(blob));

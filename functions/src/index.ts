@@ -1,5 +1,6 @@
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
+import { getImageData as getImageDataV1 } from "./get-image-data";
 import { getNetworkDocument } from "./get-network-document";
 import { getNetworkResources } from "./get-network-resources";
 import { PortalFirebaseJWTClaims } from "./portal-types";
@@ -37,6 +38,14 @@ const firestore = app.firestore();
 type IDecodedIdToken = admin.auth.DecodedIdToken & Partial<PortalFirebaseJWTClaims>;
 
 /*
+ * getImageData
+ *
+ * Retrieves the image data associated with a particular internal image url.
+ * The _v1 suffix allows us to version the API if necessary moving forward.
+ */
+export const getImageData_v1 = functions.https.onCall(getImageDataV1);
+
+/*
  * validateCommentableDocument
  *
  * Checks whether a specific commentable document exists in firestore and creates it if necessary.
@@ -52,8 +61,20 @@ export const validateCommentableDocument_v1 = functions.https.onCall(validateCom
  */
 export const postDocumentComment_v1 = functions.https.onCall(postDocumentComment);
 
+/*
+ * getNetworkDocument
+ *
+ * Retrieves the contents of a document accessible to a teacher via the teacher network.
+ * The _v1 suffix allows us to version the API if necessary moving forward.
+ */
 export const getNetworkDocument_v1 = functions.https.onCall(getNetworkDocument);
 
+/*
+ * getNetworkResources
+ *
+ * Retrieves the list of resources (documents) available to a teacher via the teacher network.
+ * The _v1 suffix allows us to version the API if necessary moving forward.
+ */
 export const getNetworkResources_v1 = functions.https.onCall(getNetworkResources);
 
 /*
