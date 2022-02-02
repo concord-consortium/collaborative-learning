@@ -20,7 +20,7 @@ const isClueAssignment = (offering: IPortalOffering) => {
     return true;
   }
   if (externalReports && externalReports.length > 0) {
-    return externalReports.find((report) => clueDashboardRegex.test(report.name));
+    return !!externalReports.find((report) => clueDashboardRegex.test(report.name));
   }
   return false;
 };
