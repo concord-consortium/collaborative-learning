@@ -10,10 +10,14 @@ import escapeStringRegexp from "escape-string-regexp";
 import fs from "fs";
 
 const curriculumDir = "../src/public/curriculum/stretching-and-shrinking";
+// if false, will ask whether to delete the unused files rather than just listing them
 const kDryRun = true;
 
+// identify the curriculum documents (all files ending in .json)
 const curriculumFilenames = fs.readdirSync(curriculumDir).filter(name => name.toLowerCase().endsWith(".json"));
+// read the contents of the curriculum files
 const curriculumFiles = curriculumFilenames.map(name => fs.readFileSync(`${curriculumDir}/${name}`, "utf8"));
+// iterate through the contents of the images directory, checking whether each image is referenced in any curriculum
 const unusedFilenames = fs.readdirSync(`${curriculumDir}/images`).filter(name => {
   const regex = new RegExp(escapeStringRegexp(name), "i");
   return !curriculumFiles.some(content => regex.test(content));
