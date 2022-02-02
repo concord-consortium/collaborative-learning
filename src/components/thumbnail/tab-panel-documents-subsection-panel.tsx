@@ -25,12 +25,13 @@ function getDocumentCaption(stores: IStores, document: DocumentModelType) {
   const { appConfig, problem, class: _class } = stores;
   const { type, uid } = document;
   if (type === SupportPublication) return document.getProperty("caption") || "Support";
-  const userName = document.isRemote
-                    ? "Network User"
-                    : _class?.getUserById(uid)?.displayName || "Unknown User";
-  const namePrefix = isPublishedType(type) ? `${userName}: ` : "";
+  const userName = _class?.getUserById(uid)?.displayName ||
+                    (document.isRemote ? "Network User" : "Unknown User");
+  const namePrefix = document.isRemote || isPublishedType(type) ? `${userName}: ` : "";
+  const dateSuffix = document.isRemote && document.createdAt
+                      ? ` (${new Date(document.createdAt).toLocaleDateString()})` : "";
   const title = getDocumentDisplayTitle(document, appConfig, problem);
-  return `${namePrefix}${title}`;
+  return `${namePrefix}${title}${dateSuffix}`;
 }
 
 export const TabPanelDocumentsSubSectionPanel = ({section, sectionDocument, tab, stores, scale, selectedDocument,
