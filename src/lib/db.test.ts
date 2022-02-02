@@ -6,7 +6,7 @@ import { UserModel } from "../models/stores/user";
 import { DBDocument } from "./db-types";
 import { DocumentModel } from "../models/document/document";
 import { DocumentContentModel } from "../models/document/document-content";
-import { PersonalDocument, ProblemDocument } from "../models/document/document-types";
+import { PersonalDocument, PlanningDocument, ProblemDocument } from "../models/document/document-types";
 import { TextContentModelType } from "../models/tools/text/text-content";
 import { ToolTileModelType } from "../models/tools/tool-tile";
 import { createSingleTileContent } from "../utilities/test-utils";
@@ -14,6 +14,29 @@ import * as UrlParams from "../utilities/url-params";
 
 // This is needed so MST can deserialize snapshots referring to tools
 import "../register-tools";
+
+var mockDatabase = jest.fn();
+var mockFirestore = jest.fn();
+var mockFunctions = jest.fn();
+var mockAuthStateUnsubscribe = jest.fn();
+
+jest.mock("firebase/app", () => {
+  const actual = jest.requireActual("firebase/app");
+  return {
+    apps: [],
+    initializeApp: () => null,
+    auth: () => ({
+      onAuthStateChanged: (callback: (user: any) => void) => {
+        callback({ uid: "user-id" });
+        return mockAuthStateUnsubscribe;
+      },
+      signInAnonymously: () => Promise.resolve()
+    }),
+    database: () => mockDatabase(),
+    firestore: () => mockFirestore(),
+    functions: () => mockFunctions()
+  };
+});
 
 type QueryParams = UrlParams.QueryParams;
 
@@ -33,11 +56,12 @@ describe("db", () => {
       user: UserModel.create({id: "1", portal: "example.com"})
     });
     db = new DB();
+    mockDatabase.mockReset();
+    mockFirestore.mockReset();
+    mockFunctions.mockReset();
   });
 
   afterEach(() => {
-    // delete all test data (for this unique anonymous test user)
-    db.firebase.ref().remove();
     db.disconnect();
   });
 
@@ -50,13 +74,16 @@ describe("db", () => {
     expect(db.isAuthStateSubscribed()).toBe(true);
     db.disconnect();
     expect(db.isAuthStateSubscribed()).toBe(false);
-}, 5000);
+  }, 5000);
 
   it("connects/disconnects when configured to use the emulators", async () => {
     setUrlParams({ firebase: "emulator", firestore: "emulator", functions: "emulator" });
-    const mockUseDatabaseEmulator = jest.spyOn(firebase.database(), "useEmulator").mockImplementation(() => null);
-    const mockUseFirestoreEmulator = jest.spyOn(firebase.firestore(), "useEmulator").mockImplementation(() => null);
-    const mockUseFunctionsEmulator = jest.spyOn(firebase.functions(), "useEmulator").mockImplementation(() => null);
+    const mockUseDatabaseEmulator = jest.fn();
+    mockDatabase.mockImplementation(() => ({ useEmulator: () => mockUseDatabaseEmulator() }));
+    const mockUseFirestoreEmulator = jest.fn();
+    mockFirestore.mockImplementation(() => ({ useEmulator: () => mockUseFirestoreEmulator() }));
+    const mockUseFunctionsEmulator = jest.fn();
+    mockFunctions.mockImplementation(() => ({ useEmulator: () => mockUseFunctionsEmulator() }));
     expect.assertions(8);
     expect(db.firebase.isConnected).toBe(false);
     expect(db.isAuthStateSubscribed()).toBe(false);
@@ -71,7 +98,7 @@ describe("db", () => {
     mockUseDatabaseEmulator.mockReset();
     mockUseFirestoreEmulator.mockReset();
     mockUseFunctionsEmulator.mockReset();
-}, 5000);
+  }, 5000);
 
   it("resolves paths in test mode", async () => {
     expect.assertions(2);
@@ -92,6 +119,14 @@ describe("db", () => {
     expect.assertions(1);
     await db.connect({appMode: "test", stores, dontStartListeners: true});
     const testString = "this is a test";
+
+    mockDatabase.mockImplementation(() => ({
+      ref: () => ({
+        set: () => null,
+        once: () => Promise.resolve({ val: () => testString })
+      })
+    }));
+
     const ref = db.firebase.ref("write-test");
     ref.set(testString);
     const snapshot = await ref.once("value");
@@ -119,7 +154,67 @@ describe("db", () => {
     });
   });
 
-  it("creates required personal document from promise", async () => {
+  it("creates required problem document", async () => {
+    expect.assertions(3);
+    const newDocument = DocumentModel.create({ uid: "1", type: ProblemDocument, key: "doc-1" });
+    mockDatabase.mockImplementation(() => ({
+      ref: () => ({
+        once: () => ({
+          then: (callback: (snap: any) => any) => {
+            // offeringUserRef.once("value")
+            callback({ val: () => true });
+            return { then: () => ({
+              // this is where we actually create the document
+              then: (_callback: () => any) => {
+                // this is where we update the relevant promise
+                const docPromise = _callback();
+                stores.documents.resolveRequiredDocumentPromise(newDocument);
+                return docPromise;
+              }
+            })};
+          }
+        })
+      })
+    }));
+    stores.documents = createDocumentsModelWithRequiredDocuments([ProblemDocument, PlanningDocument]);
+    stores.documents.resolveAllRequiredDocumentPromisesWithNull();
+    await db.connect({appMode: "test", stores, dontStartListeners: true});
+    expect((await db.guaranteeOpenDefaultDocument(ProblemDocument))?.type).toBe(ProblemDocument);
+    expect(await stores.documents.requiredDocuments[ProblemDocument].promise).toEqual(newDocument);
+    expect(await stores.documents.requiredDocuments[PlanningDocument].promise).toBeNull();
+  });
+
+  it("creates required planning document", async () => {
+    expect.assertions(3);
+    const newDocument = DocumentModel.create({ uid: "1", type: PlanningDocument, key: "doc-1" });
+    mockDatabase.mockImplementation(() => ({
+      ref: () => ({
+        once: () => ({
+          then: (callback: (snap: any) => any) => {
+            // offeringUserRef.once("value")
+            callback({ val: () => true });
+            return { then: () => ({
+              // this is where we actually create the document
+              then: (_callback: () => any) => {
+                // this is where we update the relevant promise
+                const docPromise = _callback();
+                stores.documents.resolveRequiredDocumentPromise(newDocument);
+                return docPromise;
+              }
+            })};
+          }
+        })
+      })
+    }));
+    stores.documents = createDocumentsModelWithRequiredDocuments([ProblemDocument, PlanningDocument]);
+    stores.documents.resolveAllRequiredDocumentPromisesWithNull();
+    await db.connect({appMode: "test", stores, dontStartListeners: true});
+    expect((await db.guaranteePlanningDocument([]))?.type).toBe(PlanningDocument);
+    expect(await stores.documents.requiredDocuments[PlanningDocument].promise).toEqual(newDocument);
+    expect(await stores.documents.requiredDocuments[ProblemDocument].promise).toBeNull();
+  });
+
+  it("creates required personal document from existing promise", async () => {
     const personalDocument = DocumentModel.create({ uid: "1", type: PersonalDocument, key: "doc-1" });
     stores.documents = createDocumentsModelWithRequiredDocuments([PersonalDocument]);
     stores.documents.resolveRequiredDocumentPromise(personalDocument);
