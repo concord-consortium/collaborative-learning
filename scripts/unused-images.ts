@@ -22,7 +22,7 @@ const unusedFilenames = fs.readdirSync(`${curriculumDir}/images`).filter(name =>
 enquirer.prompt<{ confirm: boolean }>({
   type: "confirm",
   name: "confirm",
-  message: `Delete ${unusedFilenames.length} unused files?`
+  message: `${kDryRun ? "List" : "Delete"} ${unusedFilenames.length} unused files?`
 }).then(response => {
   if (response.confirm) {
     unusedFilenames.forEach(name => {
