@@ -2,7 +2,6 @@ import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import { DocumentContentModel, DocumentContentModelType, cloneContentWithUniqueIds
       } from "../document/document-content";
 import { ToolButtonModel } from "../tools/tool-button";
-import { ENavTab, NavTabSpec } from "../view/nav-tabs";
 import { NavTabsConfigModel } from "./nav-tabs";
 import { SettingsMstType } from "./settings";
 
@@ -118,9 +117,6 @@ export const AppConfigModel = types
     getDocumentLabel(docType: string, num?: number, lowerCase?: boolean) {
       const docLabel = self.documentLabels.get(docType);
       return docLabel && docLabel.getLabel(num, lowerCase) || "";
-    },
-    getNavTabSpec(tabId: ENavTab): NavTabSpec | undefined {
-      return self.navTabs.tabSpecs.find(tab => tabId === tab.tab);
     }
   }))
   .views(self => ({

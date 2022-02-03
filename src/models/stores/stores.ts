@@ -165,10 +165,9 @@ export function getDisabledFeaturesOfTile(stores: IStores, tile: string, section
   }, []);
 }
 
-export function getNavTabSpecsFromStores(stores: IStores) {
+export function getNavTabConfigFromStores(stores: IStores) {
   for (const level of [stores.unit, stores.appConfig]) {
-      const value = level.navTabs && level.navTabs.tabSpecs;
-    if (value != null && value.length > 0) return value;
+    if (level.navTabs) return level.navTabs;
   }
 }
 

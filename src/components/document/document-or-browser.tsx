@@ -2,7 +2,7 @@ import React from "react";
 import { useStores } from "../../hooks/use-stores";
 import { DocumentModelType } from "../../models/document/document";
 import { LearningLogDocument, PersonalDocument, ProblemDocument } from "../../models/document/document-types";
-import { getNavTabSpecsFromStores } from "../../models/stores/stores";
+import { getNavTabConfigFromStores } from "../../models/stores/stores";
 import { ENavTab, ENavTabSectionType, NavTabSpec } from "../../models/view/nav-tabs";
 import { DocumentTabPanel } from "../navigation/document-tab-panel";
 import { EditableDocumentContent, IProps as IEditableDocumentContentProps } from "./editable-document-content";
@@ -35,9 +35,7 @@ export const DocumentOrBrowser: React.FC<IDocumentOrBrowserProps> = props => {
 
 function useTabSpec(tab: ENavTab) {
   const stores = useStores();
-  const navTabSpecs = getNavTabSpecsFromStores(stores);
-  const navTabSpec = navTabSpecs?.find( spec => spec.tab === tab );
-  return navTabSpec;
+  return getNavTabConfigFromStores(stores)?.getNavTabSpec(tab);
 }
 
 type IMyWorkDocumentOrBrowserProps = Omit<IDocumentOrBrowserProps, "tabSpec">;
