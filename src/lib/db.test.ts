@@ -1,4 +1,3 @@
-import firebase from "firebase/app";
 import { DB } from "./db";
 import { createDocumentsModelWithRequiredDocuments, DocumentsModel } from "../models/stores/documents";
 import { IStores, createStores } from "../models/stores/stores";
@@ -21,7 +20,6 @@ var mockFunctions = jest.fn();
 var mockAuthStateUnsubscribe = jest.fn();
 
 jest.mock("firebase/app", () => {
-  const actual = jest.requireActual("firebase/app");
   return {
     apps: [],
     initializeApp: () => null,
