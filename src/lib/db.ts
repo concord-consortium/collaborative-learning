@@ -378,9 +378,9 @@ export class DB {
         })
         .then((newDocument) => {
           // reset the (presumably null) promise for this document type
-          documents.addRequiredDocumentPromises([ProblemDocument]);
+          documents.addRequiredDocumentPromises([type]);
           // return the promise, which will be resolved by the DB listener
-          return documents.requiredDocuments[ProblemDocument].promise;
+          return documents.requiredDocuments[type].promise;
         })
         .then(resolve)
         .catch(reject);
