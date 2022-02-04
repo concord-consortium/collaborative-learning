@@ -1,5 +1,6 @@
 import React from "react";
 import { ThumbnailDocumentItem } from "./thumbnail-document-item";
+import { useFirestoreTeacher } from "../../hooks/firestore-hooks";
 import { DocumentModelType } from "../../models/document/document";
 import { isPublishedType, SupportPublication } from "../../models/document/document-types";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
@@ -21,12 +22,13 @@ interface IProps {
   onDocumentDeleteClick?: (document: DocumentModelType) => void;
 }
 
-function getDocumentCaption(stores: IStores, document: DocumentModelType) {
-  const { appConfig, problem, class: _class } = stores;
+function useDocumentCaption(stores: IStores, document: DocumentModelType) {
+  const { appConfig, problem, class: _class, user: { network } } = stores;
   const { type, uid } = document;
+  const teacher = useFirestoreTeacher(uid, network || "");
   if (type === SupportPublication) return document.getProperty("caption") || "Support";
   const userName = _class?.getUserById(uid)?.displayName ||
-                    (document.isRemote ? "Network User" : "Unknown User");
+                    (document.isRemote ? teacher?.name : "") || "Unknown User";
   const namePrefix = document.isRemote || isPublishedType(type) ? `${userName}: ` : "";
   const dateSuffix = document.isRemote && document.createdAt
                       ? ` (${new Date(document.createdAt).toLocaleDateString()})` : "";
@@ -39,6 +41,7 @@ export const TabPanelDocumentsSubSectionPanel = ({section, sectionDocument, tab,
                                                   onDocumentStarClick, onDocumentDeleteClick}: IProps) => {
     const { user } = stores;
     const tabName = tab.toLowerCase().replace(' ', '-');
+    const caption = useDocumentCaption(stores, sectionDocument);
 
     function handleDocumentClick() {
       onSelectDocument?.(sectionDocument);
@@ -77,7 +80,7 @@ export const TabPanelDocumentsSubSectionPanel = ({section, sectionDocument, tab,
         document={sectionDocument}
         scale={scale}
         isSelected={sectionDocument.key === selectedDocument}
-        captionText={getDocumentCaption(stores, sectionDocument)}
+        captionText={caption}
         onDocumentClick={handleDocumentClick}
         onDocumentDragStart={!sectionDocument.isRemote ? handleDocumentDragStart: undefined}
         onIsStarred={onIsStarred}
