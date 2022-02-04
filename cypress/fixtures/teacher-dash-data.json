@@ -557,16 +557,11 @@
         },
         {
             "classIndex" : 1,
-            "className": "CLUE 2"
+            "className": "CLUE A"
         },
         {
-            "classIndex" : 2
-        },
-        {
-            "classIndex" : 3
-        },
-        {
-            "classIndex" : 4
+            "classIndex" : 2,
+            "className": "CLUE B"
         }
     ]
 }
