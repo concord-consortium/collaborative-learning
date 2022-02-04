@@ -42,16 +42,18 @@ export async function getImageData(
             .catch(() => null);
   }
 
-  function firestoreImagePathPromise(): Promise<string | null> {
+  function processImageSnapshots(snaps: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>) {
+    const _imageClassPath = snaps.docs.find(doc => !!doc.data()?.classPath)?.data()?.classPath;
+    return _imageClassPath || null;
+  }
+
+  function firestorePublishedImagePromise(): Promise<string | null> {
     return admin.firestore()
             .collection(`${firestoreRoot}/mcimages`)
             .where("url", "==", legacyUrl)
             .where("classes", "array-contains", userClassHash)
             .get()
-            .then(snapshots => {
-              const _imageClassPath = snapshots.docs.find(doc => !!doc.data()?.classPath)?.data()?.classPath;
-              return _imageClassPath || null;
-            })
+            .then(processImageSnapshots)
             .catch(() => null);
   }
 
@@ -62,10 +64,7 @@ export async function getImageData(
                 .where("url", "==", legacyUrl)
                 .where("network", "==", network)
                 .get()
-                .then(snapshots => {
-                  const _imageClassPath = snapshots.docs.find(doc => !!doc.data()?.classPath)?.data()?.classPath;
-                  return _imageClassPath || null;
-                })
+                .then(processImageSnapshots)
                 .catch(() => null)
             : Promise.resolve(null);
   }
@@ -81,8 +80,8 @@ export async function getImageData(
     // if we have an imageClassHash, then it's not in the user's class (that case was handled above)
     // if we don't have a class hash, then it could be in the user's class, so we have to check
     imageClassHash ? Promise.resolve(null) : firebaseImageDataPromise(userClassPath),
-    firestoreImagePathPromise(),    // has it been published to this user's class?
-    firestoreNetworkImagePromise()  // has it been shared with this teacher's network?
+    firestorePublishedImagePromise(), // has it been published to this user's class?
+    firestoreNetworkImagePromise()    // has it been shared with this teacher's network?
   ]);
   // if we found the image data then return it
   if (imageData) return imageData;
