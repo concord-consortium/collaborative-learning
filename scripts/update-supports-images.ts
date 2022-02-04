@@ -12,6 +12,7 @@ interface IFirestoreMultiClassSupport {
   uid: string;
   classPath?: string; // frequently missing in supports published before 2.1.3 ¯\_(ツ)_/¯
   classes: string[];
+  network: string;
   content: string;
   originDoc: string;
   properties: Record<string, string>;
@@ -45,6 +46,7 @@ interface IFirestoreMultiClassImage {
   url: string;  // old-style without class hash
   classes: string[];
   classPath: string;
+  network: string;
   supportKey: string;
   // LTI fields
   platform_id: string;
@@ -329,7 +331,7 @@ admin.firestore()
       const docData: IFirestoreMultiClassSupport | undefined = (doc as any)?.data() as any;
       const {
         appMode, platform_id = "", uid, context_id: classHash,
-        classPath: docClassPath, content, originDoc, properties = {}
+        classPath: docClassPath, network, content, originDoc, properties = {}
       } = docData || {};
       // identify image-supporting tiles in this support document
       const imageTileMatches = [...(content?.matchAll(kImageTileRegex) || [])];
@@ -373,7 +375,8 @@ admin.firestore()
             const { classes = [], resource_link_id = "", resource_url = "" } = docData || {};
             const { classPath, context_id } = firestoreImages[key];
             return {
-              url: legacyUrl, classes, classPath, supportKey, platform_id, context_id, resource_link_id, resource_url
+              url: legacyUrl, classes, classPath, network, supportKey,
+              platform_id, context_id, resource_link_id, resource_url
             };
           });
         }

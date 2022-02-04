@@ -1,7 +1,10 @@
 import { apps, clearFirestoreData, initializeAdminApp, useEmulators } from "@firebase/rules-unit-testing";
 import { getImageData } from "../src/get-image-data";
 import { IGetImageDataParams } from "../src/shared";
-import { kCanonicalPortal, kClassHash, kOtherClassHash, specAuth, specStudentContext } from "./test-utils";
+import {
+  kCanonicalPortal, kClassHash, kOtherClassHash, kOtherTeacherNetwork, kTeacherNetwork,
+  specAuth, specStudentContext, specUserContext
+} from "./test-utils";
 
 useEmulators({
   database: { host: "localhost", port: 9000 },
@@ -57,6 +60,7 @@ const firestoreAdmin = mockAdmin.firestore();
 
 // const authWithNoClaims = { auth: { uid: kUserId, token: {} } };
 const authWithStudentClaims = { auth: specAuth({ token: { user_type: "student" } }) };
+const authWithTeacherClaims = { auth: specAuth({ token: { user_type: "teacher" } }) };
 
 const kTestBaseClassPath = `/authed/portals/${kCanonicalPortal}`;
 const kImageKey = "ImageKey";
@@ -74,6 +78,7 @@ async function writeMCImageRecordToFirestore(overrides?: any) {
     url: specImageUrl(),
     classes: [context_id, imageClassHash],
     classPath: `${kTestBaseClassPath}/${imageClassHash}`,
+    network: kTeacherNetwork,
     supportKey: kSupportKey,
     platform_id: kCanonicalPortal,
     context_id,
@@ -219,6 +224,42 @@ describe("getImageData", () => {
     const url = specImageUrl();
     const params: IGetImageDataParams = { context, url };
     const response = await getImageData(params, authWithStudentClaims as any);
+    expect(response).toBeFalsy();
+    expect(mockDatabaseGet).toHaveBeenCalledTimes(1);
+  });
+
+  it("should succeed if asked to retrieve image data in another class from networked teacher", async () => {
+    // return image data if request contains appropriate class and key
+    mockDatabaseGet.mockImplementation((path: string) => Promise.resolve(
+      path.includes(kOtherClassHash) && path.endsWith(kImageKey)
+        ? { exists: () => true, val: () => ({ imageData: "data:image/png;base64,..." }) }
+        : { exists: () => false, val: () => null }
+    ));
+    // the requested image hasn't been shared with this user's class but is in same network
+    await writeMCImageRecordToFirestore({ classes: [kOtherClassHash] });
+
+    const context = specUserContext();
+    const url = specImageUrl();
+    const params: IGetImageDataParams = { context, url };
+    const response = await getImageData(params, authWithTeacherClaims as any);
+    expect(response).toHaveProperty("imageData");
+    expect(mockDatabaseGet).toHaveBeenCalledTimes(2);
+  });
+
+  it("should fail if asked to retrieve image data in another class from other network", async () => {
+    // return image data if request contains appropriate class and key
+    mockDatabaseGet.mockImplementation((path: string) => Promise.resolve(
+      path.includes(kOtherClassHash) && path.endsWith(kImageKey)
+        ? { exists: () => true, val: () => ({ imageData: "data:image/png;base64,..." }) }
+        : { exists: () => false, val: () => null }
+    ));
+    // the requested image hasn't been shared with this user's class and is not in same network
+    await writeMCImageRecordToFirestore({ classes: [kOtherClassHash] });
+
+    const context = specUserContext({ network: kOtherTeacherNetwork });
+    const url = specImageUrl();
+    const params: IGetImageDataParams = { context, url };
+    const response = await getImageData(params, authWithTeacherClaims as any);
     expect(response).toBeFalsy();
     expect(mockDatabaseGet).toHaveBeenCalledTimes(1);
   });

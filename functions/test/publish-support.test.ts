@@ -3,7 +3,8 @@ import { canonicalizeUrl, publishSupport } from "../src/publish-support";
 import { IPublishSupportParams } from "../src/shared";
 import { buildFirebaseImageUrl, parseFirebaseImageUrl, replaceAll } from "../src/shared-utils";
 import {
-  kCanonicalPortal, kClassHash, kOtherClassHash, kPortal, specAuth, specDocumentContent, specUserContext
+  kCanonicalPortal, kClassHash, kOtherClassHash, kPortal, kTeacherNetwork,
+  specAuth, specDocumentContent, specUserContext
 } from "./test-utils";
 
 useEmulators({
@@ -215,6 +216,7 @@ describe("publishSupport", () => {
     });
     const expectSupportProps = {
       appMode: "authed",
+      network: kTeacherNetwork,
       type: "supportPublication",
       originDoc: kOriginDoc,
       originDocType: "personal",
@@ -231,11 +233,11 @@ describe("publishSupport", () => {
     expect(imagesSnapshot.size).toBe(3);
     imagesSnapshot.docs.forEach((imageDoc, i) => {
       const legacyUrl = legacyUrls[i];
-      const { classes, classPath, platform_id, context_id, resource_link_id, resource_url } = supportDoc;
+      const { classes, classPath, network, platform_id, context_id, resource_link_id, resource_url } = supportDoc;
       const { imageKey } = parseFirebaseImageUrl(legacyUrl)
       expect(imageDoc.id).toBe(`${supportKey}_${imageKey}`)
       expect(imageDoc.data()).toEqual({
-        url: legacyUrl, classes, classPath, supportKey, platform_id, context_id, resource_link_id, resource_url
+        url: legacyUrl, classes, classPath, network, supportKey, platform_id, context_id, resource_link_id, resource_url
       });
     });
   });
@@ -268,6 +270,7 @@ describe("publishSupport", () => {
     });
     const expectSupportProps = {
       appMode: "authed",
+      network: kTeacherNetwork,
       type: "supportPublication",
       originDoc: kOriginDoc,
       originDocType: "personal",
@@ -284,14 +287,14 @@ describe("publishSupport", () => {
     expect(imagesSnapshot.size).toBe(3);
     imagesSnapshot.docs.forEach((imageDoc, i) => {
       const legacyUrl = legacyUrls[i];
-      const { classes, classPath: supportClassPath, platform_id, resource_link_id, resource_url } = supportDoc;
+      const { classes, classPath: supportClassPath, network, platform_id, resource_link_id, resource_url } = supportDoc;
       // image document paths differ from support document paths
       const classPath = supportClassPath.replace(kClassHash, kOtherClassHash);
       const context_id = kOtherClassHash;
       const { imageKey } = parseFirebaseImageUrl(legacyUrl)
       expect(imageDoc.id).toBe(`${supportKey}_${imageKey}`)
       expect(imageDoc.data()).toEqual({
-        url: legacyUrl, classes, classPath, supportKey, platform_id, context_id, resource_link_id, resource_url
+        url: legacyUrl, classes, classPath, network, supportKey, platform_id, context_id, resource_link_id, resource_url
       });
     });
   });
