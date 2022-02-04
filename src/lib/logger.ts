@@ -46,7 +46,7 @@ interface LogMessage {
   event: string;
   method: string;
   parameters: any;
-  activityUrl: string | undefined;
+  activityUrl?: string;
 }
 
 interface TileLoggingMetadata {
