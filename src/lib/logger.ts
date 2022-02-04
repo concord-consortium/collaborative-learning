@@ -46,6 +46,7 @@ interface LogMessage {
   event: string;
   method: string;
   parameters: any;
+  activityUrl: string | undefined;
 }
 
 interface TileLoggingMetadata {
@@ -336,7 +337,6 @@ export class Logger {
     method: LogEventMethod = LogEventMethod.DO
   ): LogMessage {
     const {appConfig, user, problemPath, ui} = this.stores;
-
     const logMessage: LogMessage = {
       application: appConfig.appName,
       username: `${user.id}@${user.portal}`,
@@ -353,6 +353,7 @@ export class Logger {
       tzOffset: timeZoneOffsetString(),
       event,
       method,
+      activityUrl: user.activityUrl,
       parameters
     };
 
