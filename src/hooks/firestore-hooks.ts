@@ -1,5 +1,6 @@
 import firebase from "firebase/app";
-import { useCallback, useEffect, useState } from 'react';
+import { observable } from "mobx";
+import { useCallback, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from 'react-query';
 import { UserDocument } from "../lib/firestore-schema";
 import { useDBStore } from './use-stores';
@@ -16,30 +17,28 @@ export function useFirestore() {
   return [db.firestore, root] as const;
 }
 
-const firestoreTeachers: Record<string, UserDocument> = {};
+const firestoreTeachers = observable.map<string, UserDocument>();
 
 export function useFirestoreTeacher(uid: string, network: string) {
   const [firestore] = useFirestore();
-  const [ , setCount] = useState(0);
-  if (firestoreTeachers[uid]) return firestoreTeachers[uid];
+  const cachedTeacher = firestoreTeachers.get(uid);
+  if (cachedTeacher) return cachedTeacher;
 
   // default response until promise resolves
-  firestoreTeachers[uid] = { uid, name: "Network User", type: "teacher", network, networks: [network] };
+  firestoreTeachers.set(uid, { uid, name: "Network User", type: "teacher", network, networks: [network] });
 
   firestore.doc(`users/${uid}`).get()
     .then(snap => {
       const teacher = snap.data() as UserDocument | undefined;
       if (teacher) {
-        firestoreTeachers[uid] = teacher;
-        // trigger re-render when we get the results
-        setCount(count => ++count);
+        firestoreTeachers.set(uid, teacher);
       }
     })
     .catch(() => {
       // ignore errors
     });
 
-  return firestoreTeachers[uid];
+  return firestoreTeachers.get(uid);
 }
 
 // https://medium.com/swlh/using-firestore-with-typescript-65bd2a602945
