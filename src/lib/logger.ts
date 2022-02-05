@@ -26,6 +26,7 @@ const productionPortal = "learn.concord.org";
 
 interface LogMessage {
   application: string;
+  activityUrl?: string;
   run_remote_endpoint?: string;
   username: string;
   role: string;
@@ -46,7 +47,6 @@ interface LogMessage {
   event: string;
   method: string;
   parameters: any;
-  activityUrl?: string;
 }
 
 interface TileLoggingMetadata {
