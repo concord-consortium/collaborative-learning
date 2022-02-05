@@ -1,3 +1,4 @@
+import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
 import { getImageData } from "./get-image-data";
 import { getNetworkDocument } from "./get-network-document";
@@ -5,6 +6,10 @@ import { getNetworkResources } from "./get-network-resources";
 import { postDocumentComment } from "./post-document-comment";
 import { publishSupport } from "./publish-support";
 import { validateCommentableDocument } from "./validate-commentable-document";
+
+admin.initializeApp({
+  databaseURL: "https://collaborative-learning-ec215.firebaseio.com/"
+});
 
 /*
  * getImageData
