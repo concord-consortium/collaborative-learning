@@ -6,7 +6,7 @@ import { buildFirebaseImageUrl, parseFirebaseImageUrl } from "./shared-utils";
 import { validateUserContext } from "./user-context";
 
 // update this when deploying updates to this function
-const version = "1.0.0";
+const version = "1.0.1";
 
 export async function canonicalizeUrl(url: string, defaultClassHash: string, firestoreRoot: string) {
   const { imageClassHash, imageKey  } = parseFirebaseImageUrl(url);
@@ -25,7 +25,7 @@ export async function publishSupport(
   if (isWarmUpParams(params)) return { version };
 
   const { context, caption, classes, content, properties, resource_link_id, resource_url, ...others } = params;
-  const { appMode, classHash, demoName: _demoName, portal: platform_id } = context || {};
+  const { appMode, classHash, demoName: _demoName, portal: platform_id, network: _network } = context || {};
   const { isValid, uid, classPath, firestoreRoot } = validateUserContext(context, callableContext?.auth);
   if (!appMode || !isValid || !classHash || !classPath || !uid) {
     throw new functions.https.HttpsError("invalid-argument", "The provided user context is not valid.");
@@ -40,10 +40,12 @@ export async function publishSupport(
   const _canonicalizeUrl = (url: string) => canonicalizeUrl(url, classHash, firestoreRoot);
   const { content: canonicalizedContent, images } = await parseSupportContent(content, _canonicalizeUrl);
 
-  // only include demoName if it exists
+  // only include demoName and network if they exist
   const demoName = _demoName ? { demoName: _demoName } : undefined;
+  const network = _network ? { network: _network } : undefined;
   const supportDoc = {
-    appMode, ...demoName, classes, classPath, uid, type: "supportPublication",
+    appMode, ...demoName, classes, classPath, uid, ...network,
+    type: "supportPublication",
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
     properties: { teacherSupport: "true", caption, ...properties },
     content: canonicalizedContent, platform_id, context_id: classHash,
@@ -64,7 +66,7 @@ export async function publishSupport(
   for (const legacyUrl in images) {
     const { imageClassHash = classHash, imageKey } = parseFirebaseImageUrl(images[legacyUrl]);
     const imageClassPath = classPath.replace(classHash, imageClassHash);
-    const mcimage = { url: legacyUrl, classes, classPath: imageClassPath, supportKey,
+    const mcimage = { url: legacyUrl, classes, classPath: imageClassPath, supportKey, ...network,
                       platform_id, context_id: imageClassHash, resource_link_id, resource_url };
     const mcimageRef = admin.firestore().doc(`${firestoreRoot}/mcimages/${supportKey}_${imageKey}`);
     batch.set(mcimageRef, mcimage);
