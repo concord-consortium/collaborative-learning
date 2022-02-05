@@ -3,8 +3,11 @@ import {
 } from "@firebase/rules-unit-testing";
 import { getNetworkDocument } from "../src/get-network-document";
 import { IGetNetworkDocumentParams } from "../src/shared";
+import { buildFirebaseImageUrl, parseFirebaseImageUrl } from "../src/shared-utils";
+import { validateUserContext } from "../src/user-context";
 import {
-  kCanonicalPortal, kClassHash, kTeacherName, kTeacherNetwork, kUserId, specAuth, specUserContext
+  kCanonicalPortal, kClassHash, kPlatformUserId, kPortal, kTeacherName, kTeacherNetwork, kUserId,
+  specAuth, specDocumentContent, specUserContext
 } from "./test-utils";
 
 useEmulators({
@@ -60,7 +63,9 @@ jest.mock('firebase-admin', () => {
 const firestoreAdmin = mockAdmin.firestore();
 
 const authWithNoClaims = { auth: { uid: kUserId, token: {} } };
-const authWithTeacherClaims = { auth: specAuth({ token: { user_type: "teacher" } }) };
+const kTeacherAuthClaims = { platform_id: kPortal, platform_user_id: kPlatformUserId,
+                              user_type: "teacher", class_hash: kClassHash }
+const authWithTeacherClaims = { auth: specAuth({ token: kTeacherAuthClaims }) };
 
 async function writeTeacherRecordToFirestore(overrides?: any) {
   const user = { uid: kUserId, name: kTeacherName, type: "teacher",
@@ -157,6 +162,15 @@ describe("getNetworkDocument", () => {
 
     const context = specUserContext();
     const params: IGetNetworkDocumentParams = { context, ...specDocument({}, ["uid"]) };
+    await expect(getNetworkDocument(params, authWithTeacherClaims as any)).rejects.toBeDefined();
+  });
+
+  it("should fail if document class not specified", async () => {
+    await writeTeacherRecordToFirestore();
+    await writeClassRecordToFirestore({ context_id: kDocClassHash });
+
+    const context = specUserContext();
+    const params: IGetNetworkDocumentParams = { context, ...specDocument({}, ["context_id"]) };
     await expect(getNetworkDocument(params, authWithTeacherClaims as any)).rejects.toBeDefined();
   });
 
@@ -260,6 +274,46 @@ describe("getNetworkDocument", () => {
     expect(response).toHaveProperty("version");
     expect(response.content).toEqual(problemDocumentContent);
     expect(response.metadata).toEqual(problemDocumentMetadata);
+  });
+
+  it("should return content with image urls canonicalized", async () => {
+    await writeTeacherRecordToFirestore();
+    await writeClassRecordToFirestore({ context_id: kDocClassHash });
+
+    const context = specUserContext();
+    const { classPath: userClassPath } = validateUserContext(context, authWithTeacherClaims.auth);
+    const docClassPath = userClassPath.replace(kClassHash, kDocClassHash);
+
+    const canonicalUrl = buildFirebaseImageUrl(kDocClassHash, "image-key");
+    const { legacyUrl } = parseFirebaseImageUrl(canonicalUrl);
+    const originalContent = specDocumentContent([
+      { type: "Image", changes: [{ url: legacyUrl }] }
+    ]);
+    const updatedContent = originalContent.replace(legacyUrl, canonicalUrl);
+
+    const problemDocumentMetadata = {
+            version: "1.0", self: { classHash: kDocClassHash, offeringId: "1001", uid: kDocUserId,
+            visibility: "public", documentKey: kDocKey }
+          };
+    mockDatabaseGet.mockImplementation(path => {
+      const dbMap: Record<string, any> = {
+        [`${docClassPath}/users/${kDocUserId}/documentMetadata/${kDocKey}`]:
+          problemDocumentMetadata,
+        [`${docClassPath}/users/${kDocUserId}/documents/${kDocKey}`]:
+          originalContent
+      };
+      const content = dbMap[path];
+      return content
+              ? { exists: () => true, val: () => content }
+              : { exists: () => false, val: () => null };
+    });
+
+    const params: IGetNetworkDocumentParams = { context, ...specDocument() };
+    const response = await getNetworkDocument(params, authWithTeacherClaims as any);
+    expect(response).toHaveProperty("version");
+    expect(response.content).toEqual(updatedContent);
+    expect(response.metadata).toEqual(problemDocumentMetadata);
+    expect(response.images).toEqual({ [legacyUrl]: canonicalUrl });
   });
 
 });

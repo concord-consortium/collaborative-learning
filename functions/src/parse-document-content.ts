@@ -14,7 +14,7 @@ interface IImageInfo {
   key: string;
 }
 
-export async function parseSupportContent(contentJson: string, canonicalizeUrl: (url: string) => Promise<string>) {
+export async function parseDocumentContent(contentJson: string, canonicalizeUrl: (url: string) => Promise<string>) {
 
   const content = safeJsonParse<IDocumentContent>(contentJson);
 

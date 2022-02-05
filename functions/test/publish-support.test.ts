@@ -1,5 +1,5 @@
 import { apps, clearFirestoreData, initializeAdminApp, useEmulators } from "@firebase/rules-unit-testing";
-import { canonicalizeUrl, publishSupport } from "../src/publish-support";
+import { publishSupport } from "../src/publish-support";
 import { IPublishSupportParams } from "../src/shared";
 import { buildFirebaseImageUrl, parseFirebaseImageUrl, replaceAll } from "../src/shared-utils";
 import {
@@ -106,18 +106,6 @@ async function writeImageRecordToFirestore(overrides?: any) {
   };
   return await firestoreAdmin.doc(`${firestoreRoot}/images/${imageKey}`).set(image);
 }
-
-describe("canonicalizeUrl", () => {
-  it("should simply return invalid urls", async () => {
-    expect(await canonicalizeUrl("", "", "")).toBe("");
-    expect(await canonicalizeUrl("bogus", "class-hash", "firestore-root")).toBe("bogus");
-  });
-
-  it("should simply return canonical urls", async () => {
-    const canonicalUrl = buildFirebaseImageUrl("image-class-hash", "image-key");
-    expect(await canonicalizeUrl(canonicalUrl, "class-hash", "firestore-root")).toBe(canonicalUrl);
-  });
-});
 
 describe("publishSupport", () => {
 
