@@ -34,27 +34,6 @@
         ]
       },
       {
-        "tab": "teacher-guide",
-        "label": "Teacher Guide",
-        "teacherOnly": true,
-        "sections": []
-      },
-      {
-        "tab": "student-work",
-        "label": "Student Workspaces",
-        "teacherOnly": true,
-        "groupsDisplay": true,
-        "sections": [
-          {
-            "title": "Group Workspaces",
-            "type": "problem-documents",
-            "dataTestHeader": "group-workspaces",
-            "dataTestItem": "group-list-items",
-            "showGroupWorkspaces": true
-          }
-        ]
-      },
-      {
         "tab": "my-work",
         "label": "My Work",
         "sections": [
@@ -76,46 +55,6 @@
             "properties": ["!isDeleted"],
             "showStars": ["student", "teacher"],
             "addDocument": true
-          },
-          {
-            "title": "Starred",
-            "type": "starred-problem-documents",
-            "dataTestHeader": "my-work-section-starred",
-            "documentTypes": ["personal", "problem"],
-            "properties": ["starred", "!isDeleted"],
-            "showStars": ["student", "teacher"]
-          }
-        ]
-      },
-      {
-        "tab": "class-work",
-        "label": "Class Work",
-        "sections": [
-          {
-            "className": "section problem published",
-            "title": "Problem Workspaces",
-            "type": "published-problem-documents",
-            "dataTestHeader": "class-work-section-published",
-            "dataTestItem": "class-work-list-items",
-            "documentTypes": ["publication"],
-            "showStars": ["teacher"]
-          },
-          {
-            "className": "section personal published",
-            "title": "Extra Workspaces",
-            "type": "published-personal-documents",
-            "dataTestHeader": "class-work-section-personal",
-            "dataTestItem": "class-work-list-items",
-            "documentTypes": ["personalPublication"]
-          },
-          {
-            "className": "section problem starred",
-            "title": "Starred",
-            "type": "starred-problem-documents",
-            "dataTestHeader": "class-work-section-starred",
-            "documentTypes": ["publication"],
-            "properties": ["starred"],
-            "showStars": ["teacher"]
           }
         ]
       }
