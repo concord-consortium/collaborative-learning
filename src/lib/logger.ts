@@ -339,6 +339,7 @@ export class Logger {
     const {appConfig, user, problemPath, ui} = this.stores;
     const logMessage: LogMessage = {
       application: appConfig.appName,
+      activityUrl: user.activityUrl,
       username: `${user.id}@${user.portal}`,
       role: user.type || "unknown",
       classHash: user.classHash,
@@ -353,7 +354,6 @@ export class Logger {
       tzOffset: timeZoneOffsetString(),
       event,
       method,
-      activityUrl: user.activityUrl,
       parameters
     };
 
