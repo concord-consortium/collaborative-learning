@@ -114,6 +114,8 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const { document } = this.props;
     const { ui } = this.stores;
     const toolContentInfo = getToolContentInfoById(tool.id);
+    if (!toolContentInfo) return;
+
     const newTileOptions: IDocumentContentAddTileOptions = {
             title: this.getUniqueTitle(toolContentInfo),
             addSidecarNotes: !!toolContentInfo?.addSidecarNotes,
@@ -167,8 +169,10 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     this.removeDropRowHighlight();
 
     const toolContentInfo = getToolContentInfoById(tool.id);
-    const dragInfo: IDragToolCreateInfo =
-      { toolId: tool.id, title: this.getUniqueTitle(toolContentInfo) };
-    e.dataTransfer.setData(kDragTileCreate, JSON.stringify(dragInfo));
+    if (toolContentInfo) {
+      const dragInfo: IDragToolCreateInfo =
+        { toolId: tool.id, title: this.getUniqueTitle(toolContentInfo) };
+      e.dataTransfer.setData(kDragTileCreate, JSON.stringify(dragInfo));
+    }
   };
 }

@@ -67,7 +67,7 @@ export function toolFactory(snapshot: any) {
 }
 
 export function findMetadata(type: string, id: string) {
-  const MetadataType = getToolContentInfoById(type).metadataClass;
+  const MetadataType = getToolContentInfoById(type)?.metadataClass;
   if (!MetadataType) return;
 
   if (!_private.metadata[id]) {

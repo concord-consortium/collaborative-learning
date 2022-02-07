@@ -678,13 +678,15 @@ export const DocumentContentModel = types
         // the end of the content and then moves them to the desired location.
         const addTileOptions = { rowIndex: self.rowCount };
         const contentInfo = getToolContentInfoById(toolId);
+        if (!contentInfo) return;
+
         const documents = getParentWithTypeName(self, "Documents") as DocumentsModelType;
         const appConfig = documents?.appConfig;
 
         const newContent = contentInfo?.defaultContent({ title, url, appConfig });
         const tileInfo = self.addTileContentInNewRow(
                               newContent,
-                              { rowHeight: contentInfo?.defaultHeight, ...addTileOptions });
+                              { rowHeight: contentInfo.defaultHeight, ...addTileOptions });
         if (addSidecarNotes) {
           const { rowId } = tileInfo;
           const row = self.rowMap.get(rowId);

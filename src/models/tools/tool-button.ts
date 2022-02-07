@@ -28,7 +28,7 @@ const TileToolButtonModel = BaseToolButtonModel.named("TileToolButtonModel")
   })
   .views(self => ({
     get Icon() {
-      return  getToolContentInfoById(self.id).Icon;
+      return getToolContentInfoById(self.id)?.Icon;
     }
   }));
 

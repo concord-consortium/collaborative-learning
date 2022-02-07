@@ -34,7 +34,7 @@ describe("ToolTileModel", () => {
 
   uniqueToolIds.forEach(toolID => {
     it(`supports the tool: ${toolID}`, () => {
-      const SpecificToolContentModel = getToolContentInfoById(toolID).modelClass;
+      const SpecificToolContentModel = getToolContentInfoById(toolID)?.modelClass;
 
       // can create a model with each type of tool
       const content: any = { type: toolID };
@@ -44,7 +44,7 @@ describe("ToolTileModel", () => {
         content.originalType = "foo";
       }
       let toolTile = ToolTileModel.create({
-                      content: SpecificToolContentModel.create(content)
+                      content: SpecificToolContentModel?.create(content)
                     });
       expect(toolTile.content.type).toBe(toolID);
 
@@ -61,7 +61,7 @@ describe("ToolTileModel", () => {
     // If we have more tests verifying that Tools follow the right patterns this test
     // should be moved next to them.
     it(`${toolID} content models can be created without the type`, () => {
-      const SpecificToolContentModel = getToolContentInfoById(toolID).modelClass;
+      const SpecificToolContentModel = getToolContentInfoById(toolID)?.modelClass;
 
       // can create the model without passing the type
       const typelessContent: any = {};
@@ -69,8 +69,8 @@ describe("ToolTileModel", () => {
       if (toolID === kUnknownToolID) {
         typelessContent.originalType = "foo";
       }
-      const toolContentModel = SpecificToolContentModel.create(typelessContent);
-      expect(toolContentModel.type).toBe(toolID);
+      const toolContentModel = SpecificToolContentModel?.create(typelessContent);
+      expect(toolContentModel?.type).toBe(toolID);
     });
   });
 

@@ -58,7 +58,7 @@ export function registerToolContentInfo(toolContentInfo: IToolContentInfo) {
 // ToolContent id, e.g. kDrawingToolID, kGeometryToolID, etc.
 export function getToolContentInfoById(id: string) {
   // toLowerCase() for legacy support of tool names
-  return gToolContentInfoMapById[id.toLowerCase()];
+  return id ? gToolContentInfoMapById[id.toLowerCase()] : undefined;
 }
 
 export function getToolContentModels() {
@@ -66,7 +66,7 @@ export function getToolContentModels() {
 }
 
 export function getToolIds() {
-  return Object.keys(gToolContentInfoMapById);
+  return Object.keys(gToolContentInfoMapById).map(toolId => gToolContentInfoMapById[toolId].id);
 }
 
 
