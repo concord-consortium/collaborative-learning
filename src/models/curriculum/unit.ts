@@ -42,7 +42,7 @@ export const UnitModel = types
     supports: types.array(SupportModel),
     defaultStamps: types.array(StampModel),
     settings: types.maybe(SettingsMstType),
-    navTabs: types.maybe(NavTabsConfigModel)
+    navTabs: types.maybe(NavTabsConfigModel),
   })
   .volatile(self => ({
     userListenerDisposer: null as IReactionDisposer | null

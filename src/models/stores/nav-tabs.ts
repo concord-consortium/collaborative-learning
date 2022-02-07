@@ -7,6 +7,7 @@ export const NavTabsConfigModel = types
     preventExpandCollapse: false,
     lazyLoadTabContents: false,
     tabSpecs: types.array(NavTabModel),
+    showNavPanel: false
   })
   .views(self => ({
     getNavTabSpec(tabId: ENavTab): NavTabSpec | undefined {
