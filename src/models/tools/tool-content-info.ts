@@ -23,7 +23,6 @@ type ToolComponentType = React.ComponentType<IToolTileProps>;
 
 export interface IToolContentInfo {
   id: string;
-  tool: string;
   modelClass: typeof ToolContentModel;
   defaultContent: (options?: IDefaultContentOptions) => ToolContentModelType;
   Component: ToolComponentType;
@@ -50,21 +49,16 @@ interface IToolContentInfoMap {
   [id: string]: IToolContentInfo;
 }
 const gToolContentInfoMapById: IToolContentInfoMap = {};
-const gToolContentInfoMapByTool: IToolContentInfoMap = {};
 
 export function registerToolContentInfo(toolContentInfo: IToolContentInfo) {
-  gToolContentInfoMapById[toolContentInfo.id] = toolContentInfo;
-  gToolContentInfoMapByTool[toolContentInfo.tool] = toolContentInfo;
+  // toLowerCase() for legacy support of tool names
+  gToolContentInfoMapById[toolContentInfo.id.toLowerCase()] = toolContentInfo;
 }
 
 // ToolContent id, e.g. kDrawingToolID, kGeometryToolID, etc.
 export function getToolContentInfoById(id: string) {
-  return gToolContentInfoMapById[id];
-}
-
-// tool name used in a few places, e.g. "drawing", "geometry", etc.
-export function getToolContentInfoByTool(tool: string) {
-  return gToolContentInfoMapByTool[tool];
+  // toLowerCase() for legacy support of tool names
+  return gToolContentInfoMapById[id.toLowerCase()];
 }
 
 export function getToolContentModels() {

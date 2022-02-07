@@ -20,7 +20,7 @@ export const ToolButtonComponent: React.FC<IToolButtonProps> =
   ({ toolButton, isActive, isDisabled, onSetToolActive, onClick, onDragStart,
       onShowDropHighlight, onHideDropHighlight }) => {
 
-  const { name, title, isTileTool, Icon } = toolButton;
+  const { id, title, isTileTool, Icon } = toolButton;
 
   const handleMouseDown = () => {
     if (isDisabled) return;
@@ -45,10 +45,11 @@ export const ToolButtonComponent: React.FC<IToolButtonProps> =
     onDragStart(e, toolButton);
   };
 
+  const toolTileClass = id.toLowerCase();
   return (
-    <div className={classNames("tool", name, { active: isActive }, isDisabled ? "disabled" : "enabled")}
-        data-testid={`tool-${name}`}
-        key={name}
+    <div className={classNames("tool", toolTileClass, { active: isActive }, isDisabled ? "disabled" : "enabled")}
+        data-testid={`tool-${toolTileClass}`}
+        key={id}
         title={title}
         onMouseDown={handleMouseDown}
         onClick={handleClick}

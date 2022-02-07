@@ -6,7 +6,7 @@ import { DocumentModelType } from "../models/document/document";
 import { IDocumentContentAddTileOptions, IDragToolCreateInfo } from "../models/document/document-content";
 import { ToolbarModelType } from "../models/stores/problem-configuration";
 import { ToolButtonModelType } from "../models/tools/tool-button";
-import { getToolContentInfoByTool, IToolContentInfo } from "../models/tools/tool-content-info";
+import { getToolContentInfoById, IToolContentInfo } from "../models/tools/tool-content-info";
 import { DeleteButton } from "./delete-button";
 import { IToolButtonProps, ToolButtonComponent } from "./tool-button";
 import { EditableToolApiInterfaceRefContext } from "./tools/tool-api";
@@ -44,7 +44,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
   public render() {
     const handleClickTool = (e: React.MouseEvent<HTMLDivElement>, tool: ToolButtonModelType) => {
-      switch (tool.name) {
+      switch (tool.id) {
         case "select":
           this.handleSelect();
           break;
@@ -69,16 +69,16 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
         const buttonProps: IToolButtonProps = {
           toolButton,
           isActive: toolButton === this.state.activeTool,
-          isDisabled: toolButton.name === "delete" && !selectedTileIds.length,
+          isDisabled: toolButton.id === "delete" && !selectedTileIds.length,
           onSetToolActive: handleSetActiveTool,
           onClick: handleClickTool,
           onDragStart: handleDragTool,
           onShowDropHighlight: this.showDropRowHighlight,
           onHideDropHighlight: this.removeDropRowHighlight
         };
-        return toolButton.name !== "delete"
-                ? <ToolButtonComponent key={toolButton.name} {...buttonProps} />
-                : <DeleteButton key={toolButton.name}
+        return toolButton.id !== "delete"
+                ? <ToolButtonComponent key={toolButton.id} {...buttonProps} />
+                : <DeleteButton key={toolButton.id}
                                 onSetShowDeleteTilesConfirmationAlert={this.setShowDeleteTilesConfirmationAlert}
                                 onDeleteSelectedTiles={this.handleDeleteSelectedTiles}
                                 {...buttonProps} />;
@@ -113,13 +113,13 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   private handleAddToolTile(tool: ToolButtonModelType) {
     const { document } = this.props;
     const { ui } = this.stores;
-    const toolContentInfo = getToolContentInfoByTool(tool.name);
+    const toolContentInfo = getToolContentInfoById(tool.id);
     const newTileOptions: IDocumentContentAddTileOptions = {
             title: this.getUniqueTitle(toolContentInfo),
             addSidecarNotes: !!toolContentInfo?.addSidecarNotes,
             insertRowInfo: { rowInsertIndex: document.content?.defaultInsertRow ?? 0 }
           };
-    const rowTile = document.addTile(tool.name, newTileOptions);
+    const rowTile = document.addTile(tool.id, newTileOptions);
     if (rowTile && rowTile.tileId) {
       ui.setSelectedTileId(rowTile.tileId);
       this.setState(state => ({ activeTool: state.defaultTool }));
@@ -166,9 +166,9 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     // remove hover-insert highlight when we start a tile drag
     this.removeDropRowHighlight();
 
-    const toolContentInfo = getToolContentInfoByTool(tool.name);
+    const toolContentInfo = getToolContentInfoById(tool.id);
     const dragInfo: IDragToolCreateInfo =
-      { tool: tool.name, title: this.getUniqueTitle(toolContentInfo) };
+      { toolId: tool.id, title: this.getUniqueTitle(toolContentInfo) };
     e.dataTransfer.setData(kDragTileCreate, JSON.stringify(dragInfo));
   };
 }

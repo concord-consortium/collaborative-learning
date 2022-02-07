@@ -17,7 +17,7 @@ Each tile type has a unique tool id. Here is an example of a tool tile id defini
 ```typescript
 export const kPlaceholderToolID = "Placeholder";
 ```
-These ids are used in several places. These ids are used in several places. They are defined when the tool is registered with `registerToolContentInfo`.
+These ids are used in several places. They are defined when the tool is registered with `registerToolContentInfo`.
 
 ## Tool Tile Models
 Each tool defines a tile content model. This content model is specified as a MobX State Tree (MST) model and contains properties and actions specific to the tool. Each of the tool tile content models is unioned together to define the `ToolContentUnion` type.

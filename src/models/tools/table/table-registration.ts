@@ -6,7 +6,6 @@ import TableToolIcon from "../../../clue/assets/icons/table-tool.svg";
 
 registerToolContentInfo({
   id: kTableToolID,
-  tool: "table",
   titleBase: "Table",
   modelClass: TableContentModel,
   metadataClass: TableMetadataModel,

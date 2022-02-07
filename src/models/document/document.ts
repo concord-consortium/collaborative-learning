@@ -3,9 +3,9 @@ import { forEach } from "lodash";
 import { QueryClient, UseQueryResult } from "react-query";
 import { DocumentContentModel, DocumentContentSnapshotType } from "./document-content";
 import {
-  DocumentType, DocumentTypeEnum, IDocumentContext, ISetProperties, LearningLogDocument, LearningLogPublication,
-  PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemPublication,
-  SupportPublication
+  DocumentType, DocumentTypeEnum, IDocumentAddTileOptions, IDocumentContext, ISetProperties,
+  LearningLogDocument, LearningLogPublication, PersonalDocument, PersonalPublication,
+  PlanningDocument, ProblemDocument, ProblemPublication, SupportPublication
 } from "./document-types";
 import { AppConfigModelType } from "../stores/app-config-model";
 import { TileCommentsModel, TileCommentsModelType } from "../tools/tile-comments";
@@ -15,12 +15,6 @@ import { getFirebaseFunction } from "../../hooks/use-firebase-function";
 import { IDocumentProperties } from "../../lib/db-types";
 import { getLocalTimeStamp } from "../../utilities/time";
 import { safeJsonParse } from "../../utilities/js-utils";
-
-export interface IDocumentAddTileOptions {
-  title?: string;
-  addSidecarNotes?: boolean;
-  url?: string;
-}
 
 export const DocumentModel = types
   .model("Document", {
@@ -184,8 +178,8 @@ export const DocumentModel = types
       self.visibility = visibility;
     },
 
-    addTile(tool: string, options?: IDocumentAddTileOptions) {
-      return self.content?.userAddTile(tool, options);
+    addTile(toolId: string, options?: IDocumentAddTileOptions) {
+      return self.content?.userAddTile(toolId, options);
     },
 
     deleteTile(tileId: string) {

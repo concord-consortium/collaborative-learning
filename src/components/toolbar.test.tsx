@@ -26,20 +26,20 @@ describe("ToolbarComponent", () => {
 
   const config: ToolbarModelSnapshot = [
     {
-      name: "select",
+      id: "select",
       title: "Select",
       iconId: "icon-select-tool",
       isDefault: true,
       isTileTool: false
     },
     {
-      name: "text",
+      id: "Text",
       title: "Text",
       isDefault: false,
       isTileTool: true
     },
     {
-      name: "delete",
+      id: "delete",
       title: "Delete",
       iconId: "icon-delete-tool",
       isDefault: false,

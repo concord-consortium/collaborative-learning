@@ -8,7 +8,6 @@ export function defaultContent(): UnknownContentModelType {
 
 registerToolContentInfo({
   id: kUnknownToolID,
-  tool: "unknown",
   modelClass: UnknownContentModel,
   defaultContent,
   // TODO: should really have a separate unknown tool that shows an "unknown tile" message

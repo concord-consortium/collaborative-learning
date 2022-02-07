@@ -6,7 +6,6 @@ import DrawingToolIcon from "../../../clue/assets/icons/draw-tool.svg";
 
 registerToolContentInfo({
   id: kDrawingToolID,
-  tool: "drawing",
   modelClass: DrawingContentModel,
   metadataClass: DrawingToolMetadataModel,
   defaultHeight: kDrawingDefaultHeight,

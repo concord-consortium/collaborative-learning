@@ -180,39 +180,39 @@
     "disabledFeatures": [],
     "toolbar": [
       {
-        "name": "select",
+        "id": "select",
         "title": "Select",
         "iconId": "icon-select-tool",
         "isTileTool": false,
         "isDefault": true
       },
       {
-        "name": "text",
+        "id": "Text",
         "title": "Text",
         "isTileTool": true
       },
       {
-        "name": "table",
+        "id": "Table",
         "title": "Table",
         "isTileTool": true
       },
       {
-        "name": "geometry",
+        "id": "Geometry",
         "title": "Geometry",
         "isTileTool": true
       },
       {
-        "name": "image",
+        "id": "Image",
         "title": "Image",
         "isTileTool": true
       },
       {
-        "name": "drawing",
+        "id": "Drawing",
         "title": "Drawing",
         "isTileTool": true
       },
       {
-        "name": "delete",
+        "id": "delete",
         "title": "Delete",
         "iconId": "icon-delete-tool",
         "isTileTool": false

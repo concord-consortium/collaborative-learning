@@ -2,7 +2,7 @@ import { cloneDeep, each } from "lodash";
 import { types, getSnapshot, Instance, SnapshotIn } from "mobx-state-tree";
 import { PlaceholderContentModel } from "../tools/placeholder/placeholder-content";
 import { kTextToolID } from "../tools/text/text-content";
-import { getToolContentInfoById, getToolContentInfoByTool, IDocumentExportOptions } from "../tools/tool-content-info";
+import { getToolContentInfoById, IDocumentExportOptions } from "../tools/tool-content-info";
 import { ToolContentModelType } from "../tools/tool-types";
 import {
   ToolTileModel, ToolTileModelType, ToolTileSnapshotInType, ToolTileSnapshotOutType
@@ -10,6 +10,7 @@ import {
 import {
   TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType, TileLayoutModelType
 } from "../document/tile-row";
+import { IDocumentAddTileOptions } from "./document-types";
 import { SectionModelType } from "../curriculum/section";
 import { Logger, LogEventName } from "../../lib/logger";
 import { IDragTileItem } from "../../models/tools/tool-tile";
@@ -18,7 +19,6 @@ import { DisplayUserType } from "../stores/user-types";
 import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
 import { getParentWithTypeName } from "../../utilities/mst-utils";
 import { comma, StringBuilder } from "../../utilities/string-builder";
-import { IDocumentAddTileOptions } from "./document";
 
 export interface INewTileOptions {
   rowHeight?: number;
@@ -45,7 +45,7 @@ export interface IDocumentContentAddTileOptions extends IDocumentAddTileOptions 
 }
 
 export interface IDragToolCreateInfo {
-  tool: string;
+  toolId: string;
   title?: string;
 }
 
@@ -672,12 +672,12 @@ export const DocumentContentModel = types
           }
         }
       },
-      addTile(tool: string, options?: IDocumentContentAddTileOptions) {
+      addTile(toolId: string, options?: IDocumentContentAddTileOptions) {
         const { title, addSidecarNotes, url, insertRowInfo } = options || {};
         // for historical reasons, this function initially places new rows at
         // the end of the content and then moves them to the desired location.
         const addTileOptions = { rowIndex: self.rowCount };
-        const contentInfo = getToolContentInfoByTool(tool);
+        const contentInfo = getToolContentInfoById(toolId);
         const documents = getParentWithTypeName(self, "Documents") as DocumentsModelType;
         const appConfig = documents?.appConfig;
 
@@ -814,8 +814,8 @@ export const DocumentContentModel = types
     }
   }))
   .actions(self => ({
-    userAddTile(tool: string, options?: IDocumentContentAddTileOptions) {
-      const result = self.addTile(tool, options);
+    userAddTile(toolId: string, options?: IDocumentContentAddTileOptions) {
+      const result = self.addTile(toolId, options);
       const newTile = result?.tileId && self.getTile(result.tileId);
       if (newTile) {
         Logger.logTileEvent(LogEventName.CREATE_TILE, newTile);
