@@ -26,6 +26,7 @@ const productionPortal = "learn.concord.org";
 
 interface LogMessage {
   application: string;
+  activityUrl?: string;
   run_remote_endpoint?: string;
   username: string;
   role: string;
@@ -336,9 +337,9 @@ export class Logger {
     method: LogEventMethod = LogEventMethod.DO
   ): LogMessage {
     const {appConfig, user, problemPath, ui} = this.stores;
-
     const logMessage: LogMessage = {
       application: appConfig.appName,
+      activityUrl: user.activityUrl,
       username: `${user.id}@${user.portal}`,
       role: user.type || "unknown",
       classHash: user.classHash,
