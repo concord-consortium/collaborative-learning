@@ -15,8 +15,8 @@
     "deploy:publishSupport": "firebase deploy --only functions:publishSupport_v1",
     "deploy:validateCommentableDocument": "firebase deploy --only functions:validateCommentableDocument_v1",
     "logs": "firebase functions:log",
-    "test": "ts-node node_modules/jest/bin/jest.js --detectOpenHandles",
-    "test:coverage": "ts-node node_modules/jest/bin/jest.js --coverage --detectOpenHandles"
+    "test": "cross-env FIREBASE_CONFIG={} ts-node node_modules/jest/bin/jest.js --detectOpenHandles",
+    "test:coverage": "cross-env FIREBASE_CONFIG={} ts-node node_modules/jest/bin/jest.js --coverage --detectOpenHandles"
   },
   "engines": {
     "node": "16"
@@ -34,6 +34,7 @@
     "@types/jest": "^27.4.0",
     "@typescript-eslint/eslint-plugin": "^5.10.2",
     "@typescript-eslint/parser": "^5.10.2",
+    "cross-env": "^7.0.3",
     "eslint": "^8.8.0",
     "eslint-plugin-import": "^2.25.4",
     "firebase-functions-test": "^0.3.3",

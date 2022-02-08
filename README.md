@@ -50,10 +50,15 @@ To deploy a production release:
 
 ## Developing/deploying cloud functions
 
-CLUE uses a google cloud function to retrieve certain images from the firebase realtime database that
-would otherwise not be allowed by security rules, notably to allow users in other classes to retrieve
-images that were stored as part of a cross-class teacher support. Down the road we may encounter uses
-for additional cloud functions.
+CLUE uses several Google cloud functions to implement certain features that would be difficult (or impossible) to implement entirely client-side.
+|Function|Purpose|
+|--------|-------|
+|_getImageData_|Retrieves image data that may reside in other classes and hence is not accessible client-side, e.g. for supports published to multiple classes or documents retrieved via the teacher network.|
+|_getNetworkDocument_|Retrieves the contents of a document accessible to a teacher via the teacher network.|
+|_getNetworkResources_|Retrieves the list of resources (documents) available to a teacher via the teacher network.|
+|_postDocumentComment_|Posts a comment to a document in firestore, adding metadata for the document to firestore if necessary.|
+|_publishSupport_|Publishes a document as a support that is accessible to all of a teacher's classes (including any referenced images).|
+|_validateCommentableDocument_|Checks whether a specific commentable document exists in firestore and creates it if necessary.|
 
 The code for the functions is in the `functions` directory. You should be able to cd into the
 `functions` directory and perform basic development operations:
@@ -75,6 +80,8 @@ Google recommends (requires?) that [firebase-tools](https://www.npmjs.com/packag
 ```
 $ npm install -g firebase-tools
 ```
+This should be run periodically to make sure you're running the latest version of the tools.
+
 #### Running tests locally (without running functions in the emulator)
 ```
 $ npm run serve                 # build and then start the emulators

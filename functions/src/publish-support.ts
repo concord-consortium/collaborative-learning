@@ -1,22 +1,13 @@
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
-import { parseSupportContent } from "./parse-support-content";
+import { canonicalizeUrl } from "./canonicalize-url";
+import { parseDocumentContent } from "./parse-document-content";
 import { IPublishSupportUnionParams, isWarmUpParams } from "./shared";
-import { buildFirebaseImageUrl, parseFirebaseImageUrl } from "./shared-utils";
+import { parseFirebaseImageUrl } from "./shared-utils";
 import { validateUserContext } from "./user-context";
 
 // update this when deploying updates to this function
-const version = "1.0.1";
-
-export async function canonicalizeUrl(url: string, defaultClassHash: string, firestoreRoot: string) {
-  const { imageClassHash, imageKey  } = parseFirebaseImageUrl(url);
-  // if it's already in canonical form (or can't be canonicalized) just return it
-  if (imageClassHash || !imageKey) return url;
-  // check for an entry in our `images` collection which maps legacy image urls to their classes
-  const imageDoc = (await admin.firestore().doc(`${firestoreRoot}/images/${imageKey}`).get()).data();
-  const classHash = imageDoc ? imageDoc.context_id : defaultClassHash;
-  return buildFirebaseImageUrl(classHash, imageKey);
-}
+const version = "1.0.2";
 
 export async function publishSupport(
                         params?: IPublishSupportUnionParams,
@@ -38,7 +29,7 @@ export async function publishSupport(
   };
 
   const _canonicalizeUrl = (url: string) => canonicalizeUrl(url, classHash, firestoreRoot);
-  const { content: canonicalizedContent, images } = await parseSupportContent(content, _canonicalizeUrl);
+  const { content: canonicalizedContent, images } = await parseDocumentContent(content, _canonicalizeUrl);
 
   // only include demoName and network if they exist
   const demoName = _demoName ? { demoName: _demoName } : undefined;

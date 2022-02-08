@@ -1,18 +1,18 @@
-import { parseSupportContent } from "../src/parse-support-content";
+import { parseDocumentContent } from "../src/parse-document-content";
 import { buildFirebaseImageUrl, parseFirebaseImageUrl, replaceAll } from "../src/shared-utils";
 import { specDocumentContent } from "./test-utils";
 
-describe("parseSupportContent", () => {
+describe("parseDocumentContent", () => {
 
   const identityCanonicalize = (url: string) => Promise.resolve(url);
 
   it("should parse empty content", async () => {
-    expect(await parseSupportContent("", identityCanonicalize)).toEqual({ content: "", images: {} });
+    expect(await parseDocumentContent("", identityCanonicalize)).toEqual({ content: "", images: {} });
   });
 
   it("should parse content without images", async () => {
     const kEmptyContent = specDocumentContent();
-    expect(await parseSupportContent(kEmptyContent, identityCanonicalize)).toEqual({ content: kEmptyContent, images: {} });
+    expect(await parseDocumentContent(kEmptyContent, identityCanonicalize)).toEqual({ content: kEmptyContent, images: {} });
   });
 
   it("should parse a single Image tile with legacy url", async () => {
@@ -27,7 +27,7 @@ describe("parseSupportContent", () => {
       const { imageKey = "" } = parseFirebaseImageUrl(url);
       return Promise.resolve(buildFirebaseImageUrl(kClassHash, imageKey));
     };
-    expect(await parseSupportContent(originalContent, canonicalize))
+    expect(await parseDocumentContent(originalContent, canonicalize))
       .toEqual({ content: updatedContent, images: { [legacyUrl]: canonicalUrl } });
   });
 
@@ -45,7 +45,7 @@ describe("parseSupportContent", () => {
       const { imageKey = "" } = parseFirebaseImageUrl(url);
       return Promise.resolve(buildFirebaseImageUrl(kClassHash, imageKey));
     };
-    expect(await parseSupportContent(originalContent, canonicalize))
+    expect(await parseDocumentContent(originalContent, canonicalize))
       .toEqual({ content: updatedContent, images: { [legacyUrl2]: canonicalUrl2 } });
   });
 
@@ -63,7 +63,7 @@ describe("parseSupportContent", () => {
       const { imageKey = "" } = parseFirebaseImageUrl(url);
       return Promise.resolve(buildFirebaseImageUrl(kClassHash, imageKey));
     };
-    expect(await parseSupportContent(originalContent, canonicalize))
+    expect(await parseDocumentContent(originalContent, canonicalize))
       .toEqual({ content: updatedContent, images: { [legacyUrl1]: canonicalUrl1, [legacyUrl2]: canonicalUrl2 } });
   });
 
@@ -85,7 +85,7 @@ describe("parseSupportContent", () => {
       const { imageKey = "" } = parseFirebaseImageUrl(url);
       return Promise.resolve(buildFirebaseImageUrl(kClassHash, imageKey));
     };
-    expect(await parseSupportContent(originalContent, canonicalize))
+    expect(await parseDocumentContent(originalContent, canonicalize))
       .toEqual({ content: updatedContent, images });
   });
 

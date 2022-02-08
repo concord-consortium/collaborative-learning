@@ -1,8 +1,9 @@
 import { apps, clearFirestoreData, initializeAdminApp, useEmulators } from "@firebase/rules-unit-testing";
 import { getImageData } from "../src/get-image-data";
-import { IGetImageDataParams } from "../src/shared";
+import { IGetImageDataParams, IUserContext } from "../src/shared";
+import { validateUserContext } from "../src/user-context";
 import {
-  kCanonicalPortal, kClassHash, kOtherClassHash, kOtherTeacherNetwork, kTeacherNetwork,
+  kCanonicalPortal, kClassHash, kOtherClassHash, kOtherTeacherNetwork, kOtherUserId, kTeacherNetwork,
   specAuth, specStudentContext, specUserContext
 } from "./test-utils";
 
@@ -70,10 +71,25 @@ function specImageUrl(key = kImageKey, classHash?: string) {
   return `ccimg://fbrtdb.concord.org${classHash ? `/${classHash}` : ""}/${key}`;
 }
 
-async function writeMCImageRecordToFirestore(overrides?: any) {
-  const {
-    context_id = kClassHash, imageClassHash = kOtherClassHash, root = `/authed/${kCanonicalPortal}`
-  } = overrides || {};
+async function writeOtherClassRecordToFirestore(context: IUserContext) {
+  const { network } = context;
+  const { firestoreRoot } = validateUserContext(context);
+  const classData = {
+    id: "class-id",
+    name: "class-name",
+    uri: "https://concord.org/classes/class-id",
+    context_id: kOtherClassHash,
+    teacher: kOtherUserId,
+    teachers: [kOtherUserId],
+    network
+  }
+  return await firestoreAdmin.doc(`${firestoreRoot}/classes/${network}_${kOtherClassHash}`).set(classData);
+}
+
+async function writeMCImageRecordToFirestore(context: IUserContext, overrides?: any) {
+  const { classHash: context_id } = context;
+  const { firestoreRoot } = validateUserContext(context);
+  const { imageClassHash = kOtherClassHash } = overrides || {};
   const mcimage = {
     url: specImageUrl(),
     classes: [context_id, imageClassHash],
@@ -84,7 +100,7 @@ async function writeMCImageRecordToFirestore(overrides?: any) {
     context_id,
     ...overrides
   };
-  return await firestoreAdmin.doc(`${root}/mcimages/${kSupportKey}_${kImageKey}`).set(mcimage);
+  return await firestoreAdmin.doc(`${firestoreRoot}/mcimages/${kSupportKey}_${kImageKey}`).set(mcimage);
 }
 
 describe("getImageData", () => {
@@ -128,7 +144,7 @@ describe("getImageData", () => {
     await expect(getImageData(params, authWithStudentClaims as any)).rejects.toBeDefined();
   });
 
-  it("should fail if asked to retrieve image that doesn't exist", async () => {
+  it("should fail to retrieve image that doesn't exist", async () => {
     const context = specStudentContext();
     const url = specImageUrl();
     const params: IGetImageDataParams = { context, url };
@@ -148,7 +164,7 @@ describe("getImageData", () => {
     expect(mockDatabaseGet).toHaveBeenCalledTimes(1);
   });
 
-  it("should succeed if asked to retrieve image data in user's class via legacy url", async () => {
+  it("should retrieve image data in user's class via legacy url", async () => {
     // return image data if request contains appropriate class and key
     mockDatabaseGet.mockImplementation((path: string) => Promise.resolve(
       path.includes(kClassHash) && path.endsWith(kImageKey)
@@ -163,7 +179,7 @@ describe("getImageData", () => {
     expect(mockDatabaseGet).toHaveBeenCalledTimes(1);
   });
 
-  it("should succeed if asked to retrieve image data in user's class via newer url", async () => {
+  it("should retrieve image data in user's class via full url", async () => {
     // return image data if request contains appropriate class and key
     mockDatabaseGet.mockImplementation((path: string) => Promise.resolve(
       path.includes(kClassHash) && path.endsWith(kImageKey)
@@ -178,7 +194,7 @@ describe("getImageData", () => {
     expect(mockDatabaseGet).toHaveBeenCalledTimes(1);
   });
 
-  it("should fail if asked to retrieve image data in another class without mcimages entry", async () => {
+  it("should fail to retrieve image data in another class without mcimages entry", async () => {
     // return image data if request contains appropriate class and key
     mockDatabaseGet.mockImplementation((path: string) => Promise.resolve(
       path.includes(kOtherClassHash) && path.endsWith(kImageKey)
@@ -193,16 +209,16 @@ describe("getImageData", () => {
     expect(mockDatabaseGet).toHaveBeenCalledTimes(1);
   });
 
-  it("should fail if asked to retrieve image data in another class with incorrect mcimages entry", async () => {
+  it("should fail to retrieve image data in another class with incorrect mcimages entry", async () => {
     // return image data if request contains appropriate class and key
     mockDatabaseGet.mockImplementation((path: string) => Promise.resolve(
       path.includes(kOtherClassHash) && path.endsWith(kImageKey)
         ? { exists: () => true, val: () => ({ imageData: "data:image/png;base64,..." }) }
         : { exists: () => false, val: () => null }
     ));
-    await writeMCImageRecordToFirestore({ imageClassHash: "wrong-class" });
-
     const context = specStudentContext();
+    await writeMCImageRecordToFirestore(context, { imageClassHash: "wrong-class" });
+
     const url = specImageUrl();
     const params: IGetImageDataParams = { context, url };
     const response = await getImageData(params, authWithStudentClaims as any);
@@ -210,7 +226,7 @@ describe("getImageData", () => {
     expect(mockDatabaseGet).toHaveBeenCalledTimes(2);
   });
 
-  it("should fail if asked to retrieve image data in another class from unsanctioned class", async () => {
+  it("should fail to retrieve image data in another class from unsanctioned class", async () => {
     // return image data if request contains appropriate class and key
     mockDatabaseGet.mockImplementation((path: string) => Promise.resolve(
       path.includes(kOtherClassHash) && path.endsWith(kImageKey)
@@ -218,9 +234,9 @@ describe("getImageData", () => {
         : { exists: () => false, val: () => null }
     ));
     // the requested image hasn't been shared with this user's class
-    await writeMCImageRecordToFirestore({ classes: [kOtherClassHash] });
-
     const context = specStudentContext();
+    await writeMCImageRecordToFirestore(context, { classes: [kOtherClassHash] });
+
     const url = specImageUrl();
     const params: IGetImageDataParams = { context, url };
     const response = await getImageData(params, authWithStudentClaims as any);
@@ -228,7 +244,25 @@ describe("getImageData", () => {
     expect(mockDatabaseGet).toHaveBeenCalledTimes(1);
   });
 
-  it("should succeed if asked to retrieve image data in another class from networked teacher", async () => {
+  it("should retrieve image data in another class in this teacher's network", async () => {
+    // return image data if request contains appropriate class and key
+    mockDatabaseGet.mockImplementation((path: string) => Promise.resolve(
+      path.includes(kOtherClassHash) && path.endsWith(kImageKey)
+        ? { exists: () => true, val: () => ({ imageData: "data:image/png;base64,..." }) }
+        : { exists: () => false, val: () => null }
+    ));
+    // the requested image is in a class in this teacher's network
+    const context = specUserContext();
+    await writeOtherClassRecordToFirestore(context);
+
+    const url = specImageUrl(kImageKey, kOtherClassHash);
+    const params: IGetImageDataParams = { context, url };
+    const response = await getImageData(params, authWithTeacherClaims as any);
+    expect(response).toHaveProperty("imageData");
+    expect(mockDatabaseGet).toHaveBeenCalledTimes(1);
+  });
+
+  it("should retrieve image data published to another class from networked teacher", async () => {
     // return image data if request contains appropriate class and key
     mockDatabaseGet.mockImplementation((path: string) => Promise.resolve(
       path.includes(kOtherClassHash) && path.endsWith(kImageKey)
@@ -236,9 +270,9 @@ describe("getImageData", () => {
         : { exists: () => false, val: () => null }
     ));
     // the requested image hasn't been shared with this user's class but is in same network
-    await writeMCImageRecordToFirestore({ classes: [kOtherClassHash] });
-
     const context = specUserContext();
+    await writeMCImageRecordToFirestore(context, { classes: [kOtherClassHash] });
+
     const url = specImageUrl();
     const params: IGetImageDataParams = { context, url };
     const response = await getImageData(params, authWithTeacherClaims as any);
@@ -246,7 +280,7 @@ describe("getImageData", () => {
     expect(mockDatabaseGet).toHaveBeenCalledTimes(2);
   });
 
-  it("should fail if asked to retrieve image data in another class from other network", async () => {
+  it("should fail to retrieve image data in another class from other network", async () => {
     // return image data if request contains appropriate class and key
     mockDatabaseGet.mockImplementation((path: string) => Promise.resolve(
       path.includes(kOtherClassHash) && path.endsWith(kImageKey)
@@ -254,9 +288,9 @@ describe("getImageData", () => {
         : { exists: () => false, val: () => null }
     ));
     // the requested image hasn't been shared with this user's class and is not in same network
-    await writeMCImageRecordToFirestore({ classes: [kOtherClassHash] });
-
     const context = specUserContext({ network: kOtherTeacherNetwork });
+    await writeMCImageRecordToFirestore(context, { classes: [kOtherClassHash] });
+
     const url = specImageUrl();
     const params: IGetImageDataParams = { context, url };
     const response = await getImageData(params, authWithTeacherClaims as any);
@@ -264,16 +298,16 @@ describe("getImageData", () => {
     expect(mockDatabaseGet).toHaveBeenCalledTimes(1);
   });
 
-  it("should succeed if asked to retrieve image data in another class with mcimages entry (legacy url)", async () => {
+  it("should retrieve image data in another class with mcimages entry (legacy url)", async () => {
     // return image data if request contains appropriate class and key
     mockDatabaseGet.mockImplementation((path: string) => Promise.resolve(
       path.includes(kOtherClassHash) && path.endsWith(kImageKey)
         ? { exists: () => true, val: () => ({ imageData: "data:image/png;base64,..." }) }
         : { exists: () => false, val: () => null }
     ));
-    await writeMCImageRecordToFirestore();
-
     const context = specStudentContext();
+    await writeMCImageRecordToFirestore(context);
+
     const url = specImageUrl();
     const params: IGetImageDataParams = { context, url };
     const response = await getImageData(params, authWithStudentClaims as any);
@@ -282,16 +316,16 @@ describe("getImageData", () => {
     expect(mockDatabaseGet).toHaveBeenCalledTimes(2);
   });
 
-  it("should succeed if asked to retrieve image data in another class with mcimages entry (newer url)", async () => {
+  it("should retrieve image data in another class with mcimages entry (newer url)", async () => {
     // return image data if request contains appropriate class and key
     mockDatabaseGet.mockImplementation((path: string) => Promise.resolve(
       path.includes(kOtherClassHash) && path.endsWith(kImageKey)
         ? { exists: () => true, val: () => ({ imageData: "data:image/png;base64,..." }) }
         : { exists: () => false, val: () => null }
     ));
-    await writeMCImageRecordToFirestore();
-
     const context = specStudentContext();
+    await writeMCImageRecordToFirestore(context);
+
     const url = specImageUrl(kImageKey, kOtherClassHash);
     const params: IGetImageDataParams = { context, url };
     const response = await getImageData(params, authWithStudentClaims as any);

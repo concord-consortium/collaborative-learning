@@ -4,7 +4,7 @@ import { IGetImageDataUnionParams, isWarmUpParams } from "./shared";
 import { validateUserContext } from "./user-context";
 
 // update this when deploying updates to this function
-const version = "1.0.1";
+const version = "1.0.2";
 
 function parseImageUrl(url: string) {
   const match = /ccimg:\/\/fbrtdb\.concord\.org\/([^/]+)(\/([^/]+))?/.exec(url);
@@ -47,22 +47,36 @@ export async function getImageData(
     return _imageClassPath || null;
   }
 
-  function firestorePublishedImagePromise(): Promise<string | null> {
+  function firestoreNetworkClassPromise(): Promise<string | null> {
+    return network && (type === "teacher") && userClassHash && imageClassHash
+            ? admin.firestore()
+              .collection(`${firestoreRoot}/classes`)
+              .where("context_id", "==", imageClassHash)
+              .where("network", "==", network)
+              .limit(1) // we only need one
+              .get()
+              .then(() => userClassPath.replace(userClassHash, imageClassHash))
+            : Promise.resolve(null);
+  }
+
+  function firestorePublishedClassPromise(): Promise<string | null> {
     return admin.firestore()
             .collection(`${firestoreRoot}/mcimages`)
             .where("url", "==", legacyUrl)
             .where("classes", "array-contains", userClassHash)
+            .limit(1) // we only need one
             .get()
             .then(processImageSnapshots)
             .catch(() => null);
   }
 
-  function firestoreNetworkImagePromise(): Promise<string | null> {
+  function firestorePublishedNetworkPromise(): Promise<string | null> {
     return network && (type === "teacher")
             ? admin.firestore()
                 .collection(`${firestoreRoot}/mcimages`)
                 .where("url", "==", legacyUrl)
                 .where("network", "==", network)
+                .limit(1) // we only need one
                 .get()
                 .then(processImageSnapshots)
                 .catch(() => null)
@@ -76,16 +90,17 @@ export async function getImageData(
 
   // if we don't have an image class hash, or the image class hash doesn't match the user's class,
   // then we have to try multiple approaches, so we run multiple queries in parallel.
-  const [imageData, imageClassPath1, imageClassPath2] = await Promise.all([
+  const [imageData, ...imageClassPaths] = await Promise.all([
     // if we have an imageClassHash, then it's not in the user's class (that case was handled above)
     // if we don't have a class hash, then it could be in the user's class, so we have to check
     imageClassHash ? Promise.resolve(null) : firebaseImageDataPromise(userClassPath),
-    firestorePublishedImagePromise(), // has it been published to this user's class?
-    firestoreNetworkImagePromise()    // has it been shared with this teacher's network?
+    firestoreNetworkClassPromise(),     // is the image data in a class in this teacher's network?
+    firestorePublishedClassPromise(),   // has it been published to this user's class?
+    firestorePublishedNetworkPromise()  // has it been published to a class in this teacher's network?
   ]);
   // if we found the image data then return it
   if (imageData) return imageData;
   // if we retrieved the image path from firestore then use it to retrieve the image data
-  const imageClassPath = imageClassPath1 || imageClassPath2;
+  const imageClassPath = imageClassPaths.find(path => !!path);
   return imageClassPath ? await firebaseImageDataPromise(imageClassPath) : null;
 }
