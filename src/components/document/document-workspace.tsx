@@ -8,7 +8,7 @@ import { createDefaultSectionedContent, DocumentContentModelType } from "../../m
 import {
   DocumentDragKey, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
 } from "../../models/document/document-types";
-import { getToolbarConfigFromStores } from "../../models/stores/stores";
+import { getNavTabConfigFromStores, getToolbarConfigFromStores } from "../../models/stores/stores";
 import { kDividerHalf, kDividerMax, kDividerMin } from "../../models/stores/ui-types";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { NavTabPanel } from "../navigation/nav-tab-panel";

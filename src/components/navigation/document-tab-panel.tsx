@@ -9,6 +9,7 @@ import { DocumentModelType } from "../../models/document/document";
 import { DocumentDragKey, SupportPublication } from "../../models/document/document-types";
 import { LogEventName, Logger } from "../../lib/logger";
 import { NetworkDocumentsSection } from "./network-documents-section";
+import { getNavTabConfigFromStores } from "../../models/stores/stores";
 
 import "./document-tab-panel.sass";
 
