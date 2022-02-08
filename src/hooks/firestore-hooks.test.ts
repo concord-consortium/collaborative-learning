@@ -86,10 +86,11 @@ describe("Firestore hooks", () => {
       expect(mockGet).toHaveBeenCalledTimes(1);
       // initial response is the default response
       expect(result.current).toEqual(kDefaultTeacher);
-      rerender();
-      // second request for same teacher doesn't hit the network due to caching
-      expect(mockGet).toHaveBeenCalledTimes(1);
+      // wait for promise to resolve
       setTimeout(() => {
+        rerender();
+        // second request for same teacher doesn't hit the network due to caching
+        expect(mockGet).toHaveBeenCalledTimes(1);
         // actual teacher available once promise resolves
         expect(result.current).toEqual(kRealTeacher);
         done();

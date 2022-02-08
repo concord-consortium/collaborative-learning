@@ -1,3 +1,4 @@
+import { observer } from "mobx-react";
 import React from "react";
 import { ThumbnailDocumentItem } from "./thumbnail-document-item";
 import { useFirestoreTeacher } from "../../hooks/firestore-hooks";
@@ -36,9 +37,11 @@ function useDocumentCaption(stores: IStores, document: DocumentModelType) {
   return `${namePrefix}${title}${dateSuffix}`;
 }
 
-export const TabPanelDocumentsSubSectionPanel = ({section, sectionDocument, tab, stores, scale, selectedDocument,
-                                                  onSelectDocument, onDocumentDragStart,
-                                                  onDocumentStarClick, onDocumentDeleteClick}: IProps) => {
+// observes teacher names via useDocumentCaption()
+export const TabPanelDocumentsSubSectionPanel = observer(({
+  section, sectionDocument, tab, stores, scale, selectedDocument,
+  onSelectDocument, onDocumentDragStart, onDocumentStarClick, onDocumentDeleteClick
+}: IProps) => {
     const { user } = stores;
     const tabName = tab.toLowerCase().replace(' ', '-');
     const caption = useDocumentCaption(stores, sectionDocument);
@@ -88,4 +91,4 @@ export const TabPanelDocumentsSubSectionPanel = ({section, sectionDocument, tab,
         onDocumentDeleteClick={_handleDocumentDeleteClick}
       />
     );
-};
+});
