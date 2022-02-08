@@ -9,6 +9,57 @@
       "numFormat": ".2~f"
     }
   },
+  "navTabs": {
+    "lazyLoadTabContents": true,
+    "tabSpecs": [
+      {
+        "tab": "problems",
+        "label": "Problem",
+        "sections": [
+          {
+            "initials": "REF",
+            "title": "Reference",
+            "type": "problem-documents"
+          },
+          {
+            "initials": "PR",
+            "title": "Practice",
+            "type": "problem-documents"
+          },
+          {
+            "initials": "EX",
+            "title": "Experiment",
+            "type": "problem-documents"
+          }
+        ]
+      },
+      {
+        "tab": "my-work",
+        "label": "My Work",
+        "sections": [
+          {
+            "title": "Workspaces",
+            "type": "problem-documents",
+            "dataTestHeader": "my-work-section-investigations",
+            "dataTestItem": "my-work-list-items",
+            "documentTypes": ["problem", "planning"],
+            "order": "original",
+            "showStars": ["student", "teacher"]
+          },
+          {
+            "title": "Workspaces",
+            "type": "personal-documents",
+            "dataTestHeader": "my-work-section-workspaces",
+            "dataTestItem": "my-work-list-items",
+            "documentTypes": ["personal"],
+            "properties": ["!isDeleted"],
+            "showStars": ["student", "teacher"],
+            "addDocument": true
+          }
+        ]
+      }
+    ]
+  },
   "sections": {
     "reference": {
       "initials": "REF",
@@ -72,7 +123,7 @@
           "title": "MothEd 1.1 Identifying Moths",
           "subtitle": "",
           "disabled": [],
-          "sections": 
+          "sections":
           [
             {
             "type": "reference",
