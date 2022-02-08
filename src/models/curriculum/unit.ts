@@ -41,6 +41,10 @@ const LegacyUnitModel = types
     lookingAhead: types.maybe(DocumentContentModel),
     investigations: types.array(InvestigationModel),
     supports: types.array(SupportModel),
+    // type of user document to create/show by default
+    defaultDocumentType: types.maybe(types.enumeration(["problem", "personal"])),
+    // clients should use the defaultDocumentContent() method below
+    defaultDocumentTemplate: types.maybe(DocumentContentModel),
     defaultStamps: types.array(StampModel),
     settings: types.maybe(SettingsMstType),
     navTabs: types.maybe(NavTabsConfigModel),
@@ -80,6 +84,9 @@ const ModernUnitModel = types
   .views(self => ({
     get fullTitle() {
       return `${self.title}${self.subtitle ? ": " + self.subtitle : ""}`;
+    },
+    get defaultDocumentContent(): DocumentContentModelType | undefined {
+      return cloneContentWithUniqueIds(self.defaultDocumentTemplate);
     },
     getInvestigation(investigationOrdinal: number) {
       return self.investigations.find(inv => inv.ordinal === investigationOrdinal);
