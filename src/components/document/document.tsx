@@ -10,6 +10,7 @@ import { DocumentModelType } from "../../models/document/document";
 import { LearningLogDocument, LearningLogPublication } from "../../models/document/document-types";
 import { ToolbarModelType } from "../../models/stores/problem-configuration";
 import { SupportType, TeacherSupportModelType, AudienceEnum } from "../../models/stores/supports";
+import { ToolbarModelType } from "../../models/stores/toolbar-model";
 import { WorkspaceModelType } from "../../models/stores/workspace";
 import { IconButton } from "../utilities/icon-button";
 import ToggleControl from "../utilities/toggle-control";

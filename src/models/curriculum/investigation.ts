@@ -4,6 +4,7 @@ import { ProblemModel } from "./problem";
 import { SupportModel } from "./support";
 import { ProblemConfiguration } from "../stores/problem-configuration";
 import { SettingsMstType } from "../stores/settings";
+import { ToolbarModel } from "../stores/toolbar-model";
 
 const LegacyInvestigationModel = types
   .model("Investigation", {
@@ -14,6 +15,8 @@ const LegacyInvestigationModel = types
     problems: types.array(ProblemModel),
     reflections: types.maybe(DocumentContentModel),
     supports: types.array(SupportModel),
+    // configuration of document toolbar
+    toolbar: types.maybe(ToolbarModel),
     settings: types.maybe(SettingsMstType)
   });
 

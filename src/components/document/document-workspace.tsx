@@ -8,6 +8,7 @@ import { createDefaultSectionedContent, DocumentContentModelType } from "../../m
 import {
   DocumentDragKey, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
 } from "../../models/document/document-types";
+import { getToolbarConfigFromStores } from "../../models/stores/stores";
 import { kDividerHalf, kDividerMax, kDividerMin } from "../../models/stores/ui-types";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { NavTabPanel } from "../navigation/nav-tab-panel";
@@ -104,7 +105,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     const groupVirtualDocument = comparisonDocumentKey
       && groups.virtualDocumentForGroup(comparisonDocumentKey);
 
-    const toolbar = appConfig.toolbar;
+    const toolbar = getToolbarConfigFromStores(this.stores);
 
     if (!primaryDocument) {
       return this.renderDocument("single-workspace", "primary");
