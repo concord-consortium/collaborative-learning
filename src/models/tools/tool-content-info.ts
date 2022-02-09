@@ -66,7 +66,8 @@ export function getToolContentModels() {
 }
 
 export function getToolIds() {
-  return Object.keys(gToolContentInfoMapById).map(toolId => gToolContentInfoMapById[toolId].id);
+  // the keys are toLowerCased(), so we look up the actual id
+  return Object.values(gToolContentInfoMapById).map(info => info.id);
 }
 
 
