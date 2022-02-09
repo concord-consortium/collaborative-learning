@@ -7,10 +7,12 @@ import { specStores } from "../../models/stores/spec-stores";
 import { ToolTileModel } from "../../models/tools/tool-tile";
 import { UnknownContentModel } from "../../models/tools/tool-types";
 
+// required before tile creation
+import "../../register-tools";
+
 describe("ToolTile Component", () => {
 
-  // TODO: reenable test
-  it.skip("renders unknown tile successfully", () => {
+  it("renders unknown tile successfully", () => {
 
     const stores = specStores();
     const mockHandleTileResize = jest.fn();
