@@ -3729,6 +3729,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
+                        "<h3>Problem Overview</h3>",
                         "<p>Students translate the pictorial form of linear equations into symbolic linear equations in one variable. They begin to use the properties of equality to solve the equations symbolically. They explore equivalent expressions that can represent a given situation involving pouches and coins. They begin to relate inequalities and finding solutions of the inequalities to the work they are doing with linear equations.</p>",
                         "<p><strong>Implementation Note:</strong> You may want to have a conversation after the Initial Challenge before moving on to the What If...?. This will allow you to discuss and compare students’ equations. You can also highlight your students’ strategies for solving the equations. This may help student transition to the What If...? where they will have to solve equations without being given pictures of pouches and coins. </p>",
                         "<p>Have students work on the Initial Challenge. As a class, discuss the strategies and solutions for writing and solving the equations. After the discussion, have student work on the What If...? questions. For Situation C, you may need to remind students what an inequality is. Students used inequalities in Problem 2.1: Henri and Emile and in the Grade 6 unit <em>The Point of Being Rational.</em></p>"
@@ -3807,7 +3808,8 @@
                         "<p>After subtracting 15 from the left side of the equation, you could ask:</p>",
                         "<ul><li>What should you do to keep the two sides equal? (Subtract 15 from the right side.)</li></ul>",
                         "<p>Repeat this method for each of the questions in the Introduction. Then have students try their methods on another example of equality.</p>",
-                        "<ul><li>What should you do to keep the two sides equal? (Equality is maintained by adding, subtracting, multiplying, or dividing each side by the same number. For multiplication and division, the number must be nonzero.) </li></ul>"
+                        "<ul><li>What should you do to keep the two sides equal? (Equality is maintained by adding, subtracting, multiplying, or dividing each side by the same number. For multiplication and division, the number must be nonzero.) </li></ul>",
+                        "You could introduce that these are called the Properties of Equality or wait until the introduction of Problem 3.3."
                       ]
                     }
                   },
@@ -3818,7 +3820,8 @@
                       "text": [
                         "<p>Presenting the Challenge</p>",
                         "<p>If you did not make the transition from pouches and coins to variables and numbers at the end of the Summarize for Problem 3.1, do so now. Be sure students have a general idea of the procedures. You might want to revisit one of the situations from Problem 3.2. As a part of the discussion, discuss how the pouches and coins can be represented by various equivalent expressions.</p>",
-                        "<p>You might want to add to the instructions of the Initial Challenge by having students write their steps for solving, showing what is happening with the pouches and coins. Then next to each step write the equation symbolically.</p>"
+                        "<p>You might want to add to the instructions of the Initial Challenge by having students write their steps for solving, showing what is happening with the pouches and coins. Then next to each step write the equation symbolically.</p>",
+                        "Have students begin this problem independently and then work with a partner to compare their thinking. "
                       ]
                     }
                   }
@@ -3851,8 +3854,11 @@
                       "text": [
                         "<p><strong>Suggested Questions</strong></p>",
                         "<p>For Equation 1, ask:</p>",
-                        "<ul><li>What is your equation? (4x + 2 = 18 or 2(2x + 1) = 18)</li><li>What was the first thing you did with the pictorial equation to begin solving it? (Using the first method above, the first step would be to take away 2 coins from each side.)</li><li>How can you show this with your equation? (Subtract 2 from each side. This results in 4x + 2 - 2 = 18 - 2 or 4x = 16.)</li><li>What did you do next? (Split the coins into four equal sets.)</li><li>How can you show this with your equation? (4x = 4(4))  </li><li>What was your next step? (Set each of the 4 pouches equal to one of the 4 sets of coins.)</li><li>How can you show this with your equation? (Divide by 4 on each side. So, x = 4.) </li><li>How can you check your answer? (Using the coins and pouches, you can add up all the coins inside and outside the pouches on the left side and then check to make sure your result equals the number of coins on the right side. On the left side, there are 4 pouches, each of which we think contains 4 coins. If we are correct, there are 16 coins in the pouches. If you add those 16 coins to the 2 coins outside the pouches, the result is 18 coins on the left side. There are also 18 coins on the right side, so the answer is correct.Or, you can substitute 4 into the equation for x. The result shows that 4 is correct.</li>",
-                        "<p>     4(4) + 2 = 18\n16 + 2 = 18\n18 = 18)<p>"
+                        "<ul><li>What is your equation? (4x + 2 = 18 or 2(2x + 1) = 18)</li><li>What was the first thing you did with the pictorial equation to begin solving it? (Using the first method above, the first step would be to take away 2 coins from each side.)</li><li>How can you show this with your equation? (Subtract 2 from each side. This results in 4x + 2 - 2 = 18 - 2 or 4x = 16.)</li><li>What did you do next? (Split the coins into four equal sets.)</li><li>How can you show this with your equation? (4x = 4(4))  </li><li>What was your next step? (Set each of the 4 pouches equal to one of the 4 sets of coins.)</li><li>How can you show this with your equation? (Divide by 4 on each side. So, x = 4.) </li><li>How can you check your answer? (Using the coins and pouches, you can add up all the coins inside and outside the pouches on the left side and then check to make sure your result equals the number of coins on the right side. On the left side, there are 4 pouches, each of which we think contains 4 coins. If we are correct, there are 16 coins in the pouches. If you add those 16 coins to the 2 coins outside the pouches, the result is 18 coins on the left side. There are also 18 coins on the right side, so the answer is correct.",
+                        "Or, you can substitute 4 into the equation for x. The result shows that 4 is correct.</li>",
+                        "     4(4) + 2 = 18",
+                        "       16 + 2 = 18",
+                        "           18 = 18"
                       ]
                     }
                   },
@@ -3915,8 +3921,8 @@
                       "<p>Making the Mathematics Explicit</p>",
                       "<p>To move from pouches and coins to solving equations symbolically, discuss the What If...? Situations.</p>",
                       "<ul><li>In Situation A, what equation can we write to represent the pouches and coins code? (Various answers. The most common might be: 6x + 27 = 105.)</li><li>Using the thinking that you were using with the visual equations, how do we find the value of x. (The first step is to take away 27 coins from each side. That leaves 6 pouches on the left side and 78 coins on the right side. The second step is to divide the  coins and pouches into 6 equal groups. So, the number of coins in each pouch is 13.)</li><li>Next to your work, write down a similar method using the equation that represents this situation. (LANGUAGE)</li></ul>",
-                      "<pre>                    Step 1: Subtract 27 from each side of the equation:\n                                   6<em>x</em> + 27 -27 = 205 -27\n                                                       6<em>x</em> = 78\n</pre>",
-                      "<pre>                    Step 2: Divide by 6 on each side:\n                                                   6<em>x</em> = 78\n                                                      6    6\n                                                      <em>x</em> = 13",
+                      "Step 1: Subtract 27 from each side of the equation:\n                                   6<em>x</em> + 27 -27 = 205 -27\n                                                       6<em>x</em> = 78",
+                      "Step 2: Divide by 6 on each side:\n                                                   6<em>x</em> = 78\n                                                      6    6\n                                                      <em>x</em> = 13",
                       "<p>As students move away from the pouches and toward symbolic statements, they may find that their experience with pouches and coins is useful for recalling strategies.</p>"
                     ]
                   }
@@ -3941,9 +3947,9 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p><strong>Situation C</strong></p>",
+                      "<p><strong>What If Situation C</strong></p>",
                       "<p>Discuss that when solving an inequality, students can use what they know about solving equations to make sense of the solutions.</p>",
-                      "<ul><li>In Situation C, we know that 6 pouches and 30 coins must be less than 102 coins. What if it were equal to 102 coins? How would we write that in symbols? (6<em>x</em> + 30 = 102)</li><li>What would be the solution to the equation? (12 coins in a pouch.)</li><li>So, if 6 pouches and 30 coins must be less than 102 coins, or 6x + 30 &lt; 102, what are possible answers for how many coins could be in each pouch? (11, 10, 9, etc.)</li><li>If it were possible to have partial coins, would 11 ½ coins be a solution? (Yes.)</li><li>So, could there be more solutions than the ones you listed? (Yes. It would be any amount less than 12.)We can show the possible solutions with an expression and on a number line. (LANGUAGE)</li></ul>"
+                      "<ul><li>In What If Situation C, we know that 6 pouches and 30 coins must be less than 102 coins. What if it were equal to 102 coins? How would we write that in symbols? (6<em>x</em> + 30 = 102)</li><li>What would be the solution to the equation? (12 coins in a pouch.)</li><li>So, if 6 pouches and 30 coins must be less than 102 coins, or 6x + 30 &lt; 102, what are possible answers for how many coins could be in each pouch? (11, 10, 9, etc.)</li><li>If it were possible to have partial coins, would 11 ½ coins be a solution? (Yes.)</li><li>So, could there be more solutions than the ones you listed? (Yes. It would be any amount less than 12.)We can show the possible solutions with an expression and on a number line. (LANGUAGE)</li></ul>"
                     ]
                   }
                 },
@@ -4016,13 +4022,100 @@
                     ]
                   }
                 },
-                {
-                  "content":
+                [
                   {
-                    "type": "Image",
-                    "url": "curriculum/moving-straight-ahead/images/MSA_TG_3_2_eq_2.png"
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Original Equation</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Symbolic Equation</p>"
+                      ]
+                    }
                   }
-                },
+                ],
+                [
+                  {
+                    "content":
+                    {
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/TG_3_2_bagsncoins.jpg"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>3x + 6 = 12    </p>"
+                      ]
+                    }
+                  }
+                ],
+                [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Subtract coins first</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Divide by 3 first</p>"
+                      ]
+                    }
+                  }
+                ],
+                [
+                  {
+                    "content":
+                    {
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/TG_3_2_subtractcoins.jpg"
+                    }
+                  },
+                  {
+                    "content":
+                    {
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/TG_3_2_divideby3.jpg"
+                    }
+                  }
+                ],
+                [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>3x = 6</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>1x + 2 = 4</p>"
+                      ]
+                    }
+                  }
+                ],
                 {
                   "content":
                   {
@@ -4033,20 +4126,108 @@
                     ]
                   }
                 },
-                {
-                  "content":
+                [
                   {
-                    "type": "Image",
-                    "url": "curriculum/moving-straight-ahead/images/MSA_TG_3_2_eq_3.png"
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Original Equation</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Symbolic Equation</p>"
+                      ]
+                    }
                   }
-                },
+                ],
+                [
+                  {
+                    "content":
+                    {
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/TG_3_2_equation3.jpg"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>3x+3 = 2x+9    </p>"
+                      ]
+                    }
+                  }
+                ],
+                [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Subtract coins first</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Subtract pouches</p>"
+                      ]
+                    }
+                  }
+                ],
+                [
+                  {
+                    "content":
+                    {
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/TG_3_2_Eq3_subtractCoins.jpg"
+                    }
+                  },
+                  {
+                    "content":
+                    {
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/TG_3_2_Eq3_SubtractPouches.jpg"
+                    }
+                  }
+                ],
+                [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>3x = 2x+6</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>1x+3 = 9</p>"
+                      ]
+                    }
+                  }
+                ],
                 {
+                  "display": "teacher",
                   "content":
                   {
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p>Now What Do Students Know</p>",
+                      "<h3>Now What Do Students Know</h3>",
                       "<p>Ask students to reflect on the discussion and answer the Now What Do You Know question.</p>",
                       "<p><strong>Describe a strategy for solving equations using what you know about equality. How do you know if your answer is correct?</strong></p>",
                       "<p>See answers to the problem for more information about the strategies and embedded mathematics. </p>",
@@ -4063,7 +4244,7 @@
                       "<p><strong>Reflecting on Student Learning</strong></p>",
                       "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
                       "<ul><li>What evidence do I have that students understand the Now What Do You Know question?</li>",
-                      "<ul><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ul>",
+                      "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
                       "<li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
                     ]
                   }
