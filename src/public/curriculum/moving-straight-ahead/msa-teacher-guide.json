@@ -3314,7 +3314,9 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["This Problem introduces students to symbolic ways of solving linear equations with one unknown. Equations are represented pictorially as coins (constant term) and pouches that hold an unknown number of coins (variables). Students explore the properties of equality pictorially as they find the number of coins in a pouch. This provides a transition into solving equations symbolically.\n\nStudents use the fact that the number of coins on both sides of the equation is equal to find the number of coins in a pouch. In the process, they find that there is more than one way to represent the number of coins on one side of the equation. This provides an opportunity to use equivalent expressions as part of a strategy for solving equations."]
+                      "text": [
+                        "This Problem introduces students to symbolic ways of solving linear equations with one unknown. Equations are represented pictorially as coins (constant term) and pouches that hold an unknown number of coins (variables). Students explore the properties of equality pictorially as they find the number of coins in a pouch. This provides a transition into solving equations symbolically.\n\nStudents use the fact that the number of coins on both sides of the equation is equal to find the number of coins in a pouch. In the process, they find that there is more than one way to represent the number of coins on one side of the equation. This provides an opportunity to use equivalent expressions as part of a strategy for solving equations."
+                      ]
                     }
                   },
                   {
@@ -3322,6 +3324,17 @@
                       "type": "Text",
                       "format": "html",
                       "text": ["AoL:  Explore & Explore\nCCSSM: 7.NS.A.2c, 7.EE.A, 7.EE.A.1, 7.EE.A.2, 7.EE.B, 7.EE.B.4, 7.EE.B.4a</strong>"]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>NWDYK </p>",
+                        "<p>Pouches that contain an unknown number of coins as well as individual coins are represented with an equation. What strategies can you use to find the number of coins in each pouch? How do you know if your answer is correct?</p>"
+                      ]
                     }
                   },
                   {
@@ -3400,12 +3413,13 @@
                       },
                       "content": {
                         "type":"Geometry",
+                        "title": "Walkathon Earnings",
                         "board": {
                           "properties": {
                             "axisLabels": ["d", "$"],
                             "axisNames": ["Distance (km)", "Amount Earned"],
-                            "axisMin": [-0.2, -1],
-                            "axisRange": [50, 50]
+                            "axisMin": [-2, -5],
+                            "axisRange": [60, 50]
                           }
                         },
                         "objects": [
@@ -3427,13 +3441,15 @@
                     }
                   ],
                   {
-                    "content":
-                    {
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Take one or two of the points suggested by students and ask:</p>",
-                        "<ul><li>How can you locate this point on the line? (Draw the vertical and horizontal lines corresponding to the coordinates of the point.)</li><li>Find a pair of corresponding values in the table that are solutions to the equation. (Students may have to extend the table.) </li><li>Write two questions about Alana’s pledge plan that could be answered by the coordinates of the point (14, 12). (Students can say either “How far did Alana walk if a sponsor donates +12?” or “How much money would a sponsor donate if Alana walked 14 kilometers?”) </li><li>How can you use the equation for Alana’s plan to check the answer to the question you made up? (You can substitute <em>d </em>= 14 and <em>A</em> = 12 into the equation <em>A</em> = 5 + 0.5<em>d</em>. If the resulting equation is true, then (14, 12) is a solution.)</li><li>How can you use a graph to find the number of kilometers that Alana walked if a sponsor donated $17? (You go to 17 on the vertical axis and move straight across horizontally until you intersect the line. Then, move directly down until you intersect the horizontal axis. The value you hit on the horizontal axis is the number of kilometers walked.) </li><li>How can you use a graph to solve 20 = 5 + 0.5<em>d</em>? What would the answer mean? (Go to 20 on the vertical axis and move horizontally until you intersect the line. Read the “<em>d</em>” value at that point. This gives the distance Alana must walk in order to raise $20 from each sponsor.)</li><li>What happens if you choose a point that is not visible on this section of the graph, such as (70, 40)? Does this point lie on the line? Explain. (Students might suggest extending the line. Some might suggest checking to see if the coordinates of the point make the equation a true statement.)</li></ul>"
+                        "A = 5 + 0.5d",
+                        "<p><strong>Suggested Questions </strong> </p>",
+                        "<ul><li>How are the points (3, 6.5) and (30, 20) related to the equation A = 5 + 0.5d? (The point (3, 6.5) means that d = 3 and A = 6.5, so 6.5 = 5 + 0.5(3) is a true statement. Similarly, for (30, 20), 20 = 5 + 0.5(30) is also true.) </li><li>We say that (3, 6.5) and (30, 20) are solutions to the equation A = 5 + 0.5d. Find another point on the line whose coordinates are a solution to the equation. (Be sure students explain why they are solutions—substitute the values into the equation and check if the resulting equation is true. Students can find other solutions by choosing a value for d or A and finding the corresponding value of the other variable.) </li><li>Do you think every point on the line corresponds to a solution to the equation? (Yes, although some values may not be realistic. For example, (100, 55) is not realistic because 100 km is an unreasonable distance for a student to walk in a walkathon.)  </li></ul>",
+                        "<p>Take one or two of the points suggested by students and ask:   </p>",
+                        "<ul><li>How can you locate this point on the line? (Draw the vertical and horizontal lines corresponding to the coordinates of the point.)  </li><li>Find a pair of corresponding values in the table that are solutions to the equation. (Students may have to extend the table.)   </li><li>Write two questions about Alana’s pledge plan that could be answered by the coordinates of the point (14, 12). (Students can say either “How far did Alana walk if a sponsor donates +12?” or “How much money would a sponsor donate if Alana walked 14 kilometers?”)   </li><li>How can you use the equation for Alana’s plan to check the answer to the question you made up? (You can substitute d = 14 and A = 12 into the equation A = 5 + 0.5d. If the resulting equation is true, then (14, 12) is a solution.)   </li><li>How can you use a graph to find the number of kilometers that Alana walked if a sponsor donated $17? (You go to 17 on the vertical axis and move straight across horizontally until you intersect the line. Then, move directly down until you intersect the horizontal axis. The value you hit on the horizontal axis is the number of kilometers walked.)   </li><li>How can you use a graph to solve 20 = 5 + 0.5d? What would the answer mean? (Go to 20 on the vertical axis and move horizontally until you intersect the line. Read the “d” value at that point. This gives the distance Alana must walk in order to raise $20 from each sponsor.)  </li><li>What happens if you choose a point that is not visible on this section of the graph, such as (70, 40)? Does this point lie on the line? Explain. (Students might suggest extending the line. Some might suggest checking to see if the coordinates of the point make the equation a true statement.)   </li></ul>"
                       ]
                     }
                   },
@@ -3445,27 +3461,14 @@
                       "text": [
                         "<p>Presenting the Challenge</p>",
                         "<p>Display <strong>Graphic Organizer 3.1: Pouches and Coins</strong>. Tell the class about the pouches and gold coins used in the Kingdom of Montarek. </p>",
-                        "<ul><li>The number of gold coins on each side of the equal sign is the same, but some coins are hidden in the pouches. </li><li>In each situation, each pouch contains the same number of one-dollar gold coins.</li><li>The challenge is to find the number of coins in each pouch</li></ul>"
-                      ]
-                    }
-                  },
-                  {
-                    "content":
-                    {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>PYou can also show the Launch Video at this point. (LANGUAGE)</p>",
-                        "<p>Launch Video: This animation depicts a messenger bringing the King of Montarek 11 gold coins, in the form of 5 coins and 2 sealed pouches that each contain the same number of coins. You can show this animation after introducing the students to the context of the gold coins in the Student Edition. This animation can help spark a discussion about strategies for finding the number of gold coins in each pouch.</p>",
-                        "<p>Tell students that, in this Problem, they will use money from the Kingdom of Montarek to explore equality.</p>"
+                        "<ul><li>The number of gold coins on each side of the equal sign is the same, but some coins are hidden in the pouches. </li><li>In each situation, each pouch contains the same number of one-dollar gold coins.</li><li>The challenge is to find the number of coins in each pouch</li></ul>",
+                        "Have students begin this work independently and then compare their strategies for finding the number of coins in the pouches with a partner."
                       ]
                     }
                   }
                 ]
               },
               "supports": [
-                {"text": "What does the sign “=” mean?"},
-                {"text": "Can you represent each clue in a different way?"}
               ]
             },
             {
@@ -3488,15 +3491,25 @@
                     }
                   },
                   {
+                    "display": "teacher",
                     "content":
                     {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Planning for the Summary</strong></p>",
-                        "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know question? What will you do if you do not have evidence? </p>",
+                        "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know question? What will you do if you do not have evidence? </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
                         "<p><strong>Now What Do You Know?</strong></p>",
-                        "<p><strong>Pouches with an unknown number of coins and coins are represented with an equation. What strategies can you use to find the number of coins in each pouch? How do you know if your answer is correct?</strong></p>"
+                        "<p>Pouches with an unknown number of coins and coins are represented with an equation. What strategies can you use to find the number of coins in each pouch? How do you know if your answer is correct?</p>"
                       ]
                     }
                   }
@@ -3553,7 +3566,7 @@
                     "content":
                       {
                         "type": "Image",
-                        "url": "curriculum/moving-straight-ahead/images/MSA_TG_3_1_coin_pouches.png"
+                        "url": "curriculum/moving-straight-ahead/images/TG_3_1_bagsandcoins.jpg"
                       }
                   },
                   {
@@ -3589,10 +3602,32 @@
                           "<p>Making the Mathematics Explicit</p>",
                           "<p>After all of the Situations have been discussed, ask:</p>",
                           "<ul><li>Did everyone use the same first step in each equation? (There is often more than one way to make the first step in solving an equation, so it is likely that different groups took different steps.)</li><li>What are some common strategies that we can use to maintain equality? (As a student describes a strategy, ask him or her to refer to a step in the solution to an equation that illustrates the strategy.)</li><li>How is designing a code, like you did in Situation C, different from figuring out a code, like you did in the other questions? (Students will have various answers. Some students may think about maintaining equality. Other students may use a guess and check approach.)</li></ul>",
-                          "<p>The conditions under which the equality relation is maintained are called the properties of equality. Note that this is not essential vocabulary, and that it is not introduced in the Student Edition until Problem 3.3. However, it might help in the discussion as students begin transitioning to symbolic methods of solving equations. You could display properties of equality on poster paper at this time.Situation C makes the transition from pictures to variables. After discussing the situation, revisit some of the Codes in the Initial Challenge.Use Code 4 to make the transition from pouches to variables.</p>"
+                          "<p>The conditions under which the equality relation is maintained are called the properties of equality. Note that this is not essential vocabulary, and that it is not introduced in the Student Edition until Problem 3.3. However, it might help in the discussion as students begin transitioning to symbolic methods of solving equations. You could display properties of equality on poster paper at this time.</p>",
+                          "Situation C makes the transition from pictures to variables. After discussing the situation, revisit some of the Codes in the Initial Challenge.",
+                          "Use Code 4 to make the transition from pouches to variables."
                         ]
                       }
                   },
+                  [
+                    {
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>5 pouches + 10 coins =   35 coins </p>"
+                        ]
+                      }
+                    },
+                    {
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>5(1pouch + 2 coins) =      5(7)</p>"
+                        ]
+                      }
+                    }
+                  ],
                   {
                     "content":
                       {
@@ -3631,7 +3666,7 @@
                     "content":
                       {
                         "type": "Image",
-                        "url": "curriculum/moving-straight-ahead/images/MSA_TG_3_1_pouch_coin_problem.png"
+                        "url": "curriculum/moving-straight-ahead/images/TG_3_1_solutiongrid.jpg"
                       }
                   },
                   {
@@ -3646,6 +3681,7 @@
                     }
                   },
                   {
+                    "display": "teacher",
                     "content":
                     {
                       "type": "Text",
@@ -3659,14 +3695,15 @@
                     }
                   },
                   {
-                    "content":
-                    {
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Reflecting on Student Learning</strong> </p>",
-                        "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
-                        "<ul><li>What evidence do I have that students understand the Now What Do You Know questions?</li><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
+                        "<p><strong>Reflecting on Student Learning  </strong></p>",
+                        "<p>Use the following questions to assess student understanding at the end of the lesson.  </p>",
+                        "<ul><li>What evidence do I have that students understand the Now What Do You Know questions?</li></ul>",
+                        "<ol><li>Where did my students get stuck?</li><li>What strategies did they use? </li><li>What breakthroughs did my students have today? </li></ol>",
+                        "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?  </li></ul>"
                       ]
                     }
                   }
