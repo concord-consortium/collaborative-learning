@@ -1,9 +1,10 @@
-import { types } from "mobx-state-tree";
+import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import { SectionModel, SectionModelType } from "./section";
 import { SettingsMstType } from "../stores/settings";
 import { SupportModel } from "./support";
+import { ProblemConfiguration } from "../stores/problem-configuration";
 
-export const ProblemModel = types
+const LegacyProblemModel = types
   .model("Problem", {
     ordinal: types.integer,
     title: types.string,
@@ -12,6 +13,16 @@ export const ProblemModel = types
     sections: types.array(SectionModel),
     supports: types.array(SupportModel),
     settings: types.maybe(SettingsMstType)
+  });
+
+const ModernProblemModel = types
+  .model("Problem", {
+    ordinal: types.integer,
+    title: types.string,
+    subtitle: "",
+    sections: types.array(SectionModel),
+    supports: types.array(SupportModel),
+    config: types.maybe(types.frozen<Partial<ProblemConfiguration>>())
   })
   .views(self => ({
     get fullTitle() {
@@ -25,5 +36,21 @@ export const ProblemModel = types
       return self.sections.find((section) => section.type === sectionId);
     }
   }));
+interface LegacySnapshot extends SnapshotIn<typeof LegacyProblemModel> {}
+interface ModernSnapshot extends SnapshotIn<typeof ModernProblemModel> {}
 
-export type ProblemModelType = typeof ProblemModel.Type;
+const isLegacySnapshot = (sn: ModernSnapshot | LegacySnapshot): sn is LegacySnapshot => {
+  const s = sn as LegacySnapshot;
+  return !!s.disabled || !!s.settings;
+};
+
+export const ProblemModel = types.snapshotProcessor(ModernProblemModel, {
+  preProcessor(sn: ModernSnapshot | LegacySnapshot) {
+    if (isLegacySnapshot(sn)) {
+      const { disabled: disabledFeatures, settings, ...others } = sn;
+      return { ...others, config: { disabledFeatures, settings } };
+    }
+    return sn;
+  }
+});
+export interface ProblemModelType extends Instance<typeof ModernProblemModel> {}

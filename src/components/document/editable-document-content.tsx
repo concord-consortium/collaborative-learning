@@ -11,8 +11,8 @@ import { ToolbarComponent } from "../toolbar";
 import { EditableToolApiInterfaceRef, EditableToolApiInterfaceRefContext } from "../tools/tool-api";
 import { DocumentModelType } from "../../models/document/document";
 import { ProblemDocument } from "../../models/document/document-types";
+import { ToolbarModelType } from "../../models/stores/problem-configuration";
 import { WorkspaceMode } from "../../models/stores/workspace";
-import { ToolbarModelType } from "../../models/stores/app-config-model";
 
 import "./editable-document-content.scss";
 
@@ -26,7 +26,7 @@ const DocumentToolbar: React.FC<IToolbarProps> = ({ toolbar, ...others }) => {
 
   // The toolbar prop represents the app's configuration of the toolbar
   // It is cloned here in the document so changes to one document's toolbar
-  // do not effect another document's toolbar.
+  // do not affect another document's toolbar.
   // Currently the toolbar model is not modified, but it seems safer to do this.
   // The cloned model is stored in state so it isn't recreated on each render
   const [toolbarModel] = useState<ToolbarModelType>(() => {

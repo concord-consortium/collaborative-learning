@@ -9,7 +9,7 @@ import { AppConfigModelType } from "../models/stores/app-config-model";
 import { DocumentsModelType } from "../models/stores/documents";
 import { GroupsModelType } from "../models/stores/groups";
 import { SelectionStoreModelType } from "../models/stores/selection";
-import { getSettingFromStores, isFeatureSupported, IStores } from "../models/stores/stores";
+import { isFeatureSupported, IStores } from "../models/stores/stores";
 import { UserModelType } from "../models/stores/user";
 import { UIModelType } from "../models/stores/ui";
 
@@ -18,7 +18,7 @@ export function useStores(): IStores {
   return useContext(MobXProviderContext).stores;
 }
 
-export function useAppConfigStore(): AppConfigModelType {
+export function useAppConfig(): AppConfigModelType {
   return useStores().appConfig;
 }
 
@@ -117,7 +117,7 @@ export function useProblemStore(): ProblemModelType {
 }
 
 export function useSettingFromStores(key: string, group?: string) {
-  return getSettingFromStores(useStores(), key, group);
+  return useAppConfig().getSetting(key, group);
 }
 
 export function useSharedSelectionStore(): SelectionStoreModelType {

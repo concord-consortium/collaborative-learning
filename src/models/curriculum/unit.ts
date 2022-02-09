@@ -1,14 +1,15 @@
 import { IReactionDisposer, reaction } from "mobx";
-import { Instance, types } from "mobx-state-tree";
+import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import { DocumentContentModel } from "../document/document-content";
 import { InvestigationModel } from "./investigation";
 import { ISectionInfoMap, SectionModel, registerSectionInfo } from "./section";
 import { SupportModel } from "./support";
-import { StampModel } from "../tools/drawing/drawing-content";
+import { StampModel } from "../tools/drawing/stamp";
 import { AppConfigModelType } from "../stores/app-config-model";
 import { NavTabsConfigModel } from "../stores/nav-tabs";
 import { SettingsMstType } from "../stores/settings";
 import { IBaseStores } from "../stores/stores";
+import { UnitConfiguration } from "../stores/unit-configuration";
 
 const PlanningDocumentConfigModel = types
   .model("PlanningDocumentConfigModel", {
@@ -26,8 +27,8 @@ const PlanningDocumentConfigModel = types
     }
   }));
 
-export const UnitModel = types
-  .model("Unit", {
+const LegacyUnitModel = types
+  .model("LegacyUnit", {
     code: "",
     abbrevTitle: "",
     title: types.string,
@@ -43,6 +44,21 @@ export const UnitModel = types
     defaultStamps: types.array(StampModel),
     settings: types.maybe(SettingsMstType),
     navTabs: types.maybe(NavTabsConfigModel),
+  });
+
+
+const ModernUnitModel = types
+  .model("Unit", {
+    code: "",
+    abbrevTitle: "",
+    title: types.string,
+    subtitle: "",
+    sections: types.maybe(types.frozen<ISectionInfoMap>()),
+    planningDocument: types.maybe(PlanningDocumentConfigModel),
+    lookingAhead: types.maybe(DocumentContentModel),
+    investigations: types.array(InvestigationModel),
+    supports: types.array(SupportModel),
+    config: types.maybe(types.frozen<Partial<UnitConfiguration>>())
   })
   .volatile(self => ({
     userListenerDisposer: null as IReactionDisposer | null
@@ -85,7 +101,26 @@ export const UnitModel = types
       };
     }
   }));
-export type UnitModelType = Instance<typeof UnitModel>;
+interface LegacySnapshot extends SnapshotIn<typeof LegacyUnitModel> {}
+interface ModernSnapshot extends SnapshotIn<typeof ModernUnitModel> {}
+
+const isLegacySnapshot = (sn: ModernSnapshot | LegacySnapshot): sn is LegacySnapshot => {
+  const s = sn as LegacySnapshot;
+  return !!s.disabled || !!s.navTabs || !!s.placeholderText || !!s.defaultStamps || !!s.settings;
+};
+
+export const UnitModel = types.snapshotProcessor(ModernUnitModel, {
+  preProcessor(sn: ModernSnapshot | LegacySnapshot) {
+    if (isLegacySnapshot(sn)) {
+      const {
+        disabled: disabledFeatures, navTabs, placeholderText, defaultStamps: stamps, settings, ...others
+      } = sn;
+      return { ...others, config: { disabledFeatures, navTabs, placeholderText, stamps, settings } };
+    }
+    return sn;
+  }
+});
+export interface UnitModelType extends Instance<typeof UnitModel> {}
 
 function getUnitSpec(unitId: string | undefined, appConfig: AppConfigModelType) {
   const requestedUnit = unitId ? appConfig.getUnit(unitId) : undefined;

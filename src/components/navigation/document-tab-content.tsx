@@ -5,7 +5,7 @@ import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import { ENavTabSectionType, NavTabSpec } from "../../models/view/nav-tabs";
 import { DocumentTabPanel } from "./document-tab-panel";
 import { EditableDocumentContent } from "../document/editable-document-content";
-import { useAppConfigStore, useProblemStore, useUIStore, useUserStore } from "../../hooks/use-stores";
+import { useAppConfig, useProblemStore, useUIStore, useUserStore } from "../../hooks/use-stores";
 import { Logger, LogEventName } from "../../lib/logger";
 import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
 import { useUserContext } from "../../hooks/use-user-context";
@@ -18,7 +18,7 @@ interface IProps {
 
 export const DocumentTabContent: React.FC<IProps> = ({ tabSpec }) => {
   const [referenceDocument, setReferenceDocument] = useState<DocumentModelType>();
-  const appConfigStore = useAppConfigStore();
+  const appConfigStore = useAppConfig();
   const problemStore = useProblemStore();
   const context = useUserContext();
   const queryClient = useQueryClient();

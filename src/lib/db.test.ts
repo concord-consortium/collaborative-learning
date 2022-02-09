@@ -1,11 +1,12 @@
 import { DB } from "./db";
 import { createDocumentsModelWithRequiredDocuments, DocumentsModel } from "../models/stores/documents";
-import { IStores, createStores } from "../models/stores/stores";
-import { UserModel } from "../models/stores/user";
 import { DBDocument } from "./db-types";
 import { DocumentModel } from "../models/document/document";
 import { DocumentContentModel } from "../models/document/document-content";
 import { PersonalDocument, PlanningDocument, ProblemDocument } from "../models/document/document-types";
+import { specStores } from "../models/stores/spec-stores";
+import { IStores } from "../models/stores/stores";
+import { UserModel } from "../models/stores/user";
 import { TextContentModelType } from "../models/tools/text/text-content";
 import { ToolTileModelType } from "../models/tools/tool-tile";
 import { createSingleTileContent } from "../utilities/test-utils";
@@ -48,7 +49,7 @@ describe("db", () => {
 
   beforeEach(() => {
     setUrlParams(originalUrlParams);
-    stores = createStores({
+    stores = specStores({
       appMode: "test",
       documents: DocumentsModel.create(),
       user: UserModel.create({id: "1", portal: "example.com"})
