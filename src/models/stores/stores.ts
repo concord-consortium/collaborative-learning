@@ -136,32 +136,3 @@ export function isShowingTeacherContent(stores: IStores) {
   const { ui: { showTeacherContent }, user: { isTeacher } } = stores;
   return isTeacher && showTeacherContent;
 }
-
-export function isFeatureSupported(stores: IStores, feature: string, section?: SectionModelType) {
-  let { appConfig: { disabledFeatures } } = stores;
-  if (section) {
-    const disabled: Record<string ,string> = {};
-    mergeDisabledFeatures(disabled, disabledFeatures);
-    mergeDisabledFeatures(disabled, section.disabled);
-    disabledFeatures = Object.values(disabled);
-  }
-  const featureIndex = disabledFeatures?.findIndex(f => f === feature || f === `!${feature}`);
-  return featureIndex >= 0 ? disabledFeatures[featureIndex][0] === "!" : true;
-}
-
-export function getDisabledFeaturesOfTile(stores: IStores, tile: string, sectionId?: string) {
-  // TODO: fix section support (if we care)
-  const { appConfig: { disabledFeatures } } = stores;
-  const disabledMap: Record<string, boolean> = {};
-  disabledFeatures?.forEach(feature => {
-    const regex = new RegExp(`(!)?(${tile}.+)`);
-    const match = regex.exec(feature);
-    if (match?.[2]) {
-      disabledMap[match[2]] = !match[1];
-    }
-  });
-  return Object.keys(disabledMap).reduce<string[]>((prev, feature) => {
-    disabledMap[feature] && prev.push(feature);
-    return prev;
-  }, []);
-}

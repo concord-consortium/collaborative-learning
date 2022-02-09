@@ -1,6 +1,5 @@
 import { AppMode } from "./store-types";
 import { specStores } from "./spec-stores";
-import { isFeatureSupported, getDisabledFeaturesOfTile } from "./stores";
 import { UnitModel } from "../curriculum/unit";
 import { InvestigationModel } from "../curriculum/investigation";
 import { ProblemModel } from "../curriculum/problem";
@@ -43,53 +42,53 @@ describe("stores object", () => {
 
 });
 
+function specIntroductionSection() {
+  return SectionModel.create({ type: "introduction" });
+}
+
 describe("isFeatureSupported()", () => {
 
-  function specIntroductionSection() {
-    return SectionModel.create({ type: "introduction" });
-  }
-
   it("defaults to true for arbitrary features", () => {
-    const stores = specStores();
-    expect(isFeatureSupported(stores, "foo")).toBe(true);
-    expect(isFeatureSupported(stores, "foo", specIntroductionSection())).toBe(true);
+    const { appConfig } = specStores();
+    expect(appConfig.isFeatureSupported("foo")).toBe(true);
+    expect(appConfig.isFeatureSupported("foo", specIntroductionSection())).toBe(true);
   });
 
   it("can disable features at the unit level", () => {
-    const stores = specStores({ unit: UnitModel.create({ title: "Unit", disabled: ["foo"] }) });
-    expect(isFeatureSupported(stores, "foo")).toBe(false);
-    expect(isFeatureSupported(stores, "foo", specIntroductionSection())).toBe(false);
+    const { appConfig } = specStores({ unit: UnitModel.create({ title: "Unit", disabled: ["foo"] }) });
+    expect(appConfig.isFeatureSupported("foo")).toBe(false);
+    expect(appConfig.isFeatureSupported("foo", specIntroductionSection())).toBe(false);
   });
 
   it("can disable features at the investigation level", () => {
     const investigation = InvestigationModel.create({ ordinal: 1, title: "Investigation", disabled: ["foo"] });
-    const stores = specStores({ investigation });
-    expect(isFeatureSupported(stores, "foo")).toBe(false);
-    expect(isFeatureSupported(stores, "foo", specIntroductionSection())).toBe(false);
+    const { appConfig } = specStores({ investigation });
+    expect(appConfig.isFeatureSupported("foo")).toBe(false);
+    expect(appConfig.isFeatureSupported("foo", specIntroductionSection())).toBe(false);
   });
 
   it("can disable features at the problem level", () => {
     const problem = ProblemModel.create({ ordinal: 1, title: "Problem", disabled: ["baz", "foo"] });
-    const stores = specStores({ problem });
-    expect(isFeatureSupported(stores, "foo")).toBe(false);
-    expect(isFeatureSupported(stores, "foo", specIntroductionSection())).toBe(false);
+    const { appConfig } = specStores({ problem });
+    expect(appConfig.isFeatureSupported("foo")).toBe(false);
+    expect(appConfig.isFeatureSupported("foo", specIntroductionSection())).toBe(false);
   });
 
   it("can disable features at the section level", () => {
     const section = SectionModel.create({ type: "introduction" as SectionType, disabled: ["foo"] });
     const problem = ProblemModel.create({ ordinal: 1, title: "Problem", sections: [getSnapshot(section)] });
-    const stores = specStores({ problem });
-    expect(isFeatureSupported(stores, "foo")).toBe(true);
-    expect(isFeatureSupported(stores, "foo", section)).toBe(false);
+    const { appConfig } = specStores({ problem });
+    expect(appConfig.isFeatureSupported("foo")).toBe(true);
+    expect(appConfig.isFeatureSupported("foo", section)).toBe(false);
   });
 
   it("can disable features at the unit level and reenable them at the problem level", () => {
     const unit = UnitModel.create({ title: "Unit", disabled: ["foo"] });
     const problem = ProblemModel.create({ ordinal: 1, title: "Problem", disabled: ["baz", "!foo"] });
-    const stores = specStores({ unit, problem });
-    console.log(`disabledFeatures: ${JSON.stringify(stores.appConfig.disabledFeatures)}`);
-    expect(isFeatureSupported(stores, "foo")).toBe(true);
-    expect(isFeatureSupported(stores, "foo", specIntroductionSection())).toBe(true);
+    const { appConfig } = specStores({ unit, problem });
+    console.log(`disabledFeatures: ${JSON.stringify(appConfig.disabledFeatures)}`);
+    expect(appConfig.isFeatureSupported("foo")).toBe(true);
+    expect(appConfig.isFeatureSupported("foo", specIntroductionSection())).toBe(true);
   });
 
   it("can enable/disable features at every level", () => {
@@ -98,9 +97,9 @@ describe("isFeatureSupported()", () => {
     const section = SectionModel.create({ type: "introduction" as SectionType, disabled: ["bar", "baz", "!foo"] });
     const problem = ProblemModel.create(
                       { ordinal: 1, title: "Problem", disabled: ["foo"], sections: [getSnapshot(section)] });
-    const stores = specStores({ unit, investigation, problem });
-    expect(isFeatureSupported(stores, "foo")).toBe(false);
-    expect(isFeatureSupported(stores, "foo", section)).toBe(true);
+    const { appConfig } = specStores({ unit, investigation, problem });
+    expect(appConfig.isFeatureSupported("foo")).toBe(false);
+    expect(appConfig.isFeatureSupported("foo", section)).toBe(true);
   });
 
 });
@@ -108,9 +107,9 @@ describe("isFeatureSupported()", () => {
 describe("getDisabledFeaturesOfTile()", () => {
 
   it("returns empty array by default", () => {
-    const stores = specStores();
-    expect(getDisabledFeaturesOfTile(stores, "foo")).toEqual([]);
-    expect(getDisabledFeaturesOfTile(stores, "foo", "introduction")).toEqual([]);
+    const { appConfig } = specStores();
+    expect(appConfig.getDisabledFeaturesOfTile("foo")).toEqual([]);
+    expect(appConfig.getDisabledFeaturesOfTile("foo", specIntroductionSection())).toEqual([]);
   });
 
   it("returns disabled features from across levels", () => {
@@ -122,7 +121,7 @@ describe("getDisabledFeaturesOfTile()", () => {
                             { ordinal: 1, title: "Investigation",
                               disabled: ["!fooFeature2", "fooFeature3", "fooFeature4"] });
     const problem = ProblemModel.create({ ordinal: 1, title: "Problem", disabled: ["!fooFeature4"] });
-    const stores = specStores({ unit, investigation, problem });
-    expect(getDisabledFeaturesOfTile(stores, "foo")).toEqual(["fooFeature1", "fooFeature3"]);
+    const { appConfig } = specStores({ unit, investigation, problem });
+    expect(appConfig.getDisabledFeaturesOfTile("foo")).toEqual(["fooFeature1", "fooFeature3"]);
   });
 });

@@ -1,6 +1,7 @@
 import { types, Instance, SnapshotIn } from "mobx-state-tree";
+import { SectionModelType } from "../curriculum/section";
 import { DocumentContentModel, DocumentContentModelType } from "../document/document-content";
-import { ConfigurationManager } from "./configuration-manager";
+import { ConfigurationManager, mergeDisabledFeatures } from "./configuration-manager";
 import { NavTabsConfigModel } from "./nav-tabs";
 import { ToolbarModel } from "./problem-configuration";
 import { SettingsGroupMstType } from "./settings";
@@ -91,6 +92,26 @@ export const AppConfigModel = types
     }
   }))
   .views(self => ({
+    getDisabledFeaturesOfSection(section?: SectionModelType) {
+      let disabledFeatures = self.disabledFeatures;
+      if (section) {
+        const disabled: Record<string ,string> = {};
+        mergeDisabledFeatures(disabled, disabledFeatures);
+        mergeDisabledFeatures(disabled, section.disabled);
+        disabledFeatures = Object.values(disabled);
+      }
+      return disabledFeatures;
+    },
+    isFeatureSupported(feature: string, section?: SectionModelType) {
+      const disabledFeatures = this.getDisabledFeaturesOfSection(section);
+      const featureIndex = disabledFeatures?.findIndex(f => f === feature || f === `!${feature}`);
+      return featureIndex >= 0 ? disabledFeatures[featureIndex][0] === "!" : true;
+    },
+    getDisabledFeaturesOfTile(tile: string, section?: SectionModelType) {
+      const disabledFeatures = this.getDisabledFeaturesOfSection(section)
+                                .filter(feature => (!tile || feature.includes(tile)) && (feature[0] !== "!"));
+      return disabledFeatures;
+    },
     get defaultDocumentContent(): DocumentContentModelType | undefined {
       return DocumentContentModel.create(self.configMgr.defaultDocumentTemplate);
     },

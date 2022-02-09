@@ -3,7 +3,6 @@ import { debounce } from "lodash";
 import { observer, inject } from "mobx-react";
 import React from "react";
 import ResizeObserver from "resize-observer-polyfill";
-import { getDisabledFeaturesOfTile } from "../../models/stores/stores";
 import { cloneTileSnapshotWithNewId, IDragTileItem, IDragTiles, ToolTileModelType } from "../../models/tools/tool-tile";
 import { transformCurriculumImageUrl } from "../../models/tools/image/image-import-export";
 import { getToolContentInfoById } from "../../models/tools/tool-content-info";
@@ -145,10 +144,11 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
   constructor(props: IProps) {
     super(props);
 
+    const { appConfig } = this.stores;
     const { model } = props;
     const { content: { type } } = model;
     this.modelId = model.id;
-    model.setDisabledFeatures(getDisabledFeaturesOfTile(this.stores, type));
+    model.setDisabledFeatures(appConfig.getDisabledFeaturesOfTile(type));
 
     this.hotKeys.register({
       "cmd-option-e": this.handleCopyImportJsonToClipboard,

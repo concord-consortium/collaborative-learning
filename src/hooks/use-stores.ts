@@ -9,7 +9,7 @@ import { AppConfigModelType } from "../models/stores/app-config-model";
 import { DocumentsModelType } from "../models/stores/documents";
 import { GroupsModelType } from "../models/stores/groups";
 import { SelectionStoreModelType } from "../models/stores/selection";
-import { isFeatureSupported, IStores } from "../models/stores/stores";
+import { IStores } from "../models/stores/stores";
 import { UserModelType } from "../models/stores/user";
 import { UIModelType } from "../models/stores/ui";
 
@@ -83,7 +83,7 @@ export function useTypeOfTileInDocumentOrCurriculum(key?: string, tileId?: strin
 }
 
 export function useFeatureFlag(feature: string) {
-  return isFeatureSupported(useStores(), feature);
+  return useAppConfig().isFeatureSupported(feature);
 }
 
 export function useGroupsStore(): GroupsModelType {
