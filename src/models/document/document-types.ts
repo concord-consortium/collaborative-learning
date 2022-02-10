@@ -59,3 +59,9 @@ export interface IDocumentContext {
   getProperty: (key: string) => string | undefined;
   setProperties: (properties: ISetProperties) => void;
 }
+
+export interface IDocumentAddTileOptions {
+  title?: string;
+  addSidecarNotes?: boolean;
+  url?: string;
+}

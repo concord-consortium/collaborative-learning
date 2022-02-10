@@ -16,7 +16,8 @@ export class ConfigurationManager implements UnitConfiguration {
   }
 
   getProp<T>(prop: keyof UnitConfiguration) {
-    return (this.configs.find(config => !!config[prop])?.[prop] || this.defaults[prop]) as T;
+    const found = this.configs.find(config => config[prop] != null)?.[prop];
+    return (found != null ? found : this.defaults[prop]) as T;
   }
 
   /*

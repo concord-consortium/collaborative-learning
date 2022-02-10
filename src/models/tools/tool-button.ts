@@ -1,8 +1,8 @@
 import { getEnv, Instance, SnapshotOut, types } from "mobx-state-tree";
-import { getToolContentInfoByTool } from "./tool-content-info";
+import { getToolContentInfoById } from "./tool-content-info";
 
 const BaseToolButtonModel = types.model("BaseToolButton", {
-  name: types.string,
+  id: types.string, // toolId in the case of tool buttons
   title: types.string,
   isDefault: false,
 });
@@ -28,7 +28,7 @@ const TileToolButtonModel = BaseToolButtonModel.named("TileToolButtonModel")
   })
   .views(self => ({
     get Icon() {
-      return  getToolContentInfoByTool(self.name).Icon;
+      return getToolContentInfoById(self.id)?.Icon;
     }
   }));
 

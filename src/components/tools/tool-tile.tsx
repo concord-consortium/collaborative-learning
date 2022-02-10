@@ -187,7 +187,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     const { model, readOnly, isUserResizable, widthPct } = this.props;
     const { hoverTile } = this.state;
     const { appConfig, ui } = this.stores;
-    const { Component: ToolComponent, toolTileClass } = getToolContentInfoById(model.content.type);
+    const { Component: ToolComponent, toolTileClass } = getToolContentInfoById(model.content.type) || {};
     const isPlaceholderTile = ToolComponent === PlaceholderToolComponent;
     const isTileSelected = ui.isSelectedTile(model);
     const tileSelectedForComment = isTileSelected && ui.showChatPanel;
@@ -312,7 +312,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
 
     // Select the tile if the tool doesn't handle the selection itself
     const toolContentInfo = getToolContentInfoById(model.content.type);
-    if (!toolContentInfo.tileHandlesOwnSelection) {
+    if (!toolContentInfo?.tileHandlesOwnSelection) {
       ui.setSelectedTile(model, {append: hasSelectionModifier(e)});
     }
   };
@@ -371,7 +371,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     }
     // set the drag data
     const { model, docId } = this.props;
-    const ToolComponent = getToolContentInfoById(model.content.type).Component;
+    const ToolComponent = getToolContentInfoById(model.content.type)?.Component;
     // can't drag placeholder tiles
     if (ToolComponent === PlaceholderToolComponent) {
       e.preventDefault();

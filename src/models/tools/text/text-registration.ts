@@ -5,7 +5,6 @@ import TextToolIcon from "../../../clue/assets/icons/text-tool.svg";
 
 registerToolContentInfo({
   id: kTextToolID,
-  tool: "text",
   modelClass: TextContentModel,
   defaultContent: defaultTextContent,
   Component: TextToolComponent,

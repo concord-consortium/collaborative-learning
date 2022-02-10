@@ -5,7 +5,6 @@ import ImageToolIcon from "../../../clue/assets/icons/image-tool.svg";
 
 registerToolContentInfo({
   id: kImageToolID,
-  tool: "image",
   modelClass: ImageContentModel,
   defaultContent: defaultImageContent,
   Component: ImageToolComponent,
