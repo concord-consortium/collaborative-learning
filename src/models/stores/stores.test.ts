@@ -86,7 +86,6 @@ describe("isFeatureSupported()", () => {
     const unit = UnitModel.create({ title: "Unit", disabled: ["foo"] });
     const problem = ProblemModel.create({ ordinal: 1, title: "Problem", disabled: ["baz", "!foo"] });
     const { appConfig } = specStores({ unit, problem });
-    console.log(`disabledFeatures: ${JSON.stringify(appConfig.disabledFeatures)}`);
     expect(appConfig.isFeatureSupported("foo")).toBe(true);
     expect(appConfig.isFeatureSupported("foo", specIntroductionSection())).toBe(true);
   });

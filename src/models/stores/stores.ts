@@ -1,9 +1,7 @@
 import { AppConfigModelType, AppConfigModel } from "./app-config-model";
-import { mergeDisabledFeatures } from "./configuration-manager";
 import { getGuideJson, getUnitJson, UnitModel, UnitModelType } from "../curriculum/unit";
 import { InvestigationModelType, InvestigationModel } from "../curriculum/investigation";
 import { ProblemModel, ProblemModelType } from "../curriculum/problem";
-import { SectionModelType } from "../curriculum/section";
 import { UIModel, UIModelType } from "./ui";
 import { UserModel, UserModelType } from "./user";
 import { GroupsModel, GroupsModelType } from "./groups";

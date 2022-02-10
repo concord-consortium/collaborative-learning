@@ -81,11 +81,8 @@ export const AppConfigModel = types
     get supportStackedTwoUpView() { return self.configMgr.supportStackedTwoUpView; },
     get showPublishedDocsInPrimaryWorkspace() { return self.configMgr.showPublishedDocsInPrimaryWorkspace; },
     get comparisonPlaceholderContent() { return self.configMgr.comparisonPlaceholderContent; },
-    // get navTabs() { return NavTabsConfigModel.create(self.configMgr.navTabs); },
-    // get toolbar() { return self.configMgr.toolbar; },
     get placeholderText() { return self.configMgr.placeholderText; },
     get stamps() { return self.configMgr.stamps; },
-    // get settings() { return self.configMgr.settings; }
     getSetting(key: string, group?: string) {
       const groupSettings = group ? self.settings?.[group] as SnapshotIn<typeof SettingsGroupMstType> : undefined;
       return groupSettings?.[key] || self.settings?.[key];
