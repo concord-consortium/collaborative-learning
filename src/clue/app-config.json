@@ -233,6 +233,9 @@
       "content": "curriculum/comparing-and-scaling/comparing-and-scaling.json",
       "guide": "curriculum/comparing-and-scaling/cas-teacher-guide.json"
     },
+    "example": {
+      "content": "curriculum/example-curriculum/example-curriculum.json"
+    },
     "faw": {
       "content": "curriculum/filling-and-wrapping/filling-and-wrapping.json"
     },

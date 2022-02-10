@@ -4,7 +4,7 @@ import { DocumentComponent, WorkspaceSide } from "../../components/document/docu
 import { GroupVirtualDocumentComponent } from "../../components/document/group-virtual-document";
 import { BaseComponent, IBaseProps } from "../../components/base";
 import { DocumentModelType } from "../../models/document/document";
-import { createDefaultSectionedContent } from "../../models/document/document-content";
+import { createDefaultSectionedContent, DocumentContentModelType } from "../../models/document/document-content";
 import {
   DocumentDragKey, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
 } from "../../models/document/document-types";
@@ -65,26 +65,23 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     );
   }
 
-  private getDefaultDocumentContent() {
-    const { appConfig: { autoSectionProblemDocuments, defaultDocumentType, defaultDocumentContent },
-            problem } = this.stores;
-    if ((defaultDocumentType === ProblemDocument) && autoSectionProblemDocuments) {
+  private getDefaultDocumentContent(defaultType: string, defaultContent?: DocumentContentModelType) {
+    const { appConfig: { autoSectionProblemDocuments }, problem } = this.stores;
+    if ((defaultType === ProblemDocument) && autoSectionProblemDocuments) {
       // for problem documents, default content is a section header row and a placeholder tile
       // for each section that is present in the corresponding problem content
       return createDefaultSectionedContent(problem.sections);
     }
-    else if (defaultDocumentContent) {
-      return defaultDocumentContent;
-    }
+    return defaultContent;
   }
 
   private async guaranteeInitialDocuments() {
-    const { appConfig: {
-              defaultDocumentType, defaultLearningLogDocument, defaultLearningLogTitle, initialLearningLogTitle },
+    const { appConfig: { defaultDocumentSpec: { type: defaultType, content: defaultContent },
+            defaultLearningLogDocument, defaultLearningLogTitle, initialLearningLogTitle },
             db, ui: { problemWorkspace }, unit: { planningDocument }, user: { type: role } } = this.stores;
     if (!problemWorkspace.primaryDocumentKey) {
-      const documentContent = this.getDefaultDocumentContent();
-      const defaultDocument = await db.guaranteeOpenDefaultDocument(defaultDocumentType, documentContent);
+      const documentContent = this.getDefaultDocumentContent(defaultType, defaultContent);
+      const defaultDocument = await db.guaranteeOpenDefaultDocument(defaultType, documentContent);
       if (defaultDocument) {
         problemWorkspace.setPrimaryDocument(defaultDocument);
       }
