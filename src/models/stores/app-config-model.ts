@@ -112,6 +112,9 @@ export const AppConfigModel = types
     get defaultDocumentContent(): DocumentContentModelType | undefined {
       return DocumentContentModel.create(self.configMgr.defaultDocumentTemplate);
     },
+    get defaultDocumentSpec() {
+      return { type: self.defaultDocumentType, content: this.defaultDocumentContent };
+    },
     getDocumentLabel(docType: string, num?: number, lowerCase?: boolean) {
       const docLabel = self.documentLabels[docType];
       return docLabel ? DocumentLabelModel.create(docLabel).getLabel(num, lowerCase) : "";

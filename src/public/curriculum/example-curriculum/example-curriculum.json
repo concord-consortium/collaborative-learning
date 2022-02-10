@@ -1,0 +1,134 @@
+{
+  "code": "example",
+  "abbrevTitle": "EX",
+  "title": "Example Curriculum",
+  "subtitle": "Demonstrating Curriculum Configuration",
+  "config": {
+    "placeholderText": "This is where users can type text",
+    "defaultDocumentType": "personal",
+    "settings": {
+      "table": { "numFormat": ".2~f" }
+    },
+    "navTabs": {
+      "showNavPanel": false,
+      "lazyLoadTabContents": true,
+      "tabSpecs": [
+        {
+          "tab": "my-work",
+          "label": "My Work",
+          "sections": [
+            {
+              "title": "Workspaces",
+              "type": "personal-documents",
+              "dataTestHeader": "my-work-section-workspaces",
+              "dataTestItem": "my-work-list-items",
+              "documentTypes": ["personal"],
+              "properties": ["!isDeleted"],
+              "showStars": ["student", "teacher"],
+              "addDocument": true
+            }
+          ]
+        }
+      ]
+    },
+    "toolbar": [
+      {
+        "id": "Text",
+        "title": "Text",
+        "isTileTool": true
+      },
+      {
+        "id": "Table",
+        "title": "Table",
+        "isTileTool": true
+      },
+      {
+        "id": "Drawing",
+        "title": "Drawing",
+        "isTileTool": true
+      },
+      {
+        "id": "delete",
+        "title": "Delete",
+        "iconId": "icon-delete-tool",
+        "isTileTool": false
+      }
+    ],
+    "stamps": []
+  },
+  "sections": {
+    "first": {
+      "initials": "FI",
+      "title": "First Section",
+      "placeholder": "Work area for\nFirst Section"
+    },
+    "second": {
+      "initials": "SE",
+      "title": "Second Section",
+      "placeholder": "Second Section Placeholder"
+    },
+    "third": {
+      "initials": "TH",
+      "title": "Third Section",
+      "placeholder": "Third Section content goes here"
+    }
+  },
+  "planningDocument": {
+    "enable": "teacher",
+    "default": true,
+    "sectionInfo": {
+      "plan": {
+        "initials": "PL",
+        "title": "Plan",
+        "placeholder": "Plan the work; work the plan"
+      }
+    },
+    "sections": [{ "type": "plan" }]
+  },
+  "investigations": [
+    {
+      "description": "Investigation 1",
+      "ordinal": 1,
+      "title": "Example Investigation 1",
+      "problems": [
+        {
+          "description": "Problem 1.1",
+          "ordinal": 1,
+          "title": "1.1 Unit Toolbar Configuration",
+          "subtitle": "Text, Table, Drawing",
+          "sections": [
+            { "type": "first", "content": { "tiles": [] }, "supports": [] },
+            { "type": "second", "content": { "tiles": [] }, "supports": [] },
+            { "type": "third", "content": { "tiles": [] }, "supports": [] }
+          ]
+        },
+        {
+          "description": "Problem 1.2",
+          "ordinal": 2,
+          "title": "1.2 Problem Toolbar Configuration",
+          "subtitle": "Text only",
+          "config": {
+            "toolbar": [
+              {
+                "id": "Text",
+                "title": "Text",
+                "isTileTool": true
+              },
+              {
+                "id": "delete",
+                "title": "Delete",
+                "iconId": "icon-delete-tool",
+                "isTileTool": false
+              }
+            ]
+          },
+          "sections": [
+            { "type": "first", "content": { "tiles": [] }, "supports": [] },
+            { "type": "second", "content": { "tiles": [] }, "supports": [] },
+            { "type": "third", "content": { "tiles": [] }, "supports": [] }
+          ]
+        }
+      ]
+    }
+  ]
+}
