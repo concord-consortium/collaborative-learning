@@ -9,7 +9,6 @@ import {
   DocumentDragKey, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
 } from "../../models/document/document-types";
 import { kDividerHalf, kDividerMax, kDividerMin } from "../../models/stores/ui-types";
-import { getNavTabConfigFromStores } from "../../models/stores/stores";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { NavTabPanel } from "../navigation/nav-tab-panel";
 import { CollapsedResourcesTab } from "../navigation/collapsed-resources-tab";
@@ -39,11 +38,10 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   public render() {
-    const { ui: { problemWorkspace: {type},
-                  workspaceShown
-                }
-          } = this.stores;
-    const showNavPanel = getNavTabConfigFromStores(this.stores)?.showNavPanel;
+    const {
+      appConfig: { navTabs: { showNavPanel } },
+      ui: { problemWorkspace: { type }, workspaceShown }
+    } = this.stores;
     // NOTE: the drag handlers are in three different divs because we cannot overlay
     // the renderDocuments() div otherwise the Cypress tests will fail because none
     // of the html elements in the documents will be visible to it.  The first div acts
@@ -169,8 +167,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   private renderDocument(className: string, side: WorkspaceSide, child?: JSX.Element) {
-    const { ui,  } = this.stores;
-    const showNavPanel = getNavTabConfigFromStores(this.stores)?.showNavPanel;
+    const { appConfig: { navTabs: { showNavPanel } }, ui } = this.stores;
     const workspaceLeft = !showNavPanel? 0 : ui.navTabContentShown ? "50%" : 42;
     const style = { left: workspaceLeft };
     const roleClassName = side === "primary" ? "primary-workspace" : "reference-workspace";
@@ -205,15 +202,12 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   private renderNavTabPanel() {
-    const { teacherGuide,
+    const { appConfig: { navTabs: navTabSpecs },
+            teacherGuide,
             user: { isTeacher },
-            ui: { activeNavTab,
-                  navTabContentShown,
-                  dividerPosition,
-                }
+            ui: { activeNavTab, navTabContentShown, dividerPosition }
           } = this.stores;
-    const navTabSpecs = getNavTabConfigFromStores(this.stores);
-    const studentTabs = navTabSpecs?.tabSpecs.filter((t) => !t.teacherOnly);
+    const studentTabs = navTabSpecs?.tabSpecs.filter(t => !t.teacherOnly);
     const teacherTabs = navTabSpecs?.tabSpecs.filter(t => (t.tab !== "teacher-guide") || teacherGuide);
     const tabsToDisplay = isTeacher ? teacherTabs : studentTabs;
 
@@ -333,7 +327,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
 
   private handleNewDocumentOpen = async (type: OtherDocumentType, title: string) => {
     const { appConfig, db, ui: { problemWorkspace } } = this.stores;
-    const content = (type === PersonalDocument) && appConfig.defaultDocumentTemplate
+    const content = (type === PersonalDocument) && appConfig.hasDefaultDocumentTemplate
                       ? appConfig.defaultDocumentContent : undefined;
     const newDocument = await db.createOtherDocument(type, {title, content});
     if (newDocument) {

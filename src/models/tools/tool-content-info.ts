@@ -1,7 +1,7 @@
-import { ToolContentModel, ToolContentModelType, ToolMetadataModel } from "./tool-types";
-import { UnitModelType } from "../curriculum/unit";
-import { IToolTileProps } from "../../components/tools/tool-tile";
 import { FunctionComponent, SVGProps } from "react";
+import { ToolContentModel, ToolContentModelType, ToolMetadataModel } from "./tool-types";
+import { IToolTileProps } from "../../components/tools/tool-tile";
+import { AppConfigModelType } from "../stores/app-config-model";
 
 export interface IDMap {
   [id: string]: string;
@@ -15,9 +15,8 @@ export interface IDefaultContentOptions {
   // url is added so the CLUE core can add an image tile to the document when a user
   // drops an image on the document.
   url?: string;
-  // unit is added so the drawing tool can use a default set of stamps defined in
-  // the unit
-  unit?: UnitModelType;
+  // appConfig contains stamps (for drawing tool), placeholderText (for text tool), etc.
+  appConfig?: AppConfigModelType;
 }
 
 type ToolComponentType = React.ComponentType<IToolTileProps>;

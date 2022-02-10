@@ -1,11 +1,11 @@
 import { forEach } from "lodash";
 import { types } from "mobx-state-tree";
+import { AppConfigModelType } from "./app-config-model";
 import { DocumentModel, DocumentModelType } from "../document/document";
 import {
   DocumentType, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
   PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemPublication
 } from "../document/document-types";
-import { UnitModel, UnitModelType } from "../curriculum/unit";
 import { ClassModelType } from "./class";
 import { UserModelType } from "./user";
 
@@ -31,10 +31,10 @@ export interface IRequiredDocumentPromise {
 
 export const DocumentsModel = types
   .model("Documents", {
-    all: types.array(DocumentModel),
-    unit: types.maybe(UnitModel)
+    all: types.array(DocumentModel)
   })
   .volatile(self => ({
+    appConfig: undefined as AppConfigModelType | undefined,
     requiredDocuments: {} as Record<string, IRequiredDocumentPromise>
   }))
   .views(self => ({
@@ -216,8 +216,8 @@ export const DocumentsModel = types
       return parentDocument || null;
     };
 
-    const setUnit = (unit: UnitModelType) => {
-      self.unit = unit;
+    const setAppConfig = (appConfig: AppConfigModelType) => {
+      self.appConfig = appConfig;
     };
 
     return {
@@ -228,7 +228,7 @@ export const DocumentsModel = types
       resolveRequiredDocumentPromise,
       resolveAllRequiredDocumentPromisesWithNull,
       findDocumentOfTile,
-      setUnit
+      setAppConfig
     };
   });
 

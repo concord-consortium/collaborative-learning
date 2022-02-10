@@ -9,7 +9,6 @@ import { DocumentModelType } from "../../models/document/document";
 import { DocumentDragKey, SupportPublication } from "../../models/document/document-types";
 import { LogEventName, Logger } from "../../lib/logger";
 import { NetworkDocumentsSection } from "./network-documents-section";
-import { getNavTabConfigFromStores } from "../../models/stores/stores";
 
 import "./document-tab-panel.sass";
 
@@ -71,9 +70,10 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
   }
 
   public render() {
+    const { appConfig: { navTabs } } = this.stores;
     const { documentView, tabSpec, onTabClick, isChatOpen } = this.props;
     const { tabIndex } = this.state;
-    const navTabSpec = getNavTabConfigFromStores(this.stores)?.getNavTabSpec(tabSpec.tab);
+    const navTabSpec = navTabs.getNavTabSpec(tabSpec.tab);
     return (
       <Tabs
         className={`document-tabs ${navTabSpec?.tab} ${isChatOpen ? "chat-open" : ""}`}

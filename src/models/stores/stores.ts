@@ -14,7 +14,6 @@ import { LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocumen
 import { LearningLogWorkspace, ProblemWorkspace } from "./workspace";
 import { ClipboardModel, ClipboardModelType } from "./clipboard";
 import { SelectionStoreModel, SelectionStoreModelType } from "./selection";
-import { getSetting } from "./settings";
 import { AppMode } from "./store-types";
 
 export interface IBaseStores {
@@ -44,7 +43,7 @@ export interface IStores extends IBaseStores {
   problemPath: string;
 }
 
-interface ICreateStores extends Partial<IStores> {
+export interface ICreateStores extends Partial<IStores> {
   demoName?: string;
 }
 
@@ -110,8 +109,9 @@ export const setUnitAndProblem = async (stores: IStores, unitId: string | undefi
   const unit = UnitModel.create(unitJson);
   const {investigation, problem} = unit.getProblem(problemOrdinal || stores.appConfig.defaultProblemOrdinal);
 
+  stores.appConfig.setConfigs([unit.config || {}, investigation?.config || {}, problem?.config || {}]);
   stores.unit = unit;
-  stores.documents.setUnit(stores.unit);
+  stores.documents.setAppConfig(stores.appConfig);
   if (investigation && problem) {
     stores.investigation = investigation;
     stores.problem = problem;
@@ -133,47 +133,4 @@ export const setUnitAndProblem = async (stores: IStores, unitId: string | undefi
 export function isShowingTeacherContent(stores: IStores) {
   const { ui: { showTeacherContent }, user: { isTeacher } } = stores;
   return isTeacher && showTeacherContent;
-}
-
-export function isFeatureSupported(stores: IStores, feature: string, sectionId?: string) {
-  const { unit, investigation, problem } = stores;
-  const section = sectionId && problem.getSectionById(sectionId);
-  return [unit, investigation, problem, section].reduce((prev, level) => {
-    const featureIndex = level ? level.disabled.findIndex(f => f === feature || f === `!${feature}`) : -1;
-    const isEnabledAtLevel = featureIndex >= 0 && level ? level.disabled[featureIndex][0] === "!" : true;
-    return featureIndex >= 0 ? isEnabledAtLevel : prev;
-  }, true);
-}
-
-export function getDisabledFeaturesOfTile(stores: IStores, tile: string, sectionId?: string) {
-  const { unit, investigation, problem } = stores;
-  const section = sectionId && problem.getSectionById(sectionId);
-  const disabledMap: { [feature: string]: boolean } = {};
-  [unit, investigation, problem, section]
-    .forEach((level, index) => {
-      level && level.disabled.forEach(feature => {
-        const regex = new RegExp(`(!)?(${tile}.+)`);
-        const match = regex.exec(feature);
-        if (match && match[2]) {
-          disabledMap[match[2]] = !match[1];
-        }
-      });
-    });
-  return Object.keys(disabledMap).reduce<string[]>((prev, feature) => {
-    disabledMap[feature] && prev.push(feature);
-    return prev;
-  }, []);
-}
-
-export function getNavTabConfigFromStores(stores: IStores) {
-  for (const level of [stores.unit, stores.appConfig]) {
-    if (level.navTabs) return level.navTabs;
-  }
-}
-
-export function getSettingFromStores(stores: IStores, key: string, group?: string) {
-  for (const level of [stores.problem, stores.investigation, stores.unit, stores.appConfig]) {
-    const value = level.settings && getSetting(level.settings, key, group);
-    if (value != null) return value;
-  }
 }

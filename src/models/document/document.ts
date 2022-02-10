@@ -101,8 +101,8 @@ export const DocumentModel = types
     }
   }))
   .views(self => ({
-    matchProperties(properties: string[]) {
-      return properties.every(p => {
+    matchProperties(properties?: string[]) {
+      return properties?.every(p => {
         const match = /(!)?(.*)/.exec(p);
         const property = match && match[2];
         const wantsProperty = !(match && match[1]); // not negated => has property

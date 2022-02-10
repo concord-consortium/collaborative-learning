@@ -2,8 +2,8 @@ import mockXhr from "xhr-mock";
 import { Logger, LogEventName, ILogComment } from "./logger";
 import { DocumentModel, DocumentModelType } from "../models/document/document";
 import { ProblemDocument } from "../models/document/document-types";
-import { AppConfigModel } from "../models/stores/app-config-model";
 import { InvestigationModel } from "../models/curriculum/investigation";
+import { specAppConfig } from "../models/stores/spec-app-config";
 import { IStores, createStores } from "../models/stores/stores";
 import { UserModel } from "../models/stores/user";
 import { WorkspaceModel, ProblemWorkspace, WorkspaceModelType, LearningLogWorkspace } from "../models/stores/workspace";
@@ -38,7 +38,7 @@ describe("uninitialized logger", () => {
     mockXhr.setup();
     stores = createStores({
       appMode: "authed",
-      appConfig: AppConfigModel.create({ appName: "TestLogger"}),
+      appConfig: specAppConfig({ config: { appName: "TestLogger"} }),
       user: UserModel.create({id: "0", portal: "test"})
     });
   });
@@ -79,7 +79,7 @@ describe("dev/qa/test logger with DEBUG_LOGGER false", () => {
     mockXhr.setup();
     stores = createStores({
       appMode: "test",
-      appConfig: AppConfigModel.create({ appName: "TestLogger"}),
+      appConfig: specAppConfig({ config: { appName: "TestLogger"} }),
       ui: UIModel.create({
         activeNavTab: ENavTab.kStudentWork,
         problemWorkspace: {
@@ -128,7 +128,7 @@ describe("demo logger with DEBUG_LOGGER false", () => {
     mockXhr.setup();
     stores = createStores({
       appMode: "demo",
-      appConfig: AppConfigModel.create({ appName: "TestLogger"}),
+      appConfig: specAppConfig({ config: { appName: "TestLogger"} }),
       ui: UIModel.create({
         activeNavTab: ENavTab.kStudentWork,
         problemWorkspace: {
@@ -177,7 +177,7 @@ describe("authed logger", () => {
     mockXhr.setup();
     stores = createStores({
       appMode: "authed",
-      appConfig: AppConfigModel.create({ appName: "TestLogger"}),
+      appConfig: specAppConfig({ config: { appName: "TestLogger"} }),
       user: UserModel.create({
         id: "0", type: "student", portal: "test",
         loggingRemoteEndpoint: "foo"

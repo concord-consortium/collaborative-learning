@@ -679,9 +679,9 @@ export const DocumentContentModel = types
         const addTileOptions = { rowIndex: self.rowCount };
         const contentInfo = getToolContentInfoByTool(tool);
         const documents = getParentWithTypeName(self, "Documents") as DocumentsModelType;
-        const unit = documents?.unit;
+        const appConfig = documents?.appConfig;
 
-        const newContent = contentInfo?.defaultContent({ title, url, unit });
+        const newContent = contentInfo?.defaultContent({ title, url, appConfig });
         const tileInfo = self.addTileContentInNewRow(
                               newContent,
                               { rowHeight: contentInfo?.defaultHeight, ...addTileOptions });

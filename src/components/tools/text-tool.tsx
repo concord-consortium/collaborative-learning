@@ -161,7 +161,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
   public render() {
     const { documentContent, toolTile, readOnly, scale } = this.props;
     const { value: editorValue, selectedButtons } = this.state;
-    const { unit: { placeholderText } } = this.stores;
+    const { appConfig: { placeholderText } } = this.stores;
     const editableClass = readOnly ? "read-only" : "editable";
     // Ideally this would just be 'text-tool-editor', but 'text-tool' has been
     // used here for a while now and cypress tests depend on it. Should transition

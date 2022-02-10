@@ -4,13 +4,13 @@ import React from "react";
 import { BaseComponent, IBaseProps } from "./base";
 import { DocumentModelType, DocumentTool } from "../models/document/document";
 import { IDocumentContentAddTileOptions, IDragToolCreateInfo } from "../models/document/document-content";
+import { ToolbarModelType } from "../models/stores/problem-configuration";
+import { ToolButtonModelType } from "../models/tools/tool-button";
 import { getToolContentInfoByTool, IToolContentInfo } from "../models/tools/tool-content-info";
 import { DeleteButton } from "./delete-button";
 import { IToolButtonProps, ToolButtonComponent } from "./tool-button";
 import { EditableToolApiInterfaceRefContext } from "./tools/tool-api";
 import { kDragTileCreate  } from "./tools/tool-tile";
-import { ToolbarModelType } from "../models/stores/app-config-model";
-import { ToolButtonModelType } from "../models/tools/tool-button";
 
 import "./toolbar.sass";
 
@@ -167,7 +167,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     this.removeDropRowHighlight();
 
     const toolContentInfo = getToolContentInfoByTool(tool.name);
-    const dragInfo: IDragToolCreateInfo = 
+    const dragInfo: IDragToolCreateInfo =
       { tool: tool.name as DocumentTool, title: this.getUniqueTitle(toolContentInfo) };
     e.dataTransfer.setData(kDragTileCreate, JSON.stringify(dragInfo));
   };
