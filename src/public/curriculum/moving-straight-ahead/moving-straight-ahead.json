@@ -3140,8 +3140,17 @@
                       "text": [
                         "<p><em>Situation C. More Competition</em></p>",
                         "<p>The following table represents the costs from another company, The Big Tee.</p>",
-                        "<ul><li>Compare the cost for this company to the costs for the other two companies.</li></ul>",
-                        "<p></p>"
+                        "<ul><li>Compare the cost for this company to the costs for the other two companies.</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "name": "T-shirt Costs",
+                      "columns": [
+                        {"name":"n","values":["0","3","5","8","10"]},
+                        {"name":"C","values":["34","41.5","46.5","54","59"]}
                       ]
                     }
                   },
@@ -3956,16 +3965,6 @@
                     }
                   },
                   {
-                    "id": "phnsqbwZkOkROPan",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>END INVESTIGATION 3 INTRO</p>"
-                      ]
-                    }
-                  },
-                  {
                     "id": "KiFm6w-4CQOPubnD",
                     "content": {
                       "type": "Text",
@@ -4300,28 +4299,32 @@
                         { "type": "image", "id": "fzYVfasOW1NxQozh", "url":"curriculum/moving-straight-ahead/stamps/pouch.png","x":123,"y":94.5,"width":30,"height":37 },
                         { "type": "image", "id": "Ggp6kpLxlqrj7_3c", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":79.5,"y":41.5,"width":25,"height":25 },
                         { "type": "image", "id": "W7GcA0VUIo--DgEz", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":78.5,"y":8.5,"width":25,"height":25 },
-                        { "type": "image", "id": "ah7cjcJBUWHBHJnA", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":225.5,"y":8.5,"width":25,"height":25 },
-                        { "type": "image", "id": "Ym1sXpMrY6VvZKWJ", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":225.5,"y":44.5,"width":25,"height":25 },
-                        { "type": "image", "id": "FPW70f3CAYVkb-Xt", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":263.5,"y":7.5,"width":25,"height":25 },
-                        { "type": "image", "id": "Q8IdQCo2f3z6q9y8", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":263.5,"y":44.5,"width":25,"height":25 },
-                        { "type": "image", "id": "y6RuTdRrlynSkhpg", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":299.5,"y":-0.5,"width":25,"height":25 },
-                        { "type": "image", "id": "6iNZDp4URdBBlai7", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":298.5,"y":39.5,"width":25,"height":25 },
-                        { "type": "image", "id": "USip0KKBJwQkU81e", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":335.5,"y":9.5,"width":25,"height":25 },
-                        { "type": "image", "id": "LY-ntvEI_CCvc8Sd", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":335.5,"y":42.5,"width":25,"height":25 },
+                        { "type": "image", "id": "ah7cjcJBUWHBHJnA", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":229.5,"y":12.5,"width":25,"height":25 },
+                        { "type": "image", "id": "Ym1sXpMrY6VvZKWJ", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":230.5,"y":47.5,"width":25,"height":25 },
+                        { "type": "image", "id": "FPW70f3CAYVkb-Xt", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":265.5,"y":10.5,"width":25,"height":25 },
+                        { "type": "image", "id": "Q8IdQCo2f3z6q9y8", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":265.5,"y":47.5,"width":25,"height":25 },
+                        { "type": "image", "id": "y6RuTdRrlynSkhpg", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":300.5,"y":11.5,"width":25,"height":25 },
+                        { "type": "image", "id": "6iNZDp4URdBBlai7", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":299.5,"y":46.5,"width":25,"height":25 },
+                        { "type": "image", "id": "USip0KKBJwQkU81e", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":339.5,"y":10.5,"width":25,"height":25 },
+                        { "type": "image", "id": "LY-ntvEI_CCvc8Sd", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":340.5,"y":44.5,"width":25,"height":25 },
                         { "type": "image", "id": "haD-x5b7ZuFgwFPg", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":372.5,"y":9.5,"width":25,"height":25 },
                         { "type": "image", "id": "nGk8r3HU9c01J1HP", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":373.5,"y":44.5,"width":25,"height":25 },
                         { "type": "image", "id": "O5YYJUUlKAByIaY-", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":405.5,"y":9.5,"width":25,"height":25 },
                         { "type": "image", "id": "cxJqZbIG5329XtnY", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":404.5,"y":44.5,"width":25,"height":25 },
                         { "type": "image", "id": "6qvIynGgXbWe0f6C", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":158.5,"y":84.5,"width":25,"height":25 },
                         { "type": "image", "id": "gOeumg0nDd1dM79h", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":160.5,"y":117.5,"width":25,"height":25 },
-                        { "type": "image", "id": "BAyztxCIjydI7whu", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":212.5,"y":86.5,"width":25,"height":25 },
-                        { "type": "image", "id": "dwD6yfy9S9i579n-", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":211.5,"y":116.5,"width":25,"height":25 },
+                        { "type": "image", "id": "BAyztxCIjydI7whu", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":211.5,"y":89.5,"width":25,"height":25 },
+                        { "type": "image", "id": "dwD6yfy9S9i579n-", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":214.5,"y":117.5,"width":25,"height":25 },
                         { "type": "image", "id": "Hn5FHLsJrgy83fxg", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":252.5,"y":90.5,"width":25,"height":25 },
                         { "type": "image", "id": "6aLM4WfTJyFowJ01", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":253.5,"y":119.5,"width":25,"height":25 },
                         { "type": "image", "id": "3wFSd9tErDukB3oG", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":294.5,"y":88.5,"width":25,"height":25 },
                         { "type": "image", "id": "dv5QKo3dMRDUJf_i", "url":"curriculum/moving-straight-ahead/stamps/coin.png","x":295.5,"y":116.5,"width":25,"height":25 },
                         { "type": "image", "id": "7oJ7FyNADjViWBhz", "url":"curriculum/moving-straight-ahead/stamps/equals.png","x":201.5,"y":24.5,"width":25,"height":25 },
-                        { "type": "image", "id": "ppTyHvzZGJhhSvBV", "url":"curriculum/moving-straight-ahead/stamps/equals.png","x":186.5,"y":101.5,"width":25,"height":25 }
+                        { "type": "image", "id": "ppTyHvzZGJhhSvBV", "url":"curriculum/moving-straight-ahead/stamps/equals.png","x":186.5,"y":101.5,"width":25,"height":25 },
+                        { "type": "ellipse", "id": "nik_PGSqfNRHrhSU", "x":75.5,"y":43,"rx":38,"ry":40,"stroke":"#eb0000","fill":"none","strokeWidth":2,"strokeDashArray":"" },
+                        { "type": "ellipse", "id": "lngMii-AMuMVq42p", "x":157.5,"y":41,"rx":42,"ry":41,"stroke":"#eb0000","fill":"none","strokeWidth":2,"strokeDashArray":"" },
+                        { "type": "ellipse", "id": "V3eFKPyzxaDSo2sD", "x":277.5,"y":45,"rx":57,"ry":45,"stroke":"#eb0000","fill":"none","strokeWidth":2,"strokeDashArray":"" },
+                        { "type": "ellipse", "id": "3jC6pYgyNoEaLryU", "x":387.5,"y":47,"rx":58,"ry":48,"stroke":"#eb0000","fill":"none","strokeWidth":2,"strokeDashArray":"" }
                       ]
                     }
                   },
