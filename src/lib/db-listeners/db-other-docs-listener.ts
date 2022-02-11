@@ -71,9 +71,7 @@ export class DBOtherDocumentsListener extends BaseListener {
     this.debugLogSnapshot("#handleDocumentAdded", snapshot);
     if (dbDoc) {
       this.db.createDocumentModelFromOtherDocument(dbDoc, this.documentType)
-        .then(this.documentType === PersonalDocument
-                ? this.db.listeners.monitorPersonalDocument
-                : this.db.listeners.monitorLearningLogDocument)
+        .then(this.db.listeners.monitorOtherDocumentMetadata)
         .then(doc => {
           if (doc.uid === user.id) {
             !doc.getProperty("isDeleted") && documents.resolveRequiredDocumentPromise(doc);
