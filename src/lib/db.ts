@@ -667,6 +667,7 @@ export class DB {
   public clear(level: DBClearLevel) {
     return new Promise<void>((resolve, reject) => {
       const {user} = this.stores;
+      let qaUser;
       const clearPath = (path?: string) => {
         this.firebase.ref(path).remove().then(resolve).catch(reject);
       };
@@ -674,10 +675,13 @@ export class DB {
       if (this.stores.appMode !== "qa") {
         return reject("db#clear is only available in qa mode");
       }
-
+      
       switch (level) {
         case "all":
-          clearPath();
+          qaUser = this.firebase.getQAUserRoot();
+          if (qaUser) {
+            qaUser.remove().then(resolve).catch(reject);
+          }
           break;
         case "class":
           clearPath(this.firebase.getClassPath(user));
