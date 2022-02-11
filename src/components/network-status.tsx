@@ -2,7 +2,6 @@ import classNames from "classnames";
 import firebase from "firebase/app";
 import { observer } from "mobx-react";
 import React, { useState } from "react";
-import { LogEventName, Logger } from "../lib/logger";
 import { UserModelType } from "../models/stores/user";
 import { useErrorAlert } from "./utilities/use-error-alert";
 import "./network-status.scss";
@@ -50,9 +49,8 @@ export const NetworkStatus = observer(({ user }: IProps) => {
         showAlert();
         setIsShowingAlert(true);
         setTimer(0);
-        // since the Logger currently has no retry this won't be logged on a general network
-        // disconnect but might be helpful to know if only Firebase disconnected
-        Logger.log(LogEventName.INTERNAL_NETWORK_STATUS_ALERTED);
+        // increment our internal occurrence count
+        user.incrementNetworkStatusAlertCount();
       }
     }, 1000 * alertDelay));
   }
