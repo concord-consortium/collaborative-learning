@@ -24,14 +24,14 @@ describe("DBListeners", () => {
     db.disconnect();
   });
 
-  it("warns when monitoring the same document multiple times", () => {
+  it("no longer warns when monitoring the same document multiple times", () => {
     const listeners = new DBListeners(db);
     expect(listeners).toBeDefined();
 
     listeners.monitorDocument(document, Monitor.Local);
     jestSpyConsole("warn", mockConsole => {
       listeners.monitorDocument(document, Monitor.Local);
-      expect(mockConsole).toHaveBeenCalledTimes(1);
+      expect(mockConsole).toHaveBeenCalledTimes(0);
     });
   });
 });

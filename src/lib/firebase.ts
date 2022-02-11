@@ -1,5 +1,8 @@
 import firebase from "firebase/app";
-import { OtherDocumentType, PersonalDocument } from "../models/document/document-types";
+import {
+  LearningLogDocument, LearningLogPublication, OtherDocumentType, PersonalDocument,
+  PersonalPublication, PlanningDocument, ProblemDocument, ProblemPublication
+} from "../models/document/document-types";
 import { AudienceModelType, SectionTarget } from "../models/stores/supports";
 import { UserModelType } from "../models/stores/user";
 import { DB } from "./db";
@@ -106,13 +109,13 @@ export class Firebase {
     return `${this.getClassPath(user)}/users/${userId || user.id}`;
   }
 
-  // Published problem documents and learning logs metadata
-  public getClassPublicationsPath(user: UserModelType) {
+  // Published learning logs metadata
+  public getLearningLogPublicationsPath(user: UserModelType) {
     return `${this.getClassPath(user)}/publications`;
   }
 
   // Published personal documents metadata
-  public getClassPersonalPublicationsPath(user: UserModelType) {
+  public getPersonalPublicationsPath(user: UserModelType) {
     return `${this.getClassPath(user)}/personalPublications`;
   }
 
@@ -120,6 +123,23 @@ export class Firebase {
   public getUserDocumentPath(user: UserModelType, documentKey?: string, userId?: string) {
     const suffix = documentKey ? `/${documentKey}` : "";
     return `${this.getUserPath(user, userId)}/documents${suffix}`;
+  }
+
+  // convenience function which returns all of the relevant paths for a given document
+  public getUserDocumentPaths(user: UserModelType, documentType: string, documentKey: string, userId?: string) {
+    const content = this.getUserDocumentPath(user, documentKey, userId);
+    const metadata = this.getUserDocumentMetadataPath(user, documentKey, userId);
+    const typedMetadataMap: Record<string, () => string> = {
+      [ProblemDocument]: () => this.getProblemDocumentPath(user, documentKey, userId),
+      [PlanningDocument]: () => this.getPlanningDocumentPath(user, documentKey, userId),
+      [PersonalDocument]: () => this.getOtherDocumentPath(user, PersonalDocument, documentKey),
+      [LearningLogDocument]: () => this.getOtherDocumentPath(user, LearningLogDocument, documentKey),
+      [ProblemPublication]: () => `${this.getProblemPublicationsPath(user)}/${documentKey}`,
+      [PersonalPublication]: () => `${this.getPersonalPublicationsPath(user)}/${documentKey}`,
+      [LearningLogPublication]: () => `${this.getLearningLogPublicationsPath(user)}/${documentKey}`
+    };
+    const typedMetadata = typedMetadataMap[documentType]?.() || "";
+    return { content, metadata, typedMetadata };
   }
 
   public getUserDocumentCommentsPath(user: UserModelType, documentKey?: string, tileId?: string, commentKey?: string) {
@@ -222,7 +242,7 @@ export class Firebase {
   }
 
   // Published section [deprecated] and problem document metadata
-  public getPublicationsPath(user: UserModelType) {
+  public getProblemPublicationsPath(user: UserModelType) {
     return `${this.getOfferingPath(user)}/publications`;
   }
 

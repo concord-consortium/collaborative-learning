@@ -220,7 +220,7 @@ export const DocumentModel = types
     },
 
     incChangeCount() {
-      self.changeCount += 1;
+      return ++self.changeCount;
     },
 
     setGroupId(groupId?: string) {

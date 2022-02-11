@@ -441,7 +441,7 @@ export class DB {
     }
     return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
       this.createDocument({ type: ProblemPublication, content }).then(({document, metadata}) => {
-        const publicationRef = this.firebase.ref(this.firebase.getPublicationsPath(user)).push();
+        const publicationRef = this.firebase.ref(this.firebase.getProblemPublicationsPath(user)).push();
         const userGroup = groups.groupForUser(user.id)!;
         const groupUserConnections: DBGroupUserConnections = userGroup && userGroup.users
           .filter(groupUser => groupUser.id !== user.id)
@@ -481,8 +481,8 @@ export class DB {
     return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
       this.createDocument({ type: publicationType, content }).then(({document, metadata}) => {
         const publicationPath = publicationType === "personalPublication"
-                                ? this.firebase.getClassPersonalPublicationsPath(user)
-                                : this.firebase.getClassPublicationsPath(user);
+                                ? this.firebase.getPersonalPublicationsPath(user)
+                                : this.firebase.getLearningLogPublicationsPath(user);
         const publicationRef = this.firebase.ref(publicationPath).push();
         const publication: DBOtherPublication = {
           version: "1.0",
