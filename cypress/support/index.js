@@ -33,6 +33,6 @@ Cypress.on('uncaught:exception', (err, runnable) => {
     return false;
 });
 
-// after(function(){
-//   cy.clearQAData('all');
-// });
+after(function(){
+  cy.clearQAData('all');
+});
