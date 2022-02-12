@@ -2,6 +2,7 @@ import { throttle } from "lodash";
 import { reaction } from "mobx";
 import { onSnapshot } from "mobx-state-tree";
 import { useEffect, useMemo } from "react";
+import { DEBUG_SAVE } from "../lib/debug";
 import { Firebase } from "../lib/firebase";
 import { DocumentModelType } from "../models/document/document";
 import {
@@ -28,43 +29,52 @@ export function useDocumentSyncToFirebase(
   const throttledContentUpdate = useMemo(() => throttle((changeCount: number, content: string) => {
     firebase.ref(contentPath).update({ changeCount, content })
       .then(() => {
-        // console.log("Successful save", "document:", key, "changeCount:", changeCount);
+        DEBUG_SAVE &&
+          console.log("DEBUG: Saved", type, "document", key, "changeCount:", changeCount);
       })
       .catch(() => {
+        // TODO: note that we failed to save and retry if/when/until connection improves
         user.setIsFirebaseConnected(false);
         console.warn("Failed save!", "document:", key, "changeCount:", changeCount);
       });
-  }, 2000, { trailing: true }), [contentPath, firebase, key, user]);
+  }, 2000, { trailing: true }), [contentPath, firebase, key, type, user]);
 
   useEffect(() => {
-    console.log(`useDocumentSyncToFirebase installing listeners for ${type} document ${key} (${readOnly})`);
+    DEBUG_SAVE && !readOnly &&
+      console.log("DEBUG: Installing listeners for", type, "document", key);
     const visibilityListenerDisposer = !readOnly && (type === ProblemDocument)
             ? reaction(() => document.visibility, visibility => {
-                console.log(`Updating document visibility for ${type} document ${key}:`, visibility);
+                DEBUG_SAVE &&
+                  console.log(`DEBUG: Updating document visibility for ${type} document ${key}:`, visibility);
+                // TODO: handle errors and retry if/when/until connection improves
                 firebase.ref(typedMetadata).update({ visibility });
               })
             : undefined;
     const titleListenerDisposer = !readOnly && [PersonalDocument, LearningLogDocument].includes(type)
             ? reaction(() => document.title, title => {
-                console.log(`Updating document title for ${type} document ${key}:`, title);
+                DEBUG_SAVE && console.log(`DEBUG: Updating document title for ${type} document ${key}:`, title);
+                // TODO: handle errors and retry if/when/until connection improves
                 firebase.ref(typedMetadata).update({ title });
               })
             : undefined;
     const propsListenerDisposer = !readOnly && [PersonalDocument, LearningLogDocument].includes(type)
             ? onSnapshot(document.properties, properties => {
-                console.log(`Updating document properties for ${type} document ${key}:`, JSON.stringify(properties));
+                DEBUG_SAVE && console.log(`DEBUG: Updating document properties for ${type} document ${key}:`,
+                                          JSON.stringify(properties));
+                // TODO: handle errors and retry if/when/until connection improves
                 firebase.ref(typedMetadata).update({ properties });
               })
             : undefined;
     const contentListenerDisposer = !readOnly && document.content && !isPublishedType(type)
             ? onSnapshot(document.content, contentSnapshot => {
                 const changeCount = document.incChangeCount();
-                console.log(`Updating document content for ${type} document ${key}:`, changeCount);
+                DEBUG_SAVE && console.log(`DEBUG: Updating document content for ${type} document ${key}:`, changeCount);
                 contentSnapshot && throttledContentUpdate(changeCount, JSON.stringify(contentSnapshot));
               })
             : undefined;
     return () => {
-      console.log(`useDocumentSyncToFirebase removing listeners for ${type} document ${key} (${readOnly})`);
+      DEBUG_SAVE && !readOnly &&
+        console.log(`DEBUG: Removing listeners for ${type} document ${key}`);
       visibilityListenerDisposer?.();
       titleListenerDisposer?.();
       propsListenerDisposer?.();

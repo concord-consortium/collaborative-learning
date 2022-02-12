@@ -9,3 +9,4 @@ const debugContains = (key: string) => debug.indexOf(key) !== -1;
 export const DEBUG_LISTENERS = debugContains("listeners");
 export const DEBUG_CANVAS = debugContains("canvas");
 export const DEBUG_LOGGER = debugContains("logger");
+export const DEBUG_SAVE = debugContains("save");
