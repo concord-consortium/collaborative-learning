@@ -1,7 +1,6 @@
-import { throttle } from "lodash";
-import { reaction } from "mobx";
-import { onSnapshot } from "mobx-state-tree";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
+import { useSyncMstNodeToFirebase } from "./use-sync-mst-node-to-firebase";
+import { useSyncMstPropToFirebase } from "./use-sync-mst-prop-to-firebase";
 import { DEBUG_SAVE } from "../lib/debug";
 import { Firebase } from "../lib/firebase";
 import { DocumentModelType } from "../models/document/document";
@@ -9,6 +8,11 @@ import {
   isPublishedType, LearningLogDocument, PersonalDocument, ProblemDocument
 } from "../models/document/document-types";
 import { UserModelType } from "../models/stores/user";
+
+function debugLog(...args: any[]) {
+  // eslint-disable-next-line no-console
+  DEBUG_SAVE && console.log(...args);
+}
 
 /*
  * useDocumentSyncToFirebase
@@ -26,59 +30,70 @@ export function useDocumentSyncToFirebase(
   const { content: contentPath, typedMetadata } = firebase.getUserDocumentPaths(user, type, key, uid);
   (user.id !== uid) && console.warn("useDocumentSyncToFirebase monitoring another user's document?!?");
 
-  const throttledContentUpdate = useMemo(() => throttle((changeCount: number, content: string) => {
-    firebase.ref(contentPath).update({ changeCount, content })
-      .then(() => {
-        DEBUG_SAVE &&
-          console.log("DEBUG: Saved", type, "document", key, "changeCount:", changeCount);
-      })
-      .catch(() => {
-        // TODO: note that we failed to save and retry if/when/until connection improves
-        user.setIsFirebaseConnected(false);
-        console.warn("Failed save!", "document:", key, "changeCount:", changeCount);
-      });
-  }, 2000, { trailing: true }), [contentPath, firebase, key, type, user]);
+  // sync visibility (public/private) for problem documents
+  useSyncMstPropToFirebase<typeof document.visibility>({
+    firebase, model: document, prop: "visibility", path: typedMetadata,
+    enabled: !readOnly && (type === ProblemDocument),
+    options: {
+      onSuccess: (data, visibility) => {
+        debugLog(`DEBUG: Updated document visibility for ${type} document ${key}:`, visibility);
+      },
+      onError: (err, visibility) => {
+        console.warn(`ERROR: Failed to update document visibility for ${type} document ${key}:`, visibility);
+      }
+    }
+  });
+
+  // sync title for personal and learning log documents
+  useSyncMstPropToFirebase<typeof document.title>({
+    firebase, model: document, prop: "title", path: typedMetadata,
+    enabled: !readOnly && [PersonalDocument, LearningLogDocument].includes(type),
+    options: {
+      onSuccess: (data, title) => {
+        debugLog(`DEBUG: Updated document title for ${type} document ${key}:`, title);
+      },
+      onError: (err, title) => {
+        console.warn(`ERROR: Failed to update document title for ${type} document ${key}:`, title);
+      }
+    }
+  });
+
+  // sync properties for personal and learning log documents
+  useSyncMstNodeToFirebase({
+    firebase, model: document.properties, path: typedMetadata,
+    enabled: !readOnly && [PersonalDocument, LearningLogDocument].includes(type),
+    options: {
+      onSuccess: (data, properties) => {
+        debugLog(`DEBUG: Updated document properties for ${type} document ${key}:`, JSON.stringify(properties));
+      },
+      onError: (err, properties) => {
+        console.warn(`ERROR: Failed to update document properties for ${type} document ${key}:`,
+                    JSON.stringify(properties));
+      }
+    }
+  });
+
+  // sync content for editable document types
+  useSyncMstNodeToFirebase({
+    firebase, model: document.content, path: contentPath,
+    enabled: !readOnly && document.content && !isPublishedType(type),
+    transform: snapshot => ({ changeCount: document.incChangeCount(), content: JSON.stringify(snapshot) }),
+    options: {
+      onSuccess: (data, snapshot) => {
+        debugLog(`DEBUG: Updated document content for ${type} document ${key}:`, document.changeCount);
+      },
+      onError: (err, properties) => {
+        console.warn(`ERROR: Failed to update document content for ${type} document ${key}:`, document.changeCount);
+      }
+    }
+  });
 
   useEffect(() => {
     DEBUG_SAVE && !readOnly &&
-      console.log("DEBUG: Installing listeners for", type, "document", key);
-    const visibilityListenerDisposer = !readOnly && (type === ProblemDocument)
-            ? reaction(() => document.visibility, visibility => {
-                DEBUG_SAVE &&
-                  console.log(`DEBUG: Updating document visibility for ${type} document ${key}:`, visibility);
-                // TODO: handle errors and retry if/when/until connection improves
-                firebase.ref(typedMetadata).update({ visibility });
-              })
-            : undefined;
-    const titleListenerDisposer = !readOnly && [PersonalDocument, LearningLogDocument].includes(type)
-            ? reaction(() => document.title, title => {
-                DEBUG_SAVE && console.log(`DEBUG: Updating document title for ${type} document ${key}:`, title);
-                // TODO: handle errors and retry if/when/until connection improves
-                firebase.ref(typedMetadata).update({ title });
-              })
-            : undefined;
-    const propsListenerDisposer = !readOnly && [PersonalDocument, LearningLogDocument].includes(type)
-            ? onSnapshot(document.properties, properties => {
-                DEBUG_SAVE && console.log(`DEBUG: Updating document properties for ${type} document ${key}:`,
-                                          JSON.stringify(properties));
-                // TODO: handle errors and retry if/when/until connection improves
-                firebase.ref(typedMetadata).update({ properties });
-              })
-            : undefined;
-    const contentListenerDisposer = !readOnly && document.content && !isPublishedType(type)
-            ? onSnapshot(document.content, contentSnapshot => {
-                const changeCount = document.incChangeCount();
-                DEBUG_SAVE && console.log(`DEBUG: Updating document content for ${type} document ${key}:`, changeCount);
-                contentSnapshot && throttledContentUpdate(changeCount, JSON.stringify(contentSnapshot));
-              })
-            : undefined;
+      debugLog("DEBUG: monitoring", type, "document", key);
     return () => {
       DEBUG_SAVE && !readOnly &&
-        console.log(`DEBUG: Removing listeners for ${type} document ${key}`);
-      visibilityListenerDisposer?.();
-      titleListenerDisposer?.();
-      propsListenerDisposer?.();
-      contentListenerDisposer?.();
+        debugLog(`DEBUG: unmonitoring ${type} document ${key}`);
     };
-  }, [document, firebase, key, readOnly, throttledContentUpdate, type, typedMetadata, user]);
+  }, [document, firebase, key, readOnly, type, user]);
 }
