@@ -386,13 +386,13 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     const dragSrcContentId = getContentIdFromNode(model);
     if (!dragSrcContentId) return;
 
+    // dragging a tile selects it first
+    ui.setSelectedTile(model, { append: hasSelectionModifier(e) });
+
     const dragTiles: IDragTiles = {
       sourceDocId: docId,
       items: this.getDragTileItems(dragSrcContentId, ui.selectedTileIds)
     };
-
-    // dragging a tile selects it first
-    ui.setSelectedTile(model, { append: hasSelectionModifier(e) });
 
     // create a sorted array of selected tiles
     dragTiles.items.sort((a, b) => {
