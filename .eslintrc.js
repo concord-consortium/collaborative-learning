@@ -82,6 +82,9 @@ module.exports = {
         files: ["**/*.test.*"],
         rules: {
           "@typescript-eslint/no-non-null-assertion": "off",
+          // require() can be useful in mocking
+          "@typescript-eslint/no-require-imports": "off",
+          "@typescript-eslint/no-var-requires": "off",
           // var is useful in mocking due to its hoisting semantics
           "no-var": "off"
         }

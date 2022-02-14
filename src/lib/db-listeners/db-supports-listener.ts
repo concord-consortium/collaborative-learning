@@ -109,7 +109,7 @@ export class DBSupportsListener extends BaseListener {
               // teachers sync their support document properties to Firebase to track isDeleted
               const {audience, sectionTarget, key} = teacherSupport;
               const path = this.db.firebase.getSupportsPath(user, audience, sectionTarget, key);
-              this.db.listeners.syncDocumentProperties(document, "firebase", path);
+              this.db.listeners.syncSupportDocumentProperties(document, "firebase", path);
             }
           }
         }
@@ -160,7 +160,7 @@ export class DBSupportsListener extends BaseListener {
           const teacherSupport = support as TeacherSupportModelType;
           if (teacherSupport.uid === user.id) {
             // teachers sync their support document properties to Firebase to track isDeleted
-            this.db.listeners.syncDocumentProperties(document, "firestore");
+            this.db.listeners.syncSupportDocumentProperties(document, "firestore");
           }
         }
       }

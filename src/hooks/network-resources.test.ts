@@ -100,11 +100,10 @@ describe("Network resources hooks", () => {
           }
         });
       });
-      jestSpyConsole("warn", async (mockConsoleFn, mockRestore) => {
-        await renderHook(() => useNetworkResources());
-        expect(mockConsoleFn).toHaveBeenCalledTimes(2);
-        mockRestore();
-      }, { asyncRestore: true });
+      jestSpyConsole("warn", async spy => {
+        const { waitFor } = renderHook(() => useNetworkResources());
+        await waitFor(() => expect(spy).toHaveBeenCalledTimes(2));
+      });
       expect(mockGetNetworkResources).toHaveBeenCalled();
     });
   });

@@ -1,7 +1,6 @@
 import firebase from "firebase/app";
-import { throttle } from "lodash";
-import { observable, makeObservable } from "mobx";
-import { getSnapshot, IDisposer, onPatch, onSnapshot } from "mobx-state-tree";
+import { makeObservable, observable, runInAction } from "mobx";
+import { onSnapshot } from "mobx-state-tree";
 
 import { DB, Monitor } from "../db";
 import { DBLatestGroupIdListener } from "./db-latest-group-id-listener";
@@ -10,39 +9,18 @@ import { DBOtherDocumentsListener } from "./db-other-docs-listener";
 import { DBProblemDocumentsListener } from "./db-problem-documents-listener";
 import { DBPublicationsListener } from "./db-publications-listener";
 import { DocumentModelType } from "../../models/document/document";
-import { LearningLogDocument, OtherDocumentType, PersonalDocument } from "../../models/document/document-types";
-import { DBDocument, DatabaseType } from "../db-types";
+import { LearningLogDocument, PersonalDocument } from "../../models/document/document-types";
+import { DatabaseType, DBDocument } from "../db-types";
 import { DBSupportsListener } from "./db-supports-listener";
 import { DBCommentsListener } from "./db-comments-listener";
 import { DBStarsListener } from "./db-stars-listener";
 import { BaseListener } from "./base-listener";
 
-export interface ModelListeners {
-  [key /* unique Key */: string]: {
-    ref?: firebase.database.Reference;
-    modelDisposer?: IDisposer;
-  } | undefined;
-}
-
-export interface UserProblemDocumentListeners {
-  [key /* sectionId */: string]: {
-    [key /* userId */: string]: {
-      problemDocsRef?: firebase.database.Reference;
-      docContentRef?: firebase.database.Reference;
-    };
-  };
-}
-
-export interface DocumentModelDisposers {
-  [key /* sectionId */: string]: IDisposer;
-}
-
 export class DBListeners extends BaseListener {
   @observable public isListening = false;
   private db: DB;
 
-  private modelListeners: ModelListeners = {};
-  private documentModelDisposers: DocumentModelDisposers = {};
+  private firebaseUnlisteners: Record<string, () => void> = {};
 
   private latestGroupIdListener: DBLatestGroupIdListener;
   private groupsListener: DBGroupsListener;
@@ -87,14 +65,13 @@ export class DBListeners extends BaseListener {
       this.starsListener.start()
     ]);
 
-    this.isListening = true;
+    runInAction(() => this.isListening = true);
   }
 
   public stop() {
-    this.isListening = false;
+    runInAction(() => this.isListening = false);
 
-    this.stopModelListeners();
-    this.callDocumentModelDisposers();
+    this.stopFirebaseListeners();
 
     this.starsListener.stop();
     this.commentsListener.stop();
@@ -107,86 +84,36 @@ export class DBListeners extends BaseListener {
     this.latestGroupIdListener.stop();
   }
 
-  public getOrCreateModelListener(uniqueKeyForModel: string) {
-    return this.modelListeners[uniqueKeyForModel] || (this.modelListeners[uniqueKeyForModel] = {});
+  private stopFirebaseListeners() {
+    Object.values(this.firebaseUnlisteners).forEach(unlistener => unlistener?.());
   }
 
-  public monitorDocumentVisibility = (document: DocumentModelType) => {
-    const { user } = this.db.stores;
-    const updateRef = this.db.firebase.ref(this.db.firebase.getProblemDocumentPath(user, document.key));
-    const disposer = (onSnapshot(document, (newDocument) => {
-      updateRef.update({
-        visibility: newDocument.visibility
-      });
-    }));
-    this.documentModelDisposers[document.key] = disposer;
-  };
-
-  public monitorOtherDocument = (document: DocumentModelType, type: OtherDocumentType) => {
-    const { user } = this.db.stores;
-    const { key } = document;
-
-    const listenerKey = type === PersonalDocument
-                          ? `personalDocument:${key}`
-                          : `learningLogWorkspace:${key}`;
-    const listener = this.getOrCreateModelListener(listenerKey);
-    if (listener.modelDisposer) {
-      listener.modelDisposer();
-    }
-
-    const updatePath = type === PersonalDocument
-                        ? this.db.firebase.getUserPersonalDocPath(user, key)
-                        : this.db.firebase.getLearningLogPath(user, key);
-    const updateRef = this.db.firebase.ref(updatePath);
-    listener.modelDisposer = (onSnapshot(document, (newDocument) => {
-      updateRef.update({
-        title: newDocument.title,
-        properties: newDocument.properties
-        // TODO: for future ordering story add original to model and update here
-      });
-    }));
-
-    return document;
-  };
-
-  public monitorPersonalDocument = (document: DocumentModelType) => {
-    return this.monitorOtherDocument(document, PersonalDocument);
-  };
-
-  public monitorLearningLogDocument = (document: DocumentModelType) => {
-    return this.monitorOtherDocument(document, LearningLogDocument);
-  };
-
   public monitorDocument = (document: DocumentModelType, monitor: Monitor) => {
-    this.debugLog("#monitorDocument", `document: ${document.key} monitor: ${monitor}`);
+    this.debugLog("#monitorDocument", `document: ${document.key} type: ${document.type} monitor: ${monitor}`);
     this.monitorDocumentRef(document, monitor);
-    this.monitorDocumentModel(document, monitor);
   };
 
   public unmonitorDocument = (document: DocumentModelType, monitor: Monitor) => {
-    this.debugLog("#unmonitorDocument", `document: ${document.key} monitor: ${monitor}`);
+    this.debugLog("#unmonitorDocument", `document: ${document.key} type: ${document.type} monitor: ${monitor}`);
     this.unmonitorDocumentRef(document);
-    this.unmonitorDocumentModel(document);
   };
 
-  public syncDocumentProperties = (document: DocumentModelType, dbType: DatabaseType, path?: string) => {
+  // sync local support document properties to firebase (teachers only)
+  // TODO: move this to client-side hook as was done with other document monitoring
+  public syncSupportDocumentProperties = (document: DocumentModelType, dbType: DatabaseType, path?: string) => {
     const { user } = this.db.stores;
-    const { key, properties } = document;
+    const { key } = document;
 
     if (dbType === "firebase") {
-      const updatePath = path || this.db.firebase.getUserDocumentPath(user, key, document.uid);
+      const updatePath = path || this.db.firebase.getUserDocumentMetadataPath(user, key, document.uid);
       const updateRef = this.db.firebase.ref(updatePath);
       // synchronize document property changes to firebase
-      onSnapshot(properties, newProperties => {
-        updateRef.update({ properties: newProperties });
-      });
+      onSnapshot(document.properties, properties => updateRef.update({ properties }));
     }
     else if (dbType === "firestore") {
       const docRef = this.db.firestore.getMulticlassSupportDocumentRef(key);
       // synchronize document property changes to firestore
-      onSnapshot(properties, newProperties => {
-        docRef.update({ properties: newProperties });
-      });
+      onSnapshot(document.properties, properties => docRef.update({ properties }));
     }
   };
 
@@ -196,113 +123,32 @@ export class DBListeners extends BaseListener {
     const documentPath = this.db.firebase.getUserDocumentPath(user, documentKey, document.uid);
     const documentRef = this.db.firebase.ref(documentPath);
 
-    if (monitor === Monitor.None) {
+    if (monitor !== Monitor.Remote) {
       return;
     }
 
-    const docListener = this.db.listeners.getOrCreateModelListener(`document:${documentKey}`);
-    if (docListener.ref) {
-      docListener.ref.off("value");
-    }
-    docListener.ref = documentRef;
-
-    // for local documents, sync local document => firebase
-    if (monitor === Monitor.Local) {
-      const documentModel = documents.getDocument(documentKey);
-      if (documentModel) {
-        this.monitorDocumentModel(documentModel, monitor);
+    const snapshotHandler = (snapshot: firebase.database.DataSnapshot) => {
+      if (snapshot?.val()) {
+        const updatedDoc: DBDocument = snapshot.val();
+        const updatedContent = this.db.parseDocumentContent(updatedDoc);
+        const documentModel = documents.getDocument(documentKey);
+        documentModel?.setContent(updatedContent || {});
       }
-    }
-    // for remote documents, sync firebase => local document
-    else if (monitor === Monitor.Remote) {
-      documentRef.on("value", snapshot => {
-        if (snapshot?.val()) {
-          const updatedDoc: DBDocument = snapshot.val();
-          const updatedContent = this.db.parseDocumentContent(updatedDoc);
-          const documentModel = documents.getDocument(documentKey);
-          if (documentModel) {
-            documentModel.setContent(updatedContent || {});
-          }
-        }
-      });
-    }
+    };
+
+    // remove any previous listener
+    this.firebaseUnlisteners[documentPath]?.();
+    // install the new listener
+    documentRef.on("value", snapshotHandler);
+    // register the cleanup function
+    this.firebaseUnlisteners[documentPath] = () => documentRef.off("value", snapshotHandler);
   };
 
   private unmonitorDocumentRef = (document: DocumentModelType) => {
-    const docListener = this.modelListeners[`document:${document.key}`];
-    if (docListener && docListener.ref) {
-      docListener.ref.off("value");
-    }
-  };
-
-  private throttledSaveDocument = throttle((document: DocumentModelType) => {
     const { user } = this.db.stores;
-    const { key, changeCount, content } = document;
-    if (content) {
-      const updatePath = this.db.firebase.getUserDocumentPath(user, key, document.uid);
-      this.db.firebase.ref(updatePath)
-        .update({ changeCount, content: JSON.stringify(getSnapshot(content)) })
-        .then(() => {
-          // console.log("Successful save", "document:", key, "changeCount:", changeCount);
-        })
-        .catch(() => {
-          user.setIsFirebaseConnected(false);
-          console.warn("Failed save!", "document:", key, "changeCount:", changeCount);
-        });
-    }
-    // two-second throttle on the trailing edge so that with continued changes we save
-    // at least and at most once every two seconds
-  }, 2000, { trailing: true });
-
-  private monitorDocumentModel = (document: DocumentModelType, monitor: Monitor) => {
-    // skip if not monitoring local changes
-    if (monitor !== Monitor.Local) {
-      return;
-    }
-
-    const { type, key, content } = document;
-
-    const docListener = this.db.listeners.getOrCreateModelListener(`document:${key}`);
-    if (docListener.modelDisposer) {
-      console.warn("Warning: monitorDocumentModel is monitoring a document that was already being monitored!",
-                    "type:", type, "key:", key, "contentId:", content?.contentId);
-      docListener.modelDisposer();
-      docListener.modelDisposer = undefined;
-    }
-
-    if (content) {
-      docListener.modelDisposer = onPatch(content, (patch) => {
-        document.incChangeCount();
-        this.throttledSaveDocument(document);
-      });
-    }
+    const documentPath = this.db.firebase.getUserDocumentPath(user, document.key, document.uid);
+    this.firebaseUnlisteners[documentPath]?.();
+    if (this.firebaseUnlisteners[documentPath]) delete this.firebaseUnlisteners[documentPath];
   };
 
-  private unmonitorDocumentModel = (document: DocumentModelType) => {
-    // This is currently only called for unmonitoring remote documents as a result of group changes, but
-    // if it were to be called for a user's own document the result would be not saving the user's work.
-    const docListener = this.modelListeners[`document:${document.key}`];
-    docListener?.modelDisposer?.();
-  };
-
-  private stopModelListeners() {
-    Object.keys(this.modelListeners).forEach((docKey) => {
-      const listeners = this.modelListeners[docKey];
-      if (listeners) {
-        if (listeners.modelDisposer) {
-          listeners.modelDisposer();
-        }
-
-        if (listeners.ref) {
-          listeners.ref.off();
-        }
-      }
-    });
-  }
-
-  private callDocumentModelDisposers() {
-    Object.keys(this.documentModelDisposers).forEach((sectionId) => {
-      this.documentModelDisposers[sectionId]();
-    });
-  }
 }

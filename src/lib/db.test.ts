@@ -223,17 +223,25 @@ describe("db", () => {
   it("logs errors when asked to open default documents without required document promises", async () => {
     await db.connect({appMode: "test", stores, dontStartListeners: true});
 
-    jestSpyConsole("error", async (mockConsole, mockRestore) => {
+    await jestSpyConsole("error", async spy => {
       await db.guaranteeOpenDefaultDocument(ProblemDocument);
-      expect(mockConsole).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    await jestSpyConsole("error", async spy => {
       await db.guaranteeOpenDefaultDocument(PersonalDocument);
-      expect(mockConsole).toHaveBeenCalledTimes(2);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    await jestSpyConsole("error", async spy => {
       await db.guaranteePlanningDocument([]);
-      expect(mockConsole).toHaveBeenCalledTimes(3);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    await jestSpyConsole("error", async spy => {
       await db.guaranteeLearningLog();
-      expect(mockConsole).toHaveBeenCalledTimes(4);
-      mockRestore();
-    }, { asyncRestore: true });
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
   });
 
 });
