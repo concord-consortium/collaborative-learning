@@ -22,19 +22,19 @@ interface IProps<T> {
   transform?: (snapshot: SnapshotOut<T>) => any;
 }
 export function useSyncMstNodeToFirebase<T extends IAnyStateTreeNode>({
-  firebase, model, path, enabled = true, options, throttle = 1000, transform
+  firebase, model, path, enabled = true, options: clientOptions, throttle = 1000, transform
 }: IProps<T>) {
 
-  const finalOptions: Omit<UseMutationOptions<unknown, unknown, SnapshotOut<T>>, 'mutationFn'> = {
+  const options: Omit<UseMutationOptions<unknown, unknown, SnapshotOut<T>>, 'mutationFn'> = {
     // default is to retry with linear back-off to a maximum
     retry: true,
     retryDelay: (attempt) => Math.min(attempt * 5, 30),
     // but clients may override the defaults
-    ...options
+    ...clientOptions
   };
   const mutation = useMutation((snapshot: SnapshotOut<T>) => {
     return firebase.ref(path).update(transform?.(snapshot) ?? snapshot);
-  }, finalOptions);
+  }, options);
   const throttledMutate = useMemo(() => _throttle(mutation.mutate, throttle), [mutation.mutate, throttle]);
 
   useEffect(() => {
