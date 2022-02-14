@@ -4271,7 +4271,9 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>In this Problem, students develop symbolic strategies for solving equations of the form <em>px + q = r</em> and <em>p(x + q) = r</em>, where <em>p</em>, <em>q</em>, and <em>r</em> are specific rational numbers. Students find the solutions to these linear equations using the properties of equality. Students compare this method with other methods they have used for solving equations. Students may mention finding solutions using tables and graphs.Students also continue to solve word problems leading to inequalities of the form <em>px + q &gt; r</em> or <em>px + q &lt; r</em>, where <em>p</em>, <em>q</em>, and <em>r</em> are specific rational numbers. </p>"
+                        "<h3>Problem Overview</h3>",
+                        "<p>In this Problem, students develop symbolic strategies for solving equations of the form <em>px + q = r</em> and <em>p(x + q) = r</em>, where <em>p</em>, <em>q</em>, and <em>r</em> are specific rational numbers. Students find the solutions to these linear equations using the properties of equality. Students compare this method with other methods they have used for solving equations. Students may mention finding solutions using tables and graphs.",
+                        "Students also continue to solve word problems leading to inequalities of the form <em>px + q &gt; r</em> or <em>px + q &lt; r</em>, where <em>p</em>, <em>q</em>, and <em>r</em> are specific rational numbers. </p>"
                       ]
                     }
                   },
@@ -4283,10 +4285,22 @@
                     }
                   },
                   {
+                    "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
+                        "<p>NWDYK</p>",
+                        "<p>Describe the strategies you can use to solve linear equations using the properties of operations and equality.  </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Emerging Mathematical Ideas</h3>",
                         "<p>Extend and apply strategies for solving equations algebraically to equations with integer, fractional, and decimal values (coefficients and constants).</p>",
                         "<p>Find the solutions to linear equations using symbolic methods (properties of operations and equality) including:</p>",
                         "<ul><li>identifying and applying needed operations to both sides (such as adding 10 to both sides or dividing both sides by 2.5) in order to keep the expressions on each side of the equation equal,</li><li>identifying when to apply the Distributive Property as needed to reach a solution efficiently (factored or expanded),</li><li>applying order of operations appropriately as needed to simplify equations, and <li>understanding the goal is to isolate the variable on one side of the equation.</li></ul>",
@@ -4348,7 +4362,7 @@
                         "<p>Presenting the Challenge</p>",
                         "<p>Ask students to consider non-whole number and non-positive situations.</p>",
                         "<ul><li>We have not seen many negative numbers or fractions in the pouches and coins. Could we have negative numbers in a coin situation? (Various answers. Students might mention owing someone money or using a debit card.) </li><li>Could we have fractions in a coin situation? (Various answers. Students might say that money can be thought of in portions, for example, a quarter represents ¼ of a dollar.)</li></ul>",
-                        "<p>Ask the class to solve the equations, show their work, and check their answers.</p>"
+                        "<p>Ask the class to solve the equations, show their work, and check their answers. Have students work with a partner as they work through the problem.</p>"
                       ]
                     }
                   }
@@ -4372,19 +4386,32 @@
                         "<ul><li>What do these equations have in common? (They all involve the same three quantities, but in different arrangements or with different operations.)</li></ul>",
                         "<p>Be sure students are making a record of their methods and checking their answers. Encourage students to look for commonalities and differences in each set of equations. This should help them make the shift from equations that had all positive numbers to those that also include negative numbers.</p>",
                         "<p>If students are puzzled as to how to proceed, ask:</p>",
-                        "<ul><li>What would a visual equation with pouches and coins look like for the equation? (Answers will vary. For example, with 5<em>x</em> – 10 = 20, students might say that this would be 5 pouches with 10 coins, like the chips in Completely Rational, and is equal to 20 coins.)</li><li>What operations on x have been used to create the expressions on each side? (Addition and subtraction are used on the terms 5<em>x</em> and 10. Multiplication is used on 5 and <em>x</em>.)</li><li>Look at the equation. What is a good starting step? (Answers will vary. Some students may divide each side of the equation by 5. Others may add or subtract 10 or 5<em>x</em> to each side.)</li><li>How can you get rid of, or “undo,” each operation, but still maintain equality? (You can use the opposite, or inverse, operation. To “undo” subtraction, you add.)</li></ul>"
+                        "<ul><li>What would a visual equation with pouches and coins look like for the equation? (Answers will vary. For example, with 5x – 10 = 20, students might say that this would be 5 pouches with 10 coins, like the chips in Completely Rational, and is equal to 20 coins.)</li></ul>",
+                        "Note:  Some students will need to draw pouches and coins to help solidify this connection to symbols.  Continue to allow them to do this and use them in parts of the summary to help all make connections. ",
+                        "<ul><li>What operations on x have been used to create the expressions on each side? (Addition and subtraction are used on the terms 5x and 10. Multiplication is used on 5 and x.)  </li><li>Look at the equation. What is a good starting step? (Answers will vary. Some students may divide each side of the equation by 5. Others may add or subtract 10 or 5x to each side.)  </li><li>How can you get rid of, or “undo,” each operation, but still maintain equality? (You can use the opposite, or inverse, operation. To “undo” subtraction, you add.) </li></ul>"
                       ]
                     }
                   },
-                  { "content":
+                  { 
+                    "display": "teacher",
+                    "content":
                     {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p>Planning for the Summary</p>",
-                        "<p>What evidence will you use in the Summary to clarify and deepen the understanding of the </p>",
+                        "<p>What evidence will you use in the Summary to clarify and deepen the understanding of the </p>"
+                      ]
+                    }
+                  },
+                  { 
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
                         "<p><strong>Now What Do You Know? </strong></p>",
-                        "<p><strong>What will you do if you do not have evidence?Now What Do You Know?Describe the strategies you can use to solve linear equations using the properties of operations and equality.</strong></p>"
+                        "<p>What will you do if you do not have evidence?Now What Do You Know?Describe the strategies you can use to solve linear equations using the properties of operations and equality.</p>"
                       ]
                     }
                   }
@@ -4405,14 +4432,10 @@
                         "<p><strong>Summarize (Orchestrating the Discussion)</strong></p>",
                         "<p>Solutions and Strategies</p>",
                         "<p>Go over each part of the Problem. Call on different students to discuss their methods. (AGENCY, IDENTITY, OWNERSHIP) After a group has presented their solutions, ask the class if they have any questions they want to ask the group. For example, encourage them to ask questions like the following:</p>",
-                        "<ul><li>Why did you do this at step 2?</li>",
-                        "<li>Why did you not consider starting with a different step?</li>",
-                        "<li>Was there a shorter way of getting to the answer? </li>",
+                        "<ul><li>Why did you do this at step 2?</li><li>Why did you not consider starting with a different step?</li><li>Was there a shorter way of getting to the answer? </li></ul>",
                         "<p>In the Initial Challenge Set 1, the same set of numbers is used; only the signs change (addition, subtraction, negative, and positive). This is a good opportunity to observe if students are making sense of the operations.</p>",
                         "<p><strong>Suggested Questions </strong></p>",
-                        "<ul><li>What do the equations in Initial Challenge Set 1, parts a and c have in common? (They can be associated with the same two-variable equation, 5<em>x</em> + 10 = y. The solutions (2, 20) and (-6, -20) could be found on the same line. In the first equation, <em>y</em> = 20, and we are trying to find the corresponding value of <em>x</em>. In the second equation, <em>y</em> = -20, and we are trying to find the corresponding value of <em>x</em>.)</li>",
-                        "<li>How else could you find the corresponding values for <em>x</em>? (You could use a table or a graph.) </li>",
-                        "<li>What about the equations in Initial Challenge Set 1, parts b and d? What do they have in common? (They can be associated with the same two-variable equation, 5<em>x</em> - 10 = <em>y</em>. In the first equation, <em>y</em> = 20, and we are trying to find the corresponding value of <em>x</em>. In the second equation, <em>y</em> = -20, and we are trying to find the corresponding value of <em>x</em>. The solutions (6, 20) and (-2, -20) could be found on the same line.)</li>"
+                        "<ul><li>What do the equations in Initial Challenge Set 1, parts a and c have in common? (They can be associated with the same two-variable equation, 5<em>x</em> + 10 = y. The solutions (2, 20) and (-6, -20) could be found on the same line. In the first equation, <em>y</em> = 20, and we are trying to find the corresponding value of <em>x</em>. In the second equation, <em>y</em> = -20, and we are trying to find the corresponding value of <em>x</em>.)</li><li>How else could you find the corresponding values for <em>x</em>? (You could use a table or a graph.) </li><li>What about the equations in Initial Challenge Set 1, parts b and d? What do they have in common? (They can be associated with the same two-variable equation, 5<em>x</em> - 10 = <em>y</em>. In the first equation, <em>y</em> = 20, and we are trying to find the corresponding value of <em>x</em>. In the second equation, <em>y</em> = -20, and we are trying to find the corresponding value of <em>x</em>. The solutions (6, 20) and (-2, -20) could be found on the same line.)</li></ul>"
                       ]
                     }
                   },
@@ -4426,10 +4449,11 @@
                         "<p>Situation B of the What If...? allows you to assess how comfortable your students are using the properties of equality to solve equations. With many previous equations, students may have used numerical reasoning, guess and check, tables, or graphs to find the solutions. With the quantities in the forensic formulas, solving the equation symbolically becomes an efficient way to find the solution. </p>",
                         "<p>Write the following equation on the board: </p>",
                         "<p>61.412 + 2.317F = 150</p>",
-                        "<ul><li>How is this equation different from most of the equations in this Problem? (The coefficient of x is not a whole number.)</li><li>How can we solve this equation? (The principles of equality work for all real numbers, so we can apply the principles of equality:","<pre>          61.412 + 2.317F = 150\n</pre>",
-                        "<pre>                               2.317F = 88.588\n</pre>",
-                        "<pre>                                            F = 38.2339231\n</pre>",
-                        "</li><li>How does solving this equation help you solve the inequality 61.412 + 2.317F &lt; 150?</li></ul>",
+                        "<ul><li>How is this equation different from most of the equations in this Problem? (The coefficient of x is not a whole number.)</li><li>How can we solve this equation? (The principles of equality work for all real numbers, so we can apply the principles of equality:</li></ul>",
+                        "        61.412 + 2.317F = 150",
+                        "                              2.317F = 88.588",
+                        "                                            F = 38.2339231",
+                        "<ul><li>How does solving this equation help you solve the inequality 61.412 + 2.317F &lt; 150?</li></ul>",
                         "<p>Some students might raise the point that you can’t have negative femur lengths, but the mathematical operations make it seem that way. If so, you will have to have an informal conversation about models working for certain quantities. Later in mathematics, there will be a focus on the domain where students will consider which <em>x</em>-axis values make sense in a situation.</p>",
                         "<p>Write the following equation on the board and repeat the questions: 3.2<em>x</em> + 5 = 14.6</p>",
                         "<p>Then repeat the questions for 3.2<em>x</em> + 15 = 6.5<em>x</em> + 10. These questions will lead into the work on finding points of intersection in the next Problem.</p>"
@@ -4442,27 +4466,26 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Check for Understanding </strong></p>",
-                        "<ul><li>Consider the equation <em>y</em> = 5<em>x</em> + -11. Use a symbolic method to find <em>x</em> if <em>y</em> = 30.\n",
-                        "<pre>              <em>y</em> = 5<em>x</em> + -11\n</pre>",
-                        "<pre>           30 = 5<em>x</em> + -11\n</pre>",
-                        "<pre>           41 = 5<em>x</em> \n</pre>",
-                        "<pre>          8.2 = <em>x</em>\n</pre>",
-                        "</li><li>Use a symbolic method to find x if y = 23.5.",
-                        "<pre>               <em>y</em> = 5<em>x</em> + -11\n</pre>",
-                        "<pre>          23.5 = 5<em>x</em> + -11\n</pre>",
-                        "<pre>          34.5 = 5<em>x</em> \n</pre>",
-                        "<pre>           6.9 = <em>x</em>\n</pre>",
-                        "</li><li>Describe how you could use a graph or a table to find the solutions. (To use a graph, you could find the given y‐value on the vertical axis. Move horizontally until you reach the line, and then move vertically until you reach the horizontal axis. The value you hit on the horizontal axis will be the value of x. To use a table, find the given y‐value in the column for the dependent variable. Then find the corresponding value in the independent variable column. This value will be the value of <em>x</em>.) </li>",
-                        "<li>Consider the equations <em>y<sub>1</sub></em> = 5<em>x</em> + 11 and <em>y<sub>2</sub></em> = 2<em>x</em>.  Use a symbolic method to find <em>x</em> when <em>y<sub>1</sub></em> = <em>y<sub>2</sub></em>.",
-                        "<pre>                        <em>y<sub>1</sub></em> = <em>y<sub>2</sub></em> \n</pre>",
-                        "<pre>             5<em>x</em> + 11 = 2<em>x</em> \n</pre>",
-                        "<pre>                        11 = -3<em>x</em> \n</pre>",
-                        "<pre>                –3 2/3 = <em>x</em> \n</pre>",
-                        "</li></ul>"
+                        "<ul><li>Consider the equation <em>y</em> = 5<em>x</em> + -11. Use a symbolic method to find <em>x</em> if <em>y</em> = 30.</li></ul>",
+                        "<pre>          <em>y</em> = 5<em>x</em> + -11</pre>",
+                        "<pre>           30 = 5<em>x</em> + -11</pre>",
+                        "<pre>           41 = 5<em>x</em> </pre>",
+                        "<pre>          8.2 = <em>x</em></pre>",
+                        "<ul><li>Use a symbolic method to find x if y = 23.5.</li></ul>",
+                        "<pre>           <em>y</em> = 5<em>x</em> + -11\n</pre>",
+                        "<pre>          23.5 = 5<em>x</em> + -11</pre>",
+                        "<pre>          34.5 = 5<em>x</em> </pre>",
+                        "<pre>           6.9 = <em>x</em></pre>",
+                        "<ul><li>Describe how you could use a graph or a table to find the solutions. (To use a graph, you could find the given y‐value on the vertical axis. Move horizontally until you reach the line, and then move vertically until you reach the horizontal axis. The value you hit on the horizontal axis will be the value of x. To use a table, find the given y‐value in the column for the dependent variable. Then find the corresponding value in the independent variable column. This value will be the value of <em>x</em>.) </li><li>Consider the equations <em>y<sub>1</sub></em> = 5<em>x</em> + 11 and <em>y<sub>2</sub></em> = 2<em>x</em>.  Use a symbolic method to find <em>x</em> when <em>y<sub>1</sub></em> = <em>y<sub>2</sub></em>/li></ul>",
+                        "<pre>                  <em>y<sub>1</sub></em> = <em>y<sub>2</sub></em> </pre>",
+                        "<pre>             5<em>x</em> + 11 = 2<em>x</em> </pre>",
+                        "<pre>                        11 = -3<em>x</em> </pre>",
+                        "<pre>                –3 2/3 = <em>x</em> </pre>"
                       ]
                     }
                   },
                   {
+                    "display": "teacher",
                     "content":
                     {
                       "type": "Text",
@@ -4470,16 +4493,7 @@
                       "text": [
                         "<p>Making the Mathematics Explicit </p>",
                         "<p>While discussing the Initial Challenge Set 3, use <strong>Teaching Aid 3.3A</strong> to discuss how some students thought about the equations in Set 3. Students’ strategies for three different linear equations are given as an opportunity for students to analyze typical errors or strategies that can occur in solving a linear equation.</p>",
-                        "<p>While discussion Situation A, <strong>Teaching Aid 3.3B</strong> can be used to show how a table and graph might be used to find the solutions to equations.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "content":
-                    {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
+                        "<p>While discussion Situation A, <strong>Teaching Aid 3.3B</strong> can be used to show how a table and graph might be used to find the solutions to equations.</p>",
                         "<p><strong>Going Further</strong></p>",
                         "<p>Graph the equations for male measurements on one graph and female measurements on another. Write some comparison statements of the two graphs.</p>"
                       ]
@@ -4491,11 +4505,13 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Now What Do Students Know</p>",
+                        "<h3>Now What Do Students Know</h3>",
                         "<p>Ask students to reflect on the discussion and answer the Now What Do You Know?</p>",
                         "<p><strong>Describe the strategies you can use to solve linear equations using the properties of operations and equality. </strong></p>",
                         "<p>For symbolic methods, students’ explanations should include keeping expressions equivalent on both sides of the equal sign (e.g., adding 2 to each side, dividing each side by 3, etc.). Students should also include something about using order of operations correctly, although there are some exceptions (e.g., factoring as a first step). Students should also notice that if applying the Distributive Property is possible, then it may simplify the process.</p>",
-                        "<p>Tables and graphs can also be used to solve linear equations. For example, the equation 2<em>x</em> – 5 = <em>x</em> + 7 can be solved by finding the point of intersection of <em>y</em><sub>1</sub> = 2<em>x</em> – 5 and <em>y</em><sub>2</sub> = <em>x</em> + 7 on a graphing calculator. Sometimes it is quicker to use symbolic methods rather than spend time entering equations into a calculator. However, if calculators are already being used, and if several questions of this type are being asked, then tables or graphs might be more efficient.See answers to the Problem for more information about the strategies and embedded mathematics.</p>"
+                        "<p>Tables and graphs can also be used to solve linear equations. For example, the equation 2x – 5 = x + 7 can be solved by finding the point of intersection of y1 = 2x – 5 and y2 = x + 7 on a graphing calculator. Sometimes it is quicker to use symbolic methods rather than spend time entering equations into a calculator. However, if calculators are already being used, and if several questions of this type are being asked, then tables or graphs might be more efficient.",
+                        "See answers to the Problem for more information about the strategies and embedded mathematics. ",
+                        "Note:  Students might want to discuss the Did You Know in the student edition.  They looked at a situation in Grade 7 in the unit Stretching and Shrinking where they found the height of a mystery teacher.  This will add to their thinking about that situation</p>"
                       ]
                     }
                   },
@@ -4508,7 +4524,7 @@
                         "<p><strong>Reflecting on Student Learning</strong></p>",
                         "<p> Use the following questions to assess student understanding at the end of the lesson.</p>",
                         "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li>",
-                        "<ul><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ul>",
+                        "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
                         "<li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
                       ]
                     }
