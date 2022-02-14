@@ -46,6 +46,7 @@ interface LogMessage {
   tzOffset: string;
   event: string;
   method: string;
+  disconnects?: string;
   parameters: any;
 }
 
@@ -112,10 +113,6 @@ export enum LogEventName {
   // the following are for potential debugging purposes and are all marked "internal"
   INTERNAL_AUTHENTICATED,
   INTERNAL_ERROR_ENCOUNTERED,
-  INTERNAL_FIREBASE_DISCONNECTED,
-  INTERNAL_NETWORK_STATUS_ALERTED,
-  INTERNAL_MONITOR_DOCUMENT,
-  INTERNAL_UNMONITOR_DOCUMENT,
 
   DASHBOARD_SWITCH_CLASS,
   DASHBOARD_SWITCH_PROBLEM,
@@ -336,39 +333,50 @@ export class Logger {
     parameters?: {section?: string},
     method: LogEventMethod = LogEventMethod.DO
   ): LogMessage {
-    const {appConfig, user, problemPath, ui} = this.stores;
+    const {
+      appConfig: { appName }, appMode, problemPath,
+      ui: { activeGroupId, activeNavTab, navTabContentShown, problemWorkspace, teacherPanelKey },
+      user: { activityUrl, classHash, id, isStudent, isTeacher, portal, type, latestGroupId,
+              loggingRemoteEndpoint, firebaseDisconnects, loggingDisconnects, networkStatusAlerts
+    }} = this.stores;
+    // only log disconnect counts if there have been any disconnections
+    const totalDisconnects = firebaseDisconnects + loggingDisconnects + networkStatusAlerts;
+    const disconnects = totalDisconnects
+                          ? { disconnects: `${firebaseDisconnects}/${loggingDisconnects}/${networkStatusAlerts}` }
+                          : undefined;
     const logMessage: LogMessage = {
-      application: appConfig.appName,
-      activityUrl: user.activityUrl,
-      username: `${user.id}@${user.portal}`,
-      role: user.type || "unknown",
-      classHash: user.classHash,
+      application: appName,
+      activityUrl,
+      username: `${id}@${portal}`,
+      role: type || "unknown",
+      classHash,
       session: this.session,
-      appMode: this.stores.appMode,
+      appMode,
       investigation: this.investigationTitle,
       problem: this.problemTitle,
       problemPath,
-      navTabsOpen: ui.navTabContentShown,
-      selectedNavTab: ui.activeNavTab,
+      navTabsOpen: navTabContentShown,
+      selectedNavTab: activeNavTab,
       time: Date.now(),       // eventually we will want server skew (or to add this via FB directly)
       tzOffset: timeZoneOffsetString(),
       event,
       method,
+      ...disconnects,
       parameters
     };
 
-    if (user.loggingRemoteEndpoint) {
-      logMessage.run_remote_endpoint = user.loggingRemoteEndpoint;
+    if (loggingRemoteEndpoint) {
+      logMessage.run_remote_endpoint = loggingRemoteEndpoint;
     }
 
-    if (user.isStudent) {
-      logMessage.group = user.latestGroupId;
-      logMessage.workspaceMode = ui.problemWorkspace.mode;
+    if (isStudent) {
+      logMessage.group = latestGroupId;
+      logMessage.workspaceMode = problemWorkspace.mode;
     }
-    if (user.isTeacher) {
-      logMessage.teacherPanel = ui.teacherPanelKey;
-      if (ui.activeNavTab === ENavTab.kStudentWork) {
-        logMessage.selectedGroupId = ui.activeGroupId;
+    if (isTeacher) {
+      logMessage.teacherPanel = teacherPanelKey;
+      if (activeNavTab === ENavTab.kStudentWork) {
+        logMessage.selectedGroupId = activeGroupId;
       }
     }
 
