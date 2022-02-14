@@ -22,18 +22,18 @@ interface IProps<T> {
   throttle?: number;
 }
 export function useSyncMstPropToFirebase<T extends string | number | boolean | undefined>({
-  firebase, model, prop, path, enabled = true, options, throttle = 1000 }: IProps<T>) {
+  firebase, model, prop, path, enabled = true, options: clientOptions, throttle = 1000 }: IProps<T>) {
 
-  const finalOptions: Omit<UseMutationOptions<unknown, unknown, T>, 'mutationFn'> = {
+  const options: Omit<UseMutationOptions<unknown, unknown, T>, 'mutationFn'> = {
     // default is to retry with linear back-off to a maximum
     retry: true,
     retryDelay: (attempt) => Math.min(attempt * 5, 30),
     // but clients may override the defaults
-    ...options
+    ...clientOptions
   };
   const mutation = useMutation((value: T) => {
     return firebase.ref(path).update({ [prop]: value });
-  }, finalOptions);
+  }, options);
   const throttledMutate = useMemo(() => _throttle(mutation.mutate, throttle), [mutation.mutate, throttle]);
 
   useEffect(() => {
