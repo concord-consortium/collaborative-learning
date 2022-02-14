@@ -4467,19 +4467,19 @@
                       "text": [
                         "<p><strong>Check for Understanding </strong></p>",
                         "<ul><li>Consider the equation <em>y</em> = 5<em>x</em> + -11. Use a symbolic method to find <em>x</em> if <em>y</em> = 30.</li></ul>",
-                        "<pre>          <em>y</em> = 5<em>x</em> + -11</pre>",
+                        "<pre>           <em>y</em> = 5<em>x</em> + -11</pre>",
                         "<pre>           30 = 5<em>x</em> + -11</pre>",
                         "<pre>           41 = 5<em>x</em> </pre>",
                         "<pre>          8.2 = <em>x</em></pre>",
                         "<ul><li>Use a symbolic method to find x if y = 23.5.</li></ul>",
-                        "<pre>           <em>y</em> = 5<em>x</em> + -11\n</pre>",
+                        "<pre>            <em>y</em> = 5<em>x</em> + -11</pre>",
                         "<pre>          23.5 = 5<em>x</em> + -11</pre>",
                         "<pre>          34.5 = 5<em>x</em> </pre>",
                         "<pre>           6.9 = <em>x</em></pre>",
                         "<ul><li>Describe how you could use a graph or a table to find the solutions. (To use a graph, you could find the given y‐value on the vertical axis. Move horizontally until you reach the line, and then move vertically until you reach the horizontal axis. The value you hit on the horizontal axis will be the value of x. To use a table, find the given y‐value in the column for the dependent variable. Then find the corresponding value in the independent variable column. This value will be the value of <em>x</em>.) </li><li>Consider the equations <em>y<sub>1</sub></em> = 5<em>x</em> + 11 and <em>y<sub>2</sub></em> = 2<em>x</em>.  Use a symbolic method to find <em>x</em> when <em>y<sub>1</sub></em> = <em>y<sub>2</sub></em>/li></ul>",
                         "<pre>                  <em>y<sub>1</sub></em> = <em>y<sub>2</sub></em> </pre>",
                         "<pre>             5<em>x</em> + 11 = 2<em>x</em> </pre>",
-                        "<pre>                        11 = -3<em>x</em> </pre>",
+                        "<pre>                    11 = -3<em>x</em> </pre>",
                         "<pre>                –3 2/3 = <em>x</em> </pre>"
                       ]
                     }
@@ -4511,7 +4511,7 @@
                         "<p>For symbolic methods, students’ explanations should include keeping expressions equivalent on both sides of the equal sign (e.g., adding 2 to each side, dividing each side by 3, etc.). Students should also include something about using order of operations correctly, although there are some exceptions (e.g., factoring as a first step). Students should also notice that if applying the Distributive Property is possible, then it may simplify the process.</p>",
                         "<p>Tables and graphs can also be used to solve linear equations. For example, the equation 2x – 5 = x + 7 can be solved by finding the point of intersection of y1 = 2x – 5 and y2 = x + 7 on a graphing calculator. Sometimes it is quicker to use symbolic methods rather than spend time entering equations into a calculator. However, if calculators are already being used, and if several questions of this type are being asked, then tables or graphs might be more efficient.",
                         "See answers to the Problem for more information about the strategies and embedded mathematics. ",
-                        "Note:  Students might want to discuss the Did You Know in the student edition.  They looked at a situation in Grade 7 in the unit Stretching and Shrinking where they found the height of a mystery teacher.  This will add to their thinking about that situation</p>"
+                        "<p>Note:  Students might want to discuss the Did You Know in the student edition.  They looked at a situation in Grade 7 in the unit Stretching and Shrinking where they found the height of a mystery teacher.  This will add to their thinking about that situation</p>"
                       ]
                     }
                   },
@@ -4552,6 +4552,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
+                        "<h3>Problem Overview</h3>",
                         "<p>In this Problem, students explore a symbolic method for finding the point of intersection of two lines. Students connect this method to other methods of finding the point of intersection, such as using a graph or table of data that represents each relationship.</p>",
                         "<p>Students find the point of intersection of two lines by setting the expressions for <em>y</em> equal to each other and then solving for <em>x</em>. They use the <em>x</em>-value to find the <em>y</em>-value for the coordinates of the intersection point. If the two relationships are represented by <em>y</em><sub><em>1</em></sub><em> = mx + b</em> and <em>y</em><sub><em>2</em></sub><em> = kx + c</em>, then the point of intersection of the lines representing each equation occurs when <em>y</em><sub><em>1</em></sub><sub> </sub>= <em>y</em><sub><em>2</em></sub>, or<em> mx + b = kx + c</em>.</p>",
                         "<p>Students find the values of x that satisfy the inequalities <em>y</em><sub><em>1</em></sub> &lt;<em>y</em><sub><em>2</em></sub> and <em>y</em><sub><em>1</em></sub> &gt; <em>y</em><sub><em>2</em></sub>. They also write and interpret equivalent expressions and solve inequalities using graphs and equations.</p>",
@@ -4578,8 +4579,8 @@
                       "format": "html",
                       "text": [
                         "<p><strong>NWDYK</strong></p>",
-                        "<p><strong></strong>Describe how you can solve an equation of the form <em>ax + b = y</em>?</p>",
-                        "<p>Describe how you can solve an inequality of the form <em>ax + b &lt; c</em> or <em>ax + b &gt; c</em><strong>?</strong></p>"
+                        "<p>Describe how you can solve an equation of the form <em>ax + b = y</em>?</p>",
+                        "<p>Describe how you can solve an inequality of the form <em>ax + b &lt; c</em> or <em>ax + b &gt; c</em>?</p>"
                       ]
                     }
                   },
@@ -4631,8 +4632,7 @@
                       "text": [
                         "<p><strong>Launch (Getting Started)</strong></p>",
                         "<p>Connecting to Prior Knowledge</p>",
-                        "<p>You may want to summarize after Question B to be sure that students are comfortable finding the profit numerically and recognizing how this solution is represented on a graph. This will set the scene for representing the answers to the inequalities on graphs in Question E. </p>",
-                        "<p>Display <strong>Teaching Aid 3.4: Two T-Shirt Plans</strong> and use it to review how to interpret the information that the point of intersection provides in this situation. Explain that the point of intersection lies on both lines, so its coordinates must be a solution to the equation of each line. Revisit how inequalities represent multiples solutions. (LANGUAGE)</p>",
+                        "<p>Display Teaching Aid 3.4: Two T-Shirt Plans and use it to review how to interpret the information that the point of intersection provides in this situation. Explain that the point of intersection lies on both lines, so its coordinates must be a solution to the equation of each line. Revisit how inequalities represent multiples solutions. (LANGUAGE)</p>",
                         "<p>Choose a point, such as (10, 45).</p>"
                       ]
                     }
@@ -4662,7 +4662,9 @@
                         "<p>Presenting the Challenge</p>",
                         "<p>Tell the story of the bakery or show the Launch Video. If needed, review the concepts of income, expense, and profit with the students.</p>",
                         "<p><strong>Suggested Questions</strong></p>",
-                        "<ul><li>In the equations for income and expenses, what information do the <em>y</em>-intercepts give? (In the equation for income, the <em>y</em>-intercept tells you the income the bakery makes for selling 0 cakes in a month. In the equation for expenses, the y-intercept tells you the expenses the bakery has each month before it sells any cakes.)</li><li>What information do the coefficients of <em>n</em> represent? (In the equation for income, the coefficient of <em>n</em> represents the income the bakery earns for each cake sold. In the equation for expenses, the coefficient of <em>n</em> represents the cost to make each cake.)</li></ul>"
+                        "<ul><li>In the equations for income and expenses, what information do the <em>y</em>-intercepts give? (In the equation for income, the <em>y</em>-intercept tells you the income the bakery makes for selling 0 cakes in a month. In the equation for expenses, the y-intercept tells you the expenses the bakery has each month before it sells any cakes.)</li><li>What information do the coefficients of <em>n</em> represent? (In the equation for income, the coefficient of <em>n</em> represents the income the bakery earns for each cake sold. In the equation for expenses, the coefficient of <em>n</em> represents the cost to make each cake.)</li></ul>",
+                        "Have students work with a partner.  ",
+                        "<p><strong>Implementation Note:</strong>  You may want to summarize after What If Situation B to be sure that students are comfortable finding the profit numerically and recognizing how this solution is represented on a graph. This will set the scene for representing the answers to the inequalities on graphs in What If Situation C.</p> "
                       ]
                     }
                   }
@@ -4698,84 +4700,29 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>In the What If…? Situation A, when students determine whether there is a profit for making and selling 100 cakes, they can just compute the expenses and income and then subtract the expenses from the income. Be sure students see the connection between this numerical strategy and how it is represented on the graph. The profit is the vertical distance between the two points (100, I) and (100, E) on the graphs. Point out that, in this case, the expenses are greater than the income, so the vertical distance actually represents a loss.</p>"
+                        "<p>In the What If…? Situation A, when students determine whether there is a profit for making and selling 100 cakes, they can just compute the expenses and income and then subtract the expenses from the income. Be sure students see the connection between this numerical strategy and how it is represented on the graph. The profit is the vertical distance between the two points (100, I) and (100, E) on the graphs. Point out that, in this case, the expenses are greater than the income, so the vertical distance actually represents a loss.</p>",
+                        "Encourage students to check their answers as they continue to answer questions."
                       ]
                     }
                   },
                   {
-                    "layout": {
-                      "height": 350
-                    },
-                    "content":
-                    {
-                      "type":"Geometry",
-                      "board": {
-                        "properties": {
-                          "axisMin": [-30, -175],
-                          "axisRange": [500, 2500]
-                        }
-                      },
-                      "objects": [
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [0, 0]
-                            },
-                            {
-                              "type": "point",
-                              "parents": [400,3280]
-                            }
-                          ]
-                        },
-                        {
-                          "type": "movableLine",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [0, 825]
-                            },
-                            {
-                              "type": "point",
-                              "parents": [400,2125]
-                            }
-                          ]
-                        },
-                        {
-                          "type": "polygon",
-                          "parents": [
-                            {
-                              "type": "point",
-                              "parents": [100, 1150]
-                            },
-                            {
-                              "type": "point",
-                              "parents": [100,820]
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  },
-                  {
-                    "content":
-                    {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Encourage students to check their answers as they continue to answer questions.</p>"
-                      ]
-                    }
-                  },
-                  {
+                    "display": "teacher",
                     "content":
                     {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p>Planning for the Summary</p>",
-                        "<p>What evidence will you use in the Summary to clarify and deepen the understanding of the Now What Do You Know? What will you do if you do not have evidence?</p>",
+                        "<p>What evidence will you use in the Summary to clarify and deepen the understanding of the Now What Do You Know? What will you do if you do not have evidence?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content":
+                    {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
                         "<p>Now What Do You Know?</p>",
                         "<p><em>Describe the strategies you can use to solve linear equations using the properties of operations and equality</em></p>"
                       ]
@@ -4783,10 +4730,7 @@
                   }
               ]
               },
-              "supports": [
-                {"text": "What are his expenses and his income for the month?"},
-                {"text": "What do the coefficients of n represent?"}
-              ]
+              "supports": []
             },
             {
               "type": "summarize",
@@ -4812,6 +4756,7 @@
                     "content":
                     {
                       "type":"Geometry",
+                      "title": "Bakery Income and Expenses",
                       "board": {
                         "properties": {
                           "axisMin": [-30, -175],
@@ -4850,11 +4795,13 @@
                           "parents": [
                             {
                               "type": "point",
-                              "parents": [100, 1150]
+                              "parents": [100, 1150],
+                              "name": "330"
                             },
                             {
                               "type": "point",
-                              "parents": [100,820]
+                              "parents": [100,820],
+                              "name": ""
                             }
                           ]
                         }
@@ -4883,6 +4830,7 @@
                     }
                   },
                   {
+                    "display": "teacher",
                     "content":
                     {
                       "type": "Text",
@@ -4923,6 +4871,7 @@
                     }
                   },
                   {
+                    "display": "teacher",
                     "content":
                     {
                       "type": "Text",
@@ -4946,7 +4895,7 @@
                       "text": [
                         "<p><strong>Reflecting on Student Learning </strong></p>",
                         "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
-                        "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li><ul><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ul<li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit?The next Unit?<strong></strong></li></ul>"
+                        "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li><ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit?The next Unit?<strong></strong></li></ul>"
                       ]
                     }
                   }
