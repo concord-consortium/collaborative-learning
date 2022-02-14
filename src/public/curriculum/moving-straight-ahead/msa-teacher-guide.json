@@ -4924,44 +4924,50 @@
               "content": {
                 "tiles": [
                   {
-                    "content":
-                    {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Students investigate the “steepness” of a set of stairs by measuring the rise and run of the stairs and comparing their data to carpenters’ guidelines. The ratio of “rise‐to‐run” informally introduces the concept of slope of a line.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "content":
-                    {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "4AoL:  Analysis & Analysis",
-                        "CCSSM: 7.RP.A, 7.RP.A.2a, 7.RP.A.2b, 7.RP.A.2c"
-                      ]
-                    }
-                  },
-                  {
+                    "id": "1tw7ecc8VyGg44_h",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>NWDYK</strong>How does the steepness of stairs expressed as a ratio relate to a straight-line graph? To a linear equation that represents the graph? </p>"
+                        "<p><strong>Problem Overview</strong></p>",
+                        "<p>Students investigate the “steepness” of a set of stairs by measuring the rise and run of the stairs and comparing their data to carpenters’ guidelines. The ratio of “rise‐to‐run” informally introduces the concept of slope of a line. </p>"
                       ]
                     }
                   },
                   {
-                    "content":
-                    {
+                    "id": "A_8eoesXoERkAfyi",
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Emerging Mathematical Ideas</strong></p>",
-                        "<p>Begin to analyze linear relationships (proportional and non-proportional) to understand how the constant rate of change can be understood and represented as a ratio.Notice that the:  </p>",
-                        "<ul><li>ratio of the rise (height of each step) to the run (the depth of each step) is the same for each step along a staircase,</li><li>the steeper the staircase the bigger the ratio of rise to run for each step and vise-versa, and</li><li>the constant rate of change in every linear relationship (represented as graphs or equations) can be described as the ratio of the vertical change to the horizontal change for any section of the graph.</li></ul>"
+                        "<p>AoL:  Analysis &amp; Analysis</p>",
+                        "<p>CCSSM: 7.RP.A, 7.RP.A.2a, 7.RP.A.2b, 7.RP.A.2c</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>[start green box]</p>",
+                        "<p>NWDYK</p>",
+                        "<p>How does the steepness of stairs expressed as a ratio relate to a straight-line graph? To the linear rate of change?  To a linear equation that represents the graph?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "qZW4rBN9_P-0Ru8g",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Emerging Mathematical Ideas</p>",
+                        "<p>Begin to analyze linear relationships (proportional and non-proportional) to understand how the constant rate of change can be understood and represented as a ratio. </p>",
+                        "<p></p>",
+                        "<p>Notice that the:  </p>",
+                        "<ul><li>ratio of the rise (height of each step) to the run (the depth of each step) is the same for each step along a staircase, </li><li>the steeper the staircase the bigger the ratio of rise to run for each step and vise-versa, and</li><li>the constant rate of change in every linear relationship (represented as graphs or equations) can be described as the ratio of the vertical change to the horizontal change for any section of the graph. </li></ul>"
                       ]
                     }
                   },
@@ -4993,46 +4999,41 @@
               "type": "launch",
               "content": {
                 "tiles": [
-                   {
+                  {
+                    "id": "umAdsRtZiyXnjr_9",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Launch (Getting Started)</strong></p>",
                         "<p>Connecting to Prior Knowledge</p>",
-                        "<p>Remind students that they have explored many patterns of change that involve constant rates. They have explored the ways that the rate affects the steepness of the graph, the coefficient of x in a linear equation, and the rate of change between the variables. Tell students that, in this Investigation, they will explore another way to express a constant rate. (Language)</p>"
+                        "<p>Remind students that they have explored many patterns of change that involve constant rates. They have explored the ways that the rate affects the steepness of the graph, the coefficient of x in a linear equation, and the rate of change between the variables. Tell students that, in this Investigation, they will explore another way to express a constant rate</p>"
                       ]
                     }
                   },
                   {
+                    "id": "qUZWNjXfw_E6JhyF",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p>Presenting the Challenge</p>",
-                        "<p>Show the Launch Video. This video shows a tourist climbing a large set of stairs leading up to a monument. There are many different types of stairs at this monument. They have varying heights and lengths, and some are steeper than others. This video can illustrate for students the ways in which changing one or more of the dimensions of a stair can affect its steepness. It can give students ideas about how to measure the steepness of stairs, which can lead into a discussion of how to measure the steepness of a line. </p>"
+                        "<p>Discuss with students the different types of stairs that they have experienced. This can illustrate for students the ways in which changing one or more of the dimensions of a stair can affect its steepness. It can give students ideas about how to measure the steepness of stairs, which can lead into a discussion of how to measure the steepness of a line. </p>"
                       ]
                     }
                   },
                   {
-                    "content":
-                    {
+                    "id": "VG4Lw_ePX_V9z7jg",
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Suggested Questions</strong></p>",
-                        "<ul><li>How do really steep stairs compare to stairs that are not steep? (Answers will vary.  Students should discuss that they are more difficult to walk up.)</li><li>What does it feel like to walk or run on steep stairs? (Answers will vary.)</li><li>If you put a board on steep stairs and rode down on a skateboard, how would that compare to doing the same thing on stairs that are not steep? (Answers will vary.)</li><li>Does the steepness of a set of stairs affect the exercise? (Yes. The steeper the stairs, the more difficult they are to climb, and the more exercise you get while climbing them.) </li><li>Do all stairs have the same steepness? How can we determine the steepness? (No. Some stairs are steeper than others. We can determine the steepness by measuring the stairs.) </li><li>How can you describe the steepness of the stairs? (The steepness of stairs depends on how tall each step is (the height) and on the distance from the edge of the step to the next step (the width). So really tall steps where the flat part you step on isn’t very wide will make for a really steep set of stairs.) </li><li>Is the steepness the same between any two consecutive steps? (Yes. It seems like the steepness would be the same because you would want all the steps to be consistent. So the steepness between the consecutive steps should be the same.)</li></ul>"
-                      ]
-                    }
-                  },
-                  {
-                    "content":
-                    {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Distribute <strong>Labsheet 4.1: Stair Measurement Table</strong>. Have students work in groups of 3-4 and measure the rise and the run of a set of stairs in the school. Tell the groups that they need to measure more than one step in a set of stairs and compare the ratios.</p>",
-                        "<p><strong>Note:</strong> There are building codes that limit the variability of the rise and run, so new buildings may have stairs for which the “rise‐to‐run” ratio is consistent. Sometimes steps outside or in stadium bleachers will have a different steepness than stair steps inside houses.</p>"
+                        "<ul><li>What are the most unusual stairs that you have seen or walked on? What made them unusual? (Answers will vary.)</li><li>Do you have stairs in your house? Are they like stairs in other houses? How do they compare to stairs in public buildings? Stairs that are outside? (Answers will vary.)</li><li>How do really steep stairs compare to stairs that are not steep? (Answers will vary.  Students should discuss that they are more difficult to walk up.)</li><li>What does it feel like to walk or run on steep stairs? (Answers will vary.)</li><li>If you put a board on steep stairs and rode down on a skateboard, how would that compare to doing the same thing on stairs that are not steep? (Answers will vary.)</li><li>Does the steepness of a set of stairs affect the exercise? (Yes. The steeper the stairs, the more difficult they are to climb, and the more exercise you get while climbing them.) </li><li>Do all stairs have the same steepness? How can we determine the steepness? (No. Some stairs are steeper than others. We can determine the steepness by measuring the stairs.) </li><li>How can you describe the steepness of the stairs? (The steepness of stairs depends on how tall each step is (the height) and on the distance from the edge of the step to the next step (the width). So really tall steps where the flat part you step on isn’t very wide will make for a really steep set of stairs.) </li><li>Is the steepness the same between any two consecutive steps? (Yes. It seems like the steepness would be the same because you would want all the steps to be consistent. So the steepness between the consecutive steps should be the same.) </li></ul>",
+                        "<p></p>",
+                        "<p>Distribute <strong>Learning Aid 4.1: Stair Measurement Table</strong>. Have students work in groups of 3-4 and measure the rise and the run of a set of stairs in the school. Tell the groups that they need to measure more than one step in a set of stairs and compare the ratios.  </p>",
+                        "<p></p>",
+                        "<p><strong>Note</strong>: There are building codes that limit the variability of the rise and run, so new buildings may have stairs for which the “rise‐to‐run” ratio is consistent. Sometimes steps outside or in stadium bleachers will have a different steepness than stair steps inside houses. </p>"
                       ]
                     }
                   }
@@ -5047,99 +5048,105 @@
               "content": {
                 "tiles": [
                   {
-                    "content":{
+                    "id": "xnMoOLOwzd9PJARk",
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Explore (Digging In)</strong></p>",
-                        "<p>Providing for Individual Needs</p>",
-                        "<p>Encourage students to record their strategies.</p>",
-                        "<p>When the groups have recorded their measures of a staircase in the building, have them organize what they have found out about the ratio of rise to run between several of the steps in the staircase. Ask them to look at the ratios of the rise to the run on the staircases they measured. Have the groups work on the What If...? Situations.</p>",
-                        "<p><strong>Note:</strong> In What If...? Situation A, the ratio of rise to run of 7 to 11 fits the guideline. However, the equivalent ratio 14 to 22 does not. (Any other equivalent ratio will not meet the guidelines either.) This could cause some misunderstanding around slope, since you can use any two points and get equivalent ratios.</p>"
+                        "<p><strong>Explore (Digging In)         </strong></p>",
+                        "<p><u>Providing for Individual Needs</u></p>",
+                        "<p>When the groups have recorded their measures of a staircase in the building, have them organize what they have found out about the ratio of rise to run between several of the steps in the staircase. Ask them to look at the ratios of the rise to the run on the staircases they measured. Have the groups work on the What If Situations.</p>",
+                        "<p></p>",
+                        "<p><strong>Note</strong>: In What If Situation A, the ratio of rise to run of 7 to 11 fits the guideline. However, the equivalent ratio 14 to 22 does not. (Any other equivalent ratio will not meet the guidelines either.) This could cause some misunderstanding around slope, since you can use any two points and get equivalent ratios.</p>"
                       ]
                     }
                   },
                   {
-                    "content":
-                    {
+                    "display": "teacher",
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Planning for the Summary</strong></p>",
-                        "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know question? What will you do if you do not have evidence? </p>",
-                        "<p><strong>Now What Do You Know?</strong></p>",
-                        "<p><strong>How does the steepness of stairs expressed as a ratio relate to a straight-line graph? To a linear equation that represents the graph?</strong></p>"
+                        "<p>Planning for the Summary</p>",
+                        "<p></p>",
+                        "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know questions? What will you do if you do not have evidence? </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "cYFOOQH0NzKYe2PT",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Now What Do You Know?</em></p>",
+                        "<p>How does the steepness of stairs expressed as a ratio relate to a straight-line graph? To the linear rate of change?  To a linear equation that represents the graph?</p>"
                       ]
                     }
                   }
                 ]
               },
-              "supports": [
-                {"text": "How do you know if a relationship is linear? "},
-                {"text": "How do you know if a relationship is proportional? "}
-              ]
+              "supports": []
             },
             {
               "type": "summarize",
               "content": {
                 "tiles": [
                   {
-                    "content":
-                    {
+                    "id": "9zIq2wa9TdvdSZ1I",
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Summarize (Orchestrating the Discussion)</strong></p>",
-                        "<p>Solutions and Strategies </p>",
+                        "<p>Solutions and Strategies</p>",
                         "<p>Let each group report on stairs they have investigated. Make a class record of the stairs and measures of the stairs that are reported. Compare the ratios for various sets of stairs. </p>"
                       ]
                     }
                   },
                   {
-                    "content":
-                    {
+                    "id": "lPXeB493qEsIvcq5",
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p>Making the Mathematics Explicit</p>",
-                        "<p><strong>Suggested Questions </strong></p>",
-                        "<ul><li>Are some stairs steeper than others? If so, how can you tell? (Yes. When climbing stairs, you can tell that some sets are steeper than others because some are easier to climb than others. Mathematically, you can tell that some stairs are steeper than others if their rise-to-run ratios are different.) </li><li>What is the steepest set of stairs in our list? The least steep set of stairs? How do you know? (Answers will vary based on student measurements. Students should be able to justify their answers, though, by comparing the ratios of rise to run. The stairs with the greatest ratio are the steepest, and the stairs with the least ratio are the least steep.)</li><li>Can you order the entire list of stairs from least to greatest in terms of steepness? (Yes. You can do this by ordering their ratios from least to greatest.) </li></ul>"
-                      ]
-                    }
-                  },
-                  {
-                    "content":
-                    {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<ul><li>Are some stairs steeper than others? If so, how can you tell? (Yes. When climbing stairs, you can tell that some sets are steeper than others because some are easier to climb than others. Mathematically, you can tell that some stairs are steeper than others if their rise-to-run ratios are different.) </li><li>What is the steepest set of stairs in our list? The least steep set of stairs? How do you know? (Answers will vary based on student measurements. Students should be able to justify their answers, though, by comparing the ratios of rise to run. The stairs with the greatest ratio are the steepest, and the stairs with the least ratio are the least steep.) </li><li>Can you order the entire list of stairs from least to greatest in terms of steepness? (Yes. You can do this by ordering their ratios from least to greatest.) </li></ul>",
+                        "<p></p>",
                         "<p>These questions focus attention on uses of the ratio as a way of characterizing steepness in a mathematical sense. Steer the discussion to measures of rise and run. Make the connection to the Unit Comparing and Scaling, in which the students learned to form ratios as a way to compare situations. </p>",
                         "<p>If you have not done so already, talk about the carpenters’ guidelines with your students. </p>",
-                        "<ul><li>How do the ratios of the stairs we measured compare to the carpenters’ guidelines? Which ones meet the standards and which ones do not? (Answers will vary, but they should be reasonably close. If not, discuss possible reasons for large deviations.) </li><li>What do you think influences a builder’s decision on the run of a set of steps? (Answers will vary. Students may suggest that handicap requirements, wider run to accommodate items such as planters, and aesthetics may influence a builder’s design.)</li><li>What do you think influences a builder’s decision on the rise of a set of steps? (A builder may consider how high a person of average height can comfortably step when deciding on the rise of a set of stairs. In these questions, students should be making comparisons using the ratio of the rise to the run.) </li><li>Now let’s think about another common object that you have climbed—a ladder. How can you use what you have learned so far to help make sense of steepness as it applies to ladders? What would make a ladder feel steep and what would make the same ladder feel less steep? (The angle of the ladder against the house will affect the rise, so it will affect how easy or difficult the ladder is to climb.) </li><li>Looking at the Initial Challenge, is the steepness the same between any two consecutive steps?  (Yes. Illustrate the point by superimposing a graph on stairs showing points on the front edges.) Use <strong>Teaching Aid 4.1: Stairs on a Graph</strong>.</li><ul><li>Do these steps fit the carpenter guidelines? (2<em>R</em> + <em>r</em> = 24 and <em>R</em> + <em>r</em> = 18. So they do fit the carpenter guidelines.)</li><li>Are the points on the steps in a straight line?  (The points do lie on a straight line.)</li><li>Is the relationship between the rise and run a linear relationship? (The points do lie on a straight line. The relationship is <em>r</em> = 2<em>R</em>, which is linear. There would be a constant rate of change if we created a table.)</li><li>How is finding points on this line related to sketching a staircase with a rise-to-run ratio of 3 to 5? (Going from one point to another on the line is similar to moving 3 units vertically and then moving 5 units horizontally.)</li><li>Sketch a line that does not meet the carpenters’ guidelines. (Finding a line that does not meet the carpenters’ guidelines is an opportunity for students to test their understanding of the ratio of rise to run.)</li></ul><li>Is Anna correct in What If...? Situation B?  (Yes)</li><li>Does the ratio change if we take two steps at a time? Explain why? (No. It is the essence of proportionality. For every 1 step…, for every 2 steps…)</li></ul>"
+                        "<ul><li>How do the ratios of the stairs we measured compare to the carpenters’ guidelines? Which ones meet the standards and which ones do not? (Answers will vary, but they should be reasonably close. If not, discuss possible reasons for large deviations.) </li><li>What do you think influences a builder’s decision on the run of a set of steps? (Answers will vary. Students may suggest that handicap requirements, wider run to accommodate items such as planters, and aesthetics may influence a builder’s design.) </li><li>What do you think influences a builder’s decision on the rise of a set of steps? (A builder may consider how high a person of average height can comfortably step when deciding on the rise of a set of stairs. In these questions, students should be making comparisons using the ratio of the rise to the run.) </li><li>Now let’s think about another common object that you have climbed—a ladder. How can you use what you have learned so far to help make sense of steepness as it applies to ladders? What would make a ladder feel steep and what would make the same ladder feel less steep? (The angle of the ladder against the house will affect the rise, so it will affect how easy or difficult the ladder is to climb.) </li><li>Looking at the Initial Challenge, is the steepness the same between any two consecutive steps?  (Yes. Illustrate the point by superimposing a graph on stairs showing points on the front edges.) Use Teaching Aid 4.1: Stairs on a Graph.  </li></ul>",
+                        "<ol><li>Do these steps fit the carpenter guidelines? (2R + r = 24 and R + r = 18. So they do fit the carpenter guidelines.)</li><li>Are the points on the steps in a straight line?  (The points do lie on a straight line.)</li><li>Is the relationship between the rise and run a linear relationship? (The points do lie on a straight line. The relationship is r = 2R, which is linear. There would be a constant rate of change if we created a table.)</li><li>How is finding points on this line related to sketching a staircase with a rise-to-run ratio of 3 to 5? (Going from one point to another on the line is similar to moving 3 units vertically and then moving 5 units horizontally.) </li><li>Sketch a line that does not meet the carpenters’ guidelines. (Finding a line that does not meet the carpenters’ guidelines is an opportunity for students to test their understanding of the ratio of rise to run.) </li></ol>",
+                        "<p></p>",
+                        "<ul><li>Is Anna correct in What If Situation B?  (Yes)</li><li>Does the ratio change if we take two steps at a time? Explain why? (No. It is the essence of proportionality. For every 1 step…, for every 2 steps…)</li></ul>"
                       ]
                     }
                   },
                   {
-                    "content":
-                    {
+                    "display": "teacher",
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Now What Do Students Know</p>",
+                        "<p><strong>Now What Do Students Know</strong></p>",
                         "<p>Ask students to reflect on the discussion and answer the Now What Do You Know questions.</p>",
-                        "<p><See answers to the Problem for more information about the strategies and embedded mathematics. </p>"
+                        "<p><em>How does the steepness of stairs expressed as a ratio relate to a straight-line graph? To the linear rate of change?  To a linear equation that represents the graph?</em></p>",
+                        "<p>See answers to the Problem for more information about the strategies and embedded mathematics. </p>"
                       ]
                     }
                   },
                   {
-                    "content":
-                    {
+                    "id": "F6XBtAGHK2vORnFS",
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Reflecting on Student Learning </strong></p>",
-                        "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
-                        "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li><ul><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ul<li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit?The next Unit?<strong></strong></li></ul>"
+                        "<p><strong>Reflecting on Student Learning  </strong></p>",
+                        "<p>Use the following questions to assess student understanding at the end of the lesson.  </p>",
+                        "<ul><li>What evidence do I have that students understand the Now What Do You Know question?</li></ul>",
+                        "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
+                        "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?  </li></ul>"
                       ]
                     }
                   }
@@ -5161,46 +5168,52 @@
               "content": {
                 "tiles": [
                   {
-                    "content":
-                    {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>on the line. They compare slope of a line to the constant rate of change between the two variables in the relationship represented by <em>y = ax + b</em></p>",
-                        "<p>The slope of a line is the ratio of vertical change to horizontal change between two points on a line. The connection between this ratio and constant rate of change between the two variables in a linear relationship is made explicit. </p>",
-                        "<p>To find the equation of a line through two points, students use the points to find the slope of the line through the given points. They then find the <em>y</em>‐intercept using either a table or graph. Finally, they write an equation of the form <em>y = ax + b</em>, where <em>m</em> is the slope and <em>b</em> is the <em>y</em>‐intercept. </p>"
-                      ]
-                    }
-                  },
-                  {
-                    "content":
-                    {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "AoL: Analysis/Synthesis & Analysis",
-                        "CCSSM: 7.RP.A, 7.RP.A.1, 7.RP.A.2a, 7.RP.A.2b, 7.RP.A.2c, 7.RP.A.2d"
-                      ]
-                    }
-                  },
-                  { "display": "teacher",
+                    "id": "CJKd6xW8AlG-jzeN",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>NWDYK</strong></><p>How is the rate of change of a linear relationship related to the constant of proportionality?</p>"
+                        "<p><strong>Problem Overview</strong></p>",
+                        "<p>In this Problem, students find the slope of a line from a graph, a table, an equation, or two points on the line. They compare slope of a line to the constant rate of change between the two variables in the relationship represented by y = ax + b. </p>",
+                        "<p>The slope of a line is the ratio of vertical change to horizontal change between two points on a line. The connection between this ratio and constant rate of change between the two variables in a linear relationship is made explicit. </p>",
+                        "<p></p>",
+                        "<p>To find the equation of a line through two points, students use the points to find the slope of the line through the given points. They then find the y‐intercept using either a table or graph. Finally, they write an equation of the form y = ax + b, where m is the slope and b is the y‐intercept. </p>",
+                        "<p>Implementation Note:  You may want to have a brief summary after students do the card sort in the Initial Challenge before students work on the What If Situations.  </p>"
                       ]
                     }
                   },
                   {
-                    "content":
-                    {
+                    "id": "S13wx0-n1bsqEKoA",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>AoL: Analysis/Synthesis &amp; Analysis</p>",
+                        "<p>CCSSM: 7.RP.A, 7.RP.A.1, 7.RP.A.2a, 7.RP.A.2b, 7.RP.A.2c, 7.RP.A.2df</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>NWDYK</p>",
+                        "<p>How is the rate of change of a linear relationship related to the constant of proportionality? </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "1mt6zqjqOw53lYl9",
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Emerging Mathematical Ideas</strong></p>",
-                        "<p>relationships, the constant of proportionality for proportions, and the constant ratio of the vertical change to horizontal change for linear relationships using a variety of representations.</p>",
-                        "<p>Notice that: </p><ul><li>some linear relationships are proportional and others are not,</li><li>the rate of change describes how one variable in the relationship changes with respect to the other variable and can be found using a table of values, graph, or equation, </li><li>for linear relationships that are also proportional, the rate of change, the constant of proportionality, the ratio of vertical change to horizonal change, and the unit rate of change are all the same, and</li><li>the ordered pair (1, a) for a proportional relationship represents the unit rate of change for the relationship (that is a/1) where a is the constant of proportionality, and the equation of the line is <em>y = ax.</em> </li></ul>"
+                        "<p>Make connections, where appropriate, among the rate of change for linear relationships, the constant of proportionality for proportions, and the constant ratio of the vertical change to horizontal change for linear relationships using a variety of representations.</p>",
+                        "<p>Notice that:</p>",
+                        "<ul><li>some linear relationships are proportional and others are not,</li><li>the rate of change describes how one variable in the relationship changes with respect to the other variable and can be found using a table of values, graph, or equation, </li><li>for linear relationships that are also proportional, the rate of change, the constant of proportionality, the ratio of vertical change to horizonal change, and the unit rate of change are all the same, and </li><li>the ordered pair (1, a) for a proportional relationship represents the unit rate of change for the relationship (that is a/1) where a is the constant of proportionality, and the equation of the line is y = ax. </li></ul>"
                       ]
                     }
                   },
@@ -5233,88 +5246,121 @@
               "content": {
                 "tiles": [
                   {
-                   "content": {
-                     "type": "Text",
-                     "format": "html",
-                     "text": [
-                       "<p><strong>Launch (Getting Started)</strong></p>",
-                       "<p>Connecting to Prior Knowledge</p>",
-                       "<p>Show the Launch Video. This video shows a dynamic definition of slope. A set of footprints walks up a staircase on a coordinate grid. The staircase aligns with the graph of the line <em>y</em> = 2<em>x</em> + 3, and the footprints illustrate how to locate the rise and run on the graph. You can show this video to start a discussion about slope and about whether or not the slope of a line is the same for any two points on the line. </p>",
-                       "<p>Display <strong>Teaching Aid 4.2A: A Set of Stairs.</strong> Tell students that the steepness of the line is the ratio of rise to run, or vertical change to horizontal change, for each step. Tell students that this ratio is called the slope of the line. (Language)</p>"
-                     ]
-                   }
-                 },
-                 {
-                  "content": {
-                    "type": "Image",
-                    "url": "curriculum/moving-straight-ahead/images/MSA_TG_4_2_slope_eq.png"
+                    "id": "DNzaoecYbAJGOTiD",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Launch (Getting Started)</strong></p>",
+                        "<p>Connecting to Prior Knowledge</p>",
+                        "<p></p>",
+                        "<p>Display <strong>Teaching Aid 4.2A: A Set of Stairs</strong>. </p>",
+                        "<p>Tell students that the steepness of the line is the ratio of rise to run, or vertical change to horizontal change, for each step. Tell students that this ratio is called the slope of the line. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "IXDakLjhpGFM_Cpe",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "\u00a0                    verticalchange          rise",
+                        "Slope = ___________________ = ______",
+                        "\u00a0               horizontalchange        run"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "HQ4cLPu2E9AtnZJS",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<ul><li>Does the slope change if we take two stairs at a time? Explain. (No, because you just create an equivalent ratio. For example, suppose the rise to run between two stairs is 3 to 5. Then if you take two stairs at a time, the rise‐to‐run ratio is 6 to 10, which is equivalent to the ratio of 3 to 5.) </li><li>Is the slope the same between any two stairs? Explain. (Yes. See previous answer.) </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "uEIbMupo-eXiXlXm",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Presenting the Challenge</p>",
+                        "<p>Pose the challenge of using what they know about slope, linearity and proportionality they will be sorting contexts, graphs, tables and equations. They will sort them into negative, positive or zero slope and then decide if the groups are proportional.  Have students work in groups of 3 to sort through the Initial Challenge cards.  As they create their groups have them create posters to use in the summary.  </p>"
+                      ]
+                    }
                   }
-                 },
-                 {
-                   "content":
-                   {
-                     "type": "Text",
-                     "format": "html",
-                     "text": [
-                       "<p><strong>Suggested Questions</strong></p>",
-                       "<ul><li>Does the slope change if we take two stairs at a time? Explain. (No,because you just create an equivalent ratio. For example, suppose the rise to run between two stairs is 3 to 5. Then if you take two stairs at a time, the rise‐to‐run ratio is 6 to 10, which is equivalent to the ratio of 3 to 5.)</li><li>Is the slope the same between any two stairs? Explain. (Yes. See previous answer.) </li></ul>"
-                     ]
-                   }
-                 },
-                 {
-                   "content": {
-                     "type": "Text",
-                     "format": "html",
-                     "text": [
-                       "<p>Presenting the Challenge</p>",
-                       "<p>Pose the challenge of finding the slope of a line from a table, graph, or equation. Have students begin the Problem independently and then work with a partner as needed. </p>"
-                     ]
-                   }
-                 }
-               ]
+                ]
               },
-              "supports": [
-                {"text": "Would an equation help find the constant of proportionality?"},
-                {"text": "What is the rate of change in the graphs and the table? "}
-              ]
+              "supports": [ ]
             },
             {
               "type": "explore",
               "content": {
                 "tiles": [
                   {
-                    "content":{
+                    "id": "L4ZKRGawUekmpz3G",
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Explore (Digging In)</strong></p>",
+                        "<p><strong>Explore (Digging In) </strong></p>",
                         "<p>Providing for Individual Needs</p>",
-                        "<p>As you move around the room, check to see if students are finding the vertical and horizontal changes correctly. Have students show you on the graph where the changes are. For the most part, finding the y-intercept should be a review for students. For the tables, students may work backward in the table to find the <em>y</em>-intercept. (Time)</p>",
-                        "<p>What If...? Situation C won’t be as familiar for students and they may need more guidance. Look for ways that students will find two more points given two points on a line. Refer to these during the Summary.</p>",
-                        "<p><strong>Suggested Questions</strong></p>",
-                        "<ul><li>Start at the point where x is 3. What is the corresponding value for y? (5)</li><li>Now look at the point where x is -2. What is the corresponding value for y? (10)</li><li>What is the change in the horizontal and the vertical directions between these two points? How do you know? (In order to move from 3 to -2 on the x-axis, you move 5 units to the left. So the change in the horizontal direction is -5. In order to move from 5 to 10 on the y-axis, you move up 5 units. So the change in the vertical direction is 5.)</li><li>What does this tell you about the slope of the line representing the equation? (This tells you that the slope is 5/(-5) or -1.)</li><li>If you looked at the ratio of the horizontal change to the vertical change between two different points on the graph of the line, what would the ratio be? How do you know? (The line has the same steepness throughout the graph, so the ratio would still be -1.) </li></ul>",
-                        "<p>For some students, the most difficult part of finding the slope from two points on a line is finding the vertical and horizontal distances between two points, particularly if the point does not lie on the intersection of two grid lines. If you see students struggling with this, you might suggest that they display the two points in a table. Some students find the table easier to use for determining the rate or ratio. In any case, the connection between rate and ratio needs to be highlighted. (Portrayal)</p>"
+                        "<p>As you move around the room, check to see if students are finding the vertical and horizontal changes correctly. Have students show you graphs where the changes are. For the most part, finding the y-intercept should be a review for students. For the tables, students may work backward in the table to find the y-intercept. (Time)</p>",
+                        "<p>What If...? Situation C won’t be as familiar for students and they may need more guidance. Look for ways that students will find two more points given two points on a line. Refer to these during the Summary.</p>"
                       ]
                     }
                   },
                   {
-                    "content":
-                    {
+                    "id": "0d0xgeoZw2UIHBKD",
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Planning for the Summary</strong></p>",
-                        "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know question? What will you do if you do not have evidence? </p>",
-                        "<p><strong>Now What Do You Know?</strong></p>",
-                        "<p><strong>How does the steepness of stairs expressed as a ratio relate to a straight-line graph? To a linear equation that represents the graph?</strong></p>"
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<ul><li>Start at the point where x is 3. What is the corresponding value for y? (5) </li><li>Now look at the point where x is -2. What is the corresponding value for y? (10) </li><li>What is the change in the horizontal and the vertical directions between these two points? How do you know? (In order to move from 3 to -2 on the x-axis, you move 5 units to the left. So the change in the horizontal direction is -5. In order to move from 5 to 10 on the y-axis, you move up 5 units. So the change in the vertical direction is 5.) </li><li>What does this tell you about the slope of the line representing the equation? (This tells you that the slope is 5/(-5) or -1.) </li><li>If you looked at the ratio of the horizontal change to the vertical change between two different points on the graph of the line, what would the ratio be? How do you know? (The line has the same steepness throughout the graph, so the ratio would still be -1.) </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "ndrBXKZ8lcEaLS0S",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>For some students, the most difficult part of finding the slope from two points on a line is finding the vertical and horizontal distances between two points, particularly if the point does not lie on the intersection of two grid lines. If you see students struggling with this, you might suggest that they display the two points in a table. Some students find the table easier to use for determining the rate or ratio. In any case, the connection between rate and ratio needs to be highlighted. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Planning for the Summary</p>",
+                        "<p></p>",
+                        "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know question? What will you do if you do not have evidence? </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "WTMbXciCy754zTXV",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Now What Do You Know?</em></p>",
+                        "<p>How is the rate of change of a linear relationship related to the constant of proportionality?</p>"
                       ]
                     }
                   }
                 ]
               },
               "supports": [
-                {"text": "Are the graphs steep?  What will that mean about the rate of change?"},
-                {"text": "How do you find the rate of change in a graph, table, or equation?"}
               ]
             },
             {
@@ -5322,81 +5368,83 @@
               "content": {
                 "tiles": [
                   {
-                    "content":
-                    {
+                    "id": "sFZXIJDIev69895r",
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Summarize (Orchestrating the Discussion)</strong></p>",
-                        "<p>Solutions and Strategies </p>",
-                        "<p>Be sure to make the connections among the various representations of slope—as the constant rate of change between two variables, the ratio of vertical change to horizontal change between two points of the graph of a linear relationship, and the coefficient a in the equation y = ax + b. Be sure to discuss the constant of proportionality and when you have a proportional relationship.  (Language) </p>"
+                        "<p><u>Solutions and Strategie</u>s </p>",
+                        "<p>Have groups display their posters from the Initial Challenge and do a Gallery Walk having students look to see if there is agreement in the room on the groups and constant of proportionality.</p>",
+                        "<p>Be sure to make the connections among the various representations of slope—as the constant rate of change between two variables, the ratio of vertical change to horizontal change between two points of the graph of a linear relationship, and the coefficient a in the equation y = ax + b. Be sure to discuss the constant of proportionality and when you have a proportional relationship</p>"
                       ]
                     }
                   },
                   {
-                    "content":
-                    {
+                    "id": "XX4ueAfE5kuwZKIk",
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Making the Mathematics Explicit</p>",
-                        "<p><strong>Connecting Slope and Rate of Change</strong></p>",
-                        "<p>Making the connection between the geometric interpretation of slope and the coefficient may be a challenge for some students. Use the equation <em>y</em> = 2<em>x</em> to make a table. </p>",
-                        "<ul><li>What patterns do you see in the table? (As <em>x</em> increases by 1 unit, <em>y</em> increases by 2 units.)</li><li>As <em>x</em> increases by 1 unit, how does <em>y</em> increase? (By 2 units) </li><li>How will this pattern of change appear on the graph of this line? (We would expect to see the line “stepping up” 2 units vertically for every 1 unit horizontally.) </li></ul>",
-                        "<p>Draw the graph of <em>y</em> = 2<em>x</em>, using the coordinate pairs from the table to mark points on the graph.</p>",
+                        "<p><u>Making the Mathematics Explicit </u></p>",
+                        "<p><em>Connecting Slope and Rate of Change</em></p>",
+                        "<p>Making the connection between the geometric interpretation of slope and the coefficient may be a challenge for some students. Use the equation y = 2x to make a table. </p>",
+                        "<ul><li>What patterns do you see in the table? (As x increases by 1 unit, y increases by 2 units.)</li><li>As x increases by 1 unit, how does y increase? (By 2 units) </li><li>How will this pattern of change appear on the graph of this line? (We would expect to see the line “stepping up” 2 units vertically for every 1 unit horizontally.) </li></ul>",
+                        "<p>Draw the graph of y = 2x, using the coordinate pairs from the table to mark points on the graph. </p>",
                         "<ul><li>What is the ratio of the change in vertical distance to the horizontal distance? (2/1) </li><li>What happens to the ratio of vertical change to horizontal change when two different, not necessarily consecutive, points, such as (-2, -4) and (1,2), are measured? (This is a very important point that will need to be discussed several times. The ratio between any horizontal change to its corresponding vertical change is constant for a given linear relationship.) </li></ul>",
-                        "<p>For the points (0, 0) and (1, 2), the ratio is 2/1 or 2.</p>",
-                        "<p>For the points (3, 6) and (5, 10), the ratio is 4/2 or 2.</p>",
-                        "<p>Draw a picture to help students find the vertical distance and the horizontal distance.</p>"
+                        "<p>Demonstrate that this ratio of change is the same no matter which two points are picked. </p>",
+                        "<p>For the points (0, 0) and (1, 2), the ratio is 2/1 or 2. </p>",
+                        "<p>For the points (3, 6) and (5, 10), the ratio is 4/2 or 2. </p>",
+                        "<p>Draw a picture to help students find the vertical distance and the horizontal distance. </p>"
                       ]
                     }
                   },
                   {
-                    "content":
-                    {
+                    "id": "qaH5qLlZ0ffQ8b99",
+                    "content": {
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_TG_4_2_slope_graph.png"
                     }
                   },
                   {
-                    "content":
-                    {
+                    "id": "ZYpr-z9IdZecHxGK",
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<ul><li>What is the slope of this line? (2/1 )</li><li>How could we tell this from the equation? (It is the coefficient of <em>x</em> if the equation is of the form <em>y = ax + b</em>.) </li></ul>",
-                        "<p>Two vertical number lines can be used as another representation of the change in <em>y</em> related to the change in <em>x</em>. The picture below is helpful to some students. It shows that as <em>x</em> is changing in a regular way, <em>y</em> is also changing in a regular way, but that the two changes may be different. A change of one unit in <em>x</em> is accompanied by a change of two units in <em>y</em>. </p>"
+                        "<ul><li>What is the slope of this line? (2/1 )</li><li>How could we tell this from the equation? (It is the coefficient of x if the equation is of the form y = ax + b.) </li></ul>",
+                        "<p>Two vertical number lines can be used as another representation of the change in y related to the change in x. The picture below is helpful to some students. It shows that as x is changing in a regular way, y is also changing in a regular way, but that the two changes may be different. A change of one unit in x is accompanied by a change of two units in y. </p>"
                       ]
                     }
                   },
                   {
-                    "content":
-                    {
+                    "id": "xvo_4QaHr0xTa7Lr",
+                    "content": {
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_TG_4_2_number_line_comp.png"
                     }
                   },
                   {
-                    "content":
-                    {
+                    "id": "SeIis9L_UT7bHFCR",
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Using Slope to Find Other Points on the Line</strong></p>",
+                        "<p><em>Using Slope to Find Other Points on the Line</em></p>",
                         "<ul><li>If you know one point on the graph of a line and you know the slope of the line, how can you use the slope to create a set of points that all lie on the line? (For example, suppose the slope is 2/1 and the point on the graph of the line is (1, 2). Then the point (2, ■) can be found by moving one unit to the right and two units up on the graph.) </li></ul>"
                       ]
                     }
                   },
                   {
-                    "content":
-                    {
+                    "id": "X8B7rjefXFfXuduo",
+                    "content": {
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_TG_4_2_graph_rise_run.png"
                     }
                   },
                   {
-                    "content":
-                    {
+                    "id": "1dVdDojtrFcal6Qj",
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
@@ -5405,46 +5453,58 @@
                     }
                   },
                   {
-                    "content":
-                    {
+                    "id": "UbUEjez1Koet5yro",
+                    "content": {
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_TG_4_2_vertical_change.png"
                     }
                   },
                   {
-                    "content":
-                    {
+                    "id": "A2ZrDYfef4YbPSHr",
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Finding the y-intercept</strong></p>",
-                        "<ul><li>How can you find the <em>y</em>-intercept given 2 points on the line, such as (3, 3) and (5, 9)? (To find the <em>y</em>-intercept, you could graph a line that goes through the points (3, 3) and (5, 9) and see if you could read the y-intercept off the graph. You could also find the slope using the points (3, 3) and (5, 9). Since this is a linear relationship, you could complete a table, using the slope to count backward or forward to find the value for <em>y</em> when x is 0. </li></ul>",
-                        "<p><strong>Constant of Proportionality</strong></p>",
+                        "<p><em>Finding the y-intercept</em></p>",
+                        "<ul><li>How can you find the y-intercept given 2 points on the line, such as (3, 3) and (5, 9)? (To find the y-intercept, you could graph a line that goes through the points (3, 3) and (5, 9) and see if you could read the y-intercept off the graph. You could also find the slope using the points (3, 3) and (5, 9). Since this is a linear relationship, you could complete a table, using the slope to count backward or forward to find the value for y when x is 0. </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "V9FiWtv86nHt0wcQ",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Constant of Proportionality</em></p>",
                         "<ul><li>How does the constant of proportionality relate to the slope of a line? (When a relationship is proportional, all y over x ratios simplify to the slope of the line.)</li></ul>"
                       ]
                     }
                   },
                   {
-                    "content":
-                    {
+                    "display": "teacher",
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p>Now What Do Students Know</p>",
-                        "<p>Ask students to reflect on the discussion and answer the Now What Do You Know questions.</p>",
-                        "<p><See answers to the Problem for more information about the strategies and embedded mathematics. </p>"
+                        "<p>Ask students to reflect on the discussion and answer the Now What Do You Know question.</p>",
+                        "<p><em>How is the rate of change of a linear relationship related to the constant of proportionality?</em></p>",
+                        "<p>See answers to the Problem for more information about the strategies and embedded mathematics. </p>"
                       ]
                     }
                   },
                   {
-                    "content":
-                    {
+                    "id": "CzKXXgJN8We4LeQ4",
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Reflecting on Student Learning </strong></p>",
-                        "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
-                        "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li><ul><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ul<li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit?The next Unit?<strong></strong></li></ul>"
+                        "<p><strong>Reflecting on Student Learning  </strong></p>",
+                        "<p>Use the following questions to assess student understanding at the end of the lesson.  </p>",
+                        "<ul><li>What evidence do I have that students understand the Now What Do You Know question?</li></ul>",
+                        "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
+                        "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?  </li></ul>"
                       ]
                     }
                   }
@@ -5594,6 +5654,7 @@
                     }
                   },
                   {
+                    "display": "teacher",
                     "content":
                     {
                       "type": "Text",
@@ -5602,15 +5663,13 @@
                         "<p><strong>Planning for the Summary</strong></p>",
                         "<p>WWhat evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know questions? What will you do if you do not have evidence? </p>",
                         "<p><strong>Now What Do You Know?</strong></p>",
-                        "<p><strong>How do the situations in this Problem compare to other Problems in this Unit? Do any of these represent proportional situations? Why? In what ways are tables, graphs, equations, and inequalities useful for solving problems?</strong></p>"
+                        "<p>How do the situations in this Problem compare to other Problems in this Unit? Do any of these represent proportional situations? Why? In what ways are tables, graphs, equations, and inequalities useful for solving problems?</p>"
                       ]
                     }
                   }
                 ]
               },
               "supports": [
-                {"text": "What information do you need to know if a situation is linear?"},
-                {"text": "How do you know your equation represents the linear situation?"}
               ]
             },
             {
@@ -5632,14 +5691,13 @@
                     }
                   },
                   {
-                    "content":
-                    {
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p>Making the Mathematics Explicit</p>",
-                        "<p><strong>Suggested Questions </strong></p>",
-                        "<ul><li>How was the rate of change helpful?  (Answers will vary. Example: In the Initial Challenge students can discuss the $4.50 per student and the $1.25 per student for film rental and how those influenced the table, graph, equation, and ultimate solution.)</li><li>How does Geraldo’s Strategy (or if someone in the class made a similar table, use that instead) help to solve the problem? (Finding when the Income and Expenses are the same and knowing that this is where the movie company would break even.)</li><li>How does Anna’s Strategy (or if someone in the class made a similar graph, use that instead) help to solve the problem? (Finding where the two lines intersect is where the movie company would break even.)</li><li>How does Sze’s Strategy (or if someone in the class wrote a Profit equation, use that instead) help to solve the problem? (By making one equation you can solve it for the number of students when the profit is 0 to find where the movie company would break even.)</li><li>How did you solve What If...? Situation B? (Answers will vary. Look for students who used graphs, tables, and symbolic manipulation. Share the different strategies and help students see connections.) (Agency, Identity, Ownership)</li></ul>"
+                        "<p><strong>Suggested Questions</strong> </p>",
+                        "<ul><li>How was the rate of change helpful?  (Answers will vary. Example: In the Initial Challenge students can discuss the $4.50 per student and the $1.25 per student for film rental and how those influenced the table, graph, equation, and ultimate solution.)</li><li>How does Geraldo’s Strategy (or if someone in the class made a similar table, use that instead) help to solve the problem? (Finding when the Income and Expenses are the same and knowing that this is where the movie company would break even.) </li><li>How does Anna’s Strategy (or if someone in the class made a similar graph, use that instead) help to solve the problem? (Finding where the two lines intersect is where the movie company would break even.)</li><li>How does Sze’s Strategy (or if someone in the class wrote a Profit equation, use that instead) help to solve the problem? (By making one equation you can solve it for the number of students when the profit is 0 to find where the movie company would break even.)</li><li>How did you solve What If Situation B? (Answers will vary. Look for students who used graphs, tables, and symbolic manipulation. Share the different strategies and help students see connections. </li></ul>"
                       ]
                     }
                   },
@@ -5691,14 +5749,15 @@
                     }
                   },
                   {
-                    "content":
-                    {
+                    "display": "teacher",
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Now What Do Students Know</p>",
-                        "<p>Ask students to reflect on the discussion and answer the Now What Do You Know questions.</p>",
-                        "<p><See answers to the Problem for more information about the strategies and embedded mathematics. </p>"
+                        "<p>Now What Do Students Know </p>",
+                        "<p>Ask students to reflect on the discussion and answer the Now What Do You Know questions. </p>",
+                        "<p>How do the situations in this problem compare to other problems in this Unit? In what ways are tables, graphs, equations, and inequalities useful for solving problems?</p>",
+                        "<p>See answers to the Problem for more information about the strategies and embedded mathematics. </p>"
                       ]
                     }
                   },
@@ -5710,7 +5769,7 @@
                       "text": [
                         "<p><strong>Reflecting on Student Learning </strong></p>",
                         "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
-                        "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li><ul><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ul<li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit?The next Unit?<strong></strong></li></ul>"
+                        "<ul><li>What evidence do I have that students understand the Now What Do You Know questions?</li><ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol><ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
                       ]
                     }
                   }
