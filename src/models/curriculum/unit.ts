@@ -85,9 +85,6 @@ const ModernUnitModel = types
     get fullTitle() {
       return `${self.title}${self.subtitle ? ": " + self.subtitle : ""}`;
     },
-    get defaultDocumentContent(): DocumentContentModelType | undefined {
-      return cloneContentWithUniqueIds(self.defaultDocumentTemplate);
-    },
     getInvestigation(investigationOrdinal: number) {
       return self.investigations.find(inv => inv.ordinal === investigationOrdinal);
     }

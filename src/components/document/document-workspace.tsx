@@ -8,9 +8,6 @@ import { createDefaultSectionedContent, DocumentContentModelType } from "../../m
 import {
   DocumentDragKey, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
 } from "../../models/document/document-types";
-import {
-  getDefaultDocumentSpecFromStores, getNavTabConfigFromStores, getToolbarConfigFromStores
-} from "../../models/stores/stores";
 import { kDividerHalf, kDividerMax, kDividerMin } from "../../models/stores/ui-types";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { NavTabPanel } from "../navigation/nav-tab-panel";
@@ -82,7 +79,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     const { appConfig: { defaultDocumentSpec: { type: defaultType, content: defaultContent },
             defaultLearningLogDocument, defaultLearningLogTitle, initialLearningLogTitle },
             db, ui: { problemWorkspace }, unit: { planningDocument }, user: { type: role } } = this.stores;
-    const { type: defaultType, content: defaultContent } = getDefaultDocumentSpecFromStores(this.stores);
     if (!problemWorkspace.primaryDocumentKey) {
       const documentContent = this.getDefaultDocumentContent(defaultType, defaultContent);
       const defaultDocument = await db.guaranteeOpenDefaultDocument(defaultType, documentContent);
@@ -108,7 +104,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     const groupVirtualDocument = comparisonDocumentKey
       && groups.virtualDocumentForGroup(comparisonDocumentKey);
 
-    const toolbar = getToolbarConfigFromStores(this.stores);
+    const toolbar = appConfig.toolbar;
 
     if (!primaryDocument) {
       return this.renderDocument("single-workspace", "primary");

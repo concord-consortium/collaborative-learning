@@ -12,8 +12,6 @@ const LegacyProblemModel = types
     disabled: types.array(types.string),
     sections: types.array(SectionModel),
     supports: types.array(SupportModel),
-    // configuration of document toolbar
-    toolbar: types.maybe(ToolbarModel),
     settings: types.maybe(SettingsMstType)
   });
 
