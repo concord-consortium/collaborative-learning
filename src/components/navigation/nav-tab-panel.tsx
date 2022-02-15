@@ -3,6 +3,7 @@ import React from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { BaseComponent, IBaseProps } from "../base";
 import { kDividerMax, kDividerMin } from "../../models/stores/ui-types";
+import { DocumentModelType } from "../../models/document/document";
 import { NavTabSpec, ENavTab } from "../../models/view/nav-tabs";
 import { Logger, LogEventName } from "../../lib/logger";
 import { StudentGroupView } from "../document/student-group-view";
@@ -27,6 +28,7 @@ interface IProps extends IBaseProps {
 
 interface IState {
   tabLoadAllowed: { [tab: number]: boolean };
+  referenceDocument: DocumentModelType | undefined;
 }
 
 @inject("stores")
@@ -38,6 +40,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
     super(props);
     this.state = {
       tabLoadAllowed: {},
+      referenceDocument: undefined,
     };
   }
 
@@ -158,9 +161,11 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
     const { ui } = this.stores;
     if (tabs) {
       const tabSpec = tabs[tabIndex];
+      this.setState({ referenceDocument: undefined });
+      ui.updateFocusDocument();
+      ui.setSelectedTile();
       if (ui.activeNavTab !== tabSpec.tab) {
         ui.setActiveNavTab(tabSpec.tab);
-        ui.updateFocusDocument();
         const logParameters = {
           tab_name: tabSpec.tab.toString()
         };

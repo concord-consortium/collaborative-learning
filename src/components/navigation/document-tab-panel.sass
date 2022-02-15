@@ -32,6 +32,8 @@
       bottom: -2px
       left: 0
       position: absolute
+    &.single-panel
+      border-bottom: none
     .doc-tab
       flex-grow: 1
       height: $nav-tab-height
@@ -80,7 +82,6 @@
         &.supports
           background-color: $support-blue-light-3
   .documents-panel
-    height: calc(100vh - (#{$header-height} + #{$workspace-content-margin} * 2 + #{$nav-tab-height} * 2 + #{$tab-section-border-width} * 2))
     margin-top: $document-margin
     overflow-y: auto
   &.chat-open
