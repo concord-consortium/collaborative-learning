@@ -5149,11 +5149,11 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>1.    Using substitution, y = 3(–2/3) – 7 = –9.</p>",
+                        "<p>1.  Using substitution,   y = 3(–2/3) – 7 = –9.</p>",
                         "<p>2.  Using substitution, –5 = 3x – 7 </p>",
-                        "<p>                                      2 = 3x </p>",
-                        "<p>        x = 2/3.</p>",
-                        "<p>3.  Yes, if you had a graph of these equations, you would find the point on the line with the x-value that you are looking for         (by looking at the x-axis), and then get the corresponding y-value by looking at the y-axis. If you had a table of these equations, you would find the entry with the x-value that you are looking for, and then get the corresponding y-value by looking at the other column of the table. You could also start either of these methods with a y-value and get the corresponding x-value.</p>",
+                        "<p>                                               2 = 3x </p>",
+                        "<p>                                               x = 2/3.</p>",
+                        "<p>3.  Yes, if you had a graph of these equations, you would find the point on the line with the x-value that you are looking for (by looking at the x-axis), and then get the corresponding y-value by looking at the y-axis. If you had a table of these equations, you would find the entry with the x-value that you are looking for, and then get the corresponding y-value by looking at the other column of the table. You could also start either of these methods with a y-value and get the corresponding x-value.</p>",
                         "<p>4.  You could solve these equations by using tables or graphs if you consider the expression on each side of the equation to be its own equation. So, you’d set y1 equal to the left side of the equation and y2 equal to the right side of the equation. Then to find the solution, you’d need to find the point where y1=y2. You could do this by making tables for each equation and looking for the points where y1=y2, or by graphing lines for each equation and looking for the points of intersection. For most cases in the Initial Challenge, y2 is equal to a constant value, but this method would also work when both y1 and y2 are equal to expressions involving x.</p>"
                       ]
                     }
@@ -5265,8 +5265,17 @@
                         "<p>The solutions to this inequality will be all possible femur lengths for a female who is less than 150 cm tall.</p>"
                       ]
                     }
-                  },
-                  {
+                  }
+                ]
+              },
+              "supports": [
+              ]
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                                    {
                     "id": "wrdJxLKvrkfhDyTz",
                     "content": {
                       "type": "Text",
@@ -5283,19 +5292,10 @@
                       "format": "html",
                       "text": [
                         "<p>For symbolic methods, students’ explanations should include keeping expressions equivalent on both sides of the equal sign (e.g., adding 2 to each side, dividing each side by 3, etc.). Students should also include something about using order of operations correctly, although there are some exceptions (e.g., factoring as a first step). Students should also notice that if applying the Distributive Property is possible, then it may simplify the process.</p>",
-                        "<p>Tables and graphs can also be used to solve linear equations. For example, the equation 2x – 5 = x + 7 can be solved by finding the point of intersection of y1 = 2x – 5 and y2 = x + 7 on a graphing calculator. Sometimes it is quicker to use symbolic methods. However, if students are experienced with using technology to create tables and graphs, and if several questions of this type are being asked, then tables or graphs might be more efficient.</p>"
+                        "<p>Tables and graphs can also be used to solve linear equations. For example, the equation  2x – 5 = x + 7 can be solved by finding the point of intersection of y1 = 2x – 5  and y2 = x + 7 on a graphing calculator. Sometimes it is quicker to use symbolic methods. However, if  students are experienced with using technology to create tables and graphs, and if  several questions of this type are being asked, then tables or graphs might be more efficient.</p>"
                       ]
                     }
-                  }
-                ]
-              },
-              "supports": [
-              ]
-            },
-            {
-              "type": "nowWhatDoYouKnow",
-              "content": {
-                "tiles": [
+                  },
                   [
                     {
                       "id": "yr_zQp5Pmkj0OL6C",
@@ -5616,17 +5616,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><em>Situation C. Fabian’s Profit Inequality</em></p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "dQ6CkYHHqIgNsury",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<ul><li>Fabian and Billie are looking for other ways express how to find the number of cakes needed to make a profit. Explain why each representation does or does not make sense.</li></ul>"
+                        "<p><em>Situation C. Fabian’s Profit Inequality</em></p><ul><li>Fabian and Billie are looking for other ways express how to find the number of cakes needed to make a profit. Explain why each representation does or does not make sense.</li></ul>"
                       ]
                     }
                   },
@@ -5638,9 +5628,7 @@
                         "format": "html",
                         "text": [
                           "<p>Fabian’s Representation</p>", 
-                          "<p>Inequality Statement</p>",
-                          "<p></p>",
-                          "<p>P &gt; 4.95n – 825</p>"
+                          "<p>Inequality Statement</p>"
                         ]
                       }
                     },
@@ -5663,7 +5651,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>PLACE HOLDER</p>"
+                          "<p>P &gt; 4.95n – 825</p>"
                         ]
                       }
                     },
@@ -5751,7 +5739,6 @@
                       "text": [
                         "<p>All of the patterns of change you have explored in this Unit involved rates of change. For example, we worked with walking rates expressed in meters per second and pledge rates expressed in dollars per kilometer. In these situations, we found that the rate a affects the following in a linear relationship represented by y = ax + b: </p>",
                         "<ul><li>the steepness of the graph </li><li>how the y-values in the table change for each unit change in the x-values </li><li>and if b = 0, then the relationship is also proportional</li></ul>",
-                        "<p></p>",
                         "<p>In this Investigation, we will explore another way to express the rates of change. </p>"
                       ]
                     }
@@ -5780,7 +5767,6 @@
                         "<p>Climbing stairs is good exercise, so some athletes run up and down stairs as part of their training. The steepness of stairs determines how difficult they are to climb. By investigating the steepness of stairs, you can find another important way to describe the steepness of a line. </p>",
                         "<p>Carpenters have developed the guidelines below to ensure that the stairs they build are relatively easy for a person to climb. Steps are measured in inches. </p>",
                         "<ul><li>The run plus twice the rise should be between 24 and 26 inches.</li><li>The rise plus the run for each step should be between 17 and 19 inches.  </li></ul>",
-                        "<p></p>",
                         "<p>The steepness of stairs is determined by the ratio of the rise to the run for each step. The rise and run are labeled in the photo below. </p>"
                       ]
                     }
@@ -5811,213 +5797,6 @@
                       "text": [
                         "<p>Student answers will vary. Interesting situations to think about include: spiral staircases, school stairs, large steps (like at a museum), etc.</p>",
                         "<p>Example: 7.25 in. to 11.25 inches for the rise to the run, or approximately 0.70 for the ratio of rise to run. This is the same for every step in the staircase. The ratio of rise to run is not within the carpenter’s guidelines.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "PyPlVENfU4La5OMx",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p><em>Situation A. Arch Middle School Stairs</em></p>",
-                        "<p>A set of stairs is being built for the front of the new Arch Middle School. The ratio of rise to run is 7 to 11. </p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "spkM8ypzvF6gQu2H",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<ul><li>Is this ratio within the carpenters’ guidelines?</li></ul>"
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>2(rise) + run = 2(7) + 11 = 14 + 11 = 25, which is between 24 and 26 inches. </p>",
-                        "<p>Rise + run = 7 + 11 = 18, which is between 17 and 19 inches.</p>",
-                        "<p>Yes, these stairs meet the carpenters’ guidelines. Note that a scaled-up equivalent ratio of 14 to 22 would not meet the guidelines. </p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "qqbOsF2XTEkWceSR",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<ul><li>Make a sketch of a set of stairs that meet this ratio. Label the lengths of the rise and run of a step.</li></ul>"
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Student answers will vary.</p>",
-                        "<p>Example: a set of stairs with a height of 3.5 inches and a depth of 5.5 inches.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "yH15ghwHscqY9MZF",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<ul><li>Does everyone in your class have the same sketch? Explain why.</li></ul>"
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Not everyone in the class will have the same sketch because even the same ratio can be represented by different numbers.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "CiGxH-VR5XlQgXWm",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<ul><li>Write an equation that represents the relationship between rise and run.</li></ul>"
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Student answers will vary based on their stairs.</p>",
-                        "<p>Example answer using the stairs at Arch Middle School, rise = (7/11)run.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "PlVFQOw68ifZi71o",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<ul><li>How is the ratio of rise to run represented in the graph? Equation?</li></ul>"
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>The ratio of rise to run is represented in the graph by the steepness of the line and in the equation by the coefficient of x.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "gXaieNGQbYSFVSgD",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<ul><li>Does your graph represent a proportional relationship? Explain why. </li></ul>"
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>The graph does represent a proportional relationship because it passes through the origin.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "tP5aEfy0NGf3UCLT",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p><em>Situation B. Anna’s Claim</em></p>",
-                        "<p>Anna’s Claim:</p>",
-                        "<p>The ratio of rise to run is another way to express the pattern of change between the two variables in a linear situation.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "8EBItouYoxO-Nrdn",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<ul><li>Is she correct? Explain why.</li></ul>"
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Yes, she is correct. The ratio of rise to run describes how much one variable changes if you change the other variable by a specific amount. If the variables are always related in this way, then they have a constant rate of change, which gives a linear relationship.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "eMgUEc2Tr7aiXer7",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<ul><li>Is the ratio the same between any two steps? Explain.</li></ul>"
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Yes, because each step on the staircase will have the same height (or rise) and depth (or run).</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "0vssf7ilObtFtDe2",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<ul><li> Does the ratio change if we take two steps at a time? Explain why.</li></ul>"
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>No, because we’re rising twice as high and running twice as far.  So, the ratio will stay the same.</p>"
                       ]
                     }
                   }
@@ -6179,9 +5958,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>How does the steepness of stairs expressed as a ratio relate to a straight-line graph?  To the linear rate of change? To a linear equation that represents the graph?</p>",
-                        "<p></p>",
-                        "<p>How does the steepness of stairs expressed as a ratio relate to a straight-line graph? To a linear equation that represents the graph?</p>"
+                        "<p>How does the steepness of stairs expressed as a ratio relate to a straight-line graph?  To the linear rate of change? To a linear equation that represents the graph?</p>"
                       ]
                     }
                   },
@@ -6238,9 +6015,9 @@
                       "format": "html",
                       "text": [
                         "<p>The steepness of the line is the ratio of rise (vertical change) to run (horizontal change) for this step. We call this ratio the rate of change or slope of the line. </p>",
-                        "               vertical change       rise",
-                        "slope  =  __________________   = ______",
-                        "                horizontal change      run"
+                        "\u00a0                  vertical change       rise",
+                        "Slope  =  __________________   = ______",
+                        "                horizontal change        run"
                       ]
                     }
                   },
@@ -6355,7 +6132,9 @@
                       ]
                     },
                     "layout": { "height": 245 }
-                  },
+                  }
+                ],
+                [
                   {
                     "id": "Uevn5QnBn9rDMK40",
                     "content": {
@@ -6363,12 +6142,18 @@
                       "format": "html",
                       "text": [
                         "<p>Equation 1</p>",
-                        "<p></p>",
-                        "<p>y = x + 5</p>",
+                        "<p>y = x + 5</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "Uevn5QnBn9rDMK40",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
                         "<p>Equation 2</p>",
-                        "<p></p>",
-                        "<p>y = 20 – 3x</p>",
-                        "<p></p>"
+                        "<p>y = 20 – 3x</p>"
                       ]
                     }
                   }
@@ -6411,7 +6196,9 @@
                       ]
                     },
                     "layout": { "height": 349 }
-                  },
+                  }
+                ],
+                [
                   {
                     "id": "btlSHhdr8m_SSbMr",
                     "content": {
@@ -6419,29 +6206,22 @@
                       "format": "html",
                       "text": [
                         "<p>Equation 3</p>",
-                        "<p></p>",
-                        "<p>y = –x</p>",
+                        "<p>y = –x</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "btlSHhdr8m_SSbMr",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
                         "<p>Equation 4</p>",
-                        "<p></p>",
                         "<p>y = 0.5x</p>"
                       ]
                     }
                   }
                 ],
-                {
-                  "id": "EPe2tzkX0CCpatoG",
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": [
-                      "<p>Equation 4</p>",
-                      "<p></p>",
-                      "<p>y = 0.5x</p>",
-                      "<p></p>",
-                      "<p></p>"
-                    ]
-                  }
-                },
                 [
                   {
                     "id": "FUMmSiHIk89i_0_Z",
