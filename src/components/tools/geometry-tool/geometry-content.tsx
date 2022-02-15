@@ -11,7 +11,7 @@ import { GeometryContentModelType, GeometryMetadataModelType, setElementColor, g
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
           isDragTargetOrAncestor } from "../../../models/tools/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
-import { getPointsByCaseId } from "../../../models/tools/geometry/jxg-board";
+import { getPointsByCaseId, resumeBoardUpdates, suspendBoardUpdates } from "../../../models/tools/geometry/jxg-board";
 import { ESegmentLabelOption, ILinkProperties, JXGChange, JXGCoordPair
         } from "../../../models/tools/geometry/jxg-changes";
 import { kSnapUnit } from "../../../models/tools/geometry/jxg-point";
@@ -109,7 +109,7 @@ function syncBoardChanges(board: JXG.Board, content: GeometryContentModelType,
   const newElements: JXG.GeometryElement[] = [];
   const changedElements: JXG.GeometryElement[] = [];
   const syncedChanges = content.changes.length;
-  board.suspendUpdate();
+  suspendBoardUpdates(board);
   for (let i = prevSyncedChanges || 0; i < syncedChanges; ++i) {
     try {
       const change: JXGChange = JSON.parse(content.changes[i]);
@@ -129,7 +129,7 @@ function syncBoardChanges(board: JXG.Board, content: GeometryContentModelType,
 
   // update vertex angles affected by changed points
   updateVertexAnglesFromObjects(changedElements);
-  board.unsuspendUpdate();
+  resumeBoardUpdates(board);
 
   return { newElements: newElements.length ? newElements : undefined };
 }
@@ -358,14 +358,14 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         // If the incoming list of changes is shorter, an undo has occurred.
         // In this case, clear the board and replay it.
         if (this.syncedChanges > geometryContent.changes.length) {
-          board.suspendUpdate();
+          suspendBoardUpdates(board);
           // Board initialization creates 2 objects: the info box and the grid.
           // These won't be recreated if the board already exists so we don't delete them.
           const kDefaultBoardObjects = 2;
           for (let i = board.objectsList.length - 1; i >= kDefaultBoardObjects; i--) {
             board.removeObject(board.objectsList[i]);
           }
-          board.unsuspendUpdate();
+          resumeBoardUpdates(board);
         }
         const syncedChanges = this.syncedChanges > geometryContent.changes.length
                                 ? 0
@@ -1457,7 +1457,13 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private handleCreateAxis = (axis: JXG.Line) => {
     const handlePointerDown = (evt: any) => {
-      if (!this.props.readOnly) {
+      const { readOnly, scale } = this.props;
+      const { board } = this.state;
+      // Axis labels get the event preferentially even though we think of other potentially
+      // overlapping objects (like movable line labels) as being on top. Therefore, we only
+      // open the axis settings dialog if we consider the axis label to be the preferred
+      // clickable object at the position of the event.
+      if (board && !readOnly && (axis.label === getClickableObjectUnderMouse(board, evt, false, scale))) {
         this.handleOpenAxisSettings();
       }
     };

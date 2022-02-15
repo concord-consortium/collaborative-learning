@@ -1,4 +1,4 @@
-import { syncLinkedPoints } from "./jxg-board";
+import { resumeBoardUpdates, suspendBoardUpdates, syncLinkedPoints } from "./jxg-board";
 import { ILinkProperties, ITableLinkProperties, JXGChange, JXGChangeAgent, JXGCoordPair } from "./jxg-changes";
 import { createPoint, pointChangeAgent } from "./jxg-point";
 import { isPoint } from "./jxg-types";
@@ -99,9 +99,9 @@ export const tableLinkChangeAgent: JXGChangeAgent = {
       const pts = board.objectsList.filter(elt => {
                     return isPoint(elt) && tableId && (elt.getAttribute("linkedTableId") === tableId);
                   });
-      board.suspendUpdate();
+      suspendBoardUpdates(board);
       pts.reverse().forEach(pt => board.removeObject(pt));
-      board.unsuspendUpdate();
+      resumeBoardUpdates(board);
     }
   }
 };

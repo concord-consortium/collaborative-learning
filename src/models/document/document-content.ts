@@ -134,6 +134,15 @@ export const DocumentContentModel = types
                   return tile ? tile.isPlaceholder : false;
                 });
       },
+      getSectionIdForTile(tileId: string) {
+        let sectionId = "";
+        const foundRow = self.rowOrder.find((rowId, i) => {
+          const row = self.rowMap.get(rowId);
+          row?.sectionId && (sectionId = row?.sectionId);
+          return row?.hasTile(tileId);
+        });
+        return foundRow ? sectionId : undefined;
+      },
       getRowsInSection(sectionId: string): TileRowModelType[] {
         let sectionRowIndex: number | undefined;
         let nextSectionRowIndex: number | undefined;

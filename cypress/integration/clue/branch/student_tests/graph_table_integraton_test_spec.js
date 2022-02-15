@@ -107,7 +107,7 @@ context('Tests for graph and table integration', function () {
         tableToolTile.getTableCell().eq(10).click();
         tableToolTile.getTableCell().eq(10).type(new_y + '{enter}');
       });
-      graphToolTile.getGraphPointCoordinates(2).should('contain', '(8, ' + new_y + ')');
+      graphToolTile.getGraphPointCoordinates(2).should('contain', '(6, ' + new_y + ')');
     });
     it('will delete a point in the table', function () {
       let point = 0; //the 4th point in the graph
@@ -161,13 +161,14 @@ context('Tests for graph and table integration', function () {
   describe('normal graph interactions', function () {
     it('will add a polygon directly onto the graph', function () {
       graphToolTile.getGraphTile().click();
-      graphToolTile.addPointToGraph(5, 5); //not sure why this isn't appearing
-      graphToolTile.addPointToGraph(10, 15);
-      graphToolTile.addPointToGraph(13, 10);
-      graphToolTile.addPointToGraph(5, 10);
+      graphToolTile.addPointToGraph(10, 10); //not sure why this isn't appearing
+      graphToolTile.addPointToGraph(10, 10);
+      graphToolTile.addPointToGraph(15, 10);
+      graphToolTile.addPointToGraph(10, 5);
       graphToolTile.getGraphPoint().last().click({ force: true }).click({ force: true });
     });
-    it('will add and angle to a point created from a table', function () {
+    it('will add an angle to a point created from a table', function () {
+      graphToolTile.getGraphPolygon().last().click({force: true});
       graphToolTile.showAngle();
       graphToolTile.getAngleAdornment().should('exist');
     });

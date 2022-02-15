@@ -9,6 +9,7 @@ import {
   DocumentDragKey, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
 } from "../../models/document/document-types";
 import { kDividerHalf, kDividerMax, kDividerMin } from "../../models/stores/ui-types";
+import { getNavTabConfigFromStores } from "../../models/stores/stores";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { NavTabPanel } from "../navigation/nav-tab-panel";
 import { CollapsedResourcesTab } from "../navigation/collapsed-resources-tab";
@@ -38,19 +39,11 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   public render() {
-    const { appConfig : { navTabs: { tabSpecs } },
-            teacherGuide,
-            user: { isTeacher },
-            ui: { problemWorkspace: { type },
-                  activeNavTab,
-                  navTabContentShown,
-                  workspaceShown,
-                  dividerPosition,
+    const { ui: { problemWorkspace: {type},
+                  workspaceShown
                 }
           } = this.stores;
-    const studentTabs = tabSpecs.filter((t) => !t.teacherOnly);
-    const teacherTabs = tabSpecs.filter(t => (t.tab !== "teacher-guide") || teacherGuide);
-    const tabsToDisplay = isTeacher ? teacherTabs : studentTabs;
+    const showNavPanel = getNavTabConfigFromStores(this.stores)?.showNavPanel;
     // NOTE: the drag handlers are in three different divs because we cannot overlay
     // the renderDocuments() div otherwise the Cypress tests will fail because none
     // of the html elements in the documents will be visible to it.  The first div acts
@@ -63,24 +56,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
           onDragOver={this.handleDragOverWorkspace}
           onDrop={this.handleImageDrop}
         />
-
-        <ResizePanelDivider
-          isResourceExpanded={navTabContentShown}
-          dividerPosition={dividerPosition}
-          onExpandWorkspace={this.toggleExpandWorkspace}
-          onExpandResources={this.toggleExpandResources}
-        />
-        <NavTabPanel
-          tabs={tabsToDisplay}
-          onDragOver={this.handleDragOverWorkspace}
-          onDrop={this.handleImageDrop}
-          isResourceExpanded={navTabContentShown}
-        />
-        <CollapsedResourcesTab
-          onExpandResources={this.toggleExpandResources}
-          resourceType={activeNavTab}
-          isResourceExpanded={!navTabContentShown}
-        />
+        {showNavPanel && this.renderNavTabPanel()}
         {workspaceShown ? this.renderDocuments()
                         : <CollapsedWorkspaceTab
                             onExpandWorkspace={this.toggleExpandWorkspace}
@@ -123,7 +99,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
 
   private renderDocuments() {
     const {appConfig, documents, ui, groups} = this.stores;
-
     const { problemWorkspace } = ui;
     const { comparisonDocumentKey, hidePrimaryForCompare, comparisonVisible} = problemWorkspace;
     const showPrimary = !hidePrimaryForCompare;
@@ -194,8 +169,9 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   private renderDocument(className: string, side: WorkspaceSide, child?: JSX.Element) {
-    const { ui } = this.stores;
-    const workspaceLeft = ui.navTabContentShown ? "50%" : 42;
+    const { ui,  } = this.stores;
+    const showNavPanel = getNavTabConfigFromStores(this.stores)?.showNavPanel;
+    const workspaceLeft = !showNavPanel? 0 : ui.navTabContentShown ? "50%" : 42;
     const style = { left: workspaceLeft };
     const roleClassName = side === "primary" ? "primary-workspace" : "reference-workspace";
     return (
@@ -225,6 +201,42 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
       >
         {placeholderContent}
       </div>
+    );
+  }
+
+  private renderNavTabPanel() {
+    const { teacherGuide,
+            user: { isTeacher },
+            ui: { activeNavTab,
+                  navTabContentShown,
+                  dividerPosition,
+                }
+          } = this.stores;
+    const navTabSpecs = getNavTabConfigFromStores(this.stores);
+    const studentTabs = navTabSpecs?.tabSpecs.filter((t) => !t.teacherOnly);
+    const teacherTabs = navTabSpecs?.tabSpecs.filter(t => (t.tab !== "teacher-guide") || teacherGuide);
+    const tabsToDisplay = isTeacher ? teacherTabs : studentTabs;
+
+    return (
+      <>
+        <ResizePanelDivider
+          isResourceExpanded={navTabContentShown}
+          dividerPosition={dividerPosition}
+          onExpandWorkspace={this.toggleExpandWorkspace}
+          onExpandResources={this.toggleExpandResources}
+        />
+        <NavTabPanel
+          tabs={tabsToDisplay}
+          onDragOver={this.handleDragOverWorkspace}
+          onDrop={this.handleImageDrop}
+          isResourceExpanded={navTabContentShown}
+        />
+        <CollapsedResourcesTab
+          onExpandResources={this.toggleExpandResources}
+          resourceType={activeNavTab}
+          isResourceExpanded={!navTabContentShown}
+        />
+      </>
     );
   }
 

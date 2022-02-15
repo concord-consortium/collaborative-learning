@@ -98,6 +98,7 @@
   "showClassSwitcher": true,
   "navTabs": {
     "lazyLoadTabContents": true,
+    "showNavPanel": true,
     "tabSpecs": [
       {
         "tab": "problems",

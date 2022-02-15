@@ -1,6 +1,6 @@
 import firebase from "firebase/app";
 import { renderHook } from "@testing-library/react-hooks";
-import { useCollectionOrderedRealTimeQuery, useDeleteDocument } from "./firestore-hooks";
+import { useCollectionOrderedRealTimeQuery, useDeleteDocument, useFirestoreTeacher } from "./firestore-hooks";
 
 var mockData = [
   { id: 1, value: "foo" },
@@ -34,8 +34,10 @@ var mockOnSnapshot = (callback: (snap: any) => void) => {
   }));
 };
 var mockDelete = jest.fn();
+var mockGet = jest.fn();
 var mockDoc = jest.fn((path: string) => ({
-  delete: mockDelete
+  delete: mockDelete,
+  get: mockGet
 }));
 jest.mock("./use-stores", () => ({
   useDBStore: () => ({
@@ -64,6 +66,59 @@ describe("Firestore hooks", () => {
   beforeEach(() => {
     mockUseQuery.mockClear();
     mockSetQueryData.mockClear();
+    mockUseMutation.mockClear();
+    mockDoc.mockClear();
+    mockDelete.mockReset();
+    mockGet.mockReset();
+  });
+
+  describe("useFirestoreTeacher", () => {
+    it("should return teacher records successfully", done => {
+      expect.assertions(4);
+      const kId = "t1";
+      const kDefaultName = "Network User";
+      const kRealName = "Jane Teacher";
+      const kNetwork = "network";
+      const kRealTeacher = { uid: kId, name: kRealName, type: "teacher", network: kNetwork, networks: [kNetwork] };
+      const kDefaultTeacher = { ...kRealTeacher, name: kDefaultName };
+      mockGet.mockImplementation(() => Promise.resolve({ data: () => kRealTeacher}));
+      const { result, rerender } = renderHook(() => useFirestoreTeacher(kId, kNetwork));
+      expect(mockGet).toHaveBeenCalledTimes(1);
+      // initial response is the default response
+      expect(result.current).toEqual(kDefaultTeacher);
+      // wait for promise to resolve
+      setTimeout(() => {
+        rerender();
+        // second request for same teacher doesn't hit the network due to caching
+        expect(mockGet).toHaveBeenCalledTimes(1);
+        // actual teacher available once promise resolves
+        expect(result.current).toEqual(kRealTeacher);
+        done();
+      }, 10);
+    });
+
+    it("should return default teacher on error", done => {
+      expect.assertions(4);
+      const kId = "t2";
+      const kDefaultName = "Network User";
+      const kRealName = "Jane Teacher";
+      const kNetwork = "network";
+      const kRealTeacher = { uid: kId, name: kRealName, type: "teacher", network: kNetwork, networks: [kNetwork] };
+      const kDefaultTeacher = { ...kRealTeacher, name: kDefaultName };
+      mockGet.mockImplementation(() => Promise.reject());
+      const { result, rerender } = renderHook(() => useFirestoreTeacher(kId, kNetwork));
+      expect(mockGet).toHaveBeenCalledTimes(1);
+      // initial response is the default response
+      expect(result.current).toEqual(kDefaultTeacher);
+      rerender();
+      // second request for same teacher doesn't hit the network due to caching
+      expect(mockGet).toHaveBeenCalledTimes(1);
+      setTimeout(() => {
+        // still returns default teacher due to error retrieving real teacher
+        expect(result.current).toEqual(kDefaultTeacher);
+        done();
+      }, 10);
+    });
   });
 
   describe("useCollectionOrderedRealTimeQuery", () => {

@@ -48,7 +48,13 @@ export const UserModel = types
   })
   .volatile(self => ({
     isFirebaseConnected: false,
-    isLoggingConnected: false
+    // number of firebase disconnects encountered during the current session
+    firebaseDisconnects: 0,
+    isLoggingConnected: false,
+    // number of logging disconnects encountered during the current session
+    loggingDisconnects: 0,
+    // number of network status alerts presented during the current session
+    networkStatusAlerts: 0
   }))
   .actions((self) => ({
     setName(name: string) {
@@ -97,10 +103,15 @@ export const UserModel = types
       }
     },
     setIsFirebaseConnected(connected: boolean) {
+      if (self.isFirebaseConnected && !connected) ++self.firebaseDisconnects;
       self.isFirebaseConnected = connected;
     },
     setIsLoggingConnected(connected: boolean) {
+      if (self.isLoggingConnected && !connected) ++self.loggingDisconnects;
       self.isLoggingConnected = connected;
+    },
+    incrementNetworkStatusAlertCount() {
+      ++self.networkStatusAlerts;
     },
     setLastSupportViewTimestamp(timestamp: number) {
       self.lastSupportViewTimestamp = timestamp;

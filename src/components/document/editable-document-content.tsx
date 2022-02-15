@@ -6,7 +6,8 @@ import { CanvasComponent } from "./canvas";
 import { DocumentContextReact } from "./document-context";
 import { FourUpComponent } from "../four-up";
 import { useDocumentContext } from "../../hooks/use-document-context";
-import { useGroupsStore, useUIStore, useUserStore } from "../../hooks/use-stores";
+import { useDocumentSyncToFirebase } from "../../hooks/use-document-sync-to-firebase";
+import { useGroupsStore, useStores } from "../../hooks/use-stores";
 import { ToolbarComponent } from "../toolbar";
 import { EditableToolApiInterfaceRef, EditableToolApiInterfaceRefContext } from "../tools/tool-api";
 import { DocumentModelType } from "../../models/document/document";
@@ -87,8 +88,8 @@ export const EditableDocumentContent: React.FC<IProps> = props => {
   const { mode, isPrimary, document, toolbar, readOnly } = props;
 
   const documentContext = useDocumentContext(document);
-  const ui = useUIStore();
-  const { isNetworkedTeacher } = useUserStore();
+  const { db: { firebase }, ui, user } = useStores();
+  const { isNetworkedTeacher } = user;
 
   // set by the canvas and used by the toolbar
   const editableToolApiInterfaceRef: EditableToolApiInterfaceRef = useRef(null);
@@ -100,6 +101,9 @@ export const EditableDocumentContent: React.FC<IProps> = props => {
   const documentSelectedForComment = isChatEnabled && ui.showChatPanel && ui.selectedTileIds.length === 0 && !isPrimary;
   const editableDocContentClass = classNames("editable-document-content", showToolbarClass,
                                              {"comment-select" : documentSelectedForComment});
+
+  useDocumentSyncToFirebase(user, firebase, document, readOnly);
+
   return (
     <DocumentContextReact.Provider value={documentContext}>
       <EditableToolApiInterfaceRefContext.Provider value={editableToolApiInterfaceRef}>

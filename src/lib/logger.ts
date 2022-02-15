@@ -13,6 +13,7 @@ import { ITableChange } from "../models/tools/table/table-change";
 import { ENavTab } from "../models/view/nav-tabs";
 import { DEBUG_LOGGER } from "../lib/debug";
 import { isSectionPath, parseSectionPath } from "../../functions/src/shared";
+import { timeZoneOffsetString } from "../utilities/js-utils";
 
 type LoggerEnvironment = "dev" | "production";
 
@@ -25,6 +26,7 @@ const productionPortal = "learn.concord.org";
 
 interface LogMessage {
   application: string;
+  activityUrl?: string;
   run_remote_endpoint?: string;
   username: string;
   role: string;
@@ -41,8 +43,10 @@ interface LogMessage {
   teacherPanel?: string;
   selectedGroupId?: string;
   time: number;
+  tzOffset: string;
   event: string;
   method: string;
+  disconnects?: string;
   parameters: any;
 }
 
@@ -109,10 +113,6 @@ export enum LogEventName {
   // the following are for potential debugging purposes and are all marked "internal"
   INTERNAL_AUTHENTICATED,
   INTERNAL_ERROR_ENCOUNTERED,
-  INTERNAL_FIREBASE_DISCONNECTED,
-  INTERNAL_NETWORK_STATUS_ALERTED,
-  INTERNAL_MONITOR_DOCUMENT,
-  INTERNAL_UNMONITOR_DOCUMENT,
 
   DASHBOARD_SWITCH_CLASS,
   DASHBOARD_SWITCH_PROBLEM,
@@ -134,6 +134,7 @@ interface IDocumentInfo {
   key?: string;
   uid?: string;
   title?: string;
+  sectionId?: string;
   properties?: { [prop: string]: string };
   changeCount?: number;
   remoteContext?: string;
@@ -188,26 +189,27 @@ export class Logger {
     let parameters = {};
 
     if (tile) {
-      const document = Logger.Instance.getDocumentForTile(tile.id);
-      const teacherNetworkInfo: ITeacherNetworkInfo | undefined = document.remoteContext
-      ? { networkClassHash: document.remoteContext,
-          networkUsername: `${document.uid}@${this._instance.stores.user.portal}`}
+      const { uid, key, type, changeCount, sectionId, remoteContext } = Logger.Instance.getTileContext(tile.id);
+      const teacherNetworkInfo: ITeacherNetworkInfo | undefined = remoteContext
+      ? { networkClassHash: remoteContext,
+          networkUsername: `${uid}@${this._instance.stores.user.portal}`}
       : undefined;
 
       parameters = {
         objectId: tile.id,
         objectType: tile.content.type,
         serializedObject: getSnapshot(tile).content,
-        documentUid: document.uid,
-        documentKey: document.key,
-        documentType: document.type,
-        documentChanges: document.changeCount,
+        documentUid: uid,
+        documentKey: key,
+        documentType: type,
+        documentChanges: changeCount,
+        sectionId,
         commentText,
         ...teacherNetworkInfo
       };
 
       if (event === LogEventName.COPY_TILE && metaData && metaData.originalTileId) {
-        const sourceDocument = Logger.Instance.getDocumentForTile(metaData.originalTileId);
+        const sourceDocument = Logger.Instance.getTileContext(metaData.originalTileId);
         parameters = {
           ...parameters,
           sourceUsername: sourceDocument.uid,
@@ -215,7 +217,8 @@ export class Logger {
           sourceDocumentKey: sourceDocument.key,
           sourceDocumentType: sourceDocument.type,
           sourceDocumentTitle: sourceDocument.title || "",
-          sourceDocumentProperties: sourceDocument.properties || {}
+          sourceDocumentProperties: sourceDocument.properties || {},
+          sourceSectionId: sourceDocument.sectionId
         };
       }
     }
@@ -290,17 +293,17 @@ export class Logger {
     toolId: string,
     method?: LogEventMethod)
   {
-    const document = Logger.Instance.getDocumentForTile(toolId);
+    const { uid, key, type, changeCount, sectionId } = Logger.Instance.getTileContext(toolId);
     const parameters: {[k: string]: any} = {
       toolId,
       operation,
       ...change,
-      documentUid: document.uid,
-      documentKey: document.key,
-      documentType: document.type,
-      documentChanges: document.changeCount
+      documentUid: uid,
+      documentKey: key,
+      documentType: type,
+      documentChanges: changeCount,
+      sectionId
     };
-
     Logger.log(eventName, parameters, method);
   }
 
@@ -330,50 +333,63 @@ export class Logger {
     parameters?: {section?: string},
     method: LogEventMethod = LogEventMethod.DO
   ): LogMessage {
-    const {appConfig, user, problemPath, ui} = this.stores;
-
+    const {
+      appConfig: { appName }, appMode, problemPath,
+      ui: { activeGroupId, activeNavTab, navTabContentShown, problemWorkspace, teacherPanelKey },
+      user: { activityUrl, classHash, id, isStudent, isTeacher, portal, type, latestGroupId,
+              loggingRemoteEndpoint, firebaseDisconnects, loggingDisconnects, networkStatusAlerts
+    }} = this.stores;
+    // only log disconnect counts if there have been any disconnections
+    const totalDisconnects = firebaseDisconnects + loggingDisconnects + networkStatusAlerts;
+    const disconnects = totalDisconnects
+                          ? { disconnects: `${firebaseDisconnects}/${loggingDisconnects}/${networkStatusAlerts}` }
+                          : undefined;
     const logMessage: LogMessage = {
-      application: appConfig.appName,
-      username: `${user.id}@${user.portal}`,
-      role: user.type || "unknown",
-      classHash: user.classHash,
+      application: appName,
+      activityUrl,
+      username: `${id}@${portal}`,
+      role: type || "unknown",
+      classHash,
       session: this.session,
-      appMode: this.stores.appMode,
+      appMode,
       investigation: this.investigationTitle,
       problem: this.problemTitle,
       problemPath,
-      navTabsOpen: ui.navTabContentShown,
-      selectedNavTab: ui.activeNavTab,
+      navTabsOpen: navTabContentShown,
+      selectedNavTab: activeNavTab,
       time: Date.now(),       // eventually we will want server skew (or to add this via FB directly)
+      tzOffset: timeZoneOffsetString(),
       event,
       method,
+      ...disconnects,
       parameters
     };
 
-    if (user.loggingRemoteEndpoint) {
-      logMessage.run_remote_endpoint = user.loggingRemoteEndpoint;
+    if (loggingRemoteEndpoint) {
+      logMessage.run_remote_endpoint = loggingRemoteEndpoint;
     }
 
-    if (user.isStudent) {
-      logMessage.group = user.latestGroupId;
-      logMessage.workspaceMode = ui.problemWorkspace.mode;
+    if (isStudent) {
+      logMessage.group = latestGroupId;
+      logMessage.workspaceMode = problemWorkspace.mode;
     }
-    if (user.isTeacher) {
-      logMessage.teacherPanel = ui.teacherPanelKey;
-      if (ui.activeNavTab === ENavTab.kStudentWork) {
-        logMessage.selectedGroupId = ui.activeGroupId;
+    if (isTeacher) {
+      logMessage.teacherPanel = teacherPanelKey;
+      if (activeNavTab === ENavTab.kStudentWork) {
+        logMessage.selectedGroupId = activeGroupId;
       }
     }
 
     return logMessage;
   }
 
-  private getDocumentForTile(tileId: string): IDocumentInfo {
+  private getTileContext(tileId: string): IDocumentInfo {
     const document = this.stores.documents.findDocumentOfTile(tileId)
       || this.stores.networkDocuments.findDocumentOfTile(tileId);
     if (document) {
-      const { type, key, uid, title, changeCount, remoteContext, properties } = document;
-      return { type, key, uid, title, changeCount, remoteContext, properties: properties?.toJSON() || {} };
+      const { type, key, uid, title, content, changeCount, remoteContext, properties } = document;
+      const sectionId = content?.getSectionIdForTile(tileId);
+      return { type, key, uid, title, sectionId, changeCount, remoteContext, properties: properties?.toJSON() || {} };
     } else {
       return {
         type: "Instructions"        // eventually we will need to include copying from supports
