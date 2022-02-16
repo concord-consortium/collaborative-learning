@@ -9,57 +9,6 @@
       "numFormat": ".2~f"
     }
   },
-  "navTabs": {
-    "lazyLoadTabContents": true,
-    "tabSpecs": [
-      {
-        "tab": "problems",
-        "label": "Problem",
-        "sections": [
-          {
-            "initials": "REF",
-            "title": "Reference",
-            "type": "problem-documents"
-          },
-          {
-            "initials": "PR",
-            "title": "Practice",
-            "type": "problem-documents"
-          },
-          {
-            "initials": "EX",
-            "title": "Experiment",
-            "type": "problem-documents"
-          }
-        ]
-      },
-      {
-        "tab": "my-work",
-        "label": "My Work",
-        "sections": [
-          {
-            "title": "Workspaces",
-            "type": "problem-documents",
-            "dataTestHeader": "my-work-section-investigations",
-            "dataTestItem": "my-work-list-items",
-            "documentTypes": ["problem", "planning"],
-            "order": "original",
-            "showStars": ["student", "teacher"]
-          },
-          {
-            "title": "Workspaces",
-            "type": "personal-documents",
-            "dataTestHeader": "my-work-section-workspaces",
-            "dataTestItem": "my-work-list-items",
-            "documentTypes": ["personal"],
-            "properties": ["!isDeleted"],
-            "showStars": ["student", "teacher"],
-            "addDocument": true
-          }
-        ]
-      }
-    ]
-  },
   "sections": {
     "getStarted": {
       "initials": "GS",
@@ -175,6 +124,12 @@
                     }
                   },
                   {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/mothed/images/fieldwork.jpg"
+                    }
+                  },
+                  {
                     "display": "teacher",
                     "content": {
                       "type": "Text",
@@ -204,6 +159,17 @@
                     }
                   },
                   {
+                    "content": {
+                      "type": "Table",
+                      "name": "What lives in our schoolyard",
+                      "columns": [
+                        {"name":"Flora","values":["🌲","🌿","🍁"]},
+                        {"name":"Count","values":["3","5","100"]},
+                        {"name":"location","values":["edge of schoolyard","on trees","on ground"]}
+                      ]
+                    }
+                  },
+                  {
                     "display": "teacher",
                     "content": {
                       "type": "Text",
@@ -226,12 +192,25 @@
                       "format": "html",
                       "text": [
                         "<p> Share to compare notes with your teammates! </p>",
-                        "<p><strong>1. </strong>As your group compares observations, the <strong>Presenter</strong> can combine everyone&#x27;s findings on their <strong>Share</strong> Workspace to present or publish to the Class Work.</p>",
+                        "<p><strong>1. </strong>As your group compares observations, the <strong>Presenter</strong> can combine everyone&#x27;s findings on their <strong>Share</strong> Workspace to present or publish to the Class Work.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/mothed/images/share.jpg"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
                         "<p><strong>2. </strong>After you have agreed on your summary findings, refine your work by thinking about different types of evidence of <strong>Eastern deciduous forests:</strong></p>",
                         "<ul><li>What did you expect to find that you did not see?</li><li>What did you see that you didn’t list in <strong>Get Started</strong>?</li><li>What did you observe that isn&#x27;t actually part of a forest ecosystem?</li></ul>",
                         "<p>Is there anything you want to add to your final presentation to the class?</p>",
-                        "<p><strong>3. </strong>If you still have more time, discuss and list what you might expect to see looking different four weeks from now. What will cause these changes? Your <strong>Recorder</strong> can list all your ideas to  share with the class. </p>",
-                        "<p></p>"
+                        "<p><strong>3. </strong>If you still have more time, discuss and list what you might expect to see looking different four weeks from now. What will cause these changes? Your <strong>Recorder</strong> can list all your ideas to  share with the class. </p>"
                       ]
                     }
                   },
