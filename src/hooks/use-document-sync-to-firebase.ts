@@ -28,7 +28,7 @@ export function useDocumentSyncToFirebase(
                   user: UserModelType, firebase: Firebase, document: DocumentModelType, readOnly = false) {
   const { key, type, uid } = document;
   const { content: contentPath, typedMetadata } = firebase.getUserDocumentPaths(user, type, key, uid);
-  (user.id !== uid) && console.warn("useDocumentSyncToFirebase monitoring another user's document?!?");
+  !readOnly && (user.id !== uid) && console.warn("useDocumentSyncToFirebase monitoring another user's document?!?");
 
   // sync visibility (public/private) for problem documents
   useSyncMstPropToFirebase<typeof document.visibility>({

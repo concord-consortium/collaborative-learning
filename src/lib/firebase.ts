@@ -353,8 +353,8 @@ export class Firebase {
     return this.ref(this.getUserPath(this.db.stores.user)).child("latestGroupId");
   }
 
-  public getLastSupportViewTimestampRef() {
-    return this.ref(this.getUserPath(this.db.stores.user)).child("lastSupportViewTimestamp");
+  public getLastSupportViewTimestampPath() {
+    return `${this.getUserPath(this.db.stores.user)}/lastSupportViewTimestamp`;
   }
 
   public getLastStickyNoteViewTimestampRef() {

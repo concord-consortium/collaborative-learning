@@ -159,7 +159,12 @@ describe('Test nav panel tabs', function () {
     describe('Test supports area', function () {
       it('verify support tabs', function () {
         cy.openTopTab("supports");
+        // cy.get(".support-badge").should("be.visible");
         cy.get(".doc-tab.supports").should("have.length", 2);
+        cy.get(".doc-tab.supports.teacher-supports").click();
+        // clicking on a teacher support should update the unread supports badge
+        // cy.get("[data-test=teacher-supports-list-items]").last().click();
+        // cy.get(".support-badge").should("not.exist");
       });
     });
   });

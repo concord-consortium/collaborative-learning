@@ -925,10 +925,6 @@ export class DB {
     });
   }
 
-  public setLastSupportViewTimestamp() {
-    this.firebase.getLastSupportViewTimestampRef().set(Date.now());
-  }
-
   public setLastStickyNoteViewTimestamp() {
     this.firebase.getLastStickyNoteViewTimestampRef().set(Date.now());
   }
