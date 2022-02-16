@@ -4,7 +4,7 @@ import classNames from "classnames";
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
 import { isPublishedType, isUnpublishedType, PersonalDocument } from "../../models/document/document-types";
 import { IStores } from "../../models/stores/stores";
-import { ENavTabOrder, NavTabSectionModelType  } from "../../models/view/nav-tabs";
+import { ENavTabOrder, ENavTabSectionType, NavTabSectionModelType  } from "../../models/view/nav-tabs";
 import { CanvasComponent } from "../document/canvas";
 import { DocumentContextReact } from "../document/document-context";
 import { TabPanelDocumentsSubSectionPanel } from "./tab-panel-documents-subsection-panel";
@@ -83,12 +83,14 @@ export const TabPanelDocumentsSection = observer(({ tab, section, index, numOfSe
                                   onSelectNewDocument, onSelectDocument, onDocumentDragStart,
                                   onDocumentStarClick, onDocumentDeleteClick }: IProps) => {
     const { user } = stores;
-    const showNewDocumentThumbnail = section.addDocument && !!onSelectNewDocument;
+    const showNewDocumentThumbnail = section.addDocument && !!onSelectNewDocument
+                                      && section.type !== ENavTabSectionType.kProblemDocuments;
     const newDocumentLabel = getNewDocumentLabel(section, stores);
-    const numPanels = user.isNetworkedTeacher ? numOfSections + 1 : numOfSections;
-    const isTopPanel = index === 0 && numPanels > 1;
-    const isBottomPanel = index === numOfSections - 1 && index > 0;
-    const tabName = tab.toLowerCase().replace(' ', '-');
+    const numPanels = numOfSections && user.isNetworkedTeacher ? numOfSections + 1 : numOfSections;
+    const isTopPanel = (numOfSections && numPanels) && index === 0 && numPanels > 1;
+    const isBottomPanel = numOfSections && index === numOfSections - 1 && index > 0;
+    const isSinglePanel = numOfSections && numOfSections < 2;
+    const tabName = tab?.toLowerCase().replace(' ', '-');
     const currentClass = stores.class.name;
     const sectionDocs: DocumentModelType[] = getSectionDocs(section, stores, currentClass);
 
@@ -96,8 +98,9 @@ export const TabPanelDocumentsSection = observer(({ tab, section, index, numOfSe
       onSelectNewDocument?.(section.documentTypes[0]);
     }
     const tabPanelDocumentSectionClass = classNames("tab-panel-documents-section", tabName,
-                                                    { "top-panel": isTopPanel }, { "bottom-panel": isBottomPanel });
-    const listClass = classNames("list", tabName, {"top-panel": isTopPanel}, {"bottom-panel": isBottomPanel});
+                                                    {"top-panel": isTopPanel}, {"bottom-panel": isBottomPanel});
+    const listClass = classNames("list", tabName, {"top-panel": isTopPanel},
+                                  {"bottom-panel": isBottomPanel  && !isSinglePanel});
     return (
       <div className={tabPanelDocumentSectionClass}
             key={`${tab}-${section.type}`}

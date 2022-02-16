@@ -74,6 +74,8 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
     const { documentView, tabSpec, onTabClick, isChatOpen } = this.props;
     const { tabIndex } = this.state;
     const navTabSpec = navTabs.getNavTabSpec(tabSpec.tab);
+    const hasSubTabs = this.subTabs.length > 1;
+
     return (
       <Tabs
         className={`document-tabs ${navTabSpec?.tab} ${isChatOpen ? "chat-open" : ""}`}
@@ -82,15 +84,15 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
         selectedIndex={tabIndex}
         selectedTabClassName="selected"
       >
-        <div className="tab-header-row">
+        <div className={`tab-header-row ${!hasSubTabs ? "no-sub-tabs" : ""}`}>
           <TabList className={`tab-list ${navTabSpec?.tab}`}>
             {this.subTabs.map((subTab) => {
               const sectionTitle = subTab.label.toLowerCase().replace(' ', '-');
               const type = subTab.sections[0].type;
               return (
                 <Tab className={`doc-tab ${navTabSpec?.tab} ${sectionTitle} ${type}`}
-                    key={`section-${sectionTitle}`}
-                    onClick={() => onTabClick?.(subTab.label, type)}>
+                  key={`section-${sectionTitle}`}
+                  onClick={() => onTabClick?.(subTab.label, type)}>
                   {subTab.label}
                 </Tab>
               );
@@ -151,7 +153,7 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
     onSelectDocument?.(document);
   };
 
-  private renderSubSections(subTab: any) {
+  private renderSubSections(subTab: ISubTabSpec) {
     const { selectedDocument, onSelectNewDocument, showNetworkDocuments } = this.props;
     const { user } = this.stores;
     const classHash = this.stores.class.classHash;
