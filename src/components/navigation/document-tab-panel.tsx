@@ -80,43 +80,30 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
     const hasSubTabs = this.subTabs.length > 1;
 
     return (
-      hasSubTabs
-        ? <Tabs
-            className={`document-tabs ${navTabSpec?.tab} ${isChatOpen ? "chat-open" : ""}`}
-            forceRenderTabPanel={true}
-            onSelect={this.handleTabSelect}
-            selectedIndex={tabIndex}
-            selectedTabClassName="selected"
-          >
-            <div className="tab-header-row">
-              <TabList className={`tab-list ${navTabSpec?.tab}`}>
-                {this.subTabs.map((subTab) => {
-                  const sectionTitle = subTab.label.toLowerCase().replace(' ', '-');
-                  const type = subTab.sections[0].type;
-                  return (
-                    <Tab className={`doc-tab ${navTabSpec?.tab} ${sectionTitle} ${type}`}
-                        key={`section-${sectionTitle}`}
-                        onClick={() => onTabClick?.(subTab.label, type)}>
-                      {subTab.label}
-                    </Tab>
-                  );
-                })}
-              </TabList>
-            </div>
-            {this.renderDocumentPanel(hasSubTabs, tabIndex)}
-          </Tabs>
-
-        : <Tabs
-            className={`document-tabs ${navTabSpec?.tab} ${isChatOpen ? "chat-open" : ""}`}
-            forceRenderTabPanel={true}
-            onSelect={this.handleTabSelect}
-            selectedIndex={tabIndex}
-            selectedTabClassName="selected">
-              <TabList className={`tab-list ${navTabSpec?.tab} ${!hasSubTabs ? "single-panel" : ""}`}>
-                <Tab></Tab>
-              </TabList>
-              {this.renderDocumentPanel(hasSubTabs)}
-          </Tabs>
+      <Tabs
+        className={`document-tabs ${navTabSpec?.tab} ${isChatOpen ? "chatOpen" : ""}`}
+        forceRenderTabPanel={true}
+        onSelect={this.handleTabSelect}
+        selectedIndex={tabIndex}
+        selectedTabClassName="selected"
+      >
+        <div className={`tab-header-row ${!hasSubTabs ? "no-sub-tabs" : ""}`}>
+          <TabList className={`tab-list ${navTabSpec?.tab}`}>
+            {this.subTabs.map((subTab) => {
+              const sectionTitle = subTab.label.toLowerCase().replace(' ', '-');
+              const type = subTab.sections[0].type;
+              return (
+                <Tab className={`doc-tab ${navTabSpec?.tab} ${sectionTitle} ${type}`}
+                  key={`section-${sectionTitle}`}
+                  onClick={() => onTabClick?.(subTab.label, type)}>
+                  {subTab.label}
+                </Tab>
+              );
+            })}
+          </TabList>
+        </div>
+        {this.renderDocumentPanel(hasSubTabs, tabIndex)}
+      </Tabs>
     );
   }
 
@@ -157,39 +144,39 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
     onSelectDocument?.(document);
   };
 
-  private renderSubSections(subTab?: any) {
+  private renderSubSections(subTab: ISubTabSpec) {
     const { selectedDocument, onSelectNewDocument, showNetworkDocuments } = this.props;
     const { user } = this.stores;
     const classHash = this.stores.class.classHash;
     return (
       <div>
-        { subTab.sections.map((section: any, index: any) => {
-                const _handleDocumentStarClick = section.showStarsForUser(user)
-                  ? this.handleDocumentStarClick
-                  : undefined;
-                const _handleDocumentDeleteClick = section.showDeleteForUser(user)
-                  ? this.handleDocumentDeleteClick
-                  : undefined;
-                return (
-                  <TabPanelDocumentsSection
-                    key={section.type}
-                    tab={subTab.label}
-                    section={section}
-                    index={index}
-                    numOfSections={subTab.sections.length}
-                    stores={this.stores}
-                    scale={kNavItemScale}
-                    selectedDocument={selectedDocument}
-                    onSelectNewDocument={onSelectNewDocument}
-                    onSelectDocument={this.handleDocumentSelect}
-                    onDocumentDragStart={this.handleDocumentDragStart}
-                    onDocumentStarClick={_handleDocumentStarClick}
-                    onDocumentDeleteClick={_handleDocumentDeleteClick}
-                  />
-                );
-              })
+        {subTab.sections.map((section: any, index: any) => {
+          const _handleDocumentStarClick = section.showStarsForUser(user)
+            ? this.handleDocumentStarClick
+            : undefined;
+          const _handleDocumentDeleteClick = section.showDeleteForUser(user)
+            ? this.handleDocumentDeleteClick
+            : undefined;
+          return (
+            <TabPanelDocumentsSection
+              key={section.type}
+              tab={subTab.label}
+              section={section}
+              index={index}
+              numOfSections={subTab.sections.length}
+              stores={this.stores}
+              scale={kNavItemScale}
+              selectedDocument={selectedDocument}
+              onSelectNewDocument={onSelectNewDocument}
+              onSelectDocument={this.handleDocumentSelect}
+              onDocumentDragStart={this.handleDocumentDragStart}
+              onDocumentStarClick={_handleDocumentStarClick}
+              onDocumentDeleteClick={_handleDocumentDeleteClick}
+            />
+          );
+        })
         }
-        { showNetworkDocuments &&
+        {showNetworkDocuments &&
           <NetworkDocumentsSection
             currentClassHash={classHash}
             currentTeacherName={user.name}
@@ -205,29 +192,26 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
   }
 
   private renderDocumentPanel(hasSubTabs: boolean, tabIndex?: number) {
-    const { documentView  } = this.props;
+    const { documentView } = this.props;
     const vh = window.innerHeight;
     const headerOffset = hasSubTabs
                           ? kHeaderHeight + (2 * (kWorkspaceContentMargin + kNavTabHeight + kTabSectionBorderWidth))
                           : kHeaderHeight + (kWorkspaceContentMargin + kNavTabHeight + kTabSectionBorderWidth);
     const documentsPanelHeight = vh - headerOffset;
-    const documentsPanelStyle = {"height": documentsPanelHeight};
+    const documentsPanelStyle = { height: documentsPanelHeight } as React.CSSProperties;
     return (
       <div className="documents-panel" style={documentsPanelStyle}>
         {this.subTabs.map((subTab, index) => {
-              const sectionTitle = subTab.label.toLowerCase().replace(' ', '-');
-              return (
-                hasSubTabs
-                  ? <TabPanel key={`subtab-${subTab.label}`} data-test={`subtab-${sectionTitle}`}>
-                      { documentView && (index === tabIndex)
-                        ? documentView
-                        : this.renderSubSections(subTab)
-                      }
-                    </TabPanel>
-                  : this.renderSubSections(subTab)
-              );
-            })
-      }
+          const sectionTitle = subTab.label.toLowerCase().replace(' ', '-');
+          return (
+            <TabPanel key={`subtab-${subTab.label}`} data-test={`subtab-${sectionTitle}`}>
+              {documentView && (index === tabIndex)
+                ? documentView
+                : this.renderSubSections(subTab)
+              }
+            </TabPanel>
+          );
+        })}
       </div>
     );
   }
