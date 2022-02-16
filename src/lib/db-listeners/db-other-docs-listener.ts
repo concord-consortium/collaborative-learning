@@ -39,7 +39,7 @@ export class DBOtherDocumentsListener extends BaseListener {
     this.documentsRef = documentsRef;
     documentsRef.once("value", snapshot => {
       if (size(snapshot.val()) === 0) {
-        this.db.stores.documents.resolveRequiredDocumentPromise(null, this.documentType);
+        this.db.stores.documents.resolveRequiredDocumentPromiseWithNull(this.documentType);
       }
       this.debugLogHandlers("#start", "adding", ["child_added", "child_changed", "child_removed"], documentsRef);
       documentsRef.on("child_added", this.handleDocumentAdded);
