@@ -834,8 +834,7 @@ export const DocumentContentModel = types
     },
     userCopyTiles(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
       const dropRow = (rowInfo.rowDropIndex != null) ? self.getRowByIndex(rowInfo.rowDropIndex) : undefined;
-      const rowDropLocation = rowInfo.rowDropLocation;
-      const results = dropRow?.acceptsTileDrops && ((rowDropLocation === "left") || (rowDropLocation === "right"))
+      const results = dropRow?.acceptTileDrop(rowInfo)
                       ? self.copyTilesIntoExistingRow(tiles, rowInfo)
                       : self.copyTilesIntoNewRows(tiles, rowInfo.rowInsertIndex);
       results.forEach((result, i) => {
