@@ -834,9 +834,9 @@ export const DocumentContentModel = types
     },
     userCopyTiles(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
       const dropRow = (rowInfo.rowDropIndex != null) ? self.getRowByIndex(rowInfo.rowDropIndex) : undefined;
-      const results = dropRow?.acceptsTileDrops
-                        ? self.copyTilesIntoExistingRow(tiles, rowInfo)
-                        : self.copyTilesIntoNewRows(tiles, rowInfo.rowInsertIndex);
+      const results = dropRow?.acceptTileDrop(rowInfo)
+                      ? self.copyTilesIntoExistingRow(tiles, rowInfo)
+                      : self.copyTilesIntoNewRows(tiles, rowInfo.rowInsertIndex);
       results.forEach((result, i) => {
         const newTile = result?.tileId && self.getTile(result.tileId);
         if (result && newTile) {

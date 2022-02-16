@@ -1,5 +1,6 @@
 import { types, Instance, SnapshotIn, SnapshotOut } from "mobx-state-tree";
 import { ToolTileModelType } from "../tools/tool-tile";
+import { IDropRowInfo } from "../document/document-content";
 import { uniqueId } from "../../utilities/js-utils";
 
 export const TileLayoutModel = types
@@ -38,11 +39,12 @@ export const TileRowModel = types
     get isUserResizable() {
       return !self.isSectionHeader && self.tiles.some(tileRef => tileRef.isUserResizable);
     },
-    get acceptsTileDrops() {
-      return !self.isSectionHeader;
-    },
     get tileIds() {
       return self.tiles.map(tile => tile.tileId).join(", ");
+    },
+    acceptTileDrop(rowInfo: IDropRowInfo) {
+      const rowDropLocation = rowInfo.rowDropLocation;
+      return !self.isSectionHeader && ((rowDropLocation === "left") || (rowDropLocation === "right"));
     },
     getTileIdAtIndex(index: number) {
       const layout = (index >= 0) && (index < self.tiles.length) ? self.tiles[index] : undefined;
