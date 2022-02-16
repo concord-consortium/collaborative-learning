@@ -1113,10 +1113,9 @@
                     }
                   },
                   {
-                    "id": "5r2zT3wo_0E-yQD-",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/image/MSA_TG_1_3_Anchor.png"
+                      "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_3_Anchor.png"
                     }
                   },
                   {
@@ -1147,7 +1146,7 @@
                     "id": "_bikHymSD4_M1Y-y",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_3_GraphConstant.png"
+                      "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_3_Intersection.png"
                     }
                   },
                   {
@@ -1280,6 +1279,41 @@
                       "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_3_TableCompare2.png"
                     }
                   },
+                  [
+                    {
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>2km/$10  ≠  4km/$10</p>",
+                          "<p>1km/$10  ≠  5km/$10</p>",
+                          "<p>Not proportional.</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>1km/$3  =  2km/$6</p>",
+                          "<p>2km/$4  =  6km/$12</p>",
+                          "<p>Proportional</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>1km/$5.50  ≠  4km/$7</p>",
+                          "<p>2km/$6 ≠  6km/$8</p>",
+                          "<p>Not proportional</p>"
+                        ]
+                      }
+                    }
+                  ],
                   {
                     "id": "si5TfhZWCQv6RcLl",
                     "content": {
