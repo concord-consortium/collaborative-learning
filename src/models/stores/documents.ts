@@ -197,18 +197,23 @@ export const DocumentsModel = types
       });
     };
 
-    const resolveRequiredDocumentPromise = (document: DocumentModelType | null, typeToNull?: string) => {
-      const type = document?.type || typeToNull;
-      if (type) {
-        const promise = self.requiredDocuments[type];
-        !promise.isResolved && promise.resolve(document);
-      }
+    const resolveRequiredDocumentPromise = (document: DocumentModelType) => {
+      const promise = self.requiredDocuments[document.type];
+      !promise?.isResolved && promise?.resolve(document);
     };
 
-    const resolveAllRequiredDocumentPromisesWithNull = () => {
-      forEach(self.requiredDocuments, (wrapper, type) => {
-        resolveRequiredDocumentPromise(null, type);
-      });
+    const resolveRequiredDocumentPromiseWithNull = (type: string) => {
+      const promise = self.requiredDocuments[type];
+      !promise.isResolved && promise.resolve(null);
+    };
+
+    const resolveRequiredDocumentPromisesWithNull = (requiredTypes?: string[]) => {
+      if (requiredTypes) {
+        requiredTypes.forEach(type => resolveRequiredDocumentPromiseWithNull(type));
+      }
+      else {
+        forEach(self.requiredDocuments, (p, type) => resolveRequiredDocumentPromiseWithNull(type));
+      }
     };
 
     const findDocumentOfTile = (tileId: string): DocumentModelType | null => {
@@ -226,7 +231,8 @@ export const DocumentsModel = types
       update,
       addRequiredDocumentPromises,
       resolveRequiredDocumentPromise,
-      resolveAllRequiredDocumentPromisesWithNull,
+      resolveRequiredDocumentPromiseWithNull,
+      resolveRequiredDocumentPromisesWithNull,
       findDocumentOfTile,
       setAppConfig
     };
