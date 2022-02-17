@@ -12,6 +12,8 @@
     height: $nav-tab-height
     padding-top: 3px
     position: relative
+    &.no-sub-tabs
+      display: none
   .tab-list
     flex: 1 1 auto
     margin: 0
@@ -86,5 +88,8 @@
           background-color: $learninglog-green-light-6
     .solutions-label
       margin: 0 7px 0 3px
+  .problems-panel
+    margin-top: $document-margin
+    overflow-y: auto
   &.chat-open
     border-right: 0

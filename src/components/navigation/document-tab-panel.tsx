@@ -29,6 +29,10 @@ interface IState {
 }
 
 const kNavItemScale = 0.11;
+const kHeaderHeight = 55;
+const kWorkspaceContentMargin = 4;
+const kNavTabHeight = 34;
+const kTabSectionBorderWidth = 2;
 
 export interface ISubTabSpec {
   label: string;
@@ -75,6 +79,12 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
     const { tabIndex } = this.state;
     const navTabSpec = navTabs.getNavTabSpec(tabSpec.tab);
     const hasSubTabs = this.subTabs.length > 1;
+    const vh = window.innerHeight;
+    const headerOffset = hasSubTabs
+                          ? kHeaderHeight + (2 * (kWorkspaceContentMargin + kNavTabHeight + kTabSectionBorderWidth))
+                          : kHeaderHeight + + kNavTabHeight + (2 * (kWorkspaceContentMargin + kTabSectionBorderWidth));
+    const documentsPanelHeight = vh - headerOffset;
+    const documentsPanelStyle = { height: documentsPanelHeight };
 
     return (
       <Tabs
@@ -99,7 +109,7 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
             })}
           </TabList>
         </div>
-        <div className="documents-panel">
+        <div className="documents-panel" style={documentsPanelStyle}>
           {this.subTabs.map((subTab, index) => {
             const sectionTitle = subTab.label.toLowerCase().replace(' ', '-');
             return (

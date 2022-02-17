@@ -1,0 +1,181 @@
+{
+  "code": "example-config-subtabs",
+  "abbrevTitle": "EXCS",
+  "title": "Example Curriculum No SubTabs",
+  "subtitle": " No Subtabs",
+  "placeholderText": "Type in me!",
+  "settings": {
+    "table": {
+      "numFormat": ".2~f"
+    }
+  },
+  "navTabs": {
+    "lazyLoadTabContents": true,
+    "showNavPanel": true,
+    "tabSpecs": [
+      {
+        "tab": "problems",
+        "label": "Problems",
+        "sections": [
+          {
+            "initials": "REF",
+            "title": "Reference",
+            "type": "problem-documents"
+          },
+          {
+            "initials": "PR",
+            "title": "Practice",
+            "type": "problem-documents"
+          },
+          {
+            "initials": "EX",
+            "title": "Experiment",
+            "type": "problem-documents"
+          }
+        ]
+      },
+      {
+        "tab": "my-work",
+        "label": "My Work",
+        "sections": [
+          {
+            "title": "Workspaces",
+            "type": "problem-documents",
+            "dataTestHeader": "my-work-section-investigations",
+            "dataTestItem": "my-work-list-items",
+            "documentTypes": ["problem", "planning"],
+            "order": "original",
+            "showStars": ["student", "teacher"]
+          },
+          {
+            "title": "Workspaces",
+            "type": "personal-documents",
+            "dataTestHeader": "my-work-section-workspaces",
+            "dataTestItem": "my-work-list-items",
+            "documentTypes": ["personal"],
+            "properties": ["!isDeleted"],
+            "showStars": ["student", "teacher"],
+            "addDocument": true
+          },
+          {
+            "title": "Starred",
+            "type": "starred-problem-documents",
+            "dataTestHeader": "my-work-section-starred",
+            "documentTypes": ["personal", "problem"],
+            "properties": ["starred", "!isDeleted"],
+            "showStars": ["student", "teacher"]
+          }
+        ]
+      },
+      {
+        "tab": "class-work",
+        "label": "Class Work",
+        "sections": [
+          {
+            "className": "section problem published",
+            "title": "Problem Workspaces",
+            "type": "published-problem-documents",
+            "dataTestHeader": "class-work-section-published",
+            "dataTestItem": "class-work-list-items",
+            "documentTypes": ["publication"],
+            "showStars": ["teacher"]
+          },
+          {
+            "className": "section personal published",
+            "title": "Extra Workspaces",
+            "type": "published-personal-documents",
+            "dataTestHeader": "class-work-section-personal",
+            "dataTestItem": "class-work-list-items",
+            "documentTypes": ["personalPublication"]
+          },
+          {
+            "className": "section problem starred",
+            "title": "Starred",
+            "type": "starred-problem-documents",
+            "dataTestHeader": "class-work-section-starred",
+            "documentTypes": ["publication"],
+            "properties": ["starred"],
+            "showStars": ["teacher"]
+          }
+        ]
+      }
+    ]
+  },
+  "sections": {
+    "first": {
+      "initials": "FI",
+      "title": "First Section",
+      "placeholder": "Work area for\nFirst Section"
+    },
+    "second": {
+      "initials": "SE",
+      "title": "Second Section",
+      "placeholder": "Second Section Placeholder"
+    },
+    "third": {
+      "initials": "TH",
+      "title": "Third Section",
+      "placeholder": "Third Section content goes here"
+    }
+  },
+  "planningDocument": {
+    "enable": "teacher",
+    "default": true,
+    "sectionInfo": {
+      "plan": {
+        "initials": "PL",
+        "title": "Plan",
+        "placeholder": "Plan the work; work the plan"
+      }
+    },
+    "sections": [{ "type": "plan" }]
+  },
+  "defaultStamps": [
+  ],
+  "investigations": [
+    {
+      "description": "Investigation 1",
+      "ordinal": 1,
+      "title": "Example Investigation 1",
+      "problems": [
+        {
+          "description": "Problem 1.1",
+          "ordinal": 1,
+          "title": "1.1 Unit Toolbar Configuration",
+          "subtitle": "Text, Table, Drawing",
+          "sections": [
+            { "type": "first", "content": { "tiles": [] }, "supports": [] },
+            { "type": "second", "content": { "tiles": [] }, "supports": [] },
+            { "type": "third", "content": { "tiles": [] }, "supports": [] }
+          ]
+        },
+        {
+          "description": "Problem 1.2",
+          "ordinal": 2,
+          "title": "1.2 Problem Toolbar Configuration",
+          "subtitle": "Text only",
+          "config": {
+            "toolbar": [
+              {
+                "id": "Text",
+                "title": "Text",
+                "isTileTool": true
+              },
+              {
+                "id": "delete",
+                "title": "Delete",
+                "iconId": "icon-delete-tool",
+                "isTileTool": false
+              }
+            ]
+          },
+          "sections": [
+            { "type": "first", "content": { "tiles": [] }, "supports": [] },
+            { "type": "second", "content": { "tiles": [] }, "supports": [] },
+            { "type": "third", "content": { "tiles": [] }, "supports": [] }
+          ]
+        }
+      ]
+    }
+  ]
+}
