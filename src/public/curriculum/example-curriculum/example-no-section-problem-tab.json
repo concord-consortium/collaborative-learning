@@ -5,7 +5,7 @@
   "subtitle": "Demonstrating Curriculum Configuration",
   "config": {
     "placeholderText": "This is where users can type text",
-    "defaultDocumentType": "personal",
+    "defaultDocumentType": "problem",
     "settings": {
       "table": { "numFormat": ".2~f" }
     },
@@ -191,7 +191,8 @@
                   }
                 ]
               },
-              "supports": [] }
+              "supports": []
+            }
           ]
         }
       ]
