@@ -46,7 +46,7 @@ describe('Test nav panel tabs', function () {
       it('verify publish Investigation', function () {
         canvas.publishCanvas("investigation");
         cy.openTopTab('class-work');
-        cy.getCanvasItemTitle('problem-workspaces').should('contain', this.title);
+        cy.getCanvasItemTitle('workspaces').should('contain', this.title);
       });
       it('verify make a copy of a canvas', function () {
         canvas.copyDocument(copyDocumentTitle);
@@ -59,8 +59,8 @@ describe('Test nav panel tabs', function () {
       it('verify publish of personal workspace', function () {
         canvas.publishCanvas("personal");
         cy.openTopTab('class-work');
-        cy.openSection('class-work', 'extra-workspaces');
-        cy.getCanvasItemTitle('extra-workspaces').should('contain', copyDocumentTitle);
+        cy.openSection('class-work', 'workspaces');
+        cy.getCanvasItemTitle('workspaces').should('contain', copyDocumentTitle);
       });
       it('verify delete document reverts nav-tab panel to show thumbnails', function () {
         const deleteDocument = "Delete me";
@@ -143,15 +143,15 @@ describe('Test nav panel tabs', function () {
     });
     describe('Open correct canvas from correct section', function () {
       it('verify open published canvas from Workspace list', function () { //this assumes there are published work
-        cy.openSection("class-work", "extra-workspaces");
-        cy.openDocumentThumbnail('extra-workspaces', copyDocumentTitle);
+        cy.openSection("class-work", "workspaces");
+        cy.openDocumentThumbnail('workspaces', copyDocumentTitle);
       });
       it('verify open published canvas from Investigations list', function () { //this assumes there are published work
-        cy.openSection("class-work", "problem-workspaces");
-        cy.openDocumentThumbnail('problem-workspaces', this.title);
+        cy.openSection("class-work", "workspaces");
+        cy.openDocumentThumbnail('workspaces', this.title);
       });
       it('will verify that published canvas does not have Edit button', function () {
-        cy.get('.edit-button').should("not.exist");
+        cy.get('.edit-button').should("not.be.visible");
       });
     });
   });
