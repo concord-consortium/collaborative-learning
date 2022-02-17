@@ -2196,7 +2196,7 @@
                   "id": "509wo9XoQ2kUMENh",
                   "content": {
                     "type": "Image",
-                    "url": "ccimg://fbrtdb.concord.org/-Msoze8QiYOSGtcsK4-_"
+                    "url": "curriculum/moving-straight-ahead/images/TG_MSA_2_1_GuessandCheck.jpg"
                   }
                 },
                 {
@@ -2213,7 +2213,7 @@
                   "id": "Mhg8PZkYGPikJNbN",
                   "content": {
                     "type": "Image",
-                    "url": "ccimg://fbrtdb.concord.org/-MsozfHxVtZiBpFM4A_J"
+                    "url": "curriculum/moving-straight-ahead/images/MSA_2_1_DoubleNumberLines.jpg"
                   }
                 },
                 {
@@ -2230,7 +2230,7 @@
                   "id": "jHIjRbywcZ-BP4dz",
                   "content": {
                     "type": "Image",
-                    "url": "ccimg://fbrtdb.concord.org/-Msp-0q7oOdyG-Fb0nZj"
+                    "url": "curriculum/moving-straight-ahead/images/MSA_2_1_DistanceTable.jpg"
                   }
                 },
                 {
@@ -2247,7 +2247,7 @@
                   "id": "WlCQ_QbLV9eCV9se",
                   "content": {
                     "type": "Image",
-                    "url": "ccimg://fbrtdb.concord.org/-Msp-3H8fn1Do6N-NpAt"
+                    "url": "curriculum/moving-straight-ahead/images/MSA_TG_2_1_GraphDistances.jpg"
                   }
                 },
                 {
@@ -2264,7 +2264,7 @@
                   "id": "bnLBlvZONEWl3DZ1",
                   "content": {
                     "type": "Image",
-                    "url": "ccimg://fbrtdb.concord.org/-Msp-4iUd1DeAo_n7d4h"
+                    "url": "curriculum/moving-straight-ahead/images/MSA_TG_2_1_GraphTable.jpg"
                   }
                 },
                 {
@@ -2441,7 +2441,7 @@
                   "id": "msQRrNQWWZsjSSMo",
                   "content": {
                     "type": "Image",
-                    "url": "ccimg://fbrtdb.concord.org/-Msp03RqYB85w0zAT7UP"
+                    "url": "curriculum/moving-straight-ahead/images/MSA_TG_2_1_HenriEmileRace.jpg"
                   }
                 },
                 {
@@ -2458,7 +2458,7 @@
                   "id": "klcK_dlUyF7DruVB",
                   "content": {
                     "type": "Image",
-                    "url": "ccimg://fbrtdb.concord.org/-Msp0PlKOOcCFGu1gpvc"
+                    "url": "curriculum/moving-straight-ahead/images/MSA_TG_2_1_Numberline30.jpg"
                   }
                 },
                 {
@@ -2472,10 +2472,10 @@
                   }
                 },
                 {
-                  "id": "CH1X_RWPV2M4M0VU",
+                  "id": "msQRrNQWWZsjSSMo",
                   "content": {
                     "type": "Image",
-                    "url": "ccimg://fbrtdb.concord.org/-Msp03RqYB85w0zAT7UP"
+                    "url": "curriculum/moving-straight-ahead/images/MSA_TG_2_1_HenriEmileRace.jpg"
                   }
                 },
                 {
@@ -2490,24 +2490,24 @@
                   }
                 },
                 {
-                  "id": "-FnztiXWRRUza8t7",
+                  "id": "msQRrNQWWZsjSSMo",
                   "content": {
                     "type": "Image",
-                    "url": "ccimg://fbrtdb.concord.org/-Msp03RqYB85w0zAT7UP"
+                    "url": "curriculum/moving-straight-ahead/images/MSA_TG_2_1_HenriEmileRace.jpg"
                   }
                 },
                 {
                   "id": "dSFdp4600RGC4GWL",
                   "content": {
                     "type": "Image",
-                    "url": "ccimg://fbrtdb.concord.org/-Msp0RfdTbOV2CTQh7Sq"
+                    "url": "curriculum/moving-straight-ahead/images/MSA_TG_2_1_negNumberline.jpg"
                   }
                 },
                 {
                   "id": "0Uy0QJwdT6Ak--1U",
                   "content": {
                     "type": "Image",
-                    "url": "ccimg://fbrtdb.concord.org/-Msp0Uo9ASTlnt-2x0gB"
+                    "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_3_GraphNumberline.jpg"
                   }
                 },
                 {
@@ -2631,13 +2631,6 @@
                   }
                 },
                 {
-                  "id": "j9gAVT0SKi1mmQzS",
-                  "content": {
-                    "type": "Image",
-                    "url": "https://collaborative-learning.concord.org/assets/images/image_placeholder.png"
-                  }
-                },
-                {
                   "id": "SPSjnk9XHSOPvWXD",
                   "content": {
                     "type": "Text",
@@ -2685,10 +2678,10 @@
                 },
                 [
                   {
-                    "id": "mJHHhcNjiUM_uiZ8",
+                    "id": "msQRrNQWWZsjSSMo",
                     "content": {
                       "type": "Image",
-                      "url": "ccimg://fbrtdb.concord.org/-Msp0ZE4WlyWxH21ozPe"
+                      "url": "curriculum/moving-straight-ahead/images/MSA_TG_HenriEmileRace.jpg"
                     }
                   },
                   {
@@ -2697,7 +2690,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Emilie&#x27;s line passes through (0,0). For every doubling or tripling, etc. of the time, the distance grows by the sam multiplicative amount. </p>"
+                        "<p>Emile&#x27;s line passes through (0,0). For every doubling or tripling, etc. of the time, the distance grows by the sam multiplicative amount. </p>"
                       ]
                     }
                   }
@@ -2796,22 +2789,17 @@
                     }
                   }
                 ],
-                [
-                  {
-                    "id": "CO69n0RIEBjAG7ch",
-                    "content": {
-                      "type": "Image",
-                      "url": "ccimg://fbrtdb.concord.org/-Msp12AhriCeI-QXyYzy"
-                    }
-                  },
-                  {
-                    "id": "panouHceiXrz-oEJ",
-                    "content": {
-                      "type": "Image",
-                      "url": "ccimg://fbrtdb.concord.org/-Msp18ajMZ3S0yupGjdG"
-                    }
+                {
+                  "content": {
+                    "type": "Table",
+                    "name": "Distance From Starting Line",
+                    "columns": [
+                      {"name":"Time (sec)","values":["0","10","20","30","40"]},
+                      {"name":"Henri's Dist (m)","values":["45","55","65","75","85"]},
+                      {"name":"Emile's Dist (m)","values":["0","25","50","75","100"]}
+                    ]
                   }
-                ],
+                },
                 {
                   "id": "G1_NjdNBkMLJkL-j",
                   "content": {
@@ -2976,11 +2964,7 @@
                   }
                 ]
               },
-              "supports": [
-                {"text": "How might a table help? How might a graph help?"},
-                {"text": "Can you use the equations to help answer the question?"},
-                {"text": "What would be the cost of one shirt from each plan? 10 shirts? 20 shirts?"}
-              ]
+              "supports": [  ]
             },
             {
               "type": "explore",
@@ -3080,7 +3064,8 @@
             {
               "type": "overview",
               "content": {
-                "tiles": [{
+                "tiles": [
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
