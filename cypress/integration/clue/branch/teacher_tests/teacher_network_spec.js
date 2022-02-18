@@ -45,13 +45,13 @@ describe('Networked dividers for networked teacher', () => {
   });
   it('verify network dividers in \'Class Work\' tab for teacher in network', () => {
     cy.openTopTab("class-work");
-    cy.openSection('class-work', 'problem-workspaces');
-    teacherNetwork.verifyDividerLabel('problem-workspaces', 'my-classes');
-    teacherNetwork.verifyDividerLabel('problem-workspaces', 'my-network');
+    cy.openSection('class-work', 'workspaces');
+    teacherNetwork.verifyDividerLabel('workspaces', 'my-classes');
+    teacherNetwork.verifyDividerLabel('workspaces', 'my-network');
 
-    cy.openSection('class-work', 'extra-workspaces');
-    teacherNetwork.verifyDividerLabel('extra-workspaces', 'my-classes');
-    teacherNetwork.verifyDividerLabel('extra-workspaces', 'my-network');
+    cy.openSection('class-work', 'workspaces');
+    teacherNetwork.verifyDividerLabel('workspaces', 'my-classes');
+    teacherNetwork.verifyDividerLabel('workspaces', 'my-network');
 
     cy.openSection('class-work', 'learning-logs');
     teacherNetwork.verifyDividerLabel('learning-logs', 'my-classes');
