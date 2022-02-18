@@ -81,14 +81,14 @@
   },
   "investigations": [
     {
-      "description": "M2S Investigation Description",
+      "description": "M2Studio Investigation Description",
       "ordinal": 1,
-      "title": "M2S Investigation Title",
+      "title": "M2Studio Examples",
       "problems": [
         {
-          "description": "M2S Problem Description",
+          "description": "M2S Problem 1.1 Description",
           "ordinal": 1,
-          "title": "M2Studio Standard Document",
+          "title": "Standard Document",
           "subtitle": "",
           "disabled": [],
           "sections": [
@@ -103,9 +103,9 @@
           "supports": []
         },
         {
-          "description": "M2S Problem Description",
+          "description": "M2S Problem 1.2 Description",
           "ordinal": 2,
-          "title": "M2Studio Dashboard Document",
+          "title": "Dashboard Document",
           "subtitle": "",
           "disabled": [],
           "sections": [
