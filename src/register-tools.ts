@@ -6,3 +6,4 @@ import "./models/tools/text/text-registration";
 import "./models/tools/table/table-registration";
 import "./models/tools/image/image-registration";
 import "./models/tools/geometry/geometry-registration";
+import "./plugins/diagram-viewer/diagram-registration";

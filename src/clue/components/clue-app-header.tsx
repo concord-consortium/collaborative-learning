@@ -49,7 +49,7 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
           </div>
           <div className="separator"/>
           <CustomSelect
-            items={[{text: `${problem.title}: ${problem.subtitle}`}]}
+            items={[{text: `${problem.title}${problem.subtitle ? `: ${problem.subtitle}`: ""}`}]}
             isDisabled={true}
           />
         </div>

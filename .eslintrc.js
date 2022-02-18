@@ -9,8 +9,7 @@ module.exports = {
     plugins: ["@typescript-eslint", "json", "react", "react-hooks"],
     env: {
       browser: true,
-      es6: true,
-      jest: true
+      es6: true
     },
     settings: {
       react: {
@@ -78,16 +77,29 @@ module.exports = {
       semi: ["error", "always"]
     },
     overrides: [
-      { // some rules can be relaxed in tests
-        files: ["**/*.test.*"],
+      { // test files
+        files: ["*.test.*"],
+        env: {
+          node: true,
+          jest: true
+        },
         rules: {
           "@typescript-eslint/no-non-null-assertion": "off",
           // var is useful in mocking due to its hoisting semantics
           "no-var": "off"
         }
       },
-      {
-        files: ["**/webpack.config.js"],
+      { // eslint configs
+        files: [".eslintrc*.js"],
+        env: {
+          node: true
+        }
+      },
+      { // webpack configs
+        files: ["webpack.config.js"],
+        env: {
+          node: true
+        },
         rules: {
           "@typescript-eslint/no-require-imports": "off",
           "@typescript-eslint/no-var-requires": "off"

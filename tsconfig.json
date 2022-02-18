@@ -16,7 +16,8 @@
     "experimentalDecorators": true,
     "skipLibCheck": true,
     "jsx": "react",
-    "useDefineForClassFields": true
+    "useDefineForClassFields": true,
+    "types": []
   },
   "include": [
     "src/**/*"

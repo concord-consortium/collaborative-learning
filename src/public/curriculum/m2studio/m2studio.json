@@ -3,139 +3,126 @@
   "abbrevTitle": "M2S",
   "title": "M2Studio",
   "subtitle": "Multiple Representations",
-  "placeholderText": "Enter notes here",
-  "settings": {
-    "table": {
-      "numFormat": ".2~f"
-    }
-  },
-  "sections": {
-    "introduction": {
-      "initials": "IN",
-      "title": "Introduction",
-      "placeholder": "Work area for\nIntroduction section"
-    },
-    "initialChallenge": {
-      "initials": "IC",
-      "title": "Initial Challenge",
-      "placeholder": "Work area for\nInitial Challenge section"
-    },
-    "whatIf": {
-      "initials": "WI",
-      "title": "What If...?",
-      "placeholder": "Work area for\nWhat If...? section"
-    },
-    "nowWhatDoYouKnow": {
-      "initials": "NW",
-      "title": "Now What Do You Know?",
-      "placeholder": "Work area for\nNow What Do You Know? section"
-    },
-    "didYouKnow": {
-      "initials": "DY",
-      "title": "Did You Know?",
-      "placeholder": "Work area for\nDid You Know? section"
-    },
-    "MathReflection1": {
-      "initials": "R1",
-      "title": "Math Reflection 1",
-      "placeholder": "Work area for\nMathematical Reflection 1 section"
-    },
-     "MathReflection2": {
-      "initials": "R2",
-      "title": "Math Reflection 2",
-      "placeholder": "Work area for\nMathematical Reflection 2 section"
-    },
-     "MathReflection3": {
-      "initials": "R3",
-      "title": "Math Reflection 3",
-      "placeholder": "Work area for\nMathematical Reflection 3 section"
-    },
-     "MathReflection4": {
-      "initials": "R4",
-      "title": "Math Reflection 4",
-      "placeholder": "Work area for\nMathematical Reflection 4 section"
-    }
-  },
-  "planningDocument": {
-    "enable": "teacher",
-    "default": true,
-    "sectionInfo": {
-      "overview": {
-        "initials": "OV",
-        "title": "Overview",
-        "placeholder": "Work area for\nOverview section"
-      },
-      "launch": {
-        "initials": "LC",
-        "title": "Launch",
-        "placeholder": "Work area for\nLaunch section"
-      },
-      "explore": {
-        "initials": "EX",
-        "title": "Explore",
-        "placeholder": "Work area for\nExplore section"
-      },
-      "summarize": {
-        "initials": "SM",
-        "title": "Summarize",
-        "placeholder": "Work area for\nSummarize section"
+  "config": {
+    "autoAssignStudentsToIndividualGroups": true,
+    "disablePublish": [
+      { "documentType": "personal" },
+      { "documentType": "problem" },
+      { "documentType": "learningLog" }
+    ],
+    "placeholderText": "Enter notes here",
+    "defaultDocumentType": "personal",
+    "defaultDocumentTitle": "Untitled",
+    "documentLabels": {
+      "personal": {
+        "labels": {
+          "1": "Document",
+          "n": "Documents"
+        }
       }
     },
-    "sections": [
-      { "type": "overview" },
-      { "type": "launch" },
-      { "type": "explore" },
-      { "type": "summarize" }
+    "settings": {
+      "table": {
+        "numFormat": ".2~f"
+      }
+    },
+    "defaultStamps": [],
+    "navTabs": {
+      "showNavPanel": false,
+      "lazyLoadTabContents": true,
+      "tabSpecs": [
+        {
+          "tab": "my-work",
+          "label": "My Work",
+          "sections": [
+            {
+              "title": "Documents",
+              "type": "personal-documents",
+              "dataTestHeader": "my-work-section-workspaces",
+              "dataTestItem": "my-work-list-items",
+              "documentTypes": ["personal"],
+              "properties": ["!isDeleted"],
+              "addDocument": true
+            }
+          ]
+        }
+      ]
+    },
+    "toolbar": [
+      {
+        "id": "Diagram",
+        "title": "Diagram",
+        "isTileTool": true
+      },
+      {
+        "id": "Text",
+        "title": "Text",
+        "isTileTool": true
+      },
+      {
+        "id": "Drawing",
+        "title": "Drawing",
+        "isTileTool": true
+      },
+      {
+        "id": "delete",
+        "title": "Delete",
+        "iconId": "icon-delete-tool",
+        "isTileTool": false
+      }
     ]
   },
-  "defaultStamps": [
-  ],
+  "sections": {
+    "content": {
+      "initials": "",
+      "title": "Content",
+      "placeholder": ""
+    }
+  },
   "investigations": [
     {
-      "description": "Investigation 1",
+      "description": "M2S Investigation Description",
       "ordinal": 1,
-      "title": "Units",
+      "title": "M2S Investigation Title",
       "problems": [
         {
-          "description": "Problem 1.1",
+          "description": "M2S Problem Description",
           "ordinal": 1,
-          "title": "M2S 1.1 Converting Units",
+          "title": "M2Studio Standard Document",
           "subtitle": "",
           "disabled": [],
           "sections": [
-                        {
-                        "type": "introduction",
-                        "content": {
-                        "tiles": []
-                        },
-                        "supports": []
-                        },
-                        {
-                          "type": "initialChallenge",
-                          "content": {
-                            "tiles": []
-                          },
-                          "supports": []
-                        },
-                        {
-                          "type": "whatIf",
-                          "content": {
-                            "tiles": [],
-                            "supports": []
-                          }
-                        },
-                        {
-                          "type": "nowWhatDoYouKnow",
-                          "content": {
-                            "tiles": [],
-                            "supports": []
-                          }
-                        }
-                      ],
+            {
+              "type": "content",
+              "content": {
+                "tiles": []
+              },
+              "supports": []
+            }
+          ],
+          "supports": []
+        },
+        {
+          "description": "M2S Problem Description",
+          "ordinal": 2,
+          "title": "M2Studio Dashboard Document",
+          "subtitle": "",
+          "disabled": [],
+          "sections": [
+            {
+              "type": "content",
+              "content": {
+                "tiles": []
+              },
+              "supports": []
+            }
+          ],
+          "config": {
+            "toolbar": []
+          },
           "supports": []
         }
       ]
     }
-  ],
-  "supports": []
+  ]
 }

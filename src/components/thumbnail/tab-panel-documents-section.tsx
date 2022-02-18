@@ -2,7 +2,7 @@ import React from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
-import { isPublishedType, isUnpublishedType, PersonalDocument } from "../../models/document/document-types";
+import { isPublishedType, isUnpublishedType } from "../../models/document/document-types";
 import { IStores } from "../../models/stores/stores";
 import { ENavTabOrder, NavTabSectionModelType  } from "../../models/view/nav-tabs";
 import { CanvasComponent } from "../document/canvas";
@@ -31,7 +31,7 @@ function getNewDocumentLabel(section: NavTabSectionModelType , stores: IStores) 
   const { appConfig } = stores;
   let documentLabel = "";
   section.documentTypes.forEach(type => {
-    const label = type !== PersonalDocument ? appConfig.getDocumentLabel(type, 1) : "";
+    const label = appConfig.getDocumentLabel(type, 1);
     if (!documentLabel && label) {
       documentLabel = label;
     }
