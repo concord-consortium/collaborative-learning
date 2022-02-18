@@ -1,5 +1,5 @@
 import { simplify } from "mathjs";
-import { IAnyComplexType, Instance, types } from "mobx-state-tree";
+import { IAnyComplexType, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { ArrowHeadType, Elements } from "react-flow-renderer/nocss";
 import { getUnitConversion } from "./unit-conversion";
 
@@ -55,13 +55,13 @@ function tryToSimplify(operation: "÷"|"×", inputAUnit?:string, inputBUnit?: st
     }
 }
 
-export const DQNode = types.model("BasicNode", {
+const BaseDQNode = types.model("BasicNode", {
     id: types.identifier,
     name: types.maybe(types.string),
     unit: types.maybe(types.string),
     value: types.maybe(types.number),
-    inputA: types.maybe(types.safeReference(types.late((): IAnyComplexType => DQNode))),
-    inputB: types.maybe(types.safeReference(types.late((): IAnyComplexType => DQNode))),
+    inputA: types.maybe(types.safeReference(types.late((): IAnyComplexType => BaseDQNode))),
+    inputB: types.maybe(types.safeReference(types.late((): IAnyComplexType => BaseDQNode))),
     operation: types.maybe(types.enumeration<Operation>(Object.values(Operation))),
 
     // The x and y values are required when initializing the react flow
@@ -274,3 +274,32 @@ export const DQNode = types.model("BasicNode", {
             self.y = y;
         }
     }));
+interface BaseDQNodeSnapshot extends SnapshotIn<typeof BaseDQNode> {}
+
+// importable nodes have more flexible snapshots
+const ImportableDQNode = types.model("ImportableNode", {
+    id: types.identifier,
+    name: types.maybe(types.string),
+    unit: types.maybe(types.string),
+    value: types.maybe(types.maybeNull(types.number)),  // nulls have been encountered in the field
+    inputA: types.maybe(types.safeReference(types.late((): IAnyComplexType => BaseDQNode))),
+    inputB: types.maybe(types.safeReference(types.late((): IAnyComplexType => BaseDQNode))),
+    operation: types.maybe(types.enumeration<Operation>(Object.values(Operation))),
+    x: types.number,
+    y: types.number
+});
+interface ImportableDQNodeSnapshot extends SnapshotIn<typeof ImportableDQNode> {}
+
+const isBaseDQNodeSnapshot = (sn: BaseDQNodeSnapshot | ImportableDQNodeSnapshot): sn is BaseDQNodeSnapshot =>
+        sn.value !== null;
+
+// client-visible DQNode handles import of null values
+export const DQNode = types.snapshotProcessor(BaseDQNode, {
+  preProcessor(sn: BaseDQNodeSnapshot | ImportableDQNodeSnapshot) {
+    if (isBaseDQNodeSnapshot(sn)) return sn;
+
+    const { value, ...others } = sn;
+    return { ...others };
+  }
+});
+export interface DQNodeType extends Instance<typeof DQNode> {}
