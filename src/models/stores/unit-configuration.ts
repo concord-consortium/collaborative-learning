@@ -65,7 +65,7 @@ export interface UnitConfiguration extends ProblemConfiguration {
   // terminology for referencing documents
   documentLabels: Record<string, SnapshotIn<typeof DocumentLabelModel>>;
   // disables publishing documents of particular types or with particular properties
-  disablePublish: Array<SnapshotIn<typeof DocumentSpecModel>>;
+  disablePublish: Array<SnapshotIn<typeof DocumentSpecModel>> | boolean;
   // configures naming of copied documents
   copyPreferOriginTitle: boolean;
   // enable/disable dragging of tiles

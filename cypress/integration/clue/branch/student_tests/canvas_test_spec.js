@@ -385,6 +385,20 @@ context('Test Canvas', function () {
   });
 });
 
+describe("Canvas unit config test", function () {
+  before(function () {
+    cy.visit("??appMode=qa&fakeClass=5&fakeUser=student:5&fakeOffering=5&problem=3.3&qaGroup=5&unit=example-no-group-share");
+    cy.waitForLoad();
+  });
+
+  it("verify group section in header is not visible when unit is configured to auto assign students to groups", function () {
+    cy.get(".app-header .right .group").should("not.exist");
+  });
+  it("verify publish button is not visible when publish is disabled", function () {
+    cy.get(".icon-button.icon-publish").should("not.exist");
+  });
+});
+
 after(function () {
   cy.clearQAData('all');
 });

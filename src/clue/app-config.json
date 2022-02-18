@@ -236,6 +236,9 @@
     "example": {
       "content": "curriculum/example-curriculum/example-curriculum.json"
     },
+    "example-no-group-share": {
+      "content": "curriculum/example-curriculum/example-no-group-share.json"
+    },
     "faw": {
       "content": "curriculum/filling-and-wrapping/filling-and-wrapping.json"
     },
