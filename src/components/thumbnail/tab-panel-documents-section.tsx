@@ -79,7 +79,7 @@ function getSectionDocs(section: NavTabSectionModelType, stores: IStores, classS
   return sectDocs;
 }
 
-export const TabPanelDocumentsSection = observer(({ tab, section, index, numSections, stores, scale, selectedDocument,
+export const TabPanelDocumentsSection = observer(({ tab, section, index, numSections=0, stores, scale, selectedDocument,
                                   onSelectNewDocument, onSelectDocument, onDocumentDragStart,
                                   onDocumentStarClick, onDocumentDeleteClick }: IProps) => {
     const { user } = stores;

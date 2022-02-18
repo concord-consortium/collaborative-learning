@@ -182,7 +182,7 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
                 tab={subTab.label}
                 section={section}
                 index={index}
-                numSections={subTab.sections.length || 0}
+                numSections={subTab.sections.length}
                 stores={this.stores}
                 scale={kNavItemScale}
                 selectedDocument={selectedDocument}
