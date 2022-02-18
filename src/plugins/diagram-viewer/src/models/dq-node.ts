@@ -68,8 +68,8 @@ export const DQNode = types.model("BasicNode", {
     // component. However the react flow component ignores them after this.
     // To serialize the state the positions need to be extracted from the react flow
     // and then applied to the models.
-    x: types.integer,
-    y: types.integer
+    x: types.number,
+    y: types.number
 })
     .views(self => ({
         get reactFlowElements() {
