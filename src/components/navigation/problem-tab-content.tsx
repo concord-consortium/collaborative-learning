@@ -56,7 +56,7 @@ export const ProblemTabContent: React.FC<IProps>
   return (
     <Tabs className={classNames("problem-tabs", context, chatBorder)} selectedTabClassName="selected"
           data-focus-document={problemPath}>
-      <div className={classNames("tab-header-row", { "no-sub-tabs": !hasSubTabs})}>
+      <div className={classNames("tab-header-row", {"no-sub-tabs": !hasSubTabs})}>
         <TabList className={classNames("tab-list", {"chat-open" : ui.showChatPanel})}>
           {sections?.map((section) => {
             const sectionTitle = getSectionTitle(section.type);
@@ -71,7 +71,7 @@ export const ProblemTabContent: React.FC<IProps>
         {isTeacher && showSolutionsSwitch &&
           <SolutionsButton onClick={handleToggleSolutions} isToggled={showTeacherContent} />}
       </div>
-      <div className="problems-panel" style={problemsPanelStyle}>
+      <div className="problem-panel" style={problemsPanelStyle}>
         {sections?.map((section) => {
           return (
             <TabPanel key={`section-${section.type}`} data-focus-section={section.type}>

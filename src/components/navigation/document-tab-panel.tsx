@@ -82,7 +82,7 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
     const vh = window.innerHeight;
     const headerOffset = hasSubTabs
                           ? kHeaderHeight + (2 * (kWorkspaceContentMargin + kNavTabHeight + kTabSectionBorderWidth))
-                          : kHeaderHeight + + kNavTabHeight + (2 * (kWorkspaceContentMargin + kTabSectionBorderWidth));
+                          : kHeaderHeight + kNavTabHeight + (2 * (kWorkspaceContentMargin + kTabSectionBorderWidth));
     const documentsPanelHeight = vh - headerOffset;
     const documentsPanelStyle = { height: documentsPanelHeight };
 
@@ -182,7 +182,7 @@ export class DocumentTabPanel extends BaseComponent<IProps, IState> {
                 tab={subTab.label}
                 section={section}
                 index={index}
-                numOfSections={subTab.sections.length}
+                numSections={subTab.sections.length || 0}
                 stores={this.stores}
                 scale={kNavItemScale}
                 selectedDocument={selectedDocument}
