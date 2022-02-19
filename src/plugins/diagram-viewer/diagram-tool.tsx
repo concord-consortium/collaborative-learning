@@ -2,6 +2,7 @@ import React from "react";
 import { FlowTransform } from "react-flow-renderer";
 import { IToolTileProps } from "../../components/tools/tool-tile";
 import { DiagramContentModelType } from "./diagram-content";
+import { kQPVersion } from "./diagram-types";
 import { Diagram } from "./src/components/diagram";
 import "./diagram-tool.scss";
 
@@ -18,6 +19,7 @@ export const DiagramToolComponent: React.FC<IToolTileProps> = ({ model }) => {
         dqRoot={content.root}
         initialFlowTransform={content.transform}
         onChangeFlowTransform={handleChangeFlowTransform} />
+      <div className="qp-version">{`version: ${kQPVersion}`}</div>
     </div>
   );
 };
