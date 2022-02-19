@@ -46,6 +46,8 @@ export class ClueAppContentComponent extends BaseComponent<IProps> {
       <div className="clue-app-content">
         <ClueAppHeaderComponent panels={panels}
                             current={teacherPanelKey} onPanelChange={this.handlePanelChange}
+                            // This assumes that when we auto-assign students to groups,
+                            // we don't want to see the Groups in the header
                             showGroup={!autoAssignStudentsToIndividualGroups} />
         {currentPanelContent}
         <DialogComponent dialog={ui.dialog} />

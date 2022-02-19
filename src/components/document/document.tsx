@@ -254,6 +254,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private showPublishButton(document: DocumentModelType) {
     const { appConfig } = this.stores;
     if (!appConfig.disablePublish) return true;
+    // When we disable publishing by setting disablePublish=true,
+    // we set showPublishButton to false to hide the Publish button
     if (document.type === "planning" || appConfig.disablePublish === true) return false;
     return appConfig.disablePublish
             .findIndex(spec => {
