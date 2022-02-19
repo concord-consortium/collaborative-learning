@@ -52,6 +52,7 @@
     "build": "npm-run-all lint:build clean build:webpack",
     "build:debug": "npm-run-all lint clean build:webpack",
     "build:webpack": "cross-env NODE_OPTIONS=--max-old-space-size=4096 webpack --mode production",
+    "check:types": "tsc --noEmit",
     "clean": "rimraf dist",
     "deploy:database:rules": "firebase deploy --only database",
     "deploy:firestore:rules": "firebase deploy --only firestore:rules",

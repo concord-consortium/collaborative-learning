@@ -30,6 +30,7 @@ interface IProps extends IBaseProps {
   onNewDocument?: (type: string) => void;
   onCopyDocument?: (document: DocumentModelType) => void;
   onDeleteDocument?: (document: DocumentModelType) => void;
+  onAdminDestroyDocument?: (document: DocumentModelType) => void;
   onPublishSupport?: (document: DocumentModelType) => void;
   onPublishDocument?: (document: DocumentModelType) => void;
   toolbar?: ToolbarModelType;
@@ -229,7 +230,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
             <DocumentFileMenu document={document}
               onOpenDocument={this.handleOpenDocumentClick}
               onCopyDocument={this.handleCopyDocumentClick}
-              isDeleteDisabled={true} />
+              isDeleteDisabled={true}
+              onAdminDestroyDocument={this.handleAdminDestroyDocument} />
             {this.showPublishButton(document) &&
               <PublishButton key="publish" onClick={this.handlePublishDocument} />}
           </div>
@@ -362,7 +364,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
               onOpenDocument={this.handleOpenDocumentClick}
               onCopyDocument={this.handleCopyDocumentClick}
               isDeleteDisabled={countNotDeleted < 1}
-              onDeleteDocument={this.handleDeleteDocumentClick}/>
+              onDeleteDocument={this.handleDeleteDocumentClick}
+              onAdminDestroyDocument={this.handleAdminDestroyDocument} />
             {!hideButtons && this.showPublishButton(document) &&
               <PublishButton dataTestName="other-doc-publish-icon" onClick={this.handlePublishDocument} />}
           </div>
@@ -450,6 +453,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private handleDeleteDocumentClick = () => {
     const { document, onDeleteDocument } = this.props;
     onDeleteDocument?.(document);
+  };
+
+  private handleAdminDestroyDocument = () => {
+    const { document, onAdminDestroyDocument } = this.props;
+    onAdminDestroyDocument?.(document);
   };
 
   private handleSelectDocument = (document: DocumentModelType) => {

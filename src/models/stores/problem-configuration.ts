@@ -1,4 +1,5 @@
 import { Instance, SnapshotIn, types } from "mobx-state-tree";
+import { IAuthoredDocumentContent } from "../document/document-content-import";
 import { StampModel } from "../tools/drawing/stamp";
 import { ToolButtonModel } from "../tools/tool-button";
 import { SettingsMstType } from "./settings";
@@ -11,6 +12,7 @@ export type ToolbarModelSnapshot = SnapshotIn<typeof ToolbarModel>;
 export interface ProblemConfiguration {
   disabledFeatures: string[];
   toolbar: SnapshotIn<typeof ToolbarModel>;
+  defaultDocumentTemplate?: IAuthoredDocumentContent;
   placeholderText: string;
   stamps: SnapshotIn<typeof StampModel>[];
   settings: SnapshotIn<typeof SettingsMstType>;

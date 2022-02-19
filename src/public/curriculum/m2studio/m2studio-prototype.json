@@ -1,17 +1,12 @@
 {
-  "code": "m2s",
-  "abbrevTitle": "M2S",
-  "title": "M2Studio",
-  "subtitle": "Multiple Representations",
+  "code": "m2s-proto",
+  "abbrevTitle": "M2S-P",
+  "title": "M2Studio Prototype",
+  "subtitle": "",
   "config": {
-    "autoAssignStudentsToIndividualGroups": true,
-    "disablePublish": [
-      { "documentType": "personal" },
-      { "documentType": "problem" },
-      { "documentType": "learningLog" }
-    ],
     "placeholderText": "Enter notes here",
-    "defaultDocumentType": "personal",
+    "autoSectionProblemDocuments": false,
+    "defaultDocumentType": "problem",
     "defaultDocumentTitle": "Untitled",
     "documentLabels": {
       "personal": {
@@ -34,13 +29,21 @@
     },
     "defaultStamps": [],
     "navTabs": {
-      "showNavPanel": false,
+      "showNavPanel": true,
       "lazyLoadTabContents": true,
       "tabSpecs": [
         {
           "tab": "my-work",
-          "label": "My Work",
+          "label": "My Documents",
           "sections": [
+            {
+              "title": "Documents",
+              "type": "problem-documents",
+              "dataTestHeader": "my-work-section-investigations",
+              "dataTestItem": "my-work-list-items",
+              "documentTypes": ["problem"],
+              "order": "original"
+            },
             {
               "title": "Documents",
               "type": "personal-documents",
@@ -89,14 +92,13 @@
     {
       "description": "M2Studio Investigation Description",
       "ordinal": 1,
-      "title": "M2Studio Examples",
+      "title": "M2Studio Prototype Examples",
       "problems": [
         {
           "description": "M2S Problem 1.1 Description",
           "ordinal": 1,
           "title": "Standard Document",
           "subtitle": "",
-          "disabled": [],
           "sections": [
             {
               "type": "content",
@@ -113,7 +115,6 @@
           "ordinal": 2,
           "title": "Dashboard Document",
           "subtitle": "",
-          "disabled": [],
           "sections": [
             {
               "type": "content",
@@ -124,6 +125,37 @@
             }
           ],
           "config": {
+            "defaultDocumentTemplate": {
+              "tiles": [
+                { "content": { "type": "Diagram" } },
+                [
+                  { "content": { "type": "Text", "text": "You can have any text you want here!" } },
+                  { "content": { "type": "Drawing" } }
+                ]
+              ]
+            },
+            "toolbar": []
+          },
+          "supports": []
+        },
+        {
+          "description": "M2S Problem 1.3 Description",
+          "ordinal": 3,
+          "title": "Diagram-only Document",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "content",
+              "content": {
+                "tiles": []
+              },
+              "supports": []
+            }
+          ],
+          "config": {
+            "defaultDocumentTemplate": {
+              "tiles": [{ "content": { "type": "Diagram" } }]
+            },
             "toolbar": []
           },
           "supports": []

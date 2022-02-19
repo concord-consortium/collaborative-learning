@@ -27,12 +27,12 @@ export class DBOtherDocumentsListener extends BaseListener {
     if (this.documentType === PersonalDocument) {
       this.publicationType = PersonalPublication;
       this.documentsPath = this.db.firebase.getUserPersonalDocPath(this.db.stores.user);
-      this.publicationsPath = this.db.firebase.getClassPersonalPublicationsPath(this.db.stores.user);
+      this.publicationsPath = this.db.firebase.getPersonalPublicationsPath(this.db.stores.user);
     }
     else {
       this.publicationType = LearningLogPublication;
       this.documentsPath = this.db.firebase.getLearningLogPath(this.db.stores.user);
-      this.publicationsPath = this.db.firebase.getClassPublicationsPath(this.db.stores.user);
+      this.publicationsPath = this.db.firebase.getLearningLogPublicationsPath(this.db.stores.user);
     }
 
     const documentsRef = this.db.firebase.ref(this.documentsPath);

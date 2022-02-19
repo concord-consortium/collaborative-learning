@@ -1,5 +1,6 @@
 import React, { useContext, useMemo } from "react";
 import { AppConfigContext, IconComponent } from "../../app-config-context";
+import { useAppMode } from "../../hooks/use-stores";
 import { DocumentModelType } from "../../models/document/document";
 import { CustomSelect, ICustomDropdownItem } from "../../clue/components/custom-select";
 
@@ -13,6 +14,7 @@ interface IProps {
   onCopyDocument?: (document: DocumentModelType) => void;
   isDeleteDisabled?: boolean;
   onDeleteDocument?: (document: DocumentModelType) => void;
+  onAdminDestroyDocument?: (document: DocumentModelType) => void;
 }
 
 function idAndIcon(id: string, appIcons?: Record<string, IconComponent>) {
@@ -26,13 +28,21 @@ export const DocumentFileMenu: React.FC<IProps> = props => {
   const { document,
           isOpenDisabled, onOpenDocument,
           isCopyDisabled, onCopyDocument,
-          isDeleteDisabled, onDeleteDocument } = props;
+          isDeleteDisabled, onDeleteDocument,
+          onAdminDestroyDocument } = props;
 
+  const appMode = useAppMode();
   const { appIcons } = useContext(AppConfigContext);
   const TitleIcon = appIcons?.["icon-open-workspace"];
   // not clear why we need to reset the viewBox
   const titleIcon = TitleIcon && <TitleIcon viewBox="0 0 32 32" />;
   const isCopyReallyDisabled = (isCopyDisabled || document.type === "planning");
+  const adminDestroyDocumentItem: ICustomDropdownItem = {
+    text: "Admin Destroy...",
+    disabled: !onAdminDestroyDocument,
+    onClick: () => onAdminDestroyDocument?.(document)
+  };
+  const adminItems = onAdminDestroyDocument && (appMode === "dev") ? [adminDestroyDocumentItem] : [];
 
   const menuItems: ICustomDropdownItem[] = useMemo(() => ([
     {
@@ -52,7 +62,8 @@ export const DocumentFileMenu: React.FC<IProps> = props => {
       text: "Delete",
       disabled: !!isDeleteDisabled,
       onClick: () => onDeleteDocument?.(document)
-    }
+    },
+    ...adminItems
   // eslint-disable-next-line react-hooks/exhaustive-deps
   ]), [document]);
 

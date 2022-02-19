@@ -4,7 +4,8 @@ import { DocumentComponent, WorkspaceSide } from "../../components/document/docu
 import { GroupVirtualDocumentComponent } from "../../components/document/group-virtual-document";
 import { BaseComponent, IBaseProps } from "../../components/base";
 import { DocumentModelType } from "../../models/document/document";
-import { createDefaultSectionedContent, DocumentContentModelType } from "../../models/document/document-content";
+import { DocumentContentModelType } from "../../models/document/document-content";
+import { createDefaultSectionedContent } from "../../models/document/document-content-import";
 import {
   DocumentDragKey, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
 } from "../../models/document/document-types";
@@ -93,9 +94,9 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   private renderDocuments() {
-    const {appConfig, documents, ui, groups} = this.stores;
+    const { appMode, appConfig: { toolbar }, documents, ui, groups } = this.stores;
     const { problemWorkspace } = ui;
-    const { comparisonDocumentKey, hidePrimaryForCompare, comparisonVisible} = problemWorkspace;
+    const { comparisonDocumentKey, hidePrimaryForCompare, comparisonVisible } = problemWorkspace;
     const showPrimary = !hidePrimaryForCompare;
     const primaryDocument = this.getPrimaryDocument(problemWorkspace.primaryDocumentKey);
     const comparisonDocument = comparisonDocumentKey
@@ -103,8 +104,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
 
     const groupVirtualDocument = comparisonDocumentKey
       && groups.virtualDocumentForGroup(comparisonDocumentKey);
-
-    const toolbar = appConfig.toolbar;
 
     if (!primaryDocument) {
       return this.renderDocument("single-workspace", "primary");
@@ -138,6 +137,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         onNewDocument={this.handleNewDocument}
         onCopyDocument={this.handleCopyDocument}
         onDeleteDocument={this.handleDeleteDocument}
+        onAdminDestroyDocument={appMode === "dev" ? this.handleAdminDestroyDocument : undefined}
         onPublishSupport={this.handlePublishSupport}
         onPublishDocument={this.handlePublishDocument}
         toolbar={toolbar}
@@ -365,6 +365,21 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
       if (confirmDelete) {
         document.setProperty("isDeleted", "true");
         this.handleDeleteOpenPrimaryDocument();
+      }
+    });
+  };
+
+  private handleAdminDestroyDocument = (document: DocumentModelType) => {
+    const { appConfig, db, ui } = this.stores;
+    const docTypeString = document.getLabel(appConfig, 1);
+    const docTypeStringL = document.getLabel(appConfig, 1, true);
+    const documentString = `${document.type} ${docTypeStringL} (${document.title || ""})`;
+    ui.confirm(`Destroy this ${documentString} from the database and reload the page?`,
+                `Destroy ${docTypeString}`)
+    .then((confirmDelete: boolean) => {
+      if (confirmDelete) {
+        db.destroyFirebaseDocument(document);
+        window.location.reload();
       }
     });
   };

@@ -254,10 +254,13 @@
     "lfp": {
       "content": "curriculum/looking-for-pythagoras/looking-for-pythagoras.json"
     },
-     "m2s": {
+    "m2s": {
       "content": "curriculum/m2studio/m2studio.json"
     },
-     "moth": {
+    "m2s-proto": {
+      "content": "curriculum/m2studio/m2studio-prototype.json"
+    },
+    "moth": {
       "content": "curriculum/mothed/mothed.json"
     },
     "msa": {

@@ -1,5 +1,6 @@
 import { types, getSnapshot } from "mobx-state-tree";
-import { DocumentContentModel, IAuthoredDocumentContent } from "../document/document-content";
+import { DocumentContentModel } from "../document/document-content";
+import { IAuthoredDocumentContent } from "../document/document-content-import";
 
 export enum ESupportType {
   // simple text supports (e.g. legacy supports); content is simple text

@@ -94,7 +94,7 @@ export const EditableDocumentContent: React.FC<IProps> = props => {
   const editableToolApiInterfaceRef: EditableToolApiInterfaceRef = useRef(null);
 
   const isReadOnly = !isPrimary || readOnly || document.isPublished;
-  const isShowingToolbar = !!toolbar && !isReadOnly;
+  const isShowingToolbar = toolbar?.length && !isReadOnly;
   const showToolbarClass = isShowingToolbar ? "show-toolbar" : "hide-toolbar";
   const isChatEnabled = isNetworkedTeacher;
   const documentSelectedForComment = isChatEnabled && ui.showChatPanel && ui.selectedTileIds.length === 0 && !isPrimary;
