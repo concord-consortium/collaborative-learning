@@ -82,11 +82,9 @@ function getSectionDocs(section: NavTabSectionModelType, stores: IStores, classS
 export const TabPanelDocumentsSection = observer(({ tab, section, index, numSections=0, stores, scale, selectedDocument,
                                   onSelectNewDocument, onSelectDocument, onDocumentDragStart,
                                   onDocumentStarClick, onDocumentDeleteClick }: IProps) => {
-    const { user } = stores;
     const showNewDocumentThumbnail = section.addDocument && !!onSelectNewDocument;
     const newDocumentLabel = getNewDocumentLabel(section, stores);
-    const numPanels = user.isNetworkedTeacher ? numSections + 1 : numSections;
-    const isTopPanel = index === 0 && numPanels > 1;
+    const isTopPanel = index === 0 && numSections > 1;
     const isBottomPanel = index === numSections - 1 && index > 0;
     const isSinglePanel = numSections < 2;
     const tabName = tab?.toLowerCase().replace(' ', '-');
@@ -96,8 +94,7 @@ export const TabPanelDocumentsSection = observer(({ tab, section, index, numSect
     function handleNewDocumentClick() {
       onSelectNewDocument?.(section.documentTypes[0]);
     }
-    const tabPanelDocumentSectionClass = classNames("tab-panel-documents-section", tabName,
-                                                    {"top-panel": isTopPanel}, {"bottom-panel": isBottomPanel});
+    const tabPanelDocumentSectionClass = classNames("tab-panel-documents-section", tabName, {"top-panel": isTopPanel});
     const listClass = classNames("list", tabName, {"top-panel": isTopPanel},
                                   {"bottom-panel": isBottomPanel && !isSinglePanel});
     return (
