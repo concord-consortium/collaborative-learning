@@ -9,6 +9,10 @@
 
   .react-flow__minimap {
     bottom: 18px !important;
+
+    .react-flow__minimap-mask {
+      fill: rgba(237, 237, 237, 0.7);
+    }
   }
 
   .qp-version {

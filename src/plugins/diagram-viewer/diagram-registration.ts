@@ -10,6 +10,6 @@ registerToolContentInfo({
   defaultContent: defaultDiagramContent,
   Component: DiagramToolComponent,
   defaultHeight: kDiagramDefaultHeight,
-  toolTileClass: "diagram-tool-tile disable-tile-content-drag",
+  toolTileClass: "diagram-tool-tile disable-tile-content-drag nowheel",
   Icon: DiagramToolIcon
 });
