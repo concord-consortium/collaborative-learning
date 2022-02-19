@@ -61,8 +61,8 @@ export class DBProblemDocumentsListener extends BaseListener {
         this.handleOfferingUser(user);
       }
     });
-    // if the user doesn't exist in the DB, then there can't be any documents
-    !users?.[selfUserId] && documents.resolveAllRequiredDocumentPromisesWithNull();
+    // if the user doesn't exist in the offering, then there can't be any problem or planning documents
+    !users?.[selfUserId] && documents.resolveRequiredDocumentPromisesWithNull([ProblemDocument, PlanningDocument]);
   };
 
   private handleLoadOfferingUserAddedOrChanged = (eventType: string) => (snapshot: firebase.database.DataSnapshot) => {
@@ -80,7 +80,7 @@ export class DBProblemDocumentsListener extends BaseListener {
     const isOwnDocument = String(user.self.uid) === currentUser.id;
     // monitor problem documents
     if (isOwnDocument && (size(user.documents) === 0)) {
-      documents.resolveRequiredDocumentPromise(null, ProblemDocument);
+      documents.resolveRequiredDocumentPromiseWithNull(ProblemDocument);
     }
     forEach(user.documents, document => {
       if (!document?.documentKey || !document?.self?.uid) return;
@@ -110,7 +110,7 @@ export class DBProblemDocumentsListener extends BaseListener {
     });
     // monitor planning documents
     if (isOwnDocument && (size(user.planning) === 0)) {
-      documents.resolveRequiredDocumentPromise(null, PlanningDocument);
+      documents.resolveRequiredDocumentPromiseWithNull(PlanningDocument);
     }
     forEach(user.planning, document => {
       if (!document?.documentKey || !document?.self?.uid) return;

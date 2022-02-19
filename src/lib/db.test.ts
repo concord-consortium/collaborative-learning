@@ -176,7 +176,7 @@ describe("db", () => {
       })
     }));
     stores.documents = createDocumentsModelWithRequiredDocuments([ProblemDocument, PlanningDocument]);
-    stores.documents.resolveAllRequiredDocumentPromisesWithNull();
+    stores.documents.resolveRequiredDocumentPromisesWithNull();
     await db.connect({appMode: "test", stores, dontStartListeners: true});
     expect((await db.guaranteeOpenDefaultDocument(ProblemDocument))?.type).toBe(ProblemDocument);
     expect(await stores.documents.requiredDocuments[ProblemDocument].promise).toEqual(newDocument);
@@ -206,7 +206,7 @@ describe("db", () => {
       })
     }));
     stores.documents = createDocumentsModelWithRequiredDocuments([ProblemDocument, PlanningDocument]);
-    stores.documents.resolveAllRequiredDocumentPromisesWithNull();
+    stores.documents.resolveRequiredDocumentPromisesWithNull();
     await db.connect({appMode: "test", stores, dontStartListeners: true});
     expect((await db.guaranteePlanningDocument([]))?.type).toBe(PlanningDocument);
     expect(await stores.documents.requiredDocuments[PlanningDocument].promise).toEqual(newDocument);

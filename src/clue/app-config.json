@@ -236,6 +236,15 @@
     "example": {
       "content": "curriculum/example-curriculum/example-curriculum.json"
     },
+    "example-show-nav-panel": {
+      "content": "curriculum/example-curriculum/example-show-nav-panel.json"
+    },
+    "example-config-subtabs": {
+      "content": "curriculum/example-curriculum/example-config-subtabs.json"
+    },
+    "example-no-section-problem-tab": {
+      "content": "curriculum/example-curriculum/example-no-section-problem-tab.json"
+    },
     "faw": {
       "content": "curriculum/filling-and-wrapping/filling-and-wrapping.json"
     },
