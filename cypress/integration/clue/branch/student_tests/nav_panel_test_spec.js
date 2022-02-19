@@ -165,6 +165,59 @@ describe('Test nav panel tabs', function () {
   });
 });
 
+describe.only('Nav panel tab configs', function () {
+  const baseQueryParam = "?appMode=qa&fakeClass=10&fakeUser=student:11&fakeOffering=10&qaGroup=10";
+  it('Single Top tab with visible resource tab panel', function () {
+    cy.visit(`${baseQueryParam}&unit=example`);
+    cy.waitForLoad();
+    cy.get(".collapsed-resources-tab.my-work").should('not.exist');
+    canvas.openFileMenu();
+    cy.get ("[data-test=list-item-icon-open-workspace]").click();
+    cy.get(".tab-header-row").should("not.be.visible");
+  });
+  it('Single Top tab with visible resource tab panel', function () {
+    cy.visit(`${baseQueryParam}&unit=example-show-nav-panel`);
+    cy.waitForLoad();
+    cy.get(".collapsed-resources-tab.my-work").click();
+    cy.get(".top-tab").should("have.length", 1);
+    cy.get(".document-tabs.my-work .tab-header-row").should("not.be.visible");
+    canvas.openFileMenu();
+    cy.get ("[data-test=list-item-icon-open-workspace]").click();
+    cy.get(".tab-header-row").should("not.be.visible");
+  });
+  it('Problem Tabs with no sub tabs', function () {
+    cy.visit(`${baseQueryParam}&unit=example-no-section-problem-tab`);
+    cy.waitForLoad();
+    cy.get(".collapsed-resources-tab.my-work").click();
+    cy.openTopTab("problems");
+    cy.get(".problem-tabs .tab-header-row").should("not.be.visible");
+  });
+  it('Problem Tabs with no sub tabs', function () {
+    const exampleProblemSubTabTitles = ["First Section", "Second Section", "Third Section"];
+    const exampleMyWorkSubTabTitles = ["Workspaces", "Starred"];
+    const exampleClassWorkSubTabTitles = ["Problem Workspaces", "Extra Workspaces", "Starred"];
+
+    cy.visit(`${baseQueryParam}&unit=example-config-subtabs`);
+    cy.waitForLoad();
+    cy.get(".collapsed-resources-tab.my-work").click();
+    cy.openTopTab("problems");
+    cy.get(".problem-tabs .tab-list .prob-tab").each(($tab, index, $tabList) => {
+      expect($tabList).to.have.lengthOf(3);
+      expect($tab.text()).to.contain(exampleProblemSubTabTitles[index]);
+    });
+    cy.openTopTab("my-work");
+    cy.get(".document-tabs .tab-list .doc-tab.my-work").each(($tab, index, $tabList) => {
+      expect($tabList).to.have.lengthOf(2);
+      expect($tab.text()).to.contain(exampleMyWorkSubTabTitles[index]);
+    });
+    cy.openTopTab("class-work");
+    cy.get(".document-tabs .tab-list .doc-tab.class-work").each(($tab, index, $tabList) => {
+      expect($tabList).to.have.lengthOf(3);
+      expect($tab.text()).to.contain(exampleClassWorkSubTabTitles[index]);
+    });
+  });
+});
+
 after(function () {
   cy.clearQAData('all');
 });

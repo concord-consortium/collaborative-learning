@@ -1,0 +1,202 @@
+{
+  "code": "example-no-section-problem-tab",
+  "abbrevTitle": "EXNS",
+  "title": "Example Curriculum",
+  "subtitle": "Demonstrating Curriculum Configuration",
+  "config": {
+    "placeholderText": "This is where users can type text",
+    "defaultDocumentType": "problem",
+    "settings": {
+      "table": { "numFormat": ".2~f" }
+    },
+    "navTabs": {
+      "showNavPanel": true,
+      "lazyLoadTabContents": true,
+      "tabSpecs": [
+        {
+          "tab": "problems",
+          "label": "Activity",
+          "sections": []
+        },
+        {
+          "tab": "my-work",
+          "label": "My Work",
+          "sections": [
+            {
+              "title": "Workspaces",
+              "type": "personal-documents",
+              "dataTestHeader": "my-work-section-workspaces",
+              "dataTestItem": "my-work-list-items",
+              "documentTypes": ["personal"],
+              "properties": ["!isDeleted"],
+              "showStars": ["student", "teacher"],
+              "addDocument": true
+            }
+          ]
+        },
+        {
+          "tab": "class-work",
+          "label": "Class Work",
+          "sections": []
+        }
+      ]
+    },
+    "toolbar": [
+      {
+        "id": "Text",
+        "title": "Text",
+        "isTileTool": true
+      },
+      {
+        "id": "Table",
+        "title": "Table",
+        "isTileTool": true
+      },
+      {
+        "id": "Drawing",
+        "title": "Drawing",
+        "isTileTool": true
+      },
+      {
+        "id": "delete",
+        "title": "Delete",
+        "iconId": "icon-delete-tool",
+        "isTileTool": false
+      }
+    ],
+    "stamps": []
+  },
+  "sections": {
+    "first": {
+      "initials": "FI",
+      "title": "First Section",
+      "placeholder": "Work area for\nFirst Section"
+    },
+    "second": {
+      "initials": "SE",
+      "title": "Second Section",
+      "placeholder": "Second Section Placeholder"
+    },
+    "third": {
+      "initials": "TH",
+      "title": "Third Section",
+      "placeholder": "Third Section content goes here"
+    }
+  },
+  "planningDocument": {
+    "enable": "teacher",
+    "default": true,
+    "sectionInfo": {
+      "plan": {
+        "initials": "PL",
+        "title": "Plan",
+        "placeholder": "Plan the work; work the plan"
+      }
+    },
+    "sections": [{ "type": "plan" }]
+  },
+  "investigations": [
+    {
+      "description": "Investigation 1",
+      "ordinal": 1,
+      "title": "Example Investigation 1",
+      "problems": [
+        {
+          "description": "Problem 1.1",
+          "ordinal": 1,
+          "title": "1.1 Unit Toolbar Configuration",
+          "subtitle": "Text, Table, Drawing",
+          "sections": [
+            { "type": "first",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Get Started Tab for 5th grade:</p>",
+                        "<p>Our town is part of the <strong>US Eastern deciduous forest </strong>region. What evidence of that can we observe outside? </p>",
+                        "<p>Divide your team  into roles: Recorder;  (2-3)Researchers; Presenter</p>",
+                        "<p><strong>Activity:</strong> </p>",
+                        "<p><strong>Get Started: </strong>Work with your group and use a<em><strong> text box</strong></em> (click the &#x27;A&#x27; tool on left ) to make a list in your <strong>Workspace</strong> of what you expect to find when you go outside to look. Format your list using the options below.</p>",
+                        "<p>To gather ideas, <strong>Researchers </strong>can...</p>",
+                        "<ul><li>view out the window, </li><li>look around your classroom/home for books  or magazines,</li><li>drag images from your computer onto your  <strong>Workspace </strong>by opening an <em><strong>image </strong></em>tile using that icon on the left. The upload button appears. Only one image per tile. You can resize your image by dragging the bottom right corner of the tile.</li></ul>",
+                        "<p>Your <strong>Recorder </strong>can record everyone&#x27;s ideas  in  their CLUE workspace.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>For the teacher:</p>",
+                        "<p><strong>Welcome to CLUE</strong>! Clue is short for <em>Collaborative Learning User Environment. </em>This environment is designed to make it easy for groups of up to four students to share their work and learn from each other. </p>",
+                        "<p>When the class starts an activity, CLUE drops students into groups randomly. If you prefer to assign students to groups, have them switch groups by clicking on the group number at upper right. </p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Field Notes tab for 5th grade:</p>",
+                        "<p><strong>Field Notes</strong>: Let&#x27;s go outside! Bring your science notebook  to make notes and drawings of what you find.</p>",
+                        "<p>When you come back  inside add  your top three observations to the <strong>Field Notes</strong> space on your <strong>Workspace</strong> .</p>",
+                        "<p></p>",
+                        "<p>You can make drawings of what you found  by choosing the  <strong><em>pencil</em></strong>   tool in the Workspace. If you counted the number of certain  items you discovered, use the <strong>table </strong>tool to create a table to share. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "name": "Field Notes",
+                      "columns": [
+                        {"name":"x","values":["acorns","leaves","puffy clouds","sun AND moon!"]},
+                        {"name":"y","values":["25","lots","3","both"]}
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Share tab for 5th grade:</p>",
+                        "<p><strong>Share</strong> - Share to compare notes with your teammates! </p>",
+                        "<p>Click on the Share switch to share and discuss your ideas in the group view.</p>",
+                        "<p></p>",
+                        "<p>What different types of evidence of <strong>Eastern deciduous forest</strong> did your groupmates observe?</p>",
+                        "<ul><li>What did you expect to see that you did not see?</li><li>What did you see that you didn&#x27;t expect (didn’t list in <strong>Get Started</strong>?)</li><li>What did you observe that isn&#x27;t actually evidence of a forest ecosystem?</li></ul>",
+                        "<p>What might you expect to see looking different in four weeks? Why? </p>",
+                        "<p>Work with your group and use a <strong>table </strong> to list your findings and the changes you expect to see a month from now. Your <strong>Recorder</strong> can list all all ideas in their space to  share with the class. Add a text box if you have more questions as you imagine the schoolyard in 4 weeks. Select a <strong>Presenter </strong>to share your teamwork with the class.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "name": "Our Comparison",
+                      "columns": [
+                        {"name":"Now"},
+                        {"name":"In 4 weeks "}
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+

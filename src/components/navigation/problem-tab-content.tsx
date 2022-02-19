@@ -16,13 +16,25 @@ interface IProps {
   showSolutionsSwitch: boolean;
 }
 
+const kHeaderHeight = 55;
+const kWorkspaceContentMargin = 4;
+const kNavTabHeight = 34;
+const kTabSectionBorderWidth = 2;
+
 export const ProblemTabContent: React.FC<IProps>
   = observer(({ context, sections, showSolutionsSwitch }: IProps) => {
   const { isTeacher } = useUserStore();
   const ui = useUIStore();
   const problemPath = useProblemPathWithFacet(context);
   const { showTeacherContent } = ui;
+  const hasSubTabs = sections && sections.length > 1;
   const chatBorder = ui.showChatPanel ? "chat-open" : "";
+  const vh = window.innerHeight;
+  const headerOffset = hasSubTabs
+                        ? kHeaderHeight + (2 * (kWorkspaceContentMargin + kNavTabHeight + kTabSectionBorderWidth))
+                        : kHeaderHeight + + kNavTabHeight + (2 * (kWorkspaceContentMargin + kTabSectionBorderWidth));
+  const problemsPanelHeight = vh - headerOffset;
+  const problemsPanelStyle = { height: problemsPanelHeight };
 
   const handleTabClick = (titleArgButReallyType: string, typeArgButReallyTitle: string) => {
     // TODO: this function has its argument names reversed (see caller for details.)
@@ -44,9 +56,9 @@ export const ProblemTabContent: React.FC<IProps>
   return (
     <Tabs className={classNames("problem-tabs", context, chatBorder)} selectedTabClassName="selected"
           data-focus-document={problemPath}>
-      <div className="tab-header-row">
+      <div className={classNames("tab-header-row", {"no-sub-tabs": !hasSubTabs})}>
         <TabList className={classNames("tab-list", {"chat-open" : ui.showChatPanel})}>
-          {sections.map((section) => {
+          {sections?.map((section) => {
             const sectionTitle = getSectionTitle(section.type);
             return (
               <Tab className={classNames("prob-tab", context)} key={`section-${section.type}`}
@@ -59,13 +71,15 @@ export const ProblemTabContent: React.FC<IProps>
         {isTeacher && showSolutionsSwitch &&
           <SolutionsButton onClick={handleToggleSolutions} isToggled={showTeacherContent} />}
       </div>
-      {sections.map((section) => {
-        return (
-          <TabPanel key={`section-${section.type}`} data-focus-section={section.type}>
-            <ProblemPanelComponent section={section} key={`section-${section.type}`} />
-          </TabPanel>
-        );
-      })}
+      <div className="problem-panel" style={problemsPanelStyle}>
+        {sections?.map((section) => {
+          return (
+            <TabPanel key={`section-${section.type}`} data-focus-section={section.type}>
+              <ProblemPanelComponent section={section} key={`section-${section.type}`} />
+            </TabPanel>
+          );
+        })}
+      </div>
     </Tabs>
   );
 });

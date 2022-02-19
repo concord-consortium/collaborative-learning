@@ -16,7 +16,7 @@ interface IProps {
   tab: string;
   section: NavTabSectionModelType;
   index: number;
-  numOfSections: number;
+  numSections: number;
   stores: IStores;
   scale: number;
   selectedDocument?: string;
@@ -79,25 +79,24 @@ function getSectionDocs(section: NavTabSectionModelType, stores: IStores, classS
   return sectDocs;
 }
 
-export const TabPanelDocumentsSection = observer(({ tab, section, index, numOfSections, stores, scale, selectedDocument,
+export const TabPanelDocumentsSection = observer(({ tab, section, index, numSections=0, stores, scale, selectedDocument,
                                   onSelectNewDocument, onSelectDocument, onDocumentDragStart,
                                   onDocumentStarClick, onDocumentDeleteClick }: IProps) => {
-    const { user } = stores;
     const showNewDocumentThumbnail = section.addDocument && !!onSelectNewDocument;
     const newDocumentLabel = getNewDocumentLabel(section, stores);
-    const numPanels = user.isNetworkedTeacher ? numOfSections + 1 : numOfSections;
-    const isTopPanel = index === 0 && numPanels > 1;
-    const isBottomPanel = index === numOfSections - 1 && index > 0;
-    const tabName = tab.toLowerCase().replace(' ', '-');
+    const isTopPanel = index === 0 && numSections > 1;
+    const isBottomPanel = index === numSections - 1 && index > 0;
+    const isSinglePanel = numSections < 2;
+    const tabName = tab?.toLowerCase().replace(' ', '-');
     const currentClass = stores.class.name;
     const sectionDocs: DocumentModelType[] = getSectionDocs(section, stores, currentClass);
 
     function handleNewDocumentClick() {
       onSelectNewDocument?.(section.documentTypes[0]);
     }
-    const tabPanelDocumentSectionClass = classNames("tab-panel-documents-section", tabName,
-                                                    { "top-panel": isTopPanel }, { "bottom-panel": isBottomPanel });
-    const listClass = classNames("list", tabName, {"top-panel": isTopPanel}, {"bottom-panel": isBottomPanel});
+    const tabPanelDocumentSectionClass = classNames("tab-panel-documents-section", tabName, {"top-panel": isTopPanel});
+    const listClass = classNames("list", tabName, {"top-panel": isTopPanel},
+                                  {"bottom-panel": isBottomPanel && !isSinglePanel});
     return (
       <div className={tabPanelDocumentSectionClass}
             key={`${tab}-${section.type}`}
