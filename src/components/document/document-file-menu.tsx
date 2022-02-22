@@ -38,7 +38,7 @@ export const DocumentFileMenu: React.FC<IProps> = props => {
   const titleIcon = TitleIcon && <TitleIcon viewBox="0 0 32 32" />;
   const isCopyReallyDisabled = (isCopyDisabled || document.type === "planning");
   const adminDestroyDocumentItem: ICustomDropdownItem = {
-    text: "Admin Destroy...",
+    text: "[Dev] Destroy...",
     disabled: !onAdminDestroyDocument,
     onClick: () => onAdminDestroyDocument?.(document)
   };
