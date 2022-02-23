@@ -149,6 +149,50 @@ describe("TableContent", () => {
     expect(changeRowValues(change2, 2)).toEqual([3, "y-3"]);
   });
 
+  it.only("can import multi-column authored data with invalid expressions", () => {
+    const kTableTitle = "Table Title";
+    const importData: TableContentTableImport = {
+            type: "Table",
+            name: kTableTitle,
+            columns: [
+              { name: "xCol", values: [1, 2, 3] },
+              { name: "y", expression: "xCol + $1" }  // <== parse error
+            ]
+          };
+    const table = TableContentModel.create(importData);
+    const metadata = TableMetadataModel.create({ id: "table-1" });
+    table.doPostCreate(metadata);
+
+    expect(table.type).toBe(kTableToolID);
+    expect(table.isImported).toBe(true);
+    expect(table.changes.length).toBe(2);
+
+    const change1 = safeJsonParse(table.changes[0]);
+    expect(omitDeep(change1, ["id"])).toEqual({
+      action: "create",
+      target: "table",
+      props: {
+        name: kTableTitle,
+        columns: [
+          { name: "xCol" },
+          { name: "y", expression: "__x__ + $1", rawExpression: "xCol + $1" }
+        ]
+      }
+    });
+
+    const change2 = safeJsonParse(table.changes[1]);
+    expect(change2).toBeDefined();
+    expect(change2.action).toBe("create");
+    expect(change2.target).toBe("rows");
+    expect(change2.props.rows.length).toBe(3);
+    const dataSet = table.getSharedData();
+    const yAttr = dataSet.attrFromName("y");
+    console.log(JSON.stringify(yAttr));
+    expect(yAttr?.value(0)).toBeUndefined();
+    expect(yAttr?.value(1)).toBeUndefined();
+    expect(yAttr?.value(2)).toBeUndefined();
+  });
+
   it("can convert original change format", () => {
     const oldChanges = [
             {
