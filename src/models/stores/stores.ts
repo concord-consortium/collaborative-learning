@@ -121,13 +121,11 @@ export const setUnitAndProblem = async (stores: IStores, unitId: string | undefi
   // need to use a listener because user type can be determined after unit initialization
   unit.installUserListener(() => stores.user.isTeacher, async (isTeacher: boolean) => {
     // only load the teacher guide content for teachers
-    if (isTeacher && !stores.teacherGuide) {
+    if (isTeacher) {
       const guideJson = await getGuideJson(unitId, stores.appConfig);
       const unitGuide = guideJson && UnitModel.create(guideJson);
       const teacherGuide = unitGuide?.getProblem(problemOrdinal || stores.appConfig.defaultProblemOrdinal)?.problem;
-      if (teacherGuide) {
-        stores.teacherGuide = teacherGuide;
-      }
+      stores.teacherGuide = teacherGuide;
     }
   });
 };
@@ -165,6 +163,12 @@ export function getDisabledFeaturesOfTile(stores: IStores, tile: string, section
     disabledMap[feature] && prev.push(feature);
     return prev;
   }, []);
+}
+
+export function getNavTabConfigFromStores(stores: IStores) {
+  for (const level of [stores.unit, stores.appConfig]) {
+    if (level.navTabs) return level.navTabs;
+  }
 }
 
 export function getSettingFromStores(stores: IStores, key: string, group?: string) {

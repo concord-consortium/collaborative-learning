@@ -2,7 +2,6 @@ import { types, Instance, SnapshotIn, clone } from "mobx-state-tree";
 import {
   getImageDimensions, isPlaceholderImage, storeCorsImage, storeFileImage, storeImage
 } from "../utilities/image-utils";
-import { SupportPublication } from "./document/document-types";
 import { DB } from "../lib/db";
 import placeholderImage from "../assets/image_placeholder.png";
 
@@ -28,11 +27,9 @@ export interface IImageContext {
 }
 export interface IImageBaseOptions {
   filename?: string;
-  context?: IImageContext;
 }
 export interface IImageHandlerStoreOptions extends IImageBaseOptions{
   db?: DB;
-  userId?: string;
 }
 export interface IImageHandler {
   name: string;
@@ -158,7 +155,6 @@ export const ImageMapModel = types
   }))
   .actions(self => {
     let _db: DB;
-    let _userId: string;
 
     return {
       afterCreate() {
@@ -171,14 +167,13 @@ export const ImageMapModel = types
         self.registerHandler(externalUrlImagesHandler);
       },
 
-      initialize(db: DB, userId: string) {
+      initialize(db: DB) {
         _db = db;
-        _userId = userId;
       },
 
       addFileImage(file: File): Promise<ImageMapEntryType> {
         return new Promise((resolve, reject) => {
-          storeFileImage(_db, _userId, file)
+          storeFileImage(_db, file)
             .then(simpleImage => {
               const { normalized } = parseFauxFirebaseRTDBUrl(simpleImage.imageUrl);
               const entry: ImageMapEntrySnapshot = {
@@ -204,7 +199,7 @@ export const ImageMapModel = types
 
           const handler = self.getHandler(url);
           if (handler) {
-            const promise = handler.store(url, { db: _db, userId: _userId, ...options });
+            const promise = handler.store(url, { db: _db, ...options });
             resolve(self.addPromise(url, promise));
           }
           else {
@@ -229,12 +224,12 @@ export const externalUrlImagesHandler: IImageHandler = {
   },
 
   store(url: string, options?: IImageHandlerStoreOptions) {
-    const { db, userId } = options || {};
+    const { db } = options || {};
     // upload images from external urls to our own firebase if possible
     // this may fail depending on CORS settings on target image.
     return new Promise((resolve, reject) => {
-      if (db && userId) {
-        storeImage(db, userId, url)
+      if (db?.stores.user.id) {
+        storeImage(db, url)
           .then(simpleImage => {
             if (isPlaceholderImage(simpleImage.imageUrl)) {
               // conversion errors are resolved to placeholder image
@@ -300,7 +295,7 @@ export const firebaseStorageImagesHandler: IImageHandler = {
 
   store(url: string, options?: IImageHandlerStoreOptions) {
     return new Promise((resolve, reject) => {
-      const { db, userId } = options || {};
+      const { db } = options || {};
       // All images from firebase storage must be migrated to realtime database
       const isStorageUrl = url.startsWith(kFirebaseStorageUrlPrefix);
       const storageUrl = url.startsWith(kFirebaseStorageUrlPrefix) ? url : undefined;
@@ -308,11 +303,11 @@ export const firebaseStorageImagesHandler: IImageHandler = {
       // Pass in the imagePath as the second argument to get the ref to firebase storage by url
       // This is needed if an image of the same name has been uploaded in two different components,
       // since each public URL becomes invalid and a new url generated on upload
-      if (db && userId) {
+      if (db?.stores.user.id) {
         db.firebase.getPublicUrlFromStore(storagePath, storageUrl)
           .then(newUrl => {
             if (newUrl) {
-              storeCorsImage(db, userId, newUrl)
+              storeCorsImage(db, newUrl)
                 .then(simpleImage => {
                   // Image has been retrieved from Storage, now we can safely remove the old image
                   // TODO: remove old images
@@ -351,10 +346,17 @@ function extractPathFromFirebaseRTDBFauxUrl(url: string) {
   const match = kFirebaseRTDBFauxUrlRegex.exec(url);
   return match && match[2] || undefined;
 }
+function parseImagePath(path: string) {
+  const match = /([^/]+)\/([^/]+)/.exec(path);
+  const classHash = match?.[1] || undefined;
+  const imageKey = match?.[2] || undefined;
+  return { classHash, imageKey };
+}
 function parseFauxFirebaseRTDBUrl(url: string) {
   const path = extractPathFromFirebaseRTDBFauxUrl(url) || undefined;
+  const { classHash, imageKey } = path ? parseImagePath(path) : {} as any;
   const normalized = path && createFirebaseRTDBFauxUrl(path);
-  return { path, normalized };
+  return { path, classHash, imageKey, normalized };
 }
 
 export const firebaseRealTimeDBImagesHandler: IImageHandler = {
@@ -368,16 +370,15 @@ export const firebaseRealTimeDBImagesHandler: IImageHandler = {
 
   store(url: string, options?: IImageHandlerStoreOptions) {
     return new Promise((resolve, reject) => {
-      const { context, db } = options || {};
-      const { path, normalized } = parseFauxFirebaseRTDBUrl(url);
+      const { db } = options || {};
+      const { path, classHash, imageKey, normalized } = parseFauxFirebaseRTDBUrl(url);
 
       if (db && path && normalized) {
         // In theory we could direct all firebase image requests to the cloud function,
         // but only cross-class supports require the use of the cloud function.
-        const useCloudFn = context?.type === SupportPublication;
-        const blobPromise = useCloudFn
-                              ? db.getCloudImageBlob(path, context?.type, context?.key)
-                              : db.getImageBlob(path);
+        const blobPromise = classHash !== db.stores.user.classHash
+                              ? db.getCloudImageBlob(normalized)
+                              : db.getImageBlob(imageKey);
         blobPromise.then(blobUrl => {
           resolve(blobUrl
                     ? { filename: options?.filename, contentUrl: normalized, displayUrl: blobUrl }

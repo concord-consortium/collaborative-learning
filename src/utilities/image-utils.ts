@@ -53,7 +53,8 @@ function kUploadImage(db: DB, image: ImageModelType): Promise<ISimpleImage> {
     db.addImage(image).then(dbImage => {
       img.imageKey = dbImage.image.self.imageKey;
       img.imageData = dbImage.image.imageData;
-      img.imageUrl = getCCImagePath(dbImage.image.self.imageKey);
+      // starting with 2.1.3, image url includes class hash and image key
+      img.imageUrl = getCCImagePath(`${db.stores.user.classHash}/${dbImage.image.self.imageKey}`);
       return fetch(img.imageData);
     })
     .then(response => response.blob())
@@ -71,17 +72,16 @@ export function getCCImagePath(imageKey: string) {
   return ccImageId + imageKey;
 }
 
-export function storeCorsImage(db: DB, userId: string, imagePath: string): Promise<ISimpleImage> {
-  return storeImage(db, userId, imagePath, imagePath, true);
+export function storeCorsImage(db: DB, imagePath: string): Promise<ISimpleImage> {
+  return storeImage(db, imagePath, imagePath, true);
 }
 
-export function storeFileImage(db: DB, userId: string, file: File): Promise<ISimpleImage> {
+export function storeFileImage(db: DB, file: File): Promise<ISimpleImage> {
   const url = URL.createObjectURL(file);
-  return storeImage(db, userId, url, file.name);
+  return storeImage(db, url, file.name);
 }
 
-export function storeImage(db: DB, userId: string, url: string,
-                           name?: string, cors?: boolean): Promise<ISimpleImage> {
+export function storeImage(db: DB, url: string, name?: string, cors?: boolean): Promise<ISimpleImage> {
   const img: ISimpleImage = {
     imageUrl: placeholderImage,
     imageData: placeholderImage
@@ -99,7 +99,7 @@ export function storeImage(db: DB, userId: string, url: string,
           title: _name,
           originalSource: _name,
           createdAt: 0,
-          createdBy: userId
+          createdBy: db.stores.user.id
         });
         kUploadImage(db, image).then(storedImage => {
           resolve(storedImage);

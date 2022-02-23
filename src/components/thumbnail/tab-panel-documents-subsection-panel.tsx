@@ -1,5 +1,8 @@
+import { observer } from "mobx-react";
 import React from "react";
 import { ThumbnailDocumentItem } from "./thumbnail-document-item";
+import { useFirestoreTeacher } from "../../hooks/firestore-hooks";
+import { useLastSupportViewTimestamp } from "../../hooks/use-last-support-view-timestamp";
 import { DocumentModelType } from "../../models/document/document";
 import { isPublishedType, SupportPublication } from "../../models/document/document-types";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
@@ -21,23 +24,31 @@ interface IProps {
   onDocumentDeleteClick?: (document: DocumentModelType) => void;
 }
 
-function getDocumentCaption(stores: IStores, document: DocumentModelType) {
-  const { appConfig, problem, class: _class } = stores;
+function useDocumentCaption(stores: IStores, document: DocumentModelType) {
+  const { appConfig, problem, class: _class, user: { network } } = stores;
   const { type, uid } = document;
+  const teacher = useFirestoreTeacher(uid, network || "");
   if (type === SupportPublication) return document.getProperty("caption") || "Support";
-  const userName = document.isRemote
-                    ? "Network User"
-                    : _class?.getUserById(uid)?.displayName || "Unknown User";
-  const namePrefix = isPublishedType(type) ? `${userName}: ` : "";
+  const userName = _class?.getUserById(uid)?.displayName ||
+                    (document.isRemote ? teacher?.name : "") || "Unknown User";
+  const namePrefix = document.isRemote || isPublishedType(type) ? `${userName}: ` : "";
+  const dateSuffix = document.isRemote && document.createdAt
+                      ? ` (${new Date(document.createdAt).toLocaleDateString()})` : "";
   const title = getDocumentDisplayTitle(document, appConfig, problem);
-  return `${namePrefix}${title}`;
+  return `${namePrefix}${title}${dateSuffix}`;
 }
 
-export const TabPanelDocumentsSubSectionPanel = ({section, sectionDocument, tab, stores, scale, selectedDocument,
-                                                  onSelectDocument, onDocumentDragStart,
-                                                  onDocumentStarClick, onDocumentDeleteClick}: IProps) => {
+// observes teacher names via useDocumentCaption()
+export const TabPanelDocumentsSubSectionPanel = observer(({
+  section, sectionDocument, tab, stores, scale, selectedDocument,
+  onSelectDocument, onDocumentDragStart, onDocumentStarClick, onDocumentDeleteClick
+}: IProps) => {
     const { user } = stores;
     const tabName = tab.toLowerCase().replace(' ', '-');
+    const caption = useDocumentCaption(stores, sectionDocument);
+
+    // sync user's last support view time stamp to firebase
+    useLastSupportViewTimestamp(section.type === "teacher-supports");
 
     function handleDocumentClick() {
       onSelectDocument?.(sectionDocument);
@@ -76,7 +87,7 @@ export const TabPanelDocumentsSubSectionPanel = ({section, sectionDocument, tab,
         document={sectionDocument}
         scale={scale}
         isSelected={sectionDocument.key === selectedDocument}
-        captionText={getDocumentCaption(stores, sectionDocument)}
+        captionText={caption}
         onDocumentClick={handleDocumentClick}
         onDocumentDragStart={!sectionDocument.isRemote ? handleDocumentDragStart: undefined}
         onIsStarred={onIsStarred}
@@ -84,4 +95,4 @@ export const TabPanelDocumentsSubSectionPanel = ({section, sectionDocument, tab,
         onDocumentDeleteClick={_handleDocumentDeleteClick}
       />
     );
-};
+});

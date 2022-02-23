@@ -33,7 +33,7 @@ export const kDragTileCreate = "org.concord.clue.tile.create";
 // allows source compatibility to be checked in dragOver
 export const dragTileSrcDocId = (id: string) => `org.concord.clue.src.${id.toLowerCase()}`;
 export const dragTileType = (type: string) => `org.concord.clue.tile.type.${type}`;
-const kDefaultDragImageWidth = 300;
+const kDefaultDragImageWidth = 80;
 
 export function extractDragTileSrcDocId(dataTransfer: DataTransfer) {
   for (const type of dataTransfer.types) {
@@ -386,13 +386,13 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     const dragSrcContentId = getContentIdFromNode(model);
     if (!dragSrcContentId) return;
 
+    // dragging a tile selects it first
+    ui.setSelectedTile(model, { append: hasSelectionModifier(e) });
+
     const dragTiles: IDragTiles = {
       sourceDocId: docId,
       items: this.getDragTileItems(dragSrcContentId, ui.selectedTileIds)
     };
-
-    // dragging a tile selects it first
-    ui.setSelectedTile(model, { append: hasSelectionModifier(e) });
 
     // create a sorted array of selected tiles
     dragTiles.items.sort((a, b) => {

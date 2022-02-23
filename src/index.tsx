@@ -41,7 +41,7 @@ const initializeApp = async () => {
 
   await setUnitAndProblem(stores, unitId, problemOrdinal);
 
-  gImageMap.initialize(stores.db, user.id);
+  gImageMap.initialize(stores.db);
 
   Logger.initializeLogger(stores, stores.investigation, stores.problem);
 

@@ -1,0 +1,12 @@
+{
+  "name": "clue-scripts",
+  "version": "1.0.0",
+  "description": "Node.js scripts for use with CLUE",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT"
+}

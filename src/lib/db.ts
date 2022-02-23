@@ -25,6 +25,9 @@ import { Firebase } from "./firebase";
 import { Firestore } from "./firestore";
 import { DBListeners } from "./db-listeners";
 import { Logger, LogEventName } from "./logger";
+import { IGetImageDataParams, IPublishSupportParams } from "../../functions/src/shared";
+import { getFirebaseFunction } from "../hooks/use-firebase-function";
+import { getUserContext } from "../hooks/use-user-context";
 import { IStores } from "../models/stores/stores";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
 import { safeJsonParse } from "../utilities/js-utils";
@@ -120,7 +123,8 @@ export class DB {
           projectId: "collaborative-learning-ec215",
           storageBucket: "collaborative-learning-ec215.appspot.com",
           messagingSenderId: "112537088884",
-          appId: "1:112537088884:web:c51b1b8432fff36faff221"
+          appId: "1:112537088884:web:c51b1b8432fff36faff221",
+          measurementId: "G-XP472LRY18"
         });
       }
 
@@ -374,9 +378,9 @@ export class DB {
         })
         .then((newDocument) => {
           // reset the (presumably null) promise for this document type
-          documents.addRequiredDocumentPromises([ProblemDocument]);
+          documents.addRequiredDocumentPromises([type]);
           // return the promise, which will be resolved by the DB listener
-          return documents.requiredDocuments[ProblemDocument].promise;
+          return documents.requiredDocuments[type].promise;
         })
         .then(resolve)
         .catch(reject);
@@ -437,7 +441,7 @@ export class DB {
     }
     return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
       this.createDocument({ type: ProblemPublication, content }).then(({document, metadata}) => {
-        const publicationRef = this.firebase.ref(this.firebase.getPublicationsPath(user)).push();
+        const publicationRef = this.firebase.ref(this.firebase.getProblemPublicationsPath(user)).push();
         const userGroup = groups.groupForUser(user.id)!;
         const groupUserConnections: DBGroupUserConnections = userGroup && userGroup.users
           .filter(groupUser => groupUser.id !== user.id)
@@ -477,8 +481,8 @@ export class DB {
     return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
       this.createDocument({ type: publicationType, content }).then(({document, metadata}) => {
         const publicationPath = publicationType === "personalPublication"
-                                ? this.firebase.getClassPersonalPublicationsPath(user)
-                                : this.firebase.getClassPublicationsPath(user);
+                                ? this.firebase.getPersonalPublicationsPath(user)
+                                : this.firebase.getLearningLogPublicationsPath(user);
         const publicationRef = this.firebase.ref(publicationPath).push();
         const publication: DBOtherPublication = {
           version: "1.0",
@@ -503,34 +507,24 @@ export class DB {
   }
 
   public publishDocumentAsSupport(documentModel: DocumentModelType, caption: string) {
-    const { appMode, demo: { name: demoName }, user, problemPath } = this.stores;
+    const publishSupport = getFirebaseFunction<IPublishSupportParams>("publishSupport_v1");
+    const { problemPath, user } = this.stores;
+    const { offeringId: resource_link_id, activityUrl: resource_url = "" } = user;
     const content = documentModel.content?.publish();
     if (!content) {
       throw new Error("Could not publish the specified document because its content is not available.");
     }
-    const fs = this.firestore;
-    return fs.batch(batch => {
-      const rootRef = fs.documentRef(fs.getRootFolder());
-      batch.set(rootRef, { updatedAt: fs.timestamp() });
-      const docRef = fs.newDocumentRef(fs.getMulticlassSupportsPath());
-      batch.set(docRef, {
-        appMode,
-        demoName,
-        classPath: this.firebase.getFullClassPath(user),
-        uid: user.id,
-        type: "supportPublication",
-        createdAt: fs.timestamp(),
-        properties: { teacherSupport: "true", caption, ...documentModel.copyProperties() },
-        problem: problemPath,
-        classes: user.classHashesForProblemPath(problemPath),
-        originDoc: documentModel.key,
-        content,
-        // LTI fields
-        platform_id: user.portal,
-        context_id: user.classHash,
-        resource_link_id: user.offeringId,
-        resource_url: user.activityUrl || ""
-      });
+    return publishSupport?.({
+      context: getUserContext(this.stores),
+      caption,
+      problem: problemPath,
+      classes: user.classHashesForProblemPath(problemPath),
+      properties: documentModel.copyProperties(),
+      originDoc: documentModel.key,
+      originDocType: documentModel.type,
+      content,
+      resource_link_id,
+      resource_url
     });
   }
 
@@ -673,6 +667,7 @@ export class DB {
   public clear(level: DBClearLevel) {
     return new Promise<void>((resolve, reject) => {
       const {user} = this.stores;
+      let qaUser;
       const clearPath = (path?: string) => {
         this.firebase.ref(path).remove().then(resolve).catch(reject);
       };
@@ -680,10 +675,13 @@ export class DB {
       if (this.stores.appMode !== "qa") {
         return reject("db#clear is only available in qa mode");
       }
-
+      
       switch (level) {
         case "all":
-          clearPath();
+          qaUser = this.firebase.getQAUserRoot();
+          if (qaUser) {
+            qaUser.remove().then(resolve).catch(reject);
+          }
           break;
         case "class":
           clearPath(this.firebase.getClassPath(user));
@@ -823,17 +821,15 @@ export class DB {
             .then(blob => URL.createObjectURL(blob));
   }
 
-  public async getCloudImage(url: string, type?: string, key?: string) {
-    const { appMode, demo: { name: demoName }, user } = this.stores;
-    const { portal, classHash } = user;
-    const classPath = this.firebase.getFullClassPath(user);
-    const getImageData = firebase.functions().httpsCallable("getImageData");
-    const result = await getImageData({ url, appMode, demoName, portal, classHash, classPath, type, key });
+  public async getCloudImage(url: string) {
+    const context = getUserContext(this.stores);
+    const getImageData = getFirebaseFunction<IGetImageDataParams>("getImageData_v1");
+    const result = await getImageData({ context, url });
     return result?.data;
   }
 
-  public getCloudImageBlob(url: string, type?: string, key?: string) {
-    return this.getCloudImage(url, type, key)
+  public getCloudImageBlob(url: string) {
+    return this.getCloudImage(url)
             .then(image => image && fetch(image.imageData))
             .then(response => response?.blob())
             .then(blob => blob && URL.createObjectURL(blob));
@@ -927,10 +923,6 @@ export class DB {
     updateRef.update({
       deleted: true
     });
-  }
-
-  public setLastSupportViewTimestamp() {
-    this.firebase.getLastSupportViewTimestampRef().set(Date.now());
   }
 
   public setLastStickyNoteViewTimestamp() {

@@ -1,6 +1,8 @@
 import firebase from "firebase/app";
+import { observable } from "mobx";
 import { useCallback, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from 'react-query';
+import { UserDocument } from "../lib/firestore-schema";
 import { useDBStore } from './use-stores';
 
 export type WithId<T> = T & { id: string };
@@ -13,6 +15,30 @@ export function useFirestore() {
     root = root.slice(0, root.length - 1);
   }
   return [db.firestore, root] as const;
+}
+
+const firestoreTeachers = observable.map<string, UserDocument>();
+
+export function useFirestoreTeacher(uid: string, network: string) {
+  const [firestore] = useFirestore();
+  const cachedTeacher = firestoreTeachers.get(uid);
+  if (cachedTeacher) return cachedTeacher;
+
+  // default response until promise resolves
+  firestoreTeachers.set(uid, { uid, name: "Network User", type: "teacher", network, networks: [network] });
+
+  firestore.doc(`users/${uid}`).get()
+    .then(snap => {
+      const teacher = snap.data() as UserDocument | undefined;
+      if (teacher) {
+        firestoreTeachers.set(uid, teacher);
+      }
+    })
+    .catch(() => {
+      // ignore errors
+    });
+
+  return firestoreTeachers.get(uid);
 }
 
 // https://medium.com/swlh/using-firestore-with-typescript-65bd2a602945

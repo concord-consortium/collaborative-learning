@@ -59,7 +59,7 @@ context("Teacher Space", () => {
                     dashboard.getClassDropdown().should('contain',clueData.teacherName).and('contain',tempClass.className);
                     dashboard.getClassDropdown().should('be.visible').click({ force: true });
                     dashboard.getClassList().should('exist').and('have.class', 'show');
-                    dashboard.getClassList().find('.list-item').should('have.length', clueData.classes.length); // FIX THIS - currently shows all classes including inactive classes. Should only show active classes. Story in PT.
+                    dashboard.getClassList().find('.list-item').should('have.length', clueData.classes.length);
                     dashboard.getClassDropdown().click({ force: true });
                     dashboard.getClassList().should('not.have.class','show');
                     // //Check Teacher Username visibility and content
@@ -133,7 +133,7 @@ context("Teacher Space", () => {
                         cy.waitForLoad();
                     });
                     dashboard.getClassDropdown().should('contain', className);
-                    dashboard.getGroups().should('have.length',0);
+                    dashboard.getGroups().should('have.length', 1);
 
                     //switch back to original problem for later test
                     dashboard.getClassDropdown().click({force:true});

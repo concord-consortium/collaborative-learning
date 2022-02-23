@@ -7,7 +7,7 @@ import {
 import { validateUserContext } from "./user-context";
 
 // update this when deploying updates to this function
-const version = "1.1.1";
+const version = "1.1.2";
 
 export async function getNetworkResources(
                         params?: IGetNetworkResourcesUnionParams,
@@ -16,7 +16,7 @@ export async function getNetworkResources(
 
   const { context, problem } = params || {};
   const { appMode, classHash: userContextId, network } = context || {};
-  const { isValid, uid, classPath, firestoreRoot } = validateUserContext(context, callableContext?.auth);
+  const { isValid, uid, classPath: userClassPath, firestoreRoot } = validateUserContext(context, callableContext?.auth);
   if (!context || !isValid || !userContextId || !network || !uid) {
     throw new functions.https.HttpsError("failed-precondition", "The provided user context is not valid.");
   };
@@ -52,12 +52,18 @@ export async function getNetworkResources(
     return { context_id, resource_link_ids: classOfferings[context_id] };
   });
 
-  // lop off the last element of the path to get the root
-  const databaseRoot = classPath.split("/").slice(0, -1).join("/");
+  // returns the first document in the map of documents
+  // used to restrict problem/planning documents to singletons
+  // only the first document is considered client-side as well
+  function firstDocMap(documentMap?: Record<string, any>) {
+    const firstKey = documentMap && Object.keys(documentMap)[0];
+    return firstKey ? { [firstKey]: documentMap[firstKey] } : documentMap;
+  }
 
   // return a promise for each class
   const classPromises: Promise<INetworkResourceClassResponse>[] = [];
   classes?.forEach(async ({ context_id, resource_link_ids }) => {
+    const classPath = userClassPath.replace(userContextId, context_id);
     classPromises.push(new Promise(async (resolveClass, rejectClass) => {
       try {
         const classDoc = await admin.firestore().doc(`/${firestoreRoot}/classes/${network}_${context_id}`).get();
@@ -67,10 +73,9 @@ export async function getNetworkResources(
         let personalPublications;
         if (isValidClassNetwork) {
           try {
-            const classRoot = `${databaseRoot}/${context_id}`;
             const [learningLogPublicationsSnap, personalPublicationsSnap] = await Promise.all([
-              admin.database().ref(`${classRoot}/publications`).get(),        // published learning logs
-              admin.database().ref(`${classRoot}/personalPublications`).get() // published personal documents
+              admin.database().ref(`${classPath}/publications`).get(),        // published learning logs
+              admin.database().ref(`${classPath}/personalPublications`).get() // published personal documents
             ]);
             learningLogPublications = learningLogPublicationsSnap.val() || undefined;
             personalPublications = personalPublicationsSnap.val() || undefined;
@@ -82,7 +87,7 @@ export async function getNetworkResources(
         // return a promise for each offering within the class
         const offeringPromises: Promise<INetworkResourceOfferingResponse>[] = [];
         resource_link_ids.forEach(resource_link_id => {
-          const offeringRoot = `${databaseRoot}/${context_id}/offerings/${resource_link_id}`;
+          const offeringRoot = `${classPath}/offerings/${resource_link_id}`;
           offeringPromises.push(new Promise(async (resolveOffering, rejectOffering) => {
             if (isValidClassNetwork) {
               // return promises for individual metadata requests
@@ -99,8 +104,8 @@ export async function getNetworkResources(
                       admin.database().ref(`${offeringUserRoot}/documents`).get(),
                       admin.database().ref(`${offeringUserRoot}/planning`).get()
                     ]);
-                    const problemDocuments = problemDocumentsSnap.val() || undefined;
-                    const planningDocuments = planningDocumentsSnap.val() || undefined;
+                    const problemDocuments = firstDocMap(problemDocumentsSnap.val()) || undefined;
+                    const planningDocuments = firstDocMap(planningDocumentsSnap.val()) || undefined;
                     resolve({ uid: teacherId, problemDocuments, planningDocuments });
                   })
                 }) || [];
@@ -125,7 +130,7 @@ export async function getNetworkResources(
         const teacherClassPromises: TeacherClassPromise[] = _teachers?.map((teacherId: string) => {
           return new Promise<INetworkResourceTeacherClassResponse>(async (resolve, reject) => {
             try {
-              const classUserRoot = `${databaseRoot}/${context_id}/users/${teacherId}`;
+              const classUserRoot = `${classPath}/users/${teacherId}`;
               const [personalDocumentsSnap, learningLogsSnap] = await Promise.all([
                 admin.database().ref(`${classUserRoot}/personalDocs`).get(),
                 admin.database().ref(`${classUserRoot}/learningLogs`).get()

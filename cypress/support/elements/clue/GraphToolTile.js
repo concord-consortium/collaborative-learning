@@ -1,22 +1,25 @@
-const graphUnit=18.33;
+const kGraphPixPerCoord = { x: 18.33, y: -18.33 };
+// determined by inspection
+const kGraphOriginCoordPix = { x: 40, y: 296 };
+
+export function pointCoordsToPix(ptCoords, originPix) {
+    return { x: originPix.x + ptCoords.x * kGraphPixPerCoord.x,
+             y: originPix.y + ptCoords.y * kGraphPixPerCoord.y };
+}
+
+export function pointPixToCoords(ptPix, originPix) {
+    const x = Math.round((ptPix.x - originPix.x) / kGraphPixPerCoord.x);
+    const y = Math.round((ptPix.y - originPix.y) / kGraphPixPerCoord.y);
+    return { x: x === 0 ? 0 : x, y: y === 0 ? 0 : y }; // convert -0 to 0
+}
 
 class GraphToolTile{
     transformFromCoordinate(axis, num){
-        if (axis==='x'){
-            return (num+1.05)*graphUnit;
-        }
-        if (axis==='y'){
-            // return 320-((num+1.2)*graphUnit);
-            return 316-((num+1.05)*graphUnit);
-        }
+        return kGraphOriginCoordPix[axis] + num * kGraphPixPerCoord[axis];
     }
     transformToCoordinate(axis, num){
-        if (axis==='x'){
-            return Math.round(((num-(graphUnit))/graphUnit));
-        }
-        if (axis==='y'){
-            return Math.round((((num-320+(graphUnit*1.2))/(-1*graphUnit))));
-        }
+        const coord = Math.round((num - kGraphOriginCoordPix[axis]) / kGraphPixPerCoord[axis]);
+        return coord === 0 ? 0 : coord; // convert -0 to 0
     }
     getGraphTile(workspaceClass){
         return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .geometry-tool`);

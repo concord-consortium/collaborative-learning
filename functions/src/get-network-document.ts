@@ -1,10 +1,12 @@
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
+import { canonicalizeUrl } from "./canonicalize-url";
+import { parseDocumentContent } from "./parse-document-content";
 import { IGetNetworkDocumentUnionParams, isWarmUpParams } from "./shared";
 import { validateUserContext } from "./user-context";
 
 // update this when deploying updates to this function
-const version = "1.0.0";
+const version = "1.0.1";
 
 export async function getNetworkDocument(
                         params?: IGetNetworkDocumentUnionParams,
@@ -16,6 +18,9 @@ export async function getNetworkDocument(
   const { isValid, uid, classPath, firestoreRoot } = validateUserContext(context, callableContext?.auth);
   if (!context || !isValid || !userContextId || !network || !uid) {
     throw new functions.https.HttpsError("failed-precondition", "The provided user context is not valid.");
+  };
+  if (!documentContextId) {
+    throw new functions.https.HttpsError("invalid-argument", "The requested class is not valid.");
   };
 
   // validate that authenticated users are in the network they claim to be in
@@ -60,6 +65,10 @@ export async function getNetworkDocument(
     throw new functions.https.HttpsError("not-found", "An error occurred when reading the requested document.");
   }
 
-  // return the requested document content and metadata
-  return { version, content: documentContent, metadata: documentMetadata };
+  // canonicalize image urls so that cross-class image access works
+  const _canonicalizeUrl = (url: string) => canonicalizeUrl(url, documentContextId, firestoreRoot);
+  const { content, images } = await parseDocumentContent(documentContent, _canonicalizeUrl);
+
+  // return the requested document content and metadata (including image metadata)
+  return { version, content, metadata: documentMetadata, images };
 };

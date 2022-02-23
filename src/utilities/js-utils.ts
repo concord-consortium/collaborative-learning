@@ -102,3 +102,32 @@ export function uniqueSubscriptedName(base: string, isValid: (name: string) => b
   }
   return name;
 }
+
+/*
+ * timeZoneOffsetString()
+ *
+ * returns a string like -0800 for the time zone offset
+ * cf. https://stackoverflow.com/a/5114625/16328462
+ */
+export function timeZoneOffsetString() {
+  return formatTimeZoneOffset(new Date().getTimezoneOffset());
+}
+
+/*
+ * formatTimeZoneOffset()
+ *
+ * returns a string like -0800 for the time zone offset
+ * cf. https://stackoverflow.com/a/5114625/16328462
+ */
+export function formatTimeZoneOffset(offset: number) {
+  const posOffset = Math.abs(offset);
+
+  function pad2(value: number) {
+    const s = "" + value;
+    return `${s.length < 2 ? "0" : ""}${s}`;
+  }
+
+  return (offset <= 0 ? '+' : '-') + // Note the reversed sign!
+          pad2(Math.floor(posOffset / 60)) +
+          pad2(posOffset % 60);
+}

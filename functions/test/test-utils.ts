@@ -1,6 +1,6 @@
 import { AuthData } from "firebase-functions/lib/common/providers/https";
 import { DeepPartial } from "utility-types";
-import { IUserContext } from "../src/shared";
+import { IRowMapEntry, ITileMapEntry, IUserContext } from "../src/shared";
 
 export const kPortal = "test.portal";
 export const kClaimPortal = "https://test.portal";
@@ -24,6 +24,7 @@ export const kTeacherName = "Jane Teacher";
 export const kOtherTeacherName = "John Teacher";
 export const kTeacherNetwork = "teacher-network";
 export const kOtherTeacherNetwork = "other-network";
+export const kStudentName = "Mary Student";
 export const kDocumentType = "problem";
 export const kDocumentKey = "document-key";
 export const kProblemPath = "abc/1/2";
@@ -57,6 +58,30 @@ export const specUserContext = (overrides?: Partial<IUserContext>, exclude?: str
   return context;
 };
 
+export const specStudentContext = (overrides?: Partial<IUserContext>, exclude?: string[]): IUserContext => {
+  // default to authed mode unless another mode specified
+  const appMode = overrides?.appMode || "authed";
+  const demoName = overrides?.appMode === "demo" ? overrides?.demoName || kDemoName : undefined;
+  const portal = overrides?.portal || kPortal;
+  const classHash = overrides?.classHash || kClassHash;
+  const context: IUserContext = {
+    appMode,
+    demoName,
+    portal,
+    uid: kUserId,
+    type: "student",
+    name: kStudentName,
+    classHash,
+    // include argument overrides defaults
+    ...overrides
+  };
+  // exclude specified properties from result
+  exclude?.forEach(prop => {
+    delete (context as any)[prop];
+  });
+  return context;
+};
+
 export const specAuth = (overrides?: DeepPartial<AuthData>, exclude?: string[]): AuthData => {
   const portal = overrides?.token?.platform_id || kPortal;
   const userId = overrides?.token?.platform_user_id || kPlatformUserId;
@@ -75,3 +100,20 @@ export const specAuth = (overrides?: DeepPartial<AuthData>, exclude?: string[]):
     } as any
   };
 };
+
+export function specDocumentContent(tiles: Array<{ type: string, changes: Object[] }> = []) {
+  const rowMap: Record<string, IRowMapEntry> = {};
+  const rowOrder: string[] = [];
+  const tileMap: Record<string, ITileMapEntry> = {};
+  tiles.forEach((tile, i) => {
+    // single tile per row for simplicity
+    const tileId = `tile-${i}`
+    const tileChanges = tile.changes.map(change => JSON.stringify(change));
+    const tileContent = { type: tile.type, changes: tileChanges };
+    const row: IRowMapEntry = { id: `row-${i}`, tiles: [{ tileId }]};
+    rowMap[row.id] = row;
+    rowOrder.push(row.id);
+    tileMap[tileId] = { id: tileId, content: tileContent };
+  });
+  return JSON.stringify({ rowMap, rowOrder, tileMap });
+}

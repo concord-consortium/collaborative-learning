@@ -2,6 +2,9 @@
   "appName": "CLUE",
   "pageTitle": "CLUE: %problemTitle%",
   "units": {
+    "brain": {
+      "content": "curriculum/neural-engineering/neural-engineering.json"
+    },
     "bio": {
       "content": "curriculum/bio4community/bio4community.json"
     },
@@ -95,6 +98,7 @@
   "showClassSwitcher": true,
   "navTabs": {
     "lazyLoadTabContents": true,
+    "showNavPanel": true,
     "tabSpecs": [
       {
         "tab": "problems",

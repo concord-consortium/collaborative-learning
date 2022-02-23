@@ -1,5 +1,36 @@
 # Changelog
 
+## Version 2.1.3 - released February 22, 2022
+
+### Features/Improvements
+- Stretching and Shrinking content updates #1214
+- Moving Straight Ahead content updates #1214 #1216
+- Section information, time zone and activityUrl are now logged [179924865] [180680837] [#180680858] #1179 #1183 #1191
+- Improved captions of network documents [#180876987] [#181124146] #1185 #1189 #1197
+- Improved network status logging #1201
+- Improved drag preview image [180876905] #1205
+
+### Bugs Fixed
+- Geometry: handle axis bounds changes more efficiently #1165
+- Geometry: Adjust X axis bounds to leave room for Y axis labels [#180817314] #1166
+- Table: Handle expression evaluation exceptions #1168
+- Fixed bug which could result in showing the wrong teacher guide #1169 #1170
+- Fixed promise-handling bug in creation of planning documents [#181124054] #1187
+- Fixed display and copy of images in published supports [#180873340] [#181147217] #1174 #1175 #1176 #1180 #1190
+- Fixed display of images for networked teachers #1195
+- Limit of one returned problem/planning document #1196
+- Fixed bugs that could result in documents not saving #1200
+- Fixed unread supports indicator #1203
+- Fixed drag of unselected tiles [181260137] #1206
+- Fixed bug in dragging tiles from curriculum content #1208
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 433,155 bytes | -0.2% |
+| index.js | 4,043,774 bytes | 0.2% |
+
 ## Version 2.1.2 - released January 5, 2022
 
 ### Bugs Fixed

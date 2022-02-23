@@ -313,6 +313,72 @@ describe("getNetworkResources", () => {
     }]);
   });
 
+  it("should return singleton problem/planning documents for a single class with a single offering", async () => {
+    await writeTeacherRecordToFirestore();
+    await writeClassRecordToFirestore();
+    await writeOfferingRecordToFirestore();
+    const problemDocuments: Record<string, any> = {
+            "problem-document": {
+              version: "1.0",
+              self: { classHash: kClassHash, offeringId: kOffering1Id, uid: kUserId },
+              documentKey: "problem-document",
+              visibility: "public"
+            },
+            "problem-document-2": {
+              version: "1.0",
+              self: { classHash: kClassHash, offeringId: kOffering1Id, uid: kUserId },
+              documentKey: "problem-document-2",
+              visibility: "public"
+            }
+          };
+    const planningDocuments: Record<string, any> = {
+            "planning-document": {
+              version: "1.0",
+              self: { classHash: kClassHash, offeringId: kOffering1Id, uid: kUserId },
+              title: "title-1",
+              documentKey: "planning-document",
+              visibility: "private"
+            },
+            "planning-document-2": {
+              version: "1.0",
+              self: { classHash: kClassHash, offeringId: kOffering1Id, uid: kUserId },
+              title: "title-1",
+              documentKey: "planning-document-2",
+              visibility: "private"
+            }
+          };
+    mockDatabaseGet.mockImplementation(path => {
+      const dbMap: Record<string, any> = {
+        "/authed/portals/test_portal/classes/class-hash/offerings/1001/users/123456/documents":
+          problemDocuments,
+        "/authed/portals/test_portal/classes/class-hash/offerings/1001/users/123456/planning":
+          planningDocuments
+      };
+      const content = dbMap[path];
+      return content
+              ? { exists: () => true, val: () => content }
+              : { exists: () => false, val: () => null };
+    });
+
+    const context = specUserContext();
+    const params: IGetNetworkResourcesParams = { context, problem: kProblemPath };
+    const response = await getNetworkResources(params, authWithTeacherClaims as any);
+    expect(response).toHaveProperty("version");
+    const expectedProblemDocuments = { "problem-document": problemDocuments["problem-document"] };
+    const expectedPlanningDocuments = { "planning-document": planningDocuments["planning-document"] };
+    const expectedOffering = {
+      resource_link_id: kOffering1Id,
+      teachers: [{
+        uid: kUserId, problemDocuments: expectedProblemDocuments, planningDocuments: expectedPlanningDocuments
+      }]
+    };
+    expect(response.response?.[0].resources[0]).toEqual(expectedOffering);
+    expect(response.response).toEqual([{
+      id: "101", name: "Class 1", context_id: kClassHash, teacher: kTeacherName, teachers: [{ uid: kUserId }],
+      resources: [expectedOffering], uri: `https://concord.org/class/101`
+    }]);
+  });
+
   it("should return personal/learning log document metadata for a single class with a single offering", async () => {
     await writeTeacherRecordToFirestore();
     await writeClassRecordToFirestore();

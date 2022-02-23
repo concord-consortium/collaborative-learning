@@ -1,6 +1,9 @@
 // NOTE: to deploy only these rules run
 // `npm run deploy:firestore:rules`
 
+// Debugging note: debug(value) will output to firestore-debug.log
+// cf. https://firebase.google.com/docs/reference/rules/rules.debug
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -135,6 +138,11 @@ service cloud.firestore {
         return get(/databases/$(database)/documents/authed/$(portal)/users/$(platformUserId)).data.networks;
       }
 
+      // check whether the user being requested is in any of the current teacher's networks
+      function teacherInRequestedTeacherNetworks() {
+        return resource.data.networks.hasAny(getTeacherNetworks());
+      }
+
       // check whether the document being created/updated is associated with one of this teacher's networks
       function requestInTeacherNetworks() {
         return request.resource.data.network in getTeacherNetworks();
@@ -146,8 +154,10 @@ service cloud.firestore {
       }
 
       match /users/{userId} {
-        // teachers can read their own user documents
-        allow read: if isAuthedTeacher() && (string(request.auth.token.platform_user_id) == userId);
+        // teachers can read their own user documents or other teachers in the same network
+        allow read: if isAuthedTeacher() &&
+                        ((string(request.auth.token.platform_user_id) == userId) ||
+                          teacherInRequestedTeacherNetworks());
         // currently, only admins can write user information
         allow write: if false;
       }

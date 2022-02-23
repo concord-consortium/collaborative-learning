@@ -36,6 +36,7 @@ declare namespace JXG {
     containerObj: HTMLElement;
     cssTransMat: number[][];
     isSuspendedUpdate: boolean;
+    suspendCount: number | undefined; // CC addition
     keepaspectratio: boolean;
     origin: {
       usrCoords: [number, number, number],

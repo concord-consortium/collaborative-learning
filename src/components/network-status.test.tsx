@@ -5,15 +5,6 @@ import { ModalProvider } from "react-modal-hook";
 import { NetworkStatus } from "./network-status";
 import { UserModel } from "../models/stores/user";
 
-// mock Logger calls
-const log = jest.fn();
-jest.mock("../lib/logger", () => ({
-  ...(jest.requireActual("../lib/logger") as any),
-  Logger: {
-    log: (...args: any) => log(...args)
-  }
-}));
-
 describe("NetworkStatus", () => {
 
   beforeEach(() => {
@@ -39,7 +30,7 @@ describe("NetworkStatus", () => {
 
     const { rerender } = render(jsx);
     expect(screen.getByTestId("network-status")).toBeInTheDocument();
-    expect(log).not.toHaveBeenCalled();
+    expect(user.networkStatusAlerts).toBe(0);
 
     act(() => {
       Modal.setAppElement(".app");
@@ -47,7 +38,7 @@ describe("NetworkStatus", () => {
     });
     rerender(jsx);
     expect(screen.getByTestId("network-status")).toBeInTheDocument();
-    expect(log).not.toHaveBeenCalled();
+    expect(user.networkStatusAlerts).toBe(0);
 
     act(() => {
       user.setIsFirebaseConnected(false);
@@ -55,7 +46,7 @@ describe("NetworkStatus", () => {
     });
     rerender(jsx);
     expect(screen.getByTestId("network-status")).toBeInTheDocument();
-    expect(log).toHaveBeenCalledTimes(1);
+    expect(user.networkStatusAlerts).toBe(1);
 
     act(() => {
       user.setIsFirebaseConnected(true);

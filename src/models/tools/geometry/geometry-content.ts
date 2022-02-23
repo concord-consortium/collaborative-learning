@@ -14,8 +14,10 @@ import { getAxisLabelsFromDataSet, getTableContent, kLabelAttrName } from "../ta
 import { canonicalizeValue, linkedPointId } from "../table/table-model-types";
 import { exportGeometryJson } from "./geometry-export";
 import { defaultGeometryBoardChange, preprocessImportFormat } from "./geometry-import";
-import { getAxisAnnotations, getBaseAxisLabels, getObjectById, guessUserDesiredBoundingBox,
-          kAxisBuffer, syncAxisLabels } from "./jxg-board";
+import {
+  getAxisAnnotations, getBaseAxisLabels, getObjectById, guessUserDesiredBoundingBox, kAxisBuffer,
+  kXAxisMinBuffer, kXAxisTotalBuffer, kYAxisTotalBuffer, resumeBoardUpdates, suspendBoardUpdates, syncAxisLabels
+} from "./jxg-board";
 import { ESegmentLabelOption, forEachNormalizedChange, ILinkProperties, JXGChange, JXGCoordPair,
           JXGProperties, JXGParentType, JXGUnsafeCoordPair } from "./jxg-changes";
 import { applyChange, applyChanges, IDispatcherChangeContext } from "./jxg-dispatcher";
@@ -429,7 +431,7 @@ export const GeometryContentModel = ToolContentModel
           changeElems.forEach(changeElem => {
             if (isBoard(changeElem)) {
               board = changeElem;
-              board.suspendUpdate();
+              suspendBoardUpdates(board);
             }
             else if (onCreate) {
               onCreate(changeElem);
@@ -437,7 +439,7 @@ export const GeometryContentModel = ToolContentModel
           });
         });
       if (board) {
-        board.unsuspendUpdate();
+        resumeBoardUpdates(board);
       }
       return board;
     }
@@ -451,19 +453,20 @@ export const GeometryContentModel = ToolContentModel
       // so we need to do the same to get the new canvasWidth and canvasHeight values
       const scaledWidth = Math.trunc(width) / (scale || 1);
       const scaledHeight = Math.trunc(height) / (scale || 1);
-      const widthMultiplier = (scaledWidth - kAxisBuffer * 2) / (board.canvasWidth - kAxisBuffer * 2);
-      const heightMultiplier = (scaledHeight - kAxisBuffer * 2) / (board.canvasHeight - kAxisBuffer * 2);
+      const widthMultiplier = (scaledWidth - kXAxisTotalBuffer) / (board.canvasWidth - kXAxisTotalBuffer);
+      const heightMultiplier = (scaledHeight - kYAxisTotalBuffer) / (board.canvasHeight - kYAxisTotalBuffer);
       const unitX = board.unitX || kGeometryDefaultPixelsPerUnit;
       const unitY = board.unitY || kGeometryDefaultPixelsPerUnit;
       // Remove the buffers to correct the graph proportions
       const [xMin, yMax, xMax, yMin] = guessUserDesiredBoundingBox(board);
-      const xBufferRange = kAxisBuffer / unitX;
+      const xMinBufferRange = kXAxisMinBuffer / unitX;
+      const xMaxBufferRange = kAxisBuffer / unitX;
       const yBufferRange = kAxisBuffer / unitY;
       // Add the buffers back post-scaling
       const newBoundingBox: JXG.BoundingBox = [
-        xMin * widthMultiplier - xBufferRange,
+        xMin * widthMultiplier - xMinBufferRange,
         yMax * heightMultiplier + yBufferRange,
-        xMax * widthMultiplier + xBufferRange,
+        xMax * widthMultiplier + xMaxBufferRange,
         yMin * heightMultiplier - yBufferRange
       ];
       board.resizeContainer(scaledWidth, scaledHeight, false, true);
@@ -474,8 +477,8 @@ export const GeometryContentModel = ToolContentModel
     function rescaleBoard(board: JXG.Board, params: IAxesParams) {
       const { canvasWidth, canvasHeight } = board;
       const { xName, xAnnotation, xMin, xMax, yName, yAnnotation, yMin, yMax } = params;
-      const width = canvasWidth - kAxisBuffer * 2;
-      const height = canvasHeight - kAxisBuffer * 2;
+      const width = canvasWidth - kXAxisTotalBuffer;
+      const height = canvasHeight - kYAxisTotalBuffer;
       const unitX = width / (xMax - xMin);
       const unitY = height / (yMax - yMin);
       const change: JXGChange = {
