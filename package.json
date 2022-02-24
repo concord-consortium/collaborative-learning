@@ -12,12 +12,10 @@
   },
   "browserslist": "> 0.2%, last 5 versions, Firefox ESR, not dead",
   "jest": {
+    "preset": "ts-jest/presets/js-with-ts",
     "setupFilesAfterEnv": [
       "<rootDir>/src/setupTests.ts"
     ],
-    "transform": {
-      "^.+\\.tsx?$": "ts-jest"
-    },
     "testEnvironment": "jsdom",
     "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
     "testPathIgnorePatterns": [
@@ -25,6 +23,9 @@
       "/cypress/",
       "/firebase-test/",
       "/functions/test/(?!(shared\\.test\\.ts)$).*$"
+    ],
+    "transformIgnorePatterns": [
+      "/node_modules/(?!(d3-format|escape-string-regexp)/)"
     ],
     "coveragePathIgnorePatterns": [
       "/node_modules/",
@@ -108,7 +109,7 @@
     "@testing-library/user-event": "^13.5.0",
     "@types/color-string": "^1.5.2",
     "@types/common-tags": "^1.8.1",
-    "@types/d3-format": "^2.0.2",
+    "@types/d3-format": "^3.0.1",
     "@types/file-saver": "^2.0.5",
     "@types/is-hotkey": "^0.1.7",
     "@types/jest": "^27.4.0",
@@ -177,8 +178,8 @@
     "@concord-consortium/slate-editor": "^0.7.3",
     "classnames": "^2.3.1",
     "color-string": "^1.9.0",
-    "d3-format": "^2.0.0",
-    "escape-string-regexp": "^4.0.0",
+    "d3-format": "^3.1.0",
+    "escape-string-regexp": "^5.0.0",
     "expr-eval": "^2.0.2",
     "file-saver": "^2.0.5",
     "firebase": "^8.10.1",
@@ -205,7 +206,7 @@
     "rollbar": "^2.24.0",
     "slate-md-serializer": "^5.5.4",
     "slate-plain-serializer": "^0.7.13",
-    "superagent": "^6.1.0",
+    "superagent": "^7.1.1",
     "ts-polyfill": "^3.8.2",
     "uuid": "^8.3.2",
     "whatwg-fetch": "^3.6.2"
