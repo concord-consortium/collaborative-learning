@@ -1,4 +1,5 @@
 import { types, Instance } from "mobx-state-tree";
+import { ToolContentModel } from "../../models/tools/tool-types";
 import { kStarterToolID } from "./starter-types";
 
 export function defaultStarterContent(): StarterContentModelType {
@@ -7,8 +8,9 @@ export function defaultStarterContent(): StarterContentModelType {
 
 export const kPluginDefaultHeight = 200;
 
-export const StarterContentModel = types
-  .model("StarterTool", {
+export const StarterContentModel = ToolContentModel
+  .named("StarterTool")
+  .props({
     type: types.optional(types.literal(kStarterToolID), kStarterToolID),
     text: "Hello World",
   })
