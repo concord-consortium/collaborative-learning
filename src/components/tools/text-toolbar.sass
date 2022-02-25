@@ -1,53 +1,41 @@
 @import ../vars
 
 .text-toolbar
-  background-color: $color3-4
   position: absolute
+  height: $toolbar-button-height + 4px
+  border: $toolbar-border
+  border-radius: 0 0 $toolbar-border-radius $toolbar-border-radius
+  background-color: $workspace-teal-light-9
+  overflow: hidden
   display: flex
-  justify-content: space-around
+  flex-direction: row
   align-items: center
-  margin: 4px 2px 2px 2px
-  width: 232px
-  height: 29px
+  justify-content: center
   z-index: $toolbar-z-index
 
   &.disabled
     display: none
 
   .button-with-tool-tip
-    position: relative
-    background-color: $color3-4
-    color: black
-    font-size: 16px
-    padding-top: 3px
-    width: 30px
-    height: 28px
+    box-sizing: content-box
+    width: $toolbar-button-width
+    height: $toolbar-button-height
+    margin: 0 2px
+    background-color: $workspace-teal-light-9
+    display: flex
+    justify-content: center
+    align-items: center
+    fill: $charcoal-dark-1
     .on
-      color: #009CDC
+      fill: $workspace-teal-dark-1
     .off
-      color: #909090
-    &:hover
-      background-color: $color3-5
-      .tool-tip-text
-        visibility: visible
-        opacity: 1
-        transition: opacity 0.5s
-        transition-delay: 0.8s
-        background-color: #f0f0f0
+      fill: $charcoal-dark-1
 
-.tool-tip-text
-  position: absolute
-  visibility: hidden
-  opacity: 0
-  transition: opacity 0.1s
-  z-index: 10
-  color: black
-  white-space: nowrap
-  text-align: center
-  margin: 0
-  padding: 2px
-  border: solid 1px #dfdfdf
-  box-shadow: 4px 4px 2px lightgray
-  font-size: 8pt
-  top: 28px
-  left: 0px
+    &:hover
+      background-color: $workspace-teal-light-6
+      cursor: pointer
+    &:active
+      background-color: $workspace-teal-light-4
+      cursor: pointer
+    &.on
+      background-color: $workspace-teal-light-4

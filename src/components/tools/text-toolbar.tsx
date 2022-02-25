@@ -42,7 +42,7 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
                             documentContent,
                             toolbarHeight: 29,
                             minToolContent: 22,
-                            toolbarLeftOffset: -2,
+                            toolbarTopOffset: 2,
                             enabled,
                             ...others
                           });
