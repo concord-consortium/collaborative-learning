@@ -5,6 +5,14 @@ import { DisplayUserType } from "../stores/user-types";
 import { ToolTileSnapshotInType } from "../tools/tool-tile";
 import { DocumentContentModel, DocumentContentModelType, INewTileOptions } from "./document-content";
 
+/*
+ * For ease of authoring, CLUE documents and tiles generally support an import format that is
+ * simpler to author/edit than the full-blown serialization format. For instance, in most cases
+ * objects ids are not required in authored content and will be added automatically during the
+ * import process. The acceptable import format for tile-specific content is generally
+ * determined by the tile itself.
+ */
+
 // authored content is converted to current content on the fly
 export interface IAuthoredBaseTileContent {
   type: string;
