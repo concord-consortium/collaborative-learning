@@ -6,7 +6,6 @@ export function defaultStarterContent(): StarterContentModelType {
   return StarterContentModel.create();
 }
 
-export const kPluginDefaultHeight = 200;
 
 export const StarterContentModel = ToolContentModel
   .named("StarterTool")
@@ -25,4 +24,4 @@ export const StarterContentModel = ToolContentModel
     }
   }));
 
-export type StarterContentModelType = Instance<typeof StarterContentModel>;
+export interface StarterContentModelType extends Instance<typeof StarterContentModel> {}

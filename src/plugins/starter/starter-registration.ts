@@ -13,3 +13,4 @@ registerToolContentInfo({
     toolTileClass: "starter-tool-tile",
     Icon: StarterToolIcon
   });
+  
