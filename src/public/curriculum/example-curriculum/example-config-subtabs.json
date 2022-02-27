@@ -72,8 +72,7 @@
         "label": "Class Work",
         "sections": [
           {
-            "className": "section problem published",
-            "title": "Problem Workspaces",
+            "title": "Workspaces",
             "type": "published-problem-documents",
             "dataTestHeader": "class-work-section-published",
             "dataTestItem": "class-work-list-items",
@@ -81,8 +80,7 @@
             "showStars": ["teacher"]
           },
           {
-            "className": "section personal published",
-            "title": "Extra Workspaces",
+            "title": "Workspaces",
             "type": "published-personal-documents",
             "dataTestHeader": "class-work-section-personal",
             "dataTestItem": "class-work-list-items",
@@ -96,6 +94,14 @@
             "documentTypes": ["publication"],
             "properties": ["starred"],
             "showStars": ["teacher"]
+          },
+          {
+            "title": "Teacher Documents",
+            "type": "teacher-supports",
+            "dataTestHeader": "supports-section-teacher-supports",
+            "dataTestItem": "supports-list-items",
+            "documentTypes": ["supportPublication"],
+            "properties": ["teacherSupport", "!isDeleted"]
           }
         ]
       }

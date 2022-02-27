@@ -149,24 +149,9 @@
               "documentTypes": ["publication"],
               "properties": ["starred"],
               "showStars": ["teacher"]
-            }
-          ]
-        },
-        {
-          "tab": "supports",
-          "label": "Supports",
-          "sections": [
-            {
-              "title": "Problem Supports",
-              "type": "curricular-supports",
-              "dataTestHeader": "supports-section-jit",
-              "dataTestItem": "supports-list-items",
-              "documentTypes": ["supportPublication"],
-              "order": "original",
-              "properties": ["curricularSupport"]
             },
             {
-              "title": "Teacher Supports",
+              "title": "Teacher Documents",
               "type": "teacher-supports",
               "dataTestHeader": "supports-section-teacher-supports",
               "dataTestItem": "supports-list-items",
