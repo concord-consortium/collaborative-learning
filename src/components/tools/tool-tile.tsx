@@ -362,9 +362,9 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     }
     // tile dragging can be disabled for individual tile contents,
     // which only allows those tiles to be dragged by their drag handle
-    if (target && target.querySelector(".disable-tile-content-drag")) {
+    if (target?.closest(".disable-tile-content-drag")) {
       const eltTarget = document.elementFromPoint(e.clientX, e.clientY);
-      if (!eltTarget || !eltTarget.closest(".tool-tile-drag-handle")) {
+      if (!eltTarget?.closest(".tool-tile-drag-handle")) {
         e.preventDefault();
         return;
       }

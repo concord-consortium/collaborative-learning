@@ -8,7 +8,7 @@ registerToolContentInfo({
   modelClass: TextContentModel,
   defaultContent: defaultTextContent,
   Component: TextToolComponent,
-  toolTileClass: "text-tool-tile",
+  toolTileClass: "text-tool-tile disable-tile-content-drag",
   tileHandlesOwnSelection: true,
   Icon: TextToolIcon
 });
