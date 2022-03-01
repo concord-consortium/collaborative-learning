@@ -69,8 +69,7 @@ import "./text-tool.sass";
     | image           | `![]` syntax  | <img>        |           | broken
     | link            | `[]()` syntax | <a>          |           | broken
 
-  * The name in the Tool Bar column matches the Font Awesome icon name used in
-  the TextToolBarComponent. This name is used to both render the button and to
+  * The name in the Tool Bar column is used to both render the button and to
   identify the button's action.
 
 */
