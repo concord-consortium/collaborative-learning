@@ -5,13 +5,13 @@ import { IFloatingToolbarProps, useFloatingToolbarLocation } from "./hooks/use-f
 import { TextToolbarButton } from "./text-toolbar-button";
 import { IRegisterToolApiProps } from "./tool-tile";
 import { isMac } from "../../utilities/browser";
-import BoldToolIcon from "../../clue/assets/icons/text/bold-text-icon.svg";
-import ItalicToolIcon from "../../clue/assets/icons/text/italic-text-icon.svg";
-import UnderlineToolIcon from "../../clue/assets/icons/text/underline-text-icon.svg";
-import SuperscriptToolIcon from "../../clue/assets/icons/text/superscript-text-icon.svg";
-import SubscriptToolIcon from "../../clue/assets/icons/text/subscript-text-icon.svg";
-import NumberedListToolIcon from "../../clue/assets/icons/text/numbered-list-text-icon.svg";
-import BulletedListToolIcon from "../../clue/assets/icons/text/bulleted-list-text-icon.svg";
+import BoldToolIcon from "../../assets/icons/text/bold-text-icon.svg";
+import ItalicToolIcon from "../../assets/icons/text/italic-text-icon.svg";
+import UnderlineToolIcon from "../../assets/icons/text/underline-text-icon.svg";
+import SuperscriptToolIcon from "../../assets/icons/text/superscript-text-icon.svg";
+import SubscriptToolIcon from "../../assets/icons/text/subscript-text-icon.svg";
+import NumberedListToolIcon from "../../assets/icons/text/numbered-list-text-icon.svg";
+import BulletedListToolIcon from "../../assets/icons/text/bulleted-list-text-icon.svg";
 
 import "./text-toolbar.sass";
 
