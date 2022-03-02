@@ -31,6 +31,12 @@ export const useModelDataSet = (model: ToolTileModelType) => {
         hasColumnChanges && triggerColumnChange();
         hasRowChanges && triggerRowChange();
         syncedChanges.current = _content.changes.length;
+      } else if (syncedChanges.current > _content.changes.length) {
+        dataSet.current = DataSet.create();
+        _content.applyChangesToDataSet(dataSet.current);
+        triggerColumnChange();
+        triggerRowChange();
+        syncedChanges.current = _content.changes.length;
       }
     });
     return () => disposer();
