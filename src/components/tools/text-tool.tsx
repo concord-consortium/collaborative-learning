@@ -86,7 +86,6 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
   public state: IState = {};
   private disposers: IReactionDisposer[];
   private prevText: any;
-  private prevValue: any;
   private textToolDiv: HTMLElement | null;
   private editor: Editor | undefined;
   private tileContentRect: DOMRectReadOnly;
