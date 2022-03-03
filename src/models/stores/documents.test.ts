@@ -45,7 +45,7 @@ describe("documents model", () => {
       createdAt: 1,
       content: {}
     });
-    documents = DocumentsModel.create({});
+    documents = DocumentsModel.create({id: "test"});
   });
 
   it("has default values", () => {

@@ -1,5 +1,5 @@
 import { forEach } from "lodash";
-import { types } from "mobx-state-tree";
+import { getSnapshot, types } from "mobx-state-tree";
 import { AppConfigModelType } from "./app-config-model";
 import { DocumentModel, DocumentModelType } from "../document/document";
 import {
@@ -8,6 +8,9 @@ import {
 } from "../document/document-types";
 import { ClassModelType } from "./class";
 import { UserModelType } from "./user";
+import { addTreeMonitor } from "../history/tree-monitor";
+import { Container } from "../history/container";
+import { Tree } from "../history/tree";
 
 const extractLatestPublications = (publications: DocumentModelType[], attr: "uid" | "originDoc") => {
   const latestPublications: DocumentModelType[] = [];
@@ -29,8 +32,9 @@ export interface IRequiredDocumentPromise {
   isResolved: boolean;
 }
 
-export const DocumentsModel = types
-  .model("Documents", {
+export const DocumentsModel = Tree.named("Documents")
+  .props({
+    id: "main", // HACK for now to support tree monitor middleware
     all: types.array(DocumentModel)
   })
   .volatile(self => ({
@@ -240,8 +244,14 @@ export const DocumentsModel = types
 
 export type DocumentsModelType = typeof DocumentsModel.Type;
 
+const container = Container({});
+(window as any).container = container;
+(window as any).getSnapshot = getSnapshot;
+
 export function createDocumentsModelWithRequiredDocuments(requiredTypes: string[]) {
   const documents = DocumentsModel.create();
+  addTreeMonitor(documents, container.containerAPI, false);
+  container.trees.main = documents;
   documents.addRequiredDocumentPromises(requiredTypes);
   return documents;
 }
