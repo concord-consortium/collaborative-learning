@@ -1,9 +1,12 @@
 import React from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
+import { useAppConfig, useClassStore, useLocalDocuments, useUserStore } from "../../hooks/use-stores";
+import { AppConfigModelType } from "../../models/stores/app-config-model";
+import { DocumentsModelType } from "../../models/stores/documents";
+import { UserModelType } from "../../models/stores/user";
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
 import { isPublishedType, isUnpublishedType, PersonalDocument } from "../../models/document/document-types";
-import { IStores } from "../../models/stores/stores";
 import { ENavTabOrder, NavTabSectionModelType  } from "../../models/view/nav-tabs";
 import { CanvasComponent } from "../document/canvas";
 import { DocumentContextReact } from "../document/document-context";
@@ -17,7 +20,6 @@ interface IProps {
   section: NavTabSectionModelType;
   index: number;
   numSections: number;
-  stores: IStores;
   scale: number;
   selectedDocument?: string;
   onSelectNewDocument?: (type: string) => void;
@@ -27,11 +29,10 @@ interface IProps {
   onDocumentDeleteClick?: (document: DocumentModelType) => void;
 }
 
-function getNewDocumentLabel(section: NavTabSectionModelType , stores: IStores) {
-  const { appConfig } = stores;
+function getNewDocumentLabel(section: NavTabSectionModelType , appConfigStore: AppConfigModelType) {
   let documentLabel = "";
   section.documentTypes.forEach(type => {
-    const label = type !== PersonalDocument ? appConfig.getDocumentLabel(type, 1) : "";
+    const label = type !== PersonalDocument ? appConfigStore.getDocumentLabel(type, 1) : "";
     if (!documentLabel && label) {
       documentLabel = label;
     }
@@ -39,8 +40,8 @@ function getNewDocumentLabel(section: NavTabSectionModelType , stores: IStores) 
   return "New " + (documentLabel || "Workspace");
 }
 
-function getSectionDocs(section: NavTabSectionModelType, stores: IStores, classStr: string) {
-  const { documents, user } = stores;
+function getSectionDocs(section: NavTabSectionModelType,
+  documents: DocumentsModelType, user: UserModelType, classStr: string) {
   const publishedDocs: { [source: string]: DocumentModelType } = {};
   let sectDocs: DocumentModelType[] = [];
   (section.documentTypes || []).forEach(type => {
@@ -79,17 +80,21 @@ function getSectionDocs(section: NavTabSectionModelType, stores: IStores, classS
   return sectDocs;
 }
 
-export const TabPanelDocumentsSection = observer(({ tab, section, index, numSections=0, stores, scale, selectedDocument,
+export const TabPanelDocumentsSection = observer(({ tab, section, index, numSections=0, scale, selectedDocument,
                                   onSelectNewDocument, onSelectDocument, onDocumentDragStart,
                                   onDocumentStarClick, onDocumentDeleteClick }: IProps) => {
+    const appConfigStore = useAppConfig();
+    const classStore = useClassStore();
+    const documents = useLocalDocuments();
+    const user = useUserStore();
     const showNewDocumentThumbnail = section.addDocument && !!onSelectNewDocument;
-    const newDocumentLabel = getNewDocumentLabel(section, stores);
+    const newDocumentLabel = getNewDocumentLabel(section, appConfigStore);
     const isTopPanel = index === 0 && numSections > 1;
     const isBottomPanel = index === numSections - 1 && index > 0;
     const isSinglePanel = numSections < 2;
     const tabName = tab?.toLowerCase().replace(' ', '-');
-    const currentClass = stores.class.name;
-    const sectionDocs: DocumentModelType[] = getSectionDocs(section, stores, currentClass);
+    const currentClass = classStore.name;
+    const sectionDocs: DocumentModelType[] = getSectionDocs(section, documents, user, currentClass);
 
     function handleNewDocumentClick() {
       onSelectNewDocument?.(section.documentTypes[0]);
@@ -109,7 +114,7 @@ export const TabPanelDocumentsSection = observer(({ tab, section, index, numSect
             const documentContext = getDocumentContext(document);
             return (
               <DocumentContextReact.Provider key={document.key} value={documentContext}>
-                <TabPanelDocumentsSubSectionPanel section={section} sectionDocument={document} tab={tab} stores={stores}
+                <TabPanelDocumentsSubSectionPanel section={section} sectionDocument={document} tab={tab}
                   scale={scale} selectedDocument={selectedDocument}
                   onSelectDocument={onSelectDocument}
                   onDocumentDragStart={onDocumentDragStart}

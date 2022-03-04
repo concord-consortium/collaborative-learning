@@ -5,8 +5,8 @@ import { INetworkResourceClassResponse } from "../../../functions/src/shared";
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
 import { IStores } from "../../models/stores/stores";
 import ArrowIcon from "../../assets/icons/arrow/arrow.svg";
-import { ISubTabSpec } from "../navigation/document-tab-panel";
-import { useNetworkDocuments } from "../../hooks/use-stores";
+import { ISubTabSpec } from "../navigation/section-document-or-browser";
+import { useNetworkDocuments, useUserStore } from "../../hooks/use-stores";
 import { TabPanelDocumentsSubSectionPanel } from "./tab-panel-documents-subsection-panel";
 import { NavTabSectionModelType } from "../../models/view/nav-tabs";
 import { Logger, LogEventName } from "../../lib/logger";
@@ -32,12 +32,13 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
   ({userName, classNameStr, stores, scale, selectedDocument, onSelectDocument, subTab,
     networkResource, userId, classHash}) => {
   const [isOpen, setIsOpen] = useState(false);
+  const user = useUserStore();
   const handleSectionToggle = () => {
     Logger.log(isOpen
       ? LogEventName.TEACHER_NETWORK_COLLAPSE_DOCUMENT_SECTION
       : LogEventName.TEACHER_NETWORK_EXPAND_DOCUMENT_SECTION, {
       networkClassHash: classHash,
-      networkUsername: `${userId}@${stores.user.portal}`
+      networkUsername: `${userId}@${user.portal}`
     });
     setIsOpen(!isOpen);
   };
@@ -98,7 +99,7 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
               return (
                 <DocumentContextReact.Provider key={document.key} value={documentContext}>
                   <TabPanelDocumentsSubSectionPanel section={currentSection} sectionDocument={document}
-                    tab={subTab.label} stores={stores} scale={scale} selectedDocument={selectedDocument}
+                    tab={subTab.label} scale={scale} selectedDocument={selectedDocument}
                     onSelectDocument={() => onSelectDocument?.(document)}
                   />
                 </DocumentContextReact.Provider>

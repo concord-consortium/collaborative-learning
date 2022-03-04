@@ -1,10 +1,10 @@
 import React from "react";
 import { INetworkResourceClassResponse } from "../../../functions/src/shared";
 import { useNetworkResources } from "../../hooks/network-resources";
+import { useStores } from "../../hooks/use-stores";
 import { DocumentModelType } from "../../models/document/document";
-import { IStores } from "../../models/stores/stores";
 import { CollapsibleDocumentsSection } from "../thumbnail/collapsible-document-section";
-import { ISubTabSpec } from "./document-tab-panel";
+import { ISubTabSpec } from "./section-document-or-browser";
 
 import "./network-documents-section.scss";
 
@@ -14,7 +14,6 @@ interface IProps {
   currentTeacherName: string;
   subTab: ISubTabSpec;
   problemTitle: string;
-  stores: IStores;
   scale: number;
   onSelectDocument?: (document: DocumentModelType) => void;
 }
@@ -25,7 +24,8 @@ export enum NetworkSectionType {
 }
 
 export const NetworkDocumentsSection: React.FC<IProps> = ({ currentClassHash, currentTeacherName,
-  currentTeacherId, subTab, problemTitle, stores, scale, onSelectDocument }) => {
+  currentTeacherId, subTab, problemTitle, scale, onSelectDocument }) => {
+  const stores = useStores();
   const { data, status } = useNetworkResources();
   const statusMessage = `${status} network data`;
 

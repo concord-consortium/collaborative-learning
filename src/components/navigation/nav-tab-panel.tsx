@@ -7,7 +7,7 @@ import { NavTabSpec, ENavTab } from "../../models/view/nav-tabs";
 import { Logger, LogEventName } from "../../lib/logger";
 import { StudentGroupView } from "../document/student-group-view";
 import { ProblemTabContent } from "./problem-tab-content";
-import { DocumentTabContent } from "./document-tab-content";
+import { SectionDocumentOrBrowser } from "./section-document-or-browser";
 import { FocusDocumentTracker } from "./focus-document-tracker";
 import { SupportBadge } from "./support-badge";
 // import { NewCommentsBadge } from "./new-comments-badge";
@@ -129,7 +129,7 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
 
   private renderDocuments = (tabSpec: NavTabSpec) => {
     return (
-      <DocumentTabContent tabSpec={tabSpec} />
+      <SectionDocumentOrBrowser tabSpec={tabSpec} />
     );
   };
 
