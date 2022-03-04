@@ -12,5 +12,4 @@ registerToolContentInfo({
     defaultHeight: kStarterDefaultHeight,
     toolTileClass: "starter-tool-tile",
     Icon: StarterToolIcon
-  });
-  
+});

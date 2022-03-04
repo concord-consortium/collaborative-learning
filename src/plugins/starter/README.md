@@ -1,4 +1,4 @@
-This is an very basic tile that can be used to start work on a new tile.
+This is a very basic tile that can be used to start work on a new tile.
 
 # Demo
 
