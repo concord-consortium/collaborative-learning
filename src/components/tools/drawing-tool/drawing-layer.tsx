@@ -1198,6 +1198,15 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       }
       this.actionsCount = currentChangesLength;
       this.forceUpdate();
+    } else if (currentChangesLength < prevChanges) {
+      // A change was undone: clear all objects, and replay all of the changes
+      this.objects = {};
+      for (let i = 0; i < currentChangesLength; i++) {
+        const change = JSON.parse(drawingContent.changes[i]) as DrawingToolChange;
+        this.executeChange(change);
+      }
+      this.actionsCount = currentChangesLength;
+      this.forceUpdate();
     }
   }
 }
