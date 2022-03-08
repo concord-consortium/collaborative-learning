@@ -30,7 +30,7 @@ export const Tree = types.model("Tree", {
             return;
         }
 
-        console.log("updating tree after shared models changes", {tree: self.id, historyEntryId});
+        // console.log("updating tree after shared models changes", {tree: self.id, historyEntryId});
 
         // The TreeMonitor middleware should pickup the historyEntryId and
         // callId parameters automatically. And then when it sends any
