@@ -60,7 +60,7 @@ export const UndoStore = types
 
             // apply the patches to all trees
             const applyPromises = treeEntries.map(treeEntry => {
-                console.log(`send tile entry to ${opType} to the tree`, getSnapshot(treeEntry));
+                // console.log(`send tile entry to ${opType} to the tree`, getSnapshot(treeEntry));
 
                 // When a patch is applied to shared model, it will send its updated
                 // state to all tiles. If this is working properly the promise returned by

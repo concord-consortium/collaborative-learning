@@ -38,7 +38,7 @@ export const Container = (initialDocument: any) => {
           return;
         }
 
-        console.log(`repeating changes to ${treeId}`, snapshot);
+        // console.log(`repeating changes to ${treeId}`, snapshot);
 
         // In case #1 the passed in callId comes from the action that updated
         // the shared model view in the tree. This callId will be closed by the
@@ -62,12 +62,12 @@ export const Container = (initialDocument: any) => {
       // the top level treeId and name of actions in tiles that are only
       // changing the shared model. An example in the current code is when the
       // name of a node is changed.
-      console.log("addHistoryEntry", { historyEntryId, callId, treeId, actionName, undoable });
+      // console.log("addHistoryEntry", { historyEntryId, callId, treeId, actionName, undoable });
       documentStore.createHistoryEntry(historyEntryId, callId, actionName, treeId, undoable);
       return Promise.resolve();
     },
     addTreePatchRecord: (historyEntryId: string, callId: string, record: TreePatchRecordSnapshot) => {
-      console.log("addTreePatchRecord", { historyEntryId, callId, record} );
+      // console.log("addTreePatchRecord", { historyEntryId, callId, record} );
 
       // When the entry already exists the documentStore will add to it.
       // If the entry doesn't exist yet because this was called before

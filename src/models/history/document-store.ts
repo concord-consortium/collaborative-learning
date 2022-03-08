@@ -248,7 +248,7 @@ export const DocumentStore = types
                 });
             });
 
-            console.log(treePatches);
+            // console.log(treePatches);
 
             const applyPromises = Object.entries(treePatches).map(([treeId, patches]) => {
                 if (patches && patches.length > 0) {
