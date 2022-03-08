@@ -90,7 +90,7 @@ export const DocumentCollectionByType = observer(({ tab, section, index, numSect
     const showNewDocumentThumbnail = section.addDocument && !!onSelectNewDocument;
     const newDocumentLabel = getNewDocumentLabel(section, appConfigStore);
     const isTopPanel = index === 0 && numSections > 1;
-    const isBottomPanel = index === numSections - 1 && index > 0;
+    const isBottomPanel = index > 0;
     const isSinglePanel = numSections < 2;
     const tabName = tab?.toLowerCase().replace(' ', '-');
     const currentClass = classStore.name;
@@ -101,11 +101,13 @@ export const DocumentCollectionByType = observer(({ tab, section, index, numSect
     }
     const tabPanelDocumentSectionClass = classNames("tab-panel-documents-section", tabName, {"top-panel": isTopPanel});
     const listClass = classNames("list", tabName, {"top-panel": isTopPanel},
-                                  {"bottom-panel": isBottomPanel && !isSinglePanel});
+                                  {"bottom-panel": isBottomPanel && !isSinglePanel && sectionDocs.length > 0});
     return (
       <div className={tabPanelDocumentSectionClass}
             key={`${tab}-${section.type}`}
             data-test={`${section.dataTestHeader}-documents`}>
+        {sectionDocs[0]?.type === "supportPublication"
+          && <div><span className="teacher-supports-banner">Teacher Supports</span> </div>}
         <div className={listClass}>
           {showNewDocumentThumbnail &&
             <NewDocumentThumbnail label={newDocumentLabel} onClick={handleNewDocumentClick} />}

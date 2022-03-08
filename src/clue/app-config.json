@@ -134,6 +134,15 @@
               "documentTypes": ["personalPublication"]
             },
             {
+              "className": "section teacher supports",
+              "title": "Workspaces",
+              "type": "teacher-supports",
+              "dataTestHeader": "supports-section-teacher-supports",
+              "dataTestItem": "supports-list-items",
+              "documentTypes": ["supportPublication"],
+              "properties": ["teacherSupport", "!isDeleted"]
+            },
+            {
               "className": "section learning-log published",
               "title": "Learning Logs",
               "type": "published-learning-logs",
@@ -149,14 +158,6 @@
               "documentTypes": ["publication"],
               "properties": ["starred"],
               "showStars": ["teacher"]
-            },
-            {
-              "title": "Teacher Documents",
-              "type": "teacher-supports",
-              "dataTestHeader": "supports-section-teacher-supports",
-              "dataTestItem": "supports-list-items",
-              "documentTypes": ["supportPublication"],
-              "properties": ["teacherSupport", "!isDeleted"]
             }
           ]
         }

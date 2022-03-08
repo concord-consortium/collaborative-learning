@@ -87,6 +87,14 @@
             "documentTypes": ["personalPublication"]
           },
           {
+            "title": "Workspaces",
+            "type": "teacher-supports",
+            "dataTestHeader": "supports-section-teacher-supports",
+            "dataTestItem": "supports-list-items",
+            "documentTypes": ["supportPublication"],
+            "properties": ["teacherSupport", "!isDeleted"]
+          },
+          {
             "className": "section problem starred",
             "title": "Starred",
             "type": "starred-problem-documents",
@@ -94,14 +102,6 @@
             "documentTypes": ["publication"],
             "properties": ["starred"],
             "showStars": ["teacher"]
-          },
-          {
-            "title": "Teacher Documents",
-            "type": "teacher-supports",
-            "dataTestHeader": "supports-section-teacher-supports",
-            "dataTestItem": "supports-list-items",
-            "documentTypes": ["supportPublication"],
-            "properties": ["teacherSupport", "!isDeleted"]
           }
         ]
       }
