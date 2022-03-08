@@ -7,7 +7,7 @@ import { IStores } from "../../models/stores/stores";
 import ArrowIcon from "../../assets/icons/arrow/arrow.svg";
 import { ISubTabSpec } from "../navigation/section-document-or-browser";
 import { useNetworkDocuments, useUserStore } from "../../hooks/use-stores";
-import { TabPanelDocumentsSubSectionPanel } from "./tab-panel-documents-subsection-panel";
+import { DecoratedDocumentThumbnailItem } from "./decorated-document-thumbnail-item";
 import { NavTabSectionModelType } from "../../models/view/nav-tabs";
 import { Logger, LogEventName } from "../../lib/logger";
 
@@ -98,7 +98,7 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
               const documentContext = getDocumentContext(document);
               return (
                 <DocumentContextReact.Provider key={document.key} value={documentContext}>
-                  <TabPanelDocumentsSubSectionPanel section={currentSection} sectionDocument={document}
+                  <DecoratedDocumentThumbnailItem section={currentSection} sectionDocument={document}
                     tab={subTab.label} scale={scale} selectedDocument={selectedDocument}
                     onSelectDocument={() => onSelectDocument?.(document)}
                   />

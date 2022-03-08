@@ -10,7 +10,7 @@ import { isPublishedType, isUnpublishedType, PersonalDocument } from "../../mode
 import { ENavTabOrder, NavTabSectionModelType  } from "../../models/view/nav-tabs";
 import { CanvasComponent } from "../document/canvas";
 import { DocumentContextReact } from "../document/document-context";
-import { TabPanelDocumentsSubSectionPanel } from "./tab-panel-documents-subsection-panel";
+import { DecoratedDocumentThumbnailItem } from "./decorated-document-thumbnail-item";
 import NewDocumentIcon from "../../assets/icons/new/add.svg";
 
 import "./tab-panel-documents-section.sass";
@@ -80,7 +80,7 @@ function getSectionDocs(section: NavTabSectionModelType,
   return sectDocs;
 }
 
-export const TabPanelDocumentsSection = observer(({ tab, section, index, numSections=0, scale, selectedDocument,
+export const DocumentsTypeCollection = observer(({ tab, section, index, numSections=0, scale, selectedDocument,
                                   onSelectNewDocument, onSelectDocument, onDocumentDragStart,
                                   onDocumentStarClick, onDocumentDeleteClick }: IProps) => {
     const appConfigStore = useAppConfig();
@@ -114,7 +114,7 @@ export const TabPanelDocumentsSection = observer(({ tab, section, index, numSect
             const documentContext = getDocumentContext(document);
             return (
               <DocumentContextReact.Provider key={document.key} value={documentContext}>
-                <TabPanelDocumentsSubSectionPanel section={section} sectionDocument={document} tab={tab}
+                <DecoratedDocumentThumbnailItem section={section} sectionDocument={document} tab={tab}
                   scale={scale} selectedDocument={selectedDocument}
                   onSelectDocument={onSelectDocument}
                   onDocumentDragStart={onDocumentDragStart}

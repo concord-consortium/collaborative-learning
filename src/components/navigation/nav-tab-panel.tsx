@@ -25,20 +25,15 @@ interface IProps extends IBaseProps {
   onDrop: (e: React.DragEvent<HTMLDivElement>) => void;
 }
 
-interface IState {
-  tabLoadAllowed: { [tab: number]: boolean };
-}
 
 @inject("stores")
 @observer
-export class NavTabPanel extends BaseComponent<IProps, IState> {
+export class NavTabPanel extends BaseComponent<IProps> {
   private navTabPanelElt: HTMLDivElement | null = null;
+  private topTabReset = "" ;
 
   constructor(props: IProps) {
     super(props);
-    this.state = {
-      tabLoadAllowed: {},
-    };
   }
 
   public render() {
@@ -127,9 +122,16 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
     }
   };
 
+  private clearTopTabReset = () => {
+    // clear without triggering render (hence not in state)
+     this.topTabReset = "";
+  };
+
   private renderDocuments = (tabSpec: NavTabSpec) => {
+    const reset = tabSpec.tab === this.topTabReset;
     return (
-      <SectionDocumentOrBrowser tabSpec={tabSpec} />
+      <SectionDocumentOrBrowser tabSpec={tabSpec}
+                                reset={reset ? this.clearTopTabReset : undefined} />
     );
   };
 
@@ -166,6 +168,11 @@ export class NavTabPanel extends BaseComponent<IProps, IState> {
         };
         const logEvent = () => { Logger.log(LogEventName.SHOW_TAB, logParameters); };
         logEvent();
+      } else {
+        // track this value in a member rather than state to avoid excessive renders
+        this.topTabReset = tabSpec.tab;
+        // must force refresh initially but not when value is reset
+        this.forceUpdate();
       }
     }
   };

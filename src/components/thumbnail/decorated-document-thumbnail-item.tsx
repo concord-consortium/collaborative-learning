@@ -40,7 +40,7 @@ function useDocumentCaption(document: DocumentModelType) {
 }
 
 // observes teacher names via useDocumentCaption()
-export const TabPanelDocumentsSubSectionPanel = observer(({
+export const DecoratedDocumentThumbnailItem = observer(({
   section, sectionDocument, tab, scale, selectedDocument,
   onSelectDocument, onDocumentDragStart, onDocumentStarClick, onDocumentDeleteClick
 }: IProps) => {

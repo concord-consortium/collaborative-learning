@@ -8,7 +8,7 @@ import { EditableDocumentContent } from "../document/editable-document-content";
 import { useAppConfig, useClassStore, useProblemStore, useUIStore, useUserStore } from "../../hooks/use-stores";
 import { Logger, LogEventName } from "../../lib/logger";
 import { useUserContext } from "../../hooks/use-user-context";
-import { TabPanelDocumentsSection } from "../thumbnail/tab-panel-documents-section";
+import { DocumentsTypeCollection } from "../thumbnail/documents-type-collection";
 import { DocumentDragKey, SupportPublication } from "../../models/document/document-types";
 import { NetworkDocumentsSection } from "./network-documents-section";
 import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
@@ -24,6 +24,13 @@ const kTabSectionBorderWidth = 2;
 
 interface IProps {
   tabSpec: NavTabSpec;
+  reset?: () => void;
+  selectedDocument?: string;
+  selectedSection?: ENavTabSectionType;
+  onSelectNewDocument?: (type: string) => void;
+  onSelectDocument?: (document: DocumentModelType) => void;
+  onTabClick?: (title: string, type: string) => void;
+  isChatOpen?: boolean;
 }
 
 export interface ISubTabSpec {
@@ -31,7 +38,8 @@ export interface ISubTabSpec {
   sections: NavTabSectionSpec[];
 }
 
-export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec }) => {
+export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, selectedDocument,
+    onSelectNewDocument, onSelectDocument, onTabClick }) => {
   const [referenceDocument, setReferenceDocument] = useState<DocumentModelType>();
   const [ tabIndex, setTabIndex ] = useState(0);
   const appConfigStore = useAppConfig();
@@ -71,8 +79,17 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec }) => {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[]);
+  useEffect(()=>{
+    if (reset) {
+      console.log("in reset:", tabSpec.label, reset);
+      // setTimeout to avoid infinite render issues
+      reset();
+      setTimeout(() => handleTabClick(tabSpec.label));
+    }
+  }, [reset]);
 
-  const handleTabClick = (title: string, type: string) => {
+
+  const handleTabClick = (title: string, type?: string) => {
     setReferenceDocument(undefined);
     ui.updateFocusDocument();
     ui.setSelectedTile();
@@ -83,7 +100,6 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec }) => {
   };
 
   const handleTabSelect = (tabidx: number) => {
-    console.log("in handleTabSelect");
     setTabIndex(tabidx);
     ui.updateFocusDocument();
   };
@@ -119,6 +135,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec }) => {
         : null
     );
   };
+  
   const handleDocumentDragStart = (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => {
     e.dataTransfer.setData(DocumentDragKey, document.key);
   };
@@ -151,15 +168,16 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec }) => {
               ? handleDocumentDeleteClick
               : undefined;
             return (
-              <TabPanelDocumentsSection
+              <DocumentsTypeCollection
                 key={section.type}
                 tab={subTab.label}
                 section={section}
                 index={index}
                 numSections={subTab.sections.length}
                 scale={kNavItemScale}
-                selectedDocument={referenceDocument?.key}
-                onSelectDocument={handleSelectDocument}
+                selectedDocument={selectedDocument || referenceDocument?.key}
+                onSelectNewDocument={onSelectNewDocument}
+                onSelectDocument={onSelectDocument || handleSelectDocument}
                 onDocumentDragStart={handleDocumentDragStart}
                 onDocumentStarClick={_handleDocumentStarClick}
                 onDocumentDeleteClick={_handleDocumentDeleteClick}
