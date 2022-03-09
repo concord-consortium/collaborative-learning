@@ -80,7 +80,7 @@ function getSectionDocs(section: NavTabSectionModelType,
   return sectDocs;
 }
 
-export const DocumentsTypeCollection = observer(({ tab, section, index, numSections=0, scale, selectedDocument,
+export const DocumentCollectionByType = observer(({ tab, section, index, numSections=0, scale, selectedDocument,
                                   onSelectNewDocument, onSelectDocument, onDocumentDragStart,
                                   onDocumentStarClick, onDocumentDeleteClick }: IProps) => {
     const appConfigStore = useAppConfig();

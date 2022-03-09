@@ -30,7 +30,7 @@ interface IProps extends IBaseProps {
 @observer
 export class NavTabPanel extends BaseComponent<IProps> {
   private navTabPanelElt: HTMLDivElement | null = null;
-  private topTabReset = "" ;
+  private topTabReset = "";
 
   constructor(props: IProps) {
     super(props);
@@ -128,10 +128,12 @@ export class NavTabPanel extends BaseComponent<IProps> {
   };
 
   private renderDocuments = (tabSpec: NavTabSpec) => {
+    const { ui: { showChatPanel } } = this.stores;
     const reset = tabSpec.tab === this.topTabReset;
     return (
       <SectionDocumentOrBrowser tabSpec={tabSpec}
-                                reset={reset ? this.clearTopTabReset : undefined} />
+                                reset={reset ? this.clearTopTabReset : undefined}
+                                isChatOpen={showChatPanel}/>
     );
   };
 

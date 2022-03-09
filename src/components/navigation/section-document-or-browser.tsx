@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useQueryClient } from 'react-query';
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { DocumentModelType } from "../../models/document/document";
@@ -8,13 +8,12 @@ import { EditableDocumentContent } from "../document/editable-document-content";
 import { useAppConfig, useClassStore, useProblemStore, useUIStore, useUserStore } from "../../hooks/use-stores";
 import { Logger, LogEventName } from "../../lib/logger";
 import { useUserContext } from "../../hooks/use-user-context";
-import { DocumentsTypeCollection } from "../thumbnail/documents-type-collection";
+import { DocumentCollectionByType } from "../thumbnail/documents-type-collection";
 import { DocumentDragKey, SupportPublication } from "../../models/document/document-types";
 import { NetworkDocumentsSection } from "./network-documents-section";
 import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
 
-import "./document-tab-panel.sass";
-import "./document-tab-content.sass";
+import "./section-document-or-browser.sass";
 
 const kNavItemScale = 0.11;
 const kHeaderHeight = 55;
@@ -38,10 +37,10 @@ export interface ISubTabSpec {
   sections: NavTabSectionSpec[];
 }
 
-export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, selectedDocument,
+export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, selectedDocument, isChatOpen,
     onSelectNewDocument, onSelectDocument, onTabClick }) => {
   const [referenceDocument, setReferenceDocument] = useState<DocumentModelType>();
-  const [ tabIndex, setTabIndex ] = useState(0);
+  const [tabIndex, setTabIndex] = useState(0);
   const appConfigStore = useAppConfig();
   const problemStore = useProblemStore();
   const context = useUserContext();
@@ -69,6 +68,16 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
   const documentsPanelHeight = vh - headerOffset;
   const documentsPanelStyle = { height: documentsPanelHeight };
   const sectionClass = referenceDocument?.type === "learningLog" ? "learning-log" : "";
+  const handleTabClick = useCallback((title: string, type?: string) => {
+    setReferenceDocument(undefined);
+    ui.updateFocusDocument();
+    ui.setSelectedTile();
+    Logger.log(LogEventName.SHOW_TAB_SECTION, {
+      tab_section_name: title,
+      tab_section_type: type
+    });
+  },[ui]);
+
   useEffect(()=>{
     const selectedSection = tabSpec.tab === "supports" ? ENavTabSectionType.kTeacherSupports : undefined;
     if (selectedSection) {
@@ -79,25 +88,14 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[]);
+
   useEffect(()=>{
     if (reset) {
-      console.log("in reset:", tabSpec.label, reset);
       // setTimeout to avoid infinite render issues
       reset();
       setTimeout(() => handleTabClick(tabSpec.label));
     }
-  }, [reset]);
-
-
-  const handleTabClick = (title: string, type?: string) => {
-    setReferenceDocument(undefined);
-    ui.updateFocusDocument();
-    ui.setSelectedTile();
-    Logger.log(LogEventName.SHOW_TAB_SECTION, {
-      tab_section_name: title,
-      tab_section_type: type
-    });
-  };
+  }, [handleTabClick, reset, tabSpec.label]);
 
   const handleTabSelect = (tabidx: number) => {
     setTabIndex(tabidx);
@@ -168,7 +166,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
               ? handleDocumentDeleteClick
               : undefined;
             return (
-              <DocumentsTypeCollection
+              <DocumentCollectionByType
                 key={section.type}
                 tab={subTab.label}
                 section={section}
@@ -218,8 +216,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
   return (
     <div className="document-tab-content">
       <Tabs
-        // className={`document-tabs ${navTabSpec?.tab} ${isChatOpen ? "chat-open" : ""}`}
-        className={`document-tabs ${navTabSpec?.tab}`}
+        className={`document-tabs ${navTabSpec?.tab} ${isChatOpen ? "chat-open" : ""}`}
         forceRenderTabPanel={true}
         onSelect={handleTabSelect}
         selectedIndex={tabIndex}
