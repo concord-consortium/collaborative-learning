@@ -225,12 +225,12 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
       >
         <div className={`tab-header-row ${!hasSubTabs ? "no-sub-tabs" : ""}`}>
           <TabList className={`tab-list ${navTabSpec?.tab}`}>
-            {subTabs.map((subTab) => {
+            {subTabs.map((subTab, index) => {
               const sectionTitle = subTab.label.toLowerCase().replace(' ', '-');
               const type = subTab.sections[0].type;
               return (
                 <Tab className={`doc-tab ${navTabSpec?.tab} ${sectionTitle} ${type}`}
-                  key={`section-${sectionTitle}`}
+                  key={`section-${sectionTitle}_${index}`}
                   onClick={() => handleTabClick?.(subTab.label, type)}>
                   {subTab.label}
                 </Tab>
@@ -242,7 +242,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
           {subTabs.map((subTab, index) => {
             const sectionTitle = subTab.label.toLowerCase().replace(' ', '-');
             return (
-              <TabPanel key={`subtab-${subTab.label}`} data-test={`subtab-${sectionTitle}`}>
+              <TabPanel key={`subtab-${subTab.label}_${index}`} data-test={`subtab-${sectionTitle}`}>
                 { documentView && (index === tabIndex)
                   ? documentView
                   : renderDocumentBrowserView(subTab)
