@@ -8,7 +8,7 @@ import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import { useAppConfig, useClassStore, useProblemStore, useUserStore } from "../../hooks/use-stores";
 import { NavTabSectionModelType } from "../../models/view/nav-tabs";
 
-import "./tab-panel-documents-section.sass";
+import "./document-type-collection.sass";
 
 interface IProps {
   sectionDocument: DocumentModelType;

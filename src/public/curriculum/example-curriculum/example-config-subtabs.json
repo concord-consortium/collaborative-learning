@@ -77,14 +77,25 @@
             "dataTestHeader": "class-work-section-published",
             "dataTestItem": "class-work-list-items",
             "documentTypes": ["publication"],
-            "showStars": ["teacher"]
+            "showStars": ["teacher"],
+            "properties": ["!isTeacherDocument"]
           },
           {
             "title": "Workspaces",
             "type": "published-personal-documents",
             "dataTestHeader": "class-work-section-personal",
             "dataTestItem": "class-work-list-items",
-            "documentTypes": ["personalPublication"]
+            "documentTypes": ["personalPublication"],
+            "properties": ["!isTeacherDocument"]
+          },
+          {
+            "className": "section teacher published-documents",
+            "title": "Workspaces",
+            "type": "teacher-supports",
+            "dataTestHeader": "supports-section-teacher-supports",
+            "dataTestItem": "supports-list-items",
+            "documentTypes": ["publication", "personalPublication"],
+            "properties": ["isTeacherDocument", "!isDeleted"]
           },
           {
             "title": "Workspaces",

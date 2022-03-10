@@ -5,6 +5,7 @@ import { useAppConfig, useClassStore, useLocalDocuments, useUserStore } from "..
 import { AppConfigModelType } from "../../models/stores/app-config-model";
 import { DocumentsModelType } from "../../models/stores/documents";
 import { UserModelType } from "../../models/stores/user";
+import { ClassModelType } from "../../models/stores/class";
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
 import { isPublishedType, isUnpublishedType, PersonalDocument } from "../../models/document/document-types";
 import { ENavTabOrder, NavTabSectionModelType  } from "../../models/view/nav-tabs";
@@ -13,7 +14,7 @@ import { DocumentContextReact } from "../document/document-context";
 import { DecoratedDocumentThumbnailItem } from "./decorated-document-thumbnail-item";
 import NewDocumentIcon from "../../assets/icons/new/add.svg";
 
-import "./tab-panel-documents-section.sass";
+import "./document-type-collection.sass";
 
 interface IProps {
   tab: string;
@@ -41,7 +42,7 @@ function getNewDocumentLabel(section: NavTabSectionModelType , appConfigStore: A
 }
 
 function getSectionDocs(section: NavTabSectionModelType,
-  documents: DocumentsModelType, user: UserModelType, classStr: string) {
+  documents: DocumentsModelType, user: UserModelType, classStore: ClassModelType) {
   const publishedDocs: { [source: string]: DocumentModelType } = {};
   let sectDocs: DocumentModelType[] = [];
   (section.documentTypes || []).forEach(type => {
@@ -64,11 +65,14 @@ function getSectionDocs(section: NavTabSectionModelType,
               publishedDocs[source] = doc;
             }
           }
+          const teacher = classStore.getUserById(publishedDocs[source].uid)?.type === "teacher";
+          if (teacher) {
+            publishedDocs[source].setProperty("isTeacherDocument", "true");
+          }
         });
         sectDocs.push(...Object.values(publishedDocs));
     }
   });
-
   // Reverse the order to approximate a most-recently-used ordering.
   if (section.order === ENavTabOrder.kReverse) {
     sectDocs = sectDocs.reverse();
@@ -94,7 +98,7 @@ export const DocumentCollectionByType = observer(({ tab, section, index, numSect
     const isSinglePanel = numSections < 2;
     const tabName = tab?.toLowerCase().replace(' ', '-');
     const currentClass = classStore.name;
-    const sectionDocs: DocumentModelType[] = getSectionDocs(section, documents, user, currentClass);
+    const sectionDocs: DocumentModelType[] = getSectionDocs(section, documents, user, classStore);
 
     function handleNewDocumentClick() {
       onSelectNewDocument?.(section.documentTypes[0]);
@@ -106,8 +110,6 @@ export const DocumentCollectionByType = observer(({ tab, section, index, numSect
       <div className={tabPanelDocumentSectionClass}
             key={`${tab}-${section.type}`}
             data-test={`${section.dataTestHeader}-documents`}>
-        {sectionDocs[0]?.type === "supportPublication"
-          && <div><span className="teacher-supports-banner">Teacher Supports</span> </div>}
         <div className={listClass}>
           {showNewDocumentThumbnail &&
             <NewDocumentThumbnail label={newDocumentLabel} onClick={handleNewDocumentClick} />}
