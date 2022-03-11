@@ -110,6 +110,8 @@ export const DocumentCollectionByType = observer(({ tab, section, index, numSect
       <div className={tabPanelDocumentSectionClass}
             key={`${tab}-${section.type}`}
             data-test={`${section.dataTestHeader}-documents`}>
+        {sectionDocs[0]?.type === "supportPublication"
+          && <div><span className="teacher-supports-banner">Teacher Documents</span> </div>}
         <div className={listClass}>
           {showNewDocumentThumbnail &&
             <NewDocumentThumbnail label={newDocumentLabel} onClick={handleNewDocumentClick} />}
