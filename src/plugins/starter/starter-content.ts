@@ -14,7 +14,7 @@ export const StarterContentModel = ToolContentModel
     text: "Hello World",
   })
   .views(self => ({
-    isUserResizable() {
+    get isUserResizable() {
       return true;
     }
   }))
