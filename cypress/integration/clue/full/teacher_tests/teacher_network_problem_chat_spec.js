@@ -72,29 +72,30 @@ describe('Teachers can communicate back and forth in chat panel', () => {
     cy.clickProblemResourceTile('introduction');
     chatPanel.verifyCommentThreadContains("This is a teacher2 problem tile comment");
   });
+    //TODO: verify delete is disabled for now until work is merged to master, but keep the delete to clean up chat space
   it('verify teacher1 can only delete own comments', () => {
     cy.get(".user-name").contains("Tejal Teacher2").siblings("[data-testid=delete-message-button]").should("not.exist");
     cy.get(".user-name").contains("Tejal Teacher1").siblings("[data-testid=delete-message-button]").click();
     cy.get(".confirm-delete-alert button").contains("Delete").click();
-    chatPanel.getCommentFromThread().should("not.contain", "This is a teacher1 problem tile comment");
+    // chatPanel.getCommentFromThread().should("not.contain", "This is a teacher1 problem tile comment");
     cy.openProblemSection("Introduction");
     cy.get(".user-name").contains("Tejal Teacher2").siblings("[data-testid=delete-message-button]").should("not.exist");
     cy.get(".user-name").contains("Tejal Teacher1").siblings("[data-testid=delete-message-button]").click();
     cy.get(".confirm-delete-alert button").contains("Delete").click();
-    chatPanel.getCommentFromThread().should("not.contain", "This is a teacher1 problem document comment");
+    // chatPanel.getCommentFromThread().should("not.contain", "This is a teacher1 problem document comment");
   });
   it('verify teacher2 does not see teacher1 deleted comments', () => {
     chatPanel.openTeacherChat(portalUrl, clueTeacher2, reportUrl2);
     cy.openTopTab("problems");
     cy.openProblemSection("Introduction");
-    chatPanel.getCommentFromThread().should("not.contain", "This is a teacher1 problem document comment");
+    // chatPanel.getCommentFromThread().should("not.contain", "This is a teacher1 problem document comment");
     cy.get(".user-name").contains("Tejal Teacher2").siblings("[data-testid=delete-message-button]").click();
     cy.get(".confirm-delete-alert button").contains("Delete").click();
-    chatPanel.getCommentFromThread().should("not.contain", "This is a teacher2 problem document comment");
+    // chatPanel.getCommentFromThread().should("not.contain", "This is a teacher2 problem document comment");
     cy.clickProblemResourceTile('introduction');
-    chatPanel.getCommentFromThread().should("not.contain", "This is a teacher1 problem tile comment");
+    // chatPanel.getCommentFromThread().should("not.contain", "This is a teacher1 problem tile comment");
     cy.get(".user-name").contains("Tejal Teacher2").siblings("[data-testid=delete-message-button]").click();
     cy.get(".confirm-delete-alert button").contains("Delete").click();
-    chatPanel.getCommentFromThread().should("not.exist");
+    // chatPanel.getCommentFromThread().should("not.exist");
   });
 });
