@@ -8,6 +8,7 @@ import { nanoid } from "nanoid";
 import "./json-model";
 
 export const Container = (initialDocument: any) => {
+  const trees: Record<string, TreeAPI> = {};
 
   const getTreeFromId = (treeId: string) => {
     return trees[treeId];
@@ -79,8 +80,6 @@ export const Container = (initialDocument: any) => {
       return Promise.resolve();
     }
   };
-
-  const trees: Record<string, TreeAPI> = {};
 
   return {undoStore, documentStore, containerAPI, trees};
 };
