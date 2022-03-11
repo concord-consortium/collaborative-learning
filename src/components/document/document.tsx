@@ -62,7 +62,7 @@ const PublishButton = ({ onClick, dataTestName }: { onClick: () => void, dataTes
 const PublishSupportButton = ({ onClick }: { onClick: () => void }) => {
   return (
     <IconButton icon="publish" key="support" className="action icon-publish"
-                  onClickButton={onClick} title="Publish to Teacher Documents" />
+                  onClickButton={onClick} title="Publish to Class Work" />
   );
 };
 
