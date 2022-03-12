@@ -3,7 +3,7 @@ import { ToolContentModel } from "../../models/tools/tool-types";
 import { kStarterToolID } from "./starter-types";
 
 export function defaultStarterContent(): StarterContentModelType {
-  return StarterContentModel.create();
+  return StarterContentModel.create({text: "Hello World"});
 }
 
 
@@ -11,7 +11,7 @@ export const StarterContentModel = ToolContentModel
   .named("StarterTool")
   .props({
     type: types.optional(types.literal(kStarterToolID), kStarterToolID),
-    text: "Hello World",
+    text: "",
   })
   .views(self => ({
     get isUserResizable() {

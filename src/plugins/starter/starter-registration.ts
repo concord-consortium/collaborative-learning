@@ -5,11 +5,11 @@ import { StarterToolComponent } from "./starter-tool";
 import { defaultStarterContent, StarterContentModel } from "./starter-content";
 
 registerToolContentInfo({
-    id: kStarterToolID,
-    modelClass: StarterContentModel,
-    defaultContent: defaultStarterContent,
-    Component: StarterToolComponent,
-    defaultHeight: kStarterDefaultHeight,
-    toolTileClass: "starter-tool-tile",
-    Icon: StarterToolIcon
+  id: kStarterToolID,
+  modelClass: StarterContentModel,
+  defaultContent: defaultStarterContent,
+  Component: StarterToolComponent,
+  defaultHeight: kStarterDefaultHeight,
+  toolTileClass: "starter-tool-tile",
+  Icon: StarterToolIcon
 });

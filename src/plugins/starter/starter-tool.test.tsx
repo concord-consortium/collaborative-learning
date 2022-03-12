@@ -1,17 +1,17 @@
-import { render, waitFor } from "@testing-library/react";
+import { render } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import { IToolApi } from "../../components/tools/tool-api";
 import { ToolTileModel } from "../../models/tools/tool-tile";
-import { StarterContentModel } from "./starter-content";
+import { defaultStarterContent, StarterContentModel } from "./starter-content";
 import { StarterToolComponent } from "./starter-tool";
 
-// The starter tile needs tob e registered so the ToolTileModel.create
-// knows about it as a supported tile type
+// The starter tile needs to be registered so the ToolTileModel.create
+// knows it is a supported tile type
 import "./starter-registration";
-import userEvent from "@testing-library/user-event";
 
 describe("StarterToolComponent", () => {
-  const content = StarterContentModel.create();
+  const content = defaultStarterContent();
   const model = ToolTileModel.create({content});
 
   const defaultProps = {
@@ -21,25 +21,25 @@ describe("StarterToolComponent", () => {
     documentContent: null,
     isUserResizable: true,
     onResizeRow: (e: React.DragEvent<HTMLDivElement>): void => {
-        throw new Error("Function not implemented.");
+      throw new Error("Function not implemented.");
     },
     onSetCanAcceptDrop: (tileId?: string): void => {
-        throw new Error("Function not implemented.");
+      throw new Error("Function not implemented.");
     },
     onRequestTilesOfType: (tileType: string): { id: string; title?: string | undefined; }[] => {
-        throw new Error("Function not implemented.");
+      throw new Error("Function not implemented.");
     },
     onRequestUniqueTitle: (tileId: string): string | undefined => {
-        throw new Error("Function not implemented.");
+      throw new Error("Function not implemented.");
     },
     onRequestRowHeight: (tileId: string, height?: number, deltaHeight?: number): void => {
-        throw new Error("Function not implemented.");
+      throw new Error("Function not implemented.");
     },
     onRegisterToolApi: (toolApi: IToolApi, facet?: string): void => {
-        throw new Error("Function not implemented.");
+      throw new Error("Function not implemented.");
     },
     onUnregisterToolApi: (facet?: string): void => {
-        throw new Error("Function not implemented.");
+      throw new Error("Function not implemented.");
     }
   };
 
@@ -49,14 +49,14 @@ describe("StarterToolComponent", () => {
     expect(getByText("Hello World")).toBeInTheDocument();
   });
 
-  it("updates the text when the model changes", () => {
-    const {getByText} = 
+  it("updates the text when the model changes", async () => {
+    const {getByText, findByText} = 
       render(<StarterToolComponent  {...defaultProps} {...{model}}></StarterToolComponent>);
     expect(getByText("Hello World")).toBeInTheDocument();
 
     content.setText("New Text");
 
-    expect(getByText("New Text")).toBeInTheDocument();
+    expect(await findByText("New Text")).toBeInTheDocument();
   });
 
   it("updates the model when the user types", () => {
