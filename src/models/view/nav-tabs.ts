@@ -57,8 +57,13 @@ export const NavTabSectionModel =
       return user.type && (self.showStars.indexOf(user.type) !== -1);
     },
     showDeleteForUser(user: UserModelType) {
-      // allow teachers to delete supports
-      return (user.type === "teacher") && (self.type === ENavTabSectionType.kTeacherSupports);
+      // allow users to delete published document
+      const deletableTypes = [ENavTabSectionType.kPublishedPersonalDocuments,
+                              ENavTabSectionType.kPublishedProblemDocuments,
+                              ENavTabSectionType.kPublishedLearningLogs,
+                              ENavTabSectionType.kTeacherSupports,
+                             ];
+      return (deletableTypes.includes(self.type));
     },
   }));
 export type NavTabSectionSpec = SnapshotIn<typeof NavTabSectionModel>;
