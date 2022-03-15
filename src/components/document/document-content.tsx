@@ -223,7 +223,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const { content } = this.props;
     const toolApiInterface = this.context;
     const tileType = content?.getTile(tileId)?.content.type;
-    const titleBase = tileType && getToolContentInfoById(tileType)?.titleBase;
+    const titleBase = getToolContentInfoById(tileType)?.titleBase;
     const getTileTitle = (_tileId: string) => toolApiInterface?.getToolApi?.(_tileId)?.getTitle?.();
     return tileType && titleBase && content?.getUniqueTitle(tileType, titleBase, getTileTitle);
   };

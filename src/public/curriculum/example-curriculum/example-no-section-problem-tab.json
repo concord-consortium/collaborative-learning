@@ -37,7 +37,25 @@
         {
           "tab": "class-work",
           "label": "Class Work",
-          "sections": []
+          "sections": [
+            {
+              "className": "section problem published",
+              "title": "Workspaces",
+              "type": "published-problem-documents",
+              "dataTestHeader": "class-work-section-published",
+              "dataTestItem": "class-work-list-items",
+              "documentTypes": ["publication"],
+              "showStars": ["teacher"]
+            },
+            {
+              "className": "section personal published",
+              "title": "Workspaces",
+              "type": "published-personal-documents",
+              "dataTestHeader": "class-work-section-personal",
+              "dataTestItem": "class-work-list-items",
+              "documentTypes": ["personalPublication"]
+            }
+          ]
         }
       ]
     },
