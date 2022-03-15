@@ -66,10 +66,6 @@ function getSectionDocs(section: NavTabSectionModelType, documents: DocumentsMod
               publishedDocs[source] = doc;
             }
           }
-          const teacher = classStore.getUserById(publishedDocs[source].uid)?.type === "teacher";
-          if (teacher) {
-            publishedDocs[source].setProperty("isTeacherDocument", "true");
-          }
         });
         sectDocs.push(...Object.values(publishedDocs));
     }
