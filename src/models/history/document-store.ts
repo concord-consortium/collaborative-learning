@@ -28,12 +28,6 @@ export const CDocument = types
         history: types.array(HistoryEntry)
     });
 
-// TODO: since we are sharing the types with the undo store we should give them
-// more generic names.
-
-// TODO: it would be more efficient if the undo stack and this one were in the
-// same tree, and then the undo stack could just contain references to the
-// UndoEntries in this model. 
 export const DocumentStore = types
     .model("DocumentStore", {
         document: CDocument,
@@ -195,7 +189,7 @@ export const DocumentStore = types
 
         // This is asynchronous. We might as well use a flow so we don't have to 
         // create separate actions for each of the parts of this single action
-        const replayHistoryToTrees = flow(function* replayHistoryToTrees(treeMap: Record<string, TreeAPI> ) {
+        const replayHistoryToTrees = flow(function* replayHistoryToTrees(treeMap: Record<string, TreeAPI>, document: any ) {
             const getTreeFromId = (getEnv(self) as Environment).getTreeFromId;
             const trees = Object.values(treeMap);
 
@@ -270,7 +264,7 @@ export const DocumentStore = types
                 const finishCallId = nanoid();
                 self.startHistoryEntryCall(historyEntryId, finishCallId);
 
-                return tree.finishApplyingContainerPatches(historyEntryId, finishCallId);
+                return tree.finishApplyingContainerPatches(historyEntryId, finishCallId, document);
             });
             // I'm using a yield because it isn't clear from the docs if an flow MST action
             // can return a promise or not.

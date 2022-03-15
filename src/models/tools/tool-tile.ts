@@ -6,6 +6,8 @@ import { DisplayUserTypeEnum } from "../stores/user-types";
 import { uniqueId } from "../../utilities/js-utils";
 
 import { kPlaceholderToolID } from "./placeholder/placeholder-content";
+import { type } from "@testing-library/user-event/dist/type";
+import { SharedModelUnion } from "./shared-model";
 
 // generally negotiated with app, e.g. single column width for table
 export const kDefaultMinWidth = 60;
@@ -41,7 +43,8 @@ export const ToolTileModel = types
     // whether to restrict display to certain users
     display: DisplayUserTypeEnum,
     // e.g. "GeometryContentModel", "ImageContentModel", "TableContentModel", "TextContentModel", ...
-    content: ToolContentUnion
+    content: ToolContentUnion,
+    sharedModels: types.array(types.reference(SharedModelUnion)),
   })
   .views(self => ({
     // generally negotiated with tool, e.g. single column width for table

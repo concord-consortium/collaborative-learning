@@ -37,7 +37,7 @@ export const UndoStore = types
         // This is asynchronous. We might as well use a flow so we don't have to 
         // create separate actions for each of the parts of this single action
         const applyPatchesToTrees = 
-          flow(function* applyPatchesToTrees(entryToUndo: Instance<typeof HistoryEntry>, opType: HistoryOperation ) {
+          flow(function* applyPatchesToTrees(entryToUndo: Instance<typeof HistoryEntry>, opType: HistoryOperation, document: any ) {
             const getTreeFromId = (getEnv(self) as Environment).getTreeFromId;
             const treeEntries = entryToUndo.records;
 
@@ -91,7 +91,7 @@ export const UndoStore = types
                 const finishCallId = nanoid();
                 docStore.startHistoryEntryCall(historyEntryId, finishCallId);
 
-                return getTreeFromId(treeEntry.tree).finishApplyingContainerPatches(historyEntryId, finishCallId);
+                return getTreeFromId(treeEntry.tree).finishApplyingContainerPatches(historyEntryId, finishCallId, document);
             });
             yield Promise.all(finishPromises);
 
@@ -149,7 +149,10 @@ export const UndoStore = types
                 //
                 // FIXME: we aren't actually calling this as an action and we
                 // aren't waiting for it finish before returning
-                applyPatchesToTrees(entryToUndo, HistoryOperation.Undo);
+                //
+                // FIXME: we nee replace the last parameter with the document
+                // that is being modified
+                applyPatchesToTrees(entryToUndo, HistoryOperation.Undo, {});
 
                 self.undoIdx--;
             },
@@ -164,7 +167,10 @@ export const UndoStore = types
                 //
                 // FIXME: we aren't actually calling this as an action and we
                 // aren't waiting for it finish before returning
-                applyPatchesToTrees(entryToRedo, HistoryOperation.Redo);
+                //
+                // FIXME: we nee replace the last parameter with the document
+                // that is being modified
+                applyPatchesToTrees(entryToRedo, HistoryOperation.Redo, {});
     
                 self.undoIdx++;
             },        

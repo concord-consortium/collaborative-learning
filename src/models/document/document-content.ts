@@ -19,6 +19,7 @@ import { DisplayUserType } from "../stores/user-types";
 import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
 import { getParentWithTypeName } from "../../utilities/mst-utils";
 import { comma, StringBuilder } from "../../utilities/string-builder";
+import { SharedModelUnion } from "../tools/shared-model";
 
 export interface INewTileOptions {
   rowHeight?: number;
@@ -58,6 +59,7 @@ export const DocumentContentModel = types
     rowMap: types.map(TileRowModel),
     rowOrder: types.array(types.string),
     tileMap: types.map(ToolTileModel),
+    sharedModelMap: types.map(SharedModelUnion),
   })
   .preProcessSnapshot(snapshot => {
     return snapshot && (snapshot as any).tiles

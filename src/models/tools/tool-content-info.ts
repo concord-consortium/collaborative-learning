@@ -2,6 +2,7 @@ import { FunctionComponent, SVGProps } from "react";
 import { ToolContentModel, ToolContentModelType, ToolMetadataModel } from "./tool-types";
 import { IToolTileProps } from "../../components/tools/tool-tile";
 import { AppConfigModelType } from "../stores/app-config-model";
+import { SharedModel } from "./shared-model";
 
 export interface IDMap {
   [id: string]: string;
@@ -79,4 +80,26 @@ export interface ITileExportOptions {
 export interface IDocumentExportOptions extends ITileExportOptions {
   includeTileIds?: boolean;
   appendComma?: boolean;
+}
+
+export interface ISharedModelInfo {
+  type: string;
+  modelClass: typeof SharedModel;
+}
+
+interface ISharedModelInfoMap {
+  [type: string]: ISharedModelInfo;
+}
+const gSharedModelInfoMap: ISharedModelInfoMap = {};
+
+export function registerSharedModelInfo(sharedModelInfo: ISharedModelInfo) {
+  gSharedModelInfoMap[sharedModelInfo.type] = sharedModelInfo;
+}
+
+export function getSharedModelClasses() {
+  return Object.values(gSharedModelInfoMap).map(info => info.modelClass);
+}
+
+export function getSharedModelInfoByType(type: string) {
+  return type ? gSharedModelInfoMap[type] : undefined;
 }

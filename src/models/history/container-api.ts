@@ -63,6 +63,12 @@ export interface ContainerAPI {
      * In order to differentiate between the initiating call and the second call
      * the callId parameter is used. 
      *
+     * The reason why we don't just use addTreePatchRecord to start the history
+     * entry is because some actions don't have any patches in their own tree
+     * but they change a shared model owned by another tree. In that case we
+     * wan't to record the initiating tree and action so there is more info for
+     * the researcher.
+     * 
      * @param historyEntryId should be a unique id created by the tree. 
      * 
      * @param callId should be another unique id. The container uses this to

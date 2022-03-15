@@ -35,7 +35,7 @@ export interface TreeAPI {
      * that the tree sent to the container with addHistoryEntry and
      * addTreePatchRecord. If the tree did this right, it should only include
      * patches that are modifying the tree's state, it shouldn't include patches
-     * that are for the shared model views that are mounted in the tree.
+     * that are for the shared models that are owned by a different tree.
      *
      * @param historyEntryId the id of the history entry that will record all of
      * these changes to the tree. This is *not* the historyEntryId that is the
@@ -48,7 +48,7 @@ export interface TreeAPI {
      * change back to the container with addTreePatchRecord.
      *
      * @param patchesToApply an array of JSON patches to be applied to the
-     * tile's tree. It will be called after startApplyingContainerPatches. The
+     * tree. It will be called after startApplyingContainerPatches. The
      * patches should be applied in order starting from the first in the array.
      */
     applyContainerPatches(historyEntryId: string, callId: string, patchesToApply: readonly IJsonPatch[]): Promise<void>;
@@ -73,7 +73,7 @@ export interface TreeAPI {
      * has handled this call. 
      * 
      */
-    finishApplyingContainerPatches(historyEntryId: string, callId: string): Promise<void>;
+    finishApplyingContainerPatches(historyEntryId: string, callId: string, document: any): Promise<void>;
 
     /**
      * TODO: need to bring over updated documentation from prototype 
