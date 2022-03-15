@@ -5,7 +5,6 @@ import { useAppConfig, useClassStore, useLocalDocuments, useUserStore } from "..
 import { AppConfigModelType } from "../../models/stores/app-config-model";
 import { DocumentsModelType } from "../../models/stores/documents";
 import { UserModelType } from "../../models/stores/user";
-import { ClassModelType } from "../../models/stores/class";
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
 import { isPublishedType, isUnpublishedType, PersonalDocument } from "../../models/document/document-types";
 import { ENavTab, ENavTabOrder, NavTabSectionModelType  } from "../../models/view/nav-tabs";

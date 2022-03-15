@@ -55,7 +55,7 @@ const DownloadButton = ({ onClick }: { onClick: SVGClickHandler }) => {
 const PublishButton = ({ onClick, dataTestName }: { onClick: () => void, dataTestName?: string }) => {
   return (
     <IconButton icon="publish" key="publish" className="action icon-publish" dataTestName={dataTestName}
-                onClickButton={onClick} title="Publish To Workspace" />
+                onClickButton={onClick} title="Publish Workspace" />
   );
 };
 
