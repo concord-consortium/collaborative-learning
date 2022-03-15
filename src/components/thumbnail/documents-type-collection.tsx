@@ -5,7 +5,6 @@ import { useAppConfig, useClassStore, useLocalDocuments, useUserStore } from "..
 import { AppConfigModelType } from "../../models/stores/app-config-model";
 import { DocumentsModelType } from "../../models/stores/documents";
 import { UserModelType } from "../../models/stores/user";
-import { ClassModelType } from "../../models/stores/class";
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
 import { isPublishedType, isUnpublishedType, PersonalDocument } from "../../models/document/document-types";
 import { ENavTab, ENavTabOrder, NavTabSectionModelType  } from "../../models/view/nav-tabs";
@@ -43,7 +42,7 @@ function getNewDocumentLabel(section: NavTabSectionModelType , appConfigStore: A
 }
 
 function getSectionDocs(section: NavTabSectionModelType, documents: DocumentsModelType, user: UserModelType,
-  classStore: ClassModelType, isTeacherDocument: (document: DocumentModelType) => void) {
+  isTeacherDocument: (document: DocumentModelType) => boolean) {
   const publishedDocs: { [source: string]: DocumentModelType } = {};
   let sectDocs: DocumentModelType[] = [];
   (section.documentTypes || []).forEach(type => {
@@ -76,7 +75,8 @@ function getSectionDocs(section: NavTabSectionModelType, documents: DocumentsMod
   }
   // filter by additional properties
   if (section.properties && section.properties.length) {
-    sectDocs = sectDocs.filter(doc => doc.matchProperties(section.properties, isTeacherDocument(doc)));
+    sectDocs = sectDocs.filter(doc => doc.matchProperties(section.properties,
+                                                          { isTeacherDocument: isTeacherDocument(doc) }));
   }
   return sectDocs;
 }
@@ -92,11 +92,10 @@ export const DocumentCollectionByType = observer(({ topTab, tab, section, index,
   const newDocumentLabel = getNewDocumentLabel(section, appConfigStore);
   const isSinglePanel = numSections < 2;
   const tabName = tab?.toLowerCase().replace(' ', '-');
-  const currentClass = classStore.name;
   const isTeacherDocument = useCallback((document: DocumentModelType) => {
       return classStore.isTeacher(document.uid);
     },[classStore]);
-  const sectionDocs: DocumentModelType[] = getSectionDocs(section, documents, user, classStore, isTeacherDocument);
+  const sectionDocs: DocumentModelType[] = getSectionDocs(section, documents, user, isTeacherDocument);
   const isTopPanel = index === 0 && numSections > 1;
   const isBottomPanel = index > 0 && index === numSections - 1;
 
