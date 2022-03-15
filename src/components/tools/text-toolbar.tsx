@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { Editor } from "@concord-consortium/slate-editor";
 import { IFloatingToolbarProps, useFloatingToolbarLocation } from "./hooks/use-floating-toolbar-location";
+import { useSettingFromStores } from "../../hooks/use-stores";
 import { TextToolbarButton } from "./text-toolbar-button";
 import { IRegisterToolApiProps } from "./tool-tile";
 import { isMac } from "../../utilities/browser";
@@ -14,7 +15,6 @@ import NumberedListToolIcon from "../../assets/icons/text/numbered-list-text-ico
 import BulletedListToolIcon from "../../assets/icons/text/bulleted-list-text-icon.svg";
 
 import "./text-toolbar.sass";
-import { useSettingFromStores } from "../../hooks/use-stores";
 
 interface IButtonDef {
   iconName: string;  // icon name for this button.
