@@ -6,9 +6,9 @@ import { getToolContentModels, getToolContentInfoById } from "./tool-content-inf
 // the tool-tile.ts module is imported. This import happens in many places right now.
 // If we switch to dynamic loading of tools we will have to see if late runs after this
 // loading has completed.
-export const ToolContentUnion = types.late(() => {
+export const ToolContentUnion = types.late<typeof ToolContentModel>(() => {
   const contentModels = getToolContentModels();
-  return types.union({ dispatcher: toolFactory }, ...contentModels);
+  return types.union({ dispatcher: toolFactory }, ...contentModels) as typeof ToolContentModel;
 });
 
 export const kUnknownToolID = "Unknown";
@@ -58,12 +58,12 @@ export const _private: IPrivate = {
 };
 
 export function isToolType(type: string) {
-  return !!(type && getToolContentInfoById(type));
+  return !!getToolContentInfoById(type);
 }
 
 export function toolFactory(snapshot: any) {
   const toolType: string | undefined = snapshot?.type;
-  return toolType && getToolContentInfoById(toolType)?.modelClass || UnknownContentModel;
+  return getToolContentInfoById(toolType)?.modelClass || UnknownContentModel;
 }
 
 export function findMetadata(type: string, id: string) {

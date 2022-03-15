@@ -5,7 +5,7 @@ import { findMetadata, ToolContentUnion } from "./tool-types";
 import { DisplayUserTypeEnum } from "../stores/user-types";
 import { uniqueId } from "../../utilities/js-utils";
 
-import { kPlaceholderToolID } from "./placeholder/placeholder-content";
+import { kPlaceholderToolID, PlaceholderContentModelType } from "./placeholder/placeholder-content";
 
 // generally negotiated with app, e.g. single column width for table
 export const kDefaultMinWidth = 60;
@@ -61,7 +61,8 @@ export const ToolTileModel = types
       return self.content.type === kPlaceholderToolID;
     },
     get placeholderSectionId() {
-      return (self.content.type === kPlaceholderToolID) ? self.content.sectionId : undefined;
+      return (self.content.type === kPlaceholderToolID) ? 
+        (self.content as PlaceholderContentModelType).sectionId : undefined;
     },
     exportJson(options?: ITileExportOptions): string | undefined {
       return (self.content as any).exportJson?.(options);
