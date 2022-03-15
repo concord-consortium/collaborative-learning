@@ -11,13 +11,24 @@ $section-padding: 6px
   padding: $section-padding
   &.top-panel
     padding: 4px $section-padding 0 $section-padding
-    
-  .teacher-supports-banner
-    position: relative
-    top: -3px
-    border: solid 1px $charcoal-light-1
-    box-sizing: border-box
-    padding: 4px
+
+  .document-divider
+    width: 100%
+    border-top: solid 1px $charcoal-light-1
+    height: 20px
+    display: flex
+    justify-content: center
+    .document-divider-label
+      display: flex
+      position: relative
+      top: -10px
+      justify-content: center
+      align-self: center
+      align-items: center
+      background-color: white
+      border: solid 1px $charcoal-light-1
+      width: 130px
+      height: 26px
 
   .document-divider
     width: 100%
