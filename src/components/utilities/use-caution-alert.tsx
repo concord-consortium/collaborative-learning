@@ -9,8 +9,10 @@ interface IProps {
   title?: string;
   content: string | React.FC<any>;
   confirmLabel?: string;
+  optionLabel?: string;
   cancelLabel?: string;
   onConfirm: () => void;
+  onOption?: () => void
   onClose?: () => void;
 }
 
@@ -22,13 +24,23 @@ const TextContent: React.FC<ITextProps> = ({ content }) => {
 };
 
 export const useCautionAlert = ({
-  className, title, content, confirmLabel, cancelLabel, onConfirm, onClose
+  className, title, content, optionLabel, confirmLabel, cancelLabel, onOption, onConfirm, onClose
 }: IProps) => {
 
   const Content = typeof content === "string"
                     ? TextContent
                     : content;
   const contentProps = typeof content === "string" ? { content } : {};
+  const buttons = optionLabel
+                    ? [
+                        { label: optionLabel, onClick: onOption},
+                        { label: confirmLabel || "OK", isDefault: true, onClick: onConfirm },
+                        { label: cancelLabel || "Cancel" }
+                      ]
+                    : [
+                      { label: cancelLabel || "Cancel" },
+                        { label: confirmLabel || "OK", isDefault: true, onClick: onConfirm }
+                      ];
 
   const [showAlert, hideAlert] = useCustomModal({
     className: `error-alert ${className || ""}`,
@@ -36,12 +48,9 @@ export const useCautionAlert = ({
     Icon: CautionSvg,
     Content,
     contentProps,
-    buttons: [
-      { label: cancelLabel || "Cancel" },
-      { label: confirmLabel || "OK", isDefault: true, onClick: onConfirm }
-    ],
+    buttons,
     onClose
-  }, [onClose, onConfirm]);
+  }, [onClose, onConfirm, onOption]);
 
   return [showAlert, hideAlert];
 };

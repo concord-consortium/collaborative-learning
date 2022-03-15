@@ -2,7 +2,8 @@ import { inject, observer } from "mobx-react";
 import { autorun, IReactionDisposer, reaction } from "mobx";
 import React from "react";
 import FileSaver from "file-saver";
-
+import { useCautionAlert } from "../utilities/use-caution-alert";
+import { useUserStore } from "../../hooks/use-stores";
 import { DocumentFileMenu } from "./document-file-menu";
 import { MyWorkDocumentOrBrowser } from "./document-or-browser";
 import { BaseComponent, IBaseProps } from "../base";
@@ -52,19 +53,48 @@ const DownloadButton = ({ onClick }: { onClick: SVGClickHandler }) => {
   );
 };
 
-const PublishButton = ({ onClick, dataTestName }: { onClick: () => void, dataTestName?: string }) => {
-  return (
-    <IconButton icon="publish" key="publish" className="action icon-publish" dataTestName={dataTestName}
-                onClickButton={onClick} title="Publish Workspace" />
+  const PublishButton = ({document, onPublishDocument, onPublishSupport}:
+    { document: DocumentModelType,
+      onPublishDocument?: (document: DocumentModelType) => void,
+      onPublishSupport?: (document: DocumentModelType) => void } ) => {
+    const user = useUserStore();
+    const AlertContent = () => {
+      return <p>Do you want to publish to just this class or to all your classes?</p>;
+    };
+    const [showAlert] = useCautionAlert({
+      title: "Delete Tiles",
+      content: AlertContent,
+      confirmLabel: "Just this class",
+      optionLabel: "All my classes",
+      onConfirm: () => handlePublishDocument(),
+      onOption: () => handlePublishSupport()
+    });
+    const handlePublishButtonClick = () => {
+      if (user.isTeacher) {
+        showAlert();
+      } else {
+        handlePublishDocument();
+      }
+    };
+    const handlePublishSupport = () => {
+      onPublishSupport && onPublishSupport(document);
+    };
+    const handlePublishDocument = () => {
+      onPublishDocument && onPublishDocument(document);
+    };
+
+    return (
+      <IconButton icon="publish" key="publish" className="action icon-publish" dataTestName="publish-icon"
+                  onClickButton={handlePublishButtonClick} title="Publish Workspace" />
   );
 };
 
-const PublishSupportButton = ({ onClick }: { onClick: () => void }) => {
-  return (
-    <IconButton icon="publish" key="support" className="action icon-publish"
-                  onClickButton={onClick} title="Publish Workspace" />
-  );
-};
+// const PublishSupportButton = ({ onClick }: { onClick: () => void }) => {
+//   return (
+//     <IconButton icon="publish" key="support" className="action icon-publish"
+//                   onClickButton={onClick} title="Publish to Class Work" />
+//   );
+// };
 
 const EditButton = ({ onClick }: { onClick: () => void }) => {
   return (
@@ -213,7 +243,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private renderProblemTitleBar(type: string, hideButtons?: boolean) {
     const {problem, appMode, clipboard, user: { isTeacher }} = this.stores;
     const problemTitle = problem.title;
-    const {document, workspace} = this.props;
+    const {document, workspace, onPublishDocument, onPublishSupport} = this.props;
     const isShared = document.visibility === "public";
     const show4up = !workspace.comparisonVisible && !isTeacher;
     const downloadButton = (appMode !== "authed") && clipboard.hasJsonTileContent()
@@ -227,11 +257,14 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
               onOpenDocument={this.handleOpenDocumentClick}
               onCopyDocument={this.handleCopyDocumentClick}
               isDeleteDisabled={true} />
-            {(isTeacher && type !== "planning")
-              ? <PublishSupportButton onClick={this.handlePublishSupport} />
-              : this.showPublishButton(document) &&
-                  <PublishButton key="publish" onClick={this.handlePublishDocument} />
-            }
+            {this.showPublishButton(document) &&
+              <PublishButton document={document}
+                             onPublishDocument={onPublishDocument}
+                             onPublishSupport={onPublishSupport}
+              />}
+            {/* {(isTeacher && type !== "planning") &&
+              this.renderPublishToClassOrClass()
+            } */}
           </div>
         }
         <div className="title" data-test="document-title">
@@ -346,7 +379,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderOtherDocumentTitleBar(type: string, hideButtons?: boolean) {
-    const { document, workspace } = this.props;
+    const { document, workspace, onPublishDocument, onPublishSupport } = this.props;
     const { appConfig, user: { isTeacher }, documents, user } = this.stores;
     const otherDocuments = documents.byTypeForUser(document.type, user.id);
     const countNotDeleted = otherDocuments.reduce((prev, doc) => doc.getProperty("isDeleted") ? prev : prev + 1, 0);
@@ -363,11 +396,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
               onCopyDocument={this.handleCopyDocumentClick}
               isDeleteDisabled={countNotDeleted < 1}
               onDeleteDocument={this.handleDeleteDocumentClick}/>
-            {!hideButtons && isTeacher
-                ? <PublishSupportButton key="otherDocPub" onClick={this.handlePublishSupport} />
-                : this.showPublishButton(document)
-                    && <PublishButton dataTestName="other-doc-publish-icon" onClick={this.handlePublishDocument} />
-            }
+            {this.showPublishButton(document) &&
+              <PublishButton  document={document}
+                              onPublishDocument={onPublishDocument}
+                              onPublishSupport={onPublishSupport}
+              />}
           </div>
         }
         {hasDisplayId && <div className="display-id" style={{opacity: 0}}>{displayId}</div>}
@@ -473,15 +506,35 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       });
   };
 
-  private handlePublishSupport = () => {
-    const { document, onPublishSupport } = this.props;
-    onPublishSupport && onPublishSupport(document);
-  };
+  // private AlertContent = () => {
+  //   return <p>Do you want to publish to just this class or to all your classes?</p>;
+  // };
+  // private [showAlert] = useCautionAlert({
+  //   title: "Delete Tiles",
+  //   content: this.AlertContent,
+  //   confirmLabel: "Just this class",
+  //   optionLabel: "All my classes",
+  //   onConfirm: () => this.handlePublishDocument,
+  //   onOption: () => this.handlePublishSupport
+  // });
+  // private handlePublishButtonClick = () => {
+  //   const { user: { isTeacher } } = this.stores;
+  //   if (isTeacher) {
+  //     this.showAlert();
+  //   } else {
+  //     this.handlePublishSupport();
+  //   }
+  // }
 
-  private handlePublishDocument = () => {
-    const { document, onPublishDocument } = this.props;
-    onPublishDocument && onPublishDocument(document);
-  };
+  // private handlePublishSupport = () => {
+  //   const { document, onPublishSupport } = this.props;
+  //   onPublishSupport && onPublishSupport(document);
+  // };
+
+  // private handlePublishDocument = () => {
+  //   const { document, onPublishDocument } = this.props;
+  //   onPublishDocument && onPublishDocument(document);
+  // };
 
   private isPrimary() {
     return this.props.side === "primary";

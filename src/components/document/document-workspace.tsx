@@ -403,20 +403,26 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   };
 
   private handlePublishDocument = (document: DocumentModelType) => {
-    const { appConfig, db, ui } = this.stores;
+    const { appConfig, db, ui, user } = this.stores;
     const docTypeString = document.getLabel(appConfig, 1);
     const docTypeStringL = document.getLabel(appConfig, 1, true);
-    ui.confirm(`Do you want to publish your ${docTypeStringL}?`, `Publish ${docTypeString}`)
+    const publishToDB = () => {
+      const dbPublishDocumentFunc = document.type === ProblemDocument
+                                      ? () => db.publishProblemDocument(document)
+                                      : () => db.publishOtherDocument(document);
+      dbPublishDocumentFunc()
+        .then(() => ui.alert(`Your ${docTypeStringL} was published.`, `${docTypeString} Published`))
+        .catch((reason) => ui.alert(`Your document failed to publish: ${reason}`, "Error"));
+    };
+    if (user.type === "teacher") { publishToDB(); }
+    else {
+      ui.confirm(`Do you want to publish your ${docTypeStringL}?`, `Publish ${docTypeString}`)
       .then((confirm: boolean) => {
         if (confirm) {
-          const dbPublishDocumentFunc = document.type === ProblemDocument
-                                          ? () => db.publishProblemDocument(document)
-                                          : () => db.publishOtherDocument(document);
-          dbPublishDocumentFunc()
-            .then(() => ui.alert(`Your ${docTypeStringL} was published.`, `${docTypeString} Published`))
-            .catch((reason) => ui.alert(`Your document failed to publish: ${reason}`, "Error"));
+          publishToDB();
         }
       });
+    }
   };
 
   private getPrimaryDocument(documentKey?: string) {
