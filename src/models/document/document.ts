@@ -91,7 +91,7 @@ export const DocumentModel = types
     }
   }))
   .views(self => ({
-    matchProperties(properties?: string[]) {
+    matchProperties(properties?: string[], options?: void) {
       return properties?.every(p => {
         const match = /(!)?(.*)/.exec(p);
         const property = match && match[2];
@@ -100,8 +100,11 @@ export const DocumentModel = types
         if (property === "starred") {
           return self.isStarred === wantsProperty;
         }
+        if (property === "isTeacherDocument" && !!options) {
+          return wantsProperty;
+        } 
         if (property) {
-          return !!self.getProperty(property) === wantsProperty;
+            return !!self.getProperty(property) === wantsProperty;
         }
         // ignore empty strings, etc.
         return true;

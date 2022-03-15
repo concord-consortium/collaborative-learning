@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 import { useAppConfig, useClassStore, useLocalDocuments, useUserStore } from "../../hooks/use-stores";
@@ -41,8 +41,8 @@ function getNewDocumentLabel(section: NavTabSectionModelType , appConfigStore: A
   return "New " + (documentLabel || "Workspace");
 }
 
-function getSectionDocs(section: NavTabSectionModelType,
-  documents: DocumentsModelType, user: UserModelType, classStore: ClassModelType) {
+function getSectionDocs(section: NavTabSectionModelType, documents: DocumentsModelType, user: UserModelType,
+  classStore: ClassModelType, isTeacherDocument: (document: DocumentModelType) => void) {
   const publishedDocs: { [source: string]: DocumentModelType } = {};
   let sectDocs: DocumentModelType[] = [];
   (section.documentTypes || []).forEach(type => {
@@ -65,10 +65,6 @@ function getSectionDocs(section: NavTabSectionModelType,
               publishedDocs[source] = doc;
             }
           }
-          const teacher = classStore.getUserById(publishedDocs[source].uid)?.type === "teacher";
-          if (teacher) {
-            publishedDocs[source].setProperty("isTeacherDocument", "true");
-          }
         });
         sectDocs.push(...Object.values(publishedDocs));
     }
@@ -79,7 +75,7 @@ function getSectionDocs(section: NavTabSectionModelType,
   }
   // filter by additional properties
   if (section.properties && section.properties.length) {
-    sectDocs = sectDocs.filter(doc => doc.matchProperties(section.properties));
+    sectDocs = sectDocs.filter(doc => doc.matchProperties(section.properties, isTeacherDocument(doc)));
   }
   return sectDocs;
 }
@@ -98,7 +94,11 @@ export const DocumentCollectionByType = observer(({ tab, section, index, numSect
     const isSinglePanel = numSections < 2;
     const tabName = tab?.toLowerCase().replace(' ', '-');
     const currentClass = classStore.name;
-    const sectionDocs: DocumentModelType[] = getSectionDocs(section, documents, user, classStore);
+    const isTeacherDocument = useCallback((document: DocumentModelType) => {
+        return classStore.isTeacher(document.uid);
+      },[classStore]);
+    const sectionDocs: DocumentModelType[] = getSectionDocs(section, documents, user, classStore, isTeacherDocument);
+
 
     function handleNewDocumentClick() {
       onSelectNewDocument?.(section.documentTypes[0]);
@@ -110,7 +110,7 @@ export const DocumentCollectionByType = observer(({ tab, section, index, numSect
       <div className={tabPanelDocumentSectionClass}
             key={`${tab}-${section.type}`}
             data-test={`${section.dataTestHeader}-documents`}>
-        {sectionDocs[0]?.type === "supportPublication"
+        {classStore.isTeacher(sectionDocs[0]?.uid)
           && <div><span className="teacher-supports-banner">Teacher Documents</span> </div>}
         <div className={listClass}>
           {showNewDocumentThumbnail &&
