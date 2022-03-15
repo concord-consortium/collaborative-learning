@@ -11,6 +11,8 @@ const path = require('path');
 const rollbarSnippetPath = './node_modules/rollbar/dist/rollbar.snippet.js';
 const rollbarSnippet = fs.readFileSync(path.join(__dirname, rollbarSnippetPath), { encoding: 'utf8' }).trim();
 
+const cacheGroupOptions = { minSize:0, minChunks: 1, reuseExistingChunk: true, enforce: true };
+
 module.exports = (env, argv) => {
   const devMode = argv.mode !== 'production';
 
@@ -167,21 +169,35 @@ module.exports = (env, argv) => {
         }
       ]
     },
+    optimization: {
+      splitChunks: {
+        chunks: 'all',
+        name : false,
+        filename: "[name].[chunkhash:8].js",
+        // patterned after https://github.com/webpack/webpack/issues/6916#issuecomment-378171500
+        cacheGroups:{
+          // @concord-consortium modules
+          concord: { test:/concord-consortium/, name: "concord", priority: 10, ...cacheGroupOptions },
+          // node_modules
+          vendor: { test:/node_modules/, name: "vendor", priority: 0, ...cacheGroupOptions },
+          // local modules
+          default: { name: "main", ...cacheGroupOptions }
+        }
+      }
+    },
     resolve: {
       alias: {
         // cf. https://github.com/facebook/react/issues/20235#issuecomment-732205073
         'react/jsx-runtime': require.resolve('react/jsx-runtime')
       },
+      fallback: { crypto: false },
       extensions: [ '.ts', '.tsx', '.js', '.jsx' ]
     },
-    stats: {
-      // suppress "export not found" warnings about re-exported types
-      warningsFilter: /export .* was not found in/
-    },
+    ignoreWarnings: [/export .* was not found in/],
     plugins: [
       new ESLintPlugin(),
       new MiniCssExtractPlugin({
-        filename: devMode ? 'index.css' : 'index.[contenthash].css'
+        filename: devMode ? '[name].css' : '[name].[chunkhash:8].css'
       }),
       new HtmlWebpackPlugin({
         filename: 'index.html',
