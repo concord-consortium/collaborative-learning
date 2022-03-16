@@ -149,7 +149,7 @@ describe("TableContent", () => {
     expect(changeRowValues(change2, 2)).toEqual([3, "y-3"]);
   });
 
-  it.only("can import multi-column authored data with invalid expressions", () => {
+  it("can import multi-column authored data with invalid expressions", () => {
     const kTableTitle = "Table Title";
     const importData: TableContentTableImport = {
             type: "Table",
