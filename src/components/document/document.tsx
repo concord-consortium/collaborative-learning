@@ -61,11 +61,8 @@ const PublishButton = ({ onClick, dataTestName }: { onClick: () => void, dataTes
 
 const PublishSupportButton = ({ onClick }: { onClick: () => void }) => {
   return (
-    <>
-      <IconButton icon="publish-support" key="support" className="action icon-support"
-                  onClickButton={onClick} title="publish to supports" />
-      <div className="support-badge"/>
-    </>
+    <IconButton icon="publish" key="support" className="action icon-publish"
+                  onClickButton={onClick} title="Publish Workspace" />
   );
 };
 
@@ -230,8 +227,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
               onOpenDocument={this.handleOpenDocumentClick}
               onCopyDocument={this.handleCopyDocumentClick}
               isDeleteDisabled={true} />
-            {this.showPublishButton(document) &&
-              <PublishButton key="publish" onClick={this.handlePublishDocument} />}
+            {(isTeacher && type !== "planning")
+              ? <PublishSupportButton onClick={this.handlePublishSupport} />
+              : this.showPublishButton(document) &&
+                  <PublishButton key="publish" onClick={this.handlePublishDocument} />
+            }
           </div>
         }
         <div className="title" data-test="document-title">
@@ -240,8 +240,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         {!hideButtons &&
           <div className="actions right" data-test="document-titlebar-actions">
             {downloadButton}
-            {(isTeacher && type !== "planning") &&
-              <PublishSupportButton onClick={this.handlePublishSupport} />}
             {show4up && this.renderMode()}
             {!isTeacher &&
               <ShareButton isShared={isShared} onClick={this.handleToggleVisibility} />}
@@ -365,8 +363,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
               onCopyDocument={this.handleCopyDocumentClick}
               isDeleteDisabled={countNotDeleted < 1}
               onDeleteDocument={this.handleDeleteDocumentClick}/>
-            {!hideButtons && this.showPublishButton(document) &&
-              <PublishButton dataTestName="other-doc-publish-icon" onClick={this.handlePublishDocument} />}
+            {!hideButtons && isTeacher
+                ? <PublishSupportButton key="otherDocPub" onClick={this.handlePublishSupport} />
+                : this.showPublishButton(document)
+                    && <PublishButton dataTestName="other-doc-publish-icon" onClick={this.handlePublishDocument} />
+            }
           </div>
         }
         {hasDisplayId && <div className="display-id" style={{opacity: 0}}>{displayId}</div>}
@@ -383,7 +384,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         }
         {hasDisplayId && <div className="display-id">{displayId}</div>}
         <div className="actions">
-          {!hideButtons && isTeacher && <PublishSupportButton key="otherDocPub" onClick={this.handlePublishSupport} />}
           {(!hideButtons || supportStackedTwoUpView) &&
             <div className="actions">
               {supportStackedTwoUpView && isPrimary &&

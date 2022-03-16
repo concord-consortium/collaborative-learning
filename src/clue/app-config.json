@@ -123,7 +123,8 @@
               "dataTestHeader": "class-work-section-published",
               "dataTestItem": "class-work-list-items",
               "documentTypes": ["publication"],
-              "showStars": ["teacher"]
+              "showStars": ["teacher"],
+              "properties": ["!isTeacherDocument"]
             },
             {
               "className": "section personal published",
@@ -131,7 +132,26 @@
               "type": "published-personal-documents",
               "dataTestHeader": "class-work-section-personal",
               "dataTestItem": "class-work-list-items",
-              "documentTypes": ["personalPublication"]
+              "documentTypes": ["personalPublication"],
+              "properties": ["!isTeacherDocument"]
+            },
+            {
+              "className": "section teacher published-documents",
+              "title": "Workspaces",
+              "type": "teacher-supports",
+              "dataTestHeader": "supports-section-teacher-supports",
+              "dataTestItem": "supports-list-items",
+              "documentTypes": ["publication", "personalPublication"],
+              "properties": ["isTeacherDocument", "!isDeleted"]
+            },
+            {
+              "className": "section teacher supports",
+              "title": "Workspaces",
+              "type": "teacher-supports",
+              "dataTestHeader": "supports-section-teacher-supports",
+              "dataTestItem": "supports-list-items",
+              "documentTypes": ["supportPublication"],
+              "properties": ["teacherSupport", "!isDeleted"]
             },
             {
               "className": "section learning-log published",
@@ -149,29 +169,6 @@
               "documentTypes": ["publication"],
               "properties": ["starred"],
               "showStars": ["teacher"]
-            }
-          ]
-        },
-        {
-          "tab": "supports",
-          "label": "Supports",
-          "sections": [
-            {
-              "title": "Problem Supports",
-              "type": "curricular-supports",
-              "dataTestHeader": "supports-section-jit",
-              "dataTestItem": "supports-list-items",
-              "documentTypes": ["supportPublication"],
-              "order": "original",
-              "properties": ["curricularSupport"]
-            },
-            {
-              "title": "Teacher Supports",
-              "type": "teacher-supports",
-              "dataTestHeader": "supports-section-teacher-supports",
-              "dataTestItem": "supports-list-items",
-              "documentTypes": ["supportPublication"],
-              "properties": ["teacherSupport", "!isDeleted"]
             }
           ]
         }

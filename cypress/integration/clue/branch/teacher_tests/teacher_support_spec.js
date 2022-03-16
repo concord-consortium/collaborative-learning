@@ -21,13 +21,13 @@ import ResourcesPanel from "../../../../support/elements/clue/ResourcesPanel";
     });
 
     describe('verify supports functionality', function() {
-        it('will verify publish of support appears in Support>Teacher Workspace',function(){
+        it('will verify publish of support appears in Class Work>Workspaces',function(){
             clueCanvas.addTile('table');
-            clueCanvas.publishSupportDoc();
+            clueCanvas.publishTeacherDoc();
             cy.get(".collapsed-resources-tab.my-work").click();
-            cy.openTopTab("supports");
-            cy.openSection('supports','teacher-supports');
-            resourcesPanel.getCanvasItemTitle('supports','teacher-supports').should('contain',title);
+            cy.openTopTab("class-work");
+            cy.openSection('class-work','workspaces');
+            resourcesPanel.getCanvasItemTitle('class-work','workspaces').should('contain',title);
         });
     });
 
@@ -38,10 +38,9 @@ import ResourcesPanel from "../../../../support/elements/clue/ResourcesPanel";
               cy.visit(queryParams);
               cy.waitForLoad();
               cy.openResourceTabs();
-              cy.openTopTab("supports");
-              cy.get('.support-badge').should('be.visible');
-              cy.openSection('supports', 'teacher-supports');
-              cy.getCanvasItemTitle('teacher-supports', title).should('be.visible');
+              cy.openTopTab("class-work");
+              cy.openSection('class-work', 'workspaces');
+              cy.getCanvasItemTitle('workspaces', title).should('be.visible');
             });
     });
 

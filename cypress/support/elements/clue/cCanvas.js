@@ -20,11 +20,11 @@ class ClueCanvas {
         return cy.get('.primary-workspace [data-test=document-title]');
     }
 
-    getPublishSupport() {
-        return cy.get('[data-test=publish-support-icon]');
+    getPublishTeacherDocument() {
+        return cy.get('[data-test=publish-icon]');
     }
-    publishSupportDoc() {
-        this.getPublishSupport().click();
+    publishTeacherDoc() {
+        this.getPublishTeacherDocument().click();
         dialog.getDialogTitle().should('be.visible').and('contain', 'Support Published');
         dialog.getDialogOKButton().click();
     }
