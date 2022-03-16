@@ -15,5 +15,15 @@ class Dialog{// popup dialog box
         return cy.get('[data-test=dialog-buttons] #cancelButton');
     }
 
+    getModalTitle(){
+      return cy.get('.modal-title');
+    }
+    getModalButton(){
+      return cy.get('.modal-footer button');
+    }
+    getModalContent(){
+      return cy.get('.modal-content');
+    }
+
 }
 export default Dialog;
