@@ -172,7 +172,8 @@
     "xhr-mock": "^2.5.1"
   },
   "dependencies": {
-    "@blueprintjs/core": "^3.52.0",
+    "@blueprintjs/core": "^3.53.0",
+    "@concord-consortium/diagram-view": "^0.0.9",
     "@concord-consortium/jsxgraph": "^0.99.8-cc.1",
     "@concord-consortium/react-components": "^0.7.1",
     "@concord-consortium/slate-editor": "^0.7.3",
@@ -211,6 +212,7 @@
     "slate-plain-serializer": "^0.7.13",
     "superagent": "^6.1.0",
     "ts-polyfill": "^3.8.2",
+    "tslib": "^2.3.1",
     "uuid": "^8.3.2",
     "whatwg-fetch": "^3.6.2"
   }

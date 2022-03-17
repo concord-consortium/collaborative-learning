@@ -167,17 +167,35 @@ module.exports = (env, argv) => {
         }
       ]
     },
+    optimization: {
+      splitChunks: {
+        chunks: "all",
+        cacheGroups: {
+          vendor: {
+            name: "vendor",
+            filename: "[name].[chunkhash].js",
+            test: /[\\/]node_modules[\\/]/,
+            priority: -10,
+            reuseExistingChunk: true,
+          },
+          default: {
+            name: "index",
+            minChunks: 2,
+            priority: -20,
+            reuseExistingChunk: true,
+          },
+        },
+      }
+    },
     resolve: {
       alias: {
         // cf. https://github.com/facebook/react/issues/20235#issuecomment-732205073
         'react/jsx-runtime': require.resolve('react/jsx-runtime')
       },
+      fallback: { crypto: false },
       extensions: [ '.ts', '.tsx', '.js', '.jsx' ]
     },
-    stats: {
-      // suppress "export not found" warnings about re-exported types
-      warningsFilter: /export .* was not found in/
-    },
+    ignoreWarnings: [/export .* was not found in/],
     plugins: [
       new ESLintPlugin(),
       new MiniCssExtractPlugin({
