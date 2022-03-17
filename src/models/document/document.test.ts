@@ -100,7 +100,8 @@ describe("document model", () => {
       content: {
         rowMap: {},
         rowOrder: [],
-        tileMap: {}
+        tileMap: {},
+        sharedModelMap: {}
       },
       changeCount: 0
     });

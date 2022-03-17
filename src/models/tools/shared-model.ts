@@ -41,6 +41,7 @@ export function sharedModelFactory(snapshot: any) {
 
 export const SharedModelUnion = types.late(() => {
   const sharedModels = getSharedModelClasses();
+  console.log("late shared models", sharedModels);
   return types.union({ dispatcher: sharedModelFactory }, ...sharedModels);
 });
 

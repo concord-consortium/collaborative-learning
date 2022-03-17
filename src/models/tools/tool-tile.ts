@@ -6,7 +6,7 @@ import { DisplayUserTypeEnum } from "../stores/user-types";
 import { uniqueId } from "../../utilities/js-utils";
 
 import { kPlaceholderToolID,PlaceholderContentModelType } from "./placeholder/placeholder-content";
-import { SharedModelUnion } from "./shared-model";
+import { SharedModelType, SharedModelUnion } from "./shared-model";
 
 // generally negotiated with app, e.g. single column width for table
 export const kDefaultMinWidth = 60;
@@ -85,6 +85,15 @@ export const ToolTileModel = types
     setDisabledFeatures(disabled: string[]) {
       const metadata: any = findMetadata(self.content.type, self.id);
       metadata && metadata.setDisabledFeatures && metadata.setDisabledFeatures(disabled);
+    }    
+  }))
+  .actions(self => ({
+    addSharedModel(sharedModel: SharedModelType) {
+      self.sharedModels.push(sharedModel);
+    },
+    setSharedModel(sharedModel: SharedModelType) {
+      self.sharedModels.clear();
+      self.sharedModels.push(sharedModel);
     }
   }));
 

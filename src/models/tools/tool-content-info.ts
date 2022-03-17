@@ -95,6 +95,7 @@ interface ISharedModelInfoMap {
 const gSharedModelInfoMap: ISharedModelInfoMap = {};
 
 export function registerSharedModelInfo(sharedModelInfo: ISharedModelInfo) {
+  console.log("registerSharedModelInfo", sharedModelInfo);
   gSharedModelInfoMap[sharedModelInfo.type] = sharedModelInfo;
 }
 

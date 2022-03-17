@@ -1,5 +1,5 @@
 import { cloneDeep, each } from "lodash";
-import { types, getSnapshot, Instance, SnapshotIn } from "mobx-state-tree";
+import { types, getSnapshot, Instance, SnapshotIn, getType } from "mobx-state-tree";
 import { PlaceholderContentModel } from "../tools/placeholder/placeholder-content";
 import { kTextToolID } from "../tools/text/text-content";
 import { getToolContentInfoById, IDocumentExportOptions } from "../tools/tool-content-info";
@@ -19,7 +19,7 @@ import { DisplayUserType } from "../stores/user-types";
 import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
 import { getParentWithTypeName } from "../../utilities/mst-utils";
 import { comma, StringBuilder } from "../../utilities/string-builder";
-import { SharedModelUnion } from "../tools/shared-model";
+import { SharedModel, SharedModelType, SharedModelUnion } from "../tools/shared-model";
 
 export interface INewTileOptions {
   rowHeight?: number;
@@ -205,6 +205,14 @@ export const DocumentContentModel = types
         snapshot.rowOrder = snapshot.rowOrder.map(rowId => idMap[rowId]);
 
         return snapshot;
+      },
+      getFirstSharedModelByType(modelType: typeof SharedModelUnion ) {
+        for (const model of self.sharedModelMap.values()) {
+          if (getType(model) === modelType) {
+            return model;
+          }          
+        }
+        return undefined;
       }
     };
   })
@@ -849,6 +857,11 @@ export const DocumentContentModel = types
         }
       });
       return results;
+    }
+  }))
+  .actions(self => ({
+    addSharedModel(sharedModel: SharedModelType) {
+      self.sharedModelMap.put(sharedModel);
     }
   }));
 
