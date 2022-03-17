@@ -139,6 +139,10 @@ export class ConfigurationManager implements UnitConfiguration {
     return this.getProp<UC["toolbar"]>("toolbar");
   }
 
+  get tools() {
+    return this.getProp<UC["tools"]>("tools");
+  }
+
   get placeholderText() {
     return this.getProp<UC["placeholderText"]>("placeholderText");
   }

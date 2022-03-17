@@ -12,6 +12,8 @@ export type ToolbarModelSnapshot = SnapshotIn<typeof ToolbarModel>;
 export interface ProblemConfiguration {
   disabledFeatures: string[];
   toolbar: SnapshotIn<typeof ToolbarModel>;
+  // required tools that aren't in the toolbar can be specified here
+  tools?: string[];
   defaultDocumentTemplate?: IAuthoredDocumentContent;
   placeholderText: string;
   stamps: SnapshotIn<typeof StampModel>[];

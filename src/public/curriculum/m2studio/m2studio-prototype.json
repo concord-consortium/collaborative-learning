@@ -134,7 +134,8 @@
                 ]
               ]
             },
-            "toolbar": []
+            "toolbar": [],
+            "tools": ["Diagram", "Drawing", "Text"]
           },
           "supports": []
         },
@@ -156,7 +157,8 @@
             "defaultDocumentTemplate": {
               "tiles": [{ "content": { "type": "Diagram" } }]
             },
-            "toolbar": []
+            "toolbar": [],
+            "tools": ["Diagram"]
           },
           "supports": []
         }
