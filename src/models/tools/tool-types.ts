@@ -1,11 +1,8 @@
 import { Instance, types } from "mobx-state-tree";
 import { getToolContentModels, getToolContentInfoById } from "./tool-content-info";
 
-// It isn't clear when 'late' is run. Currently it works.  It is running
-// after all of the content models have been registered. That registration happens when
-// the tool-tile.ts module is imported. This import happens in many places right now.
-// If we switch to dynamic loading of tools we will have to see if late runs after this
-// loading has completed.
+// It appears that `late()` runs the first time the union is actually required,
+// which should be after all necessary tiles are registered.
 export const ToolContentUnion = types.late(() => {
   const contentModels = getToolContentModels();
   return types.union({ dispatcher: toolFactory }, ...contentModels);

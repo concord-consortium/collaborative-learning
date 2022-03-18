@@ -3,7 +3,7 @@ import { getSnapshot, types, Instance } from "mobx-state-tree";
 import { ITileExportOptions, IDefaultContentOptions } from "../../models/tools/tool-content-info";
 import { ToolContentModel } from "../../models/tools/tool-types";
 import { kDiagramToolID } from "./diagram-types";
-import { DQRoot } from "./src/models/dq-root";
+import { DQRoot } from "@concord-consortium/diagram-view";
 
 // This is only used directly by tests
 export function defaultDiagramContent(options?: IDefaultContentOptions) {

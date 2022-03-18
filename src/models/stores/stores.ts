@@ -1,5 +1,5 @@
 import { AppConfigModelType, AppConfigModel } from "./app-config-model";
-import { getGuideJson, getUnitJson, UnitModel, UnitModelType } from "../curriculum/unit";
+import { createUnitWithoutContent, getGuideJson, getUnitJson, UnitModel, UnitModelType } from "../curriculum/unit";
 import { InvestigationModelType, InvestigationModel } from "../curriculum/investigation";
 import { ProblemModel, ProblemModelType } from "../curriculum/problem";
 import { UIModel, UIModelType } from "./ui";
@@ -7,6 +7,7 @@ import { UserModel, UserModelType } from "./user";
 import { GroupsModel, GroupsModelType } from "./groups";
 import { ClassModel, ClassModelType } from "./class";
 import { DB } from "../../lib/db";
+import { registerTools } from "../../register-tools";
 import { DemoModelType, DemoModel } from "./demo";
 import { SupportsModel, SupportsModelType } from "./supports";
 import { DocumentsModelType, DocumentsModel, createDocumentsModelWithRequiredDocuments } from "./documents";
@@ -106,11 +107,24 @@ export function getProblemPath(stores: IBaseStores) {
 
 export const setUnitAndProblem = async (stores: IStores, unitId: string | undefined, problemOrdinal?: string) => {
   const unitJson = await getUnitJson(unitId, stores.appConfig);
-  const unit = UnitModel.create(unitJson);
-  const {investigation, problem} = unit.getProblem(problemOrdinal || stores.appConfig.defaultProblemOrdinal);
 
-  stores.appConfig.setConfigs([unit.config || {}, investigation?.config || {}, problem?.config || {}]);
-  stores.unit = unit;
+  // read the unit content, but don't instantiate section contents (DocumentModels) yet
+  const unit = createUnitWithoutContent(unitJson);
+
+  const _problemOrdinal = problemOrdinal || stores.appConfig.defaultProblemOrdinal;
+  const { investigation: _investigation, problem: _problem } = unit.getProblem(_problemOrdinal);
+
+  stores.appConfig.setConfigs([unit.config || {}, _investigation?.config || {}, _problem?.config || {}]);
+
+  // load/initialize the necessary tools
+  const { toolbar = [], tools = [] } = stores.appConfig;
+  const unitToolIds = new Set([...toolbar.map(tool => tool.id), ...tools]);
+  await registerTools([...unitToolIds]);
+
+  // read the unit content with full contents now that we have tools
+  stores.unit = UnitModel.create(unitJson);
+  const {investigation, problem} = stores.unit.getProblem(_problemOrdinal);
+
   stores.documents.setAppConfig(stores.appConfig);
   if (investigation && problem) {
     stores.investigation = investigation;

@@ -2,7 +2,8 @@ import { isToolType } from "./tool-types";
 import { kTextToolID } from "./text/text-content";
 
 // This is needed so isToolType knows about the text tool
-import "../../register-tools";
+import { registerTools } from "../../register-tools";
+registerTools([kTextToolID]);
 
 describe("ToolTypes", () => {
 

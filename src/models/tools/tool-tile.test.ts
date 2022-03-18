@@ -3,26 +3,28 @@ import { kDefaultMinWidth, ToolTileModel } from "./tool-tile";
 import { kUnknownToolID, UnknownContentModelType } from "./tool-types";
 import { getToolIds, getToolContentInfoById } from "./tool-content-info";
 
+// Define the built in tool ids explicitly as strings.
+// Strings are used because importing the tool id constant could trigger a
+// registration of the tool. The tools will all be registered due to the
+// registerTools below.
+// The tools are listed instead of just using getToolIds (see below) in order to
+// make sure all of these built in tools get registered correctly as expected.
+const builtInToolIds = [
+  "Unknown",
+  "Placeholder",
+  "Table",
+  "Geometry",
+  "Image",
+  "Text",
+  "Drawing",
+  "Diagram"
+];
+
 // This is needed so we can check which tools are registered below
-import "../../register-tools";
+import { registerTools } from "../../register-tools";
+registerTools(builtInToolIds);
 
 describe("ToolTileModel", () => {
-
-  // Define the built in tool ids explicitly as strings.
-  // Strings are used because importing the tool id constant could trigger a
-  // registration of the tool. The tools should all be registered due to the
-  // tool-tile import above.
-  // The tools are listed instead of just using getToolIds (see below) in order to
-  // make sure all of these built in tools get registered correctly as expected.
-  const builtInToolIds = [
-    "Unknown",
-    "Placeholder",
-    "Table",
-    "Geometry",
-    "Image",
-    "Text",
-    "Drawing"
-  ];
 
   // Add any dynamically registered tools to the list
   // currently there are no dynamically registered tools, but in the future hopefully
