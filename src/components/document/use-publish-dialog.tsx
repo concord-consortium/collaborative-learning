@@ -61,9 +61,9 @@ export const usePublishDialog = (document: DocumentModelType) => {
 
   const buttons = user.type === "teacher"
                     ? [
-                        { label: "All my classes", onClick: handlePublishSupport },
-                        { label: "Just this class", isDefault: true, onClick: handlePublishDocument },
-                        { label: "Cancel" }
+                        { label: "Cancel" },
+                        { label: "This Class", isDefault: true, onClick: handlePublishDocument },
+                        { label: "All Classes", onClick: handlePublishSupport }
                       ]
                     : [
                         { label: "Cancel" },
