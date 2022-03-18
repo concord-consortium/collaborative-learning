@@ -18,7 +18,7 @@ export const usePublishDialog = (document: DocumentModelType) => {
 
   const getProblemBaseTitle = (problemTitle: string) => {
     const match = /[\d.]*[\s]*(.+)/.exec(problemTitle);
-    return match && match[1] ? match[1] : problemTitle;
+    return match?.[1] || problemTitle;
   };
 
     const getSupportDocumentBaseCaption = () => {
@@ -52,7 +52,7 @@ export const usePublishDialog = (document: DocumentModelType) => {
                                                 ? "Publish Learning Log"
                                                 : "Publish Workspace";
 
-  const TextContent: React.FC = () => {
+  const TextContent = () => {
     const content = user.type === "teacher"
                       ? "Do you want to publish to just this class or to all your classes?"
                       : `Do you want to publish your ${docTypeStringL}?`;

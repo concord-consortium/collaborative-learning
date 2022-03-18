@@ -208,7 +208,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private renderProblemTitleBar(type: string, hideButtons?: boolean) {
     const {problem, appMode, clipboard, user: { isTeacher }} = this.stores;
     const problemTitle = problem.title;
-    const {document, workspace } = this.props;
+    const { document, workspace } = this.props;
     const isShared = document.visibility === "public";
     const show4up = !workspace.comparisonVisible && !isTeacher;
     const downloadButton = (appMode !== "authed") && clipboard.hasJsonTileContent()
