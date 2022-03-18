@@ -9,7 +9,6 @@ import { StudentGroupView } from "../document/student-group-view";
 import { ProblemTabContent } from "./problem-tab-content";
 import { SectionDocumentOrBrowser } from "./section-document-or-browser";
 import { FocusDocumentTracker } from "./focus-document-tracker";
-import { SupportBadge } from "./support-badge";
 // import { NewCommentsBadge } from "./new-comments-badge";
 import { ChatPanel } from "../chat/chat-panel";
 import ChatIcon from "../../assets/chat-icon.svg";
@@ -39,7 +38,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
   public render() {
     const { tabs, isResourceExpanded } = this.props;
     const { ui: { activeNavTab, dividerPosition, focusDocument, showChatPanel, selectedTileIds },
-            user, supports } = this.stores;
+            user } = this.stores;
     const selectedTabIndex = tabs?.findIndex(t => t.tab === activeNavTab);
     const resizePanelWidth = 4;
     const collapseTabWidth = 44;
@@ -67,7 +66,6 @@ export class NavTabPanel extends BaseComponent<IProps> {
                     return (
                       <React.Fragment key={tabSpec.tab}>
                         <Tab className={tabClass}>{tabSpec.label}</Tab>
-                        {(tabSpec.tab === "supports") && <SupportBadge user={user} supports={supports} /> }
                       </React.Fragment>
                     );
                   })

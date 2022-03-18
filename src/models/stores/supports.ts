@@ -9,9 +9,8 @@ import { DB } from "../../lib/db";
 import { IDocumentProperties } from "../../lib/db-types";
 import { Logger, LogEventName } from "../../lib/logger";
 import { DocumentModel, DocumentModelType } from "../document/document";
-import {
-  DocumentContentModel, DocumentContentSnapshotType, IAuthoredDocumentContent
-} from "../document/document-content";
+import { DocumentContentModel, DocumentContentSnapshotType } from "../document/document-content";
+import { IAuthoredDocumentContent } from "../document/document-content-import";
 import { SupportPublication } from "../document/document-types";
 import { DocumentsModelType } from "./documents";
 import { safeJsonParse } from "../../utilities/js-utils";

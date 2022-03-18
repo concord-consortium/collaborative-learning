@@ -159,7 +159,12 @@ describe('Test nav panel tabs', function () {
     describe('Test supports area', function () {
       it('verify support tabs', function () {
         cy.openTopTab("supports");
+        // cy.get(".support-badge").should("be.visible");
         cy.get(".doc-tab.supports").should("have.length", 2);
+        cy.get(".doc-tab.supports.teacher-supports").click();
+        // clicking on a teacher support should update the unread supports badge
+        // cy.get("[data-test=teacher-supports-list-items]").last().click();
+        // cy.get(".support-badge").should("not.exist");
       });
     });
   });
@@ -195,7 +200,7 @@ describe.only('Nav panel tab configs', function () {
   it('Problem Tabs with no sub tabs', function () {
     const exampleProblemSubTabTitles = ["First Section", "Second Section", "Third Section"];
     const exampleMyWorkSubTabTitles = ["Workspaces", "Starred"];
-    const exampleClassWorkSubTabTitles = ["Problem Workspaces", "Extra Workspaces", "Starred"];
+    const exampleClassWorkSubTabTitles = ["Workspaces", "Starred"];
 
     cy.visit(`${baseQueryParam}&unit=example-config-subtabs`);
     cy.waitForLoad();
@@ -212,7 +217,7 @@ describe.only('Nav panel tab configs', function () {
     });
     cy.openTopTab("class-work");
     cy.get(".document-tabs .tab-list .doc-tab.class-work").each(($tab, index, $tabList) => {
-      expect($tabList).to.have.lengthOf(3);
+      expect($tabList).to.have.lengthOf(2);
       expect($tab.text()).to.contain(exampleClassWorkSubTabTitles[index]);
     });
   });

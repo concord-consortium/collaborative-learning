@@ -36,10 +36,6 @@ export class DBSupportsListener extends BaseListener {
         .where("classes", "array-contains", user.classHash)
         .onSnapshot(snapshot => this.handleMulticlassSupports(snapshot));
 
-    this.lastSupportViewTimestampRef = this.db.firebase.getLastSupportViewTimestampRef();
-    this.debugLogHandler("#start", "adding", "on value", this.lastSupportViewTimestampRef);
-    this.lastSupportViewTimestampRef.on("value", this.handleLastSupportViewTimestampRef);
-
     this.lastStickyNoteViewTimestampRef = this.db.firebase.getLastStickyNoteViewTimestampRef();
     this.debugLogHandler("#start", "adding", "on value", this.lastStickyNoteViewTimestampRef);
     this.lastStickyNoteViewTimestampRef.on("value", this.handleLastStickyNoteViewTimestampRef);
@@ -50,10 +46,6 @@ export class DBSupportsListener extends BaseListener {
       this.debugLogHandlers("#stop", "removing", ["child_changed", "child_added"], this.supportsRef);
       this.supportsRef.off("child_changed", this.onChildChanged);
       this.supportsRef.off("child_added", this.onChildAdded);
-    }
-    if (this.lastSupportViewTimestampRef) {
-      this.debugLogHandler("#stop", "removing", "on value", this.lastSupportViewTimestampRef);
-      this.lastSupportViewTimestampRef.off("value", this.handleLastSupportViewTimestampRef);
     }
     if (this.lastStickyNoteViewTimestampRef) {
       this.debugLogHandler("#stop", "removing", "on value", this.lastStickyNoteViewTimestampRef);
@@ -109,7 +101,7 @@ export class DBSupportsListener extends BaseListener {
               // teachers sync their support document properties to Firebase to track isDeleted
               const {audience, sectionTarget, key} = teacherSupport;
               const path = this.db.firebase.getSupportsPath(user, audience, sectionTarget, key);
-              this.db.listeners.syncDocumentProperties(document, "firebase", path);
+              this.db.listeners.syncSupportDocumentProperties(document, "firebase", path);
             }
           }
         }
@@ -160,7 +152,7 @@ export class DBSupportsListener extends BaseListener {
           const teacherSupport = support as TeacherSupportModelType;
           if (teacherSupport.uid === user.id) {
             // teachers sync their support document properties to Firebase to track isDeleted
-            this.db.listeners.syncDocumentProperties(document, "firestore");
+            this.db.listeners.syncSupportDocumentProperties(document, "firestore");
           }
         }
       }
@@ -187,12 +179,6 @@ export class DBSupportsListener extends BaseListener {
       deleted: dbSupport.deleted || !!dbSupport.properties?.isDeleted
     });
   }
-
-  private handleLastSupportViewTimestampRef = (snapshot: firebase.database.DataSnapshot) => {
-    const val = snapshot.val() || undefined;
-    this.debugLogSnapshot("#handleLastSupportViewTimestampRef", snapshot);
-    this.db.stores.user.setLastSupportViewTimestamp(val);
-  };
 
   private handleLastStickyNoteViewTimestampRef = (snapshot: firebase.database.DataSnapshot) => {
     const val = snapshot.val() || undefined;

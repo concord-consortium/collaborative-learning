@@ -4,7 +4,8 @@ import { DocumentComponent, WorkspaceSide } from "../../components/document/docu
 import { GroupVirtualDocumentComponent } from "../../components/document/group-virtual-document";
 import { BaseComponent, IBaseProps } from "../../components/base";
 import { DocumentModelType } from "../../models/document/document";
-import { createDefaultSectionedContent, DocumentContentModelType } from "../../models/document/document-content";
+import { DocumentContentModelType } from "../../models/document/document-content";
+import { createDefaultSectionedContent } from "../../models/document/document-content-import";
 import {
   DocumentDragKey, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
 } from "../../models/document/document-types";
@@ -93,9 +94,9 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   private renderDocuments() {
-    const {appConfig, documents, ui, groups} = this.stores;
+    const { appMode, appConfig: { toolbar }, documents, ui, groups } = this.stores;
     const { problemWorkspace } = ui;
-    const { comparisonDocumentKey, hidePrimaryForCompare, comparisonVisible} = problemWorkspace;
+    const { comparisonDocumentKey, hidePrimaryForCompare, comparisonVisible } = problemWorkspace;
     const showPrimary = !hidePrimaryForCompare;
     const primaryDocument = this.getPrimaryDocument(problemWorkspace.primaryDocumentKey);
     const comparisonDocument = comparisonDocumentKey
@@ -103,8 +104,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
 
     const groupVirtualDocument = comparisonDocumentKey
       && groups.virtualDocumentForGroup(comparisonDocumentKey);
-
-    const toolbar = appConfig.toolbar;
 
     if (!primaryDocument) {
       return this.renderDocument("single-workspace", "primary");
@@ -123,8 +122,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
             onNewDocument={this.handleNewDocument}
             onCopyDocument={this.handleCopyDocument}
             onDeleteDocument={this.handleDeleteDocument}
-            onPublishSupport={this.handlePublishSupport}
-            onPublishDocument={this.handlePublishDocument}
             toolbar={toolbar}
             side="comparison"
             readOnly={true}
@@ -138,8 +135,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         onNewDocument={this.handleNewDocument}
         onCopyDocument={this.handleCopyDocument}
         onDeleteDocument={this.handleDeleteDocument}
-        onPublishSupport={this.handlePublishSupport}
-        onPublishDocument={this.handlePublishDocument}
+        onAdminDestroyDocument={appMode === "dev" ? this.handleAdminDestroyDocument : undefined}
         toolbar={toolbar}
         side="primary"
       />;
@@ -369,6 +365,21 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     });
   };
 
+  private handleAdminDestroyDocument = (document: DocumentModelType) => {
+    const { appConfig, db, ui } = this.stores;
+    const docTypeString = document.getLabel(appConfig, 1);
+    const docTypeStringL = document.getLabel(appConfig, 1, true);
+    const documentString = `${document.type} ${docTypeStringL} (${document.title || ""})`;
+    ui.confirm(`Destroy this ${documentString} from the database and reload the page?`,
+                `Destroy ${docTypeString}`)
+    .then((confirmDelete: boolean) => {
+      if (confirmDelete) {
+        db.destroyFirebaseDocument(document);
+        window.location.reload();
+      }
+    });
+  };
+
   private handleDeleteOpenPrimaryDocument = async () => {
     const { appConfig: { defaultDocumentType, defaultDocumentContent },
             db, ui: { problemWorkspace } } = this.stores;
@@ -376,47 +387,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     if (defaultDocument) {
       problemWorkspace.setPrimaryDocument(defaultDocument);
     }
-  };
-
-  private getProblemBaseTitle(title: string) {
-    const match = /[\d.]*[\s]*(.+)/.exec(title);
-    return match && match[1] ? match[1] : title;
-  }
-
-  private getSupportDocumentBaseCaption(document: DocumentModelType) {
-    return document.type === ProblemDocument
-            ? this.getProblemBaseTitle(this.stores.problem.title)
-            : document.title;
-  }
-
-  private handlePublishSupport = (document: DocumentModelType) => {
-    const { db, problemPath, ui, user } = this.stores;
-    const caption = this.getSupportDocumentBaseCaption(document) || "Untitled";
-    // TODO: Disable publish button while publishing
-    db.publishDocumentAsSupport(document, caption)
-      .then(() => {
-        const classes = user.classHashesForProblemPath(problemPath);
-        const classWord = classes.length === 1 ? "class" : "classes";
-        ui.alert(`Your support was published to ${classes.length} ${classWord}.`, "Support Published");
-      })
-      .catch((reason) => ui.alert(`Your support failed to publish: ${reason}`, "Error"));
-  };
-
-  private handlePublishDocument = (document: DocumentModelType) => {
-    const { appConfig, db, ui } = this.stores;
-    const docTypeString = document.getLabel(appConfig, 1);
-    const docTypeStringL = document.getLabel(appConfig, 1, true);
-    ui.confirm(`Do you want to publish your ${docTypeStringL}?`, `Publish ${docTypeString}`)
-      .then((confirm: boolean) => {
-        if (confirm) {
-          const dbPublishDocumentFunc = document.type === ProblemDocument
-                                          ? () => db.publishProblemDocument(document)
-                                          : () => db.publishOtherDocument(document);
-          dbPublishDocumentFunc()
-            .then(() => ui.alert(`Your ${docTypeStringL} was published.`, `${docTypeString} Published`))
-            .catch((reason) => ui.alert(`Your document failed to publish: ${reason}`, "Error"));
-        }
-      });
   };
 
   private getPrimaryDocument(documentKey?: string) {

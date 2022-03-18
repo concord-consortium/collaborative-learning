@@ -20,14 +20,25 @@ class ClueCanvas {
         return cy.get('.primary-workspace [data-test=document-title]');
     }
 
-    getPublishSupport() {
-        return cy.get('[data-test=publish-support-icon]');
+    getPublishTeacherDocument() {
+        return cy.get('[data-test=publish-icon]');
     }
-    publishSupportDoc() {
-        this.getPublishSupport().click();
-        dialog.getDialogTitle().should('be.visible').and('contain', 'Support Published');
+    publishTeacherDoc() {
+        this.getPublishTeacherDocument().click();
+        dialog.getModalTitle().should('be.visible').and('contain', 'Publish');
+        dialog.getModalButton().contains("Just this class").click();
+        dialog.getDialogTitle().should('exist').contains('Published');
         dialog.getDialogOKButton().click();
+        dialog.getDialogTitle().should('not.exist');
     }
+    publishTeacherDocToMultipleClasses() {
+      this.getPublishTeacherDocument().click();
+      dialog.getModalTitle().should('be.visible').and('contain', 'Publish');
+      dialog.getModalButton().contains("All my classes").click();
+      dialog.getDialogTitle().should('exist').contains('Published');
+      dialog.getDialogOKButton().click();
+      dialog.getDialogTitle().should('not.exist');
+  }
 
     getSingleWorkspace() {
         return cy.get('.primary-workspace');

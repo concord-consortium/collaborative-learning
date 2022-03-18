@@ -39,44 +39,6 @@ const classInfo2 = clueTeacher2.firstname + ' ' + clueTeacher2.lastname + ' / CL
 const planningDoc = 'MSA 1.4 Walkathon Money: Planning';
 
 describe('Teachers can communicate back and forth in chat panel', () => {
-  it("verify teacher1 can add comments in Problem tab documents and tiles", ()=> {
-    chatPanel.openTeacherChat(portalUrl, clueTeacher1, reportUrl1);
-    cy.openTopTab("problems");
-    cy.openProblemSection("Introduction");
-
-    // Teacher 1 document comment
-    chatPanel.verifyProblemCommentClass();
-    chatPanel.addCommentAndVerify("This is a teacher1 document comment");
-    // Teacher 1 tile comment
-    cy.clickProblemResourceTile('introduction');
-    chatPanel.addCommentAndVerify("This is a teacher1 tile comment");
-  });
-  it("verify teacher2 can view teacher1's comments and add more comments in Problem tab", () => {
-    chatPanel.openTeacherChat(portalUrl, clueTeacher2, reportUrl2);
-    cy.openTopTab("problems");
-    cy.openProblemSection("Introduction");
-
-    // Teacher 2 document comment
-    chatPanel.verifyProblemCommentClass();
-    chatPanel.verifyCommentThreadContains("This is a teacher1 document comment");
-    chatPanel.addCommentAndVerify("This is a teacher2 document comment");
-    // Teacher 2 tile comment
-    cy.clickProblemResourceTile('introduction');
-    chatPanel.verifyCommentThreadContains("This is a teacher1 tile comment");
-    chatPanel.addCommentAndVerify("This is a teacher2 tile comment");
-  });
-  it("verify teacher1 can view teacher2's comments in Problem tab", () => {
-    chatPanel.openTeacherChat(portalUrl, clueTeacher1, reportUrl1);
-    cy.openTopTab("problems");
-    cy.openProblemSection("Introduction");
-
-    // Teacher 1 document comment
-    chatPanel.verifyProblemCommentClass();
-    chatPanel.verifyCommentThreadContains("This is a teacher2 document comment");
-    // Teacher 1 tile comment
-    cy.clickProblemResourceTile('introduction');
-    chatPanel.verifyCommentThreadContains("This is a teacher2 tile comment");
-  });
   it('verify teacher1 can add comments in My Work tab documents', () => {
     chatPanel.openTeacherChat(portalUrl, clueTeacher1, reportUrl1);
     cy.openTopTab("my-work");
@@ -136,48 +98,36 @@ describe('Teachers can communicate back and forth in chat panel', () => {
     teacherNetwork.selectDocument('workspaces', 'my-classes', classInfo1, planningDoc);
     chatPanel.verifyCommentThreadContains("This is teacher2's comment on teacher1's planning document");
   });
-
-  it('verify network dividers in My Work tab for teacher in network', () => {
+  //TODO: verify delete is disabled for now until work is merged to master, but keep the delete to clean up chat space
+  it('verify teacher1 can only delete own comments', () => {
+    cy.get(".user-name").contains("Tejal Teacher2").siblings("[data-testid=delete-message-button]").should("not.exist");
+    cy.get(".user-name").contains("Tejal Teacher1").siblings("[data-testid=delete-message-button]").click();
+    cy.get(".confirm-delete-alert button").contains("Delete").click();
+    // chatPanel.getCommentFromThread().should("not.contain", "This is a teacher1 planning document comment");
+    cy.openSection('my-work', 'workspaces');
+    teacherNetwork.expandSectionClass('workspaces', 'my-classes', classInfo1);
+    teacherNetwork.selectDocument('workspaces', 'my-classes', classInfo1, workDoc);
+    cy.get(".user-name").contains("Tejal Teacher2").siblings("[data-testid=delete-message-button]").should("not.exist");
+    cy.get(".user-name").contains("Tejal Teacher1").siblings("[data-testid=delete-message-button]").click();
+    cy.get(".confirm-delete-alert button").contains("Delete").click();
+    // chatPanel.getCommentFromThread().should("not.contain", "This is a teacher1 working document comment");
+  });
+  it('verify teacher2 does not see teacher1 deleted comments', () => {
+    chatPanel.openTeacherChat(portalUrl, clueTeacher2, reportUrl2);
     cy.openTopTab("my-work");
     cy.openSection('my-work', 'workspaces');
-    teacherNetwork.verifyDividerLabel('workspaces', 'my-classes');
-    teacherNetwork.verifyDividerLabel('workspaces', 'my-network');
-
-    cy.openSection('my-work', 'starred');
-    teacherNetwork.verifyDividerLabel('starred', 'my-classes');
-    teacherNetwork.verifyDividerLabel('starred', 'my-network');
-
-    cy.openSection('my-work', 'learning-log');
-    teacherNetwork.verifyDividerLabel('learning-log', 'my-classes');
-    teacherNetwork.verifyDividerLabel('learning-log', 'my-network');
-  });
-
-  it('verify network dividers in Class Work tab for teacher in network', () => {
-    cy.openTopTab("class-work");
-    cy.openSection('class-work', 'workspaces');
-    teacherNetwork.verifyDividerLabel('workspaces', 'my-classes');
-    teacherNetwork.verifyDividerLabel('workspaces', 'my-network');
-
-    cy.openSection('class-work', 'workspaces');
-    teacherNetwork.verifyDividerLabel('workspaces', 'my-classes');
-    teacherNetwork.verifyDividerLabel('workspaces', 'my-network');
-
-    cy.openSection('class-work', 'learning-logs');
-    teacherNetwork.verifyDividerLabel('learning-logs', 'my-classes');
-    teacherNetwork.verifyDividerLabel('learning-logs', 'my-network');
-
-    cy.openSection('class-work', 'starred');
-    teacherNetwork.verifyDividerLabel('starred', 'my-classes');
-    teacherNetwork.verifyDividerLabel('starred', 'my-network');
-  });
-  it('verify network dividers in Supports tab for teacher in network', () => {
-    cy.openTopTab("supports");
-    cy.openSection('supports', 'problem-supports');
-    teacherNetwork.verifyDividerLabel('problem-supports', 'my-classes');
-    teacherNetwork.verifyDividerLabel('problem-supports', 'my-network');
-
-    cy.openSection('supports', 'teacher-supports');
-    teacherNetwork.verifyDividerLabel('teacher-supports', 'my-classes');
-    teacherNetwork.verifyDividerLabel('teacher-supports', 'my-network');
+    teacherNetwork.expandSectionClass('workspaces', 'my-network', classInfo1);
+    teacherNetwork.selectDocument('workspaces', 'my-network', classInfo1, workDoc);
+    // chatPanel.getCommentFromThread().should("not.contain", "This is a teacher1 working document comment");
+    cy.get(".user-name").contains("Tejal Teacher2").siblings("[data-testid=delete-message-button]").click();
+    cy.get(".confirm-delete-alert button").contains("Delete").click();
+    // chatPanel.getCommentFromThread().should("not.exist");
+    cy.openSection('my-work', 'workspaces');
+    teacherNetwork.expandSectionClass('workspaces', 'my-network', classInfo1);
+    teacherNetwork.selectDocument('workspaces', 'my-network', classInfo1, planningDoc);
+    // chatPanel.getCommentFromThread().should("not.contain", "This is a teacher1 planning document comment");
+    cy.get(".user-name").contains("Tejal Teacher2").siblings("[data-testid=delete-message-button]").click();
+    cy.get(".confirm-delete-alert button").contains("Delete").click();
+    // chatPanel.getCommentFromThread().should("not.exist");
   });
 });

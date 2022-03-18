@@ -11,7 +11,7 @@ import { DecoratedDocumentThumbnailItem } from "./decorated-document-thumbnail-i
 import { NavTabSectionModelType } from "../../models/view/nav-tabs";
 import { Logger, LogEventName } from "../../lib/logger";
 
-import "./tab-panel-documents-section.sass";
+import "./document-type-collection.sass";
 import "./collapsible-document-section.scss";
 
 interface IProps {
