@@ -5,8 +5,8 @@ import { getToolIds, getToolContentInfoById } from "./tool-content-info";
 
 // Define the built in tool ids explicitly as strings.
 // Strings are used because importing the tool id constant could trigger a
-// registration of the tool. The tools should all be registered due to the
-// tool-tile import above.
+// registration of the tool. The tools will all be registered due to the
+// registerTools below.
 // The tools are listed instead of just using getToolIds (see below) in order to
 // make sure all of these built in tools get registered correctly as expected.
 const builtInToolIds = [
@@ -16,7 +16,8 @@ const builtInToolIds = [
   "Geometry",
   "Image",
   "Text",
-  "Drawing"
+  "Drawing",
+  "Diagram"
 ];
 
 // This is needed so we can check which tools are registered below
