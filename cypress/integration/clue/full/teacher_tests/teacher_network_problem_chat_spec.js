@@ -1,5 +1,5 @@
 import ChatPanel from "../../../../support/elements/clue/ChatPanel";
-import TeacherNetwork from "../../../../support/elements/clue/TeacherNetwork";
+
 /**
  * Notes:
  *

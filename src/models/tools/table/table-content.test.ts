@@ -187,7 +187,6 @@ describe("TableContent", () => {
     expect(change2.props.rows.length).toBe(3);
     const dataSet = table.getSharedData();
     const yAttr = dataSet.attrFromName("y");
-    console.log(JSON.stringify(yAttr));
     expect(yAttr?.value(0)).toBeUndefined();
     expect(yAttr?.value(1)).toBeUndefined();
     expect(yAttr?.value(2)).toBeUndefined();

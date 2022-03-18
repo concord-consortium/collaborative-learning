@@ -18,25 +18,25 @@ let teacherNetwork = new TeacherNetwork;
 
 const portalUrl = "https://learn.staging.concord.org";
 const offeringId1 = "2000";
-const offeringId2 = "2004";
+// const offeringId2 = "2004";
 const reportUrl1 = "https://learn.staging.concord.org/portal/offerings/" + offeringId1 + "/external_report/49";
-const reportUrl2 = "https://learn.staging.concord.org/portal/offerings/" + offeringId2 + "/external_report/49";
+// const reportUrl2 = "https://learn.staging.concord.org/portal/offerings/" + offeringId2 + "/external_report/49";
 const clueTeacher1 = {
   username: "TejalTeacher1",
   password: "ccpassword",
   firstname: "Tejal",
   lastname: "Teacher1"
 };
-const clueTeacher2 = {
-  username: "TejalTeacher2",
-  password: "ccpassword",
-  firstname: "Tejal",
-  lastname: "Teacher2"
-};
-const classInfo1 = clueTeacher1.firstname + ' ' + clueTeacher1.lastname + ' / CLUE Testing3';
-const workDoc = 'MSA 1.4 Walkathon Money';
-const classInfo2 = clueTeacher2.firstname + ' ' + clueTeacher2.lastname + ' / CLUE Testing Class 2';
-const planningDoc = 'MSA 1.4 Walkathon Money: Planning';
+// const clueTeacher2 = {
+//   username: "TejalTeacher2",
+//   password: "ccpassword",
+//   firstname: "Tejal",
+//   lastname: "Teacher2"
+// };
+// const classInfo1 = clueTeacher1.firstname + ' ' + clueTeacher1.lastname + ' / CLUE Testing3';
+// const workDoc = 'MSA 1.4 Walkathon Money';
+// const classInfo2 = clueTeacher2.firstname + ' ' + clueTeacher2.lastname + ' / CLUE Testing Class 2';
+// const planningDoc = 'MSA 1.4 Walkathon Money: Planning';
 
 describe('Teachers can see network dividers', () => {
   it('verify network dividers in My Work tab for teacher in network', () => {
