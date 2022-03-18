@@ -1,7 +1,8 @@
 import { observer } from "mobx-react";
+import { getSnapshot } from "mobx-state-tree";
 import React, { useRef } from "react";
 import { IToolTileProps } from "../../components/tools/tool-tile";
-import { VListContentModelType } from "./vlist-content";
+import { VListContentModelType, VListItemType } from "./vlist-content";
 import "./vlist-tool.scss";
 
 export const VListToolComponent: React.FC<IToolTileProps> = observer((props) => {
@@ -21,7 +22,13 @@ export const VListToolComponent: React.FC<IToolTileProps> = observer((props) => 
       <input ref={inputEl}></input>
       <button onClick={onButtonClick}>Add Item</button>
       <ul>
-        { content.variables.map((variable, index) => <li key={index}>{variable}</li> )}
+        { content.items.map((item, index) => (
+          <li key={index}> 
+            <button onClick={() => content.moveUp(item)}>^</button> 
+            {item.name}
+            <button onClick={() => content.remove(item)}>x</button>
+          </li> 
+        ))}
       </ul>
     </div>
   );

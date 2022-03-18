@@ -72,7 +72,7 @@ export const Tree = types.model("Tree", {
 }))
 .actions(self => {
     // FIXME: should type the model
-    const updateTreeAfterSharedModelChangesInternal = (historyEntryId: string, callId: string, model: any) => {
+    const updateTreeAfterSharedModelChangesInternal = (historyEntryId: string, callId: string, sharedModel: any) => {
         // If we are applying container patches, then we ignore any sync actions
         // otherwise the user might make a change such as changing the name of a
         // node while the patches are applied. When they do this the patch for 
@@ -91,7 +91,7 @@ export const Tree = types.model("Tree", {
         // The TreeMonitor middleware should pickup the historyEntryId and
         // callId parameters automatically. And then when it sends any
         // changes captured during the update, it should include these ids
-        self.updateTreeAfterSharedModelChanges(model);
+        self.updateTreeAfterSharedModelChanges({sharedModel});
     };
     
     return {
@@ -196,12 +196,12 @@ export const Tree = types.model("Tree", {
   return {
     async handleSharedModelChanges(historyEntryId: string, callId: string, 
       call: any, sharedModelPath: string) {
-
+        
       const model = resolvePath(self, sharedModelPath);
 
       // Note: the environment of the call will be undefined because the undoRecorder cleared 
       // it out before it calling this function
-      console.log(`observed changes in sharedModel: ${model.id} of tile: ${self.id}`, {historyEntryId, action: call});
+      console.log(`observed changes in sharedModel: ${model.id} of tree: ${self.id}`, {historyEntryId, action: call});
 
       // What is tricky is that this is being called when the snapshot is applied by the
       // sharedModel syncing code "sendSnapshotToSharedModel". In that case we want to do

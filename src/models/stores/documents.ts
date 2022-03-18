@@ -249,7 +249,7 @@ const container = Container({});
 (window as any).getSnapshot = getSnapshot;
 
 export function createDocumentsModelWithRequiredDocuments(requiredTypes: string[]) {
-  const documents = DocumentsModel.create();
+  const documents = DocumentsModel.create({id: "main"}, {containerAPI: container.containerAPI});
   addTreeMonitor(documents, container.containerAPI, false);
   container.trees.main = documents;
   documents.addRequiredDocumentPromises(requiredTypes);

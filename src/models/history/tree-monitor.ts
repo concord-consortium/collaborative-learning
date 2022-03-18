@@ -96,8 +96,12 @@ export const addTreeMonitor = (tree: Instance<typeof Tree> ,  container: Contain
                     if(match) {
                         const sharedModelPath = match[1];
 
-                        // increment the number of modifications made to the shared model
-                        sharedModelModifications[sharedModelPath]++;
+                        if (!sharedModelModifications[sharedModelPath]) {
+                            sharedModelModifications[sharedModelPath] = 1;
+                        } else {
+                            // increment the number of modifications made to the shared model
+                            sharedModelModifications[sharedModelPath]++;
+                        }
 
                         // If this is a shared model view, we shouldn't record the
                         // patch.
