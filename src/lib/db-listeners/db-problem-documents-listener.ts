@@ -103,7 +103,6 @@ export class DBProblemDocumentsListener extends BaseListener {
             if (isOwnDocument) {
               documents.resolveRequiredDocumentPromise(doc);
               syncStars(doc, this.db);
-              this.db.listeners.monitorDocumentVisibility(doc);
             }
           });
       }

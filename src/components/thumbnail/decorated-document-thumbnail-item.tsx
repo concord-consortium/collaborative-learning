@@ -2,6 +2,7 @@ import { observer } from "mobx-react";
 import React from "react";
 import { ThumbnailDocumentItem } from "./thumbnail-document-item";
 import { useFirestoreTeacher } from "../../hooks/firestore-hooks";
+import { useLastSupportViewTimestamp } from "../../hooks/use-last-support-view-timestamp";
 import { DocumentModelType } from "../../models/document/document";
 import { isPublishedType, SupportPublication } from "../../models/document/document-types";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
@@ -47,6 +48,9 @@ export const DecoratedDocumentThumbnailItem = observer(({
     const user = useUserStore();
     const tabName = tab.toLowerCase().replace(' ', '-');
     const caption = useDocumentCaption(sectionDocument);
+
+    // sync user's last support view time stamp to firebase
+    useLastSupportViewTimestamp(section.type === "teacher-supports");
 
     function handleDocumentClick() {
       onSelectDocument?.(sectionDocument);

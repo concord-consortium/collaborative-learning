@@ -602,16 +602,18 @@ describe("authed logger", () => {
       workspace.toggleComparisonVisible();
     });
 
-    it("can log toggling of mode", (done) => {
+    it("can log toggling of mode with disconnects", (done) => {
       mockXhr.post(/.*/, (req, res) => {
         const request = JSON.parse(req.body());
 
         expect(request.event).toBe("VIEW_ENTER_FOUR_UP");
+        expect(request.disconnects).toBe("0/0/1");
 
         done();
         return res.status(201);
       });
 
+      stores.user.incrementNetworkStatusAlertCount();
       workspace.toggleMode();
     });
   });
