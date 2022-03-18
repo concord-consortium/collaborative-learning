@@ -1,11 +1,10 @@
 import { cloneDeep } from "lodash";
 import { getSnapshot, Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree";
+import { isPlaceholderContent } from "./placeholder/placeholder-content";
 import { ITileExportOptions } from "./tool-content-info";
 import { findMetadata, ToolContentUnion } from "./tool-types";
 import { DisplayUserTypeEnum } from "../stores/user-types";
 import { uniqueId } from "../../utilities/js-utils";
-
-import { kPlaceholderToolID, PlaceholderContentModelType } from "./placeholder/placeholder-content";
 
 // generally negotiated with app, e.g. single column width for table
 export const kDefaultMinWidth = 60;
@@ -58,11 +57,10 @@ export const ToolTileModel = types
       return !!(self.content as any).isUserResizable;
     },
     get isPlaceholder() {
-      return self.content.type === kPlaceholderToolID;
+      return isPlaceholderContent(self.content);
     },
     get placeholderSectionId() {
-      return (self.content.type === kPlaceholderToolID) ? 
-        (self.content as PlaceholderContentModelType).sectionId : undefined;
+      return isPlaceholderContent(self.content) ? (self.content).sectionId : undefined;
     },
     exportJson(options?: ITileExportOptions): string | undefined {
       return (self.content as any).exportJson?.(options);

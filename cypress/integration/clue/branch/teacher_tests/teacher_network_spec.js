@@ -61,14 +61,4 @@ describe('Networked dividers for networked teacher', () => {
     teacherNetwork.verifyDividerLabel('starred', 'my-classes');
     teacherNetwork.verifyDividerLabel('starred', 'my-network');
   });
-  it('verify network dividers in \'Supports\' tab for teacher in network', () => {
-    cy.openTopTab("supports");
-    cy.openSection('supports', 'problem-supports');
-    teacherNetwork.verifyDividerLabel('problem-supports', 'my-classes');
-    teacherNetwork.verifyDividerLabel('problem-supports', 'my-network');
-
-    cy.openSection('supports', 'teacher-supports');
-    teacherNetwork.verifyDividerLabel('teacher-supports', 'my-classes');
-    teacherNetwork.verifyDividerLabel('teacher-supports', 'my-network');
-  });
 });

@@ -1,0 +1,194 @@
+{
+  "code": "brain",
+  "abbrevTitle": "BW",
+  "title": "Brainwaves",
+  "subtitle": "",
+  "placeholderText": "Add your thoughts here.",
+  "settings": {
+    "table": {
+      "numFormat": ".2~f"
+    }
+  },
+  "sections": {
+    "reference": {
+      "initials": "REF",
+      "title": "Reference",
+      "placeholder": "Reference Images and Descriptions"
+    },
+    "practice": {
+      "initials": "PR",
+      "title": "Practice",
+      "placeholder": "Try out Tools"
+    },
+    "experiment": {
+      "initials": "EX",
+      "title": "Experiment",
+      "placeholder": "Discuss your Findings or \nDesign an Experiment"
+    }
+  },
+  "planningDocument": {
+    "enable": "teacher",
+    "default": true,
+    "sectionInfo": {
+      "overview": {
+        "initials": "OV",
+        "title": "Overview",
+        "placeholder": "Add some tiles here"
+      },
+      "launch": {
+        "initials": "LC",
+        "title": "Launch",
+        "placeholder": "Add some tiles here"
+      },
+      "explore": {
+        "initials": "EX",
+        "title": "Explore",
+        "placeholder": "Add some tiles here"
+      },
+      "summarize": {
+        "initials": "SM",
+        "title": "Summarize",
+        "placeholder": "Add some tiles here"
+      }
+    },
+    "sections": [
+      { "type": "overview" },
+      { "type": "launch" },
+      { "type": "explore" },
+      { "type": "summarize" }
+    ]
+  },
+  "defaultStamps": [
+  ],
+  "investigations": [
+    {
+      "description": "Investigation 1",
+      "ordinal": 1,
+      "title": "Motor Control",
+      "problems": [
+        {
+          "description": "Activity 1.1",
+          "ordinal": 1,
+          "title": "Technology Assistance for Paralysis",
+          "subtitle": " Background and Biology",
+          "disabled": [],
+          "sections": 
+          [
+            {
+            "type": "reference",
+            "content": {
+              "tiles": 
+              [
+                {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>Technology and Paralysis Background</h2>",
+                        "<p>During this section, we'll explore how technology can help patients with paralysis regain motor control of their limbs.</p>",
+                        "<p>To begin, watch this segment from the <a href='https://www.pbs.org/newshour/show/experimental-technology-works-to-bring-back-sense-of-touch-for-those-living-with-paralysis'>PBS News Hour</a>.</p>" 
+                      ]
+                    }
+                },
+                {
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Axons are the cells in a human that send signals from the brain to muscle cells, and allow you to move your arm or open your eyes, for example.</p>"
+                    ]
+                  }
+                },
+                {
+                  "content": {
+                    "type": "Image",
+                    "url": "curriculum/neural-engineering/images/axon.jpg"
+                  }
+                }
+              ]
+              }
+            },
+            {
+              "type": "practice",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>Group Brainstorming Activity</h2>",
+                        "<p>Whenever you explore a scientific topic, it's a good idea to start by identifying what questions you want to answer. With your group, generate a list of questions about the biology of paralysis and the kinds of technology you think would be beneficial. You can work as a group by sharing your documents using the share button and turning on the group view. When you are ready, publish your questions to the class.</p>",
+                        "Make a new text box by clicking the 'A' tool in your workspace on the right. You can drag text blocks and images from the lesson into your page, and also from your group-mates' workspaces. You can drag images on your computer onto your workspace too."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/headerHelp.jpg"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>In their CLUE Workspace journals, students should reflect critically about their readings and the questions they have brainstormed. Have students share what they observed during each type of stimulation. Then, ask students what the spike readings mean. Have students develop a quick sketch or description of how our brain communicates with our body.  This will transition the class into the next section on neuron anatomy and action potentials.</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "experiment",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Work with your group to find the signal strength and duration of axon signals. You might wish to organize your data in a table like the one below.</p>"
+
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "name": "Brain Axon Signals",
+                      "columns": [
+                        {"name":"Time (ns)","values":[0.1, 0.2, 0.3, 0.4]},
+                        {"name":"Signal","values":[0.1, 0.2, 1.6, 1.8]}
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>Mimicing Axons</h2>",
+                        "<p>We can turn a signal on and off just like an axon does using a program. We will make programs using blocks that are connected from their outputs to their inputs.</p>",
+                        "Here is a very simple program. Recreate this program with the program tool in your workspace. Then add some logic to make the lightbulb only turn on when the signal amplitude is over 0.5."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/signalProgram.jpg"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

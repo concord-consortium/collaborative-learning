@@ -45,10 +45,7 @@ export interface IToolContentInfo {
   tileHandlesOwnSelection?: boolean;
 }
 
-interface IToolContentInfoMap {
-  [id: string]: IToolContentInfo;
-}
-const gToolContentInfoMapById: IToolContentInfoMap = {};
+const gToolContentInfoMapById: Record<string, IToolContentInfo> = {};
 
 export function registerToolContentInfo(toolContentInfo: IToolContentInfo) {
   // toLowerCase() for legacy support of tool names
@@ -71,7 +68,6 @@ export function getToolIds() {
   // the keys are toLowerCased(), so we look up the actual id
   return Object.values(gToolContentInfoMapById).map(info => info.id);
 }
-
 
 export interface ITileExportOptions {
   rowHeight?: number;

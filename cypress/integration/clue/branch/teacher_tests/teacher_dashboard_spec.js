@@ -19,7 +19,7 @@ beforeEach(() => {
   cy.fixture("teacher-dash-data-CLUE-test.json").as("clueData");
 });
 
-context('Teacher Dashboard View', () => {
+context.skip('Teacher Dashboard View', () => {
   describe('UI visibility', () => {
     it('verify header elements', () => {
       cy.get('@clueData').then((clueData) => {

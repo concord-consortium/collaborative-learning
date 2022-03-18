@@ -133,7 +133,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
         : null
     );
   };
-  
+
   const handleDocumentDragStart = (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => {
     e.dataTransfer.setData(DocumentDragKey, document.key);
   };
@@ -167,7 +167,8 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
               : undefined;
             return (
               <DocumentCollectionByType
-                key={section.type}
+                key={`${section.type}_${index}`}
+                topTab={navTabSpec?.tab}
                 tab={subTab.label}
                 section={section}
                 index={index}

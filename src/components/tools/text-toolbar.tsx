@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { Editor } from "@concord-consortium/slate-editor";
 import { IFloatingToolbarProps, useFloatingToolbarLocation } from "./hooks/use-floating-toolbar-location";
+import { useSettingFromStores } from "../../hooks/use-stores";
 import { TextToolbarButton } from "./text-toolbar-button";
 import { IRegisterToolApiProps } from "./tool-tile";
 import { isMac } from "../../utilities/browser";
@@ -45,6 +46,7 @@ const handleMouseDown = (event: React.MouseEvent) => {
 
 export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
   const { documentContent, editor, selectedButtons, onIsEnabled, onButtonClick, ...others } = props;
+  const toolbarSetting = useSettingFromStores("tools", "text") as unknown as string[];
   const enabled = onIsEnabled();
   const toolbarLocation = useFloatingToolbarLocation({
                             documentContent,
@@ -54,11 +56,20 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
                             enabled,
                             ...others
                           });
+  let toolbarButtons: IButtonDef[] = [];
+  if (toolbarSetting) {
+    toolbarSetting.forEach( setting => {
+      const button = buttonDefs.find( b => b.iconName === setting);
+      button && toolbarButtons.push(button);
+    });
+  } else {
+    toolbarButtons = buttonDefs;
+  }
   return documentContent
     ? ReactDOM.createPortal(
         <div className={`text-toolbar ${enabled && toolbarLocation ? "enabled" : "disabled"}`}
               style={toolbarLocation} onMouseDown={handleMouseDown}>
-          {buttonDefs.map(button => {
+          {toolbarButtons.map(button => {
             const { iconName, Icon, toolTip } = button;
             const isSelected = !!selectedButtons.find(b => b === iconName);
             const handleClick = (event: React.MouseEvent) => {

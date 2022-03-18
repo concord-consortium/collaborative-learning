@@ -5,7 +5,8 @@ import { createSingleTileContent } from "../../utilities/test-utils";
 import { TextContentModelType } from "../tools/text/text-content";
 
 // This is needed so MST can deserialize snapshots referring to tools
-import "../../register-tools";
+import { registerTools } from "../../register-tools";
+registerTools(["Geometry", "Text"]);
 
 var mockUserContext = { appMode: "authed", classHash: "class-1" };
 var mockQueryData = { content: {}, metadata: { createdAt: 10 } };

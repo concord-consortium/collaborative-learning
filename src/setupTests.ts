@@ -11,31 +11,73 @@ enableFetchMocks();
  * Usage:
 
   it("suppresses console messages while capturing calls", () => {
-    jestSpyConsole("warn", mockConsoleFn => {
+    jestSpyConsole("warn", spy => {
       // doesn't log to console
       console.warn("Warning!");
       // but does capture calls to console
-      expect(mockConsoleFn).toHaveBeenCalled();
+      expect(spy).toHaveBeenCalled();
     });
+  });
+
+  The return value is a promise which can be awaited which is useful with async functions.
+
+  it("suppresses console messages while capturing calls", () => {
+    await jestSpyConsole("warn", spy => {
+      // doesn't log to console
+      console.warn("Warning!");
+      // but does capture calls to console
+      expect(spy).toHaveBeenCalled();
+    });
+  });
+
+  Specify { noRestore: true } to have the client take responsibility for handling cleanup:
+
+  it("suppresses console messages while capturing calls", () => {
+    const consoleSpy = jestSpyConsole("warn", spy => {
+      // doesn't log to console
+      console.warn("Warning!");
+      // but does capture calls to console
+      expect(spy).toHaveBeenCalled();
+    });
+    ...
+    (await consoleSpy).mockRestore();
   });
 
  */
 type ConsoleMethod = "log" | "warn" | "error";
-type JestSpyConsoleFn = (spyFn: jest.SpyInstance, mockRestore: () => void) => void;
+type JestSpyConsoleFn = (spy: jest.SpyInstance) => void;
 interface IJestSpyConsoleOptions {
-  asyncRestore?: boolean;
+  // if true, client is responsible for calling mockRestore on the returned instance
+  noRestore?: boolean;
+  // whether to log messages to the console
+  show?: boolean | ((...args: any[]) => boolean);
 }
-(global as any).jestSpyConsole = (method: ConsoleMethod, fn: JestSpyConsoleFn, options?: IJestSpyConsoleOptions) => {
+declare global {
+  // eslint-disable-next-line max-len
+  function jestSpyConsole(method: ConsoleMethod, fn: JestSpyConsoleFn, options?: IJestSpyConsoleOptions): Promise<jest.SpyInstance>;
+}
+global.jestSpyConsole = async (method: ConsoleMethod, fn: JestSpyConsoleFn, options?: IJestSpyConsoleOptions) => {
   // intercept and suppress console methods
-  const mockConsoleFn = jest.spyOn(global.console, method).mockImplementation(() => null);
+  const consoleMethodSpy = jest.spyOn(global.console, method).mockImplementation((...args: any[]) => {
+    if ((typeof options?.show === "boolean" && options.show) ||
+        (typeof options?.show === "function" && options.show(...args))) {
+      // output logs that match the filter (generally for debugging)
+      console.debug(...args); // eslint-disable-line no-console
+    }
+  });
 
   // call the client's code
-  fn(mockConsoleFn, () => mockConsoleFn.mockRestore());
+  await Promise.resolve(fn(consoleMethodSpy));
 
-  // restore console behavior
-  !options?.asyncRestore && mockConsoleFn.mockRestore();
+  // return the spy instance if client doesn't want us to restore it for them
+  if (options?.noRestore) {
+    return consoleMethodSpy;
+  }
+
+  // restore the original console method (unless client indicates they will)
+  consoleMethodSpy.mockRestore();
+
+  // cast so typescript doesn't complain about legitimate usage
+  // using the mock after restore will still generate an error at runtime
+  return undefined as any as typeof consoleMethodSpy;
 };
-
-declare global {
-  function jestSpyConsole(method: ConsoleMethod, fn: JestSpyConsoleFn, options?: IJestSpyConsoleOptions): void;
-}

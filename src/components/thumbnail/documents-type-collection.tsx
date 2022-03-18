@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 import { useAppConfig, useClassStore, useLocalDocuments, useUserStore } from "../../hooks/use-stores";
@@ -7,15 +7,16 @@ import { DocumentsModelType } from "../../models/stores/documents";
 import { UserModelType } from "../../models/stores/user";
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
 import { isPublishedType, isUnpublishedType, PersonalDocument } from "../../models/document/document-types";
-import { ENavTabOrder, NavTabSectionModelType  } from "../../models/view/nav-tabs";
+import { ENavTab, ENavTabOrder, NavTabSectionModelType  } from "../../models/view/nav-tabs";
 import { CanvasComponent } from "../document/canvas";
 import { DocumentContextReact } from "../document/document-context";
 import { DecoratedDocumentThumbnailItem } from "./decorated-document-thumbnail-item";
 import NewDocumentIcon from "../../assets/icons/new/add.svg";
 
-import "./tab-panel-documents-section.sass";
+import "./document-type-collection.sass";
 
 interface IProps {
+  topTab?: ENavTab;
   tab: string;
   section: NavTabSectionModelType;
   index: number;
@@ -40,8 +41,8 @@ function getNewDocumentLabel(section: NavTabSectionModelType , appConfigStore: A
   return "New " + (documentLabel || "Workspace");
 }
 
-function getSectionDocs(section: NavTabSectionModelType,
-  documents: DocumentsModelType, user: UserModelType, classStr: string) {
+function getSectionDocs(section: NavTabSectionModelType, documents: DocumentsModelType, user: UserModelType,
+  isTeacherDocument: (document: DocumentModelType) => boolean) {
   const publishedDocs: { [source: string]: DocumentModelType } = {};
   let sectDocs: DocumentModelType[] = [];
   (section.documentTypes || []).forEach(type => {
@@ -68,66 +69,73 @@ function getSectionDocs(section: NavTabSectionModelType,
         sectDocs.push(...Object.values(publishedDocs));
     }
   });
-
   // Reverse the order to approximate a most-recently-used ordering.
   if (section.order === ENavTabOrder.kReverse) {
     sectDocs = sectDocs.reverse();
   }
   // filter by additional properties
   if (section.properties && section.properties.length) {
-    sectDocs = sectDocs.filter(doc => doc.matchProperties(section.properties));
+    sectDocs = sectDocs.filter(doc => doc.matchProperties(section.properties,
+                                                          { isTeacherDocument: isTeacherDocument(doc) }));
   }
   return sectDocs;
 }
 
-export const DocumentCollectionByType = observer(({ tab, section, index, numSections=0, scale, selectedDocument,
+export const DocumentCollectionByType = observer(({ topTab, tab, section, index, numSections=0, scale, selectedDocument,
                                   onSelectNewDocument, onSelectDocument, onDocumentDragStart,
                                   onDocumentStarClick, onDocumentDeleteClick }: IProps) => {
-    const appConfigStore = useAppConfig();
-    const classStore = useClassStore();
-    const documents = useLocalDocuments();
-    const user = useUserStore();
-    const showNewDocumentThumbnail = section.addDocument && !!onSelectNewDocument;
-    const newDocumentLabel = getNewDocumentLabel(section, appConfigStore);
-    const isTopPanel = index === 0 && numSections > 1;
-    const isBottomPanel = index === numSections - 1 && index > 0;
-    const isSinglePanel = numSections < 2;
-    const tabName = tab?.toLowerCase().replace(' ', '-');
-    const currentClass = classStore.name;
-    const sectionDocs: DocumentModelType[] = getSectionDocs(section, documents, user, currentClass);
+  const appConfigStore = useAppConfig();
+  const classStore = useClassStore();
+  const documents = useLocalDocuments();
+  const user = useUserStore();
+  const showNewDocumentThumbnail = section.addDocument && !!onSelectNewDocument;
+  const newDocumentLabel = getNewDocumentLabel(section, appConfigStore);
+  const isSinglePanel = numSections < 2;
+  const tabName = tab?.toLowerCase().replace(' ', '-');
+  const isTeacherDocument = useCallback((document: DocumentModelType) => {
+      return classStore.isTeacher(document.uid);
+    },[classStore]);
+  const sectionDocs: DocumentModelType[] = getSectionDocs(section, documents, user, isTeacherDocument);
+  const isTopPanel = index === 0 && numSections > 1;
+  const isBottomPanel = index > 0 && index === numSections - 1;
 
-    function handleNewDocumentClick() {
-      onSelectNewDocument?.(section.documentTypes[0]);
-    }
-    const tabPanelDocumentSectionClass = classNames("tab-panel-documents-section", tabName, {"top-panel": isTopPanel});
-    const listClass = classNames("list", tabName, {"top-panel": isTopPanel},
-                                  {"bottom-panel": isBottomPanel && !isSinglePanel});
-    return (
-      <div className={tabPanelDocumentSectionClass}
-            key={`${tab}-${section.type}`}
-            data-test={`${section.dataTestHeader}-documents`}>
-        <div className={listClass}>
-          {showNewDocumentThumbnail &&
-            <NewDocumentThumbnail label={newDocumentLabel} onClick={handleNewDocumentClick} />}
+  function handleNewDocumentClick() {
+    onSelectNewDocument?.(section.documentTypes[0]);
+  }
+  const tabPanelDocumentSectionClass = classNames("tab-panel-documents-section", tabName, {"top-panel": isTopPanel});
+  const listClass = classNames("list", tabName, {"top-panel": isTopPanel},
+                                {"bottom-panel": isBottomPanel && !isSinglePanel && sectionDocs.length > 0});
+  return (
+    <div className={tabPanelDocumentSectionClass}
+          key={`${tab}-${section.type}`}
+          data-test={`${section.dataTestHeader}-documents`}>
+      {(classStore.isTeacher(sectionDocs[0]?.uid) && topTab === ENavTab.kClassWork)
+        && <div className="document-divider">
+              <div className="document-divider-label">Teacher Documents</div>
+           </div>
+      }
+      <div className={listClass}>
+        {showNewDocumentThumbnail &&
+          <NewDocumentThumbnail label={newDocumentLabel} onClick={handleNewDocumentClick} />}
 
-          {sectionDocs.map(document => {
-            const documentContext = getDocumentContext(document);
-            return (
-              <DocumentContextReact.Provider key={document.key} value={documentContext}>
-                <DecoratedDocumentThumbnailItem section={section} sectionDocument={document} tab={tab}
-                  scale={scale} selectedDocument={selectedDocument}
-                  onSelectDocument={onSelectDocument}
-                  onDocumentDragStart={onDocumentDragStart}
-                  onDocumentStarClick={onDocumentStarClick}
-                  onDocumentDeleteClick={onDocumentDeleteClick}
-                />
-              </DocumentContextReact.Provider>
-            );
-          })}
-        </div>
+        {sectionDocs.map(document => {
+          const documentContext = getDocumentContext(document);
+          return (
+            <DocumentContextReact.Provider key={document.key} value={documentContext}>
+              <DecoratedDocumentThumbnailItem section={section} sectionDocument={document} tab={tab}
+                scale={scale} selectedDocument={selectedDocument}
+                onSelectDocument={onSelectDocument}
+                onDocumentDragStart={onDocumentDragStart}
+                onDocumentStarClick={onDocumentStarClick}
+                onDocumentDeleteClick={onDocumentDeleteClick}
+              />
+            </DocumentContextReact.Provider>
+          );
+        })}
       </div>
-    );
-  });
+    </div>
+  );
+});
 
 interface INewDocumentThumbnailProps {
   label?: string;

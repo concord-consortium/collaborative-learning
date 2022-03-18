@@ -9,72 +9,21 @@
       "numFormat": ".2~f"
     }
   },
-  "navTabs": {
-    "lazyLoadTabContents": true,
-    "tabSpecs": [
-      {
-        "tab": "problems",
-        "label": "Problem",
-        "sections": [
-          {
-            "initials": "REF",
-            "title": "Reference",
-            "type": "problem-documents"
-          },
-          {
-            "initials": "PR",
-            "title": "Practice",
-            "type": "problem-documents"
-          },
-          {
-            "initials": "EX",
-            "title": "Experiment",
-            "type": "problem-documents"
-          }
-        ]
-      },
-      {
-        "tab": "my-work",
-        "label": "My Work",
-        "sections": [
-          {
-            "title": "Workspaces",
-            "type": "problem-documents",
-            "dataTestHeader": "my-work-section-investigations",
-            "dataTestItem": "my-work-list-items",
-            "documentTypes": ["problem", "planning"],
-            "order": "original",
-            "showStars": ["student", "teacher"]
-          },
-          {
-            "title": "Workspaces",
-            "type": "personal-documents",
-            "dataTestHeader": "my-work-section-workspaces",
-            "dataTestItem": "my-work-list-items",
-            "documentTypes": ["personal"],
-            "properties": ["!isDeleted"],
-            "showStars": ["student", "teacher"],
-            "addDocument": true
-          }
-        ]
-      }
-    ]
-  },
   "sections": {
-    "reference": {
-      "initials": "REF",
-      "title": "Reference",
-      "placeholder": "Reference Images and Descriptions"
+    "getStarted": {
+      "initials": "GS",
+      "title": "Get Started",
+      "placeholder": "Add tiles here to get started on your Activity."
     },
-    "practice": {
-      "initials": "PR",
-      "title": "Practice",
-      "placeholder": "Student Images of Moths and Data"
+    "fieldNotes": {
+      "initials": "FN",
+      "title": "Field Notes",
+      "placeholder": "Describe your explorations in the field."
     },
-    "experiment": {
-      "initials": "EX",
-      "title": "Experiment",
-      "placeholder": "Discuss your Findings or \nDesign an Experiment"
+    "share": {
+      "initials": "SH",
+      "title": "Share",
+      "placeholder": "Discuss your Findings with your class."
     }
   },
   "planningDocument": {
@@ -110,71 +59,113 @@
     ]
   },
   "defaultStamps": [
+    {
+      "url": "curriculum/mothed/stamps/acorn.png",
+      "width": 35,
+      "height": 35
+    },
+    {
+      "url": "curriculum/mothed/stamps/firneedles.png",
+      "width": 35,
+      "height": 29
+    },
+    {
+      "url": "curriculum/mothed/stamps/mapleleaf.png",
+      "width": 35,
+      "height": 38
+    },
+    {
+      "url": "curriculum/mothed/stamps/tree.png",
+      "width": 37,
+      "height": 35
+    },
+    {
+      "url": "curriculum/mothed/stamps/pine.png",
+      "width": 23,
+      "height": 40
+    },
+    {
+      "url": "curriculum/mothed/stamps/greenleaf.png",
+      "width": 35,
+      "height": 34
+    }
   ],
   "investigations": [
     {
       "description": "Investigation 1",
       "ordinal": 1,
-      "title": "MothEd Sample Curriculum",
+      "title": "MothEd Warmups",
       "problems": [
         {
           "description": "Activity 1.1",
           "ordinal": 1,
-          "title": "MothEd 1.1 Identifying Moths",
-          "subtitle": "",
+          "title": "What lives in our schoolyard? ",
+          "subtitle": "Making Observations",
           "disabled": [],
           "sections":
           [
             {
-            "type": "reference",
+            "type": "getStarted",
             "content": {
-              "tiles": [
-                {
-                  "content":
-                  {
-                    "type": "Image",
-                    "url": "curriculum/mothed/images/mothtypes.jpg"
-                  }
-                }
-              ]
-              }
-            },
-            {
-              "type": "practice",
-              "content": {
-                "tiles": [
-                  [
-                    {
-                      "content":
-                      {
-                        "type": "Image",
-                        "url": "curriculum/mothed/images/tigerMoth.jpg"
-                      }
-                    },
-                    {
-                      "content":
-                      {
-                        "type": "Image",
-                        "url": "curriculum/mothed/images/gypsyMoth.jpg"
-                      }
-                    },
-                    {
-                      "content":
-                      {
-                        "type": "Image",
-                        "url": "curriculum/mothed/images/flannelMoth.jpg"
-                      }
-                    }
-                  ],
+              "tiles": 
+                [
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Take these three images of Moths and identify them according to the Reference guide. Images can be dragged into your document.</p>",
-                        "<p>Be sure to identify using these characteristics</p>",
-                        "<ul><li>spots and other markings,</li><li>antennae,</li><li>color,</li><li>wings open or closed at rest,</li><li>size.</li></ul>",
-                        "<p>Describe, next to each image, the kind of moth you think it is and the reason you chose that type.</p>"
+                        "<p>Our town is part of the <strong>US Eastern deciduous forest </strong>region. What evidence of that can we observe outside? </p>",
+                        "<p><strong>Get Started: </strong>Divide your team  into roles: Recorder;  (2-3)Researchers; Presenter</p>",
+                        "<p>Work with your group to draw and/or make a list of what you expect to find when you go outside to look. </p>",
+                        "<p>To gather ideas, <strong>Researchers  </strong>might...</p>",
+                        "<ul><li>look out the window, </li><li>look around your classroom/home for books  or magazines,</li><li>find images or take photos.</li></ul>",
+                        "<p>Your <strong>Recorder </strong>can record everyone&#x27;s ideas  in  their CLUE workspace.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/mothed/images/fieldwork.jpg"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Welcome to CLUE</strong>! Clue is short for <em>Collaborative Learning User Environment. </em>This environment is designed to make it easy for groups of up to four students to share their work and learn from each other. </p>",
+                        "<p>When the class starts an activity, CLUE drops students into groups randomly. If you prefer to assign students to groups, have them switch groups by clicking on the group number at upper right. </p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "fieldNotes",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Let&#x27;s go outside! Bring your science notebook to make notes and drawings of what you find.</p>",
+                        "<p>When you come back  inside, add  your top three observations to the <strong>Field Notes</strong> Workspace in CLUE.</p>",
+                        "<p>If you counted the number of certain items you discovered, create a table to share. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "name": "What lives in our schoolyard",
+                      "columns": [
+                        {"name":"Flora","values":["🌲","🌿","🍁"]},
+                        {"name":"Count","values":["3","5","100"]},
+                        {"name":"location","values":["edge of schoolyard","on trees","on ground"]}
                       ]
                     }
                   },
@@ -184,9 +175,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>The moths pictured are</p>",
-                        "<ul><li>a tiger moth, identifyable by it's xxx</li><li>a gypsy moth, identifyable by it's xxx</li><li>a flannel moth, identifyable by it's xxx</li><li>size.</li></ul>",
-                        "<p>Look for student descriptions of antenna, spots, resting state.</p>"
+                        "<p>Encourage your students to try making drawings of the leaves and plants they find. See if they can make a table with the kinds of data they take - sizes and types of leaves or trees, counts of different species, etc.</p>"
                       ]
                     }
                   }
@@ -194,7 +183,7 @@
               }
             },
             {
-              "type": "experiment",
+              "type": "share",
               "content": {
                 "tiles": [
                   {
@@ -202,18 +191,36 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Here is a table that one of your classmates designed for collecting data about a moth experiment. Copy this table by dragging into your workspace, or make a new one and design your own experiment.</p>"
+                        "<p> Share to compare notes with your teammates! </p>",
+                        "<p><strong>1. </strong>As your group compares observations, the <strong>Presenter</strong> can combine everyone&#x27;s findings on their <strong>Share</strong> Workspace to present or publish to the Class Work.</p>"
                       ]
                     }
                   },
                   {
                     "content": {
-                      "type": "Table",
-                      "name": "Moth Collection Data",
-                      "columns": [
-                        {"name":"time","values":["8:54pm"]},
-                        {"name":"Temp ( °C)","values":["12"]},
-                        {"name":"number","values":[""]}
+                      "type": "Image",
+                      "url": "curriculum/mothed/images/share.jpg"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>2. </strong>After you have agreed on your summary findings, refine your work by thinking about different types of evidence of <strong>Eastern deciduous forests:</strong></p>",
+                        "<ul><li>What did you expect to find that you did not see?</li><li>What did you see that you didn’t list in <strong>Get Started</strong>?</li><li>What did you observe that isn&#x27;t actually part of a forest ecosystem?</li></ul>",
+                        "<p>Is there anything you want to add to your final presentation to the class?</p>",
+                        "<p><strong>3. </strong>If you still have more time, discuss and list what you might expect to see looking different four weeks from now. What will cause these changes? Your <strong>Recorder</strong> can list all your ideas to  share with the class. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Encourage your students to work together using the Group View (upper right) and Share switch. They can copy items from each others documents by dragging. Then have them try publishing to the Class Work tab to share their posters.</p>"
                       ]
                     }
                   }

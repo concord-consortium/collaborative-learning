@@ -69,7 +69,7 @@ export const useExpressionsDialog = ({ metadata, dataSet, onSubmit }: IProps): I
     buttons: [
       { label: "Clear", onClick: handleClear },
       { label: "Cancel" },
-      { label: "OK", isDefault: true, onClick: handleSubmit }
+      { label: "OK", isDefault: true, isDisabled: !!errorMessage, onClick: handleSubmit }
     ]
   }, [currYAttrId, errorMessage, currentExpression]);
   blurModalRef.current = blurModal;
