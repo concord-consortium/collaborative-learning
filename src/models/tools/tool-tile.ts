@@ -5,7 +5,6 @@ import { ITileExportOptions } from "./tool-content-info";
 import { findMetadata, ToolContentUnion } from "./tool-types";
 import { DisplayUserTypeEnum } from "../stores/user-types";
 import { uniqueId } from "../../utilities/js-utils";
-
 import { SharedModelType, SharedModelUnion } from "./shared-model";
 
 // generally negotiated with app, e.g. single column width for table

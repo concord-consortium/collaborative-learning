@@ -2,11 +2,19 @@ import { Instance, types } from "mobx-state-tree";
 import { SharedModelType } from "./shared-model";
 import { getToolContentModels, getToolContentInfoById } from "./tool-content-info";
 
-// It isn't clear when 'late' is run. Currently it works.  It is running
-// after all of the content models have been registered. That registration happens when
-// the tool-tile.ts module is imported. This import happens in many places right now.
-// If we switch to dynamic loading of tools we will have to see if late runs after this
-// loading has completed.
+/**
+ * A dynamic union of tool/tile content models. Its typescript type is
+ * `ToolContentModel`.
+ *
+ * This uses MST's `late()`. It appears that `late()` runs the first time the
+ * union is actually used by MST. For example to deserialize a snapshot or to
+ * create an model instance. For this to work properly, these uses need to
+ * happen after all necessary tiles are registered.
+ *
+ * By default a late type like this will have a type of `any`. All types in this
+ * late union extend ToolContentModel, so it is overridden to be
+ * ToolContentModel. This doesn't affect the MST runtime types.
+ */
 export const ToolContentUnion = types.late<typeof ToolContentModel>(() => {
   const contentModels = getToolContentModels();
   return types.union({ dispatcher: toolFactory }, ...contentModels) as typeof ToolContentModel;

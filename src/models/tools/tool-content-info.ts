@@ -56,7 +56,7 @@ export function registerToolContentInfo(toolContentInfo: IToolContentInfo) {
 // ToolContent id, e.g. kDrawingToolID, kGeometryToolID, etc.
 // undefined is supported so callers do not need to check the id before passing
 // it in.
-export function getToolContentInfoById(id: string | undefined) {
+export function getToolContentInfoById(id?: string) {
   // toLowerCase() for legacy support of tool names
   return id ? gToolContentInfoMapById[id.toLowerCase()] : undefined;
 }
