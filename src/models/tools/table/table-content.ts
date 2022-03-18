@@ -1,4 +1,4 @@
-import { Parser } from "expr-eval";
+import { Expression, Parser } from "expr-eval";
 import { castArray, each } from "lodash";
 import { types, IAnyStateTreeNode, Instance, SnapshotIn, SnapshotOut } from "mobx-state-tree";
 import { exportTableContentAsJson } from "./table-export";
@@ -98,6 +98,9 @@ export const TableMetadataModel = ToolMetadataModel
     expressions: types.map(types.string),
     rawExpressions: types.map(types.string)
   })
+  .volatile(self => ({
+    parser: new Parser()
+  }))
   .views(self => ({
     get isLinked() {
       return self.linkedGeometries.length > 0;
@@ -110,6 +113,16 @@ export const TableMetadataModel = ToolMetadataModel
     },
     hasExpression(attrId: string) {
       return !!self.expressions.get(attrId);
+    },
+    parseExpression(expr: string) {
+      let result: Expression | undefined;
+      try {
+        result = self.parser.parse(expr);
+      }
+      catch(e) {
+        // return undefined on error
+      }
+      return result;
     }
   }))
   .actions(self => ({
@@ -150,11 +163,10 @@ export const TableMetadataModel = ToolMetadataModel
       self.expressions.delete(colId);
     },
     clearRawExpressions(varName: string) {
-      const parser = new Parser();
       self.expressions.forEach((expression, colId) => {
         if (expression) {
-          const parsedExpression = parser.parse(expression);
-          if (parsedExpression.variables().indexOf(varName) > -1) {
+          const parsedExpression = self.parseExpression(expression);
+          if (parsedExpression && (parsedExpression.variables().indexOf(varName) >= 0)) {
             self.rawExpressions.delete(colId);
           }
         }
@@ -215,6 +227,9 @@ export const TableContentModel = ToolContentModel
     },
     get hasExpressions() {
       return self.metadata.hasExpressions;
+    },
+    parseExpression(expr: string) {
+      return self.metadata.parseExpression(expr);
     }
   }))
   .views(self => ({
@@ -406,12 +421,13 @@ export const TableContentModel = ToolContentModel
         const expression = self.metadata.expressions.get(attr.id);
         if (expression) {
           const xAttr = dataSet.attributes[0];
-          const parser = new Parser();
-          const parsedExpression = parser.parse(expression);
+          const parsedExpression = self.parseExpression(expression);
           for (let i = 0; i < attr.values.length; i++) {
             const xVal = xAttr.value(i) as number | string;
             if (xVal == null || xVal === "") {
               attr.setValue(i, undefined);
+            } else if (!parsedExpression) {
+              attr.setValue(i, NaN);
             } else {
               let expressionVal: number;
               try {

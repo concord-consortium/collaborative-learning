@@ -220,6 +220,9 @@
     "settings": {}
   },
   "units": {
+    "brain": {
+      "content": "curriculum/neural-engineering/neural-engineering.json"
+    },
     "bio": {
       "content": "curriculum/bio4community/bio4community.json"
     },

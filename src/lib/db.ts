@@ -441,7 +441,7 @@ export class DB {
     }
     return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
       this.createDocument({ type: ProblemPublication, content }).then(({document, metadata}) => {
-        const publicationRef = this.firebase.ref(this.firebase.getPublicationsPath(user)).push();
+        const publicationRef = this.firebase.ref(this.firebase.getProblemPublicationsPath(user)).push();
         const userGroup = groups.groupForUser(user.id)!;
         const groupUserConnections: DBGroupUserConnections = userGroup && userGroup.users
           .filter(groupUser => groupUser.id !== user.id)
@@ -481,8 +481,8 @@ export class DB {
     return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
       this.createDocument({ type: publicationType, content }).then(({document, metadata}) => {
         const publicationPath = publicationType === "personalPublication"
-                                ? this.firebase.getClassPersonalPublicationsPath(user)
-                                : this.firebase.getClassPublicationsPath(user);
+                                ? this.firebase.getPersonalPublicationsPath(user)
+                                : this.firebase.getLearningLogPublicationsPath(user);
         const publicationRef = this.firebase.ref(publicationPath).push();
         const publication: DBOtherPublication = {
           version: "1.0",
@@ -667,6 +667,7 @@ export class DB {
   public clear(level: DBClearLevel) {
     return new Promise<void>((resolve, reject) => {
       const {user} = this.stores;
+      let qaUser;
       const clearPath = (path?: string) => {
         this.firebase.ref(path).remove().then(resolve).catch(reject);
       };
@@ -674,10 +675,13 @@ export class DB {
       if (this.stores.appMode !== "qa") {
         return reject("db#clear is only available in qa mode");
       }
-
+      
       switch (level) {
         case "all":
-          clearPath();
+          qaUser = this.firebase.getQAUserRoot();
+          if (qaUser) {
+            qaUser.remove().then(resolve).catch(reject);
+          }
           break;
         case "class":
           clearPath(this.firebase.getClassPath(user));
@@ -919,10 +923,6 @@ export class DB {
     updateRef.update({
       deleted: true
     });
-  }
-
-  public setLastSupportViewTimestamp() {
-    this.firebase.getLastSupportViewTimestampRef().set(Date.now());
   }
 
   public setLastStickyNoteViewTimestamp() {
