@@ -2,7 +2,7 @@ import { inject, observer } from "mobx-react";
 import { autorun, IReactionDisposer, reaction } from "mobx";
 import React from "react";
 import FileSaver from "file-saver";
-
+import { usePublishDialog } from "./use-publish-dialog";
 import { DocumentFileMenu } from "./document-file-menu";
 import { MyWorkDocumentOrBrowser } from "./document-or-browser";
 import { BaseComponent, IBaseProps } from "../base";
@@ -30,8 +30,6 @@ interface IProps extends IBaseProps {
   onNewDocument?: (type: string) => void;
   onCopyDocument?: (document: DocumentModelType) => void;
   onDeleteDocument?: (document: DocumentModelType) => void;
-  onPublishSupport?: (document: DocumentModelType) => void;
-  onPublishDocument?: (document: DocumentModelType) => void;
   toolbar?: ToolbarModelType;
   side: WorkspaceSide;
   readOnly?: boolean;
@@ -52,17 +50,14 @@ const DownloadButton = ({ onClick }: { onClick: SVGClickHandler }) => {
   );
 };
 
-const PublishButton = ({ onClick, dataTestName }: { onClick: () => void, dataTestName?: string }) => {
+const PublishButton = ({ document }: { document: DocumentModelType }) => {
+  const [showPublishDialog] = usePublishDialog(document);
+  const handlePublishButtonClick = () => {
+    showPublishDialog();
+  };
   return (
-    <IconButton icon="publish" key="publish" className="action icon-publish" dataTestName={dataTestName}
-                onClickButton={onClick} title="Publish Workspace" />
-  );
-};
-
-const PublishSupportButton = ({ onClick }: { onClick: () => void }) => {
-  return (
-    <IconButton icon="publish" key="support" className="action icon-publish"
-                  onClickButton={onClick} title="Publish Workspace" />
+    <IconButton icon="publish" key="publish" className="action icon-publish" dataTestName="publish-icon"
+                onClickButton={handlePublishButtonClick} title="Publish Workspace" />
   );
 };
 
@@ -213,7 +208,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private renderProblemTitleBar(type: string, hideButtons?: boolean) {
     const {problem, appMode, clipboard, user: { isTeacher }} = this.stores;
     const problemTitle = problem.title;
-    const {document, workspace} = this.props;
+    const { document, workspace } = this.props;
     const isShared = document.visibility === "public";
     const show4up = !workspace.comparisonVisible && !isTeacher;
     const downloadButton = (appMode !== "authed") && clipboard.hasJsonTileContent()
@@ -227,11 +222,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
               onOpenDocument={this.handleOpenDocumentClick}
               onCopyDocument={this.handleCopyDocumentClick}
               isDeleteDisabled={true} />
-            {(isTeacher && type !== "planning")
-              ? <PublishSupportButton onClick={this.handlePublishSupport} />
-              : this.showPublishButton(document) &&
-                  <PublishButton key="publish" onClick={this.handlePublishDocument} />
-            }
+            {this.showPublishButton(document) &&
+              <PublishButton document={document} />}
           </div>
         }
         <div className="title" data-test="document-title">
@@ -347,7 +339,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private renderOtherDocumentTitleBar(type: string, hideButtons?: boolean) {
     const { document, workspace } = this.props;
-    const { appConfig, user: { isTeacher }, documents, user } = this.stores;
+    const { appConfig, user, documents } = this.stores;
     const otherDocuments = documents.byTypeForUser(document.type, user.id);
     const countNotDeleted = otherDocuments.reduce((prev, doc) => doc.getProperty("isDeleted") ? prev : prev + 1, 0);
     const { supportStackedTwoUpView } = appConfig;
@@ -363,11 +355,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
               onCopyDocument={this.handleCopyDocumentClick}
               isDeleteDisabled={countNotDeleted < 1}
               onDeleteDocument={this.handleDeleteDocumentClick}/>
-            {!hideButtons && isTeacher
-                ? <PublishSupportButton key="otherDocPub" onClick={this.handlePublishSupport} />
-                : this.showPublishButton(document)
-                    && <PublishButton dataTestName="other-doc-publish-icon" onClick={this.handlePublishDocument} />
-            }
+            {this.showPublishButton(document) &&
+              <PublishButton  document={document} />}
           </div>
         }
         {hasDisplayId && <div className="display-id" style={{opacity: 0}}>{displayId}</div>}
@@ -471,16 +460,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           document.setTitle(title);
         }
       });
-  };
-
-  private handlePublishSupport = () => {
-    const { document, onPublishSupport } = this.props;
-    onPublishSupport && onPublishSupport(document);
-  };
-
-  private handlePublishDocument = () => {
-    const { document, onPublishDocument } = this.props;
-    onPublishDocument && onPublishDocument(document);
   };
 
   private isPrimary() {

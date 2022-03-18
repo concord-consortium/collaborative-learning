@@ -123,8 +123,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
             onNewDocument={this.handleNewDocument}
             onCopyDocument={this.handleCopyDocument}
             onDeleteDocument={this.handleDeleteDocument}
-            onPublishSupport={this.handlePublishSupport}
-            onPublishDocument={this.handlePublishDocument}
             toolbar={toolbar}
             side="comparison"
             readOnly={true}
@@ -138,8 +136,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         onNewDocument={this.handleNewDocument}
         onCopyDocument={this.handleCopyDocument}
         onDeleteDocument={this.handleDeleteDocument}
-        onPublishSupport={this.handlePublishSupport}
-        onPublishDocument={this.handlePublishDocument}
         toolbar={toolbar}
         side="primary"
       />;
@@ -376,47 +372,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     if (defaultDocument) {
       problemWorkspace.setPrimaryDocument(defaultDocument);
     }
-  };
-
-  private getProblemBaseTitle(title: string) {
-    const match = /[\d.]*[\s]*(.+)/.exec(title);
-    return match && match[1] ? match[1] : title;
-  }
-
-  private getSupportDocumentBaseCaption(document: DocumentModelType) {
-    return document.type === ProblemDocument
-            ? this.getProblemBaseTitle(this.stores.problem.title)
-            : document.title;
-  }
-
-  private handlePublishSupport = (document: DocumentModelType) => {
-    const { db, problemPath, ui, user } = this.stores;
-    const caption = this.getSupportDocumentBaseCaption(document) || "Untitled";
-    // TODO: Disable publish button while publishing
-    db.publishDocumentAsSupport(document, caption)
-      .then(() => {
-        const classes = user.classHashesForProblemPath(problemPath);
-        const classWord = classes.length === 1 ? "class" : "classes";
-        ui.alert(`Your support was published to ${classes.length} ${classWord}.`, "Support Published");
-      })
-      .catch((reason) => ui.alert(`Your support failed to publish: ${reason}`, "Error"));
-  };
-
-  private handlePublishDocument = (document: DocumentModelType) => {
-    const { appConfig, db, ui } = this.stores;
-    const docTypeString = document.getLabel(appConfig, 1);
-    const docTypeStringL = document.getLabel(appConfig, 1, true);
-    ui.confirm(`Do you want to publish your ${docTypeStringL}?`, `Publish ${docTypeString}`)
-      .then((confirm: boolean) => {
-        if (confirm) {
-          const dbPublishDocumentFunc = document.type === ProblemDocument
-                                          ? () => db.publishProblemDocument(document)
-                                          : () => db.publishOtherDocument(document);
-          dbPublishDocumentFunc()
-            .then(() => ui.alert(`Your ${docTypeStringL} was published.`, `${docTypeString} Published`))
-            .catch((reason) => ui.alert(`Your document failed to publish: ${reason}`, "Error"));
-        }
-      });
   };
 
   private getPrimaryDocument(documentKey?: string) {

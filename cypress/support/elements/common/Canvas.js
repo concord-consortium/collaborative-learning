@@ -50,7 +50,7 @@ class Canvas {
   }
 
   getPersonalPublishIcon() {
-    return cy.get('[data-test=other-doc-publish-icon]');
+    return cy.get('[data-test=publish-icon]');
   }
 
   getEditTitleIcon() {
@@ -117,8 +117,8 @@ class Canvas {
     } else {
       this.getPersonalPublishIcon().click({force:true});
     }
-    dialog.getDialogTitle().should('exist').contains('Publish ');
-    dialog.getDialogOKButton().click();
+    dialog.getModalTitle().should('exist').contains('Publish ');
+    dialog.getModalButton().contains("OK").click();
     dialog.getDialogTitle().should('exist').contains('Published');
     dialog.getDialogOKButton().click();
     dialog.getDialogTitle().should('not.exist');

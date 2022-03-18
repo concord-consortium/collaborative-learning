@@ -20,7 +20,7 @@ import ResourcesPanel from "../../../../support/elements/clue/ResourcesPanel";
         cy.wait(2000);
     });
 
-    describe('verify supports functionality', function() {
+    describe.skip('verify supports functionality', function() {
         it('will verify publish of support appears in Class Work>Workspaces',function(){
             clueCanvas.addTile('table');
             clueCanvas.publishTeacherDoc();
@@ -31,7 +31,7 @@ import ResourcesPanel from "../../../../support/elements/clue/ResourcesPanel";
         });
     });
 
-    describe("test visibility of teacher supports in student's workspace", function() {
+    describe.skip("test visibility of teacher supports in student's workspace", function() {
             it('verify teacher support is visible in student nav', function() {
               const queryParams = `${Cypress.config("queryParams")}`;
 
