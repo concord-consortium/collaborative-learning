@@ -1,5 +1,4 @@
 import { SnapshotIn, types } from "mobx-state-tree";
-import { DocumentContentModel } from "../document/document-content";
 import { NavTabsConfigModel } from "./nav-tabs";
 import { ProblemConfiguration } from "./problem-configuration";
 
@@ -50,8 +49,6 @@ export interface UnitConfiguration extends ProblemConfiguration {
   // following two properties used for displaying titles for documents
   docTimeStampPropertyName: string;
   docDisplayIdPropertyName: string;
-  // clients should use the defaultDocumentContent() method below
-  defaultDocumentTemplate?: SnapshotIn<typeof DocumentContentModel>;
   // default title of learning log documents
   defaultLearningLogTitle: string;
   // overrides `defaultLearningLogTitle`; not clear why both are required

@@ -1,7 +1,7 @@
 import {
-  cloneContentWithUniqueIds, createDefaultSectionedContent,
-  DocumentContentModel, DocumentContentModelType, DocumentContentSnapshotType
+  cloneContentWithUniqueIds, DocumentContentModel, DocumentContentModelType, DocumentContentSnapshotType
 } from "./document-content";
+import { createDefaultSectionedContent } from "./document-content-import";
 import { SectionModel, SectionModelType } from "../curriculum/section";
 import { IDropRowInfo } from "../../models/document/document-content";
 import { cloneTileSnapshotWithoutId, IDragTileItem } from "../../models/tools/tool-tile";
@@ -11,7 +11,8 @@ import { safeJsonParse } from "../../utilities/js-utils";
 import placeholderImage from "../../assets/image_placeholder.png";
 
 // This is needed so MST can deserialize snapshots referring to tools
-import "../../register-tools";
+import { registerTools } from "../../register-tools";
+registerTools(["Drawing", "Geometry", "Image", "Table", "Text"]);
 
 // mock uniqueId so we can recognize auto-generated IDs
 jest.mock("../../utilities/js-utils", () => {

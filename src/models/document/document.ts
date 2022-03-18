@@ -96,6 +96,8 @@ export const DocumentModel = types
   }))
   .views(self => ({
     matchProperties(properties?: string[], options?: IMatchPropertiesOptions) {
+      // if no properties specified then consider it a match
+      if (!properties?.length) return true;
       return properties?.every(p => {
         const match = /(!)?(.*)/.exec(p);
         const property = match && match[2];

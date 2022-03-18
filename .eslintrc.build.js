@@ -8,6 +8,12 @@ module.exports = {
       "no-debugger": "error"
     },
     overrides: [
+      { // plugins (temporary)
+        files: ["**/plugins/**/*"],
+        rules: {
+          "no-console": ["warn", { allow: ["log", "warn", "error"] }],
+        }
+      },
       {
         files: ["jsxgraph.d.ts"],
         rules: {

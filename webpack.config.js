@@ -11,7 +11,7 @@ const path = require('path');
 const rollbarSnippetPath = './node_modules/rollbar/dist/rollbar.snippet.js';
 const rollbarSnippet = fs.readFileSync(path.join(__dirname, rollbarSnippetPath), { encoding: 'utf8' }).trim();
 
-const cacheGroupOptions = { minSize:0, minChunks: 1, reuseExistingChunk: true, enforce: true };
+const cacheGroupOptions = { minSize:0, minChunks: 1, reuseExistingChunk: true };
 
 module.exports = (env, argv) => {
   const devMode = argv.mode !== 'production';
@@ -170,6 +170,7 @@ module.exports = (env, argv) => {
       ]
     },
     optimization: {
+      moduleIds: "deterministic",
       splitChunks: {
         chunks: 'all',
         name : false,
@@ -177,9 +178,27 @@ module.exports = (env, argv) => {
         // patterned after https://github.com/webpack/webpack/issues/6916#issuecomment-378171500
         cacheGroups:{
           // @concord-consortium modules
-          concord: { test:/concord-consortium/, name: "concord", priority: 10, ...cacheGroupOptions },
+          concord: {
+            test: /@concord-consortium/,
+            name(module) {
+              // e.g. node_modules/@concord-consortium/package-name
+              const ccRegEx = /[\\/]@concord-consortium[\\/](.*?)([\\/]|$)/;
+              const packageName = module.identifier().match(ccRegEx)?.[1] || "";
+
+              // npm package names are URL-safe, but some servers don't like @ symbols
+              return `cc.${packageName.replace('@', '')}`;
+            },
+            priority: 10,
+            enforce: true,
+            ...cacheGroupOptions
+          },
           // node_modules
-          vendor: { test:/node_modules/, name: "vendor", priority: 0, ...cacheGroupOptions },
+          vendor: {
+            test: /node_modules/,
+            name: (module, chunks, cacheGroupKey) => `vendor-${chunks[0].name}`,
+            priority: 0,
+            ...cacheGroupOptions
+          },
           // local modules
           default: { name: "main", ...cacheGroupOptions }
         }
