@@ -1,4 +1,4 @@
-import { defaultVListContent, VListContentModel } from "./vlist-content";
+import { VListContentModel } from "./vlist-content";
 
 describe("VListContent", () => {
   // FIXME: need to have a document and shared model to run these tests now.

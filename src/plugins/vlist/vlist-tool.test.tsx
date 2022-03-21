@@ -1,9 +1,8 @@
 import { render } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import React from "react";
 import { IToolApi } from "../../components/tools/tool-api";
 import { ToolTileModel } from "../../models/tools/tool-tile";
-import { defaultVListContent, VListContentModel } from "./vlist-content";
+import { defaultVListContent } from "./vlist-content";
 import { VListToolComponent } from "./vlist-tool";
 
 // The vlist tile needs to be registered so the ToolTileModel.create

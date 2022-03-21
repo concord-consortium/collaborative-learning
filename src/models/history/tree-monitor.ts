@@ -1,7 +1,7 @@
 import { addDisposer, addMiddleware, createActionTrackingMiddleware2, flow, 
     getPath, 
     IActionTrackingMiddleware2Call, IJsonPatch, Instance, IPatchRecorder, isActionContextThisOrChildOf, 
-    IStateTreeNode, recordPatches } from "mobx-state-tree";
+    recordPatches } from "mobx-state-tree";
 import { nanoid } from "nanoid";
 import { ContainerAPI } from "./container-api";
 import { TreePatchRecordSnapshot } from "./history";

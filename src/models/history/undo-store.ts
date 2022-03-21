@@ -1,5 +1,5 @@
 import {
-    types, Instance, getSnapshot, getEnv, flow, getParent
+    types, Instance, getEnv, flow, getParent
 } from "mobx-state-tree";
 import { DocumentStore } from "./document-store";
 
@@ -37,7 +37,8 @@ export const UndoStore = types
         // This is asynchronous. We might as well use a flow so we don't have to 
         // create separate actions for each of the parts of this single action
         const applyPatchesToTrees = 
-          flow(function* applyPatchesToTrees(entryToUndo: Instance<typeof HistoryEntry>, opType: HistoryOperation, document: any ) {
+          flow(function* applyPatchesToTrees(entryToUndo: Instance<typeof HistoryEntry>, 
+                                             opType: HistoryOperation, document: any ) {
             const getTreeFromId = (getEnv(self) as Environment).getTreeFromId;
             const treeEntries = entryToUndo.records;
 
@@ -91,7 +92,8 @@ export const UndoStore = types
                 const finishCallId = nanoid();
                 docStore.startHistoryEntryCall(historyEntryId, finishCallId);
 
-                return getTreeFromId(treeEntry.tree).finishApplyingContainerPatches(historyEntryId, finishCallId, document);
+                return getTreeFromId(treeEntry.tree)
+                  .finishApplyingContainerPatches(historyEntryId, finishCallId, document);
             });
             yield Promise.all(finishPromises);
 

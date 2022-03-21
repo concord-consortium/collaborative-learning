@@ -1,8 +1,7 @@
 import { observer } from "mobx-react";
-import { getSnapshot } from "mobx-state-tree";
 import React, { useRef } from "react";
 import { IToolTileProps } from "../../components/tools/tool-tile";
-import { VListContentModelType, VListItemType } from "./vlist-content";
+import { VListContentModelType } from "./vlist-content";
 import "./vlist-tool.scss";
 
 export const VListToolComponent: React.FC<IToolTileProps> = observer((props) => {

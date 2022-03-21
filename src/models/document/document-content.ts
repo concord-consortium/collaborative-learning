@@ -18,7 +18,7 @@ import { DocumentsModelType } from "../stores/documents";
 import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
 import { getParentWithTypeName } from "../../utilities/mst-utils";
 import { comma, StringBuilder } from "../../utilities/string-builder";
-import { SharedModel, SharedModelType, SharedModelUnion } from "../tools/shared-model";
+import { SharedModelType, SharedModelUnion } from "../tools/shared-model";
 
 export interface INewTileOptions {
   rowHeight?: number;

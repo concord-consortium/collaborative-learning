@@ -189,7 +189,8 @@ export const DocumentStore = types
 
         // This is asynchronous. We might as well use a flow so we don't have to 
         // create separate actions for each of the parts of this single action
-        const replayHistoryToTrees = flow(function* replayHistoryToTrees(treeMap: Record<string, TreeAPI>, document: any ) {
+        const replayHistoryToTrees = flow(function* replayHistoryToTrees(treeMap: Record<string, TreeAPI>, 
+                document: any ) {
             const getTreeFromId = (getEnv(self) as Environment).getTreeFromId;
             const trees = Object.values(treeMap);
 

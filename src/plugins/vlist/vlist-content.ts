@@ -1,5 +1,7 @@
 import { reaction } from "mobx";
-import { types, Instance, getParentOfType, isModelType, getType, getSnapshot, getPath, hasParentOfType, addDisposer, isValidReference, detach, tryReference } from "mobx-state-tree";
+import { types, Instance, getParentOfType, getType, 
+  getSnapshot, getPath, hasParentOfType, addDisposer, 
+  isValidReference, detach, tryReference } from "mobx-state-tree";
 import { Variable } from "@concord-consortium/diagram-view";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { SharedModelType } from "../../models/tools/shared-model";
@@ -202,7 +204,3 @@ export const VListContentModel = ToolContentModel
 }));
 
 export interface VListContentModelType extends Instance<typeof VListContentModel> {}
-
-// Need to figure out how to hack in a shared model
-// Perhaps we can add a MST lifecycle action so after the content model is added
-// then we add the shared model to the document and add it to this tile's parent

@@ -1,11 +1,13 @@
 import { FlowTransform } from "react-flow-renderer";
-import { getSnapshot, types, Instance, getPath, addDisposer, hasParentOfType, getParentOfType, getType, destroy, isValidReference } from "mobx-state-tree";
+import { getSnapshot, types, Instance, getPath, addDisposer, 
+  hasParentOfType, getParentOfType, getType, destroy, 
+  isValidReference } from "mobx-state-tree";
 import { ITileExportOptions, IDefaultContentOptions } from "../../models/tools/tool-content-info";
 import { ToolContentModel } from "../../models/tools/tool-types";
 import { ToolTileModel } from "../../models/tools/tool-tile";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { kDiagramToolID } from "./diagram-types";
-import { DQRoot, DQNode, Variable, VariableType } from "@concord-consortium/diagram-view";
+import { DQRoot, DQNode } from "@concord-consortium/diagram-view";
 import { reaction } from "mobx";
 import { SharedVariables, SharedVariablesType } from "../shared-variables/shared-variables";
 import { SharedModelType } from "../../models/tools/shared-model";
