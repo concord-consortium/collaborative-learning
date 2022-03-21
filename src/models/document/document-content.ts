@@ -282,7 +282,7 @@ export const DocumentContentModel = types
       if (!row?.height) return;
       // we only export heights for specific tiles configured to do so
       const tileType = self.getTileType(tileId);
-      const tileContentInfo = tileType ? getToolContentInfoById(tileType) : undefined;
+      const tileContentInfo = getToolContentInfoById(tileType);
       if (!tileContentInfo?.exportNonDefaultHeight) return;
       // we only export heights when they differ from the default height for the tile
       const defaultHeight = tileContentInfo.defaultHeight;

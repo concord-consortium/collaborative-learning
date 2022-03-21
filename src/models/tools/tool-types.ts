@@ -1,11 +1,22 @@
 import { Instance, types } from "mobx-state-tree";
 import { getToolContentModels, getToolContentInfoById } from "./tool-content-info";
 
-// It appears that `late()` runs the first time the union is actually required,
-// which should be after all necessary tiles are registered.
-export const ToolContentUnion = types.late(() => {
+/**
+ * A dynamic union of tool/tile content models. Its typescript type is
+ * `ToolContentModel`.
+ *
+ * This uses MST's `late()`. It appears that `late()` runs the first time the
+ * union is actually used by MST. For example to deserialize a snapshot or to
+ * create an model instance. For this to work properly, these uses need to
+ * happen after all necessary tiles are registered.
+ *
+ * By default a late type like this will have a type of `any`. All types in this
+ * late union extend ToolContentModel, so it is overridden to be
+ * ToolContentModel. This doesn't affect the MST runtime types.
+ */
+export const ToolContentUnion = types.late<typeof ToolContentModel>(() => {
   const contentModels = getToolContentModels();
-  return types.union({ dispatcher: toolFactory }, ...contentModels);
+  return types.union({ dispatcher: toolFactory }, ...contentModels) as typeof ToolContentModel;
 });
 
 export const kUnknownToolID = "Unknown";
@@ -55,12 +66,12 @@ export const _private: IPrivate = {
 };
 
 export function isToolType(type: string) {
-  return !!(type && getToolContentInfoById(type));
+  return !!getToolContentInfoById(type);
 }
 
 export function toolFactory(snapshot: any) {
   const toolType: string | undefined = snapshot?.type;
-  return toolType && getToolContentInfoById(toolType)?.modelClass || UnknownContentModel;
+  return getToolContentInfoById(toolType)?.modelClass || UnknownContentModel;
 }
 
 export function findMetadata(type: string, id: string) {

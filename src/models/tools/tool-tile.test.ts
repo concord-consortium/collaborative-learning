@@ -38,6 +38,14 @@ describe("ToolTileModel", () => {
     it(`supports the tool: ${toolID}`, () => {
       const SpecificToolContentModel = getToolContentInfoById(toolID)?.modelClass;
 
+      if (!SpecificToolContentModel) {
+        // We are throwing here instead of using an expect, so typescript picks
+        // this up as a type guard. 
+        // Perhaps in the future Jest's expect statements can act as assertions
+        // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/41179
+        throw new Error(`Can't find content model for: ${toolID}`);
+      }
+
       // can create a model with each type of tool
       const content: any = { type: toolID };
 
@@ -46,7 +54,7 @@ describe("ToolTileModel", () => {
         content.originalType = "foo";
       }
       let toolTile = ToolTileModel.create({
-                      content: SpecificToolContentModel?.create(content)
+                      content: SpecificToolContentModel.create(content)
                     });
       expect(toolTile.content.type).toBe(toolID);
 
