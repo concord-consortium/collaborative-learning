@@ -1,12 +1,12 @@
-import { has } from "lodash";
-import { autorun, reaction } from "mobx";
+import { reaction } from "mobx";
 import { types, Instance, getParentOfType, isModelType, getType, getSnapshot, getPath, hasParentOfType, addDisposer, isValidReference, detach, tryReference } from "mobx-state-tree";
+import { Variable } from "@concord-consortium/diagram-view";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { SharedModelType } from "../../models/tools/shared-model";
 import { ToolTileModel } from "../../models/tools/tool-tile";
 import { ToolContentModel } from "../../models/tools/tool-types";
 import { uniqueId } from "../../utilities/js-utils";
-import { SharedVariables, SharedVariablesType, Variable } from "../shared-variables/shared-variables";
+import { SharedVariables, SharedVariablesType } from "../shared-variables/shared-variables";
 import { kVListToolID } from "./vlist-types";
 
 export function defaultVListContent(): VListContentModelType {
@@ -20,9 +20,32 @@ const VListItem = types.model("VListItem")
   variable: types.reference(Variable)
 })
 .views(self => ({
+  get tryVariable() {
+    return tryReference(() => self.variable);
+  }
+}))
+.views(self => ({
   get name() {
-    const variable = tryReference(() => self.variable);
-    return variable?.name || `invalid variable ref: ${getSnapshot(self).variable}`;
+    const variable = self.tryVariable;
+    if (!variable) {
+      return `invalid variable ref: ${getSnapshot(self).variable}`;
+    }
+
+    return variable.name || `{name is blank}`;
+  },
+  get valueAsString() {
+    const variable = self.tryVariable;
+    if (!variable) {
+      return `invalid variable ref: ${getSnapshot(self).variable}`;
+    }
+    return variable.computedValueWithSignificantDigits;
+  },
+  get unit() {
+    const variable = self.tryVariable;
+    if (!variable) {
+      return `invalid variable ref: ${getSnapshot(self).variable}`;
+    }
+    return variable.computedUnit;
   }
 }));
 export interface VListItemType extends Instance<typeof VListItem> {}
@@ -50,13 +73,6 @@ export const VListContentModel = ToolContentModel
     const sharedModel = self.toolTile?.sharedModels.find(model => getType(model) === SharedVariables);
     return sharedModel as SharedVariablesType | undefined;
   },
-  get toolTile() {
-    if (!hasParentOfType(self, ToolTileModel)) {
-      // we aren't attached in the right place yet
-      return undefined;
-    }
-    return getParentOfType(self, ToolTileModel);
-  }
 }))
 .views(self => ({
   get variables() {
@@ -72,7 +88,8 @@ export const VListContentModel = ToolContentModel
     if (!sharedModel) {
       return;
     }
-    sharedModel.addVariable(text);
+    const variable = Variable.create({name: text});
+    sharedModel.addVariable(variable);
   },
 
   moveUp(item: VListItemType) {
@@ -101,9 +118,6 @@ export const VListContentModel = ToolContentModel
     // First cleanup any invalid references this can happen when a item is deleted
     self.items.forEach(item => {
       // If the sharedItem is not valid destroy the list item
-      // CHECKME: This approach might be too aggressive. If this autorun gets applied while an applySnapshot
-      // is in the process of running, then the reference might be invalid briefly while the rest of 
-      // the items are loading.
       if (!isValidReference(() => item.variable)) {
           self.items.remove(item);
       }

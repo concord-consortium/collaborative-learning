@@ -25,7 +25,7 @@ export const VListToolComponent: React.FC<IToolTileProps> = observer((props) => 
         { content.items.map((item, index) => (
           <li key={index}> 
             <button onClick={() => content.moveUp(item)}>^</button> 
-            {item.name}
+            {item.name}: {item.valueAsString} {item.unit}
             <button onClick={() => content.remove(item)}>x</button>
           </li> 
         ))}
