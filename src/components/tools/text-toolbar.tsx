@@ -13,6 +13,7 @@ import SuperscriptToolIcon from "../../assets/icons/text/superscript-text-icon.s
 import SubscriptToolIcon from "../../assets/icons/text/subscript-text-icon.svg";
 import NumberedListToolIcon from "../../assets/icons/text/numbered-list-text-icon.svg";
 import BulletedListToolIcon from "../../assets/icons/text/bulleted-list-text-icon.svg";
+import VariablesToolIcon from "../../plugins/shared-variables/slate/variables.svg";
 
 import "./text-toolbar.sass";
 
@@ -37,7 +38,9 @@ const buttonDefs: IButtonDef[] = [
   { iconName: "subscript",   Icon: SubscriptToolIcon,     toolTip: `Subscript`},
   { iconName: "superscript", Icon: SuperscriptToolIcon,   toolTip: `Superscript`},
   { iconName: "list-ol",     Icon: NumberedListToolIcon,  toolTip: `Numbered List`},
-  { iconName: "list-ul",     Icon: BulletedListToolIcon,  toolTip: `Bulleted List`}
+  { iconName: "list-ul",     Icon: BulletedListToolIcon,  toolTip: `Bulleted List`},
+  { iconName: "m2s-variables", Icon: VariablesToolIcon,   toolTip: `Variables`},
+  // Add variable tool
 ];
 
 const handleMouseDown = (event: React.MouseEvent) => {

@@ -2,7 +2,7 @@ import React from "react";
 import { autorun, IReactionDisposer, reaction } from "mobx";
 import { observer, inject } from "mobx-react";
 import {
-  Editor, EditorRange, EditorValue, EFormat, handleToggleSuperSubscript, SlateEditor
+  Editor, EditorRange, EditorValue, EFormat, handleToggleSuperSubscript, HtmlSerializablePlugin, SlateEditor
 } from "@concord-consortium/slate-editor";
 
 import { BaseComponent } from "../base";
@@ -14,6 +14,7 @@ import { IToolApi, TileResizeEntry } from "./tool-api";
 import { IToolTileProps } from "./tool-tile";
 
 import "./text-tool.sass";
+import { VariablesPlugin } from "../../plugins/shared-variables/slate/variables-plugin";
 
 /*
   The Slate internal data model uses, among other things, "marks" and "blocks"
@@ -89,6 +90,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
   private editor: Editor | undefined;
   private tileContentRect: DOMRectReadOnly;
   private toolbarToolApi: IToolApi | undefined;
+  private variablesPlugin: HtmlSerializablePlugin | undefined;
 
   // map from slate type string to button icon name
   private slateMap: Record<string, string> = {
@@ -101,7 +103,8 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
     "superscript": "superscript",
     "subscript": "subscript",
     "bulleted-list": "list-ul",
-    "ordered-list": "list-ol"
+    "ordered-list": "list-ol",
+    "m2s-variables": "m2s-variables",
   };
 
   public componentDidMount() {
@@ -151,6 +154,8 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
         this.toolbarToolApi?.handleTileResize?.(entry);
       }
     });
+
+    this.variablesPlugin = VariablesPlugin(this.props.model);
   }
 
   public componentWillUnmount() {
@@ -197,6 +202,9 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
           case "list-ul":
             editor.command("toggleBlock", EFormat.bulletedList);
             break;
+          case "m2s-variables":
+            editor.command("configureVariable", null);
+            break;
         }
         event.preventDefault();
       }
@@ -227,6 +235,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
           value={editorValue}
           placeholder={placeholderText}
           readOnly={readOnly}
+          plugins={[this.variablesPlugin]}
           onValueChange={this.handleChange} />
       </div>
     );

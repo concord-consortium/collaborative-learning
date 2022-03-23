@@ -8,7 +8,7 @@
     "defaultDocumentType": "personal",
     "settings": {
       "table": { "numFormat": ".2~f" },
-      "text": {"tools": ["bold", "subscript", "superscript"]}
+      "text": {"tools": ["bold", "subscript", "superscript", "m2s-variables"]}
     },
     "navTabs": {
       "showNavPanel": false,

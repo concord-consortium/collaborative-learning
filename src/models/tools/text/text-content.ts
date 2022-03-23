@@ -7,6 +7,7 @@ import {
 } from "@concord-consortium/slate-editor";
 import { ITileExportOptions } from "../tool-content-info";
 import { ToolContentModel } from "../tool-types";
+import { SharedModelType } from "../shared-model";
 
 
 export const kTextToolID = "Text";
@@ -84,6 +85,22 @@ export const TextContentModel = ToolContentModel
     setSlate(value: Value) {
       self.format = "slate";
       self.text = serializeValueToLegacy(value);
+    }
+  }))
+  .actions(self => ({
+    updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
+      // Need to look for any references to items in shared models in the text
+      // content, if they don't exist in the shared model any more then clean
+      // them up in some way. 
+      // 
+      // Perhaps for just delete them. 
+      //
+      // Because it is up to the plugins to manage this, we'll have to find a
+      // way to channel this action through all of the plugins.
+      //
+      // After cleaning up an invalid references, then it should decide if it
+      // wants to change the text content if there is a new shared model item
+      // that didn't exist before.
     }
   }));
 
