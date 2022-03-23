@@ -1,5 +1,5 @@
 import { cloneDeep, each } from "lodash";
-import { types, getSnapshot, Instance, SnapshotIn, getType } from "mobx-state-tree";
+import { types, getSnapshot, Instance, SnapshotIn, getType, IAnyComplexType } from "mobx-state-tree";
 import { PlaceholderContentModel } from "../tools/placeholder/placeholder-content";
 import { kTextToolID } from "../tools/text/text-content";
 import { getToolContentInfoById, IDocumentExportOptions } from "../tools/tool-content-info";
@@ -205,7 +205,7 @@ export const DocumentContentModel = types
 
         return snapshot;
       },
-      getFirstSharedModelByType(modelType: typeof SharedModelUnion ) {
+      getFirstSharedModelByType<IT extends typeof SharedModelUnion>(modelType: IT ): IT["Type"] | undefined {
         for (const model of self.sharedModelMap.values()) {
           if (getType(model) === modelType) {
             return model;
