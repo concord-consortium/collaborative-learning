@@ -21,3 +21,38 @@
 .ccrte-variable-highlight {
   box-shadow: 0 0 0 2px lightskyblue;
 }
+
+// HACK: Override the styles of the modal dialog provided by the slate editor
+// These styles are not currently imported from the slate editor. 
+// If the real styles were imported the modal-cover style would conflict and
+// other styles would conflict with the useModal styles.
+// A couple of better options: 
+// - have slate-editor provide a component that represents the insides of the
+//   dialog. Basically the .content and .footer sections. And then we can import
+//   the styles just for that content.
+// - just have the variable plugin provide its own UI for creating and editing
+//   variables, it doesn't seem worth the effort of using the slate-editor's
+//   declarative UI for this.
+.modal-content {
+  .ccrte-modal-dialog {
+    .dialog {
+      position: inherit;
+      flex-direction: column;
+      align-items: inherit;
+      .header {
+        display: none;
+      }
+      .content {
+        .inline-row {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+        }
+      }
+      .footer {
+        display: flex;
+        justify-content: flex-end;
+      }
+    }
+  }
+}

@@ -6,8 +6,9 @@ import { getParentOfType, getPath, getSnapshot, hasParentOfType } from "mobx-sta
 import { Editor, HtmlSerializablePlugin, RenderAttributes, 
   RenderInlineProps, hasActiveInline, IFieldValues, 
   IDialogController, 
-  getDataFromElement, getRenderAttributesFromNode, classArray, EFormat
+  getDataFromElement, getRenderAttributesFromNode, classArray, EFormat, IRow
 } from "@concord-consortium/slate-editor";
+import { VariableType, Variable } from "@concord-consortium/diagram-view";
 import "./variables-plugin.scss";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DocumentContentModel } from "../../../models/document/document-content";
@@ -80,12 +81,12 @@ function getDialogValuesFromNode(node?: Inline) {
   return values;
 }
 
-function getVariables(toolTileModel: ToolTileModelType) {
+function getSharedModel(toolTileModel: ToolTileModelType) {
   console.log("afterAttach", getPath(toolTileModel));
 
   if (!hasParentOfType(toolTileModel, DocumentContentModel)) {
     // we aren't attached in the right place yet
-    return [];
+    return;
   }
 
   // see if there is already a sharedModel in the document
@@ -95,7 +96,7 @@ function getVariables(toolTileModel: ToolTileModelType) {
 
   if (!document) {
     // We don't have a document yet
-    return [];
+    return;
   }
 
   let sharedModel = document.getFirstSharedModelByType(SharedVariables);
@@ -110,7 +111,12 @@ function getVariables(toolTileModel: ToolTileModelType) {
   // TODO: currently we always just reset the shared model on the tool tile  
   toolTileModel.setSharedModel(sharedModel);
 
-  return sharedModel.variables;
+  return sharedModel;
+}
+
+function getVariables(toolTileModel: ToolTileModelType): VariableType[] {
+  const sharedModel = getSharedModel(toolTileModel);
+  return sharedModel ? sharedModel.variables : [];
 }
 
 const kSpanTag = "span";
@@ -155,20 +161,23 @@ export function VariablesPlugin(toolTileModel: ToolTileModelType): HtmlSerializa
           return editor.command("addVariable", {reference: variable.id}, node);
         }
 
+        const rows: IRow[] = [
+          {
+            name: "reference", type: "select", label: "Reference existing variable:",
+            options: variables.map(v => ({ value: v.id, label: v.name || "no name" }))
+          },
+          { name: "or", type: "label", label: "or" },
+          { name: "create", type: "label", label: "Create new variable:" },
+          [
+            { name: "name", type: "input", label: "Name:" },
+            { name: "value", type: "input", label: "Value:" }
+          ]
+        ];
+        console.log("rows", rows);
+
         dialogController.display({
           title: "Insert Variable",
-          rows: [
-            {
-              name: "reference", type: "select", label: "Reference existing variable:",
-              options: variables.map(v => ({ value: v.id, label: v.name || "no name" }))
-            },
-            { name: "or", type: "label", label: "or" },
-            { name: "create", type: "label", label: "Create new variable:" },
-            [
-              { name: "name", type: "input", label: "Name:" },
-              { name: "value", type: "input", label: "Value:" }
-            ]
-          ],
+          rows,
           values: getDialogValuesFromNode(node),
           onChange: (_editor, name, value, values) => {
             if (name === "name") {
@@ -177,6 +186,9 @@ export function VariablesPlugin(toolTileModel: ToolTileModelType): HtmlSerializa
             else if (name === "value") {
               if (parseFloat(value) == null) return false;
               dialogController.update({ value });
+            }
+            else if (name === "reference") {
+              dialogController.update({ reference: value });
             }
           },
           onValidate: (values) => {
@@ -191,7 +203,24 @@ export function VariablesPlugin(toolTileModel: ToolTileModelType): HtmlSerializa
           },
           onAccept: (_editor, values) => {
             // ... make any necessary changes to the shared model
-            return _editor.command("addVariable", values, node);
+            let {reference} = values;
+            if (!reference) {
+              const sharedModel = getSharedModel(toolTileModel);
+              if (!sharedModel) {
+                // TODO: can we just return void here?
+                return;
+              } else {
+                let value = values.value ? parseFloat(values.value) : undefined;
+                if (value == null) {
+                  value = undefined;
+                }
+                const variable = Variable.create({name: values.name, value});
+                sharedModel.addVariable(variable);
+                reference = variable.id;
+              }
+  
+            }
+            return _editor.command("addVariable", {reference}, node);
           }
         });
         return editor;

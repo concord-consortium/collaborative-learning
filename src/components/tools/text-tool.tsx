@@ -174,42 +174,6 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
 
     if (!editorValue) return null;
 
-    const handleToolBarButtonClick = (buttonIconName: string, editor: Editor, event: React.MouseEvent) => {
-      if (buttonIconName === "undo") {
-        editor.undo();
-        event.preventDefault();
-      }
-      else {
-        switch (buttonIconName) {
-          case "bold":
-            editor.command("toggleMark", EFormat.bold);
-            break;
-          case "italic":
-            editor.command("toggleMark", EFormat.italic);
-            break;
-          case "underline":
-            editor.command("toggleMark", EFormat.underlined);
-            break;
-          case "subscript":
-            handleToggleSuperSubscript(EFormat.subscript, editor);
-            break;
-          case "superscript":
-            handleToggleSuperSubscript(EFormat.superscript, editor);
-            break;
-          case "list-ol":
-            editor.command("toggleBlock", EFormat.numberedList);
-            break;
-          case "list-ul":
-            editor.command("toggleBlock", EFormat.bulletedList);
-            break;
-          case "m2s-variables":
-            editor.command("configureVariable", null);
-            break;
-        }
-        event.preventDefault();
-      }
-    };
-
     return (
       // Ideally, this would just be 'text-tool' for consistency with other tools,
       // but 'text-tool` is used for the internal editor (cf. 'classes' above),
@@ -223,7 +187,6 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
           toolTile={toolTile}
           scale={scale}
           selectedButtons={selectedButtons || []}
-          onButtonClick={handleToolBarButtonClick}
           editor={this.editor}
           onIsEnabled={this.handleIsEnabled}
           onRegisterToolApi={this.handleRegisterToolApi}
