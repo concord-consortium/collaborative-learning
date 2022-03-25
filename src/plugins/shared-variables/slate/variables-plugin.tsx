@@ -1,7 +1,7 @@
 import React, { ReactNode } from "react";
 import classNames from "classnames/dedupe";
 import clone from "lodash/clone";
-import { Inline } from "slate";
+import { Inline, Node } from "slate";
 import { getParentOfType, getPath, getSnapshot, hasParentOfType } from "mobx-state-tree";
 import { Editor, HtmlSerializablePlugin, RenderAttributes, 
   RenderInlineProps, hasActiveInline, IFieldValues, 
@@ -15,11 +15,7 @@ import { DocumentContentModel } from "../../../models/document/document-content"
 import { SharedVariables } from "../shared-variables";
 import { VariableChip } from "./variable-chip";
 
-function formatVariable(value: number) {
-  return (Math.round(100 * value) / 100).toString();
-}
-
-const kVariableSlateType = "m2s-variable";
+export const kVariableSlateType = "m2s-variable";
 const kVariableClass = "ccrte-variable";
 const kVariableHighlightClass = "ccrte-variable-highlight";
 
@@ -259,6 +255,9 @@ export function VariablesPlugin(toolTileModel: ToolTileModelType): HtmlSerializa
               isSerializing: false,
               isHighlighted: props.isSelected || props.isFocused,
               onClick: () => editor.moveFocusToStartOfNode(node),
+              // FIXME: this isn't working, I don't understand how it should
+              // work because it isn't passing the dialogController, but it does
+              // work when this is done in the slate-editor repo.
               onDoubleClick: () => editor.command("emit", "toolbarDialog", "configureVariable", node)
             };
       return renderVariable(node, { ...dataAttrs, ...attributes }, children, options);

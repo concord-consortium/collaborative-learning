@@ -194,7 +194,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
         />
         <SlateEditor
           className={classes}
-          onEditorRef={editorRef => this.editor = editorRef}
+          onEditorRef={this.handleEditorRef}
           value={editorValue}
           placeholder={placeholderText}
           readOnly={readOnly}
@@ -285,4 +285,8 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
     return this.props.model.content as TextContentModelType;
   }
 
+  private handleEditorRef = (editor: Editor) => {
+    this.editor = editor;
+    this.getContent()?.setEditor(editor);
+  };
 }
