@@ -107,6 +107,10 @@ export const TextContentModel = ToolContentModel
     }
   }))
   .actions(self => {
+    // FIXME: we shouldn't be aware of shared model managed by a slate plugin.
+    // So when the plugin is registered with the text tile, it should include a
+    // method that can be called here to do this
+
     function getSharedModel() {
       const toolTileModel = self.toolTile;
       if (!toolTileModel || !hasParentOfType(toolTileModel, DocumentContentModel)) {
