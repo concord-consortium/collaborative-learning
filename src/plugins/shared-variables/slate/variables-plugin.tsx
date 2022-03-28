@@ -64,15 +64,26 @@ function getDataFromVariableElement(el: Element) {
   return { data: _data };
 }
 
-function getDialogValuesFromNode(node?: Inline) {
+function getDialogValuesFromNode(editor: Editor, variables: VariableType[], node?: Inline) {
   const values: Record<string, string> = {};
   const { data } = node || {};
+  const highlightedText = editor.value.fragment.text;
   let name, value;
-  if ((name = data?.get("name"))) {
-    values.name = name;
-  }
-  if ((value = data?.get("value"))) {
-    values.value = value;
+  if (highlightedText !== "") {
+    const matchingVariable = variables.find(v => v.name === highlightedText);
+    if (matchingVariable) {
+      // FIXME: We are not setting the name and value fields in the form.
+      values.reference = matchingVariable.id;
+    } else {
+      values.name = highlightedText;
+    }
+  } else {
+    if ((name = data?.get("name"))) {
+      values.name = name;
+    }
+    if ((value = data?.get("value"))) {
+      values.value = value;
+    }  
   }
   return values;
 }
@@ -174,7 +185,7 @@ export function VariablesPlugin(toolTileModel: ToolTileModelType): HtmlSerializa
         dialogController.display({
           title: "Insert Variable",
           rows,
-          values: getDialogValuesFromNode(node),
+          values: getDialogValuesFromNode(editor, variables, node),
           onChange: (_editor, name, value, values) => {
             if (name === "name") {
               dialogController.update({ name: value });
@@ -224,9 +235,38 @@ export function VariablesPlugin(toolTileModel: ToolTileModelType): HtmlSerializa
       addVariable(editor: Editor, values: IFieldValues, node?: Inline) {
         const { reference } = values;
         if (!editor || !reference ) return editor;
+        // In the slate-editor demo branch of chips, this is necessary to
+        // replace the current chip after double clicking and making a change.
+        // In this shared model version changes to the current chip's fields
+        // would not need to do a replace like this. It is just a reference.
+        // However if the user wanted to switch the chip to point to a different
+        // variable that would require replacing the current chip.
+        // 
+        // This currently makes no difference because double clicking on the
+        // chip doesn't work. I believe that is because the toolbar is not
+        // adding itself to the emitter plugin, like what happens in the slate
+        // editor state-toolbar.tsx: `emmiter?.on("toolbarDialog")...`
         if (node) {
           editor.moveToStartOfNode(node)
                 .deleteForward();
+        }
+        if (editor.value.selection) {
+          // The documentation for moveToEnd says it will collapse the selection
+          // to the end point of the current selection. This is why insertText
+          // does not clear the text of the current selection. 
+          //
+          // However in some cases the text is remaining selected: When text is
+          // selected with a matching variable name, the dialog will preselect
+          // that variable in the reference drop down menu. When the dialog is
+          // closed (without doing anything else), the text remains selected
+          // along with the new chip.
+          //
+          // If you follow the same steps but also click in the name or value
+          // fields then text will not remained selected. 
+          //
+          // So this seems to be related to focus somehow. 
+          editor.moveToEnd()
+                .insertText(" ");
         }
         editor.insertInline({
           type: kVariableSlateType,
