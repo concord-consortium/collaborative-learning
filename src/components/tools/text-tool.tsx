@@ -90,7 +90,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
   private editor: Editor | undefined;
   private tileContentRect: DOMRectReadOnly;
   private toolbarToolApi: IToolApi | undefined;
-  private variablesPlugin: HtmlSerializablePlugin | undefined;
+  private plugins: HtmlSerializablePlugin[] | undefined;
 
   // map from slate type string to button icon name
   private slateMap: Record<string, string> = {
@@ -155,7 +155,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
       }
     });
 
-    this.variablesPlugin = VariablesPlugin(this.props.model);
+    this.plugins = [VariablesPlugin(this.props.model)];
   }
 
   public componentWillUnmount() {
@@ -198,7 +198,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
           value={editorValue}
           placeholder={placeholderText}
           readOnly={readOnly}
-          plugins={[this.variablesPlugin]}
+          plugins={this.plugins}
           onValueChange={this.handleChange} />
       </div>
     );
