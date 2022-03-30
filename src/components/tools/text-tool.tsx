@@ -2,7 +2,7 @@ import React from "react";
 import { autorun, IReactionDisposer, reaction } from "mobx";
 import { observer, inject } from "mobx-react";
 import {
-  Editor, EditorRange, EditorValue, EFormat, handleToggleSuperSubscript, HtmlSerializablePlugin, SlateEditor
+  Editor, EditorRange, EditorValue, HtmlSerializablePlugin, SlateEditor
 } from "@concord-consortium/slate-editor";
 
 import { BaseComponent } from "../base";

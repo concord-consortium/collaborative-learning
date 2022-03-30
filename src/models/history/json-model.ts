@@ -1,10 +1,12 @@
-import { getSnapshot, types } from "mobx-state-tree";
+import { types } from "mobx-state-tree";
 
+// This is a demonstration of how generic JSON objects can be turned into MST
+// models
 const JArray: any = types.array(types.late(() => JValue));
 export const MstJsonObject: any = types.map(types.late(() => JValue));
 const JValue = types.union(MstJsonObject, JArray, types.string, types.number, types.null);
 
-(window as any).testGeneric = (obj: any) => {
-    const testObject = MstJsonObject.create(obj);
-    console.log(getSnapshot(testObject));
-};
+// (window as any).testGeneric = (obj: any) => {
+//     const testObject = MstJsonObject.create(obj);
+//     console.log(getSnapshot(testObject));
+// };

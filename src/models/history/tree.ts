@@ -1,9 +1,14 @@
-import { types, IJsonPatch, applyPatch, resolvePath, getSnapshot, getEnv, getParentOfType } from "mobx-state-tree";
+import { types, IJsonPatch, applyPatch, resolvePath, getSnapshot, getParentOfType } from "mobx-state-tree";
 import { nanoid } from "nanoid";
+import { DEBUG_DOCUMENT } from "../../lib/debug";
 import { DocumentContentModel, DocumentContentModelType } from "../document/document-content";
 import { SharedModelType } from "../tools/shared-model";
 import { ToolTileModelType } from "../tools/tool-tile";
 import { ContainerAPI } from "./container-api";
+
+if (DEBUG_DOCUMENT) {
+  (window as any).getSnapshot = getSnapshot;
+}
 
 export const Tree = types.model("Tree", {
 })
@@ -18,7 +23,7 @@ export const Tree = types.model("Tree", {
 }))
 .actions(self => ({
   // tiles.  In the prototype there was just one tile per tree. And in that
-  // FIXME: this is where the tree should call a similiar method in all of its
+  // FIXME: this is where the tree should call a similar method in all of its
   // case the Tiles extended the Tree. Now in CLUE we want to support multiple
   // tiles in one tree. 
 
@@ -34,7 +39,6 @@ export const Tree = types.model("Tree", {
   // This "finding" should be done in a view so it is cached and doesn't
   // require the lookup on every shared model change.
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   updateTreeAfterSharedModelChanges(options: {sharedModel: SharedModelType} | {document: DocumentContentModelType}) {
     // If there is no sharedModel run the update function on all tiles which
     // have shared model references
@@ -211,8 +215,8 @@ export const Tree = types.model("Tree", {
 
       // Note: the environment of the call will be undefined because the undoRecorder cleared 
       // it out before it calling this function
-      console.log(`observed changes in sharedModel: ${model.id} of tree: ${self.treeId}`, 
-        {historyEntryId, action: call});
+      // console.log(`observed changes in sharedModel: ${model.id} of tree: ${self.treeId}`, 
+      //   {historyEntryId, action: call});
 
       // What is tricky is that this is being called when the snapshot is applied by the
       // sharedModel syncing code "sendSnapshotToSharedModel". In that case we want to do

@@ -1,16 +1,14 @@
 import { forEach } from "lodash";
-import { getSnapshot, types } from "mobx-state-tree";
+import { types } from "mobx-state-tree";
+import { observable } from "mobx";
 import { AppConfigModelType } from "./app-config-model";
-import { DocumentModel, DocumentModelType } from "../document/document";
+import { DocumentModelType } from "../document/document";
 import {
   DocumentType, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
   PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemPublication
 } from "../document/document-types";
 import { ClassModelType } from "./class";
 import { UserModelType } from "./user";
-import { addTreeMonitor } from "../history/tree-monitor";
-import { Container } from "../history/container";
-import { observable } from "mobx";
 
 const extractLatestPublications = (publications: DocumentModelType[], attr: "uid" | "originDoc") => {
   const latestPublications: DocumentModelType[] = [];
@@ -264,8 +262,6 @@ export const DocumentsModel = types
   });
 
 export type DocumentsModelType = typeof DocumentsModel.Type;
-
-(window as any).getSnapshot = getSnapshot;
 
 export function createDocumentsModelWithRequiredDocuments(requiredTypes: string[]) {
   const documents = DocumentsModel.create();

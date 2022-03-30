@@ -1,4 +1,4 @@
-import { types, Instance, hasParentOfType, getParentOfType, getSnapshot } from "mobx-state-tree";
+import { types, Instance, hasParentOfType, getParentOfType } from "mobx-state-tree";
 import { Value, Inline } from "slate";
 import Plain from "slate-plain-serializer";
 import Markdown from "slate-md-serializer";
@@ -133,7 +133,6 @@ export const TextContentModel = ToolContentModel
       if (!sharedModel) {
         // The document doesn't have a shared model yet
         sharedModel = SharedVariables.create();
-        console.log(getSnapshot(sharedModel));
         document.addSharedModel(sharedModel);
       }
     
@@ -176,7 +175,6 @@ export const TextContentModel = ToolContentModel
           return Inline.isInline(_node) && _node.type === kVariableSlateType;
         });
         variableNodes.forEach((element: Inline) => {
-          console.log("VariableNode", element.data.get("reference"));
           // Does this variable exist in our list?
           if(!variables.find(v => v.id === element.data.get("reference"))){
             self.editor.removeNodeByKey(element.key);

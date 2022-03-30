@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useSyncMstNodeToFirebase } from "./use-sync-mst-node-to-firebase";
 import { useSyncMstPropToFirebase } from "./use-sync-mst-prop-to-firebase";
-import { DEBUG_SAVE } from "../lib/debug";
+import { DEBUG_DOCUMENT, DEBUG_SAVE } from "../lib/debug";
 import { Firebase } from "../lib/firebase";
 import { DocumentModelType } from "../models/document/document";
 import {
@@ -30,8 +30,9 @@ export function useDocumentSyncToFirebase(
   const { content: contentPath, typedMetadata } = firebase.getUserDocumentPaths(user, type, key, uid);
   !readOnly && (user.id !== uid) && console.warn("useDocumentSyncToFirebase monitoring another user's document?!?");
 
-  // To help with debugging
-  (window as any).currentDocument = document;
+  if (DEBUG_DOCUMENT) {
+    (window as any).currentDocument = document;
+  }
 
   // sync visibility (public/private) for problem documents
   useSyncMstPropToFirebase<typeof document.visibility>({
