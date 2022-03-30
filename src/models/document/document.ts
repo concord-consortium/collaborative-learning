@@ -15,13 +15,16 @@ import { getFirebaseFunction } from "../../hooks/use-firebase-function";
 import { IDocumentProperties } from "../../lib/db-types";
 import { getLocalTimeStamp } from "../../utilities/time";
 import { safeJsonParse } from "../../utilities/js-utils";
+import { Container } from "../history/container";
+import { Tree } from "../history/tree";
+import { addTreeMonitor } from "../history/tree-monitor";
 
 interface IMatchPropertiesOptions {
   isTeacherDocument?: boolean;
 }
 
-export const DocumentModel = types
-  .model("Document", {
+export const DocumentModel = Tree.named("Document")
+  .props({
     uid: types.string,
     type: DocumentTypeEnum,
     key: types.string,
@@ -39,9 +42,16 @@ export const DocumentModel = types
     changeCount: types.optional(types.number, 0)
   })
   .volatile(self => ({
-    queryPromise: undefined as Promise<UseQueryResult<IGetNetworkDocumentResponse>> | undefined
+    queryPromise: undefined as Promise<UseQueryResult<IGetNetworkDocumentResponse>> | undefined,
+    // This is not really needed for functionality but it is helpful for
+    // debugging
+    container: undefined as any  
   }))
   .views(self => ({
+    // This is needed for the tree monitor and container
+    get treeId() {
+      return self.key;
+    },
     get isProblem() {
       return (self.type === ProblemDocument) || (self.type === ProblemPublication);
     },
@@ -258,6 +268,15 @@ export const DocumentModel = types
 
     setProperties(properties: ISetProperties) {
       forEach(properties, (value, key) => self.setProperty(key, value));
+    }
+  }))
+  .actions(self => ({
+    afterCreate() {
+      const container = Container({});
+      self.container = container;
+      self.containerAPI = container.containerAPI;
+      addTreeMonitor(self, container.containerAPI, false);
+      container.trees[self.treeId] = self;
     }
   }));
 

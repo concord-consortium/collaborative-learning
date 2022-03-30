@@ -1,7 +1,7 @@
 import React, { ReactNode } from "react";
 import classNames from "classnames/dedupe";
 import clone from "lodash/clone";
-import { Inline, Node } from "slate";
+import { Inline } from "slate";
 import { getParentOfType, getPath, getSnapshot, hasParentOfType } from "mobx-state-tree";
 import { Editor, HtmlSerializablePlugin, RenderAttributes, 
   RenderInlineProps, hasActiveInline, IFieldValues, 

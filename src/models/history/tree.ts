@@ -1,19 +1,29 @@
-import { types, IJsonPatch, applyPatch, resolvePath, getSnapshot, getEnv, getParentOfType } from "mobx-state-tree";
+import { types, IJsonPatch, applyPatch, resolvePath, getSnapshot, getParentOfType } from "mobx-state-tree";
 import { nanoid } from "nanoid";
+import { DEBUG_DOCUMENT } from "../../lib/debug";
 import { DocumentContentModel, DocumentContentModelType } from "../document/document-content";
 import { SharedModelType } from "../tools/shared-model";
 import { ToolTileModelType } from "../tools/tool-tile";
 import { ContainerAPI } from "./container-api";
 
+if (DEBUG_DOCUMENT) {
+  (window as any).getSnapshot = getSnapshot;
+}
+
 export const Tree = types.model("Tree", {
-  id: types.identifier
 })
 .volatile(self => ({
   applyingContainerPatches: false,
+  containerAPI: undefined as ContainerAPI | undefined
+}))
+.views(self => ({
+  get treeId(): string {
+    throw new Error("Trees need to provide a treeId property");
+  }
 }))
 .actions(self => ({
   // tiles.  In the prototype there was just one tile per tree. And in that
-  // FIXME: this is where the tree should call a similiar method in all of its
+  // FIXME: this is where the tree should call a similar method in all of its
   // case the Tiles extended the Tree. Now in CLUE we want to support multiple
   // tiles in one tree. 
 
@@ -29,7 +39,6 @@ export const Tree = types.model("Tree", {
   // This "finding" should be done in a view so it is cached and doesn't
   // require the lookup on every shared model change.
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   updateTreeAfterSharedModelChanges(options: {sharedModel: SharedModelType} | {document: DocumentContentModelType}) {
     // If there is no sharedModel run the update function on all tiles which
     // have shared model references
@@ -53,8 +62,15 @@ export const Tree = types.model("Tree", {
         }
       });
     } else {
+      // Ignore the options for now and just assume this tree is a DocumentModel
+      const document = (self as any).content as DocumentContentModelType ;
+
+      // If we still don't have a document just let the exception happen so we
+      // can track this down
+      // TODO: this whole code path needs a lot of cleanup
+
       // Only include tiles that have at least one shared model
-      options.document.tileMap.forEach(tile => {
+      document.tileMap.forEach(tile => {
         if (tile.sharedModels.length > 0) {
           tiles.push(tile);
         }
@@ -185,8 +201,6 @@ export const Tree = types.model("Tree", {
   
 })
 .actions(self => {
-  const containerAPI = () => getEnv(self).containerAPI as ContainerAPI;
-
   // FIXME: need figure out how to handle the async part here
   // Being an action we should use a flow
   //
@@ -201,7 +215,8 @@ export const Tree = types.model("Tree", {
 
       // Note: the environment of the call will be undefined because the undoRecorder cleared 
       // it out before it calling this function
-      console.log(`observed changes in sharedModel: ${model.id} of tree: ${self.id}`, {historyEntryId, action: call});
+      // console.log(`observed changes in sharedModel: ${model.id} of tree: ${self.treeId}`, 
+      //   {historyEntryId, action: call});
 
       // What is tricky is that this is being called when the snapshot is applied by the
       // sharedModel syncing code "sendSnapshotToSharedModel". In that case we want to do
@@ -249,7 +264,7 @@ export const Tree = types.model("Tree", {
         // the shared model callbacks and then they are all
         // waited for, and finally the callId is closed. 
         //
-        await containerAPI().updateSharedModel(historyEntryId, callId, self.id, snapshot);
+        await self.containerAPI?.updateSharedModel(historyEntryId, callId, self.treeId, snapshot);
       }
 
       // let the tile update its model based on the updates that
@@ -333,7 +348,7 @@ export const Tree = types.model("Tree", {
       //   would be better if we could streamline this.
       //
       const updateTreeCallId = nanoid();
-      await containerAPI().startHistoryEntryCall(historyEntryId, updateTreeCallId);
+      await self.containerAPI?.startHistoryEntryCall(historyEntryId, updateTreeCallId);
 
       // This should always result in a addTreePatchRecord being
       // called even if there are no changes.
