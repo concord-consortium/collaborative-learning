@@ -30,6 +30,9 @@ export function useDocumentSyncToFirebase(
   const { content: contentPath, typedMetadata } = firebase.getUserDocumentPaths(user, type, key, uid);
   !readOnly && (user.id !== uid) && console.warn("useDocumentSyncToFirebase monitoring another user's document?!?");
 
+  // To help with debugging
+  (window as any).currentDocument = document;
+
   // sync visibility (public/private) for problem documents
   useSyncMstPropToFirebase<typeof document.visibility>({
     firebase, model: document, prop: "visibility", path: typedMetadata,

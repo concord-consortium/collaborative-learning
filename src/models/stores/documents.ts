@@ -10,7 +10,7 @@ import { ClassModelType } from "./class";
 import { UserModelType } from "./user";
 import { addTreeMonitor } from "../history/tree-monitor";
 import { Container } from "../history/container";
-import { Tree } from "../history/tree";
+import { observable } from "mobx";
 
 const extractLatestPublications = (publications: DocumentModelType[], attr: "uid" | "originDoc") => {
   const latestPublications: DocumentModelType[] = [];
@@ -32,14 +32,14 @@ export interface IRequiredDocumentPromise {
   isResolved: boolean;
 }
 
-export const DocumentsModel = Tree.named("Documents")
-  .props({
-    id: "main", // HACK for now to support tree monitor middleware
-    all: types.array(DocumentModel)
+// types
+export const DocumentsModel = types
+  .model("Documents", {
   })
   .volatile(self => ({
     appConfig: undefined as AppConfigModelType | undefined,
-    requiredDocuments: {} as Record<string, IRequiredDocumentPromise>
+    requiredDocuments: {} as Record<string, IRequiredDocumentPromise>,
+    all: observable<DocumentModelType>([])
   }))
   .views(self => ({
     getDocument(documentKey: string) {
@@ -265,14 +265,10 @@ export const DocumentsModel = Tree.named("Documents")
 
 export type DocumentsModelType = typeof DocumentsModel.Type;
 
-const container = Container({});
-(window as any).container = container;
 (window as any).getSnapshot = getSnapshot;
 
 export function createDocumentsModelWithRequiredDocuments(requiredTypes: string[]) {
-  const documents = DocumentsModel.create({id: "main"}, {containerAPI: container.containerAPI});
-  addTreeMonitor(documents, container.containerAPI, false);
-  container.trees.main = documents;
+  const documents = DocumentsModel.create();
   documents.addRequiredDocumentPromises(requiredTypes);
   return documents;
 }
