@@ -223,7 +223,7 @@ export const addTreeMonitor = (tree: Instance<typeof Tree> ,  container: Contain
 
             // TODO: CLUE Specific filtering of 'changeCount', should we record
             // this or not?
-            const filterChangeCount = (patch: IJsonPatch) => !patch.path.match(/\/all\/\d+\/changeCount/);
+            const filterChangeCount = (patch: IJsonPatch) => !patch.path.match(/\/changeCount/);
             const patches = recorder.patches.filter(filterChangeCount);
             const inversePatches = recorder.inversePatches.filter(filterChangeCount);
 
