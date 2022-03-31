@@ -3,10 +3,9 @@ import classNames from "classnames/dedupe";
 import clone from "lodash/clone";
 import { Inline } from "slate";
 import { getParentOfType, getPath, getSnapshot, hasParentOfType } from "mobx-state-tree";
-import { Editor, HtmlSerializablePlugin, RenderAttributes, 
-  RenderInlineProps, hasActiveInline, IFieldValues, 
-  IDialogController, 
-  getDataFromElement, getRenderAttributesFromNode, classArray, EFormat, IRow
+import {
+  Editor, HtmlSerializablePlugin, RenderAttributes, RenderInlineProps, hasActiveInline, IFieldValues,
+  IDialogController, getDataFromElement, getRenderAttributesFromNode, classArray, EFormat, IRow
 } from "@concord-consortium/slate-editor";
 import { VariableType, Variable } from "@concord-consortium/diagram-view";
 import "./variables-plugin.scss";
@@ -19,6 +18,10 @@ export const kVariableSlateType = "m2s-variable";
 const kVariableClass = "ccrte-variable";
 const kVariableHighlightClass = "ccrte-variable-highlight";
 
+function parseVariableValue(value?: string) {
+  return value ? parseFloat(value) : undefined;
+}
+
 interface IRenderOptions {
   toolTileModel: ToolTileModelType;
   isSerializing?: boolean;
@@ -29,11 +32,12 @@ interface IRenderOptions {
 function renderVariable(node: Inline, attributes: RenderAttributes, children: ReactNode, options?: IRenderOptions) {
   const { data } = node;
   const { className, ...otherAttributes } = attributes;
-  const highlightClass = options?.isHighlighted && !options?.isSerializing ? kVariableHighlightClass : undefined;
+  const { isHighlighted, isSerializing, onClick: _onClick, onDoubleClick: _onDoubleClick } = options || {};
+  const highlightClass = isHighlighted && !isSerializing ? kVariableHighlightClass : undefined;
   const reference: string = data.get("reference");
   const classes = classNames(classArray(className), kVariableClass, highlightClass) || undefined;
-  const onClick = options?.isSerializing ? undefined : options?.onClick;
-  const onDoubleClick = options?.isSerializing ? undefined : options?.onDoubleClick;
+  const onClick = isSerializing ? undefined : _onClick;
+  const onDoubleClick = isSerializing ? undefined : _onDoubleClick;
 
   if (!options) {
     throw new Error("Can't render variable without options");
@@ -44,7 +48,7 @@ function renderVariable(node: Inline, attributes: RenderAttributes, children: Re
 
   return (
     <span className={classes} onClick={onClick} onDoubleClick={onDoubleClick} {...otherAttributes}>
-      { variable ? 
+      { variable ?
         <VariableChip {...{variable}}/> :
         `invalid reference: ${reference}`
     }
@@ -54,34 +58,41 @@ function renderVariable(node: Inline, attributes: RenderAttributes, children: Re
 
 function getDataFromVariableElement(el: Element) {
   const { data } = getDataFromElement(el);
-  const _data: Record<string, string | number | boolean> = clone(data) || {};
+  const _data: Record<string, string | number | boolean | undefined> = clone(data) || {};
   if (data?.name) {
     _data.name = data.name;
   }
-  if (data?.value) {
-    _data.value = Math.round(parseFloat(data.value));
-  }
+  _data.value = parseVariableValue(data?.value);
   return { data: _data };
+}
+
+function getReferenceFromNode(node?: Inline) {
+  const { data } = node || {};
+  return data?.get("reference");
 }
 
 function getDialogValuesFromNode(editor: Editor, variables: VariableType[], node?: Inline) {
   const values: Record<string, string> = {};
-  const { data } = node || {};
   const highlightedText = editor.value.fragment.text;
-  const reference = data?.get("reference");
+  const reference = getReferenceFromNode(node);
   if (reference) {
     // I think the only time this will happen is when the user double clicked on a
     // node. The node is not set otherwise.
     values.reference = reference;
+    const variable = variables.find(v => v.id === reference);
+    values.name = variable?.name || "";
+    values.value = variable?.computedValueWithSignificantDigits ?? "";
   } else if (highlightedText !== "") {
     const matchingVariable = variables.find(v => v.name === highlightedText);
     if (matchingVariable) {
       // FIXME: We are not setting the name and value fields in the form.
       values.reference = matchingVariable.id;
+      values.name = matchingVariable.name || "";
+      values.value = matchingVariable.computedValueWithSignificantDigits;
     } else {
       values.name = highlightedText;
     }
-  } 
+  }
   return values;
 }
 
@@ -112,7 +123,7 @@ function getSharedModel(toolTileModel: ToolTileModelType) {
     document.addSharedModel(sharedModel);
   }
 
-  // TODO: currently we always just reset the shared model on the tool tile  
+  // TODO: currently we always just reset the shared model on the tool tile
   toolTileModel.setSharedModel(sharedModel);
 
   return sharedModel;
@@ -157,11 +168,11 @@ export function VariablesPlugin(toolTileModel: ToolTileModelType): HtmlSerializa
       }
     },
     commands: {
-      configureVariable(editor: Editor, dialogController: IDialogController | null, node?: Inline) {        
+      configureVariable(editor: Editor, dialogController: IDialogController | null, node?: Inline) {
         const variables = getVariables(toolTileModel);
 
         if (!dialogController) {
-          const variable = variables[0];          
+          const variable = variables[0];
           return editor.command("addVariable", {reference: variable.id}, node);
         }
 
@@ -179,8 +190,9 @@ export function VariablesPlugin(toolTileModel: ToolTileModelType): HtmlSerializa
         ];
         console.log("rows", rows);
 
+        const _reference = getReferenceFromNode(node);
         dialogController.display({
-          title: "Insert Variable",
+          title: _reference ? "Edit Variable" : "Insert Variable",
           rows,
           values: getDialogValuesFromNode(editor, variables, node),
           onChange: (_editor, name, value, values) => {
@@ -196,25 +208,23 @@ export function VariablesPlugin(toolTileModel: ToolTileModelType): HtmlSerializa
             }
           },
           onValidate: (values) => {
-            const name = values.reference || values.name;
-            if (values.reference) {
-              // If we have a reference assume it is value
-              return values;
-            }
-            const value = parseFloat(values.value);
-            // FIXME: It is normal to allow variables with out values
-            return !!name && isFinite(value) ? values : "Error: invalid name or value";
+            return values.reference || values.name ? values : "Error: invalid name or value";
           },
           onAccept: (_editor, values) => {
             // ... make any necessary changes to the shared model
             let {reference} = values;
-            if (!reference) {
+            if (reference) {
+              const variable = variables.find(v => v.id === reference);
+              variable?.setName(values.name);
+              variable?.setValue(parseVariableValue(values.value));
+            }
+            else {
               const sharedModel = getSharedModel(toolTileModel);
               if (!sharedModel) {
                 // TODO: can we just return void here?
                 return;
               } else {
-                let value = values.value ? parseFloat(values.value) : undefined;
+                let value = parseVariableValue(values.value);
                 if (value == null) {
                   value = undefined;
                 }
@@ -222,7 +232,6 @@ export function VariablesPlugin(toolTileModel: ToolTileModelType): HtmlSerializa
                 sharedModel.addVariable(variable);
                 reference = variable.id;
               }
-  
             }
             return _editor.command("addVariable", {reference}, node);
           }
@@ -247,7 +256,7 @@ export function VariablesPlugin(toolTileModel: ToolTileModelType): HtmlSerializa
         if (editor.value.selection) {
           // The documentation for moveToEnd says it will collapse the selection
           // to the end point of the current selection. This is why insertText
-          // does not clear the text of the current selection. 
+          // does not clear the text of the current selection.
           //
           // However in some cases the text is remaining selected: When text is
           // selected with a matching variable name, the dialog will preselect
@@ -256,9 +265,9 @@ export function VariablesPlugin(toolTileModel: ToolTileModelType): HtmlSerializa
           // along with the new chip.
           //
           // If you follow the same steps but also click in the name or value
-          // fields then text will not remained selected. 
+          // fields then text will not remained selected.
           //
-          // So this seems to be related to focus somehow. 
+          // So this seems to be related to focus somehow.
           editor.moveToEnd()
                 .insertText(" ");
         }

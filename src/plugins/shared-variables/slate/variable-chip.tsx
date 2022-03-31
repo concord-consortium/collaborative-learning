@@ -14,9 +14,9 @@ export const VariableChip: React.FC<IProps> = observer(({variable}) => {
   return (
     <>
       <span className="ccrte-name">{name}</span>
-      <span className="ccrte-equals">=</span>
-      <span className="ccrte-value">{value}</span>
-      <span className="ccrte=unit">{unit}</span>
+      {value && <span className="ccrte-equals">=</span>}
+      {value && <span className="ccrte-value">{value}</span>}
+      {value && <span className="ccrte=unit">{unit}</span>}
     </>
   );
 });
