@@ -22,6 +22,16 @@ function parseVariableValue(value?: string) {
   return value ? parseFloat(value) : undefined;
 }
 
+// This is for the input field 
+function variableValueToString(value?: number) {
+  if (value === undefined) {
+    return "";
+  }
+  // The first argument is the locale, using undefined means it should pick up the default
+  // browser locale
+  return new Intl.NumberFormat(undefined, { maximumFractionDigits: 4 }).format(value);
+}
+
 interface IRenderOptions {
   toolTileModel: ToolTileModelType;
   isSerializing?: boolean;
@@ -81,14 +91,14 @@ function getDialogValuesFromNode(editor: Editor, variables: VariableType[], node
     values.reference = reference;
     const variable = variables.find(v => v.id === reference);
     values.name = variable?.name || "";
-    values.value = variable?.computedValueWithSignificantDigits ?? "";
+    values.value = variableValueToString(variable?.value);
   } else if (highlightedText !== "") {
     const matchingVariable = variables.find(v => v.name === highlightedText);
     if (matchingVariable) {
       // FIXME: We are not setting the name and value fields in the form.
       values.reference = matchingVariable.id;
       values.name = matchingVariable.name || "";
-      values.value = matchingVariable.computedValueWithSignificantDigits;
+      values.value = variableValueToString(matchingVariable.value);
     } else {
       values.name = highlightedText;
     }
@@ -204,7 +214,11 @@ export function VariablesPlugin(toolTileModel: ToolTileModelType): HtmlSerializa
               dialogController.update({ value });
             }
             else if (name === "reference") {
-              dialogController.update({ reference: value });
+              const reference = value;
+              const variable = variables.find(v => v.id === reference);
+              const variableName = variable?.name || "";
+              const variableValue = variableValueToString(variable?.value);
+              dialogController.update({ reference, name: variableName, value: variableValue });
             }
           },
           onValidate: (values) => {
