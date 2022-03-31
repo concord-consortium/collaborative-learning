@@ -255,35 +255,27 @@ export function VariablesPlugin(toolTileModel: ToolTileModelType): HtmlSerializa
       addVariable(editor: Editor, values: IFieldValues, node?: Inline) {
         const { reference } = values;
         if (!editor || !reference ) return editor;
-        // The intention here is to select the node that was double clicked on
-        // so the following insert will replace this node. However this isn't
-        // working. Just manually selecting a node and typing a character or
-        // hitting delete also doesn't work. So I suspect when those things are
-        // fixed this will be fixed too.
-        //
-        // If the only thing changed is the contents of the variable (name,
-        // value, or unit) it isn't necessary to replace the node.  But it
-        // doesn't hurt.
         if (node) {
-          editor.moveToRangeOfNode(node);
-        }
-        if (editor.value.selection) {
+          // If there is a node it means the user double clicked on a chip to
+          // edit it. So we select that existing node in a way that inserting
+          // something new will replace it.
+          //
+          // For some reason the range of the chip node is not really its full
+          // range it is necessary to move the focus forward one to select it in
+          // a way to be able to delete it. You can emulate this behavior
+          // manually. If you click a chip and then type a character nothing
+          // happens. But if you click a chip and hit shift+right_arrow then no
+          // more text is selected, but typing a char replaces the chip.
+          editor.moveToRangeOfNode(node).moveFocusForward(1);
+        } else if (editor.value.selection) {
           // The documentation for moveToEnd says it will collapse the selection
           // to the end point of the current selection. This is why insertText
           // does not clear the text of the current selection.
           //
-          // However in some cases the text is remaining selected: When text is
-          // selected with a matching variable name, the dialog will preselect
-          // that variable in the reference drop down menu. When the dialog is
-          // closed (without doing anything else), the text remains selected
-          // along with the new chip.
-          //
-          // If you follow the same steps but also click in the name or value
-          // fields then text will not remained selected.
-          //
-          // So this seems to be related to focus somehow.
-          editor.moveToEnd()
-                .insertText(" ");
+          // We only want to do this when there is a selection. We don't want to
+          // add a space otherwise. And if a node is selected we want it to be
+          // selected so it can be replaced.
+          editor.moveToEnd().insertText(" ");
         }
         editor.insertInline({
           type: kVariableSlateType,
@@ -294,7 +286,7 @@ export function VariablesPlugin(toolTileModel: ToolTileModelType): HtmlSerializa
     },
     schema: {
       inlines: {
-        variable: {
+        [kVariableSlateType]: {
           isVoid: true
         }
       }
