@@ -1,10 +1,14 @@
-import React from "react";
+import React, { useEffect } from "react";
 import ReactDOM from "react-dom";
 import { Editor, EFormat, handleToggleSuperSubscript } from "@concord-consortium/slate-editor";
 import { IFloatingToolbarProps, useFloatingToolbarLocation } from "./hooks/use-floating-toolbar-location";
 import { useSettingFromStores } from "../../hooks/use-stores";
 import { TextToolbarButton } from "./text-toolbar-button";
 import { IRegisterToolApiProps } from "./tool-tile";
+// Note this isn't listed as a direct dependency, it is transitive from the
+// slate-editor. Perhaps it should be exported by the slate-editor
+import EventEmitter from "eventemitter3";
+
 import { isMac } from "../../utilities/browser";
 import BoldToolIcon from "../../assets/icons/text/bold-text-icon.svg";
 import ItalicToolIcon from "../../assets/icons/text/italic-text-icon.svg";
@@ -105,6 +109,18 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
       event.preventDefault();
     }
   };
+  
+  // listen for configuration requests from plugins
+  useEffect(() => {
+    const emitter: EventEmitter | undefined = editor?.query("emitter");
+    const handler = (event: string, ...args: any) => {
+      editor?.command(event, dialogController, ...args);
+    };
+    emitter?.on("toolbarDialog", handler);
+    return () => {
+      emitter?.off("toolbarDialog", handler);
+    };
+  }, [editor, dialogController]);
   
   return documentContent
     ? ReactDOM.createPortal(
