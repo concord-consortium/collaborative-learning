@@ -68,8 +68,12 @@ function getDialogValuesFromNode(editor: Editor, variables: VariableType[], node
   const values: Record<string, string> = {};
   const { data } = node || {};
   const highlightedText = editor.value.fragment.text;
-  let name, value;
-  if (highlightedText !== "") {
+  const reference = data?.get("reference");
+  if (reference) {
+    // I think the only time this will happen is when the user double clicked on a
+    // node. The node is not set otherwise.
+    values.reference = reference;
+  } else if (highlightedText !== "") {
     const matchingVariable = variables.find(v => v.name === highlightedText);
     if (matchingVariable) {
       // FIXME: We are not setting the name and value fields in the form.
@@ -77,14 +81,7 @@ function getDialogValuesFromNode(editor: Editor, variables: VariableType[], node
     } else {
       values.name = highlightedText;
     }
-  } else {
-    if ((name = data?.get("name"))) {
-      values.name = name;
-    }
-    if ((value = data?.get("value"))) {
-      values.value = value;
-    }  
-  }
+  } 
   return values;
 }
 
@@ -235,20 +232,17 @@ export function VariablesPlugin(toolTileModel: ToolTileModelType): HtmlSerializa
       addVariable(editor: Editor, values: IFieldValues, node?: Inline) {
         const { reference } = values;
         if (!editor || !reference ) return editor;
-        // In the slate-editor demo branch of chips, this is necessary to
-        // replace the current chip after double clicking and making a change.
-        // In this shared model version changes to the current chip's fields
-        // would not need to do a replace like this. It is just a reference.
-        // However if the user wanted to switch the chip to point to a different
-        // variable that would require replacing the current chip.
-        // 
-        // This currently makes no difference because double clicking on the
-        // chip doesn't work. I believe that is because the toolbar is not
-        // adding itself to the emitter plugin, like what happens in the slate
-        // editor state-toolbar.tsx: `emmiter?.on("toolbarDialog")...`
+        // The intention here is to select the node that was double clicked on
+        // so the following insert will replace this node. However this isn't
+        // working. Just manually selecting a node and typing a character or
+        // hitting delete also doesn't work. So I suspect when those things are
+        // fixed this will be fixed too.
+        //
+        // If the only thing changed is the contents of the variable (name,
+        // value, or unit) it isn't necessary to replace the node.  But it
+        // doesn't hurt.
         if (node) {
-          editor.moveToStartOfNode(node)
-                .deleteForward();
+          editor.moveToRangeOfNode(node);
         }
         if (editor.value.selection) {
           // The documentation for moveToEnd says it will collapse the selection
