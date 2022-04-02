@@ -25,7 +25,7 @@ describe("ToolButtonComponent", () => {
 
   it("renders disabled select tool", () => {
     const toolButton = ToolButtonModel.create({
-      name: "select",
+      id: "select",
       title: "Select",
       iconId: "icon-select-tool",
       isDefault: true,
@@ -54,7 +54,7 @@ describe("ToolButtonComponent", () => {
 
   it("renders enabled text tool", () => {
     const toolButton = ToolButtonModel.create({
-      name: "text",
+      id: "Text",
       title: "Text",
       isDefault: false,
       isTileTool: true

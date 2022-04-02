@@ -7,7 +7,6 @@ import GeometryToolIcon from "../../../clue/assets/icons/graph-tool.svg";
 
 registerToolContentInfo({
   id: kGeometryToolID,
-  tool: "geometry",
   titleBase: "Graph",
   modelClass: GeometryContentModel,
   metadataClass: GeometryMetadataModel,

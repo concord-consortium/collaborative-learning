@@ -15,15 +15,12 @@ import { DEBUG_CANVAS } from "../../lib/debug";
 
 import "./canvas.sass";
 
-export type EditabilityLocation = "north east" | "north west" | "south east" | "south west";
-
 interface IProps {
   context: string;
   scale?: number;
   readOnly?: boolean;
   document?: DocumentModelType;
   content?: DocumentContentModelType;
-  editabilityLocation?: EditabilityLocation;
   overlayMessage?: string;
   selectedSectionId?: string | null;
   viaTeacherDashboard?: boolean;
@@ -72,25 +69,11 @@ export class CanvasComponent extends BaseComponent<IProps> {
       <ToolApiInterfaceContext.Provider value={this.toolApiInterface}>
         <div key="canvas" className="canvas" data-test="canvas" onKeyDown={this.handleKeyDown}>
           {this.renderContent()}
-          {this.renderEditability()}
           {this.renderDebugInfo()}
           {this.renderOverlayMessage()}
         </div>
       </ToolApiInterfaceContext.Provider>
     );
-  }
-
-  private renderEditability() {
-    const {editabilityLocation, readOnly} = this.props;
-    if (editabilityLocation) {
-      const iconName = readOnly ? "icon-copy-only" : "icon-edit";
-      return (
-        <svg key="edit" className={`icon editability ${iconName} ${editabilityLocation}`}>
-          <use xlinkHref={`#${iconName}`} />
-        </svg>
-      );
-    }
-    return null;
   }
 
   private renderContent() {

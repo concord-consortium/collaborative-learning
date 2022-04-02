@@ -12,7 +12,7 @@ export const DeleteButton: React.FC<IProps> =
   ({ toolButton, isActive, isDisabled, onSetToolActive, onClick,
       onSetShowDeleteTilesConfirmationAlert, onDeleteSelectedTiles }) => {
 
-  const { name, title, Icon } = toolButton;
+  const { id, title, Icon } = toolButton;
 
   const handleMouseDown = () => {
     !isDisabled && onSetToolActive(toolButton, true);
@@ -33,11 +33,11 @@ export const DeleteButton: React.FC<IProps> =
   });
   onSetShowDeleteTilesConfirmationAlert(showAlert);
 
-  const classes = classNames("tool", "delete-button", name,
+  const classes = classNames("tool", "delete-button", id,
                             { active: isActive }, isDisabled ? "disabled" : "enabled");
   return (
     <div className={classes} data-testid="delete-button"
-        key={name}
+        key={id}
         title={title}
         onMouseDown={handleMouseDown}
         onClick={handleClick}>

@@ -1,10 +1,11 @@
 import { SnapshotIn } from "mobx-state-tree";
 import {
-  computeStrokeDashArray, defaultDrawingContent, DrawingContentModel, DrawingToolMetadataModel, StampModel
+  computeStrokeDashArray, defaultDrawingContent, DrawingContentModel, DrawingToolMetadataModel
 } from "./drawing-content";
 import { IDrawingTileImportSpec } from "./drawing-import";
 import { DefaultToolbarSettings, DrawingToolChange, kDrawingToolID } from "./drawing-types";
-import { UnitModel } from "../../curriculum/unit";
+import { StampModel } from "./stamp";
+import { AppConfigModel } from "../../stores/app-config-model";
 
 // mock Logger calls
 jest.mock("../../../lib/logger", () => {
@@ -49,14 +50,11 @@ describe('defaultDrawingContent', () => {
     expect(content.changes).toEqual([]);
   });
   it('should return content with optional stamps', () => {
-    const myStamps = [{ url: "my/stamp/url", width: 10, height: 10 }];
-    const unit = UnitModel.create({
-      title: "fake title",
-      defaultStamps: myStamps
-    });
-    const content = defaultDrawingContent({ unit });
+    const stamps = [{ url: "my/stamp/url", width: 10, height: 10 }];
+    const appConfig = AppConfigModel.create({ config: { stamps } as any });
+    const content = defaultDrawingContent({ appConfig });
     expect(content.type).toBe(kDrawingToolID);
-    expect(content.stamps).toEqual(myStamps);
+    expect(content.stamps).toEqual(stamps);
     expect(content.changes).toEqual([]);
   });
 });

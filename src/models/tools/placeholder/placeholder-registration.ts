@@ -8,7 +8,6 @@ function defaultPlaceholderContent() {
 
 registerToolContentInfo({
   id: kPlaceholderToolID,
-  tool: "placeholder",
   modelClass: PlaceholderContentModel,
   defaultContent: defaultPlaceholderContent,
   Component: PlaceholderToolComponent,

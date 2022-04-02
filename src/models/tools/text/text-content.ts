@@ -2,10 +2,11 @@ import { types, Instance } from "mobx-state-tree";
 import { Value } from "slate";
 import Plain from "slate-plain-serializer";
 import Markdown from "slate-md-serializer";
-import { ITileExportOptions } from "../tool-content-info";
 import {
   deserializeValueFromLegacy, htmlToSlate, serializeValueToLegacy, slateToHtml, textToSlate
 } from "@concord-consortium/slate-editor";
+import { ITileExportOptions } from "../tool-content-info";
+import { ToolContentModel } from "../tool-types";
 
 
 export const kTextToolID = "Text";
@@ -16,8 +17,9 @@ export function defaultTextContent() {
 
 const MarkdownSerializer = new Markdown();
 
-export const TextContentModel = types
-  .model("TextTool", {
+export const TextContentModel = ToolContentModel
+  .named("TextTool")
+  .props({
     type: types.optional(types.literal(kTextToolID), kTextToolID),
     text: types.optional(types.union(types.string, types.array(types.string)), ""),
     // e.g. "html", "markdown", "slate", "quill", empty => plain text

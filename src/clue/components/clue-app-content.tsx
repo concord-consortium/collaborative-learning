@@ -20,7 +20,7 @@ export class ClueAppContentComponent extends BaseComponent<IProps> {
   }
 
   public render() {
-    const { user, ui } = this.stores;
+    const { appConfig: {autoAssignStudentsToIndividualGroups}, user, ui } = this.stores;
     const isTeacher = user && user.isTeacher;
 
     const panels: IPanelGroupSpec = [{
@@ -46,9 +46,11 @@ export class ClueAppContentComponent extends BaseComponent<IProps> {
       <div className="clue-app-content">
         <ClueAppHeaderComponent panels={panels}
                             current={teacherPanelKey} onPanelChange={this.handlePanelChange}
-                            showGroup={true} />
+                            // This assumes that when we auto-assign students to groups,
+                            // we don't want to see the Groups in the header
+                            showGroup={!autoAssignStudentsToIndividualGroups} />
         {currentPanelContent}
-        <DialogComponent dialog={this.stores.ui.dialog} />
+        <DialogComponent dialog={ui.dialog} />
       </div>
     );
   }

@@ -3,15 +3,18 @@ import React from "react";
 import { act, createEvent, fireEvent, render, screen } from "@testing-library/react";
 import { IToolApiInterface, ToolApiInterfaceContext } from "./tool-api";
 import { ToolTileComponent } from "./tool-tile";
+import { specStores } from "../../models/stores/spec-stores";
 import { ToolTileModel } from "../../models/tools/tool-tile";
 import { UnknownContentModel } from "../../models/tools/tool-types";
-import { createStores } from "../../app-config";
+
+// required before tile creation
+import "../../register-tools";
 
 describe("ToolTile Component", () => {
 
   it("renders unknown tile successfully", () => {
 
-    const stores = createStores();
+    const stores = specStores();
     const mockHandleTileResize = jest.fn();
     const mockToolApi: IToolApiInterface = {
       register: jest.fn(),

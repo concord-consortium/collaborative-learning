@@ -1,7 +1,7 @@
 import mockXhr from "xhr-mock";
 import { Logger } from "./logger";
-import { AppConfigModel } from "../models/stores/app-config-model";
 import { InvestigationModel } from "../models/curriculum/investigation";
+import { specAppConfig } from "../models/stores/spec-app-config";
 import { IStores, createStores } from "../models/stores/stores";
 import { UserModel } from "../models/stores/user";
 
@@ -24,7 +24,7 @@ describe("dev/qa/test logger with DEBUG_LOGGER true", () => {
     mockXhr.setup();
     stores = createStores({
       appMode: "test",
-      appConfig: AppConfigModel.create({ appName: "TestLogger"}),
+      appConfig: specAppConfig({ config: { appName: "TestLogger" } }),
       user: UserModel.create({id: "0", type: "teacher", portal: "test"})
     });
 

@@ -1,7 +1,7 @@
-import { ToolContentModel, ToolContentModelType, ToolMetadataModel } from "./tool-types";
-import { UnitModelType } from "../curriculum/unit";
-import { IToolTileProps } from "../../components/tools/tool-tile";
 import { FunctionComponent, SVGProps } from "react";
+import { ToolContentModel, ToolContentModelType, ToolMetadataModel } from "./tool-types";
+import { IToolTileProps } from "../../components/tools/tool-tile";
+import { AppConfigModelType } from "../stores/app-config-model";
 
 export interface IDMap {
   [id: string]: string;
@@ -15,16 +15,14 @@ export interface IDefaultContentOptions {
   // url is added so the CLUE core can add an image tile to the document when a user
   // drops an image on the document.
   url?: string;
-  // unit is added so the drawing tool can use a default set of stamps defined in
-  // the unit
-  unit?: UnitModelType;
+  // appConfig contains stamps (for drawing tool), placeholderText (for text tool), etc.
+  appConfig?: AppConfigModelType;
 }
 
 type ToolComponentType = React.ComponentType<IToolTileProps>;
 
 export interface IToolContentInfo {
   id: string;
-  tool: string;
   modelClass: typeof ToolContentModel;
   defaultContent: (options?: IDefaultContentOptions) => ToolContentModelType;
   Component: ToolComponentType;
@@ -47,25 +45,19 @@ export interface IToolContentInfo {
   tileHandlesOwnSelection?: boolean;
 }
 
-interface IToolContentInfoMap {
-  [id: string]: IToolContentInfo;
-}
-const gToolContentInfoMapById: IToolContentInfoMap = {};
-const gToolContentInfoMapByTool: IToolContentInfoMap = {};
+const gToolContentInfoMapById: Record<string, IToolContentInfo> = {};
 
 export function registerToolContentInfo(toolContentInfo: IToolContentInfo) {
-  gToolContentInfoMapById[toolContentInfo.id] = toolContentInfo;
-  gToolContentInfoMapByTool[toolContentInfo.tool] = toolContentInfo;
+  // toLowerCase() for legacy support of tool names
+  gToolContentInfoMapById[toolContentInfo.id.toLowerCase()] = toolContentInfo;
 }
 
 // ToolContent id, e.g. kDrawingToolID, kGeometryToolID, etc.
-export function getToolContentInfoById(id: string) {
-  return gToolContentInfoMapById[id];
-}
-
-// tool name used in a few places, e.g. "drawing", "geometry", etc.
-export function getToolContentInfoByTool(tool: string) {
-  return gToolContentInfoMapByTool[tool];
+// undefined is supported so callers do not need to check the id before passing
+// it in.
+export function getToolContentInfoById(id?: string) {
+  // toLowerCase() for legacy support of tool names
+  return id ? gToolContentInfoMapById[id.toLowerCase()] : undefined;
 }
 
 export function getToolContentModels() {
@@ -73,9 +65,9 @@ export function getToolContentModels() {
 }
 
 export function getToolIds() {
-  return Object.keys(gToolContentInfoMapById);
+  // the keys are toLowerCased(), so we look up the actual id
+  return Object.values(gToolContentInfoMapById).map(info => info.id);
 }
-
 
 export interface ITileExportOptions {
   rowHeight?: number;

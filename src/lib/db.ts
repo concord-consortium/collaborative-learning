@@ -19,8 +19,10 @@ import {
 import { SectionModelType } from "../models/curriculum/section";
 import { SupportModelType } from "../models/curriculum/support";
 import { ImageModelType } from "../models/image";
-import { DocumentContentSnapshotType, DocumentContentModelType, cloneContentWithUniqueIds, createDefaultSectionedContent
-       } from "../models/document/document-content";
+import {
+  DocumentContentSnapshotType, DocumentContentModelType, cloneContentWithUniqueIds
+} from "../models/document/document-content";
+import { createDefaultSectionedContent } from "../models/document/document-content-import";
 import { Firebase } from "./firebase";
 import { Firestore } from "./firestore";
 import { DBListeners } from "./db-listeners";
@@ -662,6 +664,17 @@ export class DB {
         .then(resolve)
         .catch(reject);
     });
+  }
+
+  public async destroyFirebaseDocument(document: DocumentModelType) {
+    const { content, metadata, typedMetadata } =
+      this.firebase.getUserDocumentPaths(this.stores.user, document.type, document.key);
+    await Promise.all([
+      this.firebase.ref(content).set(null),
+      this.firebase.ref(metadata).set(null),
+      this.firebase.ref(typedMetadata).set(null)
+    ]);
+    this.stores.documents.resolveRequiredDocumentPromiseWithNull(document.type);
   }
 
   public clear(level: DBClearLevel) {

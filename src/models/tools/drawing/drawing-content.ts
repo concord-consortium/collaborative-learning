@@ -1,7 +1,8 @@
-import { types, getSnapshot, Instance } from "mobx-state-tree";
+import { types, Instance } from "mobx-state-tree";
 import { exportDrawingTileSpec } from "./drawing-export";
 import { importDrawingTileSpec, isDrawingTileImportSpec } from "./drawing-import";
 import { DrawingObjectDataType } from "./drawing-objects";
+import { StampModel, StampModelType } from "./stamp";
 import { ITileExportOptions, IDefaultContentOptions } from "../tool-content-info";
 import { ToolMetadataModel, ToolContentModel } from "../tool-types";
 import { safeJsonParse } from "../../../utilities/js-utils";
@@ -39,24 +40,6 @@ interface DrawingToolLoggedDeleteEvent extends Partial<DrawingToolDeleteChange>,
 type DrawingToolChangeLoggedEvent = DrawingToolLoggedCreateEvent | DrawingToolLoggedMoveEvent |
                                       DrawingToolLoggedUpdateEvent | DrawingToolLoggedDeleteEvent;
 
-export const StampModel = types
-  .model("Stamp", {
-    url: types.string,
-    width: types.number,
-    height: types.number
-  })
-  .preProcessSnapshot(snapshot => {
-    // The set of available stamps is saved with each drawing tool instance (why?).
-    // Thus, we have to convert from pre-webpack/assets reform paths to curriculum
-    // paths on loading documents.
-    const newUrl = snapshot.url.replace("assets/tools/drawing-tool/stamps",
-                                        "curriculum/moving-straight-ahead/stamps");
-    return newUrl && (newUrl !== snapshot.url)
-            ? { ...snapshot, ...{ url: newUrl } }
-            : snapshot;
-  });
-export type StampModelType = Instance<typeof StampModel>;
-
 // track selection in metadata object so it is not saved to firebase but
 // also is preserved across document/content reloads
 export const DrawingToolMetadataModel = ToolMetadataModel
@@ -81,13 +64,10 @@ export type DrawingToolMetadataModelType = Instance<typeof DrawingToolMetadataMo
 
 export function defaultDrawingContent(options?: IDefaultContentOptions) {
   let stamps: StampModelType[] = [];
-  if (options?.unit) {
-    stamps = getSnapshot(options.unit.defaultStamps);
+  if (options?.appConfig?.stamps) {
+    stamps = options.appConfig.stamps;
   }
-  return DrawingContentModel.create({
-    stamps,
-    changes: []
-  });
+  return DrawingContentModel.create({ stamps, changes: [] });
 }
 
 export const DrawingContentModel = ToolContentModel

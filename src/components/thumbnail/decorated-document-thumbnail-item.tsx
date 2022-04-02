@@ -6,16 +6,15 @@ import { useLastSupportViewTimestamp } from "../../hooks/use-last-support-view-t
 import { DocumentModelType } from "../../models/document/document";
 import { isPublishedType, SupportPublication } from "../../models/document/document-types";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
-import { IStores } from "../../models/stores/stores";
+import { useAppConfig, useClassStore, useProblemStore, useUserStore } from "../../hooks/use-stores";
 import { NavTabSectionModelType } from "../../models/view/nav-tabs";
 
-import "./tab-panel-documents-section.sass";
+import "./document-type-collection.sass";
 
 interface IProps {
   sectionDocument: DocumentModelType;
   tab: string;
   section: NavTabSectionModelType;
-  stores: IStores;
   scale: number;
   selectedDocument?: string;
   onSelectDocument?: (document: DocumentModelType) => void;
@@ -24,12 +23,15 @@ interface IProps {
   onDocumentDeleteClick?: (document: DocumentModelType) => void;
 }
 
-function useDocumentCaption(stores: IStores, document: DocumentModelType) {
-  const { appConfig, problem, class: _class, user: { network } } = stores;
+function useDocumentCaption(document: DocumentModelType) {
+  const appConfig = useAppConfig();
+  const problem = useProblemStore();
+  const classStore = useClassStore();
+  const user = useUserStore();
   const { type, uid } = document;
-  const teacher = useFirestoreTeacher(uid, network || "");
+  const teacher = useFirestoreTeacher(uid, user.network || "");
   if (type === SupportPublication) return document.getProperty("caption") || "Support";
-  const userName = _class?.getUserById(uid)?.displayName ||
+  const userName = classStore.getUserById(uid)?.displayName ||
                     (document.isRemote ? teacher?.name : "") || "Unknown User";
   const namePrefix = document.isRemote || isPublishedType(type) ? `${userName}: ` : "";
   const dateSuffix = document.isRemote && document.createdAt
@@ -39,13 +41,13 @@ function useDocumentCaption(stores: IStores, document: DocumentModelType) {
 }
 
 // observes teacher names via useDocumentCaption()
-export const TabPanelDocumentsSubSectionPanel = observer(({
-  section, sectionDocument, tab, stores, scale, selectedDocument,
+export const DecoratedDocumentThumbnailItem = observer(({
+  section, sectionDocument, tab, scale, selectedDocument,
   onSelectDocument, onDocumentDragStart, onDocumentStarClick, onDocumentDeleteClick
 }: IProps) => {
-    const { user } = stores;
+    const user = useUserStore();
     const tabName = tab.toLowerCase().replace(' ', '-');
-    const caption = useDocumentCaption(stores, sectionDocument);
+    const caption = useDocumentCaption(sectionDocument);
 
     // sync user's last support view time stamp to firebase
     useLastSupportViewTimestamp(section.type === "teacher-supports");

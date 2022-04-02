@@ -2,7 +2,7 @@ import { cloneDeep, each } from "lodash";
 import { types, getSnapshot, Instance, SnapshotIn } from "mobx-state-tree";
 import { PlaceholderContentModel } from "../tools/placeholder/placeholder-content";
 import { kTextToolID } from "../tools/text/text-content";
-import { getToolContentInfoById, getToolContentInfoByTool, IDocumentExportOptions } from "../tools/tool-content-info";
+import { getToolContentInfoById, IDocumentExportOptions } from "../tools/tool-content-info";
 import { ToolContentModelType } from "../tools/tool-types";
 import {
   ToolTileModel, ToolTileModelType, ToolTileSnapshotInType, ToolTileSnapshotOutType
@@ -10,15 +10,14 @@ import {
 import {
   TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType, TileLayoutModelType
 } from "../document/tile-row";
-import { SectionModelType } from "../curriculum/section";
+import { migrateSnapshot } from "./document-content-import";
+import { IDocumentAddTileOptions } from "./document-types";
 import { Logger, LogEventName } from "../../lib/logger";
 import { IDragTileItem } from "../../models/tools/tool-tile";
 import { DocumentsModelType } from "../stores/documents";
-import { DisplayUserType } from "../stores/user-types";
 import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
 import { getParentWithTypeName } from "../../utilities/mst-utils";
 import { comma, StringBuilder } from "../../utilities/string-builder";
-import { DocumentTool, IDocumentAddTileOptions } from "./document";
 
 export interface INewTileOptions {
   rowHeight?: number;
@@ -45,7 +44,7 @@ export interface IDocumentContentAddTileOptions extends IDocumentAddTileOptions 
 }
 
 export interface IDragToolCreateInfo {
-  tool: DocumentTool;
+  toolId: string;
   title?: string;
 }
 
@@ -283,7 +282,7 @@ export const DocumentContentModel = types
       if (!row?.height) return;
       // we only export heights for specific tiles configured to do so
       const tileType = self.getTileType(tileId);
-      const tileContentInfo = tileType && getToolContentInfoById(tileType);
+      const tileContentInfo = getToolContentInfoById(tileType);
       if (!tileContentInfo?.exportNonDefaultHeight) return;
       // we only export heights when they differ from the default height for the tile
       const defaultHeight = tileContentInfo.defaultHeight;
@@ -672,19 +671,21 @@ export const DocumentContentModel = types
           }
         }
       },
-      addTile(tool: DocumentTool, options?: IDocumentContentAddTileOptions) {
+      addTile(toolId: string, options?: IDocumentContentAddTileOptions) {
         const { title, addSidecarNotes, url, insertRowInfo } = options || {};
         // for historical reasons, this function initially places new rows at
         // the end of the content and then moves them to the desired location.
         const addTileOptions = { rowIndex: self.rowCount };
-        const contentInfo = getToolContentInfoByTool(tool);
-        const documents = getParentWithTypeName(self, "Documents") as DocumentsModelType;
-        const unit = documents?.unit;
+        const contentInfo = getToolContentInfoById(toolId);
+        if (!contentInfo) return;
 
-        const newContent = contentInfo?.defaultContent({ title, url, unit });
+        const documents = getParentWithTypeName(self, "Documents") as DocumentsModelType;
+        const appConfig = documents?.appConfig;
+
+        const newContent = contentInfo?.defaultContent({ title, url, appConfig });
         const tileInfo = self.addTileContentInNewRow(
                               newContent,
-                              { rowHeight: contentInfo?.defaultHeight, ...addTileOptions });
+                              { rowHeight: contentInfo.defaultHeight, ...addTileOptions });
         if (addSidecarNotes) {
           const { rowId } = tileInfo;
           const row = self.rowMap.get(rowId);
@@ -814,8 +815,8 @@ export const DocumentContentModel = types
     }
   }))
   .actions(self => ({
-    userAddTile(tool: DocumentTool, options?: IDocumentContentAddTileOptions) {
-      const result = self.addTile(tool, options);
+    userAddTile(toolId: string, options?: IDocumentContentAddTileOptions) {
+      const result = self.addTile(toolId, options);
       const newTile = result?.tileId && self.getTile(result.tileId);
       if (newTile) {
         Logger.logTileEvent(LogEventName.CREATE_TILE, newTile);
@@ -848,130 +849,8 @@ export const DocumentContentModel = types
     }
   }));
 
-// authored content is converted to current content on the fly
-export interface IAuthoredBaseTileContent {
-  type: string;
-}
-
-export interface IAuthoredTileContent extends IAuthoredBaseTileContent {
-  [key: string]: any;
-}
-
-export interface IAuthoredTile {
-  content: IAuthoredTileContent;
-}
-
-export interface IAuthoredDocumentContent {
-  tiles: Array<IAuthoredTile | IAuthoredTile[]>;
-}
-
-interface OriginalTileLayoutModel {
-  height?: number;
-}
-
-interface OriginalSectionHeaderContent {
-  isSectionHeader: true;
-  sectionId: string;
-}
-
-function isOriginalSectionHeaderContent(content: IAuthoredTileContent | OriginalSectionHeaderContent)
-          : content is OriginalSectionHeaderContent {
-  return !!content?.isSectionHeader && !!content.sectionId;
-}
-
-interface OriginalToolTileModel {
-  id?: string;
-  display?: DisplayUserType;
-  layout?: OriginalTileLayoutModel;
-  content: IAuthoredTileContent | OriginalSectionHeaderContent;
-}
-interface OriginalAuthoredToolTileModel extends OriginalToolTileModel {
-  content: IAuthoredTileContent;
-}
-function isOriginalAuthoredToolTileModel(tile: OriginalToolTileModel): tile is OriginalAuthoredToolTileModel {
-  return !!(tile.content as IAuthoredTileContent)?.type && !tile.content.isSectionHeader;
-}
-
-type OriginalTilesSnapshot = Array<OriginalToolTileModel | OriginalToolTileModel[]>;
-
-function addImportedTileInNewRow(
-          content: DocumentContentModelType,
-          tile: OriginalAuthoredToolTileModel,
-          options: INewTileOptions) {
-  const id = tile.id || content.getNextTileId(tile.content.type);
-  const tileSnapshot = { id, ...tile };
-  return content.addTileSnapshotInNewRow(tileSnapshot as ToolTileSnapshotInType, options);
-}
-
-function addImportedTileInExistingRow(
-          content: DocumentContentModelType,
-          tile: OriginalAuthoredToolTileModel,
-          options: INewTileOptions) {
-  const id = tile.id || content.getNextTileId(tile.content.type);
-  const tileSnapshot = { id, ...tile };
-  return content.addTileSnapshotInExistingRow(tileSnapshot as ToolTileSnapshotInType, options);
-}
-
-function migrateTile(content: DocumentContentModelType, tile: OriginalToolTileModel) {
-  const { layout, ...newTile } = cloneDeep(tile);
-  const tileHeight = layout?.height;
-  if (isOriginalSectionHeaderContent(newTile.content)) {
-    const { sectionId } = newTile.content;
-    content.setImportContext(sectionId);
-    content.addSectionHeaderRow(sectionId);
-  }
-  else if (isOriginalAuthoredToolTileModel(newTile)) {
-    addImportedTileInNewRow(content, newTile, { rowIndex: content.rowCount, rowHeight: tileHeight });
-  }
-}
-
-function migrateRow(content: DocumentContentModelType, tiles: OriginalToolTileModel[]) {
-  let insertRowIndex = content.rowCount;
-  tiles.forEach((tile, tileIndex) => {
-    const { layout, ...newTile } = cloneDeep(tile);
-    const tileHeight = layout?.height;
-    const options = { rowIndex: insertRowIndex, rowHeight: tileHeight };
-    if (isOriginalAuthoredToolTileModel(newTile)) {
-      if (tileIndex === 0) {
-        const newRowInfo = addImportedTileInNewRow(content, newTile, options);
-        const newRowIndex = content.getRowIndex(newRowInfo.rowId);
-        (newRowIndex >= 0) && (insertRowIndex = newRowIndex);
-      }
-      else {
-        addImportedTileInExistingRow(content, newTile, options);
-      }
-    }
-  });
-}
-
-function migrateSnapshot(snapshot: any): any {
-  const docContent = DocumentContentModel.create();
-  const tilesOrRows: OriginalTilesSnapshot = snapshot.tiles;
-  tilesOrRows.forEach(tileOrRow => {
-    if (Array.isArray(tileOrRow)) {
-      migrateRow(docContent, tileOrRow);
-    }
-    else {
-      migrateTile(docContent, tileOrRow);
-    }
-  });
-  return getSnapshot(docContent);
-}
-
 export type DocumentContentModelType = Instance<typeof DocumentContentModel>;
 export type DocumentContentSnapshotType = SnapshotIn<typeof DocumentContentModel>;
-
-export function createDefaultSectionedContent(sections: SectionModelType[]) {
-  const tiles: OriginalToolTileModel[] = [];
-  // for blank sectioned documents, default content is a section header row and a placeholder
-  // tile for each section that is present in the template (the passed sections)
-  sections.forEach(section => {
-    tiles.push({ content: { isSectionHeader: true, sectionId: section.type }});
-    tiles.push({ content: { type: "Placeholder", sectionId: section.type }});
-  });
-  // cast required because we're using the import format
-  return DocumentContentModel.create({ tiles } as any);
-}
 
 export function cloneContentWithUniqueIds(content?: DocumentContentModelType,
                                           asTemplate?: boolean): DocumentContentModelType | undefined {

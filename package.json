@@ -53,6 +53,7 @@
     "build": "npm-run-all lint:build clean build:webpack",
     "build:debug": "npm-run-all lint clean build:webpack",
     "build:webpack": "cross-env NODE_OPTIONS=--max-old-space-size=4096 webpack --mode production",
+    "check:types": "tsc --noEmit",
     "clean": "rimraf dist",
     "deploy:database:rules": "firebase deploy --only database",
     "deploy:firestore:rules": "firebase deploy --only firestore:rules",
@@ -139,6 +140,7 @@
     "eslint-plugin-chai-friendly": "^0.7.2",
     "eslint-plugin-cypress": "^2.12.1",
     "eslint-plugin-eslint-comments": "^3.2.0",
+    "eslint-plugin-jest": "^26.1.1",
     "eslint-plugin-json": "^3.1.0",
     "eslint-plugin-react": "^7.28.0",
     "eslint-plugin-react-hooks": "^4.3.0",
@@ -173,6 +175,7 @@
   },
   "dependencies": {
     "@blueprintjs/core": "^3.53.0",
+    "@concord-consortium/diagram-view": "^0.0.9",
     "@concord-consortium/jsxgraph": "^0.99.8-cc.1",
     "@concord-consortium/react-components": "^0.7.1",
     "@concord-consortium/slate-editor": "^0.7.3",
@@ -208,6 +211,7 @@
     "slate-plain-serializer": "^0.7.13",
     "superagent": "^7.1.1",
     "ts-polyfill": "^3.8.2",
+    "tslib": "^2.3.1",
     "uuid": "^8.3.2",
     "whatwg-fetch": "^3.6.2"
   }

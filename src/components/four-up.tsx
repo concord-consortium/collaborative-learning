@@ -154,23 +154,19 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
 
     const nwCanvas = (
       <CanvasComponent context="four-up-nw" scale={nwCell.scale}
-                       editabilityLocation={toggleable ? undefined : groupUsers[0] && "north west"}
                        readOnly={isGhostUser /* Ghost users do not own group documents and cannot edit others' */}
                        document={groupDoc(0)} overlayMessage={canvasMessage(groupDoc(0))} {...others} />
     );
     const neCanvas = (
       <CanvasComponent context="four-up-ne" scale={neCell.scale}
-                       editabilityLocation={toggleable ? undefined : groupUsers[1] && "north east"}
                        readOnly={true} document={groupDoc(1)} overlayMessage={canvasMessage(groupDoc(1))} {...others} />
     );
     const seCanvas = (
       <CanvasComponent context="four-up-se" scale={seCell.scale}
-                       editabilityLocation={toggleable ? undefined : groupUsers[2] && "south east"}
                        readOnly={true} document={groupDoc(2)} overlayMessage={canvasMessage(groupDoc(2))} {...others}/>
     );
     const swCanvas = (
       <CanvasComponent context="four-up-sw" scale={swCell.scale}
-                       editabilityLocation={toggleable ? undefined : groupUsers[3] && "south west"}
                        readOnly={true} document={groupDoc(3)} overlayMessage={canvasMessage(groupDoc(3))} {...others}/>
     );
 

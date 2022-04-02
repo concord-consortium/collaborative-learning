@@ -9,7 +9,7 @@ import { UIModel } from "../models/stores/ui";
 import { UserModel } from "../models/stores/user";
 import { LearningLogWorkspace, ProblemWorkspace, WorkspaceModel } from "../models/stores/workspace";
 import {
-  useAppConfigStore, useAppMode, useClassStore, useDemoStore, useDocumentFromStore, useDocumentMetadataFromStore,
+  useAppConfig, useAppMode, useClassStore, useDemoStore, useDocumentFromStore, useDocumentMetadataFromStore,
   useDocumentOrCurriculumMetadata, useGroupsStore, useLocalDocuments, useNetworkDocumentKey, useNetworkDocuments,
   useProblemPath, useProblemPathWithFacet, useProblemStore, useSharedSelectionStore,
   useTypeOfTileInDocumentOrCurriculum, useUIStore, useUserStore
@@ -63,7 +63,7 @@ describe("useStores", () => {
           user
         }
       }));
-      expect(useAppConfigStore()).toBe(appConfig);
+      expect(useAppConfig()).toBe(appConfig);
       expect(useAppMode()).toBe("authed");
       expect(useClassStore()).toBe(_class);
       expect(useDemoStore()).toBe(demo);

@@ -5,16 +5,16 @@ import React from "react";
 import { ModalProvider } from "react-modal-hook";
 import { DocumentModel } from "../models/document/document";
 import { DocumentContentModel } from "../models/document/document-content";
-import { createStores } from "../models/stores/stores";
+import { ToolbarModel, ToolbarModelSnapshot } from "../models/stores/problem-configuration";
+import { specStores } from "../models/stores/spec-stores";
 import { ToolbarComponent } from "./toolbar";
-import { ToolbarModel, ToolbarModelSnapshot } from "../models/stores/app-config-model";
 
 // This is needed so MST can deserialize snapshots referring to tools
 import "../register-tools";
 
 describe("ToolbarComponent", () => {
 
-  const stores = createStores();
+  const stores = specStores();
   const content = DocumentContentModel.create({});
   const document = DocumentModel.create({
                     uid: "1",
@@ -26,20 +26,20 @@ describe("ToolbarComponent", () => {
 
   const config: ToolbarModelSnapshot = [
     {
-      name: "select",
+      id: "select",
       title: "Select",
       iconId: "icon-select-tool",
       isDefault: true,
       isTileTool: false
     },
     {
-      name: "text",
+      id: "Text",
       title: "Text",
       isDefault: false,
       isTileTool: true
     },
     {
-      name: "delete",
+      id: "delete",
       title: "Delete",
       iconId: "icon-delete-tool",
       isDefault: false,

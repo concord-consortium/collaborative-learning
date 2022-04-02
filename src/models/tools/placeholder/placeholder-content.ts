@@ -17,3 +17,7 @@ export const PlaceholderContentModel = ToolContentModel
 
 export type PlaceholderContentModelType = Instance<typeof PlaceholderContentModel>;
 export type PlaceholderContentSnapshotOutType = SnapshotOut<typeof PlaceholderContentModel>;
+
+export function isPlaceholderContent(content: any): content is PlaceholderContentModelType {
+  return content?.type === kPlaceholderToolID;
+}

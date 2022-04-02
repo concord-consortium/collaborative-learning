@@ -3,9 +3,9 @@ import { forEach } from "lodash";
 import { QueryClient, UseQueryResult } from "react-query";
 import { DocumentContentModel, DocumentContentSnapshotType } from "./document-content";
 import {
-  DocumentType, DocumentTypeEnum, IDocumentContext, ISetProperties, LearningLogDocument, LearningLogPublication,
-  PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemPublication,
-  SupportPublication
+  DocumentType, DocumentTypeEnum, IDocumentAddTileOptions, IDocumentContext, ISetProperties,
+  LearningLogDocument, LearningLogPublication, PersonalDocument, PersonalPublication,
+  PlanningDocument, ProblemDocument, ProblemPublication, SupportPublication
 } from "./document-types";
 import { AppConfigModelType } from "../stores/app-config-model";
 import { TileCommentsModel, TileCommentsModelType } from "../tools/tile-comments";
@@ -16,15 +16,9 @@ import { IDocumentProperties } from "../../lib/db-types";
 import { getLocalTimeStamp } from "../../utilities/time";
 import { safeJsonParse } from "../../utilities/js-utils";
 
-export interface IDocumentAddTileOptions {
-  title?: string;
-  addSidecarNotes?: boolean;
-  url?: string;
+interface IMatchPropertiesOptions {
+  isTeacherDocument?: boolean;
 }
-
-export const DocumentToolEnum = types.enumeration("tool",
-                                ["delete", "drawing", "geometry", "image", "select", "table", "text", "placeholder"]);
-export type DocumentTool = typeof DocumentToolEnum.Type;
 
 export const DocumentModel = types
   .model("Document", {
@@ -101,8 +95,10 @@ export const DocumentModel = types
     }
   }))
   .views(self => ({
-    matchProperties(properties: string[]) {
-      return properties.every(p => {
+    matchProperties(properties?: string[], options?: IMatchPropertiesOptions) {
+      // if no properties specified then consider it a match
+      if (!properties?.length) return true;
+      return properties?.every(p => {
         const match = /(!)?(.*)/.exec(p);
         const property = match && match[2];
         const wantsProperty = !(match && match[1]); // not negated => has property
@@ -110,8 +106,11 @@ export const DocumentModel = types
         if (property === "starred") {
           return self.isStarred === wantsProperty;
         }
+        if (property === "isTeacherDocument") {
+          return !!options?.isTeacherDocument === wantsProperty;
+        }
         if (property) {
-          return !!self.getProperty(property) === wantsProperty;
+            return !!self.getProperty(property) === wantsProperty;
         }
         // ignore empty strings, etc.
         return true;
@@ -188,8 +187,8 @@ export const DocumentModel = types
       self.visibility = visibility;
     },
 
-    addTile(tool: DocumentTool, options?: IDocumentAddTileOptions) {
-      return self.content?.userAddTile(tool, options);
+    addTile(toolId: string, options?: IDocumentAddTileOptions) {
+      return self.content?.userAddTile(toolId, options);
     },
 
     deleteTile(tileId: string) {

@@ -52,6 +52,14 @@ export const ClassModel = types
         return self.users.get(uid);
       }
     };
+  })
+  .views((self) => {
+    return {
+      isTeacher(uid: string) {
+        const user =  self.getUserById(uid);
+        return user?.type === "teacher";
+      }
+    };
   });
 
 export type ClassModelType = typeof ClassModel.Type;

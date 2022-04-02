@@ -46,7 +46,7 @@ describe('Test nav panel tabs', function () {
       it('verify publish Investigation', function () {
         canvas.publishCanvas("investigation");
         cy.openTopTab('class-work');
-        cy.getCanvasItemTitle('problem-workspaces').should('contain', this.title);
+        cy.getCanvasItemTitle('workspaces').should('contain', this.title);
       });
       it('verify make a copy of a canvas', function () {
         canvas.copyDocument(copyDocumentTitle);
@@ -59,8 +59,8 @@ describe('Test nav panel tabs', function () {
       it('verify publish of personal workspace', function () {
         canvas.publishCanvas("personal");
         cy.openTopTab('class-work');
-        cy.openSection('class-work', 'extra-workspaces');
-        cy.getCanvasItemTitle('extra-workspaces').should('contain', copyDocumentTitle);
+        cy.openSection('class-work', 'workspaces');
+        cy.getCanvasItemTitle('workspaces').should('contain', copyDocumentTitle);
       });
       it('verify delete document reverts nav-tab panel to show thumbnails', function () {
         const deleteDocument = "Delete me";
@@ -143,15 +143,15 @@ describe('Test nav panel tabs', function () {
     });
     describe('Open correct canvas from correct section', function () {
       it('verify open published canvas from Workspace list', function () { //this assumes there are published work
-        cy.openSection("class-work", "extra-workspaces");
-        cy.openDocumentThumbnail('extra-workspaces', copyDocumentTitle);
+        cy.openSection("class-work", "workspaces");
+        cy.openDocumentThumbnail('workspaces', copyDocumentTitle);
       });
       it('verify open published canvas from Investigations list', function () { //this assumes there are published work
-        cy.openSection("class-work", "problem-workspaces");
-        cy.openDocumentThumbnail('problem-workspaces', this.title);
+        cy.openSection("class-work", "workspaces");
+        cy.openDocumentThumbnail('workspaces', this.title);
       });
       it('will verify that published canvas does not have Edit button', function () {
-        cy.get('.edit-button').should("not.exist");
+        cy.get('.edit-button').should("not.be.visible");
       });
     });
   });
@@ -166,6 +166,59 @@ describe('Test nav panel tabs', function () {
         // cy.get("[data-test=teacher-supports-list-items]").last().click();
         // cy.get(".support-badge").should("not.exist");
       });
+    });
+  });
+});
+
+describe.only('Nav panel tab configs', function () {
+  const baseQueryParam = "?appMode=qa&fakeClass=10&fakeUser=student:11&fakeOffering=10&qaGroup=10";
+  it('Single Top tab with visible resource tab panel', function () {
+    cy.visit(`${baseQueryParam}&unit=example`);
+    cy.waitForLoad();
+    cy.get(".collapsed-resources-tab.my-work").should('not.exist');
+    canvas.openFileMenu();
+    cy.get ("[data-test=list-item-icon-open-workspace]").click();
+    cy.get(".tab-header-row").should("not.be.visible");
+  });
+  it('Single Top tab with visible resource tab panel', function () {
+    cy.visit(`${baseQueryParam}&unit=example-show-nav-panel`);
+    cy.waitForLoad();
+    cy.get(".collapsed-resources-tab.my-work").click();
+    cy.get(".top-tab").should("have.length", 1);
+    cy.get(".document-tabs.my-work .tab-header-row").should("not.be.visible");
+    canvas.openFileMenu();
+    cy.get ("[data-test=list-item-icon-open-workspace]").click();
+    cy.get(".tab-header-row").should("not.be.visible");
+  });
+  it('Problem Tabs with no sub tabs', function () {
+    cy.visit(`${baseQueryParam}&unit=example-no-section-problem-tab`);
+    cy.waitForLoad();
+    cy.get(".collapsed-resources-tab.my-work").click();
+    cy.openTopTab("problems");
+    cy.get(".problem-tabs .tab-header-row").should("not.be.visible");
+  });
+  it('Problem Tabs with no sub tabs', function () {
+    const exampleProblemSubTabTitles = ["First Section", "Second Section", "Third Section"];
+    const exampleMyWorkSubTabTitles = ["Workspaces", "Starred"];
+    const exampleClassWorkSubTabTitles = ["Workspaces", "Starred"];
+
+    cy.visit(`${baseQueryParam}&unit=example-config-subtabs`);
+    cy.waitForLoad();
+    cy.get(".collapsed-resources-tab.my-work").click();
+    cy.openTopTab("problems");
+    cy.get(".problem-tabs .tab-list .prob-tab").each(($tab, index, $tabList) => {
+      expect($tabList).to.have.lengthOf(3);
+      expect($tab.text()).to.contain(exampleProblemSubTabTitles[index]);
+    });
+    cy.openTopTab("my-work");
+    cy.get(".document-tabs .tab-list .doc-tab.my-work").each(($tab, index, $tabList) => {
+      expect($tabList).to.have.lengthOf(2);
+      expect($tab.text()).to.contain(exampleMyWorkSubTabTitles[index]);
+    });
+    cy.openTopTab("class-work");
+    cy.get(".document-tabs .tab-list .doc-tab.class-work").each(($tab, index, $tabList) => {
+      expect($tabList).to.have.lengthOf(2);
+      expect($tab.text()).to.contain(exampleClassWorkSubTabTitles[index]);
     });
   });
 });

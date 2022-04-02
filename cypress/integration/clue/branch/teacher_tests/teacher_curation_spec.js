@@ -26,9 +26,9 @@ import ClueCanvas from "../../../../support/elements/clue/cCanvas";
         it('verify starring a student published investigation',function(){
             cy.openResourceTab();
             cy.openTopTab('class-work');
-            cy.openSection('class-work','problem-workspaces');
-            resourcesPanel.starCanvasItem('class-work','problem-workspaces',studentDoc);
-            resourcesPanel.getCanvasStarIcon('class-work','problem-workspaces',studentDoc).should('have.class','starred');
+            cy.openSection('class-work','workspaces');
+            resourcesPanel.starCanvasItem('class-work','workspaces',studentDoc);
+            resourcesPanel.getCanvasStarIcon('class-work','workspaces',studentDoc).should('have.class','starred');
             //make sure only one canvas is starred,
             // but length 2 because there is one in published section and one in Starred section
             cy.get('.icon-star.starred').should('have.length',2);
@@ -45,7 +45,7 @@ import ClueCanvas from "../../../../support/elements/clue/cCanvas";
             cy.openTopTab('class-work');
             cy.openSection('class-work','starred');
             cy.getCanvasItemTitle('class-work', 'starred', studentDoc).should('not.exist');
-            cy.openSection('class-work','problem-workspaces');
-            resourcesPanel.getCanvasStarIcon('class-work','problem-workspaces',studentDoc).should('not.have.class','starred');
+            cy.openSection('class-work','workspaces');
+            resourcesPanel.getCanvasStarIcon('class-work','workspaces',studentDoc).should('not.have.class','starred');
         });
     });

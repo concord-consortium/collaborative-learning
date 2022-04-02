@@ -69,8 +69,7 @@ import "./text-tool.sass";
     | image           | `![]` syntax  | <img>        |           | broken
     | link            | `[]()` syntax | <a>          |           | broken
 
-  * The name in the Tool Bar column matches the Font Awesome icon name used in
-  the TextToolBarComponent. This name is used to both render the button and to
+  * The name in the Tool Bar column is used to both render the button and to
   identify the button's action.
 
 */
@@ -161,7 +160,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
   public render() {
     const { documentContent, toolTile, readOnly, scale } = this.props;
     const { value: editorValue, selectedButtons } = this.state;
-    const { unit: { placeholderText } } = this.stores;
+    const { appConfig: { placeholderText } } = this.stores;
     const editableClass = readOnly ? "read-only" : "editable";
     // Ideally this would just be 'text-tool-editor', but 'text-tool' has been
     // used here for a while now and cypress tests depend on it. Should transition

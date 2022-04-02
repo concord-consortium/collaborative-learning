@@ -223,7 +223,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const { content } = this.props;
     const toolApiInterface = this.context;
     const tileType = content?.getTile(tileId)?.content.type;
-    const titleBase = tileType && getToolContentInfoById(tileType)?.titleBase;
+    const titleBase = getToolContentInfoById(tileType)?.titleBase;
     const getTileTitle = (_tileId: string) => toolApiInterface?.getToolApi?.(_tileId)?.getTitle?.();
     return tileType && titleBase && content?.getUniqueTitle(tileType, titleBase, getTileTitle);
   };
@@ -414,12 +414,12 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const createTileInfo = safeJsonParse<IDragToolCreateInfo>(createTileInfoStr);
     if (!content || !createTileInfo) return;
 
-    const { tool, title } = createTileInfo;
+    const { toolId, title } = createTileInfo;
     const insertRowInfo = this.getDropRowInfo(e);
     const isInsertingInExistingRow = insertRowInfo?.rowDropLocation &&
                                       (["left", "right"].indexOf(insertRowInfo.rowDropLocation) >= 0);
-    const addSidecarNotes = (tool === "geometry") && !isInsertingInExistingRow;
-    const rowTile = content.userAddTile(tool, {title, addSidecarNotes, insertRowInfo});
+    const addSidecarNotes = (toolId.toLowerCase() === "geometry") && !isInsertingInExistingRow;
+    const rowTile = content.userAddTile(toolId, {title, addSidecarNotes, insertRowInfo});
 
     if (rowTile?.tileId) {
       ui.setSelectedTileId(rowTile.tileId);

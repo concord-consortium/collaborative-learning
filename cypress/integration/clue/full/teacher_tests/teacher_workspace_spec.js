@@ -16,131 +16,117 @@ import DrawToolTile from "../../../../support/elements/clue/DrawToolTile";
  *    all of the students in the dashboard's current view
  */
 
-context("Teacher Space", () => {
+context.skip("Teacher Workspace", () => {
 
-    let dashboard = new TeacherDashboard();
-    let clueCanvas = new ClueCanvas;
-    let tableToolTile = new TableToolTile;
-    let drawToolTile = new DrawToolTile;
+  let dashboard = new TeacherDashboard();
+  let clueCanvas = new ClueCanvas;
+  let tableToolTile = new TableToolTile;
+  let drawToolTile = new DrawToolTile;
 
-    let teacherDoc = "Teacher Investigation Copy";
+  let teacherDoc = "Personal Doc 3";
 
 
-    const offeringId = "40557";
+  const portalUrl = "https://learn.staging.concord.org";
+  const offeringId1 = "2000";
+  const reportUrl1 = "https://learn.staging.concord.org/portal/offerings/" + offeringId1 + "/external_report/49";
+  const clueTeacher1 = {
+    username: "TejalTeacher1",
+    password: "ccpassword",
+    firstname: "Tejal",
+    lastname: "Teacher1"
+  };
+  const class1 = "CLUE Testing";
+  const class2 = "CLUE Testing2";
+  // const clueStudent = {
+  //     username: "ctesting1",
+  //     password: "password",
+  //     studentUid: "345979"
+  // }
 
-    const clueTeacher = {
-        username: "clueteachertest",
-        password: "password"
-    };
-    // const clueStudent = {
-    //     username: "ctesting1",
-    //     password: "password",
-    //     studentUid: "345979"
-    // }
+  before(function () {
+    cy.login(portalUrl, clueTeacher1);
+    cy.launchReport(reportUrl1);
+    cy.waitForLoad();
+    dashboard.switchView("Workspace & Resources");
+    cy.wait(4000);
+    clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
+    clueCanvas.addTile('drawing');
+    cy.wait(2000);
+  });
 
-    before(function () {
-        cy.login("https://learn.concord.org", clueTeacher);
-        cy.launchReport('https://learn.concord.org/portal/offerings/' + offeringId + '/external_report/25');
-        cy.waitForLoad();
-        dashboard.switchView("Workspace & Resources");
-        cy.wait(4000);
-        clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
+  describe('Multiple classes', function () {
+    it('verify restore after switching classes', function () {
+      dashboard.getClassDropdown().click({ force: true });
+      dashboard.getClassList().find('.list-item').contains(class2).click({ force: true });
+      cy.waitForLoad();
+      dashboard.getClassDropdown().should('contain', class2);
+      dashboard.switchView('Workspace & Resources');
+      drawToolTile.getDrawTile().should('not.exist');
+      //switch back to original problem for later test
+      dashboard.getClassDropdown().click({ force: true });
+      dashboard.getClassList().find('.list-item').contains(class1).click({ force: true });
+      cy.waitForLoad();
+      dashboard.switchView('Workspace & Resources');
+      drawToolTile.getDrawTile().should('exist');
     });
+    //TODO: need to create another activity to assign to class
+    it.skip('verify restore after switching investigation', function () {
+      cy.get('@clueData').then((clueData) => {
+        let problems = clueData.classes[0].problems;
+        let initProblemIndex = 0;
+        let tempProblemIndex = 1;
 
-    beforeEach(() => {
-        cy.fixture("teacher-dash-data.json").as("clueData");
-    });
-
-    context.skip('Teacher Workspace', function () {
-        describe('teacher document functionality', function () {
-            before(function () {
-                clueCanvas.getSectionHeader('IN').click();
-                clueCanvas.addTile('drawing');
-                clueCanvas.addTile('table');
-                cy.openResourcesTab();
-                cy.openTopTab("my-work");
-                cy.openSection('my-work', 'workspaces');
-                cy.openDocumentWithTitle('my-work', 'workspaces', teacherDoc);
-                clueCanvas.addTile('table');
-            });
-            it('verify restore after switching classes', function () {
-                cy.get('@clueData').then((clueData) => {
-                    const initClassIndex = 0;
-                    const tempClassIndex = 1;
-                    let initClass = clueData.classes[initClassIndex];
-                    let tempClass = clueData.classes[tempClassIndex];
-                    let className = tempClass.className;
-                    let initClassName = initClass.className;
-
-                    dashboard.getClassDropdown().click({ force: true }).then(() => {
-                        dashboard.getClassList().contains(className).click({ force: true });
-                        cy.waitForLoad();
-                    });
-                    dashboard.getClassDropdown().should('contain', className);
-                    dashboard.switchView('Workspace & Resources');
-                    tableToolTile.getTableTile().should('not.exist');
-                    drawToolTile.getDrawTile().should('not.exist');
-                    //switch back to original problem for later test
-                    dashboard.getClassDropdown().click({ force: true });
-                    dashboard.getClassList().find('.list-item').contains(initClassName).click({ force: true });
-                    cy.waitForLoad();
-                    dashboard.switchView('Workspace & Resources');
-                    tableToolTile.getTableTile().should('exist');
-                    drawToolTile.getDrawTile().should('exist');
-                    cy.openResourcesTab();
-                    cy.openTopTab("my-work");
-                    cy.openSection('my-work', 'workspaces');
-                    cy.getCanvasItemTitle("workspaces").contains(teacherDoc).should('exist');
-                    cy.openDocumentWithTitle("my-work", "workspaces", teacherDoc);
-                    cy.wait(2000);
-                    tableToolTile.getTableTile().should('exist');
-                });
-
-            });
-            it('verify restore after switching investigation', function () {
-                cy.get('@clueData').then((clueData) => {
-                    let problems = clueData.classes[0].problems;
-                    let initProblemIndex = 0;
-                    let tempProblemIndex = 1;
-
-                    dashboard.getProblemDropdown().click({ force: true }).then(() => {
-                        dashboard.getProblemList().should('have.class', 'show');
-                        dashboard.getProblemList().find('.list-item').contains(problems[tempProblemIndex].problemTitle).click({ force: true });
-                        cy.waitForLoad();
-                        tempProblemIndex += 1;
-                    });
-                    dashboard.getProblemDropdown().should('contain', problems[tempProblemIndex].problemTitle);
-                    dashboard.switchView('Workspace & Resources');
-                    clueCanvas.getInvestigationCanvasTitle().should('contain', problems[tempProblemIndex].problemTitle);
-                    tableToolTile.getTableTile().should('not.exist');
-                    drawToolTile.getDrawTile().should('not.exist');
-                    //switch back to original problem to verify restore
-                    dashboard.getProblemDropdown().click({ force: true });
-                    dashboard.getProblemList().find('.list-item').contains(problems[initProblemIndex].problemTitle).click({ force: true });
-                    cy.waitForLoad();
-                    dashboard.switchView('Workspace & Resources');
-                    cy.openResourcesTab();
-                    cy.openTopTab("my-work");
-                    cy.openSection('my-work', 'workspaces');
-                    clueCanvas.getInvestigationCanvasTitle().should('contain', problems[initProblemIndex].problemTitle);
-                    tableToolTile.getTableTile().should('exist');
-                    drawToolTile.getDrawTile().should('exist');
-                    cy.openTopTab("my-work");
-                    cy.openSection('my-work', 'workspaces');
-                    cy.getCanvasItemTitle("workspaces").contains(teacherDoc).should('exist');
-                    cy.openDocumentWithTitle("my-work", "workspaces", teacherDoc);
-                    cy.wait(2000);
-                    tableToolTile.getTableTile().should('exist');
-                });
-            });
-            after(function () {
-                clueCanvas.deleteTile('table');
-                cy.openTopTab("my-work");
-                cy.openSection('my-work', 'workspaces');
-                cy.openDocumentWithTitle("my-work", "workspaces", this.investigationTitle[0]);
-                clueCanvas.deleteTile('draw');
-                clueCanvas.deleteTile('table');
-            });
+        dashboard.getProblemDropdown().click({ force: true }).then(() => {
+          dashboard.getProblemList().should('have.class', 'show');
+          dashboard.getProblemList().find('.list-item').contains(problems[tempProblemIndex].problemTitle).click({ force: true });
+          cy.waitForLoad();
+          tempProblemIndex += 1;
         });
+        dashboard.getProblemDropdown().should('contain', problems[tempProblemIndex].problemTitle);
+        dashboard.switchView('Workspace & Resources');
+        clueCanvas.getInvestigationCanvasTitle().should('contain', problems[tempProblemIndex].problemTitle);
+        tableToolTile.getTableTile().should('not.exist');
+        drawToolTile.getDrawTile().should('not.exist');
+        //switch back to original problem to verify restore
+        dashboard.getProblemDropdown().click({ force: true });
+        dashboard.getProblemList().find('.list-item').contains(problems[initProblemIndex].problemTitle).click({ force: true });
+        cy.waitForLoad();
+        dashboard.switchView('Workspace & Resources');
+        cy.openResourcesTab();
+        cy.openTopTab("my-work");
+        cy.openSection('my-work', 'workspaces');
+        clueCanvas.getInvestigationCanvasTitle().should('contain', problems[initProblemIndex].problemTitle);
+        tableToolTile.getTableTile().should('exist');
+        drawToolTile.getDrawTile().should('exist');
+        cy.openTopTab("my-work");
+        cy.openSection('my-work', 'workspaces');
+        cy.getCanvasItemTitle("workspaces").contains(teacherDoc).should('exist');
+        cy.openDocumentWithTitle("my-work", "workspaces", teacherDoc);
+        cy.wait(2000);
+        tableToolTile.getTableTile().should('exist');
+      });
     });
+    it('verify teacher document publish to multiple classes', function () {
+      clueCanvas.publishTeacherDocToMultipleClasses();
+      cy.openResourceTabs();
+      cy.openTopTab("class-work");
+      cy.getCanvasItemTitle('workspaces').contains(`${this.investigationTitle}`).should('exist');
+      dashboard.getClassDropdown().click({ force: true });
+      dashboard.getClassList().find('.list-item').contains(class2).click({ force: true });
+      cy.waitForLoad();
+      dashboard.switchView('Workspace & Resources');
+      cy.openResourceTabs();
+      cy.openTopTab("class-work");
+      cy.getCanvasItemTitle('workspaces').contains(`${this.investigationTitle}`).should('exist');
+    });
+  });
+  after(function () {
+    //switch back to original problem for later test
+    dashboard.getClassDropdown().click({ force: true });
+    dashboard.getClassList().find('.list-item').contains(class1).click({ force: true });
+    cy.waitForLoad();
+    dashboard.switchView('Workspace & Resources');
+    drawToolTile.getDrawTile().should('exist');
+    clueCanvas.deleteTile('draw');
+  });
 });

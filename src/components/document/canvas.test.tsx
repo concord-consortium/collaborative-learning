@@ -5,11 +5,12 @@ import { CanvasComponent } from "./canvas";
 import { DocumentModel } from "../../models/document/document";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { ProblemDocument } from "../../models/document/document-types";
-import { createStores } from "../../models/stores/stores";
+import { specStores } from "../../models/stores/spec-stores";
 import { createSingleTileContent } from "../../utilities/test-utils";
 
 // This is needed so MST can deserialize snapshots referring to tools
-import "../../register-tools";
+import { registerTools } from "../../register-tools";
+registerTools(["Text"]);
 
 var mockGetQueryState = jest.fn();
 jest.mock("react-query", () => ({
@@ -29,7 +30,7 @@ describe("Canvas Component", () => {
   });
 
  it("can render without a document or content", () => {
-    const stores = createStores();
+    const stores = specStores();
     render(
       <Provider stores={stores}>
         <CanvasComponent context="test" />
@@ -51,7 +52,7 @@ describe("Canvas Component", () => {
         text: "test"
       })
     });
-    const stores = createStores();
+    const stores = specStores();
     render(
       <Provider stores={stores}>
         <CanvasComponent context="test" document={document} readOnly={true} />
@@ -72,7 +73,7 @@ describe("Canvas Component", () => {
       createdAt: 1,
       visibility: "public"
     });
-    const stores = createStores();
+    const stores = specStores();
     render(
       <Provider stores={stores}>
         <CanvasComponent context="test" document={document} readOnly={true} />
@@ -86,7 +87,7 @@ describe("Canvas Component", () => {
       type: "Text",
       text: "test"
     }));
-    const stores = createStores();
+    const stores = specStores();
     render(
       <Provider stores={stores}>
         <CanvasComponent context="test" content={content} readOnly={true} />
