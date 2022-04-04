@@ -553,4 +553,16 @@ describe("useDocumentSyncToFirebase hook", () => {
       await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(2));
     });
   });
+
+  it("sets window.currentDocument when DOCUMENT_DEBUG is true", () => {
+    libDebug.DEBUG_DOCUMENT = true;
+    const { user, firebase, document } = specArgs(ProblemDocument, "xyz");
+    renderHook(() => useDocumentSyncToFirebase(user, firebase, document));
+    expect((window as any).currentDocument).toBe(document);
+
+    (window as any).currentDocument = undefined;
+    libDebug.DEBUG_DOCUMENT = false;
+    renderHook(() => useDocumentSyncToFirebase(user, firebase, document));
+    expect((window as any).currentDocument).toBeUndefined();
+  });
 });
