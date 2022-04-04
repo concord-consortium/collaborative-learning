@@ -1,7 +1,8 @@
 import { forEach } from "lodash";
 import { types } from "mobx-state-tree";
+import { observable } from "mobx";
 import { AppConfigModelType } from "./app-config-model";
-import { DocumentModel, DocumentModelType } from "../document/document";
+import { DocumentModelType } from "../document/document";
 import {
   DocumentType, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
   PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemPublication
@@ -31,11 +32,11 @@ export interface IRequiredDocumentPromise {
 
 export const DocumentsModel = types
   .model("Documents", {
-    all: types.array(DocumentModel)
   })
   .volatile(self => ({
     appConfig: undefined as AppConfigModelType | undefined,
-    requiredDocuments: {} as Record<string, IRequiredDocumentPromise>
+    requiredDocuments: {} as Record<string, IRequiredDocumentPromise>,
+    all: observable<DocumentModelType>([])
   }))
   .views(self => ({
     getDocument(documentKey: string) {
