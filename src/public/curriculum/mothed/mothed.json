@@ -31,31 +31,25 @@
     "default": true,
     "sectionInfo": {
       "overview": {
-        "initials": "OV",
-        "title": "Overview",
+        "initials": "GS",
+        "title": "Get Started",
         "placeholder": "Add some tiles here"
       },
       "launch": {
-        "initials": "LC",
-        "title": "Launch",
+        "initials": "FN",
+        "title": "Field Notes",
         "placeholder": "Add some tiles here"
       },
       "explore": {
-        "initials": "EX",
-        "title": "Explore",
-        "placeholder": "Add some tiles here"
-      },
-      "summarize": {
-        "initials": "SM",
-        "title": "Summarize",
+        "initials": "SH",
+        "title": "Share",
         "placeholder": "Add some tiles here"
       }
     },
     "sections": [
-      { "type": "overview" },
-      { "type": "launch" },
-      { "type": "explore" },
-      { "type": "summarize" }
+      { "type": "getStarted" },
+      { "type": "fieldNotes" },
+      { "type": "share" }
     ]
   },
   "defaultStamps": [
@@ -107,7 +101,7 @@
             {
             "type": "getStarted",
             "content": {
-              "tiles": 
+              "tiles":
                 [
                   {
                     "content": {
