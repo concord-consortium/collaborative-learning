@@ -1,16 +1,14 @@
 import { forEach } from "lodash";
-import { getSnapshot, types } from "mobx-state-tree";
+import { types } from "mobx-state-tree";
+import { observable } from "mobx";
 import { AppConfigModelType } from "./app-config-model";
-import { DocumentModel, DocumentModelType } from "../document/document";
+import { DocumentModelType } from "../document/document";
 import {
   DocumentType, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
   PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemPublication
 } from "../document/document-types";
 import { ClassModelType } from "./class";
 import { UserModelType } from "./user";
-import { addTreeMonitor } from "../history/tree-monitor";
-import { Container } from "../history/container";
-import { Tree } from "../history/tree";
 
 const extractLatestPublications = (publications: DocumentModelType[], attr: "uid" | "originDoc") => {
   const latestPublications: DocumentModelType[] = [];
@@ -32,14 +30,13 @@ export interface IRequiredDocumentPromise {
   isResolved: boolean;
 }
 
-export const DocumentsModel = Tree.named("Documents")
-  .props({
-    id: "main", // HACK for now to support tree monitor middleware
-    all: types.array(DocumentModel)
+export const DocumentsModel = types
+  .model("Documents", {
   })
   .volatile(self => ({
     appConfig: undefined as AppConfigModelType | undefined,
-    requiredDocuments: {} as Record<string, IRequiredDocumentPromise>
+    requiredDocuments: {} as Record<string, IRequiredDocumentPromise>,
+    all: observable<DocumentModelType>([])
   }))
   .views(self => ({
     getDocument(documentKey: string) {
@@ -265,14 +262,8 @@ export const DocumentsModel = Tree.named("Documents")
 
 export type DocumentsModelType = typeof DocumentsModel.Type;
 
-const container = Container({});
-(window as any).container = container;
-(window as any).getSnapshot = getSnapshot;
-
 export function createDocumentsModelWithRequiredDocuments(requiredTypes: string[]) {
-  const documents = DocumentsModel.create({id: "main"}, {containerAPI: container.containerAPI});
-  addTreeMonitor(documents, container.containerAPI, false);
-  container.trees.main = documents;
+  const documents = DocumentsModel.create();
   documents.addRequiredDocumentPromises(requiredTypes);
   return documents;
 }

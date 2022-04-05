@@ -32,7 +32,7 @@ describe("Four Up Component", () => {
       createdAt: 1,
       content: {}
     });
-    documents = DocumentsModel.create({id: "test"});
+    documents = DocumentsModel.create({});
     documents.add(document);
   });
 

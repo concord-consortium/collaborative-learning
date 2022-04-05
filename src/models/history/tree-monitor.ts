@@ -196,7 +196,7 @@ export const addTreeMonitor = (tree: Instance<typeof Tree> ,  container: Contain
                 // We only record this when the action is not triggered by the
                 // container. If the container triggered the action then it is up to
                 // the container to setup this information first.
-                await container.addHistoryEntry(historyEntryId, callId, tree.id, getActionName(call), true);
+                await container.addHistoryEntry(historyEntryId, callId, tree.treeId, getActionName(call), true);
             }
     
             // Call the shared model notification function if there are changes. 
@@ -230,7 +230,7 @@ export const addTreeMonitor = (tree: Instance<typeof Tree> ,  container: Contain
             // Always send the record to the container even if there are no
             // patches. This API is how the container knows the callId is finished. 
             const record: TreePatchRecordSnapshot = {
-                tree: tree.id,
+                tree: tree.treeId,
                 action: getActionName(call),
                 patches,
                 inversePatches,
