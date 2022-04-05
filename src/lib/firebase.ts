@@ -88,11 +88,6 @@ export class Firebase {
     return `/${parts.join("/")}/`;
   }
   
-  public getQAUserRoot() {
-    // get the current QA user's folder
-    return firebase.database().ref(`/qa/${this.userId}`);
-  }
-
   //
   // Paths
   //

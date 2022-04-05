@@ -9,6 +9,7 @@ let student = '5',
     classroom = '5',
     group = '5';
 
+describe('Check header area for correctness', function(){
     before(function(){
         const queryParams = `${Cypress.config("queryParams")}`;
 
@@ -16,7 +17,7 @@ let student = '5',
         cy.visit(queryParams);
         cy.waitForLoad();
     });
-describe('Check header area for correctness', function(){
+
     it('will verify if class name is correct', function(){
         header.getClassName().should('contain','Class '+classroom);
     });
@@ -29,8 +30,6 @@ describe('Check header area for correctness', function(){
     it('will verify student name is correct', function(){
         header.getUserName().should('contain','Student '+student);
     });
+
 });
 
-after(function(){
-  cy.clearQAData('all');
-});

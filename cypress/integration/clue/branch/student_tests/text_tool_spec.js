@@ -7,15 +7,15 @@ const clueCanvas = new ClueCanvas;
 const textToolTile = new TextToolTile;
 
 
-before(function(){
-    const queryParams = `${Cypress.config("queryParams")}`;
-
-    cy.clearQAData('all');
-    cy.visit(queryParams);
-    cy.waitForLoad();
-});
-
 context('Text tool tile functionalities', function(){
+    before(function(){
+        const queryParams = `${Cypress.config("queryParams")}`;
+    
+        cy.clearQAData('all');
+        cy.visit(queryParams);
+        cy.waitForLoad();
+    });
+        
     let title;
     before(()=>{
         clueCanvas.getInvestigationCanvasTitle()
@@ -50,8 +50,4 @@ context('Text tool tile functionalities', function(){
         clueCanvas.deleteTile('text');
         textToolTile.getTextTile().should('not.exist');
     });
-});
-
-after(function(){
-  cy.clearQAData('all');
 });

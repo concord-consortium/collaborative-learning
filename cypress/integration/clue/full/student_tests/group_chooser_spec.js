@@ -4,10 +4,6 @@ import ClueHeader from '../../../../support/elements/clue/cHeader';
 const header = new Header;
 const clueHeader = new ClueHeader;
 
-before(() => {
-      cy.clearQAData('all');
-});
-
 describe('Test student join a group', function(){
     let student1 = '20',
         student2 = '21',
@@ -20,7 +16,10 @@ describe('Test student join a group', function(){
         group1='20',
         group2='21';
 
-
+    before(() => {
+        cy.clearQAData('all');
+    });
+      
     function setup(student, alreadyInGroup=false){
         cy.visit('?appMode=qa&fakeClass='+fakeClass+'&fakeUser=student:'+student+'&problem='+problem);
         if (alreadyInGroup) {
@@ -123,7 +122,3 @@ describe('Test student join a group', function(){
         clueHeader.getGroupMembers().should('contain','S'+student1).and('contain','S'+student2).and('contain','S'+student4).and('contain','S'+student6);
     });
 });
-
-after(function(){
-    cy.clearQAData('all');
-  });

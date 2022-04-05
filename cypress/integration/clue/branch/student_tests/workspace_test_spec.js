@@ -5,13 +5,14 @@ const queryParams = `${Cypress.config("queryParams")}`;
 let clueCanvas = new ClueCanvas,
     textToolTile = new TextToolTile;
 
-before(function () {
-  cy.clearQAData('all');
-
-  cy.visit(queryParams);
-  cy.waitForLoad();
-});
 context('Test the overall workspace', function () {
+  before(function () {
+    cy.clearQAData('all');
+  
+    cy.visit(queryParams);
+    cy.waitForLoad();
+  });
+  
   describe('Desktop functionalities', function () {
     it('will verify that clicking on collapsed resource tab opens the nav area', function () {
       cy.get(".collapsed-resources-tab.my-work").click();
@@ -78,8 +79,4 @@ context('Test the overall workspace', function () {
     });
 
   });
-});
-
-after(function () {
-  cy.clearQAData('all');
 });
