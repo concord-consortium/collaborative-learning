@@ -34,6 +34,7 @@ import { IStores } from "../models/stores/stores";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
 import { safeJsonParse } from "../utilities/js-utils";
 import { urlParams } from "../utilities/url-params";
+import { firebaseConfig } from "./firebase-config";
 
 export enum Monitor {
   None = "None",
@@ -117,17 +118,7 @@ export class DB {
 
       // check for already being initialized for tests
       if (firebase.apps.length === 0) {
-        const key = atob("QUl6YVN5QVV6T2JMblZESURYYTB4ZUxmSVpLV3BiLTJZSWpYSXBJ");
-        firebase.initializeApp({
-          apiKey: key,
-          authDomain: "collaborative-learning-ec215.firebaseapp.com",
-          databaseURL: "https://collaborative-learning-ec215.firebaseio.com",
-          projectId: "collaborative-learning-ec215",
-          storageBucket: "collaborative-learning-ec215.appspot.com",
-          messagingSenderId: "112537088884",
-          appId: "1:112537088884:web:c51b1b8432fff36faff221",
-          measurementId: "G-XP472LRY18"
-        });
+        firebase.initializeApp(firebaseConfig());
       }
 
       if (urlParams.firebase) {
@@ -680,7 +671,6 @@ export class DB {
   public clear(level: DBClearLevel) {
     return new Promise<void>((resolve, reject) => {
       const {user} = this.stores;
-      let qaUser;
       const clearPath = (path?: string) => {
         this.firebase.ref(path).remove().then(resolve).catch(reject);
       };
@@ -689,13 +679,11 @@ export class DB {
         return reject("db#clear is only available in qa mode");
       }
       
+      if (level === "all") {
+        return reject("clearing 'all' is handled by clearFirebaseAnonQAUser");
+      }
+
       switch (level) {
-        case "all":
-          qaUser = this.firebase.getQAUserRoot();
-          if (qaUser) {
-            qaUser.remove().then(resolve).catch(reject);
-          }
-          break;
         case "class":
           clearPath(this.firebase.getClassPath(user));
           break;
