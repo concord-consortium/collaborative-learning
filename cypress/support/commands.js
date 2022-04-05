@@ -85,22 +85,6 @@ Cypress.Commands.add("clearQAData", (data)=>{ //clears data from Firebase (curre
         // The log shows the assertion passing and then shows it failing right after
         // using contains fixes this problem.
         cy.contains('span', 'QA Cleared: OK', {timeout: 60000});
-
-        // According to the firebase documentation and our implementation we shouldn't be showing
-        // QA Cleared: OK until the removal of the node in firebase is complete.
-        // However there are some randomly failing tests which could be explained if this
-        // removal on the firebase server happens later and triggers an event after the next
-        // visit command.
-        // So to be safe there is a wait here to give firebase more of a chance to process.
-        // cy.wait(1000);
-
-        // I've seen at least one failure where the QA Cleared, showed up right away. But then 
-        // then two other requests happened to firebase. One apparently resolved, the other never did.
-        // Then the wait finished, and the un-resolved request was canceled. The resolved request 
-        // turned red in cypress, but I don't know why.
-        // This was followed by the visit request that was checking for the .version class.
-        // The new visit finished loading but the page was blank.
-        // I think there might be a console log message at this point, but those aren't recorded.
     }
 });
 
