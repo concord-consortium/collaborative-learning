@@ -3,6 +3,7 @@ import TeacherDashboard from "../../../../support/elements/clue/TeacherDashboard
 import ClueCanvas from "../../../../support/elements/clue/cCanvas";
 import ResourcesPanel from "../../../../support/elements/clue/ResourcesPanel";
 
+context('Teacher Support', function() {
     let dashboard = new TeacherDashboard();
     // let primaryWorkspace = new PrimaryWorkspace();
     let resourcesPanel = new ResourcesPanel();
@@ -44,10 +45,4 @@ import ResourcesPanel from "../../../../support/elements/clue/ResourcesPanel";
             });
     });
 
-after(function(){
-        const queryParams = `${Cypress.config("teacherQueryParams")}`;
-
-        cy.visit(queryParams);
-        cy.waitForLoad();
-        cy.clearQAData('all');
 });

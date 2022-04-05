@@ -398,7 +398,3 @@ describe("Canvas unit config test", function () {
     cy.get(".icon-button.icon-publish").should("not.exist");
   });
 });
-
-after(function () {
-  cy.clearQAData('all');
-});
