@@ -92,7 +92,7 @@ Cypress.Commands.add("clearQAData", (data)=>{ //clears data from Firebase (curre
         // removal on the firebase server happens later and triggers an event after the next
         // visit command.
         // So to be safe there is a wait here to give firebase more of a chance to process.
-        cy.wait(1000);
+        // cy.wait(1000);
 
         // I've seen at least one failure where the QA Cleared, showed up right away. But then 
         // then two other requests happened to firebase. One apparently resolved, the other never did.
