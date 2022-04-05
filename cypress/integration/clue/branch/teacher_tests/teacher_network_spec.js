@@ -8,20 +8,21 @@ let teacherNetwork = new TeacherNetwork;
 
 const queryParams = "/?appMode=qa&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=msa";
 
-before(() => {
-  cy.clearQAData('all');
-
-  cy.visit(queryParams);
-  cy.waitForLoad();
-  dashboard.switchView("Workspace & Resources");
-  cy.wait(2000);
-  clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
-});
-beforeEach(() => {
-  cy.fixture("teacher-dash-data-msa-test.json").as("clueData");
-});
-
 describe('Networked dividers for networked teacher', () => {
+  before(() => {
+    cy.clearQAData('all');
+  
+    cy.visit(queryParams);
+    cy.waitForLoad();
+    dashboard.switchView("Workspace & Resources");
+    cy.wait(2000);
+    clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
+  });
+  
+  beforeEach(() => {
+    cy.fixture("teacher-dash-data-msa-test.json").as("clueData");
+  });
+    
   it('verify network dividers for teacher in network (via url params)', () => {
     cy.visit("/?appMode=qa&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=msa&network=foo");
     cy.waitForLoad();
