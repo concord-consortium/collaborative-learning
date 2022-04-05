@@ -156,7 +156,7 @@ context('Nav Panel', function () {
         });
       });
     });
-    describe('Supports Tab', function () {
+    describe.skip('Supports Tab', function () {
       describe('Test supports area', function () {
         it('verify support tabs', function () {
           cy.openTopTab("supports");
