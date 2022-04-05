@@ -28,8 +28,6 @@ context('Test header elements',()=>{
         header.getUserName().should('exist').and('contain', ((headerInfoObj.fakeUser).split(":"))[1]);
         header.getGroupNumber().should('exist').and('contain', headerInfoObj.qaGroup);
       });
-      // intentional failure
-      cy.get('.foo').should("exist");
     });
   });
 });
