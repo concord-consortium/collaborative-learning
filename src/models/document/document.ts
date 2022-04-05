@@ -16,6 +16,10 @@ import { IDocumentProperties } from "../../lib/db-types";
 import { getLocalTimeStamp } from "../../utilities/time";
 import { safeJsonParse } from "../../utilities/js-utils";
 
+interface IMatchPropertiesOptions {
+  isTeacherDocument?: boolean;
+}
+
 export const DocumentModel = types
   .model("Document", {
     uid: types.string,
@@ -91,7 +95,9 @@ export const DocumentModel = types
     }
   }))
   .views(self => ({
-    matchProperties(properties?: string[]) {
+    matchProperties(properties?: string[], options?: IMatchPropertiesOptions) {
+      // if no properties specified then consider it a match
+      if (!properties?.length) return true;
       return properties?.every(p => {
         const match = /(!)?(.*)/.exec(p);
         const property = match && match[2];
@@ -100,8 +106,11 @@ export const DocumentModel = types
         if (property === "starred") {
           return self.isStarred === wantsProperty;
         }
+        if (property === "isTeacherDocument") {
+          return !!options?.isTeacherDocument === wantsProperty;
+        }
         if (property) {
-          return !!self.getProperty(property) === wantsProperty;
+            return !!self.getProperty(property) === wantsProperty;
         }
         // ignore empty strings, etc.
         return true;
@@ -210,7 +219,7 @@ export const DocumentModel = types
     },
 
     incChangeCount() {
-      self.changeCount += 1;
+      return ++self.changeCount;
     },
 
     setGroupId(groupId?: string) {

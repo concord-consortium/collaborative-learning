@@ -135,7 +135,7 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
       // otherwise, use the default height for this type of tile
       const tile = this.getTile(tileId);
       const tileType = tile?.content.type;
-      const contentInfo = tileType && getToolContentInfoById(tileType);
+      const contentInfo = getToolContentInfoById(tileType);
       if (contentInfo?.defaultHeight) return contentInfo.defaultHeight;
     });
   }

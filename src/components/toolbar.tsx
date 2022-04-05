@@ -76,6 +76,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
           onShowDropHighlight: this.showDropRowHighlight,
           onHideDropHighlight: this.removeDropRowHighlight
         };
+        toolButton.initialize();
         return toolButton.id !== "delete"
                 ? <ToolButtonComponent key={toolButton.id} {...buttonProps} />
                 : <DeleteButton key={toolButton.id}

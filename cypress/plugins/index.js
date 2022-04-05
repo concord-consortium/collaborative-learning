@@ -40,6 +40,9 @@ function getEnvVariablesStartingWith (prefix) {
 // Also, it lets users overwrite any config value using environment variable.
 // Cypress lets you do it by default, but only for its own, predefined configuration.
 module.exports = (on, config) => {
+    // Add better reporting output
+    require('cypress-terminal-report/src/installLogsPrinter')(on);
+
     // Why do we need to read process.env again? Cypress preprocess environment variables. If it finds one with name
     // that matches one of the Cypress config options, it will update the config and remove this entry from environment
     // variables set. It would work fine unless the same option is specified in our own environments.json or user-config.json.

@@ -18,7 +18,7 @@ export class DBPublicationsListener extends BaseListener {
   public start() {
     return new Promise<void>((resolve, reject) => {
       const publicationsRef = this.publicationsRef = this.db.firebase.ref(
-        this.db.firebase.getPublicationsPath(this.db.stores.user)
+        this.db.firebase.getProblemPublicationsPath(this.db.stores.user)
       );
       // use once() so we are ensured that publications are set before we resolve
       this.debugLogHandler("#start", "adding", "once", publicationsRef);

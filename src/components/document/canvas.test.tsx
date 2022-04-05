@@ -9,7 +9,8 @@ import { specStores } from "../../models/stores/spec-stores";
 import { createSingleTileContent } from "../../utilities/test-utils";
 
 // This is needed so MST can deserialize snapshots referring to tools
-import "../../register-tools";
+import { registerTools } from "../../register-tools";
+registerTools(["Text"]);
 
 var mockGetQueryState = jest.fn();
 jest.mock("react-query", () => ({

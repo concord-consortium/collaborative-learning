@@ -19,8 +19,10 @@ import {
 import { SectionModelType } from "../models/curriculum/section";
 import { SupportModelType } from "../models/curriculum/support";
 import { ImageModelType } from "../models/image";
-import { DocumentContentSnapshotType, DocumentContentModelType, cloneContentWithUniqueIds, createDefaultSectionedContent
-       } from "../models/document/document-content";
+import {
+  DocumentContentSnapshotType, DocumentContentModelType, cloneContentWithUniqueIds
+} from "../models/document/document-content";
+import { createDefaultSectionedContent } from "../models/document/document-content-import";
 import { Firebase } from "./firebase";
 import { Firestore } from "./firestore";
 import { DBListeners } from "./db-listeners";
@@ -32,6 +34,7 @@ import { IStores } from "../models/stores/stores";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
 import { safeJsonParse } from "../utilities/js-utils";
 import { urlParams } from "../utilities/url-params";
+import { firebaseConfig } from "./firebase-config";
 
 export enum Monitor {
   None = "None",
@@ -115,17 +118,7 @@ export class DB {
 
       // check for already being initialized for tests
       if (firebase.apps.length === 0) {
-        const key = atob("QUl6YVN5QVV6T2JMblZESURYYTB4ZUxmSVpLV3BiLTJZSWpYSXBJ");
-        firebase.initializeApp({
-          apiKey: key,
-          authDomain: "collaborative-learning-ec215.firebaseapp.com",
-          databaseURL: "https://collaborative-learning-ec215.firebaseio.com",
-          projectId: "collaborative-learning-ec215",
-          storageBucket: "collaborative-learning-ec215.appspot.com",
-          messagingSenderId: "112537088884",
-          appId: "1:112537088884:web:c51b1b8432fff36faff221",
-          measurementId: "G-XP472LRY18"
-        });
+        firebase.initializeApp(firebaseConfig());
       }
 
       if (urlParams.firebase) {
@@ -441,7 +434,7 @@ export class DB {
     }
     return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
       this.createDocument({ type: ProblemPublication, content }).then(({document, metadata}) => {
-        const publicationRef = this.firebase.ref(this.firebase.getPublicationsPath(user)).push();
+        const publicationRef = this.firebase.ref(this.firebase.getProblemPublicationsPath(user)).push();
         const userGroup = groups.groupForUser(user.id)!;
         const groupUserConnections: DBGroupUserConnections = userGroup && userGroup.users
           .filter(groupUser => groupUser.id !== user.id)
@@ -481,8 +474,8 @@ export class DB {
     return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
       this.createDocument({ type: publicationType, content }).then(({document, metadata}) => {
         const publicationPath = publicationType === "personalPublication"
-                                ? this.firebase.getClassPersonalPublicationsPath(user)
-                                : this.firebase.getClassPublicationsPath(user);
+                                ? this.firebase.getPersonalPublicationsPath(user)
+                                : this.firebase.getLearningLogPublicationsPath(user);
         const publicationRef = this.firebase.ref(publicationPath).push();
         const publication: DBOtherPublication = {
           version: "1.0",
@@ -664,6 +657,17 @@ export class DB {
     });
   }
 
+  public async destroyFirebaseDocument(document: DocumentModelType) {
+    const { content, metadata, typedMetadata } =
+      this.firebase.getUserDocumentPaths(this.stores.user, document.type, document.key);
+    await Promise.all([
+      this.firebase.ref(content).set(null),
+      this.firebase.ref(metadata).set(null),
+      this.firebase.ref(typedMetadata).set(null)
+    ]);
+    this.stores.documents.resolveRequiredDocumentPromiseWithNull(document.type);
+  }
+
   public clear(level: DBClearLevel) {
     return new Promise<void>((resolve, reject) => {
       const {user} = this.stores;
@@ -674,11 +678,12 @@ export class DB {
       if (this.stores.appMode !== "qa") {
         return reject("db#clear is only available in qa mode");
       }
+      
+      if (level === "all") {
+        return reject("clearing 'all' is handled by clearFirebaseAnonQAUser");
+      }
 
       switch (level) {
-        case "all":
-          clearPath();
-          break;
         case "class":
           clearPath(this.firebase.getClassPath(user));
           break;
@@ -919,10 +924,6 @@ export class DB {
     updateRef.update({
       deleted: true
     });
-  }
-
-  public setLastSupportViewTimestamp() {
-    this.firebase.getLastSupportViewTimestampRef().set(Date.now());
   }
 
   public setLastStickyNoteViewTimestamp() {

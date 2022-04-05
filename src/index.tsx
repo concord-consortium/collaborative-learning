@@ -21,6 +21,7 @@ const kEnableLivelinessChecking = false;
 
 import "./components/utilities/blueprint";
 import "./index.sass";
+import { QAClear } from "./components/qa-clear";
 
 const appConfig = AppConfigModel.create(appConfigSnapshot);
 
@@ -38,6 +39,14 @@ const initializeApp = async () => {
 
   const isPreviewing = !!(urlParams.domain && urlParams.domain_uid && !urlParams.token);
   const stores = createStores({ appMode, appVersion, appConfig, user, showDemoCreator, demoName, isPreviewing });
+
+  if (appMode === "qa" && urlParams.qaClear === "all") {
+    ReactDOM.render(
+      <QAClear />,
+      document.getElementById("app")
+    );
+    return;
+  }
 
   await setUnitAndProblem(stores, unitId, problemOrdinal);
 

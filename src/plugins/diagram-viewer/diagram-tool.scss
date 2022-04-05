@@ -1,0 +1,28 @@
+@import "../../components/vars.sass";
+
+.diagram-tool {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: left;
+  overflow: auto;
+
+  .diagram {
+    width: 100%;
+    height: 100%;
+
+    .react-flow__minimap {
+      bottom: 18px !important;
+
+      .react-flow__minimap-mask {
+        fill: rgba(237, 237, 237, 0.7);
+      }
+    }
+  }
+
+  .qp-version {
+    position: absolute;
+    right: 16px;
+    bottom: 0;
+  }
+}

@@ -2,8 +2,10 @@ import { IReactionDisposer, reaction } from "mobx";
 import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import { DocumentContentModel } from "../document/document-content";
 import { InvestigationModel } from "./investigation";
-import { ISectionInfoMap, SectionModel, registerSectionInfo } from "./section";
-import { SupportModel } from "./support";
+import {
+  ISectionInfoMap, SectionModel, registerSectionInfo, suspendSectionContentParsing, resumeSectionContentParsing
+} from "./section";
+import { resumeSupportContentParsing, SupportModel, suspendSupportContentParsing } from "./support";
 import { StampModel } from "../tools/drawing/stamp";
 import { AppConfigModelType } from "../stores/app-config-model";
 import { NavTabsConfigModel } from "../stores/nav-tabs";
@@ -163,6 +165,19 @@ export function getGuideJson(unitId: string | undefined, appConfig: AppConfigMod
           .catch(error => {
             throw Error(`Request rejected with exception`);
           });
+}
+
+export function createUnitWithoutContent(unitJson: any) {
+  // read the unit content, but don't instantiate section contents (DocumentModels)
+  try {
+    suspendSectionContentParsing();
+    suspendSupportContentParsing();
+    return UnitModel.create(unitJson);
+  }
+  finally {
+    resumeSupportContentParsing();
+    resumeSectionContentParsing();
+  }
 }
 
 export function isDifferentUnitAndProblem(stores: IBaseStores, unitId?: string | undefined, problemOrdinal?: string) {

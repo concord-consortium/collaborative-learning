@@ -1,5 +1,75 @@
 # Changelog
 
+## Version 2.2.0 - Internal Release
+
+### Features/Improvements
+- Set Tiles/Plugins by Unit [#180424338](https://www.pivotaltracker.com/story/show/180424338)
+- Refactor app, unit, investigation, problem configuration [#181034371](https://www.pivotaltracker.com/story/show/181034371) #1199 
+- Configurable Problem Tab [#181190677](https://www.pivotaltracker.com/story/show/181190677)
+- Updated text tile icons [#181363539](https://www.pivotaltracker.com/story/show/181363539) #1223
+- Teacher support docs and regular published docs moved to "Teacher Documents" section in My Class tab. [#180635406](https://www.pivotaltracker.com/story/show/180635406) [#181364663](https://www.pivotaltracker.com/story/show/181364663)
+- Teachers choose where to publish supports "just this class" or "all my classes" [#181364692](https://www.pivotaltracker.com/story/show/181364692) #1233
+- Each publish shows a new document and users can "soft" delete their own published documents [#181363573](https://www.pivotaltracker.com/story/show/181363573)
+- Text Toolbar can be customized by the author: [#181345429](https://www.pivotaltracker.com/story/show/181345429)
+- New Diagram tool, only loaded when configured [#181175873](https://www.pivotaltracker.com/story/show/181175873) [#181214875](https://www.pivotaltracker.com/story/show/181214875)
+- Dynamic Tile loading, javascript is now broken up into several files [#181214875](https://www.pivotaltracker.com/story/show/181214875)
+- M2Studio configurations [#181193209](https://www.pivotaltracker.com/story/show/181193209)
+- Remove 'editability' icon/badge from document canvas
+- Add "destroy..." option to the file menu when the appMode is "dev"
+- Ability to automatically assign students to groups
+- Simplify the `tile` and `id` properties of tile info to just an `id`
+- Improved typescript typing of ToolContentModel 
+
+### Bugs Fixed
+- Table expression parse errors [#181360571](https://www.pivotaltracker.com/story/show/181360571)
+
+### Asset Sizes
+
+|        File                     |    Size   | % Change from Previous Release |
+|---------------------------------|-----------|--------------------------------| 
+| cc.diagram-view.a1906313.css    |     5,233 |                                |
+| cc.diagram-view.a1906313.js     |   492,381 |                                |
+| cc.jsxgraph.70963f6e.js         |   583,971 |                                |
+| cc.react-components.c414cd1e.js |    58,695 |                                |
+| cc.slate-editor.c2cc7fb9.js     |   428,891 |                                |
+| main.c0daccfe.css               |   173,696 | -60% compared to index.css     |
+| main.c0daccfe.js                | 1,217,226 | -70% compared to index.js      |
+| vendor-main.544d75c3.css        |   259,910 |                                |
+| vendor-main.544d75c3.js         | 1,683,173 |                                |
+| total .js w/o diagram view      | 3,971,956 | -1.7% compared to index.hs     |
+| total .css w/o diagram view     |   433,606 | 0.1% compared to index.css     |
+
+## Version 2.1.3 - released February 22, 2022
+
+### Features/Improvements
+- Stretching and Shrinking content updates #1214
+- Moving Straight Ahead content updates #1214 #1216
+- Section information, time zone and activityUrl are now logged [179924865] [180680837] [#180680858] #1179 #1183 #1191
+- Improved captions of network documents [#180876987] [#181124146] #1185 #1189 #1197
+- Improved network status logging #1201
+- Improved drag preview image [180876905] #1205
+
+### Bugs Fixed
+- Geometry: handle axis bounds changes more efficiently #1165
+- Geometry: Adjust X axis bounds to leave room for Y axis labels [#180817314] #1166
+- Table: Handle expression evaluation exceptions #1168
+- Fixed bug which could result in showing the wrong teacher guide #1169 #1170
+- Fixed promise-handling bug in creation of planning documents [#181124054] #1187
+- Fixed display and copy of images in published supports [#180873340] [#181147217] #1174 #1175 #1176 #1180 #1190
+- Fixed display of images for networked teachers #1195
+- Limit of one returned problem/planning document #1196
+- Fixed bugs that could result in documents not saving #1200
+- Fixed unread supports indicator #1203
+- Fixed drag of unselected tiles [181260137] #1206
+- Fixed bug in dragging tiles from curriculum content #1208
+
+### Asset Sizes
+
+| File | Size | % Change from Previous Release |
+|---|---|---|
+| index.css | 433,155 bytes | -0.2% |
+| index.js | 4,043,774 bytes | 0.2% |
+
 ## Version 2.1.2 - released January 5, 2022
 
 ### Bugs Fixed

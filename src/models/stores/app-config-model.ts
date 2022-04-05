@@ -83,6 +83,7 @@ export const AppConfigModel = types
     get comparisonPlaceholderContent() { return self.configMgr.comparisonPlaceholderContent; },
     get placeholderText() { return self.configMgr.placeholderText; },
     get stamps() { return self.configMgr.stamps; },
+    get tools() { return self.configMgr.tools; },
     getSetting(key: string, group?: string) {
       const groupSettings = group ? self.settings?.[group] as SnapshotIn<typeof SettingsGroupMstType> : undefined;
       return groupSettings?.[key] || self.settings?.[key];

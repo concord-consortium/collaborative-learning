@@ -11,6 +11,16 @@ export interface ISectionInfo {
   placeholder?: string;
 }
 
+let gSuspendSectionContentParsing = 0;
+
+export function suspendSectionContentParsing() {
+  ++gSuspendSectionContentParsing;
+}
+
+export function resumeSectionContentParsing() {
+  --gSuspendSectionContentParsing;
+}
+
 export const kAllSectionType = "all";
 const kAllSectionInfo = { initials: "*", title: "All" };
 export const kUnknownSectionType = "unknown";
@@ -73,6 +83,11 @@ export const SectionModel = types
     disabled: types.array(types.string),
     content: types.maybe(DocumentContentModel),
     supports: types.array(SupportModel),
+  })
+  .preProcessSnapshot(snap => {
+    return gSuspendSectionContentParsing
+            ? { ...snap, content: undefined }
+            : snap;
   })
   .views(self => {
     return {
