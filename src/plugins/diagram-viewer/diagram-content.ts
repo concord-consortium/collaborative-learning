@@ -1,4 +1,3 @@
-import { FlowTransform } from "react-flow-renderer";
 import { getSnapshot, types, Instance, destroy, flow } from "mobx-state-tree";
 import { ITileExportOptions, IDefaultContentOptions } from "../../models/tools/tool-content-info";
 import { ToolContentModel } from "../../models/tools/tool-types";

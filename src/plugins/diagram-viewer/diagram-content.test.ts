@@ -1,7 +1,6 @@
-import { castToSnapshot, Instance, isAlive, types } from "mobx-state-tree";
-import { defaultDiagramContent, DiagramContentModel } from "./diagram-content";
-import { DQNode } from "@concord-consortium/diagram-view";
+import { castToSnapshot, isAlive, types } from "mobx-state-tree";
 import { when } from "mobx";
+import { defaultDiagramContent, DiagramContentModel } from "./diagram-content";
 
 const TestContainer = types.model("TestContainer", {
   content: DiagramContentModel
