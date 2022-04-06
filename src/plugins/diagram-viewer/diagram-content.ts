@@ -16,7 +16,6 @@ export const DiagramContentModel = ToolContentModel
   .props({
     type: types.optional(types.literal(kDiagramToolID), kDiagramToolID),
     root: types.optional(DQRoot, getSnapshot(DQRoot.create())),
-    transform: types.maybe(types.frozen<FlowTransform>()),
     sharedModel: types.maybe(SharedVariables)
   })
   .views(self => ({
@@ -28,11 +27,6 @@ export const DiagramContentModel = ToolContentModel
   .views(self => ({
     get isUserResizable() {
       return true;
-    }
-  }))
-  .actions(self => ({
-    setTransform(transform: FlowTransform) {
-      self.transform = transform;
     }
   }))
   .actions(self => {
