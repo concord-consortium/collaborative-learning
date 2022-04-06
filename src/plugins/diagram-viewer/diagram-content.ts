@@ -1,7 +1,7 @@
 import { getSnapshot, types, Instance, destroy, flow } from "mobx-state-tree";
 import { ITileExportOptions, IDefaultContentOptions } from "../../models/tools/tool-content-info";
 import { ToolContentModel } from "../../models/tools/tool-types";
-import { kDiagramToolID } from "./diagram-types";
+import { kDiagramToolID, kDiagramToolStateVersion } from "./diagram-types";
 import { DQRoot, VariableType } from "@concord-consortium/diagram-view";
 import { SharedVariables } from "../shared-variables/shared-variables";
 
@@ -14,6 +14,7 @@ export const DiagramContentModel = ToolContentModel
   .named("DiagramTool")
   .props({
     type: types.optional(types.literal(kDiagramToolID), kDiagramToolID),
+    version: types.optional(types.literal(kDiagramToolStateVersion), kDiagramToolStateVersion),
     root: types.optional(DQRoot, getSnapshot(DQRoot.create())),
     sharedModel: types.maybe(SharedVariables)
   })

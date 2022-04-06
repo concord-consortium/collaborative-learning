@@ -5,5 +5,11 @@ export const kDiagramToolID = "Diagram";
 // instead
 export const kQPVersion = "0.0.10";
 
+// This is a version stored in the state of the tile
+// Currently any state with a different version will be ignored.
+// In the future we can hopefully we can support migrating older
+// state
+export const kDiagramToolStateVersion = "0.0.1";
+
 export const kDiagramDefaultWidth = 480;
 export const kDiagramDefaultHeight = 320;
