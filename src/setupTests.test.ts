@@ -16,7 +16,7 @@ describe("setupTests", () => {
       }).toThrow();
     });
 
-    it("handled not undefined values", () => {      
+    it("handles defined values", () => {      
       // `as any` is used here to verify that assertIsDefined is working 
       // with Typescript correctly. Without `as any` typescript ignores 
       // the `number | undefined` and just uses `number`. So then `value + 1`
@@ -30,7 +30,7 @@ describe("setupTests", () => {
       expect(value + 1).toBe(2);
     });
 
-    it("handled not null values", () => {      
+    it("handles non-null values", () => {      
       // `as any` is used here to verify that assertIsDefined is working 
       // with Typescript correctly. Without `as any` typescript ignores 
       // the `number | undefined` and just uses `number`. So then `value + 1`
