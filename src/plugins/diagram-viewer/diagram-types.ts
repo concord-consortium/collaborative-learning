@@ -1,7 +1,8 @@
 export const kDiagramToolID = "Diagram";
 
-// Taken from most recent tag when code was last synced from quantity-playground repo
-// TODO: include a version in the diagram-view export so we can just reference that
+// The version shown to the user for the Diagram tile.
+// Currently it is just the version of the diagram-view library.
+// TODO: include a version in the diagram-view library so we can reference that
 // instead
 export const kQPVersion = "0.0.10";
 
