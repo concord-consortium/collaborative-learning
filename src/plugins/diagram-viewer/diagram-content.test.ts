@@ -41,9 +41,7 @@ describe("DiagramContent", () => {
     content.root.createNode({x: 1, y: 1});
     expect(content.root.nodes.size).toBe(1);
     const newNode = Array.from(content.root.nodes.values())[0]; 
-    if (!newNode) {
-      throw new Error("can't find node that was just added");
-    }
+    assertIsDefined(newNode);
 
     expect(content.sharedModel?.variables.length).toBe(1);
     expect(newNode.x).toBe(1);
@@ -54,9 +52,8 @@ describe("DiagramContent", () => {
     const content = DiagramContentModel.create();
     const container = TestContainer.create({content: castToSnapshot(content)});
     const variablesAPI = container.content.root.variablesAPI;
-    if (!variablesAPI) {
-      throw new Error("variablesAPI not valid");
-    }
+    assertIsDefined(variablesAPI);
+
     const variable = variablesAPI.createVariable();
     expect(variable).toBeDefined();
   });
@@ -89,9 +86,7 @@ describe("DiagramContent", () => {
 
     expect(content.root.nodes.size).toBe(1);
     const firstNode = Array.from(content.root.nodes.values())[0]; 
-    if (!firstNode) {
-      throw new Error("can't find node");
-    }
+    assertIsDefined(firstNode);
 
     expect(content.sharedModel?.variables.length).toBe(1);
     expect(firstNode.variable).toBeDefined();
@@ -100,14 +95,10 @@ describe("DiagramContent", () => {
   it("removeVariable in the variables api removes a variable", (done) => {
     const content = createBasicModel();
     const variablesAPI = content.root.variablesAPI;
-    if (!variablesAPI) {
-      throw new Error("variablesAPI not valid");
-    }
+    assertIsDefined(variablesAPI);
 
     const firstNode = Array.from(content.root.nodes.values())[0]; 
-    if (!firstNode) {
-      throw new Error("can't find node");
-    }
+    assertIsDefined(firstNode);
 
     variablesAPI.removeVariable(firstNode.variable);
 
