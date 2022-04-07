@@ -23,7 +23,7 @@ describe("DiagramContent", () => {
     expect(content.isUserResizable).toBe(true);
   });
 
-  it("setups up variables api after being attached", () => {
+  it("sets up variables api after being attached", () => {
     const content = DiagramContentModel.create();
     const container = TestContainer.create({content: castToSnapshot(content)});
     expect(container.content.root.variablesAPI).toBeDefined();
@@ -33,8 +33,7 @@ describe("DiagramContent", () => {
   // DQRoot, but it exercises code provided by the diagram-content in the process
   it("supports creating Nodes", () => {
     const content = DiagramContentModel.create();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const container = TestContainer.create({content: castToSnapshot(content)});
+    TestContainer.create({content: castToSnapshot(content)});
 
     expect(content.root.nodes.size).toBe(0);
     expect(content.sharedModel?.variables.length).toBe(0);
