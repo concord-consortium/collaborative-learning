@@ -1,4 +1,4 @@
-import { castToSnapshot, isAlive, types } from "mobx-state-tree";
+import { castToSnapshot, getSnapshot, isAlive, types } from "mobx-state-tree";
 import { when } from "mobx";
 import { defaultDiagramContent, DiagramContentModel } from "./diagram-content";
 
@@ -33,6 +33,11 @@ describe("DiagramContent", () => {
   // DQRoot, but it exercises code provided by the diagram-content in the process
   it("supports creating Nodes", () => {
     const content = DiagramContentModel.create();
+    // TODO: With the current structure we need to basically make a full document
+    // to test this, otherwise DiagramContentModel won't find the shared models
+    // However we want to change that anyway to support embedding this in an
+    // iframe
+    // Maybe we can make it work with just a ToolTileModel
     TestContainer.create({content: castToSnapshot(content)});
 
     expect(content.root.nodes.size).toBe(0);
@@ -58,6 +63,7 @@ describe("DiagramContent", () => {
     expect(variable).toBeDefined();
   });
 
+  // TODO: we have to provide a shared model defined at the document level
   const createBasicModel = () => {
     const content = DiagramContentModel.create({
       root: {
@@ -69,13 +75,6 @@ describe("DiagramContent", () => {
           }
         }
       },
-      sharedModel: {
-        variables: [
-          {
-            id: "variable1"
-          }
-        ]
-      }
     });
     const container = TestContainer.create({content: castToSnapshot(content)});
     return container.content;

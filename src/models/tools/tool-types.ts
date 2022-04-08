@@ -1,4 +1,5 @@
 import { Instance, types } from "mobx-state-tree";
+import { SharedModelType } from "./shared-model";
 import { getToolContentModels, getToolContentInfoById } from "./tool-content-info";
 
 /**
@@ -48,7 +49,12 @@ export const ToolContentModel = types.model("ToolContentModel", {
     // Perhaps there is some better way to define this so that there would be an error
     // if a sub type does not override it.
     type: types.optional(types.string, kUnknownToolID)
-  });
+  })
+  .actions(self => ({
+    updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
+      throw new Error("not implemented");
+    }
+  }));
 
 export interface ToolContentModelType extends Instance<typeof ToolContentModel> {}
 

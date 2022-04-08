@@ -1,5 +1,5 @@
 import { cloneDeep, each } from "lodash";
-import { types, getSnapshot, Instance, SnapshotIn } from "mobx-state-tree";
+import { types, getSnapshot, Instance, SnapshotIn, getType } from "mobx-state-tree";
 import { PlaceholderContentModel } from "../tools/placeholder/placeholder-content";
 import { kTextToolID } from "../tools/text/text-content";
 import { getToolContentInfoById, IDocumentExportOptions } from "../tools/tool-content-info";
@@ -18,6 +18,7 @@ import { DocumentsModelType } from "../stores/documents";
 import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
 import { getParentWithTypeName } from "../../utilities/mst-utils";
 import { comma, StringBuilder } from "../../utilities/string-builder";
+import { SharedModelType, SharedModelUnion } from "../tools/shared-model";
 
 export interface INewTileOptions {
   rowHeight?: number;
@@ -57,6 +58,7 @@ export const DocumentContentModel = types
     rowMap: types.map(TileRowModel),
     rowOrder: types.array(types.string),
     tileMap: types.map(ToolTileModel),
+    sharedModelMap: types.map(SharedModelUnion),
   })
   .preProcessSnapshot(snapshot => {
     return snapshot && (snapshot as any).tiles
@@ -202,6 +204,16 @@ export const DocumentContentModel = types
         snapshot.rowOrder = snapshot.rowOrder.map(rowId => idMap[rowId]);
 
         return snapshot;
+      },
+      getFirstSharedModelByType<IT extends typeof SharedModelUnion>(modelType: IT ): IT["Type"] | undefined {
+        for (const model of self.sharedModelMap.values()) {
+          // FIXME: if we use the migration strategy used for the DiagramTool this kind of type check
+          // will probably not work. We should make an isolate test of this
+          if (getType(model) === modelType) {
+            return model;
+          }          
+        }
+        return undefined;
       }
     };
   })
@@ -846,6 +858,11 @@ export const DocumentContentModel = types
         }
       });
       return results;
+    }
+  }))
+  .actions(self => ({
+    addSharedModel(sharedModel: SharedModelType) {
+      self.sharedModelMap.put(sharedModel);
     }
   }));
 

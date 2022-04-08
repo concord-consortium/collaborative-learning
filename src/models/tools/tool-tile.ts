@@ -5,6 +5,7 @@ import { ITileExportOptions } from "./tool-content-info";
 import { findMetadata, ToolContentUnion } from "./tool-types";
 import { DisplayUserTypeEnum } from "../stores/user-types";
 import { uniqueId } from "../../utilities/js-utils";
+import { SharedModelType, SharedModelUnion } from "./shared-model";
 
 // generally negotiated with app, e.g. single column width for table
 export const kDefaultMinWidth = 60;
@@ -40,7 +41,8 @@ export const ToolTileModel = types
     // whether to restrict display to certain users
     display: DisplayUserTypeEnum,
     // e.g. "GeometryContentModel", "ImageContentModel", "TableContentModel", "TextContentModel", ...
-    content: ToolContentUnion
+    content: ToolContentUnion,
+    sharedModels: types.array(types.reference(SharedModelUnion)),
   })
   .views(self => ({
     // generally negotiated with tool, e.g. single column width for table
@@ -81,6 +83,15 @@ export const ToolTileModel = types
     setDisabledFeatures(disabled: string[]) {
       const metadata: any = findMetadata(self.content.type, self.id);
       metadata && metadata.setDisabledFeatures && metadata.setDisabledFeatures(disabled);
+    }    
+  }))
+  .actions(self => ({
+    addSharedModel(sharedModel: SharedModelType) {
+      self.sharedModels.push(sharedModel);
+    },
+    setSharedModel(sharedModel: SharedModelType) {
+      self.sharedModels.clear();
+      self.sharedModels.push(sharedModel);
     }
   }));
 
