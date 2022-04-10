@@ -1,7 +1,7 @@
 import { types } from "mobx-state-tree";
 
 describe("mst", () => {
-  it("does something weird with the snapshotProcessor", () => {
+  it("snapshotProcessor unexpectedly modifies the base type", () => {
     const Todo1 = types.model({ text: types.maybe(types.string) });
     const Todo2 = types.snapshotProcessor(Todo1, {
       preProcessor(sn) {

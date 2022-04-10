@@ -3,7 +3,7 @@ import { DiagramContentModel } from "./diagram-content";
 import { kDiagramToolStateVersion } from "./diagram-types";
 
 // When this model is instantiated it will actually modify DiagramContentModel
-// This is unexpected and is documented here: 
+// This is unexpected and is demonstrated here: 
 // `src/models/mst.test.ts` 
 export const DiagramMigrator = types.snapshotProcessor(DiagramContentModel, {
   preProcessor(snapshot: any) {

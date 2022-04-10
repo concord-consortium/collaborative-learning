@@ -74,7 +74,7 @@ export interface DiagramContentModelType extends Instance<typeof DiagramContentM
 // The migrator sometimes modifies the diagram content model so that its create 
 // method actually goes through the migrator. When that happens if the snapshot doesn't
 // have a version the snapshot will be ignored.
-// This weird migrator behavior is documented here: src/models/mst.test.ts
+// This weird migrator behavior is demonstrated here: src/models/mst.test.ts
 // So because of that this method should be used instead of directly calling create
 export function createDiagramContent(snapshot?: SnapshotIn<typeof DiagramContentModel>) {
   return DiagramContentModel.create({
