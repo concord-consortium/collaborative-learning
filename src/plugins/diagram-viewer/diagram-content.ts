@@ -1,4 +1,4 @@
-import { getSnapshot, types, Instance, destroy, 
+import { getSnapshot, types, Instance, destroy, flow, SnapshotIn,
   isValidReference, addDisposer, onSnapshot, hasParentOfType, getParentOfType, getType,
   getPath } from "mobx-state-tree";
 import { reaction } from "mobx";
@@ -9,11 +9,6 @@ import { ToolTileModel } from "../../models/tools/tool-tile";
 import { kDiagramToolID, kDiagramToolStateVersion } from "./diagram-types";
 import { SharedVariables, SharedVariablesType } from "../shared-variables/shared-variables";
 import { DocumentContentModel } from "../../models/document/document-content";
-
-// This is only used directly by tests
-export function defaultDiagramContent(options?: IDefaultContentOptions) {
-  return DiagramContentModel.create({ root: getSnapshot(DQRoot.create()) });
-}
 
 export const DiagramContentModel = ToolContentModel
   .named("DiagramTool")
@@ -157,3 +152,21 @@ export const DiagramContentModel = ToolContentModel
   }));
 
 export interface DiagramContentModelType extends Instance<typeof DiagramContentModel> {}
+
+// The migrator sometimes modifies the diagram content model so that its create 
+// method actually goes through the migrator. When that happens if the snapshot doesn't
+// have a version the snapshot will be ignored.
+// This weird migrator behavior is demonstrated here: src/models/mst.test.ts
+// So because of that this method should be used instead of directly calling create
+export function createDiagramContent(snapshot?: SnapshotIn<typeof DiagramContentModel>) {
+  return DiagramContentModel.create({
+    version: kDiagramToolStateVersion,
+    ...snapshot
+  });
+}
+
+export function defaultDiagramContent(options?: IDefaultContentOptions) {
+  return createDiagramContent({ root: getSnapshot(DQRoot.create()) });
+}
+
+
