@@ -1,6 +1,6 @@
 import { castToSnapshot, isAlive, types } from "mobx-state-tree";
 import { when } from "mobx";
-import { defaultDiagramContent, DiagramContentModel } from "./diagram-content";
+import { createDiagramContent, defaultDiagramContent, DiagramContentModel } from "./diagram-content";
 
 const TestContainer = types.model("TestContainer", {
   content: DiagramContentModel
@@ -13,18 +13,18 @@ describe("DiagramContent", () => {
   });
 
   it("can export content", () => {
-    const content = DiagramContentModel.create();
+    const content = createDiagramContent();
     const expected = JSON.stringify({nodes: {}});
     expect(content.exportJson()).toEqual(expected);
   });
 
   it("is always user resizable", () => {
-    const content = DiagramContentModel.create();
+    const content = createDiagramContent();
     expect(content.isUserResizable).toBe(true);
   });
 
   it("sets up variables api after being attached", () => {
-    const content = DiagramContentModel.create();
+    const content = createDiagramContent();
     const container = TestContainer.create({content: castToSnapshot(content)});
     expect(container.content.root.variablesAPI).toBeDefined();
   });
@@ -32,7 +32,7 @@ describe("DiagramContent", () => {
   // This is more of an integration test because it is testing the innards of 
   // DQRoot, but it exercises code provided by the diagram-content in the process
   it("supports creating Nodes", () => {
-    const content = DiagramContentModel.create();
+    const content = createDiagramContent();
     TestContainer.create({content: castToSnapshot(content)});
 
     expect(content.root.nodes.size).toBe(0);
@@ -49,7 +49,7 @@ describe("DiagramContent", () => {
   });
 
   it("createVariable in the variables api adds a variable", () => {
-    const content = DiagramContentModel.create();
+    const content = createDiagramContent();
     const container = TestContainer.create({content: castToSnapshot(content)});
     const variablesAPI = container.content.root.variablesAPI;
     assertIsDefined(variablesAPI);
@@ -59,7 +59,7 @@ describe("DiagramContent", () => {
   });
 
   const createBasicModel = () => {
-    const content = DiagramContentModel.create({
+    const content = createDiagramContent({
       root: {
         nodes: {
           "node1": {
