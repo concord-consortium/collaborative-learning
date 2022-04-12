@@ -62,7 +62,6 @@ export const DiagramContentModel = ToolContentModel
           // We already have a saved model so we skip some steps
           // below. If we don't skip these steps we can get in an infinite 
           // loop.
-          self.root.setVariablesAPI(containerSharedModel);
         } else {
           if (!containerSharedModel) {
             // The document doesn't have a shared model yet
@@ -70,21 +69,13 @@ export const DiagramContentModel = ToolContentModel
             console.log("newly created shared model", getSnapshot(containerSharedModel));
           } 
   
+          // CHECKME: this might trigger an pre-mature update because the document's
+          // shared models will be updated first before the tiles. And the update to the
+          // document's shared models will trigger the document level autorun.
           sharedModelManager.setTileSharedModel(self, "variables", containerSharedModel);  
 
-          self.root.setVariablesAPI(containerSharedModel);
-
-          // FIXME: this should probably be taken care of automatically 
-          self.updateAfterSharedModelChanges();
         }
-
-        // FIXME: we want to only do this the first time the sharedModel is added
-        // or it has changed. So probably we should save the disposer and if it is
-        // set call that disposer first and then recreate it. 
-        addDisposer(self, onSnapshot(containerSharedModel, () => {
-          self.updateAfterSharedModelChanges();
-        }));
-
+        self.root.setVariablesAPI(containerSharedModel);
       }, 
       {name: "sharedModelSetup", fireImmediately: true}));
     }

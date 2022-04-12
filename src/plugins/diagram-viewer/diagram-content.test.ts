@@ -1,4 +1,4 @@
-import { castToSnapshot, IAnyStateTreeNode, IAnyType, isAlive, types } from "mobx-state-tree";
+import { castToSnapshot, IAnyStateTreeNode, IAnyType, isAlive, onSnapshot, types } from "mobx-state-tree";
 import { when } from "mobx";
 import { createDiagramContent, defaultDiagramContent, 
   DiagramContentModel, DiagramContentModelType } from "./diagram-content";
@@ -27,6 +27,11 @@ const setupContainer = (content: DiagramContentModelType, variables: SharedVaria
     {content: castToSnapshot(content), variables: castToSnapshot(variables)},
     {sharedModelManager}
   );
+
+  // Need to monitor the variables just like sharedModelDocumentManager does
+  onSnapshot(variables, () => {
+    content.updateAfterSharedModelChanges(variables);
+  });
 
   // So far it hasn't been necessary to wait for the MobX reaction to run inside of 
   // DocumentContent#afterAttach. It seems to run immediately in the line above, so 
