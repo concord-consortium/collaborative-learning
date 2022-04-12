@@ -41,8 +41,8 @@ types.model("SharedModelDocumentManager")
     getTileSharedModel(tileContentModel: IAnyStateTreeNode, label: string) {
       const toolTile = getToolTile(tileContentModel);
 
-      // FIXME: this should look up the shared model by the label
-      return tryReference(() => toolTile?.sharedModels?.[0]);
+      // Maybe we should add a more convenient view on toolTile
+      return tryReference(() => toolTile?.sharedModels?.get(label)?.sharedModel);
     },
     setTileSharedModel(tileContentModel: IAnyStateTreeNode, label: string, sharedModel: SharedModelType): void {
       if (!self.document) {
@@ -55,8 +55,7 @@ types.model("SharedModelDocumentManager")
       }
 
       const toolTile = getToolTile(tileContentModel);
-      // FIXME: this should use the passed in label
-      toolTile?.setSharedModel(sharedModel);
+      toolTile?.setSharedModel(label, sharedModel);
     }  
   };
 });
