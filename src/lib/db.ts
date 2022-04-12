@@ -10,7 +10,7 @@ import {
   DBGroupUserConnections, DBPublication, DBPublicationDocumentMetadata, DBDocumentType, DBImage, DBTileComment,
   DBUserStar, DBOfferingUserProblemDocument, DBOtherDocument, IDocumentProperties, DBOtherPublication, DBSupport
 } from "./db-types";
-import { DocumentModelType, DocumentModel } from "../models/document/document";
+import { DocumentModelType, createDocumentModel } from "../models/document/document";
 import {
   DocumentType, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
   PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemOrPlanningDocumentType,
@@ -547,13 +547,13 @@ export class DB {
             const msg = "Warning: Reconstituting empty contents for " +
                         `document '${documentKey}' of type '${type}' for user '${userId}'`;
             console.warn(msg);
-            return DocumentModel.create({
+            return createDocumentModel({
                                   type, title, properties, groupId, visibility, uid: userId, originDoc,
                                   key: documentKey, createdAt: metadata.createdAt, content: {}, changeCount: 0 });
           }
 
           const content = this.parseDocumentContent(document);
-          return DocumentModel.create({
+          return createDocumentModel({
             type,
             title,
             properties,

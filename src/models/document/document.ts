@@ -1,4 +1,4 @@
-import { applySnapshot, types, Instance, SnapshotIn } from "mobx-state-tree";
+import { applySnapshot, types, Instance, SnapshotIn, getEnv } from "mobx-state-tree";
 import { forEach } from "lodash";
 import { QueryClient, UseQueryResult } from "react-query";
 import { DocumentContentModel, DocumentContentSnapshotType } from "./document-content";
@@ -15,6 +15,7 @@ import { getFirebaseFunction } from "../../hooks/use-firebase-function";
 import { IDocumentProperties } from "../../lib/db-types";
 import { getLocalTimeStamp } from "../../utilities/time";
 import { safeJsonParse } from "../../utilities/js-utils";
+import { createSharedModelDocumentManager, ISharedModelDocumentManager } from "../tools/shared-model-document-manager";
 
 interface IMatchPropertiesOptions {
   isTeacherDocument?: boolean;
@@ -174,6 +175,8 @@ export const DocumentModel = types
       }
       else {
         self.content = DocumentContentModel.create(snapshot);
+        const sharedModelManager = getEnv(self).sharedModelManager as ISharedModelDocumentManager;
+        sharedModelManager.setDocument(self.content);
       }
     },
 
@@ -271,4 +274,20 @@ export const getDocumentContext = (document: DocumentModelType): IDocumentContex
     getProperty: (prop: string) => document.properties.get(prop),
     setProperties: (properties: ISetProperties) => document.setProperties(properties)
   };
+};
+
+/**
+ * Create a DocumentModel and add a new sharedModelManager into its environment
+ * 
+ * @param snapshot 
+ * @returns 
+ */
+export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
+  const sharedModelManager = createSharedModelDocumentManager();
+  const document = DocumentModel.create(snapshot, {sharedModelManager});
+  console.log("createDocumentModel", document.content);
+  if (document.content) {
+    sharedModelManager.setDocument(document.content);
+  }
+  return document;
 };

@@ -1,5 +1,5 @@
 import { DBListeners } from ".";
-import { DocumentModel } from "../../models/document/document";
+import { createDocumentModel } from "../../models/document/document";
 import { ProblemDocument } from "../../models/document/document-types";
 import { DocumentsModel } from "../../models/stores/documents";
 import { specAppConfig } from "../../models/stores/spec-app-config";
@@ -15,7 +15,7 @@ describe("DBListeners", () => {
     user: UserModel.create({id: "1", portal: "example.com"})
   });
   const db = new DB();
-  const document = DocumentModel.create({
+  const document = createDocumentModel({
                     uid: "1", type: ProblemDocument, key: "doc-1", content: {} });
 
   beforeEach(async () => {

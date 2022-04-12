@@ -1,6 +1,6 @@
-import { getSnapshot, types, Instance, destroy, flow, SnapshotIn,
+import { getSnapshot, types, Instance, destroy, SnapshotIn,
   isValidReference, addDisposer, onSnapshot, hasParentOfType, getParentOfType, getType,
-  getPath } from "mobx-state-tree";
+  getPath, getEnv } from "mobx-state-tree";
 import { reaction } from "mobx";
 import { DQRoot, DQNode } from "@concord-consortium/diagram-view";
 import { ITileExportOptions, IDefaultContentOptions } from "../../models/tools/tool-content-info";
@@ -9,6 +9,7 @@ import { ToolTileModel } from "../../models/tools/tool-tile";
 import { kDiagramToolID, kDiagramToolStateVersion } from "./diagram-types";
 import { SharedVariables, SharedVariablesType } from "../shared-variables/shared-variables";
 import { DocumentContentModel } from "../../models/document/document-content";
+import { ISharedModelManager } from "../../models/tools/shared-model";
 
 export const DiagramContentModel = ToolContentModel
   .named("DiagramTool")
@@ -24,21 +25,14 @@ export const DiagramContentModel = ToolContentModel
     }
   }))
   .views(self => ({
-    get toolTile() {
-      if (!hasParentOfType(self, ToolTileModel)) {
-        // we aren't attached in the right place yet
-        return undefined;
-      }
-      return getParentOfType(self, ToolTileModel);
-    },
-  }))
-  .views(self => ({
     get isUserResizable() {
       return true;
     },
     get sharedModel() {
-      const sharedModel = self.toolTile?.sharedModels.find(model => getType(model) === SharedVariables);
-      return sharedModel as SharedVariablesType | undefined;
+      const sharedModelManager = getEnv(self)?.sharedModelManager as ISharedModelManager | undefined;
+      // Perhaps we should pass the type to getTileSharedModel, so it can return the right value
+      // just like findFirstSharedModelByType does
+      return sharedModelManager?.getTileSharedModel(self, "variables") as SharedVariablesType | undefined;
     },
   }))
   .actions(self => ({
@@ -48,65 +42,53 @@ export const DiagramContentModel = ToolContentModel
       // Monitor our parents and update our shared model when we have a document parent
       addDisposer(self, reaction(() => {
         console.log("running diagram-content reaction", getPath(self));
-        const sharedModel = self.sharedModel; 
+        const sharedModelManager = getEnv(self)?.sharedModelManager as ISharedModelManager | undefined;
 
-        if (!hasParentOfType(self, DocumentContentModel)) {
-          // we aren't attached in the right place yet
-          return {sharedModel, document: undefined};
-        }
+        const tileSharedModel = sharedModelManager?.isReady ? 
+          sharedModelManager?.getTileSharedModel(self, "variables") : undefined;
+        const containerSharedModel = sharedModelManager?.isReady ?
+          sharedModelManager?.findFirstSharedModelByType(SharedVariables) : undefined;
 
-        // see if there is already a sharedModel in the document
-        // FIXME: to support tiles in iframes, we won't have direct access to the
-        // document like this, so some kind of API will need to be used instead.
-        const document = getParentOfType(self, DocumentContentModel);
-
-        return {sharedModel, document};
+        const values = {sharedModelManager, tileSharedModel, containerSharedModel};
+        console.log("1st part of reaction returns", values);
+        return values;
       },
-      ({sharedModel, document}) => {
-        console.log("running vlist-content effect", getPath(self));
-        if (sharedModel) {
-          // we already have a sharedModel
-          // FIXME: for now we are going to ignore this because we have some issue
-          // with an existing sharedModel
-
-          // TODO: we might want to still continue to see if our document has
-          // changed so then we could reset our shared model. However I suspect
-          // that if the document changes the reference to the sharedModel will
-          // break so we'll be able to deal with it at that point.
-          // return;
-        }
-
-        if (!document) {
-          // We don't have a document yet
+      ({sharedModelManager, tileSharedModel, containerSharedModel}) => {
+        console.log("running diagram-content effect", getPath(self));
+        if (!sharedModelManager?.isReady) {
+          // We aren't added to a document yet so we can't do anything yet
           return;
         }
 
-        sharedModel = document.getFirstSharedModelByType(SharedVariables);
+        if (tileSharedModel && tileSharedModel === containerSharedModel) {
+          // We already have a saved model so we skip some steps
+          // below. If we don't skip these steps we can get in an infinite 
+          // loop.
+          self.root.setVariablesAPI(containerSharedModel);
+        } else {
+          if (!containerSharedModel) {
+            // The document doesn't have a shared model yet
+            containerSharedModel = SharedVariables.create();
+            console.log("newly created shared model", getSnapshot(containerSharedModel));
+          } 
+  
+          sharedModelManager.setTileSharedModel(self, "variables", containerSharedModel);  
 
-        if (!sharedModel) {
-          // The document doesn't have a shared model yet
-          sharedModel = SharedVariables.create();
-          console.log(getSnapshot(sharedModel));
-          document.addSharedModel(sharedModel);
-        } 
+          self.root.setVariablesAPI(containerSharedModel);
 
-        const toolTile = getParentOfType(self, ToolTileModel);    
-        toolTile.setSharedModel(sharedModel);
+          // FIXME: this should probably be taken care of automatically 
+          self.updateAfterSharedModelChanges();
+        }
 
-        self.root.setVariablesAPI(sharedModel);
-
-        // FIXME: this should probably be taken care of automatically 
-        self.updateAfterSharedModelChanges();
-
-        // TODO: we want to only do this the first time the sharedModel is added
+        // FIXME: we want to only do this the first time the sharedModel is added
         // or it has changed. So probably we should save the disposer and if it is
         // set call that disposer first and then recreate it. 
-        addDisposer(self, onSnapshot(sharedModel, () => {
+        addDisposer(self, onSnapshot(containerSharedModel, () => {
           self.updateAfterSharedModelChanges();
         }));
 
       }, 
-      {fireImmediately: true}));
+      {name: "sharedModelSetup", fireImmediately: true}));
     }
   }))
   .actions(self => ({
@@ -142,7 +124,7 @@ export const DiagramContentModel = ToolContentModel
   .actions(self => ({
     afterAttach() {
       if (self.sharedModel) {
-        // TODO: this needs to be moved to the Document level perhaps with a Tree
+        // FIXME: this needs to be moved to the Document level perhaps with a Tree
         // model the document extends
         addDisposer(self, onSnapshot(self.sharedModel, () => {
           self.updateAfterSharedModelChanges();

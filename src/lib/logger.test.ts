@@ -1,6 +1,6 @@
 import mockXhr from "xhr-mock";
 import { Logger, LogEventName, ILogComment } from "./logger";
-import { DocumentModel, DocumentModelType } from "../models/document/document";
+import { createDocumentModel, DocumentModelType } from "../models/document/document";
 import { ProblemDocument } from "../models/document/document-types";
 import { InvestigationModel } from "../models/curriculum/investigation";
 import { specAppConfig } from "../models/stores/spec-app-config";
@@ -258,7 +258,7 @@ describe("authed logger", () => {
     });
 
     it("can log an ADD a document initial comment event", (done) => {
-      const document = DocumentModel.create({
+      const document = createDocumentModel({
         type: ProblemDocument,
         uid: "1",
         key: "source-document",
@@ -289,7 +289,7 @@ describe("authed logger", () => {
     });
 
     it("can log an ADD a document response comment event", (done) => {
-      const document = DocumentModel.create({
+      const document = createDocumentModel({
         type: ProblemDocument,
         uid: "1",
         key: "source-document",
@@ -320,7 +320,7 @@ describe("authed logger", () => {
     });
 
     it("can log an ADD a tile comment event", (done) => {
-      const document = DocumentModel.create({
+      const document = createDocumentModel({
         type: ProblemDocument,
         uid: "1",
         key: "source-document",
@@ -355,7 +355,7 @@ describe("authed logger", () => {
     });
 
     it("can log a DELETE document comment event", (done) => {
-      const document = DocumentModel.create({
+      const document = createDocumentModel({
         type: ProblemDocument,
         uid: "1",
         key: "source-document",
@@ -385,7 +385,7 @@ describe("authed logger", () => {
     });
 
     it("can log a DELETE tile comment event", (done) => {
-      const document = DocumentModel.create({
+      const document = createDocumentModel({
         type: ProblemDocument,
         uid: "1",
         key: "source-document",
@@ -419,7 +419,7 @@ describe("authed logger", () => {
     });
 
     it("can log tile creation in a document", (done) => {
-      const document = DocumentModel.create({
+      const document = createDocumentModel({
         type: ProblemDocument,
         uid: "1",
         key: "source-document",
@@ -450,7 +450,7 @@ describe("authed logger", () => {
     });
 
     it("can log copying tiles between documents", (done) => {
-      const sourceDocument = DocumentModel.create({
+      const sourceDocument = createDocumentModel({
         type: ProblemDocument,
         uid: "source-user",
         key: "source-document",
@@ -460,7 +460,7 @@ describe("authed logger", () => {
       });
       sourceDocument.setContent(createSingleTileContent({ type: "Text", text: "test" }));
 
-      const destinationDocument = DocumentModel.create({
+      const destinationDocument = createDocumentModel({
         type: ProblemDocument,
         uid: "destination-user",
         key: "destination-document",
@@ -543,7 +543,7 @@ describe("authed logger", () => {
         mode: "1-up",
       });
 
-      doc1 = DocumentModel.create({
+      doc1 = createDocumentModel({
         uid: "1",
         type: ProblemWorkspace,
         key: "test1",
@@ -551,7 +551,7 @@ describe("authed logger", () => {
         content: {}
       });
 
-      doc2 = DocumentModel.create({
+      doc2 = createDocumentModel({
         uid: "2",
         type: ProblemDocument,
         key: "test2",
