@@ -1,10 +1,37 @@
-import { castToSnapshot, isAlive, types } from "mobx-state-tree";
+import { castToSnapshot, IAnyStateTreeNode, IAnyType, isAlive, types } from "mobx-state-tree";
 import { when } from "mobx";
-import { createDiagramContent, defaultDiagramContent, DiagramContentModel } from "./diagram-content";
+import { createDiagramContent, defaultDiagramContent, DiagramContentModel, DiagramContentModelType } from "./diagram-content";
+import { ISharedModelManager, SharedModelType } from "../../models/tools/shared-model";
+import { SharedVariables, SharedVariablesType } from "../shared-variables/shared-variables";
 
 const TestContainer = types.model("TestContainer", {
-  content: DiagramContentModel
+  content: DiagramContentModel,
+  variables: SharedVariables
 });
+
+const setupContainer = (content: DiagramContentModelType, variables: SharedVariablesType) => {
+  const sharedModelManager: ISharedModelManager = {
+    isReady: true,
+    findFirstSharedModelByType<IT extends IAnyType>(sharedModelType: IT): IT["Type"] | undefined {
+      return variables;
+    },
+    getTileSharedModel(tileContentModel: IAnyStateTreeNode, label: string): SharedModelType | undefined {
+      return variables;
+    },
+    setTileSharedModel(tileContentModel: IAnyStateTreeNode, label: string, sharedModel: SharedModelType): void {
+      // ignore this for now
+    }
+  };
+  TestContainer.create(
+    {content: castToSnapshot(content), variables: castToSnapshot(variables)},
+    {sharedModelManager}
+  );
+
+  // So far it hasn't been necessary to wait for the MobX reaction to run inside of 
+  // DocumentContent#afterAttach. It seems to run immediately in the line above, so 
+  // we can write expectations on this content without waiting.
+  return content;
+};
 
 describe("DiagramContent", () => {
   it("has default content", () => {
@@ -23,22 +50,21 @@ describe("DiagramContent", () => {
     expect(content.isUserResizable).toBe(true);
   });
 
-  it("sets up variables api after being attached", () => {
+  const setupContent = () => {
     const content = createDiagramContent();
-    const container = TestContainer.create({content: castToSnapshot(content)});
-    expect(container.content.root.variablesAPI).toBeDefined();
+    const variables = SharedVariables.create();
+    return setupContainer(content, variables);
+  };
+
+  it("sets up variables api after being attached", () => {
+    const content = setupContent();
+    expect(content.root.variablesAPI).toBeDefined();
   });
 
   // This is more of an integration test because it is testing the innards of 
   // DQRoot, but it exercises code provided by the diagram-content in the process
   it("supports creating Nodes", () => {
-   const content = createDiagramContent();
-    // TODO: With the current structure we need to basically make a full document
-    // to test this, otherwise DiagramContentModel won't find the shared models
-    // However we want to change that anyway to support embedding this in an
-    // iframe
-    // Maybe we can make it work with just a ToolTileModel
-    TestContainer.create({content: castToSnapshot(content)});
+    const content = setupContent();
 
     expect(content.root.nodes.size).toBe(0);
     expect(content.sharedModel?.variables.length).toBe(0);
@@ -54,16 +80,15 @@ describe("DiagramContent", () => {
   });
 
   it("createVariable in the variables api adds a variable", () => {
-    const content = createDiagramContent();
-    const container = TestContainer.create({content: castToSnapshot(content)});
-    const variablesAPI = container.content.root.variablesAPI;
+    const content = setupContent();
+
+    const variablesAPI = content.root.variablesAPI;
     assertIsDefined(variablesAPI);
 
     const variable = variablesAPI.createVariable();
     expect(variable).toBeDefined();
   });
 
-  // TODO: we have to provide a shared model defined at the document level
   const createBasicModel = () => {
     const content = createDiagramContent({
       root: {
@@ -76,8 +101,15 @@ describe("DiagramContent", () => {
         }
       },
     });
-    const container = TestContainer.create({content: castToSnapshot(content)});
-    return container.content;
+    const variables = SharedVariables.create({
+      variables: [
+        {
+          id: "variable1",
+          name: "test variable"          
+        }
+      ]
+    });
+    return setupContainer(content, variables);
   };
 
   it("can handle basic de-serialization", () => {
