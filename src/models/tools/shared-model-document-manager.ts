@@ -1,5 +1,4 @@
 import { getParentOfType, getSnapshot, hasParentOfType, 
-  IAnyModelType, 
   IAnyStateTreeNode, tryReference, types } from "mobx-state-tree";
 import { DocumentContentModelType } from "../document/document-content";
 import { ISharedModelManager, SharedModelType, SharedModelUnion } from "./shared-model";

@@ -1,14 +1,12 @@
 import { getSnapshot, types, Instance, destroy, SnapshotIn,
-  isValidReference, addDisposer, onSnapshot, hasParentOfType, getParentOfType, getType,
+  isValidReference, addDisposer, onSnapshot,
   getPath, getEnv } from "mobx-state-tree";
 import { reaction } from "mobx";
 import { DQRoot, DQNode } from "@concord-consortium/diagram-view";
 import { ITileExportOptions, IDefaultContentOptions } from "../../models/tools/tool-content-info";
 import { ToolContentModel } from "../../models/tools/tool-types";
-import { ToolTileModel } from "../../models/tools/tool-tile";
 import { kDiagramToolID, kDiagramToolStateVersion } from "./diagram-types";
 import { SharedVariables, SharedVariablesType } from "../shared-variables/shared-variables";
-import { DocumentContentModel } from "../../models/document/document-content";
 import { ISharedModelManager } from "../../models/tools/shared-model";
 
 export const DiagramContentModel = ToolContentModel
