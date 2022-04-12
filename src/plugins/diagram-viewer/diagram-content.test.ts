@@ -1,6 +1,7 @@
 import { castToSnapshot, IAnyStateTreeNode, IAnyType, isAlive, types } from "mobx-state-tree";
 import { when } from "mobx";
-import { createDiagramContent, defaultDiagramContent, DiagramContentModel, DiagramContentModelType } from "./diagram-content";
+import { createDiagramContent, defaultDiagramContent, 
+  DiagramContentModel, DiagramContentModelType } from "./diagram-content";
 import { ISharedModelManager, SharedModelType } from "../../models/tools/shared-model";
 import { SharedVariables, SharedVariablesType } from "../shared-variables/shared-variables";
 

@@ -118,17 +118,6 @@ export const DiagramContentModel = ToolContentModel
         }
       });
     }
-  }))
-  .actions(self => ({
-    afterAttach() {
-      if (self.sharedModel) {
-        // FIXME: this needs to be moved to the Document level perhaps with a Tree
-        // model the document extends
-        addDisposer(self, onSnapshot(self.sharedModel, () => {
-          self.updateAfterSharedModelChanges();
-        }));
-      }
-    }
   }));
 
 export interface DiagramContentModelType extends Instance<typeof DiagramContentModel> {}
