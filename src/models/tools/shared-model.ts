@@ -1,4 +1,4 @@
-import { IAnyModelType, IAnyStateTreeNode, Instance, types } from "mobx-state-tree";
+import { IAnyStateTreeNode, Instance, types } from "mobx-state-tree";
 import { uniqueId } from "../../utilities/js-utils";
 // FIXME: This is a circular reference tool-content-info also imports SharedModel from here
 import { getSharedModelClasses, getSharedModelInfoByType } from "./tool-content-info";
@@ -42,7 +42,6 @@ export function sharedModelFactory(snapshot: any) {
 
 export const SharedModelUnion = types.late(() => {
   const sharedModels = getSharedModelClasses();
-  console.log("late shared models", sharedModels);
   return types.union({ dispatcher: sharedModelFactory }, ...sharedModels);
 });
 

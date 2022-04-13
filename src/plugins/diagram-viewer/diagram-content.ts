@@ -1,6 +1,5 @@
 import { getSnapshot, types, Instance, destroy, SnapshotIn,
-  isValidReference, addDisposer, onSnapshot,
-  getPath, getEnv } from "mobx-state-tree";
+  isValidReference, addDisposer, getPath, getEnv } from "mobx-state-tree";
 import { reaction } from "mobx";
 import { DQRoot, DQNode } from "@concord-consortium/diagram-view";
 import { ITileExportOptions, IDefaultContentOptions } from "../../models/tools/tool-content-info";

@@ -1,5 +1,5 @@
 import { autorun, IReactionDisposer } from "mobx";
-import { getParentOfType, getSnapshot, hasParentOfType, 
+import { getParentOfType, hasParentOfType, 
   IAnyStateTreeNode, IDisposer, Instance, onSnapshot, tryReference, types } from "mobx-state-tree";
 import { DocumentContentModelType } from "../document/document-content";
 import { ISharedModelManager, SharedModelType, SharedModelUnion } from "./shared-model";
@@ -34,7 +34,6 @@ types.model("SharedModelDocumentManager")
 
   return {
     setDocument(document: DocumentContentModelType) {
-      console.log("sharedModelDocumentManager.setDocument", getSnapshot(document));
       self.document = document;
 
       // If we had a autorun already setup, dispose it
@@ -50,7 +49,6 @@ types.model("SharedModelDocumentManager")
         }
       }
 
-      console.log("setting up autorun");
       documentAutoRunDisposer = autorun(() => {
         // FIXME: this is typing the sharedModel to any I think because it is a
         // union

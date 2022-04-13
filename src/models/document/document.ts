@@ -285,7 +285,6 @@ export const getDocumentContext = (document: DocumentModelType): IDocumentContex
 export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
   const sharedModelManager = createSharedModelDocumentManager();
   const document = DocumentModel.create(snapshot, {sharedModelManager});
-  console.log("createDocumentModel", document.content);
   if (document.content) {
     sharedModelManager.setDocument(document.content);
   }

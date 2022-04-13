@@ -4,8 +4,8 @@ import "./models/tools/placeholder/placeholder-registration";
 
 const gToolRegistration: Record<string, () => void> = {
   "Diagram": () => {
-    // Currently the only time the SharedVariables, so we register both of them whenever there is 
-    // a Diagram tool in the configuration
+    // Currently the Diagram Tool is the only tool using SharedVariables, so we register 
+    // whenever a there is a Diagram tool in the configuration
     import(/* webpackChunkName: "Diagram" */"./plugins/diagram-viewer/diagram-registration");
     import(/* webpackChunkName: "SharedVariables" */"./plugins/shared-variables/shared-variables-registration");
   },

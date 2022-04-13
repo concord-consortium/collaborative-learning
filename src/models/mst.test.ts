@@ -1,5 +1,4 @@
-import { type } from "@testing-library/user-event/dist/type";
-import { IAnyModelType, types } from "mobx-state-tree";
+import { types } from "mobx-state-tree";
 
 describe("mst", () => {
   it("snapshotProcessor unexpectedly modifies the base type", () => {
