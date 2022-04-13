@@ -53,12 +53,22 @@ export interface ITileCountsPerSection {
   [key: string]: number;
 }
 
+// This intermediate type is added so the SharedModelUnion 
+// can be evaluated late. The issues with using late and maps
+// is documented here: `src/models/mst.test.ts`
+const SharedModelDocEntry = types.model("SharedModelDocEntry", {
+  sharedModel: SharedModelUnion
+});
+
 export const DocumentContentModel = types
   .model("DocumentContent", {
     rowMap: types.map(TileRowModel),
     rowOrder: types.array(types.string),
     tileMap: types.map(ToolTileModel),
-    sharedModelMap: types.map(SharedModelUnion),
+    // see SharedModelDocEntry above for why that is used instead of directly using
+    // SharedModelUnion. 
+    // The keys to this map should be the id of the shared model
+    sharedModelMap: types.map(SharedModelDocEntry),
   })
   .preProcessSnapshot(snapshot => {
     return snapshot && (snapshot as any).tiles
@@ -206,11 +216,11 @@ export const DocumentContentModel = types
         return snapshot;
       },
       getFirstSharedModelByType<IT extends typeof SharedModelUnion>(modelType: IT ): IT["Type"] | undefined {
-        for (const model of self.sharedModelMap.values()) {
+        for (const entry of self.sharedModelMap.values()) {
           // FIXME: if we use the migration strategy used for the DiagramTool this kind of type check
           // will probably not work. We should make an isolate test of this
-          if (getType(model) === modelType) {
-            return model;
+          if (getType(entry.sharedModel) === modelType) {
+            return entry.sharedModel;
           }          
         }
         return undefined;
@@ -862,7 +872,8 @@ export const DocumentContentModel = types
   }))
   .actions(self => ({
     addSharedModel(sharedModel: SharedModelType) {
-      self.sharedModelMap.put(sharedModel);
+      self.sharedModelMap.set(sharedModel.id, 
+        SharedModelDocEntry.create({sharedModel}));
     }
   }));
 

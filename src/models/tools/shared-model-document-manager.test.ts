@@ -9,10 +9,7 @@ import { SharedModel, SharedModelType } from "./shared-model";
 import { createSharedModelDocumentManager } from "./shared-model-document-manager";
 import { registerSharedModelInfo, registerToolContentInfo } from "./tool-content-info";
 import { ToolContentModel } from "./tool-types";
-
-// The registrations need to be done before importing `document-content`.
-// When the DocumentContentModel type is created the SharedModelUnion is referenced
-// and that seems to trigger the the "late" call.
+import { DocumentContentModel } from "../document/document-content";
 
 const TestSharedModel = SharedModel
   .named("TestSharedModel")
@@ -62,14 +59,6 @@ registerToolContentInfo({
   toolTileClass: "test-tile"
 });
 
-// Need to register the types before importing the document-content
-import { DocumentContentModel } from "../document/document-content";
-
-// This file is the one with most missing coverage, so it should
-// be our main focus.
-
-// Testing it in isolation seems good to me since it will be a core
-// part of supporting shared models.
 describe("SharedModelDocumentManager", () => {
   it("handles setDocument with an empty doc", () => {
     const doc = DocumentContentModel.create();
@@ -89,8 +78,10 @@ describe("SharedModelDocumentManager", () => {
     const doc = DocumentContentModel.create({
       sharedModelMap: {
         "sm1": {
-          id: "sm1",
-          type: "TestSharedModel"
+          sharedModel: {
+            id: "sm1",
+            type: "TestSharedModel"
+          }
         }
       },
       tileMap: {
@@ -166,8 +157,10 @@ describe("SharedModelDocumentManager", () => {
     const doc = DocumentContentModel.create({
       sharedModelMap: {
         "sm1": {
-          id: "sm1",
-          type: "TestSharedModel"
+          sharedModel: {
+            id: "sm1",
+            type: "TestSharedModel"
+          }
         }
       },
     });
@@ -175,7 +168,7 @@ describe("SharedModelDocumentManager", () => {
     const manager = createSharedModelDocumentManager();
     manager.setDocument(doc);
 
-    const sharedModel = doc.sharedModelMap.get("sm1");
+    const sharedModel = doc.sharedModelMap.get("sm1")?.sharedModel;
     expect(sharedModel).toBeDefined();
 
     const tileContent = TestTile.create();
@@ -199,8 +192,10 @@ describe("SharedModelDocumentManager", () => {
     const docSnapshot = {
       sharedModelMap: {
         "sm1": {
-          id: "sm1",
-          type: "TestSharedModel"
+          sharedModel: {
+            id: "sm1",
+            type: "TestSharedModel"
+          }
         }
       },
       tileMap: {
@@ -223,7 +218,7 @@ describe("SharedModelDocumentManager", () => {
     const tileContent = doc.tileMap.get("t1")?.content;
     assertIsDefined(tileContent);
     const spyUpdate = jest.spyOn(tileContent, 'updateAfterSharedModelChanges');
-    const sharedModel = doc.sharedModelMap.get("sm1");
+    const sharedModel = doc.sharedModelMap.get("sm1")?.sharedModel;
     sharedModel.setValue("something");
     expect(spyUpdate).toHaveBeenCalled();
 
@@ -234,7 +229,7 @@ describe("SharedModelDocumentManager", () => {
     const tileContent2 = doc2.tileMap.get("t1")?.content;
     assertIsDefined(tileContent2);
     const spyUpdate2 = jest.spyOn(tileContent2, 'updateAfterSharedModelChanges');
-    const sharedModel2 = doc2.sharedModelMap.get("sm1");
+    const sharedModel2 = doc2.sharedModelMap.get("sm1")?.sharedModel;
     sharedModel2.setValue("something");
     expect(spyUpdate2).toHaveBeenCalled();
 
@@ -244,10 +239,12 @@ describe("SharedModelDocumentManager", () => {
     const doc = DocumentContentModel.create({
       sharedModelMap: {
         "sm1": {
-          id: "sm1",
-          type: "TestSharedModel"
+          sharedModel: {
+            id: "sm1",
+            type: "TestSharedModel"
+          }
         }
-      }
+      },
     });
     const manager = createSharedModelDocumentManager();
     manager.setDocument(doc);
@@ -262,8 +259,10 @@ describe("SharedModelDocumentManager", () => {
     const doc = DocumentContentModel.create({
       sharedModelMap: {
         "sm1": {
-          id: "sm1",
-          type: "TestSharedModel"
+          sharedModel: {
+            id: "sm1",
+            type: "TestSharedModel"
+          }
         }
       },
       tileMap: {
