@@ -149,4 +149,12 @@ describe("DiagramContent", () => {
       done();
     });
   });
+
+  // FIXME: need a test where the container doesn't have the variables yet so the diagram-tool needs to 
+  // create and add them
+
+  // FIXME: need test that causes updateAfterSharedModelChanges to be called when there is no sharedModel
+  // I'm not sure if that is possible without calling the action directly
+
+  
 });

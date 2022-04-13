@@ -95,7 +95,7 @@ types.model("SharedModelDocumentManager")
       }
       const existingSharedModel = self.document.sharedModelMap.get(sharedModel.id);
       if (!existingSharedModel) {
-        self.document.sharedModelMap.put(sharedModel);
+        self.document.addSharedModel(sharedModel);
       }
 
       const toolTile = getToolTile(tileContentModel);
