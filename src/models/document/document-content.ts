@@ -217,8 +217,8 @@ export const DocumentContentModel = types
       },
       getFirstSharedModelByType<IT extends typeof SharedModel>(modelType: IT ): IT["Type"] | undefined {
         for (const entry of self.sharedModelMap.values()) {
-          // FIXME: if we use the migration strategy used for the DiagramTool this kind of type check
-          // will probably not work. We should make an isolate test of this
+          // Even if we use a snapshotProcessor generated type, getType will return the original 
+          // type. This is documented: src/models/mst.test.ts
           if (getType(entry.sharedModel) === modelType) {
             return entry.sharedModel;
           }          

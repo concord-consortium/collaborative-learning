@@ -1,4 +1,4 @@
-import { types } from "mobx-state-tree";
+import { getType, isType, types } from "mobx-state-tree";
 
 describe("mst", () => {
   it("snapshotProcessor unexpectedly modifies the base type", () => {
@@ -20,6 +20,17 @@ describe("mst", () => {
     // through the processor. This is bug in MST and has been reported here:
     // https://github.com/mobxjs/mobx-state-tree/issues/1897
     expect(todo1b.text).toBe("todo2 text");
+  });
+
+  it("snapshotProcessor type matches type check of original type", () => {
+    const Todo1 = types.model({ text: types.maybe(types.string) });
+    const Todo2 = types.snapshotProcessor(Todo1, {
+      preProcessor(sn) {
+        return {text: "todo2 text"};
+      }
+    });
+    const todo2 =Todo2.create();
+    expect(getType(todo2)).toEqual(Todo1);
   });
 
   it("loads late types when another type referencing is instantiated", () => {
