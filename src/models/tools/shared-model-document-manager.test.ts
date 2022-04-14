@@ -1,7 +1,3 @@
-// I'm not sure we want to test this in isolation
-// Or perhaps it is better to do it as an integration with a document
-// containing a diagram tile
-
 import { Instance, types } from "mobx-state-tree";
 
 import { IToolTileProps } from "../../components/tools/tool-tile";
@@ -36,6 +32,27 @@ registerSharedModelInfo({
   type: "TestSharedModel2",
   modelClass: TestSharedModel2
 });
+
+// Snapshot processor type
+const _TestSharedModel3 = SharedModel
+  .named("TestSharedModel3")
+  .props({type: "TestSharedModel3"});
+const TestSharedModel3 = types.snapshotProcessor(_TestSharedModel3, {
+  preProcessor(snapshot: any) {
+    // Remove any extra properties
+    return {
+      id: snapshot.id,
+      type: snapshot.type,
+    };
+  }
+});
+
+registerSharedModelInfo({
+  type: "TestSharedModel3",
+  // modelClass prop is restrictive, but the snapshotProcessor type should work fine
+  modelClass: TestSharedModel3 as typeof _TestSharedModel3
+});
+
 
 const TestTile = ToolContentModel
   .named("TestTile")
@@ -253,6 +270,30 @@ describe("SharedModelDocumentManager", () => {
 
     const sharedModel2 = manager.findFirstSharedModelByType(TestSharedModel2);
     expect(sharedModel2).toBeUndefined();
+  });
+
+  it("finds a snapshotProcessor shared model by the original type", () => {
+    const doc = DocumentContentModel.create({
+      sharedModelMap: {
+        "sm1": {
+          sharedModel: {
+            id: "sm1",
+            type: "TestSharedModel3",
+            foo: "hello"
+          }
+        }
+      },
+    });
+    const manager = createSharedModelDocumentManager();
+    manager.setDocument(doc);
+    const sharedModel = manager.findFirstSharedModelByType(_TestSharedModel3);
+    expect(sharedModel?.id).toBe("sm1");
+
+    const sharedModel2 = manager.findFirstSharedModelByType(TestSharedModel3 as typeof _TestSharedModel3);
+    expect(sharedModel2?.id).toBeUndefined();
+
+    const sharedModel3 = manager.findFirstSharedModelByType(TestSharedModel);
+    expect(sharedModel3).toBeUndefined();
   });
 
   it("gets shared model from the tool tile", () => {

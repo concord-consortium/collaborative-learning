@@ -216,14 +216,11 @@ export const DocumentContentModel = types
         return snapshot;
       },
       getFirstSharedModelByType<IT extends typeof SharedModel>(modelType: IT ): IT["Type"] | undefined {
-        for (const entry of self.sharedModelMap.values()) {
-          // Even if we use a snapshotProcessor generated type, getType will return the original 
-          // type. This is documented: src/models/mst.test.ts
-          if (getType(entry.sharedModel) === modelType) {
-            return entry.sharedModel;
-          }          
-        }
-        return undefined;
+        const sharedModelEntries = Array.from(self.sharedModelMap.values());
+        // Even if we use a snapshotProcessor generated type, getType will return the original 
+        // type. This is documented: src/models/mst.test.ts
+        const firstEntry = sharedModelEntries.find(entry => getType(entry.sharedModel) === modelType);
+        return firstEntry?.sharedModel;
       }
     };
   })
