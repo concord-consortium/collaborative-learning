@@ -2,7 +2,7 @@
 // Or perhaps it is better to do it as an integration with a document
 // containing a diagram tile
 
-import { types } from "mobx-state-tree";
+import { Instance, types } from "mobx-state-tree";
 
 import { IToolTileProps } from "../../components/tools/tool-tile";
 import { SharedModel, SharedModelType } from "./shared-model";
@@ -109,7 +109,7 @@ describe("SharedModelDocumentManager", () => {
 
     const sharedModelEntry = toolTile.sharedModels.get("label");
     expect(sharedModelEntry).toBeDefined();
-    const sharedModel = sharedModelEntry?.sharedModel;
+    const sharedModel = sharedModelEntry?.sharedModel as Instance<typeof TestSharedModel>;
     expect(sharedModel).toBeDefined();
 
     sharedModel.setValue("something");
@@ -169,7 +169,7 @@ describe("SharedModelDocumentManager", () => {
     manager.setDocument(doc);
 
     const sharedModel = doc.sharedModelMap.get("sm1")?.sharedModel;
-    expect(sharedModel).toBeDefined();
+    assertIsDefined(sharedModel);
 
     const tileContent = TestTile.create();
     const spyUpdate = jest.spyOn(tileContent, 'updateAfterSharedModelChanges');
@@ -184,7 +184,7 @@ describe("SharedModelDocumentManager", () => {
     expect(spyUpdate).not.toHaveBeenCalled();
 
     // it should be monitoring this now
-    sharedModel.setValue("something");
+    (sharedModel as Instance<typeof TestSharedModel>).setValue("something");
     expect(spyUpdate).toHaveBeenCalled();
   });
 
@@ -219,7 +219,7 @@ describe("SharedModelDocumentManager", () => {
     assertIsDefined(tileContent);
     const spyUpdate = jest.spyOn(tileContent, 'updateAfterSharedModelChanges');
     const sharedModel = doc.sharedModelMap.get("sm1")?.sharedModel;
-    sharedModel.setValue("something");
+    (sharedModel as Instance<typeof TestSharedModel>).setValue("something");
     expect(spyUpdate).toHaveBeenCalled();
 
     spyUpdate.mockClear();
@@ -230,7 +230,7 @@ describe("SharedModelDocumentManager", () => {
     assertIsDefined(tileContent2);
     const spyUpdate2 = jest.spyOn(tileContent2, 'updateAfterSharedModelChanges');
     const sharedModel2 = doc2.sharedModelMap.get("sm1")?.sharedModel;
-    sharedModel2.setValue("something");
+    (sharedModel2 as Instance<typeof TestSharedModel>).setValue("something");
     expect(spyUpdate2).toHaveBeenCalled();
 
   });
