@@ -7,11 +7,11 @@ import { SharedVariables, SharedVariablesType } from "../shared-variables/shared
 
 const TestContainer = types.model("TestContainer", {
   content: DiagramContentModel,
-  variables: SharedVariables
+  variables: types.maybe(SharedVariables)
 });
 
-const setupContainer = (content: DiagramContentModelType, variables: SharedVariablesType) => {
-  const sharedModelManager: ISharedModelManager = {
+const makeSharedModelManager = (variables?: SharedVariablesType): ISharedModelManager => {
+  return {
     isReady: true,
     findFirstSharedModelByType<IT extends IAnyType>(sharedModelType: IT): IT["Type"] | undefined {
       return variables;
@@ -23,20 +23,26 @@ const setupContainer = (content: DiagramContentModelType, variables: SharedVaria
       // ignore this for now
     }
   };
+};
+
+const setupContainer = (content: DiagramContentModelType, variables?: SharedVariablesType) => {
+  const sharedModelManager = makeSharedModelManager(variables);
   TestContainer.create(
     {content: castToSnapshot(content), variables: castToSnapshot(variables)},
     {sharedModelManager}
   );
 
   // Need to monitor the variables just like sharedModelDocumentManager does
-  onSnapshot(variables, () => {
-    content.updateAfterSharedModelChanges(variables);
-  });
+  if (variables) {
+    onSnapshot(variables, () => {
+      content.updateAfterSharedModelChanges(variables);
+    });  
+  }
 
   // So far it hasn't been necessary to wait for the MobX reaction to run inside of 
   // DocumentContent#afterAttach. It seems to run immediately in the line above, so 
   // we can write expectations on this content without waiting.
-  return content;
+  return {content, sharedModelManager};
 };
 
 describe("DiagramContent", () => {
@@ -59,7 +65,7 @@ describe("DiagramContent", () => {
   const setupContent = () => {
     const content = createDiagramContent();
     const variables = SharedVariables.create();
-    return setupContainer(content, variables);
+    return setupContainer(content, variables).content;
   };
 
   it("sets up variables api after being attached", () => {
@@ -115,7 +121,7 @@ describe("DiagramContent", () => {
         }
       ]
     });
-    return setupContainer(content, variables);
+    return setupContainer(content, variables).content;
   };
 
   it("can handle basic de-serialization", () => {
@@ -150,11 +156,20 @@ describe("DiagramContent", () => {
     });
   });
 
-  // FIXME: need a test where the container doesn't have the variables yet so the diagram-tool needs to 
-  // create and add them
-
-  // FIXME: need test that causes updateAfterSharedModelChanges to be called when there is no sharedModel
-  // I'm not sure if that is possible without calling the action directly
-
+  it("creates the variables shared model, if there isn't one", () => {
+    const content = createDiagramContent();
+    const sharedModelManager = makeSharedModelManager();
+    const setTileSharedModelSpy = jest.spyOn(sharedModelManager, "setTileSharedModel");
+    TestContainer.create(
+      {content: castToSnapshot(content)},
+      {sharedModelManager}
+    );
   
+    expect(setTileSharedModelSpy).toHaveBeenCalled();
+  });
+
+  it("handles off chance that updateAfterSharedModelChanges is called before things are ready", () => {
+    const content = createDiagramContent();
+    expect(() => content.updateAfterSharedModelChanges()).not.toThrow();
+  });  
 });

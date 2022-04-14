@@ -30,7 +30,7 @@ describe("mst", () => {
       }
     });
     const todo2 =Todo2.create();
-    expect(getType(todo2)).toEqual(Todo1);
+    expect(getType(todo2) === Todo1).toBe(true);
   });
 
   it("loads late types when another type referencing is instantiated", () => {

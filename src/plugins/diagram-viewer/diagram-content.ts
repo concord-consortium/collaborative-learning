@@ -90,6 +90,8 @@ export const DiagramContentModel = ToolContentModel
       });        
     
       if (!self.sharedModel) {
+        // We should never get into this case, but this is here to just in case 
+        // somehow we do
         return;
       }
   
