@@ -2,7 +2,7 @@ import { IAnyStateTreeNode, Instance, types } from "mobx-state-tree";
 import { uniqueId } from "../../utilities/js-utils";
 // TODO: This is a circular import, tool-content-info also imports SharedModel from here
 // This can be fixed by splitting shared-models into 2 files. One of those files will have
-// SharedModel, SharedModelType in. Those objects don't need tool-content-info, and it is 
+// SharedModel, SharedModelType in it. Those objects don't need tool-content-info, and it is 
 // those objects that are used by tool-content-info
 // This same refactoring can be applied to tool-types to eliminate a circular import there.
 import { getSharedModelClasses, getSharedModelInfoByType } from "./tool-content-info";

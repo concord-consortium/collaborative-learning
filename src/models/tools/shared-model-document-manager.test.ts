@@ -143,7 +143,7 @@ describe("SharedModelDocumentManager", () => {
     const sharedModel = TestSharedModel.create({});
     manager.setTileSharedModel(tileContent, "label", sharedModel);
 
-    // The update function should be called write after it is added
+    // The update function should be called right after it is added
     expect(spyUpdate).toHaveBeenCalled();
     spyUpdate.mockClear();
     expect(spyUpdate).not.toHaveBeenCalled();

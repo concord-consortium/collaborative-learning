@@ -36,24 +36,20 @@ types.model("SharedModelDocumentManager")
     setDocument(document: DocumentContentModelType) {
       self.document = document;
 
-      // If we had a autorun already setup, dispose it
+      // If we had an autorun already set up, dispose it
       if (documentAutoRunDisposer) {
         documentAutoRunDisposer();
 
-        // If there were was any sharedModel monitoring going on dispose it too
-        for(const [key, disposer]  of Object.entries(sharedModelMonitorDisposers)) {
-          if (disposer) {
-            disposer();
-          }
+        // If there was any sharedModel monitoring going on dispose it too
+        for(const [key, disposer] of Object.entries(sharedModelMonitorDisposers)) {
+          disposer?.();
           delete sharedModelMonitorDisposers[key];
         }
       }
 
       documentAutoRunDisposer = autorun(() => {
         for(const sharedModelEntry of document.sharedModelMap.values()) {
-          if (sharedModelMonitorDisposers[sharedModelEntry.sharedModel.id]) {
-            sharedModelMonitorDisposers[sharedModelEntry.sharedModel.id]();
-          }
+          sharedModelMonitorDisposers[sharedModelEntry.sharedModel.id]?.();
           sharedModelMonitorDisposers[sharedModelEntry.sharedModel.id] = 
             onSnapshot(sharedModelEntry.sharedModel, () => {
             // search each tile in the document.tileMap to find ones that are
@@ -80,7 +76,7 @@ types.model("SharedModelDocumentManager")
     getTileSharedModel(tileContentModel: IAnyStateTreeNode, label: string) {
       const toolTile = getToolTile(tileContentModel);
 
-      // Maybe we should add a more convenient view on toolTile
+      // Maybe we should add a more convenient view method on toolTile
       return tryReference(() => toolTile?.sharedModels?.get(label)?.sharedModel);
     },
     setTileSharedModel(tileContentModel: Instance<typeof ToolContentUnion>, 
@@ -89,8 +85,8 @@ types.model("SharedModelDocumentManager")
         console.warn("setTileSharedModel has no document. this will have no effect");
         return;
       }
-      const existingSharedModel = self.document.sharedModelMap.get(sharedModel.id);
-      if (!existingSharedModel) {
+      // register it with the document if necessary
+      if (! self.document.sharedModelMap.get(sharedModel.id)) {
         self.document.addSharedModel(sharedModel);
       }
 

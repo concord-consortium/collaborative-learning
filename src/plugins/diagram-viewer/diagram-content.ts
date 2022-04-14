@@ -81,7 +81,7 @@ export const DiagramContentModel = ToolContentModel
   }))
   .actions(self => ({
     updateAfterSharedModelChanges() {
-      // First cleanup any invalid references this can happen when a item is deleted
+      // First cleanup any invalid references this can happen when an item is deleted
       self.root.nodes.forEach(node => {
         // If the sharedItem is not valid destroy the list item
         if (!isValidReference(() => node.variable)) {

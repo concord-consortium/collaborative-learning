@@ -36,7 +36,7 @@ export function cloneTileSnapshotWithNewId(tile: ToolTileModelType, newId?: stri
 
 // To support labels, we need an intermediate object.
 // MST requires maps that contain objects with ids to use the id of the object 
-// as the key. So to work around this we've added a an interediate entry.
+// as the key. So to work around this we've added an intermediate entry.
 // The resulting snapshot should look like:
 // { ...
 //   sharedModels: {
