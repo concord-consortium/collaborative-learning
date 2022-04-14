@@ -30,6 +30,9 @@ describe("mst", () => {
       }
     });
     const todo2 =Todo2.create();
+    // I think this is the intended behavior.
+    // We are counting on this behavior to be able to find shared models of
+    // a specific type.
     expect(getType(todo2) === Todo1).toBe(true);
   });
 

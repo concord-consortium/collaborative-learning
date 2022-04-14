@@ -34,11 +34,9 @@ export const DiagramContentModel = ToolContentModel
   }))
   .actions(self => ({
     afterAttach() {
-      console.log("afterAttach", getPath(self));
 
       // Monitor our parents and update our shared model when we have a document parent
       addDisposer(self, reaction(() => {
-        console.log("running diagram-content reaction", getPath(self));
         const sharedModelManager = getEnv(self)?.sharedModelManager as ISharedModelManager | undefined;
 
         const tileSharedModel = sharedModelManager?.isReady ? 
@@ -47,11 +45,9 @@ export const DiagramContentModel = ToolContentModel
           sharedModelManager?.findFirstSharedModelByType(SharedVariables) : undefined;
 
         const values = {sharedModelManager, tileSharedModel, containerSharedModel};
-        console.log("1st part of reaction returns", values);
         return values;
       },
       ({sharedModelManager, tileSharedModel, containerSharedModel}) => {
-        console.log("running diagram-content effect", getPath(self));
         if (!sharedModelManager?.isReady) {
           // We aren't added to a document yet so we can't do anything yet
           return;
@@ -65,7 +61,6 @@ export const DiagramContentModel = ToolContentModel
           if (!containerSharedModel) {
             // The document doesn't have a shared model yet
             containerSharedModel = SharedVariables.create();
-            console.log("newly created shared model", getSnapshot(containerSharedModel));
           } 
   
           // CHECKME: this might trigger an pre-mature update because the document's
@@ -92,6 +87,7 @@ export const DiagramContentModel = ToolContentModel
       if (!self.sharedModel) {
         // We should never get into this case, but this is here to just in case 
         // somehow we do
+        console.warn("updateAfterSharedModelChanges was called with no shared model present");
         return;
       }
   
