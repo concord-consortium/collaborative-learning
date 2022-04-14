@@ -50,8 +50,6 @@ types.model("SharedModelDocumentManager")
       }
 
       documentAutoRunDisposer = autorun(() => {
-        // FIXME: this is typing the sharedModel to any I think because it is a
-        // union
         for(const sharedModelEntry of document.sharedModelMap.values()) {
           if (sharedModelMonitorDisposers[sharedModelEntry.sharedModel.id]) {
             sharedModelMonitorDisposers[sharedModelEntry.sharedModel.id]();
@@ -63,7 +61,6 @@ types.model("SharedModelDocumentManager")
             // run their update function with this shared model
             for(const tile of document.tileMap.values()) {
               for(const tileSharedModel of tile.sharedModels.values()) {
-                // FIXME: might want to use tryReference here
                 if (tileSharedModel.sharedModel === sharedModelEntry.sharedModel) {
                   tile.content.updateAfterSharedModelChanges(sharedModelEntry.sharedModel);
                 }

@@ -44,9 +44,9 @@ export function sharedModelFactory(snapshot: any) {
   return sharedModelType && getSharedModelInfoByType(sharedModelType)?.modelClass || UnknownSharedModel;
 }
 
-export const SharedModelUnion = types.late(() => {
+export const SharedModelUnion = types.late<typeof SharedModel>(() => {
   const sharedModels = getSharedModelClasses();
-  return types.union({ dispatcher: sharedModelFactory }, ...sharedModels);
+  return types.union({ dispatcher: sharedModelFactory }, ...sharedModels) as typeof SharedModel;
 });
 
 // The UnknownContentModel has to be defined in this tool-types module because it both

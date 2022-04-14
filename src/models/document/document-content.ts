@@ -18,7 +18,7 @@ import { DocumentsModelType } from "../stores/documents";
 import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
 import { getParentWithTypeName } from "../../utilities/mst-utils";
 import { comma, StringBuilder } from "../../utilities/string-builder";
-import { SharedModelType, SharedModelUnion } from "../tools/shared-model";
+import { SharedModel, SharedModelType, SharedModelUnion } from "../tools/shared-model";
 
 export interface INewTileOptions {
   rowHeight?: number;
@@ -215,7 +215,7 @@ export const DocumentContentModel = types
 
         return snapshot;
       },
-      getFirstSharedModelByType<IT extends typeof SharedModelUnion>(modelType: IT ): IT["Type"] | undefined {
+      getFirstSharedModelByType<IT extends typeof SharedModel>(modelType: IT ): IT["Type"] | undefined {
         for (const entry of self.sharedModelMap.values()) {
           // FIXME: if we use the migration strategy used for the DiagramTool this kind of type check
           // will probably not work. We should make an isolate test of this
