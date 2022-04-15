@@ -31,6 +31,12 @@ export const DiagramContentModel = ToolContentModel
       // just like findFirstSharedModelByType does
       return sharedModelManager?.getTileSharedModel(self, "variables") as SharedVariablesType | undefined;
     },
+    get positionForNewNode() {
+      // In the future this can look at all of the existing nodes and find an empty spot.
+      // For now just return 100, 100
+      // TODO: this should be moved into DQRoot
+      return {x: 100, y: 100};
+    }
   }))
   .actions(self => ({
     afterAttach() {
@@ -101,7 +107,7 @@ export const DiagramContentModel = ToolContentModel
         const nodes = Array.from(self.root.nodes.values());
         const matchingItem = nodes.find(node => node.variable.id === sharedItemId);
         if (!matchingItem) {
-          const newItem = DQNode.create({ variable: sharedItemId, x: 100, y: 100 });
+          const newItem = DQNode.create({ variable: sharedItemId, ...self.positionForNewNode });
           self.root.addNode(newItem);
         }
       });
