@@ -49,14 +49,13 @@ export const SharedModelUnion = types.late<typeof SharedModel>(() => {
   return types.union({ dispatcher: sharedModelFactory }, ...sharedModels) as typeof SharedModel;
 });
 
-// The UnknownContentModel has to be defined in this tool-types module because it both
-// "extends" ToolContentModel and UnknownContentModel is used by the toolFactory function
+// The UnknownSharedModel has to be defined in this shared-model module because it both
+// "extends" SharedModel and UnknownSharedModel is used by the sharedModelFactory function
 // above. Because of this it is a kind of circular dependency.
-// If UnknownContentModel is moved to its own module this circular dependency causes an error.
+// If UnknownSharedModel is moved to its own module this circular dependency causes an error.
 // If they are in the same module then this isn't a problem.
-//
-// There is a still an "unknown-content" module, so that module can
-// register the tool without adding a circular dependency on tool-content-info here.
+// The UnknownSharedModel is not currently registered like other shared models. It is created
+// by the sharedModelFactory when no matching model type is found. 
 const _UnknownSharedModel = SharedModel
   .named("UnknownSharedModel")
   .props({
