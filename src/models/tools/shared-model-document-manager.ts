@@ -79,10 +79,6 @@ types.model("SharedModelDocumentManager")
         return;
       }
 
-      // register it with the document if necessary.
-      // This won't re-add it if it is already there
-      const sharedModelEntry = self.document.addSharedModel(sharedModel);
-
       // add this toolTile to the sharedModel entry
       const toolTile = getToolTile(tileContentModel);
       if (!toolTile) {
@@ -90,16 +86,22 @@ types.model("SharedModelDocumentManager")
         return;
       }
 
-      // Add the tile to the shared model entry if it wasn't added before
-      if (!sharedModelEntry.tiles.includes(toolTile)) {
-        sharedModelEntry.addTile(toolTile);
+      // register it with the document if necessary.
+      // This won't re-add it if it is already there
+      const sharedModelEntry = self.document.addSharedModel(sharedModel);
+
+      // If the sharedModel was added before we don't need to do anything
+      if (sharedModelEntry.tiles.includes(toolTile)) {
+        return;
       }
 
-      // The update function in the 'autorun' will run when a new
-      // shared model is added, but if the sharedModel already exists
-      // on the document, nothing that is being monitored will change
-      // So we need to explicity run the update function just to give
-      // the tile a change to update itself.
+      sharedModelEntry.addTile(toolTile);
+
+      // The update function in the 'autorun' will run when a new shared model
+      // is added to the document, but if the sharedModel already exists on the
+      // document, nothing that is being monitored will change So we need to
+      // explicity run the update function just to give the tile a chance to
+      // update itself.
       tileContentModel.updateAfterSharedModelChanges(sharedModel);
     },
 
@@ -143,7 +145,7 @@ types.model("SharedModelDocumentManager")
         return;
       }
 
-      sharedModelEntry.tiles.remove(toolTile);
+      sharedModelEntry.removeTile(toolTile);
     },
   };
 });

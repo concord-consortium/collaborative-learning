@@ -66,6 +66,9 @@ export const SharedModelEntry = types.model("SharedModelEntry", {
 .actions(self => ({
   addTile(toolTile: ToolTileModelType) {
     self.tiles.push(toolTile);
+  },
+  removeTile(toolTile: ToolTileModelType) {
+    self.tiles.remove(toolTile);
   }
 }));
 
