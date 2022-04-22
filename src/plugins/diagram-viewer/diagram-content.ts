@@ -1,12 +1,12 @@
 import { getSnapshot, types, Instance, destroy, SnapshotIn,
-  isValidReference, addDisposer, getPath, getEnv } from "mobx-state-tree";
+  isValidReference, addDisposer, isType, getType } from "mobx-state-tree";
 import { reaction } from "mobx";
 import { DQRoot, DQNode } from "@concord-consortium/diagram-view";
 import { ITileExportOptions, IDefaultContentOptions } from "../../models/tools/tool-content-info";
 import { ToolContentModel } from "../../models/tools/tool-types";
 import { kDiagramToolID, kDiagramToolStateVersion } from "./diagram-types";
 import { SharedVariables, SharedVariablesType } from "../shared-variables/shared-variables";
-import { ISharedModelManager } from "../../models/tools/shared-model";
+import { first } from "lodash";
 
 export const DiagramContentModel = ToolContentModel
   .named("DiagramTool")
@@ -14,6 +14,7 @@ export const DiagramContentModel = ToolContentModel
     type: types.optional(types.literal(kDiagramToolID), kDiagramToolID),
     version: types.optional(types.literal(kDiagramToolStateVersion), kDiagramToolStateVersion),
     root: types.optional(DQRoot, getSnapshot(DQRoot.create())),
+    // sharedModel: types.maybe(types.reference(SharedVariables))
   })
   .views(self => ({
     exportJson(options?: ITileExportOptions) {
@@ -26,10 +27,17 @@ export const DiagramContentModel = ToolContentModel
       return true;
     },
     get sharedModel() {
-      const sharedModelManager = getEnv(self)?.sharedModelManager as ISharedModelManager | undefined;
+      const sharedModelManager = self.tileEnv?.sharedModelManager;
       // Perhaps we should pass the type to getTileSharedModel, so it can return the right value
       // just like findFirstSharedModelByType does
-      return sharedModelManager?.getTileSharedModel(self, "variables") as SharedVariablesType | undefined;
+      //
+      // For now we are checking the type ourselves, and we are assuming the shared model we want
+      // is the first one.
+      const firstSharedModel = sharedModelManager?.getTileSharedModels(self)?.[0];
+      if (!firstSharedModel || getType(firstSharedModel) !== SharedVariables) {
+        return undefined;
+      }
+      return firstSharedModel as SharedVariablesType;
     },
     get positionForNewNode() {
       // In the future this can look at all of the existing nodes and find an empty spot.
@@ -43,24 +51,27 @@ export const DiagramContentModel = ToolContentModel
 
       // Monitor our parents and update our shared model when we have a document parent
       addDisposer(self, reaction(() => {
-        const sharedModelManager = getEnv(self)?.sharedModelManager as ISharedModelManager | undefined;
+        const sharedModelManager = self.tileEnv?.sharedModelManager;
 
-        const tileSharedModel = sharedModelManager?.isReady ? 
-          sharedModelManager?.getTileSharedModel(self, "variables") : undefined;
+        // const tileSharedModel = sharedModelManager?.isReady ? 
+        //   sharedModelManager?.getTileSharedModel(self, "variables") : undefined;
         const containerSharedModel = sharedModelManager?.isReady ?
           sharedModelManager?.findFirstSharedModelByType(SharedVariables) : undefined;
 
-        const values = {sharedModelManager, tileSharedModel, containerSharedModel};
+        const tileSharedModels = sharedModelManager?.isReady ? 
+          sharedModelManager?.getTileSharedModels(self) : undefined;
+
+        const values = {sharedModelManager, containerSharedModel, tileSharedModels};
         return values;
       },
-      ({sharedModelManager, tileSharedModel, containerSharedModel}) => {
+      ({sharedModelManager, containerSharedModel, tileSharedModels}) => {
         if (!sharedModelManager?.isReady) {
           // We aren't added to a document yet so we can't do anything yet
           return;
         }
 
-        if (tileSharedModel && tileSharedModel === containerSharedModel) {
-          // We already have a saved model so we skip some steps
+        if (containerSharedModel && tileSharedModels?.includes(containerSharedModel)) {
+          // We already have a shared model so we skip some steps
           // below. If we don't skip these steps we can get in an infinite 
           // loop.
         } else {
@@ -68,13 +79,23 @@ export const DiagramContentModel = ToolContentModel
             // The document doesn't have a shared model yet
             containerSharedModel = SharedVariables.create();
           } 
-  
-          // CHECKME: this might trigger an pre-mature update because the document's
-          // shared models will be updated first before the tiles. And the update to the
-          // document's shared models will trigger the document level autorun.
-          sharedModelManager.setTileSharedModel(self, "variables", containerSharedModel);  
+          
+          // Add the shared model to both the document and the tile
+          sharedModelManager.addTileSharedModel(self, containerSharedModel);
 
+          // TODO: It would be a better example for future shared model
+          // developers if this also stored a reference to the shared model in
+          // the tile content, this would demonstrate how tiles can work with
+          // multiple shared models at the same time.
+          //
+          // If we do that then this reference probably should be kept in sync
+          // with the tileSharedModels. So if it is removed from there then the 
+          // reference is cleaned up. 
         }
+
+        // We add the shared model as the variables API even if the shared model
+        // was already added to this tile. This is necessary when deserializing
+        // a document from storage.
         self.root.setVariablesAPI(containerSharedModel);
       }, 
       {name: "sharedModelSetup", fireImmediately: true}));

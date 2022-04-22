@@ -1,10 +1,9 @@
 import { autorun, IReactionDisposer } from "mobx";
 import { getParentOfType, hasParentOfType, 
-  IAnyStateTreeNode, IDisposer, Instance, onSnapshot, tryReference, types } from "mobx-state-tree";
+  IAnyStateTreeNode, IDisposer, onSnapshot, types } from "mobx-state-tree";
 import { DocumentContentModelType } from "../document/document-content";
 import { ISharedModelManager, SharedModelType, SharedModelUnion } from "./shared-model";
 import { ToolTileModel } from "./tool-tile";
-import { ToolContentUnion } from "./tool-types";
 
 export interface ISharedModelDocumentManager extends ISharedModelManager {
   setDocument(document: DocumentContentModelType): void;
@@ -29,18 +28,22 @@ types.model("SharedModelDocumentManager")
     return getParentOfType(tileContentModel, ToolTileModel);
   };
 
-  const sharedModelMonitorDisposers: Record<string, IDisposer> = {};
+  // Partial is used here, so we are forced to check for undefined when looking
+  // up a disposer by a key.
+  const sharedModelMonitorDisposers: Partial<Record<string, IDisposer>> = {};
   let documentAutoRunDisposer: IReactionDisposer;
 
   return {
     setDocument(document: DocumentContentModelType) {
       self.document = document;
 
-      // If we had an autorun already set up, dispose it
       if (documentAutoRunDisposer) {
+        // This means setDocument was called before. In this case we assume the
+        // document has been changed. So we dispose all of the reactions and
+        // then re-create them.
         documentAutoRunDisposer();
 
-        // If there was any sharedModel monitoring going on dispose it too
+        // We need to dispose any shared model `onSnapshot` monitors as well
         for(const [key, disposer] of Object.entries(sharedModelMonitorDisposers)) {
           disposer?.();
           delete sharedModelMonitorDisposers[key];
@@ -49,18 +52,15 @@ types.model("SharedModelDocumentManager")
 
       documentAutoRunDisposer = autorun(() => {
         for(const sharedModelEntry of document.sharedModelMap.values()) {
-          sharedModelMonitorDisposers[sharedModelEntry.sharedModel.id]?.();
-          sharedModelMonitorDisposers[sharedModelEntry.sharedModel.id] = 
-            onSnapshot(sharedModelEntry.sharedModel, () => {
-            // search each tile in the document.tileMap to find ones that are
-            // referencing this sharedModel
-            // run their update function with this shared model
-            for(const tile of document.tileMap.values()) {
-              for(const tileSharedModel of tile.sharedModels.values()) {
-                if (tileSharedModel.sharedModel === sharedModelEntry.sharedModel) {
-                  tile.content.updateAfterSharedModelChanges(sharedModelEntry.sharedModel);
-                }
-              }
+          const { sharedModel } = sharedModelEntry;
+          if (sharedModelMonitorDisposers[sharedModel.id]) {
+            // We already have a snapshot listener for this sharedModel, we don't need to 
+            // replace it
+            continue;
+          }
+          sharedModelMonitorDisposers[sharedModel.id] = onSnapshot(sharedModel, () => {
+            for(const tile of sharedModelEntry.tiles) {
+              tile.content.updateAfterSharedModelChanges(sharedModelEntry.sharedModel);
             }
           });
         }
@@ -73,33 +73,78 @@ types.model("SharedModelDocumentManager")
       }
       return self.document?.getFirstSharedModelByType(sharedModelType);
     },
-    getTileSharedModel(tileContentModel: IAnyStateTreeNode, label: string) {
-      const toolTile = getToolTile(tileContentModel);
-
-      // Maybe we should add a more convenient view method on toolTile
-      return tryReference(() => toolTile?.sharedModels?.get(label)?.sharedModel);
-    },
-    setTileSharedModel(tileContentModel: Instance<typeof ToolContentUnion>, 
-      label: string, sharedModel: SharedModelType): void {
+    addTileSharedModel(tileContentModel: IAnyStateTreeNode, sharedModel: SharedModelType): void {
       if (!self.document) {
-        console.warn("setTileSharedModel has no document. this will have no effect");
+        console.warn("addTileSharedModel has no document. this will have no effect");
         return;
       }
-      // register it with the document if necessary
-      if (! self.document.sharedModelMap.get(sharedModel.id)) {
-        self.document.addSharedModel(sharedModel);
+
+      // register it with the document if necessary.
+      // This won't re-add it if it is already there
+      const sharedModelEntry = self.document.addSharedModel(sharedModel);
+
+      // add this toolTile to the sharedModel entry
+      const toolTile = getToolTile(tileContentModel);
+      if (!toolTile) {
+        console.warn("addTileSharedModel can't find the toolTile");
+        return;
+      }
+
+      // Add the tile to the shared model entry if it wasn't added before
+      if (!sharedModelEntry.tiles.includes(toolTile)) {
+        sharedModelEntry.addTile(toolTile);
+      }
+
+      // The update function in the 'autorun' will run when a new
+      // shared model is added, but if the sharedModel already exists
+      // on the document, nothing that is being monitored will change
+      // So we need to explicity run the update function just to give
+      // the tile a change to update itself.
+      tileContentModel.updateAfterSharedModelChanges(sharedModel);
+    },
+
+    getTileSharedModels(tileContentModel: IAnyStateTreeNode): SharedModelType[] {
+      if (!self.document) {
+        console.warn("getTileSharedModels has no document");
+        return [];
+      }
+
+      // add this toolTile to the sharedModel entry
+      const toolTile = getToolTile(tileContentModel);
+      if (!toolTile) {
+        console.warn("getTileSharedModels can't find the toolTile");
+        return [];
+      }
+
+      const sharedModels: SharedModelType[] = [];
+      for(const sharedModelEntry of self.document.sharedModelMap.values()) {
+        if (sharedModelEntry.tiles.includes(toolTile)) {
+          sharedModels.push(sharedModelEntry.sharedModel);
+        }
+      }
+      return sharedModels;
+    },
+
+    removeTileSharedModel(tileContentModel: IAnyStateTreeNode, sharedModel: SharedModelType): void {
+      if (!self.document) {
+        console.warn("removeTileSharedModel has no document");
+        return;
       }
 
       const toolTile = getToolTile(tileContentModel);
-      toolTile?.setSharedModel(label, sharedModel);
+      if (!toolTile) {
+        console.warn("removeTileSharedModel can't find the toolTile");
+        return;
+      }
 
-      // The update function in the 'autorun' will probably run above:
-      //   self.document.sharedModelMap.put(sharedModel);
-      // So then it won't pick up the fact that this shared model has been 
-      // added to this toolTile. 
-      // So we explicitly run it again here to be safe
-      tileContentModel.updateAfterSharedModelChanges(sharedModel);
-    }  
+      const sharedModelEntry = self.document.sharedModelMap.get(sharedModel.id);
+      if (!sharedModelEntry) {
+        console.warn(`removeTileSharedModel can't find sharedModelEntry for sharedModel: ${sharedModel.id}`);
+        return;
+      }
+
+      sharedModelEntry.tiles.remove(toolTile);
+    },
   };
 });
 

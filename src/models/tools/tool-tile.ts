@@ -5,7 +5,6 @@ import { ITileExportOptions } from "./tool-content-info";
 import { findMetadata, ToolContentUnion } from "./tool-types";
 import { DisplayUserTypeEnum } from "../stores/user-types";
 import { uniqueId } from "../../utilities/js-utils";
-import { SharedModelType, SharedModelUnion } from "./shared-model";
 
 // generally negotiated with app, e.g. single column width for table
 export const kDefaultMinWidth = 60;
@@ -34,21 +33,6 @@ export function cloneTileSnapshotWithNewId(tile: ToolTileModelType, newId?: stri
   return { id: newId || uniqueId(), ...copy };
 }
 
-// To support labels, we need an intermediate object.
-// MST requires maps that contain objects with ids to use the id of the object 
-// as the key. So to work around this we've added an intermediate entry.
-// The resulting snapshot should look like:
-// { ...
-//   sharedModels: {
-//     "label1": { sharedModel: "id-of-shared-model"},
-//     "label2": { sharedModel: "id-of-another-shared-model"},
-//   }
-// } 
-const SharedModelEntry = types
-  .model("SharedModelEntry", {
-    sharedModel: types.reference(SharedModelUnion),
-  });
-
 export const ToolTileModel = types
   .model("ToolTile", {
     // if not provided, will be generated
@@ -57,7 +41,6 @@ export const ToolTileModel = types
     display: DisplayUserTypeEnum,
     // e.g. "GeometryContentModel", "ImageContentModel", "TableContentModel", "TextContentModel", ...
     content: ToolContentUnion,
-    sharedModels: types.map(SharedModelEntry),
   })
   .views(self => ({
     // generally negotiated with tool, e.g. single column width for table
@@ -99,11 +82,6 @@ export const ToolTileModel = types
       const metadata: any = findMetadata(self.content.type, self.id);
       metadata && metadata.setDisabledFeatures && metadata.setDisabledFeatures(disabled);
     }    
-  }))
-  .actions(self => ({
-    setSharedModel(label: string, sharedModel: SharedModelType) {
-      self.sharedModels.set(label, SharedModelEntry.create({sharedModel: sharedModel.id}));
-    }
   }));
 
 export type ToolTileModelType = Instance<typeof ToolTileModel>;

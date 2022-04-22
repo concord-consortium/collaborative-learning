@@ -91,14 +91,15 @@ describe("SharedModelDocumentManager", () => {
     expect(manager.isReady).toBe(true);
   });
 
-  it("calls tileContent#udpateAfterSharedModelChanges when the shared model changes", () => {
+  it("calls tileContent#updateAfterSharedModelChanges when the shared model changes", () => {
     const doc = DocumentContentModel.create({
       sharedModelMap: {
         "sm1": {
           sharedModel: {
             id: "sm1",
             type: "TestSharedModel"
-          }
+          },
+          tiles: [ "t1" ]
         }
       },
       tileMap: {
@@ -107,9 +108,6 @@ describe("SharedModelDocumentManager", () => {
           content: {
             type: "TestTile",
           },
-          sharedModels: {
-            "label": {sharedModel: "sm1"}
-          }
         }
       }
     });
@@ -124,7 +122,7 @@ describe("SharedModelDocumentManager", () => {
     manager.setDocument(doc);
     expect(spyUpdate).not.toHaveBeenCalled();
 
-    const sharedModelEntry = toolTile.sharedModels.get("label");
+    const sharedModelEntry = doc.sharedModelMap.get("sm1");
     expect(sharedModelEntry).toBeDefined();
     const sharedModel = sharedModelEntry?.sharedModel as Instance<typeof TestSharedModel>;
     expect(sharedModel).toBeDefined();
@@ -158,7 +156,7 @@ describe("SharedModelDocumentManager", () => {
     expect(spyUpdate).not.toHaveBeenCalled();
 
     const sharedModel = TestSharedModel.create({});
-    manager.setTileSharedModel(tileContent, "label", sharedModel);
+    manager.addTileSharedModel(tileContent, sharedModel);
 
     // The update function should be called right after it is added
     expect(spyUpdate).toHaveBeenCalled();
@@ -193,7 +191,7 @@ describe("SharedModelDocumentManager", () => {
     doc.addTileContentInNewRow(tileContent);
     expect(spyUpdate).not.toHaveBeenCalled();
 
-    manager.setTileSharedModel(tileContent, "label", sharedModel);
+    manager.addTileSharedModel(tileContent, sharedModel);
 
     // The update function should be called right after it is added
     expect(spyUpdate).toHaveBeenCalled();
@@ -212,7 +210,8 @@ describe("SharedModelDocumentManager", () => {
           sharedModel: {
             id: "sm1",
             type: "TestSharedModel"
-          }
+          },
+          tiles: [ "t1" ]
         }
       },
       tileMap: {
@@ -220,9 +219,6 @@ describe("SharedModelDocumentManager", () => {
           id: "t1",
           content: {
             type: "TestTile",
-          },
-          sharedModels: {
-            "label": {sharedModel: "sm1"}
           }
         }
       }
@@ -296,14 +292,15 @@ describe("SharedModelDocumentManager", () => {
     expect(sharedModel3).toBeUndefined();
   });
 
-  it("gets shared model from the tool tile", () => {
+  it("gets shared models associated with the tile", () => {
     const doc = DocumentContentModel.create({
       sharedModelMap: {
         "sm1": {
           sharedModel: {
             id: "sm1",
             type: "TestSharedModel"
-          }
+          },
+          tiles: [ "t1" ]
         }
       },
       tileMap: {
@@ -312,9 +309,12 @@ describe("SharedModelDocumentManager", () => {
           content: {
             type: "TestTile",
           },
-          sharedModels: {
-            "label": {sharedModel: "sm1"}
-          }
+        },
+        "t2": {
+          id: "t2",
+          content: {
+            type: "TestTile",
+          },
         }
       }
     });
@@ -323,19 +323,23 @@ describe("SharedModelDocumentManager", () => {
     assertIsDefined(toolTile);
     const tileContent = toolTile.content;
     assertIsDefined(tileContent);
-    expect(toolTile.sharedModels.get("label")).toBeDefined();
-    expect(toolTile.sharedModels.get("label")?.sharedModel).toBeDefined();
     const manager = createSharedModelDocumentManager();
     manager.setDocument(doc);
-    const tileSharedModel = manager.getTileSharedModel(tileContent, "label");
-    expect(tileSharedModel).toBeDefined();
-    expect(tileSharedModel?.id).toBe("sm1");
+    const tileSharedModels = manager.getTileSharedModels(tileContent);
+    expect(tileSharedModels).toBeDefined();
+    expect(tileSharedModels).toHaveLength(1);
+    expect(tileSharedModels[0]?.id).toBe("sm1");
 
-    const missingTileSharedModel = manager.getTileSharedModel(tileContent, "label2");
-    expect(missingTileSharedModel).toBeUndefined();
+    const toolTile2 = doc.tileMap.get("t2");
+    assertIsDefined(toolTile2);
+    const tileContent2 = toolTile2.content;
+    assertIsDefined(tileContent2);
+    const tileSharedModels2 = manager.getTileSharedModels(tileContent2);
+    expect(tileSharedModels2).toBeDefined();
+    expect(tileSharedModels2).toHaveLength(0);
   });
 
-  it("sets a shared model on the tile and document", () => {
+  it("adds a shared model to the tile and document", () => {
     const doc = DocumentContentModel.create({
       tileMap: {
         "t1": {
@@ -358,12 +362,13 @@ describe("SharedModelDocumentManager", () => {
 
     // might need to specify the type...
     const sharedModel = TestSharedModel.create({});
-    manager.setTileSharedModel(tileContent, "label", sharedModel);
-    expect(doc.sharedModelMap.get(sharedModel.id)).toBeDefined();
-
-    const sharedModelEntry = toolTile.sharedModels.get("label");
+    manager.addTileSharedModel(tileContent, sharedModel);
+    const sharedModelEntry = doc.sharedModelMap.get(sharedModel.id);
     expect(sharedModelEntry).toBeDefined();
+
     expect(sharedModelEntry?.sharedModel).toBeDefined();
+    expect(sharedModelEntry?.tiles).toHaveLength(1);
+    expect(sharedModelEntry?.tiles[0]?.id).toBe("t1");
 
     expect(spyUpdate).toHaveBeenCalled();
   });
