@@ -1,5 +1,5 @@
 import { WorkspaceModel, WorkspaceModelType, ProblemWorkspace } from "./workspace";
-import { DocumentModel, DocumentModelType } from "../document/document";
+import { createDocumentModel, DocumentModelType } from "../document/document";
 import { ProblemDocument } from "../document/document-types";
 
 describe("workspaces model", () => {
@@ -13,7 +13,7 @@ describe("workspaces model", () => {
       mode: "1-up",
     });
 
-    goodDoc = DocumentModel.create({
+    goodDoc = createDocumentModel({
       uid: "2",
       type: ProblemDocument,
       key: "test2",
@@ -21,7 +21,7 @@ describe("workspaces model", () => {
       content: {}
     });
 
-    // badDoc = DocumentModel.create({
+    // badDoc = createDocumentModel({
     //   uid: "3",
     //   type: ProblemDocument,
     //   key: "test3",

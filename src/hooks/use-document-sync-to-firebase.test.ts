@@ -3,7 +3,7 @@ import { observable, reaction, runInAction } from "mobx";
 import { SnapshotIn } from "mobx-state-tree";
 import { UseMutationOptions } from "react-query";
 import { Firebase } from "../lib/firebase";
-import { DocumentModel } from "../models/document/document";
+import { DocumentModel, createDocumentModel } from "../models/document/document";
 import {
   LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
 } from "../models/document/document-types";
@@ -65,7 +65,7 @@ const specFirebase = (type: string, key: string) => {
 const specDocument = (overrides?: Partial<SnapshotIn<typeof DocumentModel>>) => {
   const props: SnapshotIn<typeof DocumentModel> = {
     type: "problem", key: "doc-key", uid: "1", content: {}, ...overrides };
-  return DocumentModel.create(props);
+  return createDocumentModel(props);
 };
 
 const specArgs = (type: string, key: string,

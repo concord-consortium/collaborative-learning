@@ -1,7 +1,7 @@
 import { DB } from "./db";
 import { createDocumentsModelWithRequiredDocuments, DocumentsModel } from "../models/stores/documents";
 import { DBDocument } from "./db-types";
-import { DocumentModel } from "../models/document/document";
+import { createDocumentModel } from "../models/document/document";
 import { DocumentContentModel } from "../models/document/document-content";
 import { PersonalDocument, PlanningDocument, ProblemDocument } from "../models/document/document-types";
 import { specStores } from "../models/stores/spec-stores";
@@ -156,7 +156,7 @@ describe("db", () => {
 
   it("creates required problem document", async () => {
     expect.assertions(3);
-    const newDocument = DocumentModel.create({ uid: "1", type: ProblemDocument, key: "doc-1" });
+    const newDocument = createDocumentModel({ uid: "1", type: ProblemDocument, key: "doc-1" });
     mockDatabase.mockImplementation(() => ({
       ref: () => ({
         once: () => ({
@@ -186,7 +186,7 @@ describe("db", () => {
 
   it("creates required planning document", async () => {
     expect.assertions(3);
-    const newDocument = DocumentModel.create({ uid: "1", type: PlanningDocument, key: "doc-1" });
+    const newDocument = createDocumentModel({ uid: "1", type: PlanningDocument, key: "doc-1" });
     mockDatabase.mockImplementation(() => ({
       ref: () => ({
         once: () => ({
@@ -215,7 +215,7 @@ describe("db", () => {
   });
 
   it("creates required personal document from existing promise", async () => {
-    const personalDocument = DocumentModel.create({ uid: "1", type: PersonalDocument, key: "doc-1" });
+    const personalDocument = createDocumentModel({ uid: "1", type: PersonalDocument, key: "doc-1" });
     stores.documents = createDocumentsModelWithRequiredDocuments([PersonalDocument]);
     stores.documents.resolveRequiredDocumentPromise(personalDocument);
     await db.connect({appMode: "test", stores, dontStartListeners: true});

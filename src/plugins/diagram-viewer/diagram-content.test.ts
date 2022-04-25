@@ -1,10 +1,52 @@
-import { castToSnapshot, isAlive, types } from "mobx-state-tree";
+import { castToSnapshot, IAnyStateTreeNode, IAnyType, isAlive, onSnapshot, types } from "mobx-state-tree";
 import { when } from "mobx";
-import { createDiagramContent, defaultDiagramContent, DiagramContentModel } from "./diagram-content";
+import { createDiagramContent, defaultDiagramContent, 
+  DiagramContentModel, DiagramContentModelType } from "./diagram-content";
+import { ISharedModelManager, SharedModelType } from "../../models/tools/shared-model";
+import { SharedVariables, SharedVariablesType } from "../shared-variables/shared-variables";
 
 const TestContainer = types.model("TestContainer", {
-  content: DiagramContentModel
+  content: DiagramContentModel,
+  variables: types.maybe(SharedVariables)
 });
+
+const makeSharedModelManager = (variables?: SharedVariablesType): ISharedModelManager => {
+  return {
+    isReady: true,
+    findFirstSharedModelByType<IT extends IAnyType>(sharedModelType: IT): IT["Type"] | undefined {
+      return variables;
+    },
+    addTileSharedModel(tileContentModel: IAnyStateTreeNode): SharedModelType | undefined {
+      return variables;
+    },
+    removeTileSharedModel(tileContentModel: IAnyStateTreeNode, sharedModel: SharedModelType): void {
+      // ignore this for now
+    },
+    getTileSharedModels(tileContentModel: IAnyStateTreeNode): SharedModelType[] {
+      return variables ? [variables] : [];
+    }
+  };
+};
+
+const setupContainer = (content: DiagramContentModelType, variables?: SharedVariablesType) => {
+  const sharedModelManager = makeSharedModelManager(variables);
+  TestContainer.create(
+    {content: castToSnapshot(content), variables: castToSnapshot(variables)},
+    {sharedModelManager}
+  );
+
+  // Need to monitor the variables just like sharedModelDocumentManager does
+  if (variables) {
+    onSnapshot(variables, () => {
+      content.updateAfterSharedModelChanges(variables);
+    });  
+  }
+
+  // So far it hasn't been necessary to wait for the MobX reaction to run inside of 
+  // DocumentContent#afterAttach. It seems to run immediately in the line above, so 
+  // we can write expectations on this content without waiting.
+  return {content, sharedModelManager};
+};
 
 describe("DiagramContent", () => {
   it("has default content", () => {
@@ -23,17 +65,21 @@ describe("DiagramContent", () => {
     expect(content.isUserResizable).toBe(true);
   });
 
-  it("sets up variables api after being attached", () => {
+  const setupContent = () => {
     const content = createDiagramContent();
-    const container = TestContainer.create({content: castToSnapshot(content)});
-    expect(container.content.root.variablesAPI).toBeDefined();
+    const variables = SharedVariables.create();
+    return setupContainer(content, variables).content;
+  };
+
+  it("sets up variables api after being attached", () => {
+    const content = setupContent();
+    expect(content.root.variablesAPI).toBeDefined();
   });
 
   // This is more of an integration test because it is testing the innards of 
   // DQRoot, but it exercises code provided by the diagram-content in the process
   it("supports creating Nodes", () => {
-    const content = createDiagramContent();
-    TestContainer.create({content: castToSnapshot(content)});
+    const content = setupContent();
 
     expect(content.root.nodes.size).toBe(0);
     expect(content.sharedModel?.variables.length).toBe(0);
@@ -49,9 +95,9 @@ describe("DiagramContent", () => {
   });
 
   it("createVariable in the variables api adds a variable", () => {
-    const content = createDiagramContent();
-    const container = TestContainer.create({content: castToSnapshot(content)});
-    const variablesAPI = container.content.root.variablesAPI;
+    const content = setupContent();
+
+    const variablesAPI = content.root.variablesAPI;
     assertIsDefined(variablesAPI);
 
     const variable = variablesAPI.createVariable();
@@ -69,16 +115,16 @@ describe("DiagramContent", () => {
           }
         }
       },
-      sharedModel: {
-        variables: [
-          {
-            id: "variable1"
-          }
-        ]
-      }
     });
-    const container = TestContainer.create({content: castToSnapshot(content)});
-    return container.content;
+    const variables = SharedVariables.create({
+      variables: [
+        {
+          id: "variable1",
+          name: "test variable"          
+        }
+      ]
+    });
+    return setupContainer(content, variables).content;
   };
 
   it("can handle basic de-serialization", () => {
@@ -112,4 +158,21 @@ describe("DiagramContent", () => {
       done();
     });
   });
+
+  it("creates the variables shared model, if there isn't one", () => {
+    const content = createDiagramContent();
+    const sharedModelManager = makeSharedModelManager();
+    const addTileSharedModelSpy = jest.spyOn(sharedModelManager, "addTileSharedModel");
+    TestContainer.create(
+      {content: castToSnapshot(content)},
+      {sharedModelManager}
+    );
+  
+    expect(addTileSharedModelSpy).toHaveBeenCalled();
+  });
+
+  it("handles off chance that updateAfterSharedModelChanges is called before things are ready", () => {
+    const content = createDiagramContent();
+    expect(() => content.updateAfterSharedModelChanges()).not.toThrow();
+  });  
 });

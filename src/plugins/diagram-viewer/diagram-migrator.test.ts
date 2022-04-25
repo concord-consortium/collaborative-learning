@@ -11,22 +11,14 @@ describe("DiagramMigrator", () => {
         }
       }
     },
-    sharedModel: {
-      variables: [
-        {
-          id: "variable1"
-        }
-      ]
-    }
   };
 
   it("loads modern state", () => {
     const migrated = DiagramMigrator.create({
-      version: "0.0.1",
+      version: "0.0.2",
       ...basicDiagram
     });
     expect(migrated.root?.nodes.size).toBe(1);
-    expect(migrated.sharedModel?.variables.length).toBe(1);
   });
 
   it("blanks out state without a version", () => {
@@ -34,7 +26,6 @@ describe("DiagramMigrator", () => {
       const migrated = DiagramMigrator.create(basicDiagram);
       expect(mockConsole).toHaveBeenCalled();
       expect(migrated.root?.nodes.size).toBe(0);
-      expect(migrated.sharedModel).toBeUndefined();
     });
   });
 
@@ -43,7 +34,6 @@ describe("DiagramMigrator", () => {
       const migrated = DiagramMigrator.create({foo: "bar"});
       expect(mockConsole).toHaveBeenCalled();
       expect(migrated.root?.nodes.size).toBe(0);
-      expect(migrated.sharedModel).toBeUndefined();
     });
   });
 

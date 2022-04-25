@@ -40,7 +40,7 @@ export const ToolTileModel = types
     // whether to restrict display to certain users
     display: DisplayUserTypeEnum,
     // e.g. "GeometryContentModel", "ImageContentModel", "TableContentModel", "TextContentModel", ...
-    content: ToolContentUnion
+    content: ToolContentUnion,
   })
   .views(self => ({
     // generally negotiated with tool, e.g. single column width for table
@@ -81,7 +81,7 @@ export const ToolTileModel = types
     setDisabledFeatures(disabled: string[]) {
       const metadata: any = findMetadata(self.content.type, self.id);
       metadata && metadata.setDisabledFeatures && metadata.setDisabledFeatures(disabled);
-    }
+    }    
   }));
 
 export type ToolTileModelType = Instance<typeof ToolTileModel>;

@@ -1,5 +1,5 @@
 import { cloneDeep, each } from "lodash";
-import { types, getSnapshot, Instance, SnapshotIn } from "mobx-state-tree";
+import { types, getSnapshot, Instance, SnapshotIn, getType } from "mobx-state-tree";
 import { PlaceholderContentModel } from "../tools/placeholder/placeholder-content";
 import { kTextToolID } from "../tools/text/text-content";
 import { getToolContentInfoById, IDocumentExportOptions } from "../tools/tool-content-info";
@@ -18,6 +18,7 @@ import { DocumentsModelType } from "../stores/documents";
 import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
 import { getParentWithTypeName } from "../../utilities/mst-utils";
 import { comma, StringBuilder } from "../../utilities/string-builder";
+import { SharedModel, SharedModelType, SharedModelUnion } from "../tools/shared-model";
 
 export interface INewTileOptions {
   rowHeight?: number;
@@ -52,11 +53,32 @@ export interface ITileCountsPerSection {
   [key: string]: number;
 }
 
+// This intermediate type is added so we can store which tiles are using the
+// shared model. It is also necessary so the SharedModelUnion can be evaluated
+// late. If the sharedModelMap was a map directly to SharedModelUnion the late 
+// evaluation would happen immediately and not pick up the registered shared
+// model tiles. This issue with using late and maps is documented here:
+// `src/models/mst.test.ts`
+export const SharedModelEntry = types.model("SharedModelEntry", {
+  sharedModel: SharedModelUnion,
+  tiles: types.array(types.reference(ToolTileModel))
+})
+.actions(self => ({
+  addTile(toolTile: ToolTileModelType) {
+    self.tiles.push(toolTile);
+  },
+  removeTile(toolTile: ToolTileModelType) {
+    self.tiles.remove(toolTile);
+  }
+}));
+
 export const DocumentContentModel = types
   .model("DocumentContent", {
     rowMap: types.map(TileRowModel),
     rowOrder: types.array(types.string),
     tileMap: types.map(ToolTileModel),
+    // The keys to this map should be the id of the shared model
+    sharedModelMap: types.map(SharedModelEntry),
   })
   .preProcessSnapshot(snapshot => {
     return snapshot && (snapshot as any).tiles
@@ -202,6 +224,13 @@ export const DocumentContentModel = types
         snapshot.rowOrder = snapshot.rowOrder.map(rowId => idMap[rowId]);
 
         return snapshot;
+      },
+      getFirstSharedModelByType<IT extends typeof SharedModel>(modelType: IT ): IT["Type"] | undefined {
+        const sharedModelEntries = Array.from(self.sharedModelMap.values());
+        // Even if we use a snapshotProcessor generated type, getType will return the original 
+        // type. This is documented: src/models/mst.test.ts
+        const firstEntry = sharedModelEntries.find(entry => getType(entry.sharedModel) === modelType);
+        return firstEntry?.sharedModel;
       }
     };
   })
@@ -847,6 +876,21 @@ export const DocumentContentModel = types
       });
       return results;
     }
+  }))
+  .actions(self => ({
+    addSharedModel(sharedModel: SharedModelType) {
+      // we make sure there isn't an entry already otherwise adding a shared
+      // model twice would clobber the existing entry.
+      let sharedModelEntry = self.sharedModelMap.get(sharedModel.id);
+
+      if (!sharedModelEntry) {
+        sharedModelEntry = SharedModelEntry.create({sharedModel});
+        self.sharedModelMap.set(sharedModel.id, sharedModelEntry);
+      }
+
+      return sharedModelEntry;
+    },
+
   }));
 
 export type DocumentContentModelType = Instance<typeof DocumentContentModel>;

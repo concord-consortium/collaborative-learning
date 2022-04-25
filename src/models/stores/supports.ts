@@ -8,7 +8,7 @@ import { UnitModelType } from "../curriculum/unit";
 import { DB } from "../../lib/db";
 import { IDocumentProperties } from "../../lib/db-types";
 import { Logger, LogEventName } from "../../lib/logger";
-import { DocumentModel, DocumentModelType } from "../document/document";
+import { createDocumentModel, DocumentModelType } from "../document/document";
 import { DocumentContentModel, DocumentContentSnapshotType } from "../document/document-content";
 import { IAuthoredDocumentContent } from "../document/document-content-import";
 import { SupportPublication } from "../document/document-types";
@@ -395,7 +395,7 @@ export function addSupportDocumentsToStore(params: ICreateFromUnitParams) {
     else {
       const content = await getDocumentContentForSupport(support.support, db);
       if (content) {
-        document = DocumentModel.create({
+        document = createDocumentModel({
                      uid: "curriculum",
                      type: SupportPublication,
                      key: supportKey,

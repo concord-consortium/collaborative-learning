@@ -3,7 +3,12 @@ import "./models/tools/unknown-content";
 import "./models/tools/placeholder/placeholder-registration";
 
 const gToolRegistration: Record<string, () => void> = {
-  "Diagram": () => import(/* webpackChunkName: "Diagram" */"./plugins/diagram-viewer/diagram-registration"),
+  "Diagram": () => {
+    // Currently the Diagram Tool is the only tool using SharedVariables, so we register 
+    // SharedVariables whenever a there is a Diagram tool in the configuration
+    import(/* webpackChunkName: "Diagram" */"./plugins/diagram-viewer/diagram-registration");
+    import(/* webpackChunkName: "SharedVariables" */"./plugins/shared-variables/shared-variables-registration");
+  },
   "Drawing": () => import(/* webpackChunkName: "Drawing" */"./models/tools/drawing/drawing-registration"),
   "Geometry": () => import(/* webpackChunkName: "Geometry" */"./models/tools/geometry/geometry-registration"),
   "Image": () => import(/* webpackChunkName: "Image" */"./models/tools/image/image-registration"),

@@ -1,10 +1,11 @@
 import { destroy, Instance, types } from "mobx-state-tree";
 import { Variable, VariableType } from "@concord-consortium/diagram-view";
+import { SharedModel } from "../../models/tools/shared-model";
 
 export const kSharedVariablesID = "SharedVariables";
 
-export const SharedVariables = types
-.model("SharedVariables", {
+export const SharedVariables = SharedModel.named("SharedVariables")
+.props({
   type: types.optional(types.literal(kSharedVariablesID), kSharedVariablesID),
   variables: types.array(Variable)
 })
