@@ -1,6 +1,3 @@
-// register the tools built into the application
-import "./register-tools";
-
 // application-specific code exported here
 import { AppConfigModelSnapshot } from "./models/stores/app-config-model.js";
 import appConfigJson from "./clue/app-config.json";
@@ -12,3 +9,5 @@ export const AppContentComponent = ClueAppContentComponent;
 export { appIcons } from "./clue/app-icons";
 import "./clue/clue.sass";
 
+// register the tools built into the application
+import "./register-tools";
