@@ -35,16 +35,12 @@ describe("ToolTileModel", () => {
   const uniqueToolIds = new Set([...registeredToolIds, ...builtInToolIds]);
 
   uniqueToolIds.forEach(toolID => {
+    // It would be useful to extend this with additional tests verifying that tiles
+    // and their content info follow the right patterns
     it(`supports the tool: ${toolID}`, () => {
-      const SpecificToolContentModel = getToolContentInfoById(toolID)?.modelClass;
+      const toolDefaultContent = getToolContentInfoById(toolID)?.defaultContent;
 
-      if (!SpecificToolContentModel) {
-        // We are throwing here instead of using an expect, so typescript picks
-        // this up as a type guard. 
-        // Perhaps in the future Jest's expect statements can act as assertions
-        // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/41179
-        throw new Error(`Can't find content model for: ${toolID}`);
-      }
+      assertIsDefined(toolDefaultContent);
 
       // can create a model with each type of tool
       const content: any = { type: toolID };
@@ -53,8 +49,9 @@ describe("ToolTileModel", () => {
       if (toolID === kUnknownToolID) {
         content.originalType = "foo";
       }
+
       let toolTile = ToolTileModel.create({
-                      content: SpecificToolContentModel.create(content)
+                      content: toolDefaultContent()
                     });
       expect(toolTile.content.type).toBe(toolID);
 
@@ -66,21 +63,6 @@ describe("ToolTileModel", () => {
       toolTile = ToolTileModel.create(snapshot);
       expect(toolTile.content.type).toBe(toolID);
 
-    });
-
-    // If we have more tests verifying that Tools follow the right patterns this test
-    // should be moved next to them.
-    it(`${toolID} content models can be created without the type`, () => {
-      const SpecificToolContentModel = getToolContentInfoById(toolID)?.modelClass;
-
-      // can create the model without passing the type
-      const typelessContent: any = {};
-      // UnknownToolModel has required property
-      if (toolID === kUnknownToolID) {
-        typelessContent.originalType = "foo";
-      }
-      const toolContentModel = SpecificToolContentModel?.create(typelessContent);
-      expect(toolContentModel?.type).toBe(toolID);
     });
   });
 

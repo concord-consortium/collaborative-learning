@@ -1,28 +1,23 @@
-import { FlowTransform } from "react-flow-renderer";
 import { getSnapshot, types, Instance, getPath, addDisposer, 
   hasParentOfType, getParentOfType, getType, destroy, 
-  isValidReference } from "mobx-state-tree";
+  isValidReference, 
+  SnapshotIn } from "mobx-state-tree";
+import { DQRoot, DQNode } from "@concord-consortium/diagram-view";
 import { ITileExportOptions, IDefaultContentOptions } from "../../models/tools/tool-content-info";
 import { ToolContentModel } from "../../models/tools/tool-types";
 import { ToolTileModel } from "../../models/tools/tool-tile";
 import { DocumentContentModel } from "../../models/document/document-content";
-import { kDiagramToolID } from "./diagram-types";
-import { DQRoot, DQNode } from "@concord-consortium/diagram-view";
+import { kDiagramToolID, kDiagramToolStateVersion } from "./diagram-types";
 import { reaction } from "mobx";
 import { SharedVariables, SharedVariablesType } from "../shared-variables/shared-variables";
 import { SharedModelType } from "../../models/tools/shared-model";
-
-// This is only used directly by tests
-export function defaultDiagramContent(options?: IDefaultContentOptions) {
-  return DiagramContentModel.create({ root: getSnapshot(DQRoot.create()) });
-}
 
 export const DiagramContentModel = ToolContentModel
   .named("DiagramTool")
   .props({
     type: types.optional(types.literal(kDiagramToolID), kDiagramToolID),
+    version: types.optional(types.literal(kDiagramToolStateVersion), kDiagramToolStateVersion),
     root: types.optional(DQRoot, getSnapshot(DQRoot.create())),
-    transform: types.maybe(types.frozen<FlowTransform>())
   })
   .views(self => ({
     exportJson(options?: ITileExportOptions) {
@@ -47,11 +42,6 @@ export const DiagramContentModel = ToolContentModel
       const sharedModel = self.toolTile?.sharedModels.find(model => getType(model) === SharedVariables);
       return sharedModel as SharedVariablesType | undefined;
     },   
-  }))
-  .actions(self => ({
-    setTransform(transform: FlowTransform) {
-      self.transform = transform;
-    }
   }))
   .actions(self => ({
     afterAttach() {
@@ -145,3 +135,21 @@ export const DiagramContentModel = ToolContentModel
   }));
 
 export interface DiagramContentModelType extends Instance<typeof DiagramContentModel> {}
+
+// The migrator sometimes modifies the diagram content model so that its create 
+// method actually goes through the migrator. When that happens if the snapshot doesn't
+// have a version the snapshot will be ignored.
+// This weird migrator behavior is demonstrated here: src/models/mst.test.ts
+// So because of that this method should be used instead of directly calling create
+export function createDiagramContent(snapshot?: SnapshotIn<typeof DiagramContentModel>) {
+  return DiagramContentModel.create({
+    version: kDiagramToolStateVersion,
+    ...snapshot
+  });
+}
+
+export function defaultDiagramContent(options?: IDefaultContentOptions) {
+  return createDiagramContent({ root: getSnapshot(DQRoot.create()) });
+}
+
+
