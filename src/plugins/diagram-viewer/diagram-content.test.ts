@@ -16,11 +16,14 @@ const makeSharedModelManager = (variables?: SharedVariablesType): ISharedModelMa
     findFirstSharedModelByType<IT extends IAnyType>(sharedModelType: IT): IT["Type"] | undefined {
       return variables;
     },
-    getTileSharedModel(tileContentModel: IAnyStateTreeNode, label: string): SharedModelType | undefined {
+    addTileSharedModel(tileContentModel: IAnyStateTreeNode): SharedModelType | undefined {
       return variables;
     },
-    setTileSharedModel(tileContentModel: IAnyStateTreeNode, label: string, sharedModel: SharedModelType): void {
+    removeTileSharedModel(tileContentModel: IAnyStateTreeNode, sharedModel: SharedModelType): void {
       // ignore this for now
+    },
+    getTileSharedModels(tileContentModel: IAnyStateTreeNode): SharedModelType[] {
+      return variables ? [variables] : [];
     }
   };
 };
@@ -159,13 +162,13 @@ describe("DiagramContent", () => {
   it("creates the variables shared model, if there isn't one", () => {
     const content = createDiagramContent();
     const sharedModelManager = makeSharedModelManager();
-    const setTileSharedModelSpy = jest.spyOn(sharedModelManager, "setTileSharedModel");
+    const addTileSharedModelSpy = jest.spyOn(sharedModelManager, "addTileSharedModel");
     TestContainer.create(
       {content: castToSnapshot(content)},
       {sharedModelManager}
     );
   
-    expect(setTileSharedModelSpy).toHaveBeenCalled();
+    expect(addTileSharedModelSpy).toHaveBeenCalled();
   });
 
   it("handles off chance that updateAfterSharedModelChanges is called before things are ready", () => {

@@ -92,36 +92,54 @@ export interface ISharedModelManager {
   
   /**
    * Find the shared model at the container level. If the tile wants to use this
-   * shared model it should call `setTileSharedModel` to save a reference to it.
-   * The container needs to know which tiles reference which shared models so it
-   * can update them when the shared model changes.
+   * shared model it should call `addTileSharedModel`. This is necessary so the
+   * container knows to call the tile's updateAfterSharedModelChanges action
+   * whenever the shared model changes.
    *
    * @param sharedModelType the MST model "class" of the shared model
    */
   findFirstSharedModelByType<IT extends typeof SharedModelUnion>(sharedModelType: IT): IT["Type"] | undefined;
 
   /**
-   * Get the shared model of this tile. They are labeled so a tile can have
-   * multiple shared models.
+   * Add a shared model to the container if it doesn't exist and add a link to
+   * the tile from the shared model. 
    *
-   * @param tileContentModel normally this would be `self` when called by a tile
-   * @param label a string labeling this shared model
-   */ 
-  getTileSharedModel(tileContentModel: IAnyStateTreeNode, label: string): SharedModelType | undefined;
+   * If the shared model was already part of this container it won't be added to
+   * the container twice. If the shared model already had a link to this tile it
+   * won't be added twice. 
+   *
+   * Tiles need to call this method when they use a shared model. This is how
+   * the container knows to call the tile's updateAfterSharedModelChanges when
+   * the shared model changes.
+   *
+   * Multiple shared models can be added to a single tile. All of these shared
+   * models will be returned by getTileSharedModels. If a tile is using multiple
+   * shared models of the same type, it might want to additionally keep its own
+   * references to these shared models. Without these extra references it would
+   * be hard to tell which shared model is which. 
+   *
+   * @param tileContentModel the tile content model that should be notified when
+   * this shared model changes 
+   *
+   * @param sharedModel the new or existing shared model that is going to be
+   * used by this tile.
+   */
+  addTileSharedModel(tileContentModel: IAnyStateTreeNode, sharedModel: SharedModelType): void;
 
   /**
-   * Tiles should call this after finding or creating shared model they want to
-   * use. If this is a new shared model instance, it will be added to the
-   * container level so other tiles can find it.
+   * Remove the link from the shared model to the tile.
    *
-   * It is important that tiles call this even if they find an existing shared
-   * model with `findFirstSharedModelByType`. The container needs to know which
-   * tiles are referencing which shared models.
-   *
-   * @param tileContentModel normally this would be `self` when called by a tile
-   * @param label a string labeling this shared model
-   * @param sharedModel a new shared model instance or one returned by
-   * `findFirstSharedModelByType`
+   * @param tileContentModel the tile content model that doesn't want to be
+   * notified anymore of shared model changes.
+   * 
+   * @param sharedModel an existing shared model
    */
-  setTileSharedModel(tileContentModel: IAnyStateTreeNode, label: string, sharedModel: SharedModelType): void;
+  removeTileSharedModel(tileContentModel: IAnyStateTreeNode, sharedModel: SharedModelType): void;
+
+  /**
+   * Get all of the shared models that link to this tile
+   * 
+   * @param tileContentModel 
+   */
+  getTileSharedModels(tileContentModel: IAnyStateTreeNode): SharedModelType[];
 }

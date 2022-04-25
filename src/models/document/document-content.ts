@@ -53,22 +53,32 @@ export interface ITileCountsPerSection {
   [key: string]: number;
 }
 
-// This intermediate type is added so the SharedModelUnion 
-// can be evaluated late. The issues with using late and maps
-// is documented here: `src/models/mst.test.ts`
-const SharedModelDocEntry = types.model("SharedModelDocEntry", {
-  sharedModel: SharedModelUnion
-});
+// This intermediate type is added so we can store which tiles are using the
+// shared model. It is also necessary so the SharedModelUnion can be evaluated
+// late. If the sharedModelMap was a map directly to SharedModelUnion the late 
+// evaluation would happen immediately and not pick up the registered shared
+// model tiles. This issue with using late and maps is documented here:
+// `src/models/mst.test.ts`
+export const SharedModelEntry = types.model("SharedModelEntry", {
+  sharedModel: SharedModelUnion,
+  tiles: types.array(types.reference(ToolTileModel))
+})
+.actions(self => ({
+  addTile(toolTile: ToolTileModelType) {
+    self.tiles.push(toolTile);
+  },
+  removeTile(toolTile: ToolTileModelType) {
+    self.tiles.remove(toolTile);
+  }
+}));
 
 export const DocumentContentModel = types
   .model("DocumentContent", {
     rowMap: types.map(TileRowModel),
     rowOrder: types.array(types.string),
     tileMap: types.map(ToolTileModel),
-    // see SharedModelDocEntry above for why that is used instead of directly using
-    // SharedModelUnion. 
     // The keys to this map should be the id of the shared model
-    sharedModelMap: types.map(SharedModelDocEntry),
+    sharedModelMap: types.map(SharedModelEntry),
   })
   .preProcessSnapshot(snapshot => {
     return snapshot && (snapshot as any).tiles
@@ -869,9 +879,18 @@ export const DocumentContentModel = types
   }))
   .actions(self => ({
     addSharedModel(sharedModel: SharedModelType) {
-      self.sharedModelMap.set(sharedModel.id, 
-        SharedModelDocEntry.create({sharedModel}));
-    }
+      // we make sure there isn't an entry already otherwise adding a shared
+      // model twice would clobber the existing entry.
+      let sharedModelEntry = self.sharedModelMap.get(sharedModel.id);
+
+      if (!sharedModelEntry) {
+        sharedModelEntry = SharedModelEntry.create({sharedModel});
+        self.sharedModelMap.set(sharedModel.id, sharedModelEntry);
+      }
+
+      return sharedModelEntry;
+    },
+
   }));
 
 export type DocumentContentModelType = Instance<typeof DocumentContentModel>;

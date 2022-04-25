@@ -1,5 +1,5 @@
-import { Instance, types } from "mobx-state-tree";
-import { SharedModelType } from "./shared-model";
+import { getEnv, Instance, types } from "mobx-state-tree";
+import { ISharedModelManager, SharedModelType } from "./shared-model";
 import { getToolContentModels, getToolContentInfoById } from "./tool-content-info";
 
 /**
@@ -21,6 +21,10 @@ export const ToolContentUnion = types.late<typeof ToolContentModel>(() => {
 });
 
 export const kUnknownToolID = "Unknown";
+
+export interface ITileEnvironment {
+  sharedModelManager?: ISharedModelManager;
+}
 
 // Generic "super class" of all tool content models
 export const ToolContentModel = types.model("ToolContentModel", {
@@ -50,6 +54,11 @@ export const ToolContentModel = types.model("ToolContentModel", {
     // if a sub type does not override it.
     type: types.optional(types.string, kUnknownToolID)
   })
+  .views(self => ({
+    get tileEnv() {
+      return getEnv(self) as ITileEnvironment | undefined;
+    }
+  }))
   .actions(self => ({
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
       throw new Error("not implemented");

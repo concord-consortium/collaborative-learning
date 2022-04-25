@@ -9,6 +9,7 @@
     "**/dist/**": true
   },
   "cSpell.words": [
+    "autorun",
     "ccimg",
     "democlass",
     "fbrtdb",

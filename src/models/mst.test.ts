@@ -1,4 +1,4 @@
-import { getType, isType, types } from "mobx-state-tree";
+import { getType, types } from "mobx-state-tree";
 
 describe("mst", () => {
   it("snapshotProcessor unexpectedly modifies the base type", () => {
