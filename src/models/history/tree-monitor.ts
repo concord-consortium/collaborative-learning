@@ -92,7 +92,7 @@ export const addTreeMonitor = (tree: Instance<typeof Tree> ,  container: Contain
                     // model is added to a document.
                     //
                     // FIXME: need to make tests for this
-                    const match = _patch.path.match(/(.*\/content\/sharedModelMap\/[^/]+)\//);
+                    const match = _patch.path.match(/(.*\/content\/sharedModelMap\/[^/]+\/sharedModel)\//);
                     if(match) {
                         const sharedModelPath = match[1];
 

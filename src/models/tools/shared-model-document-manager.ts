@@ -28,43 +28,9 @@ types.model("SharedModelDocumentManager")
     return getParentOfType(tileContentModel, ToolTileModel);
   };
 
-  // Partial is used here, so we are forced to check for undefined when looking
-  // up a disposer by a key.
-  const sharedModelMonitorDisposers: Partial<Record<string, IDisposer>> = {};
-  let documentAutoRunDisposer: IReactionDisposer;
-
   return {
     setDocument(document: DocumentContentModelType) {
       self.document = document;
-
-      if (documentAutoRunDisposer) {
-        // This means setDocument was called before. In this case we assume the
-        // document has been changed. So we dispose all of the reactions and
-        // then re-create them.
-        documentAutoRunDisposer();
-
-        // We need to dispose any shared model `onSnapshot` monitors as well
-        for(const [key, disposer] of Object.entries(sharedModelMonitorDisposers)) {
-          disposer?.();
-          delete sharedModelMonitorDisposers[key];
-        }
-      }
-
-      documentAutoRunDisposer = autorun(() => {
-        for(const sharedModelEntry of document.sharedModelMap.values()) {
-          const { sharedModel } = sharedModelEntry;
-          if (sharedModelMonitorDisposers[sharedModel.id]) {
-            // We already have a snapshot listener for this sharedModel, we don't need to 
-            // replace it
-            continue;
-          }
-          sharedModelMonitorDisposers[sharedModel.id] = onSnapshot(sharedModel, () => {
-            for(const tile of sharedModelEntry.tiles) {
-              tile.content.updateAfterSharedModelChanges(sharedModelEntry.sharedModel);
-            }
-          });
-        }
-      });
     },
 
     findFirstSharedModelByType<IT extends typeof SharedModelUnion>(sharedModelType: IT): IT["Type"] | undefined {
@@ -102,6 +68,7 @@ types.model("SharedModelDocumentManager")
       // document, nothing that is being monitored will change So we need to
       // explicity run the update function just to give the tile a chance to
       // update itself.
+      // FIXME: check if this is necessary when we are using the tree monitor
       tileContentModel.updateAfterSharedModelChanges(sharedModel);
     },
 

@@ -91,7 +91,10 @@ describe("SharedModelDocumentManager", () => {
     expect(manager.isReady).toBe(true);
   });
 
-  it("calls tileContent#updateAfterSharedModelChanges when the shared model changes", () => {
+  // FIXME this feature is handled by the tree monitor now
+  // So we'd need to create a Document instead of DocumentContent so the tree monitor
+  // would get automatically setup. 
+  xit("calls tileContent#updateAfterSharedModelChanges when the shared model changes", () => {
     const doc = DocumentContentModel.create({
       sharedModelMap: {
         "sm1": {
@@ -133,7 +136,8 @@ describe("SharedModelDocumentManager", () => {
     expect(spyUpdate).toHaveBeenCalled();
   });
 
-  it("starts monitoring shared models added after the document", () => {
+  // FIXME: this is also handled by the tree monitor see above
+  xit("starts monitoring shared models added after the document", () => {
     const doc = DocumentContentModel.create({
       tileMap: {
         "t1": {
@@ -168,7 +172,8 @@ describe("SharedModelDocumentManager", () => {
     expect(spyUpdate).toHaveBeenCalled();
   });
 
-  it("updates tiles added after the document", () => {
+  // FIXME: this is also handled by the tree monitor see above
+  xit("updates tiles added after the document", () => {
     const doc = DocumentContentModel.create({
       sharedModelMap: {
         "sm1": {
@@ -203,7 +208,8 @@ describe("SharedModelDocumentManager", () => {
     expect(spyUpdate).toHaveBeenCalled();
   });
 
-  it("handles setting the document twice", () => {
+  // FIXME: this is also handled by the tree monitor see above
+  xit("handles setting the document twice", () => {
     const docSnapshot = {
       sharedModelMap: {
         "sm1": {
@@ -446,7 +452,8 @@ describe("SharedModelDocumentManager", () => {
     expect(spyUpdate).toHaveBeenCalled();
   });
 
-  it("a shared model can be added to multiple tiles", () => {
+  // FIXME: this is also handled by the tree monitor see above
+  xit("a shared model can be added to multiple tiles", () => {
     const doc = DocumentContentModel.create({
       tileMap: {
         "t1": {
@@ -558,7 +565,8 @@ describe("SharedModelDocumentManager", () => {
     expect(spyUpdate).not.toHaveBeenCalled();
   });
 
-  it("a second shared model can be added to a tile", () => {
+  // FIXME: this is also handled by the tree monitor see above
+  xit("a second shared model can be added to a tile", () => {
     const doc = DocumentContentModel.create({
       tileMap: {
         "t1": {
