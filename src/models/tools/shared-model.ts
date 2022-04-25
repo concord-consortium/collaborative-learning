@@ -93,7 +93,7 @@ export interface ISharedModelManager {
   /**
    * Find the shared model at the container level. If the tile wants to use this
    * shared model it should call `addTileSharedModel`. This is necessary so the
-   * container knows call the tile's updateAfterSharedModelChanges action
+   * container knows to call the tile's updateAfterSharedModelChanges action
    * whenever the shared model changes.
    *
    * @param sharedModelType the MST model "class" of the shared model

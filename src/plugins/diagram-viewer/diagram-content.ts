@@ -1,12 +1,11 @@
 import { getSnapshot, types, Instance, destroy, SnapshotIn,
-  isValidReference, addDisposer, isType, getType } from "mobx-state-tree";
+  isValidReference, addDisposer, getType } from "mobx-state-tree";
 import { reaction } from "mobx";
 import { DQRoot, DQNode } from "@concord-consortium/diagram-view";
 import { ITileExportOptions, IDefaultContentOptions } from "../../models/tools/tool-content-info";
 import { ToolContentModel } from "../../models/tools/tool-types";
 import { kDiagramToolID, kDiagramToolStateVersion } from "./diagram-types";
 import { SharedVariables, SharedVariablesType } from "../shared-variables/shared-variables";
-import { first } from "lodash";
 
 export const DiagramContentModel = ToolContentModel
   .named("DiagramTool")
@@ -14,7 +13,6 @@ export const DiagramContentModel = ToolContentModel
     type: types.optional(types.literal(kDiagramToolID), kDiagramToolID),
     version: types.optional(types.literal(kDiagramToolStateVersion), kDiagramToolStateVersion),
     root: types.optional(DQRoot, getSnapshot(DQRoot.create())),
-    // sharedModel: types.maybe(types.reference(SharedVariables))
   })
   .views(self => ({
     exportJson(options?: ITileExportOptions) {
@@ -53,8 +51,6 @@ export const DiagramContentModel = ToolContentModel
       addDisposer(self, reaction(() => {
         const sharedModelManager = self.tileEnv?.sharedModelManager;
 
-        // const tileSharedModel = sharedModelManager?.isReady ? 
-        //   sharedModelManager?.getTileSharedModel(self, "variables") : undefined;
         const containerSharedModel = sharedModelManager?.isReady ?
           sharedModelManager?.findFirstSharedModelByType(SharedVariables) : undefined;
 

@@ -3,7 +3,7 @@ import { SharedModelUnion } from "./shared-model";
 
 describe("Shared Models", () => {
   describe("SharedModelUnion", () => {
-    it("creates an UnknownSharedModel when an unkown model is loaded", () => {
+    it("creates an UnknownSharedModel when an unknown model is loaded", () => {
       const Container = types.model("Container", {
         model: SharedModelUnion
       });
