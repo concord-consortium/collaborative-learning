@@ -186,7 +186,6 @@ export const DocumentModel = Tree.named("Document")
         applySnapshot(self.content, snapshot);
       }
       else {
-        // FIXME: we should be using the tree monitor here somehow
         self.content = DocumentContentModel.create(snapshot);
         const sharedModelManager = getEnv(self).sharedModelManager as ISharedModelDocumentManager;
         sharedModelManager.setDocument(self.content);
@@ -278,6 +277,7 @@ export const DocumentModel = Tree.named("Document")
   }))
   .actions(self => ({
     afterCreate() {
+      // FIXME: it would be nice to unify this with the code in createDocumentModel
       const container = Container({});
       self.container = container;
       self.containerAPI = container.containerAPI;
@@ -305,7 +305,6 @@ export const getDocumentContext = (document: DocumentModelType): IDocumentContex
  * @returns 
  */
 export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
-  // FIXME: we should be using the tree monitor somehow
   const sharedModelManager = createSharedModelDocumentManager();
   const document = DocumentModel.create(snapshot, {sharedModelManager});
   if (document.content) {
