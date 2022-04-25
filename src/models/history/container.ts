@@ -5,7 +5,6 @@ import { TreePatchRecord, TreePatchRecordSnapshot } from "./history";
 import { TreeAPI } from "./tree-api";
 import { DocumentStore } from "./document-store";
 import { nanoid } from "nanoid";
-import "./json-model";
 
 export const Container = (initialDocument: any) => {
   const trees: Record<string, TreeAPI> = {};
