@@ -101,6 +101,7 @@ global.jestSpyConsole = async (method: ConsoleMethod, fn: JestSpyConsoleFn, opti
 };
 
 global.assertIsDefined = (value: unknown) => {
+  // Look 1 stack frame up for the real problem
   expect(value).toBeDefined();
   expect(value).not.toBeNull();
 };

@@ -15,7 +15,7 @@ describe("DiagramMigrator", () => {
 
   it("loads modern state", () => {
     const migrated = DiagramMigrator.create({
-      version: "0.0.1",
+      version: "0.0.2",
       ...basicDiagram
     });
     expect(migrated.root?.nodes.size).toBe(1);

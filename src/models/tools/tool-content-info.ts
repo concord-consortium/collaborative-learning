@@ -85,13 +85,9 @@ export interface ISharedModelInfo {
   modelClass: typeof SharedModel;
 }
 
-interface ISharedModelInfoMap {
-  [type: string]: ISharedModelInfo;
-}
-const gSharedModelInfoMap: ISharedModelInfoMap = {};
+const gSharedModelInfoMap: Record<string, ISharedModelInfo> = {};
 
 export function registerSharedModelInfo(sharedModelInfo: ISharedModelInfo) {
-  console.log("registerSharedModelInfo", sharedModelInfo);
   gSharedModelInfoMap[sharedModelInfo.type] = sharedModelInfo;
 }
 

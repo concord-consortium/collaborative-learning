@@ -49,11 +49,6 @@
         "isTileTool": true
       },
       {
-        "id": "VList",
-        "title": "VList",
-        "isTileTool": true
-      },
-      {
         "id": "Diagram",
         "title": "Diagram",
         "isTileTool": true

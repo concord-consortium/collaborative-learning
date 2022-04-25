@@ -1,5 +1,5 @@
-import { Instance, types } from "mobx-state-tree";
-import { SharedModelType } from "./shared-model";
+import { getEnv, Instance, types } from "mobx-state-tree";
+import { ISharedModelManager, SharedModelType } from "./shared-model";
 import { getToolContentModels, getToolContentInfoById } from "./tool-content-info";
 
 /**
@@ -22,39 +22,48 @@ export const ToolContentUnion = types.late<typeof ToolContentModel>(() => {
 
 export const kUnknownToolID = "Unknown";
 
+export interface ITileEnvironment {
+  sharedModelManager?: ISharedModelManager;
+}
+
 // Generic "super class" of all tool content models
 export const ToolContentModel = types.model("ToolContentModel", {
-  // The type field has to be optional because the typescript type created from the sub models
-  // is an intersection ('&') of this ToolContentModel and the sub model.  If this was just:
-  //   type: types.string
-  // then typescript has errors because the intersection logic means the type field is
-  // required when creating a content model. And in many cases these tool content models
-  // are created without passing a type.
-  //
-  // It could be changed to
-  //   type: types.maybe(types.string)
-  // Because of the intersection it would still mean the sub models would do the right thing,
-  // but if someone looks at this definition of ToolContentModel, it implies the wrong thing.
-  // It might also cause problems when code is working with a generic of ToolContentModel
-  // that code couldn't assume that `model.type` is defined.
-  //
-  // Since this is optional, it needs a default value, and Unknown seems like the
-  // best option for this.
-  // I verified that a specific tool content models could not be constructed with:
-  //   ImageContentModel.create({ type: "Unknown" }).
-  // That line causes a typescript error.
-  // I think it is because the image content type is more specific with its use of
-  // types.literal so that overrides this less specific use of types.string
-  //
-  // Perhaps there is some better way to define this so that there would be an error
-  // if a sub type does not override it.
-  type: types.optional(types.string, kUnknownToolID)
-})
-.actions(self => ({
-  updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
-    throw new Error("not implemented");
-  }
-}));
+    // The type field has to be optional because the typescript type created from the sub models
+    // is an intersection ('&') of this ToolContentModel and the sub model.  If this was just:
+    //   type: types.string
+    // then typescript has errors because the intersection logic means the type field is
+    // required when creating a content model. And in many cases these tool content models
+    // are created without passing a type.
+    //
+    // It could be changed to
+    //   type: types.maybe(types.string)
+    // Because of the intersection it would still mean the sub models would do the right thing,
+    // but if someone looks at this definition of ToolContentModel, it implies the wrong thing.
+    // It might also cause problems when code is working with a generic of ToolContentModel
+    // that code couldn't assume that `model.type` is defined.
+    //
+    // Since this is optional, it needs a default value, and Unknown seems like the
+    // best option for this.
+    // I verified that a specific tool content models could not be constructed with:
+    //   ImageContentModel.create({ type: "Unknown" }).
+    // That line causes a typescript error.
+    // I think it is because the image content type is more specific with its use of
+    // types.literal so that overrides this less specific use of types.string
+    //
+    // Perhaps there is some better way to define this so that there would be an error
+    // if a sub type does not override it.
+    type: types.optional(types.string, kUnknownToolID)
+  })
+  .views(self => ({
+    get tileEnv() {
+      return getEnv(self) as ITileEnvironment | undefined;
+    }
+  }))
+  .actions(self => ({
+    updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
+      throw new Error("not implemented");
+    }
+  }));
 
 export interface ToolContentModelType extends Instance<typeof ToolContentModel> {}
 

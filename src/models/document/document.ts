@@ -1,4 +1,4 @@
-import { applySnapshot, types, Instance, SnapshotIn } from "mobx-state-tree";
+import { applySnapshot, types, Instance, SnapshotIn, getEnv } from "mobx-state-tree";
 import { forEach } from "lodash";
 import { QueryClient, UseQueryResult } from "react-query";
 import { DocumentContentModel, DocumentContentSnapshotType } from "./document-content";
@@ -18,6 +18,7 @@ import { safeJsonParse } from "../../utilities/js-utils";
 import { Container } from "../history/container";
 import { Tree } from "../history/tree";
 import { addTreeMonitor } from "../history/tree-monitor";
+import { createSharedModelDocumentManager, ISharedModelDocumentManager } from "../tools/shared-model-document-manager";
 
 interface IMatchPropertiesOptions {
   isTeacherDocument?: boolean;
@@ -185,7 +186,10 @@ export const DocumentModel = Tree.named("Document")
         applySnapshot(self.content, snapshot);
       }
       else {
+        // FIXME: we should be using the tree monitor here somehow
         self.content = DocumentContentModel.create(snapshot);
+        const sharedModelManager = getEnv(self).sharedModelManager as ISharedModelDocumentManager;
+        sharedModelManager.setDocument(self.content);
       }
     },
 
@@ -292,4 +296,20 @@ export const getDocumentContext = (document: DocumentModelType): IDocumentContex
     getProperty: (prop: string) => document.properties.get(prop),
     setProperties: (properties: ISetProperties) => document.setProperties(properties)
   };
+};
+
+/**
+ * Create a DocumentModel and add a new sharedModelManager into its environment
+ * 
+ * @param snapshot 
+ * @returns 
+ */
+export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
+  // FIXME: we should be using the tree monitor somehow
+  const sharedModelManager = createSharedModelDocumentManager();
+  const document = DocumentModel.create(snapshot, {sharedModelManager});
+  if (document.content) {
+    sharedModelManager.setDocument(document.content);
+  }
+  return document;
 };

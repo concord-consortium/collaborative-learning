@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { Provider } from "mobx-react";
 import React from "react";
 import { ModalProvider } from "react-modal-hook";
-import { DocumentModel } from "../models/document/document";
+import { createDocumentModel } from "../models/document/document";
 import { DocumentContentModel } from "../models/document/document-content";
 import { ToolbarModel, ToolbarModelSnapshot } from "../models/stores/problem-configuration";
 import { specStores } from "../models/stores/spec-stores";
@@ -16,7 +16,7 @@ describe("ToolbarComponent", () => {
 
   const stores = specStores();
   const content = DocumentContentModel.create({});
-  const document = DocumentModel.create({
+  const document = createDocumentModel({
                     uid: "1",
                     type: "problem",
                     key: "1",
