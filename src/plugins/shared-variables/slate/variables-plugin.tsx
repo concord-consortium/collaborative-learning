@@ -2,7 +2,7 @@ import React, { ReactNode } from "react";
 import classNames from "classnames/dedupe";
 import clone from "lodash/clone";
 import { Inline } from "slate";
-import { getPath } from "mobx-state-tree";
+import { getPath, getSnapshot } from "mobx-state-tree";
 import {
   Editor, HtmlSerializablePlugin, RenderAttributes, RenderInlineProps, hasActiveInline, IFieldValues,
   IDialogController, getDataFromElement, getRenderAttributesFromNode, classArray, EFormat, IRow
@@ -104,14 +104,8 @@ function getDialogValuesFromNode(editor: Editor, variables: VariableType[], node
   return values;
 }
 
-function getSharedModel(textTile: TextContentModelType) {
-  console.log("afterAttach", getPath(textTile));
-
-  return textTile.getOrCreateSharedModel();
-}
-
 function getVariables(textTile: TextContentModelType): VariableType[] {
-  const sharedModel = getSharedModel(textTile);
+  const sharedModel = textTile.getOrFindSharedModel();
   return sharedModel ? sharedModel.variables : [];
 }
 
@@ -204,7 +198,7 @@ export function VariablesPlugin(textTile: TextContentModelType): HtmlSerializabl
               variable?.setValue(parseVariableValue(values.value));
             }
             else {
-              const sharedModel = getSharedModel(textTile);
+              const sharedModel = textTile.getOrFindSharedModel();
               if (!sharedModel) {
                 // TODO: can we just return void here?
                 return;

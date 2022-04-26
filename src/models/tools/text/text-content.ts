@@ -112,7 +112,9 @@ export const TextContentModel = ToolContentModel
   }))
   .actions(self => ({
     // FIXME: we shouldn't be aware of shared model managed by a slate plugin.
-    getOrCreateSharedModel() {
+    // This is an action because it can modify the state if there isn't a shared
+    // model already associated with this tile
+    getOrFindSharedModel() {
       let sharedModel = self.sharedModel; 
     
       if (!sharedModel) {
@@ -122,12 +124,30 @@ export const TextContentModel = ToolContentModel
         if (!sharedModelManager || !sharedModelManager.isReady) {
           // In this case we can't do anything. 
           // Print a warning because it should be unusual
-          console.warn("shared model and shared model manager isn't available");
+          console.warn("shared model manager isn't available");
           return;
         }
 
-        sharedModel = SharedVariables.create();
-        sharedModelManager.addTileSharedModel(self, sharedModel);
+        const containerSharedModel = sharedModelManager.findFirstSharedModelByType(SharedVariables);
+        if (!containerSharedModel) {
+          console.warn("no shared variables model in the document");
+          // In the future we might want to create a new shared variables shared
+          // model in this case.  If we do that, we have to be careful that we don't
+          // cause an infinite loop. This getOrFindSharedModel is called from the 
+          // updateAfterSharedModelChanges so it might be called immediately after 
+          // this new shared model is added to the document.
+          //
+          // FIXME: It would be best if the searching for the shared variables model was 
+          // separated from this getOrFindSharedModel. That way getVariables could
+          // just be a view that doesn't modify any state. That could be handled by
+          // a reaction or autorun like with diagram-content.ts does. However it
+          // seems better try to fix that when move all of this code out of text-content
+          // and into the shared-variables text plugin.
+          return;
+        }
+
+        sharedModelManager.addTileSharedModel(self, containerSharedModel);
+        sharedModel = containerSharedModel;
       }
     
       return sharedModel;
@@ -135,7 +155,7 @@ export const TextContentModel = ToolContentModel
   }))
   .actions(self => {
     function getVariables(): VariableType[] {
-      const sharedModel = self.getOrCreateSharedModel();
+      const sharedModel = self.getOrFindSharedModel();
       return sharedModel ? sharedModel.variables : [];
     }
 
