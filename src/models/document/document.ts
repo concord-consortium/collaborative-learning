@@ -1,4 +1,4 @@
-import { applySnapshot, types, Instance, SnapshotIn } from "mobx-state-tree";
+import { applySnapshot, types, Instance, SnapshotIn, getEnv } from "mobx-state-tree";
 import { forEach } from "lodash";
 import { QueryClient, UseQueryResult } from "react-query";
 import { DocumentContentModel, DocumentContentSnapshotType } from "./document-content";
@@ -18,10 +18,13 @@ import { safeJsonParse } from "../../utilities/js-utils";
 import { Container } from "../history/container";
 import { Tree } from "../history/tree";
 import { addTreeMonitor } from "../history/tree-monitor";
+import { createSharedModelDocumentManager, ISharedModelDocumentManager } from "../tools/shared-model-document-manager";
 
 interface IMatchPropertiesOptions {
   isTeacherDocument?: boolean;
 }
+
+// FIXME: need to switch this to being the Tree now that it is the root
 
 export const DocumentModel = Tree.named("Document")
   .props({
@@ -45,7 +48,7 @@ export const DocumentModel = Tree.named("Document")
     queryPromise: undefined as Promise<UseQueryResult<IGetNetworkDocumentResponse>> | undefined,
     // This is not really needed for functionality but it is helpful for
     // debugging
-    container: undefined as any  
+    container: undefined as any      
   }))
   .views(self => ({
     // This is needed for the tree monitor and container
@@ -184,6 +187,8 @@ export const DocumentModel = Tree.named("Document")
       }
       else {
         self.content = DocumentContentModel.create(snapshot);
+        const sharedModelManager = getEnv(self).sharedModelManager as ISharedModelDocumentManager;
+        sharedModelManager.setDocument(self.content);
       }
     },
 
@@ -272,6 +277,7 @@ export const DocumentModel = Tree.named("Document")
   }))
   .actions(self => ({
     afterCreate() {
+      // FIXME: it would be nice to unify this with the code in createDocumentModel
       const container = Container({});
       self.container = container;
       self.containerAPI = container.containerAPI;
@@ -290,4 +296,19 @@ export const getDocumentContext = (document: DocumentModelType): IDocumentContex
     getProperty: (prop: string) => document.properties.get(prop),
     setProperties: (properties: ISetProperties) => document.setProperties(properties)
   };
+};
+
+/**
+ * Create a DocumentModel and add a new sharedModelManager into its environment
+ * 
+ * @param snapshot 
+ * @returns 
+ */
+export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
+  const sharedModelManager = createSharedModelDocumentManager();
+  const document = DocumentModel.create(snapshot, {sharedModelManager});
+  if (document.content) {
+    sharedModelManager.setDocument(document.content);
+  }
+  return document;
 };

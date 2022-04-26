@@ -56,11 +56,13 @@ export const Tree = types.model("Tree", {
     if ("sharedModel" in options) {
       sharedModel = options.sharedModel;
       const document = getParentOfType(options.sharedModel, DocumentContentModel);
-      document.tileMap.forEach(tile => {
-        if (tile.sharedModels.includes(options.sharedModel)) {
-          tiles.push(tile);
-        }
-      });
+      const sharedModelEntry = document.sharedModelMap.get(options.sharedModel.id);
+      if (!sharedModelEntry) {
+        console.warn(`no shared model entry for shared model: ${options.sharedModel.id}`);
+      } else {
+        // FIXME: this can probably be simplified now
+        sharedModelEntry.tiles.forEach(tile => tiles.push(tile));
+      }
     } else {
       // Ignore the options for now and just assume this tree is a DocumentModel
       const document = (self as any).content as DocumentContentModelType ;
@@ -70,10 +72,12 @@ export const Tree = types.model("Tree", {
       // TODO: this whole code path needs a lot of cleanup
 
       // Only include tiles that have at least one shared model
-      document.tileMap.forEach(tile => {
-        if (tile.sharedModels.length > 0) {
-          tiles.push(tile);
-        }
+      document.sharedModelMap.forEach(sharedModelEntry => {
+        sharedModelEntry.tiles.forEach(tile => {
+          if (!tiles.includes(tile)) {
+            tiles.push(tile);
+          }
+        });
       });
     }
         
@@ -215,8 +219,8 @@ export const Tree = types.model("Tree", {
 
       // Note: the environment of the call will be undefined because the undoRecorder cleared 
       // it out before it calling this function
-      // console.log(`observed changes in sharedModel: ${model.id} of tree: ${self.treeId}`, 
-      //   {historyEntryId, action: call});
+      console.log(`observed changes in sharedModel: ${model.id} of tree: ${self.treeId}`, 
+        {historyEntryId, action: call});
 
       // What is tricky is that this is being called when the snapshot is applied by the
       // sharedModel syncing code "sendSnapshotToSharedModel". In that case we want to do

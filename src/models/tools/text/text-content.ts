@@ -1,4 +1,4 @@
-import { types, Instance, hasParentOfType, getParentOfType } from "mobx-state-tree";
+import { types, Instance, getType } from "mobx-state-tree";
 import { Value, Inline } from "slate";
 import Plain from "slate-plain-serializer";
 import Markdown from "slate-md-serializer";
@@ -7,11 +7,9 @@ import {
 } from "@concord-consortium/slate-editor";
 import { ITileExportOptions } from "../tool-content-info";
 import { ToolContentModel } from "../tool-types";
-import { ToolTileModel } from "../tool-tile";
 import { SharedModelType } from "../shared-model";
 import { kVariableSlateType } from "../../../plugins/shared-variables/slate/variables-plugin";
-import { DocumentContentModel } from "../../document/document-content";
-import { SharedVariables } from "../../../plugins/shared-variables/shared-variables";
+import { SharedVariables, SharedVariablesType } from "../../../plugins/shared-variables/shared-variables";
 import { VariableType } from "@concord-consortium/diagram-view";
 
 export const kTextToolID = "Text";
@@ -77,13 +75,19 @@ export const TextContentModel = ToolContentModel
     }
   }))
   .views(self => ({
-    get toolTile() {
-      if (!hasParentOfType(self, ToolTileModel)) {
-        // we aren't attached in the right place yet
+    get sharedModel() {
+      const sharedModelManager = self.tileEnv?.sharedModelManager;
+      // Perhaps we should pass the type to getTileSharedModel, so it can return the right value
+      // just like findFirstSharedModelByType does
+      //
+      // For now we are checking the type ourselves, and we are assuming the shared model we want
+      // is the first one.
+      const firstSharedModel = sharedModelManager?.getTileSharedModels(self)?.[0];
+      if (!firstSharedModel || getType(firstSharedModel) !== SharedVariables) {
         return undefined;
       }
-      return getParentOfType(self, ToolTileModel);
-    } 
+      return firstSharedModel as SharedVariablesType;
+    },
   }))
   .actions(self => ({
     setText(text: string) {
@@ -106,44 +110,32 @@ export const TextContentModel = ToolContentModel
       self.editor = editor;
     }
   }))
-  .actions(self => {
+  .actions(self => ({
     // FIXME: we shouldn't be aware of shared model managed by a slate plugin.
-    // So when the plugin is registered with the text tile, it should include a
-    // method that can be called here to do this
-
-    function getSharedModel() {
-      const toolTileModel = self.toolTile;
-      if (!toolTileModel || !hasParentOfType(toolTileModel, DocumentContentModel)) {
-        // we aren't attached in the right place yet
-        return;
-      }
-    
-      // see if there is already a sharedModel in the document
-      // FIXME: to support tiles in iframes, we won't have direct access to the
-      // document like this, so some kind of API will need to be used instead.
-      const document = getParentOfType(toolTileModel, DocumentContentModel);
-    
-      if (!document) {
-        // We don't have a document yet
-        return;
-      }
-    
-      let sharedModel = document.getFirstSharedModelByType(SharedVariables);
+    getOrCreateSharedModel() {
+      let sharedModel = self.sharedModel; 
     
       if (!sharedModel) {
-        // The document doesn't have a shared model yet
+        // The document doesn't have a shared model yet, or the manager might
+        // not be ready yet
+        const sharedModelManager = self.tileEnv?.sharedModelManager;
+        if (!sharedModelManager || !sharedModelManager.isReady) {
+          // In this case we can't do anything. 
+          // Print a warning because it should be unusual
+          console.warn("shared model and shared model manager isn't available");
+          return;
+        }
+
         sharedModel = SharedVariables.create();
-        document.addSharedModel(sharedModel);
+        sharedModelManager.addTileSharedModel(self, sharedModel);
       }
-    
-      // TODO: currently we always just reset the shared model on the tool tile  
-      toolTileModel.setSharedModel(sharedModel);
     
       return sharedModel;
     }
-    
+  }))
+  .actions(self => {
     function getVariables(): VariableType[] {
-      const sharedModel = getSharedModel();
+      const sharedModel = self.getOrCreateSharedModel();
       return sharedModel ? sharedModel.variables : [];
     }
 

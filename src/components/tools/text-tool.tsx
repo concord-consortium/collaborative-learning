@@ -155,7 +155,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
       }
     });
 
-    this.plugins = [VariablesPlugin(this.props.model)];
+    this.plugins = [VariablesPlugin(this.props.model.content as TextContentModelType)];
   }
 
   public componentWillUnmount() {

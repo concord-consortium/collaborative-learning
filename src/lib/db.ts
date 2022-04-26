@@ -10,7 +10,7 @@ import {
   DBGroupUserConnections, DBPublication, DBPublicationDocumentMetadata, DBDocumentType, DBImage, DBTileComment,
   DBUserStar, DBOfferingUserProblemDocument, DBOtherDocument, IDocumentProperties, DBOtherPublication, DBSupport
 } from "./db-types";
-import { DocumentModelType, DocumentModel } from "../models/document/document";
+import { DocumentModelType, createDocumentModel } from "../models/document/document";
 import {
   DocumentType, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
   PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemOrPlanningDocumentType,
@@ -34,6 +34,7 @@ import { IStores } from "../models/stores/stores";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
 import { safeJsonParse } from "../utilities/js-utils";
 import { urlParams } from "../utilities/url-params";
+import { firebaseConfig } from "./firebase-config";
 
 export enum Monitor {
   None = "None",
@@ -117,17 +118,7 @@ export class DB {
 
       // check for already being initialized for tests
       if (firebase.apps.length === 0) {
-        const key = atob("QUl6YVN5QVV6T2JMblZESURYYTB4ZUxmSVpLV3BiLTJZSWpYSXBJ");
-        firebase.initializeApp({
-          apiKey: key,
-          authDomain: "collaborative-learning-ec215.firebaseapp.com",
-          databaseURL: "https://collaborative-learning-ec215.firebaseio.com",
-          projectId: "collaborative-learning-ec215",
-          storageBucket: "collaborative-learning-ec215.appspot.com",
-          messagingSenderId: "112537088884",
-          appId: "1:112537088884:web:c51b1b8432fff36faff221",
-          measurementId: "G-XP472LRY18"
-        });
+        firebase.initializeApp(firebaseConfig());
       }
 
       if (urlParams.firebase) {
@@ -556,14 +547,14 @@ export class DB {
             const msg = "Warning: Reconstituting empty contents for " +
                         `document '${documentKey}' of type '${type}' for user '${userId}'`;
             console.warn(msg);
-            return DocumentModel.create({
+            return createDocumentModel({
                                   type, title, properties, groupId, visibility, uid: userId, originDoc,
                                   key: documentKey, createdAt: metadata.createdAt, content: {}, changeCount: 0 });
           }
 
           const content = this.parseDocumentContent(document);
           try {
-            return DocumentModel.create({
+            return createDocumentModel({
               type,
               title,
               properties,
@@ -586,11 +577,10 @@ export class DB {
             // the document when a student opens it, they'll get a blank
             // document and if they make changes it will override the document
             // that failed to open.
-            return DocumentModel.create({
-                                  type, title, properties, groupId, visibility, uid: userId, originDoc,
-                                  key: documentKey, createdAt: metadata.createdAt, content: {}, changeCount: 0 });
+            return createDocumentModel({
+              type, title, properties, groupId, visibility, uid: userId, originDoc,
+              key: documentKey, createdAt: metadata.createdAt, content: {}, changeCount: 0 });
           }
-
         })
         .then((document) => {
           documents.add(document);
@@ -696,7 +686,6 @@ export class DB {
   public clear(level: DBClearLevel) {
     return new Promise<void>((resolve, reject) => {
       const {user} = this.stores;
-      let qaUser;
       const clearPath = (path?: string) => {
         this.firebase.ref(path).remove().then(resolve).catch(reject);
       };
@@ -705,13 +694,11 @@ export class DB {
         return reject("db#clear is only available in qa mode");
       }
       
+      if (level === "all") {
+        return reject("clearing 'all' is handled by clearFirebaseAnonQAUser");
+      }
+
       switch (level) {
-        case "all":
-          qaUser = this.firebase.getQAUserRoot();
-          if (qaUser) {
-            qaUser.remove().then(resolve).catch(reject);
-          }
-          break;
         case "class":
           clearPath(this.firebase.getClassPath(user));
           break;

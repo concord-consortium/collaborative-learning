@@ -30,7 +30,6 @@ export interface IRequiredDocumentPromise {
   isResolved: boolean;
 }
 
-// types
 export const DocumentsModel = types
   .model("Documents", {
   })

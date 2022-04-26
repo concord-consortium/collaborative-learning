@@ -3,7 +3,7 @@ import { observable, reaction, runInAction } from "mobx";
 import { SnapshotIn } from "mobx-state-tree";
 import { UseMutationOptions } from "react-query";
 import { Firebase } from "../lib/firebase";
-import { DocumentModel } from "../models/document/document";
+import { DocumentModel, createDocumentModel } from "../models/document/document";
 import {
   LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
 } from "../models/document/document-types";
@@ -65,7 +65,7 @@ const specFirebase = (type: string, key: string) => {
 const specDocument = (overrides?: Partial<SnapshotIn<typeof DocumentModel>>) => {
   const props: SnapshotIn<typeof DocumentModel> = {
     type: "problem", key: "doc-key", uid: "1", content: {}, ...overrides };
-  return DocumentModel.create(props);
+  return createDocumentModel(props);
 };
 
 const specArgs = (type: string, key: string,
@@ -552,5 +552,17 @@ describe("useDocumentSyncToFirebase hook", () => {
       expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
       await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(2));
     });
+  });
+
+  it("sets window.currentDocument when DOCUMENT_DEBUG is true", () => {
+    libDebug.DEBUG_DOCUMENT = true;
+    const { user, firebase, document } = specArgs(ProblemDocument, "xyz");
+    renderHook(() => useDocumentSyncToFirebase(user, firebase, document));
+    expect((window as any).currentDocument).toBe(document);
+
+    (window as any).currentDocument = undefined;
+    libDebug.DEBUG_DOCUMENT = false;
+    renderHook(() => useDocumentSyncToFirebase(user, firebase, document));
+    expect((window as any).currentDocument).toBeUndefined();
   });
 });

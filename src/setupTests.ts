@@ -55,6 +55,24 @@ interface IJestSpyConsoleOptions {
 declare global {
   // eslint-disable-next-line max-len
   function jestSpyConsole(method: ConsoleMethod, fn: JestSpyConsoleFn, options?: IJestSpyConsoleOptions): Promise<jest.SpyInstance>;
+
+  /**
+   * Use this helper to make sure a variable is defined and not null. 
+   * 
+   * Jest's `expect(value).toBeDefined()` does not tell Typescript that the variable
+   * is guaranteed to be defined afterward. By using assertIsDefined Typescript will 
+   * know the variable is defined and not null. The not null check is included
+   * because the only way I found to do this is using Typescript's NonNullable<T>. 
+   * 
+   * This is based on this: 
+   * https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-7.html#assertion-functions
+   * 
+   * Perhaps in the future Jest will support these assertions:
+   * https://github.com/DefinitelyTyped/DefinitelyTyped/issues/41179
+   * 
+   * @param value value to make sure it is defined
+   */
+  function assertIsDefined<T>(value: T): asserts value is NonNullable<T>;
 }
 global.jestSpyConsole = async (method: ConsoleMethod, fn: JestSpyConsoleFn, options?: IJestSpyConsoleOptions) => {
   // intercept and suppress console methods
@@ -80,4 +98,10 @@ global.jestSpyConsole = async (method: ConsoleMethod, fn: JestSpyConsoleFn, opti
   // cast so typescript doesn't complain about legitimate usage
   // using the mock after restore will still generate an error at runtime
   return undefined as any as typeof consoleMethodSpy;
+};
+
+global.assertIsDefined = (value: unknown) => {
+  // Look 1 stack frame up for the real problem
+  expect(value).toBeDefined();
+  expect(value).not.toBeNull();
 };

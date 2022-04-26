@@ -21,6 +21,13 @@ import './commands';
 // Alternatively you can use CommonJS syntax:
 // require('./commands'
 
+// From the install directions: https://github.com/archfz/cypress-terminal-report 
+// It recommends:
+//   require('cypress-terminal-report/src/installLogsCollector')();
+// This is switched to an import.
+import installLogsCollector from "cypress-terminal-report/src/installLogsCollector";
+installLogsCollector();
+
 Cypress.config('defaultCommandTimeout', 10000);
 
 // before(function(){ //Can't run this because full tests will not run due to website switching

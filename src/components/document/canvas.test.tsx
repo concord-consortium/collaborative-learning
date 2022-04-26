@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import { Provider } from "mobx-react";
 import { CanvasComponent } from "./canvas";
-import { DocumentModel } from "../../models/document/document";
+import { createDocumentModel } from "../../models/document/document";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { ProblemDocument } from "../../models/document/document-types";
 import { specStores } from "../../models/stores/spec-stores";
@@ -41,7 +41,7 @@ describe("Canvas Component", () => {
   });
 
   it("can render with a document", () => {
-    const document = DocumentModel.create({
+    const document = createDocumentModel({
       type: ProblemDocument,
       title: "test",
       uid: "1",
@@ -67,7 +67,7 @@ describe("Canvas Component", () => {
 
   it("renders spinner while loading remote document content", () => {
     mockGetQueryState.mockImplementation(() => ({ status: "loading" }));
-    const document = DocumentModel.create({
+    const document = createDocumentModel({
       type: ProblemDocument,
       title: "test",
       uid: "1",

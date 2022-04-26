@@ -49,16 +49,6 @@
         "isTileTool": true
       },
       {
-        "id": "VList",
-        "title": "VList",
-        "isTileTool": true
-      },
-      {
-        "id": "Diagram",
-        "title": "Diagram",
-        "isTileTool": true
-      },
-      {
         "id": "delete",
         "title": "Delete",
         "iconId": "icon-delete-tool",

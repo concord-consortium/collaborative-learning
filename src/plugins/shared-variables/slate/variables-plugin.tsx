@@ -2,17 +2,15 @@ import React, { ReactNode } from "react";
 import classNames from "classnames/dedupe";
 import clone from "lodash/clone";
 import { Inline } from "slate";
-import { getParentOfType, getPath, getSnapshot, hasParentOfType } from "mobx-state-tree";
+import { getPath } from "mobx-state-tree";
 import {
   Editor, HtmlSerializablePlugin, RenderAttributes, RenderInlineProps, hasActiveInline, IFieldValues,
   IDialogController, getDataFromElement, getRenderAttributesFromNode, classArray, EFormat, IRow
 } from "@concord-consortium/slate-editor";
 import { VariableType, Variable } from "@concord-consortium/diagram-view";
 import "./variables-plugin.scss";
-import { ToolTileModelType } from "../../../models/tools/tool-tile";
-import { DocumentContentModel } from "../../../models/document/document-content";
-import { SharedVariables } from "../shared-variables";
 import { VariableChip } from "./variable-chip";
+import { TextContentModelType } from "../../../models/tools/text/text-content";
 
 export const kVariableSlateType = "m2s-variable";
 const kVariableClass = "ccrte-variable";
@@ -33,7 +31,7 @@ function variableValueToString(value?: number) {
 }
 
 interface IRenderOptions {
-  toolTileModel: ToolTileModelType;
+  textTile: TextContentModelType;
   isSerializing?: boolean;
   isHighlighted?: boolean;
   onClick?: () => void;
@@ -53,7 +51,7 @@ function renderVariable(node: Inline, attributes: RenderAttributes, children: Re
     throw new Error("Can't render variable without options");
   }
 
-  const variables = getVariables(options.toolTileModel);
+  const variables = getVariables(options.textTile);
   const variable = variables.find(v => v.id === reference);
 
   return (
@@ -106,47 +104,20 @@ function getDialogValuesFromNode(editor: Editor, variables: VariableType[], node
   return values;
 }
 
-function getSharedModel(toolTileModel: ToolTileModelType) {
-  console.log("afterAttach", getPath(toolTileModel));
+function getSharedModel(textTile: TextContentModelType) {
+  console.log("afterAttach", getPath(textTile));
 
-  if (!hasParentOfType(toolTileModel, DocumentContentModel)) {
-    // we aren't attached in the right place yet
-    return;
-  }
-
-  // see if there is already a sharedModel in the document
-  // FIXME: to support tiles in iframes, we won't have direct access to the
-  // document like this, so some kind of API will need to be used instead.
-  const document = getParentOfType(toolTileModel, DocumentContentModel);
-
-  if (!document) {
-    // We don't have a document yet
-    return;
-  }
-
-  let sharedModel = document.getFirstSharedModelByType(SharedVariables);
-
-  if (!sharedModel) {
-    // The document doesn't have a shared model yet
-    sharedModel = SharedVariables.create();
-    console.log(getSnapshot(sharedModel));
-    document.addSharedModel(sharedModel);
-  }
-
-  // TODO: currently we always just reset the shared model on the tool tile
-  toolTileModel.setSharedModel(sharedModel);
-
-  return sharedModel;
+  return textTile.getOrCreateSharedModel();
 }
 
-function getVariables(toolTileModel: ToolTileModelType): VariableType[] {
-  const sharedModel = getSharedModel(toolTileModel);
+function getVariables(textTile: TextContentModelType): VariableType[] {
+  const sharedModel = getSharedModel(textTile);
   return sharedModel ? sharedModel.variables : [];
 }
 
 const kSpanTag = "span";
 
-export function VariablesPlugin(toolTileModel: ToolTileModelType): HtmlSerializablePlugin {
+export function VariablesPlugin(textTile: TextContentModelType): HtmlSerializablePlugin {
   return {
     deserialize(el: any, next: any) {
       if ((el.tagName.toLowerCase() === kSpanTag) && el.classList.contains(kVariableClass)) {
@@ -165,7 +136,7 @@ export function VariablesPlugin(toolTileModel: ToolTileModelType): HtmlSerializa
         const variable: Inline = obj;
         const omits = ["reference"];
         return renderVariable(variable, getRenderAttributesFromNode(variable, omits),
-                              children, { toolTileModel, isSerializing: true });
+                              children, { textTile, isSerializing: true });
       }
     },
 
@@ -179,7 +150,7 @@ export function VariablesPlugin(toolTileModel: ToolTileModelType): HtmlSerializa
     },
     commands: {
       configureVariable(editor: Editor, dialogController: IDialogController | null, node?: Inline) {
-        const variables = getVariables(toolTileModel);
+        const variables = getVariables(textTile);
 
         if (!dialogController) {
           const variable = variables[0];
@@ -233,7 +204,7 @@ export function VariablesPlugin(toolTileModel: ToolTileModelType): HtmlSerializa
               variable?.setValue(parseVariableValue(values.value));
             }
             else {
-              const sharedModel = getSharedModel(toolTileModel);
+              const sharedModel = getSharedModel(textTile);
               if (!sharedModel) {
                 // TODO: can we just return void here?
                 return;
@@ -300,7 +271,7 @@ export function VariablesPlugin(toolTileModel: ToolTileModelType): HtmlSerializa
       const dataAttrs = getRenderAttributesFromNode(node, omits);
 
       const options: IRenderOptions = {
-              toolTileModel,
+              textTile,
               isSerializing: false,
               isHighlighted: props.isSelected || props.isFocused,
               onClick: () => editor.moveFocusToStartOfNode(node),

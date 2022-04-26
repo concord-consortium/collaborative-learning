@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import { FourUpComponent } from "./four-up";
 import { GroupsModel, GroupModel, GroupUserModel } from "../models/stores/groups";
-import { DocumentModel, DocumentModelType } from "../models/document/document";
+import { createDocumentModel, DocumentModelType } from "../models/document/document";
 import { ProblemDocument } from "../models/document/document-types";
 import { DocumentsModelType, DocumentsModel } from "../models/stores/documents";
 import { specStores } from "../models/stores/spec-stores";
@@ -23,7 +23,7 @@ describe("Four Up Component", () => {
   let document: DocumentModelType;
 
   beforeEach(() => {
-    document = DocumentModel.create({
+    document = createDocumentModel({
       type: ProblemDocument,
       title: "test",
       uid: "1",
@@ -32,7 +32,7 @@ describe("Four Up Component", () => {
       createdAt: 1,
       content: {}
     });
-    documents = DocumentsModel.create();
+    documents = DocumentsModel.create({});
     documents.add(document);
   });
 
