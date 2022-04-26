@@ -553,19 +553,34 @@ export class DB {
           }
 
           const content = this.parseDocumentContent(document);
-          return createDocumentModel({
-            type,
-            title,
-            properties,
-            groupId,
-            visibility,
-            uid: userId,
-            originDoc,
-            key: document.self.documentKey,
-            createdAt: metadata.createdAt,
-            content: content ? content : {},
-            changeCount: document.changeCount
-          });
+          try {
+            return createDocumentModel({
+              type,
+              title,
+              properties,
+              groupId,
+              visibility,
+              uid: userId,
+              originDoc,
+              key: document.self.documentKey,
+              createdAt: metadata.createdAt,
+              content: content ? content : {},
+              changeCount: document.changeCount
+            });
+          } catch (e) {
+            const msg = "Warning: Reconstituting empty contents for " +
+                        `document '${documentKey}' of type '${type}' for user '${userId}'.` +
+                        "This is because DocumentModel.create failed.\n";
+            console.warn(msg, e);
+
+            // FIXME: this seems like a dangerous thing to do. If there is an error in
+            // the document when a student opens it, they'll get a blank
+            // document and if they make changes it will override the document
+            // that failed to open.
+            return createDocumentModel({
+              type, title, properties, groupId, visibility, uid: userId, originDoc,
+              key: documentKey, createdAt: metadata.createdAt, content: {}, changeCount: 0 });
+          }
         })
         .then((document) => {
           documents.add(document);

@@ -1,13 +1,16 @@
-import { types, Instance } from "mobx-state-tree";
-import { Value } from "slate";
+import { types, Instance, getType } from "mobx-state-tree";
+import { Value, Inline } from "slate";
 import Plain from "slate-plain-serializer";
 import Markdown from "slate-md-serializer";
 import {
-  deserializeValueFromLegacy, htmlToSlate, serializeValueToLegacy, slateToHtml, textToSlate
+  deserializeValueFromLegacy, Editor, htmlToSlate, serializeValueToLegacy, slateToHtml, textToSlate
 } from "@concord-consortium/slate-editor";
 import { ITileExportOptions } from "../tool-content-info";
 import { ToolContentModel } from "../tool-types";
-
+import { SharedModelType } from "../shared-model";
+import { kVariableSlateType } from "../../../plugins/shared-variables/slate/variables-plugin";
+import { SharedVariables, SharedVariablesType } from "../../../plugins/shared-variables/shared-variables";
+import { VariableType } from "@concord-consortium/diagram-view";
 
 export const kTextToolID = "Text";
 
@@ -25,6 +28,9 @@ export const TextContentModel = ToolContentModel
     // e.g. "html", "markdown", "slate", "quill", empty => plain text
     format: types.maybe(types.string)
   })
+  .volatile(self => ({
+    editor: undefined as Editor | undefined
+  }))
   .views(self => ({
     get joinText() {
       return Array.isArray(self.text)
@@ -68,6 +74,21 @@ export const TextContentModel = ToolContentModel
       ].join("\n");
     }
   }))
+  .views(self => ({
+    get sharedModel() {
+      const sharedModelManager = self.tileEnv?.sharedModelManager;
+      // Perhaps we should pass the type to getTileSharedModel, so it can return the right value
+      // just like findFirstSharedModelByType does
+      //
+      // For now we are checking the type ourselves, and we are assuming the shared model we want
+      // is the first one.
+      const firstSharedModel = sharedModelManager?.getTileSharedModels(self)?.[0];
+      if (!firstSharedModel || getType(firstSharedModel) !== SharedVariables) {
+        return undefined;
+      }
+      return firstSharedModel as SharedVariablesType;
+    },
+  }))
   .actions(self => ({
     setText(text: string) {
       self.format = undefined;
@@ -84,7 +105,75 @@ export const TextContentModel = ToolContentModel
     setSlate(value: Value) {
       self.format = "slate";
       self.text = serializeValueToLegacy(value);
+    },
+    setEditor(editor: Editor) {
+      self.editor = editor;
     }
-  }));
+  }))
+  .actions(self => ({
+    // FIXME: we shouldn't be aware of shared model managed by a slate plugin.
+    getOrCreateSharedModel() {
+      let sharedModel = self.sharedModel; 
+    
+      if (!sharedModel) {
+        // The document doesn't have a shared model yet, or the manager might
+        // not be ready yet
+        const sharedModelManager = self.tileEnv?.sharedModelManager;
+        if (!sharedModelManager || !sharedModelManager.isReady) {
+          // In this case we can't do anything. 
+          // Print a warning because it should be unusual
+          console.warn("shared model and shared model manager isn't available");
+          return;
+        }
+
+        sharedModel = SharedVariables.create();
+        sharedModelManager.addTileSharedModel(self, sharedModel);
+      }
+    
+      return sharedModel;
+    }
+  }))
+  .actions(self => {
+    function getVariables(): VariableType[] {
+      const sharedModel = self.getOrCreateSharedModel();
+      return sharedModel ? sharedModel.variables : [];
+    }
+
+    return {
+      updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
+        // Need to look for any references to items in shared models in the text
+        // content, if they don't exist in the shared model any more then clean
+        // them up in some way. 
+        // 
+        // Perhaps for just delete them. 
+        //
+        // Because it is up to the plugins to manage this, we'll have to find a
+        // way to channel this action through all of the plugins.
+        //
+        // After cleaning up an invalid references, then it should decide if it
+        // wants to change the text content if there is a new shared model item
+        // that didn't exist before.
+        if (!self.editor) {
+          return;
+        }
+
+        const variables = getVariables();
+
+        // FIXME: we shouldn't be aware of nodes managed by slate plugins. So when
+        // the plugin is registered with the text tile, it should include a method
+        // that can be called here to do this
+        const document = self.editor.value.document;
+        const variableNodes = document.filterDescendants((_node: Node) => {
+          return Inline.isInline(_node) && _node.type === kVariableSlateType;
+        });
+        variableNodes.forEach((element: Inline) => {
+          // Does this variable exist in our list?
+          if(!variables.find(v => v.id === element.data.get("reference"))){
+            self.editor.removeNodeByKey(element.key);
+          }
+        });
+      }
+    };
+  });
 
 export type TextContentModelType = Instance<typeof TextContentModel>;
