@@ -2,7 +2,6 @@ import React, { ReactNode } from "react";
 import classNames from "classnames/dedupe";
 import clone from "lodash/clone";
 import { Inline } from "slate";
-import { getPath, getSnapshot } from "mobx-state-tree";
 import {
   Editor, HtmlSerializablePlugin, RenderAttributes, RenderInlineProps, hasActiveInline, IFieldValues,
   IDialogController, getDataFromElement, getRenderAttributesFromNode, classArray, EFormat, IRow
@@ -10,9 +9,9 @@ import {
 import { VariableType, Variable } from "@concord-consortium/diagram-view";
 import "./variables-plugin.scss";
 import { VariableChip } from "./variable-chip";
+import { kVariableSlateType, getVariables, getOrFindSharedModel } from "./variables-text-content";
 import { TextContentModelType } from "../../../models/tools/text/text-content";
 
-export const kVariableSlateType = "m2s-variable";
 const kVariableClass = "ccrte-variable";
 const kVariableHighlightClass = "ccrte-variable-highlight";
 
@@ -104,11 +103,6 @@ function getDialogValuesFromNode(editor: Editor, variables: VariableType[], node
   return values;
 }
 
-function getVariables(textTile: TextContentModelType): VariableType[] {
-  const sharedModel = textTile.getOrFindSharedModel();
-  return sharedModel ? sharedModel.variables : [];
-}
-
 const kSpanTag = "span";
 
 export function VariablesPlugin(textTile: TextContentModelType): HtmlSerializablePlugin {
@@ -198,7 +192,7 @@ export function VariablesPlugin(textTile: TextContentModelType): HtmlSerializabl
               variable?.setValue(parseVariableValue(values.value));
             }
             else {
-              const sharedModel = textTile.getOrFindSharedModel();
+              const sharedModel = getOrFindSharedModel(textTile);
               if (!sharedModel) {
                 // TODO: can we just return void here?
                 return;
