@@ -16,7 +16,7 @@ export interface ITextPluginInfo {
 
 const gTextPluginInfoMap: Record<string, ITextPluginInfo | undefined> = {};
 
-export function registerPluginToolInfo(textToolInfo: ITextPluginInfo) {
+export function registerTextPluginInfo(textToolInfo: ITextPluginInfo) {
   gTextPluginInfoMap[textToolInfo.iconName] = textToolInfo;
 }
 

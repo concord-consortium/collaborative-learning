@@ -1,4 +1,4 @@
-import { registerPluginToolInfo } from "../../models/tools/text/text-plugin-info";
+import { registerTextPluginInfo } from "../../models/tools/text/text-plugin-info";
 import { registerSharedModelInfo } from "../../models/tools/tool-content-info";
 import { kSharedVariablesID, SharedVariables } from "./shared-variables";
 import VariablesToolIcon from "./slate/variables.svg";
@@ -10,7 +10,7 @@ registerSharedModelInfo({
   modelClass: SharedVariables
 });
 
-registerPluginToolInfo({
+registerTextPluginInfo({
   iconName: "m2s-variables",
   Icon: VariablesToolIcon,
   toolTip: "Variables",
