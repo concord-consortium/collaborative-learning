@@ -269,9 +269,16 @@ export function VariablesPlugin(textTile: TextContentModelType): HtmlSerializabl
               isSerializing: false,
               isHighlighted: props.isSelected || props.isFocused,
               onClick: () => editor.moveFocusToStartOfNode(node),
-              // FIXME: this isn't working, I don't understand how it should
-              // work because it isn't passing the dialogController, but it does
-              // work when this is done in the slate-editor repo.
+              // This works because slate-editor has a built in emit command which triggers
+              // an emitter.  text-toolbar.tsx adds a listener to this emitter for the 
+              // toolbarDialog event. When this event is received it calls the command 
+              // which is the 3rd arg here (in this case configureVariable), and also gives
+              // it the dialogController object followed by the node object
+              // 
+              // This is all necessary so the configureVariable command can be triggered and
+              // it is the passed dialogController. The dialogController is managed by the 
+              // text-toolbar so the configuredVariable command defined above doesn't have
+              // direct access to it.
               onDoubleClick: () => editor.command("emit", "toolbarDialog", "configureVariable", node)
             };
       return renderVariable(node, { ...dataAttrs, ...attributes }, children, options);
