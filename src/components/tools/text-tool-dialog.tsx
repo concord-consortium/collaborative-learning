@@ -2,7 +2,7 @@ import { DisplayDialogSettings, Editor, FieldType, IDialogController,
   IFieldValues, IModalDialogProps, ModalDialog } from "@concord-consortium/slate-editor";
 import { clone } from "lodash";
 import { useMemo, useRef, useState } from "react";
-import { useCustomModal } from "../../../hooks/use-custom-modal";
+import { useCustomModal } from "../../hooks/use-custom-modal";
 
 interface IProps {
   editor: Editor;

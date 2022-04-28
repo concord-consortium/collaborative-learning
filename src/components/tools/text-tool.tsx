@@ -12,9 +12,9 @@ import { hasSelectionModifier } from "../../utilities/event-utils";
 import { TextToolbarComponent } from "./text-toolbar";
 import { IToolApi, TileResizeEntry } from "./tool-api";
 import { IToolTileProps } from "./tool-tile";
+import { getTextPluginInstances, getTextPluginIds } from "../../models/tools/text/text-plugin-info";
 
 import "./text-tool.sass";
-import { VariablesPlugin } from "../../plugins/shared-variables/slate/variables-plugin";
 
 /*
   The Slate internal data model uses, among other things, "marks" and "blocks"
@@ -104,7 +104,8 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
     "subscript": "subscript",
     "bulleted-list": "list-ul",
     "ordered-list": "list-ol",
-    "m2s-variables": "m2s-variables",
+    // include the plugin ids here
+    ...getTextPluginIds().reduce((idMap, id) => ({...idMap, [id]: id}), {})
   };
 
   public componentDidMount() {
@@ -155,7 +156,8 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
       }
     });
 
-    this.plugins = [VariablesPlugin(this.props.model.content as TextContentModelType)];
+
+    this.plugins = getTextPluginInstances(this.props.model.content as TextContentModelType);
   }
 
   public componentWillUnmount() {

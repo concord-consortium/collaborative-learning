@@ -24,8 +24,10 @@
     },
     "settings": {
       "table": {
-        "numFormat": ".2~f",
-        "text": {"tools": ["bold", "subscript", "superscript", "m2s-variables"]}
+        "numFormat": ".2~f"
+      },
+      "text": {
+        "tools": ["bold", "subscript", "superscript", "m2s-variables"]
       }
     },
     "defaultStamps": [],

@@ -17,10 +17,10 @@ import SuperscriptToolIcon from "../../assets/icons/text/superscript-text-icon.s
 import SubscriptToolIcon from "../../assets/icons/text/subscript-text-icon.svg";
 import NumberedListToolIcon from "../../assets/icons/text/numbered-list-text-icon.svg";
 import BulletedListToolIcon from "../../assets/icons/text/bulleted-list-text-icon.svg";
-import VariablesToolIcon from "../../plugins/shared-variables/slate/variables.svg";
+import { useTextToolDialog } from "./text-tool-dialog";
+import { getTextPluginInfo } from "../../models/tools/text/text-plugin-info";
 
 import "./text-toolbar.sass";
-import { useTextToolDialog } from "../../plugins/shared-variables/slate/text-tool-dialog";
 
 interface IButtonDef {
   iconName: string;  // icon name for this button.
@@ -43,8 +43,6 @@ const buttonDefs: IButtonDef[] = [
   { iconName: "superscript", Icon: SuperscriptToolIcon,   toolTip: `Superscript`},
   { iconName: "list-ol",     Icon: NumberedListToolIcon,  toolTip: `Numbered List`},
   { iconName: "list-ul",     Icon: BulletedListToolIcon,  toolTip: `Bulleted List`},
-  { iconName: "m2s-variables", Icon: VariablesToolIcon,   toolTip: `Variables`},
-  // Add variable tool
 ];
 
 const handleMouseDown = (event: React.MouseEvent) => {
@@ -67,8 +65,15 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
   let toolbarButtons: IButtonDef[] = [];
   if (toolbarSetting) {
     toolbarSetting.forEach( setting => {
-      const button = buttonDefs.find( b => b.iconName === setting);
-      button && toolbarButtons.push(button);
+      const builtInButton = buttonDefs.find( b => b.iconName === setting);
+      if (builtInButton) {
+        toolbarButtons.push(builtInButton);
+        return;
+      }
+      const pluginButton = getTextPluginInfo(setting);
+      if (pluginButton) {
+        toolbarButtons.push(pluginButton);
+      }
     });
   } else {
     toolbarButtons = buttonDefs;
@@ -80,6 +85,7 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
       event.preventDefault();
     }
     else {
+      const toolInfo = getTextPluginInfo(buttonIconName);
       switch (buttonIconName) {
         case "bold":
           editor.command("toggleMark", EFormat.bold);
@@ -102,9 +108,18 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
         case "list-ul":
           editor.command("toggleBlock", EFormat.bulletedList);
           break;
-        case "m2s-variables":
-          editor.command("configureVariable", dialogController);
-          break;
+        default:
+          // Handle Text Plugins
+          if (!toolInfo?.command) {
+            console.warn("Can't find text plugin command for", buttonIconName);
+            break;
+          }
+          // Send the dialogController to all plugins
+          // FIXME: I think this should be an object instead so we can add more props
+          // to it with out changing the method signature and worrying about argument
+          // order. The reason is that I hope we can provide additional controllers or
+          // services that plugins can use
+          editor.command(toolInfo?.command, dialogController);          
       }
       event.preventDefault();
     }
