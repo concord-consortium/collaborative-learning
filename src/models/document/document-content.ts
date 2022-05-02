@@ -61,7 +61,7 @@ export interface ITileCountsPerSection {
 // `src/models/mst.test.ts`
 export const SharedModelEntry = types.model("SharedModelEntry", {
   sharedModel: SharedModelUnion,
-  tiles: types.array(types.reference(ToolTileModel))
+  tiles: types.array(types.safeReference(ToolTileModel, {acceptsUndefined: false}))
 })
 .actions(self => ({
   addTile(toolTile: ToolTileModelType) {
