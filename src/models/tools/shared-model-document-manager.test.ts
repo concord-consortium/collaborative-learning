@@ -734,5 +734,105 @@ describe("SharedModelDocumentManager", () => {
       spy.mockClear();  
     });
   });
+
+  it("handles a tile being deleted that references a shared model", () => {
+    const doc = DocumentContentModel.create({
+      sharedModelMap: {
+        "sm1": {
+          sharedModel: {
+            id: "sm1",
+            type: "TestSharedModel"
+          },
+          tiles: [ "t1", "t2" ]
+        }
+      },
+      tileMap: {
+        "t1": {
+          id: "t1",
+          content: {
+            type: "TestTile",
+          },
+        },
+        "t2": {
+          id: "t2",
+          content: {
+            type: "TestTile",
+          },
+        },
+      }
+    });
+
+    // Make sure this is working normally
+    const tileContent1 = doc.tileMap.get("t1")?.content;
+    assertIsDefined(tileContent1);
+    const spyUpdate1 = jest.spyOn(tileContent1, 'updateAfterSharedModelChanges');
+
+    const tileContent2 = doc.tileMap.get("t2")?.content;
+    assertIsDefined(tileContent2);
+    const spyUpdate2 = jest.spyOn(tileContent2, 'updateAfterSharedModelChanges');
+
+    const manager = createSharedModelDocumentManager();
+    manager.setDocument(doc);
+
+    expect(spyUpdate1).not.toHaveBeenCalled();
+    expect(spyUpdate2).not.toHaveBeenCalled();
+
+    const sharedModelEntry = doc.sharedModelMap.get("sm1");
+    expect(sharedModelEntry).toBeDefined();
+    const sharedModel = sharedModelEntry?.sharedModel as Instance<typeof TestSharedModel>;
+    expect(sharedModel).toBeDefined();
+    sharedModel.setValue("something");
+
+    expect(spyUpdate1).toHaveBeenCalled();
+    expect(spyUpdate2).toHaveBeenCalled();
+
+    // Delete tile t2
+    doc.deleteTile("t2");
+
+    // Make sure tile t1 is still working
+    spyUpdate1.mockClear();
+    sharedModel.setValue("something else");
+    expect(spyUpdate1).toHaveBeenCalled();
+  });
+
+  it("handles a loading a shared model entry with a broken reference", () => {
+    const doc = DocumentContentModel.create({
+      sharedModelMap: {
+        "sm1": {
+          sharedModel: {
+            id: "sm1",
+            type: "TestSharedModel"
+          },
+          tiles: [ "t1", "t2" ]
+        }
+      },
+      tileMap: {
+        "t1": {
+          id: "t1",
+          content: {
+            type: "TestTile",
+          },
+        },
+      }
+    });
+
+    // Make sure this is working normally
+    const tileContent1 = doc.tileMap.get("t1")?.content;
+    assertIsDefined(tileContent1);
+    const spyUpdate1 = jest.spyOn(tileContent1, 'updateAfterSharedModelChanges');
+
+    const manager = createSharedModelDocumentManager();
+    manager.setDocument(doc);
+
+    expect(spyUpdate1).not.toHaveBeenCalled();
+
+    const sharedModelEntry = doc.sharedModelMap.get("sm1");
+    expect(sharedModelEntry).toBeDefined();
+    const sharedModel = sharedModelEntry?.sharedModel as Instance<typeof TestSharedModel>;
+    expect(sharedModel).toBeDefined();
+    sharedModel.setValue("something");
+
+    expect(spyUpdate1).toHaveBeenCalled();
+  });
 });
 
