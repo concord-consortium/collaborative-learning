@@ -3,9 +3,7 @@ import jwt_decode from "jwt-decode";
 import superagent from "superagent";
 import { AppMode } from "../models/stores/store-types";
 import { QueryParams, urlParams as pageUrlParams } from "../utilities/url-params";
-// import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
-import { NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
-
+import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
 import { AppConfigModelType } from "../models/stores/app-config-model";
 import { IUserPortalOffering } from "../models/stores/user";
 import { UserType } from "../models/stores/user-types";
@@ -515,25 +513,37 @@ export const createFakeAuthentication = (options: CreateFakeAuthenticationOption
                     : undefined;
   const offeringId = createOfferingIdFromProblem(unitCode, problemOrdinal);
   const authenticatedUser = createFakeUser({appMode, classId, userType, network, userId, offeringId});
-  console.log("authenticatedUser:", authenticatedUser);
   const classInfo: ClassInfo = {
     name: authenticatedUser.className,
     classHash: authenticatedUser.classHash,
     students: [],
     teachers: [],
   };
-  // for (let i = 1; i <= NUM_FAKE_STUDENTS; i++) {
+  //This allows for student groups to be remembered when switching tabs or in cypress tests
+  if (parseInt(userId,10) <= NUM_FAKE_STUDENTS) {
+    for (let i = 1; i <= NUM_FAKE_STUDENTS; i++) {
+      classInfo.students.push(
+        createFakeUser({
+          appMode,
+          classId,
+          userType: "student",
+          userId: `${i}`,
+          offeringId
+        }) as StudentUser
+      );
+    }
+  } else { // This allows for the random student user
     classInfo.students.push(
       createFakeUser({
         appMode,
         classId,
         userType: "student",
-        // userId: `${i}`,
         userId: `${userId}`,
         offeringId
       }) as StudentUser
     );
-  // }
+  }
+
   for (let i = 1; i <= NUM_FAKE_TEACHERS; i++) {
     classInfo.teachers.push(
       createFakeUser({

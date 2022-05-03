@@ -4,7 +4,7 @@ import ClueHeader from '../../../../support/elements/clue/cHeader';
 const header = new Header;
 const clueHeader = new ClueHeader;
 
-describe.skip('Test student join a group', function(){
+describe('Test student join a group', function(){
     let student1 = '20',
         student2 = '21',
         student3 = '22',
