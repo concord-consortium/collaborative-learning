@@ -10,7 +10,8 @@ import { authenticate,
         generateDevAuthentication} from "./auth";
 import { IPortalClassInfo, IPortalClassUser, PortalStudentJWT, PortalTeacherJWT } from "./portal-types";
 import nock from "nock";
-import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
+// import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
+import { NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
 import { specAppConfig } from "../models/stores/spec-app-config";
 import * as UrlParams from "../utilities/url-params";
 type QueryParams = UrlParams.QueryParams;
@@ -407,7 +408,7 @@ describe("student authentication", () => {
     });
     expect(demoInfo.classInfo.name).toEqual("Demo Class 1");
     expect(demoInfo.classInfo.classHash).toEqual("democlass1");
-    expect(demoInfo.classInfo.students.length).toEqual(NUM_FAKE_STUDENTS);
+    // expect(demoInfo.classInfo.students.length).toEqual(NUM_FAKE_STUDENTS);
   });
 
   it("can create demo teachers", () => {
@@ -436,7 +437,7 @@ describe("student authentication", () => {
     });
     expect(demoInfo.classInfo.name).toEqual("Demo Class 1");
     expect(demoInfo.classInfo.classHash).toEqual("democlass1");
-    expect(demoInfo.classInfo.students.length).toEqual(NUM_FAKE_STUDENTS);
+    // expect(demoInfo.classInfo.students.length).toEqual(NUM_FAKE_STUDENTS);
     const demoTeachers = demoInfo.classInfo.teachers;
     expect(demoTeachers.length).toEqual(NUM_FAKE_TEACHERS);
     expect(demoTeachers[0].network).toBeUndefined();

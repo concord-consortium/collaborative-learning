@@ -3,7 +3,9 @@ import jwt_decode from "jwt-decode";
 import superagent from "superagent";
 import { AppMode } from "../models/stores/store-types";
 import { QueryParams, urlParams as pageUrlParams } from "../utilities/url-params";
-import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
+// import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
+import { NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
+
 import { AppConfigModelType } from "../models/stores/app-config-model";
 import { IUserPortalOffering } from "../models/stores/user";
 import { UserType } from "../models/stores/user-types";
@@ -11,6 +13,7 @@ import { getErrorMessage } from "../utilities/super-agent-helpers";
 import { getPortalOfferings, getPortalClassOfferings,  getProblemIdForAuthenticatedUser } from "./portal-api";
 import { PortalJWT, PortalFirebaseJWT, IPortalClassInfo } from "./portal-types";
 import { Logger, LogEventName } from "../lib/logger";
+import { uniqueId } from "../utilities/js-utils";
 
 export const PORTAL_JWT_URL_SUFFIX = "api/v1/jwt/portal";
 export const FIREBASE_JWT_URL_SUFFIX = "api/v1/jwt/firebase";
@@ -243,7 +246,6 @@ export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, ur
     let basePortalUrl: string;
 
     let {fakeClass, fakeUser} = urlParams;
-
     // handle preview launch from portal
     if (urlParams.domain && urlParams.domain_uid && !bearerToken) {
       appMode = "demo";
@@ -255,10 +257,27 @@ export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, ur
       if (!fakeClass || !fakeUser) {
         return reject("Missing fakeClass or fakeUser parameter for demo!");
       }
-      const [userType, userId] = fakeUser.split(":");
+      const userType = fakeUser.split(":")[0];
+      let userId = fakeUser.split(":")[1];
+
       if (((userType !== "student") && (userType !== "teacher")) || !userId) {
         return reject("fakeUser must be in the form of student:<id> or teacher:<id>");
       }
+
+      if ((userId === "random")) {
+        const url = window.location.toString();
+        const title = document.title;
+        const randomStudentId = uniqueId();
+        fakeUser = `student:${randomStudentId}`;
+        userId = randomStudentId;
+        const newUrl = url.replace(/student:random/, fakeUser);
+        if (window.history.state) {
+          window.history.pushState(title, title, newUrl);
+        } else {
+          window.history.replaceState(title, title, newUrl);
+        }
+      }
+
       // respect `network` url parameter in demo/qa modes
       const networkProps = urlParams.network
                             ? { network: urlParams.network, networks: [urlParams.network] }
@@ -496,23 +515,25 @@ export const createFakeAuthentication = (options: CreateFakeAuthenticationOption
                     : undefined;
   const offeringId = createOfferingIdFromProblem(unitCode, problemOrdinal);
   const authenticatedUser = createFakeUser({appMode, classId, userType, network, userId, offeringId});
+  console.log("authenticatedUser:", authenticatedUser);
   const classInfo: ClassInfo = {
     name: authenticatedUser.className,
     classHash: authenticatedUser.classHash,
     students: [],
     teachers: [],
   };
-  for (let i = 1; i <= NUM_FAKE_STUDENTS; i++) {
+  // for (let i = 1; i <= NUM_FAKE_STUDENTS; i++) {
     classInfo.students.push(
       createFakeUser({
         appMode,
         classId,
         userType: "student",
-        userId: `${i}`,
+        // userId: `${i}`,
+        userId: `${userId}`,
         offeringId
       }) as StudentUser
     );
-  }
+  // }
   for (let i = 1; i <= NUM_FAKE_TEACHERS; i++) {
     classInfo.teachers.push(
       createFakeUser({

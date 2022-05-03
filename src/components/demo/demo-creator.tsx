@@ -7,8 +7,8 @@ import { parseUrl, stringify } from "query-string";
 
 import "./demo-creator.sass";
 
-export const NUM_FAKE_CLASSES = 9;
-export const NUM_FAKE_STUDENTS = 99;
+export const NUM_FAKE_CLASSES = 100;
+// export const NUM_FAKE_STUDENTS = 99;
 export const NUM_FAKE_STUDENTS_VISIBLE = 9;
 export const NUM_FAKE_TEACHERS = 3;
 
