@@ -5,11 +5,11 @@ const clueCanvas = new ClueCanvas;
 const textToolTile = new TextToolTile;
 
 const baseUrl = `${Cypress.config("baseUrl")}`;
-context('Test group functionalities', function(){
+context.skip('Test group functionalities', function(){
     before(()=>{
         cy.clearQAData('all');
     });
-      
+
     let qaClass = 10,
         qaGroup = 10,
         problem = 3.3,

@@ -4,7 +4,7 @@ import ClueHeader from '../../../../support/elements/clue/cHeader';
 const header = new Header;
 const clueHeader = new ClueHeader;
 
-describe('Test student join a group', function(){
+describe.skip('Test student join a group', function(){
     let student1 = '20',
         student2 = '21',
         student3 = '22',
@@ -19,7 +19,7 @@ describe('Test student join a group', function(){
     before(() => {
         cy.clearQAData('all');
     });
-      
+
     function setup(student, alreadyInGroup=false){
         cy.visit('?appMode=qa&fakeClass='+fakeClass+'&fakeUser=student:'+student+'&problem='+problem);
         if (alreadyInGroup) {
