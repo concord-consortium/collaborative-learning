@@ -60,7 +60,7 @@ module.exports = {
       "no-var": "error",
       "no-whitespace-before-property": "error",
       "object-shorthand": "error",
-      "prefer-const": "error",
+      "prefer-const": ["error", {"destructuring": "all"}],
       "prefer-object-spread": "error",
       "prefer-regex-literals": "error",
       "prefer-rest-params": "error",

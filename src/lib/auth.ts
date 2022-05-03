@@ -255,8 +255,7 @@ export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, ur
       if (!fakeClass || !fakeUser) {
         return reject("Missing fakeClass or fakeUser parameter for demo!");
       }
-      const userType = fakeUser.split(":")[0];
-      let userId = fakeUser.split(":")[1];
+      let [userType, userId] = fakeUser.split(":");
 
       if (((userType !== "student") && (userType !== "teacher")) || !userId) {
         return reject("fakeUser must be in the form of student:<id> or teacher:<id>");
@@ -269,11 +268,7 @@ export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, ur
         fakeUser = `student:${randomStudentId}`;
         userId = randomStudentId;
         const newUrl = url.replace(/student:random/, fakeUser);
-        if (window.history.state) {
-          window.history.pushState(title, title, newUrl);
-        } else {
-          window.history.replaceState(title, title, newUrl);
-        }
+        window.history.replaceState(title, title, newUrl);
       }
 
       // respect `network` url parameter in demo/qa modes
@@ -519,26 +514,14 @@ export const createFakeAuthentication = (options: CreateFakeAuthenticationOption
     students: [],
     teachers: [],
   };
-  //This allows for student groups to be remembered when switching tabs or in cypress tests
-  if (parseInt(userId,10) <= NUM_FAKE_STUDENTS) {
-    for (let i = 1; i <= NUM_FAKE_STUDENTS; i++) {
-      classInfo.students.push(
-        createFakeUser({
-          appMode,
-          classId,
-          userType: "student",
-          userId: `${i}`,
-          offeringId
-        }) as StudentUser
-      );
-    }
-  } else { // This allows for the random student user
+  
+  for (let i = 1; i <= NUM_FAKE_STUDENTS; i++) {
     classInfo.students.push(
       createFakeUser({
         appMode,
         classId,
         userType: "student",
-        userId: `${userId}`,
+        userId: `${i}`,
         offeringId
       }) as StudentUser
     );
