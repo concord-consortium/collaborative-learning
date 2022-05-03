@@ -407,7 +407,7 @@ describe("student authentication", () => {
     });
     expect(demoInfo.classInfo.name).toEqual("Demo Class 1");
     expect(demoInfo.classInfo.classHash).toEqual("democlass1");
-    expect(demoInfo.classInfo.students.length).toEqual(NUM_FAKE_STUDENTS);
+    expect(demoInfo.classInfo.students.length).toEqual(NUM_FAKE_STUDENTS+1);
   });
 
   it("can create demo teachers", () => {
@@ -436,7 +436,7 @@ describe("student authentication", () => {
     });
     expect(demoInfo.classInfo.name).toEqual("Demo Class 1");
     expect(demoInfo.classInfo.classHash).toEqual("democlass1");
-    expect(demoInfo.classInfo.students.length).toEqual(NUM_FAKE_STUDENTS);
+    expect(demoInfo.classInfo.students.length).toEqual(NUM_FAKE_STUDENTS+1);
     const demoTeachers = demoInfo.classInfo.teachers;
     expect(demoTeachers.length).toEqual(NUM_FAKE_TEACHERS);
     expect(demoTeachers[0].network).toBeUndefined();
