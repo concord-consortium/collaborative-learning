@@ -514,7 +514,16 @@ export const createFakeAuthentication = (options: CreateFakeAuthenticationOption
     students: [],
     teachers: [],
   };
-  
+  // Add the random student to the class first and then fill the class
+  classInfo.students.push(
+    createFakeUser({
+      appMode,
+      classId,
+      userType: "student",
+      userId: `${userId}`,
+      offeringId
+    }) as StudentUser
+  );
   for (let i = 1; i <= NUM_FAKE_STUDENTS; i++) {
     classInfo.students.push(
       createFakeUser({
