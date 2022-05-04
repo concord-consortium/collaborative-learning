@@ -93,16 +93,14 @@ export const TextContentModel = ToolContentModel
       self.editor = editor;
     }
   }))
-  .actions(self => {
-    return {
-      updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
-        getAllTextPluginInfos().forEach(pluginInfo => {
-          pluginInfo?.updateTextContentAfterSharedModelChanges?.(
-            self, sharedModel
-          ); 
-        });
-      }
-    };
-  });
+  .actions(self => ({
+    updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
+      getAllTextPluginInfos().forEach(pluginInfo => {
+        pluginInfo?.updateTextContentAfterSharedModelChanges?.(
+          self, sharedModel
+        ); 
+      });
+    }
+  }));
 
 export type TextContentModelType = Instance<typeof TextContentModel>;
