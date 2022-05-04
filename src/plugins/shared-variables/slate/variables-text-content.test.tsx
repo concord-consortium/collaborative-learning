@@ -1,5 +1,5 @@
 import React from "react";
-import { IAnyStateTreeNode, IAnyType, types, castToSnapshot, onSnapshot } from "mobx-state-tree";
+import { IAnyStateTreeNode, IAnyType, types, castToSnapshot } from "mobx-state-tree";
 import { Editor, SlateEditor } from "@concord-consortium/slate-editor";
 import { render } from "@testing-library/react";
 import { ISharedModelManager, SharedModelType } from "../../../models/tools/shared-model";

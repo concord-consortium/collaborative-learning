@@ -1,5 +1,5 @@
-import { textToSlate } from "@concord-consortium/slate-editor";
-import { getAllTextPluginInfos, getTextPluginIds, getTextPluginInfo, getTextPluginInstances, registerTextPluginInfo } from "./text-plugin-info";
+import { getAllTextPluginInfos, getTextPluginIds, getTextPluginInfo, 
+  getTextPluginInstances, registerTextPluginInfo } from "./text-plugin-info";
 
 const testTextPluginInstance = {from: "testTextPluginInfo"};
 const testTextPluginInfo = {

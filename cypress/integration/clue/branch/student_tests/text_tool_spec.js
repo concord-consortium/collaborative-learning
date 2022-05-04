@@ -46,6 +46,11 @@ context('Text tool tile functionalities', function(){
         textToolTile.deleteText('{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}');
         textToolTile.getTextTile().last().should('not.contain', 'delete');
     });
+    it('has a toolbar that can be used', function(){
+        textToolTile.clickToolbarTool("Bold");
+        textToolTile.enterText('this should be bold');
+        textToolTile.getTextEditor().last().should('have.descendants', 'strong');
+    });
     it('delete text tile',()=>{
         clueCanvas.deleteTile('text');
         textToolTile.getTextTile().should('not.exist');
