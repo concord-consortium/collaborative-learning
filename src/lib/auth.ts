@@ -525,15 +525,17 @@ export const createFakeAuthentication = (options: CreateFakeAuthenticationOption
     }) as StudentUser
   );
   for (let i = 1; i <= NUM_FAKE_STUDENTS; i++) {
-    classInfo.students.push(
-      createFakeUser({
-        appMode,
-        classId,
-        userType: "student",
-        userId: `${i}`,
-        offeringId
-      }) as StudentUser
-    );
+    if (parseInt(userId, 10) !== i) {
+      classInfo.students.push(
+        createFakeUser({
+          appMode,
+          classId,
+          userType: "student",
+          userId: `${i}`,
+          offeringId
+        }) as StudentUser
+      );
+    }
   }
 
   for (let i = 1; i <= NUM_FAKE_TEACHERS; i++) {
