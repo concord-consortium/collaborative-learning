@@ -71,6 +71,18 @@ context('Text tool tile functionalities', function(){
         textToolTile.enterText('this should be underline');
         textToolTile.getTextEditor().last().should('have.descendants', 'sup');
         textToolTile.clickToolbarTool("Superscript");
+
+        textToolTile.enterText('{enter}');
+        textToolTile.clickToolbarTool("Numbered List");
+        textToolTile.enterText('this should be in a numbered list{enter}');
+        textToolTile.getTextEditor().last().should('have.descendants', 'ol');
+        textToolTile.clickToolbarTool("Numbered List");
+
+        textToolTile.enterText('{enter}');
+        textToolTile.clickToolbarTool("Bulleted List");
+        textToolTile.enterText('this should be in a bulleted list{enter}');
+        textToolTile.getTextEditor().last().should('have.descendants', 'ul');
+        textToolTile.clickToolbarTool("Bulleted List");
     });
     it('delete text tile',()=>{
         clueCanvas.deleteTile('text');
