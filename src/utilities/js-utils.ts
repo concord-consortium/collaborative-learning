@@ -131,3 +131,13 @@ export function formatTimeZoneOffset(offset: number) {
           pad2(Math.floor(posOffset / 60)) +
           pad2(posOffset % 60);
 }
+/*
+ * insert
+ *
+ * inserts one array into another at index position
+ */
+export const insert = (arr: any[], index:number, insertArr: any[]) => [
+  ...arr.slice(0, index),
+  ...insertArr,
+  ...arr.slice(index)
+];

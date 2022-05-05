@@ -2,7 +2,7 @@ import classNames from "classnames";
 import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
 import {
-  DeleteButton, FillColorButton, StampModeButton, StrokeColorButton, SvgToolModeButton
+  DeleteButton, FillColorButton, StampModeButton, StrokeColorButton, SvgToolModeButton, VariableButton
 } from "./drawing-toolbar-buttons";
 import { StampsPalette } from "./stamps-palette";
 import { StrokeColorPalette } from "./stroke-color-palette";
@@ -14,6 +14,8 @@ import { IRegisterToolApiProps } from "../tool-tile";
 import { DrawingContentModelType } from "../../../models/tools/drawing/drawing-content";
 import { ToolbarModalButton, ToolbarSettings } from "../../../models/tools/drawing/drawing-types";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
+import { useSettingFromStores } from "../../../hooks/use-stores";
+import { insert } from "../../../utilities/js-utils";
 
 interface IPaletteState {
   showStamps: boolean;
@@ -26,9 +28,13 @@ const kClosedPalettesState = { showStamps: false, showStroke: false, showFill: f
 interface IProps extends IFloatingToolbarProps, IRegisterToolApiProps {
   model: ToolTileModelType;
 }
+
+const defaultButtons = ["select", "line", "vector", "rectangle", "ellipse", "delete"];
 export const ToolbarView: React.FC<IProps> = (
               { documentContent, model, onIsEnabled, ...others }: IProps) => {
   const drawingContent = model.content as DrawingContentModelType;
+  const toolbarButtonSetting = useSettingFromStores("tools", "drawing") as unknown as string[];
+  const toolbarButtons = insert(defaultButtons, -1,toolbarButtonSetting);
   const { stamps, currentStamp, currentStampIndex } = drawingContent;
   const stampCount = stamps.length;
   const [paletteState, setPaletteState] = useState<IPaletteState>(kClosedPalettesState);
@@ -102,6 +108,10 @@ export const ToolbarView: React.FC<IProps> = (
     drawingContent.deleteSelectedObjects();
   };
 
+  const handleVariableButton = () => {
+    alert("open a variable dialog");
+  };
+
   const handleStrokeColorChange = (color: string) => {
     isEnabled && drawingContent.setStroke(color);
     clearPaletteState();
@@ -111,30 +121,39 @@ export const ToolbarView: React.FC<IProps> = (
     clearPaletteState();
   };
 
+  const buttonDefs: Record<string,any> = {
+    "select": <SvgToolModeButton key="select" {...modalButtonProps("select", {})}
+                                  title="Select" onSetSelectedButton={handleSetSelectedButton} />,
+    "line": <SvgToolModeButton key="line" {...modalButtonProps("line", { fill: drawingContent.stroke })}
+                                  title="Freehand" onSetSelectedButton={handleSetSelectedButton} />,
+    "vector": <SvgToolModeButton key="vector" {...modalButtonProps("vector")}
+                                    title="Line" onSetSelectedButton={handleSetSelectedButton} />,
+    "rectangle": <SvgToolModeButton key="rectangle" {...modalButtonProps("rectangle")} title="Rectangle"
+                                      onSetSelectedButton={handleSetSelectedButton} />,
+    "ellipse": <SvgToolModeButton key="ellipse" {...modalButtonProps("ellipse")} title="Ellipse"
+                                    onSetSelectedButton={handleSetSelectedButton} />,
+    "stamp": currentStamp
+                ? <StampModeButton key="stamp" stamp={currentStamp} stampCount={stampCount} title="Stamp"
+                          selected={drawingContent.isSelectedButton("stamp")}
+                          onClick={handleStampsButtonClick} onTouchHold={handleStampsButtonTouchHold} />
+                : null
+              ,
+    "stroke-color": <StrokeColorButton key="stroke" settings={drawingContent.toolbarSettings}
+                                        onClick={() => handleToggleShowStrokeColorPalette()} />,
+    "fill-color": <FillColorButton key="fill" settings={drawingContent.toolbarSettings}
+                                    onClick={() => handleToggleShowFillColorPalette()} />,
+    "delete": <DeleteButton key="delete" disabled={!drawingContent.hasSelectedObjects} onClick={handleDeleteButton} />,
+    "variable": <VariableButton key="variable" onClick={handleVariableButton} />,
+  };
+
   const toolbarClasses = classNames("drawing-tool-toolbar", { disabled: !isEnabled, flip: flipPalettes });
   return documentContent
     ? ReactDOM.createPortal(
         <div className={toolbarClasses} style={location}>
           <div className="drawing-tool-buttons">
-            <SvgToolModeButton {...modalButtonProps("select", {})}
-                                title="Select" onSetSelectedButton={handleSetSelectedButton} />
-            <SvgToolModeButton {...modalButtonProps("line", { fill: drawingContent.stroke })}
-                                title="Freehand" onSetSelectedButton={handleSetSelectedButton} />
-            <SvgToolModeButton {...modalButtonProps("vector")}
-                                title="Line" onSetSelectedButton={handleSetSelectedButton} />
-            <SvgToolModeButton {...modalButtonProps("rectangle")} title="Rectangle"
-                                onSetSelectedButton={handleSetSelectedButton} />
-            <SvgToolModeButton {...modalButtonProps("ellipse")} title="Ellipse"
-                                onSetSelectedButton={handleSetSelectedButton} />
-            {currentStamp &&
-              <StampModeButton stamp={currentStamp} stampCount={stampCount} title="Stamp"
-                                selected={drawingContent.isSelectedButton("stamp")}
-                                onClick={handleStampsButtonClick} onTouchHold={handleStampsButtonTouchHold} />}
-            <StrokeColorButton settings={drawingContent.toolbarSettings}
-                  onClick={() => handleToggleShowStrokeColorPalette()} />
-            <FillColorButton settings={drawingContent.toolbarSettings}
-                  onClick={() => handleToggleShowFillColorPalette()} />
-            <DeleteButton disabled={!drawingContent.hasSelectedObjects} onClick={handleDeleteButton} />
+            {toolbarButtons.map(button => {
+              return buttonDefs[button];
+            })}
           </div>
           {paletteState.showStroke &&
             <StrokeColorPalette selectedColor={drawingContent.stroke} onSelectColor={handleStrokeColorChange} />}
