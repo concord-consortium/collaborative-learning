@@ -4,6 +4,7 @@ import { observer, inject } from "mobx-react";
 import {
   Editor, EditorRange, EditorValue, HtmlSerializablePlugin, SlateEditor
 } from "@concord-consortium/slate-editor";
+import "@concord-consortium/slate-editor/dist/index.css";
 
 import { BaseComponent } from "../base";
 import { debouncedSelectTile } from "../../models/stores/ui";
