@@ -44,7 +44,9 @@ context('Shared Variables', function () {
   it('can add a duplicate variable chip to the text tool', function() {
     // Note that when the chip is focused you can't type so we have to use 
     // rightArrow to move off of the chip
-    textToolTile.enterText('{rightArrow}Second Chip:');
+    // We aren't using textToolTile.enterText because that calls focus() which seems
+    // to mess up the cursor position in Electron
+    textToolTile.getTextEditor().last().type('{rightArrow}Second Chip:');
     textToolTile.getTextTile().last().should('contain', 'Second Chip');
     textToolTile.clickToolbarTool("Variables");
     cy.get(".ReactModalPortal").within(() => {
@@ -56,9 +58,13 @@ context('Shared Variables', function () {
   });
 
   it('can pre populate the name field based on the selected text', function() {
+    // textToolTile.enterText uses `focus` which messes up the cursor position in Electron.
+    // So instead we click on the text tile, to do position the cursor and cause the focus event. 
+    textToolTile.getTextTile().last().find('.ccrte-variable:contains("Var A")').last().click();
+
     // Note that when the chip is focused you can't type so we have to use 
     // rightArrow to move off of the chip
-    textToolTile.enterText('{rightArrow} VarC{shift}{leftArrow}{leftArrow}{leftArrow}{leftArrow}');
+    textToolTile.getTextEditor().last().type('{rightArrow} VarC{shift}{leftArrow}{leftArrow}{leftArrow}{leftArrow}');
 
     textToolTile.clickToolbarTool("Variables");
     cy.get(".ReactModalPortal").within(() => {
@@ -67,7 +73,7 @@ context('Shared Variables', function () {
     });
     // Make sure the text tile now has a chips with VarC
     textToolTile.getTextTile().last().find('.ccrte-variable:contains("VarC")').should('exist');
-    textToolTile.enterText('{rightArrow} After chip');
+    textToolTile.getTextEditor().last().type('{rightArrow} After chip');
   });
 
   it('can edit a variable by double clicking', function() {
