@@ -50,6 +50,27 @@ context('Text tool tile functionalities', function(){
         textToolTile.clickToolbarTool("Bold");
         textToolTile.enterText('this should be bold');
         textToolTile.getTextEditor().last().should('have.descendants', 'strong');
+        textToolTile.clickToolbarTool("Bold");
+
+        textToolTile.clickToolbarTool("Italic");
+        textToolTile.enterText('this should be italics');
+        textToolTile.getTextEditor().last().should('have.descendants', 'em');
+        textToolTile.clickToolbarTool("Italic");
+
+        textToolTile.clickToolbarTool("Underline");
+        textToolTile.enterText('this should be underline');
+        textToolTile.getTextEditor().last().should('have.descendants', 'u');
+        textToolTile.clickToolbarTool("Underline");
+
+        textToolTile.clickToolbarTool("Subscript");
+        textToolTile.enterText('this should be subscript');
+        textToolTile.getTextEditor().last().should('have.descendants', 'sub');
+        textToolTile.clickToolbarTool("Subscript");
+
+        textToolTile.clickToolbarTool("Superscript");
+        textToolTile.enterText('this should be underline');
+        textToolTile.getTextEditor().last().should('have.descendants', 'sup');
+        textToolTile.clickToolbarTool("Superscript");
     });
     it('delete text tile',()=>{
         clueCanvas.deleteTile('text');
