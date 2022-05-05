@@ -105,6 +105,11 @@ function getDialogValuesFromNode(editor: Editor, variables: VariableType[], node
 
 const kSpanTag = "span";
 
+function getNodeVariable(variables: VariableType[], node?: Inline) {
+  const reference = node?.data?.get("reference");
+  return variables.find(v => v.id === reference);
+}
+
 export function VariablesPlugin(textTile: TextContentModelType): HtmlSerializablePlugin {
   return {
     deserialize(el: any, next: any) {
@@ -142,13 +147,18 @@ export function VariablesPlugin(textTile: TextContentModelType): HtmlSerializabl
 
         if (!dialogController) {
           const variable = variables[0];
-          return editor.command("addVariable", {reference: variable.id}, node);
+          return editor.command("addVariable", {reference: variable.id});
         }
+
+        // If there is a selected node we do not allow the user to change this node
+        // so the options only have this variable
+        const nodeVariable = getNodeVariable(variables, node);
+        const variableOptions = nodeVariable ? [nodeVariable] : variables;
 
         const rows: IRow[] = [
           {
             name: "reference", type: "select", label: "Reference existing variable:",
-            options: variables.map(v => ({ value: v.id, label: v.name || "no name" }))
+            options: variableOptions.map(v => ({ value: v.id, label: v.name || "no name" }))
           },
           { name: "or", type: "label", label: "or" },
           { name: "create", type: "label", label: "Create new variable:" },
@@ -190,6 +200,15 @@ export function VariablesPlugin(textTile: TextContentModelType): HtmlSerializabl
               const variable = variables.find(v => v.id === reference);
               variable?.setName(values.name);
               variable?.setValue(parseVariableValue(values.value));
+
+              // If there is a node it means they are editing an existing chip
+              // In this case we do not let them change the variable node is referencing
+              // Trying to change the reference was breaking slate
+              // So we don't need to "add" the chip because it is already there and
+              // pointing at this variable
+              if (node) {
+                return;
+              }
             }
             else {
               const sharedModel = getOrFindSharedModel(textTile);
@@ -206,27 +225,15 @@ export function VariablesPlugin(textTile: TextContentModelType): HtmlSerializabl
                 reference = variable.id;
               }
             }
-            return _editor.command("addVariable", {reference}, node);
+            return _editor.command("addVariable", {reference});
           }
         });
         return editor;
       },
-      addVariable(editor: Editor, values: IFieldValues, node?: Inline) {
+      addVariable(editor: Editor, values: IFieldValues) {
         const { reference } = values;
         if (!editor || !reference ) return editor;
-        if (node) {
-          // If there is a node it means the user double clicked on a chip to
-          // edit it. So we select that existing node in a way that inserting
-          // something new will replace it.
-          //
-          // For some reason the range of the chip node is not really its full
-          // range it is necessary to move the focus forward one to select it in
-          // a way to be able to delete it. You can emulate this behavior
-          // manually. If you click a chip and then type a character nothing
-          // happens. But if you click a chip and hit shift+right_arrow then no
-          // more text is selected, but typing a char replaces the chip.
-          editor.moveToRangeOfNode(node).moveFocusForward(1);
-        } else if (editor.value.selection) {
+        if (editor.value.selection) {
           // The documentation for moveToEnd says it will collapse the selection
           // to the end point of the current selection. This is why insertText
           // does not clear the text of the current selection.
