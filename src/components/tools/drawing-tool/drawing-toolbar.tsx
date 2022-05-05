@@ -16,6 +16,7 @@ import { ToolbarModalButton, ToolbarSettings } from "../../../models/tools/drawi
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { useSettingFromStores } from "../../../hooks/use-stores";
 import { insert } from "../../../utilities/js-utils";
+import { useVariableDialog } from "./use-variable-dialog";
 
 interface IPaletteState {
   showStamps: boolean;
@@ -34,7 +35,7 @@ export const ToolbarView: React.FC<IProps> = (
               { documentContent, model, onIsEnabled, ...others }: IProps) => {
   const drawingContent = model.content as DrawingContentModelType;
   const toolbarButtonSetting = useSettingFromStores("tools", "drawing") as unknown as string[];
-  const toolbarButtons = insert(defaultButtons, -1,toolbarButtonSetting);
+  const toolbarButtons = toolbarButtonSetting ? insert(defaultButtons, -1,toolbarButtonSetting) : defaultButtons;
   const { stamps, currentStamp, currentStampIndex } = drawingContent;
   const stampCount = stamps.length;
   const [paletteState, setPaletteState] = useState<IPaletteState>(kClosedPalettesState);
@@ -64,6 +65,7 @@ export const ToolbarView: React.FC<IProps> = (
     const { selectedButton, toolbarSettings } = drawingContent;
     return { modalButton: type, selected: selectedButton === type, settings: settings || toolbarSettings };
   };
+  const [showVariableDialog] = useVariableDialog();
 
   const handleSetSelectedButton = (modalButton: ToolbarModalButton) => {
     drawingContent.setSelectedButton(modalButton);
@@ -109,7 +111,7 @@ export const ToolbarView: React.FC<IProps> = (
   };
 
   const handleVariableButton = () => {
-    alert("open a variable dialog");
+    showVariableDialog();
   };
 
   const handleStrokeColorChange = (color: string) => {
