@@ -71,5 +71,16 @@ export interface ImageDrawingObjectData {
   height: number;
 }
 
+export interface VariableChipObjectData {
+  type: "variable";
+  id?: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  name: string;
+  value: string;
+}
+
 export type DrawingObjectDataType = LineDrawingObjectData | VectorDrawingObjectData
-  | RectangleDrawingObjectData | EllipseDrawingObjectData | ImageDrawingObjectData;
+  | RectangleDrawingObjectData | EllipseDrawingObjectData | ImageDrawingObjectData | VariableChipObjectData;

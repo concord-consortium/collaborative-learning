@@ -3,7 +3,8 @@ import { extractDragTileType, kDragTileContent } from "../tool-tile";
 import { computeStrokeDashArray, DrawingContentModelType } from "../../../models/tools/drawing/drawing-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DrawingObjectDataType, LineDrawingObjectData, VectorDrawingObjectData, RectangleDrawingObjectData,
-  EllipseDrawingObjectData, Point, ImageDrawingObjectData} from "../../../models/tools/drawing/drawing-objects";
+  EllipseDrawingObjectData, Point, ImageDrawingObjectData,
+  VariableChipObjectData} from "../../../models/tools/drawing/drawing-objects";
 import {
   DefaultToolbarSettings, DrawingToolChange, DrawingToolDeletion, DrawingToolMove, DrawingToolUpdate, ToolbarSettings
 } from "../../../models/tools/drawing/drawing-types";
@@ -225,8 +226,32 @@ class ImageObject extends DrawingObject {
   }
 }
 
+class VariableObject extends DrawingObject {
+  declare model: VariableChipObjectData;
+
+  constructor(model: VariableChipObjectData) {
+    super(model);
+  }
+
+  public getBoundingBox() {
+    const {x, y, width, height} = this.model;
+    const nw: Point = {x, y};
+    const se: Point = {x: x + width, y: y + height};
+    return {nw, se};
+  }
+
+  public render(options: DrawingObjectOptions): JSX.Element|null {
+    const {x, y, width, height} = this.model;
+    const {id} = options;
+    // const {id, handleHover} = options;
+    const varChipStyle = {top: y, left: x, width, height};
+    return <div id={id} className="variable-chip" style={varChipStyle}>pool=15</div>;
+      // <div className="">{variableOptions.name}={variableOptions.value}</div>
+  }
+}
+
 type DrawableObject = LineObject | VectorObject | RectangleObject | EllipseObject;
-type DrawingObjectUnion = DrawableObject | ImageObject;
+type DrawingObjectUnion = DrawableObject | ImageObject | VariableObject;
 
 /**  ======= Drawing Tools ======= */
 
@@ -1117,6 +1142,9 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         }
         break;
       }
+      case "variable":
+        drawingObject = new VariableObject(data);
+        break;
     }
     if (drawingObject?.model.id) {
       const objectId = drawingObject.model.id;

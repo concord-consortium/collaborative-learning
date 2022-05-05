@@ -65,7 +65,7 @@ export const ToolbarView: React.FC<IProps> = (
     const { selectedButton, toolbarSettings } = drawingContent;
     return { modalButton: type, selected: selectedButton === type, settings: settings || toolbarSettings };
   };
-  const [showVariableDialog] = useVariableDialog();
+  const [showVariableDialog] = useVariableDialog(drawingContent);
 
   const handleSetSelectedButton = (modalButton: ToolbarModalButton) => {
     drawingContent.setSelectedButton(modalButton);
