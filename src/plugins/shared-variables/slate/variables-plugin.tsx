@@ -92,7 +92,6 @@ function getDialogValuesFromNode(editor: Editor, variables: VariableType[], node
   } else if (highlightedText !== "") {
     const matchingVariable = variables.find(v => v.name === highlightedText);
     if (matchingVariable) {
-      // FIXME: We are not setting the name and value fields in the form.
       values.reference = matchingVariable.id;
       values.name = matchingVariable.name || "";
       values.value = variableValueToString(matchingVariable.value);
@@ -142,12 +141,13 @@ export function VariablesPlugin(textTile: TextContentModelType): HtmlSerializabl
       }
     },
     commands: {
-      configureVariable(editor: Editor, dialogController: IDialogController | null, node?: Inline) {
+      configureVariable(editor: Editor, dialogController: IDialogController | null, node?: Inline): Editor {
         const variables = getVariables(textTile);
 
         if (!dialogController) {
           const variable = variables[0];
-          return editor.command("addVariable", {reference: variable.id});
+          // TODO when we've upgraded Slate see if we can clean up this `as unknown as Editor`;
+          return editor.command("addVariable", {reference: variable.id}) as unknown as Editor;
         }
 
         // If there is a selected node we do not allow the user to change this node
@@ -167,7 +167,6 @@ export function VariablesPlugin(textTile: TextContentModelType): HtmlSerializabl
             { name: "value", type: "input", label: "Value:" }
           ]
         ];
-        console.log("rows", rows);
 
         const _reference = getReferenceFromNode(node);
         dialogController.display({
@@ -213,7 +212,6 @@ export function VariablesPlugin(textTile: TextContentModelType): HtmlSerializabl
             else {
               const sharedModel = getOrFindSharedModel(textTile);
               if (!sharedModel) {
-                // TODO: can we just return void here?
                 return;
               } else {
                 let value = parseVariableValue(values.value);

@@ -58,11 +58,12 @@ const createEditor = (textContent: TextContentModelType) => {
     onEditorRef={(ref?: Editor) => { editorRef = ref; }} 
     plugins={[variablesPlugin]} 
   />);
-  return editorRef;
+  return editorRef as Editor;
 };
 
 const getValueParagraphNodes = (editor: Editor) => {
-  return editor.value.toJSON().document.nodes[0].nodes;
+  // for some reason the types don't match the structure returned by toJSON()
+  return (editor.value.toJSON()?.document?.nodes?.[0] as any)?.nodes || [];
 };
 
 describe("VariablesTextContent", () => {

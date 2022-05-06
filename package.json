@@ -122,6 +122,7 @@
     "@types/react-tabs": "^2.3.4",
     "@types/slate-html-serializer": "^0.6.5",
     "@types/slate-plain-serializer": "^0.7.2",
+    "@types/slate-react": "^0.22.9",
     "@types/superagent": "^4.1.15",
     "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^5.12.0",

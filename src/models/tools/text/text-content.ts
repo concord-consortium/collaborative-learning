@@ -1,5 +1,5 @@
-import { types, Instance, getType } from "mobx-state-tree";
-import { Value, Inline } from "slate";
+import { types, Instance } from "mobx-state-tree";
+import { Value } from "slate";
 import Plain from "slate-plain-serializer";
 import Markdown from "slate-md-serializer";
 import {
@@ -89,7 +89,7 @@ export const TextContentModel = ToolContentModel
       self.format = "slate";
       self.text = serializeValueToLegacy(value);
     },
-    setEditor(editor: Editor) {
+    setEditor(editor?: Editor) {
       self.editor = editor;
     }
   }))

@@ -5,7 +5,7 @@ import { useMemo, useRef, useState } from "react";
 import { useCustomModal } from "../../hooks/use-custom-modal";
 
 interface IProps {
-  editor: Editor;
+  editor?: Editor;
 }
 
 export const useTextToolDialog = ({editor}: IProps) => {

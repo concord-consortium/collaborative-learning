@@ -43,18 +43,23 @@ export function getOrFindSharedModel(textContent: TextContentModelType) {
     const containerSharedModel = sharedModelManager.findFirstSharedModelByType(SharedVariables);
     if (!containerSharedModel) {
       console.warn("no shared variables model in the document");
-      // In the future we might want to create a new shared variables shared
-      // model in this case.  If we do that, we have to be careful that we don't
-      // cause an infinite loop. This getOrFindSharedModel is called from the 
-      // updateAfterSharedModelChanges so it might be called immediately after 
-      // this new shared model is added to the document.
+      // If we need to create a new shared variables model when there is just a
+      // text tile in the container, this code needs to be changed.
       //
-      // FIXME: It would be best if the searching for the shared variables model was 
-      // separated from this getOrFindSharedModel. That way getVariables could
-      // just be a view that doesn't modify any state. That could be handled by
-      // a reaction or autorun like with diagram-content.ts does. However it
-      // seems better try to fix that when move all of this code out of text-content
-      // and into the shared-variables text plugin.
+      // With the current code, if we created the shared variables model here,
+      // it can cause an infinite loop. This getOrFindSharedModel is called from
+      // the updateAfterSharedModelChanges so it would get called immediately
+      // after this new shared model is added to the container. And if we aren't
+      // careful we'd then try to add the shared variables model again, and
+      // again...
+      //
+      // Rather than creating the shared variables model here, it would be
+      // better to do it like the diagram-content.ts does.  It basically waits
+      // for the sharedModelManager to be ready in a MobX reaction and then adds
+      // the shared variables model when it is ready. 
+      //
+      // With that approach getVariables could just be a view that doesn't
+      // modify any state.
       return;
     }
 
@@ -68,35 +73,31 @@ export function getOrFindSharedModel(textContent: TextContentModelType) {
 export function updateAfterSharedModelChanges(
     textContent: TextContentModelType, sharedModel?: SharedModelType) {
   
-  // Need to look for any references to items in shared models in the text
-  // content, if they don't exist in the shared model any more then clean
-  // them up in some way. 
-  // 
-  // Perhaps for just delete them. 
-  //
-  // Because it is up to the plugins to manage this, we'll have to find a
-  // way to channel this action through all of the plugins.
-  //
-  // After cleaning up an invalid references, then it should decide if it
-  // wants to change the text content if there is a new shared model item
-  // that didn't exist before.
-  if (!textContent.editor) {
+  const {editor} = textContent;
+  
+  // Look for chips in the document (editor.value) 
+  // If any of these chips reference variables that no long exist, delete
+  // them from the document.
+  if (!editor) {
     return;
   }
 
   const variables = getVariables(textContent);
 
-  // FIXME: we shouldn't be aware of nodes managed by slate plugins. So when
-  // the plugin is registered with the text tile, it should include a method
-  // that can be called here to do this
-  const document = textContent.editor.value.document;
-  const variableNodes = document.filterDescendants((_node: Node) => {
-    return Inline.isInline(_node) && _node.type === kVariableSlateType;
+  const document = editor.value.document;
+  const variableNodes = document.filterDescendants((node) => {
+    return Inline.isInline(node) && node.type === kVariableSlateType;
   });
-  variableNodes.forEach((element: Inline) => {
+  variableNodes.forEach((node) => {
+    if (!node) {
+      // For some reason Immutable iterable.forEach can return undefined values
+      return;
+    }
+    const inlineNode = node as Inline;
+
     // Does this variable exist in our list?
-    if(!variables.find(v => v.id === element.data.get("reference"))){
-      textContent.editor.removeNodeByKey(element.key);
+    if(!variables.find(v => v.id === inlineNode.data.get("reference"))){
+      editor.removeNodeByKey(inlineNode.key);
     }
   });
 }

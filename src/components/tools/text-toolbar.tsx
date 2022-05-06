@@ -80,6 +80,13 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
   }
 
   const handleToolBarButtonClick = (buttonIconName: string, event: React.MouseEvent) => {
+    if (!editor) {
+      // In theory the editor can be undefined. Cut that option off
+      // here so we don't need to worry about it below
+      event.preventDefault();
+      return;
+    }
+
     if (buttonIconName === "undo") {
       editor.undo();
       event.preventDefault();
@@ -114,11 +121,14 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
             console.warn("Can't find text plugin command for", buttonIconName);
             break;
           }
-          // Send the dialogController to all plugins
-          // FIXME: I think this should be an object instead so we can add more props
-          // to it with out changing the method signature and worrying about argument
-          // order. The reason is that I hope we can provide additional controllers or
-          // services that plugins can use
+          // Send the dialogController to all plugins 
+          //
+          // TODO: I think this should be an object: `{dialogController}`
+          // instead of a raw param. This way we can add more props to it
+          // without changing the method signature and worrying about argument
+          // order. The reason is that I hope we can provide additional
+          // controllers or services that plugins can use. This change should be
+          // made in slate-editor too for consistency. 
           editor.command(toolInfo?.command, dialogController);          
       }
       event.preventDefault();

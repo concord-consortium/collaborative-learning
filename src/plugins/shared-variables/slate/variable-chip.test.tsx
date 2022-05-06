@@ -1,5 +1,5 @@
 import { Variable } from "@concord-consortium/diagram-view";
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import { applySnapshot } from "mobx-state-tree";
 import React from "react";
 import { VariableChip } from "./variable-chip";
