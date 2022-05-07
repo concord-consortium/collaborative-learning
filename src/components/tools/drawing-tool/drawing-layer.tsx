@@ -4,7 +4,7 @@ import { computeStrokeDashArray, DrawingContentModelType } from "../../../models
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DrawingObjectDataType, LineDrawingObjectData, VectorDrawingObjectData, RectangleDrawingObjectData,
   EllipseDrawingObjectData, Point, ImageDrawingObjectData,
-  VariableChipObjectData} from "../../../models/tools/drawing/drawing-objects";
+  VariableDrawingObjectData} from "../../../models/tools/drawing/drawing-objects";
 import {
   DefaultToolbarSettings, DrawingToolChange, DrawingToolDeletion, DrawingToolMove, DrawingToolUpdate, ToolbarSettings
 } from "../../../models/tools/drawing/drawing-types";
@@ -227,9 +227,9 @@ class ImageObject extends DrawingObject {
 }
 
 class VariableObject extends DrawingObject {
-  declare model: VariableChipObjectData;
+  declare model: VariableDrawingObjectData;
 
-  constructor(model: VariableChipObjectData) {
+  constructor(model: VariableDrawingObjectData) {
     super(model);
   }
 
@@ -241,12 +241,18 @@ class VariableObject extends DrawingObject {
   }
 
   public render(options: DrawingObjectOptions): JSX.Element|null {
-    const {x, y, width, height} = this.model;
-    const {id} = options;
-    // const {id, handleHover} = options;
+    const {x, y, width, height, name, value} = this.model;
+    const {id, handleHover} = options;
     const varChipStyle = {top: y, left: x, width, height};
-    return <div id={id} className="variable-chip" style={varChipStyle}>pool=15</div>;
-      // <div className="">{variableOptions.name}={variableOptions.value}</div>
+    // return <div id={id} className="variable-chip" style={varChipStyle}>pool=15</div>;
+    return  <div  id={id}
+              className="variable-chip"
+              style={varChipStyle}
+              onMouseEnter={(e) => handleHover ? handleHover(e, this, true) : null }
+              onMouseLeave={(e) => handleHover ? handleHover(e, this, false) : null }
+            >
+              {name}={value}
+            </div>;
   }
 }
 
@@ -524,6 +530,32 @@ class StampDrawingTool extends DrawingTool {
   }
 }
 
+class VariableDrawingTool extends DrawingTool {
+
+  constructor(drawingLayer: DrawingLayerView) {
+    super(drawingLayer);
+  }
+
+  public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
+    // const start = this.drawingLayer.getWorkspacePoint(e);
+    // if (!start) return;
+    // const stamp = this.drawingLayer.getCurrentStamp();
+    // if (stamp) {
+      const variableChip: VariableObject = new VariableObject({
+        type: "variable",
+        x: 350,
+        y: 150,
+        width: 75,
+        height: 24,
+        name: "pool",
+        value: "15"
+      });
+
+      this.drawingLayer.addNewDrawingObject(variableChip.model);
+    }
+  // }
+}
+
 class SelectionDrawingTool extends DrawingTool {
   constructor(drawingLayer: DrawingLayerView) {
     super(drawingLayer);
@@ -675,7 +707,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       selection: new SelectionDrawingTool(this),
       rectangle: new RectangleDrawingTool(this),
       ellipse: new EllipseDrawingTool(this),
-      stamp: new StampDrawingTool(this)
+      stamp: new StampDrawingTool(this),
+      variable: new VariableDrawingTool(this),
     };
     this.currentTool = this.tools.selection;
 
@@ -743,6 +776,9 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         break;
       case "stamp":
         this.setCurrentTool((this.tools.stamp as StampDrawingTool).setSettings(settings));
+        break;
+      case "variable":
+        this.setCurrentTool((this.tools.variable as VariableDrawingTool).setSettings(settings));
         break;
     }
   }
