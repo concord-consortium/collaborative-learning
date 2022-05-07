@@ -525,7 +525,7 @@ export const createFakeAuthentication = (options: CreateFakeAuthenticationOption
     }) as StudentUser
   );
   for (let i = 1; i <= NUM_FAKE_STUDENTS; i++) {
-    if (parseInt(userId, 10) !== i) {
+    if (i.toString() !== userId) {
       classInfo.students.push(
         createFakeUser({
           appMode,
