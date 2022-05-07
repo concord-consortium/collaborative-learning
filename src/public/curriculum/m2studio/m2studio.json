@@ -31,7 +31,7 @@
       "table": {
         "numFormat": ".2~f"
       },
-      "drawing": {"tools": ["stamp", "stroke-color", "fill-color", "variable"]}
+      "drawing": {"tools": ["select", "line", "vector", "rectangle", "ellipse", "stamp", "stroke-color", "fill-color", "variable", "delete"]}
     },
     "defaultStamps": [],
     "navTabs": {

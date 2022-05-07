@@ -15,7 +15,6 @@ import { DrawingContentModelType } from "../../../models/tools/drawing/drawing-c
 import { ToolbarModalButton, ToolbarSettings } from "../../../models/tools/drawing/drawing-types";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { useSettingFromStores } from "../../../hooks/use-stores";
-import { insert } from "../../../utilities/js-utils";
 import { useVariableDialog } from "./use-variable-dialog";
 
 interface IPaletteState {
@@ -30,12 +29,10 @@ interface IProps extends IFloatingToolbarProps, IRegisterToolApiProps {
   model: ToolTileModelType;
 }
 
-const defaultButtons = ["select", "line", "vector", "rectangle", "ellipse", "delete"];
 export const ToolbarView: React.FC<IProps> = (
               { documentContent, model, onIsEnabled, ...others }: IProps) => {
   const drawingContent = model.content as DrawingContentModelType;
   const toolbarButtonSetting = useSettingFromStores("tools", "drawing") as unknown as string[];
-  const toolbarButtons = toolbarButtonSetting ? insert(defaultButtons, -1,toolbarButtonSetting) : defaultButtons;
   const { stamps, currentStamp, currentStampIndex } = drawingContent;
   const stampCount = stamps.length;
   const [paletteState, setPaletteState] = useState<IPaletteState>(kClosedPalettesState);
@@ -123,7 +120,7 @@ export const ToolbarView: React.FC<IProps> = (
     clearPaletteState();
   };
 
-  const buttonDefs: Record<string,any> = {
+  const buttonDefs: Record<string, React.ReactNode> = {
     "select": <SvgToolModeButton key="select" {...modalButtonProps("select", {})}
                                   title="Select" onSetSelectedButton={handleSetSelectedButton} />,
     "line": <SvgToolModeButton key="line" {...modalButtonProps("line", { fill: drawingContent.stroke })}
@@ -138,8 +135,7 @@ export const ToolbarView: React.FC<IProps> = (
                 ? <StampModeButton key="stamp" stamp={currentStamp} stampCount={stampCount} title="Stamp"
                           selected={drawingContent.isSelectedButton("stamp")}
                           onClick={handleStampsButtonClick} onTouchHold={handleStampsButtonTouchHold} />
-                : null
-              ,
+                : null,
     "stroke-color": <StrokeColorButton key="stroke" settings={drawingContent.toolbarSettings}
                                         onClick={() => handleToggleShowStrokeColorPalette()} />,
     "fill-color": <FillColorButton key="fill" settings={drawingContent.toolbarSettings}
@@ -153,7 +149,7 @@ export const ToolbarView: React.FC<IProps> = (
     ? ReactDOM.createPortal(
         <div className={toolbarClasses} style={location}>
           <div className="drawing-tool-buttons">
-            {toolbarButtons.map(button => {
+            {toolbarButtonSetting.map(button => {
               return buttonDefs[button];
             })}
           </div>
