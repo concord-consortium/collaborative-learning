@@ -65,7 +65,7 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
   let toolbarButtons: IButtonDef[] = [];
   if (toolbarSetting) {
     toolbarSetting.forEach( setting => {
-      const builtInButton = buttonDefs.find( b => b.iconName === setting);
+      const builtInButton = buttonDefs.find(b => b.iconName === setting);
       if (builtInButton) {
         toolbarButtons.push(builtInButton);
         return;

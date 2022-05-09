@@ -96,9 +96,7 @@ export const TextContentModel = ToolContentModel
   .actions(self => ({
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
       getAllTextPluginInfos().forEach(pluginInfo => {
-        pluginInfo?.updateTextContentAfterSharedModelChanges?.(
-          self, sharedModel
-        ); 
+        pluginInfo?.updateTextContentAfterSharedModelChanges?.(self, sharedModel); 
       });
     }
   }));

@@ -29,7 +29,7 @@ export const useTextToolDialog = ({editor}: IProps) => {
   const handleSetValue = (name: string, value: string, type: FieldType) => {
     setFieldValues({ [name]: value });
     if (type !== "input") {
-        callOnChange(name, value);
+      callOnChange(name, value);
     }
   };
 

@@ -59,7 +59,7 @@ function renderVariable(node: Inline, attributes: RenderAttributes, children: Re
       { variable ?
         <VariableChip {...{variable}}/> :
         `invalid reference: ${reference}`
-    }
+      }
     </span>
   );
 }
@@ -214,15 +214,15 @@ export function VariablesPlugin(textTile: TextContentModelType): HtmlSerializabl
               const sharedModel = getOrFindSharedModel(textTile);
               if (!sharedModel) {
                 return;
-              } else {
-                let value = parseVariableValue(values.value);
-                if (value == null) {
-                  value = undefined;
-                }
-                const variable = Variable.create({name: values.name, value});
-                sharedModel.addVariable(variable);
-                reference = variable.id;
               }
+             
+              let value = parseVariableValue(values.value);
+              if (value == null) {
+                value = undefined;
+              }
+              const variable = Variable.create({name: values.name, value});
+              sharedModel.addVariable(variable);
+              reference = variable.id;
             }
             return _editor.command("addVariable", {reference});
           }
@@ -276,7 +276,7 @@ export function VariablesPlugin(textTile: TextContentModelType): HtmlSerializabl
               // it the dialogController object followed by the node object
               // 
               // This is all necessary so the configureVariable command can be triggered and
-              // it is the passed dialogController. The dialogController is managed by the 
+              // it is passed the dialogController. The dialogController is managed by the 
               // text-toolbar so the configuredVariable command defined above doesn't have
               // direct access to it.
               onDoubleClick: () => editor.command("emit", "toolbarDialog", "configureVariable", node)
