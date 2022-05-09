@@ -3,11 +3,12 @@ import { Value } from "slate";
 import Plain from "slate-plain-serializer";
 import Markdown from "slate-md-serializer";
 import {
-  deserializeValueFromLegacy, htmlToSlate, serializeValueToLegacy, slateToHtml, textToSlate
+  deserializeValueFromLegacy, Editor, htmlToSlate, serializeValueToLegacy, slateToHtml, textToSlate
 } from "@concord-consortium/slate-editor";
 import { ITileExportOptions } from "../tool-content-info";
 import { ToolContentModel } from "../tool-types";
-
+import { SharedModelType } from "../shared-model";
+import { getAllTextPluginInfos } from "./text-plugin-info";
 
 export const kTextToolID = "Text";
 
@@ -25,6 +26,9 @@ export const TextContentModel = ToolContentModel
     // e.g. "html", "markdown", "slate", "quill", empty => plain text
     format: types.maybe(types.string)
   })
+  .volatile(self => ({
+    editor: undefined as Editor | undefined
+  }))
   .views(self => ({
     get joinText() {
       return Array.isArray(self.text)
@@ -84,6 +88,16 @@ export const TextContentModel = ToolContentModel
     setSlate(value: Value) {
       self.format = "slate";
       self.text = serializeValueToLegacy(value);
+    },
+    setEditor(editor?: Editor) {
+      self.editor = editor;
+    }
+  }))
+  .actions(self => ({
+    updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
+      getAllTextPluginInfos().forEach(pluginInfo => {
+        pluginInfo?.updateTextContentAfterSharedModelChanges?.(self, sharedModel); 
+      });
     }
   }));
 

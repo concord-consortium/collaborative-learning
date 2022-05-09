@@ -18,5 +18,12 @@ class TextToolTile {
     deleteText(text){
         this.getTextTile().last().type(text);
     }
+
+    // This assumes the text tool is already focused
+    clickToolbarTool(titlePrefix){
+        // Note that the title is dynamic based on the OS sometimes it has Cmd- and
+        // sometimes Ctrl-
+        cy.get(`.primary-workspace .text-toolbar [data-original-title^="${titlePrefix}"]`).click();
+    }
 }
 export default TextToolTile;
