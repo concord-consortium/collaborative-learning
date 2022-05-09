@@ -4,7 +4,8 @@ import clone from "lodash/clone";
 import { Inline } from "slate";
 import {
   Editor, HtmlSerializablePlugin, RenderAttributes, RenderInlineProps, hasActiveInline, IFieldValues,
-  IDialogController, getDataFromElement, getRenderAttributesFromNode, classArray, EFormat, IRow
+  IDialogController, getDataFromElement, getRenderAttributesFromNode, classArray, EFormat, IRow,
+  kSlateVoidClass
 } from "@concord-consortium/slate-editor";
 import { VariableType, Variable } from "@concord-consortium/diagram-view";
 import "./variables-plugin.scss";
@@ -42,7 +43,7 @@ function renderVariable(node: Inline, attributes: RenderAttributes, children: Re
   const { isHighlighted, isSerializing, onClick: _onClick, onDoubleClick: _onDoubleClick } = options || {};
   const highlightClass = isHighlighted && !isSerializing ? kVariableHighlightClass : undefined;
   const reference: string = data.get("reference");
-  const classes = classNames(classArray(className), kVariableClass, highlightClass) || undefined;
+  const classes = classNames(classArray(className), kSlateVoidClass, kVariableClass, highlightClass) || undefined;
   const onClick = isSerializing ? undefined : _onClick;
   const onDoubleClick = isSerializing ? undefined : _onDoubleClick;
 
