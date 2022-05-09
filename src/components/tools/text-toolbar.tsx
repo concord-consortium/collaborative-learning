@@ -5,8 +5,8 @@ import { IFloatingToolbarProps, useFloatingToolbarLocation } from "./hooks/use-f
 import { useSettingFromStores } from "../../hooks/use-stores";
 import { TextToolbarButton } from "./text-toolbar-button";
 import { IRegisterToolApiProps } from "./tool-tile";
-// Note this isn't listed as a direct dependency, it is transitive from the
-// slate-editor. Perhaps it should be exported by the slate-editor
+// TODO: This should be exported by slate-editor, and we should import it from there. 
+// Currently it is not listed as a direct dependency of CLUE.
 import EventEmitter from "eventemitter3";
 
 import { isMac } from "../../utilities/browser";
@@ -80,58 +80,57 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
   }
 
   const handleToolBarButtonClick = (buttonIconName: string, event: React.MouseEvent) => {
+    event.preventDefault();
+
     if (!editor) {
       // In theory the editor can be undefined. Cut that option off
       // here so we don't need to worry about it below
-      event.preventDefault();
       return;
     }
 
-    if (buttonIconName === "undo") {
-      editor.undo();
-      event.preventDefault();
-    }
-    else {
-      const toolInfo = getTextPluginInfo(buttonIconName);
-      switch (buttonIconName) {
-        case "bold":
-          editor.command("toggleMark", EFormat.bold);
+    switch (buttonIconName) {
+      case "bold":
+        editor.command("toggleMark", EFormat.bold);
+        break;
+      case "italic":
+        editor.command("toggleMark", EFormat.italic);
+        break;
+      case "underline":
+        editor.command("toggleMark", EFormat.underlined);
+        break;
+      case "subscript":
+        handleToggleSuperSubscript(EFormat.subscript, editor);
+        break;
+      case "superscript":
+        handleToggleSuperSubscript(EFormat.superscript, editor);
+        break;
+      case "list-ol":
+        editor.command("toggleBlock", EFormat.numberedList);
+        break;
+      case "list-ul":
+        editor.command("toggleBlock", EFormat.bulletedList);
+        break;
+      case "undo":
+        editor.undo();
+        break;
+      default: {
+        const toolInfo = getTextPluginInfo(buttonIconName);
+
+        // Handle Text Plugins
+        if (!toolInfo?.command) {
+          console.warn("Can't find text plugin command for", buttonIconName);
           break;
-        case "italic":
-          editor.command("toggleMark", EFormat.italic);
-          break;
-        case "underline":
-          editor.command("toggleMark", EFormat.underlined);
-          break;
-        case "subscript":
-          handleToggleSuperSubscript(EFormat.subscript, editor);
-          break;
-        case "superscript":
-          handleToggleSuperSubscript(EFormat.superscript, editor);
-          break;
-        case "list-ol":
-          editor.command("toggleBlock", EFormat.numberedList);
-          break;
-        case "list-ul":
-          editor.command("toggleBlock", EFormat.bulletedList);
-          break;
-        default:
-          // Handle Text Plugins
-          if (!toolInfo?.command) {
-            console.warn("Can't find text plugin command for", buttonIconName);
-            break;
-          }
-          // Send the dialogController to all plugins 
-          //
-          // TODO: I think this should be an object: `{dialogController}`
-          // instead of a raw param. This way we can add more props to it
-          // without changing the method signature and worrying about argument
-          // order. The reason is that I hope we can provide additional
-          // controllers or services that plugins can use. This change should be
-          // made in slate-editor too for consistency. 
-          editor.command(toolInfo?.command, dialogController);          
+        }
+        // Send the dialogController to all plugins 
+        //
+        // TODO: I think this should be an object: `{dialogController}`
+        // instead of a raw param. This way we can add more props to it
+        // without changing the method signature and worrying about argument
+        // order. The reason is that I hope we can provide additional
+        // controllers or services that plugins can use. This change should be
+        // made in slate-editor too for consistency. 
+        editor.command(toolInfo?.command, dialogController);          
       }
-      event.preventDefault();
     }
   };
   

@@ -8,10 +8,11 @@ import {
   kSlateVoidClass
 } from "@concord-consortium/slate-editor";
 import { VariableType, Variable } from "@concord-consortium/diagram-view";
-import "./variables-plugin.scss";
 import { VariableChip } from "./variable-chip";
 import { kVariableSlateType, getVariables, getOrFindSharedModel } from "./variables-text-content";
 import { TextContentModelType } from "../../../models/tools/text/text-content";
+
+import "./variables-plugin.scss";
 
 const kVariableClass = "ccrte-variable";
 const kVariableHighlightClass = "ccrte-variable-highlight";

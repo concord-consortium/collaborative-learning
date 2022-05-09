@@ -3,21 +3,21 @@ import { DisplayDialogSettings, Editor, FieldType, IDialogController,
 import { clone } from "lodash";
 import { useMemo, useRef, useState } from "react";
 import { useCustomModal } from "../../hooks/use-custom-modal";
+import { useForceUpdate } from "./hooks/use-force-update";
 
 interface IProps {
   editor?: Editor;
 }
 
 export const useTextToolDialog = ({editor}: IProps) => {
-  // Fake ref
   const settingsRef = useRef<DisplayDialogSettings>();
   const validValuesRef = useRef<IFieldValues>();
-  const [,setChanges] = useState(0);
+  const forceUpdate = useForceUpdate();
 
   const setFieldValues = (newValues: IFieldValues) => {
     if (!settingsRef.current) return;
     settingsRef.current.values = { ...settingsRef.current.values, ...newValues };
-    setChanges(count => count + 1);
+    forceUpdate();
   };
 
   const validateFieldValues = () => {
