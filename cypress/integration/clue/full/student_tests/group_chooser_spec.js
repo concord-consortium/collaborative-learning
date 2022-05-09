@@ -19,7 +19,7 @@ describe('Test student join a group', function(){
     before(() => {
         cy.clearQAData('all');
     });
-      
+
     function setup(student, alreadyInGroup=false){
         cy.visit('?appMode=qa&fakeClass='+fakeClass+'&fakeUser=student:'+student+'&problem='+problem);
         if (alreadyInGroup) {
