@@ -29,10 +29,13 @@ interface IProps extends IFloatingToolbarProps, IRegisterToolApiProps {
   model: ToolTileModelType;
 }
 
+const defaultButtons = ["select", "line", "vector", "rectangle", "ellipse", "delete"];
+
 export const ToolbarView: React.FC<IProps> = (
               { documentContent, model, onIsEnabled, ...others }: IProps) => {
   const drawingContent = model.content as DrawingContentModelType;
-  const toolbarButtonSetting = useSettingFromStores("tools", "drawing") as unknown as string[];
+  const toolbarButtonSetting = useSettingFromStores("tools", "drawing") as unknown as string[] | undefined;
+  const toolbarButtons = toolbarButtonSetting || defaultButtons;
   const { stamps, currentStamp, currentStampIndex } = drawingContent;
   const stampCount = stamps.length;
   const [paletteState, setPaletteState] = useState<IPaletteState>(kClosedPalettesState);
@@ -62,7 +65,13 @@ export const ToolbarView: React.FC<IProps> = (
     const { selectedButton, toolbarSettings } = drawingContent;
     return { modalButton: type, selected: selectedButton === type, settings: settings || toolbarSettings };
   };
-  const [showVariableDialog] = useVariableDialog();
+  // TODO change to non-hardcoded version when implemented with shared model
+const options = [
+  { label: "pool", value: "Pool"},
+  { label: "stripes", value: "Stripes"},
+  { label: "solids", value: "solids"},
+];
+  const [showVariableDialog] = useVariableDialog(options);
 
   const handleSetSelectedButton = (modalButton: ToolbarModalButton) => {
     drawingContent.setSelectedButton(modalButton);
@@ -149,7 +158,7 @@ export const ToolbarView: React.FC<IProps> = (
     ? ReactDOM.createPortal(
         <div className={toolbarClasses} style={location}>
           <div className="drawing-tool-buttons">
-            {toolbarButtonSetting.map(button => {
+            {toolbarButtons.map(button => {
               return buttonDefs[button];
             })}
           </div>
