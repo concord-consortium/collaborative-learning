@@ -10,6 +10,7 @@ import { createSingleTileContent } from "../../utilities/test-utils";
 
 // This is needed so MST can deserialize snapshots referring to tools
 import { registerTools } from "../../register-tools";
+import { ModalProvider } from "react-modal-hook";
 registerTools(["Text"]);
 
 var mockGetQueryState = jest.fn();
@@ -29,7 +30,7 @@ describe("Canvas Component", () => {
     };
   });
 
- it("can render without a document or content", () => {
+  it("can render without a document or content", () => {
     const stores = specStores();
     render(
       <Provider stores={stores}>
@@ -55,7 +56,9 @@ describe("Canvas Component", () => {
     const stores = specStores();
     render(
       <Provider stores={stores}>
-        <CanvasComponent context="test" document={document} readOnly={true} />
+        <ModalProvider>
+          <CanvasComponent context="test" document={document} readOnly={true} />
+        </ModalProvider>
       </Provider>
     );
     expect(screen.getByTestId("document-content")).toBeInTheDocument();
@@ -90,7 +93,9 @@ describe("Canvas Component", () => {
     const stores = specStores();
     render(
       <Provider stores={stores}>
-        <CanvasComponent context="test" content={content} readOnly={true} />
+        <ModalProvider>
+          <CanvasComponent context="test" content={content} readOnly={true} />
+        </ModalProvider>
       </Provider>
     );
     expect(screen.getByTestId("document-content")).toBeInTheDocument();
