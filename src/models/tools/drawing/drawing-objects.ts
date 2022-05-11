@@ -80,6 +80,7 @@ export interface VariableDrawingObjectData {
   height: number;
   name?: string;
   value?: string;
+  unit?: string;
 }
 
 export type DrawingObjectDataType = LineDrawingObjectData | VectorDrawingObjectData

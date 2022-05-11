@@ -16,6 +16,8 @@ import { observer } from "mobx-react";
 import { ImageContentSnapshotOutType } from "../../../models/tools/image/image-content";
 import { gImageMap } from "../../../models/image-map";
 import placeholderImage from "../../../assets/image_placeholder.png";
+import { Variable } from "@concord-consortium/diagram-view";
+import { VariableChip } from "../../../plugins/shared-variables/slate/variable-chip";
 
 const SELECTION_COLOR = "#777";
 const HOVER_COLOR = "#bbdd00";
@@ -27,13 +29,13 @@ interface BoundingBox {
   nw: Point;
   se: Point;
 }
-interface DrawingObjectOptions {
+export interface DrawingObjectOptions {
   id: any;
   handleHover?: (e: MouseEvent|React.MouseEvent<any>, obj: DrawingObject, hovering: boolean) => void;
   drawingLayer: DrawingLayerView;
 }
 
-abstract class DrawingObject {
+export abstract class DrawingObject {
   public model: DrawingObjectDataType;
 
   constructor(model: DrawingObjectDataType) {
@@ -243,16 +245,27 @@ class VariableObject extends DrawingObject {
   public render(options: DrawingObjectOptions): JSX.Element|null {
     const {x, y, width, height, name, value} = this.model;
     const {id, handleHover} = options;
-    const varChipStyle = {top: y, left: x, width, height};
-    // return <div id={id} className="variable-chip" style={varChipStyle}>pool=15</div>;
-    return  <div  id={id}
-              className="variable-chip"
-              style={varChipStyle}
-              onMouseEnter={(e) => handleHover ? handleHover(e, this, true) : null }
-              onMouseLeave={(e) => handleHover ? handleHover(e, this, false) : null }
-            >
-              {name}={value}
-            </div>;
+    const varChipStyle = { border: "1px solid black",
+      borderRadius: "5px",
+      padding: "1px 3px",
+      margin: "0 1px"};
+      // userSelect: none};
+    const varObj = Variable.create({name: "pool", value: 15, unit: "balls"});
+    return (
+          <foreignObject
+            key={id}
+            x={x}
+            y={y}
+            width={width}
+            height={height}
+            onMouseEnter={(e) => handleHover ? handleHover(e, this, true) : null }
+            onMouseLeave={(e) => handleHover ? handleHover(e, this, false) : null }
+          >
+            <div style={varChipStyle}>
+              <VariableChip variable={varObj} />
+            </div>
+          </foreignObject>
+    );
   }
 }
 
@@ -537,23 +550,18 @@ class VariableDrawingTool extends DrawingTool {
   }
 
   public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
-    // const start = this.drawingLayer.getWorkspacePoint(e);
-    // if (!start) return;
-    // const stamp = this.drawingLayer.getCurrentStamp();
-    // if (stamp) {
-      const variableChip: VariableObject = new VariableObject({
-        type: "variable",
-        x: 350,
-        y: 150,
-        width: 75,
-        height: 24,
-        name: "pool",
-        value: "15"
-      });
+    const variableChip: VariableObject = new VariableObject({
+      type: "variable",
+      x: e.clientX,
+      y: e.clientY,
+      width: 75,
+      height: 24,
+      name: "pool",
+      value: "15"
+    });
 
-      this.drawingLayer.addNewDrawingObject(variableChip.model);
-    }
-  // }
+    this.drawingLayer.addNewDrawingObject(variableChip.model);
+  }
 }
 
 class SelectionDrawingTool extends DrawingTool {
@@ -798,6 +806,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   }
 
   public addNewDrawingObject(drawingObjectModel: DrawingObjectDataType) {
+    console.log("data:", drawingObjectModel);
     this.sendChange({action: "create", data: drawingObjectModel});
   }
 
@@ -1137,6 +1146,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   }
 
   private executeChange(change: DrawingToolChange) {
+    console.log("change:", change);
     switch (change.action) {
       case "create":
         this.createDrawingObject(change.data);
@@ -1180,6 +1190,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       }
       case "variable":
         drawingObject = new VariableObject(data);
+        console.log("drawingObject", drawingObject);
         break;
     }
     if (drawingObject?.model.id) {

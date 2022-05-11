@@ -2,7 +2,7 @@ import classNames from "classnames";
 import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
 import {
-  DeleteButton, FillColorButton, StampModeButton, StrokeColorButton, SvgToolModeButton, VariableButton
+  DeleteButton, FillColorButton, StampModeButton, StrokeColorButton, SvgToolModeButton,
 } from "./drawing-toolbar-buttons";
 import { StampsPalette } from "./stamps-palette";
 import { StrokeColorPalette } from "./stroke-color-palette";
@@ -116,7 +116,9 @@ const options = [
     drawingContent.deleteSelectedObjects();
   };
 
-  const handleVariableButton = () => {
+  const handleSetVariableButton = (modalButton: ToolbarModalButton) => {
+    drawingContent.setSelectedButton(modalButton);
+    forceUpdate();
     showVariableDialog();
   };
 
@@ -150,7 +152,8 @@ const options = [
     "fill-color": <FillColorButton key="fill" settings={drawingContent.toolbarSettings}
                                     onClick={() => handleToggleShowFillColorPalette()} />,
     "delete": <DeleteButton key="delete" disabled={!drawingContent.hasSelectedObjects} onClick={handleDeleteButton} />,
-    "variable": <VariableButton key="variable" onClick={handleVariableButton} />,
+    "variable": <SvgToolModeButton key="variable" {...modalButtonProps("variable")} title="Variable"
+                                    onSetSelectedButton={handleSetVariableButton} />,
   };
 
   const toolbarClasses = classNames("drawing-tool-toolbar", { disabled: !isEnabled, flip: flipPalettes });
