@@ -1,41 +1,62 @@
 import React, { useState } from "react";
 import Select from "react-select";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
-import { DrawingContentModelType } from "../../../models/tools/drawing/drawing-content";
-import VariableToolIcon from "../../../clue/assets/icons/variable-tool.svg";
 
 import './variable-dialog.scss';
 
-export type SelectValue = { value: string, label: string };
-export type SelectOptions = SelectValue[];
-
-export const useVariableDialog = (toolContent: DrawingContentModelType) => {
-  const fieldValues: Record<string, any> = [
-    { name: "Pool", value: 1 },
-    { name: "stripes", value: 6 },
-    { name: "solids", value: 9 }
-  ];
-  const varOptions = [
-    { label: "pool", value: "Pool"},
-    { label: "stripes", value: "Stripes"},
-    { label: "solids", value: "Solids"},
-  ];
-
-  function getSelectValue(options: SelectOptions | undefined, name: string) {
-    return options?.find(opt => opt.value === fieldValues[name]);
-  }
+export const useVariableDialog = (options: {
+  label: string;
+  value: string;
+}[]) => {
 
   const ModalContent = () => {
       const [isMenuOpen, setIsMenuOpen] = useState(false);
-      const name = "stripes";
+      const name = "var";
+      const customStyles = {
+        container: (provided: any) => ({
+          ...provided,
+          padding: '5px'
+        }),
+        control: (provided: any, state: any) => ({
+          ...provided,
+          background: '#fff',
+          borderColor: '#9e9e9e',
+          borderRadius: '2px',
+          minHeight: '30px',
+          height: '30px',
+          boxShadow: state.isFocused ? null : null,
+          cursor: 'pointer'
+        }),
+        valueContainer: (provided: any) => ({
+          ...provided,
+          height: '30px',
+          padding: '0 6px'
+        }),
+
+        input: (provided: any) => ({
+          ...provided,
+          margin: '0px',
+        }),
+        indicatorSeparator: (state: any) => ({
+          display: 'none',
+        }),
+        indicatorsContainer: (provided: any) => ({
+          ...provided,
+          height: '30px',
+        }),
+        option: (provided: any) => ({
+          ...provided,
+          cursor: 'pointer'
+        }),
+      };
     return (
       <div className="content">
         <div className="variable-choices">
           Select existing variable:
           <Select
             name={name}
-            options={varOptions}
-            value={getSelectValue(varOptions, name)}
+            styles={customStyles}
+            options={options}
             onMenuOpen={() => setIsMenuOpen(true)}
             onMenuClose={() => setIsMenuOpen(false)}
           />
@@ -44,25 +65,20 @@ export const useVariableDialog = (toolContent: DrawingContentModelType) => {
         <div className="new-variable">
           Create new variable:
           <div className="new-variable-inputs inline-row input-entry">
-            <label className="label">Name: </label><input type="text" className="input" />
-            <label className="label">Value: </label><input type="text" className="input" />
+            <label className="label">Name: <input type="text" className="input" /></label>
+            <label className="label">Value: <input type="text" className="input" /></label>
           </div>
         </div>
       </div>
     );
   };
 
-  const buttons = [ { label: "Cancel" },
-                    {  label: "OK" }
-                  ];
-
   const [showVariableDialog, hideVariableDialog] = useCustomModal({
     className: "variable-dialog",
     title: "Insert Variable",
-    Icon: VariableToolIcon,
     Content: ModalContent,
     contentProps: {},
-    buttons,
-  }, [buttons]);
+    buttons: [{ label: "Cancel" },{  label: "OK" }],
+  }, []);
   return [showVariableDialog, hideVariableDialog];
 };
