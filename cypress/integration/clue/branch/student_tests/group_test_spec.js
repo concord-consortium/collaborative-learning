@@ -9,7 +9,7 @@ context('Test group functionalities', function(){
     before(()=>{
         cy.clearQAData('all');
     });
-      
+
     let qaClass = 10,
         qaGroup = 10,
         problem = 3.3,

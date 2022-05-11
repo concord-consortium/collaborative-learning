@@ -13,17 +13,17 @@
     "getStarted": {
       "initials": "GS",
       "title": "Get Started",
-      "placeholder": "Add tiles here to get started on your Activity."
+      "placeholder": "Record your ideas"
     },
     "fieldNotes": {
       "initials": "FN",
       "title": "Field Notes",
-      "placeholder": "Describe your explorations in the field."
+      "placeholder": "Record your observations"
     },
     "share": {
       "initials": "SH",
       "title": "Share",
-      "placeholder": "Discuss your Findings with your class."
+      "placeholder": "Discuss your Findings"
     }
   },
   "planningDocument": {
@@ -53,47 +53,47 @@
     ]
   },
   "defaultStamps": [
-    {
-      "url": "curriculum/mothed/stamps/acorn.png",
-      "width": 35,
-      "height": 35
-    },
-    {
-      "url": "curriculum/mothed/stamps/firneedles.png",
-      "width": 35,
-      "height": 29
-    },
-    {
-      "url": "curriculum/mothed/stamps/mapleleaf.png",
-      "width": 35,
-      "height": 38
-    },
-    {
-      "url": "curriculum/mothed/stamps/tree.png",
-      "width": 37,
-      "height": 35
-    },
-    {
-      "url": "curriculum/mothed/stamps/pine.png",
-      "width": 23,
-      "height": 40
-    },
-    {
-      "url": "curriculum/mothed/stamps/greenleaf.png",
-      "width": 35,
-      "height": 34
-    }
+      {
+        "url": "curriculum/mothed/stamps/acorn.png",
+        "width": 35,
+        "height": 35
+      },
+      {
+        "url": "curriculum/mothed/stamps/firneedles.png",
+        "width": 35,
+        "height": 29
+      },
+      {
+        "url": "curriculum/mothed/stamps/mapleleaf.png",
+        "width": 35,
+        "height": 38
+      },
+      {
+        "url": "curriculum/mothed/stamps/tree.png",
+        "width": 37,
+        "height": 35
+      },
+      {
+        "url": "curriculum/mothed/stamps/pine.png",
+        "width": 23,
+        "height": 40
+      },
+      {
+        "url": "curriculum/mothed/stamps/greenleaf.png",
+        "width": 35,
+        "height": 34
+      }
   ],
   "investigations": [
     {
       "description": "Investigation 1",
       "ordinal": 1,
-      "title": "MothEd Warmups",
+      "title": "MothEd Sample Curriculum",
       "problems": [
         {
           "description": "Activity 1.1",
           "ordinal": 1,
-          "title": "What lives in our schoolyard? ",
+          "title": "What Lives in our Schoolyard",
           "subtitle": "Making Observations",
           "disabled": [],
           "sections":
@@ -101,7 +101,7 @@
             {
             "type": "getStarted",
             "content": {
-              "tiles":
+              "tiles": 
                 [
                   {
                     "content": {
@@ -115,12 +115,6 @@
                         "<ul><li>look out the window, </li><li>look around your classroom/home for books  or magazines,</li><li>find images or take photos.</li></ul>",
                         "<p>Your <strong>Recorder </strong>can record everyone&#x27;s ideas  in  their CLUE workspace.</p>"
                       ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/mothed/images/fieldwork.jpg"
                     }
                   },
                   {
@@ -140,7 +134,8 @@
             {
               "type": "fieldNotes",
               "content": {
-                "tiles": [
+                "tiles": 
+                [
                   {
                     "content": {
                       "type": "Text",
@@ -186,7 +181,7 @@
                       "format": "html",
                       "text": [
                         "<p> Share to compare notes with your teammates! </p>",
-                        "<p><strong>1. </strong>As your group compares observations, the <strong>Presenter</strong> can combine everyone&#x27;s findings on their <strong>Share</strong> Workspace to present or publish to the Class Work.</p>"
+                        "<p><strong>1. </strong>As your group compares observations, the <strong>Presenter</strong> can combine everyone&#x27;s findings on their <strong>Share</strong> Workspace Section to present or publish to the Class Work.</p>"
                       ]
                     }
                   },

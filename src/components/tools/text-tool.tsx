@@ -2,8 +2,9 @@ import React from "react";
 import { autorun, IReactionDisposer, reaction } from "mobx";
 import { observer, inject } from "mobx-react";
 import {
-  Editor, EditorRange, EditorValue, EFormat, handleToggleSuperSubscript, SlateEditor
+  Editor, EditorRange, EditorValue, HtmlSerializablePlugin, SlateEditor
 } from "@concord-consortium/slate-editor";
+import "@concord-consortium/slate-editor/dist/index.css";
 
 import { BaseComponent } from "../base";
 import { debouncedSelectTile } from "../../models/stores/ui";
@@ -12,6 +13,7 @@ import { hasSelectionModifier } from "../../utilities/event-utils";
 import { TextToolbarComponent } from "./text-toolbar";
 import { IToolApi, TileResizeEntry } from "./tool-api";
 import { IToolTileProps } from "./tool-tile";
+import { getTextPluginInstances, getTextPluginIds } from "../../models/tools/text/text-plugin-info";
 
 import "./text-tool.sass";
 
@@ -89,6 +91,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
   private editor: Editor | undefined;
   private tileContentRect: DOMRectReadOnly;
   private toolbarToolApi: IToolApi | undefined;
+  private plugins: HtmlSerializablePlugin[] | undefined;
 
   // map from slate type string to button icon name
   private slateMap: Record<string, string> = {
@@ -101,7 +104,9 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
     "superscript": "superscript",
     "subscript": "subscript",
     "bulleted-list": "list-ul",
-    "ordered-list": "list-ol"
+    "ordered-list": "list-ol",
+    // include the plugin ids here
+    ...getTextPluginIds().reduce((idMap, id) => ({...idMap, [id]: id}), {})
   };
 
   public componentDidMount() {
@@ -151,6 +156,9 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
         this.toolbarToolApi?.handleTileResize?.(entry);
       }
     });
+
+
+    this.plugins = getTextPluginInstances(this.props.model.content as TextContentModelType);
   }
 
   public componentWillUnmount() {
@@ -169,39 +177,6 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
 
     if (!editorValue) return null;
 
-    const handleToolBarButtonClick = (buttonIconName: string, editor: Editor, event: React.MouseEvent) => {
-      if (buttonIconName === "undo") {
-        editor.undo();
-        event.preventDefault();
-      }
-      else {
-        switch (buttonIconName) {
-          case "bold":
-            editor.command("toggleMark", EFormat.bold);
-            break;
-          case "italic":
-            editor.command("toggleMark", EFormat.italic);
-            break;
-          case "underline":
-            editor.command("toggleMark", EFormat.underlined);
-            break;
-          case "subscript":
-            handleToggleSuperSubscript(EFormat.subscript, editor);
-            break;
-          case "superscript":
-            handleToggleSuperSubscript(EFormat.superscript, editor);
-            break;
-          case "list-ol":
-            editor.command("toggleBlock", EFormat.numberedList);
-            break;
-          case "list-ul":
-            editor.command("toggleBlock", EFormat.bulletedList);
-            break;
-        }
-        event.preventDefault();
-      }
-    };
-
     return (
       // Ideally, this would just be 'text-tool' for consistency with other tools,
       // but 'text-tool` is used for the internal editor (cf. 'classes' above),
@@ -215,7 +190,6 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
           toolTile={toolTile}
           scale={scale}
           selectedButtons={selectedButtons || []}
-          onButtonClick={handleToolBarButtonClick}
           editor={this.editor}
           onIsEnabled={this.handleIsEnabled}
           onRegisterToolApi={this.handleRegisterToolApi}
@@ -223,10 +197,11 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
         />
         <SlateEditor
           className={classes}
-          onEditorRef={editorRef => this.editor = editorRef}
+          onEditorRef={this.handleEditorRef}
           value={editorValue}
           placeholder={placeholderText}
           readOnly={readOnly}
+          plugins={this.plugins}
           onValueChange={this.handleChange} />
       </div>
     );
@@ -313,4 +288,8 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
     return this.props.model.content as TextContentModelType;
   }
 
+  private handleEditorRef = (editor?: Editor) => {
+    this.editor = editor;    
+    this.getContent()?.setEditor(editor);
+  };
 }

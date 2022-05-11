@@ -1,6 +1,7 @@
 import { TextContentModel, kTextToolID } from "./text-content";
 import { Value, ValueJSON } from "slate";
 import Plain from "slate-plain-serializer";
+import { registerTextPluginInfo } from "./text-plugin-info";
 
 const emptyJson: ValueJSON = {
         document: {
@@ -14,6 +15,25 @@ const emptyJson: ValueJSON = {
           }]
         }
       };
+
+const testTextPluginInfo = {
+  iconName: "test",
+  Icon: () => null,
+  toolTip: "",
+  createSlatePlugin: jest.fn(),
+  command: ""
+};
+const testTextPluginInfoWithUpdate = {
+  iconName: "testWithUpdate",
+  Icon: () => null,
+  toolTip: "",
+  createSlatePlugin: jest.fn(),
+  command: "",
+  updateTextContentAfterSharedModelChanges: jest.fn()
+};
+
+registerTextPluginInfo(testTextPluginInfo);
+registerTextPluginInfo(testTextPluginInfoWithUpdate);
 
 describe("TextContentModel", () => {
 
@@ -93,5 +113,11 @@ describe("TextContentModel", () => {
     model.setSlate(fooValue);
     expect(model.format).toBe("slate");
     expect(Plain.serialize(model.asSlate())).toBe(foo);
+  });
+
+  it("calls updateTextContentAfterSharedModelChanges on each plugin that provides it", () => {
+    const model = TextContentModel.create({ text: "foo" });
+    model.updateAfterSharedModelChanges();
+    expect(testTextPluginInfoWithUpdate.updateTextContentAfterSharedModelChanges).toBeCalled();
   });
 });
