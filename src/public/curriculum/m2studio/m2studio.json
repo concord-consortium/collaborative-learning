@@ -29,7 +29,7 @@
     },
     "settings": {
       "table": {
-        "numFormat": ".2~f"
+        "numFormat": ".3~f"
       },
       "text": {
         "tools": ["bold", "subscript", "superscript", "m2s-variables"]
@@ -37,9 +37,35 @@
     },
     "defaultStamps": [],
     "navTabs": {
-      "showNavPanel": false,
+      "showNavPanel": true,
       "lazyLoadTabContents": true,
       "tabSpecs": [
+        {
+          "tab": "problems",
+          "label": "Activities",
+          "sections": [
+            {
+              "initials": "HELP",
+              "title": "Help",
+              "type": "problem-documents"
+            },
+            {
+              "initials": "A",
+              "title": "Task A",
+              "type": "problem-documents"
+            },
+            {
+              "initials": "B",
+              "title": "Task B",
+              "type": "problem-documents"
+            },
+            {
+              "initials": "C",
+              "title": "Task C",
+              "type": "problem-documents"
+            }
+          ]
+        },
         {
           "tab": "my-work",
           "label": "My Work",
@@ -54,8 +80,70 @@
               "addDocument": true
             }
           ]
+        },
+        {
+          "tab": "class-work",
+          "label": "Class Work",
+          "sections": [
+            {
+              "title": "Workspaces",
+              "type": "published-problem-documents",
+              "dataTestHeader": "class-work-section-published",
+              "dataTestItem": "class-work-list-items",
+              "documentTypes": ["publication"],
+              "showStars": ["teacher"],
+              "properties": ["!isTeacherDocument"]
+            },
+            {
+              "title": "Workspaces",
+              "type": "published-personal-documents",
+              "dataTestHeader": "class-work-section-personal",
+              "dataTestItem": "class-work-list-items",
+              "documentTypes": ["personalPublication"],
+              "properties": ["!isTeacherDocument"]
+            },
+            {
+              "className": "section teacher published-documents",
+              "title": "Workspaces",
+              "type": "teacher-supports",
+              "dataTestHeader": "supports-section-teacher-supports",
+              "dataTestItem": "supports-list-items",
+              "documentTypes": ["publication", "personalPublication"],
+              "properties": ["isTeacherDocument", "!isDeleted"]
+            },
+            {
+              "title": "Workspaces",
+              "type": "teacher-supports",
+              "dataTestHeader": "supports-section-teacher-supports",
+              "dataTestItem": "supports-list-items",
+              "documentTypes": ["supportPublication"],
+              "properties": ["teacherSupport", "!isDeleted"]
+            }
+          ]
         }
       ]
+    },
+    "sections": {
+      "help": {
+        "initials": "HELP",
+        "title": "Help",
+        "placeholder": "Notes on Help"
+      },
+      "taskA": {
+        "initials": "A",
+        "title": "Task A",
+        "placeholder": "Work on Task A here"
+      },
+      "taskB": {
+        "initials": "B",
+        "title": "Task B",
+        "placeholder": "Work on Task B here"
+      },
+      "taskC": {
+        "initials": "C",
+        "title": "Task C",
+        "placeholder": "Work on Task C here"
+      }
     },
     "toolbar": [
       {
@@ -71,6 +159,16 @@
       {
         "id": "Drawing",
         "title": "Drawing",
+        "isTileTool": true
+      },
+      {
+        "id": "Image",
+        "title": "Image",
+        "isTileTool": true
+      },
+      {
+        "id": "Table",
+        "title": "Table",
         "isTileTool": true
       },
       {
@@ -97,14 +195,75 @@
         {
           "description": "M2S Problem 1.1 Description",
           "ordinal": 1,
-          "title": "Standard Document",
+          "title": "Getting Started in M2Studio",
           "subtitle": "",
           "disabled": [],
           "sections": [
             {
-              "type": "content",
+              "type": "help",
               "content": {
-                "tiles": []
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Welcome to your work space! In here, you will find information and questions. You will work both individually and in groups, so be sure to listen to your teacher about what to do when. </strong></p>",
+                        "<p><strong></strong></p>",
+                        "<p><strong>Some tips for this workspace:</strong></p>",
+                        "<p>To the left, you can see buttons. These will add tiles to this workspace. </p>",
+                        "<ul><li>The top button will create a space for you to create a diagram</li><li>The next button (with the A) will create a space for you to write down your thoughts</li><li>The button with the pencil will create a space where you can draw</li></ul>",
+                        "<p>You can rearrange your spaces by clicking on the top right-hand corner of the tile (where you will see 6 dots). This will allow you drag and move the tiles. </p>",
+                        "<p>You can click on the bottom of a tile and then drag the size up or down to make it smaller or bigger. </p>",
+                        "<p>You can share your work with your group-mates by clicking the {???}.</p>",
+                        "<p>You can also look at the work of your group-mates by {????}. See something creative that you want to build upon? Drag their tile into your workspace, write &quot;Borrowed from {name}&quot; at the top of the tile, and then make your modifications!</p>",
+                        "<p></p>",
+                        "<p><strong>Are you ready? Let&#x27;s go!</strong></p>"
+                      ]
+                    }
+                  }                  
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "taskA",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Situation A</strong></p>",
+                        "<p></p>",
+                        "<p><strong>The school board wonders how long the school building should be open every day. If they close the building they can save money on operating costs, but then students might not have a place to study. The school board hires you to figure out how long each day the school should be open. Your first task is to determine what percentage of the day students typically spend at school. </strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>1. Describe your first task in your own words:</p>",
+                        "<p></p>",
+                        "<p><em>{Write you answer here}  </em></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>1. Describe your first task in your own words:</p>",
+                        "<p></p>",
+                        "<p><em>{Write you answer here}  </em></p>"
+                      ]
+                    }
+                  }                         
+                ]
               },
               "supports": []
             }
