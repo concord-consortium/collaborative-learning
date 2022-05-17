@@ -1,17 +1,13 @@
 import Canvas from '../../../../support/elements/common/Canvas';
 import ClueCanvas from '../../../../support/elements/clue/cCanvas';
 import TextToolTile from '../../../../support/elements/clue/TextToolTile';
-import DrawToolTile from '../../../../support/elements/clue/DrawToolTile';
-
 
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 const textToolTile = new TextToolTile;
-const drawToolTile = new DrawToolTile;
-
 
 context('Shared Variables', function () {
-  const queryParam = "?appMode=qa&fakeClass=5&fakeUser=student:5&demoOffering=5&problem=1.1&qaGroup=5&unit=m2s";
+  const queryParam = "?appMode=qa&fakeClass=5&fakeUser=student:5&demoOffering=5&problem=1.1&qaGroup=5&unit=example-variables";
   // What is the difference between fakeOffering and demoOffering
 
   let title;
