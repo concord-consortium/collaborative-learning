@@ -33,7 +33,8 @@
       },
       "text": {
         "tools": ["bold", "subscript", "superscript", "m2s-variables"]
-      }
+      },
+      "drawing": {"tools": ["select", "line", "vector", "rectangle", "ellipse", "stamp", "stroke-color", "fill-color", "variable", "delete"]}
     },
     "defaultStamps": [],
     "navTabs": {

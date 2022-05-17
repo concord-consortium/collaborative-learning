@@ -13,6 +13,7 @@ import EllipseToolIcon from "../../../clue/assets/icons/drawing/ellipse-icon.svg
 import LineToolIcon from "../../../clue/assets/icons/drawing/line-icon.svg";
 import RectToolIcon from "../../../clue/assets/icons/drawing/rectangle-icon.svg";
 import SelectToolIcon from "../../../clue/assets/icons/select-tool.svg";
+import VariableToolIcon from "../../../clue/assets/icons/variable-tool.svg";
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
 import { useTouchHold } from "../../../hooks/use-touch-hold";
 import { isLightColorRequiringContrastOffset } from "../../../utilities/color-utils";
@@ -22,7 +23,8 @@ const svgIcons: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
   line: FreehandToolIcon,
   rectangle: RectToolIcon,
   select: SelectToolIcon,
-  vector: LineToolIcon
+  vector: LineToolIcon,
+  variable: VariableToolIcon,
 };
 
 interface IButtonClasses {
@@ -139,4 +141,13 @@ interface IDeleteToolButtonProps {
 }
 export const DeleteButton: React.FC<IDeleteToolButtonProps> = (props) => {
   return <SvgToolbarButton SvgIcon={DeleteSelectionIcon} buttonClass="delete" title="Delete" {...props} />;
+};
+
+interface IVariableToolButtonProps {
+  disabled?: boolean;
+  onClick: () => void;
+}
+
+export const VariableButton: React.FC<IVariableToolButtonProps> = (props) => {
+  return <SvgToolbarButton SvgIcon={VariableToolIcon} buttonClass="variable" title="Variable" {...props} />;
 };
