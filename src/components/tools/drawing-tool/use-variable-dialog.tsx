@@ -1,14 +1,20 @@
 import React, { useState } from "react";
 import Select from "react-select";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
+import { DrawingContentModelType } from "../../../models/tools/drawing/drawing-content";
+import { VariableDrawingObjectData } from "../../../models/tools/drawing/drawing-objects";
 
 import './variable-dialog.scss';
 
-export const useVariableDialog = (options: {
-  label: string;
-  value: string;
-}[]) => {
+type SelectType = { label: string, value: string}
+type SelectsType = SelectType[];
 
+interface IProps {
+  options: SelectsType;
+  drawingContent: DrawingContentModelType;
+}
+
+export const useVariableDialog = ({options, drawingContent}: IProps) => {
   const ModalContent = () => {
       const [isMenuOpen, setIsMenuOpen] = useState(false);
       const name = "var";
@@ -49,6 +55,7 @@ export const useVariableDialog = (options: {
           cursor: 'pointer'
         }),
       };
+
     return (
       <div className="content">
         <div className="variable-choices">
@@ -73,12 +80,26 @@ export const useVariableDialog = (options: {
     );
   };
 
+  const handleClick = () => {
+    const variableChip: VariableDrawingObjectData = ({
+      type: "variable",
+      x: 250,
+      y: 50,
+      width: 75,
+      height: 24,
+      name: "pool",
+      value: "15",
+      unit: "balls"
+    });
+    drawingContent.applyChange({action: "create", data: variableChip});
+  };
+
   const [showVariableDialog, hideVariableDialog] = useCustomModal({
     className: "variable-dialog",
     title: "Insert Variable",
     Content: ModalContent,
     contentProps: {},
-    buttons: [{ label: "Cancel" },{  label: "OK" }],
+    buttons: [{ label: "Cancel" },{  label: "OK", onClick: handleClick }],
   }, []);
   return [showVariableDialog, hideVariableDialog];
 };

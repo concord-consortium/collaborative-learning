@@ -66,12 +66,12 @@ export const ToolbarView: React.FC<IProps> = (
     return { modalButton: type, selected: selectedButton === type, settings: settings || toolbarSettings };
   };
   // TODO change to non-hardcoded version when implemented with shared model
-const options = [
-  { label: "pool", value: "Pool"},
-  { label: "stripes", value: "Stripes"},
-  { label: "solids", value: "solids"},
-];
-  const [showVariableDialog] = useVariableDialog(options);
+  const options = [
+    { label: "pool", value: "Pool"},
+    { label: "stripes", value: "Stripes"},
+    { label: "solids", value: "solids"},
+  ];
+  const [showVariableDialog] = useVariableDialog({ options, drawingContent });
 
   const handleSetSelectedButton = (modalButton: ToolbarModalButton) => {
     drawingContent.setSelectedButton(modalButton);
@@ -116,7 +116,7 @@ const options = [
     drawingContent.deleteSelectedObjects();
   };
 
-  const handleSetVariableButton = (modalButton: ToolbarModalButton) => {
+  const handleShowVariableDialog = (modalButton: ToolbarModalButton) => {
     drawingContent.setSelectedButton(modalButton);
     forceUpdate();
     showVariableDialog();
@@ -153,7 +153,7 @@ const options = [
                                     onClick={() => handleToggleShowFillColorPalette()} />,
     "delete": <DeleteButton key="delete" disabled={!drawingContent.hasSelectedObjects} onClick={handleDeleteButton} />,
     "variable": <SvgToolModeButton key="variable" {...modalButtonProps("variable")} title="Variable"
-                                    onSetSelectedButton={handleSetVariableButton} />,
+                                    onSetSelectedButton={handleShowVariableDialog} />,
   };
 
   const toolbarClasses = classNames("drawing-tool-toolbar", { disabled: !isEnabled, flip: flipPalettes });

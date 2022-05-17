@@ -245,7 +245,7 @@ class VariableObject extends DrawingObject {
   }
 
   public render(options: DrawingObjectOptions): JSX.Element|null {
-    const {x, y, width, height, name, value} = this.model;
+    const {x, y, width, height} = this.model;
     const {id, handleHover} = options;
 
     const varChipStyle = { border: "1px solid black",
@@ -254,24 +254,23 @@ class VariableObject extends DrawingObject {
       margin: "0 1px",
       width: "fit-content",
     };
-      // userSelect: none};
     const varObj = Variable.create({name: "pool", value: 15, unit: "totalballs"});
 
     return (
-          <foreignObject
-            key={id}
-            x={x}
-            y={y}
-            width={width}
-            height={height}
-            overflow="visible"
-            onMouseEnter={(e) => handleHover ? handleHover(e, this, true) : null }
-            onMouseLeave={(e) => handleHover ? handleHover(e, this, false) : null }
-          >
-            <div style={varChipStyle} id={id}>
-              <VariableChip variable={varObj} />
-            </div>
-          </foreignObject>
+      <foreignObject
+        key={id}
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        overflow="visible"
+        onMouseEnter={(e) => handleHover ? handleHover(e, this, true) : null }
+        onMouseLeave={(e) => handleHover ? handleHover(e, this, false) : null }
+      >
+        <div style={varChipStyle} id={id}>
+          <VariableChip variable={varObj} />
+        </div>
+      </foreignObject>
     );
   }
 }
@@ -555,20 +554,6 @@ class VariableDrawingTool extends DrawingTool {
   constructor(drawingLayer: DrawingLayerView) {
     super(drawingLayer);
   }
-
-  public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
-    const variableChip: VariableObject = new VariableObject({
-      type: "variable",
-      x: e.clientX-50,
-      y: e.clientY-100,
-      width: 75,
-      height: 24,
-      name: "pool",
-      value: "15"
-    });
-
-    this.drawingLayer.addNewDrawingObject(variableChip.model);
-  }
 }
 
 class SelectionDrawingTool extends DrawingTool {
@@ -682,6 +667,7 @@ interface DrawingLayerViewProps {
   readOnly?: boolean;
   scale?: number;
   onSetCanAcceptDrop: (tileId?: string) => void;
+  showVariableDialog?: boolean;
 }
 
 interface DrawingLayerViewState {
