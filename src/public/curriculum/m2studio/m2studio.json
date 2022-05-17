@@ -6,8 +6,6 @@
   "config": {
     "autoAssignStudentsToIndividualGroups": true,
     "disablePublish": [
-      { "documentType": "personal" },
-      { "documentType": "problem" },
       { "documentType": "learningLog" }
     ],
     "placeholderText": "Enter notes here",
@@ -133,28 +131,6 @@
         }
       ]
     },
-    "sections": {
-      "help": {
-        "initials": "DOC",
-        "title": "Get Started",
-        "placeholder": "Notes on Help"
-      },
-      "taska": {
-        "initials": "A",
-        "title": "Task A",
-        "placeholder": "Work on Task A here"
-      },
-      "taskb": {
-        "initials": "B",
-        "title": "Task B",
-        "placeholder": "Work on Task B here"
-      },
-      "taskc": {
-        "initials": "C",
-        "title": "Task C",
-        "placeholder": "Work on Task C here"
-      }
-    },
     "toolbar": [
       {
         "id": "Diagram",
@@ -190,10 +166,25 @@
     ]
   },
   "sections": {
-    "content": {
-      "initials": "",
-      "title": "Content",
-      "placeholder": ""
+    "help": {
+      "initials": "DOC",
+      "title": "Get Started",
+      "placeholder": "Notes on Help"
+    },
+    "taska": {
+      "initials": "A",
+      "title": "Task A",
+      "placeholder": "Work on Task A here"
+    },
+    "taskb": {
+      "initials": "B",
+      "title": "Task B",
+      "placeholder": "Work on Task B here"
+    },
+    "taskc": {
+      "initials": "C",
+      "title": "Task C",
+      "placeholder": "Work on Task C here"
     }
   },
   "investigations": [
@@ -231,7 +222,22 @@
                         "<p><strong>Are you ready? Let&#x27;s go!</strong></p>"
                       ]
                     }
-                  }                  
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Welcome to teacher solutions</strong></p>",
+                        "<p><strong>Some tips for this workspace:</strong></p>",
+                        "<p>If your students are having trouble, consider putting some tips in a document of your own and publishing it with the uparrow button near the File menu. This will appear in Class Work and students can see the examples you post. They can publish too and the class can share ideas.</p>",
+                        "<p>All content from the left hand panels can be dragged into working documents on the right. Some curriculum pieces are intended to be dragged in as starting places for student work.</p>",
+                        "<p></p>",
+                        "<p><strong>Are you ready? Let&#x27;s go!</strong></p>"
+                      ]
+                    }
+                  }             
                 ]
               },
               "supports": []
@@ -342,7 +348,7 @@
               "supports": []
             },
             {
-              "type": "taskB",
+              "type": "taskb",
               "content": {
                 "tiles": [
                   {
@@ -366,6 +372,25 @@
                         "<p><em>{Write you answer here}  </em></p>"
                       ]
                     }
+                  }                    
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "taskc",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Situation C</strong></p>",
+                        "<p></p>",
+                        "<p><strong>The foo in the blah.... </strong></p>"
+                      ]
+                    }
                   },
                   {
                     "content": {
@@ -377,7 +402,7 @@
                         "<p><em>{Write you answer here}  </em></p>"
                       ]
                     }
-                  }                         
+                  }
                 ]
               },
               "supports": []
@@ -393,9 +418,32 @@
           "disabled": [],
           "sections": [
             {
-              "type": "content",
+              "type": "taskc",
               "content": {
-                "tiles": []
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Situation C</strong></p>",
+                        "<p></p>",
+                        "<p><strong>The foo in the blah.... </strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>1. Describe your first task in your own words:</p>",
+                        "<p></p>",
+                        "<p><em>{Write you answer here}  </em></p>"
+                      ]
+                    }
+                  }
+                ]
               },
               "supports": []
             }
