@@ -16,6 +16,7 @@ import { ToolbarModalButton, ToolbarSettings } from "../../../models/tools/drawi
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { useSettingFromStores } from "../../../hooks/use-stores";
 import { useVariableDialog } from "./use-variable-dialog";
+import { getVariables } from "../../../plugins/shared-variables/drawing/drawing-utils";
 
 interface IPaletteState {
   showStamps: boolean;
@@ -65,13 +66,8 @@ export const ToolbarView: React.FC<IProps> = (
     const { selectedButton, toolbarSettings } = drawingContent;
     return { modalButton: type, selected: selectedButton === type, settings: settings || toolbarSettings };
   };
-  // TODO change to non-hardcoded version when implemented with shared model
-  const options = [
-    { label: "pool", value: "Pool"},
-    { label: "stripes", value: "Stripes"},
-    { label: "solids", value: "solids"},
-  ];
-  const [showVariableDialog] = useVariableDialog({ options, drawingContent });
+
+  const [showVariableDialog] = useVariableDialog({ drawingContent });
 
   const handleSetSelectedButton = (modalButton: ToolbarModalButton) => {
     drawingContent.setSelectedButton(modalButton);

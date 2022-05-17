@@ -245,7 +245,7 @@ class VariableObject extends DrawingObject {
   }
 
   public render(options: DrawingObjectOptions): JSX.Element|null {
-    const {x, y, width, height} = this.model;
+    const {x, y, width, height, name, value, unit} = this.model;
     const {id, handleHover} = options;
 
     const varChipStyle = { border: "1px solid black",
@@ -254,7 +254,8 @@ class VariableObject extends DrawingObject {
       margin: "0 1px",
       width: "fit-content",
     };
-    const varObj = Variable.create({name: "pool", value: 15, unit: "totalballs"});
+    const floatValue = parseFloat(value || "");
+    const varObj = Variable.create({name, value: floatValue, unit});
 
     return (
       <foreignObject
