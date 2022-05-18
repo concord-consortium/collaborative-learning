@@ -66,7 +66,7 @@ export function getOrFindSharedModel(drawingContent: DrawingContentModelType) {
   return sharedModel;
 }
 
-export function getSelectedVariable(drawingContent: DrawingContentModelType, selectedVariableId: string) {
+export function findVariable(drawingContent: DrawingContentModelType, selectedVariableId: string) {
   const variables = getVariables(drawingContent);
   const selectedVariable = variables.find(v => v.id === selectedVariableId);
   return selectedVariable;
