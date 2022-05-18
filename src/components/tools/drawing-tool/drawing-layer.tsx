@@ -270,7 +270,7 @@ class VariableObject extends DrawingObject {
         onMouseEnter={(e) => handleHover ? handleHover(e, this, true) : null }
         onMouseLeave={(e) => handleHover ? handleHover(e, this, false) : null }
       >
-        <div style={varChipStyle} id={id}>
+        <div style={varChipStyle} id={id} className="drawing-variable">
           <VariableChip variable={selectedVariable} />
         </div>
       </foreignObject>

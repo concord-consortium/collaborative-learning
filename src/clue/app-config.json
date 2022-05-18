@@ -248,6 +248,9 @@
     "example-no-section-problem-tab": {
       "content": "curriculum/example-curriculum/example-no-section-problem-tab.json"
     },
+    "example-variables": {
+      "content": "curriculum/example-curriculum/example-variables.json"
+    },
     "faw": {
       "content": "curriculum/filling-and-wrapping/filling-and-wrapping.json"
     },
