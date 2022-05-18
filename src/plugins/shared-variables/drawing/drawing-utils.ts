@@ -3,32 +3,32 @@ import { getType } from "mobx-state-tree";
 import { DrawingContentModelType } from "../../../models/tools/drawing/drawing-content";
 import { SharedVariables, SharedVariablesType } from "../shared-variables";
 
-function getSharedVariablesModel(textContent: DrawingContentModelType) {
-  const sharedModelManager = textContent.tileEnv?.sharedModelManager;
+function getSharedVariablesModel(drawingContent: DrawingContentModelType) {
+  const sharedModelManager = drawingContent.tileEnv?.sharedModelManager;
   // Perhaps we should pass the type to getTileSharedModel, so it can return the right value
   // just like findFirstSharedModelByType does
   //
   // For now we are checking the type ourselves, and we are assuming the shared model we want
   // is the first one.
-  const firstSharedModel = sharedModelManager?.getTileSharedModels(textContent)?.[0];
+  const firstSharedModel = sharedModelManager?.getTileSharedModels(drawingContent)?.[0];
   if (!firstSharedModel || getType(firstSharedModel) !== SharedVariables) {
     return undefined;
   }
   return firstSharedModel as SharedVariablesType;
 }
 
-export function getVariables(textContent: DrawingContentModelType): VariableType[] {
-  const sharedModel = getOrFindSharedModel(textContent);
+export function getVariables(drawingContent: DrawingContentModelType): VariableType[] {
+  const sharedModel = getOrFindSharedModel(drawingContent);
   return sharedModel ? sharedModel.variables : [];
 }
 
-export function getOrFindSharedModel(textContent: DrawingContentModelType) {
-  let sharedModel = getSharedVariablesModel(textContent);
+export function getOrFindSharedModel(drawingContent: DrawingContentModelType) {
+  let sharedModel = getSharedVariablesModel(drawingContent);
 
   if (!sharedModel) {
     // The document doesn't have a shared model yet, or the manager might
     // not be ready yet
-    const sharedModelManager = textContent.tileEnv?.sharedModelManager;
+    const sharedModelManager = drawingContent.tileEnv?.sharedModelManager;
     if (!sharedModelManager || !sharedModelManager.isReady) {
       // In this case we can't do anything. 
       // Print a warning because it should be unusual
@@ -59,7 +59,7 @@ export function getOrFindSharedModel(textContent: DrawingContentModelType) {
       return;
     }
 
-    sharedModelManager.addTileSharedModel(textContent, containerSharedModel);
+    sharedModelManager.addTileSharedModel(drawingContent, containerSharedModel);
     sharedModel = containerSharedModel;
   }
 
