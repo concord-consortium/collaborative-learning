@@ -251,7 +251,9 @@ class VariableObject extends DrawingObject {
       borderRadius: "5px",
       padding: "1px 3px",
       margin: "0 1px",
+      minWidth: width,
       width: "fit-content",
+      height,
     };
     const selectedVariable = getSelectedVariable(this.drawingContent, variableId);
     if (!selectedVariable) {
@@ -263,8 +265,6 @@ class VariableObject extends DrawingObject {
         key={id}
         x={x}
         y={y}
-        width={width}
-        height={height}
         overflow="visible"
         onMouseEnter={(e) => handleHover ? handleHover(e, this, true) : null }
         onMouseLeave={(e) => handleHover ? handleHover(e, this, false) : null }
