@@ -16,10 +16,8 @@ import { observer } from "mobx-react";
 import { ImageContentSnapshotOutType } from "../../../models/tools/image/image-content";
 import { gImageMap } from "../../../models/image-map";
 import placeholderImage from "../../../assets/image_placeholder.png";
-import { Variable } from "@concord-consortium/diagram-view";
 import { VariableChip } from "../../../plugins/shared-variables/slate/variable-chip";
-import { elementIsOrContains } from "@blueprintjs/core/lib/esm/common/utils";
-import { isVisible } from "@testing-library/user-event/dist/utils";
+import { getVariables } from "../../../plugins/shared-variables/drawing/drawing-utils";
 
 const SELECTION_COLOR = "#777";
 const HOVER_COLOR = "#bbdd00";
@@ -232,9 +230,11 @@ class ImageObject extends DrawingObject {
 
 class VariableObject extends DrawingObject {
   declare model: VariableDrawingObjectData;
+  drawingContent: DrawingContentModelType;
 
-  constructor(model: VariableDrawingObjectData) {
+  constructor(model: VariableDrawingObjectData, drawingContent: DrawingContentModelType) {
     super(model);
+    this.drawingContent = drawingContent;
   }
 
   public getBoundingBox() {
@@ -245,17 +245,19 @@ class VariableObject extends DrawingObject {
   }
 
   public render(options: DrawingObjectOptions): JSX.Element|null {
-    const {x, y, width, height, name, value, unit} = this.model;
+    const {x, y, width, height, variableId } = this.model;
     const {id, handleHover} = options;
-
     const varChipStyle = { border: "1px solid black",
       borderRadius: "5px",
       padding: "1px 3px",
       margin: "0 1px",
       width: "fit-content",
     };
-    const floatValue = parseFloat(value || "");
-    const varObj = Variable.create({name, value: floatValue, unit});
+    const variables = getVariables(this.drawingContent);
+    const selectedVariable = variables.find((variable) => variable.id === variableId);
+    if (!selectedVariable) {
+      return null;
+    }
 
     return (
       <foreignObject
@@ -269,7 +271,7 @@ class VariableObject extends DrawingObject {
         onMouseLeave={(e) => handleHover ? handleHover(e, this, false) : null }
       >
         <div style={varChipStyle} id={id}>
-          <VariableChip variable={varObj} />
+          <VariableChip variable={selectedVariable} />
         </div>
       </foreignObject>
     );
@@ -668,7 +670,6 @@ interface DrawingLayerViewProps {
   readOnly?: boolean;
   scale?: number;
   onSetCanAcceptDrop: (tileId?: string) => void;
-  showVariableDialog?: boolean;
 }
 
 interface DrawingLayerViewState {
@@ -1181,7 +1182,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         break;
       }
       case "variable":
-        drawingObject = new VariableObject(data);
+          drawingObject = new VariableObject(data, this.props.model.content as DrawingContentModelType);
         break;
     }
     if (drawingObject?.model.id) {

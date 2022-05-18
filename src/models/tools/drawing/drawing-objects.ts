@@ -78,9 +78,7 @@ export interface VariableDrawingObjectData {
   y: number;
   width: number;
   height: number;
-  name?: string;
-  value?: string;
-  unit?: string;
+  variableId: string;
 }
 
 export type DrawingObjectDataType = LineDrawingObjectData | VectorDrawingObjectData
