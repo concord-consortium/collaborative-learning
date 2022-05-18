@@ -3,7 +3,8 @@ import { extractDragTileType, kDragTileContent } from "../tool-tile";
 import { computeStrokeDashArray, DrawingContentModelType } from "../../../models/tools/drawing/drawing-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DrawingObjectDataType, LineDrawingObjectData, VectorDrawingObjectData, RectangleDrawingObjectData,
-  EllipseDrawingObjectData, Point, ImageDrawingObjectData} from "../../../models/tools/drawing/drawing-objects";
+  EllipseDrawingObjectData, Point, ImageDrawingObjectData,
+  VariableDrawingObjectData} from "../../../models/tools/drawing/drawing-objects";
 import {
   DefaultToolbarSettings, DrawingToolChange, DrawingToolDeletion, DrawingToolMove, DrawingToolUpdate, ToolbarSettings
 } from "../../../models/tools/drawing/drawing-types";
@@ -15,6 +16,8 @@ import { observer } from "mobx-react";
 import { ImageContentSnapshotOutType } from "../../../models/tools/image/image-content";
 import { gImageMap } from "../../../models/image-map";
 import placeholderImage from "../../../assets/image_placeholder.png";
+import { VariableChip } from "../../../plugins/shared-variables/slate/variable-chip";
+import { findVariable } from "../../../plugins/shared-variables/drawing/drawing-utils";
 
 const SELECTION_COLOR = "#777";
 const HOVER_COLOR = "#bbdd00";
@@ -26,13 +29,13 @@ interface BoundingBox {
   nw: Point;
   se: Point;
 }
-interface DrawingObjectOptions {
+export interface DrawingObjectOptions {
   id: any;
   handleHover?: (e: MouseEvent|React.MouseEvent<any>, obj: DrawingObject, hovering: boolean) => void;
   drawingLayer: DrawingLayerView;
 }
 
-abstract class DrawingObject {
+export abstract class DrawingObject {
   public model: DrawingObjectDataType;
 
   constructor(model: DrawingObjectDataType) {
@@ -225,8 +228,57 @@ class ImageObject extends DrawingObject {
   }
 }
 
+class VariableObject extends DrawingObject {
+  declare model: VariableDrawingObjectData;
+  drawingContent: DrawingContentModelType;
+
+  constructor(model: VariableDrawingObjectData, drawingContent: DrawingContentModelType) {
+    super(model);
+    this.drawingContent = drawingContent;
+  }
+
+  public getBoundingBox() {
+    const {x, y, width, height} = this.model;
+    const nw: Point = {x, y};
+    const se: Point = {x: x + width, y: y + height};
+    return {nw, se};
+  }
+
+  public render(options: DrawingObjectOptions): JSX.Element|null {
+    const {x, y, width, height, variableId } = this.model;
+    const {id, handleHover} = options;
+    const varChipStyle = { border: "1px solid black",
+      borderRadius: "5px",
+      padding: "1px 3px",
+      margin: "0 1px",
+      minWidth: width,
+      width: "fit-content",
+      height,
+    };
+    const selectedVariable = findVariable(this.drawingContent, variableId);
+    if (!selectedVariable) {
+      return null;
+    }
+
+    return (
+      <foreignObject
+        key={id}
+        x={x}
+        y={y}
+        overflow="visible"
+        onMouseEnter={(e) => handleHover ? handleHover(e, this, true) : null }
+        onMouseLeave={(e) => handleHover ? handleHover(e, this, false) : null }
+      >
+        <div style={varChipStyle} id={id} className="drawing-variable">
+          <VariableChip variable={selectedVariable} />
+        </div>
+      </foreignObject>
+    );
+  }
+}
+
 type DrawableObject = LineObject | VectorObject | RectangleObject | EllipseObject;
-type DrawingObjectUnion = DrawableObject | ImageObject;
+type DrawingObjectUnion = DrawableObject | ImageObject | VariableObject;
 
 /**  ======= Drawing Tools ======= */
 
@@ -499,6 +551,13 @@ class StampDrawingTool extends DrawingTool {
   }
 }
 
+class VariableDrawingTool extends DrawingTool {
+
+  constructor(drawingLayer: DrawingLayerView) {
+    super(drawingLayer);
+  }
+}
+
 class SelectionDrawingTool extends DrawingTool {
   constructor(drawingLayer: DrawingLayerView) {
     super(drawingLayer);
@@ -650,7 +709,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       selection: new SelectionDrawingTool(this),
       rectangle: new RectangleDrawingTool(this),
       ellipse: new EllipseDrawingTool(this),
-      stamp: new StampDrawingTool(this)
+      stamp: new StampDrawingTool(this),
+      variable: new VariableDrawingTool(this),
     };
     this.currentTool = this.tools.selection;
 
@@ -718,6 +778,9 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         break;
       case "stamp":
         this.setCurrentTool((this.tools.stamp as StampDrawingTool).setSettings(settings));
+        break;
+      case "variable":
+        this.setCurrentTool((this.tools.variable as VariableDrawingTool).setSettings(settings));
         break;
     }
   }
@@ -1117,6 +1180,9 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         }
         break;
       }
+      case "variable":
+          drawingObject = new VariableObject(data, this.props.model.content as DrawingContentModelType);
+        break;
     }
     if (drawingObject?.model.id) {
       const objectId = drawingObject.model.id;

@@ -1,13 +1,15 @@
 import Canvas from '../../../../support/elements/common/Canvas';
 import ClueCanvas from '../../../../support/elements/clue/cCanvas';
 import TextToolTile from '../../../../support/elements/clue/TextToolTile';
+import DrawToolTile from '../../../../support/elements/clue/DrawToolTile';
 
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 const textToolTile = new TextToolTile;
+const drawToolTile = new DrawToolTile;
 
 context('Shared Variables', function () {
-  const queryParam = "?appMode=qa&fakeClass=5&fakeUser=student:5&demoOffering=5&problem=1.1&qaGroup=5&unit=example-variables";
+  const queryParam = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=example-variables";
   // What is the difference between fakeOffering and demoOffering
 
   let title;
@@ -121,8 +123,25 @@ context('Shared Variables', function () {
       clueCanvas.addTile('drawing');
       cy.get("[data-original-title=Variable").click();
       cy.get(".modal-header").should("contain", "Insert Variable");
-      cy.get("button").contains("OK").click();
-      cy.get(".modal-header").should("not.exist");
+      cy.get(".ReactModalPortal").within(() => {
+        cy.findByRole("combobox").type("VarC{enter}");
+        cy.findByRole("button", {name: "OK"}).click();
+      });
     });
+    it("verify variables appears in draw tool", () => {
+      drawToolTile.getDrawTile().last().find('.drawing-variable:contains("VarC")').should('have.length', 1);
+    });
+    it("verify changes in diagram view propagates to draw tool", () => {
+      cy.get(".diagram-tool").find(".variable-info.name[value=VarC]");
+      cy.get(".diagram-tool").find(".variable-info.name[value=VarC]").type('Var D');
+      drawToolTile.getDrawTile().last().find('.drawing-variable:contains("VarCVar D")').should('exist');
+    });
+    it('deletes variable chip in draw tool', () => {
+      drawToolTile.getDrawTile().last().click();
+      drawToolTile.getDrawToolSelect().click();
+      drawToolTile.getDrawTile().last().find('.drawing-variable:contains("VarC")').click();
+      drawToolTile.getDrawToolDelete().click();
+      drawToolTile.getDrawTile().last().find('.drawing-variable:contains("VarCVar D")').should('not.exist');
+    })
   });
 });

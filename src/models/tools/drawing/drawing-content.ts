@@ -241,6 +241,11 @@ export const DrawingContentModel = ToolContentModel
         }
       }
     };
-  });
+  })
+  .actions(self => ({
+    updateAfterSharedModelChanges() {
+      console.log("TODO: need to implement yet");
+    }
+  }));
 
 export type DrawingContentModelType = Instance<typeof DrawingContentModel>;
