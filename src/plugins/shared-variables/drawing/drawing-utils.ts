@@ -30,7 +30,7 @@ export function getOrFindSharedModel(drawingContent: DrawingContentModelType) {
     // not be ready yet
     const sharedModelManager = drawingContent.tileEnv?.sharedModelManager;
     if (!sharedModelManager || !sharedModelManager.isReady) {
-      // In this case we can't do anything. 
+      // In this case we can't do anything.
       // Print a warning because it should be unusual
       console.warn("shared model manager isn't available");
       return;
@@ -52,7 +52,7 @@ export function getOrFindSharedModel(drawingContent: DrawingContentModelType) {
       // Rather than creating the shared variables model here, it would be
       // better to do it like the diagram-content.ts does.  It basically waits
       // for the sharedModelManager to be ready in a MobX reaction and then adds
-      // the shared variables model when it is ready. 
+      // the shared variables model when it is ready.
       //
       // With that approach getVariables could just be a view that doesn't
       // modify any state.
@@ -64,4 +64,10 @@ export function getOrFindSharedModel(drawingContent: DrawingContentModelType) {
   }
 
   return sharedModel;
+}
+
+export function getSelectedVariable(drawingContent: DrawingContentModelType, selectedVariableId: string) {
+  const variables = getVariables(drawingContent);
+  const selectedVariable = variables.find(v => v.id === selectedVariableId);
+  return selectedVariable;
 }

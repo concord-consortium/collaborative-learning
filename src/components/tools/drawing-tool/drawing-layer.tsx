@@ -17,7 +17,7 @@ import { ImageContentSnapshotOutType } from "../../../models/tools/image/image-c
 import { gImageMap } from "../../../models/image-map";
 import placeholderImage from "../../../assets/image_placeholder.png";
 import { VariableChip } from "../../../plugins/shared-variables/slate/variable-chip";
-import { getVariables } from "../../../plugins/shared-variables/drawing/drawing-utils";
+import { getSelectedVariable } from "../../../plugins/shared-variables/drawing/drawing-utils";
 
 const SELECTION_COLOR = "#777";
 const HOVER_COLOR = "#bbdd00";
@@ -253,8 +253,7 @@ class VariableObject extends DrawingObject {
       margin: "0 1px",
       width: "fit-content",
     };
-    const variables = getVariables(this.drawingContent);
-    const selectedVariable = variables.find((variable) => variable.id === variableId);
+    const selectedVariable = getSelectedVariable(this.drawingContent, variableId);
     if (!selectedVariable) {
       return null;
     }

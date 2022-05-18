@@ -3,7 +3,7 @@ import Select from "react-select";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { DrawingContentModelType } from "../../../models/tools/drawing/drawing-content";
 import { VariableDrawingObjectData } from "../../../models/tools/drawing/drawing-objects";
-import { getVariables } from "../../../plugins/shared-variables/drawing/drawing-utils";
+import { getSelectedVariable, getVariables } from "../../../plugins/shared-variables/drawing/drawing-utils";
 
 import './variable-dialog.scss';
 
@@ -84,10 +84,9 @@ export const useVariableDialog = ({drawingContent}: IProps) => {
   };
 
   const handleClick = () => {
-    const variables = getVariables(drawingContent);
-    const selectedVariable = variables.find((variable) => variable.id === selectedVariableId);
+    const selectedVariable = selectedVariableId && getSelectedVariable(drawingContent, selectedVariableId);
     if (!selectedVariable) {
-      return;
+      return null;
     }
     const variableChip: VariableDrawingObjectData = ({
       type: "variable",
