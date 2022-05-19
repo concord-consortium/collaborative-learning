@@ -3,7 +3,7 @@ import Select from "react-select";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { DrawingContentModelType } from "../../../models/tools/drawing/drawing-content";
 import { VariableDrawingObjectData } from "../../../models/tools/drawing/drawing-objects";
-import { findVariable, getVariables } from "../../../plugins/shared-variables/drawing/drawing-utils";
+import { findVariable, getVariables } from "./drawing-utils";
 
 import './variable-dialog.scss';
 
