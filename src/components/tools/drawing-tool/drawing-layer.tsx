@@ -824,7 +824,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       if (!object || !_filter(object)) {
         return null;
       }
-      console.log("id:", id, object);
       return object.render({
         id,
         handleHover: this.handleObjectHover,
