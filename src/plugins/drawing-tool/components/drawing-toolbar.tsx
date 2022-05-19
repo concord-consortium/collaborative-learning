@@ -17,7 +17,7 @@ import { DrawingContentModelType } from "../model//drawing-content";
 import { ToolbarModalButton, ToolbarSettings } from "../model/drawing-types";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { useSettingFromStores } from "../../../hooks/use-stores";
-import { useVariableDialog } from "../../../components/tools/drawing-tool/use-variable-dialog";
+import { useVariableDialog } from "../../shared-variables/drawing/use-variable-dialog";
 
 interface IPaletteState {
   showStamps: boolean;
