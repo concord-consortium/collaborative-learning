@@ -1,7 +1,7 @@
-import { DisplayDialogSettings, Editor, FieldType, IDialogController, 
+import { DisplayDialogSettings, Editor, FieldType, IDialogController,
   IFieldValues, IModalDialogProps, ModalDialog } from "@concord-consortium/slate-editor";
 import { clone } from "lodash";
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { useCustomModal } from "../../hooks/use-custom-modal";
 import { useForceUpdate } from "./hooks/use-force-update";
 
@@ -14,11 +14,11 @@ export const useTextToolDialog = ({editor}: IProps) => {
   const validValuesRef = useRef<IFieldValues>();
   const forceUpdate = useForceUpdate();
 
-  const setFieldValues = (newValues: IFieldValues) => {
+  const setFieldValues = useCallback((newValues: IFieldValues) => {
     if (!settingsRef.current) return;
     settingsRef.current.values = { ...settingsRef.current.values, ...newValues };
     forceUpdate();
-  };
+  }, [forceUpdate]);
 
   const validateFieldValues = () => {
     if (settingsRef.current) {
@@ -60,7 +60,7 @@ export const useTextToolDialog = ({editor}: IProps) => {
   const dialogProps: IModalDialogProps = {
     title: settingsRef.current?.title || "",
     rows: settingsRef.current?.rows || [],
-    fieldValues: settingsRef.current?.values || {}, 
+    fieldValues: settingsRef.current?.values || {},
     onSetValue: handleSetValue,
     onChange: handleChange,
     onValidate: settingsRef.current?.onValidate,
@@ -86,7 +86,7 @@ export const useTextToolDialog = ({editor}: IProps) => {
       setFieldValues(newValues);
       validateFieldValues();
     }
-  }), [editor, showDialog]);
+  }), [editor, setFieldValues, showDialog]);
 
   return dialogController;
 };
