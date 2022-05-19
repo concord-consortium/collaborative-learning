@@ -1025,7 +1025,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
   private createDrawingObject(data: DrawingObjectDataType) {
     let drawingObject: DrawingObjectUnion;
-    console.log("data:", data);
     switch (data.type) {
       case "line":
         drawingObject = new LineObject(data);
