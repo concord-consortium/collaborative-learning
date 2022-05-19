@@ -92,8 +92,6 @@ export const useVariableDialog = ({drawingContent}: IProps) => {
       type: "variable",
       x: 250,
       y: 50,
-      width: 75,
-      height: 24,
       variableId: selectedVariable.id
     });
     drawingContent.applyChange({action: "create", data: variableChip});

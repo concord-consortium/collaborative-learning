@@ -16,9 +16,11 @@ export class VariableObject extends DrawingObject {
   }
 
   public getBoundingBox() {
-    const {x, y, width, height} = this.model;
+    const {x, y} = this.model;
+    const chipWidth = document.getElementById(this.model.variableId)?.getBoundingClientRect().width || 75;
+    const chipHeight = document.getElementById(this.model.variableId)?.getBoundingClientRect().height  || 24;
     const nw: Point = {x, y};
-    const se: Point = {x: x + width, y: y + height};
+    const se: Point = {x: x + chipWidth, y: y + chipHeight};
     return {nw, se};
   }
 
@@ -40,7 +42,7 @@ export class VariableObject extends DrawingObject {
         onMouseEnter={(e) => handleHover ? handleHover(e, this, true) : null }
         onMouseLeave={(e) => handleHover ? handleHover(e, this, false) : null }
       >
-        <span id={id} className="variable-chip">
+        <span id={variableId} className="drawing-variable variable-chip">
           <VariableChip variable={selectedVariable} />
         </span>
       </foreignObject>
