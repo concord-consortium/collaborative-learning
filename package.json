@@ -13,8 +13,9 @@
   "browserslist": "> 0.2%, last 5 versions, Firefox ESR, not dead",
   "jest": {
     "preset": "ts-jest/presets/js-with-ts",
+    "resolver": "<rootDir>/src/test/jest-resolver.js",
     "setupFilesAfterEnv": [
-      "<rootDir>/src/setupTests.ts"
+      "<rootDir>/src/test/setupTests.ts"
     ],
     "testEnvironment": "jsdom",
     "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
@@ -114,7 +115,7 @@
     "@types/d3-format": "^3.0.1",
     "@types/file-saver": "^2.0.5",
     "@types/is-hotkey": "^0.1.7",
-    "@types/jest": "^27.4.0",
+    "@types/jest": "^27.5.1",
     "@types/lodash": "^4.14.182",
     "@types/react": "^16.14.26",
     "@types/react-dom": "^16.9.16",
@@ -153,7 +154,8 @@
     "is-hotkey": "^0.2.0",
     "istanbul-instrumenter-loader": "^3.0.1",
     "istanbul-lib-coverage": "^3.2.0",
-    "jest": "^27.5.1",
+    "jest": "^28.1.0",
+    "jest-environment-jsdom": "^28.1.0",
     "jest-fetch-mock": "^3.0.3",
     "mini-css-extract-plugin": "^2.6.0",
     "nock": "^13.2.4",
@@ -165,7 +167,7 @@
     "script-loader": "^0.7.2",
     "string-replace-loader": "^3.1.0",
     "style-loader": "^3.3.1",
-    "ts-jest": "^27.1.3",
+    "ts-jest": "^28.0.2",
     "ts-loader": "^9.3.0",
     "ts-node": "^10.7.0",
     "typescript": "^4.6.4",
