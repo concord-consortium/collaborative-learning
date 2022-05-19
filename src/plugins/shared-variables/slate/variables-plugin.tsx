@@ -12,10 +12,8 @@ import { VariableChip } from "./variable-chip";
 import { kVariableSlateType, getVariables, getOrFindSharedModel } from "./variables-text-content";
 import { TextContentModelType } from "../../../models/tools/text/text-content";
 
-import "./variables-plugin.scss";
-
-const kVariableClass = "ccrte-variable";
-const kVariableHighlightClass = "ccrte-variable-highlight";
+const kVariableClass = "variable-chip";
+const kVariableHighlightClass = "variable-chip-highlight";
 
 function parseVariableValue(value?: string) {
   return value ? parseFloat(value) : undefined;
@@ -216,7 +214,7 @@ export function VariablesPlugin(textTile: TextContentModelType): HtmlSerializabl
               if (!sharedModel) {
                 return;
               }
-             
+
               let value = parseVariableValue(values.value);
               if (value == null) {
                 value = undefined;
@@ -271,13 +269,13 @@ export function VariablesPlugin(textTile: TextContentModelType): HtmlSerializabl
               isHighlighted: props.isSelected || props.isFocused,
               onClick: () => editor.moveFocusToStartOfNode(node),
               // This works because slate-editor has a built in emit command which triggers
-              // an emitter.  text-toolbar.tsx adds a listener to this emitter for the 
-              // toolbarDialog event. When this event is received it calls the command 
+              // an emitter.  text-toolbar.tsx adds a listener to this emitter for the
+              // toolbarDialog event. When this event is received it calls the command
               // which is the 3rd arg here (in this case configureVariable), and also gives
               // it the dialogController object followed by the node object
-              // 
+              //
               // This is all necessary so the configureVariable command can be triggered and
-              // it is passed the dialogController. The dialogController is managed by the 
+              // it is passed the dialogController. The dialogController is managed by the
               // text-toolbar so the configuredVariable command defined above doesn't have
               // direct access to it.
               onDoubleClick: () => editor.command("emit", "toolbarDialog", "configureVariable", node)

@@ -2,6 +2,8 @@ import { VariableType } from "@concord-consortium/diagram-view";
 import { observer } from "mobx-react";
 import React from "react";
 
+import "./variables-chip.scss";
+
 interface IProps {
   variable: VariableType;
 }
@@ -17,13 +19,13 @@ export const VariableChip: React.FC<IProps> = observer(({variable}) => {
 
   return (
     <>
-      {name && <span className="ccrte-name">{name}</span>}
-      {showEquals && <span className="ccrte-equals">=</span>}
-      {showValue && <span className="ccrte-value">{valueString}</span>}
-      {unit && 
+      {name && <span className="variable-name">{name}</span>}
+      {showEquals && <span className="variable-equals">=</span>}
+      {showValue && <span className="variable-value">{valueString}</span>}
+      {unit &&
         <>
           {wrapUnit && "("}
-            <span className="ccrte=unit">{unit}</span>
+            <span className="variable-unit">{unit}</span>
           {wrapUnit && ")"}
         </>
       }
