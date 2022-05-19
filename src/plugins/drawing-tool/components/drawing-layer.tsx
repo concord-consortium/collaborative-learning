@@ -1,12 +1,12 @@
 import React from "react";
-import { extractDragTileType, kDragTileContent } from "../tool-tile";
-import { computeStrokeDashArray, DrawingContentModelType } from "../../../plugins/drawing-tool/model/drawing-content";
+import { extractDragTileType, kDragTileContent } from "../../../components/tools/tool-tile";
+import { computeStrokeDashArray, DrawingContentModelType } from "../model/drawing-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DrawingObjectDataType, LineDrawingObjectData, VectorDrawingObjectData, RectangleDrawingObjectData,
-  EllipseDrawingObjectData, Point, ImageDrawingObjectData } from "../../../plugins/drawing-tool/model/drawing-objects";
-import { VariableObject } from "../../../plugins/shared-variables/drawing/variable-object";
+  EllipseDrawingObjectData, Point, ImageDrawingObjectData } from "../model/drawing-objects";
+import { VariableObject } from "../../shared-variables/drawing/variable-object";
 import { DefaultToolbarSettings, DrawingToolChange, DrawingToolDeletion, DrawingToolMove, 
-  DrawingToolUpdate, ToolbarSettings } from "../../../plugins/drawing-tool/model/drawing-types";
+  DrawingToolUpdate, ToolbarSettings } from "../model/drawing-types";
 import { getUrlFromImageContent, isPlaceholderImage } from "../../../utilities/image-utils";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { assign, filter } from "lodash";

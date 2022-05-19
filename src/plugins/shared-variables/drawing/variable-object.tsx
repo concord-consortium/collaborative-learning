@@ -1,5 +1,5 @@
 import React from "react";
-import DrawingObject, { DrawingObjectOptions } from "../../../components/tools/drawing-tool/drawing-object";
+import DrawingObject, { DrawingObjectOptions } from "../../drawing-tool/components/drawing-object";
 import { DrawingContentModelType } from "../../drawing-tool/model/drawing-content";
 import { Point, VariableDrawingObjectData } from "../../drawing-tool/model/drawing-objects";
 import { VariableChip } from "../slate/variable-chip";
