@@ -142,6 +142,6 @@ context('Shared Variables', function () {
       drawToolTile.getDrawTile().last().find('.drawing-variable:contains("VarC")').click();
       drawToolTile.getDrawToolDelete().click();
       drawToolTile.getDrawTile().last().find('.drawing-variable:contains("VarCVar D")').should('not.exist');
-    })
+    });
   });
 });

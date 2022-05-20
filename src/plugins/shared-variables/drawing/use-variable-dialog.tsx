@@ -18,7 +18,7 @@ export const useVariableDialog = ({drawingContent}: IProps) => {
       const variables = getVariables(drawingContent);
       const options = variables.map(variable => ({label: variable.name || "no name", value: variable.id }));
 
-      const [isMenuOpen, setIsMenuOpen] = useState(false);
+      const [ , setIsMenuOpen] = useState(false);
       const name = "var";
       const customStyles = {
         container: (provided: any) => ({

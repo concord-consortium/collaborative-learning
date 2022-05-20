@@ -78,7 +78,7 @@ module.exports = {
     },
     overrides: [
       { // test files
-        files: ["*.test.*"],
+        files: ["*.test.*", "jest-resolver.js"],
         env: {
           node: true,
           jest: true

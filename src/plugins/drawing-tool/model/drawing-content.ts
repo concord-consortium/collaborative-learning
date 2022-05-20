@@ -244,7 +244,7 @@ export const DrawingContentModel = ToolContentModel
   })
   .actions(self => ({
     updateAfterSharedModelChanges() {
-      console.log("TODO: need to implement yet");
+      console.warn("TODO: need to implement yet");
     }
   }));
 
