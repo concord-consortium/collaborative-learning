@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import React from "react";
-import { StampModelType } from "../../../models/tools/drawing/stamp";
+import { StampModelType } from "../model/stamp";
 
 interface IProps {
   stamp: StampModelType;

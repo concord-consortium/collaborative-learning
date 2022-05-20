@@ -1,9 +1,9 @@
 import classNames from "classnames";
 import React from "react";
 import { Tooltip } from "react-tippy";
-import { computeStrokeDashArray } from "../../../models/tools/drawing/drawing-content";
-import { ToolbarModalButton, ToolbarSettings } from "../../../models/tools/drawing/drawing-types";
-import { StampModelType } from "../../../models/tools/drawing/stamp";
+import { computeStrokeDashArray } from "../model/drawing-content";
+import { ToolbarModalButton, ToolbarSettings } from "../model/drawing-types";
+import { StampModelType } from "../model/stamp";
 import SmallCornerTriangle from "../../../assets/icons/small-corner-triangle.svg";
 import ColorFillIcon from "../../../clue/assets/icons/drawing/color-fill-icon.svg";
 import ColorStrokeIcon from "../../../clue/assets/icons/drawing/color-stroke-icon.svg";

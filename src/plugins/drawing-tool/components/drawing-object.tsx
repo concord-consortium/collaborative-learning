@@ -1,5 +1,5 @@
 import React from "react";
-import { DrawingObjectDataType, Point } from "../../../models/tools/drawing/drawing-objects";
+import { DrawingObjectDataType, Point } from "../model/drawing-objects";
 import { uniqueId } from "../../../utilities/js-utils";
 import { DrawingLayerView } from "./drawing-layer";
 
