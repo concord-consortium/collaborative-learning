@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import Select from "react-select";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
-import { DrawingContentModelType } from "../../../models/tools/drawing/drawing-content";
-import { VariableDrawingObjectData } from "../../../models/tools/drawing/drawing-objects";
+import { DrawingContentModelType } from "../../drawing-tool/model/drawing-content";
+import { VariableDrawingObjectData } from "../../drawing-tool/model/drawing-objects";
 import { findVariable, getVariables } from "./drawing-utils";
 
 import './variable-dialog.scss';

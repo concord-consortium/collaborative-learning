@@ -1,6 +1,6 @@
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { comma, StringBuilder } from "../../../utilities/string-builder";
-import { ITileExportOptions } from "../tool-content-info";
+import { ITileExportOptions } from "../../../models/tools/tool-content-info";
 import { DrawingObjectDataType, ImageDrawingObjectData } from "./drawing-objects";
 import { DrawingToolChange } from "./drawing-types";
 

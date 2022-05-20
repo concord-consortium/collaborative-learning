@@ -1,6 +1,6 @@
 import { VariableType } from "@concord-consortium/diagram-view";
 import { getType } from "mobx-state-tree";
-import { DrawingContentModelType } from "../../../models/tools/drawing/drawing-content";
+import { DrawingContentModelType } from "../../drawing-tool/model/drawing-content";
 import { SharedVariables, SharedVariablesType } from "../shared-variables";
 
 function getSharedVariablesModel(drawingContent: DrawingContentModelType) {

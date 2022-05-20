@@ -1,5 +1,5 @@
 import { safeJsonParse } from "../../../utilities/js-utils";
-import { ITileExportOptions } from "../tool-content-info";
+import { ITileExportOptions } from "../../../models/tools/tool-content-info";
 import { exportDrawingTileSpec } from "./drawing-export";
 import { importDrawingTileSpec } from "./drawing-import";
 import {

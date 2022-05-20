@@ -9,7 +9,7 @@ const gToolRegistration: Record<string, () => void> = {
     import(/* webpackChunkName: "Diagram" */"./plugins/diagram-viewer/diagram-registration");
     import(/* webpackChunkName: "SharedVariables" */"./plugins/shared-variables/shared-variables-registration");
   },
-  "Drawing": () => import(/* webpackChunkName: "Drawing" */"./models/tools/drawing/drawing-registration"),
+  "Drawing": () => import(/* webpackChunkName: "Drawing" */"./plugins/drawing-tool/drawing-registration"),
   "Geometry": () => import(/* webpackChunkName: "Geometry" */"./models/tools/geometry/geometry-registration"),
   "Image": () => import(/* webpackChunkName: "Image" */"./models/tools/image/image-registration"),
   "Table": () => import(/* webpackChunkName: "Table" */"./models/tools/table/table-registration"),
