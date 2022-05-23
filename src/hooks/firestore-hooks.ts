@@ -71,7 +71,7 @@ export function useCollectionOrderedRealTimeQuery<T>(
                             const docs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                             queryClient.setQueryData(partialPath, docs);
                           });
-      return () => unsubscribe();
+      return () => unsubscribe?.();
     }
   }, [converter, db, fsPath, options?.orderBy, orderBy, partialPath, queryClient]);
 

@@ -2,20 +2,22 @@ import classNames from "classnames";
 import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
 import {
-  DeleteButton, FillColorButton, StampModeButton, StrokeColorButton, SvgToolModeButton, VariableButton
+  DeleteButton, FillColorButton, StampModeButton, StrokeColorButton, SvgToolModeButton,
 } from "./drawing-toolbar-buttons";
 import { StampsPalette } from "./stamps-palette";
 import { StrokeColorPalette } from "./stroke-color-palette";
 import { FillColorPalette } from "./fill-color-palette";
-import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
-import { useForceUpdate } from "../hooks/use-force-update";
-import { useMobXOnChange } from "../hooks/use-mobx-on-change";
-import { IRegisterToolApiProps } from "../tool-tile";
-import { DrawingContentModelType } from "../../../models/tools/drawing/drawing-content";
-import { ToolbarModalButton, ToolbarSettings } from "../../../models/tools/drawing/drawing-types";
+import { 
+  IFloatingToolbarProps, useFloatingToolbarLocation 
+} from "../../../components/tools/hooks/use-floating-toolbar-location";
+import { useForceUpdate } from "../../../components/tools/hooks/use-force-update";
+import { useMobXOnChange } from "../../../components/tools/hooks/use-mobx-on-change";
+import { IRegisterToolApiProps } from "../../../components/tools/tool-tile";
+import { DrawingContentModelType } from "../model//drawing-content";
+import { ToolbarModalButton, ToolbarSettings } from "../model/drawing-types";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { useSettingFromStores } from "../../../hooks/use-stores";
-import { useVariableDialog } from "./use-variable-dialog";
+import { useVariableDialog } from "../../shared-variables/drawing/use-variable-dialog";
 
 interface IPaletteState {
   showStamps: boolean;
@@ -65,13 +67,8 @@ export const ToolbarView: React.FC<IProps> = (
     const { selectedButton, toolbarSettings } = drawingContent;
     return { modalButton: type, selected: selectedButton === type, settings: settings || toolbarSettings };
   };
-  // TODO change to non-hardcoded version when implemented with shared model
-const options = [
-  { label: "pool", value: "Pool"},
-  { label: "stripes", value: "Stripes"},
-  { label: "solids", value: "solids"},
-];
-  const [showVariableDialog] = useVariableDialog(options);
+
+  const [showVariableDialog] = useVariableDialog({ drawingContent });
 
   const handleSetSelectedButton = (modalButton: ToolbarModalButton) => {
     drawingContent.setSelectedButton(modalButton);
@@ -116,7 +113,9 @@ const options = [
     drawingContent.deleteSelectedObjects();
   };
 
-  const handleVariableButton = () => {
+  const handleShowVariableDialog = (modalButton: ToolbarModalButton) => {
+    drawingContent.setSelectedButton(modalButton);
+    forceUpdate();
     showVariableDialog();
   };
 
@@ -150,7 +149,8 @@ const options = [
     "fill-color": <FillColorButton key="fill" settings={drawingContent.toolbarSettings}
                                     onClick={() => handleToggleShowFillColorPalette()} />,
     "delete": <DeleteButton key="delete" disabled={!drawingContent.hasSelectedObjects} onClick={handleDeleteButton} />,
-    "variable": <VariableButton key="variable" onClick={handleVariableButton} />,
+    "variable": <SvgToolModeButton key="variable" {...modalButtonProps("variable")} title="Variable"
+                                    onSetSelectedButton={handleShowVariableDialog} />,
   };
 
   const toolbarClasses = classNames("drawing-tool-toolbar", { disabled: !isEnabled, flip: flipPalettes });
