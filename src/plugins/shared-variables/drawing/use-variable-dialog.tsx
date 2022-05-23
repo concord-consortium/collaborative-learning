@@ -14,12 +14,17 @@ interface IProps {
 
 export const useVariableDialog = ({drawingContent}: IProps) => {
   let selectedVariableId: string | undefined = undefined;
+  let _variableName: string | undefined = undefined;
+  let _variableValue = "";
   let variableChip: VariableDrawingObjectData;
 
   const ModalContent = () => {
     const variables = getVariables(drawingContent);
     const options = variables.map(variable => ({label: variable.name || "no name", value: variable.id }));
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [, setIsMenuOpen] = useState(false);
+    const [variableName, setVariableName] = useState("");
+    const [variableValue, setVariableValue] = useState("");
+    const [selectedOption, setSelectedOption] = useState<{label: string, value: string } | undefined>(undefined);
     const name = "var";
     const customStyles = {
       container: (provided: any) => ({
@@ -59,6 +64,26 @@ export const useVariableDialog = ({drawingContent}: IProps) => {
       }),
     };
 
+    const handleSelectChange = (value: any) => {
+      selectedVariableId = value?.value;
+      const selectedVariable = selectedVariableId && findVariable(drawingContent, selectedVariableId);
+      if (selectedVariable) {
+        _variableName = selectedVariable.name || "";
+        _variableValue = selectedVariable.value?.toString() || "";
+        setVariableName(_variableName);
+        setVariableValue(_variableValue);
+        setSelectedOption(value);
+      }
+    };
+    const handleNameChange = (e: { target: { value: string; }; }) => {
+      setVariableName(e.target.value);
+      _variableName = e.target.value;
+    };
+    const handleValueChange = (e: { target: { value: string; }; }) => {
+      setVariableValue(e.target.value);
+      _variableValue = e.target.value;
+    };
+
     return (
       <div className="content">
         <div className="variable-choices">
@@ -67,6 +92,7 @@ export const useVariableDialog = ({drawingContent}: IProps) => {
             name={name}
             styles={customStyles}
             options={options}
+            value={selectedOption}
             onChange={handleSelectChange}
             onMenuOpen={() => setIsMenuOpen(true)}
             onMenuClose={() => setIsMenuOpen(false)}
@@ -77,10 +103,16 @@ export const useVariableDialog = ({drawingContent}: IProps) => {
           Create new variable:
           <div className="new-variable-inputs inline-row input-entry">
             <label className="label">
-              Name: <input type="text" className="input" id="variable-name-input"  onChange={handleNameChange} />
+              Name:
+              <input type="text" className="input" id="variable-name-input" value={variableName}
+                      onChange={handleNameChange}
+              />
             </label>
             <label className="label">
-              Value: <input type="text" className="input" id="variable-value-input" onChange={handleValueChange} />
+              Value:
+              <input type="text" className="input" id="variable-value-input" value={variableValue}
+                      onChange={handleValueChange}
+              />
             </label>
           </div>
         </div>
@@ -88,36 +120,15 @@ export const useVariableDialog = ({drawingContent}: IProps) => {
     );
   };
 
-  const handleSelectChange = (value: any) => {
-    const variableNameEl = document.getElementById("variable-name-input") as HTMLInputElement;
-    const variableValueEl = document.getElementById("variable-value-input") as HTMLInputElement;
-    selectedVariableId = value?.value;
-    const selectedVariable = selectedVariableId && findVariable(drawingContent, selectedVariableId);
-    if (selectedVariable) {
-      variableNameEl.value = selectedVariable && selectedVariable.name || "";
-      variableValueEl.value = selectedVariable && selectedVariable.value?.toString() || "";
-    }
-  };
-  const handleNameChange = (e: { target: { value: string; }; }) => {
-    const variableNameEl = document.getElementById("variable-name-input") as HTMLInputElement;
-    variableNameEl.value = e.target.value || "";
-  };
-  const handleValueChange = (e: { target: { value: string; }; }) => {
-    const variableValueEl = document.getElementById("variable-value-input") as HTMLInputElement;
-    variableValueEl.value =  e.target.value;
-  };
-
   const handleClick = () => {
-    const variableNameEl = document.getElementById("variable-name-input") as HTMLInputElement;
-    const variableValueEl = document.getElementById("variable-value-input") as HTMLInputElement;
     const selectedVariable = selectedVariableId && findVariable(drawingContent, selectedVariableId);
     let dialogVarId: string | undefined;
 
-    if (!selectedVariable && variableNameEl.value === "" && variableValueEl.value === "") {
+    if (!selectedVariable && !_variableName && !_variableValue) {
       return null;
     } else if (!selectedVariable) {
       const sharedModel = getOrFindSharedModel(drawingContent);
-      const variable = Variable.create({name: variableNameEl.value, value: parseFloat(variableValueEl.value) });
+      const variable = Variable.create({name: _variableName, value: parseFloat(_variableValue) });
       sharedModel?.addVariable(variable);
       const newVariable = sharedModel?.variables.find(v => v === variable);
       dialogVarId = newVariable?.id;
