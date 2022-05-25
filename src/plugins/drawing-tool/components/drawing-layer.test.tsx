@@ -5,152 +5,320 @@ import { DrawingContentModel } from "../model/drawing-content";
 import { DrawingLayerView } from "./drawing-layer";
 import { EllipseDrawingObjectData, ImageDrawingObjectData, LineDrawingObjectData,
   RectangleDrawingObjectData, VectorDrawingObjectData } from "../model/drawing-objects";
+  import { DrawingToolDeletion, DrawingToolMove } from "../model/drawing-types";
 
 // The starter tile needs to be registered so the ToolTileModel.create
 // knows it is a supported tile type
 import "../drawing-registration";
 
+let content, drawingLayerProps, drawingLayer, drawingObject;
 
 describe("Drawing Layer Components", () => {
   describe("Freehand Line", () => {
-    it("adds a freehand line", () => {
-      const lineData: LineDrawingObjectData = {
-        type: "line",
-        id: "123",
-        x: 10, y: 10,
-        deltaPoints: [{ dx: 1, dy: 1 }, { dx: 2, dy: 2 }],
-        stroke: "#888888",
-        strokeDashArray: "3,3",
-        strokeWidth: 1
-      };
+    const lineData: LineDrawingObjectData = {
+      type: "line",
+      id: "123",
+      x: 10, y: 10,
+      deltaPoints: [{ dx: 1, dy: 1 }, { dx: 2, dy: 2 }],
+      stroke: "#888888",
+      strokeDashArray: "3,3",
+      strokeWidth: 1
+    };
 
-      const content = DrawingContentModel.create({changes:[
+    it("adds a freehand line", () => {
+      content = DrawingContentModel.create({changes:[
         JSON.stringify({action: "create", data: lineData})
       ]});
 
-      const drawingLayerProps = {
+      drawingLayerProps = {
         model: ToolTileModel.create({content}),
         onSetCanAcceptDrop: (tileId?: string) => {
           throw new Error("Function not implemented.");
         }
       };
       render(<DrawingLayerView {...drawingLayerProps} />);
-      const drawingLayer = screen.getByTestId("drawing-layer");
-      const drawingObject = drawingLayer.firstChild;
+      drawingLayer = screen.getByTestId("drawing-layer");
+      drawingObject = drawingLayer.firstChild;
+      expect(drawingObject).toMatchSnapshot();
+    });
+    it("moves a freehand line", () => {
+      const moves: DrawingToolMove = [{ id: "123", destination: {x: 5, y: 5} }];
+      content = DrawingContentModel.create({changes:[
+        JSON.stringify({action: "create", data: lineData}),
+        JSON.stringify({action: "move", data: moves})
+      ]});
+      drawingLayerProps = {
+        model: ToolTileModel.create({content}),
+        onSetCanAcceptDrop: (tileId?: string) => {
+          throw new Error("Function not implemented.");
+        }
+      };
+      render(<DrawingLayerView {...drawingLayerProps} />);
+      drawingLayer = screen.getByTestId("drawing-layer");
+      drawingObject = drawingLayer.firstChild;
+      expect(drawingObject).toMatchSnapshot();
+    });
+    it("deletes a freehand line", () => {
+      const deleteObject: DrawingToolDeletion = [ "123" ];
+      content = DrawingContentModel.create({changes:[
+        JSON.stringify({action: "create", data: lineData}),
+        JSON.stringify({action: "delete", data: deleteObject})
+      ]});
+      drawingLayerProps = {
+        model: ToolTileModel.create({content}),
+        onSetCanAcceptDrop: (tileId?: string) => {
+          throw new Error("Function not implemented.");
+        }
+      };
+      render(<DrawingLayerView {...drawingLayerProps} />);
+      drawingLayer = screen.getByTestId("drawing-layer");
+      drawingObject = drawingLayer.firstChild;
       expect(drawingObject).toMatchSnapshot();
     });
   });
 
   describe("Vector line", () => {
+    const vectorData: VectorDrawingObjectData = {
+      type: "vector",
+      id: "234",
+      x: 10, y: 10,
+      dx: 10, dy: 10,
+      stroke: "#888888",
+      strokeDashArray: "3,3",
+      strokeWidth: 1
+    };
     it("adds a Vector line", () => {
-      const vectorData: VectorDrawingObjectData = {
-        type: "vector",
-        x: 10, y: 10,
-        dx: 10, dy: 10,
-        stroke: "#888888",
-        strokeDashArray: "3,3",
-        strokeWidth: 1
-      };
-
-      const content = DrawingContentModel.create({changes:[
+      content = DrawingContentModel.create({changes:[
         JSON.stringify({action: "create", data: vectorData})
       ]});
 
-      const drawingLayerProps = {
+      drawingLayerProps = {
         model: ToolTileModel.create({content}),
         onSetCanAcceptDrop: (tileId?: string) => {
           throw new Error("Function not implemented.");
         }
       };
       render(<DrawingLayerView {...drawingLayerProps} />);
-      const drawingLayer = screen.getByTestId("drawing-layer");
-      const drawingObject = drawingLayer.firstChild;
+      drawingLayer = screen.getByTestId("drawing-layer");
+      drawingObject = drawingLayer.firstChild;
+      expect(drawingObject).toMatchSnapshot();
+    });
+    it("moves a vector line", () => {
+      const moves: DrawingToolMove = [{ id: "234", destination: {x: 5, y: 5} }];
+      content = DrawingContentModel.create({changes:[
+        JSON.stringify({action: "create", data: vectorData}),
+        JSON.stringify({action: "move", data: moves})
+      ]});
+      drawingLayerProps = {
+        model: ToolTileModel.create({content}),
+        onSetCanAcceptDrop: (tileId?: string) => {
+          throw new Error("Function not implemented.");
+        }
+      };
+      render(<DrawingLayerView {...drawingLayerProps} />);
+      drawingLayer = screen.getByTestId("drawing-layer");
+      drawingObject = drawingLayer.firstChild;
+      expect(drawingObject).toMatchSnapshot();
+    });
+    it("deletes a vector line", () => {
+      const deleteObject: DrawingToolDeletion = [ "234" ];
+      content = DrawingContentModel.create({changes:[
+        JSON.stringify({action: "create", data: vectorData}),
+        JSON.stringify({action: "delete", data: deleteObject})
+      ]});
+      drawingLayerProps = {
+        model: ToolTileModel.create({content}),
+        onSetCanAcceptDrop: (tileId?: string) => {
+          throw new Error("Function not implemented.");
+        }
+      };
+      render(<DrawingLayerView {...drawingLayerProps} />);
+      drawingLayer = screen.getByTestId("drawing-layer");
+      drawingObject = drawingLayer.firstChild;
       expect(drawingObject).toMatchSnapshot();
     });
   });
 
   describe("Rectangle", () => {
+    const rectData: RectangleDrawingObjectData = {
+      type: "rectangle",
+      id: "345",
+      x: 10, y: 10,
+      width: 10, height: 10,
+      fill: "#cccccc",
+      stroke: "#888888",
+      strokeDashArray: "3,3",
+      strokeWidth: 1
+    };
     it("adds a Rectangle", () => {
-      const rectData: RectangleDrawingObjectData = {
-        type: "rectangle",
-        x: 10, y: 10,
-        width: 10, height: 10,
-        fill: "#cccccc",
-        stroke: "#888888",
-        strokeDashArray: "3,3",
-        strokeWidth: 1
-      };
-
-      const content = DrawingContentModel.create({changes:[
+      content = DrawingContentModel.create({changes:[
         JSON.stringify({action: "create", data: rectData})
       ]});
 
-      const drawingLayerProps = {
+      drawingLayerProps = {
         model: ToolTileModel.create({content}),
         onSetCanAcceptDrop: (tileId?: string) => {
           throw new Error("Function not implemented.");
         }
       };
       render(<DrawingLayerView {...drawingLayerProps} />);
-      const drawingLayer = screen.getByTestId("drawing-layer");
-      const drawingObject = drawingLayer.firstChild;
+      drawingLayer = screen.getByTestId("drawing-layer");
+      drawingObject = drawingLayer.firstChild;
+      expect(drawingObject).toMatchSnapshot();
+    });
+    it("moves a rectangle", () => {
+      const moves: DrawingToolMove = [{ id: "345", destination: {x: 5, y: 5} }];
+      content = DrawingContentModel.create({changes:[
+        JSON.stringify({action: "create", data: rectData}),
+        JSON.stringify({action: "move", data: moves})
+      ]});
+      drawingLayerProps = {
+        model: ToolTileModel.create({content}),
+        onSetCanAcceptDrop: (tileId?: string) => {
+          throw new Error("Function not implemented.");
+        }
+      };
+      render(<DrawingLayerView {...drawingLayerProps} />);
+      drawingLayer = screen.getByTestId("drawing-layer");
+      drawingObject = drawingLayer.firstChild;
+      expect(drawingObject).toMatchSnapshot();
+    });
+    it("deletes a rectangle", () => {
+      const deleteObject: DrawingToolDeletion = [ "345" ];
+      content = DrawingContentModel.create({changes:[
+        JSON.stringify({action: "create", data: rectData}),
+        JSON.stringify({action: "delete", data: deleteObject})
+      ]});
+      drawingLayerProps = {
+        model: ToolTileModel.create({content}),
+        onSetCanAcceptDrop: (tileId?: string) => {
+          throw new Error("Function not implemented.");
+        }
+      };
+      render(<DrawingLayerView {...drawingLayerProps} />);
+      drawingLayer = screen.getByTestId("drawing-layer");
+      drawingObject = drawingLayer.firstChild;
       expect(drawingObject).toMatchSnapshot();
     });
   });
 
   describe("Ellipse", () => {
+    const ellipseData: EllipseDrawingObjectData = {
+      type: "ellipse",
+      id: "456",
+      x: 10, y: 10,
+      rx: 10, ry: 10,
+      fill: "#cccccc",
+      stroke: "#888888",
+      strokeDashArray: "3,3",
+      strokeWidth: 1
+    };
     it("adds a ellipse", () => {
-      const ellipseData: EllipseDrawingObjectData = {
-        type: "ellipse",
-        x: 10, y: 10,
-        rx: 10, ry: 10,
-        fill: "#cccccc",
-        stroke: "#888888",
-        strokeDashArray: "3,3",
-        strokeWidth: 1
-      };
-
-      const content = DrawingContentModel.create({changes:[
+      content = DrawingContentModel.create({changes:[
         JSON.stringify({action: "create", data: ellipseData})
       ]});
 
-      const drawingLayerProps = {
+      drawingLayerProps = {
         model: ToolTileModel.create({content}),
         onSetCanAcceptDrop: (tileId?: string) => {
           throw new Error("Function not implemented.");
         }
       };
       render(<DrawingLayerView {...drawingLayerProps} />);
-      const drawingLayer = screen.getByTestId("drawing-layer");
-      const drawingObject = drawingLayer.firstChild;
+      drawingLayer = screen.getByTestId("drawing-layer");
+      drawingObject = drawingLayer.firstChild;
+      expect(drawingObject).toMatchSnapshot();
+    });
+    it("moves a ellipse", () => {
+      const moves: DrawingToolMove = [{ id: "456", destination: {x: 5, y: 5} }];
+      content = DrawingContentModel.create({changes:[
+        JSON.stringify({action: "create", data: ellipseData}),
+        JSON.stringify({action: "move", data: moves})
+      ]});
+      drawingLayerProps = {
+        model: ToolTileModel.create({content}),
+        onSetCanAcceptDrop: (tileId?: string) => {
+          throw new Error("Function not implemented.");
+        }
+      };
+      render(<DrawingLayerView {...drawingLayerProps} />);
+      drawingLayer = screen.getByTestId("drawing-layer");
+      drawingObject = drawingLayer.firstChild;
+      expect(drawingObject).toMatchSnapshot();
+    });
+    it("deletes a ellipse", () => {
+      const deleteObject: DrawingToolDeletion = [ "456" ];
+      content = DrawingContentModel.create({changes:[
+        JSON.stringify({action: "create", data: ellipseData}),
+        JSON.stringify({action: "delete", data: deleteObject})
+      ]});
+      drawingLayerProps = {
+        model: ToolTileModel.create({content}),
+        onSetCanAcceptDrop: (tileId?: string) => {
+          throw new Error("Function not implemented.");
+        }
+      };
+      render(<DrawingLayerView {...drawingLayerProps} />);
+      drawingLayer = screen.getByTestId("drawing-layer");
+      drawingObject = drawingLayer.firstChild;
       expect(drawingObject).toMatchSnapshot();
     });
   });
 
   describe("Image", () => {
+    const imageData: ImageDrawingObjectData = {
+      type: "image",
+      id: "567",
+      url: "my/image/url",
+      originalUrl: "my/image/originalUrl",
+      x: 10, y: 10,
+      width: 10, height: 10,
+    };
     it("adds an image", () => {
-      const imageData: ImageDrawingObjectData = {
-        type: "image",
-        url: "my/image/url",
-        originalUrl: "my/image/originalUrl",
-        x: 10, y: 10,
-        width: 10, height: 10,
-      };
-
-      const content = DrawingContentModel.create({changes:[
+      content = DrawingContentModel.create({changes:[
         JSON.stringify({action: "create", data: imageData})
       ]});
 
-      const drawingLayerProps = {
+      drawingLayerProps = {
         model: ToolTileModel.create({content}),
         onSetCanAcceptDrop: (tileId?: string) => {
           throw new Error("Function not implemented.");
         }
       };
       render(<DrawingLayerView {...drawingLayerProps} />);
-      const drawingLayer = screen.getByTestId("drawing-layer");
-      const drawingObject = drawingLayer.firstChild;
+      drawingLayer = screen.getByTestId("drawing-layer");
+      drawingObject = drawingLayer.firstChild;
       expect(drawingObject).toMatchSnapshot();
+    });
+    it("moves a image", () => {
+      const moves: DrawingToolMove = [{ id: "567", destination: {x: 5, y: 5} }];
+      content = DrawingContentModel.create({changes:[
+        JSON.stringify({action: "create", data: imageData}),
+        JSON.stringify({action: "move", data: moves})
+      ]});
+      drawingLayerProps = {
+        model: ToolTileModel.create({content}),
+        onSetCanAcceptDrop: (tileId?: string) => {
+          throw new Error("Function not implemented.");
+        }
+      };
+      render(<DrawingLayerView {...drawingLayerProps} />);
+      drawingLayer = screen.getByTestId("drawing-layer");
+      drawingObject = drawingLayer.firstChild;
+      expect(drawingObject).toMatchSnapshot();
+    });
+    it("deletes a image", () => {
+      const deleteObject: DrawingToolDeletion = [ "567" ];
+      content = DrawingContentModel.create({changes:[
+        JSON.stringify({action: "create", data: imageData}),
+        JSON.stringify({action: "delete", data: deleteObject})
+      ]});
+      drawingLayerProps = {
+        model: ToolTileModel.create({content}),
+        onSetCanAcceptDrop: (tileId?: string) => {
+          throw new Error("Function not implemented.");
+        }
+      };
     });
   });
 });

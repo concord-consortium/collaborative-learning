@@ -44,7 +44,6 @@ export const ToolbarView: React.FC<IProps> = (
   const clearPaletteState = () => {
     setPaletteState(kClosedPalettesState);
   };
-  console.log("model: ", model);
   const togglePaletteState = useCallback((palette: PaletteKey, show?: boolean) => {
     setPaletteState(state => {
       const newState = { ...kClosedPalettesState };
