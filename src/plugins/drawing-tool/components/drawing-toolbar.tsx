@@ -7,8 +7,8 @@ import {
 import { StampsPalette } from "./stamps-palette";
 import { StrokeColorPalette } from "./stroke-color-palette";
 import { FillColorPalette } from "./fill-color-palette";
-import { 
-  IFloatingToolbarProps, useFloatingToolbarLocation 
+import {
+  IFloatingToolbarProps, useFloatingToolbarLocation
 } from "../../../components/tools/hooks/use-floating-toolbar-location";
 import { useForceUpdate } from "../../../components/tools/hooks/use-force-update";
 import { useMobXOnChange } from "../../../components/tools/hooks/use-mobx-on-change";
@@ -44,6 +44,7 @@ export const ToolbarView: React.FC<IProps> = (
   const clearPaletteState = () => {
     setPaletteState(kClosedPalettesState);
   };
+  console.log("model: ", model);
   const togglePaletteState = useCallback((palette: PaletteKey, show?: boolean) => {
     setPaletteState(state => {
       const newState = { ...kClosedPalettesState };
@@ -156,7 +157,7 @@ export const ToolbarView: React.FC<IProps> = (
   const toolbarClasses = classNames("drawing-tool-toolbar", { disabled: !isEnabled, flip: flipPalettes });
   return documentContent
     ? ReactDOM.createPortal(
-        <div className={toolbarClasses} style={location}>
+        <div className={toolbarClasses} style={location} data-testid="drawing-toolbar">
           <div className="drawing-tool-buttons">
             {toolbarButtons.map(button => {
               return buttonDefs[button];

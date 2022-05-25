@@ -17,12 +17,6 @@ class DrawToolTile{
     getDrawToolEllipse(){
       return cy.get('.drawing-tool-button.button-ellipse');
     }
-    getDrawToolStamp(){
-      return cy.get('.drawing-tool-button.button-stamp');
-    }
-    getDrawToolStampExpand(){
-      return cy.get('.drawing-tool-button.button-stamp expand-collapse');
-    }
     getDrawToolVariable(){
       return cy.get('.drawing-tool-button.button-variable');
     }

@@ -876,6 +876,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
     return (
       <div className="drawing-layer"
+          data-testid="drawing-layer"
           onMouseDown={this.handleMouseDown}
           onDragOver={this.handleDragOver}
           onDragLeave={this.handleDragLeave}
