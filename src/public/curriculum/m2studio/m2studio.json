@@ -5,6 +5,7 @@
   "subtitle": "Multiple Representations",
   "config": {
     "autoAssignStudentsToIndividualGroups": false,
+    "autoSectionProblemDocuments": false,
     "disablePublish": [
       { "documentType": "learningLog" }
     ],
