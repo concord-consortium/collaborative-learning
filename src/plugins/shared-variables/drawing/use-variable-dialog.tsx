@@ -94,7 +94,8 @@ export const useVariableDialog = ({drawingContent}: IProps) => {
       y: 50,
       variableId: selectedVariable.id
     });
-    drawingContent.applyChange({action: "create", data: variableChip});
+    // FIXME: need to add support for variables
+    // drawingContent.applyChange({action: "create", data: variableChip});
   };
 
   const [showVariableDialog, hideVariableDialog] = useCustomModal({

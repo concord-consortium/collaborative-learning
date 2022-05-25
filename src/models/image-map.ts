@@ -189,6 +189,8 @@ export const ImageMapModel = types
       getImage(url: string, options?: IImageBaseOptions): Promise<ImageMapEntryType> {
         return new Promise((resolve, reject) => {
           if (!url) {
+            // This is a strange pattern to call resolve multiple times
+            // I don't know what promises do in this case. 
             resolve(clone(self.images.get(placeholderImage)!));
           }
 

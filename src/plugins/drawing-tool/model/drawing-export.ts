@@ -6,7 +6,9 @@ import { DrawingToolChange } from "./drawing-types";
 
 export interface IDrawingObjectInfo {
   id: string;
-  type: DrawingObjectDataType["type"];
+  // this used to be DrawingObjectDataType["type"] but we relax it to support
+  // plugin based drawing object types
+  type: string;
   changes: DrawingToolChange[]; // changes that affect this object
   isDeleted?: boolean;          // true if the object has been deleted
 }
@@ -80,7 +82,7 @@ export const exportDrawingTileSpec = (changes: string[], options?: ITileExportOp
       switch (change.action) {
         case "create": {
           const { id, type  } = change.data;
-          if (id) {
+          if (id && type) {
             if (!objectInfoMap[id]) {
               objectInfoMap[id] = { id, type, changes: [change] };
               orderedIds.push(id);

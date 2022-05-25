@@ -286,6 +286,7 @@ describe("exportDrawingTileSpec", () => {
     const changes: DrawingToolChange[] = [
       { action: "create", data: imageData }
     ];
+    // TODO: why do we need to support objects without ids?
     // skips objects without ids
     expect(exportDrawingWithTransform(changes)).toEqual({ type: "Drawing", objects: [] });
 
