@@ -33,7 +33,7 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
 
   return (
-    <div className={classNames("drawing-tool", { "read-only": readOnly })}>
+    <div className={classNames("drawing-tool", { "read-only": readOnly })} data-testid="drawing-tool">
       <ToolbarView model={model}
                   documentContent={documentContent}
                   toolTile={toolTile}
