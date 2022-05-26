@@ -623,20 +623,27 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     const action = makeSetter(prop);
     for (const id of ids) {
       const drawingObject = this.objects[id];
-      // TODO: this would be better if it was moved into the ImageObject 
-      // However, it is complicated enough that I punted it for later.
+
+      // TODO: this approach is temporary to support the legacy approach of saving
+      // property changes. If we have migration of the old state, then this can 
+      // probably go away
+      const objActions = getMembers(drawingObject).actions;
+      if (objActions.includes(action)) {
+        applyAction(drawingObject, {name: action, args: [newValue]});
+      } else {
+        console.warn("Trying to update unsupported drawing object", drawingObject?.type, "property", prop);
+      }
+
+      // Note: I don't see any place where something records an url update event
+      // However this case has been handled in the past, so it is still handled here.
+      // If the url changes, the url in the drawingObject will be updated by 
+      // the code above. 
+      // Then updateImageUrl is called which will trigger a loading of this url into
+      // the ImageMap. The ImageComponent is watching this url through the displayUrl 
+      // property and will show the placeholder image until the new url is loaded.
       if ((drawingObject?.type === "image") && (prop === "url")) {
         const url = newValue as string;
         this.updateImageUrl(url);
-      }
-      else {
-        // TODO: this approach is temporary to support the legacy approach of saving
-        // property changes. If we have migration of the old state, then this can 
-        // probably go away
-        const objActions = getMembers(drawingObject).actions;
-        if (objActions.includes(action)) {
-          applyAction(drawingObject, {name: action, args: [newValue]});
-        }
       }
     }
   }
