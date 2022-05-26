@@ -1,8 +1,8 @@
 import { forEach } from "lodash";
-import { types } from "mobx-state-tree";
+import { getEnv, types } from "mobx-state-tree";
 import { observable } from "mobx";
 import { AppConfigModelType } from "./app-config-model";
-import { DocumentModelType } from "../document/document";
+import { DocumentModelType, IDocumentEnvironment } from "../document/document";
 import {
   DocumentType, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
   PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemPublication
@@ -163,6 +163,10 @@ export const DocumentsModel = types
     const add = (document: DocumentModelType) => {
       if (!self.getDocument(document.key)) {
         self.all.push(document);
+        const documentEnv = getEnv(document)?.documentEnv as IDocumentEnvironment | undefined;
+        if (documentEnv) {
+          documentEnv.appConfig = self.appConfig;
+        }
       }
     };
 
