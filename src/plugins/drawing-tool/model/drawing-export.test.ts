@@ -227,9 +227,12 @@ describe("exportDrawingTileSpec", () => {
     const imageData: ImageObjectSnapshot = {
       type: "image",
       url: "my/image/url",
-      // FIXME: what do we do with originalUrl in the state? 
-      // Are there examples of the change events in the database that have an originalUrl?
-      // originalUrl: "my/image/originalUrl",
+      // Note: There used to be an originalUrl in the image data.
+      // This originalUrl was set when the image drawing object was created from the 
+      // serialized image data. As far as I can tell this originalUrl should not 
+      // have been stored back in the serialized data. Additionally even if it was
+      // stored and then loaded back in, it seems it would have only caused problems.
+      // So it seems safe to ignore it here.
       x: 10, y: 10,
       width: 10, height: 10,
     };
@@ -279,9 +282,6 @@ describe("exportDrawingTileSpec", () => {
     const imageData: ImageObjectSnapshot = {
       type: "image",
       url: "my/image/url",
-      // FIXME: what do we do with originalUrl in the state? 
-      // Are there examples of the change events in the database that have an originalUrl?
-      // originalUrl: "my/image/originalUrl",
       filename: "image.png",
       x: 10, y: 10,
       width: 10, height: 10,

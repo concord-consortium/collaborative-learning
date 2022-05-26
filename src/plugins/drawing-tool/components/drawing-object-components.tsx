@@ -46,7 +46,5 @@ export type DrawingObjectSnapshotUnion =
   VariableChipObjectSnapshot;
 
 // FIXME: This is temporary it will need to be dynamic
-// I'm also not sure if MST will be smart enough to figure out the 
-// type based on the type field (especially since it is optional)
 export const DrawingObjectMSTUnion = 
   types.union(LineObject, VectorObject, RectangleObject, EllipseObject, ImageObject, VariableChipObject);

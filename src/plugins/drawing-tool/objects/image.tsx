@@ -34,9 +34,6 @@ export const ImageObject = DrawingObject.named("ImageObject")
       const se: Point = {x: x + width, y: y + height};
       return {nw, se};
     },
-    // FIXME: I'm not sure if placeholderImage is the right thing to show here
-    // FIXME: will gImageMap.getCachedImage be observable so components reading this prop
-    // will be updated automatically when it changes?
     // TODO: this currently works with stamps because the stamp is added by creating a "create"
     // change event. And then when that change event is executed it triggers a gImageMap.getImage
     // When the change events are removed, we'll need to find another way to trigger these 
