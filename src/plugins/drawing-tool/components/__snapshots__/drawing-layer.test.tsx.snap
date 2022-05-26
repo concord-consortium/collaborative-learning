@@ -102,6 +102,14 @@ exports[`Drawing Layer Components Image adds an image 1`] = `
 </svg>
 `;
 
+exports[`Drawing Layer Components Image deletes a image 1`] = `
+<svg
+  height="1500"
+  width="1500"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+/>
+`;
+
 exports[`Drawing Layer Components Image moves a image 1`] = `
 <svg
   height="1500"
