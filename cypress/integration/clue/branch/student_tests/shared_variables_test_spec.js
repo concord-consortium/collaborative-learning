@@ -143,5 +143,17 @@ context('Shared Variables', function () {
       drawToolTile.getDrawToolDelete().click();
       drawToolTile.getDrawTile().last().find('.drawing-variable:contains("VarCVar D")').should('not.exist');
     });
+    it("verify create new variable", () => {
+      cy.get("[data-original-title=Variable").click();
+      cy.get(".modal-header").should("contain", "Insert Variable");
+      cy.get(".ReactModalPortal").within(() => {
+        cy.get("#variable-name-input").type("Var E");
+        cy.get("#variable-value-input").type("5.432{enter}");
+        cy.findByRole("button", {name: "OK"}).click();
+      });
+      drawToolTile.getDrawTile().last().find('.drawing-variable:contains("Var E")').should('have.length', 1);
+      drawToolTile.getDrawTile().last().find('.drawing-variable:contains("5.432")').should('have.length', 1);
+
+    });
   });
 });
