@@ -1,8 +1,7 @@
-import { addDisposer, Instance, types } from "mobx-state-tree";
+import { addDisposer, Instance, SnapshotIn, types } from "mobx-state-tree";
 import React from "react";
 import { gImageMap } from "../../../models/image-map";
-import { Point } from "../model/drawing-objects";
-import { DrawingObject, typeField } from "../model/drawing-objects2";
+import { DrawingObject, Point, typeField } from "../model/drawing-objects";
 import { DrawingTool, IDrawingComponentProps, IDrawingLayer } from "./drawing-object-types";
 import placeholderImage from "../../../assets/image_placeholder.png";
 import { observer } from "mobx-react";
@@ -81,6 +80,7 @@ export const ImageObject = DrawingObject.named("ImageObject")
     }
   }));
 export interface ImageObjectType extends Instance<typeof ImageObject> {}
+export interface ImageObjectSnapshot extends SnapshotIn<typeof ImageObject> {}
 
 export const ImageComponent: React.FC<IDrawingComponentProps> = observer(function ImageComponent({model, handleHover}){
   if (model.type !== "image") return null;

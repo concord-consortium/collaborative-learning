@@ -11,7 +11,7 @@ import { observer } from "mobx-react";
 import { ImageContentSnapshotOutType } from "../../../models/tools/image/image-content";
 import { gImageMap } from "../../../models/image-map";
 import { SelectionBox } from "./drawing-object";
-import { DrawingObjectType } from "../model/drawing-objects2";
+import { DrawingObjectType, Point } from "../model/drawing-objects";
 import { applyAction, getMembers, getSnapshot, SnapshotOut } from "mobx-state-tree";
 import { DrawingObjectMSTUnion, DrawingObjectSnapshotUnion, renderDrawingObject } from "./drawing-object-components";
 import { DrawingTool, IDrawingLayer } from "../objects/drawing-object-types";
@@ -20,7 +20,6 @@ import { VectorDrawingTool } from "../objects/vector";
 import { RectangleDrawingTool } from "../objects/rectangle";
 import { EllipseDrawingTool } from "../objects/ellipse";
 import { ImageObject, StampDrawingTool } from "../objects/image";
-import { Point } from "../model/drawing-objects";
 import { VariableDrawingTool } from "../../shared-variables/drawing/variable-object";
 
 const SELECTION_COLOR = "#777";

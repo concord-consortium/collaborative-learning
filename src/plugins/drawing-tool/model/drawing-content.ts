@@ -11,6 +11,7 @@ import {
   DefaultToolbarSettings, DrawingToolChange, DrawingToolCreateChange, DrawingToolDeleteChange, DrawingToolMoveChange,
   DrawingToolUpdate, DrawingToolUpdateChange, kDrawingToolID, ToolbarModalButton, ToolbarSettings
 } from "./drawing-types";
+import { ImageObjectSnapshot } from "../objects/image";
 
 
 export const computeStrokeDashArray = (type?: string, strokeWidth?: string|number) => {
@@ -218,8 +219,12 @@ export const DrawingContentModel = ToolContentModel
             switch (change?.action) {
               case "create": {
                 const createData = change.data as DrawingObjectDataType;
-                if ((createData.type === "image") && (createData.url === oldUrl)) {
-                  createData.url = newUrl;
+                if (createData.type !== "image") {
+                  break;
+                } 
+                const imageData = createData as ImageObjectSnapshot;
+                if(imageData.url === oldUrl) {
+                  imageData.url = newUrl;
                   updates.push({ index, change: JSON.stringify(change) });
                 }
                 break;

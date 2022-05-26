@@ -1,12 +1,11 @@
-import { Instance, types } from "mobx-state-tree";
+import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import React from "react";
-import { Point } from "../../drawing-tool/model/drawing-objects";
-import { DrawingObject, typeField } from "../../drawing-tool/model/drawing-objects2";
+import { DrawingObject, Point, typeField } from "../../drawing-tool/model/drawing-objects";
 import { DrawingTool, IDrawingComponentProps, IDrawingLayer } from "../../drawing-tool/objects/drawing-object-types";
 import { VariableChip } from "../slate/variable-chip";
 import { findVariable } from "./drawing-utils";
 
-export const VariableObject = DrawingObject.named("VariableObject")
+export const VariableChipObject = DrawingObject.named("VariableObject")
   .props({
     type: typeField("variable"),
     variableId: types.string
@@ -28,11 +27,12 @@ export const VariableObject = DrawingObject.named("VariableObject")
       return {nw, se};  
     }
   }));
-export interface VariableObjectType extends Instance<typeof VariableObject> {}
+export interface VariableChipObjectType extends Instance<typeof VariableChipObject> {}
+export interface VariableChipObjectSnapshot extends SnapshotIn<typeof VariableChipObject> {}
 
 export const VariableChipComponent: React.FC<IDrawingComponentProps> = function ({model, handleHover, drawingContent}){
   if (model.type !== "variable") return null;
-  const { id, x, y, variableId } = model as VariableObjectType;
+  const { id, x, y, variableId } = model as VariableChipObjectType;
 
   const selectedVariable = findVariable(drawingContent, variableId);
   if (!selectedVariable) {

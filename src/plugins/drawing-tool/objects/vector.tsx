@@ -1,8 +1,7 @@
-import { Instance, types } from "mobx-state-tree";
+import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import React from "react";
 import { computeStrokeDashArray } from "../model/drawing-content";
-import { Point } from "../model/drawing-objects";
-import { StrokedObject, typeField } from "../model/drawing-objects2";
+import { Point, StrokedObject, typeField } from "../model/drawing-objects";
 import { DrawingTool, IDrawingComponentProps, IDrawingLayer } from "./drawing-object-types";
 
 // simple line
@@ -27,6 +26,7 @@ export const VectorObject = StrokedObject.named("VectorObject")
     }
   }));
 export interface VectorObjectType extends Instance<typeof VectorObject> {}
+export interface VectorObjectSnapshot extends SnapshotIn<typeof VectorObject> {}
 
 export function VectorComponent({model, handleHover} : IDrawingComponentProps) {
   if (model.type !== "vector") return null;

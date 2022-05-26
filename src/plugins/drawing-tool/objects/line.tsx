@@ -1,9 +1,8 @@
-import { Instance, types } from "mobx-state-tree";
+import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import React from "react";
 import { SelectionBox } from "../components/drawing-object";
 import { computeStrokeDashArray } from "../model/drawing-content";
-import { Point } from "../model/drawing-objects";
-import { DeltaPoint, StrokedObject, typeField } from "../model/drawing-objects2";
+import { DeltaPoint, Point, StrokedObject, typeField } from "../model/drawing-objects";
 import { DrawingTool, IDrawingComponentProps, IDrawingLayer } from "./drawing-object-types";
 
 // polyline
@@ -45,6 +44,7 @@ export const LineObject = StrokedObject.named("LineObject")
     }
   }));
 export interface LineObjectType extends Instance<typeof LineObject> {}
+export interface LineObjectSnapshot extends SnapshotIn<typeof LineObject> {}
 
 export function LineComponent({model, handleHover} : IDrawingComponentProps) {
   if (model.type !== "line") return null;

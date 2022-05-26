@@ -1,8 +1,9 @@
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { comma, StringBuilder } from "../../../utilities/string-builder";
 import { ITileExportOptions } from "../../../models/tools/tool-content-info";
-import { DrawingObjectDataType, ImageDrawingObjectData } from "./drawing-objects";
+import { DrawingObjectDataType } from "./drawing-objects";
 import { DrawingToolChange } from "./drawing-types";
+import { ImageObjectSnapshot } from "../objects/image";
 
 export interface IDrawingObjectInfo {
   id: string;
@@ -49,9 +50,10 @@ export const exportDrawingTileSpec = (changes: string[], options?: ITileExportOp
     }
     const { id: idData, type, ...others } = data;
     if ((data.type === "image") && options?.transformImageUrl) {
-      if (data.filename) {
-        (others as Partial<ImageDrawingObjectData>).url = options.transformImageUrl(data.url, data.filename);
-        delete (others as Partial<ImageDrawingObjectData>).filename;
+      const imageData = data as ImageObjectSnapshot;
+      if (imageData.filename) {
+        (others as Partial<ImageObjectSnapshot>).url = options.transformImageUrl(imageData.url, imageData.filename);
+        delete (others as Partial<ImageObjectSnapshot>).filename;
       }
     }
     const othersJson = JSON.stringify(others);

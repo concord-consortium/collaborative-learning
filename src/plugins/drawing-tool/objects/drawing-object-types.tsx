@@ -1,7 +1,6 @@
 import React from "react";
 import { DrawingContentModelType } from "../model/drawing-content";
-import { Point } from "../model/drawing-objects";
-import { DrawingObjectType } from "../model/drawing-objects2";
+import { DrawingObjectType, Point } from "../model/drawing-objects";
 import { DefaultToolbarSettings, ToolbarSettings } from "../model/drawing-types";
 import { StampModelType } from "../model/stamp";
 

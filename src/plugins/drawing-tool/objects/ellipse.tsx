@@ -1,8 +1,7 @@
-import { Instance, types } from "mobx-state-tree";
+import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import React from "react";
 import { computeStrokeDashArray } from "../model/drawing-content";
-import { Point } from "../model/drawing-objects";
-import { FilledObject, StrokedObject, typeField } from "../model/drawing-objects2";
+import { FilledObject, Point, StrokedObject, typeField } from "../model/drawing-objects";
 import { DrawingTool, IDrawingComponentProps, IDrawingLayer } from "./drawing-object-types";
 
 export const EllipseObject = types.compose("EllipseObject", StrokedObject, FilledObject)
@@ -29,6 +28,7 @@ export const EllipseObject = types.compose("EllipseObject", StrokedObject, Fille
     }
   }));
 export interface EllipseObjectType extends Instance<typeof EllipseObject> {}
+export interface EllipseObjectSnapshot extends SnapshotIn<typeof EllipseObject> {}
 
 export function EllipseComponent({model, handleHover} : IDrawingComponentProps) {
   if (model.type !== "ellipse") return null;

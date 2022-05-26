@@ -1,5 +1,14 @@
+import { Instance, types } from "mobx-state-tree";
+import { uniqueId } from "../../../utilities/js-utils";
+import { VariableChipObjectSnapshot } from "../../shared-variables/drawing/variable-object";
+import { SelectionBox } from "../components/drawing-object";
+import { EllipseObjectSnapshot } from "../objects/ellipse";
+import { ImageObjectSnapshot } from "../objects/image";
+import { LineObjectSnapshot } from "../objects/line";
+import { RectangleObjectSnapshot } from "../objects/rectangle";
+import { VectorObjectSnapshot } from "../objects/vector";
+
 export interface Point {x: number; y: number; }
-export interface DeltaPoint {dx: number; dy: number; }
 
 export interface BoundingBox {
   nw: Point;
@@ -8,76 +17,67 @@ export interface BoundingBox {
   end?: Point;
 }
 
-// "line" == polyline
-export interface LineDrawingObjectData {
-  type: "line";
-  id?: string;
-  x: number;
-  y: number;
-  deltaPoints: DeltaPoint[];
-  stroke: string;
-  strokeDashArray: string;
-  strokeWidth: number;
+/**
+ * This creates the definition for a type filed in MST.
+ * The field is optional so it doesn't have to be specified when creating
+ * an instance.
+ * 
+ * @param typeName the type
+ * @returns 
+ */
+export function typeField(typeName: string) {
+  return types.optional(types.literal(typeName), typeName);
 }
 
-// "vector" == simple line
-export interface VectorDrawingObjectData {
-  type: "vector";
-  id?: string;
-  x: number;
-  y: number;
-  dx: number;
-  dy: number;
-  stroke: string;
-  strokeDashArray: string;
-  strokeWidth: number;
-}
+export const DrawingObject = types.model("DrawingObject", {
+  type: types.optional(types.string, () => {throw "Type must be overridden";}),
+  id: types.optional(types.identifier, () => uniqueId()),  
+  x: types.number,
+  y: types.number
+})
+.views(self => ({
+  get boundingBox(): BoundingBox {
+    throw "Subclass needs to implement this";
+  }
+}))
+.views(self => ({
+  inSelection(selectionBox: SelectionBox) {
+    const {nw, se} = self.boundingBox;
+    return selectionBox.overlaps(nw, se);
+  }
+}))
+.actions(self => ({
+  setPosition(x: number, y: number) {
+    self.x = x;
+    self.y = y;
+  }
+}));
+export interface DrawingObjectType extends Instance<typeof DrawingObject> {}
 
-export interface RectangleDrawingObjectData {
-  type: "rectangle";
-  id?: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  stroke: string;
-  strokeDashArray: string;
-  strokeWidth: number;
-  fill: string;
-}
 
-export interface EllipseDrawingObjectData {
-  type: "ellipse";
-  id?: string;
-  x: number;
-  y: number;
-  rx: number;
-  ry: number;
-  stroke: string;
-  strokeDashArray: string;
-  strokeWidth: number;
-  fill: string;
-}
+export const StrokedObject = DrawingObject.named("StrokedObject")
+.props({
+  stroke: types.string,
+  strokeDashArray: types.string,
+  strokeWidth: types.number
+})
+.actions(self => ({
+  setStroke(stroke: string){ self.stroke = stroke; },
+  setStrokeDashArray(strokeDashArray: string){ self.strokeDashArray = strokeDashArray; },
+  setStrokeWidth(strokeWidth: number){ self.strokeWidth = strokeWidth; }
+}));
 
-export interface ImageDrawingObjectData {
-  type: "image";
-  id?: string;
-  url: string;
-  originalUrl?: string;
-  filename?: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
+export const FilledObject = DrawingObject.named("FilledObject")
+.props({
+  fill: types.string
+})
+.actions(self => ({
+  setFill(fill: string){ self.fill = fill; }
+}));
 
-export interface VariableDrawingObjectData {
-  type: "variable";
-  id?: string;
-  x: number;
-  y: number;
-  variableId: string;
-}
+export const DeltaPoint = types.model("DeltaPoint", {
+  dx: types.number, dy: types.number
+});
 
-export type DrawingObjectDataType = LineDrawingObjectData | VectorDrawingObjectData
-  | RectangleDrawingObjectData | EllipseDrawingObjectData | ImageDrawingObjectData | VariableDrawingObjectData;
+export type DrawingObjectDataType = LineObjectSnapshot | VectorObjectSnapshot
+  | RectangleObjectSnapshot | EllipseObjectSnapshot | ImageObjectSnapshot | VariableChipObjectSnapshot;

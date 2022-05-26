@@ -1,8 +1,7 @@
-import { Instance, types } from "mobx-state-tree";
+import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import React from "react";
 import { computeStrokeDashArray } from "../model/drawing-content";
-import { Point } from "../model/drawing-objects";
-import { FilledObject, StrokedObject, typeField } from "../model/drawing-objects2";
+import { FilledObject, Point, StrokedObject, typeField } from "../model/drawing-objects";
 import { DrawingTool, IDrawingComponentProps, IDrawingLayer } from "./drawing-object-types";
 
 export const RectangleObject = types.compose("RectangleObject", StrokedObject, FilledObject)
@@ -49,6 +48,7 @@ export const RectangleObject = types.compose("RectangleObject", StrokedObject, F
     }
   }));
 export interface RectangleObjectType extends Instance<typeof RectangleObject> {}
+export interface RectangleObjectSnapshot extends SnapshotIn<typeof RectangleObject> {}
 
 export function RectangleComponent({model, handleHover} : IDrawingComponentProps) {
   if (model.type !== "rectangle") return null;
