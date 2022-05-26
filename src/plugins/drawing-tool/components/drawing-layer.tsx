@@ -107,7 +107,6 @@ interface DrawingLayerViewState {
   selectedObjects: DrawingObjectType[];
   selectionBox: SelectionBox|null;
   hoverObject: DrawingObjectType|null;
-  isLoading: boolean;
 }
 
 @observer
@@ -130,7 +129,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       selectionBox: null,
       selectedObjects: [],
       hoverObject: null,
-      isLoading: false
     };
 
     this.tools = {
@@ -480,15 +478,13 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         // Additional code was removed here because now the image components
         // should be watching the gImageMap for changes themselves
 
-        // update react state
-        this.setState({ isLoading: false });
         // update mst content if conversion occurred
         if (image.contentUrl && (url !== image.contentUrl)) {
           this.getContent().updateImageUrl(url, image.contentUrl);
         }
       })
       .catch(() => {
-        this.setState({ isLoading: false });
+        console.warn("error loading image. url", url, "filename", filename);
       });
   };
 
@@ -633,9 +629,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   }
 
   private updateImageUrl(url: string, filename?: string) {
-    if (!this.state.isLoading) {
-      this.setState({ isLoading: true });
-    }
     this.updateLoadingImages(url, filename);
   }
 
