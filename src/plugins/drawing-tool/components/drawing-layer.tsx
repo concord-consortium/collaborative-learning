@@ -21,6 +21,7 @@ import { RectangleDrawingTool } from "../objects/rectangle";
 import { EllipseDrawingTool } from "../objects/ellipse";
 import { ImageObject, StampDrawingTool } from "../objects/image";
 import { Point } from "../model/drawing-objects";
+import { VariableDrawingTool } from "../../shared-variables/drawing/variable-object";
 
 const SELECTION_COLOR = "#777";
 const HOVER_COLOR = "#bbdd00";
@@ -78,12 +79,6 @@ class SelectionDrawingTool extends DrawingTool {
   }
 }
 
-export class VariableDrawingTool extends DrawingTool {
-
-  constructor(drawingLayer: IDrawingLayer) {
-    super(drawingLayer);
-  }
-}
 /**  ======= Drawing Layer ======= */
 
 interface ObjectMap {
@@ -380,7 +375,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       if (!object || !_filter(object)) {
         return null;
       }
-      return renderDrawingObject(object, this.handleObjectHover);
+      return renderDrawingObject(object, this.getContent(), this.handleObjectHover);
     });
   }
 
@@ -447,11 +442,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
               ? SELECTION_COLOR : HOVER_COLOR)
             : null}
           {this.state.currentDrawingObject
-            // FIXME: The drawing object render method used to be passed this:
-            //  {id: "current", drawingLayer: this})
-            // that means some of their render methods need the drawingLayer
-            // Also we aren't handling the id here the same way.
-            ? renderDrawingObject(this.state.currentDrawingObject)
+            ? renderDrawingObject(this.state.currentDrawingObject, this.getContent())
             : null}
           {this.state.selectionBox ? this.state.selectionBox.render() : null}
         </svg>
@@ -601,10 +592,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         }
         break;
       }
-      // FIXME: find some way to deal with the variable object quickly
-      // case "variable":
-      //   drawingObject = new VariableObject(data, this.props.model.content as DrawingContentModelType);
-      //   break;
       default:
         // We don't need to do anything in this case
         break;

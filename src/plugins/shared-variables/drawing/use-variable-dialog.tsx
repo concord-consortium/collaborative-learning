@@ -142,8 +142,7 @@ export const useVariableDialog = ({drawingContent}: IProps) => {
         y: 50,
         variableId: dialogVarId
       });
-      // FIXME: need to add support for variables
-      // drawingContent.applyChange({action: "create", data: variableChip});
+      drawingContent.applyChange({action: "create", data: variableChip});
     }
     selectedVariableId = undefined;
   };
