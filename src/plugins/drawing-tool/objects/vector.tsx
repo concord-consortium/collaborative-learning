@@ -1,8 +1,8 @@
 import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import React from "react";
 import { computeStrokeDashArray } from "../model/drawing-content";
-import { Point, StrokedObject, typeField } from "../model/drawing-objects";
-import { DrawingTool, IDrawingComponentProps, IDrawingLayer } from "./drawing-object-types";
+import { DrawingTool, IDrawingComponentProps, IDrawingLayer, StrokedObject, typeField } from "./drawing-object";
+import { Point } from "../model/drawing-basic-types";
 
 // simple line
 export const VectorObject = StrokedObject.named("VectorObject")
