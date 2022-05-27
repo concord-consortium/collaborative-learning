@@ -169,6 +169,11 @@
         "isTileTool": true
       },
       {
+        "id": "Geometry",
+        "title": "Geometry",
+        "isTileTool": true
+      },
+      {
         "id": "delete",
         "title": "Delete",
         "iconId": "icon-delete-tool",
