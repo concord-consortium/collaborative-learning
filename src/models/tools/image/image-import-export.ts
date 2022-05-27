@@ -8,17 +8,18 @@ export interface ILegacyImageTileImport {
 }
 
 export const isLegacyImageTileImport = (snapshot: any): snapshot is ILegacyImageTileImport => {
-  return (snapshot?.type === "Image") && snapshot.changes;
+  return !!((snapshot?.type === "Image") && snapshot.changes);
 };
 
 export const convertImageTile = (snapshot: ILegacyImageTileImport) => {
   const { changes, url, ...others } = snapshot;
-  let changeUrl = "";
+  let changeUrl = "", changeFilename = "";
   if (snapshot.changes.length > 0) {
     const changeObj = safeJsonParse(snapshot.changes[changes.length-1]);
     changeUrl = changeObj.url;
+    changeFilename = changeObj.filename;
   }
-  return ({url: changeUrl, ...others});
+  return ({url: changeUrl, fileName: changeFilename, ...others});
 
 };
 
@@ -33,7 +34,8 @@ export const exportImageTileSpec = (url?: string, filename?: string, options?: I
   return [
     `{`,
     `  "type": "Image",`,
-    `  "url": "${transformedUrl}"`,
+    `  "url": "${transformedUrl}",`,
+    `  "filename": "${transformedUrl}"`,
     `}`
   ].join("\n");
 };
