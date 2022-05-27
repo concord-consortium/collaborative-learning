@@ -47,6 +47,9 @@ class DrawToolTile{
     getEllipseDrawing(){
       return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg ellipse');
     }
+    getImageDrawing(){
+      return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg image');
+    }
 }
 
 export default DrawToolTile;

@@ -59,23 +59,24 @@ context('Table Tool Tile', function () {
           .trigger("mouseup");
         drawToolTile.getRectangleDrawing().should("exist").and("have.length", 1);
       });
-      it.skip("verify change outline color", () => {
+      it("verify change outline color", () => {
         drawToolTile.getRectangleDrawing().first().should("have.attr", "stroke").and("eq", "#000000");
         drawToolTile.getDrawToolSelect().click();
         drawToolTile.getRectangleDrawing().click({force:true});
         drawToolTile.getDrawToolStrokeColor().click();
-        cy.get(".toolbar-palette.stroke-color palette-buttons").should("be.visible");
-        cy.get(".toolbar-palette.stroke-color palette-buttons color-swatch").last().click();
+        cy.get(".toolbar-palette.stroke-color .palette-buttons").should("be.visible");
+        cy.get(".toolbar-palette.stroke-color .palette-buttons .color-swatch").last().click();
         drawToolTile.getRectangleDrawing().first().should("have.attr", "stroke").and("eq", "#d100d1");
       });
-      it.skip("verify change fill color", () => {
-        drawToolTile.getRectangleDrawing().first().should("have.attr", "fill-color").and("eq", "none");
-        drawToolTile.getDrawToolSelect().click();
-        drawToolTile.getRectangleDrawing().click({force:true});
-        drawToolTile.getDrawToolStrokeColor().click();
-        cy.get(".toolbar-palette.fill-color palette-buttons").should("be.visible");
-        cy.get(".toolbar-palette.fill-color palette-buttons color-swatch").last().click();
-        drawToolTile.getRectangleDrawing().first().should("have.attr", "fill-color").and("eq", "#d100d1");
+      it("verify change fill color", () => {
+        drawToolTile.getRectangleDrawing().first().should("not.have.attr", "fill-color");
+        // The rectangle is already selected
+        // drawToolTile.getDrawToolSelect().click();
+        // drawToolTile.getRectangleDrawing().click({force:true});
+        drawToolTile.getDrawToolFillColor().click();
+        cy.get(".toolbar-palette.fill-color .palette-buttons").should("be.visible");
+        cy.get(".toolbar-palette.fill-color .palette-buttons .color-swatch").last().click();
+        drawToolTile.getRectangleDrawing().first().should("have.attr", "fill").and("eq", "#d100d1");
       });
       it("deletes rectangle drawing", () => {
         drawToolTile.getDrawToolSelect().click();
@@ -116,20 +117,19 @@ context('Table Tool Tile', function () {
         drawToolTile.getEllipseDrawing().should("not.exist");
       });
     });
-    describe.skip("Stamp", () => {
+    describe("Stamp", () => {
       it("verify draw stamp", () => {
         drawToolTile.getDrawToolStamp().click();
         drawToolTile.getDrawTile()
           .trigger("mousedown", 250, 50)
-          .trigger("mousemove", 100,150)
           .trigger("mouseup");
-        drawToolTile.getEllipseDrawing().should("exist").and("have.length", 1);
+        drawToolTile.getImageDrawing().should("exist").and("have.length", 1);
       });
       it("deletes stamp drawing", () => {
         drawToolTile.getDrawToolSelect().click();
-        drawToolTile.getEllipseDrawing().click({force:true});
+        drawToolTile.getImageDrawing().click({force:true});
         drawToolTile.getDrawToolDelete().click();
-        drawToolTile.getEllipseDrawing().should("not.exist");
+        drawToolTile.getImageDrawing().should("not.exist");
       });
     });
   });
