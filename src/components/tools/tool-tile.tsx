@@ -320,7 +320,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
   private handleCopyImportJsonToClipboard = () => {
     const { appConfig, unit } = this.stores;
     const unitBasePath = appConfig.getUnitBasePath(unit.code);
-    const transformImageUrl = (url: string, filename?: string) => {
+    const transformImageUrl = (url?: string, filename?: string) => {
       return transformCurriculumImageUrl(url, unitBasePath, filename);
     };
     const toolApiInterface = this.context;

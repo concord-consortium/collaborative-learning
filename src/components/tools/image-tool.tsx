@@ -265,7 +265,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
       gImageMap.getImage(newUrl)
         .then(image => {
           if (image.contentUrl && !isPlaceholderImage(image.displayUrl)) {
-            this.getContent().setUrl(image.contentUrl);
+            this.getContent().url = image.contentUrl;
           }
         });
     }
