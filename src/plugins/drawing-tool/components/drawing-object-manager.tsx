@@ -3,8 +3,7 @@ import React from "react";
 import { VariableChipComponent, VariableChipObject, 
   VariableChipObjectSnapshot } from "../../shared-variables/drawing/variable-object";
 import { DrawingContentModelType } from "../model/drawing-content";
-import { DrawingObjectType } from "../model/drawing-objects";
-import { DrawingComponentType } from "../objects/drawing-object-types";
+import { DrawingComponentType, DrawingObjectType } from "../objects/drawing-object";
 import { EllipseComponent, EllipseObject, EllipseObjectSnapshot } from "../objects/ellipse";
 import { ImageComponent, ImageObject, ImageObjectSnapshot } from "../objects/image";
 import { LineComponent, LineObject, LineObjectSnapshot } from "../objects/line";

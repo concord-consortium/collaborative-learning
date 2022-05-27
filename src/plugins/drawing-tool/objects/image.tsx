@@ -1,8 +1,8 @@
 import { addDisposer, Instance, SnapshotIn, types } from "mobx-state-tree";
 import React from "react";
 import { gImageMap } from "../../../models/image-map";
-import { DrawingObject, Point, typeField } from "../model/drawing-objects";
-import { DrawingTool, IDrawingComponentProps, IDrawingLayer } from "./drawing-object-types";
+import { DrawingObject, DrawingTool, IDrawingComponentProps, IDrawingLayer, typeField } from "./drawing-object";
+import { Point } from "../model/drawing-basic-types";
 import placeholderImage from "../../../assets/image_placeholder.png";
 import { observer } from "mobx-react";
 import { autorun } from "mobx";

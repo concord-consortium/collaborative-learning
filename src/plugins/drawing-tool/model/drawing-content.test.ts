@@ -3,9 +3,10 @@ import {
   computeStrokeDashArray, defaultDrawingContent, DrawingContentModel, DrawingToolMetadataModel
 } from "./drawing-content";
 import { IDrawingTileImportSpec } from "./drawing-import";
-import { DefaultToolbarSettings, DrawingToolChange, kDrawingToolID } from "./drawing-types";
+import { DrawingToolChange, kDrawingToolID } from "./drawing-types";
 import { StampModel } from "./stamp";
 import { AppConfigModel } from "../../../models/stores/app-config-model";
+import { DefaultToolbarSettings } from "./drawing-basic-types";
 
 // mock Logger calls
 jest.mock("../../../lib/logger", () => {

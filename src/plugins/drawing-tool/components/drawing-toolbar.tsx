@@ -14,10 +14,11 @@ import { useForceUpdate } from "../../../components/tools/hooks/use-force-update
 import { useMobXOnChange } from "../../../components/tools/hooks/use-mobx-on-change";
 import { IRegisterToolApiProps } from "../../../components/tools/tool-tile";
 import { DrawingContentModelType } from "../model//drawing-content";
-import { ToolbarModalButton, ToolbarSettings } from "../model/drawing-types";
+import { ToolbarModalButton } from "../model/drawing-types";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { useSettingFromStores } from "../../../hooks/use-stores";
 import { useVariableDialog } from "../../shared-variables/drawing/use-variable-dialog";
+import { ToolbarSettings } from "../model/drawing-basic-types";
 
 interface IPaletteState {
   showStamps: boolean;

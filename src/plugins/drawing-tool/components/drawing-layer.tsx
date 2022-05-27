@@ -3,18 +3,18 @@ import { extractDragTileType, kDragTileContent } from "../../../components/tools
 import { DrawingContentModelType } from "../model/drawing-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DrawingToolChange, DrawingToolDeletion, DrawingToolMove, 
-  DrawingToolUpdate, ToolbarSettings } from "../model/drawing-types";
+  DrawingToolUpdate } from "../model/drawing-types";
 import { getUrlFromImageContent } from "../../../utilities/image-utils";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { reaction, IReactionDisposer, autorun } from "mobx";
 import { observer } from "mobx-react";
 import { ImageContentSnapshotOutType } from "../../../models/tools/image/image-content";
 import { gImageMap } from "../../../models/image-map";
-import { SelectionBox } from "./drawing-object";
-import { DrawingObjectType, Point } from "../model/drawing-objects";
+import { SelectionBox } from "./selection-box";
+import { DrawingObjectType, DrawingTool, IDrawingLayer } from "../objects/drawing-object";
+import { Point, ToolbarSettings } from "../model/drawing-basic-types";
 import { applyAction, getMembers, getSnapshot, SnapshotOut } from "mobx-state-tree";
-import { DrawingObjectMSTUnion, DrawingObjectSnapshotUnion, renderDrawingObject } from "./drawing-object-components";
-import { DrawingTool, IDrawingLayer } from "../objects/drawing-object-types";
+import { DrawingObjectMSTUnion, DrawingObjectSnapshotUnion, renderDrawingObject } from "./drawing-object-manager";
 import { LineDrawingTool } from "../objects/line";
 import { VectorDrawingTool } from "../objects/vector";
 import { RectangleDrawingTool } from "../objects/rectangle";

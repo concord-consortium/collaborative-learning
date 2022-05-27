@@ -1,9 +1,9 @@
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { comma, StringBuilder } from "../../../utilities/string-builder";
 import { ITileExportOptions } from "../../../models/tools/tool-content-info";
-import { DrawingObjectDataType } from "./drawing-objects";
 import { DrawingToolChange } from "./drawing-types";
 import { ImageObjectSnapshot } from "../objects/image";
+import { DrawingObjectSnapshotUnion } from "../components/drawing-object-manager";
 
 export interface IDrawingObjectInfo {
   id: string;
@@ -26,7 +26,7 @@ export const exportDrawingTileSpec = (changes: string[], options?: ITileExportOp
 
   const exportObject = (id: string, isLast: boolean) => {
     const objInfo = objectInfoMap[id];
-    let data = { ...objInfo.changes[0].data } as DrawingObjectDataType;
+    let data = { ...objInfo.changes[0].data } as DrawingObjectSnapshotUnion;
     for (let i = 1; i < objInfo.changes.length; ++i) {
       const change = objInfo.changes[i];
       switch (change.action) {

@@ -1,9 +1,10 @@
 import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import React from "react";
-import { SelectionBox } from "../components/drawing-object";
+import { SelectionBox } from "../components/selection-box";
 import { computeStrokeDashArray } from "../model/drawing-content";
-import { DeltaPoint, Point, StrokedObject, typeField } from "../model/drawing-objects";
-import { DrawingTool, IDrawingComponentProps, IDrawingLayer } from "./drawing-object-types";
+import { DeltaPoint, DrawingTool, IDrawingComponentProps, IDrawingLayer, 
+  StrokedObject, typeField } from "./drawing-object";
+import { Point } from "../model/drawing-basic-types";
 
 function* pointIterator(line: LineObjectType): Generator<Point, string, unknown> {
   const {x, y, deltaPoints} = line;

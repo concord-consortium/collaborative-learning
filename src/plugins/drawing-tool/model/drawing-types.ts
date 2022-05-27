@@ -1,25 +1,11 @@
-import { DrawingObjectSnapshotUnion } from "../components/drawing-object-components";
-import { Point } from "./drawing-objects";
+import { DrawingObjectSnapshotUnion } from "../components/drawing-object-manager";
+import { Point } from "./drawing-basic-types";
 
 export const kDrawingToolID = "Drawing";
 
 export const kDrawingDefaultHeight = 180;
 
 export type ToolbarModalButton = "select" | "line" | "vector" | "rectangle" | "ellipse" | "stamp" | "variable";
-
-export interface ToolbarSettings {
-  stroke: string;
-  fill: string;
-  strokeDashArray: string;
-  strokeWidth: number;
-}
-
-export const DefaultToolbarSettings: ToolbarSettings = {
-  stroke: "#000000",
-  fill: "none",
-  strokeDashArray: "",
-  strokeWidth: 2
-};
 
 export type DrawingToolMove = Array<{id: string, destination: Point}>;
 export interface DrawingToolUpdate {
