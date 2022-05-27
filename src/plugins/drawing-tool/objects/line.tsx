@@ -5,6 +5,21 @@ import { computeStrokeDashArray } from "../model/drawing-content";
 import { DeltaPoint, Point, StrokedObject, typeField } from "../model/drawing-objects";
 import { DrawingTool, IDrawingComponentProps, IDrawingLayer } from "./drawing-object-types";
 
+function* pointIterator(line: LineObjectType): Generator<Point, string, unknown> {
+  const {x, y, deltaPoints} = line;
+  let currentX = x;
+  let currentY = y;
+  for (const {dx, dy} of deltaPoints) {
+    const point: Point = {x: currentX, y: currentY};
+    yield point;
+    currentX += dx;
+    currentY += dy;
+  }
+  // Due to some conflict between TS and ESLint it is necessary to return
+  // a value here. As far as I can tell this value is not used.
+  return "done";
+}
+
 // polyline
 export const LineObject = StrokedObject.named("LineObject")
   .props({
@@ -13,9 +28,7 @@ export const LineObject = StrokedObject.named("LineObject")
   })
   .views(self => ({
     inSelection(selectionBox: SelectionBox) {
-      const {x, y, deltaPoints} = self;
-      for (const {dx, dy} of deltaPoints) {
-        const point: Point = {x: x + dx, y: y + dy};
+      for (const point of pointIterator(self as LineObjectType)){
         if (selectionBox.contains(point)) {
           return true;
         }
@@ -24,17 +37,15 @@ export const LineObject = StrokedObject.named("LineObject")
     },
 
     get boundingBox() {
-      const {x, y, deltaPoints} = self;
+      const {x, y} = self;
       const nw: Point = {x, y};
       const se: Point = {x, y};
-      let lastPoint: Point = {x, y};
-      deltaPoints.forEach((dp) => {
-        nw.x = Math.min(nw.x, lastPoint.x + dp.dx);
-        nw.y = Math.min(nw.y, lastPoint.y + dp.dy);
-        se.x = Math.max(se.x, lastPoint.x + dp.dx);
-        se.y = Math.max(se.y, lastPoint.y + dp.dy);
-        lastPoint = {x: lastPoint.x + dp.dx, y: lastPoint.y + dp.dy};
-      });
+      for (const point of pointIterator(self as LineObjectType)){
+        nw.x = Math.min(nw.x, point.x);
+        nw.y = Math.min(nw.y, point.y);
+        se.x = Math.max(se.x, point.x);
+        se.y = Math.max(se.y, point.y);
+      }
       return {nw, se};  
     }
   }))

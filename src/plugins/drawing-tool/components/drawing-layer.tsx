@@ -387,6 +387,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       seY += SELECTION_BOX_PADDING;
       return <rect
                 key={index}
+                data-testid="selection-box"
                 x={nwX}
                 y={nwY}
                 width={seX - nwX}
