@@ -3,7 +3,7 @@ import React from "react";
 import { VariableChipComponent, VariableChipObject, 
   VariableChipObjectSnapshot } from "../../shared-variables/drawing/variable-object";
 import { DrawingContentModelType } from "../model/drawing-content";
-import { DrawingComponentType, DrawingObjectType } from "../objects/drawing-object";
+import { DrawingComponentType, DrawingObjectType, HandleObjectHover } from "../objects/drawing-object";
 import { EllipseComponent, EllipseObject, EllipseObjectSnapshot } from "../objects/ellipse";
 import { ImageComponent, ImageObject, ImageObjectSnapshot } from "../objects/image";
 import { LineComponent, LineObject, LineObjectSnapshot } from "../objects/line";
@@ -23,14 +23,13 @@ export function getDrawingObjectComponent(drawingObject: DrawingObjectType) {
   return gDrawingObjectComponents[drawingObject.type];
 }
 
-type HandleObjectHover = (e: MouseEvent|React.MouseEvent<any>, obj: DrawingObjectType, hovering: boolean) => void;
-
 export function renderDrawingObject(drawingObject: DrawingObjectType, drawingContent: DrawingContentModelType, 
-  handleHover?: HandleObjectHover) {
+                                    handleHover?: HandleObjectHover) {
   const DrawingObjectComponent = getDrawingObjectComponent(drawingObject);
-  if (!DrawingObjectComponent) return null;
-  return <DrawingObjectComponent key={drawingObject.id} model={drawingObject} drawingContent={drawingContent} 
-    handleHover={handleHover}/>;
+  return DrawingObjectComponent ? 
+    <DrawingObjectComponent key={drawingObject.id} model={drawingObject} 
+      drawingContent={drawingContent} handleHover={handleHover}/> 
+    : null;
 }
 
 // FIXME: this is temporary, to support plugin based objects

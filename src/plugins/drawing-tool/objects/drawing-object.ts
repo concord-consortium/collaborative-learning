@@ -67,6 +67,9 @@ export const DeltaPoint = types.model("DeltaPoint", {
   dx: types.number, dy: types.number
 });
 
+export type HandleObjectHover = 
+  (e: MouseEvent|React.MouseEvent<any>, obj: DrawingObjectType, hovering: boolean) => void;
+
 export interface IDrawingComponentProps {
   model: DrawingObjectType;
   // TODO: this basically causes a circular reference. The drawingContent needs to know
@@ -74,7 +77,7 @@ export interface IDrawingComponentProps {
   // This drawingContent prop is only needed by the variable chip. When the variable chip
   // is a real plugin to the drawing tile, hopefully this circular dependency can be removed.
   drawingContent: DrawingContentModelType;
-  handleHover?: (e: MouseEvent | React.MouseEvent<any>, obj: DrawingObjectType, hovering: boolean) => void;
+  handleHover?: HandleObjectHover;
 }
 
 export type DrawingComponentType = React.ComponentType<IDrawingComponentProps>;

@@ -1,6 +1,7 @@
 import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import React from "react";
-import { DrawingObject, DrawingTool, IDrawingComponentProps, IDrawingLayer, typeField } from "../../drawing-tool/objects/drawing-object";
+import { DrawingObject, DrawingTool, IDrawingComponentProps, IDrawingLayer, typeField } 
+  from "../../drawing-tool/objects/drawing-object";
 import { Point } from "../../drawing-tool/model/drawing-basic-types";
 import { VariableChip } from "../slate/variable-chip";
 import { findVariable } from "./drawing-utils";

@@ -11,7 +11,7 @@ import { observer } from "mobx-react";
 import { ImageContentSnapshotOutType } from "../../../models/tools/image/image-content";
 import { gImageMap } from "../../../models/image-map";
 import { SelectionBox } from "./selection-box";
-import { DrawingObjectType, DrawingTool, IDrawingLayer } from "../objects/drawing-object";
+import { DrawingObjectType, DrawingTool, HandleObjectHover, IDrawingLayer } from "../objects/drawing-object";
 import { Point, ToolbarSettings } from "../model/drawing-basic-types";
 import { applyAction, getMembers, getSnapshot, SnapshotOut } from "mobx-state-tree";
 import { DrawingObjectMSTUnion, DrawingObjectSnapshotUnion, renderDrawingObject } from "./drawing-object-manager";
@@ -269,7 +269,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     }
   };
 
-  public handleObjectHover = (e: MouseEvent|React.MouseEvent<any>, obj: DrawingObjectType, hovering: boolean) => {
+  public handleObjectHover: HandleObjectHover = (e, obj, hovering) => {
     if (!this.props.readOnly && this.currentTool === this.tools.selection) {
       this.setState({hoverObject: hovering ? obj : null});
     }
