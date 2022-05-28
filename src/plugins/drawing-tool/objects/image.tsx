@@ -11,12 +11,8 @@ export const ImageObject = DrawingObject.named("ImageObject")
   .props({
     type: typeField("image"),
 
-    // TODO: 
-    // - figure how to handle the update actions which set the url
-
     // This is the canonical or normalized url for this image.
     url: types.string,
-
 
     // The filename needs to be stored because it is meta data created when a user adds a file
     // by uploading a file from their computer. The filename cannot be discovered just from the
