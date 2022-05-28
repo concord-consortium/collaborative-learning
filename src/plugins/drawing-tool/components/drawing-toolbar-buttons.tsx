@@ -3,6 +3,7 @@ import React from "react";
 import { Tooltip } from "react-tippy";
 import { computeStrokeDashArray } from "../model/drawing-content";
 import { ToolbarModalButton } from "../model/drawing-types";
+import { ToolbarSettings } from "../model/drawing-basic-types";
 import { StampModelType } from "../model/stamp";
 import SmallCornerTriangle from "../../../assets/icons/small-corner-triangle.svg";
 import ColorFillIcon from "../../../clue/assets/icons/drawing/color-fill-icon.svg";
@@ -17,7 +18,6 @@ import VariableToolIcon from "../../../clue/assets/icons/variable-tool.svg";
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
 import { useTouchHold } from "../../../hooks/use-touch-hold";
 import { isLightColorRequiringContrastOffset } from "../../../utilities/color-utils";
-import { ToolbarSettings } from "../model/drawing-basic-types";
 
 const svgIcons: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
   ellipse: EllipseToolIcon,

@@ -33,8 +33,7 @@ export function renderDrawingObject(drawingObject: DrawingObjectType, drawingCon
 }
 
 // FIXME: this is temporary, to support plugin based objects
-// we can't use a static union. Also if we keep it here the name of this file
-// isn't correct.
+// we can't use a static union. 
 export type DrawingObjectSnapshotUnion = 
   LineObjectSnapshot  |
   VectorObjectSnapshot  |

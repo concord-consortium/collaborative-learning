@@ -4,9 +4,9 @@ import {
 } from "./drawing-content";
 import { IDrawingTileImportSpec } from "./drawing-import";
 import { DrawingToolChange, kDrawingToolID } from "./drawing-types";
+import { DefaultToolbarSettings } from "./drawing-basic-types";
 import { StampModel } from "./stamp";
 import { AppConfigModel } from "../../../models/stores/app-config-model";
-import { DefaultToolbarSettings } from "./drawing-basic-types";
 
 // mock Logger calls
 jest.mock("../../../lib/logger", () => {

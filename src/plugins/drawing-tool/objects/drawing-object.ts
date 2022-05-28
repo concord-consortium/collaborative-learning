@@ -6,7 +6,7 @@ import { DrawingContentModelType } from "../model/drawing-content";
 import { StampModelType } from "../model/stamp";
 
 /**
- * This creates the definition for a type filed in MST.
+ * This creates the definition for a type field in MST.
  * The field is optional so it doesn't have to be specified when creating
  * an instance.
  * 

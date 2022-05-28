@@ -15,10 +15,10 @@ import { useMobXOnChange } from "../../../components/tools/hooks/use-mobx-on-cha
 import { IRegisterToolApiProps } from "../../../components/tools/tool-tile";
 import { DrawingContentModelType } from "../model//drawing-content";
 import { ToolbarModalButton } from "../model/drawing-types";
+import { ToolbarSettings } from "../model/drawing-basic-types";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { useSettingFromStores } from "../../../hooks/use-stores";
 import { useVariableDialog } from "../../shared-variables/drawing/use-variable-dialog";
-import { ToolbarSettings } from "../model/drawing-basic-types";
 
 interface IPaletteState {
   showStamps: boolean;
