@@ -11,7 +11,7 @@ export const isLegacyImageTileImport = (snapshot: any): snapshot is ILegacyImage
   return !!((snapshot?.type === "Image") && snapshot.changes);
 };
 
-export const convertImageTile = (snapshot: ILegacyImageTileImport) => {
+export const convertLegacyImageTile = (snapshot: ILegacyImageTileImport) => {
   const { changes, url, ...others } = snapshot;
   let changeUrl = "", changeFilename = "";
   if (snapshot.changes.length > 0) {
@@ -31,11 +31,20 @@ export const transformCurriculumImageUrl = (url?: string, unitBasePath?: string,
 
 export const exportImageTileSpec = (url?: string, filename?: string, options?: ITileExportOptions) => {
   const transformedUrl = url && options?.transformImageUrl?.(url, filename) || url;
-  return [
-    `{`,
-    `  "type": "Image",`,
-    `  "url": "${transformedUrl}",`,
-    `  "filename": "${transformedUrl}"`,
-    `}`
-  ].join("\n");
+  if (filename) {
+    return [
+      `{`,
+      `  "type": "Image",`,
+      `  "url": "${transformedUrl}",`,
+      `  "filename": "${transformedUrl}"`,
+      `}`
+    ].join("\n");
+  } else {
+    return [
+      `{`,
+      `  "type": "Image",`,
+      `  "url": "${transformedUrl}"`,
+      `}`
+    ].join("\n");
+  }
 };

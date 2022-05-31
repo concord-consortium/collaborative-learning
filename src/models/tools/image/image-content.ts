@@ -1,5 +1,5 @@
 import { types, Instance, SnapshotOut } from "mobx-state-tree";
-import { exportImageTileSpec, convertImageTile, isLegacyImageTileImport } from "./image-import-export";
+import { exportImageTileSpec, isLegacyImageTileImport, convertLegacyImageTile } from "./image-import-export";
 import { ITileExportOptions, IDefaultContentOptions } from "../tool-content-info";
 import { ToolContentModel } from "../tool-types";
 import { isPlaceholderImage } from "../../../utilities/image-utils";
@@ -22,7 +22,7 @@ export const ImageContentModel = ToolContentModel
   })
   .preProcessSnapshot(snapshot => {
     return isLegacyImageTileImport(snapshot)
-            ? convertImageTile(snapshot)
+            ? convertLegacyImageTile(snapshot)
             : snapshot;
   })
   .views(self => ({

@@ -1,5 +1,5 @@
 import {
-  exportImageTileSpec, convertImageTile, isLegacyImageTileImport,
+  exportImageTileSpec, convertLegacyImageTile, isLegacyImageTileImport,
 } from "./image-import-export";
 
 describe("isLegacyImageTileImport", () => {
@@ -23,7 +23,7 @@ describe("convertImageTile", () => {
       ]
 
     };
-    const result = convertImageTile(input);
+    const result = convertLegacyImageTile(input);
     expect(result.type).toBe("Image");
     expect(result.url).toBe("ccimg://myLegacyUrl");
     expect(result.fileName).toBe("img2.jpg");
