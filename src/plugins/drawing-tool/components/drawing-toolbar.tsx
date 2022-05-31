@@ -7,15 +7,17 @@ import {
 import { StampsPalette } from "./stamps-palette";
 import { StrokeColorPalette } from "./stroke-color-palette";
 import { FillColorPalette } from "./fill-color-palette";
-import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
-import { useForceUpdate } from "../hooks/use-force-update";
-import { useMobXOnChange } from "../hooks/use-mobx-on-change";
-import { IRegisterToolApiProps } from "../tool-tile";
-import { DrawingContentModelType } from "../../../models/tools/drawing/drawing-content";
-import { ToolbarModalButton, ToolbarSettings } from "../../../models/tools/drawing/drawing-types";
+import {
+  IFloatingToolbarProps, useFloatingToolbarLocation
+} from "../../../components/tools/hooks/use-floating-toolbar-location";
+import { useForceUpdate } from "../../../components/tools/hooks/use-force-update";
+import { useMobXOnChange } from "../../../components/tools/hooks/use-mobx-on-change";
+import { IRegisterToolApiProps } from "../../../components/tools/tool-tile";
+import { DrawingContentModelType } from "../model//drawing-content";
+import { ToolbarModalButton, ToolbarSettings } from "../model/drawing-types";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { useSettingFromStores } from "../../../hooks/use-stores";
-import { useVariableDialog } from "./use-variable-dialog";
+import { useVariableDialog } from "../../shared-variables/drawing/use-variable-dialog";
 
 interface IPaletteState {
   showStamps: boolean;
@@ -29,7 +31,8 @@ interface IProps extends IFloatingToolbarProps, IRegisterToolApiProps {
   model: ToolTileModelType;
 }
 
-const defaultButtons = ["select", "line", "vector", "rectangle", "ellipse", "delete"];
+const defaultButtons = ["select", "line", "vector", "rectangle", "ellipse", 
+  "stamp", "stroke-color", "fill-color", "delete"];
 
 export const ToolbarView: React.FC<IProps> = (
               { documentContent, model, onIsEnabled, ...others }: IProps) => {
@@ -154,7 +157,7 @@ export const ToolbarView: React.FC<IProps> = (
   const toolbarClasses = classNames("drawing-tool-toolbar", { disabled: !isEnabled, flip: flipPalettes });
   return documentContent
     ? ReactDOM.createPortal(
-        <div className={toolbarClasses} style={location}>
+        <div className={toolbarClasses} style={location} data-testid="drawing-toolbar">
           <div className="drawing-tool-buttons">
             {toolbarButtons.map(button => {
               return buttonDefs[button];

@@ -3,8 +3,8 @@ import { exportDrawingTileSpec } from "./drawing-export";
 import { importDrawingTileSpec, isDrawingTileImportSpec } from "./drawing-import";
 import { DrawingObjectDataType } from "./drawing-objects";
 import { StampModel, StampModelType } from "./stamp";
-import { ITileExportOptions, IDefaultContentOptions } from "../tool-content-info";
-import { ToolMetadataModel, ToolContentModel } from "../tool-types";
+import { ITileExportOptions, IDefaultContentOptions } from "../../../models/tools/tool-content-info";
+import { ToolMetadataModel, ToolContentModel } from "../../../models/tools/tool-types";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
 import {
@@ -244,7 +244,7 @@ export const DrawingContentModel = ToolContentModel
   })
   .actions(self => ({
     updateAfterSharedModelChanges() {
-      console.log("TODO: need to implement yet");
+      console.warn("TODO: need to implement yet");
     }
   }));
 

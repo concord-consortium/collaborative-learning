@@ -1,12 +1,12 @@
 import classNames from "classnames";
 import React, { useEffect } from "react";
-import { IToolTileProps } from "../tool-tile";
+import { IToolTileProps } from "../../../components/tools/tool-tile";
 import { ToolbarView } from "./drawing-toolbar";
 import { DrawingLayerView } from "./drawing-layer";
-import { useToolbarToolApi } from "../hooks/use-toolbar-tool-api";
-import { DrawingContentModelType } from "../../../models/tools/drawing/drawing-content";
+import { useToolbarToolApi } from "../../../components/tools/hooks/use-toolbar-tool-api";
+import { DrawingContentModelType } from "../model/drawing-content";
 import { useCurrent } from "../../../hooks/use-current";
-import { exportDrawingTileSpec } from "../../../models/tools/drawing/drawing-export";
+import { exportDrawingTileSpec } from "../model/drawing-export";
 import { ITileExportOptions } from "../../../models/tools/tool-content-info";
 
 import "./drawing-tool.sass";
@@ -33,7 +33,7 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
 
   return (
-    <div className={classNames("drawing-tool", { "read-only": readOnly })}>
+    <div className={classNames("drawing-tool", { "read-only": readOnly })} data-testid="drawing-tool">
       <ToolbarView model={model}
                   documentContent={documentContent}
                   toolTile={toolTile}

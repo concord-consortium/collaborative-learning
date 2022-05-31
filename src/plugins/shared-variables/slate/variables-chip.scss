@@ -1,23 +1,24 @@
-.ccrte-variable {
+.variable-chip {
   border: 1px solid black;
   border-radius: 5px;
   padding: 1px 3px;
   margin: 0 1px;
   user-select: none;
+  white-space: nowrap;
 
-  .ccrte-name {
+  .variable-name {
     padding: 0 2px;
   }
 
-  .ccrte-equals {
+  .variable-equals {
     padding: 0 2px;
   }
 
-  .ccrte-value {
+  .variable-value {
     padding: 0 2px;
   }
 }
 
-.ccrte-variable-highlight {
+.variable-chip-highlight {
   box-shadow: 0 0 0 2px lightskyblue;
 }

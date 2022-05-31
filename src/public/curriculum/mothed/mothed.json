@@ -9,6 +9,78 @@
       "numFormat": ".2~f"
     }
   },
+  "config": {
+    "placeholderText": "This is where users can type text",
+    "autoAssignStudentsToIndividualGroups": false,
+    "disablePublish": true,
+    "defaultDocumentType": "problem",
+    "settings": {
+      "table": { "numFormat": ".2~f" }
+    },
+    "navTabs": {
+      "showNavPanel": false,
+      "lazyLoadTabContents": true,
+      "tabSpecs": [
+        {
+          "title": "Workspaces",
+          "type": "problem-documents",
+          "dataTestHeader": "my-work-section-investigations",
+          "dataTestItem": "my-work-list-items",
+          "documentTypes": ["problem", "planning"],
+          "order": "original",
+          "showStars": ["student", "teacher"]
+        },
+        {
+          "tab": "my-work",
+          "label": "My Work",
+          "sections": [
+            {
+              "title": "Workspaces",
+              "type": "personal-documents",
+              "dataTestHeader": "my-work-section-workspaces",
+              "dataTestItem": "my-work-list-items",
+              "documentTypes": ["personal"],
+              "properties": ["!isDeleted"],
+              "showStars": ["student", "teacher"],
+              "addDocument": true
+            }
+          ]
+        }
+      ]
+    },
+    "stamps": [ 
+      {
+        "url": "curriculum/mothed/stamps/acorn.png",
+        "width": 35,
+        "height": 35
+      },
+      {
+        "url": "curriculum/mothed/stamps/firneedles.png",
+        "width": 35,
+        "height": 29
+      },
+      {
+        "url": "curriculum/mothed/stamps/mapleleaf.png",
+        "width": 35,
+        "height": 38
+      },
+      {
+        "url": "curriculum/mothed/stamps/tree.png",
+        "width": 37,
+        "height": 35
+      },
+      {
+        "url": "curriculum/mothed/stamps/pine.png",
+        "width": 23,
+        "height": 40
+      },
+      {
+        "url": "curriculum/mothed/stamps/greenleaf.png",
+        "width": 35,
+        "height": 34
+      }
+  ]
+  },
   "sections": {
     "getStarted": {
       "initials": "GS",
@@ -52,38 +124,6 @@
       { "type": "share" }
     ]
   },
-  "defaultStamps": [
-      {
-        "url": "curriculum/mothed/stamps/acorn.png",
-        "width": 35,
-        "height": 35
-      },
-      {
-        "url": "curriculum/mothed/stamps/firneedles.png",
-        "width": 35,
-        "height": 29
-      },
-      {
-        "url": "curriculum/mothed/stamps/mapleleaf.png",
-        "width": 35,
-        "height": 38
-      },
-      {
-        "url": "curriculum/mothed/stamps/tree.png",
-        "width": 37,
-        "height": 35
-      },
-      {
-        "url": "curriculum/mothed/stamps/pine.png",
-        "width": 23,
-        "height": 40
-      },
-      {
-        "url": "curriculum/mothed/stamps/greenleaf.png",
-        "width": 35,
-        "height": 34
-      }
-  ],
   "investigations": [
     {
       "description": "Investigation 1",
@@ -93,6 +133,168 @@
         {
           "description": "Activity 1.1",
           "ordinal": 1,
+          "title": "What are Moths?",
+          "subtitle": "Gathering our Knowledge",
+          "disabled": [],
+          "sections":
+          [
+            {
+            "type": "getStarted",
+            "content": {
+              "tiles": 
+                [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Welcome to MothEd. Together over the next few weeks we&#x27;re going to get to research moths. </p>",
+                        "<p>Let&#x27;s begin with our assumptions and prior knowledge about moths. Please create a drawing of a moth, either by choosing the drawing tool (pencil) on the right or by dragging this drawing tile below into your document. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Drawing",
+                      "objects": [
+                        { "type": "ellipse", "id": "q1WLoUS2dFy1nl3m", "x":99,"y":59,"rx":26,"ry":27,"stroke":"#000000","fill":"none","strokeWidth":2,"strokeDashArray":"" }
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Now create a description of your moth using a text tile (letter A at right).</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Have each person quickly introduces themself with their first name (“I’m Amanda or Miss Amanda, and I teach about bugs”)</p>",
+                        "<p>We will tell also introduce the camera equipment.</p>",
+                        "<p>The first task asks students to draw moths. If they ask, “What is a moth?” we can tell them a moth is a type of insect. They should draw what they think a moth might be. </p>",
+                        "<p>Students should each do their own drawing without looking at other folks’ drawings and without talking.</p>"
+                      ]
+                    }
+                  }
+                                              
+                ]
+              }
+            },
+            {
+              "type": "fieldNotes",
+              "content": {
+                "tiles": 
+                [
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [ 
+                        "<p>Divide class into small groups of 4 or less. Make sure each group is in the same Group shown in the top right of the screen. If they aren&#x27;t, have them click the group number, leave, and join whichever group number they are assigned. </p>",
+                        "<p>It&#x27;s important that students record their own and each others exact words, not an interpretation from an adult.</p>"
+                      ]
+                    }
+                  },        
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>We are here to learn about moths together. What do you know about moths?</p>",
+                        "<p>Make sure all the members of your group are in the same group number at the top right of your screen. Use the group view and share controls so that you can see and share each others notes with students in your group. Talk with your group about what you know about moths; take notes and make a list in your Field Notes section.  </p>",
+                        "<p>Find some photos of moths online. Save them to your desktop and drag them into your document. Discuss what you see in the images.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/mothed/images/share.jpg"
+                    }
+                  },            
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Encourage your students to document things they find online and save references to useful web sites.</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "share",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Moths are important in our ecosystem.</p>",
+                        "<ul><li>Moths can be important pollinators -- they help plants/flowers make seeds.</li><li>Moths can be pests that cause problems</li><li>Moths are an important part of the foodweb</li></ul>"
+                      ]
+                    }
+                  },                  
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/mothed/images/mothtypes.jpg"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>1. </strong>Take a look at the pinned moths your teacher has for you to look at.</p>",
+                        "<p>Write down a summary of</p>",
+                        "<ul><li>what do you notice? </li><li>What can you observe? </li><li>How do we know we are looking at moths? </li><li>What are some things that all the moths have in common? </li></ul>",
+                        "<p>It is important to know how many kinds of moths live in an area, since different kinds of moths do different things -- how do we tell the different kinds of moths apart? Publish your documents to the class to share your findings.</p>"
+                      ]
+                    }
+                  },                  
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>2. </strong>Refine your work by thinking about different types of evidence of <strong>Moth types and features</strong></p>",
+                        "<ul><li>What did you expect to find that you did not see?</li><li>What did you see that you didn’t list in <strong>Get Started</strong>?</li><li>What did you observe that isn&#x27;t makes moths helpful or harmful to the ecosystem?</li></ul>",
+                        "<p>Is there anything you want to add to your final presentation to the class?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Show students each others documents from the Class Work tab or ask them to look at particular docs in that tab. Discuss the class findings.</p>",
+                        "<p>Ask closing question for students to consider while we are gone:  What is one thing you found interesting today? What is one thing you wonder about?</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "description": "Activity 1.2",
+          "ordinal": 2,
           "title": "What Lives in our Schoolyard",
           "subtitle": "Making Observations",
           "disabled": [],

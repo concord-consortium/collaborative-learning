@@ -2,7 +2,8 @@ import { createContext } from "react";
 import { Optional } from "utility-types";
 import { ITileExportOptions } from "../../models/tools/tool-content-info";
 
-export type TileResizeEntry = Optional<ResizeObserverEntry, "borderBoxSize" | "contentBoxSize">;
+export type TileResizeEntry = Optional<ResizeObserverEntry,
+                                        "borderBoxSize" | "contentBoxSize" | "devicePixelContentBoxSize">;
 export interface IToolApi {
   getTitle?: () => string | undefined;
   hasSelection?: () => boolean;

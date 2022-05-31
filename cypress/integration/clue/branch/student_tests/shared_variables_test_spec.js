@@ -57,13 +57,13 @@ context('Shared Variables', function () {
         cy.findByRole("button", {name: "OK"}).click();
       });
       // Make sure the text tile now has 2 chips with Var A.
-      textToolTile.getTextTile().last().find('.ccrte-variable:contains("Var A")').should('have.length', 2);
+      textToolTile.getTextTile().last().find('.variable-chip:contains("Var A")').should('have.length', 2);
     });
 
     it('can pre populate the name field based on the selected text', function() {
       // textToolTile.enterText uses `focus` which messes up the cursor position in Electron.
       // So instead we click on the text tile, to do position the cursor and cause the focus event.
-      textToolTile.getTextTile().last().find('.ccrte-variable:contains("Var A")').last().click();
+      textToolTile.getTextTile().last().find('.variable-chip:contains("Var A")').last().click();
 
       // Note that when the chip is focused you can't type so we have to use
       // rightArrow to move off of the chip
@@ -75,18 +75,18 @@ context('Shared Variables', function () {
         cy.findByRole("button", {name: "OK"}).click();
       });
       // Make sure the text tile now has a chips with VarC
-      textToolTile.getTextTile().last().find('.ccrte-variable:contains("VarC")').should('exist');
+      textToolTile.getTextTile().last().find('.variable-chip:contains("VarC")').should('exist');
       textToolTile.getTextEditor().last().type('{rightArrow} After chip');
     });
 
     it('can edit a variable by double clicking', function() {
-      textToolTile.getTextTile().last().find('.ccrte-variable').first().dblclick();
+      textToolTile.getTextTile().last().find('.variable-name').first().dblclick();
       cy.get(".ReactModalPortal").within(() => {
         cy.findByLabelText(/Name/).clear().type("Var B");
         cy.findByRole("button", {name: "OK"}).click();
       });
       // Make sure the text tile now has 2 chips with Var B.
-      textToolTile.getTextTile().last().find('.ccrte-variable:contains("Var B")').should('have.length',  2);
+      textToolTile.getTextTile().last().find('.variable-chip:contains("Var B")').should('have.length',  2);
       // Make sure the diagram tile now has a card with Var B.
       cy.get('.primary-workspace .canvas-area .diagram-tool [data-testid="quantity-node"]')
         .findByDisplayValue('Var B')
@@ -94,13 +94,13 @@ context('Shared Variables', function () {
     });
 
     it('can set the value of a variable', function() {
-      textToolTile.getTextTile().last().find('.ccrte-variable').first().dblclick();
+      textToolTile.getTextTile().last().find('.variable-chip').first().dblclick();
       cy.get(".ReactModalPortal").within(() => {
         cy.findByLabelText(/Value/).clear().type("1.234");
         cy.findByRole("button", {name: "OK"}).click();
       });
       // Make sure the text tile now has 2 chips with Var B.
-      textToolTile.getTextTile().last().find('.ccrte-variable:contains("Var B=1.234")').should('have.length', 2);
+      textToolTile.getTextTile().last().find('.variable-chip:contains("Var B=1.234")').should('have.length', 2);
     });
 
     it('verifies restore of variable chip content',()=>{
@@ -110,7 +110,7 @@ context('Shared Variables', function () {
       //re-open investigation
       canvas.openDocumentWithTitleWithoutTabs(title);
       // Make sure the text tile still has 2 chips with Var B.
-      textToolTile.getTextTile().last().find('.ccrte-variable:contains("Var B=1.234")').should('have.length', 2);
+      textToolTile.getTextTile().last().find('.variable-chip:contains("Var B=1.234")').should('have.length', 2);
       // Make sure the diagram tile still has a card with Var B.
       cy.get('.primary-workspace .canvas-area .diagram-tool [data-testid="quantity-node"]')
         .findByDisplayValue('Var B')
@@ -142,6 +142,18 @@ context('Shared Variables', function () {
       drawToolTile.getDrawTile().last().find('.drawing-variable:contains("VarC")').click();
       drawToolTile.getDrawToolDelete().click();
       drawToolTile.getDrawTile().last().find('.drawing-variable:contains("VarCVar D")').should('not.exist');
-    })
+    });
+    it("verify create new variable", () => {
+      cy.get("[data-original-title=Variable").click();
+      cy.get(".modal-header").should("contain", "Insert Variable");
+      cy.get(".ReactModalPortal").within(() => {
+        cy.get("#variable-name-input").type("Var E");
+        cy.get("#variable-value-input").type("5.432{enter}");
+        cy.findByRole("button", {name: "OK"}).click();
+      });
+      drawToolTile.getDrawTile().last().find('.drawing-variable:contains("Var E")').should('have.length', 1);
+      drawToolTile.getDrawTile().last().find('.drawing-variable:contains("5.432")').should('have.length', 1);
+
+    });
   });
 });
