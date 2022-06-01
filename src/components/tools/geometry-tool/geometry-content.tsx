@@ -41,6 +41,7 @@ import AxisSettingsDialog from "./axis-settings-dialog";
 import { EditableGeometryTitle } from "./editable-geometry-title";
 import LabelSegmentDialog from "./label-segment-dialog";
 import MovableLineDialog from "./movable-line-dialog";
+// import { useMovableLineDialog } from "./use-movable-line-dialog";
 import placeholderImage from "../../../assets/image_placeholder.png";
 import { LinkTableButton } from "./link-table-button";
 import ErrorAlert from "../../utilities/error-alert";
@@ -48,6 +49,7 @@ import SingleStringDialog from "../../utilities/single-string-dialog";
 import { autorun, observe } from "mobx";
 
 import "./geometry-tool.sass";
+import { string } from "mobx-state-tree/dist/internal";
 
 export interface IGeometryContentProps extends IGeometryProps {
   onSetBoard: (board: JXG.Board) => void;
@@ -457,7 +459,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       return (
         <MovableLineDialog
           key="editor"
-          isOpen={line != null}
           onAccept={this.handleUpdateLine}
           onClose={this.closeLineDialog}
           line={line}
