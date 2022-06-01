@@ -8,7 +8,7 @@ export interface ILegacyImageTileImport {
 }
 
 export const isLegacyImageTileImport = (snapshot: any): snapshot is ILegacyImageTileImport => {
-  return !!((snapshot?.type === "Image") && snapshot.changes);
+  return (snapshot?.type === "Image") && !!snapshot.changes;
 };
 
 export const convertLegacyImageTile = (snapshot: ILegacyImageTileImport) => {
@@ -26,7 +26,7 @@ export const convertLegacyImageTile = (snapshot: ILegacyImageTileImport) => {
 export const transformCurriculumImageUrl = (url?: string, unitBasePath?: string, filename?: string) => {
   return unitBasePath && filename
           ? `${unitBasePath}/images/${filename}`
-          : url ? url : "";
+          : url || "";
 };
 
 export const exportImageTileSpec = (url?: string, filename?: string, options?: ITileExportOptions) => {

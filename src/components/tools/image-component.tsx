@@ -11,7 +11,7 @@ interface IProps {
   onUrlChange: (url: string, filename?: string, context?: IDocumentContext) => void;
 }
 
-const ImageComponent =
+const _ImageComponent =
   React.forwardRef<HTMLDivElement, IProps>(({ content, style, onMouseDown, onUrlChange }, forwardedRef) => {
 
     // calls onUrlChange when image url changes in content
@@ -28,5 +28,5 @@ const ImageComponent =
       </div>
     );
   });
-ImageComponent.displayName = "ImageComponent";
-export const ObserverImageComponent = observer(ImageComponent);
+_ImageComponent.displayName = "ImageComponent";
+export const ImageComponent = observer(_ImageComponent);

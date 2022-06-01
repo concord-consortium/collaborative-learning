@@ -16,7 +16,6 @@ export const ImageContentModel = ToolContentModel
   .named("ImageTool")
   .props({
     type: types.optional(types.literal(kImageToolID), kImageToolID),
-    changes: types.maybe(types.array(types.string)), //keeping for legacy documents
     url: types.maybe(types.string),
     filename: types.maybe(types.string),
   })
