@@ -34,7 +34,6 @@ describe("Image export with default options", () => {
   it("should export empty changes", () => {
     const url = "assets/images/image_placeholder.png";
         expect(exportImageTileSpec(url))
-            .toEqual(`{\n  "type": "Image",\n  "url": "assets/images/image_placeholder.png",
-  "filename": "assets/images/image_placeholder.png"\n}`);
+            .toEqual(`{\n  "type": "Image",\n  "url": "assets/images/image_placeholder.png"\n}`);
   });
 });
