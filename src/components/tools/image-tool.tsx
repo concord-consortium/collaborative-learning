@@ -6,7 +6,7 @@ import { debounce } from "lodash";
 import { BaseComponent } from "../base";
 import { EmptyImagePrompt } from "./image/empty-image-prompt";
 import { ImageToolbar } from "./image/image-toolbar";
-import { ImageComponent } from "./image-component";
+import { ObserverImageComponent } from "./image-component";
 import { IToolApi, TileResizeEntry } from "./tool-api";
 import { IToolTileProps } from "./tool-tile";
 import { IDocumentContext } from "../../models/document/document-types";
@@ -181,7 +181,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
             onIsEnabled={this.handleIsEnabled}
             onUploadImageFile={this.handleUploadImageFile}
           />
-          <ImageComponent
+          <ObserverImageComponent
             ref={elt => this.imageElt = elt}
             content={this.getContent()}
             style={imageDisplayStyle}
@@ -265,7 +265,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
       gImageMap.getImage(newUrl)
         .then(image => {
           if (image.contentUrl && !isPlaceholderImage(image.displayUrl)) {
-            this.getContent().url = image.contentUrl;
+            this.getContent().setUrl(image.contentUrl);
           }
         });
     }

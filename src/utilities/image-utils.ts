@@ -33,11 +33,6 @@ export function isPlaceholderImage(url?: string) {
   return url && (url === placeholderImage) || (url === orgPlaceholderImage);
 }
 
-export function getUrlFromImageContent(content: ImageContentSnapshotOutType) {
-  const url = content.url;
-  if (content.url) return url;
-}
-
 function kUploadImage(db: DB, image: ImageModelType): Promise<ISimpleImage> {
   const img: ISimpleImage = {
     imageUrl: placeholderImage

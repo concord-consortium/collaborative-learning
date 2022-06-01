@@ -31,9 +31,18 @@ describe("convertImageTile", () => {
 });
 
 describe("Image export with default options", () => {
-  it("should export empty changes", () => {
+  it("should export placeholder image when no image has been uploaded", () => {
     const url = "assets/images/image_placeholder.png";
         expect(exportImageTileSpec(url))
-            .toEqual(`{\n  "type": "Image",\n  "url": "assets/images/image_placeholder.png"\n}`);
+            .toEqual(`{\n  "type": "Image",\n  "url": "${url}"\n}`);
+  });
+});
+
+describe("Image export with uploaded image", () => {
+  it("should export uploaded image", () => {
+    const url = "https://collaborative-learning.concord.org/uploaded-image.jpg";
+    const filename = "https://collaborative-learning.concord.org/uploaded-image.jpg";
+        expect(exportImageTileSpec(url, filename))
+            .toEqual(`{\n  "type": "Image",\n  "url": "${url}",\n  "filename": "${filename}"\n}`);
   });
 });

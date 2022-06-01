@@ -7,7 +7,7 @@ import { DrawingObjectDataType, LineDrawingObjectData, VectorDrawingObjectData, 
 import { VariableObject } from "../../shared-variables/drawing/variable-object";
 import { DefaultToolbarSettings, DrawingToolChange, DrawingToolDeletion, DrawingToolMove, 
   DrawingToolUpdate, ToolbarSettings } from "../model/drawing-types";
-import { getUrlFromImageContent, isPlaceholderImage } from "../../../utilities/image-utils";
+import { isPlaceholderImage } from "../../../utilities/image-utils";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { assign, filter } from "lodash";
 import { reaction, IReactionDisposer, autorun } from "mobx";
@@ -974,7 +974,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       const parsedContent = safeJsonParse(dragContent);
       if (parsedContent) {
         const droppedContent: ImageContentSnapshotOutType = parsedContent.content;
-        const droppedUrl = getUrlFromImageContent(droppedContent);
+        const droppedUrl = droppedContent.url;
         if (droppedUrl) {
           this.handleImageDrop(droppedUrl);
         }
