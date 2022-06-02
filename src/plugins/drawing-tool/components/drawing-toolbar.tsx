@@ -1,9 +1,7 @@
 import classNames from "classnames";
 import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
-import {
-  DeleteButton, FillColorButton, StrokeColorButton, SvgToolModeButton,
-} from "./drawing-toolbar-buttons";
+import { DeleteButton, FillColorButton, SelectToolbarButton, StrokeColorButton} from "./drawing-toolbar-buttons";
 import { StampsPalette } from "./stamps-palette";
 import { StrokeColorPalette } from "./stroke-color-palette";
 import { FillColorPalette } from "./fill-color-palette";
@@ -14,17 +12,10 @@ import { useForceUpdate } from "../../../components/tools/hooks/use-force-update
 import { useMobXOnChange } from "../../../components/tools/hooks/use-mobx-on-change";
 import { IRegisterToolApiProps } from "../../../components/tools/tool-tile";
 import { DrawingContentModelType } from "../model//drawing-content";
-import { ToolbarModalButton } from "../model/drawing-types";
-import { ToolbarSettings } from "../model/drawing-basic-types";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { useSettingFromStores } from "../../../hooks/use-stores";
-import { useVariableDialog } from "../../shared-variables/drawing/use-variable-dialog";
-import { LineToolbarButton } from "../objects/line";
-import { StampToolbarButton } from "../objects/image";
 import { IPaletteState, IToolbarButtonProps, kClosedPalettesState, PaletteKey } from "../objects/drawing-object";
-import { VectorToolbarButton } from "../objects/vector";
-import { RectangleToolbarButton } from "../objects/rectangle";
-import { EllipseToolbarButton } from "../objects/ellipse";
+import { getDrawingToolButtonComponent } from "./drawing-object-manager";
 
 interface IProps extends IFloatingToolbarProps, IRegisterToolApiProps {
   model: ToolTileModelType;
@@ -63,18 +54,6 @@ export const ToolbarView: React.FC<IProps> = (
                                           ...others
                                         }) || {};
 
-  const modalButtonProps = (type: ToolbarModalButton, settings?: Partial<ToolbarSettings>) => {
-    const { selectedButton, toolbarSettings } = drawingContent;
-    return { modalButton: type, selected: selectedButton === type, settings: settings || toolbarSettings };
-  };
-
-  const [showVariableDialog] = useVariableDialog({ drawingContent });
-
-  const handleSetSelectedButton = (modalButton: ToolbarModalButton) => {
-    drawingContent.setSelectedButton(modalButton);
-    forceUpdate();
-  };
-
   const handleToggleShowStrokeColorPalette = (show?: boolean) => {
     togglePaletteState("showStroke", show);
   };
@@ -101,12 +80,6 @@ export const ToolbarView: React.FC<IProps> = (
     drawingContent.deleteSelectedObjects();
   };
 
-  const handleShowVariableDialog = (modalButton: ToolbarModalButton) => {
-    drawingContent.setSelectedButton(modalButton);
-    forceUpdate();
-    showVariableDialog();
-  };
-
   const handleStrokeColorChange = (color: string) => {
     isEnabled && drawingContent.setStroke(color);
     clearPaletteState();
@@ -122,21 +95,26 @@ export const ToolbarView: React.FC<IProps> = (
     clearPaletteState
   };
 
-  const buttonDefs: Record<string, React.ReactNode> = {
-    "select": <SvgToolModeButton key="select" {...modalButtonProps("select", {})}
-                                  title="Select" onSetSelectedButton={handleSetSelectedButton} />,
-    "line": <LineToolbarButton key="line" {...toolbarButtonProps} />,
-    "vector": <VectorToolbarButton key="vector" {...toolbarButtonProps} />,
-    "rectangle": <RectangleToolbarButton key="rectangle" {...toolbarButtonProps} />,
-    "ellipse": <EllipseToolbarButton key="ellipse" {...toolbarButtonProps} />,
-    "stamp": <StampToolbarButton key="stamp" {...toolbarButtonProps} />,
-    "stroke-color": <StrokeColorButton key="stroke" settings={drawingContent.toolbarSettings}
-                                        onClick={() => handleToggleShowStrokeColorPalette()} />,
-    "fill-color": <FillColorButton key="fill" settings={drawingContent.toolbarSettings}
-                                    onClick={() => handleToggleShowFillColorPalette()} />,
-    "delete": <DeleteButton key="delete" disabled={!drawingContent.hasSelectedObjects} onClick={handleDeleteButton} />,
-    "variable": <SvgToolModeButton key="variable" {...modalButtonProps("variable")} title="Variable"
-                                    onSetSelectedButton={handleShowVariableDialog} />,
+  const getToolbarButton = (toolName: string) => {
+    const ToolButton = getDrawingToolButtonComponent(toolName);
+    if (ToolButton) {
+      return <ToolButton key={toolName} {...toolbarButtonProps} />;
+    }
+
+    switch (toolName) {
+      case "select":
+        // TODO: if we can move the select tool out of drawing-layer
+        // then this button just be added to the drawing-object-manager
+        return <SelectToolbarButton key="select" {...toolbarButtonProps} />;
+      case "stroke-color":
+        return <StrokeColorButton key="stroke" settings={drawingContent.toolbarSettings}
+          onClick={() => handleToggleShowStrokeColorPalette()} />;
+      case "fill-color":
+        return <FillColorButton key="fill" settings={drawingContent.toolbarSettings}
+          onClick={() => handleToggleShowFillColorPalette()} />;
+      case "delete":
+        return <DeleteButton key="delete" disabled={!drawingContent.hasSelectedObjects} onClick={handleDeleteButton} />;
+    }
   };
 
   const toolbarClasses = classNames("drawing-tool-toolbar", { disabled: !isEnabled, flip: flipPalettes });
@@ -145,7 +123,7 @@ export const ToolbarView: React.FC<IProps> = (
         <div className={toolbarClasses} style={location} data-testid="drawing-toolbar">
           <div className="drawing-tool-buttons">
             {toolbarButtons.map(button => {
-              return buttonDefs[button];
+              return getToolbarButton(button);
             })}
           </div>
           {paletteState.showStroke &&

@@ -4,27 +4,14 @@ import { Tooltip } from "react-tippy";
 import { computeStrokeDashArray, DrawingContentModelType } from "../model/drawing-content";
 import { ToolbarModalButton } from "../model/drawing-types";
 import { ToolbarSettings } from "../model/drawing-basic-types";
+import SelectToolIcon from "../../../clue/assets/icons/select-tool.svg";
 import ColorFillIcon from "../../../clue/assets/icons/drawing/color-fill-icon.svg";
 import ColorStrokeIcon from "../../../clue/assets/icons/drawing/color-stroke-icon.svg";
 import DeleteSelectionIcon from "../../../assets/icons/delete/delete-selection-icon.svg";
-import FreehandToolIcon from "../../../clue/assets/icons/drawing/freehand-icon.svg";
-import EllipseToolIcon from "../../../clue/assets/icons/drawing/ellipse-icon.svg";
-import LineToolIcon from "../../../clue/assets/icons/drawing/line-icon.svg";
-import RectToolIcon from "../../../clue/assets/icons/drawing/rectangle-icon.svg";
-import SelectToolIcon from "../../../clue/assets/icons/select-tool.svg";
-import VariableToolIcon from "../../../clue/assets/icons/variable-tool.svg";
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
 import { isLightColorRequiringContrastOffset } from "../../../utilities/color-utils";
 import { observer } from "mobx-react";
-
-const svgIcons: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
-  ellipse: EllipseToolIcon,
-  line: FreehandToolIcon,
-  rectangle: RectToolIcon,
-  select: SelectToolIcon,
-  vector: LineToolIcon,
-  variable: VariableToolIcon,
-};
+import { IToolbarButtonProps } from "../objects/drawing-object";
 
 interface IButtonClasses {
   modalButton?: ToolbarModalButton;
@@ -73,26 +60,6 @@ export const SvgToolbarButton: React.FC<ISvgToolbarButtonProps> = ({
 /*
  * SvgToolModeButton
  */
-interface ISvgToolModeButtonProps {
-  modalButton: ToolbarModalButton;
-  selected?: boolean;
-  settings: Partial<ToolbarSettings>;
-  title: string;
-  onSetSelectedButton: (modalButton: ToolbarModalButton) => void;
-}
-export const SvgToolModeButton: React.FC<ISvgToolModeButtonProps> = ({
-  modalButton, onSetSelectedButton, ...others
-}) => {
-  const SvgIcon = modalButton && svgIcons[modalButton];
-  const handleClick = () => onSetSelectedButton?.(modalButton);
-  return SvgIcon
-    ? <SvgToolbarButton SvgIcon={SvgIcon} buttonClass={modalButton} onClick={handleClick} {...others} />
-    : null;
-};
-
-/*
- * SvgToolModeButton
- */
 interface ISvgToolModeButtonProps2 {
   SvgIcon: React.FC<React.SVGProps<SVGSVGElement>>;
   drawingContent: DrawingContentModelType;
@@ -112,6 +79,11 @@ export const SvgToolModeButton2: React.FC<ISvgToolModeButtonProps2> = observer(f
   return <SvgToolbarButton SvgIcon={SvgIcon} buttonClass={modalButton} onClick={handleClick} 
     selected={selected} settings={_settings} {...others} />;
 });
+
+export const SelectToolbarButton: React.FC<IToolbarButtonProps> = ({drawingContent}) => {
+  return <SvgToolModeButton2 modalButton="select" title="Select"
+    drawingContent={drawingContent} SvgIcon={SelectToolIcon} settings={{}}/>;
+};
 
 interface IColorButtonProps {
   settings: Partial<ToolbarSettings>;
@@ -137,13 +109,4 @@ interface IDeleteToolButtonProps {
 }
 export const DeleteButton: React.FC<IDeleteToolButtonProps> = (props) => {
   return <SvgToolbarButton SvgIcon={DeleteSelectionIcon} buttonClass="delete" title="Delete" {...props} />;
-};
-
-interface IVariableToolButtonProps {
-  disabled?: boolean;
-  onClick: () => void;
-}
-
-export const VariableButton: React.FC<IVariableToolButtonProps> = (props) => {
-  return <SvgToolbarButton SvgIcon={VariableToolIcon} buttonClass="variable" title="Variable" {...props} />;
 };

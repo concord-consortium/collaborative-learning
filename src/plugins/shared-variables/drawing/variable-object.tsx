@@ -1,10 +1,13 @@
 import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import React from "react";
-import { DrawingObject, DrawingTool, IDrawingComponentProps, IDrawingLayer, typeField } 
+import { DrawingObject, DrawingTool, IDrawingComponentProps, IDrawingLayer, IToolbarButtonProps, typeField } 
   from "../../drawing-tool/objects/drawing-object";
 import { Point } from "../../drawing-tool/model/drawing-basic-types";
 import { VariableChip } from "../slate/variable-chip";
 import { findVariable } from "./drawing-utils";
+import { useVariableDialog } from "./use-variable-dialog";
+import VariableToolIcon from "../../../clue/assets/icons/variable-tool.svg";
+import { SvgToolbarButton } from "../../drawing-tool/components/drawing-toolbar-buttons";
 
 export const VariableChipObject = DrawingObject.named("VariableObject")
   .props({
@@ -64,4 +67,15 @@ export class VariableDrawingTool extends DrawingTool {
   constructor(drawingLayer: IDrawingLayer) {
     super(drawingLayer);
   }
+}
+
+export function VariableChipToolbarButton({drawingContent}: IToolbarButtonProps) {
+  const [showVariableDialog] = useVariableDialog({ drawingContent });
+
+  const handleShowVariableDialog = () => {
+    showVariableDialog();
+  };
+
+  return <SvgToolbarButton SvgIcon={VariableToolIcon} buttonClass="variable"
+    title="Variable" onClick={handleShowVariableDialog} />;
 }

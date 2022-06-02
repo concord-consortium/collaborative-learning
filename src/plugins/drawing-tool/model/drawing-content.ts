@@ -11,7 +11,6 @@ import {
   DrawingToolUpdate, DrawingToolUpdateChange, kDrawingToolID, ToolbarModalButton
 } from "./drawing-types";
 import { ImageObjectSnapshot } from "../objects/image";
-import { DrawingObjectSnapshotUnion } from "../components/drawing-object-manager";
 import { DefaultToolbarSettings, ToolbarSettings } from "./drawing-basic-types";
 
 
