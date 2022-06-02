@@ -1,4 +1,4 @@
-import { Instance, types } from "mobx-state-tree";
+import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import { uniqueId } from "../../../utilities/js-utils";
 import { SelectionBox } from "../components/selection-box";
 import { BoundingBox, DefaultToolbarSettings, Point, ToolbarSettings } from "../model/drawing-basic-types";
@@ -41,7 +41,7 @@ export const DrawingObject = types.model("DrawingObject", {
   }
 }));
 export interface DrawingObjectType extends Instance<typeof DrawingObject> {}
-
+export interface DrawingObjectSnapshot extends SnapshotIn<typeof DrawingObject> {} 
 
 export const StrokedObject = DrawingObject.named("StrokedObject")
 .props({

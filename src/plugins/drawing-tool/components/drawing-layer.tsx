@@ -11,10 +11,11 @@ import { observer } from "mobx-react";
 import { ImageContentSnapshotOutType } from "../../../models/tools/image/image-content";
 import { gImageMap } from "../../../models/image-map";
 import { SelectionBox } from "./selection-box";
-import { DrawingObjectType, DrawingTool, HandleObjectHover, IDrawingLayer } from "../objects/drawing-object";
+import { DrawingObjectSnapshot, DrawingObjectType, DrawingTool, 
+  HandleObjectHover, IDrawingLayer } from "../objects/drawing-object";
 import { Point, ToolbarSettings } from "../model/drawing-basic-types";
 import { applyAction, getMembers, getSnapshot, SnapshotOut } from "mobx-state-tree";
-import { DrawingObjectMSTUnion, DrawingObjectSnapshotUnion, 
+import { DrawingObjectMSTUnion,
   getDrawingToolInfos, renderDrawingObject } from "./drawing-object-manager";
 import { ImageObject } from "../objects/image";
 
@@ -207,7 +208,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   public addNewDrawingObject(drawingObject: DrawingObjectType) {
     // FIXME: for now we just get a snapshot to minimize the code changes
     // in the future we'll want to just store the object directly
-    this.sendChange({action: "create", data: getSnapshot(drawingObject) as DrawingObjectSnapshotUnion});
+    this.sendChange({action: "create", data: getSnapshot(drawingObject)});
   }
 
   public setSelectedObjects(selectedObjects: DrawingObjectType[]) {
@@ -559,7 +560,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     }
   }
 
-  private createDrawingObject(data: DrawingObjectSnapshotUnion) {
+  private createDrawingObject(data: DrawingObjectSnapshot) {
     const drawingObjectMST = DrawingObjectMSTUnion.create(data);
     switch (data.type) {
       case "image": {

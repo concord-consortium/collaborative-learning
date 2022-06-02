@@ -3,19 +3,17 @@ import { comma, StringBuilder } from "../../../utilities/string-builder";
 import { ITileExportOptions } from "../../../models/tools/tool-content-info";
 import { DrawingToolChange } from "./drawing-types";
 import { ImageObjectSnapshot } from "../objects/image";
-import { DrawingObjectSnapshotUnion } from "../components/drawing-object-manager";
+import { DrawingObjectSnapshot } from "../objects/drawing-object";
 
-export interface IDrawingObjectInfo {
+interface IDrawingObjectChanges {
   id: string;
-  // this used to be DrawingObjectDataType["type"] but we relax it to support
-  // plugin based drawing object types
   type: string;
   changes: DrawingToolChange[]; // changes that affect this object
   isDeleted?: boolean;          // true if the object has been deleted
 }
 
 export const exportDrawingTileSpec = (changes: string[], options?: ITileExportOptions) => {
-  const objectInfoMap: Record<string, IDrawingObjectInfo> = {};
+  const objectInfoMap: Record<string, IDrawingObjectChanges> = {};
   const orderedIds: string[] = [];
   const builder = new StringBuilder();
 
@@ -26,7 +24,7 @@ export const exportDrawingTileSpec = (changes: string[], options?: ITileExportOp
 
   const exportObject = (id: string, isLast: boolean) => {
     const objInfo = objectInfoMap[id];
-    let data = { ...objInfo.changes[0].data } as DrawingObjectSnapshotUnion;
+    let data = { ...objInfo.changes[0].data } as DrawingObjectSnapshot;
     for (let i = 1; i < objInfo.changes.length; ++i) {
       const change = objInfo.changes[i];
       switch (change.action) {

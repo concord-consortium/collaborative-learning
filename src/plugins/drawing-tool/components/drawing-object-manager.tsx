@@ -1,24 +1,16 @@
-import { SnapshotIn, types } from "mobx-state-tree";
+import { types } from "mobx-state-tree";
 import React from "react";
-import {  
-  VariableChipObjectSnapshot, 
-} from "../../shared-variables/drawing/variable-object";
 import { DrawingContentModelType } from "../model/drawing-content";
 import { DrawingComponentType, DrawingObject, DrawingObjectType, 
   DrawingTool, HandleObjectHover, IDrawingLayer, IToolbarButtonProps } from "../objects/drawing-object";
-import { EllipseComponent, EllipseDrawingTool, EllipseObject, 
-  EllipseObjectSnapshot, EllipseToolbarButton } from "../objects/ellipse";
-import { ImageComponent, ImageObject, ImageObjectSnapshot, 
-  StampDrawingTool, StampToolbarButton } from "../objects/image";
-import { LineComponent, LineDrawingTool, LineObject, LineObjectSnapshot, LineToolbarButton } from "../objects/line";
-import { RectangleComponent, RectangleDrawingTool, RectangleObject, 
-  RectangleObjectSnapshot, 
+import { EllipseComponent, EllipseDrawingTool, EllipseObject, EllipseToolbarButton } from "../objects/ellipse";
+import { ImageComponent, ImageObject, StampDrawingTool, StampToolbarButton } from "../objects/image";
+import { LineComponent, LineDrawingTool, LineObject, LineToolbarButton } from "../objects/line";
+import { RectangleComponent, RectangleDrawingTool, RectangleObject,  
   RectangleToolbarButton} from "../objects/rectangle";
-import { VectorComponent, VectorDrawingTool, VectorObject, 
-  VectorObjectSnapshot, VectorToolbarButton } from "../objects/vector";
+import { VectorComponent, VectorDrawingTool, VectorObject, VectorToolbarButton } from "../objects/vector";
 
-// FIXME: the other info object should be renamed
-export interface IDrawingObjectInfo2 {
+export interface IDrawingObjectInfo {
   type: string;
   component: DrawingComponentType;
   modelClass: typeof DrawingObject;
@@ -32,7 +24,7 @@ export interface IDrawingToolInfo {
   buttonComponent?: React.ComponentType<IToolbarButtonProps>;
 }
 
-const gDrawingObjectInfos: Record<string, IDrawingObjectInfo2 | undefined> = {
+const gDrawingObjectInfos: Record<string, IDrawingObjectInfo | undefined> = {
   line: {
     type: "line",
     component: LineComponent,
@@ -93,7 +85,7 @@ export function getDrawingToolInfos() {
 }
 
 export function getDrawingObjectInfos() {
-  return Object.values(gDrawingObjectInfos).filter(value => value) as IDrawingObjectInfo2[];
+  return Object.values(gDrawingObjectInfos).filter(value => value) as IDrawingObjectInfo[];
 }
 
 export function getDrawingObjectComponent(drawingObject: DrawingObjectType) {
@@ -105,7 +97,7 @@ export function getDrawingToolButtonComponent(toolName: string) {
   return gDrawingToolInfos[toolName]?.buttonComponent;
 }
 
-export function registerDrawingObjectInfo(drawingObjectInfo: IDrawingObjectInfo2) {
+export function registerDrawingObjectInfo(drawingObjectInfo: IDrawingObjectInfo) {
   gDrawingObjectInfos[drawingObjectInfo.type] = drawingObjectInfo;
 }
 
@@ -121,18 +113,6 @@ export function renderDrawingObject(drawingObject: DrawingObjectType, drawingCon
       drawingContent={drawingContent} handleHover={handleHover}/> 
     : null;
 }
-
-
-
-// FIXME: this is temporary, to support plugin based objects
-// we can't use a static union. 
-export type DrawingObjectSnapshotUnion = 
-  LineObjectSnapshot  |
-  VectorObjectSnapshot  |
-  RectangleObjectSnapshot  |
-  EllipseObjectSnapshot  |
-  ImageObjectSnapshot  |
-  VariableChipObjectSnapshot;
 
 export const DrawingObjectMSTUnion = types.late<typeof DrawingObject>(() => {
   const drawingObjectModels = Object.values(gDrawingObjectInfos).map(info => info!.modelClass);
