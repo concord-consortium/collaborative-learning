@@ -1,7 +1,7 @@
 import React from "react";
 import { render } from "@testing-library/react";
 import { ImageComponent } from "./image-component";
-import { ImageContentModel } from "../../models/tools/image/image-content";
+import { ImageContentModel } from "../models/image-content";
 
 describe("Image Component", () => {
   const handleMouseDown = jest.fn();

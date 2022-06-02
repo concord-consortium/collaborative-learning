@@ -4,7 +4,9 @@ import ReactDOM from "react-dom";
 import { Tooltip } from "react-tippy";
 import UploadButtonSvg from "../../../assets/icons/upload-image/upload-image-icon.svg";
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
-import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
+import { IFloatingToolbarProps, useFloatingToolbarLocation }
+  from "../../../components/tools/hooks/use-floating-toolbar-location";
+
 
 import "react-tippy/dist/tippy.css";
 import "./image-toolbar.scss";

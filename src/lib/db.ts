@@ -18,7 +18,7 @@ import {
 } from "../models/document/document-types";
 import { SectionModelType } from "../models/curriculum/section";
 import { SupportModelType } from "../models/curriculum/support";
-import { ImageModelType } from "../models/image";
+import { ImageModelType } from "../plugins/image/models/image";
 import {
   DocumentContentSnapshotType, DocumentContentModelType, cloneContentWithUniqueIds
 } from "../models/document/document-content";
@@ -686,7 +686,7 @@ export class DB {
       if (this.stores.appMode !== "qa") {
         return reject("db#clear is only available in qa mode");
       }
-      
+
       if (level === "all") {
         return reject("clearing 'all' is handled by clearFirebaseAnonQAUser");
       }

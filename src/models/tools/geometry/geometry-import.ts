@@ -1,6 +1,6 @@
 import { castArray } from "lodash";
 import { uniqueId } from "../../../utilities/js-utils";
-import { gImageMap } from "../../image-map";
+import { gImageMap } from "../../../plugins/image/models/image-map";
 import { kAxisBuffer, kXAxisMinBuffer } from "./jxg-board";
 import { JXGChange, JXGCoordPair, JXGProperties, JXGStringPair } from "./jxg-changes";
 import {

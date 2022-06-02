@@ -13,7 +13,7 @@ import { urlParams } from "./utilities/url-params";
 import { getAppMode } from "./lib/auth";
 import { Logger } from "./lib/logger";
 import { setPageTitle } from "./lib/misc";
-import { gImageMap } from "./models/image-map";
+import { gImageMap } from "./plugins/image/models/image-map";
 import PackageJson from "../package.json";
 import { setLivelinessChecking } from "mobx-state-tree";
 // set to true to enable MST liveliness checking

@@ -1,5 +1,5 @@
+import { ITileExportOptions } from "../../../models/tools/tool-content-info";
 import { safeJsonParse } from "../../../utilities/js-utils";
-import { ITileExportOptions } from "../tool-content-info";
 
 export interface ILegacyImageTileImport {
   type: "Image";

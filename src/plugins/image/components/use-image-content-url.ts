@@ -1,8 +1,8 @@
 import { reaction } from "mobx";
 import { useContext, useEffect } from "react";
-import { IDocumentContext } from "../../models/document/document-types";
-import { ImageContentModelType } from "../../models/tools/image/image-content";
-import { DocumentContextReact } from "../document/document-context";
+import { IDocumentContext } from "../../../models/document/document-types";
+import { ImageContentModelType } from "../models/image-content";
+import { DocumentContextReact } from "../../../components/document/document-context";
 
 type OnUrlChangeFn = (url: string, filename?: string, context?: IDocumentContext) => void;
 

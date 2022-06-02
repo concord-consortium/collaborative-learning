@@ -2,8 +2,8 @@ import { types, Instance, SnapshotIn, clone } from "mobx-state-tree";
 import {
   getImageDimensions, isPlaceholderImage, storeCorsImage, storeFileImage, storeImage
 } from "../utilities/image-utils";
-import { DB } from "../lib/db";
-import placeholderImage from "../assets/image_placeholder.png";
+import { DB } from "../../../lib/db";
+import placeholderImage from "../../../assets/image_placeholder.png";
 
 export const kExternalUrlHandlerName = "externalUrl";
 export const kLocalAssetsHandlerName = "localAssets";

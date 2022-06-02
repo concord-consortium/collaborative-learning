@@ -6,7 +6,7 @@ import { BaseComponent } from "../base";
 import { DocumentContentComponent } from "./document-content";
 import { DocumentModelType } from "../../models/document/document";
 import { DocumentContentModelType } from "../../models/document/document-content";
-import { transformCurriculumImageUrl } from "../../models/tools/image/image-import-export";
+import { transformCurriculumImageUrl } from "../../plugins/image/models/image-import-export";
 import {
   IToolApi, IToolApiInterface, IToolApiMap, ToolApiInterfaceContext, EditableToolApiInterfaceRefContext
 } from "../tools/tool-api";

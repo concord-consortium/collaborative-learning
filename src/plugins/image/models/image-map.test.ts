@@ -1,8 +1,8 @@
 import { externalUrlImagesHandler, localAssetsImagesHandler,
         firebaseRealTimeDBImagesHandler, firebaseStorageImagesHandler,
         IImageHandler, ImageMapEntry, ImageMapModel, ImageMapModelType } from "./image-map";
-import { parseFirebaseImageUrl } from "../../functions/src/shared-utils";
-import { DB } from "../lib/db";
+import { parseFirebaseImageUrl } from "../../../../functions/src/shared-utils";
+import { DB } from "../../../lib/db";
 import * as ImageUtils from "../utilities/image-utils";
 import placeholderImage from "../assets/image_placeholder.png";
 

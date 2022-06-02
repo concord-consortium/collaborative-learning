@@ -4,7 +4,7 @@ import { observer, inject } from "mobx-react";
 import React from "react";
 import ResizeObserver from "resize-observer-polyfill";
 import { cloneTileSnapshotWithNewId, IDragTileItem, IDragTiles, ToolTileModelType } from "../../models/tools/tool-tile";
-import { transformCurriculumImageUrl } from "../../models/tools/image/image-import-export";
+import { transformCurriculumImageUrl } from "../../plugins/image/models/image-import-export";
 import { getToolContentInfoById } from "../../models/tools/tool-content-info";
 import { BaseComponent } from "../base";
 import PlaceholderToolComponent from "./placeholder-tool/placeholder-tool";

@@ -3,7 +3,7 @@ import { exportGeometryJson } from "./geometry-export";
 import { preprocessImportFormat } from "./geometry-import";
 
 const getImageMock = jest.fn();
-jest.mock("../../image-map", () => ({
+jest.mock("../../../plugins/image/models/image-map", () => ({
   gImageMap: {
     getImage: (...args: any[]) => getImageMock(...args)
   }

@@ -10,7 +10,8 @@ import { IToolbarActionHandlers } from "./geometry-shared";
 import {
   AngleLabelButton, CommentButton, DeleteButton, DuplicateButton, LineLabelButton, MovableLineButton
 } from "./geometry-tool-buttons";
-import { ImageUploadButton } from "../image/image-toolbar";
+import { ImageUploadButton } from "../../../plugins/image/components/image-toolbar";
+
 
 import "./geometry-toolbar.sass";
 

@@ -5,15 +5,15 @@ import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DrawingObjectDataType, LineDrawingObjectData, VectorDrawingObjectData, RectangleDrawingObjectData,
   EllipseDrawingObjectData, Point, ImageDrawingObjectData } from "../model/drawing-objects";
 import { VariableObject } from "../../shared-variables/drawing/variable-object";
-import { DefaultToolbarSettings, DrawingToolChange, DrawingToolDeletion, DrawingToolMove, 
+import { DefaultToolbarSettings, DrawingToolChange, DrawingToolDeletion, DrawingToolMove,
   DrawingToolUpdate, ToolbarSettings } from "../model/drawing-types";
-import { isPlaceholderImage } from "../../../utilities/image-utils";
+import { isPlaceholderImage } from "../../image/utilities/image-utils";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { assign, filter } from "lodash";
 import { reaction, IReactionDisposer, autorun } from "mobx";
 import { observer } from "mobx-react";
-import { ImageContentSnapshotOutType } from "../../../models/tools/image/image-content";
-import { gImageMap } from "../../../models/image-map";
+import { ImageContentSnapshotOutType } from "../../image/models/image-content";
+import { gImageMap } from "../../image/models/image-map";
 import placeholderImage from "../../../assets/image_placeholder.png";
 import  DrawingObject, { DrawingObjectOptions, SelectionBox } from "./drawing-object";
 

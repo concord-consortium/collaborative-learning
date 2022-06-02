@@ -2,7 +2,7 @@ import { getObjectById } from "./jxg-board";
 import { JXGChangeAgent } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
 import { isImage } from "./jxg-types";
-import { gImageMap } from "../../image-map";
+import { gImageMap } from "../../../plugins/image/models/image-map";
 import { uniqueId } from "../../../utilities/js-utils";
 
 export const imageChangeAgent: JXGChangeAgent = {

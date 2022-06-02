@@ -1,7 +1,7 @@
 import { observer } from "mobx-react";
 import React from "react";
-import { IDocumentContext } from "../../models/document/document-types";
-import { ImageContentModelType } from "../../models/tools/image/image-content";
+import { IDocumentContext } from "../../../models/document/document-types";
+import { ImageContentModelType } from "../models/image-content";
 import { useImageContentUrl } from "./use-image-content-url";
 
 interface IProps {

@@ -28,7 +28,7 @@ import {
 } from "../../../models/tools/geometry/jxg-vertex-angle";
 import { injectGetTableLinkColorsFunction } from "../../../models/tools/geometry/jxg-table-link";
 import { extractDragTileType, kDragTileContent, kDragTileId, dragTileSrcDocId } from "../tool-tile";
-import { ImageMapEntryType, gImageMap } from "../../../models/image-map";
+import { ImageMapEntryType, gImageMap } from "../../../plugins/image/models/image-map";
 import { ITileExportOptions } from "../../../models/tools/tool-content-info";
 import { getParentWithTypeName } from "../../../utilities/mst-utils";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
