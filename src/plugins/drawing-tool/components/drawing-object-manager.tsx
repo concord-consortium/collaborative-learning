@@ -9,6 +9,8 @@ import { LineComponent, LineDrawingTool, LineObject, LineToolbarButton } from ".
 import { RectangleComponent, RectangleDrawingTool, RectangleObject,  
   RectangleToolbarButton} from "../objects/rectangle";
 import { VectorComponent, VectorDrawingTool, VectorObject, VectorToolbarButton } from "../objects/vector";
+import { SelectToolbarButton } from "./drawing-toolbar-buttons";
+import { SelectionDrawingTool } from "./selection-drawing-tool";
 
 export interface IDrawingObjectInfo {
   type: string;
@@ -53,6 +55,11 @@ const gDrawingObjectInfos: Record<string, IDrawingObjectInfo | undefined> = {
 };
 
 const gDrawingToolInfos: Record<string, IDrawingToolInfo | undefined> = {
+  select: {
+    name: "select",
+    toolClass: SelectionDrawingTool,
+    buttonComponent: SelectToolbarButton
+  },
   line: {
     name: "line",
     toolClass: LineDrawingTool,
