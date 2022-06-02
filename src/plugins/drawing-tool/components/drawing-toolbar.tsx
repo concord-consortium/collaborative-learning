@@ -1,15 +1,13 @@
 import classNames from "classnames";
 import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
-import { DeleteButton, FillColorButton, SelectToolbarButton, StrokeColorButton} from "./drawing-toolbar-buttons";
+import { FillColorButton, StrokeColorButton} from "./drawing-toolbar-buttons";
 import { StampsPalette } from "./stamps-palette";
 import { StrokeColorPalette } from "./stroke-color-palette";
 import { FillColorPalette } from "./fill-color-palette";
 import {
   IFloatingToolbarProps, useFloatingToolbarLocation
 } from "../../../components/tools/hooks/use-floating-toolbar-location";
-import { useForceUpdate } from "../../../components/tools/hooks/use-force-update";
-import { useMobXOnChange } from "../../../components/tools/hooks/use-mobx-on-change";
 import { IRegisterToolApiProps } from "../../../components/tools/tool-tile";
 import { DrawingContentModelType } from "../model//drawing-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
@@ -44,7 +42,6 @@ export const ToolbarView: React.FC<IProps> = (
     });
   }, [stampCount]);
   const isEnabled = onIsEnabled();
-  const forceUpdate = useForceUpdate();
   const { flipPalettes, ...location } = useFloatingToolbarLocation({
                                           documentContent,
                                           toolbarHeight: 38,
@@ -70,16 +67,6 @@ export const ToolbarView: React.FC<IProps> = (
     }
   };
 
-  // update toolbar when object selection changes
-  useMobXOnChange(
-    () => drawingContent.hasSelectedObjects,
-    () => forceUpdate()
-  );
-
-  const handleDeleteButton = () => {
-    drawingContent.deleteSelectedObjects();
-  };
-
   const handleStrokeColorChange = (color: string) => {
     isEnabled && drawingContent.setStroke(color);
     clearPaletteState();
@@ -102,18 +89,12 @@ export const ToolbarView: React.FC<IProps> = (
     }
 
     switch (toolName) {
-      case "select":
-        // TODO: if we can move the select tool out of drawing-layer
-        // then this button just be added to the drawing-object-manager
-        return <SelectToolbarButton key="select" {...toolbarButtonProps} />;
       case "stroke-color":
         return <StrokeColorButton key="stroke" settings={drawingContent.toolbarSettings}
           onClick={() => handleToggleShowStrokeColorPalette()} />;
       case "fill-color":
         return <FillColorButton key="fill" settings={drawingContent.toolbarSettings}
           onClick={() => handleToggleShowFillColorPalette()} />;
-      case "delete":
-        return <DeleteButton key="delete" disabled={!drawingContent.hasSelectedObjects} onClick={handleDeleteButton} />;
     }
   };
 

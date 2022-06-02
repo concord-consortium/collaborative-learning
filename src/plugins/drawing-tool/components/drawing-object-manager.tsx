@@ -9,7 +9,7 @@ import { LineComponent, LineDrawingTool, LineObject, LineToolbarButton } from ".
 import { RectangleComponent, RectangleDrawingTool, RectangleObject,  
   RectangleToolbarButton} from "../objects/rectangle";
 import { VectorComponent, VectorDrawingTool, VectorObject, VectorToolbarButton } from "../objects/vector";
-import { SelectToolbarButton } from "./drawing-toolbar-buttons";
+import { DeleteButton, SelectToolbarButton } from "./drawing-toolbar-buttons";
 import { SelectionDrawingTool } from "./selection-drawing-tool";
 
 export interface IDrawingObjectInfo {
@@ -22,7 +22,7 @@ export interface IDrawingToolInfo {
   name: string;
   // using a simple `typeof DrawingTool` can't be used because that type
   // is an abstract class so can't be instantiated. 
-  toolClass: { new(drawingLayer: IDrawingLayer): DrawingTool };
+  toolClass?: { new(drawingLayer: IDrawingLayer): DrawingTool };
   buttonComponent: React.ComponentType<IToolbarButtonProps>;
 }
 
@@ -84,6 +84,10 @@ const gDrawingToolInfos: Record<string, IDrawingToolInfo | undefined> = {
     name: "stamp",
     toolClass: StampDrawingTool,
     buttonComponent: StampToolbarButton
+  },
+  delete: {
+    name: "delete",
+    buttonComponent: DeleteButton
   }
 };
 

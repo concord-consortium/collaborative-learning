@@ -24,12 +24,6 @@ export const buttonClasses = ({ modalButton, disabled, selected, others }: IButt
   return classNames("drawing-tool-button", modalButtonClass, { disabled, selected }, others);
 };
 
-export const modalButtonProps = (type: ToolbarModalButton, drawingContent: DrawingContentModelType, 
-                                 settings?: Partial<ToolbarSettings>) => {
-  const { selectedButton, toolbarSettings } = drawingContent;
-  return { modalButton: type, selected: selectedButton === type, settings: settings || toolbarSettings };
-};
-
 /*
  * SvgToolbarButton
  */
@@ -104,9 +98,16 @@ export const StrokeColorButton: React.FC<IColorButtonProps> = ({ settings, onCli
 };
 
 interface IDeleteToolButtonProps {
-  disabled?: boolean;
-  onClick: () => void;
+  drawingContent: DrawingContentModelType;
 }
-export const DeleteButton: React.FC<IDeleteToolButtonProps> = (props) => {
-  return <SvgToolbarButton SvgIcon={DeleteSelectionIcon} buttonClass="delete" title="Delete" {...props} />;
-};
+export const DeleteButton: React.FC<IDeleteToolButtonProps> = observer(function DeleteButton({
+  drawingContent
+}) {
+  const onClick = () => {
+    drawingContent.deleteSelectedObjects();
+  };
+  const disabled = !drawingContent.hasSelectedObjects;
+
+  return <SvgToolbarButton SvgIcon={DeleteSelectionIcon} buttonClass="delete" title="Delete" 
+    onClick={onClick} disabled={disabled} />;
+});

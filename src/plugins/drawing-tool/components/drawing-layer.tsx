@@ -77,7 +77,9 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     this.tools = {};
     const drawingToolInfos = getDrawingToolInfos();
     drawingToolInfos.forEach(info => {
-      this.tools[info.name] = new info.toolClass(this);
+      if (info.toolClass) {
+        this.tools[info.name] = new info.toolClass(this);
+      }
     });
 
     this.currentTool = this.tools.select!;
