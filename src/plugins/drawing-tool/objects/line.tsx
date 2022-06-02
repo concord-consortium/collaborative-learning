@@ -5,7 +5,7 @@ import { computeStrokeDashArray } from "../model/drawing-content";
 import { DeltaPoint, DrawingTool, IDrawingComponentProps, IDrawingLayer, 
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
 import { Point } from "../model/drawing-basic-types";
-import { SvgToolModeButton2 } from "../components/drawing-toolbar-buttons";
+import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 import FreehandToolIcon from "../../../clue/assets/icons/drawing/freehand-icon.svg";
 
 function* pointIterator(line: LineObjectType): Generator<Point, string, unknown> {
@@ -121,6 +121,6 @@ export class LineDrawingTool extends DrawingTool {
 }
 
 export function LineToolbarButton({drawingContent}: IToolbarButtonProps) {
-  return <SvgToolModeButton2 modalButton="line" settings={{ fill: drawingContent.stroke }}
+  return <SvgToolModeButton modalButton="line" settings={{ fill: drawingContent.stroke }}
     title="Freehand" drawingContent={drawingContent} SvgIcon={FreehandToolIcon} />;
 }

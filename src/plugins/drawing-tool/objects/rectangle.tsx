@@ -5,7 +5,7 @@ import { DrawingTool, FilledObject, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
 import { Point } from "../model/drawing-basic-types";
 import RectToolIcon from "../../../clue/assets/icons/drawing/rectangle-icon.svg";
-import { SvgToolModeButton2 } from "../components/drawing-toolbar-buttons";
+import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 
 export const RectangleObject = types.compose("RectangleObject", StrokedObject, FilledObject)
   .props({
@@ -114,6 +114,6 @@ export class RectangleDrawingTool extends DrawingTool {
 }
 
 export function RectangleToolbarButton({drawingContent}: IToolbarButtonProps) {
-  return <SvgToolModeButton2 modalButton="rectangle" title="Rectangle" 
+  return <SvgToolModeButton modalButton="rectangle" title="Rectangle" 
     drawingContent={drawingContent} SvgIcon={RectToolIcon}  />;
 }

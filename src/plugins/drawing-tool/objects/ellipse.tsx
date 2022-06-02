@@ -4,7 +4,7 @@ import { computeStrokeDashArray } from "../model/drawing-content";
 import { DrawingObjectType, DrawingTool, FilledObject, IDrawingComponentProps, IDrawingLayer, 
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
 import { Point } from "../model/drawing-basic-types";
-import { SvgToolModeButton2 } from "../components/drawing-toolbar-buttons";
+import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 import EllipseToolIcon from "../../../clue/assets/icons/drawing/ellipse-icon.svg";
 
 export const EllipseObject = types.compose("EllipseObject", StrokedObject, FilledObject)
@@ -97,6 +97,6 @@ export class EllipseDrawingTool extends DrawingTool {
 }
 
 export function EllipseToolbarButton({drawingContent}: IToolbarButtonProps) {
-  return <SvgToolModeButton2 modalButton="ellipse" title="Ellipse"
+  return <SvgToolModeButton modalButton="ellipse" title="Ellipse"
       drawingContent={drawingContent} SvgIcon={EllipseToolIcon} />;
 }

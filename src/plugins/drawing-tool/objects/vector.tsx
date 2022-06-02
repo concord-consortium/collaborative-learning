@@ -4,7 +4,7 @@ import { computeStrokeDashArray } from "../model/drawing-content";
 import { DrawingTool, IDrawingComponentProps, IDrawingLayer, 
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
 import { Point } from "../model/drawing-basic-types";
-import { SvgToolModeButton2 } from "../components/drawing-toolbar-buttons";
+import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 import LineToolIcon from "../../../clue/assets/icons/drawing/line-icon.svg";
 
 // simple line
@@ -97,6 +97,6 @@ export class VectorDrawingTool extends DrawingTool {
 }
 
 export function VectorToolbarButton({drawingContent}: IToolbarButtonProps) {
-  return <SvgToolModeButton2 modalButton="vector" title="Line"
+  return <SvgToolModeButton modalButton="vector" title="Line"
     drawingContent={drawingContent} SvgIcon={LineToolIcon} />;
 }

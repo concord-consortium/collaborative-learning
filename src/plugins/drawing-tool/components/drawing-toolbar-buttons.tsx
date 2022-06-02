@@ -60,7 +60,7 @@ export const SvgToolbarButton: React.FC<ISvgToolbarButtonProps> = ({
 /*
  * SvgToolModeButton
  */
-interface ISvgToolModeButtonProps2 {
+interface ISvgToolModeButtonProps {
   SvgIcon: React.FC<React.SVGProps<SVGSVGElement>>;
   drawingContent: DrawingContentModelType;
   modalButton: ToolbarModalButton;
@@ -68,7 +68,7 @@ interface ISvgToolModeButtonProps2 {
   settings?: Partial<ToolbarSettings>;
   title: string;
 }
-export const SvgToolModeButton2: React.FC<ISvgToolModeButtonProps2> = observer(function SvgToolModeButton2({
+export const SvgToolModeButton: React.FC<ISvgToolModeButtonProps> = observer(function SvgToolModeButton({
   SvgIcon, drawingContent, modalButton, settings, ...others
 }) {
   const handleClick = () =>  drawingContent.setSelectedButton(modalButton);
@@ -81,7 +81,7 @@ export const SvgToolModeButton2: React.FC<ISvgToolModeButtonProps2> = observer(f
 });
 
 export const SelectToolbarButton: React.FC<IToolbarButtonProps> = ({drawingContent}) => {
-  return <SvgToolModeButton2 modalButton="select" title="Select"
+  return <SvgToolModeButton modalButton="select" title="Select"
     drawingContent={drawingContent} SvgIcon={SelectToolIcon} settings={{}}/>;
 };
 
