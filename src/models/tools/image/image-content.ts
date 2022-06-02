@@ -45,7 +45,7 @@ export const ImageContentModel = ToolContentModel
     },
     updateImageUrl(oldUrl: string, newUrl: string) {
       if (!oldUrl || !newUrl || (oldUrl === newUrl)) return;
-      self.url = newUrl;
+      if (self.url === oldUrl) self.url = newUrl;
     }
   }));
 
