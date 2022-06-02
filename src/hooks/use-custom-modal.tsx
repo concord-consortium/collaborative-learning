@@ -58,7 +58,7 @@ export const useCustomModal = <IContentProps,>({
         e.preventDefault();
       }
     }
-  }, [blurModal, buttons, handleCloseRef]);
+  }, [blurModal, buttons]);
 
   const handleAfterOpen = ({overlayEl, contentEl}: { overlayEl: Element, contentEl: HTMLDivElement }) => {
     contentElt.current = contentEl;
