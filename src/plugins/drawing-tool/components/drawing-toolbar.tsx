@@ -2,7 +2,7 @@ import classNames from "classnames";
 import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
 import {
-  DeleteButton, FillColorButton, StampModeButton, StrokeColorButton, SvgToolModeButton,
+  DeleteButton, FillColorButton, StrokeColorButton, SvgToolModeButton,
 } from "./drawing-toolbar-buttons";
 import { StampsPalette } from "./stamps-palette";
 import { StrokeColorPalette } from "./stroke-color-palette";
@@ -19,14 +19,12 @@ import { ToolbarSettings } from "../model/drawing-basic-types";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { useSettingFromStores } from "../../../hooks/use-stores";
 import { useVariableDialog } from "../../shared-variables/drawing/use-variable-dialog";
-
-interface IPaletteState {
-  showStamps: boolean;
-  showStroke: boolean;
-  showFill: boolean;
-}
-type PaletteKey = keyof IPaletteState;
-const kClosedPalettesState = { showStamps: false, showStroke: false, showFill: false };
+import { LineToolbarButton } from "../objects/line";
+import { StampToolbarButton } from "../objects/image";
+import { IPaletteState, IToolbarButtonProps, kClosedPalettesState, PaletteKey } from "../objects/drawing-object";
+import { VectorToolbarButton } from "../objects/vector";
+import { RectangleToolbarButton } from "../objects/rectangle";
+import { EllipseToolbarButton } from "../objects/ellipse";
 
 interface IProps extends IFloatingToolbarProps, IRegisterToolApiProps {
   model: ToolTileModelType;
@@ -40,7 +38,7 @@ export const ToolbarView: React.FC<IProps> = (
   const drawingContent = model.content as DrawingContentModelType;
   const toolbarButtonSetting = useSettingFromStores("tools", "drawing") as unknown as string[] | undefined;
   const toolbarButtons = toolbarButtonSetting || defaultButtons;
-  const { stamps, currentStamp, currentStampIndex } = drawingContent;
+  const { stamps, currentStampIndex } = drawingContent;
   const stampCount = stamps.length;
   const [paletteState, setPaletteState] = useState<IPaletteState>(kClosedPalettesState);
   const clearPaletteState = () => {
@@ -85,18 +83,6 @@ export const ToolbarView: React.FC<IProps> = (
     togglePaletteState("showFill", show);
   };
 
-  const handleStampsButtonClick = useCallback(() => {
-    drawingContent.setSelectedButton("stamp");
-    togglePaletteState("showStamps", false);
-    forceUpdate();
-  }, [drawingContent, forceUpdate, togglePaletteState]);
-
-  const handleStampsButtonTouchHold = useCallback(() => {
-    drawingContent.setSelectedButton("stamp");
-    togglePaletteState("showStamps");
-    forceUpdate();
-  }, [drawingContent, forceUpdate, togglePaletteState]);
-
   const handleSelectStamp = (stampIndex: number) => {
     if (isEnabled) {
       drawingContent.setSelectedStamp(stampIndex);
@@ -130,22 +116,20 @@ export const ToolbarView: React.FC<IProps> = (
     clearPaletteState();
   };
 
+  const toolbarButtonProps: IToolbarButtonProps = {
+    drawingContent,
+    togglePaletteState,
+    clearPaletteState
+  };
+
   const buttonDefs: Record<string, React.ReactNode> = {
     "select": <SvgToolModeButton key="select" {...modalButtonProps("select", {})}
                                   title="Select" onSetSelectedButton={handleSetSelectedButton} />,
-    "line": <SvgToolModeButton key="line" {...modalButtonProps("line", { fill: drawingContent.stroke })}
-                                  title="Freehand" onSetSelectedButton={handleSetSelectedButton} />,
-    "vector": <SvgToolModeButton key="vector" {...modalButtonProps("vector")}
-                                    title="Line" onSetSelectedButton={handleSetSelectedButton} />,
-    "rectangle": <SvgToolModeButton key="rectangle" {...modalButtonProps("rectangle")} title="Rectangle"
-                                      onSetSelectedButton={handleSetSelectedButton} />,
-    "ellipse": <SvgToolModeButton key="ellipse" {...modalButtonProps("ellipse")} title="Ellipse"
-                                    onSetSelectedButton={handleSetSelectedButton} />,
-    "stamp": currentStamp
-                ? <StampModeButton key="stamp" stamp={currentStamp} stampCount={stampCount} title="Stamp"
-                          selected={drawingContent.isSelectedButton("stamp")}
-                          onClick={handleStampsButtonClick} onTouchHold={handleStampsButtonTouchHold} />
-                : null,
+    "line": <LineToolbarButton key="line" {...toolbarButtonProps} />,
+    "vector": <VectorToolbarButton key="vector" {...toolbarButtonProps} />,
+    "rectangle": <RectangleToolbarButton key="rectangle" {...toolbarButtonProps} />,
+    "ellipse": <EllipseToolbarButton key="ellipse" {...toolbarButtonProps} />,
+    "stamp": <StampToolbarButton key="stamp" {...toolbarButtonProps} />,
     "stroke-color": <StrokeColorButton key="stroke" settings={drawingContent.toolbarSettings}
                                         onClick={() => handleToggleShowStrokeColorPalette()} />,
     "fill-color": <FillColorButton key="fill" settings={drawingContent.toolbarSettings}

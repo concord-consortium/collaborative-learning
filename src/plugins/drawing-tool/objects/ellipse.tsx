@@ -2,8 +2,10 @@ import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import React from "react";
 import { computeStrokeDashArray } from "../model/drawing-content";
 import { DrawingTool, FilledObject, IDrawingComponentProps, IDrawingLayer, 
-  StrokedObject, typeField } from "./drawing-object";
+  IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
 import { Point } from "../model/drawing-basic-types";
+import { SvgToolModeButton2 } from "../components/drawing-toolbar-buttons";
+import EllipseToolIcon from "../../../clue/assets/icons/drawing/ellipse-icon.svg";
 
 export const EllipseObject = types.compose("EllipseObject", StrokedObject, FilledObject)
   .props({
@@ -90,3 +92,7 @@ export class EllipseDrawingTool extends DrawingTool {
   }
 }
 
+export function EllipseToolbarButton({drawingContent}: IToolbarButtonProps) {
+  return <SvgToolModeButton2 modalButton="ellipse" title="Ellipse"
+      drawingContent={drawingContent} SvgIcon={EllipseToolIcon} />;
+}

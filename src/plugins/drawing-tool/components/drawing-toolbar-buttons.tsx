@@ -1,11 +1,9 @@
 import classNames from "classnames";
 import React from "react";
 import { Tooltip } from "react-tippy";
-import { computeStrokeDashArray } from "../model/drawing-content";
+import { computeStrokeDashArray, DrawingContentModelType } from "../model/drawing-content";
 import { ToolbarModalButton } from "../model/drawing-types";
 import { ToolbarSettings } from "../model/drawing-basic-types";
-import { StampModelType } from "../model/stamp";
-import SmallCornerTriangle from "../../../assets/icons/small-corner-triangle.svg";
 import ColorFillIcon from "../../../clue/assets/icons/drawing/color-fill-icon.svg";
 import ColorStrokeIcon from "../../../clue/assets/icons/drawing/color-stroke-icon.svg";
 import DeleteSelectionIcon from "../../../assets/icons/delete/delete-selection-icon.svg";
@@ -16,8 +14,8 @@ import RectToolIcon from "../../../clue/assets/icons/drawing/rectangle-icon.svg"
 import SelectToolIcon from "../../../clue/assets/icons/select-tool.svg";
 import VariableToolIcon from "../../../clue/assets/icons/variable-tool.svg";
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
-import { useTouchHold } from "../../../hooks/use-touch-hold";
 import { isLightColorRequiringContrastOffset } from "../../../utilities/color-utils";
+import { observer } from "mobx-react";
 
 const svgIcons: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
   ellipse: EllipseToolIcon,
@@ -37,6 +35,12 @@ interface IButtonClasses {
 export const buttonClasses = ({ modalButton, disabled, selected, others }: IButtonClasses) => {
   const modalButtonClass = modalButton ? `button-${modalButton}` : undefined;
   return classNames("drawing-tool-button", modalButtonClass, { disabled, selected }, others);
+};
+
+export const modalButtonProps = (type: ToolbarModalButton, drawingContent: DrawingContentModelType, 
+                                 settings?: Partial<ToolbarSettings>) => {
+  const { selectedButton, toolbarSettings } = drawingContent;
+  return { modalButton: type, selected: selectedButton === type, settings: settings || toolbarSettings };
 };
 
 /*
@@ -86,37 +90,28 @@ export const SvgToolModeButton: React.FC<ISvgToolModeButtonProps> = ({
     : null;
 };
 
-interface IStampModeButtonProps {
-  selected: boolean;
-  stamp: StampModelType;
-  stampCount: number;
+/*
+ * SvgToolModeButton
+ */
+interface ISvgToolModeButtonProps2 {
+  SvgIcon: React.FC<React.SVGProps<SVGSVGElement>>;
+  drawingContent: DrawingContentModelType;
+  modalButton: ToolbarModalButton;
+  selected?: boolean;
+  settings?: Partial<ToolbarSettings>;
   title: string;
-  onClick: () => void;
-  onTouchHold: () => void;
 }
-export const StampModeButton: React.FC<IStampModeButtonProps> = ({
-  selected, stamp, stampCount, title, onClick, onTouchHold
-}) => {
-  const { didTouchHold, ...handlers } = useTouchHold(onTouchHold, onClick);
-  const handleExpandCollapseClick = (e: React.MouseEvent) => {
-    if (!didTouchHold()) {
-      onTouchHold();
-      e.stopPropagation();
-    }
-  };
-  const tooltipOptions = useTooltipOptions();
-  return (
-    <Tooltip title={title} {...tooltipOptions}>
-      <div className={buttonClasses({ modalButton: "stamp", selected })} {...handlers}>
-        <img src={stamp.url} draggable="false" />
-        {stampCount > 1 &&
-          <div className="expand-collapse" onClick={handleExpandCollapseClick}>
-            <SmallCornerTriangle />
-          </div>}
-      </div>
-    </Tooltip>
-  );
-};
+export const SvgToolModeButton2: React.FC<ISvgToolModeButtonProps2> = observer(function SvgToolModeButton2({
+  SvgIcon, drawingContent, modalButton, settings, ...others
+}) {
+  const handleClick = () =>  drawingContent.setSelectedButton(modalButton);
+  const { selectedButton, toolbarSettings } = drawingContent;
+  const selected = selectedButton === modalButton;
+  const _settings = settings || toolbarSettings;
+
+  return <SvgToolbarButton SvgIcon={SvgIcon} buttonClass={modalButton} onClick={handleClick} 
+    selected={selected} settings={_settings} {...others} />;
+});
 
 interface IColorButtonProps {
   settings: Partial<ToolbarSettings>;

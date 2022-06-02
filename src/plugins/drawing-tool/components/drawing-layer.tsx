@@ -14,13 +14,9 @@ import { SelectionBox } from "./selection-box";
 import { DrawingObjectType, DrawingTool, HandleObjectHover, IDrawingLayer } from "../objects/drawing-object";
 import { Point, ToolbarSettings } from "../model/drawing-basic-types";
 import { applyAction, getMembers, getSnapshot, SnapshotOut } from "mobx-state-tree";
-import { DrawingObjectMSTUnion, DrawingObjectSnapshotUnion, renderDrawingObject } from "./drawing-object-manager";
-import { LineDrawingTool } from "../objects/line";
-import { VectorDrawingTool } from "../objects/vector";
-import { RectangleDrawingTool } from "../objects/rectangle";
-import { EllipseDrawingTool } from "../objects/ellipse";
-import { ImageObject, StampDrawingTool } from "../objects/image";
-import { VariableDrawingTool } from "../../shared-variables/drawing/variable-object";
+import { DrawingObjectMSTUnion, DrawingObjectSnapshotUnion, 
+  getDrawingToolInfos, renderDrawingObject } from "./drawing-object-manager";
+import { ImageObject } from "../objects/image";
 
 const SELECTION_COLOR = "#777";
 const HOVER_COLOR = "#bbdd00";
@@ -85,7 +81,7 @@ interface ObjectMap {
 }
 
 interface DrawingToolMap {
-  [key: string]: DrawingTool;
+  [key: string]: DrawingTool | undefined;
 }
 
 interface DrawingLayerViewProps {
@@ -126,15 +122,14 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     };
 
     this.tools = {
-      line: new LineDrawingTool(this),
-      vector: new VectorDrawingTool(this),
-      selection: new SelectionDrawingTool(this),
-      rectangle: new RectangleDrawingTool(this),
-      ellipse: new EllipseDrawingTool(this),
-      stamp: new StampDrawingTool(this),
-      variable: new VariableDrawingTool(this)
+      selection: new SelectionDrawingTool(this)
     };
-    this.currentTool = this.tools.selection;
+    const drawingToolInfos = getDrawingToolInfos();
+    drawingToolInfos.forEach(info => {
+      this.tools[info.name] = new info.toolClass(this);
+    });
+
+    this.currentTool = this.tools.selection!;
 
     this.objects = {};
 
@@ -182,29 +177,17 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
   public syncCurrentTool(selectedButton: string) {
     const settings = this.getContent().toolbarSettings;
-    switch (selectedButton) {
-      case "select":
-        this.setCurrentTool(this.tools.selection);
-        break;
-      case "line":
-        this.setCurrentTool((this.tools.line as LineDrawingTool).setSettings(settings));
-        break;
-      case "vector":
-        this.setCurrentTool((this.tools.vector as VectorDrawingTool).setSettings(settings));
-        break;
-      case "rectangle":
-        this.setCurrentTool((this.tools.rectangle as RectangleDrawingTool).setSettings(settings));
-        break;
-      case "ellipse":
-        this.setCurrentTool((this.tools.ellipse as EllipseDrawingTool).setSettings(settings));
-        break;
-      case "stamp":
-        this.setCurrentTool((this.tools.stamp as StampDrawingTool).setSettings(settings));
-        break;
-      case "variable":
-        this.setCurrentTool((this.tools.variable as VariableDrawingTool).setSettings(settings));
-        break;
+
+    const toolName = selectedButton === "select" ? "selection" : selectedButton;
+    const tool = this.tools[toolName];
+    
+    if (!tool) {
+      console.warn("Unknown tool selected", selectedButton);
+      return;
     }
+
+    tool.setSettings(settings);
+    this.setCurrentTool(tool);
   }
 
   public addListeners() {

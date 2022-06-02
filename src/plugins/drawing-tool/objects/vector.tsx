@@ -1,8 +1,11 @@
 import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import React from "react";
 import { computeStrokeDashArray } from "../model/drawing-content";
-import { DrawingTool, IDrawingComponentProps, IDrawingLayer, StrokedObject, typeField } from "./drawing-object";
+import { DrawingTool, IDrawingComponentProps, IDrawingLayer, 
+  IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
 import { Point } from "../model/drawing-basic-types";
+import { SvgToolModeButton2 } from "../components/drawing-toolbar-buttons";
+import LineToolIcon from "../../../clue/assets/icons/drawing/line-icon.svg";
 
 // simple line
 export const VectorObject = StrokedObject.named("VectorObject")
@@ -91,4 +94,9 @@ export class VectorDrawingTool extends DrawingTool {
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseup", handleMouseUp);
   }
+}
+
+export function VectorToolbarButton({drawingContent}: IToolbarButtonProps) {
+  return <SvgToolModeButton2 modalButton="vector" title="Line"
+    drawingContent={drawingContent} SvgIcon={LineToolIcon} />;
 }
