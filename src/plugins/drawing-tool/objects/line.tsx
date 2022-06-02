@@ -90,8 +90,7 @@ export class LineDrawingTool extends DrawingTool {
     let lastPoint = start;
     const addPoint = (e2: MouseEvent|React.MouseEvent<HTMLDivElement>) => {
       const p = this.drawingLayer.getWorkspacePoint(e2);
-      if (!p) return;
-      if ((p.x >= 0) && (p.y >= 0)) {
+      if (p && (p.x >= 0) && (p.y >= 0)) {
         line.addPoint({dx: p.x - lastPoint.x, dy: p.y - lastPoint.y});
         lastPoint = p;
         this.drawingLayer.setCurrentDrawingObject(line);
