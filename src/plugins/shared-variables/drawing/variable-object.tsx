@@ -51,6 +51,7 @@ export const VariableChipComponent: React.FC<IDrawingComponentProps> = function 
     >
       { // FIXME: the same variable can have multiple chips so that would mean multiple
         // spans with the same id. The model.id would be a better id to use.
+        // PT story to fix this: https://www.pivotaltracker.com/story/show/182352893
       }
       <span id={variableId} className="drawing-variable variable-chip">
         <VariableChip variable={selectedVariable} />

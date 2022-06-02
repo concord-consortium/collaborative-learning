@@ -1,13 +1,13 @@
 import { addDisposer, Instance, SnapshotIn, types } from "mobx-state-tree";
 import React, { useCallback } from "react";
+import { observer } from "mobx-react";
+import { autorun } from "mobx";
 import { gImageMap } from "../../../models/image-map";
 import { DrawingObject, DrawingTool, IDrawingComponentProps, IDrawingLayer, 
   IToolbarButtonProps, typeField } from "./drawing-object";
 import { Point } from "../model/drawing-basic-types";
 import placeholderImage from "../../../assets/image_placeholder.png";
 import SmallCornerTriangle from "../../../assets/icons/small-corner-triangle.svg";
-import { observer } from "mobx-react";
-import { autorun } from "mobx";
 import { Tooltip } from "react-tippy";
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
 import { buttonClasses } from "../components/drawing-toolbar-buttons";

@@ -4,15 +4,15 @@ import { ToolTileModel } from "../../../models/tools/tool-tile";
 import { DrawingContentModel, DrawingContentModelType } from "../model/drawing-content";
 import { DrawingLayerView } from "./drawing-layer";
 import { DrawingToolDeletion, DrawingToolMove } from "../model/drawing-types";
-
-// The drawing tile needs to be registered so the ToolTileModel.create
-// knows it is a supported tile type
-import "../drawing-registration";
 import { LineObjectSnapshot } from "../objects/line";
 import { VectorObjectSnapshot } from "../objects/vector";
 import { RectangleObjectSnapshot } from "../objects/rectangle";
 import { EllipseObjectSnapshot } from "../objects/ellipse";
 import { ImageObjectSnapshot } from "../objects/image";
+
+// The drawing tile needs to be registered so the ToolTileModel.create
+// knows it is a supported tile type
+import "../drawing-registration";
 
 let content, drawingLayerProps, drawingLayer;
 

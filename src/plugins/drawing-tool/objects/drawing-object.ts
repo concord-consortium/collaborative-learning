@@ -99,7 +99,7 @@ export interface IToolbarButtonProps {
 export type DrawingComponentType = React.ComponentType<IDrawingComponentProps>;
 
 export interface IDrawingLayer {
-  getWorkspacePoint: (e:MouseEvent|React.MouseEvent<any>) => Point|null;
+  getWorkspacePoint: (e:MouseEvent|React.MouseEvent) => Point|null;
   setCurrentDrawingObject: (object: DrawingObjectType|null) => void;
   addNewDrawingObject: (object: DrawingObjectType) => void;
   getCurrentStamp: () => StampModelType|null;

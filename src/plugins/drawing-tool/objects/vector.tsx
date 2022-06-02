@@ -23,7 +23,7 @@ export const VectorObject = StrokedObject.named("VectorObject")
     }
   }))
   .actions(self => ({
-    setDxDy(dx: number, dy: number) {
+    setDeltas(dx: number, dy: number) {
       self.dx = dx;
       self.dy = dy;
     }
@@ -77,7 +77,7 @@ export class VectorDrawingTool extends DrawingTool {
           dx = 0;
         }
       }
-      vector.setDxDy(dx, dy);
+      vector.setDeltas(dx, dy);
       this.drawingLayer.setCurrentDrawingObject(vector);
     };
     const handleMouseUp = (e2: MouseEvent) => {

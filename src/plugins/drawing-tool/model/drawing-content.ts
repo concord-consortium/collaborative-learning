@@ -28,6 +28,10 @@ export const computeStrokeDashArray = (type?: string, strokeWidth?: string|numbe
   }
 };
 
+function isImageObjectSnapshot(snapshot: any): snapshot is ImageObjectSnapshot {
+  return snapshot.type === "image";
+}
+
 interface LoggedEventProperties {
   properties?: string[];
 }
@@ -219,14 +223,12 @@ export const DrawingContentModel = ToolContentModel
             const change = safeJsonParse<DrawingToolChange>(changeJson);
             switch (change?.action) {
               case "create": {
-                const createData = change.data as DrawingObjectSnapshotUnion;
-                if (createData.type !== "image") {
-                  break;
-                } 
-                const imageData = createData as ImageObjectSnapshot;
-                if(imageData.url === oldUrl) {
-                  imageData.url = newUrl;
-                  updates.push({ index, change: JSON.stringify(change) });
+                const createData = change.data;
+                if (isImageObjectSnapshot(createData)) {
+                  if(createData.url === oldUrl) {
+                    createData.url = newUrl;
+                    updates.push({ index, change: JSON.stringify(change) });
+                  }
                 }
                 break;
               }
