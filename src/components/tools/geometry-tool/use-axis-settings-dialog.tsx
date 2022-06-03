@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import LinkGraphIcon from "../../../clue/assets/icons/table/link-graph-icon.svg";
-import { useCurrent } from "../../../hooks/use-current";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { IAxesParams } from "../../../models/tools/geometry/geometry-content";
 import { getAxisAnnotations, getBaseAxisLabels, guessUserDesiredBoundingBox
@@ -189,39 +188,34 @@ export const useAxisSettingsDialog = ({ board, onAccept, onClose }: IProps) => {
   const [horizontalMax, setHorizontalMax] = useState(JXG.toFixed(Math.max(0, bBox[2]), 1));
   const [verticalMin, setVerticalMin] = useState(JXG.toFixed(Math.min(0, bBox[3]), 1));
 
-  const fHorizontalMin = useCurrent(parseFloat(horizontalMin));
-  const fHorizontalMax = useCurrent(parseFloat(horizontalMax));
-  const fVerticalMin = useCurrent(parseFloat(verticalMin));
-  const fVerticalMax = useCurrent(parseFloat(verticalMax));
+  const fHorizontalMin = parseFloat(horizontalMin);
+  const fHorizontalMax = parseFloat(horizontalMax);
+  const fVerticalMin = parseFloat(verticalMin);
+  const fVerticalMax = parseFloat(verticalMax);
   const errorMessage =
-    !isFinite(fHorizontalMin.current) || !isFinite(fHorizontalMax.current)
-      || !isFinite(fVerticalMin.current) || !isFinite(fVerticalMax.current)
+    !isFinite(fHorizontalMin) || !isFinite(fHorizontalMax)
+      || !isFinite(fVerticalMin) || !isFinite(fVerticalMax)
     ? "Please enter valid numbers for axis minimum and maximum values"
-    : fHorizontalMin.current > 0 || fVerticalMin.current > 0
+    : fHorizontalMin > 0 || fVerticalMin > 0
     ? "Axis minimum values must be less than or equal to 0."
-    : fHorizontalMax.current < 0 || fVerticalMax.current < 0
+    : fHorizontalMax < 0 || fVerticalMax < 0
     ? "Axis maximum values must be greater than or equal to 0."
-    : fHorizontalMin.current >= fHorizontalMax.current
-      || fVerticalMin.current >= fVerticalMax.current
+    : fHorizontalMin >= fHorizontalMax
+      || fVerticalMin >= fVerticalMax
     ? "Axis minimum values must be less than axis maximum values"
     : "";
 
-  // We need to useCurrent on all parameters to onAccept() so it will work with keyboard submission
-  const cHorizontalName = useCurrent(horizontalName);
-  const cVerticalName = useCurrent(verticalName);
-  const cHorizontalLabel = useCurrent(horizontalLabel);
-  const cVerticalLabel = useCurrent(verticalLabel);
   const handleClick = () => {
     if (errorMessage.length === 0) {
       onAccept({
-        xName: cHorizontalName.current,
-        yName: cVerticalName.current,
-        xAnnotation: cHorizontalLabel.current,
-        yAnnotation: cVerticalLabel.current,
-        xMax: fHorizontalMax.current,
-        yMax: fVerticalMax.current,
-        xMin: fHorizontalMin.current,
-        yMin: fVerticalMin.current
+        xName: horizontalName,
+        yName: verticalName,
+        xAnnotation: horizontalLabel,
+        yAnnotation: verticalLabel,
+        xMax: fHorizontalMax,
+        yMax: fVerticalMax,
+        xMin: fHorizontalMin,
+        yMin: fVerticalMin
       });
     } else {
       onClose();
