@@ -3,6 +3,31 @@ import LinkGraphIcon from "../../../clue/assets/icons/table/link-graph-icon.svg"
 import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { getBoundingBoxIntersections, solveForY } from "../../../models/tools/geometry/jxg-movable-line";
 import { round } from "lodash";
+import './movable-line-dialog.sass';
+import './dialog.sass';
+
+interface LineOptionProps {
+  display: string;
+  id: string;
+  defaultValue: string;
+  setValue: React.Dispatch<React.SetStateAction<string>>;
+}
+const LineOption: React.FC<LineOptionProps> = ({display, id, defaultValue, setValue}) => {
+  return (
+    <div className="movable-line-option">
+      <label className="dialog-label" htmlFor={id}>{display}</label>
+      <input
+        className="nc-attribute-name-input pt-input"
+        id={id}
+        type="text"
+        maxLength={5}
+        defaultValue={defaultValue}
+        onChange={e => setValue(e.target.value)}
+        dir="auto"
+      />
+    </div>
+  );
+};
 
 interface IContentProps {
   slope: string;
@@ -13,29 +38,23 @@ interface IContentProps {
 }
 const Content: React.FC<IContentProps> = ({ slope, setSlope, intercept, setIntercept, errorMessage }) => {
   return (
-    <>
-      <div className="nc-attribute-name-prompt">Slope:</div>
-      <input
-        className="nc-attribute-name-input pt-input"
-        type="text"
-        maxLength={5}
+    <div className="movable-line-dialog-content">
+      <LineOption
+        display="Slope:"
+        id="slopeInput"
         defaultValue={slope}
-        onChange={e => setSlope(e.target.value)}
-        dir="auto"
+        setValue={setSlope}
       />
-      <div className="nc-attribute-name-prompt">y-intercept:</div>
-      <input
-        className="nc-attribute-name-input pt-input"
-        type="text"
-        maxLength={5}
+      <LineOption
+        display="y-intercept:"
+        id="yinterceptInput"
         defaultValue={intercept}
-        onChange={e => setIntercept(e.target.value)}
-        dir="auto"
+        setValue={setIntercept}
       />
-      <div className="nc-dialog-error">
+      <div className="dialog-error-message">
         {errorMessage}
       </div>
-    </>
+    </div>
   );
 };
 

@@ -5,6 +5,7 @@ import { IAxesParams } from "../../../models/tools/geometry/geometry-content";
 import { getAxisAnnotations, getBaseAxisLabels, guessUserDesiredBoundingBox
         } from "../../../models/tools/geometry/jxg-board";
 import "./axis-settings-dialog.sass";
+import "./dialog.sass";
 
 const kBoundsMaxChars = 6;
 const kNameMaxChars = 20;
@@ -61,7 +62,7 @@ const Content: React.FC<IContentProps> = ({
           max={yMax}
           setMax={setYMax}
         />
-        <div className="nc-dialog-error">
+        <div className="dialog-error-message">
           {errorMessage}
         </div>
       </>
