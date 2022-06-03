@@ -22,7 +22,6 @@ const Content: React.FC<IContentProps> = ({ slope, setSlope, intercept, setInter
         maxLength={5}
         defaultValue={slope}
         onChange={e => setSlope(e.target.value)}
-        // onKeyDown={handleKeyDown}
         dir="auto"
       />
       <div className="nc-attribute-name-prompt">y-intercept:</div>
@@ -32,7 +31,6 @@ const Content: React.FC<IContentProps> = ({ slope, setSlope, intercept, setInter
         maxLength={5}
         defaultValue={intercept}
         onChange={e => setIntercept(e.target.value)}
-        // onKeyDown={handleKeyDown}
         dir="auto"
       />
       <div className="nc-dialog-error">
@@ -95,15 +93,6 @@ export const useMovableLineDialog = ({ line, onAccept, onClose }: IProps) => {
       onClose();
     }
   };
-
-  // const handleKeyDown = (evt: React.KeyboardEvent<HTMLInputElement>) => {
-  //   evt.stopPropagation();
-  //   if (evt.keyCode === 13) {
-  //     this.handleAccept();
-  //   } else if (evt.keyCode === 27) {
-  //     this.handleCancel();
-  //   }
-  // };
 
   const [showModal, hideModal] = useCustomModal({
     Icon: LinkGraphIcon,
