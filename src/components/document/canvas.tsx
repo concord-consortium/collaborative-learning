@@ -126,7 +126,7 @@ export class CanvasComponent extends BaseComponent<IProps> {
     const { appConfig, unit } = this.stores;
     const unitBasePath = appConfig.getUnitBasePath(unit.code);
     const documentContent = document?.content ?? content;
-    const transformImageUrl = (url: string, filename?: string) => {
+    const transformImageUrl = (url?: string, filename?: string) => {
       return transformCurriculumImageUrl(url, unitBasePath, filename);
     };
     const json = documentContent?.exportAsJson({ includeTileIds: true, transformImageUrl });
