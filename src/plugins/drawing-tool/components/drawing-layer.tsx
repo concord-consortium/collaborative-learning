@@ -9,7 +9,6 @@ import { reaction, IReactionDisposer, autorun } from "mobx";
 import { observer } from "mobx-react";
 import { ImageContentSnapshotOutType } from "../../image/models/image-content";
 import { gImageMap } from "../../image/models/image-map";
-import placeholderImage from "../../../assets/image_placeholder.png";
 import { SelectionBox } from "./selection-box";
 import { DrawingObjectType, DrawingTool, HandleObjectHover, IDrawingLayer } from "../objects/drawing-object";
 import { Point, ToolbarSettings } from "../model/drawing-basic-types";

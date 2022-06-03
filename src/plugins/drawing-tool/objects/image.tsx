@@ -2,7 +2,7 @@ import { addDisposer, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { observer } from "mobx-react";
 import { autorun } from "mobx";
 import React from "react";
-import { gImageMap } from "../../../models/image-map";
+import { gImageMap } from "../../image/models/image-map";
 import { DrawingObject, DrawingTool, IDrawingComponentProps, IDrawingLayer, typeField } from "./drawing-object";
 import { Point } from "../model/drawing-basic-types";
 import placeholderImage from "../../../assets/image_placeholder.png";
@@ -16,7 +16,7 @@ export const ImageObject = DrawingObject.named("ImageObject")
 
     // The filename needs to be stored because it is meta data created when a user adds a file
     // by uploading a file from their computer. The filename cannot be discovered just from the
-    // URL. Currently images can't be uploaded into the drawing tile, but they can be uploaded 
+    // URL. Currently images can't be uploaded into the drawing tile, but they can be uploaded
     // into a image tile and then that image dragged to the drawing tile. In this case we want
     // to preserve the filename of the source image.
     filename: types.maybe(types.string),
@@ -32,7 +32,7 @@ export const ImageObject = DrawingObject.named("ImageObject")
     },
     // TODO: this currently works with stamps because the stamp is added by creating a "create"
     // change event. And then when that change event is executed it triggers a gImageMap.getImage
-    // When the change events are removed, we'll need to find another way to trigger these 
+    // When the change events are removed, we'll need to find another way to trigger these
     // gImageMap.getImage calls.
     get displayUrl() {
       return gImageMap.getCachedImage(self.url)?.displayUrl || (placeholderImage as string);
@@ -53,7 +53,7 @@ export const ImageObject = DrawingObject.named("ImageObject")
       // this way when the image is reloaded from state the width and height are immediately
       // available and there won't be any resize flickering.
       // In all cases I can find the correct width and height will be set when the ImageObject is
-      // created. However the old code was modifying the width and height after the image 
+      // created. However the old code was modifying the width and height after the image
       // entry became available, so there might be a case where width and height change.
       addDisposer(self, autorun(() =>{
         const imageMapEntry = gImageMap.getCachedImage(self.url);
