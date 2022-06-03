@@ -1,5 +1,6 @@
 import classNames from "classnames";
 import React from "react";
+import { observer } from "mobx-react";
 import { Tooltip } from "react-tippy";
 import { computeStrokeDashArray, DrawingContentModelType } from "../model/drawing-content";
 import { ToolbarModalButton } from "../model/drawing-types";
@@ -10,7 +11,6 @@ import ColorStrokeIcon from "../../../clue/assets/icons/drawing/color-stroke-ico
 import DeleteSelectionIcon from "../../../assets/icons/delete/delete-selection-icon.svg";
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
 import { isLightColorRequiringContrastOffset } from "../../../utilities/color-utils";
-import { observer } from "mobx-react";
 import { IToolbarButtonProps } from "../objects/drawing-object";
 
 interface IButtonClasses {
@@ -65,7 +65,7 @@ interface ISvgToolModeButtonProps {
 export const SvgToolModeButton: React.FC<ISvgToolModeButtonProps> = observer(function SvgToolModeButton({
   SvgIcon, drawingContent, modalButton, settings, ...others
 }) {
-  const handleClick = () =>  drawingContent.setSelectedButton(modalButton);
+  const handleClick = () => drawingContent.setSelectedButton(modalButton);
   const { selectedButton, toolbarSettings } = drawingContent;
   const selected = selectedButton === modalButton;
   const _settings = settings || toolbarSettings;
