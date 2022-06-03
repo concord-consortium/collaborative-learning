@@ -48,6 +48,12 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
         case "select":
           this.handleSelect();
           break;
+        case "undo":
+          this.handleUndo();
+          break;
+          case "redo":
+            this.handleRedo();
+            break;
         case "delete":
           this.handleDelete();
           break;
@@ -131,6 +137,14 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
   private handleSelect() {
     // nothing to do
+  }
+
+  private handleUndo() {
+    alert("Undo button was clicked");
+  }
+
+  private handleRedo() {
+    alert("Redo button was clicked");
   }
 
   private handleDelete() {
