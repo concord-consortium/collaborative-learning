@@ -3,7 +3,8 @@ import {
   computeStrokeDashArray, defaultDrawingContent, DrawingContentModel, DrawingToolMetadataModel
 } from "./drawing-content";
 import { IDrawingTileImportSpec } from "./drawing-import";
-import { DefaultToolbarSettings, DrawingToolChange, kDrawingToolID } from "./drawing-types";
+import { DrawingToolChange, kDrawingToolID } from "./drawing-types";
+import { DefaultToolbarSettings } from "./drawing-basic-types";
 import { StampModel } from "./stamp";
 import { AppConfigModel } from "../../../models/stores/app-config-model";
 

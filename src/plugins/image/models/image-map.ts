@@ -189,7 +189,7 @@ export const ImageMapModel = types
       getImage(url: string, options?: IImageBaseOptions): Promise<ImageMapEntryType> {
         return new Promise((resolve, reject) => {
           if (!url) {
-            resolve(clone(self.images.get(placeholderImage)!));
+            return resolve(clone(self.images.get(placeholderImage)!));
           }
 
           const imageEntry = self.images.get(url);

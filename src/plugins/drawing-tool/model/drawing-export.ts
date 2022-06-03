@@ -1,12 +1,15 @@
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { comma, StringBuilder } from "../../../utilities/string-builder";
 import { ITileExportOptions } from "../../../models/tools/tool-content-info";
-import { DrawingObjectDataType, ImageDrawingObjectData } from "./drawing-objects";
 import { DrawingToolChange } from "./drawing-types";
+import { ImageObjectSnapshot } from "../objects/image";
+import { DrawingObjectSnapshotUnion } from "../components/drawing-object-manager";
 
 export interface IDrawingObjectInfo {
   id: string;
-  type: DrawingObjectDataType["type"];
+  // this used to be DrawingObjectDataType["type"] but we relax it to support
+  // plugin based drawing object types
+  type: string;
   changes: DrawingToolChange[]; // changes that affect this object
   isDeleted?: boolean;          // true if the object has been deleted
 }
@@ -23,7 +26,7 @@ export const exportDrawingTileSpec = (changes: string[], options?: ITileExportOp
 
   const exportObject = (id: string, isLast: boolean) => {
     const objInfo = objectInfoMap[id];
-    let data = { ...objInfo.changes[0].data } as DrawingObjectDataType;
+    let data = { ...objInfo.changes[0].data } as DrawingObjectSnapshotUnion;
     for (let i = 1; i < objInfo.changes.length; ++i) {
       const change = objInfo.changes[i];
       switch (change.action) {
@@ -47,9 +50,10 @@ export const exportDrawingTileSpec = (changes: string[], options?: ITileExportOp
     }
     const { id: idData, type, ...others } = data;
     if ((data.type === "image") && options?.transformImageUrl) {
-      if (data.filename) {
-        (others as Partial<ImageDrawingObjectData>).url = options.transformImageUrl(data.url, data.filename);
-        delete (others as Partial<ImageDrawingObjectData>).filename;
+      const imageData = data as ImageObjectSnapshot;
+      if (imageData.filename) {
+        (others as Partial<ImageObjectSnapshot>).url = options.transformImageUrl(imageData.url, imageData.filename);
+        delete (others as Partial<ImageObjectSnapshot>).filename;
       }
     }
     const othersJson = JSON.stringify(others);
@@ -80,7 +84,7 @@ export const exportDrawingTileSpec = (changes: string[], options?: ITileExportOp
       switch (change.action) {
         case "create": {
           const { id, type  } = change.data;
-          if (id) {
+          if (id && type) {
             if (!objectInfoMap[id]) {
               objectInfoMap[id] = { id, type, changes: [change] };
               orderedIds.push(id);
