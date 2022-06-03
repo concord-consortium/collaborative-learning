@@ -12,66 +12,54 @@ const kLabelMaxChars = 40;
 
 // The complete dialog content
 interface IContentProps {
-  horizontalName: string;
-  setHorizontalName: React.Dispatch<React.SetStateAction<string>>;
-  verticalName: string;
-  setVerticalName: React.Dispatch<React.SetStateAction<string>>;
-  horizontalLabel: string;
-  setHorizontalLabel: React.Dispatch<React.SetStateAction<string>>;
-  verticalLabel: string;
-  setVerticalLabel: React.Dispatch<React.SetStateAction<string>>;
-  horizontalMin: string;
-  setHorizontalMin: React.Dispatch<React.SetStateAction<string>>;
-  verticalMin: string;
-  setVerticalMin: React.Dispatch<React.SetStateAction<string>>;
-  horizontalMax: string;
-  setHorizontalMax: React.Dispatch<React.SetStateAction<string>>;
-  verticalMax: string;
-  setVerticalMax: React.Dispatch<React.SetStateAction<string>>;
+  xName: string;
+  setXName: React.Dispatch<React.SetStateAction<string>>;
+  yName: string;
+  setYName: React.Dispatch<React.SetStateAction<string>>;
+  xLabel: string;
+  setXLabel: React.Dispatch<React.SetStateAction<string>>;
+  yLabel: string;
+  setYLabel: React.Dispatch<React.SetStateAction<string>>;
+  xMin: string;
+  setXMin: React.Dispatch<React.SetStateAction<string>>;
+  yMin: string;
+  setYMin: React.Dispatch<React.SetStateAction<string>>;
+  xMax: string;
+  setXMax: React.Dispatch<React.SetStateAction<string>>;
+  yMax: string;
+  setYMax: React.Dispatch<React.SetStateAction<string>>;
   errorMessage: string;
 }
 const Content: React.FC<IContentProps> = ({
-    horizontalName,
-    setHorizontalName,
-    verticalName,
-    setVerticalName,
-    horizontalLabel,
-    setHorizontalLabel,
-    verticalLabel,
-    setVerticalLabel,
-    horizontalMin,
-    setHorizontalMin,
-    verticalMin,
-    setVerticalMin,
-    horizontalMax,
-    setHorizontalMax,
-    verticalMax,
-    setVerticalMax,
+    xName, setXName, yName, setYName,
+    xLabel, setXLabel, yLabel, setYLabel,
+    xMin, setXMin, yMin, setYMin,
+    xMax, setXMax, yMax, setYMax,
     errorMessage
   })=> {
     return (
       <>
         <AxisView
           title="Horizontal Axis"
-          axisName={horizontalName}
-          setName={setHorizontalName}
-          label={horizontalLabel}
-          setLabel={setHorizontalLabel}
-          min={horizontalMin}
-          setMin={setHorizontalMin}
-          max={horizontalMax}
-          setMax={setHorizontalMax}
+          axisName={xName}
+          setName={setXName}
+          label={xLabel}
+          setLabel={setXLabel}
+          min={xMin}
+          setMin={setXMin}
+          max={xMax}
+          setMax={setXMax}
         />
         <AxisView
           title="Vertical Axis"
-          axisName={verticalName}
-          setName={setVerticalName}
-          label={verticalLabel}
-          setLabel={setVerticalLabel}
-          min={verticalMin}
-          setMin={setVerticalMin}
-          max={verticalMax}
-          setMax={setVerticalMax}
+          axisName={yName}
+          setName={setYName}
+          label={yLabel}
+          setLabel={setYLabel}
+          min={yMin}
+          setMin={setYMin}
+          max={yMax}
+          setMax={setYMax}
         />
         <div className="nc-dialog-error">
           {errorMessage}
@@ -94,14 +82,10 @@ interface axisViewProps {
 }
 const AxisView: React.FC<axisViewProps> = ({
   title,
-  axisName,
-  setName,
-  label,
-  setLabel,
-  min,
-  setMin,
-  max,
-  setMax
+  axisName, setName,
+  label, setLabel,
+  min, setMin,
+  max, setMax
 }: axisViewProps) => {
   return (
     <div className="axis-settings-container">
@@ -175,47 +159,45 @@ interface IProps {
 }
 export const useAxisSettingsDialog = ({ board, onAccept, onClose }: IProps) => {
   const [hName, vName] = getBaseAxisLabels(board);
-  const [horizontalName, setHorizontalName] = useState(hName);
-  const [verticalName, setVerticalName] = useState(vName);
+  const [xName, setXName] = useState(hName);
+  const [yName, setYName] = useState(vName);
 
   const [hLabel, vLabel] = getAxisAnnotations(board);
-  const [horizontalLabel, setHorizontalLabel] = useState(hLabel);
-  const [verticalLabel, setVerticalLabel] = useState(vLabel);
+  const [xLabel, setXLabel] = useState(hLabel);
+  const [yLabel, setYLabel] = useState(vLabel);
 
   const bBox = guessUserDesiredBoundingBox(board);
-  const [horizontalMin, setHorizontalMin] = useState(JXG.toFixed(Math.min(0, bBox[0]), 1));
-  const [verticalMax, setVerticalMax] = useState(JXG.toFixed(Math.max(0, bBox[1]), 1));
-  const [horizontalMax, setHorizontalMax] = useState(JXG.toFixed(Math.max(0, bBox[2]), 1));
-  const [verticalMin, setVerticalMin] = useState(JXG.toFixed(Math.min(0, bBox[3]), 1));
+  const [xMin, setXMin] = useState(JXG.toFixed(Math.min(0, bBox[0]), 1));
+  const [yMax, setYMax] = useState(JXG.toFixed(Math.max(0, bBox[1]), 1));
+  const [xMax, setXMax] = useState(JXG.toFixed(Math.max(0, bBox[2]), 1));
+  const [yMin, setYMin] = useState(JXG.toFixed(Math.min(0, bBox[3]), 1));
 
-  const fHorizontalMin = parseFloat(horizontalMin);
-  const fHorizontalMax = parseFloat(horizontalMax);
-  const fVerticalMin = parseFloat(verticalMin);
-  const fVerticalMax = parseFloat(verticalMax);
+  const fXMin = parseFloat(xMin);
+  const fXMax = parseFloat(xMax);
+  const fYMin = parseFloat(yMin);
+  const fYMax = parseFloat(yMax);
   const errorMessage =
-    !isFinite(fHorizontalMin) || !isFinite(fHorizontalMax)
-      || !isFinite(fVerticalMin) || !isFinite(fVerticalMax)
+    !isFinite(fXMin) || !isFinite(fXMax) || !isFinite(fYMin) || !isFinite(fYMax)
     ? "Please enter valid numbers for axis minimum and maximum values"
-    : fHorizontalMin > 0 || fVerticalMin > 0
+    : fXMin > 0 || fYMin > 0
     ? "Axis minimum values must be less than or equal to 0."
-    : fHorizontalMax < 0 || fVerticalMax < 0
+    : fXMax < 0 || fYMax < 0
     ? "Axis maximum values must be greater than or equal to 0."
-    : fHorizontalMin >= fHorizontalMax
-      || fVerticalMin >= fVerticalMax
+    : fXMin >= fXMax || fYMin >= fYMax
     ? "Axis minimum values must be less than axis maximum values"
     : "";
 
   const handleClick = () => {
     if (errorMessage.length === 0) {
       onAccept({
-        xName: horizontalName,
-        yName: verticalName,
-        xAnnotation: horizontalLabel,
-        yAnnotation: verticalLabel,
-        xMax: fHorizontalMax,
-        yMax: fVerticalMax,
-        xMin: fHorizontalMin,
-        yMin: fVerticalMin
+        xName,
+        yName,
+        xAnnotation: xLabel,
+        yAnnotation: yLabel,
+        xMax: fXMax,
+        yMax: fYMax,
+        xMin: fXMin,
+        yMin: fYMin
       });
     } else {
       onClose();
@@ -227,22 +209,10 @@ export const useAxisSettingsDialog = ({ board, onAccept, onClose }: IProps) => {
     title: "Edit Axis",
     Content,
     contentProps: {
-      horizontalName,
-      setHorizontalName,
-      verticalName,
-      setVerticalName,
-      horizontalLabel,
-      setHorizontalLabel,
-      verticalLabel,
-      setVerticalLabel,
-      horizontalMin,
-      setHorizontalMin,
-      verticalMin,
-      setVerticalMin,
-      horizontalMax,
-      setHorizontalMax,
-      verticalMax,
-      setVerticalMax,
+      xName, setXName, yName, setYName,
+      xLabel, setXLabel, yLabel, setYLabel,
+      xMin, setXMin, yMin, setYMin,
+      xMax, setXMax, yMax, setYMax,
       errorMessage
     },
     buttons: [
@@ -254,17 +224,7 @@ export const useAxisSettingsDialog = ({ board, onAccept, onClose }: IProps) => {
       }
     ],
     onClose
-  }, [
-    horizontalName,
-    verticalName,
-    horizontalLabel,
-    verticalLabel,
-    horizontalMin,
-    verticalMin,
-    horizontalMax,
-    verticalMax,
-    errorMessage
-  ]);
+  }, [xName, yName, xLabel, yLabel, xMin, yMin, xMax, yMax, errorMessage]);
 
   return [showModal, hideModal];
 };
