@@ -2,9 +2,8 @@ import React from "react";
 import { extractDragTileType, kDragTileContent } from "../../../components/tools/tool-tile";
 import { DrawingContentModelType } from "../model/drawing-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
-import { DrawingToolChange, DrawingToolDeletion, DrawingToolMove, 
+import { DrawingToolChange, DrawingToolDeletion, DrawingToolMove,
   DrawingToolUpdate } from "../model/drawing-types";
-import { getUrlFromImageContent } from "../../../utilities/image-utils";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { reaction, IReactionDisposer, autorun } from "mobx";
 import { observer } from "mobx-react";
@@ -391,7 +390,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   // name too.
   // Currently it is probably not possible to drag an image out of a drawing tile,
   // however the same image might be used in an image tile.  These two tiles will
-  // share the same imageEntry so when either creates the imageEntry they need to 
+  // share the same imageEntry so when either creates the imageEntry they need to
   // include the filename.
   private updateLoadingImages = (url: string, filename?: string) => {
     if (this.fetchingImages.indexOf(url) > -1) return;
@@ -457,7 +456,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       const parsedContent = safeJsonParse(dragContent);
       if (parsedContent) {
         const droppedContent: ImageContentSnapshotOutType = parsedContent.content;
-        const droppedUrl = getUrlFromImageContent(droppedContent);
+        const droppedUrl = droppedContent.url;
         if (droppedUrl) {
           this.handleImageDrop(droppedUrl);
         }
@@ -518,7 +517,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         const imageEntry = gImageMap.getCachedImage(imageData.url);
         if (!imageEntry) {
           // If this image hasn't been loaded to gImageMap, trigger that loading.
-          // The ImageObject will automatically be watching for changes to this 
+          // The ImageObject will automatically be watching for changes to this
           // imageEntry and update itself when the load is done.
           //
           // The filename is passed so that it gets added to the imageEntry in the
@@ -561,7 +560,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       const drawingObject = this.objects[id];
 
       // TODO: this approach is temporary to support the legacy approach of saving
-      // property changes. If we have migration of the old state, then this can 
+      // property changes. If we have migration of the old state, then this can
       // probably go away
       const objActions = getMembers(drawingObject).actions;
       if (objActions.includes(action)) {
@@ -572,10 +571,10 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
       // Note: I don't see any place where something records an url update event
       // However this case has been handled in the past, so it is still handled here.
-      // If the url changes, the url in the drawingObject will be updated by 
-      // the code above. 
+      // If the url changes, the url in the drawingObject will be updated by
+      // the code above.
       // Then updateImageUrl is called which will trigger a loading of this url into
-      // the ImageMap. The ImageComponent is watching this url through the displayUrl 
+      // the ImageMap. The ImageComponent is watching this url through the displayUrl
       // property and will show the placeholder image until the new url is loaded.
       if ((drawingObject?.type === "image") && (prop === "url")) {
         const url = newValue as string;
