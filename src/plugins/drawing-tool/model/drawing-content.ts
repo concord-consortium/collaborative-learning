@@ -1,16 +1,18 @@
 import { types, Instance } from "mobx-state-tree";
 import { exportDrawingTileSpec } from "./drawing-export";
 import { importDrawingTileSpec, isDrawingTileImportSpec } from "./drawing-import";
-import { DrawingObjectDataType } from "./drawing-objects";
 import { StampModel, StampModelType } from "./stamp";
 import { ITileExportOptions, IDefaultContentOptions } from "../../../models/tools/tool-content-info";
 import { ToolMetadataModel, ToolContentModel } from "../../../models/tools/tool-types";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
 import {
-  DefaultToolbarSettings, DrawingToolChange, DrawingToolCreateChange, DrawingToolDeleteChange, DrawingToolMoveChange,
-  DrawingToolUpdate, DrawingToolUpdateChange, kDrawingToolID, ToolbarModalButton, ToolbarSettings
+  DrawingToolChange, DrawingToolCreateChange, DrawingToolDeleteChange, DrawingToolMoveChange,
+  DrawingToolUpdate, DrawingToolUpdateChange, kDrawingToolID, ToolbarModalButton
 } from "./drawing-types";
+import { ImageObjectSnapshot } from "../objects/image";
+import { DrawingObjectSnapshotUnion } from "../components/drawing-object-manager";
+import { DefaultToolbarSettings, ToolbarSettings } from "./drawing-basic-types";
 
 
 export const computeStrokeDashArray = (type?: string, strokeWidth?: string|number) => {
@@ -25,6 +27,10 @@ export const computeStrokeDashArray = (type?: string, strokeWidth?: string|numbe
       return "";
   }
 };
+
+function isImageObjectSnapshot(snapshot: any): snapshot is ImageObjectSnapshot {
+  return snapshot.type === "image";
+}
 
 interface LoggedEventProperties {
   properties?: string[];
@@ -217,10 +223,12 @@ export const DrawingContentModel = ToolContentModel
             const change = safeJsonParse<DrawingToolChange>(changeJson);
             switch (change?.action) {
               case "create": {
-                const createData = change.data as DrawingObjectDataType;
-                if ((createData.type === "image") && (createData.url === oldUrl)) {
-                  createData.url = newUrl;
-                  updates.push({ index, change: JSON.stringify(change) });
+                const createData = change.data;
+                if (isImageObjectSnapshot(createData)) {
+                  if(createData.url === oldUrl) {
+                    createData.url = newUrl;
+                    updates.push({ index, change: JSON.stringify(change) });
+                  }
                 }
                 break;
               }

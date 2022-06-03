@@ -3,7 +3,7 @@ import Select from "react-select";
 import { Variable } from "@concord-consortium/diagram-view";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { DrawingContentModelType } from "../../drawing-tool/model/drawing-content";
-import { VariableDrawingObjectData } from "../../drawing-tool/model/drawing-objects";
+import { VariableChipObjectSnapshot } from "./variable-object";
 import { findVariable, getVariables, getOrFindSharedModel } from "./drawing-utils";
 
 import './variable-dialog.scss';
@@ -16,7 +16,7 @@ export const useVariableDialog = ({drawingContent}: IProps) => {
   let selectedVariableId: string | undefined = undefined;
   let _variableName: string | undefined = undefined;
   let _variableValue = "";
-  let variableChip: VariableDrawingObjectData;
+  let variableChip: VariableChipObjectSnapshot;
 
   const ModalContent = () => {
     const variables = getVariables(drawingContent);

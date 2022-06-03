@@ -1,8 +1,9 @@
+import { EllipseObjectSnapshot } from "../objects/ellipse";
+import { ImageObjectSnapshot } from "../objects/image";
+import { LineObjectSnapshot } from "../objects/line";
+import { RectangleObjectSnapshot } from "../objects/rectangle";
+import { VectorObjectSnapshot } from "../objects/vector";
 import { IDrawingTileImportSpec, importDrawingTileSpec, isDrawingTileImportSpec } from "./drawing-import";
-import {
-  EllipseDrawingObjectData, ImageDrawingObjectData, LineDrawingObjectData,
-  RectangleDrawingObjectData, VectorDrawingObjectData
-} from "./drawing-objects";
 
 // mock uniqueId so we can recognize auto-generated IDs
 let idCount = 0;
@@ -36,7 +37,7 @@ describe("importDrawingTileSpec", () => {
   }
 
   it("should import vectors (simple lines)", () => {
-    const vectorData: VectorDrawingObjectData = {
+    const vectorData: VectorObjectSnapshot = {
       type: "vector",
       x: 10, y: 10,
       dx: 10, dy: 10,
@@ -55,7 +56,7 @@ describe("importDrawingTileSpec", () => {
   });
 
   it("should import lines (polylines)", () => {
-    const lineData: LineDrawingObjectData = {
+    const lineData: LineObjectSnapshot = {
       type: "line",
       x: 10, y: 10,
       deltaPoints: [{ dx: 10, dy: 10 }, { dx: 5, dy: 5 }],
@@ -74,7 +75,7 @@ describe("importDrawingTileSpec", () => {
   });
 
   it("should import rectangles", () => {
-    const rectData: RectangleDrawingObjectData = {
+    const rectData: RectangleObjectSnapshot = {
       type: "rectangle",
       x: 10, y: 10,
       width: 10, height: 10,
@@ -94,7 +95,7 @@ describe("importDrawingTileSpec", () => {
   });
 
   it("should import ellipses", () => {
-    const ellipseData: EllipseDrawingObjectData = {
+    const ellipseData: EllipseObjectSnapshot = {
       type: "ellipse",
       x: 10, y: 10,
       rx: 10, ry: 10,
@@ -114,7 +115,7 @@ describe("importDrawingTileSpec", () => {
   });
 
   it("should import images", () => {
-    const imageData: ImageDrawingObjectData = {
+    const imageData: ImageObjectSnapshot = {
       type: "image",
       url: "my/image/url",
       x: 10, y: 10,
