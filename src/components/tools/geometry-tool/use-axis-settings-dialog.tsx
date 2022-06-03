@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import LinkGraphIcon from "../../../clue/assets/icons/table/link-graph-icon.svg";
+import GraphToolIcon from "../../../clue/assets/icons/graph-tool.svg";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { IAxesParams } from "../../../models/tools/geometry/geometry-content";
 import { getAxisAnnotations, getBaseAxisLabels, guessUserDesiredBoundingBox
@@ -206,7 +206,7 @@ export const useAxisSettingsDialog = ({ board, onAccept, onClose }: IProps) => {
   };
 
   const [showModal, hideModal] = useCustomModal({
-    Icon: LinkGraphIcon,
+    Icon: GraphToolIcon,
     title: "Edit Axis",
     Content,
     contentProps: {

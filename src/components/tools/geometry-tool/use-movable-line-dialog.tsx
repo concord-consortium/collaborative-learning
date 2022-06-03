@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import LinkGraphIcon from "../../../clue/assets/icons/table/link-graph-icon.svg";
+import MovableLineSvg from "../../../clue/assets/icons/geometry/movable-line.svg";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { getBoundingBoxIntersections, solveForY } from "../../../models/tools/geometry/jxg-movable-line";
 import { round } from "lodash";
@@ -113,7 +113,7 @@ export const useMovableLineDialog = ({ line, onAccept, onClose }: IProps) => {
   };
 
   const [showModal, hideModal] = useCustomModal({
-    Icon: LinkGraphIcon,
+    Icon: MovableLineSvg,
     title: "Edit Line",
     Content,
     contentProps: { slope, setSlope, intercept, setIntercept, errorMessage },

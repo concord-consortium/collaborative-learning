@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import LinkGraphIcon from "../../../clue/assets/icons/table/link-graph-icon.svg";
+import LineLabelSvg from "../../../clue/assets/icons/geometry/line-label.svg";
 import { ESegmentLabelOption } from "../../../models/tools/geometry/jxg-changes";
 import { getPolygonEdge } from "../../../models/tools/geometry/jxg-polygon";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
@@ -88,7 +88,7 @@ export const useLabelSegmentDialog = ({ board, polygon, points, onAccept, onClos
   };
 
   const [showModal, hideModal] = useCustomModal({
-    Icon: LinkGraphIcon,
+    Icon: LineLabelSvg,
     title: "Edit Segment Label",
     Content,
     contentProps: { labelOption, setLabelOption },
