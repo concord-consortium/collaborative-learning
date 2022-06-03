@@ -2,11 +2,12 @@ import { safeJsonParse } from "../../../utilities/js-utils";
 import { ITileExportOptions } from "../../../models/tools/tool-content-info";
 import { exportDrawingTileSpec } from "./drawing-export";
 import { importDrawingTileSpec } from "./drawing-import";
-import {
-  EllipseDrawingObjectData, ImageDrawingObjectData, LineDrawingObjectData,
-  RectangleDrawingObjectData, VectorDrawingObjectData
-} from "./drawing-objects";
 import { DrawingToolChange } from "./drawing-types";
+import { LineObjectSnapshot } from "../objects/line";
+import { VectorObjectSnapshot } from "../objects/vector";
+import { RectangleObjectSnapshot } from "../objects/rectangle";
+import { EllipseObjectSnapshot } from "../objects/ellipse";
+import { ImageObjectSnapshot } from "../objects/image";
 
 function exportDrawing(changes: DrawingToolChange[], options?: ITileExportOptions) {
   const changesJson = changes.map(change => JSON.stringify(change));
@@ -41,7 +42,7 @@ describe("exportDrawingTileSpec", () => {
   });
 
   it("should export vectors (simple lines)", () => {
-    const vectorData: VectorDrawingObjectData = {
+    const vectorData: VectorObjectSnapshot = {
       type: "vector",
       x: 10, y: 10,
       dx: 10, dy: 10,
@@ -55,8 +56,8 @@ describe("exportDrawingTileSpec", () => {
     // skips objects without ids
     expect(exportDrawing(changes)).toEqual({ type: "Drawing", objects: [] });
 
-    const v1Data: VectorDrawingObjectData = { ...vectorData, id: "v1" };
-    const v2Data: VectorDrawingObjectData = { ...vectorData, id: "v2" };
+    const v1Data: VectorObjectSnapshot = { ...vectorData, id: "v1" };
+    const v2Data: VectorObjectSnapshot = { ...vectorData, id: "v2" };
     const changesWithId: DrawingToolChange[] = [
       { action: "create", data: v1Data },
       { action: "create", data: v2Data },
@@ -85,7 +86,7 @@ describe("exportDrawingTileSpec", () => {
   });
 
   it("should export lines (polylines)", () => {
-    const lineData: LineDrawingObjectData = {
+    const lineData: LineObjectSnapshot = {
       type: "line",
       x: 10, y: 10,
       deltaPoints: [{ dx: 1, dy: 1 }, { dx: 2, dy: 2 }],
@@ -99,8 +100,8 @@ describe("exportDrawingTileSpec", () => {
     // skips objects without ids
     expect(exportDrawing(changes)).toEqual({ type: "Drawing", objects: [] });
 
-    const l1Data: LineDrawingObjectData = { ...lineData, id: "l1" };
-    const l2Data: LineDrawingObjectData = { ...lineData, id: "l2" };
+    const l1Data: LineObjectSnapshot = { ...lineData, id: "l1" };
+    const l2Data: LineObjectSnapshot = { ...lineData, id: "l2" };
     const changesWithId: DrawingToolChange[] = [
       { action: "create", data: l1Data },
       { action: "create", data: l2Data }
@@ -127,7 +128,7 @@ describe("exportDrawingTileSpec", () => {
   });
 
   it("should export rectangles", () => {
-    const rectData: RectangleDrawingObjectData = {
+    const rectData: RectangleObjectSnapshot = {
       type: "rectangle",
       x: 10, y: 10,
       width: 10, height: 10,
@@ -142,9 +143,9 @@ describe("exportDrawingTileSpec", () => {
     // skips objects without ids
     expect(exportDrawing(changes)).toEqual({ type: "Drawing", objects: [] });
 
-    const r1Data: RectangleDrawingObjectData = { ...rectData, id: "r1" };
-    const r2Data: RectangleDrawingObjectData = { ...rectData, id: "r2" };
-    const r3Data: RectangleDrawingObjectData = { ...rectData, id: "r3" };
+    const r1Data: RectangleObjectSnapshot = { ...rectData, id: "r1" };
+    const r2Data: RectangleObjectSnapshot = { ...rectData, id: "r2" };
+    const r3Data: RectangleObjectSnapshot = { ...rectData, id: "r3" };
     const changesWithId: DrawingToolChange[] = [
       { action: "create", data: r1Data },
       { action: "create", data: r2Data },
@@ -175,7 +176,7 @@ describe("exportDrawingTileSpec", () => {
   });
 
   it("should export ellipses", () => {
-    const ellipseData: EllipseDrawingObjectData = {
+    const ellipseData: EllipseObjectSnapshot = {
       type: "ellipse",
       x: 10, y: 10,
       rx: 10, ry: 10,
@@ -190,9 +191,9 @@ describe("exportDrawingTileSpec", () => {
     // skips objects without ids
     expect(exportDrawing(changes)).toEqual({ type: "Drawing", objects: [] });
 
-    const e1Data: EllipseDrawingObjectData = { ...ellipseData, id: "e1" };
-    const e2Data: EllipseDrawingObjectData = { ...ellipseData, id: "e2" };
-    const e3Data: EllipseDrawingObjectData = { ...ellipseData, id: "e3" };
+    const e1Data: EllipseObjectSnapshot = { ...ellipseData, id: "e1" };
+    const e2Data: EllipseObjectSnapshot = { ...ellipseData, id: "e2" };
+    const e3Data: EllipseObjectSnapshot = { ...ellipseData, id: "e3" };
     const changesWithId: DrawingToolChange[] = [
       { action: "create", data: e1Data },
       { action: "create", data: e2Data },
@@ -223,10 +224,15 @@ describe("exportDrawingTileSpec", () => {
   });
 
   it("should export images", () => {
-    const imageData: ImageDrawingObjectData = {
+    const imageData: ImageObjectSnapshot = {
       type: "image",
       url: "my/image/url",
-      originalUrl: "my/image/originalUrl",
+      // Note: There used to be an originalUrl in the image data.
+      // This originalUrl was set when the image drawing object was created from the 
+      // serialized image data. As far as I can tell this originalUrl should not 
+      // have been stored back in the serialized data. Additionally even if it was
+      // stored and then loaded back in, it seems it would have only caused problems.
+      // So it seems safe to ignore it here.
       x: 10, y: 10,
       width: 10, height: 10,
     };
@@ -236,9 +242,9 @@ describe("exportDrawingTileSpec", () => {
     // skips objects without ids
     expect(exportDrawing(changes)).toEqual({ type: "Drawing", objects: [] });
 
-    const i1Data: ImageDrawingObjectData = { ...imageData, id: "i1" };
-    const i2Data: ImageDrawingObjectData = { ...imageData, id: "i2" };
-    const i3Data: ImageDrawingObjectData = { ...imageData, id: "i3" };
+    const i1Data: ImageObjectSnapshot = { ...imageData, id: "i1" };
+    const i2Data: ImageObjectSnapshot = { ...imageData, id: "i2" };
+    const i3Data: ImageObjectSnapshot = { ...imageData, id: "i3" };
     const changesWithId: DrawingToolChange[] = [
       { action: "create", data: i1Data },
       { action: "create", data: i2Data },
@@ -273,10 +279,9 @@ describe("exportDrawingTileSpec", () => {
       }
     };
     const exportDrawingWithTransform = (_changes: DrawingToolChange[]) => exportDrawing(_changes, options);
-    const imageData: ImageDrawingObjectData = {
+    const imageData: ImageObjectSnapshot = {
       type: "image",
       url: "my/image/url",
-      originalUrl: "my/image/originalUrl",
       filename: "image.png",
       x: 10, y: 10,
       width: 10, height: 10,
@@ -286,12 +291,13 @@ describe("exportDrawingTileSpec", () => {
     const changes: DrawingToolChange[] = [
       { action: "create", data: imageData }
     ];
+    // TODO: why do we need to support objects without ids?
     // skips objects without ids
     expect(exportDrawingWithTransform(changes)).toEqual({ type: "Drawing", objects: [] });
 
-    const i1Data: ImageDrawingObjectData = { ...imageData, id: "i1" };
-    const i2Data: ImageDrawingObjectData = { ...imageData, id: "i2" };
-    const i3Data: ImageDrawingObjectData = { ...imageData, id: "i3" };
+    const i1Data: ImageObjectSnapshot = { ...imageData, id: "i1" };
+    const i2Data: ImageObjectSnapshot = { ...imageData, id: "i2" };
+    const i3Data: ImageObjectSnapshot = { ...imageData, id: "i3" };
     const changesWithId: DrawingToolChange[] = [
       { action: "create", data: i1Data },
       { action: "create", data: i2Data },
