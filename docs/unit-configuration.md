@@ -2,7 +2,7 @@
 
 ## Top-level Unit Properties
 
-```
+```typescript
     code: "",
     abbrevTitle: "",
     title: types.string,
@@ -19,7 +19,7 @@
 
 If any of these properties are encountered at the top-level of the unit configuration then the code assumes it is dealing with a legacy configuration and the contents of the `config` property are ignored.
 
-```
+```typescript
     disabled: types.array(types.string),
     placeholderText: "",
     defaultStamps: types.array(StampModel), ==> renamed `stamps` within `config`
@@ -31,7 +31,7 @@ If any of these properties are encountered at the top-level of the unit configur
 
 These properties are configurable at the application (built into the code) or the unit level of the curriculum JSON.
 
-```
+```typescript
   // used in application loading message, log messages, etc.
   appName: string;
   // displayed in browser tab/window title
@@ -83,7 +83,7 @@ These properties are configurable at the application (built into the code) or th
 
 These properties are configurable at the unit, investigation, or problem levels of the curriculum JSON.
 
-```
+```typescript
   disabledFeatures: string[];
   toolbar: SnapshotIn<typeof ToolbarModel>;
   // required tools that aren't in the toolbar can be specified here
