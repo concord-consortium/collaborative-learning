@@ -1,6 +1,7 @@
 {
   "code": "moth",
   "abbrevTitle": "MothEd",
+  "appName": "MothEd",
   "title": "MothEd Identifying Moths",
   "subtitle": "Wings, Spots, and Legs",
   "config": {
@@ -9,95 +10,94 @@
     "settings": {
       "table": { "numFormat": ".2~f" }
     },
-    "tools": ["Text", "Image", "Drawing", "Table"]
-  },
-  "navTabs": {
-    "showNavPanel": true,
-    "lazyLoadTabContents": true,
-    "tabSpecs": [
+    "navTabs": {
+      "showNavPanel": true,
+      "lazyLoadTabContents": true,
+      "tabSpecs": [
+        {
+          "tab": "problems",
+          "label": "Activity",
+          "sections": [
+            {
+              "initials": "GS",
+              "title": "Get Started",
+              "type": "problem-documents"
+            },
+            {
+              "initials": "TB",
+              "title": "Trap Building",
+              "type": "problem-documents"
+            },
+            {
+              "initials": "PIN",
+              "title": "Pinning",
+              "type": "problem-documents"
+            },
+            {
+              "initials": "SUM",
+              "title": "Summary",
+              "type": "problem-documents"
+            }
+          ]
+        },
+        {
+          "tab": "class-work",
+          "label": "Class Work",
+          "sections": [
+            {
+              "title": "Workspaces",
+              "type": "published-problem-documents",
+              "dataTestHeader": "class-work-section-published",
+              "dataTestItem": "class-work-list-items",
+              "documentTypes": ["publication"],
+              "showStars": [],
+              "properties": ["!isDeleted"]
+            },
+            {
+              "title": "Workspaces",
+              "type": "teacher-supports",
+              "dataTestHeader": "supports-section-teacher-supports",
+              "dataTestItem": "supports-list-items",
+              "documentTypes": ["supportPublication"],
+              "properties": ["teacherSupport", "!isDeleted"]
+            }
+          ]
+        }
+      ]
+    },
+    "stamps": [ 
       {
-        "tab": "problems",
-        "label": "Activity",
-        "sections": [
-          {
-            "initials": "GS",
-            "title": "Get Started",
-            "type": "problem-documents"
-          },
-          {
-            "initials": "TB",
-            "title": "Trap Building",
-            "type": "problem-documents"
-          },
-          {
-            "initials": "PIN",
-            "title": "Pinning",
-            "type": "problem-documents"
-          },
-          {
-            "initials": "SUM",
-            "title": "Summary",
-            "type": "problem-documents"
-          }
-        ]
+        "url": "curriculum/mothed/stamps/acorn.png",
+        "width": 35,
+        "height": 35
       },
       {
-        "tab": "class-work",
-        "label": "Class Work",
-        "sections": [
-          {
-            "title": "Workspaces",
-            "type": "published-problem-documents",
-            "dataTestHeader": "class-work-section-published",
-            "dataTestItem": "class-work-list-items",
-            "documentTypes": ["publication"],
-            "showStars": [],
-            "properties": [""]
-          },
-          {
-            "title": "Workspaces",
-            "type": "teacher-supports",
-            "dataTestHeader": "supports-section-teacher-supports",
-            "dataTestItem": "supports-list-items",
-            "documentTypes": ["supportPublication"],
-            "properties": ["teacherSupport", "!isDeleted"]
-          }
-        ]
+        "url": "curriculum/mothed/stamps/firneedles.png",
+        "width": 35,
+        "height": 29
+      },
+      {
+        "url": "curriculum/mothed/stamps/mapleleaf.png",
+        "width": 35,
+        "height": 38
+      },
+      {
+        "url": "curriculum/mothed/stamps/tree.png",
+        "width": 37,
+        "height": 35
+      },
+      {
+        "url": "curriculum/mothed/stamps/pine.png",
+        "width": 23,
+        "height": 40
+      },
+      {
+        "url": "curriculum/mothed/stamps/greenleaf.png",
+        "width": 35,
+        "height": 34
       }
     ]
   },
-  "defaultStamps": [ 
-    {
-      "url": "curriculum/mothed/stamps/acorn.png",
-      "width": 35,
-      "height": 35
-    },
-    {
-      "url": "curriculum/mothed/stamps/firneedles.png",
-      "width": 35,
-      "height": 29
-    },
-    {
-      "url": "curriculum/mothed/stamps/mapleleaf.png",
-      "width": 35,
-      "height": 38
-    },
-    {
-      "url": "curriculum/mothed/stamps/tree.png",
-      "width": 37,
-      "height": 35
-    },
-    {
-      "url": "curriculum/mothed/stamps/pine.png",
-      "width": 23,
-      "height": 40
-    },
-    {
-      "url": "curriculum/mothed/stamps/greenleaf.png",
-      "width": 35,
-      "height": 34
-    }
-  ],
   "sections": {
     "getStarted": {
       "initials": "GS",
