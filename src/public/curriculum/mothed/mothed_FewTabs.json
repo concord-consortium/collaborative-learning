@@ -1,5 +1,5 @@
 {
-  "code": "moth",
+  "code": "moth-few",
   "abbrevTitle": "MothEd",
   "title": "MothEd Identifying Moths",
   "subtitle": "Wings, Spots, and Legs",
@@ -149,7 +149,7 @@
             {
             "type": "getStarted",
             "content": {
-              "tiles": 
+              "tiles":
                 [
                   {
                     "content": {
@@ -182,7 +182,7 @@
             {
               "type": "fieldNotes",
               "content": {
-                "tiles": 
+                "tiles":
                 [
                   {
                     "content": {

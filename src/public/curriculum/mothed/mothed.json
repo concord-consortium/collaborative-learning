@@ -10,6 +10,41 @@
     "settings": {
       "table": { "numFormat": ".2~f" }
     },
+    "toolbar": [
+      {
+        "id": "select",
+        "title": "Select",
+        "iconId": "icon-select-tool",
+        "isTileTool": false,
+        "isDefault": true
+      },
+      {
+        "id": "Text",
+        "title": "Text",
+        "isTileTool": true
+      },
+      {
+        "id": "Table",
+        "title": "Table",
+        "isTileTool": true
+      },
+      {
+        "id": "Image",
+        "title": "Image",
+        "isTileTool": true
+      },
+      {
+        "id": "Drawing",
+        "title": "Drawing",
+        "isTileTool": true
+      },
+      {
+        "id": "delete",
+        "title": "Delete",
+        "iconId": "icon-delete-tool",
+        "isTileTool": false
+      }
+    ],
     "navTabs": {
       "showNavPanel": true,
       "lazyLoadTabContents": true,
@@ -41,6 +76,31 @@
           ]
         },
         {
+          "tab": "my-work",
+          "label": "My Work",
+          "sections": [
+            {
+              "title": "Workspaces",
+              "type": "problem-documents",
+              "dataTestHeader": "my-work-section-investigations",
+              "dataTestItem": "my-work-list-items",
+              "documentTypes": ["problem", "planning"],
+              "order": "original",
+              "showStars": ["student", "teacher"]
+            },
+            {
+              "title": "Workspaces",
+              "type": "personal-documents",
+              "dataTestHeader": "my-work-section-workspaces",
+              "dataTestItem": "my-work-list-items",
+              "documentTypes": ["personal"],
+              "properties": ["!isDeleted"],
+              "showStars": ["student", "teacher"],
+              "addDocument": true
+            }
+          ]
+        },
+        {
           "tab": "class-work",
           "label": "Class Work",
           "sections": [
@@ -65,7 +125,7 @@
         }
       ]
     },
-    "stamps": [ 
+    "stamps": [
       {
         "url": "curriculum/mothed/stamps/acorn.png",
         "width": 35,
@@ -163,7 +223,7 @@
             {
             "type": "getStarted",
             "content": {
-              "tiles": 
+              "tiles":
                 [
                   {
                     "content": {
@@ -175,7 +235,7 @@
                         "<ol><li>On the back of your drawing, write some words that describe the moth.</li><li> Take a picture of your drawing, and a picture of the words you wrote on the back.</li><li> Put your name on the back of the drawing and hand it in to your teacher.</li></ol>"
                       ]
                     }
-                  },                  
+                  },
                   {
                     "content": {
                       "type": "Text",
@@ -188,7 +248,7 @@
                         "<p>That&#x27;s it! You&#x27;ve entered your drawings into CLUE.</p>"
                       ]
                     }
-                  },                  
+                  },
                   {
                     "display": "teacher",
                     "content": {
@@ -220,7 +280,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": [ 
+                      "text": [
                         "<p>Divide class into small groups of 4 or less. Make sure each group is in the same Group shown in the top right of the screen. If they aren&#x27;t, have them click the group number, leave, and join whichever group number they are assigned. </p>",
                         "<p>It&#x27;s important that students record their own and each others exact words, not an interpretation from an adult.</p>"
                       ]
@@ -231,14 +291,14 @@
                       "type": "Image",
                       "url": "curriculum/mothed/images/share.jpg"
                     }
-                  }                
+                  }
                 ]
               }
             },
             {
               "type": "trapBuilding",
               "content": {
-                "tiles": 
+                "tiles":
                 [
                   {
                     "content": {
@@ -265,7 +325,7 @@
                         "<ul><li>Moths can be important pollinators -- they help plants/flowers make seeds.</li><li>Moths can be pests that cause problems</li><li>Moths are an important part of the foodweb</li></ul>"
                       ]
                     }
-                  },                  
+                  },
                   {
                     "content": {
                       "type": "Image",
@@ -283,7 +343,7 @@
                         "<p>It is important to know how many kinds of moths live in an area, since different kinds of moths do different things -- how do we tell the different kinds of moths apart? Publish your documents to the class to share your findings.</p>"
                       ]
                     }
-                  },                  
+                  },
                   {
                     "content": {
                       "type": "Text",
@@ -350,7 +410,7 @@
             {
             "type": "getStarted",
             "content": {
-              "tiles": 
+              "tiles":
                 [
                   {
                     "content": {
@@ -383,7 +443,7 @@
             {
               "type": "fieldNotes",
               "content": {
-                "tiles": 
+                "tiles":
                 [
                   {
                     "content": {
