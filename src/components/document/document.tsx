@@ -11,6 +11,7 @@ import { LearningLogDocument, LearningLogPublication } from "../../models/docume
 import { ToolbarModelType } from "../../models/stores/problem-configuration";
 import { SupportType, TeacherSupportModelType, AudienceEnum } from "../../models/stores/supports";
 import { WorkspaceModelType } from "../../models/stores/workspace";
+import { ENavTab } from "../../models/view/nav-tabs";
 import { IconButton } from "../utilities/icon-button";
 import ToggleControl from "../utilities/toggle-control";
 import { Logger, LogEventName } from "../../lib/logger";
@@ -192,6 +193,12 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
+  private showFileMenu() {
+    const { appConfig: { navTabs } } = this.stores;
+    // show the File menu if my work navigation is enabled
+    return !!navTabs.getNavTabSpec(ENavTab.kMyWork);
+  }
+
   private renderTitleBar(type: string) {
     const { document, side } = this.props;
     const hideButtons = (side === "comparison") || document.isPublished;
@@ -211,6 +218,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const problemTitle = problem.title;
     const { document, workspace } = this.props;
     const isShared = document.visibility === "public";
+    const showFileMenu = this.showFileMenu();
     const show4up = !workspace.comparisonVisible && !isTeacher;
     const downloadButton = (appMode !== "authed") && clipboard.hasJsonTileContent()
                             ? <DownloadButton key="download" onClick={this.handleDownloadTileJson} />
@@ -219,11 +227,12 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       <div className={`titlebar ${type}`}>
         {!hideButtons &&
           <div className="actions left">
-            <DocumentFileMenu document={document}
-              onOpenDocument={this.handleOpenDocumentClick}
-              onCopyDocument={this.handleCopyDocumentClick}
-              isDeleteDisabled={true}
-              onAdminDestroyDocument={this.handleAdminDestroyDocument} />
+            {showFileMenu &&
+              <DocumentFileMenu document={document}
+                onOpenDocument={this.handleOpenDocumentClick}
+                onCopyDocument={this.handleCopyDocumentClick}
+                isDeleteDisabled={true}
+                onAdminDestroyDocument={this.handleAdminDestroyDocument} />}
             {this.showPublishButton(document) &&
               <PublishButton document={document} />}
           </div>
