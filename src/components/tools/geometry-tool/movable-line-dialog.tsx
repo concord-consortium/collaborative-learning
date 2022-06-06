@@ -12,11 +12,7 @@ const MovableLineDialog: React.FC<IProps> = ({
   line, onAccept, onClose
 }) => {
 
-  const [showDialog, hideDialog] = useMovableLineDialog({
-    line,
-    onAccept,
-    onClose
-  });
+  const [showDialog, hideDialog] = useMovableLineDialog({ line, onAccept, onClose });
 
   useEffect(() => {
     showDialog();

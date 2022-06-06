@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import LineLabelSvg from "../../../clue/assets/icons/geometry/line-label.svg";
 import { ESegmentLabelOption } from "../../../models/tools/geometry/jxg-changes";
 import { getPolygonEdge } from "../../../models/tools/geometry/jxg-polygon";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
-import "./label-segment-dialog.sass";
+import "./label-segment-dialog.scss";
 
 interface LabelRadioButtonProps {
   display: string;
@@ -76,8 +76,7 @@ interface IProps {
   onClose: () => void;
 }
 export const useLabelSegmentDialog = ({ board, polygon, points, onAccept, onClose }: IProps) => {
-  // TODO: Do we need to find the segment on every render?
-  const segment = getPolygonSegment(board, polygon, points);
+  const segment = useMemo(() => getPolygonSegment(board, polygon, points), [board, polygon, points]);
   const [initialLabelOption] = useState(segment?.getAttribute("clientLabelOption") || "none");
   const [labelOption, setLabelOption] = useState(initialLabelOption);
 

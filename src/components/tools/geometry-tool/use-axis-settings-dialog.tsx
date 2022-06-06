@@ -4,8 +4,8 @@ import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { IAxesParams } from "../../../models/tools/geometry/geometry-content";
 import { getAxisAnnotations, getBaseAxisLabels, guessUserDesiredBoundingBox
         } from "../../../models/tools/geometry/jxg-board";
-import "./axis-settings-dialog.sass";
-import "./dialog.sass";
+import "./axis-settings-dialog.scss";
+import "./dialog.scss";
 
 const kBoundsMaxChars = 6;
 const kNameMaxChars = 20;
@@ -72,7 +72,7 @@ const Content: React.FC<IContentProps> = ({
 // Options for a single axis (included twice in the content)
 interface axisViewProps {
   title: string;
-  axisName: string; // Can't use just 'name'
+  axisName: string; // Can't use just 'name' because it's a built-in javascript property
   setName: React.Dispatch<React.SetStateAction<string>>;
   label: string;
   setLabel: React.Dispatch<React.SetStateAction<string>>;
@@ -218,7 +218,7 @@ export const useAxisSettingsDialog = ({ board, onAccept, onClose }: IProps) => {
 
   const [showModal, hideModal] = useCustomModal({
     Icon: GraphToolIcon,
-    title: "Edit Axis",
+    title: "Axis Settings",
     Content,
     contentProps: {
       xName, setXName, yName, setYName,

@@ -1,10 +1,10 @@
 import React, { useState } from "react";
+import { round } from "lodash";
 import MovableLineSvg from "../../../clue/assets/icons/geometry/movable-line.svg";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { getBoundingBoxIntersections, solveForY } from "../../../models/tools/geometry/jxg-movable-line";
-import { round } from "lodash";
-import './movable-line-dialog.sass';
-import './dialog.sass';
+import './movable-line-dialog.scss';
+import './dialog.scss';
 
 interface LineOptionProps {
   display: string;
@@ -114,7 +114,7 @@ export const useMovableLineDialog = ({ line, onAccept, onClose }: IProps) => {
 
   const [showModal, hideModal] = useCustomModal({
     Icon: MovableLineSvg,
-    title: "Edit Line",
+    title: "Movable Line",
     Content,
     contentProps: { slope, setSlope, intercept, setIntercept, errorMessage },
     buttons: [

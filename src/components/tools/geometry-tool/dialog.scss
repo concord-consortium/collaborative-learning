@@ -1,0 +1,13 @@
+.dialog-error-message {
+  margin: 1em;
+  color: red;
+  font-size: 12pt;
+
+  &.single-line {
+    height: 1em;
+  }
+  
+  &.double-line {
+    height: 2em;
+  }
+}
