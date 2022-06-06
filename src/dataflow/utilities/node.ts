@@ -313,22 +313,22 @@ export const ProgramRunTimes: ProgramRunTime[] = [
   {
     text: "1 hour",
     val: 3600,
-    disabled: true
+    disabled: false
   },
   {
     text: "6 hours",
     val: 21600,
-    disabled: true
+    disabled: false
   },
   {
     text: "1 day",
     val: 86400,
-    disabled: true
+    disabled: false
   },
   {
     text: "5 days",
     val: 432000,
-    disabled: true
+    disabled: false
   },
   {
     text: "30 days",
