@@ -24,7 +24,7 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
 
     onRegisterToolApi({
       exportContentAsTileJson: (options?: ITileExportOptions) => {
-        return exportDrawingTileSpec(contentRef.current.changes, options);
+        return contentRef.current.exportJson(options);
       }
     });
 

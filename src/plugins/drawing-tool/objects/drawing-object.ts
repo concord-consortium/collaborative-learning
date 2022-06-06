@@ -1,4 +1,4 @@
-import { Instance, SnapshotIn, types } from "mobx-state-tree";
+import { getMembers, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { uniqueId } from "../../../utilities/js-utils";
 import { SelectionBox } from "../components/selection-box";
 import { BoundingBox, DefaultToolbarSettings, Point, ToolbarSettings } from "../model/drawing-basic-types";
@@ -54,6 +54,13 @@ export const StrokedObject = DrawingObject.named("StrokedObject")
   setStrokeDashArray(strokeDashArray: string){ self.strokeDashArray = strokeDashArray; },
   setStrokeWidth(strokeWidth: number){ self.strokeWidth = strokeWidth; }
 }));
+export interface StrokedObjectType extends Instance<typeof StrokedObject> {}
+
+// TODO there should be a better way to do this 
+export function isStrokedObject(object: DrawingObjectType): object is StrokedObjectType {
+  const typeMembers = getMembers(object);
+  return !!(typeMembers.properties?.stroke);
+}
 
 export const FilledObject = DrawingObject.named("FilledObject")
 .props({
@@ -62,6 +69,12 @@ export const FilledObject = DrawingObject.named("FilledObject")
 .actions(self => ({
   setFill(fill: string){ self.fill = fill; }
 }));
+export interface FilledObjectType extends Instance<typeof FilledObject> {}
+
+export function isFilledObject(object: DrawingObjectType): object is FilledObjectType {
+  const typeMembers = getMembers(object);
+  return !!(typeMembers.properties?.fill);
+}
 
 export const DeltaPoint = types.model("DeltaPoint", {
   dx: types.number, dy: types.number
@@ -76,6 +89,9 @@ export interface IDrawingComponentProps {
   // about all of the tools and the tools need to use this IDrawingComponentProps.
   // This drawingContent prop is only needed by the variable chip. When the variable chip
   // is a real plugin to the drawing tile, hopefully this circular dependency can be removed.
+  // A possible solution for this is to put this in a context. This way the chip component
+  // embedded in what should be a generic drawing component can access info about the parent
+  // of the drawing component. This might already be available in an existing context.
   drawingContent: DrawingContentModelType;
   handleHover?: HandleObjectHover;
 }
@@ -133,3 +149,16 @@ export abstract class DrawingTool {
     // handled in subclass
   }
 }
+
+export const computeStrokeDashArray = (type?: string, strokeWidth?: string|number) => {
+  const dotted = isFinite(Number(strokeWidth)) ? Number(strokeWidth) : 0;
+  const dashed = dotted * 3;
+  switch (type) {
+    case "dotted":
+      return `${dotted},${dotted}`;
+    case "dashed":
+      return `${dashed},${dashed}`;
+    default:
+      return "";
+  }
+};

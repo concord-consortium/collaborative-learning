@@ -1,19 +1,17 @@
 import React from "react";
+import { reaction, IReactionDisposer } from "mobx";
+import { observer } from "mobx-react";
+import { SnapshotOut } from "mobx-state-tree";
 import { extractDragTileType, kDragTileContent } from "../../../components/tools/tool-tile";
 import { DrawingContentModelType } from "../model/drawing-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
-import { DrawingToolChange, DrawingToolDeletion, DrawingToolMove,
-  DrawingToolUpdate } from "../model/drawing-types";
 import { safeJsonParse } from "../../../utilities/js-utils";
-import { reaction, IReactionDisposer, autorun } from "mobx";
-import { observer } from "mobx-react";
 import { ImageContentSnapshotOutType } from "../../../models/tools/image/image-content";
 import { gImageMap } from "../../../models/image-map";
 import { SelectionBox } from "./selection-box";
 import { DrawingObjectSnapshot, DrawingObjectType, DrawingTool, 
   HandleObjectHover } from "../objects/drawing-object";
 import { Point, ToolbarSettings } from "../model/drawing-basic-types";
-import { applyAction, getMembers, getSnapshot, SnapshotOut } from "mobx-state-tree";
 import { DrawingObjectMSTUnion,
   getDrawingToolInfos, renderDrawingObject } from "./drawing-object-manager";
 import { ImageObject } from "../objects/image";
@@ -22,15 +20,7 @@ const SELECTION_COLOR = "#777";
 const HOVER_COLOR = "#bbdd00";
 const SELECTION_BOX_PADDING = 10;
 
-function makeSetter(prop: string) {
-  return "set" + prop.charAt(0).toUpperCase() + prop.slice(1);
-}
-
 /**  ======= Drawing Layer ======= */
-
-interface ObjectMap {
-  [key: string]: DrawingObjectType|null;
-}
 
 interface DrawingToolMap {
   [key: string]: DrawingTool | undefined;
@@ -55,7 +45,6 @@ interface DrawingLayerViewState {
 export class DrawingLayerView extends React.Component<DrawingLayerViewProps, DrawingLayerViewState> {
   public currentTool: DrawingTool|null;
   public tools: DrawingToolMap;
-  private objects: ObjectMap;
   private svgRef: React.RefObject<any>|null;
   private setSvgRef: (element: any) => void;
   private _isMounted: boolean;
@@ -83,8 +72,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
     this.currentTool = this.tools.select!;
 
-    this.objects = {};
-
     this.svgRef = null;
     this.setSvgRef = (element) => {
       this.svgRef = element;
@@ -106,7 +93,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     this.disposers.push(reaction(
       () => this.getContent().metadata.selection.toJSON(),
       selectedIds => {
-        const selectedObjects = selectedIds.map(id => this.objects[id]).filter(obj => !!obj) as DrawingObjectType[];
+        const selectedObjects = selectedIds.map(
+          id => this.getContent().objectMap[id]).filter(obj => !!obj) as DrawingObjectType[];
         this.setState({ selectedObjects });
       }
     ));
@@ -115,10 +103,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       () => this.getContent().toolbarSettings,
       settings => this.setCurrentToolSettings(settings)
     ));
-
-    this.disposers.push(autorun(() => {
-      this.syncChanges();
-    }));
   }
 
   public componentWillUnmount() {
@@ -155,9 +139,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   }
 
   public addNewDrawingObject(drawingObject: DrawingObjectType) {
-    // FIXME: for now we just get a snapshot to minimize the code changes
-    // in the future we'll want to just store the object directly
-    this.sendChange({action: "create", data: getSnapshot(drawingObject)});
+    this.getContent().addObject(drawingObject);
   }
 
   public setSelectedObjects(selectedObjects: DrawingObjectType[]) {
@@ -182,12 +164,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   }
 
   public handleDelete() {
-    const {selectedObjects} = this.state;
-    if (selectedObjects.length > 0) {
-      const deletedObjects = selectedObjects.map(object => object.id);
-      this.sendChange({action: "delete", data: deletedObjects as DrawingToolDeletion});
-      this.setSelectedObjects([]);
-    }
+    this.getContent().deleteSelectedObjects();
   }
 
   public handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -238,6 +215,11 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       moved = moved || ((dx !== 0) && (dy !== 0));
 
       objectsToInteract.forEach((object, index) => {
+        // FIXME: this will change the state of the model during the move
+        // previously the state was only changed on mouse up
+        // we probably need to emulate this behavior, both for undo/redo
+        // and to avoid sending too much state. This is the same problem 
+        // we will have with typing characters into a text field.
         object.setPosition(start[index].x + dx, start[index].y + dy);
       });
 
@@ -247,7 +229,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         this.setSelectedObjects(objectsToInteract);
         needToAddHoverToSelection = false;
       }
-      this.forceUpdate();
     };
     const handleMouseUp = (e2: MouseEvent) => {
       e2.preventDefault();
@@ -255,13 +236,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
       if (moved) {
-        if (objectsToInteract.length > 0) {
-          const moves: DrawingToolMove = objectsToInteract.map((object) => ({
-            id: object.id || "",
-            destination: {x: object.x, y: object.y}
-          }));
-          this.sendChange({action: "move", data: moves});
-        }
+        // Regarding the FIXME above, this is where we'd want to trigger the end 
+        // of the undo-able event
       }
       else {
         this.handleObjectClick(e2, obj);
@@ -302,8 +278,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
   // when we add text, this filter can be used with this.renderObjects((object) => object.type !== "text")
   public renderObjects(_filter: (object: DrawingObjectType) => boolean) {
-    return Object.keys(this.objects).map((id) => {
-      const object = this.objects[id];
+    return this.getContent().objects.map((object) => {
       if (!object || !_filter(object)) {
         return null;
       }
@@ -392,6 +367,11 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   // however the same image might be used in an image tile.  These two tiles will
   // share the same imageEntry so when either creates the imageEntry they need to
   // include the filename.
+  //
+  // FIXME: this is not called anymore so when a image is added it probably won't
+  // trigger an gImageMap.getImage. So we'll have to find a new place to do this.
+  // It used to be called by createDrawingObject, when the object was an image.
+  // And gImageMap.getCachedImage(imageData.url) was falsey.
   private updateLoadingImages = (url: string, filename?: string) => {
     if (this.fetchingImages.indexOf(url) > -1) return;
     this.fetchingImages.push(url);
@@ -487,139 +467,12 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       });
   }
 
-  private sendChange(change: DrawingToolChange): any {
-    const drawingContent = this.props.model.content as DrawingContentModelType;
-    drawingContent.applyChange(change);
-  }
-
-  private executeChange(change: DrawingToolChange) {
-    switch (change.action) {
-      case "create":
-        this.createDrawingObject(change.data);
-        break;
-      case "move":
-        this.moveDrawingObjects(change.data);
-        break;
-      case "update":
-        this.updateDrawingObjects(change.data);
-        break;
-      case "delete":
-        this.deleteDrawingObjects(change.data);
-        break;
-    }
-  }
-
-  private createDrawingObject(data: DrawingObjectSnapshot) {
-    const drawingObjectMST = DrawingObjectMSTUnion.create(data);
-    switch (data.type) {
-      case "image": {
-        const imageData = data as SnapshotOut<typeof ImageObject>;
-        const imageEntry = gImageMap.getCachedImage(imageData.url);
-        if (!imageEntry) {
-          // If this image hasn't been loaded to gImageMap, trigger that loading.
-          // The ImageObject will automatically be watching for changes to this
-          // imageEntry and update itself when the load is done.
-          //
-          // The filename is passed so that it gets added to the imageEntry in the
-          // ImageMap. See updateLoadingImages for more details.
-          this.updateImageUrl(imageData.url, imageData.filename);
-        }
-        break;
-      }
-      default:
-        // We don't need to do anything in this case
-        break;
-    }
-    if (drawingObjectMST?.id) {
-      const objectId = drawingObjectMST.id;
-      if (this.objects[objectId]) {
-        console.warn(`DrawingLayer.createDrawingObject detectected duplicate ${data.type} with id ${objectId}`);
-      }
-      this.objects[objectId] = drawingObjectMST;
-      this.forceUpdate();
-    }
-  }
-
-  private moveDrawingObjects(moves: DrawingToolMove) {
-    for (const move of moves) {
-      const drawingObject = this.objects[move.id];
-      if (drawingObject) {
-        drawingObject.setPosition(move.destination.x, move.destination.y);
-      }
-    }
-  }
-
-  private updateImageUrl(url: string, filename?: string) {
-    this.updateLoadingImages(url, filename);
-  }
-
-  private updateDrawingObjects(update: DrawingToolUpdate) {
-    const {ids, update: {prop, newValue}} = update;
-    const action = makeSetter(prop);
-    for (const id of ids) {
-      const drawingObject = this.objects[id];
-
-      // TODO: this approach is temporary to support the legacy approach of saving
-      // property changes. If we have migration of the old state, then this can
-      // probably go away
-      const objActions = getMembers(drawingObject).actions;
-      if (objActions.includes(action)) {
-        applyAction(drawingObject, {name: action, args: [newValue]});
-      } else {
-        console.warn("Trying to update unsupported drawing object", drawingObject?.type, "property", prop);
-      }
-
-      // Note: I don't see any place where something records an url update event
-      // However this case has been handled in the past, so it is still handled here.
-      // If the url changes, the url in the drawingObject will be updated by
-      // the code above.
-      // Then updateImageUrl is called which will trigger a loading of this url into
-      // the ImageMap. The ImageComponent is watching this url through the displayUrl
-      // property and will show the placeholder image until the new url is loaded.
-      if ((drawingObject?.type === "image") && (prop === "url")) {
-        const url = newValue as string;
-        this.updateImageUrl(url);
-      }
-    }
-  }
-
-  private deleteDrawingObjects(idsToDelete: string[]) {
-    for (const id of idsToDelete) {
-      const drawingObject = this.objects[id];
-      if (drawingObject) {
-        const {selectedObjects} = this.state;
-        const index = selectedObjects.indexOf(drawingObject);
-        if (index !== -1) {
-          selectedObjects.splice(index, 1);
-        }
-        delete this.objects[id];
-        this.setState({selectedObjects, hoverObject: null});
-      }
-    }
-  }
-
   private forEachObject(callback: (object: DrawingObjectType, key?: string) => void) {
-    const {objects} = this;
-    Object.keys(objects).forEach((id) => {
-      const object = objects[id];
+    const {objects} = this.getContent();
+    objects.forEach((object) => {
       if (object) {
-        callback(object, id);
+        callback(object, object.id);
       }
     });
-  }
-
-  private syncChanges() {
-    const drawingContent = this.props.model.content as DrawingContentModelType;
-    const currentChangesLength = drawingContent.changes ? drawingContent.changes.length : 0;
-    const prevChanges = this.actionsCount;
-
-    if (currentChangesLength > prevChanges) {
-      for (let i = prevChanges; i < currentChangesLength; i++) {
-        const change = JSON.parse(drawingContent.changes[i]) as DrawingToolChange;
-        this.executeChange(change);
-      }
-      this.actionsCount = currentChangesLength;
-      this.forceUpdate();
-    }
   }
 }

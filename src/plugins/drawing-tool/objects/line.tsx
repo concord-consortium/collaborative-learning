@@ -1,8 +1,7 @@
 import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import React from "react";
 import { SelectionBox } from "../components/selection-box";
-import { computeStrokeDashArray } from "../model/drawing-content";
-import { DeltaPoint, DrawingTool, IDrawingComponentProps, IDrawingLayer, 
+import { computeStrokeDashArray, DeltaPoint, DrawingTool, IDrawingComponentProps, IDrawingLayer, 
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
 import { Point } from "../model/drawing-basic-types";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";

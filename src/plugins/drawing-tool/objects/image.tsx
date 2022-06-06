@@ -54,6 +54,10 @@ export const ImageObject = DrawingObject.named("ImageObject")
       self.url = url;
     },
 
+    setFilename(filename?: string) {
+      self.filename = filename;
+    },
+
     afterCreate() {
       // Monitor the image map entry and save the width and height when it is available
       // this way when the image is reloaded from state the width and height are immediately

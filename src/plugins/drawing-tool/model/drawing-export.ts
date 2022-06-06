@@ -1,9 +1,10 @@
 import { safeJsonParse } from "../../../utilities/js-utils";
-import { comma, StringBuilder } from "../../../utilities/string-builder";
 import { ITileExportOptions } from "../../../models/tools/tool-content-info";
 import { DrawingToolChange } from "./drawing-types";
-import { ImageObjectSnapshot } from "../objects/image";
-import { DrawingObjectSnapshot } from "../objects/drawing-object";
+import { ImageObjectType } from "../objects/image";
+import { DrawingObjectSnapshot, DrawingObjectType } from "../objects/drawing-object";
+import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
+import { applyAction, getMembers, getSnapshot, types } from "mobx-state-tree";
 
 interface IDrawingObjectChanges {
   id: string;
@@ -12,10 +13,35 @@ interface IDrawingObjectChanges {
   isDeleted?: boolean;          // true if the object has been deleted
 }
 
-export const exportDrawingTileSpec = (changes: string[], options?: ITileExportOptions) => {
+export function makeSetter(prop: string) {
+  return "set" + prop.charAt(0).toUpperCase() + prop.slice(1);
+}
+
+export function applyPropertyChange(drawingObject: DrawingObjectType, prop: string, newValue: string | number) {
+  const action = makeSetter(prop);
+  const objActions = getMembers(drawingObject).actions;
+  if (objActions.includes(action)) {
+    applyAction(drawingObject, { name: action, args: [newValue] });
+  } else {
+    console.warn("Trying to update unsupported drawing object", drawingObject?.type, "property", prop);
+  }
+}
+
+const DrawingContentExport = types.model("DrawingContentExport", {
+  type: "Drawing",
+  objects: types.array(DrawingObjectMSTUnion)
+})
+.actions(self => ({
+  addObject(object: DrawingObjectType) {
+    self.objects.push(object);
+  }
+}));
+
+export const playbackChanges = (changes: string[], options?: ITileExportOptions) => {
   const objectInfoMap: Record<string, IDrawingObjectChanges> = {};
   const orderedIds: string[] = [];
-  const builder = new StringBuilder();
+
+  const content = DrawingContentExport.create();
 
   const isExportable = (id: string) => {
     const objInfo = objectInfoMap[id];
@@ -24,14 +50,15 @@ export const exportDrawingTileSpec = (changes: string[], options?: ITileExportOp
 
   const exportObject = (id: string, isLast: boolean) => {
     const objInfo = objectInfoMap[id];
-    let data = { ...objInfo.changes[0].data } as DrawingObjectSnapshot;
+    const data = { ...objInfo.changes[0].data } as DrawingObjectSnapshot;
+    const object = DrawingObjectMSTUnion.create(data);
     for (let i = 1; i < objInfo.changes.length; ++i) {
       const change = objInfo.changes[i];
       switch (change.action) {
         case "move":
           change.data.forEach(move => {
             if (move.id === id) {
-              data = { ...data, x: move.destination.x , y: move.destination.y };
+              object.setPosition(move.destination.x, move.destination.y);
             }
           });
           break;
@@ -39,28 +66,28 @@ export const exportDrawingTileSpec = (changes: string[], options?: ITileExportOp
           const { ids, update: { prop, newValue }} = change.data;
           ids.forEach(_id => {
             if (_id === id) {
-              (data as any)[prop] = newValue;
+              applyPropertyChange(object, prop, newValue);
             }
           });
           break;
         }
       }
     }
-    const { id: idData, type, ...others } = data;
-    if ((data.type === "image") && options?.transformImageUrl) {
-      const imageData = data as ImageObjectSnapshot;
-      if (imageData.filename) {
-        (others as Partial<ImageObjectSnapshot>).url = options.transformImageUrl(imageData.url, imageData.filename);
-        delete (others as Partial<ImageObjectSnapshot>).filename;
+
+    // TODO: This seems specific to exporting, when we are just migrating I don't think
+    // we need or want to transform urls 
+    if ((object.type === "image") && options?.transformImageUrl) {
+      const image = object as ImageObjectType;
+      if (image.filename) {
+        image.setUrl(options.transformImageUrl(image.url, image.filename));
+        image.setFilename(undefined);
       }
     }
-    const othersJson = JSON.stringify(others);
-    const othersStr = othersJson.slice(1, othersJson.length - 1);
-    builder.pushLine(`{ "type": "${objInfo.type}", "id": "${id}", ${othersStr} }${comma(!isLast)}`, 4);
+
+    content.addObject(object);
   };
 
   const exportObjects = () => {
-    builder.pushLine(`"objects": [`, 2);
     let lastExportedId: string;
     orderedIds.forEach(id => {
       if (isExportable(id)) {
@@ -72,7 +99,6 @@ export const exportDrawingTileSpec = (changes: string[], options?: ITileExportOp
         exportObject(id, id === lastExportedId);
       }
     });
-    builder.pushLine(`]`, 2);
   };
 
   // loop through each change, adding it to the set of changes that affect each object
@@ -122,9 +148,15 @@ export const exportDrawingTileSpec = (changes: string[], options?: ITileExportOp
     }
   });
 
-  builder.pushLine("{");
-  builder.pushLine(`"type": "Drawing",`, 2);
   exportObjects();
-  builder.pushLine("}");
-  return builder.build();
+  return getSnapshot(content);
+};
+
+export const exportDrawingTileSpec = (changes: string[], options?: ITileExportOptions) => {
+  // FIXME: this should something like: 
+  //   https://www.npmjs.com/package/json-stringify-pretty-compact
+  // That will generate a string from the object that is more compact than standard 
+  // JSON.stringify. This compact form is close to what the old code did using a
+  // string builder.
+  return JSON.stringify(playbackChanges(changes, options));
 };

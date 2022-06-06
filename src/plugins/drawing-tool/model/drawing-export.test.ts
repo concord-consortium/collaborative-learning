@@ -54,6 +54,7 @@ describe("exportDrawingTileSpec", () => {
       { action: "create", data: vectorData }
     ];
     // skips objects without ids
+    // TODO: verify with previous loading code
     expect(exportDrawing(changes)).toEqual({ type: "Drawing", objects: [] });
 
     const v1Data: VectorObjectSnapshot = { ...vectorData, id: "v1" };
@@ -61,6 +62,7 @@ describe("exportDrawingTileSpec", () => {
     const changesWithId: DrawingToolChange[] = [
       { action: "create", data: v1Data },
       { action: "create", data: v2Data },
+      // TODO: verify with previous loading code
       { action: "create", data: v2Data }  // ignores objects with duplicate ids
     ];
     expect(exportDrawing(changesWithId)).toEqual({ type: "Drawing", objects: [v1Data, v2Data] });
@@ -80,6 +82,7 @@ describe("exportDrawingTileSpec", () => {
       { action: "create", data: v1Data },
       { action: "create", data: v2Data },
       { action: "delete", data: ["v1"]},
+      // TODO: verify with previous loading code
       { action: "delete", data: ["v3"]}   // handles invalid ids
     ];
     expect(exportDrawing(changesWithDeletion)).toEqual({ type: "Drawing", objects: [v2Data] });

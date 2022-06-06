@@ -2,7 +2,7 @@ import classNames from "classnames";
 import React from "react";
 import { observer } from "mobx-react";
 import { Tooltip } from "react-tippy";
-import { computeStrokeDashArray, DrawingContentModelType } from "../model/drawing-content";
+import { DrawingContentModelType } from "../model/drawing-content";
 import { ToolbarModalButton } from "../model/drawing-types";
 import { ToolbarSettings } from "../model/drawing-basic-types";
 import SelectToolIcon from "../../../clue/assets/icons/select-tool.svg";
@@ -11,7 +11,7 @@ import ColorStrokeIcon from "../../../clue/assets/icons/drawing/color-stroke-ico
 import DeleteSelectionIcon from "../../../assets/icons/delete/delete-selection-icon.svg";
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
 import { isLightColorRequiringContrastOffset } from "../../../utilities/color-utils";
-import { IToolbarButtonProps } from "../objects/drawing-object";
+import { computeStrokeDashArray, IToolbarButtonProps } from "../objects/drawing-object";
 
 interface IButtonClasses {
   modalButton?: ToolbarModalButton;
@@ -56,6 +56,9 @@ export const SvgToolbarButton: React.FC<ISvgToolbarButtonProps> = ({
  */
 interface ISvgToolModeButtonProps {
   SvgIcon: React.FC<React.SVGProps<SVGSVGElement>>;
+  // FIXME: this causes an circular dependency
+  // I thin the only thing the drawingContent is used for here is to set
+  // the selected button. So this method could moved to an interface instead.
   drawingContent: DrawingContentModelType;
   modalButton: ToolbarModalButton;
   selected?: boolean;
