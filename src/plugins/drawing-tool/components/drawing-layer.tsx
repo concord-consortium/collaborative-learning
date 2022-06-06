@@ -10,16 +10,13 @@ import { observer } from "mobx-react";
 import { ImageContentSnapshotOutType } from "../../../models/tools/image/image-content";
 import { gImageMap } from "../../../models/image-map";
 import { SelectionBox } from "./selection-box";
-import { DrawingObjectType, DrawingTool, HandleObjectHover, IDrawingLayer } from "../objects/drawing-object";
+import { DrawingObjectSnapshot, DrawingObjectType, DrawingTool, 
+  HandleObjectHover } from "../objects/drawing-object";
 import { Point, ToolbarSettings } from "../model/drawing-basic-types";
 import { applyAction, getMembers, getSnapshot, SnapshotOut } from "mobx-state-tree";
-import { DrawingObjectMSTUnion, DrawingObjectSnapshotUnion, renderDrawingObject } from "./drawing-object-manager";
-import { LineDrawingTool } from "../objects/line";
-import { VectorDrawingTool } from "../objects/vector";
-import { RectangleDrawingTool } from "../objects/rectangle";
-import { EllipseDrawingTool } from "../objects/ellipse";
-import { ImageObject, StampDrawingTool } from "../objects/image";
-import { VariableDrawingTool } from "../../shared-variables/drawing/variable-object";
+import { DrawingObjectMSTUnion,
+  getDrawingToolInfos, renderDrawingObject } from "./drawing-object-manager";
+import { ImageObject } from "../objects/image";
 
 const SELECTION_COLOR = "#777";
 const HOVER_COLOR = "#bbdd00";
@@ -29,54 +26,6 @@ function makeSetter(prop: string) {
   return "set" + prop.charAt(0).toUpperCase() + prop.slice(1);
 }
 
-/**  ======= Drawing Tools ======= */
-class SelectionDrawingTool extends DrawingTool {
-  constructor(drawingLayer: IDrawingLayer) {
-    super(drawingLayer);
-  }
-
-  public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
-    // We are internal so we can use some private stuff not exposed by
-    // IDrawingLayer
-    const drawingLayerView = this.drawingLayer as DrawingLayerView;
-    const addToSelectedObjects = e.ctrlKey || e.metaKey;
-    const start = this.drawingLayer.getWorkspacePoint(e);
-    if (!start) return;
-    drawingLayerView.startSelectionBox(start);
-
-    const handleMouseMove = (e2: MouseEvent) => {
-      e2.preventDefault();
-      const p = this.drawingLayer.getWorkspacePoint(e2);
-      if (!p) return;
-      drawingLayerView.updateSelectionBox(p);
-    };
-    const handleMouseUp = (e2: MouseEvent) => {
-      e2.preventDefault();
-      drawingLayerView.endSelectionBox(addToSelectedObjects);
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
-  }
-
-  public handleObjectClick(e: React.MouseEvent<HTMLDivElement>, obj: DrawingObjectType) {
-    // We are internal so we can use some private stuff not exposed by
-    // IDrawingLayer
-    const drawingLayerView = this.drawingLayer as DrawingLayerView;
-    const {selectedObjects} = drawingLayerView.state;
-    const index = selectedObjects.indexOf(obj);
-    if (index === -1) {
-      selectedObjects.push(obj);
-    }
-    else {
-      selectedObjects.splice(index, 1);
-    }
-    drawingLayerView.setSelectedObjects(selectedObjects);
-  }
-}
-
 /**  ======= Drawing Layer ======= */
 
 interface ObjectMap {
@@ -84,7 +33,7 @@ interface ObjectMap {
 }
 
 interface DrawingToolMap {
-  [key: string]: DrawingTool;
+  [key: string]: DrawingTool | undefined;
 }
 
 interface DrawingLayerViewProps {
@@ -124,16 +73,15 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       hoverObject: null,
     };
 
-    this.tools = {
-      line: new LineDrawingTool(this),
-      vector: new VectorDrawingTool(this),
-      selection: new SelectionDrawingTool(this),
-      rectangle: new RectangleDrawingTool(this),
-      ellipse: new EllipseDrawingTool(this),
-      stamp: new StampDrawingTool(this),
-      variable: new VariableDrawingTool(this)
-    };
-    this.currentTool = this.tools.selection;
+    this.tools = {};
+    const drawingToolInfos = getDrawingToolInfos();
+    drawingToolInfos.forEach(info => {
+      if (info.toolClass) {
+        this.tools[info.name] = new info.toolClass(this);
+      }
+    });
+
+    this.currentTool = this.tools.select!;
 
     this.objects = {};
 
@@ -181,29 +129,15 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
   public syncCurrentTool(selectedButton: string) {
     const settings = this.getContent().toolbarSettings;
-    switch (selectedButton) {
-      case "select":
-        this.setCurrentTool(this.tools.selection);
-        break;
-      case "line":
-        this.setCurrentTool((this.tools.line as LineDrawingTool).setSettings(settings));
-        break;
-      case "vector":
-        this.setCurrentTool((this.tools.vector as VectorDrawingTool).setSettings(settings));
-        break;
-      case "rectangle":
-        this.setCurrentTool((this.tools.rectangle as RectangleDrawingTool).setSettings(settings));
-        break;
-      case "ellipse":
-        this.setCurrentTool((this.tools.ellipse as EllipseDrawingTool).setSettings(settings));
-        break;
-      case "stamp":
-        this.setCurrentTool((this.tools.stamp as StampDrawingTool).setSettings(settings));
-        break;
-      case "variable":
-        this.setCurrentTool((this.tools.variable as VariableDrawingTool).setSettings(settings));
-        break;
+    const tool = this.tools[selectedButton];
+    
+    if (!tool) {
+      console.warn("Unknown tool selected", selectedButton);
+      return;
     }
+
+    tool.setSettings(settings);
+    this.setCurrentTool(tool);
   }
 
   public addListeners() {
@@ -223,7 +157,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   public addNewDrawingObject(drawingObject: DrawingObjectType) {
     // FIXME: for now we just get a snapshot to minimize the code changes
     // in the future we'll want to just store the object directly
-    this.sendChange({action: "create", data: getSnapshot(drawingObject) as DrawingObjectSnapshotUnion});
+    this.sendChange({action: "create", data: getSnapshot(drawingObject)});
   }
 
   public setSelectedObjects(selectedObjects: DrawingObjectType[]) {
@@ -269,7 +203,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   };
 
   public handleObjectHover: HandleObjectHover = (e, obj, hovering) => {
-    if (!this.props.readOnly && this.currentTool === this.tools.selection) {
+    if (!this.props.readOnly && this.currentTool === this.tools.select) {
       this.setState({hoverObject: hovering ? obj : null});
     }
   };
@@ -575,7 +509,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     }
   }
 
-  private createDrawingObject(data: DrawingObjectSnapshotUnion) {
+  private createDrawingObject(data: DrawingObjectSnapshot) {
     const drawingObjectMST = DrawingObjectMSTUnion.create(data);
     switch (data.type) {
       case "image": {

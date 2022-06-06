@@ -2,8 +2,10 @@ import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import React from "react";
 import { computeStrokeDashArray } from "../model/drawing-content";
 import { DrawingTool, FilledObject, IDrawingComponentProps, IDrawingLayer, 
-  StrokedObject, typeField } from "./drawing-object";
+  IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
 import { Point } from "../model/drawing-basic-types";
+import RectToolIcon from "../../../clue/assets/icons/drawing/rectangle-icon.svg";
+import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 
 export const RectangleObject = types.compose("RectangleObject", StrokedObject, FilledObject)
   .props({
@@ -109,4 +111,9 @@ export class RectangleDrawingTool extends DrawingTool {
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseup", handleMouseUp);
   }
+}
+
+export function RectangleToolbarButton({drawingContent}: IToolbarButtonProps) {
+  return <SvgToolModeButton modalButton="rectangle" title="Rectangle" 
+    drawingContent={drawingContent} SvgIcon={RectToolIcon}  />;
 }

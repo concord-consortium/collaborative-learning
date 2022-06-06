@@ -1,4 +1,4 @@
-import { DrawingObjectSnapshotUnion } from "../components/drawing-object-manager";
+import { DrawingObjectSnapshot } from "../objects/drawing-object";
 import { Point } from "./drawing-basic-types";
 
 export const kDrawingToolID = "Drawing";
@@ -19,7 +19,7 @@ export type DrawingToolDeletion = string[];
 
 export interface DrawingToolCreateChange {
   action: "create";
-  data: DrawingObjectSnapshotUnion;
+  data: DrawingObjectSnapshot;
 }
 export interface DrawingToolMoveChange {
   action: "move";
