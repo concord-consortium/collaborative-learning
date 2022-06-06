@@ -88,14 +88,21 @@ const AxisView: React.FC<axisViewProps> = ({
   min, setMin,
   max, setMax
 }: axisViewProps) => {
+  const labelId = `${title}-label-input-id`;
   return (
     <div className="axis-settings-container">
       <div className="axis-title">{title}</div>
       <div>
-        <span className="nc-attribute-name-prompt label-padding">Label: </span>
+        <label
+          className="nc-attribute-name-prompt label-padding"
+          htmlFor={labelId}
+        >
+          Label: 
+        </label>
         <span>
           <input
             className="nc-attribute-name-input pt-input input-margin"
+            id={labelId}
             type="text"
             maxLength={kLabelMaxChars}
             defaultValue={label}
@@ -106,18 +113,21 @@ const AxisView: React.FC<axisViewProps> = ({
       </div>
       <div className="axis-options">
         <AxisOption
+          axis={title}
           optionLabel="Minimum Value:"
           defaultValue={min}
           setValue={setMin}
           maxChars={kBoundsMaxChars}
         />
         <AxisOption
+          axis={title}
           optionLabel="Maximum Value:"
           defaultValue={max}
           setValue={setMax}
           maxChars={kBoundsMaxChars}
         />
         <AxisOption
+          axis={title}
           optionLabel="Variable Name:"
           defaultValue={axisName}
           setValue={setName}
@@ -130,19 +140,22 @@ const AxisView: React.FC<axisViewProps> = ({
 
 // A single axis option
 interface axisOptionProps {
+  axis: string;
   optionLabel: string;
   defaultValue: string;
   setValue: React.Dispatch<React.SetStateAction<string>>;
   maxChars: number;
 }
 const AxisOption: React.FC<axisOptionProps> = ({
-  optionLabel, defaultValue, setValue, maxChars
+  axis, optionLabel, defaultValue, setValue, maxChars
 }: axisOptionProps) => {
+  const id = `${axis}-${optionLabel}-input-id`;
   return (
     <div className="axis-option">
-      <div className="nc-attribute-name-prompt label-padding">{optionLabel}</div>
+      <label className="nc-attribute-name-prompt label-padding" htmlFor={id}>{optionLabel}</label>
       <input
         className="nc-attribute-name-input pt-input input-margin"
+        id={id}
         type="text"
         maxLength={maxChars}
         defaultValue={defaultValue}
