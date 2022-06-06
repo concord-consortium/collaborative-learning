@@ -13,7 +13,7 @@ interface LabelRadioButtonProps {
 }
 const LabelRadioButton: React.FC<LabelRadioButtonProps> = ({display, label, checkedLabel, setLabelOption}) => {
   return (
-    <label className="radio-button-label">
+    <div className="radio-button-container">
       <input
         className="radio-button"
         type="radio"
@@ -27,8 +27,10 @@ const LabelRadioButton: React.FC<LabelRadioButtonProps> = ({display, label, chec
           }
         }}
       />
-      {display}
-    </label>
+      <label htmlFor={label}>
+        {display}
+      </label>
+    </div>
   );
 };
 

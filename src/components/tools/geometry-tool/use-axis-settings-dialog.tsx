@@ -62,7 +62,7 @@ const Content: React.FC<IContentProps> = ({
           max={yMax}
           setMax={setYMax}
         />
-        <div className="dialog-error-message">
+        <div className="dialog-error-message single-line">
           {errorMessage}
         </div>
       </>
@@ -99,17 +99,15 @@ const AxisView: React.FC<axisViewProps> = ({
         >
           Label: 
         </label>
-        <span>
-          <input
-            className="nc-attribute-name-input pt-input input-margin"
-            id={labelId}
-            type="text"
-            maxLength={kLabelMaxChars}
-            defaultValue={label}
-            onChange={e => setLabel(e.target.value)}
-            dir="auto"
-          />
-        </span>
+        <input
+          className="nc-attribute-name-input pt-input input-margin"
+          id={labelId}
+          type="text"
+          maxLength={kLabelMaxChars}
+          defaultValue={label}
+          onChange={e => setLabel(e.target.value)}
+          dir="auto"
+        />
       </div>
       <div className="axis-options">
         <AxisOption

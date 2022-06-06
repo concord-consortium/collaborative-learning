@@ -51,7 +51,7 @@ const Content: React.FC<IContentProps> = ({ slope, setSlope, intercept, setInter
         defaultValue={intercept}
         setValue={setIntercept}
       />
-      <div className="dialog-error-message">
+      <div className="dialog-error-message double-line">
         {errorMessage}
       </div>
     </div>
