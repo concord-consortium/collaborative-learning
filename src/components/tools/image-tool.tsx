@@ -41,30 +41,17 @@ let nextImageToolId = 0;
 @inject("stores")
 @observer
 export default class ImageToolComponent extends BaseComponent<IProps, IState> {
-  public state: IState = { isLoading: true };
-
+  public state: IState = { isLoading: true,
+                           imageContentUrl: this.getContent().url
+                         };
   // give each component instance a unique id
   private imageToolId = ++nextImageToolId;
   private _isMounted = false;
   private toolbarToolApi: IToolApi | undefined;
   private resizeObserver: ResizeObserver;
   private imageElt: HTMLDivElement | null;
-  private listenerDisposer: (() => void) | undefined;
-  private debouncedUpdateImage = debounce((url: string, filename?: string) => {
-    // Under some circumstances, notably when the image being requested has been copied from a multi-class support,
-    // the call to getImage() below will fail initially, but the url being requested will later be cached by the
-    // gImageMap once the multi-class support is loaded. To account for this, we register a listener which will be
-    // called when the requested image is loaded into the cache. If we succeed in retrieving the image directly,
-    // then we remove the listener ourselves.
-    this.listenerDisposer?.();
-    this.listenerDisposer = gImageMap.registerListener(
-                              url, `${this.imageToolId}`, () => {
-                                if (this._isMounted) {
-                                  this.forceUpdate();
-                                  this.listenerDisposer?.();
-                                  this.listenerDisposer = undefined;
-                                }
-                              });
+  private updateImage = (url: string, filename?: string) => {
+
     gImageMap.getImage(url, { filename })
       .then(image => {
         if (!this._isMounted) return;
@@ -79,9 +66,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
         if (image.contentUrl && (url !== image.contentUrl)) {
           this.getContent().updateImageUrl(url, image.contentUrl);
         }
-        // We've successfully loaded the image. No need to continue listening.
-        this.listenerDisposer?.();
-        this.listenerDisposer = undefined;
       })
       .catch(() => {
         this.setState({
@@ -91,7 +75,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
           imageEntry: undefined
         });
       });
-  }, 100);
+  };
   private imageDragDrop: ImageDragDrop;
 
   constructor(props: IProps) {
@@ -132,7 +116,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   }
 
   public componentWillUnmount() {
-    this.listenerDisposer?.();
     this.resizeObserver.disconnect();
     this._isMounted = false;
   }
@@ -226,7 +209,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     if (!this.state.isLoading) {
       this.setState({ isLoading: true });
     }
-    this.debouncedUpdateImage(url, filename);
+    this.updateImage(url, filename);
   }
 
   private handleUploadImageFile = (file: File) => {

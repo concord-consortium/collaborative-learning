@@ -17,7 +17,7 @@ function getSectionForDocument(document: DocumentModelType) {
 
 interface IDocumentOrBrowserProps extends IEditableDocumentContentProps {
   showBrowser: boolean;
-  tabSpec: NavTabSpec;
+  tabSpec?: NavTabSpec;
   onSelectNewDocument?: (type: string) => void;
   onSelectDocument?: (document: DocumentModelType) => void;
 }
@@ -39,5 +39,5 @@ function useTabSpec(tab: ENavTab) {
 type IMyWorkDocumentOrBrowserProps = Omit<IDocumentOrBrowserProps, "tabSpec">;
 export const MyWorkDocumentOrBrowser: React.FC<IMyWorkDocumentOrBrowserProps> = props => {
   const myWorkTabSpec = useTabSpec(ENavTab.kMyWork);
-  return myWorkTabSpec ? <DocumentOrBrowser tabSpec={myWorkTabSpec} {...props} /> : null;
+  return <DocumentOrBrowser tabSpec={myWorkTabSpec} {...props} />;
 };
