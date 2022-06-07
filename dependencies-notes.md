@@ -19,7 +19,6 @@ Notes on dependencies and in particular on what's keeping particular dependencie
 
 |Dependency          |Current Version|Latest Version|Notes                                                                                |
 |--------------------|---------------|--------------|-------------------------------------------------------------------------------------|
-|@blueprintjs/core   |3.54.0         |4.3.2         |Version 4 not attempted; we'll probably remove the dependency rather than update it. |
 |@concord-consortium/jsxgraph|0.99.8-cc.1|1.4.4     |We have our own fork that (unfortunately) hasn't been updated for a long time.       |
 |@concord-consortium/react-hook-form|3.0.0-cc.1|3.0.0|Had to create our own fork to update React `peerDependencies` for npm 8.11. Original appears to have been abandoned. |
 |firebase            |8.10.1         |9.8.2         |Version 9 requires substantial migration; attempted update with `compat` imports failed. |
