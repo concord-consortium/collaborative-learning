@@ -57,8 +57,8 @@ export class CanvasComponent extends BaseComponent<IProps> {
 
     this.hotKeys.register({
       "cmd-shift-s": this.handleCopyDocumentJson,
-      "cmd-alt-z": this.handleDocumentUndo,
-      "cmd-alt-v": this.handleDocumentRedo
+      "cmd-z": this.handleDocumentUndo,
+      "cmd-shift-z": this.handleDocumentRedo
     });
   }
 
