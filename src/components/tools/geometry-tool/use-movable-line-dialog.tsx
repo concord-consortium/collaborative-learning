@@ -17,7 +17,7 @@ const LineOption: React.FC<LineOptionProps> = ({display, id, defaultValue, setVa
     <div className="movable-line-option">
       <label className="dialog-label" htmlFor={id}>{display}</label>
       <input
-        className="nc-attribute-name-input pt-input"
+        className="dialog-name-input pt-input"
         id={id}
         type="text"
         maxLength={5}
