@@ -25,13 +25,19 @@ const logManagerUrl: Record<LoggerEnvironment, string> = {
 const productionPortal = "learn.concord.org";
 
 interface LogMessage {
+  // these top-level properties are treated specially by the log-ingester:
+  // https://github.com/concord-consortium/log-ingester/blob/a8b16fdb02f4cef1f06965a55c5ec6c1f5d3ae1b/canonicalize.js#L3
   application: string;
-  activityUrl?: string;
+  activity?: string;
+  event: string;
+  // event_value: string; // not currently used in CLUE but available if another top-level field were required
   run_remote_endpoint?: string;
+  session: string;
   username: string;
+
+  // the rest of the properties are packaged into `extras` by the log-ingester
   role: string;
   classHash: string;
-  session: string;
   appMode: string;
   investigation?: string;
   problem?: string;
@@ -44,7 +50,6 @@ interface LogMessage {
   selectedGroupId?: string;
   time: number;
   tzOffset: string;
-  event: string;
   method: string;
   disconnects?: string;
   parameters: any;
@@ -346,7 +351,7 @@ export class Logger {
                           : undefined;
     const logMessage: LogMessage = {
       application: appName,
-      activityUrl,
+      activity: activityUrl,
       username: `${id}@${portal}`,
       role: type || "unknown",
       classHash,
