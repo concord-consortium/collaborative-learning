@@ -90,7 +90,7 @@ export const useLabelSegmentDialog = ({ board, polygon, points, onAccept, onClos
 
   const [showModal, hideModal] = useCustomModal({
     Icon: LineLabelSvg,
-    title: "Line Label",
+    title: "Segment Label",
     Content,
     contentProps: { labelOption, setLabelOption },
     buttons: [
