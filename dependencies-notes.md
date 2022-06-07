@@ -17,7 +17,6 @@ Notes on dependencies and in particular on what's keeping particular dependencie
 
 |Dependency          |Current Version|Latest Version|Notes                                                                                |
 |--------------------|---------------|--------------|-------------------------------------------------------------------------------------|
-|@blueprintjs/core   |3.54.0         |4.3.2         |Version 4 not attempted; we'll probably remove the dependency rather than update it. |
 |firebase            |8.10.1         |9.8.1         |v9 contains substantial API changes; attempted update with `compat` imports failed.  |
 |immutable           |3.8.2          |4.0.0         |Major version update not attempted; only required by legacy slate versions.          |
 |jsxgraph            |0.99.8-cc.1    |1.4.2         |We have our own fork that (unfortunately) hasn't been updated for a long time.       |
