@@ -6,6 +6,12 @@
   "subtitle": "Wings, Spots, and Legs",
   "config": {
     "placeholderText": "Document your thoughts",
+    "autoSectionProblemDocuments": false,
+    "defaultDocumentTemplate": {
+      "tiles": [
+          { "content": { "type": "Text", "text": "Welcome! To begin reviewing the CLUE software, please click the  orange My Resources bar at extreme left, and then click the tab labeled <strong>Activity</strong>." } }
+      ]
+    },
     "defaultDocumentType": "problem",
     "settings": {
       "table": { "numFormat": ".2~f" }
@@ -241,11 +247,8 @@
                   },
                   {
                     "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p><strong>Day 1</strong></p>"
-                      ]
+                      "type": "Image",
+                      "url": "curriculum/mothed/images/Day1.png"
                     }
                   },        
                   {
@@ -337,17 +340,14 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Watch <strong><a href='https://www.youtube.com/watch?v=JQL25_hoQ1k'>Seven Spectacular Moths</a></strong> and comment about what you notice. [Placeholder] more about moths and why they are important to scientists.</p>"
+                        "<p>Watch <strong><a href='https://www.youtube.com/watch?v=JQL25_hoQ1k'>Seven Spectacular Moths</a></strong> and write down what you notice in a text tile (letter <strong>A</strong> at right). Please note, this is a placeholder video only. If your school does not allow access to YouTube, it will not load.  We will place videos on accessible servers for the actual curricular materials .] </p>"
                       ]
                     }
                   },
                   {
                     "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p><strong>Day 2</strong></p>"
-                      ]
+                      "type": "Image",
+                      "url": "curriculum/mothed/images/Day2.png"
                     }
                   },
                   {
@@ -419,42 +419,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Moths are important in our ecosystem.</p>",
-                        "<ul><li>Moths can be important pollinators -- they help plants/flowers make seeds.</li><li>Moths can be pests that cause problems</li><li>Moths are an important part of the foodweb</li></ul>"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p><strong>1. </strong>Take a look at the pinned moths your teacher has for you to look at or the moths in the image.</p>",
-                        "<p>Document these observations:</p>",
-                        "<ul><li>what do you notice? </li><li>What can you observe? </li><li>How do we know we are looking at moths? </li><li>What are some things that all the moths have in common? </li></ul>",
-                        "<p>It is important to know how many kinds of moths live in an area, since different kinds of moths do different things -- how do we tell the different kinds of moths apart? Publish your documents to the class to share your findings.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p><strong>2. </strong>Refine your work by thinking about different types of evidence of <strong>Moth types and features</strong></p>",
-                        "<ul><li>What did you expect to find that you did not see?</li><li>What did you see that you didn’t list in <strong>Get Started</strong>?</li><li>What did you observe that isn&#x27;t makes moths helpful or harmful to the ecosystem?</li></ul>",
-                        "<p>Is there anything you want to add to your final presentation to the class?</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Show students each others documents from the Class Work tab or ask them to look at particular docs in that tab. Discuss the class findings.</p>",
-                        "<p>Ask closing question for students to consider while we are gone:  What is one thing you found interesting today? What is one thing you wonder about?</p>"
+                        "<p>This section will document how to pin moths, and allow students to display, annotate, and discuss images of their pinned moths.</p>"
                       ]
                     }
                   }
@@ -470,8 +435,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>What have we learned about moths?</p>",
-                        "<ul><li>Reflect on your learning in this unit</li><li>Publish ideas you'd like to share with the class</li></ul>"
+                        "<p>This section will scaffold student documentation  and discussion of their experimental findings.</p>"
                       ]
                     }
                   },
