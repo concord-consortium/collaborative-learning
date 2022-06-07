@@ -19,7 +19,7 @@ export const DrawingMigrator = types.snapshotProcessor(DrawingContentModel, {
     }
 
     // FIXME: This is checking for objects and generating changes. 
-    // those changes will not be a valid state, so this should throw an error.
+    // those changes will not be a valid state, so this will throw an error.
     // It should instead mostly just pass the objects through, 
     // it might need to add ids to objects.
     if(isDrawingTileImportSpec(snapshot)) {
