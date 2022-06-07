@@ -5,6 +5,7 @@ import { computeStrokeDashArray, DrawingTool, IDrawingComponentProps, IDrawingLa
 import { Point } from "../model/drawing-basic-types";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 import LineToolIcon from "../../../clue/assets/icons/drawing/line-icon.svg";
+import { observer } from "mobx-react";
 
 // simple line
 export const VectorObject = StrokedObject.named("VectorObject")
@@ -30,7 +31,7 @@ export const VectorObject = StrokedObject.named("VectorObject")
 export interface VectorObjectType extends Instance<typeof VectorObject> {}
 export interface VectorObjectSnapshot extends SnapshotIn<typeof VectorObject> {}
 
-export function VectorComponent({model, handleHover} : IDrawingComponentProps) {
+export const VectorComponent = observer(function VectorComponent({model, handleHover} : IDrawingComponentProps) {
   if (model.type !== "vector") return null;
   const { id, x, y, dx, dy, stroke, strokeWidth, strokeDashArray } = model as VectorObjectType;
   return <line
@@ -44,7 +45,7 @@ export function VectorComponent({model, handleHover} : IDrawingComponentProps) {
     strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
     onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
     onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null} />;
-}
+});
 
 export class VectorDrawingTool extends DrawingTool {
 

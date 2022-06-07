@@ -5,6 +5,7 @@ import { computeStrokeDashArray, DrawingObjectType, DrawingTool, FilledObject, I
 import { Point } from "../model/drawing-basic-types";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 import EllipseToolIcon from "../../../clue/assets/icons/drawing/ellipse-icon.svg";
+import { observer } from "mobx-react";
 
 export const EllipseObject = types.compose("EllipseObject", StrokedObject, FilledObject)
   .props({
@@ -36,7 +37,7 @@ function isEllipseObject(model: DrawingObjectType): model is EllipseObjectType {
   return model.type === "ellipse";
 }
 
-export function EllipseComponent({model, handleHover} : IDrawingComponentProps) {
+export const EllipseComponent = observer(function EllipseComponent({model, handleHover} : IDrawingComponentProps) {
   if (!isEllipseObject(model)) return null;
   const { id, x, y, rx, ry, stroke, strokeWidth, strokeDashArray, fill } = model;
   return <ellipse
@@ -51,7 +52,7 @@ export function EllipseComponent({model, handleHover} : IDrawingComponentProps) 
     strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
     onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
     onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null} />;
-}
+});
 
 export class EllipseDrawingTool extends DrawingTool {
 

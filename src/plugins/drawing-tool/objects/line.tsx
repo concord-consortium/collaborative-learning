@@ -6,6 +6,7 @@ import { computeStrokeDashArray, DeltaPoint, DrawingTool, IDrawingComponentProps
 import { Point } from "../model/drawing-basic-types";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 import FreehandToolIcon from "../../../clue/assets/icons/drawing/freehand-icon.svg";
+import { observer } from "mobx-react";
 
 function* pointIterator(line: LineObjectType): Generator<Point, string, unknown> {
   const {x, y, deltaPoints} = line;
@@ -59,7 +60,7 @@ export const LineObject = StrokedObject.named("LineObject")
 export interface LineObjectType extends Instance<typeof LineObject> {}
 export interface LineObjectSnapshot extends SnapshotIn<typeof LineObject> {}
 
-export function LineComponent({model, handleHover} : IDrawingComponentProps) {
+export const LineComponent = observer(function LineComponent({model, handleHover} : IDrawingComponentProps) {
   if (model.type !== "line") return null;
   const { id, x, y, deltaPoints, stroke, strokeWidth, strokeDashArray } = model as LineObjectType;
   const commands = `M ${x} ${y} ${deltaPoints.map((point) => `l ${point.dx} ${point.dy}`).join(" ")}`;
@@ -72,7 +73,7 @@ export function LineComponent({model, handleHover} : IDrawingComponentProps) {
     strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
     onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
     onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null} />;
-}
+});
 
 export class LineDrawingTool extends DrawingTool {
 

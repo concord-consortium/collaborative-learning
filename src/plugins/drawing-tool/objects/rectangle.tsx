@@ -5,6 +5,7 @@ import { computeStrokeDashArray, DrawingTool, FilledObject, IDrawingComponentPro
 import { Point } from "../model/drawing-basic-types";
 import RectToolIcon from "../../../clue/assets/icons/drawing/rectangle-icon.svg";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
+import { observer } from "mobx-react";
 
 export const RectangleObject = types.compose("RectangleObject", StrokedObject, FilledObject)
   .props({
@@ -52,7 +53,7 @@ export const RectangleObject = types.compose("RectangleObject", StrokedObject, F
 export interface RectangleObjectType extends Instance<typeof RectangleObject> {}
 export interface RectangleObjectSnapshot extends SnapshotIn<typeof RectangleObject> {}
 
-export function RectangleComponent({model, handleHover} : IDrawingComponentProps) {
+export const RectangleComponent = observer(function RectangleComponent({model, handleHover} : IDrawingComponentProps) {
   if (model.type !== "rectangle") return null;
   const { id, x, y, width, height, stroke, strokeWidth, strokeDashArray, fill } = model as RectangleObjectType;
   return <rect
@@ -68,7 +69,7 @@ export function RectangleComponent({model, handleHover} : IDrawingComponentProps
     onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
     onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null} />;
 
-}
+});
 
 export class RectangleDrawingTool extends DrawingTool {
 
