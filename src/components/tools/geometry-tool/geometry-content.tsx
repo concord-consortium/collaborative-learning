@@ -31,7 +31,6 @@ import { extractDragTileType, kDragTileContent, kDragTileId, dragTileSrcDocId } 
 import { ImageMapEntryType, gImageMap } from "../../../models/image-map";
 import { ITileExportOptions } from "../../../models/tools/tool-content-info";
 import { getParentWithTypeName } from "../../../utilities/mst-utils";
-import { getUrlFromImageContent } from "../../../utilities/image-utils";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { assign, castArray, debounce, each, filter, find, keys as _keys, throttle, values } from "lodash";
@@ -1057,7 +1056,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const { board } = this.state;
     if (parsedContent && board) {
         const droppedContent = parsedContent.content;
-        const url = getUrlFromImageContent(droppedContent);
+        const url = droppedContent.url;
         if (url) {
           gImageMap.getImage(url)
             .then(image => this.setBackgroundImage(image));

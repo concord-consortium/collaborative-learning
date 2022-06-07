@@ -3,9 +3,12 @@ import React from "react";
 import { ToolTileModel } from "../../../models/tools/tool-tile";
 import { DrawingContentModel, DrawingContentModelType } from "../model/drawing-content";
 import { DrawingLayerView } from "./drawing-layer";
-import { EllipseDrawingObjectData, ImageDrawingObjectData, LineDrawingObjectData,
-  RectangleDrawingObjectData, VectorDrawingObjectData } from "../model/drawing-objects";
-  import { DrawingToolDeletion, DrawingToolMove } from "../model/drawing-types";
+import { DrawingToolDeletion, DrawingToolMove } from "../model/drawing-types";
+import { LineObjectSnapshot } from "../objects/line";
+import { VectorObjectSnapshot } from "../objects/vector";
+import { RectangleObjectSnapshot } from "../objects/rectangle";
+import { EllipseObjectSnapshot } from "../objects/ellipse";
+import { ImageObjectSnapshot } from "../objects/image";
 
 // The drawing tile needs to be registered so the ToolTileModel.create
 // knows it is a supported tile type
@@ -27,7 +30,7 @@ const getDrawingObject = (objectContent: DrawingContentModelType) => {
 
 describe("Drawing Layer Components", () => {
   describe("Freehand Line", () => {
-    const lineData: LineDrawingObjectData = {
+    const lineData: LineObjectSnapshot = {
       type: "line",
       id: "123",
       x: 10, y: 10,
@@ -62,7 +65,7 @@ describe("Drawing Layer Components", () => {
   });
 
   describe("Vector line", () => {
-    const vectorData: VectorDrawingObjectData = {
+    const vectorData: VectorObjectSnapshot = {
       type: "vector",
       id: "234",
       x: 10, y: 10,
@@ -96,7 +99,7 @@ describe("Drawing Layer Components", () => {
   });
 
   describe("Rectangle", () => {
-    const rectData: RectangleDrawingObjectData = {
+    const rectData: RectangleObjectSnapshot = {
       type: "rectangle",
       id: "345",
       x: 10, y: 10,
@@ -131,7 +134,7 @@ describe("Drawing Layer Components", () => {
   });
 
   describe("Ellipse", () => {
-    const ellipseData: EllipseDrawingObjectData = {
+    const ellipseData: EllipseObjectSnapshot = {
       type: "ellipse",
       id: "456",
       x: 10, y: 10,
@@ -166,11 +169,10 @@ describe("Drawing Layer Components", () => {
   });
 
   describe("Image", () => {
-    const imageData: ImageDrawingObjectData = {
+    const imageData: ImageObjectSnapshot = {
       type: "image",
       id: "567",
       url: "my/image/url",
-      originalUrl: "my/image/originalUrl",
       x: 10, y: 10,
       width: 10, height: 10,
     };
