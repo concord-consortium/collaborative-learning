@@ -9,7 +9,13 @@
     "autoSectionProblemDocuments": false,
     "defaultDocumentTemplate": {
       "tiles": [
-          { "content": { "type": "Text", "text": "Welcome! To begin reviewing the CLUE software, please click the  orange My Resources bar at extreme left, and then click the tab labeled <strong>Activity</strong>." } }
+        {
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": "Welcome! To begin reviewing the CLUE software, please click the orange My Resources bar at extreme left, and then click the tab labeled <strong>Activity</strong>."
+          }
+        }
       ]
     },
     "defaultDocumentType": "problem",
@@ -250,7 +256,7 @@
                       "type": "Image",
                       "url": "curriculum/mothed/images/Day1.png"
                     }
-                  },        
+                  },
                   {
                     "content": {
                       "type": "Text",
@@ -261,7 +267,7 @@
                         "<ol><li>On the back of your drawing, write some words that describe the moth.</li><li>Take a picture of your drawing, and a picture of the words you wrote on the back.</li><li>Put your name on the back of the drawing and hand it in to your teacher.</li></ol>"
                       ]
                     }
-                  },                           
+                  },
                   {
                     "content": {
                       "type": "Text",
@@ -285,7 +291,7 @@
                         "<p>Next, find some photos of moths online. Save them to your desktop and drag them into image tiles. </p>"
                       ]
                     }
-                  },                                  
+                  },
                   {
                     "display": "teacher",
                     "content": {
@@ -308,7 +314,7 @@
                         "<p>Use the group controls so that you can see and share each others&#x27; notes and images. See the image below for how to do that. </p>"
                       ]
                     }
-                  },                  
+                  },
                   {
                     "display": "teacher",
                     "content": {
@@ -388,8 +394,8 @@
                       ]
                     }
                   }
-                  
-                                         
+
+
                 ]
               }
             },
