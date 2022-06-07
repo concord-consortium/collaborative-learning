@@ -14,7 +14,7 @@
     "defaultDocumentTitle": "Untitled",
     "defaultDocumentTemplate": {
       "tiles": [
-        { "content": { "type": "Text", "text": "Directions: Use the space below to consider how you would approach your first task. Use the prompt questions at left to help you organize your thoughts. You can use any of the tile types (diagram, text, drawing, image, table) to help you with your assignment. " } },
+        { "content": { "type": "Text", "format": "html", "text": "Directions: Use the space below to consider how you would approach your first task. Use the prompt questions at left to help you organize your thoughts. You can use any of the tile types (diagram, text, drawing, image, table) to help you with your assignment. " } },
         { "layout": {
           "height": 700
         },
