@@ -93,31 +93,6 @@
           ]
         },
         {
-          "tab": "my-work",
-          "label": "My Work",
-          "sections": [
-            {
-              "title": "Workspaces",
-              "type": "problem-documents",
-              "dataTestHeader": "my-work-section-investigations",
-              "dataTestItem": "my-work-list-items",
-              "documentTypes": ["problem", "planning"],
-              "order": "original",
-              "showStars": []
-            },
-            {
-              "title": "Workspaces",
-              "type": "personal-documents",
-              "dataTestHeader": "my-work-section-workspaces",
-              "dataTestItem": "my-work-list-items",
-              "documentTypes": ["personal"],
-              "properties": ["!isDeleted"],
-              "showStars": [],
-              "addDocument": true
-            }
-          ]
-        },
-        {
           "tab": "class-work",
           "label": "Class Work",
           "sections": [
