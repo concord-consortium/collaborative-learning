@@ -54,3 +54,26 @@ To fix these issues once and for all, we need to make sure that (1) image data c
   - >This is step three of the work to support multi-class images in multi-class supports. In [part two](https://github.com/concord-consortium/collaborative-learning/pull/1174) we designed the firestore schema and implemented a script to migrate existing published supports to the new format. With this PR, we implement the firebase function that retrieves the image data making use of the new firestore collections where appropriate.
 4. Add `publishSupport()` firebase function ([PR #1180](https://github.com/concord-consortium/collaborative-learning/pull/1180))
   - >This is the final piece of the epic journey to support multi-class access to images published to multi-class supports and then potentially copied from there. In this piece, a new `publishSupport()` firebase function writes the multi-class support document to firestore (like before), but it also (a) canonicalizes image url references in the content so that image references copied from these multi-class supports will contain their class information and (b) writes a multi-class image entry to firestore for each image referenced in the support so that downstream clients will be able to determine which images have been published to which classes even after the image has been copied into another user context. For support of legacy images published as part of earlier multi-class supports, the new `publishSupport()` function consults the firestore `images` collection which maps legacy image url references to their correct locations and was constructed by the `update-supports-images` script implemented in step one of this epic.
+
+# ImageMap
+
+The basic idea is to move the loading and error states into the ImageMap.  So an ImageEntry would be added to map right away this way other components can see it is loading from the result of `getCachedImage`.
+
+1. the image is already in the cache so `getCachedImage` returns an entry with a displayUrl of the blob url
+2. the image is not in the cache, the url requested is to a firebase url that starts with `ccimg://fbrtdb.concord.org` and it gets successfully downloaded. This should go through the following states:
+    1. nothing in cache
+    2. getImage triggers a loading of the image
+    3. getCachedImage entry indicates its loading
+    4. after the loading completes, the entry is updated with a displayUrl pointing at a blob
+3. the image is not in the cache, and it fails to download:
+    1. nothing in the cache
+    2. getCachedImage entry indicates its loading
+    3. after loading fails, the entry has an error state and displayUrl of the placeholder image
+4. the image failed to load before, so the cache returns entry with an error state and displayUrl of the placeholder image
+5. the image is an external url (needs more detail)
+    1. getCachedImage entry has a displayUrl of the external url (this might trigger a double download, so might not be good)
+    2. the cache downloads this image and the maybe the cache entry has a state indicating it is loading
+    3. the cache uploads it to firebase
+    4. entry’s contentUrl is changed to point at the newly uploaded image `ccimage://fbrtdb.concord.org/...` maybe a state change
+    5. the cache downloads this image from its new location
+    6. entry’s displayUrl updates to point at the blob url of the downloaded image
