@@ -20,7 +20,7 @@ import { setLivelinessChecking } from "mobx-state-tree";
 const kEnableLivelinessChecking = false;
 
 import "./components/utilities/blueprint";
-import "./index.sass";
+import "./index.scss";
 import { QAClear } from "./components/qa-clear";
 
 const appConfig = AppConfigModel.create(appConfigSnapshot);
