@@ -207,7 +207,8 @@ module.exports = (env, argv) => {
     resolve: {
       alias: {
         // cf. https://github.com/facebook/react/issues/20235#issuecomment-732205073
-        'react/jsx-runtime': require.resolve('react/jsx-runtime')
+        'react/jsx-runtime': require.resolve('react/jsx-runtime'),
+        'react-modal-hook': '@concord-consortium/react-modal-hook'
       },
       fallback: { crypto: false },
       extensions: [ '.ts', '.tsx', '.js', '.jsx' ]

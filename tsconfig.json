@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "outDir": "dist",
     "sourceMap": true,
     "target": "ES2015",
@@ -17,6 +18,9 @@
     "skipLibCheck": true,
     "jsx": "react",
     "useDefineForClassFields": true,
+    "paths": {
+      "react-modal-hook": ["node_modules/@concord-consortium/react-modal-hook/dist"]
+    },
     "types": []
   },
   "include": ["src/**/*"],
