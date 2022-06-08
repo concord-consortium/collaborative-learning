@@ -71,7 +71,7 @@ module.exports = (env, argv) => {
         // the code larger and slower
         process.env.CODE_COVERAGE ? {
           test: /\.[tj]sx?$/,
-          loader: 'istanbul-instrumenter-loader',
+          loader: '@jsdevtools/coverage-istanbul-loader',
           options: { esModules: true },
           enforce: 'post',
           exclude: path.join(__dirname, 'node_modules'),

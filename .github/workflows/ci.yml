@@ -53,10 +53,13 @@ jobs:
           # pass GitHub token to allow accurately detecting a build vs a re-run build
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # turn on code coverage when running npm start
-          # so far we've been using a webpack istanbul-instrumenter-loader for this
-          # but there has been work on building code coverage into node itself, which
-          # should be much faster
+          # so far we've been using a webpack coverage-istanbul-loader for this
+          # but there has been work on using the code coverage support in the browser directly, 
+          # which should be much faster
           CODE_COVERAGE: true
+          # Also turn on the code coverage tasks in cypress itself, these are disabled
+          # by default.
+          CYPRESS_coverage: true
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
