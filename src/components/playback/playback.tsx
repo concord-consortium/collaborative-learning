@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import classNames from "classnames";
 import { NavTabSpec } from "../../models/view/nav-tabs";
 import { SliderComponent } from "./slider";
@@ -12,13 +12,22 @@ import "./playback.scss";
 // }
 
 export const PlaybackComponent: React.FC = () => {
+  const [showPlaybackControls, setShowPlaybackControls] = useState(false);
+  const handleTogglePlaybackControlComponent = () => {
+    setShowPlaybackControls(!showPlaybackControls);
+  };
   const renderPlaybackToolbarButton = () => {
+    const playbackToolbarButtonComponentStyle =
+      classNames("playback-toolbar-button-component", {"disabled" : false}, {"show-control": showPlaybackControls});
     return (
-      <div className={"playback-toolbar-button-component"}>
-        <div className={"playback-toolbar-button-container"}>
-          <PlaybackIcon className={"playback-toolbar-button"}/>
+      <>
+        <div className={playbackToolbarButtonComponentStyle} onClick={handleTogglePlaybackControlComponent}>
+          <div className={"playback-toolbar-button-container"}>
+            <PlaybackIcon className={"playback-toolbar-button"}/>
+          </div>
         </div>
-      </div>
+        {showPlaybackControls && <div className="canvas-separator"/>}
+      </>
     );
   };
   const renderPlayButton = () => {
@@ -37,17 +46,23 @@ export const PlaybackComponent: React.FC = () => {
     );
   };
 
-  const playbackComponentClass = ("playback-component");
+  const renderPlaybackControls = () => {
+    const playbackControlsClass = classNames("playback-controls");
 
-  return (
-    <>
-      {renderPlaybackToolbarButton()}
-      <div className={playbackComponentClass}>
+    return (
+      <div className={playbackControlsClass}>
         {renderPlayButton()}
         <SliderComponent />
         {renderTimeInfo()}
       </div>
-    </>
+    );
+  };
+
+  return (
+    <div className="playback-component">
+      {renderPlaybackToolbarButton()}
+      {showPlaybackControls && renderPlaybackControls()}
+    </div>
   );
 
 

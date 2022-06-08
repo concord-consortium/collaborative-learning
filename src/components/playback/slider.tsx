@@ -1,4 +1,5 @@
 import React from "react";
+import TimeThumbnail from "../../clue/assets/icons/playback/time-thumb.svg";
 
 import "./slider.scss";
 
@@ -14,6 +15,9 @@ export const SliderComponent: React.FC = () => {
     return (
       <div className={"slider-rail"}>
         <div className={"slider-track"} />
+        {/* <div className={"slider-handle"}>
+          <TimeThumbnail />
+        </div> */}
       </div>
     );
   };

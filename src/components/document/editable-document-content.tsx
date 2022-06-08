@@ -115,7 +115,7 @@ export const EditableDocumentContent: React.FC<IProps> = props => {
           <DocumentCanvas mode={mode} isPrimary={isPrimary} document={document} readOnly={isReadOnly} />
         </div>
       </EditableToolApiInterfaceRefContext.Provider>
-      <PlaybackComponent />
+      {user.isTeacher && <PlaybackComponent />}
     </DocumentContextReact.Provider>
   );
 };
