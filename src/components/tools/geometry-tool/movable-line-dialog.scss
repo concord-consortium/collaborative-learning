@@ -1,0 +1,13 @@
+.movable-line-dialog-content {
+  width: 300px;
+
+  .movable-line-option {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 1em;
+
+    .dialog-label {
+      font-size: 12pt;
+    }
+  }
+}
