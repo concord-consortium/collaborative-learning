@@ -1,26 +1,119 @@
 import { types } from "mobx-state-tree";
 import React from "react";
-import { VariableChipComponent, VariableChipObject, 
-  VariableChipObjectSnapshot } from "../../shared-variables/drawing/variable-object";
 import { DrawingContentModelType } from "../model/drawing-content";
-import { DrawingComponentType, DrawingObjectType, HandleObjectHover } from "../objects/drawing-object";
-import { EllipseComponent, EllipseObject, EllipseObjectSnapshot } from "../objects/ellipse";
-import { ImageComponent, ImageObject, ImageObjectSnapshot } from "../objects/image";
-import { LineComponent, LineObject, LineObjectSnapshot } from "../objects/line";
-import { RectangleComponent, RectangleObject, RectangleObjectSnapshot } from "../objects/rectangle";
-import { VectorComponent, VectorObject, VectorObjectSnapshot } from "../objects/vector";
+import { DrawingComponentType, DrawingObject, DrawingObjectType, 
+  DrawingTool, HandleObjectHover, IDrawingLayer, IToolbarButtonProps } from "../objects/drawing-object";
+import { EllipseComponent, EllipseDrawingTool, EllipseObject, EllipseToolbarButton } from "../objects/ellipse";
+import { ImageComponent, ImageObject, StampDrawingTool, StampToolbarButton } from "../objects/image";
+import { LineComponent, LineDrawingTool, LineObject, LineToolbarButton } from "../objects/line";
+import { RectangleComponent, RectangleDrawingTool, RectangleObject,  
+  RectangleToolbarButton} from "../objects/rectangle";
+import { VectorComponent, VectorDrawingTool, VectorObject, VectorToolbarButton } from "../objects/vector";
+import { DeleteButton, SelectToolbarButton } from "./drawing-toolbar-buttons";
+import { SelectionDrawingTool } from "./selection-drawing-tool";
 
-const gDrawingObjectComponents: Record<string, DrawingComponentType | undefined> = {
-  "line": LineComponent,
-  "vector": VectorComponent,
-  "rectangle": RectangleComponent,
-  "ellipse": EllipseComponent,
-  "image": ImageComponent,
-  "variable": VariableChipComponent,
+export interface IDrawingObjectInfo {
+  type: string;
+  component: DrawingComponentType;
+  modelClass: typeof DrawingObject;
+}
+
+export interface IDrawingToolInfo {
+  name: string;
+  // using a simple `typeof DrawingTool` can't be used because that type
+  // is an abstract class so can't be instantiated. 
+  toolClass?: { new(drawingLayer: IDrawingLayer): DrawingTool };
+  buttonComponent: React.ComponentType<IToolbarButtonProps>;
+}
+
+const gDrawingObjectInfos: Record<string, IDrawingObjectInfo | undefined> = {
+  line: {
+    type: "line",
+    component: LineComponent,
+    modelClass: LineObject,
+  },
+  vector: {
+    type: "vector",
+    component: VectorComponent,
+    modelClass: VectorObject,
+  },
+  rectangle: {
+    type: "rectangle",
+    component: RectangleComponent,
+    modelClass: RectangleObject,
+  },
+  ellipse: {
+    type: "ellipse",
+    component: EllipseComponent,
+    modelClass: EllipseObject,
+  },
+  image: {
+    type: "image",
+    component: ImageComponent,
+    modelClass: ImageObject,
+  }
 };
 
+const gDrawingToolInfos: Record<string, IDrawingToolInfo | undefined> = {
+  select: {
+    name: "select",
+    toolClass: SelectionDrawingTool,
+    buttonComponent: SelectToolbarButton
+  },
+  line: {
+    name: "line",
+    toolClass: LineDrawingTool,
+    buttonComponent: LineToolbarButton
+  },
+  vector: {
+    name: "vector",
+    toolClass: VectorDrawingTool,
+    buttonComponent: VectorToolbarButton
+  },
+  rectangle: {
+    name: "rectangle",
+    toolClass: RectangleDrawingTool,
+    buttonComponent: RectangleToolbarButton
+  },
+  ellipse: {
+    name: "ellipse",
+    toolClass: EllipseDrawingTool,
+    buttonComponent: EllipseToolbarButton
+  },
+  stamp: {
+    name: "stamp",
+    toolClass: StampDrawingTool,
+    buttonComponent: StampToolbarButton
+  },
+  delete: {
+    name: "delete",
+    buttonComponent: DeleteButton
+  }
+};
+
+export function getDrawingToolInfos() {
+  return Object.values(gDrawingToolInfos).filter(value => value) as IDrawingToolInfo[];
+}
+
+export function getDrawingObjectInfos() {
+  return Object.values(gDrawingObjectInfos).filter(value => value) as IDrawingObjectInfo[];
+}
+
 export function getDrawingObjectComponent(drawingObject: DrawingObjectType) {
-  return gDrawingObjectComponents[drawingObject.type];
+  const info = gDrawingObjectInfos[drawingObject.type];
+  return info?.component;
+}
+
+export function getDrawingToolButtonComponent(toolName: string) {
+  return gDrawingToolInfos[toolName]?.buttonComponent;
+}
+
+export function registerDrawingObjectInfo(drawingObjectInfo: IDrawingObjectInfo) {
+  gDrawingObjectInfos[drawingObjectInfo.type] = drawingObjectInfo;
+}
+
+export function registerDrawingToolInfo(drawingToolInfo: IDrawingToolInfo) {
+  gDrawingToolInfos[drawingToolInfo.name] = drawingToolInfo;
 }
 
 export function renderDrawingObject(drawingObject: DrawingObjectType, drawingContent: DrawingContentModelType, 
@@ -32,16 +125,7 @@ export function renderDrawingObject(drawingObject: DrawingObjectType, drawingCon
     : null;
 }
 
-// FIXME: this is temporary, to support plugin based objects
-// we can't use a static union. 
-export type DrawingObjectSnapshotUnion = 
-  LineObjectSnapshot  |
-  VectorObjectSnapshot  |
-  RectangleObjectSnapshot  |
-  EllipseObjectSnapshot  |
-  ImageObjectSnapshot  |
-  VariableChipObjectSnapshot;
-
-// FIXME: This is temporary it will need to be dynamic
-export const DrawingObjectMSTUnion = 
-  types.union(LineObject, VectorObject, RectangleObject, EllipseObject, ImageObject, VariableChipObject);
+export const DrawingObjectMSTUnion = types.late<typeof DrawingObject>(() => {
+  const drawingObjectModels = Object.values(gDrawingObjectInfos).map(info => info!.modelClass);
+  return types.union(...drawingObjectModels) as typeof DrawingObject;
+});

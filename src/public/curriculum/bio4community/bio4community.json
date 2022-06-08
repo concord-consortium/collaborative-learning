@@ -1,84 +1,150 @@
 {
-  "code": "cr",
-  "abbrevTitle": "CR",
-  "title": "Completely Rational",
-  "subtitle": "A Focus on Integers",
-  "placeholderText": "Enter notes here",
+  "code": "bio",
+  "abbrevTitle": "BIO4",
+  "title": "Bio4Community",
+  "subtitle": "Stress in our Community and Bodies",
+  "placeholderText": "Discuss Evidence here",
   "settings": {
     "table": {
       "numFormat": ".2~f"
     }
   },
+  "config": {
+    "defaultDocumentTemplate": {
+      "tiles": [
+        [
+          { "content": { "type": "Image" } },
+          { "content": { "type": "Text", "text": "Provide your evidence here" } }
+        ]
+      ]
+    },
+    "tools": ["Text", "Image", "Drawing", "Table"]
+  },
+  "navTabs": {
+    "lazyLoadTabContents": true,
+    "showNavPanel": true,
+    "tabSpecs": [
+      {
+        "tab": "problems",
+        "label": "Chapter",
+        "sections": [
+          {
+            "initials": "ST",
+            "title": "Story",
+            "type": "problem-documents"
+          },
+          {
+            "initials": "SC",
+            "title": "Sources",
+            "type": "problem-documents"
+          },
+          {
+            "initials": "MD",
+            "title": "Models",
+            "type": "problem-documents"
+          }
+        ]
+      },
+      {
+        "tab": "my-work",
+        "label": "My Work",
+        "sections": [
+          {
+            "title": "Workspaces",
+            "type": "problem-documents",
+            "dataTestHeader": "my-work-section-investigations",
+            "dataTestItem": "my-work-list-items",
+            "documentTypes": ["problem", "planning"],
+            "order": "original",
+            "showStars": []
+          },
+          {
+            "title": "Workspaces",
+            "type": "personal-documents",
+            "dataTestHeader": "my-work-section-workspaces",
+            "dataTestItem": "my-work-list-items",
+            "documentTypes": ["personal"],
+            "properties": ["!isDeleted"],
+            "showStars": [],
+            "addDocument": true
+          },
+          {
+            "title": "Diary",
+            "type": "learning-logs",
+            "dataTestHeader": "learning-log-section",
+            "documentTypes": ["learningLog"],
+            "properties": ["!isDeleted"],
+            "addDocument": true
+          }
+        ]
+      },
+      {
+        "tab": "class-work",
+        "label": "Class Work",
+        "sections": [
+          {
+            "title": "Workspaces",
+            "type": "published-problem-documents",
+            "dataTestHeader": "class-work-section-published",
+            "dataTestItem": "class-work-list-items",
+            "documentTypes": ["publication"],
+            "showStars": ["teacher"],
+            "properties": ["!isTeacherDocument"]
+          },
+          {
+            "title": "Workspaces",
+            "type": "published-personal-documents",
+            "dataTestHeader": "class-work-section-personal",
+            "dataTestItem": "class-work-list-items",
+            "documentTypes": ["personalPublication"],
+            "properties": ["!isTeacherDocument"]
+          },
+          {
+            "className": "section teacher published-documents",
+            "title": "Workspaces",
+            "type": "teacher-supports",
+            "dataTestHeader": "supports-section-teacher-supports",
+            "dataTestItem": "supports-list-items",
+            "documentTypes": ["publication", "personalPublication"],
+            "properties": ["isTeacherDocument", "!isDeleted"]
+          },
+          {
+            "title": "Workspaces",
+            "type": "teacher-supports",
+            "dataTestHeader": "supports-section-teacher-supports",
+            "dataTestItem": "supports-list-items",
+            "documentTypes": ["supportPublication"],
+            "properties": ["teacherSupport", "!isDeleted"]
+          }
+        ]
+      }
+    ]
+  },
   "sections": {
-    "introduction": {
-      "initials": "IN",
-      "title": "Introduction",
-      "placeholder": "Work area for\nIntroduction section"
+    "narrative": {
+      "initials": "ST",
+      "title": "Story",
+      "placeholder": "Work area for Story"
     },
-    "initialChallenge": {
-      "initials": "IC",
-      "title": "Initial Challenge",
-      "placeholder": "Work area for\nInitial Challenge section"
+    "sources": {
+      "initials": "SC",
+      "title": "Sources",
+      "placeholder": "Work area for Evidence"
     },
-    "whatIf": {
-      "initials": "WI",
-      "title": "What If...?",
-      "placeholder": "Work area for\nWhat If...? section"
-    },
-    "nowWhatDoYouKnow": {
-      "initials": "NW",
-      "title": "Now What Do You Know?",
-      "placeholder": "Work area for\nNow What Do You Know? section"
-    },
-    "didYouKnow": {
-      "initials": "DY",
-      "title": "Did You Know?",
-      "placeholder": "Work area for\nDid You Know? section"
-    },
-    "MathReflection1": {
-      "initials": "R1",
-      "title": "Math Reflection 1",
-      "placeholder": "Work area for\nMathematical Reflection 1 section"
-    },
-     "MathReflection2": {
-      "initials": "R2",
-      "title": "Math Reflection 2",
-      "placeholder": "Work area for\nMathematical Reflection 2 section"
-    },
-     "MathReflection3": {
-      "initials": "R3",
-      "title": "Math Reflection 3",
-      "placeholder": "Work area for\nMathematical Reflection 3 section"
-    },
-     "MathReflection4": {
-      "initials": "R4",
-      "title": "Math Reflection 4",
-      "placeholder": "Work area for\nMathematical Reflection 4 section"
+    "models": {
+      "initials": "MD",
+      "title": "Models",
+      "placeholder": "Work area for Models"
     }
   },
   "planningDocument": {
     "enable": "teacher",
     "default": true,
     "sectionInfo": {
-      "overview": {
-        "initials": "OV",
-        "title": "Overview",
-        "placeholder": "Work area for\nOverview section"
-      },
-      "launch": {
-        "initials": "LC",
-        "title": "Launch",
-        "placeholder": "Work area for\nLaunch section"
-      },
-      "explore": {
-        "initials": "EX",
-        "title": "Explore",
-        "placeholder": "Work area for\nExplore section"
-      },
-      "summarize": {
-        "initials": "SM",
-        "title": "Summarize",
-        "placeholder": "Work area for\nSummarize section"
+      "sources": {
+        "initials": "SC",
+        "title": "Sources",
+        "placeholder": "Work area for Sources"
       }
     },
     "sections": [
@@ -94,38 +160,151 @@
     {
       "description": "Investigation 1",
       "ordinal": 1,
-      "title": "CR Investigation 1 Extending the Rational Number System",
+      "title": "Rakesh: Chapter 1",
       "problems": [
         {
-          "description": "Problem 1.1",
+          "description": "Story 1",
           "ordinal": 1,
-          "title": "CR 1.1 The Game of Going Positive",
-          "subtitle": "Using Positive and Negative Numbers",
+          "title": "Rakesh Chapter 1",
+          "subtitle": "Stress and Heart Attacks",
           "disabled": [],
           "sections": [
                         {
-                        "type": "introduction",
+                        "type": "narrative",
                         "content": {
-                        "tiles": []
+                          "tiles": [
+                            {
+                              "id": "d3tBK1qdpQEqwI6U",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p><strong>CHAPTER I: DEAUNDRE</strong></p>"
+                                ]
+                              }
+                            },
+                            [
+                              {
+                                "layout": {
+                                  "height": 250
+                                },
+                                "id": "JnxX0qRc7w60JXMO",
+                                "content": {
+                                  "type": "Image",
+                                  "url": "curriculum/bio4community/images/thing.png"
+                                }
+                              },
+                              {
+                                "id": "BJEa1s4mUyjR4zSf",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p>Rakesh sat in the small break room in the Amazon warehouse, fidgeting with his lunch. He smiled as he looked down at the small post-it note poking out from inside the crumpled brown bag that read “Good luck at work today Dad!”  His kids always knew how to make him smile. </p>"
+                                   ]
+                                }
+                              }
+                            ],
+                            {
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p>It was hard being a single dad. Even though his kids were older and in 7th grade and high school, it still felt like all the world/’s burdens were on his shoulders; but seeing them happy helped. He wanted to give his kids a stable life so he worked 10 hours a night and woke up early to make his kids breakfast before going to work. That left little time for Rakesh to destress and have “me” time. But it was worth it if it meant he could eventually be promoted to manager where he would have higher pay and more stable hours which meant more time with his kids. </p>",
+                                   "<p>In the lunchroom, Rakesh was zoning out, pushing the rice in his container around, when one of his co-workers, Nicole, came in. </p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "HE5gTAWDNJd2izrt",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p>Nicole: &quot;Hey. Did you hear about Deaundre?&quot;</p>",
+                                  "<p>Rakesh: 'No. Is everything alright?'</p>",
+                                  "<p>Nicole: 'He had a heart attack while he was here. He’s at the hospital right now.'</p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "ljYjBsAbW2OqPgcx",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p>Rakesh felt the concern take over him. He and Deaundre have a lot in common. They both were the same age, had two kids, and both loved baseball. Deaundre was one of those guys who worked just as hard as everyone else but did it with a smile on his face - he never let that smile drop. Knowing he, of all people, was at the hospital was really upsetting. </p>",
+                                  "<p>Rakesh decided to visit Deaundre at the hospital before work the next day, stopping at a local bodega to grab him a smiling bear wearing a fedora that kind of looked like him. </p>",
+                                  "<p>“Knock knock,” Rakesh entered with the bear held up to his face. Deaundre still had that smile plastered on. The two of them sat and talked for a while. Deaundre explained that the heart attack was due to a blockage in his blood vessels. </p>",
+                                  "<p>Deaundre: “Yeah, the doc keeps saying I overworked myself and the stress of it all led to blockages or at least didn’t help ‘em.” </p>",
+                                  "<p>This caught Rakesh’s attention. </p>",
+                                  "<p>Rakesh: “Wait. Your stress led to your heart attack?</p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "zXHl7yUN991OzW1B",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p>To say Rakesh was shocked was an understatement. He thought back to his never-ending shifts at work that he and Deaundre did together. He admitted the stress sometimes got to his head, he felt jittery and anxious like there were butterflies in his stomach. But he didn’t understand how something in his mind could affect his body. Stress only had mental symptoms… right? He wondered, how could stress cause blocked blood vessels? </p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "RUJlvb2XrzrwZyoM",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p><strong>Can you help him figure this out?</strong></p>",
+                                  "<p><strong>Discuss with your group--What do you think is the connection between stress and blocked blood vessels?</strong></p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "oTCwCFum-7MGn2Kh",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p>Rakesh left the hospital shocked and even more stressed. When he got home he did his best not to show his sons how worried he was. His younger son, Ajay, was in a cheerful mood as he helped with dinner and that made Rakesh feel better. Ajay joked about his friends on the track team and how excited he was for the track meet he was going to have in two days. Ajay was fast and nimble, and great at sports. He could also eat his weight in food, and he did at dinner that evening. </p>",
+                                  "<p>After dinner, the boys were washing dishes, Rakesh decided to do some research on his own on the internet. He googled “heart attack and stress”. One of the links that came up caught his eye. It was a video of some monkeys and it showed a blocked blood vessel, he decided to check it out. He clicked on the link: “The Effects of Stress on the Heart”</p>",
+                                  "<ol><li>Watch the video - &lt;a href&gt;EVIDENCE 1-The Effects of Stress on the Heart. </li><li>Discuss the video with your group and together, answer the questions in the Sources. </li><li>Write what you learned from this evidence in your document on the right.</li></ol>"
+                                ]
+                              }
+                            }
+                          ]
                         },
                         "supports": []
                         },
                         {
-                          "type": "initialChallenge",
+                          "type": "sources",
                           "content": {
-                            "tiles": []
+                            "tiles": [
+                              {
+                                "id": "oTCwCFum-7MGn2Kh",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<ol><li>Watch the video The Effects of Stress on the Heart. </li><li>Discuss the video with your group and together, answer the questions below. </li><li>Write what you learned from this evidence in your document on the right.</li></ol>"
+                                  ]
+                                }
+                              },
+                              {
+                                "content": {
+                                  "type": "Image",
+                                  "url": "videoURL"
+                                }
+                              }
+                            ]
                           },
                           "supports": []
                         },
                         {
-                          "type": "whatIf",
-                          "content": {
-                            "tiles": [],
-                            "supports": []
-                          }
-                        },
-                        {
-                          "type": "nowWhatDoYouKnow",
+                          "type": "models",
                           "content": {
                             "tiles": [],
                             "supports": []
@@ -135,460 +314,109 @@
           "supports": []
         },
         {
-          "description": "Problem 1.2",
+          "description": "Rakesh: Chapter 2",
           "ordinal": 2,
-          "title": "CR 1.2 Falling and Rising Temperatures in Montana",
+          "title": "Rakesh: Chapter 2",
+          "subtitle": "Nanni's Birthday",
           "sections": [
                         {
-                        "type": "introduction",
-                        "content": {
-                        "tiles": []
-                        },
+                        "type": "narrative",
+                        "content": 
+                          {
+                            "tiles": [
+                              {
+                                "id": "hY6Bplt1q0-ypYsI",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p>The video that Rakesh watched stayed in his head for the next two days. It confirmed what Deaundre told him, but he just couldn’t get over the differences between the two monkey’s blood vessels! Through a little more googling, he discovered that it was cholesterol that was filling those blood vessels.</p>",
+                                    "<p>That puzzled him, he thought cholesterol was in food. How would it end up stuck in the middle of the blood vessel? He also thought of Deaundre, was his artery filled with that gross stuff? What about his own blood vessels, did he also have cholesterol plugging up his arteries? That thought made his heart skip a beat and he could feel himself starting to sweat. Just thinking about all this stressed him out, and stress, as he now knew, was the reason Deaundre was in the hospital in the first place! He needed to stop these negative thoughts and get to work. He had a long day ahead, and he wanted to check in on Deaundre after work. But at least it was Friday and there would be time to destress on the weekend.</p>",
+                                    "<p>On Saturday evening he and the boys were going to their grandmother’s, or Naani as they called her, 80th birthday. His cousin Meera was hosting. She was one of his favorite people on this planet and one of the smartest he knew. They grew up together and had a close bond. Meera was a certified nutritionist and worked at a hospital. As they were driving to Meera’s house for the party, an idea popped into Rakesh’s head. Maybe he could ask her about cholesterol and how it was getting into blood vessels?</p>",
+                                    "<p>At the party, Naani was so happy to see everyone. Rakesh’s sons – Ajay and Kabir – gave their grandmother a huge hug and her eyes beamed with joy. Rakesh was so happy to see his mother doing well. The birthday party was wonderful. The whole family was having a great time, the food was delicious, and you could feel the love surrounding Naani. Towards the end of the party, once Meera had finished eating her cake, Rakesh remembered to ask her about the cholesterol thing.</p>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "_5-6uytEzlfXJCse",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p><em>Rakesh: “Meera, that is delicious isn’t it” he pointed at the crumbs on her plate.</em></p>",
+                                    "<p><em>Meera: “OMG, yes! I love chocolate cake with mocha frosting.”</em></p>",
+                                    "<p><em>Rakesh: “Acha (‘ok’ in Hindi, their language) listen Meera I know we’re at a Naani’s birthday party, but I have a serious question I really need to ask you. My friend Deaundre almost had a heart attack this week and the doctor said it was due to blocked blood vessels. I checked google and saw this video about blocked blood vessels and it looked awful, gross and a bit scary. I think the blood vessels were blocked by cholesterol or something. Do you know anything about this?”</em></p>",
+                                    "<p><em>Meera: “Of course, cholesterol is found in most foods. I actually wrote about cholesterol and health in my blog a few weeks ago.”</em></p>",
+                                    "<p><em>Rakesh: “Wait. I didn’t know you have a blog! That’s awesome!”</em></p>",
+                                    "<p><em>Meera: “Well clearly you don’t check the family group text properly because I’ve sent many links from my blog for everyone to read!</em></p>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "2BSbL6mQZFiG7OgS",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p>Meera laughed while teasing Rakesh, who looked a bit sheepish and smiled. He definitely does not keep up with the family group chat and just got caught! Meera continued:</p>",
+                                    "<p><em>Meera: “Honestly, I mostly do it mostly for my clients. It saves so much time during our appointments if they do some background reading before we meet to discuss their diets. I’ll text you the link for the post about cholesterol. Read that and then tell me what you think?</em></p>",
+                                    "<p><em>Rakesh: “Absolutely! And this time, I promise I’ll actually read the link you send!”</em></p>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "13dlLb-2XetKMMUP",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p>Rakesh laughed and was about to ask Meera more questions, but Naani was ready for chai (Indian tea) and so Meera rushed to go get it ready for her.</p>",
+                                    "<p>Once he got home from the party, Rakesh checked his phone and found the text from Meera. He clicked on the link she sent: “All the Fuss About Cholesterol”</p>"
+                                  ]
+                                }
+                              }
+                            ]
+                          },
                         "supports": []
                         },
                         {
-                          "type": "initialChallenge",
+                          "type": "sources",
                           "content": {
-                            "tiles": []
+                            "tiles": [
+                              {
+                                "id": "13dlLb-2XetKMMUP",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p> Read the blog <a href='https://docs.google.com/document/d/1sJeQJTULItNaogZdQiD7ezeHK6_nBxPI/edit'>All the Fuss About Cholesterol<a>.</p>",
+                                    "<p> Discuss the blog with your group and together, answer the questions on the slides.</p>",
+                                    "<p>Write what you learned from this evidence in your document on the right.</p>"
+                                  ]
+                                }
+                              }
+                            ]
                           },
                           "supports": []
                         },
                         {
-                          "type": "whatIf",
+                          "type": "models",
                           "content": {
-                            "tiles": [],
-                            "supports": []
-                          }
-                        },
-                        {
-                          "type": "nowWhatDoYouKnow",
-                          "content": {
-                            "tiles": [],
-                            "supports": []
-                          }
-                        }
-                      ],
-          "supports": []
-        },
-        {
-          "description": "Problem 1.3",
-          "ordinal": 3,
-          "title": "CR 1.3 The Game of Zero",
-          "subtitle": "Using a Chip Model",
-          "sections": [
-                        {
-                        "type": "introduction",
-                        "content": {
-                        "tiles": []
-                        },
-                        "supports": []
-                        },
-                        {
-                          "type": "initialChallenge",
-                          "content": {
-                            "tiles": []
-                          },
-                          "supports": []
-                        },
-                        {
-                          "type": "whatIf",
-                          "content": {
-                            "tiles": [],
-                            "supports": []
-                          }
-                        },
-                        {
-                          "type": "nowWhatDoYouKnow",
-                          "content": {
-                            "tiles": [],
-                            "supports": []
-                          }
-                        }
-                      ],
-          "supports": []
-        }
-      ]
-    },
-    {
-      "description": "Investigation 2",
-      "ordinal": 2,
-      "title": "CR Investigation 2 Adding and Subtracting Rational Numbers",
-      "problems": [
-        {
-          "description": "Problem 2.1",
-          "ordinal": 1,
-          "title": "CR 2.1 Extending Addition of Rational Numbers",
-          "subtitle": "",
-          "sections": [
-                        {
-                        "type": "introduction",
-                        "content": {
-                        "tiles": []
-                        },
-                        "supports": []
-                        },
-                        {
-                          "type": "initialChallenge",
-                          "content": {
-                            "tiles": []
-                          },
-                          "supports": []
-                        },
-                        {
-                          "type": "whatIf",
-                          "content": {
-                            "tiles": [],
-                            "supports": []
-                          }
-                        },
-                        {
-                          "type": "nowWhatDoYouKnow",
-                          "content": {
-                            "tiles": [],
-                            "supports": []
-                          }
-                        }
-                      ],
-          "supports": []
-        },
-        {
-          "description": "Problem 2.2",
-          "ordinal": 2,
-          "title": "CR 2.2 Extending Subtraction of Rational Numbers",
-          "subtitle": "",
-          "sections": [
-                        {
-                        "type": "introduction",
-                        "content": {
-                        "tiles": []
-                        },
-                        "supports": []
-                        },
-                        {
-                          "type": "initialChallenge",
-                          "content": {
-                            "tiles": []
-                          },
-                          "supports": []
-                        },
-                        {
-                          "type": "whatIf",
-                          "content": {
-                            "tiles": [],
-                            "supports": []
-                          }
-                        },
-                        {
-                          "type": "nowWhatDoYouKnow",
-                          "content": {
-                            "tiles": [],
-                            "supports": []
-                          }
-                        }
-                      ],
-          "supports": []
-        },
-        {
-          "description": "Problem 2.3",
-          "ordinal": 3,
-          "title": "CR 2.3 Profit or Loss",
-          "subtitle":"The +/- Connection",
-          "sections": [
-          ],
-          "supports": []
-        }
-      ]
-    },
-    {
-      "description": "Investigation 3",
-      "ordinal": 3,
-      "title": "CR Investigation 3 Multiplying and Dividing Rational Numbers",
-      "problems": [
-        {
-          "description": "Problem 3.1",
-          "ordinal": 1,
-          "title": "CR 3.1 The Game of Relay Numbers",
-          "subtitle": "Multiplication Patterns with Rational Numbers",
-          "sections": [
-                        {
-                        "type": "introduction",
-                        "content": {
-                        "tiles": []
-                        },
-                        "supports": []
-                        },
-                        {
-                          "type": "initialChallenge",
-                          "content": {
-                            "tiles": []
-                          },
-                          "supports": []
-                        },
-                        {
-                          "type": "whatIf",
-                          "content": {
-                            "tiles": [],
-                            "supports": []
-                          }
-                        },
-                        {
-                          "type": "nowWhatDoYouKnow",
-                          "content": {
-                            "tiles": [],
-                            "supports": []
-                          }
-                        }
-                      ],
-          "supports": []
-        },
-        {
-          "description": "Problem 3.2",
-          "ordinal": 2,
-          "title": "CR 3.2 Revisiting the Relay Race",
-          "subtitle": "Division of Rational Numbers",
-          "sections": [
-                        {
-                        "type": "introduction",
-                        "content": {
-                        "tiles": []
-                        },
-                        "supports": []
-                        },
-                        {
-                          "type": "initialChallenge",
-                          "content": {
-                            "tiles": []
-                          },
-                          "supports": []
-                        },
-                        {
-                          "type": "whatIf",
-                          "content": {
-                            "tiles": [],
-                            "supports": []
-                          }
-                        },
-                        {
-                          "type": "nowWhatDoYouKnow",
-                          "content": {
-                            "tiles": [],
-                            "supports": []
-                          }
-                        }
-                      ],
-          "supports": []
-        },
-        {
-          "description": "Problem 3.3",
-          "ordinal": 3,
-          "title": "CR 3.3 The Integer Product Game",
-          "subtitle": "Applying Multiplication and Division",
-          "sections": [
-                        {
-                        "type": "introduction",
-                        "content": {
-                        "tiles": []
-                        },
-                        "supports": []
-                        },
-                        {
-                          "type": "initialChallenge",
-                          "content": {
-                            "tiles": []
-                          },
-                          "supports": []
-                        },
-                        {
-                          "type": "whatIf",
-                          "content": {
-                            "tiles": [],
-                            "supports": []
-                          }
-                        },
-                        {
-                          "type": "nowWhatDoYouKnow",
-                          "content": {
-                            "tiles": [],
+                            "tiles": [
+                              {
+                                "id": "13dlLb-2XetKMMUP",
+                                "content": {
+                                  "type": "Image",
+                                  "url": "curriculum/bio4community/images/plaqueModel.png"
+                                }
+                              }
+                            ],
                             "supports": []
                           }
                         }
                       ],
           "supports": []
         }
-      ]
-    },
-    {
-      "description": "Investigation 4",
-      "ordinal": 4,
-      "title": "CR Investigation 4 Wrapping It Up",
-      "problems": [
-        {
-          "description": "Problem 4.1",
-          "ordinal": 1,
-          "title": "CR 4.1 The Game of Dealing Up",
-          "subtitle": "Writing and Evaluating Expressions",
-          "sections": [
-                        {
-                        "type": "introduction",
-                        "content": {
-                        "tiles": []
-                        },
-                        "supports": []
-                        },
-                        {
-                          "type": "initialChallenge",
-                          "content": {
-                            "tiles": []
-                          },
-                          "supports": []
-                        },
-                        {
-                          "type": "whatIf",
-                          "content": {
-                            "tiles": [],
-                            "supports": []
-                          }
-                        },
-                        {
-                          "type": "nowWhatDoYouKnow",
-                          "content": {
-                            "tiles": [],
-                            "supports": []
-                          }
-                        }
-                      ],
-          "supports": []
-        },
-        {
-          "description": "Problem 4.2",
-          "ordinal": 2,
-          "title": "CR 4.2 Making a Profit",
-          "subtitle": "More or Less",
-          "sections": [
-                        {
-                        "type": "introduction",
-                        "content": {
-                        "tiles": []
-                        },
-                        "supports": []
-                        },
-                        {
-                          "type": "initialChallenge",
-                          "content": {
-                            "tiles": []
-                          },
-                          "supports": []
-                        },
-                        {
-                          "type": "whatIf",
-                          "content": {
-                            "tiles": [],
-                            "supports": []
-                          }
-                        },
-                        {
-                          "type": "nowWhatDoYouKnow",
-                          "content": {
-                            "tiles": [],
-                            "supports": []
-                          }
-                        }
-                      ],
-          "supports": []
-        },
-        {
-          "description": "Problem 4.3",
-          "ordinal": 3,
-          "title": "CR 4.3 Water In and Out",
-          "subtitle": "Rational Numbers to the Rescue",
-          "sections": [
-          ],
-          "supports": []
-        }
-      ]
-    },
-    {
-      "description": "Mathematical Reflections",
-      "ordinal": 5,
-      "title": "Completely Rational Mathematical Reflections",
-      "problems": [{
-          "description": "Mathematical Reflections",
-          "ordinal": 1,
-          "title": "CR Mathematical Reflections",
-          "subtitle": "",
-          "sections": [
-            {
-              "type": "MathReflection1",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "In this unit we are continuing to explore rational numbers, including operations and their properties with positive, negative numbers and zero and how to recognize and use these operations to solve problems. At the end of this Investigation, <em>What do you know about rational numbers and their operations?</em>"
-                      ]
-                    }
-                  }
-                ]
-              },
-              "supports": [ ]
-            },
-            {
-              "type": "MathReflection2",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "In this unit we are continuing to explore rational numbers, including operations and their properties with positive, negative numbers and zero and how to recognize and use these operations to solve problems. At the end of this Investigation, <em>What do you know about rational numbers and their operations?</em>"
-                      ]
-                    }
-                  }
-                ]
-              },
-              "supports": [ ]
-            },
-            {
-              "type": "MathReflection3",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "In this unit we are continuing to explore rational numbers, including operations and their properties with positive, negative numbers and zero and how to recognize and use these operations to solve problems. At the end of this Investigation, <em>What do you know about rational numbers and their operations?</em>"
-                      ]
-                    }
-                  }
-                ]
-              },
-              "supports": [ ]
-            },
-            {
-              "type": "MathReflection4",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                       "In this unit we are continuing to explore rational numbers, including operations and their properties with positive, negative numbers and zero and how to recognize and use these operations to solve problems. At the end of this Investigation, <em>What do you know about rational numbers and their operations?</em>"
-                      ]
-                    }
-                  }
-                ]
-              },
-              "supports": [ ]
-            }
-          ]
-        }
-      ],
-      "supports": [
       ]
     }
   ],

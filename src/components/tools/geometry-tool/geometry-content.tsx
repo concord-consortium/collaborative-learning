@@ -456,7 +456,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       return (
         <MovableLineDialog
           key="editor"
-          isOpen={line != null}
           onAccept={this.handleUpdateLine}
           onClose={this.closeLineDialog}
           line={line}
@@ -499,7 +498,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           board={board}
           polygon={polygon}
           points={points as [JXG.Point, JXG.Point]}
-          isOpen={showSegmentLabelDialog}
           onAccept={handleAccept}
           onClose={handleClose}
         />

@@ -1,11 +1,17 @@
 import { addDisposer, Instance, SnapshotIn, types } from "mobx-state-tree";
+import React, { useCallback } from "react";
 import { observer } from "mobx-react";
 import { autorun } from "mobx";
-import React from "react";
+import { Tooltip } from "react-tippy";
 import { gImageMap } from "../../../models/image-map";
-import { DrawingObject, DrawingTool, IDrawingComponentProps, IDrawingLayer, typeField } from "./drawing-object";
+import { DrawingObject, DrawingTool, IDrawingComponentProps, IDrawingLayer, 
+  IToolbarButtonProps, typeField } from "./drawing-object";
 import { Point } from "../model/drawing-basic-types";
 import placeholderImage from "../../../assets/image_placeholder.png";
+import SmallCornerTriangle from "../../../assets/icons/small-corner-triangle.svg";
+import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
+import { buttonClasses } from "../components/drawing-toolbar-buttons";
+import { useTouchHold } from "../../../hooks/use-touch-hold";
 
 export const ImageObject = DrawingObject.named("ImageObject")
   .props({
@@ -114,3 +120,47 @@ export class StampDrawingTool extends DrawingTool {
   }
 }
 
+export const StampToolbarButton: React.FC<IToolbarButtonProps> = ({
+  drawingContent, togglePaletteState, clearPaletteState
+}) => {
+  const tooltipOptions = useTooltipOptions();
+  const { selectedButton, stamps } = drawingContent;
+  const { currentStamp } = drawingContent;
+  const stampCount = stamps.length;
+
+  const modalButton = "stamp";
+  const selected = selectedButton === modalButton;
+
+  const handleStampsButtonClick = useCallback(() => {
+    drawingContent.setSelectedButton("stamp");
+    togglePaletteState("showStamps", false);
+  }, [drawingContent, togglePaletteState]);
+
+  const handleStampsButtonTouchHold = useCallback(() => {
+    drawingContent.setSelectedButton("stamp");
+    togglePaletteState("showStamps");
+  }, [drawingContent, togglePaletteState]);
+
+  const { didTouchHold, ...handlers } = useTouchHold(handleStampsButtonTouchHold, handleStampsButtonClick);
+
+  const handleExpandCollapseClick = (e: React.MouseEvent) => {
+    if (!didTouchHold()) {
+      handleStampsButtonTouchHold();
+      e.stopPropagation();
+    }
+  };
+
+  return (
+    currentStamp 
+      ? <Tooltip title="Stamp" {...tooltipOptions}>
+          <div className={buttonClasses({ modalButton, selected })} {...handlers}>
+            <img src={currentStamp.url} draggable="false" />
+            {stampCount > 1 &&
+              <div className="expand-collapse" onClick={handleExpandCollapseClick}>
+                <SmallCornerTriangle />
+              </div>}
+          </div>
+        </Tooltip>
+      : null
+  );
+};

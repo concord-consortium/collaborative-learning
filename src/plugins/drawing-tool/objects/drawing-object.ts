@@ -1,4 +1,4 @@
-import { Instance, types } from "mobx-state-tree";
+import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import { uniqueId } from "../../../utilities/js-utils";
 import { SelectionBox } from "../components/selection-box";
 import { BoundingBox, DefaultToolbarSettings, Point, ToolbarSettings } from "../model/drawing-basic-types";
@@ -41,7 +41,7 @@ export const DrawingObject = types.model("DrawingObject", {
   }
 }));
 export interface DrawingObjectType extends Instance<typeof DrawingObject> {}
-
+export interface DrawingObjectSnapshot extends SnapshotIn<typeof DrawingObject> {} 
 
 export const StrokedObject = DrawingObject.named("StrokedObject")
 .props({
@@ -78,6 +78,22 @@ export interface IDrawingComponentProps {
   // is a real plugin to the drawing tile, hopefully this circular dependency can be removed.
   drawingContent: DrawingContentModelType;
   handleHover?: HandleObjectHover;
+}
+
+// TODO: the support for palettes is hard coded to specific tools
+export interface IPaletteState {
+  showStamps: boolean;
+  showStroke: boolean;
+  showFill: boolean;
+}
+export type PaletteKey = keyof IPaletteState;
+export const kClosedPalettesState = { showStamps: false, showStroke: false, showFill: false };
+
+export interface IToolbarButtonProps {
+  drawingContent: DrawingContentModelType;
+  // TODO: the support for palettes is hard coded to specific tools
+  togglePaletteState: (palette: PaletteKey, show?: boolean) => void;  
+  clearPaletteState: () => void;
 }
 
 export type DrawingComponentType = React.ComponentType<IDrawingComponentProps>;

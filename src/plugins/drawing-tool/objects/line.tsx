@@ -3,8 +3,10 @@ import React from "react";
 import { SelectionBox } from "../components/selection-box";
 import { computeStrokeDashArray } from "../model/drawing-content";
 import { DeltaPoint, DrawingTool, IDrawingComponentProps, IDrawingLayer, 
-  StrokedObject, typeField } from "./drawing-object";
+  IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
 import { Point } from "../model/drawing-basic-types";
+import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
+import FreehandToolIcon from "../../../clue/assets/icons/drawing/freehand-icon.svg";
 
 function* pointIterator(line: LineObjectType): Generator<Point, string, unknown> {
   const {x, y, deltaPoints} = line;
@@ -116,4 +118,9 @@ export class LineDrawingTool extends DrawingTool {
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseup", handleMouseUp);
   }
+}
+
+export function LineToolbarButton({drawingContent}: IToolbarButtonProps) {
+  return <SvgToolModeButton modalButton="line" settings={{ fill: drawingContent.stroke }}
+    title="Freehand" drawingContent={drawingContent} SvgIcon={FreehandToolIcon} />;
 }

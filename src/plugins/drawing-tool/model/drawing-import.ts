@@ -1,9 +1,9 @@
 import { uniqueId } from "../../../utilities/js-utils";
-import { DrawingObjectSnapshotUnion } from "../components/drawing-object-manager";
+import { DrawingObjectSnapshot } from "../objects/drawing-object";
 
 export interface IDrawingTileImportSpec {
   type: "Drawing";
-  objects: DrawingObjectSnapshotUnion[];
+  objects: DrawingObjectSnapshot[];
 }
 
 export const isDrawingTileImportSpec = (snapshot: any): snapshot is IDrawingTileImportSpec =>
