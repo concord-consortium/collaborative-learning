@@ -14,6 +14,7 @@ import { DocumentModelType } from "../../models/document/document";
 import { ProblemDocument } from "../../models/document/document-types";
 import { ToolbarModelType } from "../../models/stores/problem-configuration";
 import { WorkspaceMode } from "../../models/stores/workspace";
+import { PlaybackComponent } from "../playback/playback";
 
 import "./editable-document-content.scss";
 
@@ -114,6 +115,7 @@ export const EditableDocumentContent: React.FC<IProps> = props => {
           <DocumentCanvas mode={mode} isPrimary={isPrimary} document={document} readOnly={isReadOnly} />
         </div>
       </EditableToolApiInterfaceRefContext.Provider>
+      <PlaybackComponent />
     </DocumentContextReact.Provider>
   );
 };
