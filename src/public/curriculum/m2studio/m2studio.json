@@ -14,7 +14,21 @@
     "defaultDocumentTitle": "Untitled",
     "defaultDocumentTemplate": {
       "tiles": [
-        { "content": { "type": "Text", "format": "html", "text": "Directions: Use the space below to consider how you would approach your first task. Use the prompt questions at left to help you organize your thoughts. You can use any of the tile types (diagram, text, drawing, image, table) to help you with your assignment. " } },
+        {
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p><strong>Instructions and Tips: </strong></p>",
+              "<p>* Use the space below to consider how you would approach your first task. </p>",
+              "<p>        &lt;&gt; First, drag the prompt from your task into this workspace using the 6 dots in the corner of that tile. </p>",
+              "<p>        &lt;&gt;Then use the prompt questions at left to help you organize your thoughts. </p>",
+              "<p>* You can use any of the tile types (diagram, text, drawing, image, table) to help you with your assignment.  </p>",
+              "<p>* Make sure you label your answers with the number of the question you are answering. </p>",
+              "<p></p>"
+            ]
+          }
+        },
         { "layout": {
           "height": 700
         },
@@ -236,18 +250,19 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Welcome to your work space! In here, you will find information and questions. You will work both individually and in groups, so be sure to listen to your teacher about what to do when. </strong></p>",
+                        "<p><strong></strong></p>",
                         "<p><strong>Some tips for this workspace:</strong></p>",
-                        "<p>To the right, you can see 6 buttons. These will add tiles to your workspace:</p>",
-                        "<ul><li>The top button will create a space for you to create a diagram</li><li>The next button (with the A) will create a space for you to write down your thoughts</li><li>The button with the pencil will create a space where you can draw</li><li>The button with the mountain allows you to import images</li><li>The button with the table lets you build a table</li><li>The X will delete a tile</li></ul>",
+                        "<p>To the right, you can see 7 buttons. These will add tiles to your workspace:</p>",
+                        "<ul><li>The top button will create a space for you to create a diagram</li><li>The next button (with the A) will create a space for you to write down your thoughts</li><li>The button with the pencil will create a space where you can draw</li><li>The button with the mountain allows you to import images</li><li>The button with the table lets you build a table</li><li>The button with the graph lets you plot points</li><li>The X will delete a tile (this cannot be undone!)</li></ul>",
                         "<p>You can rearrange your spaces by clicking on the top right-hand corner of the tile (where you will see 6 dots). This will allow you drag and move the tiles. </p>",
-                        "<p>You can click on the bottom of a tile and then drag the size up or down to make it smaller or bigger. </p>",
-                        "<p>You can share your work with your whole class by clicking the uparrow Publish button next to the File menu.</p>",
-                        "<p>You can also look at the work of your group-mates by clicking the Group View icon on the top bar. See something creative that you want to build upon? Drag their tile into your workspace, write &quot;Borrowed from {name}&quot; at the top of the tile, and then make your modifications!</p>",
+                        "<p>You can click on the bottom right corner of any tile and then drag it up or down to make it smaller or bigger. </p>",
+                        "<p>You can share your work with your group-mates by using the Share slider on the top right corner, or publish your work to the whole class by clicking the button with the up-arrow next to the File menu.</p>",
+                        "<p>You can also look at the work of your group-mates by clicking the Group View icon on the top bar (it looks like a window). </p>",
                         "<p></p>",
                         "<p><strong>Are you ready? Let&#x27;s go!</strong></p>"
                       ]
                     }
-                  },
+                  },                  
                   {
                     "display": "teacher",
                     "content": {
