@@ -627,7 +627,7 @@
                       "text": [
                         "<p><strong>Uploading an Image to a Graph</strong></p>",
                         "<p></p>",
-                        "<p>The Graph tool can measure the lengths of line segments using the Line Label feature. It also can be used to make measurements on images that can be uploaded to the graph. Start a new graph in the Initial Challenge section and find an image on your computer that you’d like to share. You can make points and shapes on top of the image. Is there anything in the image that you can measure? Add a label with a measurement.</p>"
+                        "<p>The Graph tool can measure the lengths of line segments using the Segment Label feature. It also can be used to make measurements on images that can be uploaded to the graph. Start a new graph in the Initial Challenge section and find an image on your computer that you’d like to share. You can make points and shapes on top of the image. Is there anything in the image that you can measure? Add a label with a measurement.</p>"
                       ]
                     }
                   }
