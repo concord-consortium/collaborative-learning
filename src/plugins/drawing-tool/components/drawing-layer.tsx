@@ -368,7 +368,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   // share the same imageEntry so when either creates the imageEntry they need to
   // include the filename.
   //
-  // FIXME: this is not called anymore so when a image is added it probably won't
+  // FIXME_NOW: this is not called anymore so when a image is added it probably won't
   // trigger an gImageMap.getImage. So we'll have to find a new place to do this.
   // It used to be called by createDrawingObject, when the object was an image.
   // And gImageMap.getCachedImage(imageData.url) was falsey.

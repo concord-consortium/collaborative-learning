@@ -1,6 +1,6 @@
 import { types } from "mobx-state-tree";
 import { DrawingContentModel } from "./drawing-content";
-import { playbackChanges } from "./drawing-export";
+import { playbackChanges } from "./drawing-change-playback";
 import { isDrawingTileImportSpec, importDrawingTileSpec } from "./drawing-import";
 import { kDrawingStateVersion } from "./drawing-types";
 
@@ -18,7 +18,7 @@ export const DrawingMigrator = types.snapshotProcessor(DrawingContentModel, {
       return snapshot;
     }
 
-    // FIXME: This is checking for objects and generating changes. 
+    // FIXME_NOW: This is checking for objects and generating changes. 
     // those changes will not be a valid state, so this will throw an error.
     // It should instead mostly just pass the objects through, 
     // it might need to add ids to objects.

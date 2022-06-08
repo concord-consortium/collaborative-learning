@@ -1,7 +1,5 @@
 import { safeJsonParse } from "../../../utilities/js-utils";
-import { ITileExportOptions } from "../../../models/tools/tool-content-info";
 import { DrawingToolChange } from "./drawing-types";
-import { ImageObjectType } from "../objects/image";
 import { DrawingObjectSnapshot, DrawingObjectType } from "../objects/drawing-object";
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
 import { applyAction, getMembers, getSnapshot, types } from "mobx-state-tree";
@@ -37,7 +35,7 @@ const DrawingContentExport = types.model("DrawingContentExport", {
   }
 }));
 
-export const playbackChanges = (changes: string[], options?: ITileExportOptions) => {
+export const playbackChanges = (changes: string[]) => {
   const objectInfoMap: Record<string, IDrawingObjectChanges> = {};
   const orderedIds: string[] = [];
 
@@ -71,16 +69,6 @@ export const playbackChanges = (changes: string[], options?: ITileExportOptions)
           });
           break;
         }
-      }
-    }
-
-    // TODO: This seems specific to exporting, when we are just migrating I don't think
-    // we need or want to transform urls 
-    if ((object.type === "image") && options?.transformImageUrl) {
-      const image = object as ImageObjectType;
-      if (image.filename) {
-        image.setUrl(options.transformImageUrl(image.url, image.filename));
-        image.setFilename(undefined);
       }
     }
 
@@ -150,13 +138,4 @@ export const playbackChanges = (changes: string[], options?: ITileExportOptions)
 
   exportObjects();
   return getSnapshot(content);
-};
-
-export const exportDrawingTileSpec = (changes: string[], options?: ITileExportOptions) => {
-  // FIXME: this should something like: 
-  //   https://www.npmjs.com/package/json-stringify-pretty-compact
-  // That will generate a string from the object that is more compact than standard 
-  // JSON.stringify. This compact form is close to what the old code did using a
-  // string builder.
-  return JSON.stringify(playbackChanges(changes, options));
 };

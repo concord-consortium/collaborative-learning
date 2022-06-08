@@ -4,7 +4,7 @@ import { observer } from "mobx-react";
 import { autorun } from "mobx";
 import { Tooltip } from "react-tippy";
 import { gImageMap } from "../../../models/image-map";
-import { DrawingObject, DrawingTool, IDrawingComponentProps, IDrawingLayer, 
+import { DrawingObject, DrawingObjectSnapshot, DrawingTool, IDrawingComponentProps, IDrawingLayer, 
   IToolbarButtonProps, typeField } from "./drawing-object";
 import { Point } from "../model/drawing-basic-types";
 import placeholderImage from "../../../assets/image_placeholder.png";
@@ -41,6 +41,18 @@ export const ImageObject = DrawingObject.named("ImageObject")
     // When the change events are removed, we'll need to find another way to trigger these 
     // gImageMap.getImage calls.
     get displayUrl() {
+      // I think it would work for this to:
+      // 1. check if it is available in the cache, if so return it
+      // 2. if not then call gImageMap.getImage to load it. I believe that will mean 
+      // the value of displayUrl will get updated once it gets loaded automatically
+      //
+      // The trick might be to know the difference between a successful load and a failure to load
+      // If there is a failure, I think the gImageMap does not store anything to indicate that.
+      // The ImageTile differentiates this by using a "loading" state variable. We could use the 
+      // same here in volatile state, but because the gImageMap is shared by multiple components
+      // this wouldn't really handle this case well. I think ideally the gImageMap would keep track
+      // of the failure and retry automatically. This way the display url could know the difference
+      // between loading, failed, and success.
       return gImageMap.getCachedImage(self.url)?.displayUrl || (placeholderImage as string);
     },
 
@@ -62,7 +74,7 @@ export const ImageObject = DrawingObject.named("ImageObject")
       // Monitor the image map entry and save the width and height when it is available
       // this way when the image is reloaded from state the width and height are immediately
       // available and there won't be any resize flickering.
-      // In all cases I can find the correct width and height will be set when the ImageObject is
+      // In all cases I can find, the correct width and height will be set when the ImageObject is
       // created. However the old code was modifying the width and height after the image 
       // entry became available, so there might be a case where width and height change.
       addDisposer(self, autorun(() =>{
@@ -84,6 +96,10 @@ export const ImageObject = DrawingObject.named("ImageObject")
   }));
 export interface ImageObjectType extends Instance<typeof ImageObject> {}
 export interface ImageObjectSnapshot extends SnapshotIn<typeof ImageObject> {}
+
+export function isImageObjectSnapshot(object: DrawingObjectSnapshot): object is ImageObjectSnapshot {
+  return object.type === "image";
+}
 
 export const ImageComponent: React.FC<IDrawingComponentProps> = observer(function ImageComponent({model, handleHover}){
   if (model.type !== "image") return null;

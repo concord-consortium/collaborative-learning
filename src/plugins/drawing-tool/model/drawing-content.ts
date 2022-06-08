@@ -1,11 +1,13 @@
 import { types, Instance, SnapshotIn, getSnapshot} from "mobx-state-tree";
+import { clone } from "lodash";
+import stringify from "json-stringify-pretty-compact";
 import { StampModel, StampModelType } from "./stamp";
 import { ITileExportOptions, IDefaultContentOptions } from "../../../models/tools/tool-content-info";
 import { ToolMetadataModel, ToolContentModel } from "../../../models/tools/tool-types";
 import {
   kDrawingStateVersion, kDrawingToolID, ToolbarModalButton
 } from "./drawing-types";
-import { ImageObjectType } from "../objects/image";
+import { ImageObjectType, isImageObjectSnapshot } from "../objects/image";
 import { DefaultToolbarSettings, ToolbarSettings } from "./drawing-basic-types";
 // FIXME: this creates a cycle, the 
 // `drawing-object-manager -> drawing-object -> drawing-content` 
@@ -103,9 +105,24 @@ export const DrawingContentModel = ToolContentModel
       return { stroke, fill, strokeDashArray, strokeWidth };
     },
     exportJson(options?: ITileExportOptions) {
-      // FIXME need to translate the image urls if that option is set
-      const {type, objects} = getSnapshot(self);
-      return JSON.stringify({type, objects});
+      // Translate image urls if necessary
+      const {type, objects: originalObjects} = getSnapshot(self);
+      const objects = originalObjects.map(object => {
+        if (isImageObjectSnapshot(object) && options?.transformImageUrl) {
+          if (object.filename) {
+            const newImage = clone(object);
+            newImage.url = options.transformImageUrl(object.url, object.filename);
+            newImage.filename = undefined;
+            return newImage;
+          }
+        }
+        return object;
+      });
+
+      // json-stringify-pretty-compact is used, so the exported content is more
+      // compact. It results in something close to what we used to get when the 
+      // export was created using a string builder.
+      return stringify({type, objects}, {maxLength: 200});
     }
   }))
   .extend(self => {
