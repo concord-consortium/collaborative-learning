@@ -284,6 +284,7 @@ export const DrawingContentModel = ToolContentModel
   }));
 
 export type DrawingContentModelType = Instance<typeof DrawingContentModel>;
+export type DrawingContentModelSnapshot = SnapshotIn<typeof DrawingContentModel>;
 
 // The migrator sometimes modifies the content model it is trying to migrate.
 // This weird migrator behavior is demonstrated here: src/models/mst.test.ts

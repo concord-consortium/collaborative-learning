@@ -1,34 +1,20 @@
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { ITileExportOptions } from "../../../models/tools/tool-content-info";
-import { importDrawingTileSpec } from "./drawing-import";
-import { DrawingToolChange } from "./drawing-types";
 import { LineObjectSnapshot, LineObjectType } from "../objects/line";
 import { VectorObjectSnapshot, VectorObjectType } from "../objects/vector";
 import { RectangleObjectSnapshot, RectangleObjectType } from "../objects/rectangle";
 import { EllipseObjectSnapshot, EllipseObjectType } from "../objects/ellipse";
 import { ImageObjectSnapshot } from "../objects/image";
 import { createDrawingContent, DrawingContentModelType } from "./drawing-content";
-
-// FIXME_NOW: once the import code is fixed we should add this round trip test
-function exportDrawing(changes: DrawingToolChange[], options?: ITileExportOptions) {
-  const changesJson = changes.map(change => JSON.stringify(change));
-  const exportJson = "{}"; // exportDrawingTileSpec(
-  const exportJs = safeJsonParse(exportJson);
-  if (exportJs) {
-    // validate export-import-export round-trip
-    const importJs = importDrawingTileSpec(exportJs);
-    // const export2Json = exportDrawingTileSpec(importJs.changes, options);
-    // expect(safeJsonParse(export2Json)).toEqual(exportJs);
-  }
-  else {
-    // log the JSON on error for debugging
-    // !exportJs && console.log("JSON PARSE ERROR\n----------------\n", exportJson);
-  }
-  return exportJs;
-}
+import { DrawingMigrator } from "./drawing-migrator";
 
 function exportDrawing2(drawing: DrawingContentModelType) {
   const exportedString = drawing.exportJson();
+  // validate export import round-trip
+  const exportedJSON = safeJsonParse(exportedString);
+  const imported = DrawingMigrator.create(exportedJSON);
+  const exportedString2 = imported.exportJson();
+  expect(safeJsonParse(exportedString2)).toEqual(exportedJSON);
   return safeJsonParse(exportedString);
 }
 

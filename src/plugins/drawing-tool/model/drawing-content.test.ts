@@ -1,8 +1,7 @@
-import { SnapshotIn } from "mobx-state-tree";
 import {
-  createDrawingContent, defaultDrawingContent, DrawingContentModel, DrawingToolMetadataModel
+  createDrawingContent, defaultDrawingContent, 
+  DrawingContentModelSnapshot, DrawingToolMetadataModel
 } from "./drawing-content";
-import { IDrawingTileImportSpec } from "./drawing-import";
 import { kDrawingToolID } from "./drawing-types";
 import { DefaultToolbarSettings } from "./drawing-basic-types";
 import { StampModel } from "./stamp";
@@ -65,7 +64,7 @@ describe('defaultDrawingContent', () => {
 
 describe("DrawingContentModel", () => {
 
-  function createDrawingContentWithMetadata(options?: SnapshotIn<typeof DrawingContentModel>) {
+  function createDrawingContentWithMetadata(options?: DrawingContentModelSnapshot) {
     const model = createDrawingContent(options);
     const metadata = DrawingToolMetadataModel.create({ id: "drawing-1" });
     model.doPostCreate(metadata);
@@ -95,7 +94,7 @@ describe("DrawingContentModel", () => {
         { type: "rectangle", x: 10, y: 10, width: 100, height: 100,
           fill, stroke, strokeDashArray, strokeWidth } as RectangleObjectSnapshot
       ]
-    } as IDrawingTileImportSpec);
+    });
     expect(model.type).toBe(kDrawingToolID);
     expect(model.objects.length).toBe(1);
     expect(model.objects[0].type).toBe("rectangle");
