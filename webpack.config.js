@@ -71,7 +71,7 @@ module.exports = (env, argv) => {
         // the code larger and slower
         process.env.CODE_COVERAGE ? {
           test: /\.[tj]sx?$/,
-          loader: 'istanbul-instrumenter-loader',
+          loader: '@jsdevtools/coverage-istanbul-loader',
           options: { esModules: true },
           enforce: 'post',
           exclude: path.join(__dirname, 'node_modules'),
@@ -207,7 +207,8 @@ module.exports = (env, argv) => {
     resolve: {
       alias: {
         // cf. https://github.com/facebook/react/issues/20235#issuecomment-732205073
-        'react/jsx-runtime': require.resolve('react/jsx-runtime')
+        'react/jsx-runtime': require.resolve('react/jsx-runtime'),
+        'react-modal-hook': '@concord-consortium/react-modal-hook'
       },
       fallback: { crypto: false },
       extensions: [ '.ts', '.tsx', '.js', '.jsx' ]
