@@ -18,6 +18,7 @@ export const ImageContentModel = ToolContentModel
     type: types.optional(types.literal(kImageToolID), kImageToolID),
     url: types.maybe(types.string),
     filename: types.maybe(types.string),
+    title: types.maybe(types.string),
   })
   .preProcessSnapshot(snapshot => {
     return isLegacyImageTileImport(snapshot)
@@ -46,6 +47,9 @@ export const ImageContentModel = ToolContentModel
     updateImageUrl(oldUrl: string, newUrl: string) {
       if (!oldUrl || !newUrl || (oldUrl === newUrl)) return;
       if (self.url === oldUrl) self.url = newUrl;
+    },
+    setTitle(title: string) {
+      self.title = title;
     }
   }));
 

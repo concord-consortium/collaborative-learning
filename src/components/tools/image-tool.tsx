@@ -14,6 +14,7 @@ import { debouncedSelectTile } from "../../models/stores/ui";
 import { gImageMap, ImageMapEntryType } from "../../models/image-map";
 import { ImageContentModelType } from "../../models/tools/image/image-content";
 import { ITileExportOptions } from "../../models/tools/tool-content-info";
+import { EditableTileTitle } from "./editable-tile-title";
 import { hasSelectionModifier } from "../../utilities/event-utils";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { isPlaceholderImage } from "../../utilities/image-utils";
@@ -32,6 +33,7 @@ interface IState {
   imageEltWidth?: number;
   imageEltHeight?: number;
   requestedHeight?: number;
+  isEditingTitle?: boolean;
 }
 
 const defaultImagePlaceholderSize = { width: 100, height: 100 };
@@ -42,7 +44,8 @@ let nextImageToolId = 0;
 @observer
 export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   public state: IState = { isLoading: true,
-                           imageContentUrl: this.getContent().url
+                           imageContentUrl: this.getContent().url,
+                           isEditingTitle: false
                          };
   // give each component instance a unique id
   private imageToolId = ++nextImageToolId;
@@ -50,6 +53,8 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   private toolbarToolApi: IToolApi | undefined;
   private resizeObserver: ResizeObserver;
   private imageElt: HTMLDivElement | null;
+  // private measureLabelText: (label: string) => number;
+  // private measureLabelText = useMeasureText("italic 14px Lato, sans-serif");
   private updateImage = (url: string, filename?: string) => {
 
     gImageMap.getImage(url, { filename })
@@ -164,6 +169,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
             onIsEnabled={this.handleIsEnabled}
             onUploadImageFile={this.handleUploadImageFile}
           />
+          {this.renderTitleArea()}
           <ImageComponent
             ref={elt => this.imageElt = elt}
             content={this.getContent()}
@@ -199,6 +205,52 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     return aspectRatio && imageEltWidth
             ? Math.min(Math.ceil(imageEltWidth / aspectRatio), naturalHeight) + kMarginsAndBorders
             : naturalHeight + kMarginsAndBorders;
+  }
+
+  private handleBeginEditTitle = () => {
+    this.setState({ isEditingTitle: true });
+  };
+
+  private handleTitleChange = (title?: string) => {
+    // title && this.getContent().updateTitle(this.state.board, title);
+    this.setState({ isEditingTitle: false });
+  };
+
+  private renderTitleArea() {
+    return (
+      <div className="title-area-wrapper" key="title-area">
+        <div className="title-area">
+          {this.renderTitle()}
+        </div>
+      </div>
+    );
+  }
+
+  // Taken from ./hooks/use-measure-text.ts
+  // TODO: Need a unified solution here
+  private getMeasureText(font: string) {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    context && font && (context.font = font);
+    return (text: string) => {
+      const _context = canvas.getContext("2d");
+      return _context
+                ? Math.ceil(10 * _context.measureText(text).width) / 10
+                : 0;
+    };
+  }
+
+  private renderTitle() {
+    const getTitle = () => this.getContent().title || "";
+    // const { measureText, readOnly, size, scale } = this.props;
+    const { readOnly, scale } = this.props;
+    const measureText = this.getMeasureText("italic 14px Lato, sans-serif");
+    const size = {width: this.state.imageEltWidth || null , height: this.state.imageEltHeight || null};
+    return (
+      <EditableTileTitle key="geometry-title" size={size} scale={scale} getTitle={getTitle}
+                              readOnly={readOnly} measureText={measureText}
+                              onBeginEdit={this.handleBeginEditTitle} onEndEdit={this.handleTitleChange} />
+    );
   }
 
   private getContent() {
