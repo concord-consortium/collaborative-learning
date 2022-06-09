@@ -53,8 +53,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   private toolbarToolApi: IToolApi | undefined;
   private resizeObserver: ResizeObserver;
   private imageElt: HTMLDivElement | null;
-  // private measureLabelText: (label: string) => number;
-  // private measureLabelText = useMeasureText("italic 14px Lato, sans-serif");
   private updateImage = (url: string, filename?: string) => {
 
     gImageMap.getImage(url, { filename })
@@ -212,7 +210,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleTitleChange = (title?: string) => {
-    // title && this.getContent().updateTitle(this.state.board, title);
+    title && this.getContent().setTitle(title);
     this.setState({ isEditingTitle: false });
   };
 
