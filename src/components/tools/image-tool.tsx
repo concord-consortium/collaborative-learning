@@ -87,6 +87,16 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     this.imageDragDrop = new ImageDragDrop({
       isAcceptableImageDrag: this.isAcceptableImageDrag
     });
+
+    // Taken and modified from geometry-content.tsx.
+    // TODO: This should be abstracted for all tiles.
+    // if we haven't been assigned a title already, request one now
+    // we set the title without updating the content, so the title is ephemeral
+    if (!this.getContent().title) {
+      const { model: { id }, onRequestUniqueTitle } = this.props;
+      const title = onRequestUniqueTitle(id);
+      title && this.getContent().setTitle(title);
+    }
   }
 
   public componentDidMount() {
@@ -106,6 +116,9 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     this.imageElt && this.resizeObserver.observe(this.imageElt);
 
     this.props.onRegisterToolApi({
+      getTitle: () => {
+        return this.getContent().title || "";
+      },
       exportContentAsTileJson: (options?: ITileExportOptions) => {
         return this.getContent().exportJson(options);
       },
