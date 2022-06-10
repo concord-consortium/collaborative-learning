@@ -1,4 +1,4 @@
-import { types, Instance, SnapshotIn, clone } from "mobx-state-tree";
+import { types, Instance, SnapshotIn, clone, getSnapshot } from "mobx-state-tree";
 import {
   getImageDimensions, isPlaceholderImage, storeCorsImage, storeFileImage, storeImage
 } from "../utilities/image-utils";
@@ -74,8 +74,8 @@ export const ImageMapModel = types
   .actions(self => ({
     syncContentUrl(url: string, entry: ImageMapEntryType) {
       if (entry.contentUrl && (url !== entry.contentUrl)) {
-        // if the url was changed, store it under the new url as well
-        self.images.set(entry.contentUrl, clone(entry));
+        // if the url was changed, store or update it under the new url as well
+        self.images.set(entry.contentUrl, getSnapshot(entry));
       }
     },
 
@@ -105,52 +105,54 @@ export const ImageMapModel = types
     }
   }))
   .actions(self => ({
-    addImage(url: string, snapshot: ImageMapEntrySnapshot): Promise<ImageMapEntryType> {
-      return new Promise((resolve, reject) => {
-        let entry: ImageMapEntryType | undefined;
+    async addImage(url: string, snapshot: ImageMapEntrySnapshot): Promise<ImageMapEntryType> {
+      let entry: ImageMapEntryType | undefined;
 
-        // update existing entry
-        if (self.images.has(url)) {
-          entry = self.images.get(url);
-          if (entry && snapshot.contentUrl) {
-            entry.contentUrl = snapshot.contentUrl;
-          }
-          if (entry && snapshot.displayUrl) {
-            entry.displayUrl = snapshot.displayUrl;
+      // update existing entry
+      if (self.images.has(url)) {
+        entry = self.images.get(url);
+        if (entry && snapshot.contentUrl) {
+          entry.contentUrl = snapshot.contentUrl;
+        }
+        if (entry && snapshot.displayUrl) {
+          entry.displayUrl = snapshot.displayUrl;
+        }
+      }
+      // create new entry
+      else {
+        entry = ImageMapEntry.create(snapshot);
+        self.images.set(url, entry);
+        // notify any listeners that the url is now available
+        if (self.listeners[url]) {
+          for (const id in self.listeners[url]) {
+            self.listeners[url][id]();
           }
         }
-        // create new entry
-        else {
-          entry = ImageMapEntry.create(snapshot);
-          self.images.set(url, entry);
-          // notify any listeners that the url is now available
-          if (self.listeners[url]) {
-            for (const id in self.listeners[url]) {
-              self.listeners[url][id]();
-            }
-          }
-        }
-        self.syncContentUrl(url, entry!);
+      }
+      self.syncContentUrl(url, entry!);
 
-        getImageDimensions(entry && entry.displayUrl || url)
-          .then(dimensions => {
-            const imageEntry = self.images.get(url);
-            if (imageEntry) {
-              self.setDimensions(url, dimensions.width, dimensions.height);
-              self.syncContentUrl(url, imageEntry);
-              resolve(imageEntry);
-            }
-          });
-      });
-    }
-  }))
-  .actions(self => ({
-    addPromise(url: string, promise: Promise<ImageMapEntrySnapshot>): Promise<ImageMapEntryType> {
-      return new Promise((resolve, reject) => {
-        promise.then(snapshot => {
-          resolve(self.addImage(url, snapshot));
-        });
-      });
+      // If the getImageDimension image element never loads then we won't get
+      // past this line. 
+      // However the entry has already been added to the map, so there will be
+      // a dimensionless entry in this case.
+      // Also in most cases addImage is not called until the image has already been
+      // downloaded and displayUrl is actually a blob url.
+      // So it should be unlikely in these cases that getImageDimensions will fail.
+      const dimensions = await getImageDimensions(entry && entry.displayUrl || url);
+      const imageEntry = self.images.get(url);
+      if (!imageEntry) {
+        // This should really not happen, we just added an image entry above
+        // and there isn't a way to remove entries from the map
+        /* istanbul ignore next */
+        throw `missing image entry in cache for ${url}`;
+      }
+      self.setDimensions(url, dimensions.width, dimensions.height);
+      // If this addImage is called more than once there could be multiple
+      // of these promises running at once. And the last one to finish will 
+      // clobber the imageEntry.contentUrl entry that was there before.
+      // The last one to finish might not be the right one if there are multiple.
+      self.syncContentUrl(url, imageEntry);
+      return imageEntry;
     }
   }))
   .actions(self => {
@@ -171,41 +173,40 @@ export const ImageMapModel = types
         _db = db;
       },
 
-      addFileImage(file: File): Promise<ImageMapEntryType> {
-        return new Promise((resolve, reject) => {
-          storeFileImage(_db, file)
-            .then(simpleImage => {
-              const { normalized } = parseFauxFirebaseRTDBUrl(simpleImage.imageUrl);
-              const entry: ImageMapEntrySnapshot = {
-                      filename: file.name,
-                      contentUrl: normalized,
-                      displayUrl: simpleImage.imageData
-                    };
-              resolve(self.addImage(entry.contentUrl!, entry));
-            });
-        });
+      // General Note: Typically actions should not be async like this. An async action will 
+      // run outside normal action path so MST can't record its changes to the model.
+      // If it tries to modify the model directly MST will raise an error. In the cases
+      // below other actions are always called to mae modifications so this is safe.
+      async addFileImage(file: File): Promise<ImageMapEntryType> {
+        const simpleImage = await storeFileImage(_db, file);
+        const { normalized } = parseFauxFirebaseRTDBUrl(simpleImage.imageUrl);
+        const entry: ImageMapEntrySnapshot = {
+                filename: file.name,
+                contentUrl: normalized,
+                displayUrl: simpleImage.imageData
+              };
+        return self.addImage(entry.contentUrl!, entry);
       },
 
-      getImage(url: string, options?: IImageBaseOptions): Promise<ImageMapEntryType> {
-        return new Promise((resolve, reject) => {
-          if (!url) {
-            return resolve(clone(self.images.get(placeholderImage)!));
-          }
+      async getImage(url: string, options?: IImageBaseOptions): Promise<ImageMapEntryType> {
+        if (!url) {
+          return clone(self.images.get(placeholderImage)!);
+        }
 
-          const imageEntry = self.images.get(url);
-          if (imageEntry) {
-            return resolve(imageEntry);
-          }
+        const imageEntry = self.images.get(url);
+        if (imageEntry) {
+          // This might or might not have dimensions yet
+          return imageEntry;
+        }
 
-          const handler = self.getHandler(url);
-          if (handler) {
-            const promise = handler.store(url, { db: _db, ...options });
-            resolve(self.addPromise(url, promise));
-          }
-          else {
-            resolve(clone(self.images.get(placeholderImage)!));
-          }
-        });
+        const handler = self.getHandler(url);
+        if (handler) {
+          const imageEntrySnapshot = await handler.store(url, { db: _db, ...options });
+          return self.addImage(url, imageEntrySnapshot);
+        }
+        else {
+          return clone(self.images.get(placeholderImage)!);
+        }
       }
 
     };
@@ -223,37 +224,42 @@ export const externalUrlImagesHandler: IImageHandler = {
     return url ? /^(https?:\/\/|data:image\/)/.test(url) : false;
   },
 
-  store(url: string, options?: IImageHandlerStoreOptions) {
+  async store(url: string, options?: IImageHandlerStoreOptions) {
     const { db } = options || {};
     // upload images from external urls to our own firebase if possible
     // this may fail depending on CORS settings on target image.
-    return new Promise((resolve, reject) => {
-      if (db?.stores.user.id) {
-        storeImage(db, url)
-          .then(simpleImage => {
-            if (isPlaceholderImage(simpleImage.imageUrl)) {
-              // conversion errors are resolved to placeholder image
-              // this generally occurs due to a CORS error, in which
-              // case we just use the original url.
-              resolve({ contentUrl: url, displayUrl: url });
-            }
-            else {
-              const { normalized } = parseFauxFirebaseRTDBUrl(simpleImage.imageUrl);
-              resolve({ contentUrl: normalized, displayUrl: simpleImage.imageData });
-            }
-          })
-          .catch(() => {
-            // If the silent upload has failed, do we retain the full url or
-            // encourage the user to download a copy and re-upload?
-            // For now, return the original image url.
-            resolve({ contentUrl: url, displayUrl: url });
-          });
+    // After the data of the image is uploaded to firebase is it is not
+    // explicitly downloaded again:
+    // 1. storeImage creates a canvas and adds the url to this canvas
+    // 2. a data uri is extracted from the canvas
+    // 3. an object with the data uri is uploaded to firebase
+    // 4. the data uri is "fetched" to turn it into a blob and then blob url
+    // 5. the resulting imageData value will be the blob url
+    // 6. the displayUrl is set to this blob url
+    if (db?.stores.user.id) {
+      try {
+        const simpleImage = await storeImage(db, url);
+        if (isPlaceholderImage(simpleImage.imageUrl)) {
+          // conversion errors are resolved to placeholder image
+          // this generally occurs due to a CORS error, in which
+          // case we just use the original url.
+          return { contentUrl: url, displayUrl: url };
+        }
+        else {
+          const { normalized } = parseFauxFirebaseRTDBUrl(simpleImage.imageUrl);
+          return { contentUrl: normalized, displayUrl: simpleImage.imageData };
+        }
+      } catch (error) {
+          // If the silent upload has failed, do we retain the full url or
+          // encourage the user to download a copy and re-upload?
+          // For now, return the original image url.
+          return { contentUrl: url, displayUrl: url };
       }
-      else {
-        // For now, return the original image url.
-        resolve({ contentUrl: url, displayUrl: url });
-      }
-    });
+    }
+    else {
+      // For now, return the original image url.
+      return { contentUrl: url, displayUrl: url };
+    }
   }
 };
 
@@ -268,13 +274,13 @@ export const localAssetsImagesHandler: IImageHandler = {
     return url ? url.startsWith("assets/") || url.startsWith("curriculum/") : false;
   },
 
-  store(url: string) {
+  async store(url: string) {
                     // convert original curriculum image paths
     const _url = url.replace("assets/curriculum", "curriculum")
                     // convert original drawing tool stamp paths
                     .replace("assets/tools/drawing-tool/stamps",
                              "curriculum/moving-straight-ahead/stamps");
-    return Promise.resolve({ contentUrl: _url, displayUrl: _url });
+    return { contentUrl: _url, displayUrl: _url };
   }
 };
 
@@ -293,40 +299,36 @@ export const firebaseStorageImagesHandler: IImageHandler = {
                           /^\/.+\/portals\/.+$/.test(url);
   },
 
-  store(url: string, options?: IImageHandlerStoreOptions) {
-    return new Promise((resolve, reject) => {
-      const { db } = options || {};
-      // All images from firebase storage must be migrated to realtime database
-      const isStorageUrl = url.startsWith(kFirebaseStorageUrlPrefix);
-      const storageUrl = url.startsWith(kFirebaseStorageUrlPrefix) ? url : undefined;
-      const storagePath = !isStorageUrl ? url : undefined;
-      // Pass in the imagePath as the second argument to get the ref to firebase storage by url
-      // This is needed if an image of the same name has been uploaded in two different components,
-      // since each public URL becomes invalid and a new url generated on upload
-      if (db?.stores.user.id) {
-        db.firebase.getPublicUrlFromStore(storagePath, storageUrl)
-          .then(newUrl => {
-            if (newUrl) {
-              storeCorsImage(db, newUrl)
-                .then(simpleImage => {
-                  // Image has been retrieved from Storage, now we can safely remove the old image
-                  // TODO: remove old images
-                  const { normalized } = parseFauxFirebaseRTDBUrl(simpleImage.imageUrl);
-                  resolve({ contentUrl: normalized, displayUrl: simpleImage.imageData });
-                });
-            }
-            else {
-              resolve({ contentUrl: placeholderImage, displayUrl: placeholderImage });
-            }
-          })
-          .catch(() => {
-            resolve({ contentUrl: placeholderImage, displayUrl: placeholderImage });
-          });
+  async store(url: string, options?: IImageHandlerStoreOptions) {
+    const { db } = options || {};
+    // All images from firebase storage must be migrated to realtime database
+    const isStorageUrl = url.startsWith(kFirebaseStorageUrlPrefix);
+    const storageUrl = url.startsWith(kFirebaseStorageUrlPrefix) ? url : undefined;
+    const storagePath = !isStorageUrl ? url : undefined;
+    // Pass in the imagePath as the second argument to get the ref to firebase storage by url
+    // This is needed if an image of the same name has been uploaded in two different components,
+    // since each public URL becomes invalid and a new url generated on upload
+    if (db?.stores.user.id) {
+      try {
+        const newUrl = await db.firebase.getPublicUrlFromStore(storagePath, storageUrl);
+
+        if (newUrl) {
+          const simpleImage = await storeCorsImage(db, newUrl);
+          // Image has been retrieved from Storage, now we can safely remove the old image
+          // TODO: remove old images
+          const { normalized } = parseFauxFirebaseRTDBUrl(simpleImage.imageUrl);
+          return { contentUrl: normalized, displayUrl: simpleImage.imageData };
+        }
+        else {
+          return { contentUrl: placeholderImage, displayUrl: placeholderImage };
+        }
+      } catch (error) {
+        return { contentUrl: placeholderImage, displayUrl: placeholderImage };
       }
-      else {
-        resolve({ contentUrl: placeholderImage, displayUrl: placeholderImage });
-      }
-    });
+    }
+    else {
+      return { contentUrl: placeholderImage, displayUrl: placeholderImage };
+    }
   }
 };
 
@@ -368,27 +370,24 @@ export const firebaseRealTimeDBImagesHandler: IImageHandler = {
           (url.startsWith(`${kCCImageScheme}://`) && (url.indexOf("concord.org") < 0));
   },
 
-  store(url: string, options?: IImageHandlerStoreOptions) {
-    return new Promise((resolve, reject) => {
-      const { db } = options || {};
-      const { path, classHash, imageKey, normalized } = parseFauxFirebaseRTDBUrl(url);
+  async store(url: string, options?: IImageHandlerStoreOptions) {
+    const { db } = options || {};
+    const { path, classHash, imageKey, normalized } = parseFauxFirebaseRTDBUrl(url);
 
-      if (db && path && normalized) {
-        // In theory we could direct all firebase image requests to the cloud function,
-        // but only cross-class supports require the use of the cloud function.
-        const blobPromise = classHash !== db.stores.user.classHash
-                              ? db.getCloudImageBlob(normalized)
-                              : db.getImageBlob(imageKey);
-        blobPromise.then(blobUrl => {
-          resolve(blobUrl
-                    ? { filename: options?.filename, contentUrl: normalized, displayUrl: blobUrl }
-                    : {});
-        });
-      }
-      else {
-        resolve({});
-      }
-    });
+    if (db && path && normalized) {
+      // In theory we could direct all firebase image requests to the cloud function,
+      // but only cross-class supports require the use of the cloud function.
+      const blobPromise = classHash !== db.stores.user.classHash
+                            ? db.getCloudImageBlob(normalized)
+                            : db.getImageBlob(imageKey);
+      const blobUrl = await blobPromise;
+      return blobUrl
+             ? { filename: options?.filename, contentUrl: normalized, displayUrl: blobUrl }
+             : {};
+    }
+    else {
+      return {};
+    }
   }
 };
 
