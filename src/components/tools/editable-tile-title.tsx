@@ -2,7 +2,7 @@ import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useState } from "react";
 import { SizeMeProps } from "react-sizeme";
-import { GeometryLabelInput } from "./geometry-tool/geometry-label-input";
+import { TileLabelInput } from "./tile-label-input";
 
 import "./editable-tile-title.scss";
 
@@ -65,7 +65,7 @@ export const EditableTileTitle: React.FC<IProps> = observer(({
   return (
     <div className={classes} style={containerStyle} onClick={handleClick}>
       {isEditing
-        ? <GeometryLabelInput value={editingTitle} style={inputStyle}
+        ? <TileLabelInput value={editingTitle} style={inputStyle}
             onKeyDown={handleKeyDown} onChange={setEditingTitle} onBlur={() => handleClose(true)} />
         : <div className="editable-tile-title-text">{title}</div>}
     </div>
