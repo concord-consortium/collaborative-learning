@@ -9,7 +9,7 @@ interface IProps extends IGeometryContentProps{
   readOnly?: boolean;
 }
 export const GeometryContentWrapper: React.FC<IProps> = (props) => {
-  const measureLabelText = useMeasureText("italic 14px Lato, sans-serif");
+  const measureLabelText = useMeasureText();
   return (
     <div className={classNames("geometry-wrapper", { "read-only": props.readOnly })}>
       <SizeMe monitorHeight={true}>

@@ -9,6 +9,7 @@ import { ImageToolbar } from "./image/image-toolbar";
 import { ImageComponent } from "./image-component";
 import { IToolApi, TileResizeEntry } from "./tool-api";
 import { IToolTileProps } from "./tool-tile";
+import { measureText } from "./hooks/use-measure-text";
 import { IDocumentContext } from "../../models/document/document-types";
 import { debouncedSelectTile } from "../../models/stores/ui";
 import { gImageMap, ImageMapEntryType } from "../../models/image-map";
@@ -81,12 +82,22 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   };
   private imageDragDrop: ImageDragDrop;
 
+  // Persistent variables used to size editable title
+  private canvas: HTMLCanvasElement;
+  private textSizeCache: Record<string, number>;
+  private measureText: (text: string) => number;
+
   constructor(props: IProps) {
     super(props);
 
     this.imageDragDrop = new ImageDragDrop({
       isAcceptableImageDrag: this.isAcceptableImageDrag
     });
+
+    // Initialize variables used to size editable title
+    this.canvas = document.createElement("canvas");
+    this.textSizeCache = {};
+    this.measureText = (text:string) => { return measureText(text, this.canvas, this.textSizeCache); };
 
     // Taken and modified from geometry-content.tsx.
     // TODO: This should be abstracted for all tiles.
@@ -237,31 +248,16 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     );
   }
 
-  // Taken from ./hooks/use-measure-text.ts
-  // TODO: Need a unified solution here
-  private getMeasureText(font: string) {
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
-    context && font && (context.font = font);
-    return (text: string) => {
-      const _context = canvas.getContext("2d");
-      return _context
-                ? Math.ceil(10 * _context.measureText(text).width) / 10
-                : 0;
-    };
-  }
-
   private getTitle() {
     return this.getContent().title || "";
   }
 
   private renderTitle() {
     const { readOnly, scale } = this.props;
-    const measureText = this.getMeasureText("italic 14px Lato, sans-serif");
     const size = {width: this.state.imageEltWidth || null , height: this.state.imageEltHeight || null};
     return (
       <EditableTileTitle key="geometry-title" size={size} scale={scale} getTitle={this.getTitle.bind(this)}
-                              readOnly={readOnly} measureText={measureText}
+                              readOnly={readOnly} measureText={this.measureText}
                               onBeginEdit={this.handleBeginEditTitle} onEndEdit={this.handleTitleChange} />
     );
   }
