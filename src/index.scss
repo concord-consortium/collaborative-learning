@@ -3,13 +3,11 @@
 @charset "UTF-8";
 
 html {
-  -webkit-box-sizing:border-box;
-          box-sizing:border-box;
+  box-sizing:border-box;
 }
 
 *, *::before, *::after {
-  -webkit-box-sizing:inherit;
-          box-sizing:inherit;
+  box-sizing:inherit;
 }
 
 body {
@@ -19,7 +17,6 @@ body {
   line-height:1.28581;
   text-transform:none;
   color:#182026;
-  // font-family:-apple-system, "BlinkMacSystemFont", "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Open Sans", "Helvetica Neue", "Icons16", sans-serif;
 }
 
 p {
@@ -54,13 +51,4 @@ body {
 
 .error {
   color: #f00;
-}
-
-.tbd {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  height: 100%;
-  width: 100%;
 }
