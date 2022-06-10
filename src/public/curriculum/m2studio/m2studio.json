@@ -96,6 +96,21 @@
           ]
         },
         {
+          "tab": "student-work",
+          "label": "Student Workspaces",
+          "teacherOnly": true,
+          "groupsDisplay": true,
+          "sections": [
+            {
+              "title": "Group Workspaces",
+              "type": "problem-documents",
+              "dataTestHeader": "group-workspaces",
+              "dataTestItem": "group-list-items",
+              "showGroupWorkspaces": true
+            }
+          ]
+        },
+        {
           "tab": "my-work",
           "label": "My Work",
           "sections": [
@@ -262,7 +277,7 @@
                         "<p><strong>Are you ready? Let&#x27;s go!</strong></p>"
                       ]
                     }
-                  },                  
+                  },
                   {
                     "display": "teacher",
                     "content": {
@@ -277,7 +292,7 @@
                         "<p><strong>Are you ready? Let&#x27;s go!</strong></p>"
                       ]
                     }
-                  }             
+                  }
                 ]
               },
               "supports": []
@@ -330,7 +345,7 @@
                         "<p><em>Note: If you want to sketch the relationship, click on the pencil icon to create a drawing tile!</em></p>"
                       ]
                     }
-                  }                  
+                  }
                 ]
               },
               "supports": []
@@ -383,7 +398,7 @@
                         "<p><em>Note: If you want to sketch the relationship, click on the pencil icon to create a drawing tile!</em></p>"
                       ]
                     }
-                  }                                   
+                  }
                 ]
               },
               "supports": []
@@ -436,7 +451,7 @@
                         "<p><em>Note: If you want to sketch the relationship, click on the pencil icon to create a drawing tile!</em></p>"
                       ]
                     }
-                  }                                   
+                  }
                 ]
               },
               "supports": []
@@ -489,7 +504,7 @@
                         "<p><em>Note: If you want to sketch the relationship, click on the pencil icon to create a drawing tile!</em></p>"
                       ]
                     }
-                  }                                   
+                  }
                 ]
               },
               "supports": []
