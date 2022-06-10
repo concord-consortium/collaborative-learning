@@ -340,7 +340,7 @@ describe("ImageMap", () => {
                           displayUrl: kLocalImageUrl2
                         });
     sImageMap.syncContentUrl(kLocalImageUrl, imageEntry2);
-    const altEntry = sImageMap.getCachedImage(kLocalImageUrl2)
+    const altEntry = sImageMap.getCachedImage(kLocalImageUrl2);
     expect(altEntry).toEqual(imageEntry2);
 
     // syncs should update existing entries
