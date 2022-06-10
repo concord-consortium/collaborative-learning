@@ -43,13 +43,13 @@ function getNewDocumentLabel(section: NavTabSectionModelType , appConfigStore: A
 
 function getSectionDocs(section: NavTabSectionModelType, documents: DocumentsModelType, user: UserModelType,
   isTeacherDocument: (document: DocumentModelType) => boolean) {
-  const publishedDocs: { [source: string]: DocumentModelType } = {};
   let sectDocs: DocumentModelType[] = [];
   (section.documentTypes || []).forEach(type => {
     if (isUnpublishedType(type)) {
       sectDocs.push(...documents.byTypeForUser(type as any, user.id));
     }
     else if (isPublishedType(type)) {
+      const publishedDocs: { [source: string]: DocumentModelType } = {};
       // only show the most recent publication of each document
       documents
         .byType(type as any)
