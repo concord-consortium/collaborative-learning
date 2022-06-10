@@ -1,4 +1,4 @@
-import firebase from "firebase";
+import firebase from "firebase/app";
 import { firebaseConfig } from "./firebase-config";
 
 // The problem with this approach is that it can't be used to clear a logged in
@@ -14,7 +14,7 @@ export const clearFirebaseAnonQAUser = async () => {
   let firebaseUser: firebase.User | undefined;
 
   // We are ignoring the unsubscribe method returned because this function is only
-  // used in a one-off way. 
+  // used in a one-off way.
   firebase.auth().onAuthStateChanged((_firebaseUser) => {
     if (_firebaseUser) {
       firebaseUser = _firebaseUser;
@@ -27,7 +27,7 @@ export const clearFirebaseAnonQAUser = async () => {
     throw new Error("Firebase User not set after sign in");
   }
 
-  // Notes: 
+  // Notes:
   // 1. This path is defined in firebase.ts, there isn't an easy way to use the
   //    Firebase class without causing additional Firestore connections So it is
   //    duplicated here.

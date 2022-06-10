@@ -276,6 +276,10 @@ export const getDocumentContext = (document: DocumentModelType): IDocumentContex
   };
 };
 
+export interface IDocumentEnvironment {
+  appConfig?: AppConfigModelType;
+}
+
 /**
  * Create a DocumentModel and add a new sharedModelManager into its environment
  * 
@@ -284,7 +288,8 @@ export const getDocumentContext = (document: DocumentModelType): IDocumentContex
  */
 export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
   const sharedModelManager = createSharedModelDocumentManager();
-  const document = DocumentModel.create(snapshot, {sharedModelManager});
+  const documentEnv: IDocumentEnvironment = {};
+  const document = DocumentModel.create(snapshot, {sharedModelManager, documentEnv});
   if (document.content) {
     sharedModelManager.setDocument(document.content);
   }

@@ -1,37 +1,7 @@
 import React from "react";
-import { DrawingObjectDataType, Point } from "../model/drawing-objects";
-import { uniqueId } from "../../../utilities/js-utils";
-import { DrawingLayerView } from "./drawing-layer";
+import { Point } from "../model/drawing-basic-types";
 
 const SELECTION_COLOR = "#777";
-
-interface BoundingBox {
-  nw: Point;
-  se: Point;
-}
-
-export interface DrawingObjectOptions {
-  id: any;
-  handleHover?: (e: MouseEvent|React.MouseEvent<any>, obj: DrawingObject, hovering: boolean) => void;
-  drawingLayer: DrawingLayerView;
-}
-
-export default abstract class DrawingObject {
-  public model: DrawingObjectDataType;
-
-  constructor(model: DrawingObjectDataType) {
-    this.model = model;
-    this.model.id = this.model.id || uniqueId();
-  }
-
-  public inSelection(selectionBox: SelectionBox) {
-    const {nw, se} = this.getBoundingBox();
-    return selectionBox.overlaps(nw, se);
-  }
-
-  public abstract getBoundingBox(): BoundingBox;
-  public abstract render(options: DrawingObjectOptions): JSX.Element | null;
-}
 
 export class SelectionBox {
   private start: Point;

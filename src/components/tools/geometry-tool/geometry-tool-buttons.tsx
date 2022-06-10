@@ -58,7 +58,7 @@ export const DuplicateButton: React.FC<IClientToolButtonProps> = (props) => {
 export const LineLabelButton: React.FC<IClientToolButtonProps> = (props) => {
   const tooltipOptions = useTooltipOptions({ distance: kTooltipYDistance });
   return (
-    <Tooltip title="Line label" {...tooltipOptions}>
+    <Tooltip title="Segment label" {...tooltipOptions}>
       <GeometryToolButton SvgComponent={LineLabelSvg} className="line-label" {...props}/>
     </Tooltip>
   );

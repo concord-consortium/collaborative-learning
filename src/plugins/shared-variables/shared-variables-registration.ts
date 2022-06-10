@@ -4,6 +4,9 @@ import { kSharedVariablesID, SharedVariables } from "./shared-variables";
 import VariablesToolIcon from "./slate/variables.svg";
 import { VariablesPlugin } from "./slate/variables-plugin";
 import { updateAfterSharedModelChanges } from "./slate/variables-text-content";
+import { registerDrawingObjectInfo, registerDrawingToolInfo } from "../drawing-tool/components/drawing-object-manager";
+import { VariableChipComponent, VariableChipObject, VariableChipToolbarButton, 
+  VariableDrawingTool } from "./drawing/variable-object";
 
 registerSharedModelInfo({
   type: kSharedVariablesID,
@@ -18,3 +21,17 @@ registerTextPluginInfo({
   command: "configureVariable",
   updateTextContentAfterSharedModelChanges: updateAfterSharedModelChanges
 });
+
+registerDrawingObjectInfo({
+  type: "variable",
+  component:VariableChipComponent,
+  modelClass: VariableChipObject
+});
+
+registerDrawingToolInfo({
+  name: "variable",
+  toolClass: VariableDrawingTool,
+  buttonComponent: VariableChipToolbarButton
+});
+
+

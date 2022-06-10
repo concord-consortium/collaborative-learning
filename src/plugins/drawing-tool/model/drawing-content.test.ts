@@ -3,9 +3,12 @@ import {
   computeStrokeDashArray, defaultDrawingContent, DrawingContentModel, DrawingToolMetadataModel
 } from "./drawing-content";
 import { IDrawingTileImportSpec } from "./drawing-import";
-import { DefaultToolbarSettings, DrawingToolChange, kDrawingToolID } from "./drawing-types";
+import { DrawingToolChange, kDrawingToolID } from "./drawing-types";
+import { DefaultToolbarSettings } from "./drawing-basic-types";
 import { StampModel } from "./stamp";
 import { AppConfigModel } from "../../../models/stores/app-config-model";
+import { ImageObjectSnapshot } from "../objects/image";
+import { RectangleObjectSnapshot } from "../objects/rectangle";
 
 // mock Logger calls
 jest.mock("../../../lib/logger", () => {
@@ -79,7 +82,9 @@ describe("DrawingContentModel", () => {
 
   it("imports the drawing tool import format", () => {
     const model = createDrawingContent({
-      type: "Drawing", objects: [ { type: "rectangle", x: 10, y: 10, width: 100, height: 100 }]
+      type: "Drawing", objects: [ 
+        { type: "rectangle", x: 10, y: 10, width: 100, height: 100 } as RectangleObjectSnapshot
+      ]
     } as IDrawingTileImportSpec);
     expect(model.type).toBe(kDrawingToolID);
     expect(model.changes.length).toBe(1);
@@ -182,8 +187,11 @@ describe("DrawingContentModel", () => {
   });
 
   it("can update image urls", () => {
+    const initialImage: ImageObjectSnapshot = {
+      type: "image", id: "img1", url: "my/image/url", x: 0, y: 0, width: 10, height: 10
+    };
     const changes: DrawingToolChange[] = [
-      { action: "create", data: { type: "image", id: "img1", url: "my/image/url", x: 0, y: 0, width: 10, height: 10 }},
+      { action: "create", data: initialImage },
       { action: "update", data: { ids: ["img1"], update: { prop: "url", newValue: "my/image/url2" }}}
     ];
     const model = createDrawingContent({
