@@ -176,7 +176,8 @@ export const ImageMapModel = types
       // General Note: Typically actions should not be async like this. An async action will 
       // run outside normal action path so MST can't record its changes to the model.
       // If it tries to modify the model directly MST will raise an error. In the cases
-      // below other actions are always called to mae modifications so this is safe.
+      // below other actions are always called to make modifications so this is safe.
+      // TODO: switch to using `flow` just make this safer for future modifications
       async addFileImage(file: File): Promise<ImageMapEntryType> {
         const simpleImage = await storeFileImage(_db, file);
         const { normalized } = parseFauxFirebaseRTDBUrl(simpleImage.imageUrl);
@@ -228,7 +229,7 @@ export const externalUrlImagesHandler: IImageHandler = {
     const { db } = options || {};
     // upload images from external urls to our own firebase if possible
     // this may fail depending on CORS settings on target image.
-    // After the data of the image is uploaded to firebase is it is not
+    // After the data of the image is uploaded to firebase, it is not
     // explicitly downloaded again:
     // 1. storeImage creates a canvas and adds the url to this canvas
     // 2. a data uri is extracted from the canvas
@@ -377,10 +378,9 @@ export const firebaseRealTimeDBImagesHandler: IImageHandler = {
     if (db && path && normalized) {
       // In theory we could direct all firebase image requests to the cloud function,
       // but only cross-class supports require the use of the cloud function.
-      const blobPromise = classHash !== db.stores.user.classHash
-                            ? db.getCloudImageBlob(normalized)
-                            : db.getImageBlob(imageKey);
-      const blobUrl = await blobPromise;
+      const blobUrl = classHash !== db.stores.user.classHash
+                            ? await db.getCloudImageBlob(normalized)
+                            : await db.getImageBlob(imageKey);
       return blobUrl
              ? { filename: options?.filename, contentUrl: normalized, displayUrl: blobUrl }
              : {};
