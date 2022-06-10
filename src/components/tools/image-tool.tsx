@@ -102,8 +102,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     // Taken and modified from geometry-content.tsx.
     // TODO: This should be abstracted for all tiles.
     // if we haven't been assigned a title already, request one now
-    // we set the title without updating the content, so the title is ephemeral
-    if (!this.getContent().title) {
+    if (this.getTitle() === '') {
       const { model: { id }, onRequestUniqueTitle } = this.props;
       const title = onRequestUniqueTitle(id);
       title && this.getContent().setTitle(title);
