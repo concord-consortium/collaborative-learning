@@ -15,7 +15,6 @@
     width: $canvas-separator-width;
     height: 46px;
     bottom: 0;
-    background-color: $workspace-teal-light-4;
   }
 
   .playback-toolbar-button-component {
@@ -24,8 +23,8 @@
     align-items: center;
     height: 50px;
     width: 40px;
-    border-top: 2px solid #0592af;
-    border-right: 2px solid #0592af;
+    border-top: 2px solid;
+    border-right: 2px solid;
     border-top-right-radius: 3px;
     box-sizing: content-box;
 
@@ -34,7 +33,7 @@
     }
 
     .playback-toolbar-button-container {
-      background-color: $charcoal-light-6;
+      // background-color: $charcoal-light-6;
       height: 46px;
       width: 40px;
       display: flex;
@@ -45,14 +44,14 @@
       .playback-toolbar-button {
         width: 36px;
         height: 34px;
-        background-color: $charcoal-light-6;
+        // background-color: $charcoal-light-6;
         text-align: center;
         font-size: 20px;
         font-weight: bold;
         cursor: pointer;
 
         svg path {
-          fill: $charcoal-dark-1;
+          // fill: $charcoal-dark-1;
           pointer-events: none;
         }
 

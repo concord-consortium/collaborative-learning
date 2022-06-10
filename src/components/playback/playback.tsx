@@ -6,37 +6,42 @@ import PlaybackIcon from "../../clue/assets/icons/playback/playback-icon.svg";
 import PlayButton from "../../clue/assets/icons/playback/play-button.svg";
 
 import "./playback.scss";
+import { useUIStore } from "../../hooks/use-stores";
 
 // interface IProps {
 //   navTab: NavTabSpec; //need the tab to know which color to use
 // }
 
 export const PlaybackComponent: React.FC = () => {
+  const { activeNavTab } = useUIStore();
   const [showPlaybackControls, setShowPlaybackControls] = useState(false);
   const handleTogglePlaybackControlComponent = () => {
     setShowPlaybackControls(!showPlaybackControls);
   };
   const renderPlaybackToolbarButton = () => {
     const playbackToolbarButtonComponentStyle =
-      classNames("playback-toolbar-button-component", {"disabled" : false}, {"show-control": showPlaybackControls});
+      classNames("playback-toolbar-button-component", "themed", activeNavTab, {"disabled" : false},
+                  {"show-control": showPlaybackControls});
     return (
       <>
         <div className={playbackToolbarButtonComponentStyle} onClick={handleTogglePlaybackControlComponent}>
-          <div className={"playback-toolbar-button-container"}>
-            <PlaybackIcon className={"playback-toolbar-button"}/>
+          <div className={`playback-toolbar-button-container themed ${activeNavTab}`}>
+            <PlaybackIcon className={`playback-toolbar-button themed ${activeNavTab}`}/>
           </div>
         </div>
-        {showPlaybackControls && <div className="canvas-separator"/>}
+        {showPlaybackControls && <div className={`canvas-separator themed ${activeNavTab}`}/>}
       </>
     );
   };
+
   const renderPlayButton = () => {
     return (
-      <div className={"play-button"}>
-        <PlayButton />
+      <div className={`play-button themed ${activeNavTab}`}>
+        <PlayButton className={`themed ${activeNavTab}`}/>
       </div>
     );
   };
+  
   const renderTimeInfo = () => {
     return (
       <div className={"time-info"}>
@@ -47,7 +52,7 @@ export const PlaybackComponent: React.FC = () => {
   };
 
   const renderPlaybackControls = () => {
-    const playbackControlsClass = classNames("playback-controls");
+    const playbackControlsClass = classNames("playback-controls", "themed", activeNavTab);
 
     return (
       <div className={playbackControlsClass}>
