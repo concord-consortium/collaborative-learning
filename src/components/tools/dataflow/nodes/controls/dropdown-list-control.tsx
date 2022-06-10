@@ -1,5 +1,5 @@
 // FIXME: ESLint is unhappy with these control components
-/* eslint-disable react/display-name, react-hooks/rules-of-hooks */
+/* eslint-disable react-hooks/rules-of-hooks */
 import React, { useRef } from "react";
 import Rete, { NodeEditor, Node } from "rete";
 import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
@@ -153,11 +153,11 @@ export class DropdownListControl extends Rete.Control {
     this.props.value = val;
     this.putData(this.key, val);
     (this as any).update();
-  }
+  };
 
   public getValue = () => {
     return this.props.value;
-  }
+  };
 
   /**
    * Is passed a function that will check each list option to see if it should
@@ -167,11 +167,11 @@ export class DropdownListControl extends Rete.Control {
     this.props.isDisabled = fn;
     this.ensureValueIsInBounds();
     (this as any).update();
-  }
+  };
 
   public setOptions = (options: any) => {
     this.props.optionArray = options;
-  }
+  };
 
   /**
    * This is called both when we load (in case the options have changed, and the user
@@ -207,6 +207,6 @@ export class DropdownListControl extends Rete.Control {
       }
     }
     this.setValue(optionValue(enabledOptions[0]));
-  }
+  };
 }
 /* eslint-enable */

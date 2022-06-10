@@ -1,5 +1,5 @@
 // FIXME: ESLint is unhappy with these control components
-/* eslint-disable react/display-name, react-hooks/rules-of-hooks */
+/* eslint-disable react-hooks/rules-of-hooks */
 import React, { useRef } from "react";
 import Rete, { NodeEditor, Node } from "rete";
 import { useStopEventPropagation } from "./custom-hooks";
@@ -62,14 +62,14 @@ export class TextControl extends Rete.Control {
     this.props.value = val;
     this.putData(this.key, val);
     (this as any).update();
-  }
+  };
 
   public setColor = (color: string) => {
     this.props.color = color;
-  }
+  };
 
   public getValue = () => {
     return this.props.value;
-  }
+  };
 }
 /* eslint-enable */

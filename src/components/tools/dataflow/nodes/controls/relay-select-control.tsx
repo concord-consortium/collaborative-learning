@@ -1,5 +1,5 @@
 // FIXME: ESLint is unhappy with these control components
-/* eslint-disable react/display-name, react-hooks/rules-of-hooks */
+/* eslint-disable react-hooks/rules-of-hooks */
 import React, { useRef }  from "react";
 import Rete, { NodeEditor, Node } from "rete";
 import { NodeChannelInfo, kRelaySelectMessage,
@@ -135,16 +135,16 @@ export class RelaySelectControl extends Rete.Control {
     this.props.channels = channels;
     // problem, if called with event nodecreate, update doesn't exist
     // (this as any).update();
-  }
+  };
 
   public setValue = (val: any) => {
     this.props.value = val;
     this.putData(this.key, val);
     (this as any).update();
-  }
+  };
 
   public getValue = () => {
     return this.props.value;
-  }
+  };
 }
 /* eslint-enable */

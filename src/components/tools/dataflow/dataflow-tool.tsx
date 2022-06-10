@@ -1,7 +1,9 @@
+import { cloneDeep } from "lodash";
 import React from "react";
 import { SizeMe, SizeMeProps } from "react-sizeme";
 import { observer, inject } from "mobx-react";
 import { getSnapshot } from "mobx-state-tree";
+import { DataflowProgram, IStartProgramParams } from "./dataflow-program";
 import { BaseComponent } from "../../../components/base";
 import { ICreateOtherDocumentParams } from "../../../lib/db";
 import { IDocumentProperties } from "../../../lib/db-types";
@@ -11,6 +13,7 @@ import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { IToolTileProps } from "../tool-tile";
 
 import "./dataflow-tool.sass";
+import { DataflowContentModelType } from "src/models/tools/dataflow/dataflow-content";
 
 interface IProps extends IToolTileProps{
   model: ToolTileModelType;
@@ -96,7 +99,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
     const document = this.getDocument();
     if (document) {
       // get snapshot of DocumentContent
-      const contentSnapshot = cloneDeep(getSnapshot(document.content));
+      const contentSnapshot = document.content && cloneDeep(getSnapshot(document.content));
       // make a new DocumentContentModel from the snapshot
       const documentContent = DocumentContentModel.create(contentSnapshot);
       // find the program tile (should only be 1) and apply the program run info
@@ -120,13 +123,13 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
               content: JSON.parse(documentContent.publish())
             };
       const newPersonalDocument = await db.createPersonalDocument(createParams);
-      this.switchToDocument(newPersonalDocument);
+      newPersonalDocument && this.switchToDocument(newPersonalDocument);
     }
-  }
+  };
 
   private handleProgramChange = (program: any) => {
     this.getContent().setProgram(program);
-  }
+  };
 
   private getOriginalProgramDocument = () => {
     const { documents } = this.stores;
@@ -134,36 +137,36 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
     const originDocumentId = document && document.properties.get("dfProgramId");
     const originDocument = originDocumentId ? documents.getDocument(originDocumentId) : undefined;
     return originDocument?.getProperty("isDeleted") ? undefined : originDocument;
-  }
+  };
 
   private handleShowOriginalProgram = () => {
     const originDocument = this.getOriginalProgramDocument();
     originDocument && this.switchToDocument(originDocument);
-  }
+  };
 
   private handleSetProgramStartTime = (time: number) => {
     this.getContent().setProgramStartTime(time);
-  }
+  };
   private handleCheckProgramRunState = (endTime: number) => {
     this.getContent().setRunningStatus(endTime);
-  }
+  };
   private handleSetProgramEndTime = (time: number) => {
     this.getContent().setProgramEndTime(time);
     this.getContent().setRunningStatus(time);
-  }
+  };
 
   private handleSetProgramStartEndTime = (startTime: number, endTime: number) => {
     this.getContent().setProgramStartEndTime(startTime, endTime);
     this.getContent().setRunningStatus(endTime);
-  }
+  };
 
   private handleProgramRunTimeChange = (program: any) => {
     this.getContent().setProgramRunTime(program);
-  }
+  };
 
   private handleProgramZoomChange = (dx: number, dy: number, scale: number) => {
     this.getContent().setProgramZoom(dx, dy, scale);
-  }
+  };
 
   private getContent() {
     return this.props.model.content as DataflowContentModelType;

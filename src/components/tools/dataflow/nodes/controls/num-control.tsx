@@ -1,5 +1,5 @@
 // FIXME: ESLint is unhappy with these control components
-/* eslint-disable react/display-name, react-hooks/rules-of-hooks */
+/* eslint-disable react-hooks/rules-of-hooks */
 import React, { useRef } from "react";
 import Rete, { NodeEditor, Node } from "rete";
 import { useStopEventPropagation } from "./custom-hooks";
@@ -123,7 +123,7 @@ export class NumControl extends Rete.Control {
   public setInputValue = (val: string) => {
     this.props.inputValue = val;
     (this as any).update();
-  }
+  };
 
   public setValue = (val: number) => {
     if (this.min && val < this.min) {
@@ -135,14 +135,14 @@ export class NumControl extends Rete.Control {
     const periodUnitsInSeconds = periodUnits ? periodUnits.lengthInSeconds : 1;
     this.putData(this.key, val * periodUnitsInSeconds);
     (this as any).update();
-  }
+  };
 
   public restoreValue = () => {
     this.setInputValue(this.props.value);
-  }
+  };
 
   public getValue = () => {
     return this.props.value;
-  }
+  };
 }
 /* eslint-enable */

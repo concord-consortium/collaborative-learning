@@ -1,5 +1,3 @@
-// FIXME: ESLint is unhappy with these control components
-/* eslint-disable react/display-name, react-hooks/rules-of-hooks */
 import React from "react";
 import Rete, { NodeEditor, Node } from "rete";
 import { roundNodeValue } from "../../../../../models/tools/dataflow/utilities/node";
@@ -48,16 +46,15 @@ export class ValueControl extends Rete.Control {
   public setSentence = (sentence: string) => {
     this.props.sentence = sentence;
     (this as any).update();
-  }
+  };
 
   public setValue = (val: number) => {
     this.props.value = val;
     this.putData(this.key, val);
     (this as any).update();
-  }
+  };
 
   public getValue = () => {
     return this.props.value;
-  }
+  };
 }
-/* eslint-enable */

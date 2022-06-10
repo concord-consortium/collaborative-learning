@@ -1,5 +1,3 @@
-// FIXME: ESLint is unhappy with these control components
-/* eslint-disable react/display-name, react-hooks/rules-of-hooks */
 import React from "react";
 import Rete, { NodeEditor, Node } from "rete";
 import bulbOn from "../../../../../assets/tools/dataflow/lightbulb-on.png";
@@ -36,6 +34,5 @@ export class LightbulbControl extends Rete.Control {
     this.props.value = val;
     this.putData(this.key, val);
     (this as any).update();
-  }
+  };
 }
-/* eslint-enable */

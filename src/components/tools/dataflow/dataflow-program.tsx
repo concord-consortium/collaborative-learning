@@ -256,7 +256,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       style.height = `${editorHeight}px`;
     }
     return style;
-  }
+  };
 
   private initProgramEditor = () => {
     (async () => {
@@ -357,7 +357,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       }
 
     })();
-  }
+  };
 
   private processAndSave = async () => {
     await this.programEngine.abort();
@@ -367,7 +367,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.setState({disableDataStorage: false});
     }
     this.props.onProgramChange(programJSON);
-  }
+  };
 
   private updateChannels = () => {
     // // const { hubStore } = this.stores; FIXME
@@ -399,7 +399,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     //     }
     //   });
     // });
-  }
+  };
 
   private updateRunAndGraphStates() {
     const programRunState: ProgramRunStates = this.getRunState();
@@ -439,31 +439,31 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     } else {
       return ProgramRunStates.Ready;
     }
-  }
+  };
 
   private isReady = () => {
     return (this.state.programRunState === ProgramRunStates.Ready);
-  }
+  };
 
   private isRunning = () => {
     return (this.state.programRunState === ProgramRunStates.Running);
-  }
+  };
 
   private isComplete = () => {
     return (this.state.programRunState === ProgramRunStates.Complete);
-  }
+  };
 
   private isProgramOnly = () => {
     return (this.state.programDisplayState === ProgramDisplayStates.Program);
-  }
+  };
 
   private isGraphOnly = () => {
     return (this.state.programDisplayState === ProgramDisplayStates.Graph);
-  }
+  };
 
   private isSideBySide = () => {
     return (this.state.programDisplayState === ProgramDisplayStates.SideBySide);
-  }
+  };
 
   private getEditorClassForDisplayState() {
     return {
@@ -502,7 +502,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             [ProgramDisplayStates.Graph]: ProgramDisplayStates.Graph
           }[this.state.programDisplayState];
     this.setProgramDisplayState(programDisplayState);
-  }
+  };
 
   private handleClickSplitRight = () => {
     const programDisplayState = {
@@ -513,7 +513,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             [ProgramDisplayStates.Program]: ProgramDisplayStates.Program
           }[this.state.programDisplayState];
     this.setProgramDisplayState(programDisplayState);
-  }
+  };
 
   private keepNodesInView = () => {
     const margin = 5;
@@ -528,7 +528,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.programEditor.view.area.update();
       }
     }
-  }
+  };
 
   private getBoundingRectOfNode(n: Node): Rect | undefined {
     const { k } = this.programEditor.view.area.transform;
@@ -594,7 +594,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       return false;
     }
     return true;
-  }
+  };
 
   private checkActiveRelaysAndRunProgram = () => {
     // const { ui } = this.stores;  FIXME
@@ -618,7 +618,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     //   }
     //   this.checkDevicesAndRunProgram();
     // });
-  }
+  };
 
   private hasValidInputNodes = () => {
     const missingDevices: MissingDevice[] = [];
@@ -640,14 +640,14 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       }
     });
     return missingDevices;
-  }
+  };
 
   private prepareToRunProgram = () => {
     if (!this.hasValidOutputNodes()) {
       return;
     }
     this.checkActiveRelaysAndRunProgram();
-  }
+  };
   private checkDevicesAndRunProgram = () => {
     const missingDevices = this.hasValidInputNodes();
     if (missingDevices.length) {
@@ -668,7 +668,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     } else {
       this.requestNameAndRunProgram();
     }
-  }
+  };
 
   private requestNameAndRunProgram = () => {
     const dialogPrompt = this.hasDataStorage()
@@ -679,13 +679,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     .then((title: string) => {
       this.runProgram(title);
     });
-  }
+  };
 
   private closeCompletedRunProgramNodePlots = (program: any) => {
     if (this.props.programRunId && (this.getRunState() === ProgramRunStates.Complete)) {
       forEach(program.nodes, (node: any) => { node.data?.plot && (node.data.plot = false); });
     }
-  }
+  };
 
   private closeEditorNodePlots = () => {
     this.programEditor.nodes.forEach((n: Node) => {
@@ -694,7 +694,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         plotControl.setGraph(false);
       }
     });
-  }
+  };
 
   private runProgram = (programTitle: string) => {    // FIXME
     // const programData: any = this.generateProgramData(programTitle);
@@ -705,7 +705,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     // this.setState({programRunState: ProgramRunStates.Running,
     //                programDisplayState: ProgramDisplayStates.Graph,
     //                remainingTimeInSeconds: this.props.programRunTime || DEFAULT_PROGRAM_TIME});
-  }
+  };
   private stopProgram = () => {   // FIXME
     // deleteProgram(this.props.programEndTime);
     // const programEndTime = Date.now();
@@ -716,10 +716,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     // this.props.onCheckProgramRunState(programEndTime);
     // this.closeEditorNodePlots();
     // clearInterval(this.intervalHandle);
-  }
+  };
   private setProgramRunTime = (time: number) => {
     this.props.onProgramRunTimeChange(time);
-  }
+  };
   private generateProgramData = (programTitle: string) => {
     let interval =  1;
     let datasetName = "";
@@ -812,7 +812,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
               });
 
     return programData;
-  }
+  };
 
   private generateProgramRunId(programTitle: string, programStartTime: number) {
     return `${programTitle}-${programStartTime}`;
@@ -826,7 +826,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (nodeType === "Data Storage") {
       this.setState({disableDataStorage: true});
     }
-  }
+  };
   private getNewNodePosition = () => {
     const numNodes = this.programEditor.nodes.length;
     const kNodesPerColumn = 5;
@@ -841,7 +841,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                      * kColumnWidth + Math.floor(numNodes / (kNodesPerColumn * kNodesPerRow)) * kColumnOffset,
                      kTopMargin + numNodes % kNodesPerColumn * kRowHeight];
     return nodePos;
-  }
+  };
 
   private moveNodeToFront = (node: any, newNode: boolean) => {
     const totalNodes = this.programEditor.nodes.length;
@@ -863,7 +863,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         }
       }
     });
-  }
+  };
 
   private deviceRefresh = () => {   // FIXME
     // const message =
@@ -878,12 +878,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     //     iot.refreshAllHubsChannelInfo();
     //   }
     // });
-  }
+  };
 
   private clearProgram = () => {
     this.programEditor.clear();
     this.setState({disableDataStorage: false});
-  }
+  };
 
   // OBSOLETE: this function no longer works as expected
   // Setting ticks=0 no longer resets generators
@@ -899,7 +899,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         }
       }
     });
-  }
+  };
 
   private getDatasetName() {
     let datasetName: string | undefined;
@@ -930,7 +930,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private getNodeCount = (type?: string) => {
     return (type ? this.programEditor.nodes.filter(n => (n.name === type)).length : this.programEditor.nodes.length);
-  }
+  };
 
   private heartBeat = () => {
     const nodeProcessMap: { [name: string]: (n: Node) => void } = {
@@ -967,7 +967,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       })();
     }
     this.updateRunState();
-  }
+  };
 
   private updateNodeChannelInfo = (n: Node) => {
     const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
@@ -980,7 +980,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       relayList.setChannels(this.channels);
       (relayList as any).update();
     }
-  }
+  };
 
   private updateNodeSensorValue = (n: Node) => {
     const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
@@ -999,7 +999,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         sensorSelect.setSensorValue(NaN);
       }
     }
-  }
+  };
 
   private updateNodeRecentValues = (n: Node) => {
     const nodeValue: any = n.data.nodeValue;
@@ -1027,7 +1027,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (plotControl) {
       (n as any).update();
     }
-  }
+  };
 
   private getNodeSequenceNamesAndUnits = () => {
     // returns a mapping of input block ids to user-specified sequence names and units if available
@@ -1054,7 +1054,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       });
     }
     return { names: sequenceNames, units: sequenceUnits };
-  }
+  };
 
   private updateGraphDataSet = () => {
     if (this.props.programRunId && this.hasDataStorage()) {
@@ -1086,7 +1086,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       //   }
       // });
     }
-  }
+  };
 
   private updateGeneratorNode = (n: Node) => {
     const generatorType = n.data.generatorType;
@@ -1102,7 +1102,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         nodeValue.setValue(val);
       }
     }
-  }
+  };
 
   private updateTimerNode = (n: Node) => {
     const timeOn = Number(n.data.timeOn);
@@ -1116,7 +1116,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         nodeValue.setValue(val);
       }
     }
-  }
+  };
 
   private updateRunState = () => {
     if (this.isRunning()) {
@@ -1133,17 +1133,17 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.setState({ remainingTimeInSeconds });
       }
     }
-  }
+  };
 
   private zoomIn = () => {
     const { k } = this.programEditor.view.area.transform;
     this.setZoom(Math.min(MAX_ZOOM, k + .05));
-  }
+  };
 
   private zoomOut = () => {
     const { k } = this.programEditor.view.area.transform;
     this.setZoom(Math.max(MIN_ZOOM, k - .05));
-  }
+  };
 
   private setZoom = (zoom: number) => {
     const currentTransform = this.programEditor.view.area.transform;
@@ -1151,6 +1151,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.programEditor.view.area.update();
     const { transform } = this.programEditor.view.area;
     this.props.onZoomChange(transform.x, transform.y, transform.k);
-  }
+  };
 
 }

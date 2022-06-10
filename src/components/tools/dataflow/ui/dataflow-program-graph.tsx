@@ -57,17 +57,17 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
   }
   public handleLayoutClick = () => {
     this.setState(prevState => ({stacked: !prevState.stacked}));
-  }
+  };
   public handleTypeClick = () => {
     this.setState(prevState => ({scatter: !prevState.scatter}));
-  }
+  };
   public handleDataModeClick = () => {
     this.setState(prevState => ({fullRun: !prevState.fullRun}));
-  }
+  };
   public handleExport = () => {
     const {dataSet} = this.props;
     exportDataCSV(dataSet.sequences);
-  }
+  };
 
   public handleExportImage = () => {
     const node = this.graphContainerRef.current;
@@ -107,7 +107,7 @@ export class DataflowProgramGraph extends React.Component<IProps, IState> {
       link.click();
       document.body.removeChild(link);
     }
-  }
+  };
 
   public shouldComponentUpdate(nextProps: IProps, nextState: IState) {
     if (!isEqual(nextState.dataSetHidden, this.state.dataSetHidden)) {

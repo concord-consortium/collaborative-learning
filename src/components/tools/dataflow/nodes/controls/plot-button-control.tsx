@@ -1,5 +1,3 @@
-// FIXME: ESLint is unhappy with these control components
-/* eslint-disable react/display-name, react-hooks/rules-of-hooks */
 import React from "react";
 import Rete, { NodeEditor, Node } from "rete";
 import "./plot-button-control.sass";
@@ -52,7 +50,6 @@ export class PlotButtonControl extends Rete.Control {
     // in the proper state after the button is pressed
     this.node.update();
     this.emitter.trigger("process");
-  }
+  };
 
 }
-/* eslint-enable */

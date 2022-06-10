@@ -1,5 +1,5 @@
 // FIXME: ESLint is unhappy with these control components
-/* eslint-disable react/display-name, react-hooks/rules-of-hooks */
+/* eslint-disable react-hooks/rules-of-hooks */
 import React, { useRef }  from "react";
 import Rete, { NodeEditor, Node } from "rete";
 import { NodeSensorTypes, NodeChannelInfo,
@@ -248,7 +248,7 @@ export class SensorSelectControl extends Rete.Control {
     this.props.channels = channels;
     // problem, if called with event nodecreate, update doesn't exist
     // (this as any).update();
-  }
+  };
 
   public setSensorType = (val: any) => {
     this.setSensor("none");
@@ -256,7 +256,7 @@ export class SensorSelectControl extends Rete.Control {
     this.props.type = val;
     this.putData("type", val);
     (this as any).update();
-  }
+  };
 
   public setSensor = (val: any) => {
     const nch: NodeChannelInfo = this.props.channels.find((ch: any) => ch.channelId === val);
@@ -271,22 +271,22 @@ export class SensorSelectControl extends Rete.Control {
     this.props.sensor = val;
     this.putData("sensor", val);
     (this as any).update();
-  }
+  };
 
   public setSensorValue = (val: any) => {
     this.props.value = val;
     this.putData("nodeValue", val);
     (this as any).update();
-  }
+  };
 
   public setSensorVirtualState = (val: boolean) => {
     this.props.value = val;
     this.putData("virtual", val);
     (this as any).update();
-  }
+  };
 
   public getSensorValue = () => {
     return this.props.value;
-  }
+  };
 }
 /* eslint-enable */

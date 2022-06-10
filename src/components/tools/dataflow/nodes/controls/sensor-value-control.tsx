@@ -1,5 +1,3 @@
-// FIXME: ESLint is unhappy with these control components
-/* eslint-disable react/display-name, react-hooks/rules-of-hooks */
 import React from "react";
 import Rete, { NodeEditor, Node } from "rete";
 import { NodeSensorTypes } from "../../../../../models/tools/dataflow/utilities/node";
@@ -44,11 +42,11 @@ export class SensorValueControl extends Rete.Control {
     this.putData(this.key, val);
     this.updateUnits();
     (this as any).update();
-  }
+  };
 
   public getValue = () => {
     return this.props.value;
-  }
+  };
 
   private updateUnits = () => {
     const type = this.node.data.type as string;
@@ -58,6 +56,5 @@ export class SensorValueControl extends Rete.Control {
       units = sensorType.units;
     }
     this.props.units = units;
-  }
+  };
 }
-/* eslint-enable */
