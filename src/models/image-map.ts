@@ -1,6 +1,6 @@
-import { types, Instance, SnapshotIn, clone, getSnapshot } from "mobx-state-tree";
+import { types, Instance, SnapshotIn, clone, getSnapshot, flow } from "mobx-state-tree";
 import {
-  getImageDimensions, isPlaceholderImage, storeCorsImage, storeFileImage, storeImage
+  getImageDimensions, IImageDimensions, ISimpleImage, isPlaceholderImage, storeCorsImage, storeFileImage, storeImage
 } from "../utilities/image-utils";
 import { DB } from "../lib/db";
 import placeholderImage from "../assets/image_placeholder.png";
@@ -105,7 +105,35 @@ export const ImageMapModel = types
     }
   }))
   .actions(self => ({
-    async addImage(url: string, snapshot: ImageMapEntrySnapshot): Promise<ImageMapEntryType> {
+    // Flows are the recommended way to deal with async actions in MobX and MobX State Tree.
+    // However, typing them is difficult. If you leave them untyped like:
+    // `flow(function* addImage(url: string, snapshot: ImageMapEntrySnapshot) {` 
+    // The return value will be a Promise based on the actual return value of the generator
+    // function. This means there is no enforcement of a particular return type.
+    // Also the value of all yield calls is any. 
+    //
+    // The approach used below types the generator function with:
+    //   Generator<PromiseLike<any>, ImageMapEntryType, unknown>
+    // which means:
+    // - the value passed to yield has to be PromiseLike<any>
+    // - the return type has to be ImageMapEntryType
+    // - yield returns an unknown type so you have to cast it before using it
+    //
+    // Ignoring the return value of yield there are two other options for enforcing the return
+    // value of the flow:
+    // - `flow<ImageMapEntryType, any>(function* addImage(url: string, snapshot: ImageMapEntrySnapshot) {`
+    // - `flow<ImageMapEntryType, [string, ImageMapEntrySnapshot]>(function* addImage(url, snapshot) {`
+    // The first option looks nice because the arguments are typed as normal, however it means the actual
+    // action will have un typed arguments
+    // The second results in a weird signature where the argument names of addImage are just arg0, arg1
+    // In both of these cases the return value of yield is any so it is not as safe as the Generator 
+    // approach being used.
+    //
+    // There is also the yield* toGenerator approach https://mobx-state-tree.js.org/API/#togenerator which
+    // provides a way to automatically type the return value of the yield. But that doesn't solve 
+    // the problem of typing the return value of the flow.
+    addImage: flow(function* addImage(url: string, snapshot: ImageMapEntrySnapshot)
+                               : Generator<PromiseLike<any>, ImageMapEntryType, unknown> {
       let entry: ImageMapEntryType | undefined;
 
       // update existing entry
@@ -138,7 +166,7 @@ export const ImageMapModel = types
       // Also in most cases addImage is not called until the image has already been
       // downloaded and displayUrl is actually a blob url.
       // So it should be unlikely in these cases that getImageDimensions will fail.
-      const dimensions = await getImageDimensions(entry && entry.displayUrl || url);
+      const dimensions = (yield getImageDimensions(entry && entry.displayUrl || url)) as IImageDimensions;
       const imageEntry = self.images.get(url);
       if (!imageEntry) {
         // This should really not happen, we just added an image entry above
@@ -153,7 +181,7 @@ export const ImageMapModel = types
       // The last one to finish might not be the right one if there are multiple.
       self.syncContentUrl(url, imageEntry);
       return imageEntry;
-    }
+    })
   }))
   .actions(self => {
     let _db: DB;
@@ -173,13 +201,8 @@ export const ImageMapModel = types
         _db = db;
       },
 
-      // General Note: Typically actions should not be async like this. An async action will 
-      // run outside normal action path so MST can't record its changes to the model.
-      // If it tries to modify the model directly MST will raise an error. In the cases
-      // below other actions are always called to make modifications so this is safe.
-      // TODO: switch to using `flow` just make this safer for future modifications
-      async addFileImage(file: File): Promise<ImageMapEntryType> {
-        const simpleImage = await storeFileImage(_db, file);
+      addFileImage: flow(function* (file: File): Generator<PromiseLike<any>, Promise<ImageMapEntryType>, unknown> {
+        const simpleImage = (yield storeFileImage(_db, file)) as ISimpleImage;
         const { normalized } = parseFauxFirebaseRTDBUrl(simpleImage.imageUrl);
         const entry: ImageMapEntrySnapshot = {
                 filename: file.name,
@@ -187,9 +210,10 @@ export const ImageMapModel = types
                 displayUrl: simpleImage.imageData
               };
         return self.addImage(entry.contentUrl!, entry);
-      },
+      }),
 
-      async getImage(url: string, options?: IImageBaseOptions): Promise<ImageMapEntryType> {
+      getImage: flow(function* (url: string, options?: IImageBaseOptions)
+                       : Generator<PromiseLike<any>, ImageMapEntryType | Promise<ImageMapEntryType>, unknown> {
         if (!url) {
           return clone(self.images.get(placeholderImage)!);
         }
@@ -202,13 +226,13 @@ export const ImageMapModel = types
 
         const handler = self.getHandler(url);
         if (handler) {
-          const imageEntrySnapshot = await handler.store(url, { db: _db, ...options });
+          const imageEntrySnapshot = (yield handler.store(url, { db: _db, ...options })) as ImageMapEntrySnapshot;
           return self.addImage(url, imageEntrySnapshot);
         }
         else {
           return clone(self.images.get(placeholderImage)!);
         }
-      }
+      })
 
     };
   });
