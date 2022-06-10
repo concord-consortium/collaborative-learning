@@ -1,5 +1,5 @@
  
-// Taken from @blueprintjs/core/lib/css/blueprint.css 
+// Taken from @blueprintjs/core/lib/css/blueprint.css, which was in use until ~ CLUE 2.2.
 @charset "UTF-8";
 
 html {
@@ -22,10 +22,6 @@ body {
 p {
   margin-bottom:10px;
   margin-top:0;
-}
-
-::-moz-selection {
-  background:rgba(125, 188, 255, 0.6);
 }
 
 ::selection {
