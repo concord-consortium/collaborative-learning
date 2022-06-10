@@ -117,7 +117,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
 
     this.props.onRegisterToolApi({
       getTitle: () => {
-        return this.getContent().title || "";
+        return this.getTitle();
       },
       exportContentAsTileJson: (options?: ITileExportOptions) => {
         return this.getContent().exportJson(options);
@@ -251,14 +251,16 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     };
   }
 
+  private getTitle() {
+    return this.getContent().title || "";
+  }
+
   private renderTitle() {
-    const getTitle = () => this.getContent().title || "";
-    // const { measureText, readOnly, size, scale } = this.props;
     const { readOnly, scale } = this.props;
     const measureText = this.getMeasureText("italic 14px Lato, sans-serif");
     const size = {width: this.state.imageEltWidth || null , height: this.state.imageEltHeight || null};
     return (
-      <EditableTileTitle key="geometry-title" size={size} scale={scale} getTitle={getTitle}
+      <EditableTileTitle key="geometry-title" size={size} scale={scale} getTitle={this.getTitle.bind(this)}
                               readOnly={readOnly} measureText={measureText}
                               onBeginEdit={this.handleBeginEditTitle} onEndEdit={this.handleTitleChange} />
     );
