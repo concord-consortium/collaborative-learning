@@ -98,15 +98,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     this.canvas = document.createElement("canvas");
     this.textSizeCache = {};
     this.measureText = (text:string) => { return measureText(text, this.canvas, this.textSizeCache); };
-
-    // Taken and modified from geometry-content.tsx.
-    // TODO: This should be abstracted for all tiles.
-    // if we haven't been assigned a title already, request one now
-    if (this.getTitle() === '') {
-      const { model: { id }, onRequestUniqueTitle } = this.props;
-      const title = onRequestUniqueTitle(id);
-      title && this.getContent().setTitle(title);
-    }
   }
 
   public componentDidMount() {
@@ -139,6 +130,15 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
         this.toolbarToolApi?.handleTileResize?.(entry);
       }
     });
+    
+    // Taken and modified from geometry-content.tsx.
+    // TODO: This should be abstracted for all tiles.
+    // if we haven't been assigned a title already, request one now
+    if (this.getTitle() === '') {
+      const { model: { id }, onRequestUniqueTitle } = this.props;
+      const title = onRequestUniqueTitle(id);
+      title && this.getContent().setTitle(title);
+    }
   }
 
   public componentWillUnmount() {
