@@ -16,21 +16,21 @@ beforeAll(() => {
 });
 
 describe("ImageMap", () => {
-  const kLocalImage = "assets/logo_tw.png";
-  const kHttpImage = "http://icon.cat/img/icon_loop.png";
-  const kHttpsImage = "https://icon.cat/img/icon_loop.png";
+  const kLocalImageUrl = "assets/logo_tw.png";
+  const kHttpImageUrl = "http://icon.cat/img/icon_loop.png";
+  const kHttpsImageUrl = "https://icon.cat/img/icon_loop.png";
   const kFBStorageUrl = "https://firebasestorage.googleapis.com/path/to/image";
   const kFBStorageRef = "/dev/w8podRScLDbiu5zK3bE6323PY6G3/portals/localhost/coin-background.png";
-  const kCCImgOriginal = "ccimg://imagePath";
-  const kCCImgFBRTDB = "ccimg://fbrtdb.concord.org/imagePath";
+  const kCCImgOriginalUrl = "ccimg://imagePath";
+  const kCCImgFBRTDBUrl = "ccimg://fbrtdb.concord.org/imagePath";
   // starting with CLUE 2.1.3, image paths include the class hash
-  const kCCImgClassFBRTDB = "ccimg://fbrtdb.concord.org/classHash/imagePath";
-  const kCCImgS3 = "ccimg://s3.concord.org/path/to/image";
+  const kCCImgClassFBRTDBUrl = "ccimg://fbrtdb.concord.org/classHash/imagePath";
+  const kCCImgS3Url = "ccimg://s3.concord.org/path/to/image";
   const kBlobUrl = "blob://some-blob-path";
   const kDataUri = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABG2lUWH";
   const kInputs = [
-          kLocalImage, kHttpImage, kHttpsImage, kFBStorageUrl, kFBStorageRef,
-          kCCImgOriginal, kCCImgFBRTDB, kCCImgClassFBRTDB, kDataUri, kCCImgS3, kBlobUrl];
+          kLocalImageUrl, kHttpImageUrl, kHttpsImageUrl, kFBStorageUrl, kFBStorageRef,
+          kCCImgOriginalUrl, kCCImgFBRTDBUrl, kCCImgClassFBRTDBUrl, kDataUri, kCCImgS3Url, kBlobUrl];
   const kHandlers = [
           localAssetsImagesHandler, externalUrlImagesHandler, externalUrlImagesHandler,
           firebaseStorageImagesHandler, firebaseStorageImagesHandler,
@@ -61,31 +61,31 @@ describe("ImageMap", () => {
 
   it("test basic accessors", () => {
     expect(sImageMap.isExternalUrl(placeholderImage)).toBe(false);
-    expect(sImageMap.isExternalUrl(kLocalImage)).toBe(false);
-    expect(sImageMap.isExternalUrl(kHttpImage)).toBe(true);
-    expect(sImageMap.isExternalUrl(kHttpsImage)).toBe(true);
+    expect(sImageMap.isExternalUrl(kLocalImageUrl)).toBe(false);
+    expect(sImageMap.isExternalUrl(kHttpImageUrl)).toBe(true);
+    expect(sImageMap.isExternalUrl(kHttpsImageUrl)).toBe(true);
     expect(sImageMap.isExternalUrl(kFBStorageUrl)).toBe(false);
     expect(sImageMap.isExternalUrl(kDataUri)).toBe(true);
 
     expect(sImageMap.isPlaceholder(placeholderImage)).toBe(true);
-    expect(sImageMap.isPlaceholder(kLocalImage)).toBe(false);
-    expect(sImageMap.isPlaceholder(kHttpImage)).toBe(false);
-    expect(sImageMap.isPlaceholder(kHttpsImage)).toBe(false);
+    expect(sImageMap.isPlaceholder(kLocalImageUrl)).toBe(false);
+    expect(sImageMap.isPlaceholder(kHttpImageUrl)).toBe(false);
+    expect(sImageMap.isPlaceholder(kHttpsImageUrl)).toBe(false);
     expect(sImageMap.isPlaceholder(kFBStorageUrl)).toBe(false);
     expect(sImageMap.isPlaceholder(kDataUri)).toBe(false);
   });
 
   it("test localAssetsImagesHandler", () => {
-    expectToMatch(localAssetsImagesHandler, [kLocalImage]);
-    return localAssetsImagesHandler.store(kLocalImage)
+    expectToMatch(localAssetsImagesHandler, [kLocalImageUrl]);
+    return localAssetsImagesHandler.store(kLocalImageUrl)
             .then(imageResult => {
-              expect(imageResult.contentUrl).toBe(kLocalImage);
-              expect(imageResult.displayUrl).toBe(kLocalImage);
+              expect(imageResult.contentUrl).toBe(kLocalImageUrl);
+              expect(imageResult.displayUrl).toBe(kLocalImageUrl);
             });
   });
 
   it("test externalUrlImagesHandler", () => {
-    expectToMatch(externalUrlImagesHandler, [kHttpImage, kHttpsImage, kFBStorageUrl, kDataUri]);
+    expectToMatch(externalUrlImagesHandler, [kHttpImageUrl, kHttpsImageUrl, kFBStorageUrl, kDataUri]);
 
     let p1: any;
     let p2: any;
@@ -93,8 +93,8 @@ describe("ImageMap", () => {
     {
       const storeSpy = jest.spyOn(ImageUtils, "storeImage")
                             .mockImplementation(() =>
-                              Promise.resolve({ imageUrl: kCCImgFBRTDB, imageData: kBlobUrl}));
-      p1 = externalUrlImagesHandler.store(kHttpsImage, { db: createMockDB() })
+                              Promise.resolve({ imageUrl: kCCImgFBRTDBUrl, imageData: kBlobUrl}));
+      p1 = externalUrlImagesHandler.store(kHttpsImageUrl, { db: createMockDB() })
         .then(imageResult => {
           expect(storeSpy).toHaveBeenCalled();
           expect(imageResult.contentUrl &&
@@ -105,11 +105,11 @@ describe("ImageMap", () => {
     {
       const storeSpy = jest.spyOn(ImageUtils, "storeImage")
                             .mockImplementation(() => Promise.reject(new Error("Loading error")));
-      p2 = externalUrlImagesHandler.store(kHttpsImage, { db: createMockDB() })
+      p2 = externalUrlImagesHandler.store(kHttpsImageUrl, { db: createMockDB() })
         .then(imageResult => {
           expect(storeSpy).toHaveBeenCalled();
-          expect(imageResult.contentUrl).toBe(kHttpsImage);
-          expect(imageResult.displayUrl).toBe(kHttpsImage);
+          expect(imageResult.contentUrl).toBe(kHttpsImageUrl);
+          expect(imageResult.displayUrl).toBe(kHttpsImageUrl);
         });
     }
     return Promise.all([p1, p2]);
@@ -120,7 +120,7 @@ describe("ImageMap", () => {
     let p2: any;
 
     {
-      const kHttpsImage2 = kHttpsImage + "2";
+      const kHttpsImage2 = kHttpsImageUrl + "2";
       const storeSpy = jest.spyOn(ImageUtils, "storeImage")
                             .mockImplementation(() =>
                               Promise.resolve({ imageUrl: placeholderImage, imageData: placeholderImage}));
@@ -132,7 +132,7 @@ describe("ImageMap", () => {
         });
     }
     {
-      const kHttpsImage3 = kHttpsImage + "3";
+      const kHttpsImage3 = kHttpsImageUrl + "3";
       const storeSpy = jest.spyOn(ImageUtils, "storeImage")
                             .mockImplementation(() =>
                               Promise.resolve({ imageUrl: placeholderImage, imageData: placeholderImage}));
@@ -150,7 +150,7 @@ describe("ImageMap", () => {
     expectToMatch(firebaseStorageImagesHandler, [kFBStorageUrl, kFBStorageRef]);
 
     const storeSpy = jest.spyOn(ImageUtils, "storeCorsImage")
-                          .mockImplementation(() => Promise.resolve({ imageUrl: kCCImgFBRTDB, imageData: kBlobUrl}));
+                          .mockImplementation(() => Promise.resolve({ imageUrl: kCCImgFBRTDBUrl, imageData: kBlobUrl}));
     return firebaseStorageImagesHandler.store(kFBStorageUrl, { db: createMockDB() })
       .then(imageResult => {
         expect(storeSpy).toHaveBeenCalled();
@@ -162,7 +162,7 @@ describe("ImageMap", () => {
 
   it("test firebaseStorageImagesHandler on firebase storage reference", () => {
     const storeSpy = jest.spyOn(ImageUtils, "storeImage")
-                          .mockImplementation(() => Promise.resolve({ imageUrl: kCCImgFBRTDB, imageData: kBlobUrl}));
+                          .mockImplementation(() => Promise.resolve({ imageUrl: kCCImgFBRTDBUrl, imageData: kBlobUrl}));
     return firebaseStorageImagesHandler.store(kFBStorageRef, { db: createMockDB() })
       .then(imageResult => {
         expect(storeSpy).toHaveBeenCalled();
@@ -178,7 +178,7 @@ describe("ImageMap", () => {
           });
     // const storeSpy = jest.spyOn(ImageUtils, "storeImage")
     //                       .mockImplementation(() => Promise.resolve({ imageUrl: kCCImgFBRTDB, imageData: kBlobUrl}));
-    firebaseStorageImagesHandler.store(kCCImgFBRTDB, { db: mockDB })
+    firebaseStorageImagesHandler.store(kCCImgFBRTDBUrl, { db: mockDB })
       .then(imageResult => {
         // expect(storeSpy).not.toHaveBeenCalled();
         expect(imageResult.contentUrl).toBe(placeholderImage);
@@ -187,7 +187,7 @@ describe("ImageMap", () => {
 
     // handle invalid user Id
     mockDB.stores.user.id = "";
-    firebaseStorageImagesHandler.store(kCCImgFBRTDB, { db: mockDB })
+    firebaseStorageImagesHandler.store(kCCImgFBRTDBUrl, { db: mockDB })
       .then(imageResult => {
         // expect(storeSpy).not.toHaveBeenCalled();
         expect(imageResult.contentUrl).toBe(placeholderImage);
@@ -202,7 +202,7 @@ describe("ImageMap", () => {
           });
     // const storeSpy = jest.spyOn(ImageUtils, "storeImage")
     //                       .mockImplementation(() => Promise.reject(new Error("Conversion error")));
-    return firebaseStorageImagesHandler.store(kCCImgFBRTDB, { db: mockDB })
+    return firebaseStorageImagesHandler.store(kCCImgFBRTDBUrl, { db: mockDB })
       .then(imageResult => {
         // expect(storeSpy).not.toHaveBeenCalled();
         expect(imageResult.contentUrl).toBe(placeholderImage);
@@ -213,48 +213,48 @@ describe("ImageMap", () => {
   it("test firebaseStorageImagesHandler error handling", () => {
     const storeSpy = jest.spyOn(ImageUtils, "storeImage")
                           .mockImplementation(() => Promise.reject(new Error("Conversion error")));
-    return firebaseStorageImagesHandler.store(kCCImgFBRTDB, { db: createMockDB() })
+    return firebaseStorageImagesHandler.store(kCCImgFBRTDBUrl, { db: createMockDB() })
       .then(imageResult => {
         expect(storeSpy).toHaveBeenCalled();
-        expect(imageResult.contentUrl).toBe(kCCImgFBRTDB);
+        expect(imageResult.contentUrl).toBe(kCCImgFBRTDBUrl);
         expect(imageResult.displayUrl).toBe(kBlobUrl);
       });
   });
 
   it("test firebaseRealTimeDBImagesHandler", () => {
-    const { imageKey } = parseFirebaseImageUrl(kCCImgClassFBRTDB);
-    expectToMatch(firebaseRealTimeDBImagesHandler, [kCCImgOriginal, kCCImgFBRTDB, kCCImgClassFBRTDB]);
+    const { imageKey } = parseFirebaseImageUrl(kCCImgClassFBRTDBUrl);
+    expectToMatch(firebaseRealTimeDBImagesHandler, [kCCImgOriginalUrl, kCCImgFBRTDBUrl, kCCImgClassFBRTDBUrl]);
     let p1: any;
     let p2: any;
     let p3: any;
     let p4: any;
     {
       const mockDB = createMockDB();
-      p1 = firebaseRealTimeDBImagesHandler.store(kCCImgOriginal, { db: mockDB })
+      p1 = firebaseRealTimeDBImagesHandler.store(kCCImgOriginalUrl, { db: mockDB })
         .then(imageResult => {
           // url doesn't include classHash, so we use the firebase function
-          expect(mockDB.getCloudImageBlob).toHaveBeenCalledWith(kCCImgFBRTDB);
-          expect(imageResult.contentUrl).toBe(kCCImgFBRTDB);
+          expect(mockDB.getCloudImageBlob).toHaveBeenCalledWith(kCCImgFBRTDBUrl);
+          expect(imageResult.contentUrl).toBe(kCCImgFBRTDBUrl);
           expect(imageResult.displayUrl).toMatch(/^blob:/);
         });
     }
     {
       const mockDB = createMockDB();
-      p2 = firebaseRealTimeDBImagesHandler.store(kCCImgFBRTDB, { db: mockDB })
+      p2 = firebaseRealTimeDBImagesHandler.store(kCCImgFBRTDBUrl, { db: mockDB })
         .then(imageResult => {
           // url doesn't include classHash, so we use the firebase function
-          expect(mockDB.getCloudImageBlob).toHaveBeenCalledWith(kCCImgFBRTDB);
-          expect(imageResult.contentUrl).toBe(kCCImgFBRTDB);
+          expect(mockDB.getCloudImageBlob).toHaveBeenCalledWith(kCCImgFBRTDBUrl);
+          expect(imageResult.contentUrl).toBe(kCCImgFBRTDBUrl);
           expect(imageResult.displayUrl).toMatch(/^blob:/);
         });
     }
     {
       const mockDB = createMockDB();
-      p3 = firebaseRealTimeDBImagesHandler.store(kCCImgClassFBRTDB, { db: mockDB })
+      p3 = firebaseRealTimeDBImagesHandler.store(kCCImgClassFBRTDBUrl, { db: mockDB })
         .then(imageResult => {
           // url does include classHash, so we can retrieve it locally
           expect(mockDB.getImageBlob).toHaveBeenCalledWith(imageKey);
-          expect(imageResult.contentUrl).toBe(kCCImgClassFBRTDB);
+          expect(imageResult.contentUrl).toBe(kCCImgClassFBRTDBUrl);
           expect(imageResult.displayUrl).toMatch(/^blob:/);
         });
     }
@@ -315,16 +315,16 @@ describe("ImageMap", () => {
                         .mockImplementation(() =>
                           Promise.resolve({ src: placeholderImage, width: 200, height: 150 }));
     const listener = jest.fn();
-    sImageMap.registerListener(kLocalImage, "foo", listener);
-    sImageMap.registerListener(kLocalImage, "bar", listener);
+    sImageMap.registerListener(kLocalImageUrl, "foo", listener);
+    sImageMap.registerListener(kLocalImageUrl, "bar", listener);
     const count = sImageMap.imageCount;
-    return sImageMap.getImage(kLocalImage)
+    return sImageMap.getImage(kLocalImageUrl)
             .then(image => {
               expect(sImageMap.imageCount).toBe(count + 1);
-              expect(sImageMap.hasImage(kLocalImage));
+              expect(sImageMap.hasImage(kLocalImageUrl));
               expect(dimSpy).toHaveBeenCalled();
-              expect(image.contentUrl).toBe(kLocalImage);
-              expect(image.displayUrl).toBe(kLocalImage);
+              expect(image.contentUrl).toBe(kLocalImageUrl);
+              expect(image.displayUrl).toBe(kLocalImageUrl);
               expect(image.width).toBe(200);
               expect(image.height).toBe(150);
               expect(listener).toHaveBeenCalledTimes(2);
@@ -332,23 +332,46 @@ describe("ImageMap", () => {
   });
 
   it("can update an image entry", () => {
-    const kLocalImage2 = kLocalImage + "2";
-    const kLocalImage2b = kLocalImage2 + "b";
+    const kLocalImageUrl2 = kLocalImageUrl + "2";
+    const kLocalImageUrl2b = kLocalImageUrl2 + "b";
     const imageEntry2 = ImageMapEntry.create({
-                          ...sImageMap.getCachedImage(kLocalImage),
-                          contentUrl: kLocalImage2,
-                          displayUrl: kLocalImage2
+                          ...sImageMap.getCachedImage(kLocalImageUrl),
+                          contentUrl: kLocalImageUrl2,
+                          displayUrl: kLocalImageUrl2
                         });
-    sImageMap.syncContentUrl(kLocalImage, imageEntry2);
-    expect(sImageMap.getCachedImage(kLocalImage2)).toEqual(imageEntry2);
+    sImageMap.syncContentUrl(kLocalImageUrl, imageEntry2);
+    const altEntry = sImageMap.getCachedImage(kLocalImageUrl2);
+    expect(altEntry).toEqual(imageEntry2);
 
-    const imageEntry2b = ImageMapEntry.create({
-                          ...imageEntry2,
-                          contentUrl: kLocalImage2b,
-                          displayUrl: kLocalImage2b
-                        });
-    sImageMap.addImage(kLocalImage2, imageEntry2b);
-    expect(sImageMap.getCachedImage(kLocalImage2)).toEqual(imageEntry2b);
+    // syncs should update existing entries
+    const imageEntry2mod = ImageMapEntry.create({
+      ...sImageMap.getCachedImage(kLocalImageUrl),
+      contentUrl: kLocalImageUrl2,
+      displayUrl: kLocalImageUrl2,
+      width: 20,
+      height: 20
+    });
+    sImageMap.syncContentUrl(kLocalImageUrl, imageEntry2mod);
+    expect(altEntry).toEqual(imageEntry2mod);
+
+    // Update an existing entry using addImage.
+    // It only updates the contentUrl and displayUrl
+    // So the width and height that were set above will still
+    // be set when the image is read out again.
+    // TODO: I'm not sure this case is really needed.
+    const imageEntry2Changed = ImageMapEntry.create({
+                                ...imageEntry2,
+                                contentUrl: kLocalImageUrl2b,
+                                displayUrl: kLocalImageUrl2b
+                              });
+    sImageMap.addImage(kLocalImageUrl2, imageEntry2Changed);
+    const imageEntry2Expected= ImageMapEntry.create({
+      ...imageEntry2mod,
+      contentUrl: kLocalImageUrl2b,
+      displayUrl: kLocalImageUrl2b
+    });
+
+    expect(sImageMap.getCachedImage(kLocalImageUrl2)).toEqual(imageEntry2Expected);
   });
 
   it("returns the placeholder for unmatched images", () => {
@@ -361,7 +384,7 @@ describe("ImageMap", () => {
   it("can add a file image", () => {
     const storeSpy = jest.spyOn(ImageUtils, "storeFileImage")
                           .mockImplementation(() =>
-                            Promise.resolve({ imageUrl: kCCImgFBRTDB, imageData: kBlobUrl}));
+                            Promise.resolve({ imageUrl: kCCImgFBRTDBUrl, imageData: kBlobUrl}));
     const file: any = { name: "foo" };
     return sImageMap.addFileImage(file)
             .then(image => {
