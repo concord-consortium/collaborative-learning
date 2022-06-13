@@ -262,6 +262,14 @@ export const DocumentModel = types
     setProperties(properties: ISetProperties) {
       forEach(properties, (value, key) => self.setProperty(key, value));
     }
+  }))
+  .actions(self => ({
+    undoLastAction() {
+      alert("This is the undo action");
+    },
+    redoLastAction() {
+      alert("This is the redo action");
+    },
   }));
 
 export type DocumentModelType = Instance<typeof DocumentModel>;
@@ -282,9 +290,9 @@ export interface IDocumentEnvironment {
 
 /**
  * Create a DocumentModel and add a new sharedModelManager into its environment
- * 
- * @param snapshot 
- * @returns 
+ *
+ * @param snapshot
+ * @returns
  */
 export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
   const sharedModelManager = createSharedModelDocumentManager();
