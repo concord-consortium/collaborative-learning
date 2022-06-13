@@ -41,7 +41,7 @@ export const PlaybackComponent: React.FC = () => {
       </div>
     );
   };
-  
+
   const renderTimeInfo = () => {
     return (
       <div className={"time-info"}>
