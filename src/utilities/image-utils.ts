@@ -1,6 +1,5 @@
 import { DB } from "../lib/db";
 import { ImageModelType, ImageModel } from "../models/image";
-import { ImageContentSnapshotOutType } from "../models/tools/image/image-content";
 import placeholderImage from "../assets/image_placeholder.png";
 import orgPlaceholderImage from "../assets/image_placeholder_org.png";
 
@@ -79,6 +78,7 @@ export function storeImage(db: DB, url: string, name?: string, cors?: boolean): 
   return new Promise((resolve, reject) => {
     if (!url) reject(img);
 
+    // This downloads the url onto a canvas and returns a data url for the canvas.
     resizeImage(url, ImageConstants.maxWidth, ImageConstants.maxHeight, cors)
       .then(imageData => {
         const _name = name || url;
@@ -90,6 +90,8 @@ export function storeImage(db: DB, url: string, name?: string, cors?: boolean): 
           createdAt: 0,
           createdBy: db.stores.user.id
         });
+        // This does not download the imageData again, but it does use
+        // fetch to turn it into a blob object.
         kUploadImage(db, image).then(storedImage => {
           resolve(storedImage);
         }).catch(() => {
