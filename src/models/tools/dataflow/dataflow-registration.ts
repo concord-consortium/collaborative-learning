@@ -2,7 +2,7 @@ import {
   DataflowContentModel, defaultDataflowContent, kDataflowDefaultHeight, kDataflowToolID
 } from "./dataflow-content";
 import { registerToolContentInfo } from "../tool-content-info";
-import DataflowToolComponent from "src/components/tools/dataflow/dataflow-tool";
+import DataflowToolComponent from "../../../components/tools/dataflow/dataflow-tool";
 
 registerToolContentInfo({
   id: kDataflowToolID,
