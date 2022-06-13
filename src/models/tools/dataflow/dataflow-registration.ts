@@ -3,6 +3,7 @@ import {
 } from "./dataflow-content";
 import { registerToolContentInfo } from "../tool-content-info";
 import DataflowToolComponent from "../../../components/tools/dataflow/dataflow-tool";
+import DataflowToolIcon from "../../../clue/assets/icons/dataflow-tool.svg";
 
 registerToolContentInfo({
   id: kDataflowToolID,
@@ -10,5 +11,6 @@ registerToolContentInfo({
   defaultHeight: kDataflowDefaultHeight,
   defaultContent: defaultDataflowContent,
   Component: DataflowToolComponent,
-  toolTileClass: "dataflow-tool-tile"
+  toolTileClass: "dataflow-tool-tile",
+  Icon: DataflowToolIcon
 });
