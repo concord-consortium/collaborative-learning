@@ -40,7 +40,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
     const { ui: { activeNavTab, dividerPosition, focusDocument, showChatPanel, selectedTileIds },
             user } = this.stores;
     const selectedTabIndex = tabs?.findIndex(t => t.tab === activeNavTab);
-    const resizePanelWidth = 4;
+    const resizePanelWidth = 6;
     const collapseTabWidth = 44;
     const resourceWidth = dividerPosition === kDividerMin
                             ? kDividerMin
