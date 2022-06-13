@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import classNames from "classnames";
-import { NavTabSpec } from "../../models/view/nav-tabs";
 import { SliderComponent } from "./slider";
 import PlaybackIcon from "../../clue/assets/icons/playback/playback-icon.svg";
 import PlayButton from "../../clue/assets/icons/playback/play-button.svg";
@@ -22,14 +21,20 @@ export const PlaybackComponent: React.FC = () => {
     const playbackToolbarButtonComponentStyle =
       classNames("playback-toolbar-button-component", "themed", activeNavTab, {"disabled" : false},
                   {"show-control": showPlaybackControls});
+    const playbackToolbarButtonContainerStyle =
+      classNames("playback-toolbar-button-container", "themed", activeNavTab,
+                {"show-control": showPlaybackControls});
+    const playbackToolbarButtonStyle =
+      classNames("playback-toolbar-button", "themed", activeNavTab,
+                {"show-control": showPlaybackControls});
     return (
       <>
         <div className={playbackToolbarButtonComponentStyle} onClick={handleTogglePlaybackControlComponent}>
-          <div className={`playback-toolbar-button-container themed ${activeNavTab}`}>
-            <PlaybackIcon className={`playback-toolbar-button themed ${activeNavTab}`}/>
+          <div className={playbackToolbarButtonContainerStyle}>
+            <PlaybackIcon className={playbackToolbarButtonStyle}/>
           </div>
         </div>
-        {showPlaybackControls && <div className={`canvas-separator themed ${activeNavTab}`}/>}
+        {showPlaybackControls && <div className={`canvas-separator ${activeNavTab}`}/>}
       </>
     );
   };
@@ -63,12 +68,13 @@ export const PlaybackComponent: React.FC = () => {
     );
   };
 
+  const playbackComponentClass = classNames("playback-component", "themed", activeNavTab,
+                                            {"show-control" : showPlaybackControls});
+
   return (
-    <div className="playback-component">
+    <div className={playbackComponentClass}>
       {renderPlaybackToolbarButton()}
       {showPlaybackControls && renderPlaybackControls()}
     </div>
   );
-
-
 };

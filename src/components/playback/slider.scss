@@ -19,10 +19,10 @@ $border-radius-base: 6px;
 
   .rc-slider {
     position: relative;
-    width: calc(100% - 15px);
+    width: calc(100% - 20px);
     height: 14px;
     padding: 12px 0;
-    margin: 0 8px 0 5px;
+    margin: 0 10px;
     border-radius: $border-radius-base;
     touch-action: none;
     box-sizing: border-box;
@@ -48,7 +48,6 @@ $border-radius-base: 6px;
       width: 24px;
       height: 24px;
       margin-top: -11px;
-      margin-left: 12px;
       background-color: #fff;
       border: solid 2px $workspace-teal-dark-1;
       border-radius: 50%;
