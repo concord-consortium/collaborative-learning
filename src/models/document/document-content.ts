@@ -71,8 +71,6 @@ export const SharedModelEntry = types.model("SharedModelEntry", {
   }
 }));
 
-let minNameNumber = 0;
-
 export const DocumentContentModel = types
   .model("DocumentContent", {
     rowMap: types.map(TileRowModel),
@@ -328,9 +326,8 @@ export const DocumentContentModel = types
         return match?.[1]
                 ? Math.max(maxIndex, +match[1])
                 : maxIndex;
-      }, minNameNumber);
-      minNameNumber = maxDefaultTitleIndex + 1;
-      return `${titleBase} ${minNameNumber}`;
+      }, 0);
+      return `${titleBase} ${maxDefaultTitleIndex + 1}`;
     },
     getTileCountsPerSection(sectionIds: string[]): ITileCountsPerSection {
       const counts: ITileCountsPerSection = {};
