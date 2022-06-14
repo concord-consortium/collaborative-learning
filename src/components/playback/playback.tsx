@@ -7,10 +7,6 @@ import PlayButton from "../../clue/assets/icons/playback/play-button.svg";
 import "./playback.scss";
 import { useUIStore } from "../../hooks/use-stores";
 
-// interface IProps {
-//   navTab: NavTabSpec; //need the tab to know which color to use
-// }
-
 export const PlaybackComponent: React.FC = () => {
   const { activeNavTab } = useUIStore();
   const [showPlaybackControls, setShowPlaybackControls] = useState(false);
@@ -19,31 +15,22 @@ export const PlaybackComponent: React.FC = () => {
   };
   const renderPlaybackToolbarButton = () => {
     const playbackToolbarButtonComponentStyle =
-      classNames("playback-toolbar-button-component", "themed", activeNavTab, {"disabled" : false},
+      classNames("playback-toolbar-button-component", {"disabled" : false},
                   {"show-control": showPlaybackControls});
-    const playbackToolbarButtonContainerStyle =
-      classNames("playback-toolbar-button-container", "themed", activeNavTab,
-                {"show-control": showPlaybackControls});
     const playbackToolbarButtonStyle =
       classNames("playback-toolbar-button", "themed", activeNavTab,
                 {"show-control": showPlaybackControls});
     return (
-      <>
-        <div className={playbackToolbarButtonComponentStyle} onClick={handleTogglePlaybackControlComponent}>
-          <div className={playbackToolbarButtonContainerStyle}>
-            <PlaybackIcon className={playbackToolbarButtonStyle}/>
-          </div>
-        </div>
-        {showPlaybackControls && <div className={`canvas-separator ${activeNavTab}`}/>}
-      </>
+      <div className={playbackToolbarButtonComponentStyle} onClick={handleTogglePlaybackControlComponent}>
+        <PlaybackIcon className={playbackToolbarButtonStyle}/>
+      </div>
     );
   };
 
   const renderPlayButton = () => {
+    const playButtonStyle = classNames("play-button", "themed", activeNavTab, {"disabled" : false});
     return (
-      <div className={`play-button themed ${activeNavTab}`}>
-        <PlayButton className={`themed ${activeNavTab}`}/>
-      </div>
+      <PlayButton className={playButtonStyle}/>
     );
   };
 
@@ -57,10 +44,11 @@ export const PlaybackComponent: React.FC = () => {
   };
 
   const renderPlaybackControls = () => {
-    const playbackControlsClass = classNames("playback-controls", "themed", activeNavTab);
+    const playbackControlsClass = classNames("playback-controls", activeNavTab);
 
     return (
       <div className={playbackControlsClass}>
+        <div className={`control-separator ${activeNavTab}`}/>
         {renderPlayButton()}
         <SliderComponent />
         {renderTimeInfo()}
@@ -68,7 +56,7 @@ export const PlaybackComponent: React.FC = () => {
     );
   };
 
-  const playbackComponentClass = classNames("playback-component", "themed", activeNavTab,
+  const playbackComponentClass = classNames("playback-component", activeNavTab,
                                             {"show-control" : showPlaybackControls});
 
   return (
