@@ -82,22 +82,12 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   };
   private imageDragDrop: ImageDragDrop;
 
-  // Persistent variables used to size editable title
-  private canvas: HTMLCanvasElement;
-  private textSizeCache: Record<string, number>;
-  private measureText: (text: string) => number;
-
   constructor(props: IProps) {
     super(props);
 
     this.imageDragDrop = new ImageDragDrop({
       isAcceptableImageDrag: this.isAcceptableImageDrag
     });
-
-    // Initialize variables used to size editable title
-    this.canvas = document.createElement("canvas");
-    this.textSizeCache = {};
-    this.measureText = (text:string) => { return measureText(text, this.canvas, this.textSizeCache); };
   }
 
   public componentDidMount() {
@@ -256,7 +246,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     const size = {width: this.state.imageEltWidth || null , height: this.state.imageEltHeight || null};
     return (
       <EditableTileTitle key="geometry-title" size={size} scale={scale} getTitle={this.getTitle.bind(this)}
-                              readOnly={readOnly} measureText={this.measureText}
+                              readOnly={readOnly} measureText={measureText}
                               onBeginEdit={this.handleBeginEditTitle} onEndEdit={this.handleTitleChange} />
     );
   }

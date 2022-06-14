@@ -1,19 +1,22 @@
-import { useCallback, useRef } from "react";
+import { useCallback } from "react";
 
 const defaultFont = "italic 14px Lato, sans-serif";
+const canvas = document.createElement("canvas");
+const cache = <Record<string, Record<string, number>>>({});
 
 export const measureText =
-  (text:string, canvas:HTMLCanvasElement, cache:Record<string, number> = {}, font:string = defaultFont) => {
+  (text:string, font = defaultFont) => {
   const context = canvas.getContext("2d");
   context && font && (context.font = font);
-  cache[text] = cache[text] || (context ? Math.ceil(10 * context.measureText(text).width) / 10 : 0);
-  return cache[text];
+  if (!cache[font]) {
+    cache[font] = {};
+  }
+  cache[font][text] = cache[font][text] || (context ? Math.ceil(10 * context.measureText(text).width) / 10 : 0);
+  return cache[font][text];
 };
 
-export const useMeasureText = (font: string = defaultFont) => {
-  const cache = useRef<Record<string, number>>({});
-  const canvas = useRef(document.createElement("canvas"));
+export const useMeasureText = (font = defaultFont) => {
   return useCallback((text: string) => {
-    return measureText(text, canvas.current, cache.current, font);
+    return measureText(text, font);
   }, [font]);
 };
