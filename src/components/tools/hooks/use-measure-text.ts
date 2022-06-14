@@ -8,9 +8,7 @@ export const measureText =
   (text:string, font = defaultFont) => {
   const context = canvas.getContext("2d");
   context && font && (context.font = font);
-  if (!cache[font]) {
-    cache[font] = {};
-  }
+  cache[font] = cache[font] || {};
   cache[font][text] = cache[font][text] || (context ? Math.ceil(10 * context.measureText(text).width) / 10 : 0);
   return cache[font][text];
 };
