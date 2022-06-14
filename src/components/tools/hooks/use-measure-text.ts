@@ -2,7 +2,7 @@ import { useCallback } from "react";
 
 const defaultFont = "italic 14px Lato, sans-serif";
 const canvas = document.createElement("canvas");
-const cache = <Record<string, Record<string, number>>>({});
+const cache: Record<string, Record<string, number>> = {};
 
 export const measureText =
   (text:string, font = defaultFont) => {
