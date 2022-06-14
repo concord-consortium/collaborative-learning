@@ -1,8 +1,8 @@
 {
-  "code": "example",
-  "abbrevTitle": "EX",
-  "title": "Example Curriculum",
-  "subtitle": "Demonstrating Curriculum Configuration",
+  "code": "dataflow-example",
+  "abbrevTitle": "DE",
+  "title": "Dataflow Example Curriculum",
+  "subtitle": "Demonstrating the Dataflow Tile",
   "config": {
     "placeholderText": "This is where users can type text",
     "defaultDocumentType": "personal",
@@ -46,6 +46,11 @@
       {
         "id": "Drawing",
         "title": "Drawing",
+        "isTileTool": true
+      },
+      {
+        "id": "Dataflow",
+        "title": "Dataflow",
         "isTileTool": true
       },
       {
