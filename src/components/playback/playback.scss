@@ -157,10 +157,9 @@
 
     .play-button {
       cursor: pointer;
-      width: 40px;
-      height: 42px;
-      padding: 6px 2px 5px 5px;
-      margin-left: 1px;
+      width: 42px;
+      height: 46px;
+      padding: 9px 2px 5px 5px;
       &.my-work {
         background-color: $workspace-teal-light-8;
         stroke: $workspace-teal-dark-1;
