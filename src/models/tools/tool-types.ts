@@ -1,6 +1,7 @@
-import { getEnv, Instance, types } from "mobx-state-tree";
+import { getEnv, Instance, types, getParent, getType } from "mobx-state-tree";
 import { ISharedModelManager, SharedModelType } from "./shared-model";
 import { getToolContentModels, getToolContentInfoById } from "./tool-content-info";
+import { ToolTileModelType } from "./tool-tile";
 
 /**
  * A dynamic union of tool/tile content models. Its typescript type is
@@ -82,6 +83,14 @@ export const _private: IPrivate = {
 
 export function isToolType(type: string) {
   return !!getToolContentInfoById(type);
+}
+
+export function getToolTileModel(toolContentModel: ToolContentModelType) {
+  const parent = getParent(toolContentModel);
+  if (getType(parent).name === "ToolTile") {
+    return parent as ToolTileModelType;
+  }
+  return undefined;
 }
 
 export function toolFactory(snapshot: any) {
