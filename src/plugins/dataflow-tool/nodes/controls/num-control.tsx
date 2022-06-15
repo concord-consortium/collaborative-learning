@@ -72,15 +72,16 @@ export class NumControl extends Rete.Control {
           />
           { compProps.units?.length
             ? <div className="type-options-back">
-                <select className="type-options"
-                  onChange={handleSelectChange}
-                  value={compProps.currentUnits}
-                >
-                  { compProps.units.map((unit, index) => (
-                      <option key={index} value={unit}>{unit}</option>
-                    ))
-                  }
-                </select>
+                <div className="type-options">
+                  <select onChange={handleSelectChange}
+                    value={compProps.currentUnits}
+                  >
+                    { compProps.units.map((unit, index) => (
+                        <option key={index} value={unit}>{unit}</option>
+                      ))
+                    }
+                  </select>
+                </div>
               </div>
             : null
           }
