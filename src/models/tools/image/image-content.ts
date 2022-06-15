@@ -41,6 +41,13 @@ export const ImageContentModel = ToolContentModel
             : snapshot;
   })
   .views(self => ({
+    get toolTileModel() {
+      const parent = getParent(self);
+      if (getType(parent).name === "ToolTile") {
+        return parent as ToolTileModelType;
+      }
+      return undefined;
+    },
     get title() {
       return self.metadata.title;
     },
@@ -60,12 +67,9 @@ export const ImageContentModel = ToolContentModel
   .actions(self => ({
     doPostCreate(metadata: ImageMetadataModelType) {
       self.metadata = metadata;
-      const parent = getParent(self);
-      if (getType(parent).name === "ToolTile") {
-        const toolTileModel = parent as ToolTileModelType;
-        if (toolTileModel.title) {
-          self.metadata.setTitle(toolTileModel.title);
-        }
+      const toolTileModel = self.toolTileModel;
+      if (toolTileModel && toolTileModel.title) {
+        self.metadata.setTitle(toolTileModel.title);
       }
     },
     setUrl(url: string, filename?: string) {
@@ -78,9 +82,8 @@ export const ImageContentModel = ToolContentModel
     },
     setTitle(title: string) {
       self.metadata.setTitle(title);
-      const parent = getParent(self);
-      if (getType(parent).name === "ToolTile") {
-        const toolTileModel = parent as ToolTileModelType;
+      const toolTileModel = self.toolTileModel;
+      if (toolTileModel) {
         toolTileModel.setTitle(title);
       }
     }
