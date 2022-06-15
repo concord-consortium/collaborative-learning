@@ -106,9 +106,19 @@ const ModernUnitModel = types
 interface LegacySnapshot extends SnapshotIn<typeof LegacyUnitModel> {}
 interface ModernSnapshot extends SnapshotIn<typeof ModernUnitModel> {}
 
-const isLegacySnapshot = (sn: ModernSnapshot | LegacySnapshot): sn is LegacySnapshot => {
+const hasLegacySnapshotProperties = (sn: ModernSnapshot | LegacySnapshot) => {
   const s = sn as LegacySnapshot;
   return !!s.disabled || !!s.navTabs || !!s.placeholderText || !!s.defaultStamps || !!s.settings;
+};
+
+const isLegacySnapshot = (sn: ModernSnapshot | LegacySnapshot): sn is LegacySnapshot => {
+  const s = sn as ModernSnapshot;
+  return !s.config && hasLegacySnapshotProperties(sn);
+};
+
+const isAmbiguousSnapshot = (sn: ModernSnapshot | LegacySnapshot): sn is LegacySnapshot => {
+  const s = sn as ModernSnapshot;
+  return !!s.config && hasLegacySnapshotProperties(sn);
 };
 
 export const UnitModel = types.snapshotProcessor(ModernUnitModel, {
@@ -118,6 +128,9 @@ export const UnitModel = types.snapshotProcessor(ModernUnitModel, {
         disabled: disabledFeatures, navTabs, placeholderText, defaultStamps: stamps, settings, ...others
       } = sn;
       return { ...others, config: { disabledFeatures, navTabs, placeholderText, stamps, settings } };
+    }
+    else if (isAmbiguousSnapshot(sn)) {
+      console.warn("UnitModel ignoring legacy top-level properties!");
     }
     return sn;
   }
