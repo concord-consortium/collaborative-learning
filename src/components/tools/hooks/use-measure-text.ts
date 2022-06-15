@@ -1,6 +1,6 @@
 import { useCallback } from "react";
+import { defaultFont } from "../../constants";
 
-const defaultFont = "italic 14px Lato, sans-serif";
 const canvas = document.createElement("canvas");
 const cache: Record<string, Record<string, number>> = {};
 
