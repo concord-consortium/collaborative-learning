@@ -34,7 +34,7 @@ import { DataflowProgramGraph,DataSet, ProgramDisplayStates } from "./ui/dataflo
 import { NodeChannelInfo, NodeSensorTypes, NodeGeneratorTypes, ProgramRunTimes, NodeTimerInfo, DEFAULT_PROGRAM_TIME,
          IntervalTimes } from "../model/utilities/node";
 import { safeJsonParse } from "../../../utilities/js-utils";
-import { Rect, scaleRect, unionRect } from "../../../utilities/rect";
+import { Rect, scaleRect, unionRect } from "../utilities/rect";
 import { DocumentContextReact } from "../../../components/document/document-context";
 
 import "./dataflow-program.sass";
