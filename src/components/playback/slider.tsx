@@ -4,6 +4,7 @@ import classNames from "classnames";
 import { useUIStore } from "../../hooks/use-stores";
 
 import "./slider.scss";
+import { PlaybackMarkerToolbar } from "./marker-toolbar";
 
 export const SliderComponent: React.FC = () => {
   const { activeNavTab } = useUIStore();
@@ -25,9 +26,13 @@ export const SliderComponent: React.FC = () => {
   };
 
   return (
-    <div className={sliderComponentClass}>
-      {renderMarkerRail()}
-      {renderSliderRail()}
-    </div>
+    <>
+      <PlaybackMarkerToolbar />
+      <div className={sliderComponentClass}>
+        {renderMarkerRail()}
+        {renderSliderRail()}
+      </div>
+    </>
+
   );
 };

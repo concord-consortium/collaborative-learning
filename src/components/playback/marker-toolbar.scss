@@ -1,0 +1,153 @@
+@import "../vars";
+
+.marker-toolbar {
+  width: 114px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  position: absolute;
+  bottom: 46px;
+  left: 50px;
+  height: $toolbar-button-height + 4px;
+  border: $toolbar-border;
+  border-radius: $toolbar-border-radius $toolbar-border-radius $toolbar-border-radius 0;
+  overflow: hidden;
+  z-index: $toolbar-z-index;
+  background-color: white;
+  &.my-work {
+    border-color: $workspace-teal-dark-1;
+  }
+  &.class-work {
+    border-color: $classwork-purple-dark-1;
+  }
+  &.student-groups {
+    border-color: $charcoal-dark-1;
+  }
+  &.learning-log {
+    border-color: $learninglog-green-dark-1;
+  }
+
+  .marker-button {
+    &.my-work {
+      background-color: $workspace-teal-light-9;
+      &:hover {
+        background-color: $workspace-teal-light-6;
+      }
+      &:active {
+        background-color: $workspace-teal-light-4;
+      }
+      path:first-of-type {
+        stroke: $workspace-teal-dark-1;
+        fill: $workspace-teal-light-4;
+      }
+      path:last-of-type {
+        fill: $workspace-teal-dark-1;
+      }
+    }
+    &.class-work {
+      background-color: $classwork-purple-light-9;
+      &:hover {
+        background-color: $classwork-purple-light-6;
+      }
+      &:active {
+        background-color: $classwork-purple-light-4;
+      }
+      path:first-of-type {
+        stroke: $classwork-purple-dark-1;
+        fill: $classwork-purple-light-4;
+      }
+      path:last-of-type {
+        fill: $classwork-purple-dark-1;
+      }
+    }
+    &.student-groups {
+      background-color: $charcoal-light-9;
+      &:hover {
+        background-color: $charcoal-light-6;
+      }
+      &:active {
+        background-color: $charcoal-light-4;
+      }
+      path:first-of-type {
+        stroke: $charcoal-dark-1;
+        fill: $charcoal-light-4;
+      }
+      path:last-of-type {
+        fill: $charcoal-dark-1;
+      }
+    }
+    &.learning-log {
+      background-color: $learninglog-green-light-9;
+      &:hover {
+        background-color: $learninglog-green-light-6;
+      }
+      &:active {
+        background-color: $learninglog-green-light-4;
+      }
+      path:first-of-type {
+        stroke: $learninglog-green-dark-1;
+        fill: $learninglog-green-light-4;
+      }
+      path:last-of-type {
+        fill: $learninglog-green-dark-1;
+      }
+    }
+
+    &.disabled {
+      opacity: 0.35;
+    }
+  }
+  .comment-marker-button {
+    &.my-work {
+      background-color: $workspace-teal-light-9;
+      &:hover {
+        background-color: $workspace-teal-light-6;
+      }
+      &:active {
+        background-color: $workspace-teal-light-4;
+      }
+      path {
+        fill: $workspace-teal-dark-1;
+      }
+    }
+    &.class-work {
+      background-color: $classwork-purple-light-9;
+      &:hover {
+        background-color: $classwork-purple-light-6;
+      }
+      &:active {
+        background-color: $classwork-purple-light-4;
+      }
+      path {
+        fill: $classwork-purple-dark-1;
+      }
+    }
+    &.student-groups {
+      background-color: $charcoal-light-9;
+      &:hover {
+        background-color: $charcoal-light-6;
+      }
+      &:active {
+        background-color: $charcoal-light-4;
+      }
+      path {
+        fill: $charcoal-dark-1;
+      }
+    }
+    &.learning-log {
+      background-color: $learninglog-green-light-9;
+      &:hover {
+        background-color: $learninglog-green-light-6;
+      }
+      &:active {
+        background-color: $learninglog-green-light-4;
+      }
+      path {
+        fill: $learninglog-green-dark-1;
+      }
+    }
+    &.disabled {
+      opacity: 0.35;
+    }
+  }
+}
