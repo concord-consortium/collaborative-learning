@@ -14,7 +14,6 @@ import { DocumentModelType } from "../../models/document/document";
 import { ProblemDocument } from "../../models/document/document-types";
 import { ToolbarModelType } from "../../models/stores/problem-configuration";
 import { WorkspaceMode } from "../../models/stores/workspace";
-import { PlaybackComponent } from "../playback/playback";
 
 import "./editable-document-content.scss";
 
@@ -41,6 +40,7 @@ const DocumentToolbar: React.FC<IToolbarProps> = ({ toolbar, ...others }) => {
 
 interface IOneUpCanvasProps {
   document: DocumentModelType;
+  showPlayback?: boolean;
   readOnly: boolean;
 }
 const OneUpCanvas: React.FC<IOneUpCanvasProps> = props => {
@@ -65,15 +65,16 @@ interface IDocumentCanvasProps {
   isPrimary: boolean;
   document: DocumentModelType;
   readOnly: boolean;
+  showPlayback?: boolean;
 }
 const DocumentCanvas: React.FC<IDocumentCanvasProps> = props => {
-  const { mode, isPrimary, document, readOnly } = props;
+  const { mode, isPrimary, document, readOnly, showPlayback } = props;
   const isFourUp = (document.type === ProblemDocument) && (isPrimary && (mode === "4-up"));
   return (
     <div className="canvas-area">
       {isFourUp
         ? <EditableFourUpCanvas userId={document.uid} />
-        : <OneUpCanvas document={document} readOnly={readOnly} />}
+        : <OneUpCanvas document={document} readOnly={readOnly} showPlayback={showPlayback}/>}
     </div>
   );
 };
@@ -82,11 +83,12 @@ export interface IProps {
   mode: WorkspaceMode;
   isPrimary: boolean;
   document: DocumentModelType;
+  showPlayback?: boolean;
   toolbar?: ToolbarModelType;
   readOnly?: boolean;
 }
 export const EditableDocumentContent: React.FC<IProps> = props => {
-  const { mode, isPrimary, document, toolbar, readOnly } = props;
+  const { mode, isPrimary, document, toolbar, readOnly, showPlayback } = props;
 
   const documentContext = useDocumentContext(document);
   const { db: { firebase }, ui, user } = useStores();
@@ -112,10 +114,10 @@ export const EditableDocumentContent: React.FC<IProps> = props => {
               data-focus-document={document.key} >
           {isShowingToolbar && <DocumentToolbar document={document} toolbar={toolbar} />}
           {isShowingToolbar && <div className="canvas-separator"/>}
-          <DocumentCanvas mode={mode} isPrimary={isPrimary} document={document} readOnly={isReadOnly} />
+          <DocumentCanvas mode={mode} isPrimary={isPrimary} document={document} readOnly={isReadOnly}
+                          showPlayback={showPlayback} />
         </div>
       </EditableToolApiInterfaceRefContext.Provider>
-      {user.isTeacher && <PlaybackComponent />}
     </DocumentContextReact.Provider>
   );
 };

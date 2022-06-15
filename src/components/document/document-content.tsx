@@ -12,6 +12,7 @@ import { IDragTiles } from "../../models/tools/tool-tile";
 import { ToolApiInterfaceContext } from "../tools/tool-api";
 import { dragTileSrcDocId, kDragTileCreate, kDragTiles } from "../tools/tool-tile";
 import { safeJsonParse } from "../../utilities/js-utils";
+import { PlaybackComponent } from "../playback/playback";
 
 import "./document-content.sass";
 
@@ -20,6 +21,7 @@ interface IProps extends IBaseProps {
   documentId?: string;
   content?: DocumentContentModelType;
   typeClass: string;
+  showPlayback?: boolean;
   readOnly?: boolean;
   scale?: number;
   selectedSectionId?: string | null;
@@ -101,7 +103,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const {viaTeacherDashboard} = this.props;
+    const {viaTeacherDashboard, showPlayback} = this.props;
     const {ui, user: {isNetworkedTeacher}} = this.stores;
     const isChatEnabled = isNetworkedTeacher;
     const documentSelectedForComment = isChatEnabled && ui.showChatPanel && ui.selectedTileIds.length === 0;
@@ -119,6 +121,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       >
         {this.renderRows()}
         {this.renderSpacer()}
+        {showPlayback && <PlaybackComponent />}
       </div>
     );
   }
