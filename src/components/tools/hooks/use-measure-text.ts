@@ -4,8 +4,7 @@ const defaultFont = "italic 14px Lato, sans-serif";
 const canvas = document.createElement("canvas");
 const cache: Record<string, Record<string, number>> = {};
 
-export const measureText =
-  (text:string, font = defaultFont) => {
+export const measureText = (text:string, font = defaultFont) => {
   const context = canvas.getContext("2d");
   context && font && (context.font = font);
   cache[font] = cache[font] || {};

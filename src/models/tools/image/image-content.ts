@@ -1,7 +1,8 @@
-import { types, Instance, SnapshotOut } from "mobx-state-tree";
+import { types, Instance, SnapshotOut, getParent, getType } from "mobx-state-tree";
 import { exportImageTileSpec, isLegacyImageTileImport, convertLegacyImageTile } from "./image-import-export";
 import { ITileExportOptions, IDefaultContentOptions } from "../tool-content-info";
 import { ToolContentModel, ToolMetadataModel } from "../tool-types";
+import { ToolTileModelType } from "../tool-tile";
 import { isPlaceholderImage } from "../../../utilities/image-utils";
 import placeholderImage from "../../../assets/image_placeholder.png";
 
@@ -30,7 +31,6 @@ export const ImageContentModel = ToolContentModel
     type: types.optional(types.literal(kImageToolID), kImageToolID),
     url: types.maybe(types.string),
     filename: types.maybe(types.string),
-    // title: types.maybe(types.string),
   })
   .volatile(self => ({
     metadata: undefined as any as ImageMetadataModelType
@@ -60,6 +60,13 @@ export const ImageContentModel = ToolContentModel
   .actions(self => ({
     doPostCreate(metadata: ImageMetadataModelType) {
       self.metadata = metadata;
+      const parent = getParent(self);
+      if (getType(parent).name === "ToolTile") {
+        const toolTileModel = parent as ToolTileModelType;
+        if (toolTileModel.title) {
+          self.metadata.setTitle(toolTileModel.title);
+        }
+      }
     },
     setUrl(url: string, filename?: string) {
       self.url = url;
@@ -71,6 +78,11 @@ export const ImageContentModel = ToolContentModel
     },
     setTitle(title: string) {
       self.metadata.setTitle(title);
+      const parent = getParent(self);
+      if (getType(parent).name === "ToolTile") {
+        const toolTileModel = parent as ToolTileModelType;
+        toolTileModel.setTitle(title);
+      }
     }
   }));
 
