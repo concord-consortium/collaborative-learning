@@ -217,7 +217,8 @@ module.exports = (env, argv) => {
     plugins: [
       new ESLintPlugin(),
       new MiniCssExtractPlugin({
-        filename: devMode ? '[name].css' : '[name].[chunkhash:8].css'
+        filename: devMode ? '[name].css' : '[name].[chunkhash:8].css',
+        ignoreOrder: true
       }),
       new HtmlWebpackPlugin({
         filename: 'index.html',
