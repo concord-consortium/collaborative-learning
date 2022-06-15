@@ -203,8 +203,8 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderSpacer = () => {
-    return !this.props.readOnly &&
-            <div className="spacer" onClick={this.handleClick} />;
+    const spacerClass = classNames({"spacer" : !this.props.readOnly}, {"playback-spacer": this.props.showPlayback});
+    return <div className={spacerClass} onClick={this.handleClick} />;
   };
 
   private handleScroll = throttle((e: React.UIEvent<HTMLDivElement>) => {
