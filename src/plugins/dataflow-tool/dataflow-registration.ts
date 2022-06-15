@@ -3,7 +3,7 @@ import {
 } from "./model/dataflow-content";
 import { registerToolContentInfo } from "../../models/tools/tool-content-info";
 import DataflowToolComponent from "./components/dataflow-tool";
-import DataflowToolIcon from "../../clue/assets/icons/program.svg";
+import DataflowToolIcon from "./assets/program.svg";
 
 registerToolContentInfo({
   id: kDataflowToolID,
