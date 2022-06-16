@@ -16,6 +16,7 @@ import { gImageMap, ImageMapEntryType } from "../../models/image-map";
 import { ImageContentModelType } from "../../models/tools/image/image-content";
 import { ITileExportOptions } from "../../models/tools/tool-content-info";
 import { EditableTileTitle } from "./editable-tile-title";
+import { defaultTileTitleFont } from "../constants";
 import { hasSelectionModifier } from "../../utilities/event-utils";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { isPlaceholderImage } from "../../utilities/image-utils";
@@ -246,7 +247,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     const size = {width: this.state.imageEltWidth || null , height: this.state.imageEltHeight || null};
     return (
       <EditableTileTitle key="geometry-title" size={size} scale={scale} getTitle={this.getTitle.bind(this)}
-                              readOnly={readOnly} measureText={measureText}
+                              readOnly={readOnly} measureText={(text) => measureText(text, defaultTileTitleFont)}
                               onBeginEdit={this.handleBeginEditTitle} onEndEdit={this.handleTitleChange} />
     );
   }
