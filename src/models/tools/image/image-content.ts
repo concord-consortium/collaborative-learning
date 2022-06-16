@@ -1,7 +1,8 @@
 import { types, Instance, SnapshotOut } from "mobx-state-tree";
 import { exportImageTileSpec, isLegacyImageTileImport, convertLegacyImageTile } from "./image-import-export";
 import { ITileExportOptions, IDefaultContentOptions } from "../tool-content-info";
-import { ToolContentModel, ToolMetadataModel, getToolTileModel } from "../tool-types";
+import { setTileTitleFromContent } from "../tool-tile";
+import { ToolContentModel, ToolMetadataModelType } from "../tool-types";
 import { isPlaceholderImage } from "../../../utilities/image-utils";
 import placeholderImage from "../../../assets/image_placeholder.png";
 
@@ -12,18 +13,6 @@ export function defaultImageContent(options?: IDefaultContentOptions) {
   return ImageContentModel.create({url: options?.url || placeholderImage});
 }
 
-export const ImageMetadataModel = ToolMetadataModel
-  .named("ImageMetadata")
-  .props({
-    title: types.maybe(types.string)
-  })
-  .actions(self => ({
-    setTitle(title: string) {
-      self.title = title;
-    }
-  }));
-export type ImageMetadataModelType = Instance<typeof ImageMetadataModel>;
-
 export const ImageContentModel = ToolContentModel
   .named("ImageTool")
   .props({
@@ -32,7 +21,7 @@ export const ImageContentModel = ToolContentModel
     filename: types.maybe(types.string),
   })
   .volatile(self => ({
-    metadata: undefined as any as ImageMetadataModelType
+    metadata: undefined as any as ToolMetadataModelType
   }))
   .preProcessSnapshot(snapshot => {
     return isLegacyImageTileImport(snapshot)
@@ -57,12 +46,8 @@ export const ImageContentModel = ToolContentModel
     }
   }))
   .actions(self => ({
-    doPostCreate(metadata: ImageMetadataModelType) {
+    doPostCreate(metadata: ToolMetadataModelType) {
       self.metadata = metadata;
-      const toolTileModel = getToolTileModel(self);
-      if (toolTileModel && toolTileModel.title) {
-        self.metadata.setTitle(toolTileModel.title);
-      }
     },
     setUrl(url: string, filename?: string) {
       self.url = url;
@@ -73,11 +58,7 @@ export const ImageContentModel = ToolContentModel
       if (self.url === oldUrl) self.url = newUrl;
     },
     setTitle(title: string) {
-      self.metadata.setTitle(title);
-      const toolTileModel = getToolTileModel(self);
-      if (toolTileModel) {
-        toolTileModel.setTitle(title);
-      }
+      setTileTitleFromContent(self, title);
     }
   }));
 

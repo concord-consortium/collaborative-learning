@@ -1,8 +1,8 @@
 import { cloneDeep } from "lodash";
-import { getSnapshot, Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree";
+import { getParent, getSnapshot, getType, Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree";
 import { isPlaceholderContent } from "./placeholder/placeholder-content";
 import { ITileExportOptions } from "./tool-content-info";
-import { findMetadata, ToolContentUnion } from "./tool-types";
+import { findMetadata, ToolContentModelType, ToolContentUnion } from "./tool-types";
 import { DisplayUserTypeEnum } from "../stores/user-types";
 import { uniqueId } from "../../utilities/js-utils";
 
@@ -33,15 +33,32 @@ export function cloneTileSnapshotWithNewId(tile: ToolTileModelType, newId?: stri
   return { id: newId || uniqueId(), ...copy };
 }
 
+export function getToolTileModel(toolContentModel: ToolContentModelType) {
+  const parent = getParent(toolContentModel);
+  return getType(parent).name === "ToolTile" ? parent as ToolTileModelType : undefined;
+}
+
+export function getTileTitleFromContent(toolContentModel: ToolContentModelType) {
+  return getToolTileModel(toolContentModel)?.title;
+}
+
+export function setTileTitleFromContent(toolContentModel: ToolContentModelType, title: string) {
+  const toolTile = getToolTileModel(toolContentModel);
+  const metadata = toolTile?.id ? findMetadata(toolContentModel.type, toolTile?.id) : undefined;
+  toolTile?.setTitle(title);
+  metadata?.setTitle(title);
+}
+
 export const ToolTileModel = types
   .model("ToolTile", {
     // if not provided, will be generated
     id: types.optional(types.identifier, () => uniqueId()),
+    // all tiles can have a title
+    title: types.maybe(types.string),
     // whether to restrict display to certain users
     display: DisplayUserTypeEnum,
     // e.g. "GeometryContentModel", "ImageContentModel", "TableContentModel", "TextContentModel", ...
-    content: ToolContentUnion,
-    title: types.maybe(types.string)
+    content: ToolContentUnion
   })
   .views(self => ({
     // generally negotiated with tool, e.g. single column width for table
@@ -69,7 +86,7 @@ export const ToolTileModel = types
   }))
   .actions(self => ({
     afterCreate() {
-      const metadata = findMetadata(self.content.type, self.id);
+      const metadata = findMetadata(self.content.type, self.id, self.title);
       const content = self.content as any;
       if (metadata && content.doPostCreate) {
         content.doPostCreate(metadata);
