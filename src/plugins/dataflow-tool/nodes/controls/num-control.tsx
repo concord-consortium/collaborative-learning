@@ -3,7 +3,6 @@
 import React, { useRef } from "react";
 import Rete, { NodeEditor, Node } from "rete";
 import { useStopEventPropagation } from "./custom-hooks";
-import { HTMLSelect } from "@blueprintjs/core";
 import { NodePeriodUnits } from "../../model/utilities/node";
 import "./num-control.sass";
 
@@ -73,15 +72,16 @@ export class NumControl extends Rete.Control {
           />
           { compProps.units?.length
             ? <div className="type-options-back">
-                <HTMLSelect className="type-options"
-                  onChange={handleSelectChange}
-                  value={compProps.currentUnits}
-                >
-                  { compProps.units.map((unit, index) => (
-                      <option key={index} value={unit}>{unit}</option>
-                    ))
-                  }
-                </HTMLSelect>
+                <div className="type-options">
+                  <select onChange={handleSelectChange}
+                    value={compProps.currentUnits}
+                  >
+                    { compProps.units.map((unit, index) => (
+                        <option key={index} value={unit}>{unit}</option>
+                      ))
+                    }
+                  </select>
+                </div>
               </div>
             : null
           }

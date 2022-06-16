@@ -1,6 +1,5 @@
 import React from "react";
 import { ProgramRunTime } from "../../model/utilities/node";
-import { HTMLSelect } from "@blueprintjs/core";
 import { IconButton } from "../../../../components/utilities/icon-button";
 
 import "./dataflow-program-topbar.sass";
@@ -63,18 +62,19 @@ const DurationSelectorComponent: React.SFC<DurationSelectorProps> = (props: Dura
           <div className="label">Duration</div>
         </div>
         <div className="duration-options-back">
-          <HTMLSelect className="duration-options"
-            onChange={handleSelectChange}
-            disabled={!props.isRunEnabled || props.readOnly}
-            value={props.programDefaultRunTime.toString()}
-          >
-            { props.programRunTimes.map((rt: ProgramRunTime) => (
-                <option key={rt.text} value={rt.val} disabled={rt.disabled}>
-                  {rt.text}
-                </option>
-              ))
-            }
-          </HTMLSelect>
+          <div className="duration-options">
+            <select onChange={handleSelectChange}
+              disabled={!props.isRunEnabled || props.readOnly}
+              value={props.programDefaultRunTime.toString()}
+            >
+              { props.programRunTimes.map((rt: ProgramRunTime) => (
+                  <option key={rt.text} value={rt.val} disabled={rt.disabled}>
+                    {rt.text}
+                  </option>
+                ))
+              }
+            </select>
+          </div>
         </div>
       </div>
       <button

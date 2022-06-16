@@ -12,7 +12,6 @@ import { CustomSelect } from "./custom-select";
 // cf. https://mattferderer.com/use-sass-variables-in-typescript-and-javascript
 import styles from "./toggle-buttons.scss";
 
-import "../../components/utilities/blueprint.sass";
 import "./clue-app-header.sass";
 
 interface IProps extends IBaseProps {
