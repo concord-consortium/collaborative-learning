@@ -147,9 +147,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const editorClass = `editor ${editorClassForDisplayState}`;
     const toolbarEditorContainerClass = `toolbar-editor-container ${(this.isComplete() && "complete")}`;
     const isTesting = ["qa", "test"].indexOf(this.stores.appMode) >= 0;
-    const showProgramToolbar = (this.state.programDisplayState === ProgramDisplayStates.Program) &&
-                                !readOnly && !documentProperties?.dfHasData && !documentProperties?.dfHasRelay;
-    const showZoomControl = showProgramToolbar;
+    const showZoomControl = (this.state.programDisplayState === ProgramDisplayStates.Program) &&
+                                !documentProperties?.dfHasData && !documentProperties?.dfHasRelay;
+    const showProgramToolbar = showZoomControl && !readOnly;
     return (
       <div className="dataflow-program-container">
         {this.isRunning() && <div className="running-indicator" />}
@@ -184,7 +184,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                 <DataflowProgramZoom
                   onZoomInClick={this.zoomIn}
                   onZoomOutClick={this.zoomOut}
-                  disabled={readOnly || !this.isReady()}
+                  disabled={!this.isReady()}
                 /> }
               { this.shouldShowProgramCover() &&
                 <DataflowProgramCover editorClass={editorClassForDisplayState} isRunning={this.isRunning()} /> }

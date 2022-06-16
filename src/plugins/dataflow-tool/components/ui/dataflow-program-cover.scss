@@ -1,0 +1,26 @@
+@import "../dataflow-vars";
+
+.editor {
+  .cover {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, .5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    top: 0px;
+    z-index: 1; // So zoom widget is still useable
+    &.half {
+      width: 50%;
+    }
+    &.some {
+      width: 20%;
+    }
+
+    .stop {
+      width: 150px;
+      height: 50px;
+    }
+  }
+}
