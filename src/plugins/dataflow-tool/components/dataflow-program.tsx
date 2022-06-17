@@ -104,6 +104,7 @@ interface IState {
   programDisplayState: ProgramDisplayStates;
   graphDataSet: DataSet;
   editorContainerWidth: number;
+  heartbeatInterval: number;
   remainingTimeInSeconds: number;
   lastIntervalDuration: number;
 }
@@ -139,6 +140,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       graphDataSet: { sequences: [], startTime: 0, endTime: 0 },
       editorContainerWidth: 0,
       programDisplayState: ProgramDisplayStates.Program,
+      heartbeatInterval: HEARTBEAT_INTERVAL,
       remainingTimeInSeconds: 0,
       lastIntervalDuration: 0,
     };
@@ -161,10 +163,22 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         {!this.isComplete() && <DataflowProgramTopbar
           onRunProgramClick={this.prepareToRunProgram}
           onStopProgramClick={this.stopProgram}
-          onProgramTimeSelectClick={this.setProgramRunTime}
+          // onProgramTimeSelectClick={this.setProgramRunTime}
           onRefreshDevices={this.deviceRefresh}
-          programRunTimes={ProgramRunTimes}
-          programDefaultRunTime={programRunTime || DEFAULT_PROGRAM_TIME}
+          // programRunTimes={ProgramRunTimes}
+          rateOptions={[
+            {rate: 1, label: '1ms'},
+            {rate: 10, label: '10ms'},
+            {rate: 100, label: '100ms'},
+            {rate: 1000, label: '1s'},
+            {rate: 10000, label: '10s'}
+          ]}
+          dataRate={this.state.heartbeatInterval}
+          onRateSelectClick={(rate: number) => {
+            this.startHeartbeat(rate);
+            this.setState({ heartbeatInterval: rate });
+          }}
+          // programDefaultRunTime={programRunTime || DEFAULT_PROGRAM_TIME}
           isRunEnabled={this.isReady()}
           runningProgram={this.isRunning() && !readOnly}
           remainingTimeInSeconds={this.state.remainingTimeInSeconds}
@@ -360,10 +374,18 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.updateRunAndGraphStates();
 
       if (!this.isComplete() || this.props.programIsRunning === "true") {
-        this.intervalHandle = setInterval(this.heartBeat, HEARTBEAT_INTERVAL);
+        this.startHeartbeat(this.state.heartbeatInterval);
+        // this.intervalHandle = setInterval(this.heartBeat, HEARTBEAT_INTERVAL);
       }
 
     })();
+  };
+
+  private startHeartbeat = (rate: number) => {
+    if (this.intervalHandle) {
+      clearInterval(this.intervalHandle);
+    }
+    this.intervalHandle = setInterval(this.heartBeat, rate);
   };
 
   private processAndSave = async () => {
