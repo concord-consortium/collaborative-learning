@@ -36,9 +36,21 @@ const GroupViewTitlebar: React.FC<IGroupViewTitlebarProps> = ({ selectedId, onSe
                                   onSelectGroup={onSelectGroup} />;
             })}
       </div>
-      {<div className="group-title" data-test="document-title">
+      {/* {<div className="group-title" data-test="document-title">
           {selectedId ? `Group ${selectedId}` : "No groups"}
-       </div>}
+       </div>} */}
+    </div>
+  );
+};
+
+interface IGroupTitlebarProps {
+  selectedId: string;
+}
+
+const GroupTitlebar: React.FC<IGroupTitlebarProps> = ({selectedId}) => {
+  return (
+    <div className="group-title" data-test="group-title">
+      {selectedId ? `Student Group ${selectedId}` : "No groups"}
     </div>
   );
 };
@@ -58,6 +70,7 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
   return (
     <div key="student-group-view" className="document student-group-view">
       <GroupViewTitlebar selectedId={selectedGroupId} onSelectGroup={handleSelectGroup} />
+      <GroupTitlebar selectedId={selectedGroupId} />
       <div className="canvas-area">
         <FourUpComponent userId={user.id} groupId={selectedGroupId} isGhostUser={true} />
       </div>

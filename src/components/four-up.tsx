@@ -177,7 +177,9 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
         const { name: fullName, initials } = groupUser.user;
         const className = `member${isToggled ? " member-centered" : ""}`;
         const name = isToggled ? fullName : initials;
-        return <div className={className} title={fullName}>{name}</div>;
+        return <div className={className} title={fullName} onClick={() => this.handleExpandView(context, groupUser)}>
+                  {name}
+               </div>;
       }
     };
 
@@ -381,6 +383,22 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleOverlayClicked = (context: string) => {
+    const { groupId, setFocusedGroupUser } = this.props;
+    const groupUser = this.userByContext[context];
+    const toggleContext = (state: IState) => context === state.toggledContext ? null : context;
+    const toggledContext = toggleContext(this.state);
+    this.setState(state => ({ toggledContext: toggleContext(state) }));
+    if (groupUser) {
+      const event = toggledContext ? LogEventName.DASHBOARD_SELECT_STUDENT : LogEventName.DASHBOARD_DESELECT_STUDENT;
+      Logger.log(event, {groupId, studentId: groupUser.user.id});
+    }
+    if (setFocusedGroupUser) {
+      const focusedGroupUser = toggledContext ? groupUser?.user : undefined;
+      setFocusedGroupUser(focusedGroupUser);
+    }
+  };
+  
+  private handleExpandView = (context: string, user: FourUpUser) => {
     const { groupId, setFocusedGroupUser } = this.props;
     const groupUser = this.userByContext[context];
     const toggleContext = (state: IState) => context === state.toggledContext ? null : context;
