@@ -280,32 +280,10 @@ export const ImageMapModel = types
       }
 
       const existingStoringPromise = self.storingPromises[url];      
-      if (existingStoringPromise) {
-        if (imageEntry?.status === EntryStatus.Error) {
-          // FIXME: maybe we should just get rid of this code?
-          // As long as we ignore the existing promise when the status is error
-          // it shouldn't hurt to leave it around.
-          // We can add functional tests first and then remove the code and make
-          // sure they still work
-          // The only downside I can think of is memory leaks, but if those are a problem
-          // we should clean up the promise when the error happens
-
-          // If the imageEntry has a status of Error.  We clear out the storingPromise.
-          delete self.storingPromises[url];
-
-          // If there is a contentUrl because of an error during computing
-          // dimensions there could be a storingPromise for the contentUrl that was
-          // added by syncContenUrl, to be complete we delete that too.
-          if (imageEntry.contentUrl && imageEntry.contentUrl !== url) {
-            const contentUrlEntry = self.images.get(imageEntry.contentUrl);
-            if (contentUrlEntry?.status === EntryStatus.Error) {
-              // delete the promise if it exists
-              delete self.storingPromises[imageEntry.contentUrl];
-            }
-          }
-        } else {
-          return existingStoringPromise;
-        }
+      if (existingStoringPromise && imageEntry?.status !== EntryStatus.Error) {
+        // If the imageEntry is errored we ignore the existing promise
+        // This way a second getImage request will try to store the image again
+        return existingStoringPromise;
       }
 
       const handler = self.getHandler(url);
