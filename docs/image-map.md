@@ -31,7 +31,26 @@ To work with MobX observation, call `getImage` with the URL you want to load. Do
 ### Error Handling
 
 When an error occurs during storing or getting the dimensions, the cache entry will have a status of `Error`.
+
 This error might be because of a network issue, so it could be temporary. It could also indicate the URL is just invalid. Currently no error message is provided. Also the cache does not automatically retry if a store or dimension computation fails.  However code using the cache can call `getImage` again after getting an error and the cache will attempt to store and compute the dimensions again.
+
+If the error happened while computing the dimensions the entry should have a valid displayUrl and might also have a contentUrl.  If the error happened during the storage phase the entry will typically have no contentUrl and its displayUrl will the be the placeholder image.
+
+#### Error Recovery
+If getImage is called again for an entry that has a status of Error, the entry will be reset to the storing status. Its properties will be cleared and displayUrl will be the placeholderUrl.
+
+If an error happens during computing dimensions phase, the currentUrl and displayUrl of the content might be set to valid values. However to keep things simple these values are still cleared out when getImage is called again.
+
+#### Current Implementation Notes
+
+The Image Tool has catch block on some getImage calls but not all of them.
+
+geometry-content.tsx has a catch block on one getImage call but not the one that happens during a drop.
+
+geometry-import.ts does not have a catch block on its getImage call. 
+FIXME: This brings a up a good point, using the API in observer mode would result in uncaught exceptions if getImage rejected the promise. So either it should not reject, or it needs an option to avoid the reject.
+
+drawing-layer.tsx doesn't have a catch block on all getImage calls
 
 ### URL Conversion
 
@@ -52,14 +71,16 @@ Below are the combination of states between the new entry and the existing entry
 ### New cache entry is in Ready state
 If the existing entry is 
 - `Ready` do nothing
-- `Computing Dimensions` and `Storing` this should mean the existing entry is being updated right now, do nothing. If we overwrote the entry we'd kind of be orphaning the promise that was working on updating then entry. And it might mean the entry flips states in an unpredictable manner.
+- `Computing Dimensions` this could happen either if the existing entry was created directly by getImage or if the existing entry was created because it is a copy of the original entry due to a URL conversion.  If the existing entry is copy of the original entry then it should be updated.  If the entry existing is not a copy then it should be left alone because there should be another promise updating it. Unlike `Computing Dimensions` an existing entry in the `Storing` state should never be copied due to a URL conversion.
+- `Storing` this should mean the existing entry is being updated by another promise, do nothing. If we overwrote the entry we'd kind of be orphaning the promise that was working on updating then entry. And it might mean the entry flips states in an unpredictable manner.
 - `Error` update the existing entry with the new entry's fields
 - `undefined` store a copy of new entry
 
 ### New cache entry is in the Error state
 If the existing entry is 
 - `Ready` do nothing, the entry was already downloaded successfully leave it alone
-- `Computing Dimensions` and `Storing` this should mean the existing entry is being updated right now, do nothing. Hopefully this update of the entry will succeed where the new entry failed.
+- `Computing Dimensions` this could happen either if the existing entry was created directly by getImage or if the existing entry was created because it is a copy of the original entry due to a URL conversion. If the existing entry is copy of the original entry then it should be updated. If the existing entry is not a copy then it should be left alone because there should be another promise updating it.
+- `Storing` this should mean the existing entry is being updated right now, do nothing. Hopefully this update of the entry will succeed where the new entry failed. Unlike `Computing Dimensions` an existing entry in the `Storing` state should never be copied due to a URL conversion.
 - `Error` do nothing, no point in replacing an error with an error.
 - `undefined` do nothing, there isn't a best approach here, but doing nothing simplifies the logic.
 
@@ -90,3 +111,33 @@ Because the cache is used this way to transfer the filename, it means when the d
 Any tile that stores image URLs in its serialized state also needs to store the filename if it is available. This is because any tile might be the first one to request the image from the image map cache. All following requests will just work with the parameters of the first request. 
 
 For example, the same image is used by a geometry tile and an image tile. To illustrate this lets assume the geometry tile doesn't store the filename. When the document is reloaded, if the geometry tile requested the URL for the image first, an entry will be added to the cache that doesn't have a filename. When the image tile requests the same URL it would get back an entry without a filename. The original image tile could know the filename from its own state. However if the image was copied to another document the new image tile would only have access to the info in the cache entry, so it would not know the filename.
+
+## Dimensions
+
+The width and height of the image entry might not be set. This can happen if you are are observing an entry which has a status of `storing`, `computingDimensions`, or `error`. 
+
+The best approach is for the client using the image map to store the dimensions in its state when they are known. This way when the image is being reloaded the client's components can reserve this space. Now if the entry has a width and height those can be used, otherwise the component falls back to the ones in the state. If the entries width height are different than what is in the state the state should be updated.
+
+When there is an error the cache returns a displayUrl of the placeholder image. But it doesn't return its dimensions. This is intentional. The error might be temporary (network glitch), so this allows the client to stick with any known dimensions. This prevents resizing or shifting when the actual image is loaded.
+
+### Current Implementation Notes on Dimensions
+
+The Image Tool uses the computed height to request a height from its tool tile wrapper.
+Otherwise, it doesn't seem to use the width or height, it seems like it is just letting the 
+browser size the image based on the tool tile wrapper.
+If the height is not set then the desired height is undefined so no request is made
+
+geometry-content.tsx only partially handles image dimensions the code in the debouncing update ignores them. But code in tile drop and uploading background image also handles them. 
+It assumes the width and height are set with: 
+  `const width = image.width! / kGeometryDefaultPixelsPerUnit;`
+Because this is in a getImage handler, it should mean it won't get a entry computing dimensions. But it might get one that has error'd.  
+FIXME: We should update this code so it can handles unset this would be the only place that does this. And I think it is better if the error entry doesn't set them. That way clients can use their existing dimensions to display the displayURL (a placeholder if an error) when they aren't available. Currently the width and height will be set to NaN.
+
+jxg-image is getting a size from the internal object. it doesn't use the dimensions of the imageEntry that it gets using getCachedImage. Instead it just uses the size that was set above. 
+
+drawing-layer.tsx (old version) assumes the image has a width and height. MST will throw an error in this code if there is an error and an image is returned without width and height
+
+drawing-tool/objects/image.tsx this handles the case when the map entry doesn't have a width or height. It only updates its own image object width and height if they are set. So otherwise the width and height of the saved entry should be used.
+
+## Error Catching
+
