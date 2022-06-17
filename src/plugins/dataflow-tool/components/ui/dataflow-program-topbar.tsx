@@ -2,7 +2,7 @@ import React from "react";
 import { ProgramRunTime } from "../../model/utilities/node";
 import { IconButton } from "../../../../components/utilities/icon-button";
 
-import "./dataflow-program-topbar.sass";
+import "./dataflow-program-topbar.scss";
 
 interface TopbarProps {
   onRunProgramClick: () => void;
@@ -102,36 +102,40 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
   const secondsString = String(remainingSeconds).padStart(2, "0");
   return (
     <div className="program-editor-topbar">
-      <div className="refresh">
+      <div className="topbar-left"></div>
+      <div className="topbar-center">
+        { props.runningProgram
+          ? <CountdownTimerComponent
+              duration={runTime ? runTime.text.toString() : ""}
+              width={progressWidth}
+              hours={hoursString}
+              minutes={minutesString}
+              seconds={secondsString}
+              />
+          : <DurationSelectorComponent
+              onRunProgramClick={props.onRunProgramClick}
+              programRunTimes={props.programRunTimes}
+              programDefaultRunTime={props.programDefaultRunTime}
+              onProgramTimeSelectClick={props.onProgramTimeSelectClick}
+              isRunEnabled={props.isRunEnabled}
+              readOnly={props.readOnly}
+            />
+        }
+        <button
+          className="program-state-button"
+          title="Stop Program"
+          onClick={props.onStopProgramClick}
+          disabled={!props.runningProgram || !props.readOnly}
+        >
+          <div className="icon stop" />
+          <div className="text">Stop</div>
+        </button>
+      </div>
+      <div className="topbar-right">
+        <span className={"rate-ui"}>10</span>
         <IconButton icon="refresh" key="refresh" className={"icon-refresh"}
           onClickButton={props.onRefreshDevices} title="Refresh Devices" disabled={props.readOnly} />
       </div>
-      { props.runningProgram
-        ? <CountdownTimerComponent
-            duration={runTime ? runTime.text.toString() : ""}
-            width={progressWidth}
-            hours={hoursString}
-            minutes={minutesString}
-            seconds={secondsString}
-            />
-        : <DurationSelectorComponent
-            onRunProgramClick={props.onRunProgramClick}
-            programRunTimes={props.programRunTimes}
-            programDefaultRunTime={props.programDefaultRunTime}
-            onProgramTimeSelectClick={props.onProgramTimeSelectClick}
-            isRunEnabled={props.isRunEnabled}
-            readOnly={props.readOnly}
-          />
-      }
-      <button
-        className="program-state-button"
-        title="Stop Program"
-        onClick={props.onStopProgramClick}
-        disabled={!props.runningProgram || !props.readOnly}
-      >
-        <div className="icon stop" />
-        <div className="text">Stop</div>
-      </button>
     </div>
   );
 
