@@ -352,7 +352,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       this.updateRunAndGraphStates();
 
-      if (!this.props.readOnly && !this.isComplete() || this.props.programIsRunning === "true") {
+      if (!this.isComplete() || this.props.programIsRunning === "true") {
         this.intervalHandle = setInterval(this.heartBeat, HEARTBEAT_INTERVAL);
       }
 
