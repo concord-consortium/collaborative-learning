@@ -9,11 +9,14 @@ import { ImageToolbar } from "./image/image-toolbar";
 import { ImageComponent } from "./image-component";
 import { IToolApi, TileResizeEntry } from "./tool-api";
 import { IToolTileProps } from "./tool-tile";
+import { measureText } from "./hooks/use-measure-text";
 import { IDocumentContext } from "../../models/document/document-types";
 import { debouncedSelectTile } from "../../models/stores/ui";
 import { gImageMap, ImageMapEntryType } from "../../models/image-map";
 import { ImageContentModelType } from "../../models/tools/image/image-content";
 import { ITileExportOptions } from "../../models/tools/tool-content-info";
+import { EditableTileTitle } from "./editable-tile-title";
+import { defaultTileTitleFont } from "../constants";
 import { hasSelectionModifier } from "../../utilities/event-utils";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { isPlaceholderImage } from "../../utilities/image-utils";
@@ -32,6 +35,7 @@ interface IState {
   imageEltWidth?: number;
   imageEltHeight?: number;
   requestedHeight?: number;
+  isEditingTitle?: boolean;
 }
 
 const defaultImagePlaceholderSize = { width: 100, height: 100 };
@@ -42,7 +46,8 @@ let nextImageToolId = 0;
 @observer
 export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   public state: IState = { isLoading: true,
-                           imageContentUrl: this.getContent().url
+                           imageContentUrl: this.getContent().url,
+                           isEditingTitle: false
                          };
   // give each component instance a unique id
   private imageToolId = ++nextImageToolId;
@@ -103,6 +108,9 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     this.imageElt && this.resizeObserver.observe(this.imageElt);
 
     this.props.onRegisterToolApi({
+      getTitle: () => {
+        return this.getTitle();
+      },
       exportContentAsTileJson: (options?: ITileExportOptions) => {
         return this.getContent().exportJson(options);
       },
@@ -113,6 +121,15 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
         this.toolbarToolApi?.handleTileResize?.(entry);
       }
     });
+    
+    // Taken and modified from geometry-content.tsx.
+    // TODO: This should be abstracted for all tiles.
+    // if we haven't been assigned a title already, request one now
+    if (this.getTitle() === '') {
+      const { model: { id }, onRequestUniqueTitle } = this.props;
+      const title = onRequestUniqueTitle(id);
+      title && this.getContent().setTitle(title);
+    }
   }
 
   public componentWillUnmount() {
@@ -164,6 +181,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
             onIsEnabled={this.handleIsEnabled}
             onUploadImageFile={this.handleUploadImageFile}
           />
+          {this.renderTitleArea()}
           <ImageComponent
             ref={elt => this.imageElt = elt}
             content={this.getContent()}
@@ -199,6 +217,39 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     return aspectRatio && imageEltWidth
             ? Math.min(Math.ceil(imageEltWidth / aspectRatio), naturalHeight) + kMarginsAndBorders
             : naturalHeight + kMarginsAndBorders;
+  }
+
+  private handleBeginEditTitle = () => {
+    this.setState({ isEditingTitle: true });
+  };
+
+  private handleTitleChange = (title?: string) => {
+    title && this.getContent().setTitle(title);
+    this.setState({ isEditingTitle: false });
+  };
+
+  private renderTitleArea() {
+    return (
+      <div className="title-area-wrapper" key="title-area">
+        <div className="title-area">
+          {this.renderTitle()}
+        </div>
+      </div>
+    );
+  }
+
+  private getTitle() {
+    return this.getContent().title || "";
+  }
+
+  private renderTitle() {
+    const { readOnly, scale } = this.props;
+    const size = {width: this.state.imageEltWidth || null , height: this.state.imageEltHeight || null};
+    return (
+      <EditableTileTitle key="geometry-title" size={size} scale={scale} getTitle={this.getTitle.bind(this)}
+                              readOnly={readOnly} measureText={(text) => measureText(text, defaultTileTitleFont)}
+                              onBeginEdit={this.handleBeginEditTitle} onEndEdit={this.handleTitleChange} />
+    );
   }
 
   private getContent() {

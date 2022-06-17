@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactDataGrid from "react-data-grid";
 import { getTableContentHeight, TableContentModelType } from "../../../models/tools/table/table-content";
 import { exportTableContentAsJson } from "../../../models/tools/table/table-export";
+import { defaultBoldFont } from "../../constants";
 import { IToolTileProps } from "../tool-tile";
 import { EditableTableTitle } from "./editable-table-title";
 import { TableToolbar } from "./table-toolbar";
@@ -69,8 +70,8 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   const {
     ref: gridRef, gridContext, inputRowId, selectedCell, getSelectedRows, ...gridProps
   } = useGridContext({ modelId: model.id, showRowLabels, triggerColumnChange });
-  const measureHeaderText = useMeasureText("bold 14px Lato, sans-serif");
-  // const measureBodyText = useMeasureText("14px Lato, sans-serif");
+  const measureHeaderText = useMeasureText(defaultBoldFont);
+  // const measureBodyText = useMeasureText(defaultFont);
   const { getTitle, onBeginTitleEdit, onEndTitleEdit } = useTableTitle({
     gridContext, dataSet: dataSet.current, readOnly,
     onSetTableTitle, onRequestUniqueTitle: handleRequestUniqueTitle

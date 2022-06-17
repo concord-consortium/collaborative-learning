@@ -1,4 +1,4 @@
-import { getEnv, Instance, types } from "mobx-state-tree";
+import { getEnv, Instance, types, getParent, getType } from "mobx-state-tree";
 import { ISharedModelManager, SharedModelType } from "./shared-model";
 import { getToolContentModels, getToolContentInfoById } from "./tool-content-info";
 
@@ -68,8 +68,16 @@ export const ToolContentModel = types.model("ToolContentModel", {
 export interface ToolContentModelType extends Instance<typeof ToolContentModel> {}
 
 export const ToolMetadataModel = types.model("ToolMetadataModel", {
-    id: types.string
-  });
+    // id of associated tile
+    id: types.string,
+    // title of associated tile
+    title: types.maybe(types.string)
+  })
+  .actions(self => ({
+    setTitle(title: string) {
+      self.title = title;
+    }
+  }));
 export interface ToolMetadataModelType extends Instance<typeof ToolMetadataModel> {}
 
 interface IPrivate {
@@ -89,12 +97,12 @@ export function toolFactory(snapshot: any) {
   return getToolContentInfoById(toolType)?.modelClass || UnknownContentModel;
 }
 
-export function findMetadata(type: string, id: string) {
+export function findMetadata(type: string, id: string, title?: string) {
   const MetadataType = getToolContentInfoById(type)?.metadataClass;
   if (!MetadataType) return;
 
   if (!_private.metadata[id]) {
-    _private.metadata[id] = MetadataType.create({ id });
+    _private.metadata[id] = MetadataType.create({ id, title });
   }
   return _private.metadata[id];
 }

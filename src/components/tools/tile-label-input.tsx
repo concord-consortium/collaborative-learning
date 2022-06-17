@@ -12,7 +12,7 @@ interface IProps {
   onChange: (value: string) => void;
   onBlur: (value: string) => void;
 }
-export const GeometryLabelInput: React.FC<IProps> = ({ style, value, onKeyDown, onChange, onBlur }) => {
+export const TileLabelInput: React.FC<IProps> = ({ style, value, onKeyDown, onChange, onBlur }) => {
   return (
     <div className="clue-editor-container" style={style}>
       <input

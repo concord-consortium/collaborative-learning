@@ -1,0 +1,36 @@
+@import "../vars.sass";
+
+.editable-tile-title {
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $charcoal-dark-2;
+  background-color: white;
+  border: 1.5px solid $charcoal-light-1;
+  border-radius: 5px;
+  text-align: center;
+  opacity: 80%;
+
+  input {
+    text-align: center;
+  }
+
+  .editable-tile-title-text {
+    font-style: italic;
+  }
+}
+
+.title-area-wrapper {
+  display: flex;
+  justify-content: center;
+
+  .title-area {
+    position: absolute;
+    top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;  // has to be higher than JSXGraph entities that should be below it
+  }
+}
