@@ -105,6 +105,7 @@ interface IState {
   graphDataSet: DataSet;
   editorContainerWidth: number;
   remainingTimeInSeconds: number;
+  lastIntervalDuration: number;
 }
 
 const numSocket = new Rete.Socket("Number value");
@@ -124,6 +125,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private sequenceNames: NodeSequenceNameMap;
   private sequenceUnits: NodeSequenceUnitsMap;
   private intervalHandle: any;
+  private lastIntervalTime: number;
   private programEditor: NodeEditor;
   private programEngine: any;
   private editorDomElement: HTMLElement | null;
@@ -138,7 +140,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       editorContainerWidth: 0,
       programDisplayState: ProgramDisplayStates.Program,
       remainingTimeInSeconds: 0,
+      lastIntervalDuration: 0,
     };
+    this.lastIntervalTime = Date.now();
   }
 
   public render() {
@@ -166,6 +170,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           remainingTimeInSeconds={this.state.remainingTimeInSeconds}
           readOnly={readOnly || !this.isReady()}
           showRateUI={showRateUI}
+          lastIntervalDuration={this.state.lastIntervalDuration}
         />}
         <div className={toolbarEditorContainerClass}>
           { showProgramToolbar && <DataflowProgramToolbar
@@ -935,6 +940,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private heartBeat = () => {
+    // Update the sampling rate
+    const now = Date.now();
+    this.setState({lastIntervalDuration: now - this.lastIntervalTime});
+    this.lastIntervalTime = now;
+
     const nodeProcessMap: { [name: string]: (n: Node) => void } = {
             Generator: this.updateGeneratorNode,
             Timer: this.updateTimerNode,
