@@ -180,14 +180,14 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
               ref={(elt) => this.editorDomElement = elt}
             >
               <div className="flow-tool" ref={elt => this.toolDiv = elt}/>
+              { this.shouldShowProgramCover() &&
+                <DataflowProgramCover editorClass={editorClassForDisplayState} isRunning={this.isRunning()} /> }
               {showZoomControl &&
                 <DataflowProgramZoom
                   onZoomInClick={this.zoomIn}
                   onZoomOutClick={this.zoomOut}
                   disabled={!this.isReady()}
                 /> }
-              { this.shouldShowProgramCover() &&
-                <DataflowProgramCover editorClass={editorClassForDisplayState} isRunning={this.isRunning()} /> }
             </div>
             {this.isProgramOnly() && onShowOriginalProgram &&
               <DataflowOpenProgramButton className="program-editor" onClick={onShowOriginalProgram} /> }
