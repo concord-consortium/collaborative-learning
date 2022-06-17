@@ -1,6 +1,6 @@
 import React from "react";
 
-import "./dataflow-program-zoom.sass";
+import "./dataflow-program-zoom.scss";
 
 interface ZoomProps {
   onZoomInClick: () => void;

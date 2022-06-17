@@ -147,9 +147,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const editorClass = `editor ${editorClassForDisplayState}`;
     const toolbarEditorContainerClass = `toolbar-editor-container ${(this.isComplete() && "complete")}`;
     const isTesting = ["qa", "test"].indexOf(this.stores.appMode) >= 0;
-    const showProgramToolbar = (this.state.programDisplayState === ProgramDisplayStates.Program) &&
-                                !readOnly && !documentProperties?.dfHasData && !documentProperties?.dfHasRelay;
-    const showZoomControl = showProgramToolbar;
+    const showZoomControl = (this.state.programDisplayState === ProgramDisplayStates.Program) &&
+                                !documentProperties?.dfHasData && !documentProperties?.dfHasRelay;
+    const showProgramToolbar = showZoomControl && !readOnly;
     return (
       <div className="dataflow-program-container">
         {this.isRunning() && <div className="running-indicator" />}
@@ -180,14 +180,14 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
               ref={(elt) => this.editorDomElement = elt}
             >
               <div className="flow-tool" ref={elt => this.toolDiv = elt}/>
+              { this.shouldShowProgramCover() &&
+                <DataflowProgramCover editorClass={editorClassForDisplayState} isRunning={this.isRunning()} /> }
               {showZoomControl &&
                 <DataflowProgramZoom
                   onZoomInClick={this.zoomIn}
                   onZoomOutClick={this.zoomOut}
-                  disabled={readOnly || !this.isReady()}
+                  disabled={!this.isReady()}
                 /> }
-              { this.shouldShowProgramCover() &&
-                <DataflowProgramCover editorClass={editorClassForDisplayState} isRunning={this.isRunning()} /> }
             </div>
             {this.isProgramOnly() && onShowOriginalProgram &&
               <DataflowOpenProgramButton className="program-editor" onClick={onShowOriginalProgram} /> }
@@ -352,7 +352,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       this.updateRunAndGraphStates();
 
-      if (!this.props.readOnly && !this.isComplete() || this.props.programIsRunning === "true") {
+      if (!this.isComplete() || this.props.programIsRunning === "true") {
         this.intervalHandle = setInterval(this.heartBeat, HEARTBEAT_INTERVAL);
       }
 

@@ -1,6 +1,6 @@
 import React from "react";
 
-import "./dataflow-program-cover.sass";
+import "./dataflow-program-cover.scss";
 
 interface CoverProps {
   editorClass: string;

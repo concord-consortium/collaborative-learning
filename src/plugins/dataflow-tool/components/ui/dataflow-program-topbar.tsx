@@ -104,7 +104,7 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
     <div className="program-editor-topbar">
       <div className="refresh">
         <IconButton icon="refresh" key="refresh" className={"icon-refresh"}
-                  onClickButton={props.onRefreshDevices} title="Refresh Devices" />
+          onClickButton={props.onRefreshDevices} title="Refresh Devices" disabled={props.readOnly} />
       </div>
       { props.runningProgram
         ? <CountdownTimerComponent

@@ -10,6 +10,7 @@ interface IconButtonProps {
   enabled?: boolean;
   url?: string;
   dataTestName?: string;
+  disabled?: boolean;
 }
 
 export const IconButton = (props: IconButtonProps) => {
@@ -23,6 +24,7 @@ export const IconButton = (props: IconButtonProps) => {
       className={`icon-button ${props.className}`}
       onClick={props.onClickButton}
       data-test={props.dataTestName || `${props.icon}-icon`}
+      disabled={props.disabled}
     >
       <div
         className={`button-icon ${props.icon} ${props.innerClassName || ""}`}
