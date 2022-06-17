@@ -15,6 +15,7 @@ interface TopbarProps {
   runningProgram: boolean;
   remainingTimeInSeconds: number;
   readOnly: boolean;
+  showRateUI: boolean;
 }
 
 const kProgressWidth = 76;
@@ -132,7 +133,7 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
         </button>
       </div>
       <div className="topbar-right">
-        <span className={"rate-ui"}>10</span>
+        {props.showRateUI && <span className={"rate-ui"}>10</span>}
         <IconButton icon="refresh" key="refresh" className={"icon-refresh"}
           onClickButton={props.onRefreshDevices} title="Refresh Devices" disabled={props.readOnly} />
       </div>
