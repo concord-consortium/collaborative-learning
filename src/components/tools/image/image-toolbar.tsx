@@ -6,7 +6,6 @@ import UploadButtonSvg from "../../../assets/icons/upload-image/upload-image-ico
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
 import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
 
-import "react-tippy/dist/tippy.css";
 import "./image-toolbar.scss";
 
 interface IImageUploadButtonProps {

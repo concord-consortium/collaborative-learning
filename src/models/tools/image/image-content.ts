@@ -1,7 +1,8 @@
 import { types, Instance, SnapshotOut } from "mobx-state-tree";
 import { exportImageTileSpec, isLegacyImageTileImport, convertLegacyImageTile } from "./image-import-export";
 import { ITileExportOptions, IDefaultContentOptions } from "../tool-content-info";
-import { ToolContentModel } from "../tool-types";
+import { setTileTitleFromContent } from "../tool-tile";
+import { ToolContentModel, ToolMetadataModelType } from "../tool-types";
 import { isPlaceholderImage } from "../../../utilities/image-utils";
 import placeholderImage from "../../../assets/image_placeholder.png";
 
@@ -19,12 +20,18 @@ export const ImageContentModel = ToolContentModel
     url: types.maybe(types.string),
     filename: types.maybe(types.string),
   })
+  .volatile(self => ({
+    metadata: undefined as any as ToolMetadataModelType
+  }))
   .preProcessSnapshot(snapshot => {
     return isLegacyImageTileImport(snapshot)
             ? convertLegacyImageTile(snapshot)
             : snapshot;
   })
   .views(self => ({
+    get title() {
+      return self.metadata.title;
+    },
     get isUserResizable() {
       return true;
     },
@@ -39,6 +46,9 @@ export const ImageContentModel = ToolContentModel
     }
   }))
   .actions(self => ({
+    doPostCreate(metadata: ToolMetadataModelType) {
+      self.metadata = metadata;
+    },
     setUrl(url: string, filename?: string) {
       self.url = url;
       self.filename = filename;
@@ -46,6 +56,9 @@ export const ImageContentModel = ToolContentModel
     updateImageUrl(oldUrl: string, newUrl: string) {
       if (!oldUrl || !newUrl || (oldUrl === newUrl)) return;
       if (self.url === oldUrl) self.url = newUrl;
+    },
+    setTitle(title: string) {
+      setTileTitleFromContent(self, title);
     }
   }));
 

@@ -94,13 +94,13 @@ const AxisView: React.FC<axisViewProps> = ({
       <div className="axis-title">{title}</div>
       <div>
         <label
-          className="nc-attribute-name-prompt label-padding"
+          className="axis-settings-label"
           htmlFor={labelId}
         >
           Label: 
         </label>
         <input
-          className="nc-attribute-name-input pt-input input-margin"
+          className="dialog-name-input pt-input input-margin"
           id={labelId}
           type="text"
           maxLength={kLabelMaxChars}
@@ -150,9 +150,9 @@ const AxisOption: React.FC<axisOptionProps> = ({
   const id = `${axis}-${optionLabel}-input-id`;
   return (
     <div className="axis-option">
-      <label className="nc-attribute-name-prompt label-padding" htmlFor={id}>{optionLabel}</label>
+      <label className="axis-settings-label" htmlFor={id}>{optionLabel}</label>
       <input
-        className="nc-attribute-name-input pt-input input-margin"
+        className="dialog-name-input pt-input input-margin"
         id={id}
         type="text"
         maxLength={maxChars}

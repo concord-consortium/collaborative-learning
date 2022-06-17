@@ -209,6 +209,18 @@
         "isTileTool": true
       },
       {
+        "id": "undo",
+        "title": "Undo",
+        "iconId": "icon-undo-tool",
+        "isTileTool": false
+      },
+      {
+        "id": "redo",
+        "title": "Redo",
+        "iconId": "icon-redo-tool",
+        "isTileTool": false
+      },
+      {
         "id": "delete",
         "title": "Delete",
         "iconId": "icon-delete-tool",
@@ -232,6 +244,9 @@
     "cas": {
       "content": "curriculum/comparing-and-scaling/comparing-and-scaling.json",
       "guide": "curriculum/comparing-and-scaling/cas-teacher-guide.json"
+    },
+    "dataflow-example": {
+      "content": "curriculum/dataflow/dataflow-example.json"
     },
     "example": {
       "content": "curriculum/example-curriculum/example-curriculum.json"

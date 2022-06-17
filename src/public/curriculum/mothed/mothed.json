@@ -13,7 +13,7 @@
           "content": {
             "type": "Text",
             "format": "html",
-            "text": "Welcome! To begin reviewing the CLUE software, please click the orange My Resources bar at extreme left, and then click the tab labeled <strong>Activity</strong>."
+            "text": "Welcome! To begin reviewing the CLUE software, please click the My Resources bar at extreme left, and then click the tab labeled <strong>Activity</strong>."
           }
         }
       ]
@@ -147,48 +147,6 @@
         "url": "curriculum/mothed/stamps/greenleaf.png",
         "width": 35,
         "height": 34
-      }
-    ]
-  },
-  "navTabs": {
-    "lazyLoadTabContents": true,
-    "showNavPanel": true,
-    "tabSpecs": [
-      {
-        "tab": "problems",
-        "label": "Activity",
-        "sections": [
-          {
-            "initials": "GS",
-            "title": "Get Started",
-            "type": "problem-documents"
-          },
-          {
-            "initials": "FN",
-            "title": "Field Notes",
-            "type": "problem-documents"
-          },
-          {
-            "initials": "SH",
-            "title": "Share",
-            "type": "problem-documents"
-          }
-        ]
-      },
-      {
-        "tab": "class-work",
-        "label": "Class Activities",
-        "sections": [
-          {
-            "className": "section problem published",
-            "title": "Shared Activities",
-            "type": "published-problem-documents",
-            "dataTestHeader": "class-work-section-published",
-            "dataTestItem": "class-work-list-items",
-            "documentTypes": ["publication"],
-            "showStars": ["teacher"]
-          }
-        ]
       }
     ]
   },
