@@ -54,12 +54,14 @@ export const PlaybackComponent: React.FC = () => {
 
   const renderPlaybackControls = () => {
     const playbackControlsClass = classNames("playback-controls", activeNavTab);
+// TODO: play button is disabled because user is already at the end
+//       moving time handle enables play button
 
     return (
       <div className={playbackControlsClass}>
         <div className={`control-separator ${activeNavTab}`}/>
         {renderPlayPauseButton()}
-        <SliderComponent />
+        <SliderComponent sliderPlaying={sliderPlaying} onTogglePlayPause={handlePlayPauseToggle}/>
         {renderTimeInfo()}
       </div>
     );
