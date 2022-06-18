@@ -151,7 +151,7 @@ export const ImageMapModel = types
     // There is also the yield* toGenerator approach https://mobx-state-tree.js.org/API/#togenerator which
     // provides a way to automatically type the return value of the yield. But that doesn't solve 
     // the problem of typing the return value of the flow.
-    addImage: flow(function* addImage(url: string, storeResult: IImageHandlerStoreResult)
+    _addImage: flow(function* _addImage(url: string, storeResult: IImageHandlerStoreResult)
                               : Generator<PromiseLike<any>, ImageMapEntryType, unknown> {
 
       if (!storeResult.displayUrl) {
@@ -161,7 +161,7 @@ export const ImageMapModel = types
         console.error(`addImage called with a storeResult without an displayUrl. ` + 
           `url: ${url}, contentUrl: ${storeResult.contentUrl}, success: ${storeResult.success}`);
 
-        // We have still store the entry but we update it to be errored.
+        // We still store the entry but we update it to be errored.
         storeResult.success = false;
       }
 
@@ -174,8 +174,6 @@ export const ImageMapModel = types
       // Update or add the entry. We do this whether there is an error or not.
       // If there is an error it is still recorded so observers of the entry
       // will see the change
-      // Note: originally the contentUrl of the original entry was only updated if it was actually
-      // set in the snapshot. This approach complicates things and I don't see a benefit to it.
       self.images.set(url, snapshot);
 
       const entry = self.images.get(url)!;
@@ -184,12 +182,15 @@ export const ImageMapModel = types
         // This means the storage operation failed. 
 
         // We could clear the storingPromise here, but instead we just leave it and
-        // rely on getImage to ignore and delete the storingPromise when it sees there is
+        // rely on getImage to ignore the storingPromise when it sees there is
         // an entry with a status of error.
 
         // Even if this entry has a contentUrl that is different than its url
         // we do not update the entry at the contentUrl. 
         // See image-map.md "New cache entry is in the Error state"
+        // Note: when there is an error at this point the promise that is managing
+        // this call to _addImage should not be responsible for the entry at 
+        // contentUrl. 
 
         // We return so we don't sync and don't try to get the dimensions
         // See image-map.md "Dimensions" for why we don't set the dimensions
@@ -202,7 +203,7 @@ export const ImageMapModel = types
         // If the getImageDimension image element never loads or errors then we won't get
         // past this line. However I'd hope that the browser will eventually trigger 
         // one of those events.
-        // However in most cases addImage is not called until the image has already been
+        // In most cases _addImage is not called until the image has already been
         // downloaded and displayUrl is actually a blob url.
         // So it should be unlikely in these cases that getImageDimensions will fail.
         //
@@ -220,7 +221,8 @@ export const ImageMapModel = types
         // Note: we are not updating or clearing the other fields of the entry here
         // Its status will be Error, but it might have a contentUrl and a displayUrl.
         // Leaving the contentUrl in place is necessary so syncContentUrl can work.
-        // Leaving displayUrl is less clear
+        // Leaving displayUrl untouched might not be the best thing to do, but there
+        // isn't a good reason to change it so far.
       }
 
       self._syncContentUrl(url, entry);
@@ -233,7 +235,7 @@ export const ImageMapModel = types
     return {
       afterCreate() {
         // placeholder doesn't have contentUrl
-        self.addImage(placeholderImage, { displayUrl: placeholderImage, success: true });
+        self._addImage(placeholderImage, { displayUrl: placeholderImage, success: true });
 
         self.registerHandler(firebaseRealTimeDBImagesHandler);
         self.registerHandler(firebaseStorageImagesHandler);
@@ -254,13 +256,13 @@ export const ImageMapModel = types
                 displayUrl: simpleImage.imageData,
                 success: true
               };
-        return self.addImage(entry.contentUrl!, entry);
+        return self._addImage(entry.contentUrl!, entry);
       }),
 
-      _getImage: flow(function* (url: string, handler: IImageHandler, options?: IImageBaseOptions)
+      _storeAndAddImage: flow(function* (url: string, handler: IImageHandler, options?: IImageBaseOptions)
                        : Generator<PromiseLike<any>, ImageMapEntryType | Promise<ImageMapEntryType>, unknown> {
-        const imageEntrySnapshot = (yield handler.store(url, { db: _db, ...options })) as IImageHandlerStoreResult;
-        return self.addImage(url, imageEntrySnapshot);
+        const storeResult = (yield handler.store(url, { db: _db, ...options })) as IImageHandlerStoreResult;
+        return self._addImage(url, storeResult);
       }),
     };
   })
@@ -304,7 +306,7 @@ export const ImageMapModel = types
       
       self.images.set(url, {status: EntryStatus.Storing, displayUrl: placeholderImage});
 
-      const storingPromise = self._getImage(url, handler, options);
+      const storingPromise = self._storeAndAddImage(url, handler, options);
 
       // keep track of the storingPromise
       self.storingPromises[url] = storingPromise;
@@ -401,7 +403,7 @@ const kFirebaseStorageUrlPrefix = "https://firebasestorage.googleapis.com";
 // this could be a temporary network error.
 // By not setting the contentUrl, it also means that the default placeholder image 
 // entry will not be modified by syncContentUrl. That is a good thing.
-const kErrorImageEntrySnapshot: IImageHandlerStoreResult = { 
+const kErrorStorageResult: IImageHandlerStoreResult = { 
   displayUrl: placeholderImage, success: false
 };
 
@@ -437,14 +439,14 @@ export const firebaseStorageImagesHandler: IImageHandler = {
             success: true };
         }
         else {
-          return kErrorImageEntrySnapshot;
+          return kErrorStorageResult;
         }
       } catch (error) {
-        return kErrorImageEntrySnapshot;
+        return kErrorStorageResult;
       }
     }
     else {
-      return kErrorImageEntrySnapshot;
+      return kErrorStorageResult;
     }
   }
 };
@@ -506,10 +508,10 @@ export const firebaseRealTimeDBImagesHandler: IImageHandler = {
              // This empty entry seems to also be expected by jxg-image which was for for
              // for falsey displayUrl. It has been updated to also check the status of the
              // entry
-             : kErrorImageEntrySnapshot;
+             : kErrorStorageResult;
     }
     else {
-      return kErrorImageEntrySnapshot;
+      return kErrorStorageResult;
     }
   }
 };
