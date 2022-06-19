@@ -78,6 +78,7 @@ export function storeImage(db: DB, url: string, name?: string, cors?: boolean): 
   return new Promise((resolve, reject) => {
     if (!url) reject(img);
 
+    // This downloads the url onto a canvas and returns a data url for the canvas.
     resizeImage(url, ImageConstants.maxWidth, ImageConstants.maxHeight, cors)
       .then(imageData => {
         const _name = name || url;
@@ -89,6 +90,8 @@ export function storeImage(db: DB, url: string, name?: string, cors?: boolean): 
           createdAt: 0,
           createdBy: db.stores.user.id
         });
+        // This does not download the imageData again, but it does use
+        // fetch to turn it into a blob object.
         kUploadImage(db, image).then(storedImage => {
           resolve(storedImage);
         }).catch(() => {
@@ -157,11 +160,14 @@ function resizeImage(imageUrl: string, maxWidth: number, maxHeight: number, cors
 }
 
 export function getImageDimensions(url: string): Promise<IImageDimensions> {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const image = new Image();
     image.onload = () => {
       const dimensions = { src: image.src, width: image.width, height: image.height };
       resolve(dimensions);
+    };
+    image.onerror = (e) => {
+      reject(new Error(`Error getting dimensions of image: ${url}`));
     };
     image.src = url;
   });

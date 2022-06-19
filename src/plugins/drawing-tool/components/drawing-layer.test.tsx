@@ -15,6 +15,8 @@ import "../drawing-registration";
 
 let content: DrawingContentModelType, drawingLayerProps, drawingLayer;
 
+const kLocalImageUrl = "assets/logo_tw.png";
+
 const getDrawingObject = (objectContent: DrawingContentModelType) => {
   drawingLayerProps = {
     model: ToolTileModel.create({content: objectContent}),
@@ -140,7 +142,7 @@ describe("Drawing Layer Components", () => {
     beforeEach(() => {
       image = ImageObject.create({
         id: "567",
-        url: "my/image/url",
+        url: kLocalImageUrl,
         x: 10, y: 10,
         width: 10, height: 10,  
       });
