@@ -3,7 +3,7 @@ import React, { useCallback } from "react";
 import { observer } from "mobx-react";
 import { autorun } from "mobx";
 import { Tooltip } from "react-tippy";
-import { gImageMap } from "../../../models/image-map";
+import { EntryStatus, gImageMap } from "../../../models/image-map";
 import { DrawingObject, DrawingObjectSnapshot, DrawingTool, IDrawingComponentProps, IDrawingLayer, 
   IToolbarButtonProps, typeField } from "./drawing-object";
 import { Point } from "../model/drawing-basic-types";
@@ -36,24 +36,14 @@ export const ImageObject = DrawingObject.named("ImageObject")
       const se: Point = {x: x + width, y: y + height};
       return {nw, se};
     },
-    // TODO: this currently works with stamps because the stamp is added by creating a "create"
-    // change event. And then when that change event is executed it triggers a gImageMap.getImage
-    // When the change events are removed, we'll need to find another way to trigger these 
-    // gImageMap.getImage calls.
     get displayUrl() {
-      // I think it would work for this to:
-      // 1. check if it is available in the cache, if so return it
-      // 2. if not then call gImageMap.getImage to load it. I believe that will mean 
-      // the value of displayUrl will get updated once it gets loaded automatically
-      //
-      // The trick might be to know the difference between a successful load and a failure to load
-      // If there is a failure, I think the gImageMap does not store anything to indicate that.
-      // The ImageTile differentiates this by using a "loading" state variable. We could use the 
-      // same here in volatile state, but because the gImageMap is shared by multiple components
-      // this wouldn't really handle this case well. I think ideally the gImageMap would keep track
-      // of the failure and retry automatically. This way the display url could know the difference
-      // between loading, failed, and success.
-      return gImageMap.getCachedImage(self.url)?.displayUrl || (placeholderImage as string);
+      let entry = gImageMap.getCachedImage(self.url);
+      if (!entry || entry.status === EntryStatus.Error) {
+        gImageMap.getImage(self.url, {filename: self.filename});
+        entry = gImageMap.getCachedImage(self.url);
+      }
+      // TODO we could return a spinner image if the entry is storing or computing dimensions
+      return entry?.displayUrl || (placeholderImage as string);
     },
 
   }))
