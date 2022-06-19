@@ -117,8 +117,8 @@ export const ImageMapModel = types
           self.storingPromises[url] === self.storingPromises[entry.contentUrl]) {
         // If the existingEntry is "managed" by the same promise as the entry
         // we should updated it in some cases.
-        // See image-map.md "New Cache entry is in the Error state" and 
-        // "New cache entry is in Ready state"
+        // See image-map.md "Updated Cache entry is in the Error state" and 
+        // "Updated cache entry is in Ready state"
         self.images.set(entry.contentUrl, getSnapshot(entry));
       }
     },
@@ -187,7 +187,7 @@ export const ImageMapModel = types
 
         // Even if this entry has a contentUrl that is different than its url
         // we do not update the entry at the contentUrl. 
-        // See image-map.md "New cache entry is in the Error state"
+        // See image-map.md "Updated cache entry is in the Error state"
         // Note: when there is an error at this point the promise that is managing
         // this call to _addImage should not be responsible for the entry at 
         // contentUrl. 
