@@ -1,7 +1,6 @@
 import React from "react";
 import { reaction, IReactionDisposer } from "mobx";
 import { observer } from "mobx-react";
-import { SnapshotOut } from "mobx-state-tree";
 import { extractDragTileType, kDragTileContent } from "../../../components/tools/tool-tile";
 import { DrawingContentModelType } from "../model/drawing-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
@@ -9,11 +8,10 @@ import { safeJsonParse } from "../../../utilities/js-utils";
 import { ImageContentSnapshotOutType } from "../../../models/tools/image/image-content";
 import { gImageMap } from "../../../models/image-map";
 import { SelectionBox } from "./selection-box";
-import { DrawingObjectSnapshot, DrawingObjectType, DrawingTool, 
+import { DrawingObjectType, DrawingTool, 
   HandleObjectHover } from "../objects/drawing-object";
 import { Point, ToolbarSettings } from "../model/drawing-basic-types";
-import { DrawingObjectMSTUnion,
-  getDrawingToolInfos, renderDrawingObject } from "./drawing-object-manager";
+import { getDrawingToolInfos, renderDrawingObject } from "./drawing-object-manager";
 import { ImageObject } from "../objects/image";
 
 const SELECTION_COLOR = "#777";
