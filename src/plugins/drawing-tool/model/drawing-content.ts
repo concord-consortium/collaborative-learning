@@ -171,6 +171,7 @@ export const DrawingContentModel = ToolContentModel
       }
     }
 
+    // Keeping this around to help when adding back logging
     // function updateSelectedObjects(prop: string, newValue: string|number) {
     //   if (self.metadata.selection.length > 0) {
     //     const updateChange: DrawingToolChange = {

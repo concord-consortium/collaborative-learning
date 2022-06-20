@@ -25,7 +25,7 @@ export const DrawingMigrator = types.snapshotProcessor(DrawingContentModel, {
     if(isDrawingTileImport(snapshot)) {
       // All we currently need to do in this case is add a version.
       // If the internal format of state changes, then we might need do some migration
-      // here.  However in most cases the content that is being import is under our 
+      // here.  However in most cases the content that is being imported is under our 
       // control, so we can probably just update the content.
       // 
       // For now the version is hard coded, if the current state version 

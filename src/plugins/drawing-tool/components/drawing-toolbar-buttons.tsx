@@ -57,7 +57,7 @@ export const SvgToolbarButton: React.FC<ISvgToolbarButtonProps> = ({
 interface ISvgToolModeButtonProps {
   SvgIcon: React.FC<React.SVGProps<SVGSVGElement>>;
   // FIXME: this causes an circular dependency
-  // I thin the only thing the drawingContent is used for here is to set
+  // I think the only thing the drawingContent is used for here is to set
   // the selected button. So this method could moved to an interface instead.
   drawingContent: DrawingContentModelType;
   modalButton: ToolbarModalButton;

@@ -227,9 +227,5 @@ describe("DrawingContentModel", () => {
 
     model.updateImageUrl("my/image/url", "my/image/newUrl");
     expect(image.url).toBe("my/image/newUrl");
-
-    // I'm not really sure what this is testing
-    model.updateImageUrl("my/image/url2", "my/image/newUrl");
-    expect(image.url).toBe("my/image/newUrl");
   });
 });

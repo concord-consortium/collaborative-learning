@@ -25,7 +25,9 @@ export function applyPropertyChange(drawingObject: DrawingObjectType, prop: stri
   }
 }
 
-const DrawingContentExport = types.model("DrawingContentExport", {
+// This just has the list of objects, it does not include the fill, stroke, 
+// stamps, dashedArray, strokeWidth, currentStamp, or version
+const BasicDrawingContent = types.model("BasicDrawingContent", {
   type: "Drawing",
   objects: types.array(DrawingObjectMSTUnion)
 })
@@ -39,7 +41,7 @@ export const playbackChanges = (changes: string[]) => {
   const objectInfoMap: Record<string, IDrawingObjectChanges> = {};
   const orderedIds: string[] = [];
 
-  const content = DrawingContentExport.create();
+  const content = BasicDrawingContent.create();
 
   const isExportable = (id: string) => {
     const objInfo = objectInfoMap[id];

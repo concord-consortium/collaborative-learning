@@ -47,8 +47,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   private setSvgRef: (element: any) => void;
   private _isMounted: boolean;
   private disposers: IReactionDisposer[];
-  private fetchingImages: string[] = [];
-  private actionsCount: number;
 
   constructor(props: DrawingLayerViewProps) {
     super(props);
@@ -80,7 +78,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
   public componentDidMount() {
     this._isMounted = true;
-    this.actionsCount  = 0;
     this.disposers = [];
 
     this.disposers.push(reaction(
@@ -88,6 +85,10 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       selectedButton => this.syncCurrentTool(selectedButton)
     ));
 
+    // TODO: the list of selected objects is operated on directly by the model for example:
+    // deleteSelectedObjects. So it is redundant to have the selection stored here in the state
+    // too. There are still a few places working with this list of selected objects from the
+    // state instead of the model. 
     this.disposers.push(reaction(
       () => this.getContent().metadata.selection.toJSON(),
       selectedIds => {
@@ -356,40 +357,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       </div>
     );
   }
-
-  // The filename is passed here so it gets added to the imageEntry in the ImageMap
-  // This imageEntry is used as the transport object during drag and drop operations
-  // so it needs this filename so places the image is dropped on can have the file
-  // name too.
-  // Currently it is probably not possible to drag an image out of a drawing tile,
-  // however the same image might be used in an image tile.  These two tiles will
-  // share the same imageEntry so when either creates the imageEntry they need to
-  // include the filename.
-  //
-  // FIXME: this is not called anymore so when a image is added it probably won't
-  // trigger an gImageMap.getImage. So we'll have to find a new place to do this.
-  // It used to be called by createDrawingObject, when the object was an image.
-  // And gImageMap.getCachedImage(imageData.url) was falsey.
-  private updateLoadingImages = (url: string, filename?: string) => {
-    if (this.fetchingImages.indexOf(url) > -1) return;
-    this.fetchingImages.push(url);
-
-    gImageMap.getImage(url, { filename })
-      .then(image => {
-        if (!this._isMounted) return;
-
-        // Additional code was removed here because now the image components
-        // should be watching the gImageMap for changes themselves
-
-        // update mst content if conversion occurred
-        if (image.contentUrl && (url !== image.contentUrl)) {
-          this.getContent().updateImageUrl(url, image.contentUrl);
-        }
-      })
-      .catch(() => {
-        console.warn("error loading image. url", url, "filename", filename);
-      });
-  };
 
   private getContent() {
     return this.props.model.content as DrawingContentModelType;
