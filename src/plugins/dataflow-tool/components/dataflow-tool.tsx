@@ -37,7 +37,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
     const { model, readOnly, height } = this.props;
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
-    const { program, programRunId, programIsRunning, programStartTime, programEndTime, programRunTime, programZoom }
+    const { program, programRunId, programIsRunning, programStartTime, programEndTime, programDataRate, programZoom }
       = this.getContent();
     const showOriginalProgramButton = !!this.getOriginalProgramDocument();
     return (
@@ -61,8 +61,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
                 onSetProgramEndTime={this.handleSetProgramEndTime}
                 programEndTime={programEndTime}
                 onSetProgramStartEndTime={this.handleSetProgramStartEndTime}
-                programRunTime={programRunTime}
-                onProgramRunTimeChange={this.handleProgramRunTimeChange}
+                programDataRate={programDataRate}
+                onProgramDataRateChange={this.handleProgramDataRateChange}
                 programZoom={programZoom}
                 onZoomChange={this.handleProgramZoomChange}
                 size={size}
@@ -169,8 +169,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
     this.getContent().setRunningStatus(endTime);
   };
 
-  private handleProgramRunTimeChange = (program: any) => {
-    this.getContent().setProgramRunTime(program);
+  private handleProgramDataRateChange = (program: any) => {
+    this.getContent().setProgramDataRate(program);
   };
 
   private handleProgramZoomChange = (dx: number, dy: number, scale: number) => {
