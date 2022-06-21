@@ -284,6 +284,35 @@ export const ChartPlotColors = ["#d51eff", "#17ddd7", "#d3d114", "#3974ff", "#ff
                                "#5d6e77", "#31bc5a", "#0caadd"];
 export const NodePlotColor = "#969696";
 
+export interface ProgramDataRate {
+  text: string;
+  val: number;
+  disabled?: boolean;
+}
+export const DEFAULT_DATA_RATE = 1000;
+export const ProgramDataRates: ProgramDataRate[] = [
+  {
+    text: "1ms",
+    val: 1
+  },
+  {
+    text: "10ms",
+    val: 10
+  },
+  {
+    text: "100ms",
+    val: 100
+  },
+  {
+    text: "1s",
+    val: 1000
+  },
+  {
+    text: "10s",
+    val: 10000
+  }
+];
+
 export interface ProgramRunTime {
   text: string;
   val: number;
@@ -292,50 +321,6 @@ export interface ProgramRunTime {
 export interface IntervalTime extends ProgramRunTime {
   maxProgramRunTime: number;
 }
-export const DEFAULT_PROGRAM_TIME = 300;
-export const ProgramRunTimes: ProgramRunTime[] = [
-  {
-    text: "1 min",
-    val: 60
-  },
-  {
-    text: "5 mins",
-    val: 300
-  },
-  {
-    text: "10 mins",
-    val: 600
-  },
-  {
-    text: "30 mins",
-    val: 1800
-  },
-  {
-    text: "1 hour",
-    val: 3600,
-    disabled: true
-  },
-  {
-    text: "6 hours",
-    val: 21600,
-    disabled: true
-  },
-  {
-    text: "1 day",
-    val: 86400,
-    disabled: true
-  },
-  {
-    text: "5 days",
-    val: 432000,
-    disabled: true
-  },
-  {
-    text: "30 days",
-    val: 2592000,
-    disabled: true
-  }
-];
 
 export const IntervalTimes: IntervalTime[] = [
   {

@@ -11,7 +11,7 @@
       "text": {"tools": ["bold", "subscript", "superscript"]}
     },
     "navTabs": {
-      "showNavPanel": false,
+      "showNavPanel": true,
       "lazyLoadTabContents": true,
       "tabSpecs": [
         {

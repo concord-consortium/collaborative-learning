@@ -31,8 +31,8 @@ import { DataflowProgramCover } from "./ui/dataflow-program-cover";
 import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
 import { DataflowProgramGraph,DataSet, ProgramDisplayStates } from "./ui/dataflow-program-graph";
 // import { uploadProgram, fetchProgramData, fetchActiveRelays, deleteProgram } from "../utilities/aws";
-import { NodeChannelInfo, NodeSensorTypes, NodeGeneratorTypes, ProgramRunTimes, NodeTimerInfo, DEFAULT_PROGRAM_TIME,
-         IntervalTimes } from "../model/utilities/node";
+import { NodeChannelInfo, NodeSensorTypes, NodeGeneratorTypes, ProgramDataRates, NodeTimerInfo,
+         IntervalTimes, virtualSensorChannels } from "../model/utilities/node";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { Rect, scaleRect, unionRect } from "../utilities/rect";
 import { DocumentContextReact } from "../../../components/document/document-context";
@@ -89,8 +89,8 @@ interface IProps extends SizeMeProps {
   onSetProgramEndTime: (time: number) => void;
   programEndTime: number;
   onSetProgramStartEndTime: (startTime: number, endTime: number) => void;
-  programRunTime: number;
-  onProgramRunTimeChange: (programRunTime: number) => void;
+  programDataRate: number;
+  onProgramDataRateChange: (dataRate: number) => void;
   programZoom?: ProgramZoomType;
   onZoomChange: (dx: number, dy: number, scale: number) => void;
   programIsRunning?: string;
@@ -104,13 +104,14 @@ interface IState {
   programDisplayState: ProgramDisplayStates;
   graphDataSet: DataSet;
   editorContainerWidth: number;
+  dataRate: number;
   remainingTimeInSeconds: number;
+  lastIntervalDuration: number;
 }
 
 const numSocket = new Rete.Socket("Number value");
 const RETE_APP_IDENTIFIER = "dataflow@0.1.0";
 export const MAX_NODE_VALUES = 16;
-const HEARTBEAT_INTERVAL = 1000;
 const MAX_ZOOM = 2;
 const MIN_ZOOM = .1;
 
@@ -124,6 +125,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private sequenceNames: NodeSequenceNameMap;
   private sequenceUnits: NodeSequenceUnitsMap;
   private intervalHandle: any;
+  private lastIntervalTime: number;
   private programEditor: NodeEditor;
   private programEngine: any;
   private editorDomElement: HTMLElement | null;
@@ -137,16 +139,20 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       graphDataSet: { sequences: [], startTime: 0, endTime: 0 },
       editorContainerWidth: 0,
       programDisplayState: ProgramDisplayStates.Program,
+      dataRate: props.programDataRate,
       remainingTimeInSeconds: 0,
+      lastIntervalDuration: 0,
     };
+    this.lastIntervalTime = Date.now();
   }
 
   public render() {
-    const { readOnly, documentProperties, onShowOriginalProgram, programRunTime } = this.props;
+    const { readOnly, documentProperties, onShowOriginalProgram } = this.props;
     const editorClassForDisplayState = this.getEditorClassForDisplayState();
     const editorClass = `editor ${editorClassForDisplayState}`;
     const toolbarEditorContainerClass = `toolbar-editor-container ${(this.isComplete() && "complete")}`;
     const isTesting = ["qa", "test"].indexOf(this.stores.appMode) >= 0;
+    const showRateUI = ["qa", "test", "dev"].indexOf(this.stores.appMode) >= 0;
     const showZoomControl = (this.state.programDisplayState === ProgramDisplayStates.Program) &&
                                 !documentProperties?.dfHasData && !documentProperties?.dfHasRelay;
     const showProgramToolbar = showZoomControl && !readOnly;
@@ -156,14 +162,16 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         {!this.isComplete() && <DataflowProgramTopbar
           onRunProgramClick={this.prepareToRunProgram}
           onStopProgramClick={this.stopProgram}
-          onProgramTimeSelectClick={this.setProgramRunTime}
           onRefreshDevices={this.deviceRefresh}
-          programRunTimes={ProgramRunTimes}
-          programDefaultRunTime={programRunTime || DEFAULT_PROGRAM_TIME}
+          programDataRates={ProgramDataRates}
+          dataRate={this.state.dataRate}
+          onRateSelectClick={this.onProgramDataRateChange}
           isRunEnabled={this.isReady()}
           runningProgram={this.isRunning() && !readOnly}
           remainingTimeInSeconds={this.state.remainingTimeInSeconds}
           readOnly={readOnly || !this.isReady()}
+          showRateUI={showRateUI}
+          lastIntervalDuration={this.state.lastIntervalDuration}
         />}
         <div className={toolbarEditorContainerClass}>
           { showProgramToolbar && <DataflowProgramToolbar
@@ -353,10 +361,23 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.updateRunAndGraphStates();
 
       if (!this.isComplete() || this.props.programIsRunning === "true") {
-        this.intervalHandle = setInterval(this.heartBeat, HEARTBEAT_INTERVAL);
+        this.setDataRate(this.state.dataRate);
       }
 
     })();
+  };
+
+  private setDataRate = (rate: number) => {
+    if (this.intervalHandle) {
+      clearInterval(this.intervalHandle);
+    }
+    this.intervalHandle = setInterval(this.tick, rate);
+  };
+
+  private onProgramDataRateChange = (rate: number) => {
+    this.setDataRate(rate);
+    this.setState({ dataRate: rate });
+    this.props.onProgramDataRateChange(rate);
   };
 
   private processAndSave = async () => {
@@ -370,16 +391,16 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private updateChannels = () => {
-    // // const { hubStore } = this.stores; FIXME
-    // this.channels = [];
+    // const { hubStore } = this.stores; FIXME
+    this.channels = [];
 
     // function parseValue(value: string) {
     //   const chValue = Number.parseFloat(value);
     //   return Number.isFinite(chValue) ? chValue : NaN;
     // }
 
-    // // add virtual channels that always appear
-    // this.channels = [...virtualSensorChannels];
+    // add virtual channels that always appear
+    this.channels = [...virtualSensorChannels];
 
     // hubStore.hubs.forEach(hub => {
     //   hub.hubChannels.forEach(ch => {
@@ -420,17 +441,18 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private updateDisabledIntervals() {
-    const dataStorage = this.programEditor.nodes.find(n => n.name === "Data Storage");
-    if (dataStorage) {
-      const intervalControl = dataStorage.controls.get("interval") as DropdownListControl;
-      intervalControl.setDisabledFunction((option: ListOption) => {
-        const interval = IntervalTimes.find(i => option.val === i.val);
-        if (interval && this.props.programRunTime > interval.maxProgramRunTime) {
-          return true;
-        }
-        return option.val! >= this.props.programRunTime;
-      });
-    }
+    // const dataStorage = this.programEditor.nodes.find(n => n.name === "Data Storage");
+    // if (dataStorage) {
+    //   const intervalControl = dataStorage.controls.get("interval") as DropdownListControl;
+    //   intervalControl.setDisabledFunction((option: ListOption) => {
+    //     const interval = IntervalTimes.find(i => option.val === i.val);
+    //     if (interval && this.props.programRunTime > interval.maxProgramRunTime) {
+    //       return true;
+    //     }
+    //     return option.val! >= this.props.programRunTime;
+    //   });
+    // }
+    return true;
   }
 
   private getRunState = () => {
@@ -717,14 +739,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     // this.closeEditorNodePlots();
     // clearInterval(this.intervalHandle);
   };
-  private setProgramRunTime = (time: number) => {
-    this.props.onProgramRunTimeChange(time);
-  };
   private generateProgramData = (programTitle: string) => {
     let interval =  1;
     let datasetName = "";
     const programStartTime = Date.now();
-    const programEndTime = programStartTime + (1000 * this.props.programRunTime);
+    // Nonsensical change just to avoid an error. This will probably be purged from the code soon.
+    // const programEndTime = programStartTime + (1000 * this.props.programRunTime);
+    const programEndTime = programStartTime + 1000;
 
     const hubs: string[] = [];
     const sensors: string[] = [];
@@ -932,7 +953,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     return (type ? this.programEditor.nodes.filter(n => (n.name === type)).length : this.programEditor.nodes.length);
   };
 
-  private heartBeat = () => {
+  private tick = () => {
+    // Update the sampling rate
+    const now = Date.now();
+    this.setState({lastIntervalDuration: now - this.lastIntervalTime});
+    this.lastIntervalTime = now;
+
     const nodeProcessMap: { [name: string]: (n: Node) => void } = {
             Generator: this.updateGeneratorNode,
             Timer: this.updateTimerNode,
