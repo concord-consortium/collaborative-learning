@@ -51,7 +51,7 @@ interface RateSelectorProps {
   readOnly: boolean;
 }
 
-const RateSelectorComponent: React.FC<RateSelectorProps> = (props: RateSelectorProps) => {
+const RateSelectorComponent = (props: RateSelectorProps) => {
   const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     props.onRateSelectClick(Number(event.target.value));
   };
@@ -85,7 +85,7 @@ interface RecordButtonProps {
   readOnly: boolean;
 }
 
-const RecordButton: React.FC<RecordButtonProps> = (props: RecordButtonProps) => {
+const RecordButton = (props: RecordButtonProps) => {
   return (
     <button
       className="program-state-button"
