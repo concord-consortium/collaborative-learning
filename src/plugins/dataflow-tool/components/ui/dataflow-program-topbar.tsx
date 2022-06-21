@@ -69,7 +69,7 @@ const RateSelectorComponent: React.FC<RateSelectorProps> = (props: RateSelectorP
               id="rate-select"
             >
               { props.rateOptions.map((rate: ProgramDataRate) => (
-                <option key={rate.text} value={rate.val}>
+                <option key={rate.text} value={rate.val} disabled={rate.disabled}>
                   {rate.text}
                 </option>
               ))}
