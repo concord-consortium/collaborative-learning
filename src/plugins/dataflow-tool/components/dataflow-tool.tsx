@@ -10,6 +10,7 @@ import { IDocumentProperties } from "../../../lib/db-types";
 import { DocumentModelType } from "../../../models/document/document";
 import { DocumentContentModel } from "../../../models/document/document-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
+import { ITileExportOptions } from "../../../models/tools/tool-content-info";
 import { IToolTileProps } from "../../../components/tools/tool-tile";
 
 import "./dataflow-tool.sass";
@@ -72,6 +73,14 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
         </SizeMe>
       </div>
     );
+  }
+
+  public componentDidMount() {
+    this.props.onRegisterToolApi({
+      exportContentAsTileJson: (options?: ITileExportOptions) => {
+        return this.getContent().exportJson(options);
+      }
+    });
   }
 
   private getDocument() {

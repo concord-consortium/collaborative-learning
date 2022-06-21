@@ -1,5 +1,6 @@
 import { types, Instance } from "mobx-state-tree";
 import { ToolContentModel } from "../../../models/tools/tool-types";
+import { ITileExportOptions } from "../../../models/tools/tool-content-info";
 import { DEFAULT_PROGRAM_TIME } from "./utilities/node";
 
 export const kDataflowToolID = "Dataflow";
@@ -33,6 +34,9 @@ export const DataflowContentModel = ToolContentModel
   .views(self => ({
     isUserResizable() {
       return true;
+    },
+    exportJson(options?: ITileExportOptions) {
+      return self.program;
     }
   }))
   .actions(self => ({
