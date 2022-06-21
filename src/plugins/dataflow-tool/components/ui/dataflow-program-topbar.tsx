@@ -1,5 +1,5 @@
 import React from "react";
-// import { ProgramRunTime } from "../../model/utilities/node";
+import { ProgramDataRate } from "../../model/utilities/node";
 import { IconButton } from "../../../../components/utilities/icon-button";
 
 import "./dataflow-program-topbar.scss";
@@ -7,10 +7,7 @@ import "./dataflow-program-topbar.scss";
 interface TopbarProps {
   onRunProgramClick: () => void;
   onStopProgramClick: () => void;
-  // programRunTimes: ProgramRunTime[];
-  // programDefaultRunTime: number;
-  // onProgramTimeSelectClick: (type: number) => void;
-  rateOptions: {rate: number, label: string}[];
+  programDataRates: ProgramDataRate[];
   dataRate: number;
   onRateSelectClick: (rate: number) => void;
   onRefreshDevices: () => void;
@@ -48,7 +45,7 @@ interface TopbarProps {
 // };
 
 interface RateSelectorProps {
-  rateOptions: {rate: number, label: string}[];
+  rateOptions: ProgramDataRate[];
   dataRate: number;
   onRateSelectClick: (rate: number) => void;
   readOnly: boolean;
@@ -71,9 +68,9 @@ const RateSelectorComponent: React.FC<RateSelectorProps> = (props: RateSelectorP
               value={props.dataRate.toString()}
               id="rate-select"
             >
-              { props.rateOptions.map((rate: {rate: number, label: string}) => (
-                <option key={rate.label} value={rate.rate}>
-                  {rate.label}
+              { props.rateOptions.map((rate: ProgramDataRate) => (
+                <option key={rate.text} value={rate.val}>
+                  {rate.text}
                 </option>
               ))}
             </select>
@@ -147,7 +144,7 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
       <div className="topbar-left"></div>
       <div className="topbar-center">
         <RateSelectorComponent
-          rateOptions={props.rateOptions}
+          rateOptions={props.programDataRates}
           dataRate={props.dataRate}
           onRateSelectClick={props.onRateSelectClick}
           readOnly={props.readOnly}

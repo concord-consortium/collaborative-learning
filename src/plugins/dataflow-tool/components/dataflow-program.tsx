@@ -31,7 +31,7 @@ import { DataflowProgramCover } from "./ui/dataflow-program-cover";
 import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
 import { DataflowProgramGraph,DataSet, ProgramDisplayStates } from "./ui/dataflow-program-graph";
 // import { uploadProgram, fetchProgramData, fetchActiveRelays, deleteProgram } from "../utilities/aws";
-import { NodeChannelInfo, NodeSensorTypes, NodeGeneratorTypes, ProgramRunTimes, NodeTimerInfo, DEFAULT_PROGRAM_TIME,
+import { NodeChannelInfo, NodeSensorTypes, NodeGeneratorTypes, ProgramDataRates, NodeTimerInfo,
          IntervalTimes } from "../model/utilities/node";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { Rect, scaleRect, unionRect } from "../utilities/rect";
@@ -89,8 +89,8 @@ interface IProps extends SizeMeProps {
   onSetProgramEndTime: (time: number) => void;
   programEndTime: number;
   onSetProgramStartEndTime: (startTime: number, endTime: number) => void;
-  programRunTime: number;
-  onProgramRunTimeChange: (programRunTime: number) => void;
+  programDataRate: number;
+  onProgramDataRateChange: (dataRate: number) => void;
   programZoom?: ProgramZoomType;
   onZoomChange: (dx: number, dy: number, scale: number) => void;
   programIsRunning?: string;
@@ -112,7 +112,6 @@ interface IState {
 const numSocket = new Rete.Socket("Number value");
 const RETE_APP_IDENTIFIER = "dataflow@0.1.0";
 export const MAX_NODE_VALUES = 16;
-const HEARTBEAT_INTERVAL = 1000;
 const MAX_ZOOM = 2;
 const MIN_ZOOM = .1;
 
@@ -140,7 +139,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       graphDataSet: { sequences: [], startTime: 0, endTime: 0 },
       editorContainerWidth: 0,
       programDisplayState: ProgramDisplayStates.Program,
-      heartbeatInterval: HEARTBEAT_INTERVAL,
+      heartbeatInterval: props.programDataRate,
       remainingTimeInSeconds: 0,
       lastIntervalDuration: 0,
     };
@@ -148,7 +147,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { readOnly, documentProperties, onShowOriginalProgram, programRunTime } = this.props;
+    const { readOnly, documentProperties, onShowOriginalProgram } = this.props;
     const editorClassForDisplayState = this.getEditorClassForDisplayState();
     const editorClass = `editor ${editorClassForDisplayState}`;
     const toolbarEditorContainerClass = `toolbar-editor-container ${(this.isComplete() && "complete")}`;
@@ -163,22 +162,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         {!this.isComplete() && <DataflowProgramTopbar
           onRunProgramClick={this.prepareToRunProgram}
           onStopProgramClick={this.stopProgram}
-          // onProgramTimeSelectClick={this.setProgramRunTime}
           onRefreshDevices={this.deviceRefresh}
-          // programRunTimes={ProgramRunTimes}
-          rateOptions={[
-            {rate: 1, label: '1ms'},
-            {rate: 10, label: '10ms'},
-            {rate: 100, label: '100ms'},
-            {rate: 1000, label: '1s'},
-            {rate: 10000, label: '10s'}
-          ]}
+          programDataRates={ProgramDataRates}
           dataRate={this.state.heartbeatInterval}
-          onRateSelectClick={(rate: number) => {
-            this.startHeartbeat(rate);
-            this.setState({ heartbeatInterval: rate });
-          }}
-          // programDefaultRunTime={programRunTime || DEFAULT_PROGRAM_TIME}
+          onRateSelectClick={this.onProgramDataRateChange}
           isRunEnabled={this.isReady()}
           runningProgram={this.isRunning() && !readOnly}
           remainingTimeInSeconds={this.state.remainingTimeInSeconds}
@@ -388,6 +375,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.intervalHandle = setInterval(this.heartBeat, rate);
   };
 
+  private onProgramDataRateChange = (rate: number) => {
+    this.startHeartbeat(rate);
+    this.setState({ heartbeatInterval: rate });
+    this.props.onProgramDataRateChange(rate);
+  };
+
   private processAndSave = async () => {
     await this.programEngine.abort();
     const programJSON = this.programEditor.toJSON();
@@ -449,17 +442,18 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private updateDisabledIntervals() {
-    const dataStorage = this.programEditor.nodes.find(n => n.name === "Data Storage");
-    if (dataStorage) {
-      const intervalControl = dataStorage.controls.get("interval") as DropdownListControl;
-      intervalControl.setDisabledFunction((option: ListOption) => {
-        const interval = IntervalTimes.find(i => option.val === i.val);
-        if (interval && this.props.programRunTime > interval.maxProgramRunTime) {
-          return true;
-        }
-        return option.val! >= this.props.programRunTime;
-      });
-    }
+    // const dataStorage = this.programEditor.nodes.find(n => n.name === "Data Storage");
+    // if (dataStorage) {
+    //   const intervalControl = dataStorage.controls.get("interval") as DropdownListControl;
+    //   intervalControl.setDisabledFunction((option: ListOption) => {
+    //     const interval = IntervalTimes.find(i => option.val === i.val);
+    //     if (interval && this.props.programRunTime > interval.maxProgramRunTime) {
+    //       return true;
+    //     }
+    //     return option.val! >= this.props.programRunTime;
+    //   });
+    // }
+    return true;
   }
 
   private getRunState = () => {
@@ -746,14 +740,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     // this.closeEditorNodePlots();
     // clearInterval(this.intervalHandle);
   };
-  private setProgramRunTime = (time: number) => {
-    this.props.onProgramRunTimeChange(time);
-  };
+  // private setProgramRunTime = (time: number) => {
+  //   this.props.onProgramRunTimeChange(time);
+  // };
   private generateProgramData = (programTitle: string) => {
     let interval =  1;
     let datasetName = "";
     const programStartTime = Date.now();
-    const programEndTime = programStartTime + (1000 * this.props.programRunTime);
+    // const programEndTime = programStartTime + (1000 * this.props.programRunTime);
+    const programEndTime = programStartTime + 1000;
 
     const hubs: string[] = [];
     const sensors: string[] = [];

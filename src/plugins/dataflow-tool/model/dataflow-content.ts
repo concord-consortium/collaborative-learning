@@ -1,6 +1,6 @@
 import { types, Instance } from "mobx-state-tree";
 import { ToolContentModel } from "../../../models/tools/tool-types";
-import { DEFAULT_PROGRAM_TIME } from "./utilities/node";
+import { DEFAULT_DATA_RATE } from "./utilities/node";
 
 export const kDataflowToolID = "Dataflow";
 
@@ -26,7 +26,7 @@ export const DataflowContentModel = ToolContentModel
     programRunId: "",
     programStartTime: 0,
     programEndTime: 0,
-    programRunTime: DEFAULT_PROGRAM_TIME,
+    programDataRate: DEFAULT_DATA_RATE,
     programIsRunning: "",
     programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
   })
@@ -39,8 +39,8 @@ export const DataflowContentModel = ToolContentModel
     setProgram(program: any) {
       self.program = JSON.stringify(program);
     },
-    setProgramRunTime(runTime: number) {
-      self.programRunTime = runTime;
+    setProgramDataRate(dataRate: number) {
+      self.programDataRate = dataRate;
     },
     setProgramRunId(id: string) {
       self.programRunId = id;
