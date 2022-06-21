@@ -104,7 +104,7 @@ interface IState {
   programDisplayState: ProgramDisplayStates;
   graphDataSet: DataSet;
   editorContainerWidth: number;
-  heartbeatInterval: number;
+  dataRate: number;
   remainingTimeInSeconds: number;
   lastIntervalDuration: number;
 }
@@ -139,7 +139,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       graphDataSet: { sequences: [], startTime: 0, endTime: 0 },
       editorContainerWidth: 0,
       programDisplayState: ProgramDisplayStates.Program,
-      heartbeatInterval: props.programDataRate,
+      dataRate: props.programDataRate,
       remainingTimeInSeconds: 0,
       lastIntervalDuration: 0,
     };
@@ -164,7 +164,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           onStopProgramClick={this.stopProgram}
           onRefreshDevices={this.deviceRefresh}
           programDataRates={ProgramDataRates}
-          dataRate={this.state.heartbeatInterval}
+          dataRate={this.state.dataRate}
           onRateSelectClick={this.onProgramDataRateChange}
           isRunEnabled={this.isReady()}
           runningProgram={this.isRunning() && !readOnly}
@@ -361,23 +361,22 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.updateRunAndGraphStates();
 
       if (!this.isComplete() || this.props.programIsRunning === "true") {
-        this.startHeartbeat(this.state.heartbeatInterval);
-        // this.intervalHandle = setInterval(this.heartBeat, HEARTBEAT_INTERVAL);
+        this.setDataRate(this.state.dataRate);
       }
 
     })();
   };
 
-  private startHeartbeat = (rate: number) => {
+  private setDataRate = (rate: number) => {
     if (this.intervalHandle) {
       clearInterval(this.intervalHandle);
     }
-    this.intervalHandle = setInterval(this.heartBeat, rate);
+    this.intervalHandle = setInterval(this.tick, rate);
   };
 
   private onProgramDataRateChange = (rate: number) => {
-    this.startHeartbeat(rate);
-    this.setState({ heartbeatInterval: rate });
+    this.setDataRate(rate);
+    this.setState({ dataRate: rate });
     this.props.onProgramDataRateChange(rate);
   };
 
@@ -740,9 +739,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     // this.closeEditorNodePlots();
     // clearInterval(this.intervalHandle);
   };
-  // private setProgramRunTime = (time: number) => {
-  //   this.props.onProgramRunTimeChange(time);
-  // };
   private generateProgramData = (programTitle: string) => {
     let interval =  1;
     let datasetName = "";
@@ -956,7 +952,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     return (type ? this.programEditor.nodes.filter(n => (n.name === type)).length : this.programEditor.nodes.length);
   };
 
-  private heartBeat = () => {
+  private tick = () => {
     // Update the sampling rate
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
