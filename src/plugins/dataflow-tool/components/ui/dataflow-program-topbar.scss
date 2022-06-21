@@ -9,7 +9,6 @@ $duration-label-back: $gray-mid;
   display: flex;
   flex-direction: row;
   align-items: center;
-  // justify-content: space-between;
   width: 100%;
   flex: 0 0 $topbar-height;
   background-color: $topbar-color;
@@ -52,7 +51,7 @@ $duration-label-back: $gray-mid;
         left: 118px;
         width: 84px;
         height: 28px;
-        border-radius: 3px 3px 3px 3px;
+        border-radius: 3px;
         color: black;
         background-color: white;
         border: solid 2px #bcbcbc;
@@ -61,7 +60,7 @@ $duration-label-back: $gray-mid;
           left: 2px;
           height: 20px;
           background-color: #fde5c1;
-          border-radius: 2pxpx 2px 2px 2px;
+          border-radius: 2px;
         }
         .progress-time {
           position: absolute;
