@@ -81,64 +81,25 @@ const RateSelectorComponent: React.FC<RateSelectorProps> = (props: RateSelectorP
   );
 };
 
-// interface DurationSelectorProps {
-//   onRunProgramClick: () => void;
-//   programRunTimes: ProgramRunTime[];
-//   programDefaultRunTime: number;
-//   onProgramTimeSelectClick: (type: number) => void;
-//   isRunEnabled: boolean;
-//   readOnly: boolean;
-// }
+interface RecordButtonProps {
+  readOnly: boolean;
+}
 
-// const DurationSelectorComponent: React.SFC<DurationSelectorProps> = (props: DurationSelectorProps) => {
-//   const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-//     props.onProgramTimeSelectClick(Number(event.target.value));
-//   };
-//   return (
-//     <div className="running-container">
-//       <div className="duration" title="Set Program Duration">
-//         <div className="label-back">
-//           <div className="label">Duration</div>
-//         </div>
-//         <div className="duration-options-back">
-//           <div className="duration-options">
-//             <select onChange={handleSelectChange}
-//               disabled={!props.isRunEnabled || props.readOnly}
-//               value={props.programDefaultRunTime.toString()}
-//             >
-//               { props.programRunTimes.map((rt: ProgramRunTime) => (
-//                   <option key={rt.text} value={rt.val} disabled={rt.disabled}>
-//                     {rt.text}
-//                   </option>
-//                 ))
-//               }
-//             </select>
-//           </div>
-//         </div>
-//       </div>
-//       <button
-//         className="program-state-button"
-//         title="Run Program"
-//         onClick={props.onRunProgramClick}
-//         disabled={!props.isRunEnabled || props.readOnly}
-//       >
-//         <div className="icon run" />
-//         <div className="text">Run</div>
-//       </button>
-//     </div>
-//   );
-// };
+const RecordButton: React.FC<RecordButtonProps> = (props: RecordButtonProps) => {
+  return (
+    <button
+      className="program-state-button"
+      title="Record"
+      onClick={() => { return null; }}
+      disabled={props.readOnly}
+    >
+      <div className="icon run" />
+      <div className="text">Record</div>
+    </button>
+  );
+};
 
 export const DataflowProgramTopbar = (props: TopbarProps) => {
-  // const runTime = props.programRunTimes.find( (rt: ProgramRunTime) => rt.val === props.programDefaultRunTime );
-  // const remainingHours = Math.floor(props.remainingTimeInSeconds / 3600);
-  // const remainingMinutes = Math.floor((props.remainingTimeInSeconds - remainingHours * 3600) / 60);
-  // const remainingSeconds = (props.remainingTimeInSeconds - (remainingHours * 3600) - (remainingMinutes * 60) ) % 60;
-  // const completedTimeInSeconds = props.programDefaultRunTime - props.remainingTimeInSeconds;
-  // const progressWidth = (kProgressWidth * completedTimeInSeconds / props.programDefaultRunTime);
-  // const hoursString = String(remainingHours).padStart(2, "0");
-  // const minutesString = String(remainingMinutes).padStart(2, "0");
-  // const secondsString = String(remainingSeconds).padStart(2, "0");
   return (
     <div className="program-editor-topbar">
       <div className="topbar-left"></div>
@@ -149,23 +110,7 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
           onRateSelectClick={props.onRateSelectClick}
           readOnly={props.readOnly}
         />
-        { /*props.runningProgram
-          ? <CountdownTimerComponent
-              duration={runTime ? runTime.text.toString() : ""}
-              width={progressWidth}
-              hours={hoursString}
-              minutes={minutesString}
-              seconds={secondsString}
-              />
-          : <DurationSelectorComponent
-              onRunProgramClick={props.onRunProgramClick}
-              programRunTimes={props.programRunTimes}
-              programDefaultRunTime={props.programDefaultRunTime}
-              onProgramTimeSelectClick={props.onProgramTimeSelectClick}
-              isRunEnabled={props.isRunEnabled}
-              readOnly={props.readOnly}
-            />*/
-        }
+        <RecordButton readOnly={props.readOnly} />
         <button
           className="program-state-button"
           title="Stop Program"
