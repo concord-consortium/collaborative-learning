@@ -743,6 +743,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     let interval =  1;
     let datasetName = "";
     const programStartTime = Date.now();
+    // Nonsensical change just to avoid an error. This will probably be purged from the code soon.
     // const programEndTime = programStartTime + (1000 * this.props.programRunTime);
     const programEndTime = programStartTime + 1000;
 

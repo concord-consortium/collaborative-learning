@@ -90,7 +90,7 @@ const RecordButton = (props: RecordButtonProps) => {
     <button
       className="program-state-button"
       title="Record"
-      onClick={() => { return null; }}
+      onClick={() => null }
       disabled={props.readOnly}
     >
       <div className="icon run" />
