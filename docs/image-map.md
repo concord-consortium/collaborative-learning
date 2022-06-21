@@ -1,10 +1,10 @@
 # Image Map
 
-The Image Map is a cache used by CLUE to handle image loading. To understand this document it is best to review the document about [images](images.md)
+The Image Map is a cache used by CLUE to handle image loading. To understand this document it is best to review the document about [images](images.md).
 
-The key of an entry in the cache is its URL. As described in the images doc these URL can be:
+The key of an entry in the cache is its URL. As described in the images doc these URLs can be:
 - regular http/https URLs
-- "local" assets stored in this repository
+- "local" assets stored in this repository (generally curriculum images)
 - special URLs pointing at Firebase Storage or an object in the Firebase Realtime DB.
 
 Entries in the cache have the following properties:
@@ -24,7 +24,7 @@ Entries in the cache can have 4 status values:
 
 There are 2 main ways to work with the cache. Using promises and using MobX observation.
 
-To work with promises, call `getImage` with the URL you want to load. Use `then` or `await` to get its resolved value. It will resolve to the cache entry with a status of either `Ready` or `Error`.  If some other code has called `getImage` before you, the your call will not download the image again, it will wait for the first image to load and then resolve to the same cache entry.
+To work with promises, call `getImage` with the URL you want to load. Use `then` or `await` to get its resolved value. It will resolve to the cache entry with a status of either `Ready` or `Error`.  If some other code has called `getImage` before you, the call will not download the image again. It will wait for the first image to load and then resolve to the same cache entry.
 
 To work with MobX observation, call `getImage` with the URL you want to load. Do not wait for the promise. Instead call `getCachedImage`. The returned entry will initially have a status of `Storing`. This entry can be observed so your code will update when its status, displayURL, and width and height are updated.
 
@@ -73,7 +73,7 @@ If the existing entry is
 If the existing entry is 
 - `Ready` do nothing, the entry was already downloaded successfully leave it alone
 - `Computing Dimensions` and `Storing` this should mean the existing entry is being updated right now by a different promise, do nothing. Unlike when the updated cache entry is in the error or ready state, in this case the updated cache entry should not have been copied yet, so it can't managed by the same promise.
-- `Error` update the existing entry with the new entry. Also update the promise map so the URL of the existing entry maps to the promise of the updated entry. This way if a `getImage` request comes in for existing entry's URL. This request will wait until the updated entry's promise has resolved.
+- `Error` update the existing entry with the new entry. Also update the promise map so the URL of the existing entry maps to the promise of the updated entry. This way if a `getImage` request comes in for the existing entry's URL, this request will wait until the updated entry's promise has resolved.
 - `undefined` same as `Error`
 
 ### Updated cache entry is in the Error state
@@ -105,7 +105,7 @@ Because the cache is used this way to transfer the filename, it means when the d
 
 Any tile that stores image URLs in its serialized state also needs to store the filename if it is available. This is because any tile might be the first one to request the image from the ImageMap cache. All following requests will just work with the parameters of the first request. 
 
-For example, the same image is used by a geometry tile and an image tile. To illustrate this lets assume the geometry tile doesn't store the filename. When the document is reloaded, if the geometry tile requested the URL for the image first, an entry will be added to the cache that doesn't have a filename. When the image tile requests the same URL it would get back an entry without a filename. This original image tile could know the filename from its own state. However if the image was then copied to another document the new image tile would only have access to the info in the cache entry, so it would not know the filename.
+For example, the same image is used by a geometry tile and an image tile. To illustrate this let's assume the geometry tile doesn't store the filename. When the document is reloaded, if the geometry tile requested the URL for the image first, an entry will be added to the cache that doesn't have a filename. When the image tile requests the same URL it would get back an entry without a filename. This original image tile could know the filename from its own state. However if the image was then copied to another document the new image tile would only have access to the info in the cache entry, so it would not know the filename.
 
 ## Dimensions
 
@@ -126,7 +126,7 @@ geometry-content.tsx only partially handles image dimensions the code in the deb
 It assumes the width and height are set with: 
   `const width = image.width! / kGeometryDefaultPixelsPerUnit;`
 Because this is in a getImage handler, it should mean it won't get a entry computing dimensions. But it might get one that has error'd.  
-FIXME: We should update this code so it can handles undefined width and height values. It seems best to work on this in follow up PR.
+FIXME: We should update this code so it handles undefined width and height values. It seems best to work on this in follow up PR.
 
 jxg-image (a part of the geometry tile) is getting a size from the internal object. it doesn't use the dimensions of the imageEntry that it gets using getCachedImage. Instead it just uses the size that was set above. 
 

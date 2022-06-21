@@ -95,7 +95,7 @@ export const ImageMapModel = types
         return;
       }
 
-      // See image-map.md "URL Conversion" for a full fleshed out description
+      // See image-map.md "URL Conversion" for a fully fleshed out description
       // of this logic.
       const existingEntry = self.images.get(entry.contentUrl);
       if (!existingEntry || existingEntry.status === EntryStatus.Error) {
@@ -294,7 +294,7 @@ export const ImageMapModel = types
         return clone(self.images.get(placeholderImage)!);
       }
 
-      // If there is an existing entry we'll overwrite it so it's status is
+      // If there is an existing entry we'll overwrite it so its status is
       // storing and the displayUrl is the placeholder. In theory the
       // existingEntry could have a status of Storing, ComputingDimensions, or
       // Error. Because there is no existingStoringPromise the status should
@@ -505,7 +505,7 @@ export const firebaseRealTimeDBImagesHandler: IImageHandler = {
              // Note: we used to return an empty image entry here. This used to cause
              // problems with some code that would then try to load the original url which
              // might be a ccimg: url.
-             // This empty entry seems to also be expected by jxg-image which was for for
+             // This empty entry seems to also be expected by jxg-image which was testing
              // for falsey displayUrl. It has been updated to also check the status of the
              // entry
              : kErrorStorageResult;
