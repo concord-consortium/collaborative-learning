@@ -8,8 +8,7 @@ export const kDrawingToolID = "Drawing";
 export const kDrawingStateVersion = "1.0.0";
 export const kDrawingDefaultHeight = 180;
 
-export type ToolbarModalButton = "select" | "line" | "vector" | "rectangle" | "ellipse" | "stamp" | "variable";
-
+// These types are used by legacy import code in drawing-change-playback.ts
 export type DrawingToolMove = Array<{id: string, destination: Point}>;
 export interface DrawingToolUpdate {
   ids: string[];

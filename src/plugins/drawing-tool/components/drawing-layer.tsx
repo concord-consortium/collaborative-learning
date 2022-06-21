@@ -149,6 +149,10 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     drawingContent.setSelection(selectedObjectIds);
   }
 
+  public getSelectedObjects(): DrawingObjectType [] {
+    return this.state.selectedObjects;
+  }
+
   public setCurrentTool(tool: DrawingTool|null) {
     this.currentTool = tool;
   }
@@ -281,7 +285,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       if (!object || !_filter(object)) {
         return null;
       }
-      return renderDrawingObject(object, this.getContent(), this.handleObjectHover);
+      return renderDrawingObject(object, this.handleObjectHover);
     });
   }
 
@@ -350,7 +354,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
               ? SELECTION_COLOR : HOVER_COLOR)
             : null}
           {this.state.currentDrawingObject
-            ? renderDrawingObject(this.state.currentDrawingObject, this.getContent())
+            ? renderDrawingObject(this.state.currentDrawingObject)
             : null}
           {this.state.selectionBox ? this.state.selectionBox.render() : null}
         </svg>

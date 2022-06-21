@@ -2,8 +2,24 @@ import { getMembers, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { uniqueId } from "../../../utilities/js-utils";
 import { SelectionBox } from "../components/selection-box";
 import { BoundingBox, DefaultToolbarSettings, Point, ToolbarSettings } from "../model/drawing-basic-types";
-import { DrawingContentModelType } from "../model/drawing-content";
 import { StampModelType } from "../model/stamp";
+
+export type ToolbarModalButton = "select" | "line" | "vector" | "rectangle" | "ellipse" | "stamp" | "variable";
+
+// This is an interface that is a subset of what the DrawingContentModel provides.
+// This interface is used to break the circular reference between DrawingContentModel
+// and the toolbar components.
+export interface IToolbarManager {
+  setSelectedButton(button: ToolbarModalButton): void;
+  selectedButton: string;
+  toolbarSettings: ToolbarSettings;
+  hasSelectedObjects: boolean;
+  addObject(object: DrawingObjectType): void;
+  deleteSelectedObjects(): void;
+  stamps: StampModelType[];
+  currentStamp: StampModelType | null;
+  stroke: string;
+}
 
 /**
  * This creates the definition for a type field in MST.
@@ -93,14 +109,6 @@ export type HandleObjectHover =
 
 export interface IDrawingComponentProps {
   model: DrawingObjectType;
-  // TODO: this basically causes a circular reference. The drawingContent needs
-  // to know about all of the tools and the tools need to use this
-  // IDrawingComponentProps. This drawingContent prop is only needed by the
-  // variable chip. A possible solution for this is to put this in a context.
-  // This way the chip component embedded in what should be a generic drawing
-  // component can access info about the parent of the drawing component. This
-  // might already be available in an existing context.
-  drawingContent: DrawingContentModelType;
   handleHover?: HandleObjectHover;
 }
 
@@ -114,7 +122,7 @@ export type PaletteKey = keyof IPaletteState;
 export const kClosedPalettesState = { showStamps: false, showStroke: false, showFill: false };
 
 export interface IToolbarButtonProps {
-  drawingContent: DrawingContentModelType;
+  toolbarManager: IToolbarManager;
   // TODO: the support for palettes is hard coded to specific tools
   togglePaletteState: (palette: PaletteKey, show?: boolean) => void;  
   clearPaletteState: () => void;
@@ -127,6 +135,11 @@ export interface IDrawingLayer {
   setCurrentDrawingObject: (object: DrawingObjectType|null) => void;
   addNewDrawingObject: (object: DrawingObjectType) => void;
   getCurrentStamp: () => StampModelType|null;
+  startSelectionBox: (start: Point) => void;
+  updateSelectionBox: (p: Point) => void;
+  endSelectionBox: (addToSelectedObjects: boolean) => void;
+  setSelectedObjects: (selectedObjects: DrawingObjectType[]) => void;
+  getSelectedObjects: () => DrawingObjectType[];
 }
 
 export abstract class DrawingTool {

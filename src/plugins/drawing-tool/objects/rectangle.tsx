@@ -4,7 +4,7 @@ import React from "react";
 import { computeStrokeDashArray, DrawingTool, FilledObject, IDrawingComponentProps, IDrawingLayer, 
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
 import { Point } from "../model/drawing-basic-types";
-import RectToolIcon from "../../../clue/assets/icons/drawing/rectangle-icon.svg";
+import RectToolIcon from "../assets/rectangle-icon.svg";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 
 export const RectangleObject = types.compose("RectangleObject", StrokedObject, FilledObject)
@@ -113,7 +113,7 @@ export class RectangleDrawingTool extends DrawingTool {
   }
 }
 
-export function RectangleToolbarButton({drawingContent}: IToolbarButtonProps) {
+export function RectangleToolbarButton({toolbarManager}: IToolbarButtonProps) {
   return <SvgToolModeButton modalButton="rectangle" title="Rectangle" 
-    drawingContent={drawingContent} SvgIcon={RectToolIcon}  />;
+    toolbarManager={toolbarManager} SvgIcon={RectToolIcon}  />;
 }
