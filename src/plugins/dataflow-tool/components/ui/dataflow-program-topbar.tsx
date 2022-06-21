@@ -57,12 +57,12 @@ const RateSelectorComponent: React.FC<RateSelectorProps> = (props: RateSelectorP
   };
   return (
     <div className="running-container">
-      <div className="duration" title="Set Program Data Rate">
+      <div className="datarate" title="Set Program Data Rate">
         <div className="label-back">
           <label className="label" htmlFor="rate-select">Data Rate</label>
         </div>
-        <div className="duration-options-back">
-          <div className="duration-options">
+        <div className="datarate-options-back">
+          <div className="datarate-options">
             <select onChange={handleSelectChange}
               disabled={props.readOnly}
               value={props.dataRate.toString()}

@@ -26,8 +26,6 @@ $duration-label-back: $gray-mid;
     width: 80%;
 
     .running-container {
-      display: flex;
-      flex-direction: row;
       &.countdown {
         position: relative;
         width: 208px;
@@ -71,20 +69,21 @@ $duration-label-back: $gray-mid;
       }
     }
 
-    .duration {
+    .datarate {
       position: relative;
-      width: 152px;
+      width: 158px;
 
       .label-back {
-        width: 70px;
+        width: 130px;
         height: 28px;
         border-radius: 3px;
         border-top-right-radius: 0px;
         border-bottom-right-radius: 0px;
         background-color: $duration-label-back;
         padding: 6px 3px 5px 9px;
+        text-align: left;
         .label {
-          width: 58px;
+          width: 118px;
           height: 17px;
           font-size: 14px;
           font-weight: 500;
@@ -92,12 +91,11 @@ $duration-label-back: $gray-mid;
           font-stretch: normal;
           line-height: normal;
           letter-spacing: normal;
-          text-align: right;
           color: white;
         }
       }
 
-      .duration-options-back {
+      .datarate-options-back {
         position: absolute;
         right: 0px;
         top: 0px;
@@ -109,7 +107,7 @@ $duration-label-back: $gray-mid;
         border-bottom-left-radius: 0px;
         background-color: $duration-label-back;
 
-        .duration-options select {
+        .datarate-options select {
           position: relative;
           width: 80px;
           height: 24px;
@@ -122,7 +120,7 @@ $duration-label-back: $gray-mid;
           }
         }
 
-        .duration-options span {
+        .datarate-options span {
           top: 9px;
           width: 0;
           height: 0;
@@ -134,7 +132,7 @@ $duration-label-back: $gray-mid;
           }
         }
 
-        .duration-options option {
+        .datarate-options option {
           &:disabled {
             color: $gray-disabled;
           }
@@ -144,7 +142,7 @@ $duration-label-back: $gray-mid;
 
     .program-state-button {
       position: relative;
-      width: 70px;
+      width: 75px;
       height: 28px;
       border-radius: 3px;
       border: solid 2px $gray-mid;
