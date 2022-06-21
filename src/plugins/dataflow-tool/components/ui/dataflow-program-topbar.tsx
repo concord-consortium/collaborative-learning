@@ -66,7 +66,7 @@ const RateSelectorComponent: React.FC<RateSelectorProps> = (props: RateSelectorP
             <select onChange={handleSelectChange}
               disabled={props.readOnly}
               value={props.dataRate.toString()}
-              id="rate-select"
+              id="rate-select" // TODO: The id needs to be unique to the particular DF tile
             >
               { props.rateOptions.map((rate: ProgramDataRate) => (
                 <option key={rate.text} value={rate.val} disabled={rate.disabled}>
