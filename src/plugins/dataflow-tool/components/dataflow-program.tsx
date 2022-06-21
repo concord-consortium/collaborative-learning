@@ -32,7 +32,7 @@ import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
 import { DataflowProgramGraph,DataSet, ProgramDisplayStates } from "./ui/dataflow-program-graph";
 // import { uploadProgram, fetchProgramData, fetchActiveRelays, deleteProgram } from "../utilities/aws";
 import { NodeChannelInfo, NodeSensorTypes, NodeGeneratorTypes, ProgramDataRates, NodeTimerInfo,
-         IntervalTimes } from "../model/utilities/node";
+         IntervalTimes, virtualSensorChannels } from "../model/utilities/node";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { Rect, scaleRect, unionRect } from "../utilities/rect";
 import { DocumentContextReact } from "../../../components/document/document-context";
@@ -391,16 +391,16 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private updateChannels = () => {
-    // // const { hubStore } = this.stores; FIXME
-    // this.channels = [];
+    // const { hubStore } = this.stores; FIXME
+    this.channels = [];
 
     // function parseValue(value: string) {
     //   const chValue = Number.parseFloat(value);
     //   return Number.isFinite(chValue) ? chValue : NaN;
     // }
 
-    // // add virtual channels that always appear
-    // this.channels = [...virtualSensorChannels];
+    // add virtual channels that always appear
+    this.channels = [...virtualSensorChannels];
 
     // hubStore.hubs.forEach(hub => {
     //   hub.hubChannels.forEach(ch => {
