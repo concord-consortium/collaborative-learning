@@ -272,7 +272,7 @@ export const ImageMapModel = types
                     : Generator<PromiseLike<any>, ImageMapEntryType | Promise<ImageMapEntryType>, unknown> {
       if (!url) {
         // TODO: how often does this happen, should it be silently ignored like this?
-        console.warn("ImageMap#getImage called a falsy URL", url);
+        console.warn("ImageMap#getImage called with a falsy URL", url);
         return clone(self.images.get(placeholderImage)!);
       }
 
