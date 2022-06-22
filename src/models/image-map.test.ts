@@ -1,3 +1,5 @@
+import { runInAction, when } from "mobx";
+import { applySnapshot, destroy, protect, unprotect } from "mobx-state-tree";
 import { externalUrlImagesHandler, localAssetsImagesHandler,
         firebaseRealTimeDBImagesHandler, firebaseStorageImagesHandler,
         IImageHandler, ImageMapEntry, ImageMapModel, ImageMapModelType, 
@@ -7,8 +9,6 @@ import { parseFirebaseImageUrl } from "../../functions/src/shared-utils";
 import { DB } from "../lib/db";
 import * as ImageUtils from "../utilities/image-utils";
 import placeholderImage from "../assets/image_placeholder.png";
-import { runInAction, when } from "mobx";
-import { applySnapshot, destroy, protect, unprotect } from "mobx-state-tree";
 
 let sImageMap: ImageMapModelType;
 

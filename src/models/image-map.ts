@@ -1,4 +1,4 @@
-import { types, Instance, SnapshotIn, clone, getSnapshot, flow, applyPatch, applySnapshot } from "mobx-state-tree";
+import { types, Instance, SnapshotIn, clone, getSnapshot, flow } from "mobx-state-tree";
 import {
   getImageDimensions, IImageDimensions, ISimpleImage, isPlaceholderImage, storeCorsImage, storeFileImage, storeImage
 } from "../utilities/image-utils";
@@ -299,7 +299,7 @@ export const ImageMapModel = types
       }
 
       // If there is an existing entry we'll overwrite it so its status is
-      // storing and the displayUrl is the placeholder. In theory the
+      // `PendingStorage` and the `displayUrl` is the placeholder. In theory the
       // existingEntry could have a status of PendingStorage, PendingDimensions, or
       // Error. Because there is no existingStoringPromise the status should
       // really not be PendingStorage or PendingDimensions.
