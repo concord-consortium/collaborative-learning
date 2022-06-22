@@ -1,3 +1,4 @@
+import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import React from "react";
 import { computeStrokeDashArray, DrawingObjectType, DrawingTool, FilledObject, IDrawingComponentProps, IDrawingLayer, 
@@ -5,7 +6,6 @@ import { computeStrokeDashArray, DrawingObjectType, DrawingTool, FilledObject, I
 import { Point } from "../model/drawing-basic-types";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 import EllipseToolIcon from "../../../clue/assets/icons/drawing/ellipse-icon.svg";
-import { observer } from "mobx-react";
 
 export const EllipseObject = types.compose("EllipseObject", StrokedObject, FilledObject)
   .props({

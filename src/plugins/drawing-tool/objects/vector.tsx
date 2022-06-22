@@ -1,3 +1,4 @@
+import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import React from "react";
 import { computeStrokeDashArray, DrawingTool, IDrawingComponentProps, IDrawingLayer, 
@@ -5,7 +6,6 @@ import { computeStrokeDashArray, DrawingTool, IDrawingComponentProps, IDrawingLa
 import { Point } from "../model/drawing-basic-types";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 import LineToolIcon from "../../../clue/assets/icons/drawing/line-icon.svg";
-import { observer } from "mobx-react";
 
 // simple line
 export const VectorObject = StrokedObject.named("VectorObject")

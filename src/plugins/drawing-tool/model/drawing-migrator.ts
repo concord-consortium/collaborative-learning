@@ -8,7 +8,7 @@ import { clone } from "lodash";
 export const isDrawingTileImport = (snapshot: any) =>
               (snapshot?.type === "Drawing") && (snapshot.objects != null) && !snapshot.changes;
 
-// When this model is instantiated it will actually modify DiagramContentModel
+// When this model is instantiated it will actually modify DrawingContentModel
 // This is unexpected and is demonstrated here: 
 // `src/models/mst.test.ts` 
 export const DrawingMigrator = types.snapshotProcessor(DrawingContentModel, {

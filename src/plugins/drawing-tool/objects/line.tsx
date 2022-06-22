@@ -1,3 +1,4 @@
+import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import React from "react";
 import { SelectionBox } from "../components/selection-box";
@@ -6,7 +7,6 @@ import { computeStrokeDashArray, DeltaPoint, DrawingTool, IDrawingComponentProps
 import { Point } from "../model/drawing-basic-types";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 import FreehandToolIcon from "../../../clue/assets/icons/drawing/freehand-icon.svg";
-import { observer } from "mobx-react";
 
 function* pointIterator(line: LineObjectType): Generator<Point, string, unknown> {
   const {x, y, deltaPoints} = line;

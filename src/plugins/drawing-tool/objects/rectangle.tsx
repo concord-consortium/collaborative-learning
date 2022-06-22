@@ -1,3 +1,4 @@
+import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import React from "react";
 import { computeStrokeDashArray, DrawingTool, FilledObject, IDrawingComponentProps, IDrawingLayer, 
@@ -5,7 +6,6 @@ import { computeStrokeDashArray, DrawingTool, FilledObject, IDrawingComponentPro
 import { Point } from "../model/drawing-basic-types";
 import RectToolIcon from "../../../clue/assets/icons/drawing/rectangle-icon.svg";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
-import { observer } from "mobx-react";
 
 export const RectangleObject = types.compose("RectangleObject", StrokedObject, FilledObject)
   .props({

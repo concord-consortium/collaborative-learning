@@ -66,7 +66,7 @@ describe("mst", () => {
     expect(lateCalled).toBe(true);
   });
 
-  it("does not load a late type immediately when it is the direct child of a array", () => {        
+  it("does not load a late type immediately when it is the direct child of an array", () => {        
     let lateCalled = false;
     types.model("TypeWithLate", {
       prop: types.array(types.late(() => {
