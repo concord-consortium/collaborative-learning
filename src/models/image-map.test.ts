@@ -356,7 +356,7 @@ describe("ImageMap", () => {
       await when(() => !!sImageMap.getCachedImage(kLocalImageUrl));
       
       const imageEntry = sImageMap.getCachedImage(kLocalImageUrl);
-      expect(imageEntry?.status).toBe(EntryStatus.ComputingDimensions);
+      expect(imageEntry?.status).toBe(EntryStatus.PendingDimensions);
   
       expect(dimSpy).toHaveBeenCalled();
       // We wait for 20ms just to give the javascript engine time to resolve
@@ -451,9 +451,9 @@ describe("ImageMap", () => {
       const getImagePromise2 = sImageMap.getImage(kLocalImageUrl);
       
       // TODO: it'd be good to check the intermediate state to see that the 
-      // main entry is has a storing status. And then when addImage is called
-      // the main entry and the copied entry have a computingDimensions state
-      // Doing this would require setting up a delayed 
+      // main entry has a `PendingStorage` status. And then when addImage is called
+      // the main entry and the copied entry have a `PendingDimensions` state
+      // Doing this would require setting up a delayed getDimensions like above
 
       const returnedEntry2 = await getImagePromise2;
       const expectedEntry2 = {
@@ -473,14 +473,14 @@ describe("ImageMap", () => {
       // Directly add an initial entry
       const initialEntry = {
         displayUrl: "bogus",
-        status: EntryStatus.Storing
+        status: EntryStatus.PendingStorage
       };
       unsafeUpdate(() => sImageMap.images.set(kLocalImageUrl, initialEntry));
 
       const consoleSpy = jest.spyOn(global.console, "warn").mockImplementation();
       const getImagePromise = sImageMap.getImage(kLocalImageUrl);
       expect(sImageMap.getCachedImage(kLocalImageUrl)).toEqual({
-        status: EntryStatus.Storing,
+        status: EntryStatus.PendingStorage,
         displayUrl: placeholderImage
       });
       expect(consoleSpy).toBeCalledTimes(1);
@@ -555,7 +555,7 @@ describe("ImageMap", () => {
       };
       unsafeUpdate(() => sImageMap.images.set(kLocalImageUrl, initialEntry));
   
-      // It synchronously updates the entry and changes the status to computingDimensions.
+      // It synchronously updates the entry and changes the status to `PendingDimensions`.
       const changedStoreResult = {
         contentUrl: kLocalImageUrl2,
         displayUrl: kLocalImageUrl2,
@@ -566,7 +566,7 @@ describe("ImageMap", () => {
       expect(sImageMap.getCachedImage(kLocalImageUrl)).toEqual({
         contentUrl: kLocalImageUrl2,
         displayUrl: kLocalImageUrl2,
-        status: EntryStatus.ComputingDimensions
+        status: EntryStatus.PendingDimensions
       });
   
       // Then asynchronously after the getImageDimensions call returns,
@@ -625,11 +625,11 @@ describe("ImageMap", () => {
       await sImageMap._addImage(kLocalImageUrl, storeResult);
       expect(entryInMap).toEqual(expectedEntry);
 
-      resetEntryInMap(EntryStatus.ComputingDimensions);
+      resetEntryInMap(EntryStatus.PendingDimensions);
       await sImageMap._addImage(kLocalImageUrl, storeResult);
       expect(entryInMap).toEqual(expectedEntry);
 
-      resetEntryInMap(EntryStatus.Storing);
+      resetEntryInMap(EntryStatus.PendingStorage);
       await sImageMap._addImage(kLocalImageUrl, storeResult);
       expect(entryInMap).toEqual(expectedEntry);
 
