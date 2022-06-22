@@ -1,4 +1,4 @@
-import { types, Instance, SnapshotIn, clone, getSnapshot, flow, applyPatch, applySnapshot } from "mobx-state-tree";
+import { types, Instance, SnapshotIn, clone, getSnapshot, flow } from "mobx-state-tree";
 import {
   getImageDimensions, IImageDimensions, ISimpleImage, isPlaceholderImage, storeCorsImage, storeFileImage, storeImage
 } from "../utilities/image-utils";
@@ -11,8 +11,8 @@ export const kFirebaseStorageHandlerName = "firebaseStorage";
 export const kFirebaseRealTimeDBHandlerName = "firebaseRealTimeDB";
 
 export enum EntryStatus { 
-  Storing = "storing",
-  ComputingDimensions = "computingDimensions",
+  PendingStorage = "pendingStorage",
+  PendingDimensions = "pendingDimensions",
   Ready = "ready", 
   Error = "error" 
 }
@@ -95,7 +95,7 @@ export const ImageMapModel = types
         return;
       }
 
-      // See image-map.md "URL Conversion" for a full fleshed out description
+      // See image-map.md "URL Conversion" for a fully fleshed out description
       // of this logic.
       const existingEntry = self.images.get(entry.contentUrl);
       if (!existingEntry || existingEntry.status === EntryStatus.Error) {
@@ -103,7 +103,7 @@ export const ImageMapModel = types
           // store or update the entry
           self.images.set(entry.contentUrl, getSnapshot(entry));
         }
-        else if (entry.status === EntryStatus.ComputingDimensions) {
+        else if (entry.status === EntryStatus.PendingDimensions) {
           // store or update the entry
           self.images.set(entry.contentUrl, getSnapshot(entry));
           // copy the storing promise incase some code calls 
@@ -112,7 +112,7 @@ export const ImageMapModel = types
         }
       }
 
-      if (existingEntry?.status === EntryStatus.ComputingDimensions && 
+      if (existingEntry?.status === EntryStatus.PendingDimensions && 
           (entry.status === EntryStatus.Error || entry.status === EntryStatus.Ready) && 
           self.storingPromises[url] === self.storingPromises[entry.contentUrl]) {
         // If the existingEntry is "managed" by the same promise as the entry
@@ -168,7 +168,7 @@ export const ImageMapModel = types
       const { success: successfulStore, ...otherProps} = storeResult; 
       const snapshot: ImageMapEntrySnapshot = {
         ...otherProps,
-        status: successfulStore ? EntryStatus.ComputingDimensions : EntryStatus.Error
+        status: successfulStore ? EntryStatus.PendingDimensions : EntryStatus.Error
       };
 
       // Update or add the entry. We do this whether there is an error or not.
@@ -272,6 +272,7 @@ export const ImageMapModel = types
                     : Generator<PromiseLike<any>, ImageMapEntryType | Promise<ImageMapEntryType>, unknown> {
       if (!url) {
         // TODO: how often does this happen, should it be silently ignored like this?
+        console.warn("ImageMap#getImage called with a falsy URL", url);
         return clone(self.images.get(placeholderImage)!);
       }
 
@@ -285,6 +286,9 @@ export const ImageMapModel = types
       if (existingStoringPromise && imageEntry?.status !== EntryStatus.Error) {
         // If the imageEntry is errored we ignore the existing promise
         // This way a second getImage request will try to store the image again
+        // TODO: it might be necessary to keep track of how many times we have
+        // retried a particular URL. Otherwise there could be cases where we 
+        // go into a loop of retrying forever.
         return existingStoringPromise;
       }
 
@@ -294,17 +298,17 @@ export const ImageMapModel = types
         return clone(self.images.get(placeholderImage)!);
       }
 
-      // If there is an existing entry we'll overwrite it so it's status is
-      // storing and the displayUrl is the placeholder. In theory the
-      // existingEntry could have a status of Storing, ComputingDimensions, or
+      // If there is an existing entry we'll overwrite it so its status is
+      // `PendingStorage` and the `displayUrl` is the placeholder. In theory the
+      // existingEntry could have a status of PendingStorage, PendingDimensions, or
       // Error. Because there is no existingStoringPromise the status should
-      // really not be Storing or ComputingDimensions.
-      if (imageEntry?.status === EntryStatus.Storing || 
-          imageEntry?.status === EntryStatus.ComputingDimensions) {
+      // really not be PendingStorage or PendingDimensions.
+      if (imageEntry?.status === EntryStatus.PendingStorage || 
+          imageEntry?.status === EntryStatus.PendingDimensions) {
         console.warn(`ImageMap.getImage found an entry with a status ${imageEntry.status} at ${url}`);
       }
       
-      self.images.set(url, {status: EntryStatus.Storing, displayUrl: placeholderImage});
+      self.images.set(url, {status: EntryStatus.PendingStorage, displayUrl: placeholderImage});
 
       const storingPromise = self._storeAndAddImage(url, handler, options);
 
@@ -505,7 +509,7 @@ export const firebaseRealTimeDBImagesHandler: IImageHandler = {
              // Note: we used to return an empty image entry here. This used to cause
              // problems with some code that would then try to load the original url which
              // might be a ccimg: url.
-             // This empty entry seems to also be expected by jxg-image which was for for
+             // This empty entry seems to also be expected by jxg-image which was testing
              // for falsey displayUrl. It has been updated to also check the status of the
              // entry
              : kErrorStorageResult;
