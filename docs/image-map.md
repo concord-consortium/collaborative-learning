@@ -39,7 +39,7 @@ If the error happened while computing the dimensions the entry should have a val
 The promise should not be rejected unless there is a bug in the code. This is because getImage is intended to work both in the promise approach and in the observer approach. Using the observer approach there would be no catch block on getImage, so the browser would report an unhandled promise error if the promise was rejected.
 
 ### Error Recovery
-If getImage is called again for an entry that has a status of Error, the entry will be reset to the storing status. Its properties will be cleared and displayUrl will be the placeholderUrl.
+If `getImage` is called again for an entry that has a status of `Error`, the entry will be reset to the `PendingStorage` status. Its properties will be cleared and `displayUrl` will be the `placeholderUrl`.
 
 If an error happens during the `PendingDimensions` phase, the currentUrl and displayUrl of the content might be set to valid values. However to keep things simple these values are still cleared out when getImage is called again.
 
@@ -72,7 +72,7 @@ If the existing entry is
 ### Updated cache entry is in the PendingDimensions state
 If the existing entry is 
 - `Ready` do nothing, the entry was already downloaded successfully leave it alone
-- `PendingDimensions` and `PendingStorage` this should mean the existing entry is being updated right now by a different promise, do nothing. Unlike when the updated cache entry is in the error or ready state, in this case the updated cache entry should not have been copied yet, so it can't managed by the same promise.
+- `PendingDimensions` and `PendingStorage` this should mean the existing entry is being updated right now by a different promise, do nothing. Unlike when the updated cache entry is in the `Error` or `Ready` state, in this case the updated cache entry should not have been copied yet, so it can't managed by the same promise.
 - `Error` update the existing entry with the new entry. Also update the promise map so the URL of the existing entry maps to the promise of the updated entry. This way if a `getImage` request comes in for the existing entry's URL, this request will wait until the updated entry's promise has resolved.
 - `undefined` same as `Error`
 
@@ -125,7 +125,7 @@ If the height is not set then the desired height is undefined so no request is m
 geometry-content.tsx only partially handles image dimensions the code in the debouncing update ignores them. But code in tile drop and uploading background image also handles them. 
 It assumes the width and height are set with: 
   `const width = image.width! / kGeometryDefaultPixelsPerUnit;`
-Because this is in a getImage handler, it should mean it won't get a entry with a status of `PendingDimensions`. But it might get one that has a status of `Error`.  
+Because this is in a `getImage` handler, it should mean it won't get a entry with a status of `PendingDimensions`. But it might get one that has a status of `Error`.  
 FIXME: We should update this code so it handles undefined width and height values. It seems best to work on this in follow up PR.
 
 jxg-image (a part of the geometry tile) is getting a size from the internal object. it doesn't use the dimensions of the imageEntry that it gets using getCachedImage. Instead it just uses the size that was set above. 
