@@ -160,11 +160,14 @@ function resizeImage(imageUrl: string, maxWidth: number, maxHeight: number, cors
 }
 
 export function getImageDimensions(url: string): Promise<IImageDimensions> {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const image = new Image();
     image.onload = () => {
       const dimensions = { src: image.src, width: image.width, height: image.height };
       resolve(dimensions);
+    };
+    image.onerror = (e) => {
+      reject(new Error(`Error getting dimensions of image: ${url}`));
     };
     image.src = url;
   });
