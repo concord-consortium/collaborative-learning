@@ -120,6 +120,7 @@ const MIN_ZOOM = .1;
 export class DataflowProgram extends BaseComponent<IProps, IState> {
   public static contextType = DocumentContextReact;
 
+  private components: any[];
   private toolDiv: HTMLElement | null;
   private channels: NodeChannelInfo[] = [];
   private sequenceNames: NodeSequenceNameMap;
@@ -216,7 +217,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   public componentDidMount() {
     this._isMounted = true;
     if (!this.programEditor && this.toolDiv) {
-      this.initProgramEditor();
+      this.initProgram();
     }
     if (this.isComplete()) {
       this.props.onCheckProgramRunState(this.props.programEndTime);
@@ -247,7 +248,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
 
     if (!this.programEditor && this.toolDiv) {
-      this.initProgramEditor();
+      this.initProgram();
     }
 
     if (this.props.program !== prevProps.program) {
@@ -270,34 +271,52 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     return style;
   };
 
+  private initProgram = () => {
+    this.initComponents();
+    this.initProgramEngine();
+    this.initProgramEditor();
+
+    if (!this.isComplete() || this.props.programIsRunning === "true") {
+      this.setDataRate(this.state.dataRate);
+    }
+  };
+
+  private initComponents = () => {
+    this.components = [new NumberReteNodeFactory(numSocket),
+      new MathReteNodeFactory(numSocket),
+      new TransformReteNodeFactory(numSocket),
+      new LogicReteNodeFactory(numSocket),
+      new SensorReteNodeFactory(numSocket),
+      new RelayReteNodeFactory(numSocket),
+      new LightBulbReteNodeFactory(numSocket),
+      new GeneratorReteNodeFactory(numSocket),
+      new TimerReteNodeFactory(numSocket),
+      new DataStorageReteNodeFactory(numSocket)];
+  };
+
+  private initProgramEngine = () => {
+    this.programEngine = new Rete.Engine(RETE_APP_IDENTIFIER);
+
+    this.components.map(c => {
+      this.programEngine.register(c);
+    });
+  };
+
   private initProgramEditor = () => {
     (async () => {
-      const components = [new NumberReteNodeFactory(numSocket),
-        new MathReteNodeFactory(numSocket),
-        new TransformReteNodeFactory(numSocket),
-        new LogicReteNodeFactory(numSocket),
-        new SensorReteNodeFactory(numSocket),
-        new RelayReteNodeFactory(numSocket),
-        new LightBulbReteNodeFactory(numSocket),
-        new GeneratorReteNodeFactory(numSocket),
-        new TimerReteNodeFactory(numSocket),
-        new DataStorageReteNodeFactory(numSocket)];
       if (!this.toolDiv) return;
 
       this.programEditor = new Rete.NodeEditor(RETE_APP_IDENTIFIER, this.toolDiv);
       this.programEditor.use(ConnectionPlugin);
       this.programEditor.use(ReactRenderPlugin);
 
-      this.programEngine = new Rete.Engine(RETE_APP_IDENTIFIER);
-
-      components.map(c => {
+      this.components.map(c => {
         this.programEditor.register(c);
-        this.programEngine.register(c);
       });
 
       const program = this.props.program && safeJsonParse(this.props.program);
       if (program) {
-        // TODO: Recent values should be cleared when exporting, etc
+        // TODO: Recent values should be kept while running but not saved
         // forEach(program.nodes, (n: any) => {
         //   if (n.data.recentValues) {
         //     n.data.recentValues = [];
@@ -366,11 +385,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.programEditor.trigger("process");
 
       this.updateRunAndGraphStates();
-
-      if (!this.isComplete() || this.props.programIsRunning === "true") {
-        this.setDataRate(this.state.dataRate);
-      }
-
     })();
   };
 
