@@ -6,8 +6,8 @@ import { StampModelType } from "../model/stamp";
 
 export type ToolbarModalButton = "select" | "line" | "vector" | "rectangle" | "ellipse" | "stamp" | "variable";
 
-// This is an interface that is a subset of what the DrawingContentModel provides.
-// This interface is used to break the circular reference between DrawingContentModel
+// This interface is a subset of what the DrawingContentModel provides.
+// It is used to break the circular reference between DrawingContentModel
 // and the toolbar components.
 export interface IToolbarManager {
   setSelectedButton(button: ToolbarModalButton): void;
