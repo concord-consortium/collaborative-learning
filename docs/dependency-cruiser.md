@@ -33,7 +33,7 @@ The following command graphs:
 - first level of files outside of the drawing-tool folder that files in the drawing-tool folder depend on
 - files outside drawing-tool folder that depend on files inside the drawing-tool folder.
 ```
-depcruise -do-not-follow node_modules --focus "^src/plugins/drawing-tool" -T dot --config -- src/plugins/drawing-tool/drawing-registration.ts | dot -T svg | depcruise-wrap-stream-in-html > depcruise.html
+depcruise --do-not-follow node_modules --focus "^src/plugins/drawing-tool" -T dot --config -- src/plugins/drawing-tool/drawing-registration.ts | dot -T svg | depcruise-wrap-stream-in-html > depcruise.html
 ```
 
 If you want to just look at dependencies starting from a file this one will just go 3 deep from a file. It is configured to not follow dependencies in the node_modules:
