@@ -104,7 +104,6 @@ interface IState {
   programDisplayState: ProgramDisplayStates;
   graphDataSet: DataSet;
   editorContainerWidth: number;
-  dataRate: number;
   remainingTimeInSeconds: number;
   lastIntervalDuration: number;
 }
@@ -140,7 +139,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       graphDataSet: { sequences: [], startTime: 0, endTime: 0 },
       editorContainerWidth: 0,
       programDisplayState: ProgramDisplayStates.Program,
-      dataRate: props.programDataRate,
       remainingTimeInSeconds: 0,
       lastIntervalDuration: 0,
     };
@@ -165,8 +163,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           onStopProgramClick={this.stopProgram}
           onRefreshDevices={this.deviceRefresh}
           programDataRates={ProgramDataRates}
-          dataRate={this.state.dataRate}
-          onRateSelectClick={this.onProgramDataRateChange}
+          dataRate={this.props.programDataRate}
+          onRateSelectClick={this.props.onProgramDataRateChange}
           isRunEnabled={this.isReady()}
           runningProgram={this.isRunning() && !readOnly}
           remainingTimeInSeconds={this.state.remainingTimeInSeconds}
@@ -254,6 +252,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (this.props.program !== prevProps.program) {
       this.updateProgramEditor();
     }
+
+    if (this.props.programDataRate !== prevProps.programDataRate) {
+      this.setDataRate(this.props.programDataRate);
+    }
   }
 
   private getEditorStyle = () => {
@@ -277,7 +279,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.initProgramEditor();
 
     if (!this.isComplete() || this.props.programIsRunning === "true") {
-      this.setDataRate(this.state.dataRate);
+      this.setDataRate(this.props.programDataRate);
     }
   };
 
@@ -401,12 +403,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       clearInterval(this.intervalHandle);
     }
     this.intervalHandle = setInterval(this.tick, rate);
-  };
-
-  private onProgramDataRateChange = (rate: number) => {
-    this.setDataRate(rate);
-    this.setState({ dataRate: rate });
-    this.props.onProgramDataRateChange(rate);
   };
 
   private processAndSave = async () => {
