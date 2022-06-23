@@ -24,7 +24,8 @@ export const ImageMapEntry = types
     displayUrl: types.maybe(types.string),
     width: types.maybe(types.number),
     height: types.maybe(types.number),
-    status: types.enumeration<EntryStatus>("EntryStatus", Object.values(EntryStatus))
+    status: types.enumeration<EntryStatus>("EntryStatus", Object.values(EntryStatus)),
+    retries: 0
   });
 export type ImageMapEntryType = Instance<typeof ImageMapEntry>;
 export type ImageMapEntrySnapshot = SnapshotIn<typeof ImageMapEntry>;
@@ -165,15 +166,21 @@ export const ImageMapModel = types
         storeResult.success = false;
       }
 
-      const { success: successfulStore, ...otherProps} = storeResult; 
-      const snapshot: ImageMapEntrySnapshot = {
-        ...otherProps,
-        status: successfulStore ? EntryStatus.PendingDimensions : EntryStatus.Error
-      };
-
       // Update or add the entry. We do this whether there is an error or not.
       // If there is an error it is still recorded so observers of the entry
       // will see the change
+      // If there is an existing entry we copy the retries property
+      const existingEntry = self.images.get(url);
+      let retries = 0;
+      if (existingEntry) {
+        retries = existingEntry.retries;
+      }
+      const { success: successfulStore, ...otherProps} = storeResult; 
+      const snapshot: ImageMapEntrySnapshot = {
+        ...otherProps,
+        status: successfulStore ? EntryStatus.PendingDimensions : EntryStatus.Error,
+        retries
+      };
       self.images.set(url, snapshot);
 
       const entry = self.images.get(url)!;
@@ -283,12 +290,11 @@ export const ImageMapModel = types
       }
 
       const existingStoringPromise = self.storingPromises[url];      
-      if (existingStoringPromise && imageEntry?.status !== EntryStatus.Error) {
+      if ( existingStoringPromise && 
+           ( imageEntry?.status !== EntryStatus.Error || imageEntry?.retries >= 2 ) ) {
         // If the imageEntry is errored we ignore the existing promise
         // This way a second getImage request will try to store the image again
-        // TODO: it might be necessary to keep track of how many times we have
-        // retried a particular URL. Otherwise there could be cases where we 
-        // go into a loop of retrying forever.
+        // If we've already retried storing the image 2 times, don't try again.
         return existingStoringPromise;
       }
 
@@ -308,7 +314,14 @@ export const ImageMapModel = types
         console.warn(`ImageMap.getImage found an entry with a status ${imageEntry.status} at ${url}`);
       }
       
-      self.images.set(url, {status: EntryStatus.PendingStorage, displayUrl: placeholderImage});
+      let retries = 0;
+      if (imageEntry) {
+        // When we have an imageEntry at this point it means we are retrying
+        retries = imageEntry.retries + 1;
+      }
+
+      self.images.set(url, {status: EntryStatus.PendingStorage, displayUrl: placeholderImage, 
+        retries});
 
       const storingPromise = self._storeAndAddImage(url, handler, options);
 

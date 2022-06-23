@@ -13,6 +13,7 @@ Entries in the cache have the following properties:
 - **width, height** the dimension of the image
 - **filename** if the image was loaded from a file, this is the name of the file
 - **status** what state the entry is in, see below
+- **retries** how many times getImage has tried to store the image after a previous attempt
 
 Entries in the cache can have 4 status values:
 - **PendingStorage**: `getImage` has been called with a URL and this URL is being processed to download and store the image data.
