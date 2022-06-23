@@ -6,7 +6,6 @@ import { DrawingLayerView } from "./drawing-layer";
 import { useToolbarToolApi } from "../../../components/tools/hooks/use-toolbar-tool-api";
 import { DrawingContentModelType } from "../model/drawing-content";
 import { useCurrent } from "../../../hooks/use-current";
-import { exportDrawingTileSpec } from "../model/drawing-export";
 import { ITileExportOptions } from "../../../models/tools/tool-content-info";
 
 import "./drawing-tool.sass";
@@ -24,7 +23,7 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
 
     onRegisterToolApi({
       exportContentAsTileJson: (options?: ITileExportOptions) => {
-        return exportDrawingTileSpec(contentRef.current.changes, options);
+        return contentRef.current.exportJson(options);
       }
     });
 

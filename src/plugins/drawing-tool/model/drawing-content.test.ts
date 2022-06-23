@@ -1,14 +1,14 @@
-import { SnapshotIn } from "mobx-state-tree";
 import {
-  computeStrokeDashArray, defaultDrawingContent, DrawingContentModel, DrawingToolMetadataModel
+  createDrawingContent, defaultDrawingContent, 
+  DrawingContentModelSnapshot, DrawingToolMetadataModel
 } from "./drawing-content";
-import { IDrawingTileImportSpec } from "./drawing-import";
-import { DrawingToolChange, kDrawingToolID } from "./drawing-types";
+import { kDrawingToolID } from "./drawing-types";
 import { DefaultToolbarSettings } from "./drawing-basic-types";
 import { StampModel } from "./stamp";
 import { AppConfigModel } from "../../../models/stores/app-config-model";
-import { ImageObjectSnapshot } from "../objects/image";
-import { RectangleObjectSnapshot } from "../objects/rectangle";
+import { ImageObject } from "../objects/image";
+import { RectangleObject, RectangleObjectSnapshot, RectangleObjectType } from "../objects/rectangle";
+import { computeStrokeDashArray } from "../objects/drawing-object";
 
 // mock Logger calls
 jest.mock("../../../lib/logger", () => {
@@ -50,7 +50,7 @@ describe('defaultDrawingContent', () => {
     const content = defaultDrawingContent();
     expect(content.type).toBe(kDrawingToolID);
     expect(content.stamps).toEqual([]);
-    expect(content.changes).toEqual([]);
+    expect(content.objects).toEqual([]);
   });
   it('should return content with optional stamps', () => {
     const stamps = [{ url: "my/stamp/url", width: 10, height: 10 }];
@@ -58,42 +58,50 @@ describe('defaultDrawingContent', () => {
     const content = defaultDrawingContent({ appConfig });
     expect(content.type).toBe(kDrawingToolID);
     expect(content.stamps).toEqual(stamps);
-    expect(content.changes).toEqual([]);
+    expect(content.objects).toEqual([]);
   });
 });
 
 describe("DrawingContentModel", () => {
 
-  function createDrawingContent(options?: SnapshotIn<typeof DrawingContentModel>) {
-    const model = DrawingContentModel.create(options);
+  function createDrawingContentWithMetadata(options?: DrawingContentModelSnapshot) {
+    const model = createDrawingContent(options);
     const metadata = DrawingToolMetadataModel.create({ id: "drawing-1" });
     model.doPostCreate(metadata);
     return model;
   }
 
+  const mockSettings = {
+    fill: "#666666",
+    stroke: "#888888",
+    strokeDashArray: "3,3",
+    strokeWidth: 5
+  };
+
   it("accepts default arguments on creation", () => {
-    const model = createDrawingContent();
+    const model = createDrawingContentWithMetadata();
     expect(model.type).toBe(kDrawingToolID);
-    expect(model.changes).toEqual([]);
+    expect(model.objects).toEqual([]);
     expect(model.isUserResizable).toBe(true);
     expect(model.selectedButton).toBe("select");
     expect(model.isSelectedButton("select")).toBe(true);
   });
 
   it("imports the drawing tool import format", () => {
-    const model = createDrawingContent({
+    const { fill, stroke, strokeDashArray, strokeWidth} = mockSettings;
+    const model = createDrawingContentWithMetadata({
       type: "Drawing", objects: [ 
-        { type: "rectangle", x: 10, y: 10, width: 100, height: 100 } as RectangleObjectSnapshot
+        { type: "rectangle", x: 10, y: 10, width: 100, height: 100,
+          fill, stroke, strokeDashArray, strokeWidth } as RectangleObjectSnapshot
       ]
-    } as IDrawingTileImportSpec);
+    });
     expect(model.type).toBe(kDrawingToolID);
-    expect(model.changes.length).toBe(1);
-    expect(JSON.parse(model.changes[0]).action).toBe("create");
-    expect(JSON.parse(model.changes[0]).data.type).toBe("rectangle");
+    expect(model.objects.length).toBe(1);
+    expect(model.objects[0].type).toBe("rectangle");
   });
 
   it("can reset the tool button", () => {
-    const model = createDrawingContent();
+    const model = createDrawingContentWithMetadata();
     model.setSelectedButton("vector");
     expect(model.selectedButton).toBe("vector");
     model.setSelectedButton("vector");
@@ -104,11 +112,8 @@ describe("DrawingContentModel", () => {
   });
 
   it("can manage the toolbar settings", () => {
-    const fill = "#666666";
-    const stroke = "#888888";
-    const strokeDashArray = "3,3";
-    const strokeWidth = 5;
-    const model = createDrawingContent();
+    const { fill, stroke, strokeDashArray, strokeWidth} = mockSettings;
+    const model = createDrawingContentWithMetadata();
     const defaultSettings = {
       stroke: DefaultToolbarSettings.stroke,
       fill: DefaultToolbarSettings.fill,
@@ -127,44 +132,59 @@ describe("DrawingContentModel", () => {
   });
 
   it("can delete a set of selected drawing objects", () => {
-    const model = createDrawingContent();
+    const model = createDrawingContentWithMetadata();
+    const {stroke, fill, strokeWidth, strokeDashArray} = mockSettings;
+
+    model.addObject(RectangleObject.create(
+      {id:"a", x:0, y:0, width:10, height:10,
+       stroke, fill, strokeWidth, strokeDashArray}));
+
+    model.addObject(RectangleObject.create(
+      {id:"b", x:20, y:20, width:10, height:10,
+       stroke, fill, strokeWidth, strokeDashArray}));
 
     // delete does nothing if nothing is selected
+    expect(model.objects.length).toBe(2);
     model.deleteSelectedObjects();
-    expect(model.changes.length).toBe(0);
+    expect(model.objects.length).toBe(2);
 
     model.setSelection(["a", "b"]);
     expect(model.hasSelectedObjects).toBe(true);
     model.deleteSelectedObjects();
-    expect(model.changes.length).toBe(1);
-
-    const change = JSON.parse(model.changes[0]);
-    expect(change.action).toBe("delete");
-    expect(change.data).toEqual(["a", "b"]);
+    expect(model.objects.length).toBe(0);
   });
 
   it("can update the properties of a set of selected drawing objects", () => {
-    const model = createDrawingContent();
+    const model = createDrawingContentWithMetadata();
     expect(model.currentStamp).toBeNull();
+
+    const {stroke, fill, strokeWidth, strokeDashArray} = mockSettings;
+    model.addObject(RectangleObject.create(
+      {id:"a", x:0, y:0, width:10, height:10,
+       stroke, fill, strokeWidth, strokeDashArray}));
+
+    model.addObject(RectangleObject.create(
+      {id:"b", x:20, y:20, width:10, height:10,
+       stroke, fill, strokeWidth, strokeDashArray}));
 
     model.setSelection(["a", "b"]);
     model.setStroke("#000000");
     model.setStrokeWidth(2);
-    expect(model.changes.length).toBe(2);
 
-    const change0 = JSON.parse(model.changes[0]);
-    expect(change0.action).toBe("update");
-    expect(change0.data.ids).toEqual(["a", "b"]);
-    expect(change0.data.update.prop).toEqual("stroke");
-    expect(change0.data.update.newValue).toEqual("#000000");
+    expect(model.objects[0].type).toBe("rectangle");
+    const rect1 = model.objects[0] as RectangleObjectType;
+    // Set stroke doesn't seem to be applied to the selected objects
+    expect(rect1.stroke).toBe("#000000");
+    expect(rect1.strokeWidth).toBe(2);
 
-    const change1 = JSON.parse(model.changes[1]);
-    expect(change1.data.update.prop).toEqual("strokeWidth");
-    expect(change1.data.update.newValue).toEqual(2);
+    expect(model.objects[1].type).toBe("rectangle");
+    const rect2 = model.objects[0] as RectangleObjectType;
+    expect(rect2.stroke).toBe("#000000");
+    expect(rect2.strokeWidth).toBe(2);
   });
 
   it("can change the current stamp", () => {
-    const model = createDrawingContent({
+    const model = createDrawingContentWithMetadata({
       stamps: [ {
           url: "a.png",
           width: 10,
@@ -187,33 +207,25 @@ describe("DrawingContentModel", () => {
   });
 
   it("can update image urls", () => {
-    const initialImage: ImageObjectSnapshot = {
-      type: "image", id: "img1", url: "my/image/url", x: 0, y: 0, width: 10, height: 10
-    };
-    const changes: DrawingToolChange[] = [
-      { action: "create", data: initialImage },
-      { action: "update", data: { ids: ["img1"], update: { prop: "url", newValue: "my/image/url2" }}}
-    ];
-    const model = createDrawingContent({
-      changes: changes.map(change => JSON.stringify(change))
+    const originalUrl = "my/image/url";
+    const image = ImageObject.create({
+      url: originalUrl, x: 0, y: 0, width: 10, height: 10
     });
-    const modelChanges = () => model.changes.map(change => JSON.parse(change));
+    const model = createDrawingContentWithMetadata({
+      objects: [image]
+    });
 
     model.updateImageUrl("", "");
-    expect(modelChanges()).toEqual(changes);
+    expect(image.url).toEqual(originalUrl);
+
+    // Updates to a empty string are ignored
     model.updateImageUrl("my/image/url", "");
-    expect(modelChanges()).toEqual(changes);
+    expect(image.url).toEqual(originalUrl);
+
     model.updateImageUrl("", "my/image/newUrl");
-    expect(modelChanges()).toEqual(changes);
+    expect(image.url).toEqual(originalUrl);
 
     model.updateImageUrl("my/image/url", "my/image/newUrl");
-    expect(JSON.parse(model.changes[0]).data.url).toBe("my/image/newUrl");
-    model.updateImageUrl("my/image/url2", "my/image/newUrl");
-    expect(JSON.parse(model.changes[1]).data.update.newValue).toBe("my/image/newUrl");
-
-    // ignores invalid changes
-    const bogusModel = createDrawingContent({ changes: [...model.changes, "{ INVALID }"] });
-    bogusModel.updateImageUrl("my/image/url", "my/image/newUrl");
-    expect(JSON.parse(bogusModel.changes[0]).data.url).toBe("my/image/newUrl");
+    expect(image.url).toBe("my/image/newUrl");
   });
 });

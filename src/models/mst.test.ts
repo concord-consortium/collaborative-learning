@@ -66,6 +66,17 @@ describe("mst", () => {
     expect(lateCalled).toBe(true);
   });
 
+  it("does not load a late type immediately when it is the direct child of an array", () => {        
+    let lateCalled = false;
+    types.model("TypeWithLate", {
+      prop: types.array(types.late(() => {
+        lateCalled = true;
+        return types.string;
+      }))
+    });
+    expect(lateCalled).toBe(false);
+  });
+
   it("loads a late type immediately when it is the direct child of an optional", () => {        
     let lateCalled = false;
     types.model("TypeWithLate", {
