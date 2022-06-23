@@ -4,7 +4,7 @@ import { Variable } from "@concord-consortium/diagram-view";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { VariableChipObject } from "./variable-object";
 import { findVariable, getVariables, getOrFindSharedModel } from "./drawing-utils";
-import { DrawingContentModelContext } from "../../drawing-tool/components/drawing-tool";
+import { DrawingContentModelContext } from "../../drawing-tool/components/drawing-content-context";
 
 import './variable-dialog.scss';
 
