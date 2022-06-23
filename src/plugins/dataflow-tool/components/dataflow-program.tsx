@@ -389,7 +389,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private updateProgramEditor = () => {
-    if (this.toolDiv) {
+    // TODO: allow updates to write tiles for undo/redo
+    if (this.toolDiv && this.props.readOnly) {
       this.toolDiv.innerHTML = "";
       this.initProgramEditor();
     }
