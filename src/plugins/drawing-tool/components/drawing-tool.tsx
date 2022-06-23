@@ -7,9 +7,9 @@ import { useToolbarToolApi } from "../../../components/tools/hooks/use-toolbar-t
 import { DrawingContentModelType } from "../model/drawing-content";
 import { useCurrent } from "../../../hooks/use-current";
 import { ITileExportOptions } from "../../../models/tools/tool-content-info";
+import { DrawingContentModelContext } from "./drawing-content-context";
 
 import "./drawing-tool.sass";
-import { DrawingContentModelContext } from "./drawing-content-context";
 
 type IProps = IToolTileProps;
 
