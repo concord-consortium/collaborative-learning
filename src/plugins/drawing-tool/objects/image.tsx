@@ -38,23 +38,9 @@ export const ImageObject = DrawingObject.named("ImageObject")
     },
     get displayUrl() {
       let entry = gImageMap.getCachedImage(self.url);
-      // FIXME: this causes an infinite loop when there is an network error
-      // The setting of the entry status to Error causes observers 
-      // to re-render. So those observers will call displayUrl again
-      // and since the entry has a status of Error this line will be
-      // true so getImage will be called again. This sets the entry.status
-      // to PendingStorage which triggers a re-render again. In this case
-      // the displayUrl will falsy so the placeholder image will be returned
-      // then when the network request fails the entry.status will be switched
-      // back to Error which will trigger another render, and cycle repeats.
-      //
-      // The fix seems to be to add a counter here or in the image map so 
-      // we don't retry more than that.
-      //
-      // We should add a test first though. Perhaps with an autorun and a
-      // invalid URL. The autorun should loop just like the render.  Because multiple
-      // places might be requesting this it should be on the image map itself.
-      // So I can make this a separate PR off of that one...
+      // Note: this was causing an infinite loop when loading the image failed.
+      // The ImageMap was updated so it would limit the number times it would
+      // retry fetching an image, and this has stopped the infinite loop.
       if (!entry || entry.status === EntryStatus.Error) {
         gImageMap.getImage(self.url, {filename: self.filename});
         entry = gImageMap.getCachedImage(self.url);
