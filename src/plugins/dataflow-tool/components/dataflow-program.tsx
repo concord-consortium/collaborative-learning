@@ -249,6 +249,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (!this.programEditor && this.toolDiv) {
       this.initProgramEditor();
     }
+
+    if (this.props.program !== prevProps.program) {
+      this.updateProgramEditor();
+    }
   }
 
   private getEditorStyle = () => {
@@ -293,13 +297,16 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       const program = this.props.program && safeJsonParse(this.props.program);
       if (program) {
-        forEach(program.nodes, (n: any) => {
-          if (n.data.recentValues) {
-            n.data.recentValues = [];
-          }
-        });
+        // TODO: Recent values should be cleared when exporting, etc
+        // forEach(program.nodes, (n: any) => {
+        //   if (n.data.recentValues) {
+        //     n.data.recentValues = [];
+        //   }
+        // });
         this.closeCompletedRunProgramNodePlots(program);
         await this.programEditor.fromJSON(program);
+        // This line will clear garbage stored data if something breaks
+        // await this.programEditor.fromJSON({id:"none", nodes: {}});
         if (this.hasDataStorage()) {
           this.setState({disableDataStorage: true});
         }
@@ -365,6 +372,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       }
 
     })();
+  };
+
+  private updateProgramEditor = () => {
+    if (this.toolDiv) {
+      this.toolDiv.innerHTML = "";
+      this.initProgramEditor();
+    }
   };
 
   private setDataRate = (rate: number) => {
