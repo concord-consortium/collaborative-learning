@@ -1,10 +1,10 @@
-import { runInAction, when } from "mobx";
+import { autorun, runInAction, when } from "mobx";
 import { applySnapshot, destroy, protect, unprotect } from "mobx-state-tree";
 import { externalUrlImagesHandler, localAssetsImagesHandler,
         firebaseRealTimeDBImagesHandler, firebaseStorageImagesHandler,
         IImageHandler, ImageMapEntry, ImageMapModel, ImageMapModelType, 
         EntryStatus, IImageHandlerStoreOptions, 
-        IImageHandlerStoreResult } from "./image-map";
+        IImageHandlerStoreResult, ImageMapEntryType} from "./image-map";
 import { parseFirebaseImageUrl } from "../../functions/src/shared-utils";
 import { DB } from "../lib/db";
 import * as ImageUtils from "../utilities/image-utils";
@@ -305,12 +305,14 @@ describe("ImageMap", () => {
 
   describe("getImage", () => {
     it("can handle falsy urls", () => {
+      const consoleSpy = jest.spyOn(global.console, "warn").mockImplementation();
       expect(sImageMap.getCachedImage("")).toBeUndefined();
       return sImageMap.getImage("")
               .then(image => {
                 expect(image.displayUrl).toBe(placeholderImage);
                 expect(image.width).toBe(200);
                 expect(image.height).toBe(150);
+                expect(consoleSpy).toBeCalledTimes(1);
               });
     });
   
@@ -320,7 +322,8 @@ describe("ImageMap", () => {
         displayUrl: placeholderImage,
         width: 200,
         height: 150,
-        status: EntryStatus.Ready
+        status: EntryStatus.Ready,
+        retries: 0
       });
       return sImageMap.getImage(placeholderImage)
               .then(image => {
@@ -438,7 +441,8 @@ describe("ImageMap", () => {
       const expectedEntry = {
         contentUrl: "convertedUrl", 
         displayUrl: "convertedUrl", 
-        status: EntryStatus.Error
+        status: EntryStatus.Error,
+        retries: 0
       };
       expect(returnedEntry).toEqual(expectedEntry);
       expect(sImageMap.getCachedImage(kLocalImageUrl)).toEqual(expectedEntry);
@@ -461,7 +465,8 @@ describe("ImageMap", () => {
         displayUrl: "convertedUrl", 
         width: 200,
         height: 150,
-        status: EntryStatus.Ready
+        status: EntryStatus.Ready,
+        retries: 1
       };
       expect(returnedEntry2).toEqual(expectedEntry2);
       expect(sImageMap.getCachedImage(kLocalImageUrl)).toEqual(expectedEntry2);
@@ -481,7 +486,8 @@ describe("ImageMap", () => {
       const getImagePromise = sImageMap.getImage(kLocalImageUrl);
       expect(sImageMap.getCachedImage(kLocalImageUrl)).toEqual({
         status: EntryStatus.PendingStorage,
-        displayUrl: placeholderImage
+        displayUrl: placeholderImage,
+        retries: 1
       });
       expect(consoleSpy).toBeCalledTimes(1);
 
@@ -491,7 +497,74 @@ describe("ImageMap", () => {
         contentUrl: kLocalImageUrl,
         displayUrl: kLocalImageUrl,
         height: 150,
-        width: 200
+        width: 200,
+        retries: 1
+      });
+    });
+
+    it("limits the number times it retries entries that have failed", () => {
+      const mockHandler: any = {
+        async store(url: string, options?: IImageHandlerStoreOptions): Promise<IImageHandlerStoreResult> {
+          return {
+            displayUrl: placeholderImage, 
+            success: false};
+        }
+      };
+      jest.spyOn(sImageMap, "getHandler").mockImplementation((url: string) => mockHandler);
+      const mockUrl = "fake-url-for-retry-test";
+
+      let countOfGetImage = 0;
+      let countOfAutorun = 0;
+      let imageEntry: ImageMapEntryType | undefined;
+      let displayUrl: string | undefined; 
+      let lastStatus: EntryStatus | undefined;
+      const disposer = autorun(() => {
+        // This is a pattern that an observing component could use to display an
+        // image entry. Without a retry limit in the ImageMap, in certain cases
+        // this would loop forever This is because the status is flipping
+        // between PendingStorage and Error.
+        imageEntry = sImageMap.getCachedImage(mockUrl);
+        if (!imageEntry || imageEntry.status === EntryStatus.Error) {
+          sImageMap.getImage(mockUrl);
+          countOfGetImage ++;
+          imageEntry = sImageMap.getCachedImage(mockUrl);
+        }
+        // This displayURL is what the the observing component would use to
+        // render the image.  
+        displayUrl = imageEntry?.displayUrl;
+        
+        // **This line is important.** 
+        // Without this line, there will be no looping. This line tells MobX the
+        // autorun should be re-run whenever the status changes. The status is
+        // being checked above, but only if imageEntry already exists. So the
+        // first time through the autorun the status is not checked above.
+        lastStatus = imageEntry?.status;
+
+        countOfAutorun++;
+        if (countOfAutorun > 15) {
+          // Stop the loop if it is out of control
+          // The autorun might get run extra times if the getImage or getCachedImage makes changes
+          // to the image entry, this is why the limit is 15 instead of something lower
+          disposer();
+        }
+      });  
+
+      return new Promise(resolve => setTimeout(resolve, 500))
+      .then(() => {
+        // Make sure the autorun is disposed so it doesn't continue to watch for changes
+        disposer();
+        expect(imageEntry?.retries).toBe(2);
+        expect(lastStatus).toBe(EntryStatus.Error);
+        expect(displayUrl).toBe(placeholderImage);
+        // 1st getImage: retries 0
+        // 2nd getImage: retries 1
+        // 3rd getImage: retries 2
+        // 4th getImage: not retrying, retries 2, status error
+        expect(countOfGetImage).toBe(4);
+        // The autorun is run extra times which do not trigger getImage calls
+        // I think these happen because the imageEntry is changed or the ImageMap is changed
+        // How many time this runs isn't really important as long as it isn't excessive
+        expect(countOfAutorun).toBeLessThan(10);
       });
     });
   });
@@ -566,7 +639,8 @@ describe("ImageMap", () => {
       expect(sImageMap.getCachedImage(kLocalImageUrl)).toEqual({
         contentUrl: kLocalImageUrl2,
         displayUrl: kLocalImageUrl2,
-        status: EntryStatus.PendingDimensions
+        status: EntryStatus.PendingDimensions,
+        retries: 0
       });
   
       // Then asynchronously after the getImageDimensions call returns,
@@ -578,7 +652,8 @@ describe("ImageMap", () => {
           displayUrl: kLocalImageUrl2,
           status: EntryStatus.Ready,
           width: 200,
-          height: 150
+          height: 150,
+          retries: 0
         });
       });
     });
@@ -600,7 +675,8 @@ describe("ImageMap", () => {
       const expectedEntry = {
         contentUrl: kLocalImageUrl,
         displayUrl: kLocalImageUrl,
-        status: EntryStatus.Error
+        status: EntryStatus.Error,
+        retries: 0
       };
       
       // It synchronously adds the entry to the map
