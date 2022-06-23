@@ -8,7 +8,7 @@ import { findVariable } from "./drawing-utils";
 import { useVariableDialog } from "./use-variable-dialog";
 import VariableToolIcon from "../../../clue/assets/icons/variable-tool.svg";
 import { SvgToolbarButton } from "../../drawing-tool/components/drawing-toolbar-buttons";
-import { DrawingContentModelContext } from "../..//drawing-tool/components/drawing-tool";
+import { DrawingContentModelContext } from "../../drawing-tool/components/drawing-content-context";
 
 export const VariableChipObject = DrawingObject.named("VariableObject")
   .props({

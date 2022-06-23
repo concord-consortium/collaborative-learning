@@ -4,17 +4,14 @@ import { IToolTileProps } from "../../../components/tools/tool-tile";
 import { ToolbarView } from "./drawing-toolbar";
 import { DrawingLayerView } from "./drawing-layer";
 import { useToolbarToolApi } from "../../../components/tools/hooks/use-toolbar-tool-api";
-import { DrawingContentModelType, createDrawingContent } from "../model/drawing-content";
+import { DrawingContentModelType } from "../model/drawing-content";
 import { useCurrent } from "../../../hooks/use-current";
 import { ITileExportOptions } from "../../../models/tools/tool-content-info";
 
 import "./drawing-tool.sass";
+import { DrawingContentModelContext } from "./drawing-content-context";
 
 type IProps = IToolTileProps;
-
-// This default drawing content should never be used, but it is necessary
-// so code using this context doesn't have to check for undefined
-export const DrawingContentModelContext = React.createContext<DrawingContentModelType>(createDrawingContent());
 
 const DrawingToolComponent: React.FC<IProps> = (props) => {
   const { documentContent, toolTile, model, readOnly, scale, onRegisterToolApi, onUnregisterToolApi } = props;
