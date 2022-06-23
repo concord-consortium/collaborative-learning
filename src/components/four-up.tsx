@@ -24,6 +24,7 @@ interface IProps extends IBaseProps {
   selectedSectionId?: string | null;
   viaTeacherDashboard?: boolean;
   setFocusedGroupUser?: (focusedGroupUser?: GroupUserModelType) => void;
+  setSelectedFourUpContext?: (selectedContext: string | undefined) => void;
 }
 
 interface IState {
@@ -397,7 +398,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       setFocusedGroupUser(focusedGroupUser);
     }
   };
-  
+
   private handleExpandView = (context: string, user: FourUpUser) => {
     const { groupId, setFocusedGroupUser } = this.props;
     const groupUser = this.userByContext[context];
