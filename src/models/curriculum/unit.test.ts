@@ -72,4 +72,34 @@ describe("UnitModel", () => {
     expect(isDifferentUnitAndProblem(stores, "u2", "1.1")).toBe(true);
     expect(isDifferentUnitAndProblem(stores, "u2", "2.2")).toBe(true);
   });
+
+  it("can import legacy snapshots", () => {
+    const legacyPlaceholder = "Legacy Placeholder";
+    const snap = {
+      code: "code",
+      title: "Title",
+      placeholderText: legacyPlaceholder
+    };
+    const _unit = UnitModel.create(snap);
+    expect(_unit.config?.placeholderText).toBe(legacyPlaceholder);
+  });
+
+  it("treats ambiguous snapshots as modern rather than legacy", done => {
+    const legacyPlaceholder = "Legacy Placeholder";
+    const modernPlaceholder = "Modern Placeholder";
+    const snap = {
+      code: "code",
+      title: "Title",
+      placeholderText: legacyPlaceholder,
+      config: {
+        placeholderText: modernPlaceholder
+      }
+    };
+    jestSpyConsole("warn", spy => {
+      const _unit = UnitModel.create(snap);
+      expect(_unit.config?.placeholderText).toBe(modernPlaceholder);
+      expect(spy).toHaveBeenCalled();
+      done();
+    });
+  });
 });

@@ -2,9 +2,9 @@ import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useState } from "react";
 import { SizeMeProps } from "react-sizeme";
-import { GeometryLabelInput } from "./geometry-label-input";
+import { TileLabelInput } from "./tile-label-input";
 
-import "./geometry-title.scss";
+import "./editable-tile-title.scss";
 
 interface IProps extends SizeMeProps {
   className?: string;
@@ -15,7 +15,7 @@ interface IProps extends SizeMeProps {
   onBeginEdit?: () => void;
   onEndEdit?: (title?: string) => void;
 }
-export const EditableGeometryTitle: React.FC<IProps> = observer(({
+export const EditableTileTitle: React.FC<IProps> = observer(({
   className, readOnly, size: contentSize, scale, getTitle, measureText, onBeginEdit, onEndEdit
 }) => {
   // getTitle() and observer() allow this component to re-render
@@ -55,8 +55,9 @@ export const EditableGeometryTitle: React.FC<IProps> = observer(({
     setIsEditing(false);
   };
   const isDefaultTitle = title && /Graph\s+(\d+)\s*$/.test(title);
-  const classes = classNames("geometry-title", className,
-                            { "geometry-title-editing": isEditing, "geometry-title-default": isDefaultTitle });
+  const classes = classNames("editable-tile-title", className,
+                            { "editable-tile-title-editing": isEditing,
+                            "editable-tile-title-default": isDefaultTitle });
   const containerStyle: React.CSSProperties = { left, width };
   const kMinInputWidth = 200; // so there's room to expand very short titles
   const inputWidth = width >= kMinInputWidth ? "100%" : kMinInputWidth;
@@ -64,9 +65,9 @@ export const EditableGeometryTitle: React.FC<IProps> = observer(({
   return (
     <div className={classes} style={containerStyle} onClick={handleClick}>
       {isEditing
-        ? <GeometryLabelInput value={editingTitle} style={inputStyle}
+        ? <TileLabelInput value={editingTitle} style={inputStyle}
             onKeyDown={handleKeyDown} onChange={setEditingTitle} onBlur={() => handleClose(true)} />
-        : <div className="geometry-title-text">{title}</div>}
+        : <div className="editable-tile-title-text">{title}</div>}
     </div>
   );
 });

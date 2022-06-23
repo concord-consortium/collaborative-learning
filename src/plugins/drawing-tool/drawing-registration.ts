@@ -7,6 +7,7 @@ import { DrawingMigrator } from "./model/drawing-migrator";
 
 registerToolContentInfo({
   id: kDrawingToolID,
+  titleBase: "Drawing",
   // TODO: maybe there is a better way to do this kind of casting?
   //   The issue is that modelClass prop has a type of `typeof ToolContentModel`,
   //   That type is pretty restrictive and doesn't accommodate the return of 
