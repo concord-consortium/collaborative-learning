@@ -4,17 +4,11 @@ import stringify from "json-stringify-pretty-compact";
 import { StampModel, StampModelType } from "./stamp";
 import { ITileExportOptions, IDefaultContentOptions } from "../../../models/tools/tool-content-info";
 import { ToolMetadataModel, ToolContentModel } from "../../../models/tools/tool-types";
-import {
-  kDrawingStateVersion, kDrawingToolID, ToolbarModalButton
-} from "./drawing-types";
+import { kDrawingStateVersion, kDrawingToolID } from "./drawing-types";
 import { ImageObjectType, isImageObjectSnapshot } from "../objects/image";
 import { DefaultToolbarSettings, ToolbarSettings } from "./drawing-basic-types";
-// FIXME: this creates a cycle, the 
-// `drawing-object-manager -> drawing-object -> drawing-content` 
-// I think the right fix is to break the `drawing-object -> drawing-content` dependency
-// Drawing objects should get the drawing-content from a context instead of a prop.
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
-import { DrawingObjectType, isFilledObject, isStrokedObject } from "../objects/drawing-object";
+import { DrawingObjectType, isFilledObject, isStrokedObject, ToolbarModalButton } from "../objects/drawing-object";
 
 // interface LoggedEventProperties {
 //   properties?: string[];

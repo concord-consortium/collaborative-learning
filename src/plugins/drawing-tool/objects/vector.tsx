@@ -5,7 +5,7 @@ import { computeStrokeDashArray, DrawingTool, IDrawingComponentProps, IDrawingLa
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
 import { Point } from "../model/drawing-basic-types";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
-import LineToolIcon from "../../../clue/assets/icons/drawing/line-icon.svg";
+import LineToolIcon from "../assets/line-icon.svg";
 
 // simple line
 export const VectorObject = StrokedObject.named("VectorObject")
@@ -96,7 +96,7 @@ export class VectorDrawingTool extends DrawingTool {
   }
 }
 
-export function VectorToolbarButton({drawingContent}: IToolbarButtonProps) {
+export function VectorToolbarButton({toolbarManager}: IToolbarButtonProps) {
   return <SvgToolModeButton modalButton="vector" title="Line"
-    drawingContent={drawingContent} SvgIcon={LineToolIcon} />;
+    toolbarManager={toolbarManager} SvgIcon={LineToolIcon} />;
 }

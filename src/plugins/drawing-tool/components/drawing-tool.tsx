@@ -7,6 +7,7 @@ import { useToolbarToolApi } from "../../../components/tools/hooks/use-toolbar-t
 import { DrawingContentModelType } from "../model/drawing-content";
 import { useCurrent } from "../../../hooks/use-current";
 import { ITileExportOptions } from "../../../models/tools/tool-content-info";
+import { DrawingContentModelContext } from "./drawing-content-context";
 
 import "./drawing-tool.sass";
 
@@ -32,14 +33,16 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
 
   return (
-    <div className={classNames("drawing-tool", { "read-only": readOnly })} data-testid="drawing-tool">
-      <ToolbarView model={model}
-                  documentContent={documentContent}
-                  toolTile={toolTile}
-                  scale={scale}
-                  {...toolbarProps} />
-      <DrawingLayerView {...props} />
-    </div>
+    <DrawingContentModelContext.Provider value={contentRef.current} >
+      <div className={classNames("drawing-tool", { "read-only": readOnly })} data-testid="drawing-tool">
+        <ToolbarView model={model}
+                    documentContent={documentContent}
+                    toolTile={toolTile}
+                    scale={scale}
+                    {...toolbarProps} />
+        <DrawingLayerView {...props} />
+      </div>
+    </DrawingContentModelContext.Provider>
   );
 };
 export default DrawingToolComponent;

@@ -134,25 +134,25 @@ export class StampDrawingTool extends DrawingTool {
 }
 
 export const StampToolbarButton: React.FC<IToolbarButtonProps> = ({
-  drawingContent, togglePaletteState, clearPaletteState
+  toolbarManager, togglePaletteState, clearPaletteState
 }) => {
   const tooltipOptions = useTooltipOptions();
-  const { selectedButton, stamps } = drawingContent;
-  const { currentStamp } = drawingContent;
+  const { selectedButton, stamps } = toolbarManager;
+  const { currentStamp } = toolbarManager;
   const stampCount = stamps.length;
 
   const modalButton = "stamp";
   const selected = selectedButton === modalButton;
 
   const handleStampsButtonClick = useCallback(() => {
-    drawingContent.setSelectedButton("stamp");
+    toolbarManager.setSelectedButton("stamp");
     togglePaletteState("showStamps", false);
-  }, [drawingContent, togglePaletteState]);
+  }, [toolbarManager, togglePaletteState]);
 
   const handleStampsButtonTouchHold = useCallback(() => {
-    drawingContent.setSelectedButton("stamp");
+    toolbarManager.setSelectedButton("stamp");
     togglePaletteState("showStamps");
-  }, [drawingContent, togglePaletteState]);
+  }, [toolbarManager, togglePaletteState]);
 
   const { didTouchHold, ...handlers } = useTouchHold(handleStampsButtonTouchHold, handleStampsButtonClick);
 
