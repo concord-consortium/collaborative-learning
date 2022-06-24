@@ -438,6 +438,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const sequenceInfo = this.getNodeSequenceNamesAndUnits();
     this.sequenceNames = sequenceInfo.names;
     this.sequenceUnits = sequenceInfo.units;
+
+    console.log("NOTE [ 1 ]: dataflow-program :: updateRunAndGraphStates(): this:", this)
   }
 
   private updateDisabledIntervals() {
@@ -754,6 +756,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     let hasValidRelay = false;
     let hasLightbulb = false;
     this.programEditor.nodes.forEach((n: Node) => {
+      console.log("NOTE [ 1.1 ]: this node has to find its channel: ", n )
       if (n.name === "Sensor" && n.data.sensor && !n.data.virtual) {
         const chInfo = this.channels.find(ci => ci.channelId === n.data.sensor);
         if (chInfo) {
@@ -840,6 +843,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private addNode = async (nodeType: string) => {
+    console.log("NOTE [ 2 ]: dataflow-program :: addNode: ")
     const nodeFactory = this.programEditor.components.get(nodeType) as any;
     const n1 = await nodeFactory!.createNode();
     n1.position = this.getNewNodePosition();
@@ -847,6 +851,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (nodeType === "Data Storage") {
       this.setState({disableDataStorage: true});
     }
+    console.log("NOTE [ 2.1 ] and here is the instasntiated node, have a look at its `data` property: ", n1, " and find where `nodeValue` is updated")
   };
   private getNewNodePosition = () => {
     const numNodes = this.programEditor.nodes.length;
@@ -954,6 +959,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private tick = () => {
+    console.log('[ 4 ]:  _ _ TICK _ _ ')
     // Update the sampling rate
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
@@ -964,7 +970,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             Timer: this.updateTimerNode,
             Sensor: (n: Node) => {
                       this.updateNodeChannelInfo(n);
-                      this.updateNodeSensorValue(n);
+                      this.updateNodeSensorValue(n); // find me
                     },
             Relay: this.updateNodeChannelInfo
           };
@@ -1115,6 +1121,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private updateGeneratorNode = (n: Node) => {
+    // console.log("NOTE [3] before updateGeneratorNode n: ", n)
     const generatorType = n.data.generatorType;
     const period = Number(n.data.period);
     const amplitude = Number(n.data.amplitude);
@@ -1122,12 +1129,19 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (nodeGeneratorType && period && amplitude) {
       const time = Date.now();
       // note: period is given in s, but we're passing in ms for time, need to adjust
+    
+      /* NOTE [3] look up this node type's update method (by wave type) and 
+      call it with current params from settings resulting in doing math to get next value? */
       const val = nodeGeneratorType.method(time, period * 1000, amplitude);
-      const nodeValue = n.controls.get("nodeValue") as NumControl;
+
+      /* NOTE [3] get rete's control since we are about to update the value it holds */
+      const nodeValue = n.controls.get("nodeValue") as NumControl; 
+      
       if (nodeValue) {
         nodeValue.setValue(val);
       }
     }
+    // console.log("NOTE [3.1] after updateGeneratorNode n.data.nodeValue: ", n.data.nodeValue)
   };
 
   private updateTimerNode = (n: Node) => {
