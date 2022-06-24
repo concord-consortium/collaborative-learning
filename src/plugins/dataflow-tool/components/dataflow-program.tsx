@@ -969,8 +969,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             Generator: this.updateGeneratorNode,
             Timer: this.updateTimerNode,
             Sensor: (n: Node) => {
-                      this.updateNodeChannelInfo(n);
-                      this.updateNodeSensorValue(n); // find me
+                      this.updateNodeChannelInfo(n); // NOTE [ 5 ] find me
+                      this.updateNodeSensorValue(n); // NOTE [ 5 ] find me
                     },
             Relay: this.updateNodeChannelInfo
           };
@@ -1002,9 +1002,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private updateNodeChannelInfo = (n: Node) => {
+    console.log("NOTE [ 5 ] updateNodeChannelInfo -- setting up sensor controls to recieve data?")
     const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
     const relayList = n.controls.get("relayList") as RelaySelectControl;
     if (sensorSelect) {
+      console.log("NOTE [ 5.1 ] where do we look up channel: ", this.channels)
       sensorSelect.setChannels(this.channels);
       (sensorSelect as any).update();
     }
@@ -1141,7 +1143,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         nodeValue.setValue(val);
       }
     }
-    // console.log("NOTE [3.1] after updateGeneratorNode n.data.nodeValue: ", n.data.nodeValue)
+    // console.log("NOTE [3] after updateGeneratorNode n.data.nodeValue: ", n.data.nodeValue)
   };
 
   private updateTimerNode = (n: Node) => {
