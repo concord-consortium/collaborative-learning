@@ -219,6 +219,11 @@ export const NodeSensorTypes = [
   }
 ];
 
+/* NOTE [9] here's source of the math for the oscillators
+  you might see if you can create a method here that returns the latest value
+  from the serial stream. or find the method that returns latest value from 
+  actual stream 
+*/
 export const NodeGeneratorTypes = [
   {
     name: "Sine",
@@ -376,6 +381,10 @@ export const kSensorSelectMessage = "Select a sensor";
 export const kRelayMissingMessage = "Finding";
 export const kSensorMissingMessage = "Finding";
 
+/* NOTE [10] sensor and/or these are sources of dummy data, but we should find how we bring in real 
+non-virtual sensor data 
+You might be able to use something like below on incoming sensor data
+*/
 const virtualTempChannel: NodeChannelInfo = {
   hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "Temperature", channelId: "00001-VIR",
   missing: false, type: "temperature", units: "°C", plug: 1, value: 0, virtual: true,
