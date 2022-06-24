@@ -211,6 +211,12 @@ export const NodeSensorTypes = [
     units: "PM2.5",
     icon: "icon-particulates"
   },
+  {
+    name: "EMG Reading",
+    type: "emg-reading",
+    units: "mv",
+    icon: "icon-emg-reading"
+  }
 ];
 
 export const NodeGeneratorTypes = [
