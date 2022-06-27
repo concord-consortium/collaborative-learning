@@ -423,19 +423,13 @@ const serialDataChannel: NodeChannelInfo = {
   hubId: "00000-SENSOR-HUB", hubName: "EMG", name: "EMG", channelId: "0000SENS",
   /* TODO this should not be a virtual sensor, need to back out farther to get entry point that matches architecture */
   missing: false, type: "emg-reading", units: "mv", plug: 8, value: 0, virtual: false,
-  virtualValueMethod: (t: number) => {
-    const vals = [10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11];
-    //return vals[t % vals.length];
-    return getIntFromSensor()
-} };
+  // virtualValueMethod: (t: number) => {
+  //   const vals = [10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11];
+  //   //return vals[t % vals.length];
+  //   return getIntFromSensor()
+  // } 
+};
 
 export const virtualSensorChannels: NodeChannelInfo[] = [
   virtualTempChannel, virtualHumidChannel, virtualCO2Channel, virtualO2Channel,
   virtualLightChannel, virtualPartChannel, serialDataChannel ];
-
-
-/* entirely temporary and a proof-of-concept */
-
-function getIntFromSensor(){
-  return 123
-}
