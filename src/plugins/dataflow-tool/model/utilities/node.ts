@@ -426,9 +426,16 @@ const serialDataChannel: NodeChannelInfo = {
   virtualValueMethod: (t: number) => {
     const vals = [10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11];
     //return vals[t % vals.length];
-    return 42
+    return getIntFromSensor()
 } };
 
 export const virtualSensorChannels: NodeChannelInfo[] = [
   virtualTempChannel, virtualHumidChannel, virtualCO2Channel, virtualO2Channel,
   virtualLightChannel, virtualPartChannel, serialDataChannel ];
+
+
+/* entirely temporary and a proof-of-concept */
+
+function getIntFromSensor(){
+  return 123
+}
