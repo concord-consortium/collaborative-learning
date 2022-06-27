@@ -425,7 +425,8 @@ const serialDataChannel: NodeChannelInfo = {
   missing: false, type: "emg-reading", units: "mv", plug: 8, value: 0, virtual: true,
   virtualValueMethod: (t: number) => {
     const vals = [10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11];
-    return vals[t % vals.length];
+    //return vals[t % vals.length];
+    return 42
 } };
 
 export const virtualSensorChannels: NodeChannelInfo[] = [
