@@ -245,7 +245,7 @@ export class SensorSelectControl extends Rete.Control {
   }
 
   public setChannels = (channels: NodeChannelInfo[]) => {
-    console.log("NOTE [ 6 ] : calling setChannels(channels)")
+    console.log("NOTE [ 6 ] : setChannels(channels): ", channels)
     this.props.channels = channels;
     // problem, if called with event nodecreate, update doesn't exist
     // (this as any).update();
@@ -260,12 +260,11 @@ export class SensorSelectControl extends Rete.Control {
   };
 
   public setSensor = (val: any) => {
-    console.log("NOTE [ 6.1 ] calling setSensor, based on val: ", val)
+    console.log("NOTE [ TUNING IN 1 ] calling setSensor, based on val: ", val)
     
     const nch: NodeChannelInfo = this.props.channels.find((ch: any) => ch.channelId === val);
 
-    console.log("NOTE [6.2] setSensor calling setSensorValue to nch.value, nch: ", nch)
-    console.log("NOTE [7] I think I need to chase down the channel as I think that provides the value")
+    console.log("NOTE [ TUNING IN 2 ] setSensor calling setSensorValue to nch.value, nch: ", nch)
     this.setSensorValue(nch ? nch.value : NaN);
     this.setSensorVirtualState(!!nch?.virtual);
 
@@ -281,7 +280,7 @@ export class SensorSelectControl extends Rete.Control {
 
 
   public setSensorValue = (val: any) => {
-    console.log("setSensorValue was passed this val: ", val)
+    console.log("NOTE [ 9 ] setSensorValue(val): ", val)
     this.props.value = val;
     this.putData("nodeValue", val);
     (this as any).update();

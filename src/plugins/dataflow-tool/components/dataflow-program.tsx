@@ -439,7 +439,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.sequenceNames = sequenceInfo.names;
     this.sequenceUnits = sequenceInfo.units;
 
-    console.log("NOTE [ 1 ]: dataflow-program :: updateRunAndGraphStates(): this:", this)
+    // console.log("NOTE [ 1 ]: dataflow-program :: updateRunAndGraphStates(): this:", this)
   }
 
   private updateDisabledIntervals() {
@@ -843,7 +843,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private addNode = async (nodeType: string) => {
-    console.log("NOTE [ 2 ]: dataflow-program :: addNode: ")
+    //console.log("NOTE [ 2 ]: dataflow-program :: addNode: ")
     const nodeFactory = this.programEditor.components.get(nodeType) as any;
     const n1 = await nodeFactory!.createNode();
     n1.position = this.getNewNodePosition();
@@ -851,7 +851,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (nodeType === "Data Storage") {
       this.setState({disableDataStorage: true});
     }
-    console.log("NOTE [ 2.1 ] and here is the instasntiated node, have a look at its `data` property: ", n1, " and find where `nodeValue` is updated")
+    console.log("NOTE [ 2.1 ] instantiated a node: ", n1)
   };
   private getNewNodePosition = () => {
     const numNodes = this.programEditor.nodes.length;
@@ -959,7 +959,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private tick = () => {
-    console.log('[ 4 ]:  _ _ TICK _ _ ')
+    console.log('NOTE [ 4 ]: _____TICK:  updateNodeChannel(n) then updateNodeSensorValue(n) ')
     // Update the sampling rate
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
@@ -969,8 +969,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             Generator: this.updateGeneratorNode,
             Timer: this.updateTimerNode,
             Sensor: (n: Node) => {
-                      this.updateNodeChannelInfo(n); // NOTE [ 5 ] find me
-                      this.updateNodeSensorValue(n); // NOTE [ 5 ] find me
+                      this.updateNodeChannelInfo(n); 
+                      this.updateNodeSensorValue(n); 
                     },
             Relay: this.updateNodeChannelInfo
           };
@@ -1002,11 +1002,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private updateNodeChannelInfo = (n: Node) => {
-    console.log("NOTE [ 5 ] updateNodeChannelInfo -- setting up sensor controls to recieve data?")
     const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
     const relayList = n.controls.get("relayList") as RelaySelectControl;
     if (sensorSelect) {
-      console.log("NOTE [ 5.1 ] where do we look up channel: ", this.channels)
+      console.log("NOTE [ 5 ] setting channel to one of: ", this.channels)
       sensorSelect.setChannels(this.channels);
       (sensorSelect as any).update();
     }
@@ -1017,9 +1016,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private updateNodeSensorValue = (n: Node) => {
+    console.log("NOTE [ 7 ] updateNodeSensorValue(n)")
     const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
     if (sensorSelect && !this.isComplete()) {
-      const chInfo = this.channels.find(ci => ci.channelId === n.data.sensor);
+      const chInfo = this.channels.find(ci => ci.channelId === n.data.sensor); 
+
 
       // update virtual sensors
       if (chInfo?.virtualValueMethod) {
@@ -1028,6 +1029,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       }
 
       if (chInfo && chInfo.value) {
+        console.log("NOTE [ 8 ] found channel info and value and here is the obj w value in it: ", chInfo)
         sensorSelect.setSensorValue(chInfo.value);
       } else {
         sensorSelect.setSensorValue(NaN);

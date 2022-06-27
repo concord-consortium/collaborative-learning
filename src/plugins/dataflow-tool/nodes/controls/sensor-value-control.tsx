@@ -11,7 +11,7 @@ export class SensorValueControl extends Rete.Control {
   private node: Node;
 
   constructor(emitter: NodeEditor, key: string, node: Node, readonly = false) {
-    console.log("NOTE [ 9 ] instantiating SensorValueControl")
+    console.log("NOTE [ 0 ] instantiating SensorValueControl")
     super(key);
     this.key = key;
     this.node = node;
@@ -39,7 +39,7 @@ export class SensorValueControl extends Rete.Control {
   }
 
   public setValue = (val: number) => {
-    console.log("NOTE [8] setValue called from sensor-value-control, passed", val)
+    console.log("NOTE [ 10 ] setValue called from sensor-value-control, passed", val)
     this.props.value = val;
     this.putData(this.key, val);
     this.updateUnits();
