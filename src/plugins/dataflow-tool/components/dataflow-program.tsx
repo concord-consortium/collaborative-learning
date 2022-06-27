@@ -1027,6 +1027,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         chInfo.value = chInfo.virtualValueMethod(time);
       }
 
+      /* adding a type of channel, can skip the fake virtual */
+      if (chInfo?.channelId == '0000SENS'){
+        chInfo.value = 75
+      }
+
       if (chInfo && chInfo.value) {
         console.log("STEP [ 7 ] found channel info and value and here is the obj w value in it: ", chInfo)
         sensorSelect.setSensorValue(chInfo.value);
