@@ -1027,9 +1027,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         chInfo.value = chInfo.virtualValueMethod(time);
       }
 
-      /* adding a type of channel, can skip the fake virtual */
+      /* PROOF-OF-CONCEPT FOR SERIAL DATA ( will need to be rewritten with correct architecture ) */
       if (chInfo?.channelId == '0000SENS'){
-        chInfo.value = 75
+        setUpForSerial()
+        chInfo.value = getSerialStream()
       }
 
       if (chInfo && chInfo.value) {
@@ -1197,4 +1198,36 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.props.onZoomChange(transform.x, transform.y, transform.k);
   };
 
+}
+
+/* Of course this is completely a poc and will not be written here like this */
+let port: SerialPort;
+let readableStream: any;
+let textDecoder: any;
+let promiseToBeClosed: any;
+let streamReader: any;
+let portInfo: any;
+let listo: any;
+let cleaned = []
+
+async function setUpForSerial(){
+
+  listo = document.createElement('div')
+  listo.style.visibility='hidden'
+
+  port = await navigator.serial.requestPort() 
+  await port.open({ baudRate: 9600 }).catch((e: any) => console.log(e))
+
+  portInfo = port.getInfo()
+  console.log(portInfo)
+
+  handleReadableStream(port)
+}
+
+async function handleReadableStream(port: any){
+
+}
+
+function getSerialStream(){
+  return 1975
 }
