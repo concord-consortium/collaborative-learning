@@ -5,13 +5,14 @@ let promiseToBeClosed: any;
 let streamReader: any;
 
 export async function connectToPort(channel: any){
-  port = await (navigator as any).serial.requestPort() 
-  await port.open({ baudRate: 9600 }).catch((e:any) => console.log(e))
-  channel.serialPort = port
-  // portInfo = port.getInfo()
-  // console.log(portInfo)
-
-  //handleReadableStream(port)
+  port = await (navigator as any).serial.requestPort();
+  await port.open({ baudRate: 9600 }).catch((e:any) => console.log(e));
+  channel.serialPort = port;
+  let btn = document.getElementById('serial-connect-button');
+  if (btn){
+    btn.style.backgroundColor = 'green'
+    btn.innerText = 'connected to serial port'
+  }
 }
 
 export async function handleReadableStream(port: any){
