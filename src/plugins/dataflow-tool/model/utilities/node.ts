@@ -275,6 +275,7 @@ export interface NodeChannelInfo {
   value: number;
   name: string;
   virtual?: boolean;
+  serialPort?: any;
   virtualValueMethod?: (t: number) => number;
 }
 
@@ -423,6 +424,8 @@ const serialDataChannel: NodeChannelInfo = {
   hubId: "00000-SENSOR-HUB", hubName: "EMG", name: "EMG", channelId: "0000SENS",
   /* TODO this should not be a virtual sensor, need to back out farther to get entry point that matches architecture */
   missing: false, type: "emg-reading", units: "mv", plug: 8, value: 0, virtual: false,
+
+  serialPort: {}
   // virtualValueMethod: (t: number) => {
   //   const vals = [10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11];
   //   //return vals[t % vals.length];
