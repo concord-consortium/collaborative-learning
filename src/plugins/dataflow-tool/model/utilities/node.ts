@@ -277,6 +277,7 @@ export interface NodeChannelInfo {
   virtual?: boolean;
   serialPort?: any;
   virtualValueMethod?: (t: number) => number;
+  localSensorValueMethod?: (t: number) => number
 }
 
 export const roundNodeValue = (n: number) => {
@@ -421,26 +422,35 @@ const virtualPartChannel: NodeChannelInfo = {
   } };
 
 const serialDataChannel: NodeChannelInfo = {
-  hubId: "00000-SENSOR-HUB", hubName: "EMG", name: "EMG", channelId: "0000SENS",
-  /* TODO this should not be a virtual sensor, need to back out farther to get entry point that matches architecture */
-  missing: false, type: "emg-reading", units: "mv", plug: 8, value: 0, virtual: false,
-
+  hubId: "00000-SENSOR-HUB", 
+  hubName: "EMG", 
+  name: "EMG", 
+  channelId: "0000SENS",
+  missing: false, 
+  type: "emg-reading", 
+  units: "mv", 
+  plug: 8, 
+  value: 0, 
+  virtual: false,
   serialPort: {},
 
-  /* we should create a "realValueMethod" eventually */
-  virtualValueMethod: () => {
-    // TUE AM: since timing is going to be funky, for now stashing the latest value in localStorage
-    const storedEmg = localStorage.getItem('emg-val')
-    let myString = storedEmg !== null ? storedEmg : "42"
-    return parseInt(myString)
-  }
-  // virtualValueMethod: (t: number) => {
-  //   const vals = [10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11];
-  //   //return vals[t % vals.length];
-  //   return getIntFromSensor()
-  // } 
+  /* this is where we return the value, at the moment, into the existing flow
+     not sure where the roughly 1000ms timing is coming from 
+     (it's not the 1000 passed in on virtualValue call, e.g.) but will have
+     to get way back to get more real time
+  */
+  localSensorValueMethod: (t: number) => {
+    console.log('ZZ LOCAL SENSOR VALUE method getting called')
+    const myString = localStorage.getItem('emg-val')
+    if (myString !== null){
+      return parseInt(myString)
+    } else {
+      return 0
+    }
+  } 
 };
 
+/* serial data will need to not live in the virtual list */
 export const virtualSensorChannels: NodeChannelInfo[] = [
   virtualTempChannel, virtualHumidChannel, virtualCO2Channel, virtualO2Channel,
   virtualLightChannel, virtualPartChannel, serialDataChannel ];

@@ -13,6 +13,9 @@ export async function connectToPort(channel: any){
     btn.style.backgroundColor = 'green'
     btn.innerText = 'connected to serial port'
   }
+  if (port.readable){
+    handleReadableStream(port)
+  }
 }
 
 export async function handleReadableStream(port: any){
@@ -56,6 +59,6 @@ export function handleStreamObj(val: any){
     /* remove our current match from the end of the buffer */
     localBuffer = localBuffer.substring(0, localBuffer.length - match[0].length)
     const nice = match[1]
-    console.log(nice)
+    localStorage.setItem('emg-val', String(nice))
   }
 }

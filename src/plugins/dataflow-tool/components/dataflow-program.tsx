@@ -1029,6 +1029,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         chInfo.value = chInfo.virtualValueMethod(time);
       }
 
+      if (chInfo?.localSensorValueMethod){
+        console.log("STEP [ 6.1 ] localSensorValueMethod")
+        const time = Math.floor(Date.now() / 100 );
+        chInfo.value = chInfo.localSensorValueMethod(time)
+      }
       /* PROOF-OF-CONCEPT FOR SERIAL DATA ( will need to be rewritten with correct architecture )
          If we have selected the sensor channel, 
          and there is not already a port open on it, 
