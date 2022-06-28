@@ -1,7 +1,7 @@
 import { types, Instance, applySnapshot, getSnapshot } from "mobx-state-tree";
 import { cloneDeep } from "lodash";
 import { ToolContentModel } from "../../../models/tools/tool-types";
-import { DataflowNodeModel } from "./dataflow-node-model";
+import { DataflowProgramModel } from "./dataflow-program-model";
 import { DEFAULT_DATA_RATE } from "./utilities/node";
 
 export const kDataflowToolID = "Dataflow";
@@ -19,12 +19,6 @@ const ProgramZoom = types.model({
 });
 export type ProgramZoomType = typeof ProgramZoom.Type;
 const DEFAULT_PROGRAM_ZOOM = { dx: 0, dy: 0, scale: 1 };
-
-export const DataflowProgramModel = types.
-  model("DataflowProgram", {
-    id: types.maybe(types.string),
-    nodes: types.map(DataflowNodeModel)
-  });
 
 export const DataflowContentModel = ToolContentModel
   .named("DataflowTool")

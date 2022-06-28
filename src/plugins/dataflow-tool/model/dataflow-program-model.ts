@@ -1,7 +1,19 @@
 import { types } from "mobx-state-tree";
-import { SocketModel } from "./socket-model";
 
-export const DataflowNodeDataModel = types.
+const ConnectionModel = types
+  .model("Connection", {
+    node: types.number,
+    output: types.maybe(types.string),
+    input: types.maybe(types.string),
+    data: types.map(types.string)
+  });
+  
+const SocketModel = types
+  .model("Socket", {
+    connections: types.array(ConnectionModel)
+  });
+
+const DataflowNodeDataModel = types.
   model("DataflowNodeData", {
     plot: types.maybe(types.boolean),
     nodeValue: types.maybeNull(types.number),
@@ -50,7 +62,7 @@ export const DataflowNodeDataModel = types.
     // sequence1, sequence2, ...
   });
 
-export const DataflowNodeModel = types.
+const DataflowNodeModel = types.
   model("DataflowNode", {
     id: types.number,
     name: types.string,
@@ -58,4 +70,10 @@ export const DataflowNodeModel = types.
     inputs: types.map(SocketModel),
     outputs: types.map(SocketModel),
     data: DataflowNodeDataModel,
+  });
+
+export const DataflowProgramModel = types.
+  model("DataflowProgram", {
+    id: types.maybe(types.string),
+    nodes: types.map(DataflowNodeModel)
   });
