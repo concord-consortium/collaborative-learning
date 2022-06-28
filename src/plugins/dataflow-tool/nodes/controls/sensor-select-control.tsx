@@ -143,9 +143,6 @@ export class SensorSelectControl extends Rete.Control {
         if (ch === "none") return "None Available";
         if (!ch) return `${kSensorMissingMessage} ${id}`;
         if (ch.missing) return `${kSensorMissingMessage} ${ch.channelId}`;
-        if (ch.channelId == '0000SENS'){
-          connectToPort(ch)
-        }
         let count = 0;
         channelsForType.forEach( c => { if (c.type === ch.type && ch.hubId === c.hubId) count++; } );
         const chStr = ch.virtual

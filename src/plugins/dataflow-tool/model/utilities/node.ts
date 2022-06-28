@@ -425,7 +425,15 @@ const serialDataChannel: NodeChannelInfo = {
   /* TODO this should not be a virtual sensor, need to back out farther to get entry point that matches architecture */
   missing: false, type: "emg-reading", units: "mv", plug: 8, value: 0, virtual: false,
 
-  serialPort: {}
+  serialPort: {},
+
+  /* we should create a "realValueMethod" eventually */
+  virtualValueMethod: () => {
+    // TUE AM: since timing is going to be funky, for now stashing the latest value in localStorage
+    const storedEmg = localStorage.getItem('emg-val')
+    let myString = storedEmg !== null ? storedEmg : "0"
+    return parseInt(myString)
+  }
   // virtualValueMethod: (t: number) => {
   //   const vals = [10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11];
   //   //return vals[t % vals.length];

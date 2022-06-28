@@ -37,6 +37,8 @@ import { safeJsonParse } from "../../../utilities/js-utils";
 import { Rect, scaleRect, unionRect } from "../utilities/rect";
 import { DocumentContextReact } from "../../../components/document/document-context";
 
+import { connectToPort } from "../utilities/serialPoc";
+
 import "./dataflow-program.sass";
 
 interface NodeNameValuePair {
@@ -1027,10 +1029,22 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         chInfo.value = chInfo.virtualValueMethod(time);
       }
 
-      /* PROOF-OF-CONCEPT FOR SERIAL DATA ( will need to be rewritten with correct architecture ) */
+      /* PROOF-OF-CONCEPT FOR SERIAL DATA ( will need to be rewritten with correct architecture )
+         If we have selected the sensor channel, 
+         and there is not already a port open on it, 
+         open a port on the channel
+      */
       if (chInfo?.channelId == '0000SENS'){
-        setUpForSerial()
-        chInfo.value = getSerialStream()
+        if (Object.keys(chInfo.serialPort).length === 0){
+          console.log('TIME TO CONNECT PORT TO CHANNEL')
+          let connectButton = document.createElement('button')
+          
+          // TUE AM:  will eventuially work -- put in a button so you can click it to connect
+          // console.log('put in a button')
+          // let connectButton = document.createElement('button')
+          // connectButton.innerHTML = 'Connect to Sensor'
+          // document.querySelector('body')?.prepend(connectButton)
+        }
       }
 
       if (chInfo && chInfo.value) {
@@ -1201,33 +1215,3 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 }
 
 /* Of course this is completely a poc and will not be written here like this */
-let port: SerialPort;
-let readableStream: any;
-let textDecoder: any;
-let promiseToBeClosed: any;
-let streamReader: any;
-let portInfo: any;
-let listo: any;
-let cleaned = []
-
-async function setUpForSerial(){
-
-  listo = document.createElement('div')
-  listo.style.visibility='hidden'
-
-  port = await navigator.serial.requestPort() 
-  await port.open({ baudRate: 9600 }).catch((e: any) => console.log(e))
-
-  portInfo = port.getInfo()
-  console.log(portInfo)
-
-  handleReadableStream(port)
-}
-
-async function handleReadableStream(port: any){
-
-}
-
-function getSerialStream(){
-  return 1975
-}
