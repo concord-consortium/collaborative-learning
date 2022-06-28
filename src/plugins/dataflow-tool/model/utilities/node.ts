@@ -431,7 +431,7 @@ const serialDataChannel: NodeChannelInfo = {
   virtualValueMethod: () => {
     // TUE AM: since timing is going to be funky, for now stashing the latest value in localStorage
     const storedEmg = localStorage.getItem('emg-val')
-    let myString = storedEmg !== null ? storedEmg : "0"
+    let myString = storedEmg !== null ? storedEmg : "42"
     return parseInt(myString)
   }
   // virtualValueMethod: (t: number) => {
