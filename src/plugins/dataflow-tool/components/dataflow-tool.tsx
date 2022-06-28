@@ -2,7 +2,7 @@ import { cloneDeep } from "lodash";
 import React from "react";
 import { SizeMe, SizeMeProps } from "react-sizeme";
 import { observer, inject } from "mobx-react";
-import { getSnapshot } from "mobx-state-tree";
+import { getSnapshot, onPatch } from "mobx-state-tree";
 import { DataflowProgram, IStartProgramParams } from "./dataflow-program";
 import { BaseComponent } from "../../../components/base";
 import { ICreateOtherDocumentParams } from "../../../lib/db";
@@ -31,6 +31,12 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
   public static tileHandlesSelection = true;
 
   public state: IState = {};
+
+  public componentDidMount() {
+    onPatch(this.getContent().nodes, patch => {
+      console.log(JSON.stringify(patch));
+    });
+  }
 
   public render() {
     const { model, readOnly, height } = this.props;
