@@ -1037,13 +1037,21 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       if (chInfo?.channelId == '0000SENS'){
         if (Object.keys(chInfo.serialPort).length === 0){
           console.log('TIME TO CONNECT PORT TO CHANNEL')
-          let connectButton = document.createElement('button')
-          
-          // TUE AM:  will eventuially work -- put in a button so you can click it to connect
-          // console.log('put in a button')
-          // let connectButton = document.createElement('button')
-          // connectButton.innerHTML = 'Connect to Sensor'
-          // document.querySelector('body')?.prepend(connectButton)
+         if (document.getElementById('serial-connect-button') == null){
+            let connectButton = document.createElement('button')
+            connectButton.id = 'serial-connect-button'
+            connectButton.innerText = 'connect to serial'
+            connectButton.style.position = 'absolute'
+            connectButton.style.zIndex = "100000"
+            connectButton.style.bottom = "50px"
+            connectButton.style.left = "50px"
+            connectButton.style.padding = "20px"
+            connectButton.style.background = "yellow"
+            document.body.prepend(connectButton)
+            connectButton.onclick = function(){
+              connectToPort(chInfo)
+            }
+          }
         }
       }
 
