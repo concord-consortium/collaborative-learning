@@ -161,7 +161,7 @@ describe("TableContent", () => {
           };
     const table = TableContentModel.create(importData);
     const metadata = TableMetadataModel.create({ id: "table-1" });
-    table.doPostCreate(metadata);
+    table.doPostCreate!(metadata);
 
     expect(table.type).toBe(kTableToolID);
     expect(table.isImported).toBe(true);
@@ -344,7 +344,7 @@ describe("TableContent", () => {
     const snapshot = { changes: changes.map(change => JSON.stringify(change)) };
     const table = TableContentModel.create(snapshot);
     const metadata = TableMetadataModel.create({ id: "table-1" });
-    table.doPostCreate(metadata);
+    table.doPostCreate!(metadata);
     table.setAttributeName("zCol", "newZ");
     expect(table.changes.length).toBe(3);
     const change3 = safeJsonParse(table.changes[2]);
@@ -421,7 +421,7 @@ describe("TableContent", () => {
     const snapshot = { changes: changes.map(change => JSON.stringify(change)) };
     const table = TableContentModel.create(snapshot);
     const metadata = TableMetadataModel.create({ id: "table-1" });
-    table.doPostCreate(metadata);
+    table.doPostCreate!(metadata);
     table.setExpression("y1Col", kSerializedXKey, "x");
     table.setExpression("y2Col", "foo", "foo");
 
