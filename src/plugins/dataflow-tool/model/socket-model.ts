@@ -1,3 +1,6 @@
+
+// TODO: Combine this with dataflow-node-model.ts
+
 import { types } from 'mobx-state-tree';
 
 export const ConnectionModel = types
@@ -10,16 +13,5 @@ export const ConnectionModel = types
 
 export const SocketModel = types
   .model("Socket", {
-    // name: types.string,
     connections: types.array(ConnectionModel)
   });
-  // })
-  // .actions(self => ({
-  //   updateConnections(connections: any[]) {
-  //     self.connections = [];
-
-  //     for (const connection of connections) {
-  //       self.connections.push(ConnectionModel.create(connection));
-  //     }
-  //   }
-  // }));

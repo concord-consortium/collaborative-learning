@@ -32,18 +32,12 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
 
   public state: IState = {};
 
-  public componentDidMount() {
-    onPatch(this.getContent().nodes, patch => {
-      console.log(JSON.stringify(patch));
-    });
-  }
-
   public render() {
     const { model, readOnly, height } = this.props;
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
-    const { program, programRunId, programIsRunning, programStartTime, programEndTime, programDataRate, programZoom }
-      = this.getContent();
+    const { program, programString, programRunId, programIsRunning, programStartTime,
+      programEndTime, programDataRate, programZoom } = this.getContent();
     const showOriginalProgramButton = !!this.getOriginalProgramDocument();
     return (
       <div className={classes}>
@@ -55,6 +49,9 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
                 readOnly={readOnly}
                 documentProperties={this.getDocumentProperties()}
                 program={program}
+                // TODO: Better way to handle changes?
+                // programString={program ? JSON.stringify(getSnapshot(program)) : ''}
+                programString={programString}
                 onProgramChange={this.handleProgramChange}
                 onShowOriginalProgram={showOriginalProgramButton ? this.handleShowOriginalProgram : undefined}
                 onStartProgram={this.handleStartProgram}

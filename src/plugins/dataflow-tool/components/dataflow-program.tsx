@@ -6,8 +6,9 @@ import Rete, { NodeEditor, Node, Input } from "rete";
 import ConnectionPlugin from "rete-connection-plugin";
 import ReactRenderPlugin from "rete-react-render-plugin";
 import { autorun } from "mobx";
+import { getSnapshot, onPatch, onSnapshot } from "mobx-state-tree";
 import { SizeMeProps } from "react-sizeme";
-import { forEach } from "lodash";
+import { forEach, cloneDeep, isEqual } from "lodash";
 import { ProgramZoomType } from "../model/dataflow-content";
 import { SensorSelectControl } from "../nodes/controls/sensor-select-control";
 import { RelaySelectControl } from "../nodes/controls/relay-select-control";
@@ -79,7 +80,8 @@ interface IProps extends SizeMeProps {
   modelId: string;
   readOnly?: boolean;
   documentProperties?: { [key: string]: string };
-  program?: string;
+  program?: any;
+  programString?: string; // TODO: Can we ditch this?
   onProgramChange: (program: any) => void;
   onShowOriginalProgram?: () => void;
   onStartProgram: (params: IStartProgramParams) => void;
@@ -220,6 +222,27 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (this.isComplete()) {
       this.props.onCheckProgramRunState(this.props.programEndTime);
     }
+    
+    // TODO: Is there a way to handle changes outside of componentDidUpdate?
+    // if (this.props.program) {
+    //   onSnapshot(this.props.program.nodes, snapshot => {
+    //     if (this.props.readOnly) {
+    //       console.log('updating');
+    //       this.updateProgramEditor();
+    //     }
+    //   });
+    // }
+    // if (this.props.program) {
+    //   onPatch(this.props.program.nodes, patch => {
+    //     if (this.props.readOnly) {
+    //       if (!(patch.path.includes('recentValues') || patch.path.includes('nodeValue'))) {
+    //         console.log(JSON.stringify(patch));
+    //         // this.forceUpdate();
+    //         this.updateProgramEditor();
+    //       }
+    //     }
+    //   });
+    // }
   }
 
   public componentWillUnmount() {
@@ -249,7 +272,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.initProgram();
     }
 
-    if (this.props.program !== prevProps.program) {
+    // TODO: Is there a way to handle updates outside of componentDidUpdate?
+    if (this.props.programString !== prevProps.programString) {
       this.updateProgramEditor();
     }
 
@@ -316,18 +340,18 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.programEditor.register(c);
       });
 
-      const program = this.props.program && safeJsonParse(this.props.program);
-      if (program) {
+      const program = this.props.program && getSnapshot(this.props.program);
+      if (program && program.id) {
         // TODO: Recent values should be kept while running but not saved
         // forEach(program.nodes, (n: any) => {
         //   if (n.data.recentValues) {
         //     n.data.recentValues = [];
         //   }
         // });
-        this.closeCompletedRunProgramNodePlots(program);
-        await this.programEditor.fromJSON(program);
-        // This line will clear garbage stored data if something breaks
-        // await this.programEditor.fromJSON({id:"none", nodes: {}});
+        
+        // TODO: Can this line be removed?
+        // this.closeCompletedRunProgramNodePlots(program);
+        await this.programEditor.fromJSON(cloneDeep(program));
         if (this.hasDataStorage()) {
           this.setState({disableDataStorage: true});
         }

@@ -1,4 +1,4 @@
-import { types, Instance, applySnapshot } from "mobx-state-tree";
+import { types, Instance, applySnapshot, getSnapshot } from "mobx-state-tree";
 import { cloneDeep } from "lodash";
 import { ToolContentModel } from "../../../models/tools/tool-types";
 import { DataflowNodeModel } from "./dataflow-node-model";
@@ -20,18 +20,25 @@ const ProgramZoom = types.model({
 export type ProgramZoomType = typeof ProgramZoom.Type;
 const DEFAULT_PROGRAM_ZOOM = { dx: 0, dy: 0, scale: 1 };
 
+export const DataflowProgramModel = types.
+  model("DataflowProgram", {
+    id: types.maybe(types.string),
+    nodes: types.map(DataflowNodeModel)
+  });
+
 export const DataflowContentModel = ToolContentModel
   .named("DataflowTool")
   .props({
     type: types.optional(types.literal(kDataflowToolID), kDataflowToolID),
-    program: "",
+    program: types.optional(DataflowProgramModel, getSnapshot(DataflowProgramModel.create())),
+    // TODO: Is there a way to handle changes without the programString?
+    programString: "",
     programRunId: "",
     programStartTime: 0,
     programEndTime: 0,
     programDataRate: DEFAULT_DATA_RATE,
     programIsRunning: "",
     programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
-    nodes: types.map(DataflowNodeModel),
   })
   .views(self => ({
     isUserResizable() {
@@ -40,41 +47,11 @@ export const DataflowContentModel = ToolContentModel
   }))
   .actions(self => ({
     setProgram(program: any) {
-      self.program = JSON.stringify(program);
-
-      applySnapshot(self.nodes, cloneDeep(program.nodes));
-      /*
-      // Update nodes in MST
-      for (const id in program.nodes) {
-        const node = program.nodes[id];
-        const modelNode = self.nodes.get(id);
-        if (modelNode) {
-          modelNode.setName(node.name);
-          modelNode.setPosition(node.position);
-          modelNode.setData(JSON.stringify(node.data));
-          modelNode.setInputs(node.inputs);
-          modelNode.setOutputs(node.outputs);
-        } else {
-          const newNode = DataflowNodeModel.create({
-            id: node.id.toString(),
-            name: node.name,
-            data: JSON.stringify(node.data)
-          });
-          newNode.setPosition(node.position);
-          newNode.setInputs(node.inputs);
-          newNode.setOutputs(node.outputs);
-        }
-        // self.nodes.set(id, JSON.stringify(node));
+      if (program) {
+        applySnapshot(self.program, cloneDeep(program));
+        // TODO: Is there a way to handle changes without the programString?
+        self.programString = JSON.stringify(program);
       }
-      // Remove deleted nodes from MST
-      const missingIds: string[] = [];
-      self.nodes.forEach((node, id) => {
-        if (!(id in program.nodes)) {
-          missingIds.push(id);
-        }
-      });
-      missingIds.forEach(id => self.nodes.delete(id));
-      */
     },
     setProgramDataRate(dataRate: number) {
       self.programDataRate = dataRate;
