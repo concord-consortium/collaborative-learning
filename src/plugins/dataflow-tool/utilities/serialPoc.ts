@@ -1,3 +1,5 @@
+
+
 let port: any;
 let portInfo: any;
 let textDecoder: any;
@@ -5,6 +7,7 @@ let promiseToBeClosed: any;
 let streamReader: any;
 
 export async function connectToPort(channel: any){
+ 
   port = await (navigator as any).serial.requestPort();
   await port.open({ baudRate: 9600 }).catch((e:any) => console.log(e));
   channel.serialPort = port;
@@ -59,6 +62,6 @@ export function handleStreamObj(val: any){
     /* remove our current match from the end of the buffer */
     localBuffer = localBuffer.substring(0, localBuffer.length - match[0].length)
     const nice = match[1]
-    localStorage.setItem('emg-val', String(nice))
+    global.emgVal = parseInt(nice)
   }
 }

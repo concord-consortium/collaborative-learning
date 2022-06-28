@@ -441,12 +441,7 @@ const serialDataChannel: NodeChannelInfo = {
   */
   localSensorValueMethod: (t: number) => {
     console.log('ZZ LOCAL SENSOR VALUE method getting called')
-    const myString = localStorage.getItem('emg-val')
-    if (myString !== null){
-      return parseInt(myString)
-    } else {
-      return 0
-    }
+    return global.emgVal
   } 
 };
 
