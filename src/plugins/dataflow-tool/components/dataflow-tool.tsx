@@ -2,7 +2,7 @@ import { cloneDeep } from "lodash";
 import React from "react";
 import { SizeMe, SizeMeProps } from "react-sizeme";
 import { observer, inject } from "mobx-react";
-import { getSnapshot, onPatch } from "mobx-state-tree";
+import { getSnapshot } from "mobx-state-tree";
 import { DataflowProgram, IStartProgramParams } from "./dataflow-program";
 import { BaseComponent } from "../../../components/base";
 import { ICreateOtherDocumentParams } from "../../../lib/db";
@@ -36,7 +36,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
     const { model, readOnly, height } = this.props;
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
-    const { program, programString, programRunId, programIsRunning, programStartTime,
+    const { program, programRunId, programIsRunning, programStartTime,
       programEndTime, programDataRate, programZoom } = this.getContent();
     const showOriginalProgramButton = !!this.getOriginalProgramDocument();
     return (
@@ -49,9 +49,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
                 readOnly={readOnly}
                 documentProperties={this.getDocumentProperties()}
                 program={program}
-                // TODO: Better way to handle changes?
-                // programString={program ? JSON.stringify(getSnapshot(program)) : ''}
-                programString={programString}
                 onProgramChange={this.handleProgramChange}
                 onShowOriginalProgram={showOriginalProgramButton ? this.handleShowOriginalProgram : undefined}
                 onStartProgram={this.handleStartProgram}

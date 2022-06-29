@@ -10,14 +10,31 @@ const ConnectionModel = types
   
 const SocketModel = types
   .model("Socket", {
-    connections: types.array(ConnectionModel)
+    connections: types.map(ConnectionModel)
+  })
+  .preProcessSnapshot((snapshot: any) => {
+    // Connections are stored in rete as an array, but MST works better with maps
+    if (Array.isArray(snapshot.connections)) {
+      const connections: any = {};
+      snapshot.connections.forEach((connection: any) => {
+        connections[`${connection.node}-${connection.output}-${connection.input}`] = connection;
+      });
+      return { connections };
+    }
+    return snapshot;
+  })
+  .postProcessSnapshot((snapshot: any) => {
+    if (!Array.isArray(snapshot.connections)) {
+      return { connections: Object.values(snapshot.connections) };
+    }
+    return snapshot;
   });
 
 const DataflowNodeDataModel = types.
   model("DataflowNodeData", {
     plot: types.maybe(types.boolean),
-    nodeValue: types.maybeNull(types.number),
-    recentValues: types.array(types.maybeNull(types.number)),
+    nodeValue: types.maybe(types.number),
+    recentValues: types.maybe(types.string),
 
     // Sensor
     type: types.maybe(types.string),
@@ -60,16 +77,52 @@ const DataflowNodeDataModel = types.
     interval: types.maybe(types.string),
     inputKeys: types.array(types.string),
     // sequence1, sequence2, ...
+  })
+  .preProcessSnapshot((snapshot: any) => {
+    let { nodeValue, recentValues, ...rest} = snapshot;
+    // Make null and NaN become undefined when going into MST
+    if ((nodeValue == null) || !isFinite(nodeValue)) {
+      nodeValue = undefined;
+    }
+    // Store recentValues as a string instead of an array so there's only one patch per update
+    if (Array.isArray(recentValues)) {
+      recentValues = JSON.stringify(recentValues);
+    }
+    // recentValues = recentValues?.map((v: number | undefined) => (v != null) && isFinite(v) ? v : undefined);
+    return { nodeValue, recentValues, ...rest };
+  })
+  .postProcessSnapshot((snapshot: any) => {
+    if (snapshot.recentValues && !Array.isArray(snapshot.recentValues)) {
+      const { recentValues, ...rest } = snapshot;
+      return { recentValues: JSON.parse(recentValues), ...rest };
+    }
+    return snapshot;
   });
 
 const DataflowNodeModel = types.
   model("DataflowNode", {
     id: types.number,
     name: types.string,
-    position: types.array(types.number),
+    x: types.number,
+    y: types.number,
     inputs: types.map(SocketModel),
     outputs: types.map(SocketModel),
     data: DataflowNodeDataModel,
+  })
+  .preProcessSnapshot((snapshot: any) => {
+    // Turn position into x and y because MST has weird issues with arrays
+    if (Array.isArray(snapshot.position)) {
+      const { position, ...rest } = snapshot;
+      return { x: position[0], y: position[1], ...rest };
+    }
+    return snapshot;
+  })
+  .postProcessSnapshot((snapshot: any) => {
+    if (snapshot.x && snapshot.y) {
+      const { x, y, ...rest } = snapshot;
+      return { position: [x, y], ...rest };
+    }
+    return snapshot;
   });
 
 export const DataflowProgramModel = types.

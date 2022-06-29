@@ -25,8 +25,6 @@ export const DataflowContentModel = ToolContentModel
   .props({
     type: types.optional(types.literal(kDataflowToolID), kDataflowToolID),
     program: types.optional(DataflowProgramModel, getSnapshot(DataflowProgramModel.create())),
-    // TODO: Is there a way to handle changes without the programString?
-    programString: "",
     programRunId: "",
     programStartTime: 0,
     programEndTime: 0,
@@ -43,8 +41,6 @@ export const DataflowContentModel = ToolContentModel
     setProgram(program: any) {
       if (program) {
         applySnapshot(self.program, cloneDeep(program));
-        // TODO: Is there a way to handle changes without the programString?
-        self.programString = JSON.stringify(program);
       }
     },
     setProgramDataRate(dataRate: number) {

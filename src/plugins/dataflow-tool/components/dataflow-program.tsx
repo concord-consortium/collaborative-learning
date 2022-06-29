@@ -6,9 +6,10 @@ import Rete, { NodeEditor, Node, Input } from "rete";
 import ConnectionPlugin from "rete-connection-plugin";
 import ReactRenderPlugin from "rete-react-render-plugin";
 import { autorun } from "mobx";
-import { getSnapshot, onPatch, onSnapshot } from "mobx-state-tree";
+import { getSnapshot, IDisposer, onPatch, onSnapshot } from "mobx-state-tree";
 import { SizeMeProps } from "react-sizeme";
 import { forEach, cloneDeep, isEqual } from "lodash";
+import { compare } from "fast-json-patch";
 import { ProgramZoomType } from "../model/dataflow-content";
 import { SensorSelectControl } from "../nodes/controls/sensor-select-control";
 import { RelaySelectControl } from "../nodes/controls/relay-select-control";
@@ -81,7 +82,6 @@ interface IProps extends SizeMeProps {
   readOnly?: boolean;
   documentProperties?: { [key: string]: string };
   program?: any;
-  programString?: string; // TODO: Can we ditch this?
   onProgramChange: (program: any) => void;
   onShowOriginalProgram?: () => void;
   onStartProgram: (params: IStartProgramParams) => void;
@@ -132,6 +132,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private programEngine: any;
   private editorDomElement: HTMLElement | null;
   private _isMounted: boolean;
+  private disposers: IDisposer[] = [];
 
   constructor(props: IProps) {
     super(props);
@@ -224,29 +225,42 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
     
     // TODO: Is there a way to handle changes outside of componentDidUpdate?
+    if (this.props.program) {
+      this.disposers.push(onSnapshot(this.props.program.nodes, snapshot => {
+        if (this.props.readOnly) {
+          // const changes = compare((window as any).lastSnapshot || {}, snapshot as any);
+          // (window as any).lastSnapshot = cloneDeep(snapshot);
+          // console.log(`last vs snap ${JSON.stringify(changes)}`);
+          // const changes2 = compare(getSnapshot(this.props.program.nodes), snapshot as any);
+          // console.log(`curr vs snap ${JSON.stringify(changes2)}`);
+          // eslint-disable-next-line max-len
+          // console.log(`old value: ${JSON.stringify((window as any).lastSnapshot['1']?.inputs?.num1)}`);
+          // eslint-disable-next-line max-len
+          // console.log(`current value: ${JSON.stringify((getSnapshot(this.props.program.nodes) as any)['1']?.inputs?.num1)}`);
+          // eslint-disable-next-line max-len
+          // console.log(`snapshot value: ${JSON.stringify((snapshot as any)['1']?.inputs?.num1)}`);
+          this.updateProgramEditor();
+        }
+      }));
+    }
     // if (this.props.program) {
-    //   onSnapshot(this.props.program.nodes, snapshot => {
-    //     if (this.props.readOnly) {
-    //       console.log('updating');
-    //       this.updateProgramEditor();
-    //     }
-    //   });
-    // }
-    // if (this.props.program) {
-    //   onPatch(this.props.program.nodes, patch => {
+    //   this.disposers.push(onPatch(this.props.program.nodes, patch => {
     //     if (this.props.readOnly) {
     //       if (!(patch.path.includes('recentValues') || patch.path.includes('nodeValue'))) {
-    //         console.log(JSON.stringify(patch));
+    //         console.log(`onpatch: ${JSON.stringify(patch)}`);
     //         // this.forceUpdate();
-    //         this.updateProgramEditor();
+    //         // this.updateProgramEditor();
     //       }
     //     }
-    //   });
+    //   }));
     // }
   }
 
   public componentWillUnmount() {
     clearInterval(this.intervalHandle);
+
+    this.disposers.forEach(disposer => disposer());
+
     this._isMounted = false;
   }
 
@@ -270,11 +284,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     if (!this.programEditor && this.toolDiv) {
       this.initProgram();
-    }
-
-    // TODO: Is there a way to handle updates outside of componentDidUpdate?
-    if (this.props.programString !== prevProps.programString) {
-      this.updateProgramEditor();
     }
 
     if (this.props.programDataRate !== prevProps.programDataRate) {
