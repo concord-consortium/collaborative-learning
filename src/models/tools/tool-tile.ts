@@ -97,8 +97,7 @@ export const ToolTileModel = types
       self.content.onTileAction?.(call);
     },
     willRemoveFromDocument() {
-      const willRemoveFromDocument = self.content.willRemoveFromDocument;
-      return willRemoveFromDocument && willRemoveFromDocument();
+      return self.content.willRemoveFromDocument?.();
     },
     setDisabledFeatures(disabled: string[]) {
       const metadata: any = findMetadata(self.content.type, self.id);

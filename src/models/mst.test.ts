@@ -191,8 +191,7 @@ describe("mst", () => {
       afterCreate() {
         addDisposer(self, autorun(() => {
           autorunCount++;
-          const root = getRoot(self);
-          console.log("root", (root as any).toJSON());
+          getRoot(self);
         }));
       }
     }));
@@ -231,11 +230,9 @@ describe("mst", () => {
       afterCreate() {
         addDisposer(self, autorun(() => {
           autorunCount++;
-          let parent;
           if (hasParent(self)) {
-            parent = getParent(self);
+            getParent(self);
           }
-          console.log("parent", (parent as any)?.toJSON());
         }));
       }
     }));
