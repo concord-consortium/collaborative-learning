@@ -36,7 +36,20 @@ export const DataflowContentModel = ToolContentModel
       return true;
     },
     exportJson(options?: ITileExportOptions) {
-      return self.program;
+      // return JSON.stringify({
+      //   type: self.type,
+      //   program: self.program,
+      //   programDataRate: self.programDataRate,
+      //   programZoom: self.programZoom
+      // });
+      return [
+        `{`,
+        `  "type": "Dataflow"`,
+        `  "programDataRate": ${self.programDataRate}`,
+        `  "programZoom": ${self.programZoom}`,
+        `  "program": ${self.program}`,
+        `}`
+      ].join("\n");
     }
   }))
   .actions(self => ({
