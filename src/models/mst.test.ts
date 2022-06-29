@@ -1,4 +1,6 @@
-import { applySnapshot, getType, isAlive, types } from "mobx-state-tree";
+import { autorun } from "mobx";
+import { addDisposer, applySnapshot, getType, isAlive, types, getRoot, 
+  Instance, getParent, destroy, hasParent } from "mobx-state-tree";
 
 describe("mst", () => {
   it("snapshotProcessor unexpectedly modifies the base type", () => {
@@ -178,4 +180,87 @@ describe("mst", () => {
     expect(isAlive(firstValue)).toBe(false);
 
   });
+
+  test("getRoot is not observable", () => {
+    let autorunCount = 0;
+
+    const Todo = types.model({
+      name: types.string
+    })
+    .actions(self => ({
+      afterCreate() {
+        addDisposer(self, autorun(() => {
+          autorunCount++;
+          const root = getRoot(self);
+          console.log("root", (root as any).toJSON());
+        }));
+      }
+    }));
+
+    const TodoList = types.model({
+      todos: types.array(Todo)
+    })
+    .actions(self => ({
+      addTodo(_todo: Instance<typeof Todo>) {
+        self.todos.push(_todo);
+      }
+    }));
+
+    const todo = Todo.create({name: "hello"});
+    expect(autorunCount).toBe(1);
+
+    const todoList = TodoList.create();
+    todoList.addTodo(todo);
+    return new Promise(resolve => {
+      setTimeout(resolve, 50);
+    })
+    .then(() => {
+      expect(autorunCount).toBe(1);
+      expect(getRoot(todo)).toBe(todoList);
+      destroy(todoList);
+    });
+  });
+
+  test("getParent is not observable", () => {
+    let autorunCount = 0;
+
+    const Todo = types.model({
+      name: types.string
+    })
+    .actions(self => ({
+      afterCreate() {
+        addDisposer(self, autorun(() => {
+          autorunCount++;
+          let parent;
+          if (hasParent(self)) {
+            parent = getParent(self);
+          }
+          console.log("parent", (parent as any)?.toJSON());
+        }));
+      }
+    }));
+
+    const TodoList = types.model({
+      todos: types.array(Todo)
+    })
+    .actions(self => ({
+      addTodo(_todo: Instance<typeof Todo>) {
+        self.todos.push(_todo);
+      }
+    }));
+
+    const todo = Todo.create({name: "hello"});
+    expect(autorunCount).toBe(1);
+
+    const todoList = TodoList.create();
+    todoList.addTodo(todo);
+    return new Promise(resolve => {
+      setTimeout(resolve, 50);
+    })
+    .then(() => {
+      expect(autorunCount).toBe(1);
+      expect(getParent(todo)).toBe(todoList.todos);
+    });
+  });
+
 });
