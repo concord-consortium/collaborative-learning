@@ -10,6 +10,7 @@ import { DefaultToolbarSettings, ToolbarSettings } from "./drawing-basic-types";
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
 import { DrawingObjectSnapshotForAdd, DrawingObjectType, isFilledObject, 
   isStrokedObject, ToolbarModalButton } from "../objects/drawing-object";
+import { LogEventName, Logger } from "../../../lib/logger";
 
 // interface LoggedEventProperties {
 //   properties?: string[];
@@ -136,7 +137,13 @@ export const DrawingContentModel = ToolContentModel
       self.metadata = metadata as DrawingToolMetadataModelType;
     },
     onTileAction(call) {
-      console.log("Action was called", call);
+      const {name, ...loggedChangeProps} = call;
+      // FIXME: what do we do with the typing of log events here?
+      // We could specify the known types, but this will easily get out of date
+      // and it would be easy to miss one.
+      // I think the main point of these actions is or documentation
+      Logger.logToolChange(LogEventName.DRAWING_TOOL_CHANGE, name, 
+        loggedChangeProps as any, self.metadata?.id ?? "");
     }
   }))
   .extend(self => {
