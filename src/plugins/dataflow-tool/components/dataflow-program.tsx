@@ -8,7 +8,7 @@ import ReactRenderPlugin from "rete-react-render-plugin";
 import { autorun } from "mobx";
 import { getSnapshot, IDisposer, onPatch, onSnapshot } from "mobx-state-tree";
 import { SizeMeProps } from "react-sizeme";
-import { forEach, cloneDeep, isEqual } from "lodash";
+import { forEach, cloneDeep } from "lodash";
 import { compare } from "fast-json-patch";
 import { ProgramZoomType } from "../model/dataflow-content";
 import { SensorSelectControl } from "../nodes/controls/sensor-select-control";
@@ -224,7 +224,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.props.onCheckProgramRunState(this.props.programEndTime);
     }
     
-    // TODO: Is there a way to handle changes outside of componentDidUpdate?
     if (this.props.program) {
       this.disposers.push(onSnapshot(this.props.program.nodes, snapshot => {
         if (this.props.readOnly) {
@@ -309,7 +308,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private initProgram = () => {
     this.initComponents();
     this.initProgramEngine();
-    this.initProgramEditor();
+    this.initProgramEditor(true);
 
     if (!this.isComplete() || this.props.programIsRunning === "true") {
       this.setDataRate(this.props.programDataRate);
@@ -337,7 +336,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     });
   };
 
-  private initProgramEditor = () => {
+  private initProgramEditor = (clearHistory = false) => {
     (async () => {
       if (!this.toolDiv) return;
 
@@ -349,14 +348,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.programEditor.register(c);
       });
 
-      const program = this.props.program && getSnapshot(this.props.program);
+      const program = this.props.program && cloneDeep(getSnapshot(this.props.program));
       if (program && program.id) {
-        // TODO: Recent values should be kept while running but not saved
-        // forEach(program.nodes, (n: any) => {
-        //   if (n.data.recentValues) {
-        //     n.data.recentValues = [];
-        //   }
-        // });
+        if (!this.props.readOnly && clearHistory) {
+          forEach(program.nodes, (n: any) => {
+            if (n.data.recentValues) {
+              n.data.recentValues = [];
+            }
+          });
+        }
         
         // TODO: Can this line be removed?
         // this.closeCompletedRunProgramNodePlots(program);
