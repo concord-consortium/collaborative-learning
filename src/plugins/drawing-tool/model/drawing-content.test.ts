@@ -67,7 +67,7 @@ describe("DrawingContentModel", () => {
   function createDrawingContentWithMetadata(options?: DrawingContentModelSnapshot) {
     const model = createDrawingContent(options);
     const metadata = DrawingToolMetadataModel.create({ id: "drawing-1" });
-    model.doPostCreate(metadata);
+    model.doPostCreate!(metadata);
     return model;
   }
 

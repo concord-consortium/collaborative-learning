@@ -2,7 +2,7 @@ import { cloneDeep } from "lodash";
 import { getParent, getSnapshot, getType, Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree";
 import { isPlaceholderContent } from "./placeholder/placeholder-content";
 import { ITileExportOptions } from "./tool-content-info";
-import { findMetadata, ToolContentModelType, ToolContentUnion } from "./tool-types";
+import { findMetadata, IToolContentModelHooks, ToolContentModelType, ToolContentUnion } from "./tool-types";
 import { DisplayUserTypeEnum } from "../stores/user-types";
 import { uniqueId } from "../../utilities/js-utils";
 
@@ -87,13 +87,13 @@ export const ToolTileModel = types
   .actions(self => ({
     afterCreate() {
       const metadata = findMetadata(self.content.type, self.id, self.title);
-      const content = self.content as any;
+      const content = self.content;
       if (metadata && content.doPostCreate) {
         content.doPostCreate(metadata);
       }
     },
     willRemoveFromDocument() {
-      const willRemoveFromDocument = (self.content as any).willRemoveFromDocument;
+      const willRemoveFromDocument = self.content.willRemoveFromDocument;
       return willRemoveFromDocument && willRemoveFromDocument();
     },
     setDisabledFeatures(disabled: string[]) {
