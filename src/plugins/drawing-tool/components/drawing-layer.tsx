@@ -229,11 +229,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       }
 
       objectsBeingDragged.forEach((object, index) => {
-        // FIXME: this will change the state of the model during the move
-        // previously the state was only changed on mouse up
-        // we probably need to emulate this behavior, both for undo/redo
-        // and to avoid sending too much state. This is the same problem 
-        // we will have with typing characters into a text field.
         object.setPosition(start[index].x + dx, start[index].y + dy);
       });
 
@@ -250,9 +245,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
       if (moved) {
-        // FIXME it would be better for logging if we had a setPosition that took
-        // a list of ids here
-        // For that we need the cumulative dx and dy
         const moves: DrawingObjectMove[] = objectsToInteract.map((object, index) => {
           const draggedObject = objectsBeingDragged[index];
           return {

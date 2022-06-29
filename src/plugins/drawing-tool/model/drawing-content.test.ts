@@ -8,7 +8,7 @@ import { DefaultToolbarSettings } from "./drawing-basic-types";
 import { StampModel } from "./stamp";
 import { AppConfigModel } from "../../../models/stores/app-config-model";
 import { ImageObject } from "../objects/image";
-import { RectangleObjectSnapshot, RectangleObjectSnapshotForAdd, 
+import { RectangleObject, RectangleObjectSnapshot, RectangleObjectSnapshotForAdd, 
   RectangleObjectType } from "../objects/rectangle";
 import { computeStrokeDashArray } from "../objects/drawing-object";
 import { LogEventName, Logger } from "../../../lib/logger";
@@ -218,6 +218,7 @@ describe("DrawingContentModel", () => {
     model.setSelection(["a", "b"]);
     model.setStroke("#000000", model.selectedIds);
     model.setStrokeWidth(2, model.selectedIds);
+    model.setStrokeDashArray("3,3", model.selectedIds);
 
     expect(model.objects[0].type).toBe("rectangle");
     const rect1 = model.objects[0] as RectangleObjectType;
@@ -236,6 +237,8 @@ describe("DrawingContentModel", () => {
       LogEventName.DRAWING_TOOL_CHANGE, "setStroke", { args: ["#000000", ["a", "b"]], path: "" }, "drawing-1");
     expect(Logger.logToolChange).toHaveBeenNthCalledWith(3,
       LogEventName.DRAWING_TOOL_CHANGE, "setStrokeWidth", { args: [2, ["a", "b"]], path: "" }, "drawing-1");
+    expect(Logger.logToolChange).toHaveBeenNthCalledWith(4,
+      LogEventName.DRAWING_TOOL_CHANGE, "setStrokeDashArray", { args: ["3,3", ["a", "b"]], path: "" }, "drawing-1");
   });
 
   it("can move objects", () => {
@@ -303,5 +306,12 @@ describe("DrawingContentModel", () => {
 
     model.updateImageUrl("my/image/url", "my/image/newUrl");
     expect(image.url).toBe("my/image/newUrl");
+  });
+
+  test("addObject throws when an instance is passed to it", () => {
+    const model = createDrawingContentWithMetadata();
+    const rect = RectangleObject.create(baseRectangleSnapshot);
+    
+    expect(() => model.addObject(rect)).toThrow();
   });
 });
