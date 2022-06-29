@@ -133,6 +133,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private editorDomElement: HTMLElement | null;
   private _isMounted: boolean;
   private disposers: IDisposer[] = [];
+  private processing = false;
 
   constructor(props: IProps) {
     super(props);
@@ -439,6 +440,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private processAndSave = async () => {
+    if (this.processing) {
+      // If we're already processing, wait a few milliseconds and try again
+      setTimeout(this.processAndSave, 5);
+      return;
+    }
+
+    this.processing = true;
     await this.programEngine.abort();
     const programJSON = this.programEditor.toJSON();
     await this.programEngine.process(programJSON);
@@ -446,6 +454,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.setState({disableDataStorage: false});
     }
     this.props.onProgramChange(programJSON);
+    this.processing = false;
   };
 
   private updateChannels = () => {
