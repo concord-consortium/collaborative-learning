@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import { Instance, SnapshotIn, types } from "mobx-state-tree";
+import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
 import { SelectionBox } from "../components/selection-box";
 import { computeStrokeDashArray, DeltaPoint, DrawingTool, IDrawingComponentProps, IDrawingLayer, 
@@ -107,7 +107,7 @@ export class LineDrawingTool extends DrawingTool {
       e2.preventDefault();
       if (line.deltaPoints.length > 0) {
         addPoint(e2);
-        this.drawingLayer.addNewDrawingObject(line);
+        this.drawingLayer.addNewDrawingObject(getSnapshot(line));
       }
       this.drawingLayer.setCurrentDrawingObject(null);
       window.removeEventListener("mousemove", handleMouseMove);

@@ -1,4 +1,4 @@
-import { types, Instance, SnapshotIn, getSnapshot} from "mobx-state-tree";
+import { types, Instance, SnapshotIn, getSnapshot, onAction, isStateTreeNode} from "mobx-state-tree";
 import { clone } from "lodash";
 import stringify from "json-stringify-pretty-compact";
 import { StampModel, StampModelType } from "./stamp";
@@ -8,7 +8,8 @@ import { kDrawingStateVersion, kDrawingToolID } from "./drawing-types";
 import { ImageObjectType, isImageObjectSnapshot } from "../objects/image";
 import { DefaultToolbarSettings, ToolbarSettings } from "./drawing-basic-types";
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
-import { DrawingObjectType, isFilledObject, isStrokedObject, ToolbarModalButton } from "../objects/drawing-object";
+import { DrawingObjectSnapshotForAdd, DrawingObjectType, isFilledObject, 
+  isStrokedObject, ToolbarModalButton } from "../objects/drawing-object";
 
 // interface LoggedEventProperties {
 //   properties?: string[];
@@ -42,6 +43,9 @@ export const DrawingToolMetadataModel = ToolMetadataModel
     },
     setSelection(selection: string[]) {
       self.selection.replace(selection);
+    },
+    unselectId(id: string) {
+      self.selection.remove(id);
     }
   }));
 export type DrawingToolMetadataModelType = Instance<typeof DrawingToolMetadataModel>;
@@ -65,7 +69,7 @@ export const DrawingContentModel = ToolContentModel
     currentStampIndex: types.maybe(types.number)
   })
   .volatile(self => ({
-    metadata: undefined as any as DrawingToolMetadataModelType
+    metadata: undefined as DrawingToolMetadataModelType | undefined
   }))
   .views(self => ({
     get objectMap() {
@@ -80,13 +84,16 @@ export const DrawingContentModel = ToolContentModel
       return true;
     },
     isSelectedButton(button: ToolbarModalButton) {
-      return button === self.metadata.selectedButton;
+      return button === self.metadata?.selectedButton;
     },
     get selectedButton() {
-      return self.metadata.selectedButton;
+      return self.metadata ? self.metadata.selectedButton : "select";
     },
     get hasSelectedObjects() {
-      return self.metadata.selection.length > 0;
+      return self.metadata ? self.metadata.selection.length > 0 : false;
+    },
+    get selectedIds() {
+      return self.metadata ? getSnapshot(self.metadata.selection) : [];
     },
     get currentStamp() {
       const currentStampIndex = self.currentStampIndex || 0;
@@ -123,6 +130,9 @@ export const DrawingContentModel = ToolContentModel
     doPostCreate(metadata) {
       self.metadata = metadata as DrawingToolMetadataModelType;
     },
+    onTileAction(call) {
+      console.log("Action was called", call);
+    }
   }))
   .extend(self => {
 
@@ -147,27 +157,16 @@ export const DrawingContentModel = ToolContentModel
     //     loggedChangeProps, self.metadata?.id ?? "");
     // }
 
-    function removeObjects(ids: string[]) {
+    function forEachObjectId(ids: string[], func: (object: DrawingObjectType, id: string) => void) {
+      if (ids.length === 0) return;
+      
       const { objectMap } = self;
       ids.forEach(id => {
         const object = objectMap[id];
         if (object) {
-          self.objects.remove(object);
+          func(object, id);
         }
       });
-    }
-
-    // FIXME: when we are logging this, if we just log the MST action and its params
-    // it won't provide enough info. 
-    // If we record the action and the changes that will be enough but it will be
-    // verbose. If we move the selection out of the model, then it will be required
-    // to pass the selected objects in the initial action so then its params will be
-    // sufficient.
-    function deleteSelectedObjects() {
-      if (self.metadata.selection.length > 0) {
-        removeObjects(self.metadata.selection);
-        self.metadata.setSelection([]);
-      }
     }
 
     // Keeping this around to help when adding back logging
@@ -187,54 +186,43 @@ export const DrawingContentModel = ToolContentModel
     //   }
     // }
 
-    function forEachSelectedObject(func: (object: DrawingObjectType) => void) {
-      if (self.metadata.selection.length === 0) return;
-      
-      const { objectMap } = self;
-      self.metadata.selection.forEach(id => {
-        const object = objectMap[id];
-        if (object) {
-          func(object);
-        }
-      });
-    }
-
     return {
       actions: {
-        addObject(object: DrawingObjectType) {
+        addObject(object: DrawingObjectSnapshotForAdd) {
+          if (isStateTreeNode(object as any)) {
+            throw new Error("addObject requires a snapshot");
+          }
+  
           self.objects.push(object);
         },
-        removeObject(object: DrawingObjectType) {
-          self.objects.remove(object);
-        },
 
-        setStroke(stroke: string) {
+        setStroke(stroke: string, ids: string[]) {
           self.stroke = stroke;
-          forEachSelectedObject(object => {
+          forEachObjectId(ids, object => {
             if(isStrokedObject(object)) {
               object.setStroke(stroke);
             }
           });
         },
-        setFill(fill: string) {
+        setFill(fill: string, ids: string[]) {
           self.fill = fill;
-          forEachSelectedObject(object => {
+          forEachObjectId(ids, object => {
             if (isFilledObject(object)) {
               object.setFill(fill);
             }
           });
         },
-        setStrokeDashArray(strokeDashArray: string) {
+        setStrokeDashArray(strokeDashArray: string, ids: string[]) {
           self.strokeDashArray = strokeDashArray;
-          forEachSelectedObject(object => {
+          forEachObjectId(ids, object => {
             if(isStrokedObject(object)) {
               object.setStrokeDashArray(strokeDashArray);
             }
           });
         },
-        setStrokeWidth(strokeWidth: number) {
+        setStrokeWidth(strokeWidth: number, ids: string[]) {
           self.strokeWidth = strokeWidth;
-          forEachSelectedObject(object => {
+          forEachObjectId(ids, object => {
             if(isStrokedObject(object)) {
               object.setStrokeWidth(strokeWidth);
             }
@@ -242,22 +230,29 @@ export const DrawingContentModel = ToolContentModel
         },
 
         setSelectedButton(button: ToolbarModalButton) {
-          self.metadata.setSelectedButton(button);
+          self.metadata?.setSelectedButton(button);
         },
 
         setSelection(ids: string[]) {
-          self.metadata.setSelection(ids);
+          self.metadata?.setSelection(ids);
         },
 
         setSelectedStamp(stampIndex: number) {
           self.currentStampIndex = stampIndex;
         },
 
-        deleteSelectedObjects,
+        deleteObjects(ids: string[]) {
+          forEachObjectId(ids, (object, id) => {
+            if (object) {
+              self.objects.remove(object);
+              self.metadata?.unselectId(id);
+            }
+          });
+        },
 
         // sets the model to how we want it to appear when a user first opens a document
         reset() {
-          self.metadata.setSelectedButton("select");
+          self.metadata?.setSelectedButton("select");
         },
         updateImageUrl(oldUrl: string, newUrl: string) {
           if (!oldUrl || !newUrl || (oldUrl === newUrl)) return;

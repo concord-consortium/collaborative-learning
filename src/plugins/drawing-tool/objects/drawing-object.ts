@@ -14,8 +14,8 @@ export interface IToolbarManager {
   selectedButton: string;
   toolbarSettings: ToolbarSettings;
   hasSelectedObjects: boolean;
-  addObject(object: DrawingObjectType): void;
-  deleteSelectedObjects(): void;
+  selectedIds: string [];
+  deleteObjects(ids: string[]): void;
   stamps: StampModelType[];
   currentStamp: StampModelType | null;
   stroke: string;
@@ -58,6 +58,9 @@ export const DrawingObject = types.model("DrawingObject", {
 }));
 export interface DrawingObjectType extends Instance<typeof DrawingObject> {}
 export interface DrawingObjectSnapshot extends SnapshotIn<typeof DrawingObject> {} 
+// Snapshots being passed to add need to have a type so the MST Union can figure out 
+// what they are.  They do not need an id because object will add that when it is created
+export interface DrawingObjectSnapshotForAdd extends SnapshotIn<typeof DrawingObject> {type: string} 
 
 export const StrokedObject = DrawingObject.named("StrokedObject")
 .props({
@@ -133,7 +136,7 @@ export type DrawingComponentType = React.ComponentType<IDrawingComponentProps>;
 export interface IDrawingLayer {
   getWorkspacePoint: (e:MouseEvent|React.MouseEvent) => Point|null;
   setCurrentDrawingObject: (object: DrawingObjectType|null) => void;
-  addNewDrawingObject: (object: DrawingObjectType) => void;
+  addNewDrawingObject: (object: DrawingObjectSnapshotForAdd) => void;
   getCurrentStamp: () => StampModelType|null;
   startSelectionBox: (start: Point) => void;
   updateSelectionBox: (p: Point) => void;

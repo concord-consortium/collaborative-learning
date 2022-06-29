@@ -1,6 +1,7 @@
 import { autorun } from "mobx";
 import { addDisposer, applySnapshot, getType, isAlive, types, getRoot, 
-  Instance, getParent, destroy, hasParent } from "mobx-state-tree";
+  isStateTreeNode, SnapshotOut, Instance, getParent, destroy, hasParent,
+  getSnapshot } from "mobx-state-tree";
 
 describe("mst", () => {
   it("snapshotProcessor unexpectedly modifies the base type", () => {
@@ -263,4 +264,42 @@ describe("mst", () => {
     });
   });
 
+
+  test("instances can be passed to snapshot methods", () => {
+    const Todo = types.model({
+      name: types.string
+    })
+    .actions(self => ({
+      doSomething () {
+        return false;
+      }
+    }));
+    interface TodoSnapshot extends SnapshotOut<typeof Todo> {}
+
+    const todo1 = Todo.create({name: "hello"});
+    const todo2 = Todo.create({name: "bye"});
+    applySnapshot(todo1, todo2);
+    expect(todo1.name).toBe("bye");
+
+    const TodoList = types.model({
+      todos: types.array(Todo)
+    })
+    .actions(self => ({
+      addTodo(todo: TodoSnapshot) {
+        if (isStateTreeNode(todo as any)) {
+          throw new Error("passed in todo is not a snapshot");
+        }
+        self.todos.push(todo);
+      }
+    }));
+
+    const todoList = TodoList.create();
+    todoList.addTodo(getSnapshot(todo1));
+    expect(todoList.todos[0]).toEqual(todo1);
+    expect(todoList.todos[0]).not.toBe(todo1);
+
+    expect(() => {
+      todoList.addTodo(todo1);
+    }).toThrow();
+  });
 });

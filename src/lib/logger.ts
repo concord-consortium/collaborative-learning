@@ -406,7 +406,7 @@ export class Logger {
 function sendToLoggingService(data: LogMessage, user: UserModelType) {
   if (DEBUG_LOGGER) {
     // eslint-disable-next-line no-console
-    console.log("Logger#sendToLoggingService sending", JSON.stringify(data), "to", logManagerUrl);
+    console.log("Logger#sendToLoggingService sending", data, "to", logManagerUrl);
   }
   if (!Logger.isLoggingEnabled) return;
 

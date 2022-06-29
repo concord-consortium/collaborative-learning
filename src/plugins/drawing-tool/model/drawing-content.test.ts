@@ -7,7 +7,8 @@ import { DefaultToolbarSettings } from "./drawing-basic-types";
 import { StampModel } from "./stamp";
 import { AppConfigModel } from "../../../models/stores/app-config-model";
 import { ImageObject } from "../objects/image";
-import { RectangleObject, RectangleObjectSnapshot, RectangleObjectType } from "../objects/rectangle";
+import { RectangleObjectSnapshot, RectangleObjectSnapshotForAdd, 
+  RectangleObjectType } from "../objects/rectangle";
 import { computeStrokeDashArray } from "../objects/drawing-object";
 
 // mock Logger calls
@@ -77,6 +78,14 @@ describe("DrawingContentModel", () => {
     strokeDashArray: "3,3",
     strokeWidth: 5
   };
+  const baseRectangleSnapshot: RectangleObjectSnapshotForAdd = {
+    type: "rectangle",
+    x: 0,
+    y: 0,
+    width: 10,
+    height: 10,
+    ...mockSettings,
+  };
 
   it("accepts default arguments on creation", () => {
     const model = createDrawingContentWithMetadata();
@@ -121,36 +130,33 @@ describe("DrawingContentModel", () => {
       strokeWidth: DefaultToolbarSettings.strokeWidth
     };
     expect(model.toolbarSettings).toEqual(defaultSettings);
-    model.setStroke(stroke);
+    model.setStroke(stroke, model.selectedIds);
     expect(model.toolbarSettings).toEqual({ ...defaultSettings, stroke });
-    model.setFill(fill);
+    model.setFill(fill, model.selectedIds);
     expect(model.toolbarSettings).toEqual({ ...defaultSettings, fill, stroke });
-    model.setStrokeDashArray(strokeDashArray);
+    model.setStrokeDashArray(strokeDashArray, model.selectedIds);
     expect(model.toolbarSettings).toEqual({ ...defaultSettings, fill, stroke, strokeDashArray });
-    model.setStrokeWidth(strokeWidth);
+    model.setStrokeWidth(strokeWidth, model.selectedIds);
     expect(model.toolbarSettings).toEqual({ ...defaultSettings, fill, stroke, strokeDashArray, strokeWidth });
   });
 
   it("can delete a set of selected drawing objects", () => {
     const model = createDrawingContentWithMetadata();
-    const {stroke, fill, strokeWidth, strokeDashArray} = mockSettings;
 
-    model.addObject(RectangleObject.create(
-      {id:"a", x:0, y:0, width:10, height:10,
-       stroke, fill, strokeWidth, strokeDashArray}));
+    const rectSnapshot1: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"a", x:0, y:0};
+    model.addObject(rectSnapshot1);
 
-    model.addObject(RectangleObject.create(
-      {id:"b", x:20, y:20, width:10, height:10,
-       stroke, fill, strokeWidth, strokeDashArray}));
+    const rectSnapshot2: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"b", x:20, y:20};
+    model.addObject(rectSnapshot2);
 
     // delete does nothing if nothing is selected
     expect(model.objects.length).toBe(2);
-    model.deleteSelectedObjects();
+    model.deleteObjects(model.selectedIds);
     expect(model.objects.length).toBe(2);
 
     model.setSelection(["a", "b"]);
     expect(model.hasSelectedObjects).toBe(true);
-    model.deleteSelectedObjects();
+    model.deleteObjects(model.selectedIds);
     expect(model.objects.length).toBe(0);
   });
 
@@ -158,18 +164,15 @@ describe("DrawingContentModel", () => {
     const model = createDrawingContentWithMetadata();
     expect(model.currentStamp).toBeNull();
 
-    const {stroke, fill, strokeWidth, strokeDashArray} = mockSettings;
-    model.addObject(RectangleObject.create(
-      {id:"a", x:0, y:0, width:10, height:10,
-       stroke, fill, strokeWidth, strokeDashArray}));
+    const rectSnapshot1: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"a", x:0, y:0};
+    model.addObject(rectSnapshot1);
 
-    model.addObject(RectangleObject.create(
-      {id:"b", x:20, y:20, width:10, height:10,
-       stroke, fill, strokeWidth, strokeDashArray}));
+    const rectSnapshot2: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"b", x:10, y:10};
+    model.addObject(rectSnapshot2);
 
     model.setSelection(["a", "b"]);
-    model.setStroke("#000000");
-    model.setStrokeWidth(2);
+    model.setStroke("#000000", model.selectedIds);
+    model.setStrokeWidth(2, model.selectedIds);
 
     expect(model.objects[0].type).toBe("rectangle");
     const rect1 = model.objects[0] as RectangleObjectType;

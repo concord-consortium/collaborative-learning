@@ -89,6 +89,7 @@ export const ImageObject = DrawingObject.named("ImageObject")
   }));
 export interface ImageObjectType extends Instance<typeof ImageObject> {}
 export interface ImageObjectSnapshot extends SnapshotIn<typeof ImageObject> {}
+export interface ImageObjectSnapshotForAdd extends SnapshotIn<typeof ImageObject> {type: string}
 
 export function isImageObjectSnapshot(object: DrawingObjectSnapshot): object is ImageObjectSnapshot {
   return object.type === "image";
@@ -120,13 +121,14 @@ export class StampDrawingTool extends DrawingTool {
     if (!start) return;
     const stamp = this.drawingLayer.getCurrentStamp();
     if (stamp) {
-      const stampImage = ImageObject.create({
+      const stampImage: ImageObjectSnapshotForAdd = {
+        type: "image",
         url: stamp.url,
         x: start.x - (stamp.width / 2),
         y: start.y - (stamp.height / 2),
         width: stamp.width,
         height: stamp.height
-      });
+      };
 
       this.drawingLayer.addNewDrawingObject(stampImage);
     }
