@@ -2,7 +2,7 @@ import React from "react";
 import { reaction, IReactionDisposer } from "mobx";
 import { observer } from "mobx-react";
 import { extractDragTileType, kDragTileContent } from "../../../components/tools/tool-tile";
-import { DrawingContentModelType } from "../model/drawing-content";
+import { DrawingContentModelType, DrawingObjectMove } from "../model/drawing-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { ImageContentSnapshotOutType } from "../../../models/tools/image/image-content";
@@ -253,10 +253,14 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         // FIXME it would be better for logging if we had a setPosition that took
         // a list of ids here
         // For that we need the cumulative dx and dy
-        objectsToInteract.forEach((object, index) => {
+        const moves: DrawingObjectMove[] = objectsToInteract.map((object, index) => {
           const draggedObject = objectsBeingDragged[index];
-          object.setPosition(draggedObject.x, draggedObject.y);
+          return {
+            id: object.id,
+            destination: {x: draggedObject.x, y: draggedObject.y}
+          };
         });
+        this.getContent().moveObjects(moves);
       }
       else {
         this.handleObjectClick(e2, obj);

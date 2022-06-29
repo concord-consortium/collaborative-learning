@@ -54,6 +54,11 @@ interface ObjectMap {
   [key: string]: DrawingObjectType|null;
 }
 
+export interface DrawingObjectMove {
+  id: string, 
+  destination: {x: number, y: number}
+}
+
 export const DrawingContentModel = ToolContentModel
   .named("DrawingTool")
   .props({
@@ -247,6 +252,13 @@ export const DrawingContentModel = ToolContentModel
               self.objects.remove(object);
               self.metadata?.unselectId(id);
             }
+          });
+        },
+
+        moveObjects(moves: DrawingObjectMove[]) {
+          moves.forEach(move => {
+            const object = self.objectMap[move.id];
+            object?.setPosition(move.destination.x, move.destination.y);
           });
         },
 
