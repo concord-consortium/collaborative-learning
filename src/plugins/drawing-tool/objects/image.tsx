@@ -3,8 +3,8 @@ import React, { useCallback } from "react";
 import { observer } from "mobx-react";
 import { autorun } from "mobx";
 import { Tooltip } from "react-tippy";
-import { gImageMap } from "../../../models/image-map";
-import { DrawingObject, DrawingTool, IDrawingComponentProps, IDrawingLayer, 
+import { EntryStatus, gImageMap } from "../../../models/image-map";
+import { DrawingObject, DrawingObjectSnapshot, DrawingTool, IDrawingComponentProps, IDrawingLayer, 
   IToolbarButtonProps, typeField } from "./drawing-object";
 import { Point } from "../model/drawing-basic-types";
 import placeholderImage from "../../../assets/image_placeholder.png";
@@ -36,12 +36,17 @@ export const ImageObject = DrawingObject.named("ImageObject")
       const se: Point = {x: x + width, y: y + height};
       return {nw, se};
     },
-    // TODO: this currently works with stamps because the stamp is added by creating a "create"
-    // change event. And then when that change event is executed it triggers a gImageMap.getImage
-    // When the change events are removed, we'll need to find another way to trigger these 
-    // gImageMap.getImage calls.
     get displayUrl() {
-      return gImageMap.getCachedImage(self.url)?.displayUrl || (placeholderImage as string);
+      let entry = gImageMap.getCachedImage(self.url);
+      // Note: this was causing an infinite loop when loading the image failed.
+      // The ImageMap was updated so it would limit the number times it would
+      // retry fetching an image, and this has stopped the infinite loop.
+      if (!entry || entry.status === EntryStatus.Error) {
+        gImageMap.getImage(self.url, {filename: self.filename});
+        entry = gImageMap.getCachedImage(self.url);
+      }
+      // TODO we could return a spinner image if the entry is storing or computing dimensions
+      return entry?.displayUrl || (placeholderImage as string);
     },
 
   }))
@@ -54,11 +59,15 @@ export const ImageObject = DrawingObject.named("ImageObject")
       self.url = url;
     },
 
+    setFilename(filename?: string) {
+      self.filename = filename;
+    },
+
     afterCreate() {
       // Monitor the image map entry and save the width and height when it is available
       // this way when the image is reloaded from state the width and height are immediately
       // available and there won't be any resize flickering.
-      // In all cases I can find the correct width and height will be set when the ImageObject is
+      // In all cases I can find, the correct width and height will be set when the ImageObject is
       // created. However the old code was modifying the width and height after the image 
       // entry became available, so there might be a case where width and height change.
       addDisposer(self, autorun(() =>{
@@ -80,6 +89,10 @@ export const ImageObject = DrawingObject.named("ImageObject")
   }));
 export interface ImageObjectType extends Instance<typeof ImageObject> {}
 export interface ImageObjectSnapshot extends SnapshotIn<typeof ImageObject> {}
+
+export function isImageObjectSnapshot(object: DrawingObjectSnapshot): object is ImageObjectSnapshot {
+  return object.type === "image";
+}
 
 export const ImageComponent: React.FC<IDrawingComponentProps> = observer(function ImageComponent({model, handleHover}){
   if (model.type !== "image") return null;
@@ -121,25 +134,25 @@ export class StampDrawingTool extends DrawingTool {
 }
 
 export const StampToolbarButton: React.FC<IToolbarButtonProps> = ({
-  drawingContent, togglePaletteState, clearPaletteState
+  toolbarManager, togglePaletteState, clearPaletteState
 }) => {
   const tooltipOptions = useTooltipOptions();
-  const { selectedButton, stamps } = drawingContent;
-  const { currentStamp } = drawingContent;
+  const { selectedButton, stamps } = toolbarManager;
+  const { currentStamp } = toolbarManager;
   const stampCount = stamps.length;
 
   const modalButton = "stamp";
   const selected = selectedButton === modalButton;
 
   const handleStampsButtonClick = useCallback(() => {
-    drawingContent.setSelectedButton("stamp");
+    toolbarManager.setSelectedButton("stamp");
     togglePaletteState("showStamps", false);
-  }, [drawingContent, togglePaletteState]);
+  }, [toolbarManager, togglePaletteState]);
 
   const handleStampsButtonTouchHold = useCallback(() => {
-    drawingContent.setSelectedButton("stamp");
+    toolbarManager.setSelectedButton("stamp");
     togglePaletteState("showStamps");
-  }, [drawingContent, togglePaletteState]);
+  }, [toolbarManager, togglePaletteState]);
 
   const { didTouchHold, ...handlers } = useTouchHold(handleStampsButtonTouchHold, handleStampsButtonClick);
 

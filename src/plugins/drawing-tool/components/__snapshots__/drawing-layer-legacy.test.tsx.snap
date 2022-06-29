@@ -118,7 +118,7 @@ exports[`Drawing Layer Components Image moves a image 1`] = `
 >
   <image
     height="10"
-    href="assets/logo_tw.png"
+    href="test-file-stub"
     width="10"
     x="5"
     y="5"

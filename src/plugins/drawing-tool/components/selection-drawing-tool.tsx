@@ -1,6 +1,5 @@
 import React from "react";
 import { DrawingObjectType, DrawingTool, IDrawingLayer } from "../objects/drawing-object";
-import { DrawingLayerView } from "./drawing-layer";
 
 export class SelectionDrawingTool extends DrawingTool {
   constructor(drawingLayer: IDrawingLayer) {
@@ -8,9 +7,7 @@ export class SelectionDrawingTool extends DrawingTool {
   }
 
   public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
-    // We are internal so we can use some private stuff not exposed by 
-    // IDrawingLayer
-    const drawingLayerView = this.drawingLayer as DrawingLayerView;
+    const drawingLayerView = this.drawingLayer;
     const addToSelectedObjects = e.ctrlKey || e.metaKey;
     const start = this.drawingLayer.getWorkspacePoint(e);
     if (!start) return;
@@ -34,10 +31,7 @@ export class SelectionDrawingTool extends DrawingTool {
   }
 
   public handleObjectClick(e: React.MouseEvent<HTMLDivElement>, obj: DrawingObjectType) {
-    // We are internal so we can use some private stuff not exposed by 
-    // IDrawingLayer
-    const drawingLayerView = this.drawingLayer as DrawingLayerView;
-    const { selectedObjects } = drawingLayerView.state;
+    const selectedObjects = this.drawingLayer.getSelectedObjects();
     const index = selectedObjects.indexOf(obj);
     if (index === -1) {
       selectedObjects.push(obj);
@@ -45,6 +39,6 @@ export class SelectionDrawingTool extends DrawingTool {
     else {
       selectedObjects.splice(index, 1);
     }
-    drawingLayerView.setSelectedObjects(selectedObjects);
+    this.drawingLayer.setSelectedObjects(selectedObjects);
   }
 }

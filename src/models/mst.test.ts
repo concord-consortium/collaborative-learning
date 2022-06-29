@@ -1,4 +1,4 @@
-import { getType, types } from "mobx-state-tree";
+import { applySnapshot, getType, isAlive, types } from "mobx-state-tree";
 
 describe("mst", () => {
   it("snapshotProcessor unexpectedly modifies the base type", () => {
@@ -66,6 +66,17 @@ describe("mst", () => {
     expect(lateCalled).toBe(true);
   });
 
+  it("does not load a late type immediately when it is the direct child of an array", () => {        
+    let lateCalled = false;
+    types.model("TypeWithLate", {
+      prop: types.array(types.late(() => {
+        lateCalled = true;
+        return types.string;
+      }))
+    });
+    expect(lateCalled).toBe(false);
+  });
+
   it("loads a late type immediately when it is the direct child of an optional", () => {        
     let lateCalled = false;
     types.model("TypeWithLate", {
@@ -125,5 +136,46 @@ describe("mst", () => {
 
     TypeUsingLate.create({withLateMap: {"key": {prop: "value"}}});
     expect(lateCalled).toBe(true);
+  });
+
+  test("applySnapshot does not merge the properties", () => {
+    const Todo1 = types.model({ 
+      text1: types.maybe(types.string),
+      text2: types.maybe(types.string)
+    });
+
+    const todo = Todo1.create({text1: "1", text2:"2"});
+    expect(todo.text1).toBe("1");
+    applySnapshot(todo, {text2: "changed"});
+    expect(todo.text1).toBeUndefined();
+  });
+
+  test("map set applies a snapshot to the existing object", () => {
+    const TodoValue = types.model({
+      name: types.string
+    });
+    const Todo = types.model({ 
+      values: types.map(TodoValue),
+    })
+    .actions(self => ({
+      setValue(key: string, value: any) {
+        self.values.set(key, value);
+      }
+    }));
+
+    const todo = Todo.create({values: {"first": {name: "1"}}});
+    const firstValue = todo.values.get("first");
+    expect(firstValue!.name).toBe("1");
+
+    todo.setValue("first", {name: "changed"});
+    const updatedValue = todo.values.get("first");
+    expect(updatedValue).toBe(firstValue);
+    expect(firstValue!.name).toBe("changed");
+
+    todo.setValue("first", TodoValue.create({name: "created"}));
+    const createdValue = todo.values.get("first");
+    expect(createdValue).not.toBe(firstValue);
+    expect(isAlive(firstValue)).toBe(false);
+
   });
 });
