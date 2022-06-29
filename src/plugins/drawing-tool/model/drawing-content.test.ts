@@ -1,3 +1,4 @@
+import { addDisposer, onAction } from "mobx-state-tree";
 import {
   createDrawingContent, defaultDrawingContent, 
   DrawingContentModelSnapshot, DrawingToolMetadataModel
@@ -10,6 +11,7 @@ import { ImageObject } from "../objects/image";
 import { RectangleObjectSnapshot, RectangleObjectSnapshotForAdd, 
   RectangleObjectType } from "../objects/rectangle";
 import { computeStrokeDashArray } from "../objects/drawing-object";
+import { LogEventName, Logger } from "../../../lib/logger";
 
 // mock Logger calls
 jest.mock("../../../lib/logger", () => {
@@ -69,6 +71,9 @@ describe("DrawingContentModel", () => {
     const model = createDrawingContent(options);
     const metadata = DrawingToolMetadataModel.create({ id: "drawing-1" });
     model.doPostCreate!(metadata);
+    addDisposer(model, onAction(model, (call) => {
+      model.onTileAction!(call);
+    }));
     return model;
   }
 
@@ -143,6 +148,10 @@ describe("DrawingContentModel", () => {
   it("can delete a set of selected drawing objects", () => {
     const model = createDrawingContentWithMetadata();
 
+    // TODO: maybe we want to just reset the one function, but TS doesn't like us calling resetMock
+    // on Logger.logToolChange
+    jest.resetAllMocks();
+
     const rectSnapshot1: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"a", x:0, y:0};
     model.addObject(rectSnapshot1);
 
@@ -156,8 +165,43 @@ describe("DrawingContentModel", () => {
 
     model.setSelection(["a", "b"]);
     expect(model.hasSelectedObjects).toBe(true);
+
     model.deleteObjects(model.selectedIds);
     expect(model.objects.length).toBe(0);
+    // Note: Normally the path will start at the root of the document, but for this test we are
+    // are mocking the onTileAction so the path is just blank
+    expect(Logger.logToolChange).toHaveBeenNthCalledWith(1,
+      LogEventName.DRAWING_TOOL_CHANGE, "addObject", { args: [ {
+        fill: "#666666",
+        height: 10,
+        id: "a",
+        stroke: "#888888",
+        strokeDashArray: "3,3",
+        strokeWidth: 5,
+        type: "rectangle",
+        width: 10,
+        x: 0,
+        y: 0
+      } ], path: ""}, "drawing-1");
+    expect(Logger.logToolChange).toHaveBeenNthCalledWith(2,
+      LogEventName.DRAWING_TOOL_CHANGE, "addObject", { args: [ {
+        fill: "#666666",
+        height: 10,
+        id: "b",
+        stroke: "#888888",
+        strokeDashArray: "3,3",
+        strokeWidth: 5,
+        type: "rectangle",
+        width: 10,
+        x: 20,
+        y: 20
+      } ], path: ""}, "drawing-1");
+    expect(Logger.logToolChange).toHaveBeenNthCalledWith(3,
+      LogEventName.DRAWING_TOOL_CHANGE, "deleteObjects", { args: [ [] ], path: ""}, "drawing-1");
+    expect(Logger.logToolChange).toHaveBeenNthCalledWith(4,
+      LogEventName.DRAWING_TOOL_CHANGE, "setSelection", { args: [ ["a", "b"] ], path: ""}, "drawing-1");
+    expect(Logger.logToolChange).toHaveBeenNthCalledWith(5,
+      LogEventName.DRAWING_TOOL_CHANGE, "deleteObjects", { args: [ ["a", "b"] ], path: ""}, "drawing-1");
   });
 
   it("can update the properties of a set of selected drawing objects", () => {
@@ -170,6 +214,7 @@ describe("DrawingContentModel", () => {
     const rectSnapshot2: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"b", x:10, y:10};
     model.addObject(rectSnapshot2);
 
+    jest.resetAllMocks();
     model.setSelection(["a", "b"]);
     model.setStroke("#000000", model.selectedIds);
     model.setStrokeWidth(2, model.selectedIds);
@@ -184,6 +229,34 @@ describe("DrawingContentModel", () => {
     const rect2 = model.objects[0] as RectangleObjectType;
     expect(rect2.stroke).toBe("#000000");
     expect(rect2.strokeWidth).toBe(2);
+
+    expect(Logger.logToolChange).toHaveBeenNthCalledWith(1,
+      LogEventName.DRAWING_TOOL_CHANGE, "setSelection", { args: [["a", "b"]], path: "" }, "drawing-1");
+    expect(Logger.logToolChange).toHaveBeenNthCalledWith(2,
+      LogEventName.DRAWING_TOOL_CHANGE, "setStroke", { args: ["#000000", ["a", "b"]], path: "" }, "drawing-1");
+    expect(Logger.logToolChange).toHaveBeenNthCalledWith(3,
+      LogEventName.DRAWING_TOOL_CHANGE, "setStrokeWidth", { args: [2, ["a", "b"]], path: "" }, "drawing-1");
+  });
+
+  it("can move objects", () => {
+    const model = createDrawingContentWithMetadata();
+
+    const rectSnapshot1: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"a", x:0, y:0};
+    model.addObject(rectSnapshot1);
+
+    const rectSnapshot2: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"b", x:10, y:10};
+    model.addObject(rectSnapshot2);
+
+    jest.resetAllMocks();
+    model.moveObjects([
+      {id: "a", destination: {x: 20, y: 20}},
+      {id: "b", destination: {x: 30, y: 30}} 
+    ]);
+    expect(Logger.logToolChange).toHaveBeenNthCalledWith(1,
+      LogEventName.DRAWING_TOOL_CHANGE, "moveObjects", { args: [[
+        {id: "a", destination: {x: 20, y: 20}},
+        {id: "b", destination: {x: 30, y: 30}} 
+      ]], path: "" }, "drawing-1");
   });
 
   it("can change the current stamp", () => {
