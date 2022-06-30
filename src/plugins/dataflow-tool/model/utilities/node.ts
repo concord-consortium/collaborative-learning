@@ -434,13 +434,9 @@ const serialDataChannel: NodeChannelInfo = {
   virtual: false,
   serialPort: {},
 
-  /* this is where we return the value, at the moment, into the existing flow
-     not sure where the roughly 1000ms timing is coming from 
-     (it's not the 1000 passed in on virtualValue call, e.g.) but will have
-     to get way back to get more real time
+  /* this is where we return the value, at the moment, into the existing flow?
   */
   localSensorValueMethod: (t: number) => {
-    console.log('ZZ LOCAL SENSOR VALUE method getting called')
     return global.emgVal
   } 
 };

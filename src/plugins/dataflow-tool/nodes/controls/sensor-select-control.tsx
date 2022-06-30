@@ -8,8 +8,6 @@ import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custo
 import "./sensor-select-control.sass";
 import "./value-control.sass";
 
-import { connectToPort } from "../../utilities/serialPoc"
-
 export class SensorSelectControl extends Rete.Control {
   private emitter: NodeEditor;
   private component: any;
@@ -138,7 +136,7 @@ export class SensorSelectControl extends Rete.Control {
       const selectedChannel = channelsForType.find((ch: any) => ch.channelId === id);
 
       const getChannelString = (ch?: NodeChannelInfo | "none") => {
-        console.log("STEP [ TUNING IN z ] getChannelString from ch: NodeChannelInfo and open port", ch)
+        console.log("STEP [ 5.1 ] getChannelString from ch: NodeChannelInfo and open port", ch)
         if (!ch && (!id || id === "none")) return kSensorSelectMessage;
         if (ch === "none") return "None Available";
         if (!ch) return `${kSensorMissingMessage} ${id}`;
