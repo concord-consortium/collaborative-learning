@@ -32,17 +32,19 @@ describe("convertImageTile", () => {
 
 describe("Image export with default options", () => {
   it("should export placeholder image when no image has been uploaded", () => {
+    const title = "Image 1";
     const url = "assets/images/image_placeholder.png";
-        expect(exportImageTileSpec(url))
-            .toEqual(`{\n  "type": "Image",\n  "url": "${url}"\n}`);
+        expect(exportImageTileSpec(title, url))
+          .toEqual(`{\n  "type": "Image",\n  "title": "${title}",\n  "url": "${url}"\n}`);
   });
 });
 
 describe("Image export with uploaded image", () => {
   it("should export uploaded image", () => {
+    const title = "Image 1";
     const url = "https://collaborative-learning.concord.org/uploaded-image.jpg";
     const filename = "https://collaborative-learning.concord.org/uploaded-image.jpg";
-        expect(exportImageTileSpec(url, filename))
-            .toEqual(`{\n  "type": "Image",\n  "url": "${url}",\n  "filename": "${filename}"\n}`);
+        expect(exportImageTileSpec(title, url, filename))
+          .toEqual(`{\n  "type": "Image",\n  "title": "${title}",\n  "url": "${url}",\n  "filename": "${filename}"\n}`);
   });
 });

@@ -42,7 +42,7 @@ export const ImageContentModel = ToolContentModel
       return !!url && !isPlaceholderImage(url);
     },
     exportJson(options?: ITileExportOptions) {
-      return exportImageTileSpec(self.url, self.filename, options);
+      return exportImageTileSpec(self.metadata.title, self.url, self.filename, options);
     }
   }))
   .actions(self => ({

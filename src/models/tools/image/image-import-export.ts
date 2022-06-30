@@ -29,22 +29,19 @@ export const transformCurriculumImageUrl = (url?: string, unitBasePath?: string,
           : url || "";
 };
 
-export const exportImageTileSpec = (url?: string, filename?: string, options?: ITileExportOptions) => {
+export const exportImageTileSpec = (title?: string, url?: string, filename?: string, options?: ITileExportOptions) => {
   const transformedUrl = url && options?.transformImageUrl?.(url, filename) || url;
+  const jsonArray = [
+    `{`,
+    `  "type": "Image",`,
+    `  "title": "${title}",`,
+  ];
   if (filename) {
-    return [
-      `{`,
-      `  "type": "Image",`,
-      `  "url": "${transformedUrl}",`,
-      `  "filename": "${transformedUrl}"`,
-      `}`
-    ].join("\n");
+    jsonArray.push(`  "url": "${transformedUrl}",`);
+    jsonArray.push(`  "filename": "${transformedUrl}"`);
   } else {
-    return [
-      `{`,
-      `  "type": "Image",`,
-      `  "url": "${transformedUrl}"`,
-      `}`
-    ].join("\n");
+    jsonArray.push(`  "url": "${transformedUrl}"`);
   }
+  jsonArray.push(`}`);
+  return jsonArray.join("\n");
 };
