@@ -1,4 +1,4 @@
-import { types, Instance } from "mobx-state-tree";
+import { types, Instance, getSnapshot } from "mobx-state-tree";
 import { ToolContentModel } from "../../../models/tools/tool-types";
 import { ITileExportOptions } from "../../../models/tools/tool-content-info";
 import { DEFAULT_DATA_RATE } from "./utilities/node";
@@ -36,18 +36,17 @@ export const DataflowContentModel = ToolContentModel
       return true;
     },
     exportJson(options?: ITileExportOptions) {
-      // return JSON.stringify({
-      //   type: self.type,
-      //   program: self.program,
-      //   programDataRate: self.programDataRate,
-      //   programZoom: self.programZoom
-      // });
+      const zoom = getSnapshot(self.programZoom);
       return [
         `{`,
-        `  "type": "Dataflow"`,
-        `  "programDataRate": ${self.programDataRate}`,
-        `  "programZoom": ${self.programZoom}`,
-        `  "program": ${self.program}`,
+        `  "type": "Dataflow",`,
+        `  "programDataRate": ${self.programDataRate},`,
+        `  "programZoom": {`,
+        `    "dx": ${zoom.dx},`,
+        `    "dy": ${zoom.dy},`,
+        `    "scale": ${zoom.scale}`,
+        `  },`,
+        `  "program": ${JSON.stringify(self.program)}`,
         `}`
       ].join("\n");
     }
