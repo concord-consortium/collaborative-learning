@@ -18,7 +18,7 @@ const ProgramZoom = types.model({
   scale: types.number,
 });
 export type ProgramZoomType = typeof ProgramZoom.Type;
-const DEFAULT_PROGRAM_ZOOM = { dx: 0, dy: 0, scale: 1 };
+export const DEFAULT_PROGRAM_ZOOM = { dx: 0, dy: 0, scale: 1 };
 
 export const DataflowContentModel = ToolContentModel
   .named("DataflowTool")
@@ -33,7 +33,7 @@ export const DataflowContentModel = ToolContentModel
     programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
   })
   .views(self => ({
-    isUserResizable() {
+    get isUserResizable() {
       return true;
     }
   }))
