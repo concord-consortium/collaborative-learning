@@ -1,4 +1,4 @@
-import { types } from "mobx-state-tree";
+import { types, Instance } from "mobx-state-tree";
 
 const ConnectionModel = types
   .model("Connection", {
@@ -130,3 +130,5 @@ export const DataflowProgramModel = types.
     id: types.maybe(types.string),
     nodes: types.map(DataflowNodeModel)
   });
+
+export type DataflowProgramModelType = Instance<typeof DataflowProgramModel>;

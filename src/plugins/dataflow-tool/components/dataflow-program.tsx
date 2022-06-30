@@ -335,9 +335,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           });
         }
         
-        // TODO: Can this line be removed?
-        // this.closeCompletedRunProgramNodePlots(program);
-        await this.programEditor.fromJSON(cloneDeep(program));
+        await this.programEditor.fromJSON(program);
         if (this.hasDataStorage()) {
           this.setState({disableDataStorage: true});
         }
@@ -786,7 +784,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     let interval =  1;
     let datasetName = "";
     const programStartTime = Date.now();
-    // Nonsensical change just to avoid an error. This will probably be purged from the code soon.
+    // TODO: Nonsensical change just to avoid an error. This will probably be purged from the code soon.
     // const programEndTime = programStartTime + (1000 * this.props.programRunTime);
     const programEndTime = programStartTime + 1000;
 
