@@ -147,6 +147,12 @@ export const DrawingContentModel = ToolContentModel
     return {
       actions: {
         addObject(object: DrawingObjectSnapshotForAdd) {
+          // The reason only snapshots are allowed is so the logged action
+          // includes the snapshot in the `call` that is passed to `onAction`. 
+          // If a instance is passed instead of a snapshot, then MST will just 
+          // log something like:
+          // `{ $MST_UNSERIALIZABLE: true, type: "someType" }`. 
+          // More details can be found here: https://mobx-state-tree.js.org/API/#onaction
           if (isStateTreeNode(object as any)) {
             throw new Error("addObject requires a snapshot");
           }
