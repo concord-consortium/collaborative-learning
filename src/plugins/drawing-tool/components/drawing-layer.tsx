@@ -1,5 +1,6 @@
 import React from "react";
 import { reaction, IReactionDisposer } from "mobx";
+import { clone } from "mobx-state-tree";
 import { observer } from "mobx-react";
 import { extractDragTileType, kDragTileContent } from "../../../components/tools/tool-tile";
 import { DrawingContentModelType, DrawingObjectMove } from "../model/drawing-content";
@@ -14,7 +15,6 @@ import { DrawingObjectSnapshotForAdd, DrawingObjectType, DrawingTool,
 import { Point, ToolbarSettings } from "../model/drawing-basic-types";
 import { getDrawingToolInfos, renderDrawingObject } from "./drawing-object-manager";
 import { ImageObject } from "../objects/image";
-import { clone } from "mobx-state-tree";
 
 const SELECTION_COLOR = "#777";
 const HOVER_COLOR = "#bbdd00";

@@ -12,20 +12,6 @@ import { DrawingObjectSnapshotForAdd, DrawingObjectType, isFilledObject,
   isStrokedObject, ToolbarModalButton } from "../objects/drawing-object";
 import { LogEventName, Logger } from "../../../lib/logger";
 
-// interface LoggedEventProperties {
-//   properties?: string[];
-// }
-// interface DrawingToolLoggedCreateEvent extends Partial<DrawingToolCreateChange>, LoggedEventProperties {
-// }
-// interface DrawingToolLoggedMoveEvent extends Partial<DrawingToolMoveChange>, LoggedEventProperties {
-// }
-// interface DrawingToolLoggedUpdateEvent extends Partial<DrawingToolUpdateChange>, LoggedEventProperties {
-// }
-// interface DrawingToolLoggedDeleteEvent extends Partial<DrawingToolDeleteChange>, LoggedEventProperties {
-// }
-// type DrawingToolChangeLoggedEvent = DrawingToolLoggedCreateEvent | DrawingToolLoggedMoveEvent |
-//                                       DrawingToolLoggedUpdateEvent | DrawingToolLoggedDeleteEvent;
-
 // track selection in metadata object so it is not saved to firebase but
 // also is preserved across document/content reloads
 export const DrawingToolMetadataModel = ToolMetadataModel
@@ -93,7 +79,7 @@ export const DrawingContentModel = ToolContentModel
       return button === self.metadata?.selectedButton;
     },
     get selectedButton() {
-      return self.metadata ? self.metadata.selectedButton : "select";
+      return self.metadata?.selectedButton || "select";
     },
     get hasSelectedObjects() {
       return self.metadata ? self.metadata.selection.length > 0 : false;
@@ -138,36 +124,13 @@ export const DrawingContentModel = ToolContentModel
     },
     onTileAction(call) {
       const {name, ...loggedChangeProps} = call;
-      // FIXME: what do we do with the typing of log events here?
-      // We could specify the known types, but this will easily get out of date
-      // and it would be easy to miss one.
-      // I think the main point of these actions is or documentation
+      // TODO: logToolChange includes an explicit DrawingToolLogEvent
+      // this isn't a good pattern to support generic plugins logging events
       Logger.logToolChange(LogEventName.DRAWING_TOOL_CHANGE, name, 
-        loggedChangeProps as any, self.metadata?.id ?? "");
+        loggedChangeProps, self.metadata?.id ?? "");
     }
   }))
   .extend(self => {
-
-    // FIXME: need to deal with logging the events
-    // function applyChange(change: DrawingToolChange) {
-    //   self.changes.push(JSON.stringify(change));
-
-    //   let loggedChangeProps = {...change} as DrawingToolChangeLoggedEvent;
-    //   delete loggedChangeProps.data;
-    //   if (!Array.isArray(change.data)) {
-    //     // flatten change.properties
-    //     loggedChangeProps = {
-    //       ...loggedChangeProps,
-    //       ...change.data
-    //     };
-    //   } else {
-    //     // or clean up MST array
-    //     loggedChangeProps.properties = Array.from(change.data as string[]);
-    //   }
-    //   delete loggedChangeProps.action;
-    //   Logger.logToolChange(LogEventName.DRAWING_TOOL_CHANGE, change.action,
-    //     loggedChangeProps, self.metadata?.id ?? "");
-    // }
 
     function forEachObjectId(ids: string[], func: (object: DrawingObjectType, id: string) => void) {
       if (ids.length === 0) return;
@@ -180,23 +143,6 @@ export const DrawingContentModel = ToolContentModel
         }
       });
     }
-
-    // Keeping this around to help when adding back logging
-    // function updateSelectedObjects(prop: string, newValue: string|number) {
-    //   if (self.metadata.selection.length > 0) {
-    //     const updateChange: DrawingToolChange = {
-    //       action: "update",
-    //       data: {
-    //         ids: self.metadata.selection,
-    //         update: {
-    //           prop,
-    //           newValue
-    //         }
-    //       }
-    //     };
-    //     applyChange(updateChange);
-    //   }
-    // }
 
     return {
       actions: {

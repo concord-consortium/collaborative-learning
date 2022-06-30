@@ -8,7 +8,7 @@ import { InvestigationModelType } from "../models/curriculum/investigation";
 import { ProblemModelType } from "../models/curriculum/problem";
 import { DocumentModelType } from "../models/document/document";
 import { JXGChange } from "../models/tools/geometry/jxg-changes";
-import { DrawingToolChange } from "../plugins/drawing-tool/model/drawing-types";
+import { DrawingToolChange, DrawingToolLogEvent } from "../plugins/drawing-tool/model/drawing-types";
 import { ITableChange } from "../models/tools/table/table-change";
 import { ENavTab } from "../models/view/nav-tabs";
 import { DEBUG_LOGGER } from "../lib/debug";
@@ -131,7 +131,7 @@ export enum LogEventName {
 }
 
 type LoggableToolChangeEvent = Optional<JXGChange, "operation"> |
-                                Partial<DrawingToolChange> |
+                                DrawingToolLogEvent |
                                 Optional<ITableChange, "action">;
 
 interface IDocumentInfo {
