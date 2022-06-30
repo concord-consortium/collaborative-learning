@@ -1,4 +1,4 @@
-import { getEnv, Instance, types, getParent, getType, SnapshotIn } from "mobx-state-tree";
+import { getEnv, Instance, ISerializedActionCall, types } from "mobx-state-tree";
 import { ISharedModelManager, SharedModelType } from "./shared-model";
 import { getToolContentModels, getToolContentInfoById } from "./tool-content-info";
 
@@ -36,6 +36,12 @@ export interface IToolContentModelHooks {
    * more than one place.
    */
   doPostCreate?(metadata: ToolMetadataModelType): void,
+
+  /**
+   * This is called for any action that is called on the wrapper (ToolTile) or one of
+   * its children. It can be used for logging or internal monitoring of action calls.
+   */
+  onTileAction?(call: ISerializedActionCall): void,
 
   /**
    * This is called before the tile is removed from the row of the document.

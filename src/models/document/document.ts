@@ -1,4 +1,4 @@
-import { applySnapshot, types, Instance, SnapshotIn, getEnv } from "mobx-state-tree";
+import { applySnapshot, types, Instance, SnapshotIn, getEnv, onAction, addDisposer } from "mobx-state-tree";
 import { forEach } from "lodash";
 import { QueryClient, UseQueryResult } from "react-query";
 import { DocumentContentModel, DocumentContentSnapshotType } from "./document-content";
@@ -302,6 +302,16 @@ export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
     documentEnv: {}
   };
   const document = DocumentModel.create(snapshot, fullEnvironment);
+  addDisposer(document, onAction(document, (call) => {
+    if (!document.content || !call.path?.match(/\/content\/tileMap\//)) {
+      return;
+    }
+    const toolTileId = call.path?.match(/\/content\/tileMap\/([^/]*)/)?.[1];
+    if (toolTileId) {
+      const toolTile = document.content.tileMap.get(toolTileId);
+      toolTile?.onTileAction(call);
+    }
+  }));
   if (document.content) {
     sharedModelManager.setDocument(document.content);
   }
