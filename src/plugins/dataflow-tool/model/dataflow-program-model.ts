@@ -112,13 +112,13 @@ const DataflowNodeModel = types.
   .preProcessSnapshot((snapshot: any) => {
     // Turn position into x and y because MST has weird issues with arrays
     if (Array.isArray(snapshot.position)) {
-      const { position, ...rest } = snapshot;
-      return { x: position[0], y: position[1], ...rest };
+      const { position: [x, y], ...rest } = snapshot;
+      return { x, y, ...rest };
     }
     return snapshot;
   })
   .postProcessSnapshot((snapshot: any) => {
-    if (snapshot.x && snapshot.y) {
+    if (snapshot.x != null && snapshot.y != null) {
       const { x, y, ...rest } = snapshot;
       return { position: [x, y], ...rest };
     }
