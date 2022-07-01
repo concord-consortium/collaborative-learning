@@ -10,6 +10,7 @@ import { getSnapshot, IDisposer, onSnapshot } from "mobx-state-tree";
 import { SizeMeProps } from "react-sizeme";
 import { forEach, cloneDeep } from "lodash";
 import { ProgramZoomType } from "../model/dataflow-content";
+import { DataflowProgramModelType } from "../model/dataflow-program-model";
 import { SensorSelectControl } from "../nodes/controls/sensor-select-control";
 import { RelaySelectControl } from "../nodes/controls/relay-select-control";
 import { NumberReteNodeFactory } from "../nodes/factories/number-rete-node-factory";
@@ -79,7 +80,7 @@ interface IProps extends SizeMeProps {
   modelId: string;
   readOnly?: boolean;
   documentProperties?: { [key: string]: string };
-  program?: any;
+  program?: DataflowProgramModelType;
   onProgramChange: (program: any) => void;
   onShowOriginalProgram?: () => void;
   onStartProgram: (params: IStartProgramParams) => void;
@@ -335,7 +336,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           });
         }
         
-        await this.programEditor.fromJSON(program);
+        await this.programEditor.fromJSON(program as any);
         if (this.hasDataStorage()) {
           this.setState({disableDataStorage: true});
         }
