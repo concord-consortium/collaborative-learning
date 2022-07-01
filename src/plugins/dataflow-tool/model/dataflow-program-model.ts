@@ -9,7 +9,7 @@ const ConnectionModel = types
     data: types.map(types.string)
   });
   
-const SocketModel = types
+export const SocketModel = types
   .model("Socket", {
     connections: types.map(ConnectionModel)
   })
@@ -75,7 +75,7 @@ const DataflowNodeDataModel = types.
     // sequence1, sequence2, ...
   });
 
-const DataflowNodeModel = types.
+export const DataflowNodeModel = types.
   model("DataflowNode", {
     id: types.number,
     name: types.string,
@@ -94,11 +94,8 @@ const DataflowNodeModel = types.
     return snapshot;
   })
   .postProcessSnapshot((snapshot: any) => {
-    if (snapshot.x != null && snapshot.y != null) {
-      const { x, y, ...rest } = snapshot;
-      return { position: [x, y], ...rest };
-    }
-    return snapshot;
+    const { x, y, ...rest } = snapshot;
+    return { position: [x, y], ...rest };
   });
 
 // A model for keeping the values separate from the structure of a node.
@@ -106,7 +103,7 @@ const DataflowValueModel = types.
   model("DataflowValue", {
     nodeValue: types.maybe(types.number),
     // JSON.stringified array of recent node values
-    recentValues: types.maybe(types.string)
+    recentValues: types.optional(types.string, "[]")
   });
 
 export const DataflowProgramModel = types.
@@ -143,7 +140,7 @@ export const DataflowProgramModel = types.
       const data = newNodes[key].data;
       const { nodeValue, recentValues } = values[key];
       data.nodeValue = nodeValue;
-      data.recentValues = recentValues ? JSON.parse(recentValues) : [];
+      data.recentValues = JSON.parse(recentValues);
     });
     return { nodes: newNodes, ...rest };
   });
