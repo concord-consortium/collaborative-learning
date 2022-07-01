@@ -1,6 +1,6 @@
 import React from "react";
 import { reaction, IReactionDisposer } from "mobx";
-import { clone } from "mobx-state-tree";
+import { clone, isAlive } from "mobx-state-tree";
 import { observer } from "mobx-react";
 import { extractDragTileType, kDragTileContent } from "../../../components/tools/tool-tile";
 import { DrawingContentModelType, DrawingObjectMove } from "../model/drawing-content";
@@ -245,6 +245,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       e2.stopPropagation();
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
+      // FIXME: somewhere in here it seems like the hoverObject should be cleared, perhaps even
+      // on the mouse down?
       if (moved) {
         const moves: DrawingObjectMove[] = objectsToInteract.map((object, index) => {
           const draggedObject = objectsBeingDragged[index];
@@ -368,7 +370,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
           {this.renderObjects(object => object.type !== "image" && !idsBeingDragged.includes(object.id))}
           {this.state.objectsBeingDragged.map((object) => renderDrawingObject(object))}
           {this.renderSelectedObjects(objectsToRenderSelected, SELECTION_COLOR)}
-          {(this.state.hoverObject && !hoveringOverAlreadySelectedObject)
+          {(this.state.hoverObject && !hoveringOverAlreadySelectedObject && isAlive(this.state.hoverObject))
             ? this.renderSelectedObjects([this.state.hoverObject], HOVER_COLOR)
             : null}
           {this.state.currentDrawingObject
