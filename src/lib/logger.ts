@@ -8,7 +8,7 @@ import { InvestigationModelType } from "../models/curriculum/investigation";
 import { ProblemModelType } from "../models/curriculum/problem";
 import { DocumentModelType } from "../models/document/document";
 import { JXGChange } from "../models/tools/geometry/jxg-changes";
-import { DrawingToolChange } from "../plugins/drawing-tool/model/drawing-types";
+import { DrawingToolChange, DrawingToolLogEvent } from "../plugins/drawing-tool/model/drawing-types";
 import { ITableChange } from "../models/tools/table/table-change";
 import { ENavTab } from "../models/view/nav-tabs";
 import { DEBUG_LOGGER } from "../lib/debug";
@@ -131,7 +131,7 @@ export enum LogEventName {
 }
 
 type LoggableToolChangeEvent = Optional<JXGChange, "operation"> |
-                                Partial<DrawingToolChange> |
+                                DrawingToolLogEvent |
                                 Optional<ITableChange, "action">;
 
 interface IDocumentInfo {
@@ -406,7 +406,7 @@ export class Logger {
 function sendToLoggingService(data: LogMessage, user: UserModelType) {
   if (DEBUG_LOGGER) {
     // eslint-disable-next-line no-console
-    console.log("Logger#sendToLoggingService sending", JSON.stringify(data), "to", logManagerUrl);
+    console.log("Logger#sendToLoggingService sending", data, "to", logManagerUrl);
   }
   if (!Logger.isLoggingEnabled) return;
 

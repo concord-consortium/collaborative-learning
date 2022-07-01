@@ -101,6 +101,14 @@ context('Table Tool Tile', function () {
         cy.get(".toolbar-palette.fill-color .palette-buttons .color-swatch").last().click();
         drawToolTile.getRectangleDrawing().first().should("have.attr", "fill").and("eq", "#d100d1");
       });
+      it("verify move object", () => {
+        drawToolTile.getDrawToolSelect().click();
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 100, 100)
+          .trigger("mousemove", 200, 100)
+          .trigger("mouseup", 200, 100);
+        drawToolTile.getRectangleDrawing().first().should("have.attr", "x").then(parseInt).and("within", 170, 220);
+      });
       it("verify draw squares", () => {
         drawToolTile.getDrawToolRectangle().click();
         drawToolTile.getDrawTile()
