@@ -1,3 +1,4 @@
+import { cloneDeep } from "lodash";
 import { types, Instance } from "mobx-state-tree";
 
 const ConnectionModel = types
@@ -30,9 +31,6 @@ const SocketModel = types
 const DataflowNodeDataModel = types.
   model("DataflowNodeData", {
     plot: types.maybe(types.boolean),
-    nodeValue: types.maybe(types.number),
-    // JSON.stringified array of recent node values
-    recentValues: types.maybe(types.string),
 
     // Sensor
     type: types.maybe(types.string),
@@ -75,26 +73,6 @@ const DataflowNodeDataModel = types.
     interval: types.maybe(types.string),
     inputKeys: types.array(types.string),
     // sequence1, sequence2, ...
-  })
-  .preProcessSnapshot((snapshot: any) => {
-    let { nodeValue, recentValues, ...rest} = snapshot;
-    // Make null and NaN become undefined when going into MST
-    if ((nodeValue == null) || !isFinite(nodeValue)) {
-      nodeValue = undefined;
-    }
-    // Store recentValues as a string instead of an array so there's only one patch per update
-    if (Array.isArray(recentValues)) {
-      recentValues = JSON.stringify(recentValues);
-    }
-    // recentValues = recentValues?.map((v: number | undefined) => (v != null) && isFinite(v) ? v : undefined);
-    return { nodeValue, recentValues, ...rest };
-  })
-  .postProcessSnapshot((snapshot: any) => {
-    if (snapshot.recentValues && !Array.isArray(snapshot.recentValues)) {
-      const { recentValues, ...rest } = snapshot;
-      return { recentValues: JSON.parse(recentValues), ...rest };
-    }
-    return snapshot;
   });
 
 const DataflowNodeModel = types.
@@ -123,10 +101,51 @@ const DataflowNodeModel = types.
     return snapshot;
   });
 
+// A model for keeping the values separate from the structure of a node.
+const DataflowValueModel = types.
+  model("DataflowValue", {
+    nodeValue: types.maybe(types.number),
+    // JSON.stringified array of recent node values
+    recentValues: types.maybe(types.string)
+  });
+
 export const DataflowProgramModel = types.
   model("DataflowProgram", {
     id: types.maybe(types.string),
-    nodes: types.map(DataflowNodeModel)
+    nodes: types.map(DataflowNodeModel),
+    // values has the same keys as nodes, where the values (current and recent) for the
+    // node at nodes[key] is stored at values[key]
+    values: types.map(DataflowValueModel)
+  })
+  .preProcessSnapshot((snapshot: any) => {
+    const { nodes, ...rest } = snapshot;
+    const values: { [key: string]: any } = {};
+    if (nodes) {
+      const keys = Object.keys(nodes);
+      keys.forEach((key: string) => {
+        const { nodeValue, recentValues, ...restData } = nodes[key].data;
+        values[key] = {
+          // Make null and NaN become undefined when going into MST
+          nodeValue: ((nodeValue == null) || !isFinite(nodeValue)) ? undefined : nodeValue,
+          // Store recentValues as a string instead of an array so there's only one patch per update
+          recentValues: JSON.stringify(recentValues)
+        };
+        nodes[key].data = { ...restData };
+      });
+    }
+    return { nodes, values, ...rest };
+  })
+  .postProcessSnapshot((snapshot: any) => {
+    const { nodes, values, ...rest } = snapshot;
+    const newNodes = cloneDeep(nodes);
+    const keys = Object.keys(values);
+    keys.forEach((key: string) => {
+      const data = newNodes[key].data;
+      const { nodeValue, recentValues } = values[key];
+      data.nodeValue = nodeValue;
+      data.recentValues = recentValues ? JSON.parse(recentValues) : [];
+    });
+    return { nodes: newNodes, ...rest };
   });
 
 export interface DataflowProgramModelType extends Instance<typeof DataflowProgramModel> {}
