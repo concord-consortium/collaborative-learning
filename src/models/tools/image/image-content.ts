@@ -19,14 +19,20 @@ export const ImageContentModel = ToolContentModel
     type: types.optional(types.literal(kImageToolID), kImageToolID),
     url: types.maybe(types.string),
     filename: types.maybe(types.string),
+    loadedTitle: types.maybe(types.string),
   })
   .volatile(self => ({
-    metadata: undefined as any as ToolMetadataModelType
+    metadata: undefined as any as ToolMetadataModelType,
   }))
-  .preProcessSnapshot(snapshot => {
-    return isLegacyImageTileImport(snapshot)
-            ? convertLegacyImageTile(snapshot)
-            : snapshot;
+  .preProcessSnapshot((snapshot: any) => {
+    if (isLegacyImageTileImport(snapshot)) {
+      return convertLegacyImageTile(snapshot);
+    } else if (snapshot.title) {
+      const { title, ...rest } = snapshot;
+      return { loadedTitle: title, ...rest };
+    } else {
+      return snapshot;
+    }
   })
   .views(self => ({
     get title() {
@@ -48,6 +54,9 @@ export const ImageContentModel = ToolContentModel
   .actions(self => ({
     doPostCreate(metadata: ToolMetadataModelType) {
       self.metadata = metadata;
+      if (self.loadedTitle) {
+        (self as any).setTitle(self.loadedTitle);
+      }
     },
     setUrl(url: string, filename?: string) {
       self.url = url;
@@ -59,7 +68,7 @@ export const ImageContentModel = ToolContentModel
     },
     setTitle(title: string) {
       setTileTitleFromContent(self, title);
-    }
+    },
   }));
 
 export type ImageContentModelType = Instance<typeof ImageContentModel>;
