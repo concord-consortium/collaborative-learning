@@ -326,7 +326,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       });
 
       const program = this.props.program && cloneDeep(getSnapshot(this.props.program));
-      if (program && program.id) {
+      if (program?.id) {
         if (!this.props.readOnly && clearHistory) {
           forEach(program.nodes, (n: any) => {
             if (n.data.recentValues) {

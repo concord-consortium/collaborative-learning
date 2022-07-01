@@ -23,17 +23,15 @@ const SocketModel = types
     }
     return snapshot;
   })
-  .postProcessSnapshot((snapshot: any) => {
-    if (!Array.isArray(snapshot.connections)) {
-      return { connections: Object.values(snapshot.connections) };
-    }
-    return snapshot;
+  .postProcessSnapshot(snapshot => {
+    return { connections: Object.values(snapshot.connections) };
   });
 
 const DataflowNodeDataModel = types.
   model("DataflowNodeData", {
     plot: types.maybe(types.boolean),
     nodeValue: types.maybe(types.number),
+    // JSON.stringified array of recent node values
     recentValues: types.maybe(types.string),
 
     // Sensor
@@ -131,4 +129,4 @@ export const DataflowProgramModel = types.
     nodes: types.map(DataflowNodeModel)
   });
 
-export type DataflowProgramModelType = Instance<typeof DataflowProgramModel>;
+export interface DataflowProgramModelType extends Instance<typeof DataflowProgramModel> {}
