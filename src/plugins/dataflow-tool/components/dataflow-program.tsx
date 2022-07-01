@@ -25,7 +25,6 @@ import { TimerReteNodeFactory } from "../nodes/factories/timer-rete-node-factory
 import { DataStorageReteNodeFactory } from "../nodes/factories/data-storage-rete-node-factory";
 import { PlotButtonControl } from "../nodes/controls/plot-button-control";
 import { NumControl } from "../nodes/controls/num-control";
-import { DropdownListControl, ListOption } from "../nodes/controls/dropdown-list-control";
 import { DataflowOpenProgramButton } from "./ui/dataflow-open-program-button";
 import { DataflowProgramToolbar } from "./ui/dataflow-program-toolbar";
 import { DataflowProgramTopbar } from "./ui/dataflow-program-topbar";
@@ -34,7 +33,7 @@ import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
 import { DataflowProgramGraph,DataSet, ProgramDisplayStates } from "./ui/dataflow-program-graph";
 // import { uploadProgram, fetchProgramData, fetchActiveRelays, deleteProgram } from "../utilities/aws";
 import { NodeChannelInfo, NodeSensorTypes, NodeGeneratorTypes, ProgramDataRates, NodeTimerInfo,
-         IntervalTimes, virtualSensorChannels } from "../model/utilities/node";
+         virtualSensorChannels } from "../model/utilities/node";
 import { Rect, scaleRect, unionRect } from "../utilities/rect";
 import { DocumentContextReact } from "../../../components/document/document-context";
 
