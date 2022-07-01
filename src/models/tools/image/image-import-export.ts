@@ -35,12 +35,10 @@ export const exportImageTileSpec = (title?: string, url?: string, filename?: str
     `{`,
     `  "type": "Image",`,
     `  "title": "${title}",`,
+    `  "url": "${transformedUrl}"${filename ? "," : ""}`
   ];
   if (filename) {
-    jsonArray.push(`  "url": "${transformedUrl}",`);
     jsonArray.push(`  "filename": "${transformedUrl}"`);
-  } else {
-    jsonArray.push(`  "url": "${transformedUrl}"`);
   }
   jsonArray.push(`}`);
   return jsonArray.join("\n");
