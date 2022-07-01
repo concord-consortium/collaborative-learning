@@ -1,0 +1,209 @@
+{
+    "content": {
+        "id": "dataflow@0.1.0",
+        "nodes": {
+            "1": {
+                "id": 1,
+                "data": {
+                    "generatorType": "Sine",
+                    "amplitudeUnits": "",
+                    "amplitude": 1,
+                    "periodUnits": "sec",
+                    "period": 10,
+                    "plot": true,
+                    "nodeValue": -0.71,
+                    "recentValues": [
+                        -0.36,
+                        0.25,
+                        0.77,
+                        1,
+                        0.84,
+                        0.36,
+                        -0.25,
+                        -0.77,
+                        -1,
+                        -0.85,
+                        -0.37,
+                        0.72,
+                        0.99,
+                        0.88,
+                        0.44,
+                        -0.17,
+                        -0.71
+                    ]
+                },
+                "inputs": {},
+                "outputs": {
+                    "num": {
+                        "connections": [
+                            {
+                                "node": 3,
+                                "input": "num1",
+                                "data": {}
+                            }
+                        ]
+                    }
+                },
+                "position": [
+                    -23.42285792809036,
+                    5.19042970400981
+                ],
+                "name": "Generator"
+            },
+            "2": {
+                "id": 2,
+                "data": {
+                    "timeOnUnits": "sec",
+                    "timeOn": 2,
+                    "timeOffUnits": "sec",
+                    "timeOff": 2,
+                    "plot": false,
+                    "nodeValue": 0,
+                    "recentValues": [
+                        1,
+                        0,
+                        0,
+                        1,
+                        1,
+                        0,
+                        0,
+                        1,
+                        1,
+                        0,
+                        0,
+                        1,
+                        0,
+                        0,
+                        1,
+                        1,
+                        0
+                    ]
+                },
+                "inputs": {},
+                "outputs": {
+                    "num": {
+                        "connections": [
+                            {
+                                "node": 3,
+                                "input": "num2",
+                                "data": {}
+                            }
+                        ]
+                    }
+                },
+                "position": [
+                    -51.19220512635368,
+                    307.7008374357209
+                ],
+                "name": "Timer"
+            },
+            "3": {
+                "id": 3,
+                "data": {
+                    "logicOperator": "Less Than Or Equal To",
+                    "plot": false,
+                    "nodeValue": 1,
+                    "recentValues": [
+                        1,
+                        1,
+                        0,
+                        0,
+                        1,
+                        1,
+                        0,
+                        1,
+                        1,
+                        1,
+                        1,
+                        1,
+                        1,
+                        0,
+                        0,
+                        1,
+                        1
+                    ]
+                },
+                "inputs": {
+                    "num1": {
+                        "connections": [
+                            {
+                                "node": 1,
+                                "output": "num",
+                                "data": {}
+                            }
+                        ]
+                    },
+                    "num2": {
+                        "connections": [
+                            {
+                                "node": 2,
+                                "output": "num",
+                                "data": {}
+                            }
+                        ]
+                    }
+                },
+                "outputs": {
+                    "num": {
+                        "connections": [
+                            {
+                                "node": 4,
+                                "input": "num1",
+                                "data": {}
+                            }
+                        ]
+                    }
+                },
+                "position": [
+                    235.94728174619516,
+                    120.07811937142453
+                ],
+                "name": "Logic"
+            },
+            "4": {
+                "id": 4,
+                "data": {
+                    "plot": false,
+                    "nodeValue": 1,
+                    "lightbulb": 1,
+                    "recentValues": [
+                        1,
+                        1,
+                        0,
+                        0,
+                        1,
+                        1,
+                        0,
+                        1,
+                        1,
+                        1,
+                        1,
+                        1,
+                        1,
+                        0,
+                        0,
+                        1,
+                        1
+                    ]
+                },
+                "inputs": {
+                    "num1": {
+                        "connections": [
+                            {
+                                "node": 3,
+                                "output": "num",
+                                "data": {}
+                            }
+                        ]
+                    }
+                },
+                "outputs": {},
+                "position": [
+                    339.0866277975235,
+                    298.7329634051025
+                ],
+                "name": "Demo Output"
+            }
+        }
+    }
+}

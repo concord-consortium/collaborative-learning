@@ -37,8 +37,8 @@ export const NodeTypes: NodeType[] = [
     displayName: "Relay",
   },
   {
-    name: "Light Bulb",
-    displayName: "Light Bulb",
+    name: "Demo Output",
+    displayName: "Demo Output",
   },
   {
     name: "Data Storage",

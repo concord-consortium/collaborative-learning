@@ -2,12 +2,12 @@ import Rete, { Node, Socket } from "rete";
 import { NodeData } from "rete/types/core/data";
 import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
 import { ValueControl } from "../controls/value-control";
-import { LightbulbControl } from "../controls/lightbulb-control";
+import { DemoOutputControl } from "../controls/demo-output-control";
 import { PlotButtonControl } from "../controls/plot-button-control";
 
-export class LightBulbReteNodeFactory extends DataflowReteNodeFactory {
+export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
-    super("Light Bulb", numSocket);
+    super("Demo Output", numSocket);
   }
 
   public builder(node: Node) {
@@ -18,7 +18,7 @@ export class LightBulbReteNodeFactory extends DataflowReteNodeFactory {
       return node
         .addControl(new PlotButtonControl(this.editor, "plot", node))
         .addControl(new ValueControl(this.editor, "nodeValue", node))
-        .addControl(new LightbulbControl(this.editor, "lightbulb", node))
+        .addControl(new DemoOutputControl(this.editor, "demoOutput", node))
         .addInput(inp1) as any;
     }
   }
@@ -35,8 +35,8 @@ export class LightBulbReteNodeFactory extends DataflowReteNodeFactory {
         nodeValue && nodeValue.setValue(result);
         nodeValue?.setSentence(result === 0 ? "off" : "on");
 
-        const lightbulb = _node.controls.get("lightbulb") as LightbulbControl;
-        lightbulb && lightbulb.setValue(result);
+        const demoOutput = _node.controls.get("demoOutput") as DemoOutputControl;
+        demoOutput && demoOutput.setValue(result);
 
         this.editor.view.updateConnections( {node: _node} );
       }

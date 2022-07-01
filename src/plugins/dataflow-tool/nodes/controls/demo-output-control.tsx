@@ -2,9 +2,9 @@ import React from "react";
 import Rete, { NodeEditor, Node } from "rete";
 import bulbOn from "../../assets/lightbulb-on.png";
 import bulbOff from "../../assets/lightbulb-off.png";
-import "./lightbulb-control.sass";
+import "./demo-output-control.scss";
 
-export class LightbulbControl extends Rete.Control {
+export class DemoOutputControl extends Rete.Control {
   private emitter: NodeEditor;
   private component: any;
   private props: any;
