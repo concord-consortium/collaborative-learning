@@ -323,9 +323,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     const transformImageUrl = (url?: string, filename?: string) => {
       return transformCurriculumImageUrl(url, unitBasePath, filename);
     };
-    const toolApiInterface = this.context;
-    const toolApi = toolApiInterface?.getToolApi(this.modelId);
-    let tileJsonString = toolApi?.exportContentAsTileJson?.({ transformImageUrl });
+    let tileJsonString = this.props.model.exportJson({ transformImageUrl });
     if (tileJsonString) {
       // Put all exported content in a top-level object, under key: "content",
       // but _preserve_ existing formatting (which collapses some elements
@@ -333,7 +331,6 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
       tileJsonString = (tileJsonString.slice(-1) === "\n")
         ? tileJsonString.slice(0, -1) // Remove trailing new line char.
         : tileJsonString;
-      tileJsonString = `{\n  "content": ${tileJsonString.replace(/\n/g, "\n  ")}\n}\n`;
     }
     tileJsonString && navigator.clipboard.writeText(tileJsonString);
     return true;

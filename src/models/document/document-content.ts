@@ -71,6 +71,8 @@ export const SharedModelEntry = types.model("SharedModelEntry", {
   }
 }));
 
+const importContextTileCounts: Record<string, number> = {};
+
 export const DocumentContentModel = types
   .model("DocumentContent", {
     rowMap: types.map(TileRowModel),
@@ -88,7 +90,7 @@ export const DocumentContentModel = types
     visibleRows: [] as string[],
     highlightPendingDropLocation: -1,
     importContextCurrentSection: "",
-    importContextTileCounts: {} as Record<string, number>
+    // importContextTileCounts: {} as Record<string, number>
   }))
   .views(self => {
     // used for drag/drop self-drop detection, for instance
@@ -284,25 +286,12 @@ export const DocumentContentModel = types
     },
     exportTileAsJson(tileInfo: TileLayoutModelType, options?: IDocumentExportOptions) {
       const { includeTileIds, ...otherOptions } = options || {};
+      const tileOptions = { includeId: includeTileIds, ...otherOptions};
       const tile = self.getTile(tileInfo.tileId);
-      let json = tile?.exportJson(otherOptions);
-      if (!json) return;
-      if (options?.rowHeight) {
-        // add comma before layout/height entry
-        json = json[json.length - 1] === "\n"
-                ? `${json.slice(0, json.length - 1)},\n`
-                : `${json},`;
+      const json = tile?.exportJson(tileOptions);
+      if (json) {
+        return json.concat(comma(!!options?.appendComma));
       }
-
-      const builder = new StringBuilder();
-      builder.pushLine("{");
-      if (options?.includeTileIds) {
-        builder.pushLine(`"id": "${tileInfo.tileId}",`, 2);
-      }
-      builder.pushBlock(`"content": ${json}`, 2);
-      options?.rowHeight && builder.pushLine(`"layout": { "height": ${options.rowHeight} }`, 2);
-      builder.pushLine(`}${comma(!!options?.appendComma)}`);
-      return builder.build();
     }
   }))
   .views(self => ({
@@ -382,17 +371,24 @@ export const DocumentContentModel = types
   .actions(self => ({
     setImportContext(section: string) {
       self.importContextCurrentSection = section;
-      self.importContextTileCounts = {};
+      // self.importContextTileCounts = {};
     },
     getNextTileId(tileType: string) {
-      if (!self.importContextTileCounts[tileType]) {
-        self.importContextTileCounts[tileType] = 1;
+      // if (!self.importContextTileCounts[tileType]) {
+      //   self.importContextTileCounts[tileType] = 1;
+      // }
+      // else {
+      //   ++self.importContextTileCounts[tileType];
+      // }
+      if (!importContextTileCounts[tileType]) {
+        importContextTileCounts[tileType] = 1;
       }
       else {
-        ++self.importContextTileCounts[tileType];
+        ++importContextTileCounts[tileType];
       }
       const section = self.importContextCurrentSection || "document";
-      return `${section}_${tileType}_${self.importContextTileCounts[tileType]}`;
+      // return `${section}_${tileType}_${self.importContextTileCounts[tileType]}`;
+      return `${section}_${tileType}_${importContextTileCounts[tileType]}`;
     },
     insertRow(row: TileRowModelType, index?: number) {
       self.rowMap.put(row);

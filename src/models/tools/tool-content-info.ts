@@ -71,6 +71,8 @@ export function getToolIds() {
 }
 
 export interface ITileExportOptions {
+  includeId?: boolean;
+  excludeTitle?: boolean;
   rowHeight?: number;
   transformImageUrl?: (url: string, filename?: string) => string;
 }
@@ -78,6 +80,7 @@ export interface ITileExportOptions {
 export interface IDocumentExportOptions extends ITileExportOptions {
   includeTileIds?: boolean;
   appendComma?: boolean;
+  transformImageUrl?: (url: string, filename?: string) => string;
 }
 
 export interface ISharedModelInfo {
