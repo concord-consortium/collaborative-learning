@@ -211,6 +211,12 @@ export const NodeSensorTypes = [
     units: "PM2.5",
     icon: "icon-particulates"
   },
+  {
+    name: "EMG Reading",
+    type: "emg-reading",
+    units: "f(mv)", // TODO: f will need to reflect transformation that occurs in the arduino sketch that passes transformed reading to Dataflow
+    icon: "icon-emg-reading"
+  }
 ];
 
 export const NodeGeneratorTypes = [
