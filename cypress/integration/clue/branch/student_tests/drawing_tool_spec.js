@@ -4,18 +4,19 @@ import ClueCanvas from '../../../../support/elements/clue/cCanvas';
 let clueCanvas = new ClueCanvas,
   drawToolTile = new DrawToolTile;
 
-// NOTE: For some reason cypres+chrome thinks that the SVG elements are in a scrollable
-// container. Because of this when cypress does an action on a SVG element like click 
-// or trigger by default it tries to scroll this element to the top of its visible area.
-// Likewise when looking at the tests results after a run is complete the cypress app will
-// automatically scroll this area when you select an cypress `get` that is selecting a
-// SVG element.
-// The first issue is address here by adding `scrollBehavior: false` to each action that
-// works with an SVG element.
-// The second issue has no simple solution, so you need to remember it when looking at the
-// results.
-// The best solution to both problems would be to figure out the CSS necessary so
-// cypress+chrome simply cannot scroll the container.
+// NOTE: For some reason cypress+chrome thinks that the SVG elements are in a
+// scrollable container. Because of this when cypress does an action on a SVG
+// element like click or trigger, by default it tries to scroll this element to
+// the top of the containers visible area. Likewise when looking at the test
+// results after a run is complete the cypress app will automatically scroll
+// this area when you select a cypress `get` that is selecting a SVG element.
+//
+// - The first issue is addressed here by adding `scrollBehavior: false` to each
+//   action that works with an SVG element.
+// - The second issue has no simple solution, so you need to remember it when
+//   looking at the results.
+// - The best solution to both problems would be to figure out the CSS necessary
+//   so cypress+chrome simply cannot scroll the container.
 
 context('Draw Tool Tile', function () {
   before(function () {
