@@ -1,5 +1,5 @@
+import { cloneDeep } from "lodash";
 import { types, Instance, getSnapshot, SnapshotOut } from "mobx-state-tree";
-import { postProcessProgramSnapshotForRete } from "./utilities/export";
 
 const ConnectionModel = types
   .model("Connection", {
@@ -8,6 +8,22 @@ const ConnectionModel = types
     input: types.maybe(types.string),
     data: types.map(types.string)
   });
+
+// The postProcessXSnapshotForRete functions are used to convert a program snapshot from
+// MST/firebase to a format rete will accept. Comments in preProcessSnapshot() functions
+// in corresponding models describe what these functions are undoing.
+
+const postProcessSocketSnapshotForRete = (snapshot: DataflowSocketSnapshotOut) => {
+  return { connections: Object.values(snapshot.connections) };
+};
+
+const postProcessSocketsSnapshotForRete = (snapshot: Record<string, DataflowSocketSnapshotOut>) => {
+  const processedSockets: any = {};
+  for (const key in snapshot) {
+    processedSockets[key] = postProcessSocketSnapshotForRete(snapshot[key]);
+  }
+  return processedSockets;
+};
   
 export const SocketModel = types
   .model("Socket", {
@@ -74,6 +90,16 @@ const DataflowNodeDataModel = types.
     // sequence1, sequence2, ...
   });
 
+const postProcessNodeSnapshotForRete = (snapshot: DataflowNodeSnapshotOut) => {
+  const { x, y, inputs, outputs, ...rest } = snapshot;
+  return {
+    position: [x, y],
+    inputs: postProcessSocketsSnapshotForRete(inputs),
+    outputs: postProcessSocketsSnapshotForRete(outputs),
+    ...rest
+  };
+};
+
 export const DataflowNodeModel = types.
   model("DataflowNode", {
     id: types.number,
@@ -102,6 +128,25 @@ const DataflowValueModel = types.
     // JSON.stringified array of recent node values
     recentValues: types.optional(types.string, "[]")
   });
+
+const postProcessProgramSnapshotForRete = (snapshot: DataflowProgramSnapshotOut) => {
+  const { nodes, values, ...rest } = snapshot;
+  const newNodes = cloneDeep(nodes) as any;
+  const keys = Object.keys(newNodes);
+  keys.forEach((key: string) => {
+    newNodes[key] = postProcessNodeSnapshotForRete(newNodes[key]);
+    const data = newNodes[key].data;
+    if ((values as any)?.[key]) {
+      const { nodeValue, recentValues } = (values as any)[key];
+      data.nodeValue = nodeValue;
+      data.recentValues = JSON.parse(recentValues);
+    } else {
+      data.nodeValue = null;
+      data.recentValues = [];
+    }
+  });
+  return { nodes: newNodes, ...rest };
+};
 
 export const DataflowProgramModel = types.
   model("DataflowProgram", {
