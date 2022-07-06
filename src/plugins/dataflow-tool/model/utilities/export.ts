@@ -1,6 +1,7 @@
 import { cloneDeep } from "lodash";
 import { DataSequence } from "../../components/ui/dataflow-program-graph";
-import { DataflowProgramModelType, DataflowNodeModelType, DataflowSocketModelType } from "../dataflow-program-model";
+import { DataflowProgramSnapshotOut, DataflowNodeSnapshotOut, DataflowSocketSnapshotOut }
+  from "../dataflow-program-model";
 
 export const exportDataCSV = (dataSequences: DataSequence[]) => {
   if (!dataSequences) {
@@ -43,18 +44,19 @@ export const exportCSV = (csv: string, fileName: string) => {
 // a format rete will accept. See comments for preProcessSnapshot() functions in
 // dataflow-program-model.ts to see what these functions are undoing.
 
-const postProcessSocketSnapshotForRete = (snapshot: DataflowSocketModelType) => {
+const postProcessSocketSnapshotForRete = (snapshot: DataflowSocketSnapshotOut) => {
   return { connections: Object.values(snapshot.connections) };
 };
 
-const postProcessSocketsSnapshotForRete = (snapshot: any) => {
+const postProcessSocketsSnapshotForRete = (snapshot: Record<string, DataflowSocketSnapshotOut>) => {
+  const processedSockets: any = {};
   for (const key in snapshot) {
-    snapshot[key] = postProcessSocketSnapshotForRete(snapshot[key]);
+    processedSockets[key] = postProcessSocketSnapshotForRete(snapshot[key]);
   }
-  return snapshot;
+  return processedSockets;
 };
 
-const postProcessNodeSnapshotForRete = (snapshot: DataflowNodeModelType) => {
+const postProcessNodeSnapshotForRete = (snapshot: DataflowNodeSnapshotOut) => {
   const { x, y, inputs, outputs, ...rest } = snapshot;
   return {
     position: [x, y],
@@ -64,7 +66,7 @@ const postProcessNodeSnapshotForRete = (snapshot: DataflowNodeModelType) => {
   };
 };
 
-export const postProcessProgramSnapshotForRete = (snapshot: any /*DataflowProgramModelType*/) => {
+export const postProcessProgramSnapshotForRete = (snapshot: DataflowProgramSnapshotOut) => {
   const { nodes, values, ...rest } = snapshot;
   const newNodes = cloneDeep(nodes) as any;
   const keys = Object.keys(newNodes);

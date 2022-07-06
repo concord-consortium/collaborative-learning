@@ -1,4 +1,4 @@
-import { types, Instance, getSnapshot } from "mobx-state-tree";
+import { types, Instance, getSnapshot, SnapshotOut } from "mobx-state-tree";
 import { postProcessProgramSnapshotForRete } from "./utilities/export";
 
 const ConnectionModel = types
@@ -25,7 +25,7 @@ export const SocketModel = types
     return snapshot;
   });
 
-export interface DataflowSocketModelType extends Instance<typeof SocketModel> {}
+export interface DataflowSocketSnapshotOut extends SnapshotOut<typeof SocketModel> {}
 
 const DataflowNodeDataModel = types.
   model("DataflowNodeData", {
@@ -93,7 +93,7 @@ export const DataflowNodeModel = types.
     return snapshot;
   });
 
-export interface DataflowNodeModelType extends Instance<typeof DataflowNodeModel> {}
+export interface DataflowNodeSnapshotOut extends SnapshotOut<typeof DataflowNodeModel> {}
 
 // A model for keeping the values separate from the structure of a node.
 const DataflowValueModel = types.
@@ -136,3 +136,4 @@ export const DataflowProgramModel = types.
   });
 
 export interface DataflowProgramModelType extends Instance<typeof DataflowProgramModel> {}
+export interface DataflowProgramSnapshotOut extends SnapshotOut<typeof DataflowProgramModel> {}
