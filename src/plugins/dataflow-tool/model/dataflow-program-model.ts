@@ -1,4 +1,3 @@
-import { cloneDeep } from "lodash";
 import { types, Instance } from "mobx-state-tree";
 
 const ConnectionModel = types
@@ -23,10 +22,9 @@ export const SocketModel = types
       return { connections };
     }
     return snapshot;
-  })
-  .postProcessSnapshot(snapshot => {
-    return { connections: Object.values(snapshot.connections) };
   });
+
+export interface DataflowSocketModelType extends Instance<typeof SocketModel> {}
 
 const DataflowNodeDataModel = types.
   model("DataflowNodeData", {
@@ -92,11 +90,9 @@ export const DataflowNodeModel = types.
       return { x, y, ...rest };
     }
     return snapshot;
-  })
-  .postProcessSnapshot((snapshot: any) => {
-    const { x, y, ...rest } = snapshot;
-    return { position: [x, y], ...rest };
   });
+
+export interface DataflowNodeModelType extends Instance<typeof DataflowNodeModel> {}
 
 // A model for keeping the values separate from the structure of a node.
 const DataflowValueModel = types.
@@ -131,18 +127,6 @@ export const DataflowProgramModel = types.
       });
     }
     return { nodes, values, ...rest };
-  })
-  .postProcessSnapshot((snapshot: any) => {
-    const { nodes, values, ...rest } = snapshot;
-    const newNodes = cloneDeep(nodes);
-    const keys = Object.keys(values);
-    keys.forEach((key: string) => {
-      const data = newNodes[key].data;
-      const { nodeValue, recentValues } = values[key];
-      data.nodeValue = nodeValue;
-      data.recentValues = JSON.parse(recentValues);
-    });
-    return { nodes: newNodes, ...rest };
   });
 
 export interface DataflowProgramModelType extends Instance<typeof DataflowProgramModel> {}

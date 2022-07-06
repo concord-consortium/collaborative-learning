@@ -8,7 +8,7 @@ import ReactRenderPlugin from "rete-react-render-plugin";
 import { autorun } from "mobx";
 import { getSnapshot, IDisposer, onSnapshot } from "mobx-state-tree";
 import { SizeMeProps } from "react-sizeme";
-import { forEach, cloneDeep } from "lodash";
+import { forEach, cloneDeep, map } from "lodash";
 import { ProgramZoomType } from "../model/dataflow-content";
 import { DataflowProgramModelType } from "../model/dataflow-program-model";
 import { SensorSelectControl } from "../nodes/controls/sensor-select-control";
@@ -34,6 +34,7 @@ import { DataflowProgramGraph,DataSet, ProgramDisplayStates } from "./ui/dataflo
 // import { uploadProgram, fetchProgramData, fetchActiveRelays, deleteProgram } from "../utilities/aws";
 import { NodeChannelInfo, NodeSensorTypes, NodeGeneratorTypes, ProgramDataRates, NodeTimerInfo,
          virtualSensorChannels } from "../model/utilities/node";
+import { postProcessProgramSnapshotForRete } from "../model/utilities/export";
 import { Rect, scaleRect, unionRect } from "../utilities/rect";
 import { DocumentContextReact } from "../../../components/document/document-context";
 
@@ -325,7 +326,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.programEditor.register(c);
       });
 
-      const program = this.props.program && cloneDeep(getSnapshot(this.props.program));
+      const program = this.props.program && postProcessProgramSnapshotForRete(getSnapshot(this.props.program));
       if (program?.id) {
         if (!this.props.readOnly && clearHistory) {
           forEach(program.nodes, (n: any) => {
