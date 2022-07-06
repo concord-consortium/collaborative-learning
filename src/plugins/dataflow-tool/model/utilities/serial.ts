@@ -24,12 +24,13 @@ export class SerialChannel {
         return await (navigator as any).serial.requestPort()
     }
 
-    public async handleStream(){
-      await this.port?.open({ baudRate: 9600 }).catch((e: any) => console.log(e))
-        while (this.port?.readable) {
-          console.log('noice')
+    public async handleStream(nodeChannel: any){
+      console.log('SERIAL NOTE: handleStream has been called and now this is this: ', this)
+      await nodeChannel.serialPort?.open({ baudRate: 9600 }).catch((e: any) => console.log(e))
+        while (nodeChannel.serialPort?.readable) {
+          console.log('SERIAL NOTE: port is readable')
           let textDecoder = new TextDecoderStream()
-          let  promiseToBeClosed = this.port.readable.pipeTo(textDecoder.writable)
+          let  promiseToBeClosed = nodeChannel.serialPort.readable.pipeTo(textDecoder.writable)
           let streamReader = textDecoder.readable.getReader()
             
             try {
@@ -38,7 +39,7 @@ export class SerialChannel {
                 if (done){
                   break
                 }
-                this.handleStreamObj(value)
+                this.handleStreamObj(value, nodeChannel)
               }
             } 
             catch (error) {
@@ -50,7 +51,7 @@ export class SerialChannel {
           }
     }
 
-    private handleStreamObj(val: any){
+    private handleStreamObj(val: any, chan:any){
       this.localBuffer+= val
 
       /* any number of digits followed by a carriage return and a newline */
@@ -66,6 +67,8 @@ export class SerialChannel {
         const nice = match[1]
         this.value = nice
         console.log(this.value)
+        // SERIAL NOTE - too many singletons in the mix but getting it working
+        chan.value = this.value
         // GROK 5 - this is only problem - this should just update the channel.value, not the "rete"
         // GROK 6 - whoa, which I already did since UI does it
         // this.updateReteValue(this.value)

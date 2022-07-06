@@ -291,6 +291,14 @@ export class SensorSelectControl extends Rete.Control {
           nch.hasSerialPort = true;
           nch.serialPort = p;
         })
+        
+        .then(() => {
+          if(nch.hasSerialPort){
+            console.log('SERIAL NOTE: ok who is in charge here, too many singletons ruin the soup')
+            console.log('Ok, seems we need to pass the port to SerialChannel, which really is more of a SerialChannelManager')
+            emgInChannel.handleStream(nch)
+          }
+        })
       }
     }
 
