@@ -32,7 +32,7 @@ import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
 import { DataflowProgramGraph,DataSet, ProgramDisplayStates } from "./ui/dataflow-program-graph";
 // import { uploadProgram, fetchProgramData, fetchActiveRelays, deleteProgram } from "../utilities/aws";
 import { NodeChannelInfo, NodeSensorTypes, NodeGeneratorTypes, ProgramDataRates, NodeTimerInfo,
-         IntervalTimes, virtualSensorChannels } from "../model/utilities/node";
+         IntervalTimes, virtualSensorChannels, liveSensorChannels } from "../model/utilities/node";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { Rect, scaleRect, unionRect } from "../utilities/rect";
 import { DocumentContextReact } from "../../../components/document/document-context";
@@ -332,6 +332,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         // add the current set of sensors or relays to node controls
         if (node.name === "Sensor") {
           const sensorSelect = node.controls.get("sensorSelect") as SensorSelectControl;
+          // SERIAL NOTE setChannels
           sensorSelect.setChannels(this.channels);
         } else if (node.name === "Relay") {
           const relayList = node.controls.get("relayList") as RelaySelectControl;
@@ -391,6 +392,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private updateChannels = () => {
+    console.log('SERIAL NOTE 0 updateChannels')
     // const { hubStore } = this.stores; FIXME
     this.channels = [];
 
@@ -400,7 +402,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     // }
 
     // add virtual channels that always appear
-    this.channels = [...virtualSensorChannels];
+    this.channels = [...virtualSensorChannels, ...liveSensorChannels];
 
     // hubStore.hubs.forEach(hub => {
     //   hub.hubChannels.forEach(ch => {
@@ -996,9 +998,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private updateNodeChannelInfo = (n: Node) => {
+    // console.log('SERIAL NOTE 1: updateNodeChannelInfo')
     const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
     const relayList = n.controls.get("relayList") as RelaySelectControl;
     if (sensorSelect) {
+      // SERIAL NOTE setChannels
       sensorSelect.setChannels(this.channels);
       (sensorSelect as any).update();
     }
@@ -1019,6 +1023,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         chInfo.value = chInfo.virtualValueMethod(time);
       }
 
+
+      // SERIAL NOTE: if our channel has a value, this might take care of updating it
+      // and we won't need localSensorValueMethod
       if (chInfo && chInfo.value) {
         sensorSelect.setSensorValue(chInfo.value);
       } else {

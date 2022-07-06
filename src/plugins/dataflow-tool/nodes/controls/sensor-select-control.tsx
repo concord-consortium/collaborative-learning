@@ -129,19 +129,25 @@ export class SensorSelectControl extends Rete.Control {
                                       this.props.showSensorList = false;
                                       (this as any).update();
                                     });
-
       const channelsForType = channels.filter((ch: NodeChannelInfo) => {
         return (ch.type === type) || (type === "none" && ch.type !== "relay");
       });
       const selectedChannel = channelsForType.find((ch: any) => ch.channelId === id);
 
-      const getChannelString = (ch?: NodeChannelInfo | "none") => {
+      const getChannelString = (ch?: NodeChannelInfo | "none") => { 
+
         if (!ch && (!id || id === "none")) return kSensorSelectMessage;
         if (ch === "none") return "None Available";
         if (!ch) return `${kSensorMissingMessage} ${id}`;
         if (ch.missing) return `${kSensorMissingMessage} ${ch.channelId}`;
         let count = 0;
         channelsForType.forEach( c => { if (c.type === ch.type && ch.hubId === c.hubId) count++; } );
+
+        if (ch.virtual == false && ch.type == 'emg-reading'){
+          const serialConnectionIndicator = ch.hasSerialPort ? '⚡ connected' : '⚠️ not connected'
+          return `${ch.name} ${serialConnectionIndicator}`
+        }
+        
         const chStr = ch.virtual
           ? `${ch.name} Demo Data`
           : `${ch.hubName}:${ch.type}${ch.plug > 0 && count > 1 ? `(plug ${ch.plug})` : ""}`;
@@ -245,12 +251,19 @@ export class SensorSelectControl extends Rete.Control {
   }
 
   public setChannels = (channels: NodeChannelInfo[]) => {
+    // SERIAL NOTE 
+    if (channels.length > 0){
+      // console.log('SERIAL NOTE 4: setChannels called and passed: ', channels)
+    }
+    
     this.props.channels = channels;
     // problem, if called with event nodecreate, update doesn't exist
     // (this as any).update();
   };
 
   public setSensorType = (val: any) => {
+    // SERIAL NOTE
+    console.log('SERIAL NOTE 5: setSensorType was called with val: ', val)
     this.setSensor("none");
 
     this.props.type = val;
@@ -259,9 +272,21 @@ export class SensorSelectControl extends Rete.Control {
   };
 
   public setSensor = (val: any) => {
+    // SERIAL NOTE
     const nch: NodeChannelInfo = this.props.channels.find((ch: any) => ch.channelId === val);
     this.setSensorValue(nch ? nch.value : NaN);
     this.setSensorVirtualState(!!nch?.virtual);
+
+    console.log(nch)
+    if (nch && nch.type == 'emg-reading'){
+      if (nch.hasSerialPort || nch.virtual ){
+        return
+      }
+
+      else {
+        alert('ok, now it is time to getPort() and update this channels serialPort')
+      }
+    }
 
     if (nch && nch.type && this.getData("type") !== nch.type) {
       this.props.type = nch.type;

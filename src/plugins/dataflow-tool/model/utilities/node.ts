@@ -275,8 +275,11 @@ export interface NodeChannelInfo {
   value: number;
   name: string;
   virtual?: boolean;
+  hasSerialPort?: boolean;
+  // SERIAL NOTE TO DO GET THE TYPE SerialPort TO WORK
+  serialPort?: any;
   virtualValueMethod?: (t: number) => number;
-  liveValueMethod?: (n: number) => number;
+  localSensorValueMethod?: (n: number) => number;
 }
 
 export const roundNodeValue = (n: number) => {
@@ -435,3 +438,19 @@ const virtualPartChannel: NodeChannelInfo = {
 export const virtualSensorChannels: NodeChannelInfo[] = [
   virtualTempChannel, virtualHumidChannel, virtualCO2Channel, virtualO2Channel,
   virtualLightChannel, virtualPartChannel, virtualEmgChannel ];
+
+// SERIAL NOTE TO DO - This is not sufficiently abstract.  There could be two emg sensors in a single program.
+// SERIAL NOTE TO DO - Its not really a "hub" - it's going to be local data, serving exactly one client
+const liveEmgSensorChannel: NodeChannelInfo = {
+  hubId: "00000-LIVE-EMG", hubName: "Local EMG Sensor", name: "EMG", channelId: "emg1",
+  missing: false, type: "emg-reading", units: "f(mv)", plug: 9, value: 42, virtual: false,
+  hasSerialPort: false
+  // we don't need this, channel's value is already checked on tick
+  // localSensorValueMethod: (t: number) => {
+  //   return 1
+  // } 
+};            
+  
+export const liveSensorChannels: NodeChannelInfo[] = [
+  liveEmgSensorChannel
+]
