@@ -4,6 +4,7 @@ import React, { useRef }  from "react";
 import Rete, { NodeEditor, Node } from "rete";
 import { NodeSensorTypes, NodeChannelInfo,
          kSensorSelectMessage, kSensorMissingMessage } from "../../model/utilities/node";
+import { SerialChannel } from "../../model/utilities/serial";
 import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
 import "./sensor-select-control.sass";
 import "./value-control.sass";
@@ -277,14 +278,19 @@ export class SensorSelectControl extends Rete.Control {
     this.setSensorValue(nch ? nch.value : NaN);
     this.setSensorVirtualState(!!nch?.virtual);
 
-    console.log(nch)
+    console.log("NCH: ", nch)
     if (nch && nch.type == 'emg-reading'){
       if (nch.hasSerialPort || nch.virtual ){
         return
       }
 
       else {
-        alert('ok, now it is time to getPort() and update this channels serialPort')
+        //SERIAL NOTE - move this out to a function here
+        let emgInChannel = new SerialChannel(this.node.id)
+        emgInChannel.findPort().then((p) => {
+          nch.hasSerialPort = true;
+          nch.serialPort = p;
+        })
       }
     }
 

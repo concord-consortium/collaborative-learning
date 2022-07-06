@@ -1,3 +1,5 @@
+import { SerialChannel } from "./serial";
+
 export interface NodeType {
   name: string;
   displayName: string;
@@ -276,8 +278,8 @@ export interface NodeChannelInfo {
   name: string;
   virtual?: boolean;
   hasSerialPort?: boolean;
-  // SERIAL NOTE TO DO GET THE TYPE SerialPort TO WORK
-  serialPort?: any;
+  // SERIAL NOTE TODO GET THE TYPE SerialPort TO WORK and create a type that nests a SerialPort in a SerialChannel
+  serialPort?:  any; //SerialPort;
   virtualValueMethod?: (t: number) => number;
   localSensorValueMethod?: (n: number) => number;
 }
@@ -444,7 +446,7 @@ export const virtualSensorChannels: NodeChannelInfo[] = [
 const liveEmgSensorChannel: NodeChannelInfo = {
   hubId: "00000-LIVE-EMG", hubName: "Local EMG Sensor", name: "EMG", channelId: "emg1",
   missing: false, type: "emg-reading", units: "f(mv)", plug: 9, value: 42, virtual: false,
-  hasSerialPort: false
+  hasSerialPort: false, serialPort: {}
   // we don't need this, channel's value is already checked on tick
   // localSensorValueMethod: (t: number) => {
   //   return 1
