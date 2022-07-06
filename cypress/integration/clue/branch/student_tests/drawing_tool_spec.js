@@ -171,30 +171,70 @@ context('Draw Tool Tile', function () {
       });
       it("verify draw squares", () => {
         drawToolTile.getDrawToolRectangle().click();
+
+        // starting from top edge
         drawToolTile.getDrawTile()
-          .trigger("mousedown", 450, 50, {ctrlKey: true})
-          .trigger("mousemove", 450, 100,{ctrlKey: true})
-          .trigger("mouseup",   450, 100);
+          .trigger("mousedown", 100, 50, {ctrlKey: true})
+          .trigger("mousemove", 100, 70,{ctrlKey: true})
+          .trigger("mouseup",   100, 70);
 
         drawToolTile.getRectangleDrawing().should("exist").and("have.length", 1);
-        drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "50");
-        drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "50");
+        drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "20");
+        drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "20");
 
+        // starting from the left edge
         drawToolTile.getDrawTile()
-          .trigger("mousedown", 650, 50, {ctrlKey: true})
-          .trigger("mousemove", 710, 50,{ctrlKey: true})
-          .trigger("mouseup",   710, 50);
+          .trigger("mousedown", 200, 50, {ctrlKey: true})
+          .trigger("mousemove", 230, 50,{ctrlKey: true})
+          .trigger("mouseup",   230, 50);
         drawToolTile.getRectangleDrawing().should("exist").and("have.length", 2);
+        drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "30");
+        drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "30");  
+
+        // draw a square starting at the bottom edge
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 300, 90, {ctrlKey: true})
+          .trigger("mousemove", 300, 50,{ctrlKey: true})
+          .trigger("mouseup",   300, 50);
+        drawToolTile.getRectangleDrawing().should("exist").and("have.length", 3);
+        drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "40");
+        drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "40");  
+
+        // draw a square starting at the right edge
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 450, 50, {ctrlKey: true})
+          .trigger("mousemove", 400, 50,{ctrlKey: true})
+          .trigger("mouseup",   400, 50);
+        drawToolTile.getRectangleDrawing().should("exist").and("have.length", 4);
+        drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "50");
+        drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "50");        
+
+        // Diagonal from top right to bottom left with the width 60 and height 50
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 560, 50, {ctrlKey: true})
+          .trigger("mousemove", 500, 100,{ctrlKey: true})
+          .trigger("mouseup",   500, 100);
+        drawToolTile.getRectangleDrawing().should("exist").and("have.length", 5);
         drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "60");
-        drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "60");  
+        drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "60");        
+
+        // Diagonal from bottom right to top left with the width 50 and the height 70
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 650, 120, {ctrlKey: true})
+          .trigger("mousemove", 600, 50,{ctrlKey: true})
+          .trigger("mouseup",   600, 50);
+        drawToolTile.getRectangleDrawing().should("exist").and("have.length", 6);
+        drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "70");
+        drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "70");        
+
       });
       it("deletes rectangle drawings", () => {
         drawToolTile.getDrawTile().click();
-        drawToolTile.getDrawToolSelect().click();
-        drawToolTile.getRectangleDrawing().first().click({force:true, scrollBehavior: false});
-        drawToolTile.getDrawToolDelete().click();
-        drawToolTile.getRectangleDrawing().first().click({force:true, scrollBehavior: false});
-        drawToolTile.getDrawToolDelete().click();
+        for (let i=0; i<6; i++) {
+          drawToolTile.getDrawToolSelect().click();
+          drawToolTile.getRectangleDrawing().first().click({force:true, scrollBehavior: false});
+          drawToolTile.getDrawToolDelete().click();  
+        }
         drawToolTile.getRectangleDrawing().should("not.exist");
       });
     });
