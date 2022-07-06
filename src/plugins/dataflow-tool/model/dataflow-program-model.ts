@@ -1,4 +1,5 @@
-import { types, Instance } from "mobx-state-tree";
+import { types, Instance, getSnapshot } from "mobx-state-tree";
+import { postProcessProgramSnapshotForRete } from "./utilities/export";
 
 const ConnectionModel = types
   .model("Connection", {
@@ -110,6 +111,11 @@ export const DataflowProgramModel = types.
     // node at nodes[key] is stored at values[key]
     values: types.map(DataflowValueModel)
   })
+  .views(self => ({
+    get snapshotForRete() {
+      return postProcessProgramSnapshotForRete(getSnapshot(self));
+    }
+  }))
   .preProcessSnapshot((snapshot: any) => {
     const { nodes, ...rest } = snapshot;
     const values: { [key: string]: any } = {};

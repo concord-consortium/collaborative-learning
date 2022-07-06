@@ -1,7 +1,6 @@
 import { getSnapshot } from "mobx-state-tree";
 import { defaultDataflowContent, DEFAULT_PROGRAM_ZOOM } from "./dataflow-content";
 import { exampleProgram, newDataRate, newZoom } from "./dataflow-content-test-constants";
-import { postProcessProgramSnapshotForRete } from "./utilities/export";
 import { DEFAULT_DATA_RATE } from "./utilities/node";
 
 describe("DataflowContentModel", () => {
@@ -49,7 +48,7 @@ describe("DataflowContentModel", () => {
     const dcm = defaultDataflowContent();
     expect(Object.values(getSnapshot(dcm.program.nodes)).length).toBe(0);
     dcm.setProgram(JSON.parse(exampleProgram));
-    const { nodes } = postProcessProgramSnapshotForRete(getSnapshot(dcm.program));
+    const { nodes } = dcm.program.snapshotForRete;
     expect(Object.values(nodes).length).toBe(4);
     expect(nodes["1"].data.generatorType).toBe("Sine");
     expect(nodes["1"].position[0]).toBe(40);
