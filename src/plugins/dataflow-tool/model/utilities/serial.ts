@@ -11,11 +11,7 @@ export class SerialChannel {
       this.localBuffer = ''
     }
 
-    // public updateReteValue(v: string){
-    //   console.log('rete node: ' + this.nodeId + 'should have value of: ' + this.value)
-    // }
-
-    // argh my types found by VSC but not by app
+    // SERIAL NOTE: my types found by VSC but not by app
     // public async findPort(): Promise<SerialPort> {
     //     return await (navigator as Navigator).serial.requestPort()
     // }
@@ -25,10 +21,8 @@ export class SerialChannel {
     }
 
     public async handleStream(nodeChannel: any){
-      console.log('SERIAL NOTE: handleStream has been called and now this is this: ', this)
       await nodeChannel.serialPort?.open({ baudRate: 9600 }).catch((e: any) => console.log(e))
         while (nodeChannel.serialPort?.readable) {
-          console.log('SERIAL NOTE: port is readable')
           let textDecoder = new TextDecoderStream()
           let  promiseToBeClosed = nodeChannel.serialPort.readable.pipeTo(textDecoder.writable)
           let streamReader = textDecoder.readable.getReader()
@@ -60,18 +54,13 @@ export class SerialChannel {
       /* an array that includes [{the whole match}, {the captured string we want}] */
       const match = pattern.exec(this.localBuffer)
     
-      //console.log(match)
       if (match){
         /* remove our current match from the end of the buffer */
         this.localBuffer = this.localBuffer.substring(0, this.localBuffer.length - match[0].length)
         const nice = match[1]
         this.value = nice
         console.log(this.value)
-        // SERIAL NOTE - too many singletons in the mix but getting it working
         chan.value = this.value
-        // GROK 5 - this is only problem - this should just update the channel.value, not the "rete"
-        // GROK 6 - whoa, which I already did since UI does it
-        // this.updateReteValue(this.value)
       }
     }
 }

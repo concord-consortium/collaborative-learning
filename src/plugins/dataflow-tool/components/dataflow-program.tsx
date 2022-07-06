@@ -332,7 +332,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         // add the current set of sensors or relays to node controls
         if (node.name === "Sensor") {
           const sensorSelect = node.controls.get("sensorSelect") as SensorSelectControl;
-          // SERIAL NOTE setChannels
           sensorSelect.setChannels(this.channels);
         } else if (node.name === "Relay") {
           const relayList = node.controls.get("relayList") as RelaySelectControl;
@@ -392,7 +391,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private updateChannels = () => {
-    console.log('SERIAL NOTE 0 updateChannels')
+    // console.log('SERIAL NOTE 0 updateChannels')
     // const { hubStore } = this.stores; FIXME
     this.channels = [];
 
@@ -1002,7 +1001,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
     const relayList = n.controls.get("relayList") as RelaySelectControl;
     if (sensorSelect) {
-      // SERIAL NOTE setChannels
       sensorSelect.setChannels(this.channels);
       (sensorSelect as any).update();
     }
@@ -1023,9 +1021,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         chInfo.value = chInfo.virtualValueMethod(time);
       }
 
-
-      // SERIAL NOTE: if our channel has a value, this might take care of updating it
-      // and we won't need localSensorValueMethod
+      // update live sensors
       if (chInfo && chInfo.value) {
         sensorSelect.setSensorValue(chInfo.value);
       } else {

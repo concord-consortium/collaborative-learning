@@ -251,20 +251,13 @@ export class SensorSelectControl extends Rete.Control {
     };
   }
 
-  public setChannels = (channels: NodeChannelInfo[]) => {
-    // SERIAL NOTE 
-    if (channels.length > 0){
-      // console.log('SERIAL NOTE 4: setChannels called and passed: ', channels)
-    }
-    
+  public setChannels = (channels: NodeChannelInfo[]) => {    
     this.props.channels = channels;
     // problem, if called with event nodecreate, update doesn't exist
     // (this as any).update();
   };
 
   public setSensorType = (val: any) => {
-    // SERIAL NOTE
-    console.log('SERIAL NOTE 5: setSensorType was called with val: ', val)
     this.setSensor("none");
 
     this.props.type = val;
@@ -273,7 +266,6 @@ export class SensorSelectControl extends Rete.Control {
   };
 
   public setSensor = (val: any) => {
-    // SERIAL NOTE
     const nch: NodeChannelInfo = this.props.channels.find((ch: any) => ch.channelId === val);
     this.setSensorValue(nch ? nch.value : NaN);
     this.setSensorVirtualState(!!nch?.virtual);
@@ -285,7 +277,7 @@ export class SensorSelectControl extends Rete.Control {
       }
 
       else {
-        //SERIAL NOTE - move this out to a function here
+        //SERIAL TODO - move this out to a function
         let emgInChannel = new SerialChannel(this.node.id)
         emgInChannel.findPort().then((p) => {
           nch.hasSerialPort = true;
@@ -294,8 +286,6 @@ export class SensorSelectControl extends Rete.Control {
         
         .then(() => {
           if(nch.hasSerialPort){
-            console.log('SERIAL NOTE: ok who is in charge here, too many singletons ruin the soup')
-            console.log('Ok, seems we need to pass the port to SerialChannel, which really is more of a SerialChannelManager')
             emgInChannel.handleStream(nch)
           }
         })

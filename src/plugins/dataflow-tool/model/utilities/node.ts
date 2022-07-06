@@ -216,7 +216,7 @@ export const NodeSensorTypes = [
   {
     name: "EMG Reading",
     type: "emg-reading",
-    units: "f(mv)", // TODO: f will need to reflect transformation that occurs in the arduino sketch that passes transformed reading to Dataflow
+    units: "f(mv)", // SERIAL NOTE TODO: reflect transformation that occurs in arduino sketch
     icon: "icon-emg-reading"
   }
 ];
@@ -278,10 +278,9 @@ export interface NodeChannelInfo {
   name: string;
   virtual?: boolean;
   hasSerialPort?: boolean;
-  // SERIAL NOTE TODO GET THE TYPE SerialPort TO WORK and create a type that nests a SerialPort in a SerialChannel
+  // SERIAL NOTE TODO get the type SerialPort to work create a type that nests a SerialPort in a SerialDeviceConnection
   serialPort?:  any; //SerialPort;
   virtualValueMethod?: (t: number) => number;
-  localSensorValueMethod?: (n: number) => number;
 }
 
 export const roundNodeValue = (n: number) => {
@@ -432,7 +431,7 @@ const virtualPartChannel: NodeChannelInfo = {
     hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "EMG", channelId: "00007VIR",
     missing: false, type: "emg-reading", units: "f(mv)", plug: 8, value: 0, virtual: true,
     virtualValueMethod: (t: number) => {
-      // SERIAL NOTE TODO: get better mock data, and perhaps multiple virtual channels for differnet levels of transformation
+      // SERIAL NOTE TODO: a choice of a number of mock data streams as specified in Pivotal
       const vals = [70, 72, 74, 103, 106, 120, 121, 122, 124, 140, 144, 143, 120, 145, 151, 167, 130, 118, 71, 70, 70];
       return vals[t % vals.length];
     } };
@@ -441,18 +440,13 @@ export const virtualSensorChannels: NodeChannelInfo[] = [
   virtualTempChannel, virtualHumidChannel, virtualCO2Channel, virtualO2Channel,
   virtualLightChannel, virtualPartChannel, virtualEmgChannel ];
 
-// SERIAL NOTE TO DO - This is not sufficiently abstract.  There could be two emg sensors in a single program.
-// SERIAL NOTE TO DO - Its not really a "hub" - it's going to be local data, serving exactly one client
+// SERIAL NOTE TODO QUESTION - Adopt architecture where `SerialDeviceConnection` has an array of channels?
 const liveEmgSensorChannel: NodeChannelInfo = {
   hubId: "00000-LIVE-EMG", hubName: "Local EMG Sensor", name: "EMG", channelId: "emg1",
   missing: false, type: "emg-reading", units: "f(mv)", plug: 9, value: 42, virtual: false,
   hasSerialPort: false, serialPort: {}
-  // we don't need this, channel's value is already checked on tick
-  // localSensorValueMethod: (t: number) => {
-  //   return 1
-  // } 
 };            
   
 export const liveSensorChannels: NodeChannelInfo[] = [
   liveEmgSensorChannel
-]
+];
