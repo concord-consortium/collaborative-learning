@@ -3,6 +3,7 @@ import { SectionModel, SectionModelType } from "./section";
 import { SettingsMstType } from "../stores/settings";
 import { SupportModel } from "./support";
 import { ProblemConfiguration } from "../stores/problem-configuration";
+import { problemPathContext } from "../document/document-content";
 
 const LegacyProblemModel = types
   .model("Problem", {
@@ -50,6 +51,7 @@ export const ProblemModel = types.snapshotProcessor(ModernProblemModel, {
       const { disabled: disabledFeatures, settings, ...others } = sn;
       return { ...others, config: { disabledFeatures, settings } };
     }
+    problemPathContext.problem = sn.ordinal;
     return sn;
   }
 });

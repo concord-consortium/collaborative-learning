@@ -1,5 +1,5 @@
 import { types, Instance, SnapshotIn } from "mobx-state-tree";
-import { DocumentContentModel } from "../document/document-content";
+import { DocumentContentModel, problemPathContext } from "../document/document-content";
 import { ProblemModel } from "./problem";
 import { SupportModel } from "./support";
 import { ProblemConfiguration } from "../stores/problem-configuration";
@@ -48,6 +48,7 @@ export const InvestigationModel = types.snapshotProcessor(ModernInvestigationMod
       const { disabled: disabledFeatures, settings, ...others } = sn;
       return { ...others, config: { disabledFeatures, settings } };
     }
+    problemPathContext.investigation = sn.ordinal;
     return sn;
   }
 });

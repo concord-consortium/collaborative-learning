@@ -71,7 +71,11 @@ export const SharedModelEntry = types.model("SharedModelEntry", {
   }
 }));
 
-const importContextTileCounts: Record<string, number> = {};
+// problemPathContext is used to generate unique ids for tiles specified in curriculums.
+// Unit, investigation, and problem models are responsible for updating this shared object
+// during the preProcessSnapshot step so the DocumentContentModel knows where we are
+// when generating ids.
+export const problemPathContext = { unit: "", investigation: 0, problem: 0 };
 
 export const DocumentContentModel = types
   .model("DocumentContent", {
@@ -90,7 +94,7 @@ export const DocumentContentModel = types
     visibleRows: [] as string[],
     highlightPendingDropLocation: -1,
     importContextCurrentSection: "",
-    // importContextTileCounts: {} as Record<string, number>
+    importContextTileCounts: {} as Record<string, number>
   }))
   .views(self => {
     // used for drag/drop self-drop detection, for instance
@@ -371,24 +375,22 @@ export const DocumentContentModel = types
   .actions(self => ({
     setImportContext(section: string) {
       self.importContextCurrentSection = section;
-      // self.importContextTileCounts = {};
+      self.importContextTileCounts = {};
     },
     getNextTileId(tileType: string) {
-      // if (!self.importContextTileCounts[tileType]) {
-      //   self.importContextTileCounts[tileType] = 1;
-      // }
-      // else {
-      //   ++self.importContextTileCounts[tileType];
-      // }
-      if (!importContextTileCounts[tileType]) {
-        importContextTileCounts[tileType] = 1;
-      }
-      else {
-        ++importContextTileCounts[tileType];
+      if (!self.importContextTileCounts[tileType]) {
+        self.importContextTileCounts[tileType] = 1;
+      } else {
+        ++self.importContextTileCounts[tileType];
       }
       const section = self.importContextCurrentSection || "document";
-      // return `${section}_${tileType}_${self.importContextTileCounts[tileType]}`;
-      return `${section}_${tileType}_${importContextTileCounts[tileType]}`;
+      const problemPath =
+        `${problemPathContext.unit}/${problemPathContext.investigation}/${problemPathContext.problem}`;
+      // const id = `${problemPath}_${section}_${tileType}_${self.importContextTileCounts[tileType]}`;
+      // if (tileType === "Image") {
+      //   console.log(id);
+      // }
+      return `${problemPath}_${section}_${tileType}_${self.importContextTileCounts[tileType]}`;
     },
     insertRow(row: TileRowModelType, index?: number) {
       self.rowMap.put(row);
