@@ -421,14 +421,17 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
 
     this.processing = true;
-    await this.programEngine.abort();
-    const programJSON = this.programEditor.toJSON();
-    await this.programEngine.process(programJSON);
-    if (!this.hasDataStorage()) {
-      this.setState({disableDataStorage: false});
+    try {
+      await this.programEngine.abort();
+      const programJSON = this.programEditor.toJSON();
+      await this.programEngine.process(programJSON);
+      if (!this.hasDataStorage()) {
+        this.setState({disableDataStorage: false});
+      }
+      this.props.onProgramChange(programJSON);
+    } finally {
+      this.processing = false;
     }
-    this.props.onProgramChange(programJSON);
-    this.processing = false;
   };
 
   private updateChannels = () => {
