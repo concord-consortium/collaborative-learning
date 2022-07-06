@@ -222,7 +222,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       if (!current) return;
       const dx = current.x - starting.x;
       const dy = current.y - starting.y;
-      moved = moved || ((dx !== 0) && (dy !== 0));
+      moved = moved || ((dx !== 0) || (dy !== 0));
 
       if (objectsBeingDragged.length === 0) {
         objectsBeingDragged = objectsToInteract.map(object => clone(object));
