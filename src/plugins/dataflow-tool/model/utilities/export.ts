@@ -39,6 +39,10 @@ export const exportCSV = (csv: string, fileName: string) => {
   document.body.removeChild(link);
 };
 
+// The following functions are used to convert a program snapshot from MST/firebase to
+// a format rete will accept. See comments for preProcessSnapshot() functions in
+// dataflow-program-model.ts to see what these functions are undoing.
+
 const postProcessSocketSnapshotForRete = (snapshot: DataflowSocketModelType) => {
   return { connections: Object.values(snapshot.connections) };
 };
