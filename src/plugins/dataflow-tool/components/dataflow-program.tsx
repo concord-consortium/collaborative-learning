@@ -131,6 +131,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private editorDomElement: HTMLElement | null;
   private _isMounted: boolean;
   private disposers: IDisposer[] = [];
+  private onSnapshotSetup = false;
   private processing = false;
 
   constructor(props: IProps) {
@@ -223,13 +224,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.props.onCheckProgramRunState(this.props.programEndTime);
     }
     
-    if (this.props.program) {
-      this.disposers.push(onSnapshot(this.props.program.nodes, snapshot => {
-        if (this.props.readOnly) {
-          this.updateProgramEditor();
-        }
-      }));
-    }
+    this.setupOnSnapshot();
   }
 
   public componentWillUnmount() {
@@ -265,6 +260,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (this.props.programDataRate !== prevProps.programDataRate) {
       this.setDataRate(this.props.programDataRate);
     }
+
+    this.setupOnSnapshot();
   }
 
   private getEditorStyle = () => {
@@ -397,6 +394,19 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.updateRunAndGraphStates();
     })();
   };
+
+  private setupOnSnapshot() {
+    if (!this.onSnapshotSetup) {
+      if (this.props.program) {
+        this.disposers.push(onSnapshot(this.props.program.nodes, snapshot => {
+          if (this.props.readOnly) {
+            this.updateProgramEditor();
+          }
+        }));
+        this.onSnapshotSetup = true;
+      }
+    }
+  }
 
   private updateProgramEditor = () => {
     // TODO: allow updates to write tiles for undo/redo
