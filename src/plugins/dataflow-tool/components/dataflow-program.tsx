@@ -326,7 +326,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const program = this.props.program && this.props.program.snapshotForRete;
       if (program?.id) {
         if (!this.props.readOnly && clearHistory) {
-          forEach(program.nodes, (n: any) => {
+          forEach(program.nodes, (n: Node) => {
             if (n.data.recentValues) {
               n.data.recentValues = [];
             }
@@ -895,7 +895,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private addNode = async (nodeType: string) => {
-    const nodeFactory = this.programEditor.components.get(nodeType) as any;
+    const nodeFactory = this.programEditor.components.get(nodeType) as DataflowReteNodeFactory;
     const n1 = await nodeFactory!.createNode();
     n1.position = this.getNewNodePosition();
     this.programEditor.addNode(n1);
@@ -913,13 +913,14 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const kTopMargin = 5;
     const kColumnOffset = 15;
     const { k } = this.programEditor.view.area.transform;
-    const nodePos = [kLeftMargin * (1 / k) + Math.floor((numNodes % (kNodesPerColumn * kNodesPerRow)) / kNodesPerColumn)
-                     * kColumnWidth + Math.floor(numNodes / (kNodesPerColumn * kNodesPerRow)) * kColumnOffset,
-                     kTopMargin + numNodes % kNodesPerColumn * kRowHeight];
+    const nodePos: [number, number] =
+      [kLeftMargin * (1 / k) + Math.floor((numNodes % (kNodesPerColumn * kNodesPerRow)) / kNodesPerColumn)
+        * kColumnWidth + Math.floor(numNodes / (kNodesPerColumn * kNodesPerRow)) * kColumnOffset,
+      kTopMargin + numNodes % kNodesPerColumn * kRowHeight];
     return nodePos;
   };
 
-  private moveNodeToFront = (node: any, newNode: boolean) => {
+  private moveNodeToFront = (node: Node, newNode: boolean) => {
     const totalNodes = this.programEditor.nodes.length;
     const selectedNodeView = this.programEditor.view.nodes.get(node);
     let selectedNodeZ = 0;
