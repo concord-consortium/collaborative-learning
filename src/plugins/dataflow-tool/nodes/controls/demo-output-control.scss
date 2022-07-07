@@ -1,15 +1,33 @@
 @import "../../components/dataflow-vars";
 
-.lightbulb-control {
-  height: 70px;
-  width: 112px;
+.demo-output-control {
   position: relative;
+
+  .demo-output-image {
+    position: absolute;
+  }
+}
+
+.lightbulb-control {
+  height: 94px;
+  width: 113px;
 
   .lightbulb-image {
     width: 113px;
     height: 112px;
-    position: absolute;
     left: 0;
-    top: -24px;
+    top: 0;
+  }
+}
+
+.backyard-claw-control {
+  height: 147px;
+  width: 113px;
+
+  .backyard-claw-image {
+    width: 172px;
+    height: 165px;
+    left: -29px;
+    top: 0;
   }
 }

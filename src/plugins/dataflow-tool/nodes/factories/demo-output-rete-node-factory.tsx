@@ -17,13 +17,6 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
     if (this.editor) {
       const inp1 = new Rete.Input("num1", "Number", this.numSocket);
 
-      // const dropdownOptions = NodeOperationTypes
-      //   .filter((nodeOp) => {
-      //     return nodeOp.type === "logic";
-      //   }).map((nodeOp) => {
-      //     return { name: nodeOp.name, icon: nodeOp.icon };
-      //   });
-
       return node
         .addControl(new DropdownListControl(this.editor, "outputType", node, NodeDemoOutputTypes, true))
         .addControl(new PlotButtonControl(this.editor, "plot", node))
@@ -41,12 +34,20 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
     if (this.editor) {
       const _node = this.editor.nodes.find((n: { id: any; }) => n.id === node.id);
       if (_node) {
+        const outputTypeControl = _node.controls.get("outputType") as DropdownListControl;
+        const outputType = outputTypeControl.getValue();
+
         const nodeValue = _node.controls.get("nodeValue") as ValueControl;
         nodeValue && nodeValue.setValue(result);
-        nodeValue?.setSentence(result === 0 ? "off" : "on");
+        if (outputType === "Light Bulb") {
+          nodeValue?.setSentence(result === 0 ? "off" : "on");
+        } else {
+          nodeValue?.setSentence(result === 0 ? "closed" : "open");
+        }
 
         const demoOutput = _node.controls.get("demoOutput") as DemoOutputControl;
         demoOutput && demoOutput.setValue(result);
+        demoOutput && demoOutput.setOutputType(outputType);
 
         this.editor.view.updateConnections( {node: _node} );
       }
