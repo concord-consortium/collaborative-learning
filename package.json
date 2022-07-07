@@ -98,6 +98,10 @@
     "url": "https://github.com/concord-consortium/collaborative-learning/issues"
   },
   "homepage": "https://github.com/concord-consortium/collaborative-learning#readme",
+  "overrides": {
+    "slate-react": "@concord-consortium/slate-react",
+    "slate-react-placeholder": "@concord-consortium/slate-react-placeholder"
+  },
   "devDependencies": {
     "@babel/core": "^7.18.2",
     "@babel/preset-env": "^7.18.2",
