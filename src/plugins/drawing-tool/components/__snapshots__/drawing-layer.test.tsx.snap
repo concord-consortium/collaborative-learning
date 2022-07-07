@@ -1,0 +1,217 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Drawing Layer Components Ellipse adds a ellipse 1`] = `
+<svg
+  height="1500"
+  width="1500"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+  <ellipse
+    cx="10"
+    cy="10"
+    fill="#cccccc"
+    rx="10"
+    ry="10"
+    stroke="#888888"
+    stroke-dasharray=""
+    stroke-width="1"
+  />
+</svg>
+`;
+
+exports[`Drawing Layer Components Ellipse deletes a ellipse 1`] = `
+<svg
+  height="1500"
+  width="1500"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+/>
+`;
+
+exports[`Drawing Layer Components Ellipse moves a ellipse 1`] = `
+<svg
+  height="1500"
+  width="1500"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+  <ellipse
+    cx="5"
+    cy="5"
+    fill="#cccccc"
+    rx="10"
+    ry="10"
+    stroke="#888888"
+    stroke-dasharray=""
+    stroke-width="1"
+  />
+</svg>
+`;
+
+exports[`Drawing Layer Components Freehand Line adds a freehand line 1`] = `
+<svg
+  height="1500"
+  width="1500"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+  <path
+    d="M 10 10 l 1 1 l 2 2"
+    fill="none"
+    stroke="#888888"
+    stroke-dasharray=""
+    stroke-width="1"
+  />
+</svg>
+`;
+
+exports[`Drawing Layer Components Freehand Line deletes a freehand line 1`] = `
+<svg
+  height="1500"
+  width="1500"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+/>
+`;
+
+exports[`Drawing Layer Components Freehand Line moves a freehand line 1`] = `
+<svg
+  height="1500"
+  width="1500"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+  <path
+    d="M 5 5 l 1 1 l 2 2"
+    fill="none"
+    stroke="#888888"
+    stroke-dasharray=""
+    stroke-width="1"
+  />
+</svg>
+`;
+
+exports[`Drawing Layer Components Image adds an image 1`] = `
+<svg
+  height="1500"
+  width="1500"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+  <image
+    height="10"
+    href="test-file-stub"
+    width="10"
+    x="10"
+    y="10"
+  />
+</svg>
+`;
+
+exports[`Drawing Layer Components Image deletes a image 1`] = `
+<svg
+  height="1500"
+  width="1500"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+/>
+`;
+
+exports[`Drawing Layer Components Image moves a image 1`] = `
+<svg
+  height="1500"
+  width="1500"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+  <image
+    height="10"
+    href="assets/logo_tw.png"
+    width="10"
+    x="5"
+    y="5"
+  />
+</svg>
+`;
+
+exports[`Drawing Layer Components Rectangle adds a Rectangle 1`] = `
+<svg
+  height="1500"
+  width="1500"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+  <rect
+    fill="#cccccc"
+    height="10"
+    stroke="#888888"
+    stroke-dasharray=""
+    stroke-width="1"
+    width="10"
+    x="10"
+    y="10"
+  />
+</svg>
+`;
+
+exports[`Drawing Layer Components Rectangle deletes a rectangle 1`] = `
+<svg
+  height="1500"
+  width="1500"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+/>
+`;
+
+exports[`Drawing Layer Components Rectangle moves a rectangle 1`] = `
+<svg
+  height="1500"
+  width="1500"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+  <rect
+    fill="#cccccc"
+    height="10"
+    stroke="#888888"
+    stroke-dasharray=""
+    stroke-width="1"
+    width="10"
+    x="5"
+    y="5"
+  />
+</svg>
+`;
+
+exports[`Drawing Layer Components Vector line adds a Vector line 1`] = `
+<svg
+  height="1500"
+  width="1500"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+  <line
+    stroke="#888888"
+    stroke-dasharray=""
+    stroke-width="1"
+    x1="10"
+    x2="20"
+    y1="10"
+    y2="20"
+  />
+</svg>
+`;
+
+exports[`Drawing Layer Components Vector line deletes a vector line 1`] = `
+<svg
+  height="1500"
+  width="1500"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+/>
+`;
+
+exports[`Drawing Layer Components Vector line moves a vector line 1`] = `
+<svg
+  height="1500"
+  width="1500"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+  <line
+    stroke="#888888"
+    stroke-dasharray=""
+    stroke-width="1"
+    x1="5"
+    x2="15"
+    y1="5"
+    y2="15"
+  />
+</svg>
+`;

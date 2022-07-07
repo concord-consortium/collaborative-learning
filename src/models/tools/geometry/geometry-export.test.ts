@@ -3,6 +3,8 @@ import { exportGeometryJson } from "./geometry-export";
 import { preprocessImportFormat } from "./geometry-import";
 import { JXGChange } from "./jxg-changes";
 
+const kLocalImageUrl = "assets/logo_tw.png";
+
 const exportGeometry = (changes: JXGChange[]) => {
   const changesJson = changes.map(change => JSON.stringify(change));
   const exportJson = exportGeometryJson(changesJson);
@@ -852,13 +854,13 @@ describe("Geometry Export", () => {
         target: "board",
         properties: { axis: true, boundingBox: [-2, 15, 22, -1], unitX: 20, unitY: 20 }
       },
-      { operation: "create", target: "image", parents: ["my/image/url", [0, 0], [10, 10]], properties: { id: "i1" } }
+      { operation: "create", target: "image", parents: [kLocalImageUrl, [0, 0], [10, 10]], properties: { id: "i1" } }
     ];
     expect(exportGeometry(changes)).toEqual({
       type: "Geometry",
       board: { properties: { axisMin: [-2, -1], axisRange: [24, 16] } },
       objects: [
-        { type: "image", parents: { url: "my/image/url", coords: [0, 0], size: [183, 183] }, properties: { id: "i1" } }
+        { type: "image", parents: { url: kLocalImageUrl, coords: [0, 0], size: [183, 183] }, properties: { id: "i1" } }
       ]
     });
     const [received, expected] = testRoundTrip(changes);
@@ -872,7 +874,7 @@ describe("Geometry Export", () => {
         target: "board",
         properties: { axis: true, boundingBox: [-2, 15, 22, -1], unitX: 20, unitY: 20 }
       },
-      { operation: "create", target: "image", parents: ["my/image/url", [0, 0], [10, 10]], properties: { id: "i1" } },
+      { operation: "create", target: "image", parents: [kLocalImageUrl, [0, 0], [10, 10]], properties: { id: "i1" } },
       { operation: "delete", target: "image", targetID: "i1" }
     ];
     expect(exportGeometry(changes)).toEqual({

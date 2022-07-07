@@ -553,19 +553,27 @@ export class DB {
           }
 
           const content = this.parseDocumentContent(document);
-          return createDocumentModel({
-            type,
-            title,
-            properties,
-            groupId,
-            visibility,
-            uid: userId,
-            originDoc,
-            key: document.self.documentKey,
-            createdAt: metadata.createdAt,
-            content: content ? content : {},
-            changeCount: document.changeCount
-          });
+          try {
+            return createDocumentModel({
+              type,
+              title,
+              properties,
+              groupId,
+              visibility,
+              uid: userId,
+              originDoc,
+              key: document.self.documentKey,
+              createdAt: metadata.createdAt,
+              content: content ? content : {},
+              changeCount: document.changeCount
+            });
+          } catch (e) {
+            const msg = "Could not open " +
+                        `document '${documentKey}' of type '${type}' for user '${userId}'.` +
+                        "This is because DocumentModel.create failed.\n";
+            console.error(msg, e);
+            throw e;
+          }
         })
         .then((document) => {
           documents.add(document);

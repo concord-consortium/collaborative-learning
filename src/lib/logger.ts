@@ -8,7 +8,7 @@ import { InvestigationModelType } from "../models/curriculum/investigation";
 import { ProblemModelType } from "../models/curriculum/problem";
 import { DocumentModelType } from "../models/document/document";
 import { JXGChange } from "../models/tools/geometry/jxg-changes";
-import { DrawingToolChange } from "../models/tools/drawing/drawing-types";
+import { DrawingToolChange, DrawingToolLogEvent } from "../plugins/drawing-tool/model/drawing-types";
 import { ITableChange } from "../models/tools/table/table-change";
 import { ENavTab } from "../models/view/nav-tabs";
 import { DEBUG_LOGGER } from "../lib/debug";
@@ -25,13 +25,19 @@ const logManagerUrl: Record<LoggerEnvironment, string> = {
 const productionPortal = "learn.concord.org";
 
 interface LogMessage {
+  // these top-level properties are treated specially by the log-ingester:
+  // https://github.com/concord-consortium/log-ingester/blob/a8b16fdb02f4cef1f06965a55c5ec6c1f5d3ae1b/canonicalize.js#L3
   application: string;
-  activityUrl?: string;
+  activity?: string;
+  event: string;
+  // event_value: string; // not currently used in CLUE but available if another top-level field were required
   run_remote_endpoint?: string;
+  session: string;
   username: string;
+
+  // the rest of the properties are packaged into `extras` by the log-ingester
   role: string;
   classHash: string;
-  session: string;
   appMode: string;
   investigation?: string;
   problem?: string;
@@ -44,7 +50,6 @@ interface LogMessage {
   selectedGroupId?: string;
   time: number;
   tzOffset: string;
-  event: string;
   method: string;
   disconnects?: string;
   parameters: any;
@@ -126,7 +131,7 @@ export enum LogEventName {
 }
 
 type LoggableToolChangeEvent = Optional<JXGChange, "operation"> |
-                                Partial<DrawingToolChange> |
+                                DrawingToolLogEvent |
                                 Optional<ITableChange, "action">;
 
 interface IDocumentInfo {
@@ -346,7 +351,7 @@ export class Logger {
                           : undefined;
     const logMessage: LogMessage = {
       application: appName,
-      activityUrl,
+      activity: activityUrl,
       username: `${id}@${portal}`,
       role: type || "unknown",
       classHash,
@@ -401,7 +406,7 @@ export class Logger {
 function sendToLoggingService(data: LogMessage, user: UserModelType) {
   if (DEBUG_LOGGER) {
     // eslint-disable-next-line no-console
-    console.log("Logger#sendToLoggingService sending", JSON.stringify(data), "to", logManagerUrl);
+    console.log("Logger#sendToLoggingService sending", data, "to", logManagerUrl);
   }
   if (!Logger.isLoggingEnabled) return;
 

@@ -1,3 +1,4 @@
+import { observer } from "mobx-react";
 import React from "react";
 import { IDocumentContext } from "../../models/document/document-types";
 import { ImageContentModelType } from "../../models/tools/image/image-content";
@@ -10,7 +11,7 @@ interface IProps {
   onUrlChange: (url: string, filename?: string, context?: IDocumentContext) => void;
 }
 
-export const ImageComponent =
+const _ImageComponent =
   React.forwardRef<HTMLDivElement, IProps>(({ content, style, onMouseDown, onUrlChange }, forwardedRef) => {
 
     // calls onUrlChange when image url changes in content
@@ -27,4 +28,5 @@ export const ImageComponent =
       </div>
     );
   });
-ImageComponent.displayName = "ImageComponent";
+_ImageComponent.displayName = "ImageComponent";
+export const ImageComponent = observer(_ImageComponent);

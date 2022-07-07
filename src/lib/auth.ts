@@ -11,6 +11,7 @@ import { getErrorMessage } from "../utilities/super-agent-helpers";
 import { getPortalOfferings, getPortalClassOfferings,  getProblemIdForAuthenticatedUser } from "./portal-api";
 import { PortalJWT, PortalFirebaseJWT, IPortalClassInfo } from "./portal-types";
 import { Logger, LogEventName } from "../lib/logger";
+import { uniqueId } from "../utilities/js-utils";
 
 export const PORTAL_JWT_URL_SUFFIX = "api/v1/jwt/portal";
 export const FIREBASE_JWT_URL_SUFFIX = "api/v1/jwt/firebase";
@@ -243,7 +244,6 @@ export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, ur
     let basePortalUrl: string;
 
     let {fakeClass, fakeUser} = urlParams;
-
     // handle preview launch from portal
     if (urlParams.domain && urlParams.domain_uid && !bearerToken) {
       appMode = "demo";
@@ -255,10 +255,22 @@ export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, ur
       if (!fakeClass || !fakeUser) {
         return reject("Missing fakeClass or fakeUser parameter for demo!");
       }
-      const [userType, userId] = fakeUser.split(":");
+      let [userType, userId] = fakeUser.split(":");
+
       if (((userType !== "student") && (userType !== "teacher")) || !userId) {
         return reject("fakeUser must be in the form of student:<id> or teacher:<id>");
       }
+
+      if ((userId === "random")) {
+        const url = window.location.toString();
+        const title = document.title;
+        const randomStudentId = uniqueId();
+        fakeUser = `student:${randomStudentId}`;
+        userId = randomStudentId;
+        const newUrl = url.replace(/student:random/, fakeUser);
+        window.history.replaceState(title, title, newUrl);
+      }
+
       // respect `network` url parameter in demo/qa modes
       const networkProps = urlParams.network
                             ? { network: urlParams.network, networks: [urlParams.network] }
@@ -502,17 +514,30 @@ export const createFakeAuthentication = (options: CreateFakeAuthenticationOption
     students: [],
     teachers: [],
   };
+  // Add the random student to the class first and then fill the class
+  classInfo.students.push(
+    createFakeUser({
+      appMode,
+      classId,
+      userType: "student",
+      userId: `${userId}`,
+      offeringId
+    }) as StudentUser
+  );
   for (let i = 1; i <= NUM_FAKE_STUDENTS; i++) {
-    classInfo.students.push(
-      createFakeUser({
-        appMode,
-        classId,
-        userType: "student",
-        userId: `${i}`,
-        offeringId
-      }) as StudentUser
-    );
+    if (i.toString() !== userId) {
+      classInfo.students.push(
+        createFakeUser({
+          appMode,
+          classId,
+          userType: "student",
+          userId: `${i}`,
+          offeringId
+        }) as StudentUser
+      );
+    }
   }
+
   for (let i = 1; i <= NUM_FAKE_TEACHERS; i++) {
     classInfo.teachers.push(
       createFakeUser({

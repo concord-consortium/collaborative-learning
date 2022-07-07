@@ -1,4 +1,4 @@
-import { applySnapshot, types, Instance, SnapshotIn, getEnv } from "mobx-state-tree";
+import { applySnapshot, types, Instance, SnapshotIn, getEnv, onAction, addDisposer } from "mobx-state-tree";
 import { forEach } from "lodash";
 import { QueryClient, UseQueryResult } from "react-query";
 import { DocumentContentModel, DocumentContentSnapshotType } from "./document-content";
@@ -19,6 +19,7 @@ import { Container } from "../history/container";
 import { Tree } from "../history/tree";
 import { addTreeMonitor } from "../history/tree-monitor";
 import { createSharedModelDocumentManager, ISharedModelDocumentManager } from "../tools/shared-model-document-manager";
+import { ITileEnvironment } from "../tools/tool-types";
 
 interface IMatchPropertiesOptions {
   isTeacherDocument?: boolean;
@@ -187,8 +188,8 @@ export const DocumentModel = Tree.named("Document")
       }
       else {
         self.content = DocumentContentModel.create(snapshot);
-        const sharedModelManager = getEnv(self).sharedModelManager as ISharedModelDocumentManager;
-        sharedModelManager.setDocument(self.content);
+        const sharedModelManager = (getEnv(self) as ITileEnvironment).sharedModelManager;
+        (sharedModelManager as ISharedModelDocumentManager).setDocument(self.content);
       }
     },
 
@@ -283,7 +284,13 @@ export const DocumentModel = Tree.named("Document")
       self.containerAPI = container.containerAPI;
       addTreeMonitor(self, container.containerAPI, false);
       container.trees[self.treeId] = self;
-    }
+    },
+    undoLastAction() {
+      alert("This is the undo action");
+    },
+    redoLastAction() {
+      alert("This is the redo action");
+    },
   }));
 
 export type DocumentModelType = Instance<typeof DocumentModel>;
@@ -298,15 +305,33 @@ export const getDocumentContext = (document: DocumentModelType): IDocumentContex
   };
 };
 
+export interface IDocumentEnvironment {
+  appConfig?: AppConfigModelType;
+}
+
 /**
  * Create a DocumentModel and add a new sharedModelManager into its environment
- * 
- * @param snapshot 
- * @returns 
+ *
+ * @param snapshot
+ * @returns
  */
 export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
   const sharedModelManager = createSharedModelDocumentManager();
-  const document = DocumentModel.create(snapshot, {sharedModelManager});
+  const fullEnvironment: ITileEnvironment & {documentEnv: IDocumentEnvironment} = {
+    sharedModelManager,
+    documentEnv: {}
+  };
+  const document = DocumentModel.create(snapshot, fullEnvironment);
+  addDisposer(document, onAction(document, (call) => {
+    if (!document.content || !call.path?.match(/\/content\/tileMap\//)) {
+      return;
+    }
+    const toolTileId = call.path?.match(/\/content\/tileMap\/([^/]*)/)?.[1];
+    if (toolTileId) {
+      const toolTile = document.content.tileMap.get(toolTileId);
+      toolTile?.onTileAction(call);
+    }
+  }));
   if (document.content) {
     sharedModelManager.setDocument(document.content);
   }

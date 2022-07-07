@@ -1,0 +1,24 @@
+.variable-chip {
+  border: 1px solid black;
+  border-radius: 5px;
+  padding: 1px 3px;
+  margin: 0 1px;
+  user-select: none;
+  white-space: nowrap;
+
+  .variable-name {
+    padding: 0 2px;
+  }
+
+  .variable-equals {
+    padding: 0 2px;
+  }
+
+  .variable-value {
+    padding: 0 2px;
+  }
+}
+
+.variable-chip-highlight {
+  box-shadow: 0 0 0 2px lightskyblue;
+}

@@ -1,6 +1,6 @@
-import { types, Instance, SnapshotIn, clone } from "mobx-state-tree";
+import { types, Instance, SnapshotIn, clone, getSnapshot, flow } from "mobx-state-tree";
 import {
-  getImageDimensions, isPlaceholderImage, storeCorsImage, storeFileImage, storeImage
+  getImageDimensions, IImageDimensions, ISimpleImage, isPlaceholderImage, storeCorsImage, storeFileImage, storeImage
 } from "../utilities/image-utils";
 import { DB } from "../lib/db";
 import placeholderImage from "../assets/image_placeholder.png";
@@ -10,13 +10,22 @@ export const kLocalAssetsHandlerName = "localAssets";
 export const kFirebaseStorageHandlerName = "firebaseStorage";
 export const kFirebaseRealTimeDBHandlerName = "firebaseRealTimeDB";
 
+export enum EntryStatus { 
+  PendingStorage = "pendingStorage",
+  PendingDimensions = "pendingDimensions",
+  Ready = "ready", 
+  Error = "error" 
+}
+
 export const ImageMapEntry = types
   .model("ImageEntry", {
     filename: types.maybe(types.string),
     contentUrl: types.maybe(types.string),
     displayUrl: types.maybe(types.string),
     width: types.maybe(types.number),
-    height: types.maybe(types.number)
+    height: types.maybe(types.number),
+    status: types.enumeration<EntryStatus>("EntryStatus", Object.values(EntryStatus)),
+    retries: 0
   });
 export type ImageMapEntryType = Instance<typeof ImageMapEntry>;
 export type ImageMapEntrySnapshot = SnapshotIn<typeof ImageMapEntry>;
@@ -31,11 +40,17 @@ export interface IImageBaseOptions {
 export interface IImageHandlerStoreOptions extends IImageBaseOptions{
   db?: DB;
 }
+export interface IImageHandlerStoreResult {
+  filename?: string;
+  contentUrl?: string;
+  displayUrl?: string;
+  success: boolean;
+}
 export interface IImageHandler {
   name: string;
   priority: number;
   match: (url: string) => boolean;
-  store: (url: string, options?: IImageHandlerStoreOptions) => Promise<ImageMapEntrySnapshot>;
+  store: (url: string, options?: IImageHandlerStoreOptions) => Promise<IImageHandlerStoreResult>;
 }
 // map from image url => component id => listener function
 export type ImageListenerMap = Record<string, Record<string, () => void>>;
@@ -46,14 +61,11 @@ export const ImageMapModel = types
   })
   .volatile(self => ({
     handlers: [] as IImageHandler[],
-    listeners: {} as ImageListenerMap
+    storingPromises: {} as Record<string, Promise<ImageMapEntryType>>
   }))
   .views(self => ({
     hasImage(url: string) {
       return self.images.has(url);
-    },
-    get imageCount() {
-      return self.images.size;
     },
     getHandler(url: string) {
       const index = self.handlers.findIndex(handler => handler.match(url));
@@ -72,21 +84,6 @@ export const ImageMapModel = types
     }
   }))
   .actions(self => ({
-    syncContentUrl(url: string, entry: ImageMapEntryType) {
-      if (entry.contentUrl && (url !== entry.contentUrl)) {
-        // if the url was changed, store it under the new url as well
-        self.images.set(entry.contentUrl, clone(entry));
-      }
-    },
-
-    setDimensions(url: string, width: number, height: number) {
-      const entry = self.images.get(url);
-      if (entry) {
-        entry.width = width;
-        entry.height = height;
-      }
-    },
-
     registerHandler(handler: IImageHandler) {
       self.handlers.push(handler);
       self.handlers.sort((a, b) => {
@@ -94,64 +91,150 @@ export const ImageMapModel = types
       });
     },
 
-    // listeners are called when a requested url is cached
-    registerListener(url: string, id: string, listener: () => void) {
-      if (!self.listeners[url]) {
-        self.listeners[url] = {};
+    _syncContentUrl(url: string, entry: ImageMapEntryType) {
+      if (!entry.contentUrl || (url === entry.contentUrl)) {
+        return;
       }
-      self.listeners[url][id] = listener;
-      // return disposer function
-      return () => delete self.listeners[url][id];
-    }
+
+      // See image-map.md "URL Conversion" for a fully fleshed out description
+      // of this logic.
+      const existingEntry = self.images.get(entry.contentUrl);
+      if (!existingEntry || existingEntry.status === EntryStatus.Error) {
+        if (entry.status === EntryStatus.Ready) {
+          // store or update the entry
+          self.images.set(entry.contentUrl, getSnapshot(entry));
+        }
+        else if (entry.status === EntryStatus.PendingDimensions) {
+          // store or update the entry
+          self.images.set(entry.contentUrl, getSnapshot(entry));
+          // copy the storing promise incase some code calls 
+          // getImage(entry.contentUrl)
+          self.storingPromises[entry.contentUrl] = self.storingPromises[url];
+        }
+      }
+
+      if (existingEntry?.status === EntryStatus.PendingDimensions && 
+          (entry.status === EntryStatus.Error || entry.status === EntryStatus.Ready) && 
+          self.storingPromises[url] === self.storingPromises[entry.contentUrl]) {
+        // If the existingEntry is "managed" by the same promise as the entry
+        // we should updated it in some cases.
+        // See image-map.md "Updated Cache entry is in the Error state" and 
+        // "Updated cache entry is in Ready state"
+        self.images.set(entry.contentUrl, getSnapshot(entry));
+      }
+    },
   }))
   .actions(self => ({
-    addImage(url: string, snapshot: ImageMapEntrySnapshot): Promise<ImageMapEntryType> {
-      return new Promise((resolve, reject) => {
-        let entry: ImageMapEntryType | undefined;
+    // Flows are the recommended way to deal with async actions in MobX and MobX State Tree.
+    // However, typing them is difficult. If you leave them untyped like:
+    // `flow(function* addImage(url: string, snapshot: ImageMapEntrySnapshot) {` 
+    // The return value will be a Promise based on the actual return value of the generator
+    // function. This means there is no enforcement of a particular return type.
+    // Also the value of all yield calls is any. 
+    //
+    // The approach used below types the generator function with:
+    //   Generator<PromiseLike<any>, ImageMapEntryType, unknown>
+    // which means:
+    // - the value passed to yield has to be PromiseLike<any>
+    // - the return type has to be ImageMapEntryType
+    // - yield returns an unknown type so you have to cast it before using it
+    //
+    // Ignoring the return value of yield there are two other options for enforcing the return
+    // value of the flow:
+    // - `flow<ImageMapEntryType, any>(function* addImage(url: string, snapshot: ImageMapEntrySnapshot) {`
+    // - `flow<ImageMapEntryType, [string, ImageMapEntrySnapshot]>(function* addImage(url, snapshot) {`
+    // The first option looks nice because the arguments are typed as normal, however it means the actual
+    // action will have un typed arguments
+    // The second results in a weird signature where the argument names of addImage are just arg0, arg1
+    // In both of these cases the return value of yield is any so it is not as safe as the Generator 
+    // approach being used.
+    //
+    // There is also the yield* toGenerator approach https://mobx-state-tree.js.org/API/#togenerator which
+    // provides a way to automatically type the return value of the yield. But that doesn't solve 
+    // the problem of typing the return value of the flow.
+    _addImage: flow(function* _addImage(url: string, storeResult: IImageHandlerStoreResult)
+                              : Generator<PromiseLike<any>, ImageMapEntryType, unknown> {
 
-        // update existing entry
-        if (self.images.has(url)) {
-          entry = self.images.get(url);
-          if (entry && snapshot.contentUrl) {
-            entry.contentUrl = snapshot.contentUrl;
-          }
-          if (entry && snapshot.displayUrl) {
-            entry.displayUrl = snapshot.displayUrl;
-          }
-        }
-        // create new entry
-        else {
-          entry = ImageMapEntry.create(snapshot);
-          self.images.set(url, entry);
-          // notify any listeners that the url is now available
-          if (self.listeners[url]) {
-            for (const id in self.listeners[url]) {
-              self.listeners[url][id]();
-            }
-          }
-        }
-        self.syncContentUrl(url, entry!);
+      if (!storeResult.displayUrl) {
+        // As far as I can tell it should be an error if the displayUrl
+        // is not set. Even when there is an error the displayUrl should be
+        // set to the placeholderImage.
+        console.error(`addImage called with a storeResult without an displayUrl. ` + 
+          `url: ${url}, contentUrl: ${storeResult.contentUrl}, success: ${storeResult.success}`);
 
-        getImageDimensions(entry && entry.displayUrl || url)
-          .then(dimensions => {
-            const imageEntry = self.images.get(url);
-            if (imageEntry) {
-              self.setDimensions(url, dimensions.width, dimensions.height);
-              self.syncContentUrl(url, imageEntry);
-              resolve(imageEntry);
-            }
-          });
-      });
-    }
-  }))
-  .actions(self => ({
-    addPromise(url: string, promise: Promise<ImageMapEntrySnapshot>): Promise<ImageMapEntryType> {
-      return new Promise((resolve, reject) => {
-        promise.then(snapshot => {
-          resolve(self.addImage(url, snapshot));
-        });
-      });
-    }
+        // We still store the entry but we update it to be errored.
+        storeResult.success = false;
+      }
+
+      // Update or add the entry. We do this whether there is an error or not.
+      // If there is an error it is still recorded so observers of the entry
+      // will see the change
+      // If there is an existing entry we copy the retries property
+      const existingEntry = self.images.get(url);
+      let retries = 0;
+      if (existingEntry) {
+        retries = existingEntry.retries;
+      }
+      const { success: successfulStore, ...otherProps} = storeResult; 
+      const snapshot: ImageMapEntrySnapshot = {
+        ...otherProps,
+        status: successfulStore ? EntryStatus.PendingDimensions : EntryStatus.Error,
+        retries
+      };
+      self.images.set(url, snapshot);
+
+      const entry = self.images.get(url)!;
+
+      if (entry.status === EntryStatus.Error) {
+        // This means the storage operation failed. 
+
+        // We could clear the storingPromise here, but instead we just leave it and
+        // rely on getImage to ignore the storingPromise when it sees there is
+        // an entry with a status of error.
+
+        // Even if this entry has a contentUrl that is different than its url
+        // we do not update the entry at the contentUrl. 
+        // See image-map.md "Updated cache entry is in the Error state"
+        // Note: when there is an error at this point the promise that is managing
+        // this call to _addImage should not be responsible for the entry at 
+        // contentUrl. 
+
+        // We return so we don't sync and don't try to get the dimensions
+        // See image-map.md "Dimensions" for why we don't set the dimensions
+        return entry;  
+      } 
+
+      self._syncContentUrl(url, entry);
+
+      try {
+        // If the getImageDimension image element never loads or errors then we won't get
+        // past this line. However I'd hope that the browser will eventually trigger 
+        // one of those events.
+        // In most cases _addImage is not called until the image has already been
+        // downloaded and displayUrl is actually a blob url.
+        // So it should be unlikely in these cases that getImageDimensions will fail.
+        //
+        // We know the entry.displayUrl is defined because we made sure the snapshot.displayUrl
+        // is defined above.
+        const dimensions = (yield getImageDimensions(entry.displayUrl!)) as IImageDimensions;
+        entry.width = dimensions.width;
+        entry.height = dimensions.height;  
+        entry.status = EntryStatus.Ready;  
+      } catch (error) {
+        entry.status = EntryStatus.Error;
+        // If there is a contentUrl there could be a second entry that needs to be updated.
+        // syncContentUrl takes care of this
+
+        // Note: we are not updating or clearing the other fields of the entry here
+        // Its status will be Error, but it might have a contentUrl and a displayUrl.
+        // Leaving the contentUrl in place is necessary so syncContentUrl can work.
+        // Leaving displayUrl untouched might not be the best thing to do, but there
+        // isn't a good reason to change it so far.
+      }
+
+      self._syncContentUrl(url, entry);
+      return entry;
+    })
   }))
   .actions(self => {
     let _db: DB;
@@ -159,7 +242,7 @@ export const ImageMapModel = types
     return {
       afterCreate() {
         // placeholder doesn't have contentUrl
-        self.addImage(placeholderImage, { displayUrl: placeholderImage });
+        self._addImage(placeholderImage, { displayUrl: placeholderImage, success: true });
 
         self.registerHandler(firebaseRealTimeDBImagesHandler);
         self.registerHandler(firebaseStorageImagesHandler);
@@ -171,45 +254,83 @@ export const ImageMapModel = types
         _db = db;
       },
 
-      addFileImage(file: File): Promise<ImageMapEntryType> {
-        return new Promise((resolve, reject) => {
-          storeFileImage(_db, file)
-            .then(simpleImage => {
-              const { normalized } = parseFauxFirebaseRTDBUrl(simpleImage.imageUrl);
-              const entry: ImageMapEntrySnapshot = {
-                      filename: file.name,
-                      contentUrl: normalized,
-                      displayUrl: simpleImage.imageData
-                    };
-              resolve(self.addImage(entry.contentUrl!, entry));
-            });
-        });
-      },
+      addFileImage: flow(function* (file: File): Generator<PromiseLike<any>, Promise<ImageMapEntryType>, unknown> {
+        const simpleImage = (yield storeFileImage(_db, file)) as ISimpleImage;
+        const { normalized } = parseFauxFirebaseRTDBUrl(simpleImage.imageUrl);
+        const entry: IImageHandlerStoreResult = {
+                filename: file.name,
+                contentUrl: normalized,
+                displayUrl: simpleImage.imageData,
+                success: true
+              };
+        return self._addImage(entry.contentUrl!, entry);
+      }),
 
-      getImage(url: string, options?: IImageBaseOptions): Promise<ImageMapEntryType> {
-        return new Promise((resolve, reject) => {
-          if (!url) {
-            resolve(clone(self.images.get(placeholderImage)!));
-          }
-
-          const imageEntry = self.images.get(url);
-          if (imageEntry) {
-            return resolve(imageEntry);
-          }
-
-          const handler = self.getHandler(url);
-          if (handler) {
-            const promise = handler.store(url, { db: _db, ...options });
-            resolve(self.addPromise(url, promise));
-          }
-          else {
-            resolve(clone(self.images.get(placeholderImage)!));
-          }
-        });
+      _storeAndAddImage: flow(function* (url: string, handler: IImageHandler, options?: IImageBaseOptions)
+                       : Generator<PromiseLike<any>, ImageMapEntryType | Promise<ImageMapEntryType>, unknown> {
+        const storeResult = (yield handler.store(url, { db: _db, ...options })) as IImageHandlerStoreResult;
+        return self._addImage(url, storeResult);
+      }),
+    };
+  })
+  .actions(self => ({
+    // eslint-disable-next-line require-yield
+    getImage: flow(function* (url: string, options?: IImageBaseOptions)
+                    : Generator<PromiseLike<any>, ImageMapEntryType | Promise<ImageMapEntryType>, unknown> {
+      if (!url) {
+        // TODO: how often does this happen, should it be silently ignored like this?
+        console.warn("ImageMap#getImage called with a falsy URL", url);
+        return clone(self.images.get(placeholderImage)!);
       }
 
-    };
-  });
+      const imageEntry = self.images.get(url);
+      if (imageEntry?.status === EntryStatus.Ready) {
+        // This image has been downloaded successfully already
+        return imageEntry;
+      }
+
+      const existingStoringPromise = self.storingPromises[url];      
+      if ( existingStoringPromise && 
+           ( imageEntry?.status !== EntryStatus.Error || imageEntry?.retries >= 2 ) ) {
+        // If the imageEntry is errored we ignore the existing promise
+        // This way a second getImage request will try to store the image again
+        // If we've already retried storing the image 2 times, don't try again.
+        return existingStoringPromise;
+      }
+
+      const handler = self.getHandler(url);
+      if (!handler) {
+        console.warn(`No handler found for ${url}`);
+        return clone(self.images.get(placeholderImage)!);
+      }
+
+      // If there is an existing entry we'll overwrite it so its status is
+      // `PendingStorage` and the `displayUrl` is the placeholder. In theory the
+      // existingEntry could have a status of PendingStorage, PendingDimensions, or
+      // Error. Because there is no existingStoringPromise the status should
+      // really not be PendingStorage or PendingDimensions.
+      if (imageEntry?.status === EntryStatus.PendingStorage || 
+          imageEntry?.status === EntryStatus.PendingDimensions) {
+        console.warn(`ImageMap.getImage found an entry with a status ${imageEntry.status} at ${url}`);
+      }
+      
+      let retries = 0;
+      if (imageEntry) {
+        // When we have an imageEntry at this point it means we are retrying
+        retries = imageEntry.retries + 1;
+      }
+
+      self.images.set(url, {status: EntryStatus.PendingStorage, displayUrl: placeholderImage, 
+        retries});
+
+      const storingPromise = self._storeAndAddImage(url, handler, options);
+
+      // keep track of the storingPromise
+      self.storingPromises[url] = storingPromise;
+
+      return storingPromise;      
+    })
+  }));
 export type ImageMapModelType = Instance<typeof ImageMapModel>;
 
 /*
@@ -223,37 +344,47 @@ export const externalUrlImagesHandler: IImageHandler = {
     return url ? /^(https?:\/\/|data:image\/)/.test(url) : false;
   },
 
-  store(url: string, options?: IImageHandlerStoreOptions) {
+  async store(url: string, options?: IImageHandlerStoreOptions): Promise<IImageHandlerStoreResult> {
     const { db } = options || {};
     // upload images from external urls to our own firebase if possible
     // this may fail depending on CORS settings on target image.
-    return new Promise((resolve, reject) => {
-      if (db?.stores.user.id) {
-        storeImage(db, url)
-          .then(simpleImage => {
-            if (isPlaceholderImage(simpleImage.imageUrl)) {
-              // conversion errors are resolved to placeholder image
-              // this generally occurs due to a CORS error, in which
-              // case we just use the original url.
-              resolve({ contentUrl: url, displayUrl: url });
-            }
-            else {
-              const { normalized } = parseFauxFirebaseRTDBUrl(simpleImage.imageUrl);
-              resolve({ contentUrl: normalized, displayUrl: simpleImage.imageData });
-            }
-          })
-          .catch(() => {
-            // If the silent upload has failed, do we retain the full url or
-            // encourage the user to download a copy and re-upload?
-            // For now, return the original image url.
-            resolve({ contentUrl: url, displayUrl: url });
-          });
+    // After the data of the image is uploaded to firebase, it is not
+    // explicitly downloaded again:
+    // 1. storeImage creates a canvas and adds the url to this canvas
+    // 2. a data uri is extracted from the canvas
+    // 3. an object with the data uri is uploaded to firebase
+    // 4. the data uri is "fetched" to turn it into a blob and then blob url
+    // 5. the resulting imageData value will be the blob url
+    // 6. the displayUrl is set to this blob url
+    if (db?.stores.user.id) {
+      try {
+        const simpleImage = await storeImage(db, url);
+        if (isPlaceholderImage(simpleImage.imageUrl)) {
+          // conversion errors are resolved to placeholder image
+          // this generally occurs due to a CORS error, in which
+          // case we just use the original url.
+          //
+          // TODO: if we get a CORS error we'll likely get that same
+          // error again. So we should serialize that info and use it
+          // to not try to download the image again.
+          return { contentUrl: url, displayUrl: url, success: true };
+        }
+        else {
+          const { normalized } = parseFauxFirebaseRTDBUrl(simpleImage.imageUrl);
+          return { contentUrl: normalized, displayUrl: simpleImage.imageData,
+            success: true  };
+        }
+      } catch (error) {
+          // If the silent upload has failed, do we retain the full url or
+          // encourage the user to download a copy and re-upload?
+          // For now, return the original image url.
+          return { contentUrl: url, displayUrl: url, success: true  };
       }
-      else {
-        // For now, return the original image url.
-        resolve({ contentUrl: url, displayUrl: url });
-      }
-    });
+    }
+    else {
+      // For now, return the original image url.
+      return { contentUrl: url, displayUrl: url, success: true  };
+    }
   }
 };
 
@@ -268,13 +399,13 @@ export const localAssetsImagesHandler: IImageHandler = {
     return url ? url.startsWith("assets/") || url.startsWith("curriculum/") : false;
   },
 
-  store(url: string) {
+  async store(url: string) {
                     // convert original curriculum image paths
     const _url = url.replace("assets/curriculum", "curriculum")
                     // convert original drawing tool stamp paths
                     .replace("assets/tools/drawing-tool/stamps",
                              "curriculum/moving-straight-ahead/stamps");
-    return Promise.resolve({ contentUrl: _url, displayUrl: _url });
+    return { contentUrl: _url, displayUrl: _url, success: true  };
   }
 };
 
@@ -282,6 +413,16 @@ export const localAssetsImagesHandler: IImageHandler = {
  * firebaseStorageImagesHandler
  */
 const kFirebaseStorageUrlPrefix = "https://firebasestorage.googleapis.com";
+
+// The contentUrl is not set here.
+// This means any content that is referencing an image that cannot be downloaded
+// will not be updated. Modifying content like this seems kind of dangerous because
+// this could be a temporary network error.
+// By not setting the contentUrl, it also means that the default placeholder image 
+// entry will not be modified by syncContentUrl. That is a good thing.
+const kErrorStorageResult: IImageHandlerStoreResult = { 
+  displayUrl: placeholderImage, success: false
+};
 
 export const firebaseStorageImagesHandler: IImageHandler = {
   name: kFirebaseStorageHandlerName,
@@ -293,40 +434,37 @@ export const firebaseStorageImagesHandler: IImageHandler = {
                           /^\/.+\/portals\/.+$/.test(url);
   },
 
-  store(url: string, options?: IImageHandlerStoreOptions) {
-    return new Promise((resolve, reject) => {
-      const { db } = options || {};
-      // All images from firebase storage must be migrated to realtime database
-      const isStorageUrl = url.startsWith(kFirebaseStorageUrlPrefix);
-      const storageUrl = url.startsWith(kFirebaseStorageUrlPrefix) ? url : undefined;
-      const storagePath = !isStorageUrl ? url : undefined;
-      // Pass in the imagePath as the second argument to get the ref to firebase storage by url
-      // This is needed if an image of the same name has been uploaded in two different components,
-      // since each public URL becomes invalid and a new url generated on upload
-      if (db?.stores.user.id) {
-        db.firebase.getPublicUrlFromStore(storagePath, storageUrl)
-          .then(newUrl => {
-            if (newUrl) {
-              storeCorsImage(db, newUrl)
-                .then(simpleImage => {
-                  // Image has been retrieved from Storage, now we can safely remove the old image
-                  // TODO: remove old images
-                  const { normalized } = parseFauxFirebaseRTDBUrl(simpleImage.imageUrl);
-                  resolve({ contentUrl: normalized, displayUrl: simpleImage.imageData });
-                });
-            }
-            else {
-              resolve({ contentUrl: placeholderImage, displayUrl: placeholderImage });
-            }
-          })
-          .catch(() => {
-            resolve({ contentUrl: placeholderImage, displayUrl: placeholderImage });
-          });
+  async store(url: string, options?: IImageHandlerStoreOptions): Promise<IImageHandlerStoreResult> {
+    const { db } = options || {};
+    // All images from firebase storage must be migrated to realtime database
+    const isStorageUrl = url.startsWith(kFirebaseStorageUrlPrefix);
+    const storageUrl = url.startsWith(kFirebaseStorageUrlPrefix) ? url : undefined;
+    const storagePath = !isStorageUrl ? url : undefined;
+    // Pass in the imagePath as the second argument to get the ref to firebase storage by url
+    // This is needed if an image of the same name has been uploaded in two different components,
+    // since each public URL becomes invalid and a new url generated on upload
+    if (db?.stores.user.id) {
+      try {
+        const newUrl = await db.firebase.getPublicUrlFromStore(storagePath, storageUrl);
+
+        if (newUrl) {
+          const simpleImage = await storeCorsImage(db, newUrl);
+          // Image has been retrieved from Storage, now we can safely remove the old image
+          // TODO: remove old images
+          const { normalized } = parseFauxFirebaseRTDBUrl(simpleImage.imageUrl);
+          return { contentUrl: normalized, displayUrl: simpleImage.imageData,
+            success: true };
+        }
+        else {
+          return kErrorStorageResult;
+        }
+      } catch (error) {
+        return kErrorStorageResult;
       }
-      else {
-        resolve({ contentUrl: placeholderImage, displayUrl: placeholderImage });
-      }
-    });
+    }
+    else {
+      return kErrorStorageResult;
+    }
   }
 };
 
@@ -368,27 +506,30 @@ export const firebaseRealTimeDBImagesHandler: IImageHandler = {
           (url.startsWith(`${kCCImageScheme}://`) && (url.indexOf("concord.org") < 0));
   },
 
-  store(url: string, options?: IImageHandlerStoreOptions) {
-    return new Promise((resolve, reject) => {
-      const { db } = options || {};
-      const { path, classHash, imageKey, normalized } = parseFauxFirebaseRTDBUrl(url);
+  async store(url: string, options?: IImageHandlerStoreOptions): Promise<IImageHandlerStoreResult> {
+    const { db } = options || {};
+    const { path, classHash, imageKey, normalized } = parseFauxFirebaseRTDBUrl(url);
 
-      if (db && path && normalized) {
-        // In theory we could direct all firebase image requests to the cloud function,
-        // but only cross-class supports require the use of the cloud function.
-        const blobPromise = classHash !== db.stores.user.classHash
-                              ? db.getCloudImageBlob(normalized)
-                              : db.getImageBlob(imageKey);
-        blobPromise.then(blobUrl => {
-          resolve(blobUrl
-                    ? { filename: options?.filename, contentUrl: normalized, displayUrl: blobUrl }
-                    : {});
-        });
-      }
-      else {
-        resolve({});
-      }
-    });
+    if (db && path && normalized) {
+      // In theory we could direct all firebase image requests to the cloud function,
+      // but only cross-class supports require the use of the cloud function.
+      const blobUrl = classHash !== db.stores.user.classHash
+                            ? await db.getCloudImageBlob(normalized)
+                            : await db.getImageBlob(imageKey);
+      return blobUrl
+             ? { filename: options?.filename, contentUrl: normalized, displayUrl: blobUrl,
+                 success: true }
+             // Note: we used to return an empty image entry here. This used to cause
+             // problems with some code that would then try to load the original url which
+             // might be a ccimg: url.
+             // This empty entry seems to also be expected by jxg-image which was testing
+             // for falsey displayUrl. It has been updated to also check the status of the
+             // entry
+             : kErrorStorageResult;
+    }
+    else {
+      return kErrorStorageResult;
+    }
   }
 };
 

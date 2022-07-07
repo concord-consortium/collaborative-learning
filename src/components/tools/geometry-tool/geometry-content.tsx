@@ -31,14 +31,13 @@ import { extractDragTileType, kDragTileContent, kDragTileId, dragTileSrcDocId } 
 import { ImageMapEntryType, gImageMap } from "../../../models/image-map";
 import { ITileExportOptions } from "../../../models/tools/tool-content-info";
 import { getParentWithTypeName } from "../../../utilities/mst-utils";
-import { getUrlFromImageContent } from "../../../utilities/image-utils";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { assign, castArray, debounce, each, filter, find, keys as _keys, throttle, values } from "lodash";
 import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
 import { getDataSetBounds, IDataSet } from "../../../models/data/data-set";
 import AxisSettingsDialog from "./axis-settings-dialog";
-import { EditableGeometryTitle } from "./editable-geometry-title";
+import { EditableTileTitle } from "../editable-tile-title";
 import LabelSegmentDialog from "./label-segment-dialog";
 import MovableLineDialog from "./movable-line-dialog";
 import placeholderImage from "../../../assets/image_placeholder.png";
@@ -457,7 +456,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       return (
         <MovableLineDialog
           key="editor"
-          isOpen={line != null}
           onAccept={this.handleUpdateLine}
           onClose={this.closeLineDialog}
           line={line}
@@ -500,7 +498,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           board={board}
           polygon={polygon}
           points={points as [JXG.Point, JXG.Point]}
-          isOpen={showSegmentLabelDialog}
           onAccept={handleAccept}
           onClose={handleClose}
         />
@@ -549,7 +546,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const getTitle = () => this.getContent().title || "";
     const { measureText, readOnly, size, scale } = this.props;
     return (
-      <EditableGeometryTitle key="geometry-title" size={size} scale={scale} getTitle={getTitle}
+      <EditableTileTitle key="geometry-title" size={size} scale={scale} getTitle={getTitle}
                               readOnly={readOnly} measureText={measureText}
                               onBeginEdit={this.handleBeginEditTitle} onEndEdit={this.handleTitleChange} />
     );
@@ -1059,7 +1056,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const { board } = this.state;
     if (parsedContent && board) {
         const droppedContent = parsedContent.content;
-        const url = getUrlFromImageContent(droppedContent);
+        const url = droppedContent.url;
         if (url) {
           gImageMap.getImage(url)
             .then(image => this.setBackgroundImage(image));

@@ -209,6 +209,18 @@
         "isTileTool": true
       },
       {
+        "id": "undo",
+        "title": "Undo",
+        "iconId": "icon-undo-tool",
+        "isTileTool": false
+      },
+      {
+        "id": "redo",
+        "title": "Redo",
+        "iconId": "icon-redo-tool",
+        "isTileTool": false
+      },
+      {
         "id": "delete",
         "title": "Delete",
         "iconId": "icon-delete-tool",
@@ -233,11 +245,17 @@
       "content": "curriculum/comparing-and-scaling/comparing-and-scaling.json",
       "guide": "curriculum/comparing-and-scaling/cas-teacher-guide.json"
     },
+    "dataflow-example": {
+      "content": "curriculum/dataflow/dataflow-example.json"
+    },
     "example": {
       "content": "curriculum/example-curriculum/example-curriculum.json"
     },
     "example-no-group-share": {
       "content": "curriculum/example-curriculum/example-no-group-share.json"
+    },
+    "example-no-my-work": {
+      "content": "curriculum/example-curriculum/example-no-my-work.json"
     },
     "example-show-nav-panel": {
       "content": "curriculum/example-curriculum/example-show-nav-panel.json"
@@ -247,6 +265,9 @@
     },
     "example-no-section-problem-tab": {
       "content": "curriculum/example-curriculum/example-no-section-problem-tab.json"
+    },
+    "example-variables": {
+      "content": "curriculum/example-curriculum/example-variables.json"
     },
     "faw": {
       "content": "curriculum/filling-and-wrapping/filling-and-wrapping.json"

@@ -1,5 +1,5 @@
 import { cloneDeep, each } from "lodash";
-import { types, getSnapshot, Instance, SnapshotIn, getType } from "mobx-state-tree";
+import { types, getSnapshot, Instance, SnapshotIn, getType, getEnv } from "mobx-state-tree";
 import { PlaceholderContentModel } from "../tools/placeholder/placeholder-content";
 import { kTextToolID } from "../tools/text/text-content";
 import { getToolContentInfoById, IDocumentExportOptions } from "../tools/tool-content-info";
@@ -14,11 +14,10 @@ import { migrateSnapshot } from "./document-content-import";
 import { IDocumentAddTileOptions } from "./document-types";
 import { Logger, LogEventName } from "../../lib/logger";
 import { IDragTileItem } from "../../models/tools/tool-tile";
-import { DocumentsModelType } from "../stores/documents";
 import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
-import { getParentWithTypeName } from "../../utilities/mst-utils";
 import { comma, StringBuilder } from "../../utilities/string-builder";
 import { SharedModel, SharedModelType, SharedModelUnion } from "../tools/shared-model";
+import { IDocumentEnvironment } from "./document";
 
 export interface INewTileOptions {
   rowHeight?: number;
@@ -61,7 +60,7 @@ export interface ITileCountsPerSection {
 // `src/models/mst.test.ts`
 export const SharedModelEntry = types.model("SharedModelEntry", {
   sharedModel: SharedModelUnion,
-  tiles: types.array(types.reference(ToolTileModel))
+  tiles: types.array(types.safeReference(ToolTileModel, {acceptsUndefined: false}))
 })
 .actions(self => ({
   addTile(toolTile: ToolTileModelType) {
@@ -708,8 +707,8 @@ export const DocumentContentModel = types
         const contentInfo = getToolContentInfoById(toolId);
         if (!contentInfo) return;
 
-        const documents = getParentWithTypeName(self, "Documents") as DocumentsModelType;
-        const appConfig = documents?.appConfig;
+        const documentEnv = getEnv(self)?.documentEnv as IDocumentEnvironment | undefined;
+        const appConfig = documentEnv?.appConfig;
 
         const newContent = contentInfo?.defaultContent({ title, url, appConfig });
         const tileInfo = self.addTileContentInNewRow(

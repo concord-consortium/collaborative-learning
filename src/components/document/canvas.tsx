@@ -56,7 +56,9 @@ export class CanvasComponent extends BaseComponent<IProps> {
     };
 
     this.hotKeys.register({
-      "cmd-shift-s": this.handleCopyDocumentJson
+      "cmd-shift-s": this.handleCopyDocumentJson,
+      "cmd-z": this.handleDocumentUndo,
+      "cmd-shift-z": this.handleDocumentRedo
     });
   }
 
@@ -126,10 +128,20 @@ export class CanvasComponent extends BaseComponent<IProps> {
     const { appConfig, unit } = this.stores;
     const unitBasePath = appConfig.getUnitBasePath(unit.code);
     const documentContent = document?.content ?? content;
-    const transformImageUrl = (url: string, filename?: string) => {
+    const transformImageUrl = (url?: string, filename?: string) => {
       return transformCurriculumImageUrl(url, unitBasePath, filename);
     };
     const json = documentContent?.exportAsJson({ includeTileIds: true, transformImageUrl });
     json && navigator.clipboard.writeText(json);
+  };
+
+  private handleDocumentUndo = () => {
+    const { document } = this.props;
+    document?.undoLastAction();
+  };
+
+  private handleDocumentRedo = () => {
+    const { document } = this.props;
+    document?.redoLastAction();
   };
 }

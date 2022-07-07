@@ -1,4 +1,4 @@
-import { getEnv, Instance, types } from "mobx-state-tree";
+import { getEnv, Instance, ISerializedActionCall, types } from "mobx-state-tree";
 import { ISharedModelManager, SharedModelType } from "./shared-model";
 import { getToolContentModels, getToolContentInfoById } from "./tool-content-info";
 
@@ -24,6 +24,59 @@ export const kUnknownToolID = "Unknown";
 
 export interface ITileEnvironment {
   sharedModelManager?: ISharedModelManager;
+}
+
+export interface IToolContentModelHooks {
+  /**
+   * This is called after the wrapper around the content model is created. This wrapper is
+   * a ToolTileModel. This should only be called once.
+   *
+   * @param metadata an instance of this model's metadata it might be shared by
+   * multiple instances of the model if the document of this model is open in
+   * more than one place.
+   */
+  doPostCreate?(metadata: ToolMetadataModelType): void,
+
+  /**
+   * This is called for any action that is called on the wrapper (ToolTile) or one of
+   * its children. It can be used for logging or internal monitoring of action calls.
+   */
+  onTileAction?(call: ISerializedActionCall): void,
+
+  /**
+   * This is called before the tile is removed from the row of the document.
+   * Immediately after the tile is removed from the row it is also removed from
+   * the tileMap which is the actual container of the tile. 
+   */
+  willRemoveFromDocument?(): void
+}
+
+// This is a way to work with MST action syntax
+// The input argument has to match the api and the result
+// is a literal object type which is compatible with the ModelActions
+// type that is required.
+// A downside is that when working with the specific model type
+// TS doesn't know which methods of the API it actually implements
+
+/**
+ * A TypeScript helper method for adding hooks to a content model. It should be
+ * used like:
+ * ```
+ * .actions(self => toolContentModelHooks({
+ *   // add your hook functions here
+ * }))
+ * ```
+ *
+ * Unfortunately all hooks you define become optional. Because these hooks
+ * should normally only be called by the framework, most likely this issue will
+ * only come up in tests.
+ *
+ * @param hooks the hook functions
+ * @returns the hook functions in a literal object format that is compatible
+ * with the ModelActions type of MST
+ */
+export function toolContentModelHooks(hooks: IToolContentModelHooks) {
+  return {...hooks};
 }
 
 // Generic "super class" of all tool content models
@@ -63,13 +116,23 @@ export const ToolContentModel = types.model("ToolContentModel", {
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
       throw new Error("not implemented");
     }
-  }));
+  }))
+  // Add an empty api so the api methods can be used on this generic type
+  .actions(self => toolContentModelHooks({}));
 
 export interface ToolContentModelType extends Instance<typeof ToolContentModel> {}
 
 export const ToolMetadataModel = types.model("ToolMetadataModel", {
-    id: types.string
-  });
+    // id of associated tile
+    id: types.string,
+    // title of associated tile
+    title: types.maybe(types.string)
+  })
+  .actions(self => ({
+    setTitle(title: string) {
+      self.title = title;
+    }
+  }));
 export interface ToolMetadataModelType extends Instance<typeof ToolMetadataModel> {}
 
 interface IPrivate {
@@ -89,12 +152,12 @@ export function toolFactory(snapshot: any) {
   return getToolContentInfoById(toolType)?.modelClass || UnknownContentModel;
 }
 
-export function findMetadata(type: string, id: string) {
+export function findMetadata(type: string, id: string, title?: string) {
   const MetadataType = getToolContentInfoById(type)?.metadataClass;
   if (!MetadataType) return;
 
   if (!_private.metadata[id]) {
-    _private.metadata[id] = MetadataType.create({ id });
+    _private.metadata[id] = MetadataType.create({ id, title });
   }
   return _private.metadata[id];
 }
