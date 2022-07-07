@@ -323,7 +323,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     const transformImageUrl = (url?: string, filename?: string) => {
       return transformCurriculumImageUrl(url, unitBasePath, filename);
     };
-    let tileJsonString = this.props.model.exportJson({ transformImageUrl });
+    let tileJsonString = this.props.model.exportJson({ transformImageUrl, includeId: true });
     if (tileJsonString) {
       // Put all exported content in a top-level object, under key: "content",
       // but _preserve_ existing formatting (which collapses some elements
