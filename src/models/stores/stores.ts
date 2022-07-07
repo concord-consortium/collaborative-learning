@@ -14,6 +14,7 @@ import { DocumentsModelType, DocumentsModel, createDocumentsModelWithRequiredDoc
 import { LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument } from "../document/document-types";
 import { LearningLogWorkspace, ProblemWorkspace } from "./workspace";
 import { ClipboardModel, ClipboardModelType } from "./clipboard";
+import { SerialDevice } from "./serial";
 import { SelectionStoreModel, SelectionStoreModelType } from "./selection";
 import { AppMode } from "./store-types";
 
@@ -38,6 +39,7 @@ export interface IBaseStores {
   supports: SupportsModelType;
   clipboard: ClipboardModelType;
   selection: SelectionStoreModelType;
+  serialDevice: SerialDevice;
 }
 
 export interface IStores extends IBaseStores {
@@ -84,7 +86,8 @@ export function createStores(params?: ICreateStores): IStores {
     showDemoCreator: params?.showDemoCreator || false,
     supports: params?.supports || SupportsModel.create({}),
     clipboard: ClipboardModel.create(),
-    selection: SelectionStoreModel.create()
+    selection: SelectionStoreModel.create(),
+    serialDevice: new SerialDevice()
   };
   return {
     ...stores,

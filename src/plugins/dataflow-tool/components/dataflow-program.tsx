@@ -954,6 +954,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private tick = () => {
+    if(this.channels.length > 0){
+      // SERIAL QUESTION - I notice this.channels is only populated on 1/4 ticks.  Why?
+      console.log('TICK, DataFlowProgram.channels: ', this.channels)
+    }
     // Update the sampling rate
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
