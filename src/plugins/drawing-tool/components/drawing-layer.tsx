@@ -237,6 +237,11 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         // we delay until we confirm that the user is dragging the objects before adding the hover object
         // to the selection, to avoid messing with the click to select/deselect logic
         this.setSelectedObjects(objectsToInteract);
+        // Note: the hoverObject could be kind of in a weird state here. It might
+        // be both selected and hovered at the same time. However it is more
+        // simple to keep the hoverObject independent of the selection. It just
+        // represents the current object the mouse is over regardless of whether
+        // it is selected or not.
         needToAddHoverToSelection = false;
       }
     };
@@ -245,8 +250,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       e2.stopPropagation();
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
-      // FIXME: somewhere in here it seems like the hoverObject should be cleared, perhaps even
-      // on the mouse down?
       if (moved) {
         const moves: DrawingObjectMove[] = objectsToInteract.map((object, index) => {
           const draggedObject = objectsBeingDragged[index];

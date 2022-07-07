@@ -131,7 +131,6 @@ context('Draw Tool Tile', function () {
           // Get the rectangle to be hovered. In the code we are listening to
           // `onMouseEnter` but in Cypress triggering a "mouseenter" event
           // doesn't work. Triggering a "mouseover" does work for some reason.
-          // Cypress'.
           .trigger("mouseover", {scrollBehavior: false});
 
         // The hover box is rendered as a selection-box with a different color
