@@ -3,7 +3,9 @@ import { NodeData } from "rete/types/core/data";
 import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
 import { ValueControl } from "../controls/value-control";
 import { DemoOutputControl } from "../controls/demo-output-control";
+import { DropdownListControl } from "../controls/dropdown-list-control";
 import { PlotButtonControl } from "../controls/plot-button-control";
+import { NodeDemoOutputTypes } from "../../model/utilities/node";
 
 export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
@@ -15,7 +17,15 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
     if (this.editor) {
       const inp1 = new Rete.Input("num1", "Number", this.numSocket);
 
+      // const dropdownOptions = NodeOperationTypes
+      //   .filter((nodeOp) => {
+      //     return nodeOp.type === "logic";
+      //   }).map((nodeOp) => {
+      //     return { name: nodeOp.name, icon: nodeOp.icon };
+      //   });
+
       return node
+        .addControl(new DropdownListControl(this.editor, "outputType", node, NodeDemoOutputTypes, true))
         .addControl(new PlotButtonControl(this.editor, "plot", node))
         .addControl(new ValueControl(this.editor, "nodeValue", node))
         .addControl(new DemoOutputControl(this.editor, "demoOutput", node))

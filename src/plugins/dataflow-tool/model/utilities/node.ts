@@ -213,6 +213,21 @@ export const NodeSensorTypes = [
   },
 ];
 
+export const NodeDemoOutputTypes = [
+  {
+    name: "Light Bulb",
+    icon: "icon-light-bulb"
+  },
+  {
+    name: "Backyard Claw",
+    icon: "icon-backyard-claw"
+  },
+  {
+    name: "Grabber",
+    icon: "icon-grabber"
+  }
+];
+
 export const NodeGeneratorTypes = [
   {
     name: "Sine",
