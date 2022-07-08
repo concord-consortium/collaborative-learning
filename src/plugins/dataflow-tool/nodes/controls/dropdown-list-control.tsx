@@ -3,7 +3,7 @@
 import React, { useRef } from "react";
 import Rete, { NodeEditor, Node } from "rete";
 import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
-import "./dropdown-list-control.sass";
+import "./dropdown-list-control.scss";
 
 export interface ListOption {
   name: string;
