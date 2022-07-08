@@ -1,7 +1,7 @@
 import { addDisposer, addMiddleware, createActionTrackingMiddleware2, flow, 
     getPath, 
     IActionTrackingMiddleware2Call, IJsonPatch, Instance, IPatchRecorder, isActionContextThisOrChildOf, 
-    recordPatches } from "mobx-state-tree";
+    isAlive, recordPatches } from "mobx-state-tree";
 import { nanoid } from "nanoid";
 import { ContainerAPI } from "./container-api";
 import { TreePatchRecordSnapshot } from "./history";
@@ -219,6 +219,12 @@ export const addTreeMonitor = (tree: Instance<typeof Tree> ,  container: Contain
                     // it can inform the tiles of all changes at the same time.
                     await tree.handleSharedModelChanges(historyEntryId, callId, call, sharedModelPath);
                 }
+            }
+
+            // The tree might have been destroyed in the meantime. This happens during tests.
+            // In that case we bail and don't record anything
+            if (!isAlive(tree)) {
+                return;
             }
 
             // TODO: CLUE Specific filtering of 'changeCount', should we record

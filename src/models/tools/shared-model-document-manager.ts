@@ -63,12 +63,20 @@ types.model("SharedModelDocumentManager")
 
       sharedModelEntry.addTile(toolTile);
 
+      // FIXME: this comment is out of data. There is no longer an `autorun` instead
+      // the call tree looks like:
+      // addTreeMonitor.recordAction
+      // └ Tree.handleSharedModelChanges
+      //   └ Tree.updateTreeAfterSharedModelChangesInternal
+      //     └ Tree.updateTreeAfterSharedModelChanges
+      //       └ tile.content.updateAfterSharedModelChanges
+      //
       // The update function in the 'autorun' will run when a new shared model
       // is added to the document, but if the sharedModel already exists on the
       // document, nothing that is being monitored will change So we need to
       // explicity run the update function just to give the tile a chance to
       // update itself.
-      // FIXME: check if this is necessary when we are using the tree monitor
+      // FIXME: check if this is necessary when now that are using the tree monitor
       tileContentModel.updateAfterSharedModelChanges(sharedModel);
     },
 

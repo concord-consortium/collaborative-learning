@@ -82,10 +82,7 @@ export const Tree = types.model("Tree", {
     }
         
     // Run update function on the tiles
-    for(const tile of tiles) {
-      // FIXME: Unfortunately the tile.content is now "any" because it is a union
-      // of unknown types. Hopefully we can fix this by somehow telling MST
-      // and typescript that all of these content types extend ToolContentModel
+    for(const tile of tiles) {      
       tile.content.updateAfterSharedModelChanges(sharedModel);
     }
   }

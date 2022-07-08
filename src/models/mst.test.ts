@@ -299,4 +299,17 @@ describe("mst", () => {
       todoList.addTodo(todo1);
     }).toThrow();
   });
+
+  test("instance values in snapshots are not copied", () => {
+    const Todo = types.model({
+      name: types.string
+    });
+    const TodoList = types.model({
+      todos: types.array(Todo)
+    });
+
+    const todo = Todo.create({name: "todo1"});
+    const todoList = TodoList.create({todos: [todo]});
+    expect(todoList.todos.at(0)).toBe(todo);
+  });
 });
