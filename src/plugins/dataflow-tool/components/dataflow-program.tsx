@@ -845,7 +845,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private addNode = async (nodeType: string) => {
-    //console.log('NODE STEP 1: add node')
+    console.log('NODE STEP 1: add node')
     const nodeFactory = this.programEditor.components.get(nodeType) as any;
     const n1 = await nodeFactory!.createNode();
     n1.position = this.getNewNodePosition();
@@ -965,7 +965,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       // console.log('TICK, DataFlowProgram.channels: ', this.channels)
     }
 
-    console.log('TICK, DataFlowProgram.channels: ', this.channels)
+    // console.log('TICK, DataFlowProgram.channels: ', this.channels)
     
     // Update the sampling rate
     const now = Date.now();
