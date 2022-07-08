@@ -1,11 +1,11 @@
+import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import React from "react";
-import { computeStrokeDashArray } from "../model/drawing-content";
-import { DrawingObjectType, DrawingTool, FilledObject, IDrawingComponentProps, IDrawingLayer, 
+import { computeStrokeDashArray, DrawingObjectType, DrawingTool, FilledObject, IDrawingComponentProps, IDrawingLayer, 
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
 import { Point } from "../model/drawing-basic-types";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
-import EllipseToolIcon from "../../../clue/assets/icons/drawing/ellipse-icon.svg";
+import EllipseToolIcon from "../assets/ellipse-icon.svg";
 
 export const EllipseObject = types.compose("EllipseObject", StrokedObject, FilledObject)
   .props({
@@ -37,7 +37,7 @@ function isEllipseObject(model: DrawingObjectType): model is EllipseObjectType {
   return model.type === "ellipse";
 }
 
-export function EllipseComponent({model, handleHover} : IDrawingComponentProps) {
+export const EllipseComponent = observer(function EllipseComponent({model, handleHover} : IDrawingComponentProps) {
   if (!isEllipseObject(model)) return null;
   const { id, x, y, rx, ry, stroke, strokeWidth, strokeDashArray, fill } = model;
   return <ellipse
@@ -52,7 +52,7 @@ export function EllipseComponent({model, handleHover} : IDrawingComponentProps) 
     strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
     onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
     onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null} />;
-}
+});
 
 export class EllipseDrawingTool extends DrawingTool {
 
@@ -96,7 +96,7 @@ export class EllipseDrawingTool extends DrawingTool {
   }
 }
 
-export function EllipseToolbarButton({drawingContent}: IToolbarButtonProps) {
+export function EllipseToolbarButton({toolbarManager}: IToolbarButtonProps) {
   return <SvgToolModeButton modalButton="ellipse" title="Ellipse"
-      drawingContent={drawingContent} SvgIcon={EllipseToolIcon} />;
+      toolbarManager={toolbarManager} SvgIcon={EllipseToolIcon} />;
 }

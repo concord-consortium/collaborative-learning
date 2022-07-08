@@ -77,7 +77,7 @@ export const ToolbarView: React.FC<IProps> = (
   };
 
   const toolbarButtonProps: IToolbarButtonProps = {
-    drawingContent,
+    toolbarManager: drawingContent,
     togglePaletteState,
     clearPaletteState
   };

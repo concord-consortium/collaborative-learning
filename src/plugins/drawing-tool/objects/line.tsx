@@ -1,12 +1,12 @@
+import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import React from "react";
 import { SelectionBox } from "../components/selection-box";
-import { computeStrokeDashArray } from "../model/drawing-content";
-import { DeltaPoint, DrawingTool, IDrawingComponentProps, IDrawingLayer, 
+import { computeStrokeDashArray, DeltaPoint, DrawingTool, IDrawingComponentProps, IDrawingLayer, 
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
 import { Point } from "../model/drawing-basic-types";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
-import FreehandToolIcon from "../../../clue/assets/icons/drawing/freehand-icon.svg";
+import FreehandToolIcon from "../assets/freehand-icon.svg";
 
 function* pointIterator(line: LineObjectType): Generator<Point, string, unknown> {
   const {x, y, deltaPoints} = line;
@@ -60,7 +60,7 @@ export const LineObject = StrokedObject.named("LineObject")
 export interface LineObjectType extends Instance<typeof LineObject> {}
 export interface LineObjectSnapshot extends SnapshotIn<typeof LineObject> {}
 
-export function LineComponent({model, handleHover} : IDrawingComponentProps) {
+export const LineComponent = observer(function LineComponent({model, handleHover} : IDrawingComponentProps) {
   if (model.type !== "line") return null;
   const { id, x, y, deltaPoints, stroke, strokeWidth, strokeDashArray } = model as LineObjectType;
   const commands = `M ${x} ${y} ${deltaPoints.map((point) => `l ${point.dx} ${point.dy}`).join(" ")}`;
@@ -73,7 +73,7 @@ export function LineComponent({model, handleHover} : IDrawingComponentProps) {
     strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
     onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
     onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null} />;
-}
+});
 
 export class LineDrawingTool extends DrawingTool {
 
@@ -120,7 +120,7 @@ export class LineDrawingTool extends DrawingTool {
   }
 }
 
-export function LineToolbarButton({drawingContent}: IToolbarButtonProps) {
-  return <SvgToolModeButton modalButton="line" settings={{ fill: drawingContent.stroke }}
-    title="Freehand" drawingContent={drawingContent} SvgIcon={FreehandToolIcon} />;
+export function LineToolbarButton({toolbarManager}: IToolbarButtonProps) {
+  return <SvgToolModeButton modalButton="line" settings={{ fill: toolbarManager.stroke }}
+    title="Freehand" toolbarManager={toolbarManager} SvgIcon={FreehandToolIcon} />;
 }

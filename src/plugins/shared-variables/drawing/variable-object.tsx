@@ -1,5 +1,5 @@
 import { Instance, SnapshotIn, types } from "mobx-state-tree";
-import React from "react";
+import React, {useContext} from "react";
 import { DrawingObject, DrawingTool, IDrawingComponentProps, IDrawingLayer, IToolbarButtonProps, typeField } 
   from "../../drawing-tool/objects/drawing-object";
 import { Point } from "../../drawing-tool/model/drawing-basic-types";
@@ -8,6 +8,7 @@ import { findVariable } from "./drawing-utils";
 import { useVariableDialog } from "./use-variable-dialog";
 import VariableToolIcon from "../../../clue/assets/icons/variable-tool.svg";
 import { SvgToolbarButton } from "../../drawing-tool/components/drawing-toolbar-buttons";
+import { DrawingContentModelContext } from "../../drawing-tool/components/drawing-content-context";
 
 export const VariableChipObject = DrawingObject.named("VariableObject")
   .props({
@@ -34,7 +35,8 @@ export const VariableChipObject = DrawingObject.named("VariableObject")
 export interface VariableChipObjectType extends Instance<typeof VariableChipObject> {}
 export interface VariableChipObjectSnapshot extends SnapshotIn<typeof VariableChipObject> {}
 
-export const VariableChipComponent: React.FC<IDrawingComponentProps> = function ({model, handleHover, drawingContent}){
+export const VariableChipComponent: React.FC<IDrawingComponentProps> = function ({model, handleHover}){
+  const drawingContent = useContext(DrawingContentModelContext);
   if (model.type !== "variable") return null;
   const { id, x, y, variableId } = model as VariableChipObjectType;
 
@@ -69,8 +71,8 @@ export class VariableDrawingTool extends DrawingTool {
   }
 }
 
-export function VariableChipToolbarButton({drawingContent}: IToolbarButtonProps) {
-  const [showVariableDialog] = useVariableDialog({ drawingContent });
+export function VariableChipToolbarButton(props: IToolbarButtonProps) {
+  const [showVariableDialog] = useVariableDialog();
 
   const handleShowVariableDialog = () => {
     showVariableDialog();
