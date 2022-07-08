@@ -434,3 +434,13 @@ const virtualEmgChannel: NodeChannelInfo = {
 export const virtualSensorChannels: NodeChannelInfo[] = [
   virtualTempChannel, virtualHumidChannel, virtualCO2Channel, virtualO2Channel,
   virtualLightChannel, virtualPartChannel, virtualEmgChannel ];
+
+  // JB SERIAL TODO make this a type and instantiate dynamically because need real ids and one per sensor
+// const liveEmgSensorChannel: NodeChannelInfo = {
+//   hubId: "00000-LIVE-EMG", hubName: "Local EMG Sensor", name: "EMG", channelId: "emg1",
+//   missing: false, type: "emg-reading", units: "f(mv)", plug: 9, value: 42, virtual: false,
+// };            
+  
+// export const liveSensorChannels: NodeChannelInfo[] = [
+//   liveEmgSensorChannel
+// ];
