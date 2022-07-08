@@ -4,26 +4,187 @@
   "title": "Brainwaves",
   "subtitle": "",
   "placeholderText": "Add your thoughts here.",
-  "settings": {
-    "table": {
-      "numFormat": ".2~f"
-    }
+  "config": {
+    "placeholderText": "Document your thoughts",
+    "autoSectionProblemDocuments": false,
+    "defaultDocumentTemplate": {
+      "tiles": [
+        {
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": "Welcome! To begin reviewing the CLUE software, please click the My Resources bar at extreme left, and then click the tab labeled <strong>Lesson</strong>."
+          }
+        }
+      ]
+    },
+    "defaultDocumentType": "problem",
+    "settings": {
+      "table": { "numFormat": ".2~f" }
+    },
+    "toolbar": [
+      {
+        "id": "select",
+        "title": "Select",
+        "iconId": "icon-select-tool",
+        "isTileTool": false,
+        "isDefault": true
+      },
+      {
+        "id": "Text",
+        "title": "Text",
+        "isTileTool": true
+      },
+      {
+        "id": "Dataflow",
+        "title": "Dataflow",
+        "isTileTool": true
+      },
+      {
+        "id": "Table",
+        "title": "Table",
+        "isTileTool": true
+      },
+      {
+        "id": "Image",
+        "title": "Image",
+        "isTileTool": true
+      },
+      {
+        "id": "Drawing",
+        "title": "Drawing",
+        "isTileTool": true
+      },
+      {
+        "id": "Geometry",
+        "title": "Graph",
+        "isTileTool": true
+      },
+      {
+        "id": "delete",
+        "title": "Delete",
+        "iconId": "icon-delete-tool",
+        "isTileTool": false
+      }
+    ],
+    "navTabs": {
+      "showNavPanel": true,
+      "lazyLoadTabContents": true,
+      "tabSpecs": [
+        {
+          "tab": "problems",
+          "label": "Lessons",
+          "sections": [
+            {
+              "initials": "IN",
+              "title": "Introduction",
+              "type": "problem-documents"
+            },
+            {
+              "initials": "LAB",
+              "title": "Lab Work",
+              "type": "problem-documents"
+            },
+            {
+              "initials": "PR",
+              "title": "Programming",
+              "type": "problem-documents"
+            },
+            {
+              "initials": "RF",
+              "title": "Reflection",
+              "type": "problem-documents"
+            }
+          ]
+        },
+        {
+          "tab": "class-work",
+          "label": "Extensions",
+          "sections": [
+            {
+              "title": "Custom Lessons",
+              "type": "teacher-supports",
+              "dataTestHeader": "supports-section-teacher-supports",
+              "dataTestItem": "supports-list-items",
+              "documentTypes": ["publication", "personalPublication"],
+              "properties": ["isTeacherDocument", "!isDeleted"]
+            },
+            {
+              "title": "Class Models and Data",
+              "type": "published-problem-documents",
+              "dataTestHeader": "class-work-section-published",
+              "dataTestItem": "class-work-list-items",
+              "documentTypes": ["publication"],
+              "showStars": ["teacher"],
+              "properties": ["!isTeacherDocument"]
+            },
+            {
+              "title": "Class Models and Data",
+              "type": "published-personal-documents",
+              "dataTestHeader": "class-work-section-personal",
+              "dataTestItem": "class-work-list-items",
+              "documentTypes": ["personalPublication"],
+              "properties": ["!isTeacherDocument"]
+            }
+          ]
+        },
+        {
+          "tab": "my-work",
+          "label": "My Work",
+          "sections": [
+            {
+              "title": "Workspaces",
+              "type": "problem-documents",
+              "dataTestHeader": "my-work-section-investigations",
+              "dataTestItem": "my-work-list-items",
+              "documentTypes": ["problem", "planning"],
+              "order": "original",
+              "showStars": []
+            },
+            {
+              "title": "Workspaces",
+              "type": "personal-documents",
+              "dataTestHeader": "my-work-section-workspaces",
+              "dataTestItem": "my-work-list-items",
+              "documentTypes": ["personal"],
+              "properties": ["!isDeleted"],
+              "showStars": [],
+              "addDocument": true
+            },
+            {
+              "title": "KWL Journals",
+              "type": "learning-logs",
+              "dataTestHeader": "learning-log-section",
+              "documentTypes": ["learningLog"],
+              "properties": ["!isDeleted"],
+              "addDocument": true
+            }
+          ]
+        }
+      ]
+    },
+    "stamps": [    ]
   },
   "sections": {
-    "reference": {
-      "initials": "REF",
-      "title": "Reference",
-      "placeholder": "Reference Images and Descriptions"
+    "intro": {
+      "initials": "IN",
+      "title": "Introduction",
+      "placeholder": "Add notes on this lesson's topic and goals."
     },
-    "practice": {
+    "labWork": {
+      "initials": "LAB",
+      "title": "Lab Work",
+      "placeholder": "Discuss how to approach your experiment, take data, write programs."
+    },
+    "programming": {
       "initials": "PR",
-      "title": "Practice",
-      "placeholder": "Try out Tools"
+      "title": "Programming",
+      "type": "Create programs here"
     },
-    "experiment": {
-      "initials": "EX",
-      "title": "Experiment",
-      "placeholder": "Discuss your Findings or \nDesign an Experiment"
+    "reflection": {
+      "initials": "RF",
+      "title": "Reflection",
+      "type": "problem-documents"
     }
   },
   "planningDocument": {
@@ -58,60 +219,210 @@
       { "type": "summarize" }
     ]
   },
-  "defaultStamps": [
-  ],
   "investigations": [
     {
       "description": "Investigation 1",
       "ordinal": 1,
-      "title": "Motor Control",
+      "title": "Biology and Motion",
       "problems": [
         {
-          "description": "Activity 1.1",
+          "description": "Lesson 1.1",
           "ordinal": 1,
-          "title": "Technology Assistance for Paralysis",
-          "subtitle": " Background and Biology",
+          "title": "How do Bionic Arms Work?",
+          "subtitle": "",
           "disabled": [],
           "sections": 
           [
             {
-            "type": "reference",
-            "content": {
-              "tiles": 
-              [
-                {
+              "type": "intro",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "FeiVDmGGmamqLrn5",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h2>Technology and Paralysis Background</h2>",
-                        "<p>During this section, we'll explore how technology can help patients with paralysis regain motor control of their limbs.</p>",
-                        "<p>To begin, watch this segment from the <a href='https://www.pbs.org/newshour/show/experimental-technology-works-to-bring-back-sense-of-touch-for-those-living-with-paralysis'>PBS News Hour</a>.</p>" 
+                        "<h2>Objective: </h2>",
+                        "<p>During this lesson, we will explore emerging robotics technology that helps people with neurological conditions or missing limbs.</p>"
                       ]
                     }
-                },
-                {
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": [
-                      "<p>Axons are the cells in a human that send signals from the brain to muscle cells, and allow you to move your arm or open your eyes, for example.</p>"
-                    ]
+                  },
+                  {
+                    "id": "dhCKo3wP2pRDcKhv",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>Let&#x27;s Explore Energy Sticks! </h2>",
+                        "<p>Please watch the video to explore what energy sticks are: <a href='https://www.youtube.com/watch?v=RYm3soCD9Jg&amp;ab_channel=ArborScientific'>Energy Stick Video</a></p>",
+                        "<p>Try creating some tiles in your workspace and write down some thoughts about what Energy sticks are and how they work. You can make text tiles (letter A), drawings (pencil), Tables and graphs, including pictures or photos, and even make programs, which we will work with in future lessons.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/energyStick.jpg"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>In their CLUE Workspace, students should reflect critically about their readings and any questions they have brainstormed. Have students try out some of the tools to document what they learned.</p>"
+                      ]
+                    }
                   }
-                },
-                {
-                  "content": {
-                    "type": "Image",
-                    "url": "curriculum/neural-engineering/images/axon.jpg"
-                  }
-                }
-              ]
+                ]
               }
             },
             {
-              "type": "practice",
+              "type": "labWork",
               "content": {
                 "tiles": [
+                  {
+                    "id": "xvGNO49WAIVh6DIQ",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>Experiment with Energy Sticks</h2>",
+                        "<p>Please pair up with the friend and play with the energy stick provided. While playing with it, you can try any of these activities:</p>",
+                        "<ul><li>compare each partner holding one end of the energy stick with one hand and keeping your other hand at your sides with holding one end of the energy stick while simultaneously holding hands with your partner.</li><li>compare holding one end of the energy stick while simultaneously holding one end of a piece of wood (e.g., wooden spoon) with holding one end of the energy stick while simultaneously holding one end of a piece of metal (e.g., metal spoon).</li></ul>",
+                        "<p>Document the results of each experiment. Then try making up a few experiments of your own. What does each trial prove?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>Programs to Express Closing a Circuit</h2>",
+                        "<p>We can use a program to turn lights on and off in the same way you just did with the Energy Sticks.</p>",
+                        "Here is a very simple program. Recreate this program with the program tool in your workspace. Then add some logic to make the lightbulb only turn on when the signal amplitude is over 0.5.",
+                        "<p>Programs are one way to express models of actual circuits."
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/signalProgram.jpg"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "reflection",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "tJZWTi-WSYcSULuW",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>DISCUSS</h2>",
+                        "<p>Let&#x27;s Discuss your shared experience of playing with the energy sticks and what you have observed! Some questions you could think about are:</p>",
+                        "<ul><li>What makes our classroom light glow? (Flick light switch off) Why does flicking the switch stop the light from glowing? </li><li>What conditions appear to be necessary to make the light stick glow? What conditions appear to be necessary to make the light stick not glow? How can this be explained?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "2LHRBzTmJD5hzG5R",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>How do Bionic Arms Work? </h2>",
+                        "<p>Please watch one of the following videos to learn about the bionic arms: </p>",
+                        "<p><a href=' https://docs.google.com/presentation/d/1dHXctK0ogUft9mhM8TBB1m_kDUP_i0jbgvDpBVIb1WI/edit#slide=id.g1f5a554dbf_0_404'>Tilly’s Bionic Arms</a></p>",
+                        "<p><a href='https://drive.google.com/file/d/1Frped4M9BUD-KCYwiucsM3Z7jasCNm8v/view'>Beyond Robotics</a></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>Working in Groups</h2>",
+                        "<p>Please practice working in groups using the group sharing tools in CLUE. Switch to the Group View and share your documents. Swap ideas about what you saw in the Bionic Arm videos, and how you think they relate to the energy stick.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/headerHelp.jpg"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Drag the table below into your learning log, and fill it in for this experiment.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "pC1DYCIgCcBCcfiq",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>KWL JOURNAL</h2>",
+                        "<p>You will keep a journal of what you have learned throughout these lessons. Begin or Open a KWL Journal either from the File menu or from the My Work tab. Record today's date. Then drag the table below into your journal and fill it out.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "VX0fplHGo5DQbZPK",
+                    "content": {
+                      "type": "Table",
+                      "name": "After each activity, please record what you know, wonder, and learn about the topic.",
+                      "columns": [
+                        {"name":"Date","values":["","",""]},
+                        {"name":"Today's Topic","values":["","",""]},
+                        {"name":"Know","values":["","",""]},
+                        {"name":"Wonder","values":["","",""]},
+                        {"name":"Learn","values":["","",""]}
+                      ]
+                    }
+                  }                
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "description": "Lesson 1.5 - Sample",
+          "ordinal": 5,
+          "title": "Technology Assistance for Paralysis",
+          "subtitle": "EMG Signals",
+          "disabled": [],
+          "sections": 
+          [
+            {
+              "type": "intro",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>Objective</h2>",
+                        "<p>During this section, we will explore how EMG signals can be used to control a robotic claw.  For that, you will use electromyography (EMG) in coordination with a robotic claw to model the performance of a bionic arm.</p>" 
+                      ]
+                    }
+                  },
                   {
                     "content": {
                       "type": "Text",
@@ -143,7 +454,7 @@
               }
             },
             {
-              "type": "experiment",
+              "type": "labWork",
               "content": {
                 "tiles": [
                   {
@@ -183,6 +494,45 @@
                       "url": "curriculum/neural-engineering/images/signalProgram.jpg"
                     }
                   }
+                ]
+              }
+            },
+            {
+              "type": "reflection",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Discuss with your group to find the signal strength and duration of axon signals. You might wish to organize your data in a table like the one below. </p>"
+
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Drag the table below into your learning log, and fill it in for this experiment.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Table",
+                      "name": "Record what you know, wonder, and learn about the topic.",
+                      "columns": [
+                        {"name":"Date"},
+                        {"name":"Today's Topic"},
+                        {"name":"Know"},
+                        {"name":"Wonder"},
+                        {"name":"Learn"}
+                      ]
+                    }
+                  }                  
                 ]
               }
             }
