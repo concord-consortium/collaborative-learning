@@ -25,8 +25,6 @@ interface IMatchPropertiesOptions {
   isTeacherDocument?: boolean;
 }
 
-// FIXME: need to switch this to being the Tree now that it is the root
-
 export const DocumentModel = Tree.named("Document")
   .props({
     uid: types.string,
