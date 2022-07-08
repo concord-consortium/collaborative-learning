@@ -2,6 +2,7 @@ import Rete, { Node, Socket } from "rete";
 import { NodeData } from "rete/types/core/data";
 import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
 import { ValueControl } from "../controls/value-control";
+import { TextControl } from "../controls/text-control";
 import { DemoOutputControl } from "../controls/demo-output-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
 import { PlotButtonControl } from "../controls/plot-button-control";
@@ -17,12 +18,21 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
     if (this.editor) {
       const inp1 = new Rete.Input("num1", "Number", this.numSocket);
 
-      return node
+      node
         .addControl(new DropdownListControl(this.editor, "outputType", node, NodeDemoOutputTypes, true))
         .addControl(new PlotButtonControl(this.editor, "plot", node))
         .addControl(new ValueControl(this.editor, "nodeValue", node))
-        .addControl(new DemoOutputControl(this.editor, "demoOutput", node))
-        .addInput(inp1) as any;
+        .addControl(new DemoOutputControl(this.editor, "demoOutput", node));
+
+      // this.addInput(node, "num1");
+      node.addInput(inp1);
+
+      if (node.data.outputType === "Grabber") {
+        this.addInput(node, "speed");
+        this.addInput(node, "tilt");
+      }
+
+      return node as any;
     }
   }
 
@@ -46,11 +56,69 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
         }
 
         const demoOutput = _node.controls.get("demoOutput") as DemoOutputControl;
-        demoOutput && demoOutput.setValue(result);
-        demoOutput && demoOutput.setOutputType(outputType);
+        demoOutput?.setValue(result);
+
+        if (outputType === "Grabber") {
+          this.addInput(_node, "speed");
+          this.addInput(_node, "tilt");
+        } else {
+          this.removeInput(_node, "speed");
+          this.removeInput(_node, "tilt");
+        }
+        node.data.outputType = outputType;
+        demoOutput?.setOutputType(outputType);
 
         this.editor.view.updateConnections( {node: _node} );
+
+        _node.update();
       }
     }
   }
+
+  private addInput(node: Node, inputKey: string) {
+    if (this.editor) {
+      const oldInput = node.inputs.get(inputKey);
+      if (!oldInput) {
+        const input = new Rete.Input(inputKey, "Number", this.numSocket);
+        // node.addControl(new PlotButtonControl(this.editor, inputKey + "Plot", node))
+        //   .addControl(new ValueControl(this.editor, inputKey + "Value", node));
+        node.addInput(input);
+        // input.addControl(new PlotButtonControl(this.editor, inputKey + "Plot", node));
+        // input.addControl(new ValueControl(
+        //   this.editor,
+        //   inputKey + "Value",
+        //   node
+        // ));
+        input.addControl(new TextControl(
+          this.editor,
+          inputKey + "Text",
+          node,
+          "",
+          inputKey, // Display text
+          `Display for ${inputKey}`
+        ));
+      }
+    }
+  }
+
+  private removeInput(node: Node, inputKey: string) {
+    const input = node.inputs.get(inputKey);
+    if (input && this.editor) {
+      input.connections.slice().map(this.editor.removeConnection.bind(this.editor));
+      node.removeInput(input);
+    }
+    // this.removeControl(node, inputKey + "Plot");
+    // this.removeControl(node, inputKey + "Value");
+    // const control = node.controls.get(inputKey);
+    // if (control && this.editor) {
+    //   node.removeControl(control);
+    // }
+  }
+
+  // private removeControl(node: Node, controlKey: string) {
+  //   const control = node.controls.get(controlKey);
+  //   if (control && this.editor) {
+  //     node.removeControl(control);
+  //   }
+  // }
 }
