@@ -71,12 +71,6 @@ export const SharedModelEntry = types.model("SharedModelEntry", {
   }
 }));
 
-// problemPathContext is used to generate unique ids for tiles specified in curriculums.
-// Unit, investigation, and problem models are responsible for updating this shared object
-// during the preProcessSnapshot step so the DocumentContentModel knows where we are
-// when generating ids.
-export const problemPathContext = { unit: "", investigation: 0, problem: 0 };
-
 export const DocumentContentModel = types
   .model("DocumentContent", {
     rowMap: types.map(TileRowModel),
@@ -383,14 +377,12 @@ export const DocumentContentModel = types
       } else {
         ++self.importContextTileCounts[tileType];
       }
+      // FIXME: This doesn't generate unique ids.
+      // Many sections seem to be unnamed, so they never set the importContextCurrentSection.
+      // The result is tiles in different sections (including different investigations and problems)
+      // have the same id, and in turn share the same metadata.
       const section = self.importContextCurrentSection || "document";
-      const problemPath =
-        `${problemPathContext.unit}/${problemPathContext.investigation}/${problemPathContext.problem}`;
-      // const id = `${problemPath}_${section}_${tileType}_${self.importContextTileCounts[tileType]}`;
-      // if (tileType === "Image") {
-      //   console.log(id);
-      // }
-      return `${problemPath}_${section}_${tileType}_${self.importContextTileCounts[tileType]}`;
+      return `${section}_${tileType}_${self.importContextTileCounts[tileType]}`;
     },
     insertRow(row: TileRowModelType, index?: number) {
       self.rowMap.put(row);

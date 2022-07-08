@@ -1,6 +1,6 @@
 import { IReactionDisposer, reaction } from "mobx";
 import { Instance, SnapshotIn, types } from "mobx-state-tree";
-import { DocumentContentModel, problemPathContext } from "../document/document-content";
+import { DocumentContentModel } from "../document/document-content";
 import { InvestigationModel } from "./investigation";
 import {
   ISectionInfoMap, SectionModel, registerSectionInfo, suspendSectionContentParsing, resumeSectionContentParsing
@@ -132,7 +132,6 @@ export const UnitModel = types.snapshotProcessor(ModernUnitModel, {
     else if (isAmbiguousSnapshot(sn)) {
       console.warn("UnitModel ignoring legacy top-level properties!");
     }
-    problemPathContext.unit = sn.code || "";
     return sn;
   }
 });
