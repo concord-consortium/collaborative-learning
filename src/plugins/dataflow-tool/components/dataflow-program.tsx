@@ -845,7 +845,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private addNode = async (nodeType: string) => {
-    console.log('NODE STEP 1: add node')
+    //console.log('NODE STEP 1: add node')
     const nodeFactory = this.programEditor.components.get(nodeType) as any;
     const n1 = await nodeFactory!.createNode();
     n1.position = this.getNewNodePosition();
@@ -973,9 +973,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             Generator: this.updateGeneratorNode,
             Timer: this.updateTimerNode,
             Sensor: (n: Node) => {
-                      console.log("NODE STEP 2 now we must call updateNodeChannelInfo")
+                      //console.log("NODE STEP 2 now we must call updateNodeChannelInfo")
                       this.updateNodeChannelInfo(n);
-                      console.log("NODE STEP 3 now we must call updateNodeSensorValue")
+                      //console.log("NODE STEP 3 now we must call updateNodeSensorValue")
                       this.updateNodeSensorValue(n);
                     },
             Relay: this.updateNodeChannelInfo
@@ -983,6 +983,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     let processNeeded = false;
     this.programEditor.nodes.forEach((n: Node) => {
+      console.log("this.programEditor.nodes: ", this.programEditor.nodes)
       const nodeProcess = nodeProcessMap[n.name];
       if (nodeProcess) {
         processNeeded = true;
@@ -1008,11 +1009,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private updateNodeChannelInfo = (n: Node) => {
-    console.log('STEP NODE - this is where we figure out if we are a sensor, given n:', n)
     const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
     const relayList = n.controls.get("relayList") as RelaySelectControl;
     if (sensorSelect) {
-      console.log('STEP NODE - and here we set the channels to the channels that exist - and that is our dynamism problem')
+      //console.log('STEP NODE SERIAL JB - and here we set the channels to the channels that exist - and that is our dynamism problem')
       sensorSelect.setChannels(this.channels);
       (sensorSelect as any).update();
     }
