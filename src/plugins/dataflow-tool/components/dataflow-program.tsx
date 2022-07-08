@@ -323,7 +323,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.programEditor.register(c);
       });
 
-      const program = this.props.program && this.props.program.snapshotForRete;
+      const program = this.props.program?.snapshotForRete;
       if (program?.id) {
         if (!this.props.readOnly && clearHistory) {
           forEach(program.nodes, (n: Node) => {
@@ -1107,7 +1107,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
     const plotControl = n.controls.get("plot") as PlotButtonControl;
     if (plotControl) {
-      (n as any).update();
+      n.update();
     }
   };
 
