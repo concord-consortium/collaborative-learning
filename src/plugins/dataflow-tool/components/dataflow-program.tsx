@@ -964,6 +964,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       // JB SERIAL QUESTION - this.channels only ends up populated on 1/4 ticks?
       // console.log('TICK, DataFlowProgram.channels: ', this.channels)
     }
+
+    console.log('TICK, DataFlowProgram.channels: ', this.channels)
+    
     // Update the sampling rate
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
