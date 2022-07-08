@@ -4,8 +4,21 @@ import ClueCanvas from '../../../../support/elements/clue/cCanvas';
 let clueCanvas = new ClueCanvas,
   drawToolTile = new DrawToolTile;
 
+// NOTE: For some reason cypress+chrome thinks that the SVG elements are in a
+// scrollable container. Because of this when cypress does an action on a SVG
+// element like click or trigger, by default it tries to scroll this element to
+// the top of the containers visible area. Likewise when looking at the test
+// results after a run is complete the cypress app will automatically scroll
+// this area when you select a cypress `get` that is selecting a SVG element.
+//
+// - The first issue is addressed here by adding `scrollBehavior: false` to each
+//   action that works with an SVG element.
+// - The second issue has no simple solution, so you need to remember it when
+//   looking at the results.
+// - The best solution to both problems would be to figure out the CSS necessary
+//   so cypress+chrome simply cannot scroll the container.
 
-context('Table Tool Tile', function () {
+context('Draw Tool Tile', function () {
   before(function () {
     const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=msa";
     cy.clearQAData('all');
@@ -68,7 +81,7 @@ context('Table Tool Tile', function () {
       });
       it("deletes vector drawing", () => {
         drawToolTile.getDrawToolSelect().click();
-        drawToolTile.getVectorDrawing().click();
+        drawToolTile.getVectorDrawing().click({scrollBehavior: false});
         drawToolTile.getDrawToolDelete().click();
         drawToolTile.getVectorDrawing().should("not.exist");
       });
@@ -85,7 +98,7 @@ context('Table Tool Tile', function () {
       it("verify change outline color", () => {
         drawToolTile.getRectangleDrawing().first().should("have.attr", "stroke").and("eq", "#000000");
         drawToolTile.getDrawToolSelect().click();
-        drawToolTile.getRectangleDrawing().click({force:true});
+        drawToolTile.getRectangleDrawing().click({force:true, scrollBehavior: false});
         drawToolTile.getDrawToolStrokeColor().click();
         cy.get(".toolbar-palette.stroke-color .palette-buttons").should("be.visible");
         cy.get(".toolbar-palette.stroke-color .palette-buttons .color-swatch").last().click();
@@ -93,49 +106,135 @@ context('Table Tool Tile', function () {
       });
       it("verify change fill color", () => {
         drawToolTile.getRectangleDrawing().first().should("not.have.attr", "fill-color");
-        // The rectangle is already selected
-        // drawToolTile.getDrawToolSelect().click();
-        // drawToolTile.getRectangleDrawing().click({force:true});
+        // The rectangle is already selected, so we don't need to select it again
         drawToolTile.getDrawToolFillColor().click();
         cy.get(".toolbar-palette.fill-color .palette-buttons").should("be.visible");
         cy.get(".toolbar-palette.fill-color .palette-buttons .color-swatch").last().click();
         drawToolTile.getRectangleDrawing().first().should("have.attr", "fill").and("eq", "#d100d1");
       });
-      it("verify move object", () => {
+      it("verify moving pre-selected object", () => {
         drawToolTile.getDrawToolSelect().click();
         drawToolTile.getDrawTile()
           .trigger("mousedown", 100, 100)
           .trigger("mousemove", 200, 100)
           .trigger("mouseup", 200, 100);
-        drawToolTile.getRectangleDrawing().first().should("have.attr", "x").then(parseInt).and("within", 170, 220);
+        // For some reason the move isn't very accurate in cypress so often the final location off
+        drawToolTile.getRectangleDrawing().first().should("have.attr", "x").then(parseInt).and("within", 160, 220);
+      });
+      it("verify hovering objects", () => {
+        drawToolTile.getDrawTile()
+          // Un-select the rectangle
+          .trigger("mousedown", 500, 100)
+          .trigger("mouseup", 500, 100);
+        
+        drawToolTile.getRectangleDrawing().first()
+          // Get the rectangle to be hovered. In the code we are listening to
+          // `onMouseEnter` but in Cypress triggering a "mouseenter" event
+          // doesn't work. Triggering a "mouseover" does work for some reason.
+          .trigger("mouseover", {scrollBehavior: false});
+
+        // The hover box is rendered as a selection-box with a different color
+        drawToolTile.getSelectionBox().should("exist").should("have.attr", "stroke").and("eq", "#bbdd00");        
+
+        // The best way I found to remove the hover was to delete the rectangle
+        drawToolTile.getRectangleDrawing().first().click({force: true, scrollBehavior: false});
+        drawToolTile.getDrawToolDelete().click();
+        drawToolTile.getSelectionBox().should("not.exist");        
+
+      });
+      it("verify moving not selected object", () => {
+        drawToolTile.getDrawToolRectangle().click();
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 250,  50)
+          .trigger("mousemove", 100, 150)
+          .trigger("mouseup",   100, 150);
+        drawToolTile.getRectangleDrawing().should("exist").and("have.length", 1);
+
+        drawToolTile.getDrawToolSelect().click();
+
+        // Get the rectangle to be hovered, see above for more info.
+        drawToolTile.getRectangleDrawing()
+          .trigger("mouseover", {scrollBehavior: false});
+        drawToolTile.getSelectionBox().should("exist").should("have.attr", "stroke").and("eq", "#bbdd00");
+
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 100, 135)
+          .trigger("mousemove", 200, 135)
+          .trigger("mouseup", 200, 135);
+
+        drawToolTile.getRectangleDrawing().first().should("have.attr", "x").then(parseInt).and("within", 150, 250);
+
+        // The best way I found to remove the hover was to delete the rectangle
+        drawToolTile.getRectangleDrawing().first().click({force: true, scrollBehavior: false});
+        drawToolTile.getDrawToolDelete().click();
+        drawToolTile.getSelectionBox().should("not.exist");        
       });
       it("verify draw squares", () => {
         drawToolTile.getDrawToolRectangle().click();
+
+        // starting from top edge
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 100, 50, {ctrlKey: true})
+          .trigger("mousemove", 100, 70,{ctrlKey: true})
+          .trigger("mouseup",   100, 70);
+
+        drawToolTile.getRectangleDrawing().should("exist").and("have.length", 1);
+        drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "20");
+        drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "20");
+
+        // starting from the left edge
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 200, 50, {ctrlKey: true})
+          .trigger("mousemove", 230, 50,{ctrlKey: true})
+          .trigger("mouseup",   230, 50);
+        drawToolTile.getRectangleDrawing().should("exist").and("have.length", 2);
+        drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "30");
+        drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "30");  
+
+        // draw a square starting at the bottom edge
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 300, 90, {ctrlKey: true})
+          .trigger("mousemove", 300, 50,{ctrlKey: true})
+          .trigger("mouseup",   300, 50);
+        drawToolTile.getRectangleDrawing().should("exist").and("have.length", 3);
+        drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "40");
+        drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "40");  
+
+        // draw a square starting at the right edge
         drawToolTile.getDrawTile()
           .trigger("mousedown", 450, 50, {ctrlKey: true})
-          .trigger("mousemove", 450, 100,{ctrlKey: true})
-          .trigger("mouseup",   450, 100);
-        drawToolTile.getRectangleDrawing().should("exist").and("have.length", 2);
-        drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "46");
-        drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "46");
+          .trigger("mousemove", 400, 50,{ctrlKey: true})
+          .trigger("mouseup",   400, 50);
+        drawToolTile.getRectangleDrawing().should("exist").and("have.length", 4);
+        drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "50");
+        drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "50");        
 
+        // Diagonal from top right to bottom left with the width 60 and height 50
         drawToolTile.getDrawTile()
-          .trigger("mousedown", 650, 50, {ctrlKey: true})
-          .trigger("mousemove", 710, 50,{ctrlKey: true})
-          .trigger("mouseup",   710, 50);
-        drawToolTile.getRectangleDrawing().should("exist").and("have.length", 3);
+          .trigger("mousedown", 560, 50, {ctrlKey: true})
+          .trigger("mousemove", 500, 100,{ctrlKey: true})
+          .trigger("mouseup",   500, 100);
+        drawToolTile.getRectangleDrawing().should("exist").and("have.length", 5);
         drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "60");
-        drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "60");  
+        drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "60");        
+
+        // Diagonal from bottom right to top left with the width 50 and the height 70
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 650, 120, {ctrlKey: true})
+          .trigger("mousemove", 600, 50,{ctrlKey: true})
+          .trigger("mouseup",   600, 50);
+        drawToolTile.getRectangleDrawing().should("exist").and("have.length", 6);
+        drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "70");
+        drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "70");        
+
       });
       it("deletes rectangle drawings", () => {
         drawToolTile.getDrawTile().click();
-        drawToolTile.getDrawToolSelect().click();
-        drawToolTile.getRectangleDrawing().first().click({force:true});
-        drawToolTile.getDrawToolDelete().click();
-        drawToolTile.getRectangleDrawing().first().click({force:true});
-        drawToolTile.getDrawToolDelete().click();
-        drawToolTile.getRectangleDrawing().first().click({force:true});
-        drawToolTile.getDrawToolDelete().click();
+        for (let i=0; i<6; i++) {
+          drawToolTile.getDrawToolSelect().click();
+          drawToolTile.getRectangleDrawing().first().click({force:true, scrollBehavior: false});
+          drawToolTile.getDrawToolDelete().click();  
+        }
         drawToolTile.getRectangleDrawing().should("not.exist");
       });
     });
@@ -161,9 +260,9 @@ context('Table Tool Tile', function () {
       it("deletes ellipse drawing", () => {
         drawToolTile.getDrawTile().click();
         drawToolTile.getDrawToolSelect().click();
-        drawToolTile.getEllipseDrawing().first().click({force:true});
+        drawToolTile.getEllipseDrawing().first().click({force:true, scrollBehavior: false});
         drawToolTile.getDrawToolDelete().click();
-        drawToolTile.getEllipseDrawing().first().click({force:true});
+        drawToolTile.getEllipseDrawing().first().click({force:true, scrollBehavior: false});
         drawToolTile.getDrawToolDelete().click();
         drawToolTile.getEllipseDrawing().should("not.exist");
       });
@@ -178,7 +277,7 @@ context('Table Tool Tile', function () {
       });
       it("deletes stamp drawing", () => {
         drawToolTile.getDrawToolSelect().click();
-        drawToolTile.getImageDrawing().click({force:true});
+        drawToolTile.getImageDrawing().click({force:true, scrollBehavior: false});
         drawToolTile.getDrawToolDelete().click();
         drawToolTile.getImageDrawing().should("not.exist");
       });

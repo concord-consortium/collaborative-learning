@@ -1,6 +1,6 @@
 import React from "react";
 import { reaction, IReactionDisposer } from "mobx";
-import { clone } from "mobx-state-tree";
+import { clone, isAlive } from "mobx-state-tree";
 import { observer } from "mobx-react";
 import { extractDragTileType, kDragTileContent } from "../../../components/tools/tool-tile";
 import { DrawingContentModelType, DrawingObjectMove } from "../model/drawing-content";
@@ -194,6 +194,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   };
 
   // handles dragging of selected/hovered objects
+  // TODO: it seems this could be cleaned up. Keeping the state variable objectsBeingDragged
+  // locally in this function and modifying the local variable is not safe.
   public handleSelectedObjectMouseDown = (e: React.MouseEvent<any>, obj: DrawingObjectType) => {
     if (this.props.readOnly) return;
     let moved = false;
@@ -209,7 +211,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     }
     const starting = this.getWorkspacePoint(e);
     if (!starting) return;
-    const start = objectsToInteract.map(object => ({x: object.x, y: object.y}));
 
     e.stopPropagation();
 
@@ -221,7 +222,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       if (!current) return;
       const dx = current.x - starting.x;
       const dy = current.y - starting.y;
-      moved = moved || ((dx !== 0) && (dy !== 0));
+      moved = moved || ((dx !== 0) || (dy !== 0));
 
       if (objectsBeingDragged.length === 0) {
         objectsBeingDragged = objectsToInteract.map(object => clone(object));
@@ -229,13 +230,18 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       }
 
       objectsBeingDragged.forEach((object, index) => {
-        object.setPosition(start[index].x + dx, start[index].y + dy);
+        object.setPosition(objectsToInteract[index].x + dx, objectsToInteract[index].y + dy);
       });
 
       if (needToAddHoverToSelection) {
         // we delay until we confirm that the user is dragging the objects before adding the hover object
         // to the selection, to avoid messing with the click to select/deselect logic
         this.setSelectedObjects(objectsToInteract);
+        // Note: the hoverObject could be kind of in a weird state here. It might
+        // be both selected and hovered at the same time. However it is more
+        // simple to keep the hoverObject independent of the selection. It just
+        // represents the current object the mouse is over regardless of whether
+        // it is selected or not.
         needToAddHoverToSelection = false;
       }
     };
@@ -351,6 +357,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         : false;
 
     const idsBeingDragged = this.state.objectsBeingDragged.map(object => object.id);
+    const objectsToRenderSelected = this.state.objectsBeingDragged.length > 0 ? 
+      this.state.objectsBeingDragged : this.state.selectedObjects;
 
     return (
       <div className="drawing-layer"
@@ -364,12 +372,9 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
           {this.renderObjects(object => object.type === "image" && !idsBeingDragged.includes(object.id))}
           {this.renderObjects(object => object.type !== "image" && !idsBeingDragged.includes(object.id))}
           {this.state.objectsBeingDragged.map((object) => renderDrawingObject(object))}
-          {this.state.objectsBeingDragged.length > 0 ? 
-            this.renderSelectedObjects(this.state.objectsBeingDragged, SELECTION_COLOR)
-            : this.renderSelectedObjects(this.state.selectedObjects, SELECTION_COLOR)}
-          {this.state.hoverObject
-            ? this.renderSelectedObjects([this.state.hoverObject], hoveringOverAlreadySelectedObject
-              ? SELECTION_COLOR : HOVER_COLOR)
+          {this.renderSelectedObjects(objectsToRenderSelected, SELECTION_COLOR)}
+          {(this.state.hoverObject && !hoveringOverAlreadySelectedObject && isAlive(this.state.hoverObject))
+            ? this.renderSelectedObjects([this.state.hoverObject], HOVER_COLOR)
             : null}
           {this.state.currentDrawingObject
             ? renderDrawingObject(this.state.currentDrawingObject)
