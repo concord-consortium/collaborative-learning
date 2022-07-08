@@ -211,6 +211,12 @@ export const NodeSensorTypes = [
     units: "PM2.5",
     icon: "icon-particulates"
   },
+  {
+    name: "EMG Reading",
+    type: "emg-reading",
+    units: "f(mv)", // JB SERIAL NOTE TODO: reflect transformation that occurs in arduino sketch
+    icon: "icon-emg-reading"
+  }
 ];
 
 export const NodeGeneratorTypes = [
@@ -416,7 +422,15 @@ const virtualPartChannel: NodeChannelInfo = {
     const vals = [10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11];
     return vals[t % vals.length];
   } };
+const virtualEmgChannel: NodeChannelInfo = {
+    hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "EMG", channelId: "00007VIR",
+    missing: false, type: "emg-reading", units: "f(mv)", plug: 8, value: 0, virtual: true,
+    virtualValueMethod: (t: number) => {
+      // JB SERIAL NOTE TODO: a choice of a number of mock data streams as specified in Pivotal
+      const vals = [70, 72, 74, 103, 106, 120, 121, 122, 124, 140, 144, 143, 120, 145, 151, 167, 130, 118, 71, 70, 70];
+      return vals[t % vals.length];
+} };
 
 export const virtualSensorChannels: NodeChannelInfo[] = [
   virtualTempChannel, virtualHumidChannel, virtualCO2Channel, virtualO2Channel,
-  virtualLightChannel, virtualPartChannel ];
+  virtualLightChannel, virtualPartChannel, virtualEmgChannel ];

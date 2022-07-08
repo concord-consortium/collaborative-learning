@@ -392,6 +392,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private updateChannels = () => {
     // const { hubStore } = this.stores; FIXME
+    
+    // JB SERIAL TODO GET CHANNEL INTO ARRAY HERE
+    console.log('about to update channels: ', this)
+
+
     this.channels = [];
 
     // function parseValue(value: string) {
@@ -955,8 +960,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private tick = () => {
     if(this.channels.length > 0){
-      // SERIAL QUESTION - I notice this.channels is only populated on 1/4 ticks.  Why?
-      console.log('TICK, DataFlowProgram.channels: ', this.channels)
+      // JB SERIAL QUESTION - this.channels only ends up populated on 1/4 ticks?
+      // console.log('TICK, DataFlowProgram.channels: ', this.channels)
     }
     // Update the sampling rate
     const now = Date.now();

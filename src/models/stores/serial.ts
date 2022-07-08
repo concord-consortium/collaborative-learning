@@ -1,23 +1,25 @@
 export class SerialDevice {
     value: string
     localBuffer: string
-    private port: any //TODO: types SerialPort | null 
+    private port: any // JB SERIAL TODO: types SerialPort | null 
 
     constructor() {
-        this.value = '0'
-        this.localBuffer = ''
-      }
+      this.value = '0'
+      this.localBuffer = ''
+    }
   
-      public async findPort(){
-        try {
-            await (navigator as any).serial.requestPort()
-            .then((p: any) => {
-              this.port = p
-            })
-        }
-
-        catch (error) {
-            console.log('error requesting port: ', error)
-        }
+    public async findPort(){
+      try {
+          await (navigator as any).serial.requestPort()
+          .then((p: any) => {
+            this.port = p
+          })
       }
+
+      catch (error) {
+          console.log('error requesting port: ', error)
+      }
+    }
+
+
 }
