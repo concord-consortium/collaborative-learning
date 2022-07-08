@@ -4,6 +4,7 @@ import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
 import { ValueControl } from "../controls/value-control";
 import { TextControl } from "../controls/text-control";
 import { DemoOutputControl } from "../controls/demo-output-control";
+import { DemoOutputValueControl } from "../controls/demo-output-value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
 import { PlotButtonControl } from "../controls/plot-button-control";
 import { NodeDemoOutputTypes } from "../../model/utilities/node";
@@ -16,20 +17,20 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
   public builder(node: Node) {
     super.defaultBuilder(node);
     if (this.editor) {
-      const inp1 = new Rete.Input("num1", "Number", this.numSocket);
+      // const inp1 = new Rete.Input("num1", "Number", this.numSocket);
 
       node
         .addControl(new DropdownListControl(this.editor, "outputType", node, NodeDemoOutputTypes, true))
-        .addControl(new PlotButtonControl(this.editor, "plot", node))
-        .addControl(new ValueControl(this.editor, "nodeValue", node))
+        // .addControl(new PlotButtonControl(this.editor, "plot", node))
+        // .addControl(new ValueControl(this.editor, "nodeValue", node))
         .addControl(new DemoOutputControl(this.editor, "demoOutput", node));
 
-      // this.addInput(node, "num1");
-      node.addInput(inp1);
+      this.addInput(node, "num1");
+      // node.addInput(inp1);
 
       if (node.data.outputType === "Grabber") {
-        this.addInput(node, "speed");
-        this.addInput(node, "tilt");
+        this.addInput(node, "speed", "speed: ");
+        this.addInput(node, "tilt", "tilt: ");
       }
 
       return node as any;
@@ -59,8 +60,8 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
         demoOutput?.setValue(result);
 
         if (outputType === "Grabber") {
-          this.addInput(_node, "speed");
-          this.addInput(_node, "tilt");
+          this.addInput(_node, "speed", "speed: ");
+          this.addInput(_node, "tilt", "tilt: ");
         } else {
           this.removeInput(_node, "speed");
           this.removeInput(_node, "tilt");
@@ -75,7 +76,7 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
     }
   }
 
-  private addInput(node: Node, inputKey: string) {
+  private addInput(node: Node, inputKey: string, displayLabel = "") {
     if (this.editor) {
       const oldInput = node.inputs.get(inputKey);
       if (!oldInput) {
@@ -89,11 +90,12 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
         //   inputKey + "Value",
         //   node
         // ));
-        input.addControl(new TextControl(
+        input.addControl(new DemoOutputValueControl(
           this.editor,
           inputKey + "Text",
           node,
-          "",
+          () => { node.data.plot = !node.data.plot; },
+          displayLabel,
           inputKey, // Display text
           `Display for ${inputKey}`
         ));

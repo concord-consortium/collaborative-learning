@@ -1,0 +1,19 @@
+@import "../../components/dataflow-vars";
+
+.demo-output-value-container {
+  margin: 0 3px 0 0px;
+  padding: 3px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: $light-bulb-orange-readout;
+  border-radius: 3px 15px 15px 3px;
+  width: 140px;
+  height: 30px;
+  box-sizing: border-box;
+  border: solid 2px white;
+
+  .display-text {
+    font-size: 18px;
+  }
+}

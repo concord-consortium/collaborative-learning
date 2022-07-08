@@ -3,7 +3,7 @@ import { Line } from "react-chartjs-2";
 import { ChartOptions, ChartData, ChartDataSets } from "chart.js";
 import { MAX_NODE_VALUES } from "../components/dataflow-program";
 import { NodePlotColor } from "../model/utilities/node";
-import "./dataflow-node.sass";
+import "./dataflow-node.scss";
 
 interface NodePlotProps {
   display: boolean;
