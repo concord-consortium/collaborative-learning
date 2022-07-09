@@ -392,12 +392,34 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   /* maybe we should do something like this  1 of 3 */
   private setupSerialChannelsForEachConnectedSensor = () => {
+
+    const { serialDevice } = this.stores;
+    console.log('serialDevice at the moment: ', serialDevice)
+    console.log('DataFlowProgram.programEditor at the moment: ', this.programEditor)
+
+    this.programEditor.nodes.forEach((n) => {
+
+      const requiresSerial = n.name == 'Sensor' && n.data.virtual == false
+
+      console.log('this node: ', n.data)
+      console.log('this node usesSerial: ', requiresSerial)
+      //console.log("NODE DATA: ", n)
+      // if we have a non-virtual node, it may be, or hope to be, connected to a live sensor
+      // so we need to figure out if it is already connected to a channel
+      // if not, we need to make the channel and connect it
+      // if ( n.data.virtual !== false ){
+      //   alert('you might need serial connection!')
+      // }
+    })
+
     return liveSensorChannels
   }
 
   private updateChannels = () => {
     // const { hubStore } = this.stores; FIXME 
-    console.log(this.stores)
+    
+
+
     this.channels = [];
 
     // function parseValue(value: string) {
@@ -1019,7 +1041,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private updateNodeSensorValue = (n: Node) => {
-    // JB SERIAL TODO CLEAN UP console.log("STEP ? ticl somewhere above", this)
     const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
     if (sensorSelect && !this.isComplete()) {
       const chInfo = this.channels.find(ci => ci.channelId === n.data.sensor);
