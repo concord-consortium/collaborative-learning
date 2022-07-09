@@ -32,7 +32,7 @@ import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
 import { DataflowProgramGraph,DataSet, ProgramDisplayStates } from "./ui/dataflow-program-graph";
 // import { uploadProgram, fetchProgramData, fetchActiveRelays, deleteProgram } from "../utilities/aws";
 import { NodeChannelInfo, NodeSensorTypes, NodeGeneratorTypes, ProgramDataRates, NodeTimerInfo,
-         IntervalTimes, virtualSensorChannels } from "../model/utilities/node";
+         IntervalTimes, virtualSensorChannels, liveSensorChannels } from "../model/utilities/node";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { Rect, scaleRect, unionRect } from "../utilities/rect";
 import { DocumentContextReact } from "../../../components/document/document-context";
@@ -390,13 +390,14 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.props.onProgramChange(programJSON);
   };
 
+  /* maybe we should do something like this  1 of 3 */
+  private setupSerialChannelsForEachConnectedSensor = () => {
+    return liveSensorChannels
+  }
+
   private updateChannels = () => {
-    // const { hubStore } = this.stores; FIXME
-    
-    // JB SERIAL TODO GET CHANNEL INTO ARRAY HERE
-    console.log('about to update channels: ', this)
-
-
+    // const { hubStore } = this.stores; FIXME 
+    console.log(this.stores)
     this.channels = [];
 
     // function parseValue(value: string) {
@@ -404,8 +405,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     //   return Number.isFinite(chValue) ? chValue : NaN;
     // }
 
-    // add virtual channels that always appear
-    this.channels = [...virtualSensorChannels];
+    /* 2 of 3 */
+    let createdSensorChannels = this.setupSerialChannelsForEachConnectedSensor()
+
+    this.channels = [...virtualSensorChannels, ...createdSensorChannels];
 
     // hubStore.hubs.forEach(hub => {
     //   hub.hubChannels.forEach(ch => {
@@ -960,13 +963,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private tick = () => {
-    if(this.channels.length > 0){
-      // JB SERIAL QUESTION - this.channels only ends up populated on 1/4 ticks?
-      // console.log('TICK, DataFlowProgram.channels: ', this.channels)
-    }
-
-    // console.log('TICK, DataFlowProgram.channels: ', this.channels)
-    
     // Update the sampling rate
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
@@ -976,9 +972,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             Generator: this.updateGeneratorNode,
             Timer: this.updateTimerNode,
             Sensor: (n: Node) => {
-                      //console.log("NODE STEP 2 now we must call updateNodeChannelInfo")
                       this.updateNodeChannelInfo(n);
-                      //console.log("NODE STEP 3 now we must call updateNodeSensorValue")
                       this.updateNodeSensorValue(n);
                     },
             Relay: this.updateNodeChannelInfo
@@ -986,7 +980,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     let processNeeded = false;
     this.programEditor.nodes.forEach((n: Node) => {
-      console.log("this.programEditor.nodes: ", this.programEditor.nodes)
       const nodeProcess = nodeProcessMap[n.name];
       if (nodeProcess) {
         processNeeded = true;
