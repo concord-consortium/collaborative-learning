@@ -245,6 +245,7 @@ export class SensorSelectControl extends Rete.Control {
   }
 
   public setChannels = (channels: NodeChannelInfo[]) => {
+    // basically replace props with data fetched from channel?
     this.props.channels = channels;
     // problem, if called with event nodecreate, update doesn't exist
     // (this as any).update();

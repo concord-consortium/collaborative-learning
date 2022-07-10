@@ -11,6 +11,7 @@ interface TopbarProps {
   dataRate: number;
   onRateSelectClick: (rate: number) => void;
   onRefreshDevices: () => void;
+  onSerialRefreshDevices: () => void;
   isRunEnabled: boolean;
   runningProgram: boolean;
   remainingTimeInSeconds: number;
@@ -123,8 +124,12 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
       </div>
       <div className="topbar-right">
         {props.showRateUI && <span className={"rate-ui"}>{`${props.lastIntervalDuration}ms`}</span>}
-        <IconButton icon="refresh" key="refresh" className={"icon-refresh"}
-          onClickButton={props.onRefreshDevices} title="Refresh Devices" disabled={props.readOnly} />
+        <IconButton 
+          icon="refresh" key="refresh" className={"icon-refresh"}
+          onClickButton={props.onSerialRefreshDevices} 
+          title="Refresh Devices" 
+          disabled={props.readOnly} 
+        />
       </div>
     </div>
   );

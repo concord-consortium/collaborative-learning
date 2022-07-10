@@ -214,7 +214,7 @@ export const NodeSensorTypes = [
   {
     name: "EMG Reading",
     type: "emg-reading",
-    units: "f(mv)", // JB SERIAL NOTE TODO: reflect transformation that occurs in arduino sketch
+    units: "f(mv)", 
     icon: "icon-emg-reading"
   }
 ];
@@ -426,7 +426,6 @@ const virtualEmgChannel: NodeChannelInfo = {
     hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "EMG", channelId: "00007VIR",
     missing: false, type: "emg-reading", units: "f(mv)", plug: 8, value: 0, virtual: true,
     virtualValueMethod: (t: number) => {
-      // JB SERIAL NOTE TODO: a choice of a number of mock data streams as specified in Pivotal
       const vals = [70, 72, 74, 103, 106, 120, 121, 122, 124, 140, 144, 143, 120, 145, 151, 167, 130, 118, 71, 70, 70];
       return vals[t % vals.length];
 } };
@@ -435,7 +434,6 @@ export const virtualSensorChannels: NodeChannelInfo[] = [
   virtualTempChannel, virtualHumidChannel, virtualCO2Channel, virtualO2Channel,
   virtualLightChannel, virtualPartChannel, virtualEmgChannel ];
 
-// JB SERIAL TODO make this a type and instantiate dynamically because need real ids and one per sensor temporary solution in place now
 const liveEmgSensorChannel: NodeChannelInfo = {
   hubId: "00000-LIVE-EMG", hubName: "Local EMG Sensor", name: "EMG", channelId: "emg1",
   missing: false, type: "emg-reading", units: "f(mv)", plug: 9, value: 42, virtual: false,

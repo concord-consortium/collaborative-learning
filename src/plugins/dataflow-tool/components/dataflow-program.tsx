@@ -163,6 +163,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           onRunProgramClick={this.prepareToRunProgram}
           onStopProgramClick={this.stopProgram}
           onRefreshDevices={this.deviceRefresh}
+          onSerialRefreshDevices={this.serialDeviceRefresh}
           programDataRates={ProgramDataRates}
           dataRate={this.state.dataRate}
           onRateSelectClick={this.onProgramDataRateChange}
@@ -330,6 +331,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.programEditor.on("nodecreate", node => {
         // trigger after each of the first six events
         // add the current set of sensors or relays to node controls
+
+        // SERIAL NOTE: this happens once here when node is created, and then happens the rest of the time on tick
         if (node.name === "Sensor") {
           const sensorSelect = node.controls.get("sensorSelect") as SensorSelectControl;
           sensorSelect.setChannels(this.channels);
@@ -390,36 +393,24 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.props.onProgramChange(programJSON);
   };
 
-  /* maybe we should do something like this  1 of 3 */
+  // SERIAL TASK this stub is a currently a method of main program, but perhaps
+  // it should be a method on the serialDevice, since it 
+  // has the job of being in touch with arduino
   private setupSerialChannelsForEachConnectedSensor = () => {
-
+    
     const { serialDevice } = this.stores;
-    console.log('serialDevice at the moment: ', serialDevice)
-    console.log('DataFlowProgram.programEditor at the moment: ', this.programEditor)
 
     this.programEditor.nodes.forEach((n) => {
-
-      const requiresSerial = n.name == 'Sensor' && n.data.virtual == false
-
-      console.log('this node: ', n.data)
-      console.log('this node usesSerial: ', requiresSerial)
-      //console.log("NODE DATA: ", n)
-      // if we have a non-virtual node, it may be, or hope to be, connected to a live sensor
-      // so we need to figure out if it is already connected to a channel
-      // if not, we need to make the channel and connect it
-      // if ( n.data.virtual !== false ){
-      //   alert('you might need serial connection!')
-      // }
+      // might this node be in need of a serial channel?
     })
 
     return liveSensorChannels
   }
 
   private updateChannels = () => {
+
     // const { hubStore } = this.stores; FIXME 
     
-
-
     this.channels = [];
 
     // function parseValue(value: string) {
@@ -427,7 +418,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     //   return Number.isFinite(chValue) ? chValue : NaN;
     // }
 
-    /* 2 of 3 */
     let createdSensorChannels = this.setupSerialChannelsForEachConnectedSensor()
 
     this.channels = [...virtualSensorChannels, ...createdSensorChannels];
@@ -870,7 +860,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private addNode = async (nodeType: string) => {
-    console.log('NODE STEP 1: add node')
     const nodeFactory = this.programEditor.components.get(nodeType) as any;
     const n1 = await nodeFactory!.createNode();
     n1.position = this.getNewNodePosition();
@@ -916,6 +905,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       }
     });
   };
+
+  private serialDeviceRefresh = () => {
+    alert("evaluate this.nodes and store.serialDevice and prompt for connection if need be")
+  }
 
   private deviceRefresh = () => {   // FIXME
     // const message =
@@ -1030,7 +1023,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
     const relayList = n.controls.get("relayList") as RelaySelectControl;
     if (sensorSelect) {
-      //console.log('STEP NODE SERIAL JB - and here we set the channels to the channels that exist - and that is our dynamism problem')
+      // tell rete controller to consume the data
       sensorSelect.setChannels(this.channels);
       (sensorSelect as any).update();
     }
@@ -1043,6 +1036,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private updateNodeSensorValue = (n: Node) => {
     const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
     if (sensorSelect && !this.isComplete()) {
+      // SERIAL TASK - your node will know its channel by the data.sensor property
+      // which will have been populated by a string that 
+      // began life in an arduino sketch when sensor was declared or hooked up (if not just an incremented int)
       const chInfo = this.channels.find(ci => ci.channelId === n.data.sensor);
 
       // update virtual sensors

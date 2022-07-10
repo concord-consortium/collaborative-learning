@@ -1,7 +1,7 @@
 export class SerialDevice {
     value: string
     localBuffer: string
-    private port: any // JB SERIAL TODO: types SerialPort | null 
+    private port: any // SERIAL TODO: types SerialPort | null 
 
     constructor() {
       this.value = '0'
