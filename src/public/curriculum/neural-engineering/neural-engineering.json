@@ -13,7 +13,7 @@
           "content": {
             "type": "Text",
             "format": "html",
-            "text": "Welcome! To begin reviewing the CLUE software, please click the My Resources bar at extreme left, and then click the tab labeled <strong>Lesson</strong>."
+            "text": "Welcome! To begin using the CLUE software, please click the My Resources bar at extreme left, and then click the tab labeled <strong>Lesson</strong>."
           }
         }
       ]
@@ -643,7 +643,7 @@
           "description": "Lesson 1.3",
           "ordinal": 3,
           "title": "Lesson 1.2B What body systems contribute to limb movement",
-          "subtitle": "Part B",
+          "subtitle": "Part 2",
           "disabled": [],
           "sections": 
           [
@@ -1799,8 +1799,8 @@
         {
           "description": "Lesson 1.4",
           "ordinal": 4,
-          "title": "Lesson 1.4",
-          "subtitle": "",
+          "title": "Lesson 1.4 Identify and Measure Muscle Activity",
+          "subtitle": "Electromyography",
           "disabled": [],
           "sections": 
           [
@@ -1808,7 +1808,149 @@
               "type": "intro",
               "content": {
                 "tiles": [
-
+                  {
+                    "id": "nf_i-PVBetdUFtBO",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>Objective</h2>",
+                        "<p>How can we identify and measure the activity of muscles? During this lesson, you will use Electromyography (EMG) to investigate your own muscle activity. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "-lGkEOMNjsqf-LZx",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Visualize and Record Muscle Activity</strong></p>",
+                        "<p>Let’s measure your muscle activity! In order to make muscle activity usable as data to drive Bionics, we need to be able to measure it. For this, we will use EMG sensors, which <a href='https://imotions.com/blog/electromyography-101/'>measure the electrical activity</a> that occurs when you contract or expand your muscles.</p>",
+                        "<p>For this activity you will need the following materials:</p>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "PodHYZ4go3HA1HYi",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/neural-engineering/images/1.jpg",
+                        "filename": "curriculum/neural-engineering/images/1.jpg"
+                      }
+                    },
+                    {
+                      "id": "2gcDnEdA3OTheS9w",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Muscle SpikerShield (yellow board) coupled with an Arduino board (blue). The Muscle SpikerShield allows you to record your muscle&#x27;s electrical activity (known as Electromyography or EMG). </p>"
+                        ]
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "4pWC3KJXXdYoa5vv",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/neural-engineering/images/2.jpg",
+                        "filename": "curriculum/neural-engineering/images/2.jpg"
+                      }
+                    },
+                    {
+                      "id": "h7P3h8mhehe_Cuzr",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Orange Muscle Electrode Cable with 3 alligator clips (two reds, one black). </p>"
+                        ]
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "mkXPYx1_SJ4rNsCg",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/neural-engineering/images/3.jpg",
+                        "filename": "curriculum/neural-engineering/images/3.jpg"
+                      }
+                    },
+                    {
+                      "id": "3TxP81BNLdqAWksC",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Smartphone Data Cable and an Adapter. This cable connects the Muscle SpikerShield to a smartphone to visualize the muscle data. You will also need an adapter to connect the cable to your smartphone. </p>"
+                        ]
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "I_o28skM9_9QVzEu",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/neural-engineering/images/4.jpg",
+                        "filename": "curriculum/neural-engineering/images/4.jpg"
+                      }
+                    },
+                    {
+                      "id": "Kh590E5YLoZa_HR-",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Sticker electrodes - used to pick up electrical signals from your muscles. </p>"
+                        ]
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "Twbv6PU3nxhlG4qd",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/neural-engineering/images/5.jpg",
+                        "filename": "curriculum/neural-engineering/images/5.jpg"
+                      }
+                    },
+                    {
+                      "id": "XPhporOEXVAjaiKE",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>A smartphone with the Backyard Brains Spike Recorder App. You can download the app for free from the App store or Google Play. </p>"
+                        ]
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "hB0y5oGIJC8z8tgZ",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/neural-engineering/images/6.jpg",
+                        "filename": "curriculum/neural-engineering/images/6.jpg"
+                      }
+                    },
+                    {
+                      "id": "1tEg4VyVBMnyWl_o",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>One (1) 9 V Battery and a hand grip (optional). </p>"
+                        ]
+                      }
+                    }
+                  ]
                 ]
               }
             },
@@ -1817,6 +1959,145 @@
               "content": {
                 "tiles": [
 
+      {
+        "id": "vKWBej7rDSOc90FV",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Procedure</strong></p>",
+            "<p>1. Connect the 9V battery to the Arduino board (blue board)</p>"
+          ]
+        }
+      },
+      {
+        "id": "UycXde31wVAn6h4h",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/neural-engineering/images/7.jpg",
+          "filename": "curriculum/neural-engineering/images/7.jpg"
+        }
+      },
+      {
+        "id": "hRL2PzfJH5u7ohJD",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>2. Connect the smartphone data cable (the green cable) to the Muscle SpikerShield green connector. Make sure you connect the end of the green cable labeled as “SpikerBox” to the Muscle SpikerShield. The other end (labeled as “Smartphone”) should be connected to your smartphone (via the provided adapter).</p>"
+          ]
+        }
+      },
+      {
+        "id": "qa3UEw13ZY0pNRWJ",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/neural-engineering/images/8.jpg",
+          "filename": "curriculum/neural-engineering/images/8.jpg"
+        }
+      },
+      {
+        "id": "AIaXlh5Jt6mO1ko4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>3. Decide who is going to be the study participant (you can take turns). Place two electrode stickers on the participant’s forearm close to each other and another one on the participant’s elbow (this is the reference electrode)</p>"
+          ]
+        }
+      },
+      {
+        "id": "2hcaL4NZmS-uOSsY",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/neural-engineering/images/9.jpg",
+          "filename": "curriculum/neural-engineering/images/9.jpg"
+        }
+      },
+      {
+        "id": "Xf1VSQp7lP4Hckuo",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>4. Connect the orange muscle electrode cable (the one with the three alligators) to the Muscle SpikerShield orange connector:</p>"
+          ]
+        }
+      },
+      {
+        "id": "hGLe_2Xa-uVW069o",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/neural-engineering/images/10.jpg",
+          "filename": "curriculum/neural-engineering/images/10.jpg"
+        }
+      },
+      {
+        "id": "ubWseUhinUcs1rwC",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>5. Connect the two red alligators to the electrodes on your arm. The black cable should be connected to the reference electrode:</p>"
+          ]
+        }
+      },
+      {
+        "id": "2r6t0lkN0WkyPi2i",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/neural-engineering/images/11.jpg",
+          "filename": "curriculum/neural-engineering/images/11.jpg"
+        }
+      },
+      [
+        {
+          "id": "Mo17A3If3LtSFuUG",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p>6. Open the Backyard Brains Spike Recorder App on your phone. Your screen should look similar to this:</p>",
+              "<p> </p>",
+              "<p>Pinch to change the time scale (horizontal axis) to 1.5 - 2 seconds. You can also change the y-axis scale if needed.  </p>",
+              "<p> </p>",
+              "<p>Hold the hand grip and squeeze it (or just make a fist if you don’t have a hand grip). How does the display changes when you use your arm muscles?</p>"
+            ]
+          }
+        },
+        {
+          "id": "nHcjmx6S8pJ4HydI",
+          "content": {
+            "type": "Image",
+            "url": "curriculum/neural-engineering/images/12.jpg",
+            "filename": "curriculum/neural-engineering/images/12.jpg"
+          }
+        }
+      ],
+      {
+        "id": "7NWg1JOva6MjHeUC",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Now, it is time to reflect on the activity as a group! Use this space to discuss: </p>",
+            "<ul><li>How does muscle activity vary between one’s dominant vs. non-dominant hand? </li><li>How does muscle activity vary between different muscles (e.g., forearm vs. forehead muscles)?</li><li>How does muscle activity vary between <a href='https://www.google.com/url?q=https://www.bbc.co.uk/bitesize/guides/zct2hv4/revision/2%23:~:text%3DIn%2520an%2520antagonistic%2520muscle%2520pair,lengthening%2520is%2520called%2520the%2520antagonist.&amp;sa=D&amp;source=docs&amp;ust=1656487065696941&amp;usg=AOvVaw3V0NsK35zz-BzcJKzU5B1m'>agonist and antagonist muscles</a>? </li><li>What happens when we activate our hand muscles for an extended period of time using a <a href='https://backyardbrains.com/experiments/rateoffatigue'>hand gripper</a>?</li><li>Can you predict who’s going to win an arm-wrestling contest based on the contestants’ muscle activity?</li></ul>",
+            "<p>Please document your observations in your team&#x27;s EMG journal."
+          ]
+        }
+      },
+      {
+        "id": "WuopQlrpwqmWttBz",
+        "content": {
+          "type": "Table",
+          "name": "EMG Journal",
+          "columns": [
+            {"name":"Question","values":["How does muscle activity vary between one’s dominant vs. non-dominant hand? ","How does muscle activity vary between different muscles (e.g., forearm vs. forehead muscles)?","How does muscle activity vary between agonist and antagonist muscles? (see here)","What happens when one activates their arm muscles for an extended period of time using a hand gripper (see here)?","Can you predict who would win an arm wrestling contest based on the contestants’ muscle activity?","Additional questions I have:"]},
+            {"name":"Claim (a statement in response to question, supported by evidence)","values":["Compared to the dominant hand, the non-dominant hand’s muscle activity….","","","","",""]},
+            {"name":"Evidence (may insert screen shots or images of illustrations)","values":["","","","","",""]}
+          ]
+        }
+      }
                 ]
               }
             },
@@ -1824,7 +2105,43 @@
               "type": "reflection",
               "content": {
                 "tiles": [
-                           
+                  {
+                    "id": "1LAoIq9nuvILIX29",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>DISCUSS</h2>",
+                        "<p>Now, it is time to reflect on the activity as class!</p>",
+                        "<ul><li>Why does gathering EMG signals matter to you, your family, or others in the community? </li><li>Why does this matter to scientists, physicians, physical therapists, athletic trainers, and/or biomedical engineers?</li><li>How may gathering EMG data inform the design of a device that can help people with neurological conditions or missing limbs?</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "pC1DYCIgCcBCcfiq",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>KWL JOURNAL</h2>",
+                        "<p>You will keep a journal of what you have learned throughout these lessons. Begin or Open a KWL Journal either from the File menu or from the My Work tab. Record today's date. Then drag the table below into your journal and fill it out.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "VX0fplHGo5DQbZPK",
+                    "content": {
+                      "type": "Table",
+                      "name": "After each activity, please record what you know, wonder, and learn about the topic.",
+                      "columns": [
+                        {"name":"Date","values":["","",""]},
+                        {"name":"Today's Topic","values":["","",""]},
+                        {"name":"Know","values":["","",""]},
+                        {"name":"Wonder","values":["","",""]},
+                        {"name":"Learn","values":["","",""]}
+                      ]
+                    }
+                  }        
                 ]
               }
             }
@@ -1833,7 +2150,7 @@
         {
           "description": "Lesson 1.5",
           "ordinal": 5,
-          "title": "Lesson 1.5",
+          "title": "Lesson 1.5 Control a Robot Claw with EMG Signals",
           "subtitle": "",
           "disabled": [],
           "sections": 
@@ -1842,7 +2159,45 @@
               "type": "intro",
               "content": {
                 "tiles": [
-
+                  {
+                    "id": "NSxSrK1mHn_EtS5E",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "How can EMG signals be used to control a robotic claw?",
+                        "<h2>Objective</h2>",
+                        "<p>During this section, we will explore how EMG signals can be used to control a robotic claw.  For that, you will use electromyography (EMG) in coordination with a robotic claw to model the performance of a bionic arm. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "NIkxcsP7Zwth_DUf",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/13.jpg" 
+                    }
+                  },
+                  {
+                    "id": "tWbNyudvP6G960PT",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Let’s learn how to control a robotic claw with muscle sensors! In this activity, you can choose &#x27;Simulation&#x27; or the Arduino analog input pins with the materials illustrated below to visualize your real-time muscle movements and control a claw with your muscle sensors.  You can also either select a claw simulation or work with the analog claw to observe the real-time changes. </p>",
+                        "<p><strong>Setting up the Analog Muscle Sensors &amp; Claw:</strong></p>",
+                        "<p><strong>Materials: </strong></p>",
+                        "<p>You will need all the materials from the previous activity (image on the left) with the following additions (image on the right): (1) A robotic claw; (2) An Arduino USB cable (blue cable)</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "ClSkJ9aDMd5oXpQS",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/14.jpg"
+                    }
+                  }
                 ]
               }
             },
@@ -1850,7 +2205,166 @@
               "type": "labWork",
               "content": {
                 "tiles": [
-
+                  {
+                    "id": "Wg76H3JcM_qGbOLS",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Setting up:</strong></p>",
+                        "<p>1. Connect the blue cable to the Arduino board and then connect the other end of the blue cable to your computer’s USB port: </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "P-LY18BXc3nQk6QD",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/15.jpg"
+                    }
+                  },
+                  {
+                    "id": "_tBY3tOwPRKPKgQM",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>2. Connect the claw to the Muscle SpikerShield (the yellow board). Note that there is a cable coming out of the claw with three wires (yellow, red, and black). Look closely at the Muscle SpikerShield (the yellow board on top of the Arduino). Next to the gray-ish box, there are three pins labeled “Y” (for yellow), “R” (red), and “B” (black). Gently connect the claw to the Muscle SpikerShield as shown here:</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "SNFVNIZDoFInF55J",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/16.jpg"
+                    }
+                  },
+                  {
+                    "id": "7UjZSEKyKt_ugJ3A",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>3. Power up the claw, connect a 9V battery to the Muscle SpikerShield (the yellow board):</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "8npmrdC0WXZmIThQ",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/17.jpg"
+                    }
+                  },
+                  {
+                    "id": "pKO6PU8wQ0Cbcf-w",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>4.  Decide who is going to be the study participant (you can take turns). Place two electrode stickers on the participant’s forearm close to each other and another one on the participant’s elbow (this is the reference electrode)</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "5bOtNtKeEGz9C0Yl",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/18.jpg"
+                    }
+                  },
+                  {
+                    "id": "wxWLZ6UABBf8HGF_",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>5. Connect the orange muscle electrode cable (the one with the three alligators) to the Muscle SpikerShield orange connector: </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "_WgzTEJKQ9MFf_9F",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/19.jpg"
+                    }
+                  },
+                  {
+                    "id": "PuDVhTBsxEpk-6JV",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>6. Connect the two red alligators to the electrodes on your arm. The black cable should be connected to the reference electrode:</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "54M3JuQkdfGSHcXT",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/20.jpg"
+                    }
+                  },
+                  {
+                    "id": "5tJ4Yb_Srm1XmNw_",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>I want to call this section <strong>Programming</strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "ebQXEoEiGp5DadAU",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Place the code blocks to control the claw/gripper with the muscle sensors. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "szby0s6YvLrB9WEL",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/10.jpg"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "id": "Yqms-LsAR0EaXXuZ",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Explanation of the above code blocks (not for students):</strong></p>",
+                        "<p>In this activity, there is only one muscle (EMG) sensor. Students can choose one of the  &#x27;Demo’ inputs or a connected Arduino. When the student choses &#x27;BB EMG’ from the Sensor block menu then they will get a browser dialog allowing them to select the hardware for real-time data input.</p>",
+                        "<p>The app visualizes the muscle electrical activity, allowing students to change the vertical scale of the signal with the ‘+’ and ‘-’ buttons.  </p>",
+                        "<p>Once a logic block is added, a horizontal threshold line is superimposed on the EMG data. Students can then choose an operation (e.g., ‘Greater than’) and enter a value (e.g., ‘8’). The horizontal red line (i.e., the threshold) shifts up/down accordingly.  </p>",
+                        "<p>Next, students add an ‘action’ and an ‘output device’ blocks.  </p>",
+                        "<p>Output: Students can either choose ‘Simulation’ for a simulated output device (a basic gripper that opens and closes) or one of the Arduino’s digital outputs to control an external device.   </p>",
+                        "<p>Under ‘Action’, students choose a specific movement (e.g., ‘close’). Some types of movements have additional parameters, like speed (in this case, how fast the gripper closes).  </p>",
+                        "<p>When the signal rises above the threshold the gripper closes, and when the signal drops below the threshold the gripper opens. </p>",
+                        "<p>The logic block might need to detect if the EMG crosses the threshold with a rising or falling edge. The polarity of the cross may inform whether the gripper opens or closes. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "XY7oFR3XIFHgn9tG",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>TIP: </strong>While interacting with the claw, pay close attention to how you could make it work better. Some options to consider are: </p>",
+                        "<ul><li>Changing the locations of the electrodes. For example, students may have more success controlling the claw by placing the EMG electrodes on the fleshy part below their pinky and the reference electrode by their thumb. </li><li>Changing the sensitivity of the device by pressing the gray button the Muscle SpikerShield. </li><li>Adding, editing the parameters on the app</li><li>Grasping objects of different sizes/weights. </li></ul>"
+                      ]
+                    }
+                  }
                 ]
               }
             },
@@ -1858,14 +2372,48 @@
               "type": "reflection",
               "content": {
                 "tiles": [
-                           
+                  {
+                    "id": "NnEsglq6h1cl1LLF",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Now, it is time to reflect on the activity as a group! Add tiles in your workspace to:</p>",
+                        "<ul><li>Evaluate the strengths and weaknesses of the EMG-controlled claw and summarize your ideas in a table format.</li><li>Reflect on how the design of the claw can be improved and please sketch out your ideas. </li><li>Reflecting back on the video with the young woman at the opening of the unit, discuss how a device like the claw can serve her in her day-to-day life. </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "-stXSYhQihn8cigq",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Open your Journal and add a copy of the table below to document this activity.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "loDGgu4BfJ1642rw",
+                    "content": {
+                      "type": "Table",
+                      "name": "After each activity, please record what you know, wonder, and learn about the topic.",
+                      "columns": [
+                        {"name":"Date","values":["","","",""]},
+                        {"name":"Today's Topic","values":["","","",""]},
+                        {"name":"Know","values":["","","",""]},
+                        {"name":"Wonder","values":["","","",""]},
+                        {"name":"Learn","values":["","","",""]}
+                      ]
+                    }
+                  }
                 ]
               }
             }
           ]
         },
         {
-          "description": "Lesson 1.5 - Sample",
+          "description": "Lesson 1.6 - Sample",
           "ordinal": 6,
           "title": "Technology Assistance for Paralysis",
           "subtitle": "EMG Signals",
