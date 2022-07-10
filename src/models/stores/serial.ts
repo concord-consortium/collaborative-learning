@@ -7,12 +7,17 @@ export class SerialDevice {
       this.value = '0'
       this.localBuffer = ''
     }
+
+    public hasPort(){
+      return this.port !== undefined ? true : false
+    }
   
-    public async findPort(){
+    public async requestAndSetPort(){
       try {
           await (navigator as any).serial.requestPort()
           .then((p: any) => {
             this.port = p
+            console.log('we have a port: ', this.port)
           })
       }
 
@@ -20,6 +25,4 @@ export class SerialDevice {
           console.log('error requesting port: ', error)
       }
     }
-
-
 }
