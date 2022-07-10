@@ -434,6 +434,10 @@ export const virtualSensorChannels: NodeChannelInfo[] = [
   virtualTempChannel, virtualHumidChannel, virtualCO2Channel, virtualO2Channel,
   virtualLightChannel, virtualPartChannel, virtualEmgChannel ];
 
+// SERIAL TODO - if dynamic channels do not work, change this so that it 
+// sounds more like a general device - we would then parse out the right data for the node
+// in the neighborhood of dataflow-program, line 1015
+// we would have a serialValueMethod that would do it based on sensor type and a limited set/number
 const liveEmgSensorChannel: NodeChannelInfo = {
   hubId: "00000-LIVE-EMG", hubName: "Local EMG Sensor", name: "EMG", channelId: "emg1",
   missing: false, type: "emg-reading", units: "f(mv)", plug: 9, value: 42, virtual: false,
