@@ -3,6 +3,7 @@ import { ProgramDataRate } from "../../model/utilities/node";
 import { IconButton } from "../../../../components/utilities/icon-button";
 
 import "./dataflow-program-topbar.scss";
+import { SerialDevice } from "src/models/stores/serial";
 
 interface TopbarProps {
   onRunProgramClick: () => void;
@@ -18,6 +19,7 @@ interface TopbarProps {
   readOnly: boolean;
   showRateUI: boolean;
   lastIntervalDuration: number;
+  serialDeviceInfo: SerialDevice;
 }
 
 // const kProgressWidth = 76;
@@ -101,6 +103,12 @@ const RecordButton = (props: RecordButtonProps) => {
 };
 
 export const DataflowProgramTopbar = (props: TopbarProps) => {
+
+  function refreshButtonClasses(){
+    const status = props.serialDeviceInfo.hasPort() ? 'serial-on' : 'serial-off'    
+    return `${status} icon-serial`
+  }
+
   return (
     <div className="program-editor-topbar">
       <div className="topbar-left"></div>
@@ -125,10 +133,11 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
       <div className="topbar-right">
         {props.showRateUI && <span className={"rate-ui"}>{`${props.lastIntervalDuration}ms`}</span>}
         <IconButton 
-          icon="refresh" key="refresh" className={"icon-refresh"}
+          icon="serial" key="serial" 
           onClickButton={props.onSerialRefreshDevices} 
-          title="Refresh Devices" 
-          disabled={props.readOnly} 
+          title="Refresh Serial Connection" 
+          // disabled={props.readOnly}
+          className={refreshButtonClasses()}
         />
       </div>
     </div>

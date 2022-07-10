@@ -202,7 +202,7 @@ $duration-label-back: $gray-mid;
       border: 2px solid #bcbcbc;
     }
 
-    .icon-refresh {
+    .icon-refresh, .icon-serial {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -235,6 +235,35 @@ $duration-label-back: $gray-mid;
           background-image: url("../../assets/icons/refresh/refresh-active.svg");
         }
       }
+
+      .serial {
+        width: 16px;
+        height: 16px;
+        background-repeat: no-repeat;
+        background-image: url("../../assets/icons/serial/serial.svg");
+        &:hover {
+          // TO DO - replace with better icons 
+          background-image: url("../../assets/icons/serial/serial.svg");
+        }
+        &:active {
+          background-image: url("../../assets/icons/serial/serial.svg");
+        }
+      }
+
+    }
+
+    .serial-off, .serial-on {
+      width: 30px;
+      border-radius: 3px;
+      border: solid 2px #bcbcbc;
+    }
+
+    .serial-off {
+      background-color: lightsalmon;
+    }
+
+    .serial-on {
+      background-color: lightgreen;
     }
   }
 }

@@ -173,6 +173,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           readOnly={readOnly || !this.isReady()}
           showRateUI={showRateUI}
           lastIntervalDuration={this.state.lastIntervalDuration}
+          serialDeviceInfo={this.stores.serialDevice}
         />}
         <div className={toolbarEditorContainerClass}>
           { showProgramToolbar && <DataflowProgramToolbar
@@ -907,7 +908,16 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private serialDeviceRefresh = () => {
-    alert("evaluate this.nodes and store.serialDevice and prompt for connection if need be")
+    console.log(this.programEditor.nodes);
+    console.log(this.channels);
+    console.log(this.stores.serialDevice)
+
+    if (!this.stores.serialDevice.hasPort()){
+      this.stores.serialDevice.requestAndSetPort();
+    }
+
+    
+    //alert("evaluate this.nodes and store.serialDevice and prompt for connection if need be")
   }
 
   private deviceRefresh = () => {   // FIXME
