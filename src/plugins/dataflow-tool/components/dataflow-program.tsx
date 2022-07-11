@@ -38,6 +38,7 @@ import { Rect, scaleRect, unionRect } from "../utilities/rect";
 import { DocumentContextReact } from "../../../components/document/document-context";
 
 import "./dataflow-program.sass";
+import { withTooltip } from "react-tippy";
 
 interface NodeNameValuePair {
   name: string;
@@ -394,19 +395,26 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.props.onProgramChange(programJSON);
   };
 
+  private alertIfNeedSerial(){
+    const wouldNeedSerial = this.programEditor.nodes.find( n => n.data.virtual == false )
+    if ( wouldNeedSerial !== undefined ){
+      // TODO - UX:  modal? something else?
+      alert('Please connect to serial to use that sensor.')
+    }
+  }
 
   private updateChannels = () => {
 
-    // const { hubStore } = this.stores; FIXME 
-    
     this.channels = [];
+    this.channels = [...virtualSensorChannels, ...serialSensorChannels]
+    this.alertIfNeedSerial()
+
+    // const { hubStore } = this.stores; FIXME 
 
     // function parseValue(value: string) {
     //   const chValue = Number.parseFloat(value);
     //   return Number.isFinite(chValue) ? chValue : NaN;
     // }
-    this.channels = [...virtualSensorChannels, ...serialSensorChannels]
-    
 
     // hubStore.hubs.forEach(hub => {
     //   hub.hubChannels.forEach(ch => {
