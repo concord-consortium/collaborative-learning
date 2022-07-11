@@ -23,7 +23,7 @@ export class SerialDevice {
       }
 
       catch (error) {
-          console.log('error requesting port: ', error);
+        console.error('error requesting port: ', error);
       }
     }
 
