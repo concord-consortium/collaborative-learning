@@ -216,6 +216,12 @@ export const NodeSensorTypes = [
     type: "emg-reading",
     units: "f(mv)", 
     icon: "icon-emg-reading"
+  },
+  {
+    name: "FSR Reading",
+    type: "fsr-reading",
+    units: "n", 
+    icon: "icon-emg-reading"
   }
 ];
 
