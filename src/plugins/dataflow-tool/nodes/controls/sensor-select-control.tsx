@@ -142,6 +142,14 @@ export class SensorSelectControl extends Rete.Control {
         if (ch.missing) return `${kSensorMissingMessage} ${ch.channelId}`;
         let count = 0;
         channelsForType.forEach( c => { if (c.type === ch.type && ch.hubId === c.hubId) count++; } );
+
+        // SERIAL TODO - once we know the shape of a dynamic channel we can do this again
+        // if (ch.virtual == false && ch.type == 'emg-reading'){
+        //   const serialConnectionIndicator = ch.hasSerialPort ? '⚡ connected' : '⚠️ not connected'
+        //   return `${ch.name} ${serialConnectionIndicator}`
+        // }
+        
+
         const chStr = ch.virtual
           ? `${ch.name} Demo Data`
           : `${ch.hubName}:${ch.type}${ch.plug > 0 && count > 1 ? `(plug ${ch.plug})` : ""}`;

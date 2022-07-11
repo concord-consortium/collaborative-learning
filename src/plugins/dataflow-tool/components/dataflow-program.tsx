@@ -32,7 +32,7 @@ import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
 import { DataflowProgramGraph,DataSet, ProgramDisplayStates } from "./ui/dataflow-program-graph";
 // import { uploadProgram, fetchProgramData, fetchActiveRelays, deleteProgram } from "../utilities/aws";
 import { NodeChannelInfo, NodeSensorTypes, NodeGeneratorTypes, ProgramDataRates, NodeTimerInfo,
-         IntervalTimes, virtualSensorChannels, liveSensorChannels } from "../model/utilities/node";
+         IntervalTimes, virtualSensorChannels, serialSensorChannels } from "../model/utilities/node";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { Rect, scaleRect, unionRect } from "../utilities/rect";
 import { DocumentContextReact } from "../../../components/document/document-context";
@@ -394,19 +394,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.props.onProgramChange(programJSON);
   };
 
-  // SERIAL TASK this stub is a currently a method of main program, but perhaps
-  // it should be a method on the serialDevice, since it 
-  // has the job of being in touch with arduino
-  private setupSerialChannelsForEachConnectedSensor = () => {
-    
-    const { serialDevice } = this.stores;
-
-    this.programEditor.nodes.forEach((n) => {
-      // might this node be in need of a serial channel?
-    })
-
-    return liveSensorChannels
-  }
 
   private updateChannels = () => {
 
@@ -418,10 +405,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     //   const chValue = Number.parseFloat(value);
     //   return Number.isFinite(chValue) ? chValue : NaN;
     // }
-
-    let createdSensorChannels = this.setupSerialChannelsForEachConnectedSensor()
-
-    this.channels = [...virtualSensorChannels, ...createdSensorChannels];
+    this.channels = [...virtualSensorChannels, ...serialSensorChannels]
+    
 
     // hubStore.hubs.forEach(hub => {
     //   hub.hubChannels.forEach(ch => {
@@ -908,16 +893,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private serialDeviceRefresh = () => {
-    console.log(this.programEditor.nodes);
-    console.log(this.channels);
-    console.log(this.stores.serialDevice)
 
     if (!this.stores.serialDevice.hasPort()){
-      this.stores.serialDevice.requestAndSetPort();
+      this.stores.serialDevice.requestAndSetPort()
+        .then(() => {
+          this.stores.serialDevice.handleStream(this.channels);
+        });
     }
-
-    
-    //alert("evaluate this.nodes and store.serialDevice and prompt for connection if need be")
   }
 
   private deviceRefresh = () => {   // FIXME
@@ -1046,11 +1028,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private updateNodeSensorValue = (n: Node) => {
     const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
     if (sensorSelect && !this.isComplete()) {
-      // SERIAL TASK - your node will know its channel by the data.sensor property
-      // which will have been populated by a string that 
-      // began life in an arduino sketch when sensor was declared or hooked up (if not just an incremented int)
+ 
       const chInfo = this.channels.find(ci => ci.channelId === n.data.sensor);
-
+      
       // update virtual sensors
       if (chInfo?.virtualValueMethod) {
         const time = Math.floor(Date.now() / 1000);

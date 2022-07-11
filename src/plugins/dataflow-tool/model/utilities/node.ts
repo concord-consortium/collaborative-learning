@@ -434,15 +434,37 @@ export const virtualSensorChannels: NodeChannelInfo[] = [
   virtualTempChannel, virtualHumidChannel, virtualCO2Channel, virtualO2Channel,
   virtualLightChannel, virtualPartChannel, virtualEmgChannel ];
 
-// SERIAL TODO - if dynamic channels do not work, change this so that it 
-// sounds more like a general device - we would then parse out the right data for the node
-// in the neighborhood of dataflow-program, line 1015
-// we would have a serialValueMethod that would do it based on sensor type and a limited set/number
-const liveEmgSensorChannel: NodeChannelInfo = {
-  hubId: "00000-LIVE-EMG", hubName: "Local EMG Sensor", name: "EMG", channelId: "emg1",
-  missing: false, type: "emg-reading", units: "f(mv)", plug: 9, value: 42, virtual: false,
-};            
+// SERIAL - note these values need to appear as same strings in Arduino sketches
+// https://github.com/bacalj/dataflow-muscle-spiker-shield/blob/master/basicTwoSensors/basicTwoSensors.ino
+// data comes up from arduino with keys to match, based on sensor type - emg, fsr
+// could be more dynamic, but for now we are ready for one of each type of sensor
+
+const emgSensorChannel: NodeChannelInfo = {
+  hubId: "SERIAL-ARDUINO", 
+  hubName: "Arduino w/ MuscleSpikerShield",
+  name: "emg", 
+  channelId: "emg",
+  missing: false, 
+  type: "emg-reading", 
+  units: "f(mv)", 
+  plug: 9, 
+  value: 0, 
+  virtual: false,
+};       
+
+const fsrSensorChannel: NodeChannelInfo = {
+  hubId: "SERIAL-ARDUINO", 
+  hubName: "Arduino w/ MuscleSpikerShield",
+  name: "fsr", 
+  channelId: "fsr",
+  missing: false, 
+  type: "fsr-reading", 
+  units: "n", 
+  plug: 10, 
+  value: 0, 
+  virtual: false,
+}; 
   
-export const liveSensorChannels: NodeChannelInfo[] = [
-  liveEmgSensorChannel
+export const serialSensorChannels: NodeChannelInfo[] = [
+  emgSensorChannel, fsrSensorChannel
 ];
