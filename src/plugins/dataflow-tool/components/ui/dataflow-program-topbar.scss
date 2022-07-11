@@ -225,7 +225,7 @@ $duration-label-back: $gray-mid;
         opacity: 0.6;
       }
       .refresh {
-        //width: 16px;
+        width: 16px;
         height: 16px;
         background-repeat: no-repeat;
         background-image: url("../../assets/icons/refresh/refresh.svg");
@@ -254,7 +254,7 @@ $duration-label-back: $gray-mid;
     }
 
     .serial-off, .serial-on {
-      width: 70px;
+      width: 30px;
       border-radius: 3px;
       border: solid 2px #bcbcbc;
     }
