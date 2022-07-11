@@ -105,8 +105,8 @@ const RecordButton = (props: RecordButtonProps) => {
 export const DataflowProgramTopbar = (props: TopbarProps) => {
 
   function refreshButtonClasses(){
-    const status = props.serialDeviceInfo.hasPort() ? 'serial-on' : 'serial-off'    
-    return `${status} icon-serial`
+    const status = props.serialDeviceInfo.hasPort() ? 'serial-on' : 'serial-off';    
+    return `${status} icon-serial`;
   }
 
   return (

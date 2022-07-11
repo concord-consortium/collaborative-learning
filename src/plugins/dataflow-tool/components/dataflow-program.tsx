@@ -396,11 +396,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private alertIfNeedSerial(){
     if (!this.stores.serialDevice.hasPort()){
-      const wouldNeedSerial = this.programEditor.nodes.find( n => n.data.virtual == false )
+      const wouldNeedSerial = this.programEditor.nodes.find( n => n.data.virtual === false );
       if ( wouldNeedSerial !== undefined ){
         // TODO - UX:  modal? something else?
         // alert('Please connect your device to serial to use external sensors.')
-        console.log('user should be notified that they need to connect device')
+        console.log('user should be notified that they need to connect device');
       }
     }
   }
@@ -408,8 +408,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private updateChannels = () => {
 
     this.channels = [];
-    this.channels = [...virtualSensorChannels, ...serialSensorChannels]
-    this.alertIfNeedSerial()
+    this.channels = [...virtualSensorChannels, ...serialSensorChannels];
+    this.alertIfNeedSerial();
 
     // const { hubStore } = this.stores; FIXME 
 
@@ -910,7 +910,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           this.stores.serialDevice.handleStream(this.channels);
         });
     }
-  }
+  };
 
   private deviceRefresh = () => {   // FIXME
     // const message =

@@ -144,7 +144,8 @@ export class SensorSelectControl extends Rete.Control {
         let count = 0;
         channelsForType.forEach( c => { if (c.type === ch.type && ch.hubId === c.hubId) count++; } );
 
-        // SERIAL TODO - will need to either access store or add props so this control can reflect that it needs serial to be connected        
+        // SERIAL TODO - will need to either access store 
+        // or add props so this control can reflect that it needs serial to be connected        
 
         const chStr = ch.virtual
           ? `${ch.name} Demo Data`
