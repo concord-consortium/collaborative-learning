@@ -21,6 +21,7 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
       this.addInput(node, "nodeValue");
 
       if (node.data.outputType === "Grabber") {
+        node.data.trackedValues = ["nodeValue", "speed", "tilt"];
         this.addInput(node, "speed", "speed: ");
         this.addInput(node, "tilt", "tilt: ");
       }
@@ -54,6 +55,7 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
 
         // Update inputs based on output type
         if (outputType === "Grabber") {
+          _node.data.trackedValues = ["nodeValue", "speed", "tilt"];
           this.addInput(_node, "speed", "speed: ");
           this.addInput(_node, "tilt", "tilt: ");
 
@@ -73,6 +75,7 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
             tiltControl?.setValue(tiltValue);
           }
         } else {
+          _node.data.trackedValues = ["nodeValue"];
           this.removeInput(_node, "speed");
           this.removeInput(_node, "tilt");
         }
@@ -94,7 +97,7 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
         node.addInput(input);
         input.addControl(new DemoOutputValueControl(
           this.editor,
-          inputKey + "Text",
+          inputKey,
           node,
           () => { node.data.plot = !node.data.plot; },
           displayLabel,

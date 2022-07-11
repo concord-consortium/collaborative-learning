@@ -27,30 +27,34 @@ export const DataflowNodePlot = (props: NodePlotProps) => {
 };
 
 function lineData(node: any) {
-  const data = node.data.recentValues;
   const chartDataSets: ChartDataSets[] = [];
 
   let dsMax = 0;
   let dsMin = 0;
-  const dataset: ChartDataSets = {
-    backgroundColor: NodePlotColor,
-    borderColor: NodePlotColor,
-    borderWidth: 2,
-    pointRadius: 2,
-    data: [0],
-    fill: false,
-  };
-  chartDataSets.push(dataset);
+  node.data.trackedValues.forEach((valueKey: string) => {
+    const recentValues: any = node.data.recentValues[valueKey];
+    if (recentValues !== undefined) {
+      const dataset: ChartDataSets = {
+        backgroundColor: NodePlotColor,
+        borderColor: NodePlotColor,
+        borderWidth: 2,
+        pointRadius: 2,
+        data: [0],
+        fill: false,
+      };
 
-  const chData: any[] = [];
-  data.forEach((val: any) => {
-    if (isFinite(val)) {
-      chData.push(val);
-      dsMax = Math.max(dsMax, val);
-      dsMin = Math.min(dsMin, val);
+      const chData: any[] = [];
+      recentValues.forEach((val: any) => {
+        if (isFinite(val)) {
+          chData.push(val);
+          dsMax = Math.max(dsMax, val);
+          dsMin = Math.min(dsMin, val);
+        }
+      });
+      dataset.data = chData;
+      chartDataSets.push(dataset);
     }
   });
-  chartDataSets[0].data = chData;
   stepY = (dsMax - dsMin) / 2;
 
   const chartData: ChartData = {

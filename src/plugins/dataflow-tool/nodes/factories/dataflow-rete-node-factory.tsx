@@ -6,6 +6,7 @@ export const kEmptyValueString = "__";
 
 export abstract class DataflowReteNodeFactory extends Rete.Component {
   protected numSocket: Socket;
+
   constructor(name: string, numSocket: Socket) {
     super(name);
     this.numSocket = numSocket;
@@ -18,6 +19,7 @@ export abstract class DataflowReteNodeFactory extends Rete.Component {
       node
         .addControl(new DeleteControl(this.editor, "delete", node));
     }
+    node.data.trackedValues = ["nodeValue"];
     return node;
   }
 }

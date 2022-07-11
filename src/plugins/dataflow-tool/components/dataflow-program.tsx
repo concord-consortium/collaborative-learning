@@ -295,7 +295,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       if (program) {
         forEach(program.nodes, (n: any) => {
           if (n.data.recentValues) {
-            n.data.recentValues = [];
+            n.data.recentValues = {};
+            forEach(n.data.trackedValues, (v: string) => {
+              n.data.recentValues[v] = [];
+            });
+            // n.data.recentValues = [];
           }
         });
         this.closeCompletedRunProgramNodePlots(program);
@@ -976,6 +980,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         processNeeded = true;
         nodeProcess(n);
       }
+      // TODO: We probably need a better way to determine if recentValues should be updated
       if (Object.prototype.hasOwnProperty.call(n.data, "nodeValue")) {
         this.updateNodeRecentValues(n);
       }
@@ -1028,31 +1033,37 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private updateNodeRecentValues = (n: Node) => {
-    const nodeValue: any = n.data.nodeValue;
-    let recentValue: NodeValue = {};
-    const nodeValueKey = "nodeValue";
-    // Store recentValue as object with unique keys for each value stored in node
-    // Needed for node types such as data storage that require more than a single value
-    if (nodeValue === "number") {
-      recentValue[nodeValueKey] = { name: n.name, val: nodeValue };
-    } else {
-      recentValue = nodeValue;
-    }
-    if (n.data.recentValues) {
-      const recentValues: any = n.data.recentValues;
-      if (recentValues.length > MAX_NODE_VALUES) {
-        recentValues.shift();
+    (n as any).data.trackedValues.forEach((valueKey: string) => {
+      const value: any = n.data[valueKey];
+      let recentValue: NodeValue = {};
+
+      // Store recentValue as object with unique keys for each value stored in node
+      // Needed for node types such as data storage that require more than a single value
+      if (value === "number") {
+        recentValue[valueKey] = { name: n.name, val: value };
+      } else {
+        recentValue = value;
       }
-      recentValues.push(recentValue);
-      n.data.recentValues = recentValues;
-    } else {
-      const recentValues: NodeValue[] = [recentValue];
-      n.data.recentValues = recentValues;
-    }
-    const plotControl = n.controls.get("plot") as PlotButtonControl;
-    if (plotControl) {
-      (n as any).update();
-    }
+
+      if (n.data.recentValues) {
+        if ((n.data.recentValues as any)[valueKey]) {
+          const recentValues: any = (n.data.recentValues as any)[valueKey];
+          if (recentValues.length > MAX_NODE_VALUES) {
+            recentValues.shift();
+          }
+          recentValues.push(recentValue);
+          (n.data.recentValues as any)[valueKey] = recentValues;
+        } else {
+          (n.data.recentValues as any)[valueKey] = [recentValue];
+        }
+      } else {
+        n.data.recentValues = {[valueKey]: [recentValue]};
+      }
+
+      if ((n as any).data.trackedValues) {
+        (n as any).update();
+      }
+    });
   };
 
   private getNodeSequenceNamesAndUnits = () => {
