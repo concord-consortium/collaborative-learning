@@ -334,7 +334,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         // trigger after each of the first six events
         // add the current set of sensors or relays to node controls
 
-        // SERIAL NOTE: this happens once here when node is created, and then happens the rest of the time on tick
         if (node.name === "Sensor") {
           const sensorSelect = node.controls.get("sensorSelect") as SensorSelectControl;
           sensorSelect.setChannels(this.channels);
@@ -396,10 +395,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private alertIfNeedSerial(){
-    const wouldNeedSerial = this.programEditor.nodes.find( n => n.data.virtual == false )
-    if ( wouldNeedSerial !== undefined ){
-      // TODO - UX:  modal? something else?
-      alert('Please connect to serial to use that sensor.')
+    if (!this.stores.serialDevice.hasPort()){
+      const wouldNeedSerial = this.programEditor.nodes.find( n => n.data.virtual == false )
+      if ( wouldNeedSerial !== undefined ){
+        // TODO - UX:  modal? something else?
+        // alert('Please connect your device to serial to use external sensors.')
+        console.log('user should be notified that they need to connect device')
+      }
     }
   }
 
