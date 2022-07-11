@@ -34,6 +34,7 @@ function lineData(node: any) {
   node.data.trackedValues.forEach((valueKey: string) => {
     const recentValues: any = node.data.recentValues[valueKey];
     if (recentValues !== undefined) {
+      const customOptions = node.data.minigraphSetup?.[valueKey] || {};
       const dataset: ChartDataSets = {
         backgroundColor: NodePlotColor,
         borderColor: NodePlotColor,
@@ -41,6 +42,7 @@ function lineData(node: any) {
         pointRadius: 2,
         data: [0],
         fill: false,
+        ...customOptions
       };
 
       const chData: any[] = [];

@@ -13,6 +13,27 @@
   box-sizing: border-box;
   border: solid 2px white;
 
+  .left-content {
+    display: flex;
+    align-items: center;
+
+    .minigraph-legend {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      .legend-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 5.5px;
+        border-width: 2px;
+        border-style: solid;
+      }
+    }
+  }
+
   .display-text {
     font-size: 18px;
   }

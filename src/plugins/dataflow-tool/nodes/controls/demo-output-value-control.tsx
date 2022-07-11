@@ -3,6 +3,7 @@
 import React from "react";
 import Rete, { NodeEditor, Node } from "rete";
 import { PlotButtonControlComponent } from "./plot-button-control";
+import { NodePlotColor } from "../../model/utilities/node";
 import "./demo-output-value-control.scss";
 
 export class DemoOutputValueControl extends Rete.Control {
@@ -18,7 +19,9 @@ export class DemoOutputValueControl extends Rete.Control {
     label = "",
     initVal = 0,
     tooltip = "",
-    initDisplayMessage = ""
+    initDisplayMessage = "",
+    backgroundColor = NodePlotColor,
+    borderColor = NodePlotColor,
   ) {
     super(key);
     this.emitter = emitter;
@@ -35,23 +38,37 @@ export class DemoOutputValueControl extends Rete.Control {
       },
       label,
       tooltip,
-      displayMessage: initDisplayMessage // A message to display instead of the value
+      displayMessage: initDisplayMessage, // A message to display instead of the value
+      backgroundColor,
+      borderColor,
+      connected: false
     };
 
     this.component = (compProps: {
       value: any,
       onChange: any,
       label: any,
-      color: string,
       tooltip: string,
-      displayMessage: string
+      displayMessage: string,
+      backgroundColor: string,
+      borderColor: string,
+      connected: boolean
     }) => {
       return (
         <div className="demo-output-value-container" title={compProps.tooltip}>
-          <PlotButtonControlComponent showgraph={false} onGraphButtonClick={onGraphButtonClick} />
-          {
-          compProps.color && <div className="color-dot" style={{backgroundColor: compProps.color}}/>
-          }
+          <div className="left-content">
+            <PlotButtonControlComponent showgraph={false} onGraphButtonClick={onGraphButtonClick} />
+            <div className="minigraph-legend">
+              { compProps.connected
+                ? <div
+                  className="legend-dot"
+                  style={{
+                    backgroundColor: compProps.backgroundColor,
+                    borderColor: compProps.borderColor
+                  }} />
+                : '' }
+            </div>
+          </div>
           <div className="display-text">
             {compProps.value === undefined
               ? "Undefined"
@@ -73,8 +90,9 @@ export class DemoOutputValueControl extends Rete.Control {
     (this as any).update();
   };
 
-  public setColor = (color: string) => {
-    this.props.color = color;
+  public setConnected = (connected: boolean) => {
+    this.props.connected = connected;
+    (this as any).update();
   };
 
   public getValue = () => {

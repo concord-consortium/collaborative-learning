@@ -4,7 +4,7 @@ import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
 import { DemoOutputControl } from "../controls/demo-output-control";
 import { DemoOutputValueControl } from "../controls/demo-output-value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
-import { NodeDemoOutputTypes } from "../../model/utilities/node";
+import { NodeDemoOutputTypes, NodePlotBlue, NodePlotRed, NodePlotColor } from "../../model/utilities/node";
 
 export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
@@ -14,6 +14,21 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
   public builder(node: Node) {
     super.defaultBuilder(node);
     if (this.editor) {
+      node.data.minigraphSetup = {
+        "nodeValue": {
+          backgroundColor: NodePlotColor,
+          borderColor: NodePlotColor
+        },
+        "speed": {
+          backgroundColor: NodePlotBlue,
+          borderColor: NodePlotBlue
+        },
+        "tilt": {
+          backgroundColor: "#fff",
+          borderColor: NodePlotRed
+        }
+      };
+
       node
         .addControl(new DropdownListControl(this.editor, "outputType", node, NodeDemoOutputTypes, true))
         .addControl(new DemoOutputControl(this.editor, "demoOutput", node));
@@ -49,6 +64,7 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
         } else {
           nodeValue?.setDisplayMessage(result === 0 ? "closed" : "open");
         }
+        nodeValue?.setConnected(inputs.nodeValue.length);
 
         const demoOutput = _node.controls.get("demoOutput") as DemoOutputControl;
         demoOutput?.setValue(result);
@@ -66,6 +82,7 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
           if (speedValue !== undefined) {
             speedControl?.setValue(speedValue);
           }
+          speedControl?.setConnected(inputs.speed.length);
 
           // Update grabber tilt
           const tiltInput = inputs.tilt.length ? inputs.tilt[0] : node.data.tilt;
@@ -74,6 +91,7 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
           if (tiltValue !== undefined) {
             tiltControl?.setValue(tiltValue);
           }
+          tiltControl?.setConnected(inputs.tilt.length);
         } else {
           _node.data.trackedValues = ["nodeValue"];
           this.removeInput(_node, "speed");
@@ -103,7 +121,9 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
           displayLabel,
           0, // Initial value
           `Display for ${inputKey}`,
-          '' // Initial display message
+          '', // Initial display message
+          (node as any).data.minigraphSetup[inputKey].backgroundColor,
+          (node as any).data.minigraphSetup[inputKey].borderColor
         ));
       }
     }

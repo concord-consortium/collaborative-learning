@@ -298,6 +298,8 @@ export const ChartPlotColors = ["#d51eff", "#17ddd7", "#d3d114", "#3974ff", "#ff
                                "#5dd581", "#3cc8f5", "#aeb9bf", "#92e3aa", "#7ad9f8",
                                "#5d6e77", "#31bc5a", "#0caadd"];
 export const NodePlotColor = "#969696";
+export const NodePlotBlue = ChartPlotColors[3];
+export const NodePlotRed = ChartPlotColors[4];
 
 export interface ProgramDataRate {
   text: string;
