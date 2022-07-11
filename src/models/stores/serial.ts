@@ -39,7 +39,7 @@ export class SerialDevice {
           // create one and add it to the channel store
     // }
 
-    public async handleStream(channels: any){
+    public async handleStream(channels: Array<NodeChannelInfo>){
       await this.port?.open({ baudRate: 9600 }).catch((e: any) => console.log(e))
         
         while (this.port?.readable) {
@@ -66,7 +66,7 @@ export class SerialDevice {
           }
     }
 
-    public handleStreamObj(value:any, channels:any){
+    public handleStreamObj(value: string, channels: Array<NodeChannelInfo>){
       this.localBuffer+= value
 
       /* any number of digits followed by a carriage return and a newline */
@@ -79,21 +79,18 @@ export class SerialDevice {
       if (match !== null){
 
         const takeAway = match[0].length + 3 // its either 'emg' or 'msr'
-
         this.localBuffer = this.localBuffer.substring(0, this.localBuffer.length - takeAway);
-        
         const nice = match[1] + match[2];
        
-        const targetChannel = channels.find((c: any) => {
+        const targetChannel = channels.find((c: NodeChannelInfo) => {
           return c.channelId === nice.substring(0,3);
         })
 
         const justDigits = /[0-9]+/
+        const foundDigits = justDigits.exec(nice) 
 
-        const mismo = justDigits.exec(nice) 
-
-        if (mismo){
-          targetChannel.value = mismo[0]
+        if (foundDigits && targetChannel){
+          targetChannel.value = parseInt(foundDigits[0])
         }
     
       }
