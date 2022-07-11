@@ -72,7 +72,7 @@ export class SerialDevice {
       /* any number of digits followed by a carriage return and a newline */
       const pattern = /(emg|fsr)([0-9]+)[\r][\n]/g;
     
-      /* an array that includes [{the whole match}, {the captured string we want}] */
+      /* an array that includes [{the whole match}, {emg|fsr}, {the numeric value}] */
       const match = pattern.exec(this.localBuffer);
       
     
