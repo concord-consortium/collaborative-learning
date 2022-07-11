@@ -131,7 +131,7 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
         </button>
       </div>
       <div className="topbar-right">
-        {props.showRateUI && <span className={"rate-ui"}>{`${props.lastIntervalDuration}ms`}</span>}
+        {props.showRateUI && <div className={"rate-ui"}>{`${props.lastIntervalDuration}ms`}</div>}
         <IconButton 
           icon="serial" key="serial" 
           onClickButton={props.onSerialRefreshDevices} 
