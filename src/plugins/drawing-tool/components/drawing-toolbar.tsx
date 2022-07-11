@@ -68,11 +68,11 @@ export const ToolbarView: React.FC<IProps> = (
   };
 
   const handleStrokeColorChange = (color: string) => {
-    isEnabled && drawingContent.setStroke(color);
+    isEnabled && drawingContent.setStroke(color, drawingContent.selectedIds);
     clearPaletteState();
   };
   const handleFillColorChange = (color: string) => {
-    isEnabled && drawingContent.setFill(color);
+    isEnabled && drawingContent.setFill(color, drawingContent.selectedIds);
     clearPaletteState();
   };
 

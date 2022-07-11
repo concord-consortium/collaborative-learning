@@ -8,6 +8,12 @@ export const kDrawingToolID = "Drawing";
 export const kDrawingStateVersion = "1.0.0";
 export const kDrawingDefaultHeight = 180;
 
+// This is the form the log events take  
+export interface DrawingToolLogEvent {
+  path?: string;
+  args?: Array<any>;
+}
+
 // These types are used by legacy import code in drawing-change-playback.ts
 export type DrawingToolMove = Array<{id: string, destination: Point}>;
 export interface DrawingToolUpdate {
