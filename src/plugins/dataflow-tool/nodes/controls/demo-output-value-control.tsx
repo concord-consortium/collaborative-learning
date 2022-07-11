@@ -1,9 +1,8 @@
 // FIXME: ESLint is unhappy with these control components
 /* eslint-disable react-hooks/rules-of-hooks */
-import React, { useRef } from "react";
+import React from "react";
 import Rete, { NodeEditor, Node } from "rete";
 import { PlotButtonControlComponent } from "./plot-button-control";
-// import { useStopEventPropagation } from "./custom-hooks";
 import "./demo-output-value-control.scss";
 
 export class DemoOutputValueControl extends Rete.Control {
@@ -17,16 +16,13 @@ export class DemoOutputValueControl extends Rete.Control {
     node: Node,
     onGraphButtonClick: () => void,
     label = "",
-    initVal = "",
-    tooltip = ""
+    initVal = 0,
+    tooltip = "",
+    initDisplayMessage = ""
   ) {
     super(key);
     this.emitter = emitter;
     this.key = key;
-
-    // const handleChange = (onChange: any) => {
-    //   return (e: any) => { onChange(e.target.value); };
-    // };
 
     const initial = node.data[key] || initVal;
     node.data[key] = initial;
@@ -38,12 +34,18 @@ export class DemoOutputValueControl extends Rete.Control {
         this.emitter.trigger("process");
       },
       label,
-      tooltip
+      tooltip,
+      displayMessage: initDisplayMessage // A message to display instead of the value
     };
 
-    this.component = (compProps: { value: any; onChange: any; label: any, color: string, tooltip: string}) => {
-      // const inputRef = useRef<HTMLInputElement>(null);
-      // useStopEventPropagation(inputRef, "pointerdown");
+    this.component = (compProps: {
+      value: any,
+      onChange: any,
+      label: any,
+      color: string,
+      tooltip: string,
+      displayMessage: string
+    }) => {
       return (
         <div className="demo-output-value-container" title={compProps.tooltip}>
           <PlotButtonControlComponent showgraph={false} onGraphButtonClick={onGraphButtonClick} />
@@ -51,23 +53,23 @@ export class DemoOutputValueControl extends Rete.Control {
           compProps.color && <div className="color-dot" style={{backgroundColor: compProps.color}}/>
           }
           <div className="display-text">
-            {compProps.label + compProps.value}
+            {compProps.value === undefined
+              ? "Undefined"
+              : compProps.label + (compProps.displayMessage || compProps.value)}
           </div>
         </div>
       );
     };
-    // <input
-    //   className="text-input"
-    //   ref={inputRef}
-    //   type={"text"}
-    //   value={compProps.value}
-    //   onChange={handleChange(compProps.onChange)}
-    // />
   }
 
-  public setValue = (val: string) => {
+  public setValue = (val: number) => {
     this.props.value = val;
     this.putData(this.key, val);
+    (this as any).update();
+  };
+
+  public setDisplayMessage = (message: string) => {
+    this.props.displayMessage = message;
     (this as any).update();
   };
 
