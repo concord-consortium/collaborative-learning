@@ -1,12 +1,12 @@
 import { useCallback } from "react";
 import { useCurrent } from "../../../hooks/use-current";
 import { ICase, ICaseCreation, IDataSet } from "../../../models/data/data-set";
-import { getGeometryContent } from "../../../models/tools/geometry/geometry-content";
-import { ILinkProperties, ITableChange } from "../../../models/tools/table/table-change";
+import { ILinkProperties, ITileLinkMetadata } from "../../../models/tools/table-link-types";
+import { syncTableChangeToLinkedClient } from "../../../models/tools/table-links";
 import { getTableContentHeight, TableContentModelType } from "../../../models/tools/table/table-content";
-import { isLinkableValue, ITileLinkMetadata } from "../../../models/tools/table/table-model-types";
+import { isLinkableValue } from "../../../models/tools/table/table-model-types";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
-import { safeJsonParse, uniqueId, uniqueName } from "../../../utilities/js-utils";
+import { uniqueId, uniqueName } from "../../../utilities/js-utils";
 import { TColumn } from "./table-types";
 
 export interface IContentChangeHandlers {
@@ -31,7 +31,7 @@ interface IProps {
   triggerRowChange: () => void;
 }
 export const useContentChangeHandlers = ({
-  model, dataSet, readOnly, onRequestRowHeight, triggerColumnChange
+  model, dataSet, readOnly, onRequestRowHeight, triggerColumnChange, triggerRowChange
 }: IProps): IContentChangeHandlers => {
   const modelRef = useCurrent(model);
   const getContent = useCallback(() => modelRef.current.content as TableContentModelType, [modelRef]);
@@ -41,31 +41,18 @@ export const useContentChangeHandlers = ({
    */
   // link information attached to individual table changes/actions
   const getTableActionLinks = useCallback((newClientId?: string): ILinkProperties | undefined => {
-    const linkedClients = getContent().metadata.linkedGeometries;
+    const linkedClients = getContent().linkedGeometries;
     // if there are no linked clients, then we don't need to attach link info to the action
     if (!linkedClients?.length && !newClientId) return;
-    // id is used to link actions across tiles
-    const actionId = uniqueId();
     const newClientIds = newClientId ? [newClientId] : [];
-    return { id: actionId, tileIds: [...linkedClients, ...newClientIds] };
+    return { tileIds: [...linkedClients, ...newClientIds] };
   }, [getContent]);
-
-  const syncChangeToLinkedClient = useCallback((clientTileId: string, linkId: string) => {
-    const tableContent = getContent();
-    const lastChange = safeJsonParse<ITableChange>(tableContent.changes[tableContent.changes.length - 1]);
-    // eventually we'll presumably need to support other clients
-    const clientContent = getGeometryContent(getContent(), clientTileId);
-    // link information attached to individual client changes/actions
-    const clientActionLinks = getContent().getClientLinks(linkId, dataSet);
-    // synchronize the table change to the linked client
-    lastChange && clientContent?.syncLinkedChange(dataSet, lastChange, clientActionLinks);
-  }, [dataSet, getContent]);
 
   const syncLinkedClients = useCallback((tableActionLinks?: ILinkProperties) => {
     tableActionLinks?.tileIds.forEach(tileId => {
-      syncChangeToLinkedClient(tileId, tableActionLinks.id);
+      syncTableChangeToLinkedClient(getContent(), tileId);
     });
-  }, [syncChangeToLinkedClient]);
+  }, [getContent]);
 
   const validateCase = useCallback((aCase: ICaseCreation) => {
     const newCase: ICaseCreation = { __id__: uniqueId() };
@@ -141,7 +128,8 @@ export const useContentChangeHandlers = ({
     const tableActionLinks = getTableActionLinks();
     getContent().setCanonicalCaseValues([caseValues], tableActionLinks);
     syncLinkedClients(tableActionLinks);
-  }, [readOnly, getTableActionLinks, getContent, syncLinkedClients]);
+    triggerRowChange();
+  }, [readOnly, getTableActionLinks, getContent, syncLinkedClients, triggerRowChange]);
 
   const removeRows = useCallback((rowIds: string[]) => {
     if (readOnly) return;
@@ -156,17 +144,17 @@ export const useContentChangeHandlers = ({
     // add action to table content
     const tableActionLinks = getTableActionLinks(geomTileInfo.id);
     if (!tableActionLinks) return;
-    getContent().addGeometryLink(geomTileInfo.id, tableActionLinks);
+    getContent().addGeometryLink(geomTileInfo.id);
     // sync change to the newly linked client - not all linked clients
-    syncChangeToLinkedClient(geomTileInfo.id, tableActionLinks.id);
-  }, [getContent, getTableActionLinks, syncChangeToLinkedClient]);
+    syncTableChangeToLinkedClient(getContent(), geomTileInfo.id);
+  }, [getContent, getTableActionLinks]);
 
   const unlinkGeometryTile = useCallback((geomTileInfo: ITileLinkMetadata) => {
     const tableActionLinks = getTableActionLinks(geomTileInfo.id);
     if (!tableActionLinks) return;
-    getContent().removeGeometryLink(geomTileInfo.id, tableActionLinks);
-    syncChangeToLinkedClient(geomTileInfo.id, tableActionLinks.id);
-  }, [getContent, getTableActionLinks, syncChangeToLinkedClient]);
+    getContent().removeGeometryLink(geomTileInfo.id);
+    syncTableChangeToLinkedClient(getContent(), geomTileInfo.id);
+  }, [getContent, getTableActionLinks]);
 
   return { onSetTableTitle: setTableTitle, onSetColumnName: setColumnName, onSetColumnExpressions: setColumnExpressions,
           onAddColumn: addColumn, onRemoveColumn: removeColumn,

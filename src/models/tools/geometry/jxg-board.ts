@@ -1,12 +1,11 @@
 import { assign, each, find } from "lodash";
 import "./jxg";
-import { JXGChange, JXGChangeAgent, JXGProperties } from "./jxg-changes";
+import { ITableLinkProperties, JXGChange, JXGChangeAgent, JXGProperties } from "./jxg-changes";
 import {
   isAxis, isBoard, isLinkedPoint, isPoint,
   kGeometryDefaultAxisMin, kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj
 } from "./jxg-types";
 import { goodTickValue } from "../../../utilities/graph-utils";
-import { ITableLinkProperties } from "../table/table-change";
 
 const kScalerClasses = ["canvas-scaler", "scaled-list-item"];
 

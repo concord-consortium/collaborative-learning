@@ -11,10 +11,10 @@ context('Table Tool Tile', function () {
   before(function () {
     const queryParams = `${Cypress.config("queryParams")}`;
     cy.clearQAData('all');
-  
+
     cy.visit(queryParams);
     cy.waitForLoad();
-  });  
+  });
 
   describe('Test table functions', function () {
     it('will add a table to canvas', function () {
@@ -87,17 +87,11 @@ context('Table Tool Tile', function () {
     // TODO: Found 1, expected 3
     it('will add content to table', function () {
       cy.get(".primary-workspace").within((workspace) => {
-        tableToolTile.getTableCell().eq(1).click().type('3{enter}');
-        tableToolTile.getTableCell().eq(2).click();
-        // cy.wait(100);
+        tableToolTile.typeInTableCell(1, '3');
         tableToolTile.getTableCell().eq(1).should('contain', '3');
-        tableToolTile.getTableCell().eq(2).type('2.5{enter}');
-        tableToolTile.getTableCell().eq(5).click();
-        // cy.wait(100);
+        tableToolTile.typeInTableCell(2, '2.5');
         tableToolTile.getTableCell().eq(2).should('contain', '2.5');
-        tableToolTile.getTableCell().eq(1).click().type('5{enter}');
-        tableToolTile.getTableCell().eq(5).click();
-        // cy.wait(100);
+        tableToolTile.typeInTableCell(1, '5');
         tableToolTile.getTableCell().eq(1).should('contain', '5');
         tableToolTile.getTableRow().should('have.length', 2);
       });
@@ -164,4 +158,3 @@ context('Table Tool Tile', function () {
     });
   });
 });
-

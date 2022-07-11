@@ -1,8 +1,7 @@
 import classNames from "classnames";
-import { autorun } from "mobx";
-import { useCallback, useEffect, useRef, useState } from "react";
+// import { autorun } from "mobx";
+import { useCallback, useState } from "react";
 import { useCurrent } from "../../../hooks/use-current";
-import { DataSet } from "../../../models/data/data-set";
 import { TableContentModelType } from "../../../models/tools/table/table-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { kRowHeight } from "./table-types";
@@ -15,26 +14,27 @@ import { kRowHeight } from "./table-types";
 export const useModelDataSet = (model: ToolTileModelType) => {
   const modelRef = useCurrent(model);
   const getContent = useCallback(() => modelRef.current.content as TableContentModelType, [modelRef]);
-  const dataSet = useRef(DataSet.create());
-  const syncedChanges = useRef(0);
+  const dataSet = useCurrent(getContent().dataSet);
+  // const dataSet = useRef(DataSet.create());
+  // const syncedChanges = useRef(0);
   const [columnChanges, setColumnChanges] = useState(0);
   const triggerColumnChange = useCallback(() => setColumnChanges(state => ++state), []);
   const [rowChanges, setRowChanges] = useState(0);
   const triggerRowChange = useCallback(() => setRowChanges(state => ++state), []);
 
-  useEffect(() => {
-    // can't use getContent() here as then content changes don't trigger reinstallation of the autorun
-    const _content = model.content as TableContentModelType;
-    const disposer = autorun(() => {
-      if (syncedChanges.current < _content.changes.length) {
-        const [hasColumnChanges, hasRowChanges] = _content.applyChanges(dataSet.current, syncedChanges.current);
-        hasColumnChanges && triggerColumnChange();
-        hasRowChanges && triggerRowChange();
-        syncedChanges.current = _content.changes.length;
-      }
-    });
-    return () => disposer();
-  }, [model.content, triggerColumnChange, triggerRowChange]);
+  // useEffect(() => {
+  //   // can't use getContent() here as then content changes don't trigger reinstallation of the autorun
+  //   const _content = model.content as TableContentModelType;
+  //   const disposer = autorun(() => {
+  //     if (syncedChanges.current < _content.changes.length) {
+  //       const [hasColumnChanges, hasRowChanges] = _content.applyChanges(dataSet.current, syncedChanges.current);
+  //       hasColumnChanges && triggerColumnChange();
+  //       hasRowChanges && triggerRowChange();
+  //       syncedChanges.current = _content.changes.length;
+  //     }
+  //   });
+  //   return () => disposer();
+  // }, [model.content, triggerColumnChange, triggerRowChange]);
 
   const setTableTitle = useCallback((title: string) => {
     (title != null) && getContent().setTableName(title);

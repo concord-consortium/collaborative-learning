@@ -16,6 +16,9 @@
     "mcimage",
     "mcimages",
     "mcsupports",
-    "towle"
+    "tablelink",
+    "towle",
+    "ulid",
+    "wumps"
   ]
 }

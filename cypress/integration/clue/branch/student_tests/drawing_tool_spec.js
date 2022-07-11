@@ -43,7 +43,7 @@ context('Draw Tool Tile', function () {
       });
       it("selects freehand drawing", () => {
         drawToolTile.getDrawToolSelect().click();
-        // First make sure we don't select it even if we are inside of its 
+        // First make sure we don't select it even if we are inside of its
         // bounding box
         drawToolTile.getDrawTile()
           .trigger("mousedown", 370, 50)

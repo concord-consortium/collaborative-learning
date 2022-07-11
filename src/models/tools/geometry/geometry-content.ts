@@ -1,15 +1,16 @@
 import { assign, castArray, each, keys, omit, size as _size } from "lodash";
-import { types, Instance, SnapshotOut, IAnyStateTreeNode } from "mobx-state-tree";
+import { types, Instance, SnapshotOut } from "mobx-state-tree";
 import { Lambda } from "mobx";
 import { Optional } from "utility-types";
 import { SelectionStoreModelType } from "../../stores/selection";
-import { addLinkedTable, removeLinkedTable } from "../table-links";
+import { getRowLabelFromLinkProps, ITableLinkProperties, linkedPointId } from "../table-link-types";
+import {
+  addLinkedTable, clearGeometryLinksFromTables, getAxisLabelsFromDataSet, isLinkableTable,
+  kLabelAttrName, removeLinkedTable
+} from "../table-links";
 import { ITileExportOptions, IDefaultContentOptions } from "../tool-content-info";
 import { toolContentModelHooks, ToolContentModel, ToolMetadataModel } from "../tool-types";
-import {
-  getRowLabelFromLinkProps, IColumnProperties, ICreateRowsProperties, IRowProperties,
-  ITableChange, ITableLinkProperties
-} from "../table/table-change";
+import { ICreateRowsProperties, IRowProperties, ITableChange } from "../table/table-change";
 import { getAxisLabelsFromDataSet, getTableContent, kLabelAttrName } from "../table/table-content";
 import { canonicalizeValue, linkedPointId } from "../table/table-model-types";
 import { exportGeometryJson } from "./geometry-export";
@@ -30,7 +31,6 @@ import {
 } from "./jxg-types";
 import { IDataSet } from "../../data/data-set";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
-import { getTileContentById } from "../../../utilities/mst-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
 
 export const kGeometryToolID = "Geometry";
@@ -59,11 +59,6 @@ export function defaultGeometryContent(options?: IDefaultContentOptions): Geomet
   const boardChange = defaultGeometryBoardChange();
   changes.push(JSON.stringify(boardChange));
   return GeometryContentModel.create({ changes });
-}
-
-export function getGeometryContent(target: IAnyStateTreeNode, tileId: string): GeometryContentModelType | undefined {
-  const content = getTileContentById(target, tileId);
-  return content && content as GeometryContentModelType;
 }
 
 export interface IAxisLabels {
@@ -265,21 +260,9 @@ export const GeometryContentModel = ToolContentModel
       if (!lastChangeParsed || !isUndoableChange(lastChangeParsed)) return false;
       const lastChangeLinks = lastChangeParsed.links;
       if (!lastChangeLinks) return true;
-      const linkedTiles = lastChangeLinks.tileIds;
-      const linkedTile = linkedTiles?.[0];
-      const tableContent = linkedTile ? getTableContent(self, linkedTile) : undefined;
-      return tableContent ? tableContent.canUndoLinkedChange(/*lastChangeParsed*/) : false;
-    },
-    canUndoLinkedChange(change: ITableChange) {
-      const hasUndoableChanges = self.changes.length > 1;
-      if (!hasUndoableChanges) return false;
-      const lastChange = hasUndoableChanges ? self.changes[self.changes.length - 1] : undefined;
-      const lastChangeParsed = safeJsonParse<JXGChange>(lastChange);
-      const lastChangeLinks = lastChangeParsed?.links;
-      if (!lastChangeLinks) return false;
-      const geometryActionLinkId = lastChangeLinks.id;
-      const tableActionLinkId = change.links?.id;
-      return geometryActionLinkId && tableActionLinkId && (geometryActionLinkId === tableActionLinkId);
+      // we don't support undoing changes linked to tables in this transition period
+      // between undo/redo implementations
+      return false;
     }
   }))
   .views(self => ({
@@ -323,10 +306,7 @@ export const GeometryContentModel = ToolContentModel
       self.metadata = metadata as GeometryMetadataModelType;
     },
     willRemoveFromDocument() {
-      self.metadata.linkedTables.forEach(({ id: tableId }) => {
-        const tableContent = getTableContent(self, tableId);
-        tableContent && tableContent.removeGeometryLink(self.metadata.id);
-      });
+      clearGeometryLinksFromTables(self, self.metadata.id, self.metadata.linkedTableIds);
       self.metadata.clearLinkedTables();
     }
   }))
@@ -371,8 +351,7 @@ export const GeometryContentModel = ToolContentModel
         const xLabel = links?.labels?.find(entry => entry.id === "xAxis")?.label;
         const yLabel = links?.labels?.find(entry => entry.id === "yAxis")?.label;
         if (op === "create") {
-          const tableContent = getTableContent(self, tableId);
-          if (tableContent) {
+          if (isLinkableTable(self, tableId)) {
             const axes: IAxisLabels = { x: xLabel, y: yLabel };
             self.metadata.addTableLink(tableId, axes);
           }
@@ -391,13 +370,13 @@ export const GeometryContentModel = ToolContentModel
       }
     }
 
-    function getLinkedTableChange(change: JXGChange) {
-      const links = change.links as ITableLinkProperties | undefined;
-      const linkId = links?.id;
-      const tableId = links?.tileIds[0];
-      const tableContent = tableId ? getTableContent(self, tableId) : undefined;
-      return linkId ? tableContent?.getLinkedChange(linkId) : undefined;
-    }
+    // function getLinkedTableChange(change: JXGChange) {
+    //   const links = change.links as ITableLinkProperties | undefined;
+    //   // const linkId = links?.id;
+    //   const tableId = links?.tileIds[0];
+    //   const tableContent = tableId ? getTableContent(self, tableId) : undefined;
+    //   return tableContent?.getLinkedChange(self.metadata.id) || undefined;
+    // }
 
     function handleDidApplyChange(board: JXG.Board | undefined, change: JXGChange) {
       const { operation } = change;
@@ -1049,7 +1028,7 @@ export const GeometryContentModel = ToolContentModel
         get batchChangeCount() {
           return batchChanges.length;
         },
-        getLinkedTableChange,
+        // getLinkedTableChange,
         copySelection,
         findObjects,
         getOneSelectedPoint,
@@ -1200,114 +1179,104 @@ export const GeometryContentModel = ToolContentModel
       return [pointIds, positions];
     }
   }))
+  // .actions(self => ({
+  //   syncColumnsChange(dataSet: IDataSet, change: ITableChange, links: ITableLinkProperties) {
+  //     const tableId = links.tileIds[0];
+  //     let shouldUpdateAxisLabels = false;
+  //     switch (change.action) {
+  //       case "create": {
+  //         // new column => new point for each case
+  //         const attrIds = castArray(change.ids);
+  //         const [pointIds, positions] = self.getPointPositionsForColumns(dataSet, attrIds);
+  //         const props = pointIds.map(id => ({ id }));
+  //         pointIds && pointIds.length && self.addPoints(undefined, positions, props, links);
+  //         shouldUpdateAxisLabels = true;
+  //         break;
+  //       }
+  //       case "update": {
+  //         const ids = castArray(change.ids);
+  //         const attrIdsWithExpr: string[] = [];
+  //         const changeProps: IColumnProperties[] = castArray(change.props as any);
+  //         ids.forEach((attrId, index) => {
+  //           const props = changeProps[index] || changeProps[0];
+  //           // update column name => update axis labels
+  //           if (props.name != null) {
+  //             shouldUpdateAxisLabels = true;
+  //           }
+  //           // update column expression => update points associated with column
+  //           if (props.expression != null) {
+  //             attrIdsWithExpr.push(attrId);
+  //           }
+  //         });
+  //         if (attrIdsWithExpr.length) {
+  //           const [pointIds, positions] = self.getPointPositionsForColumns(dataSet, attrIdsWithExpr);
+  //           const props = positions.map(position => ({ position }));
+  //           pointIds && pointIds.length && self.updateObjects(undefined, pointIds, props, links);
+  //         }
+  //         break;
+  //       }
+  //       case "delete": {
+  //         // delete column => remove points associated with column
+  //         const pointIds: string[] = [];
+  //         const ids = castArray(change.ids);
+  //         ids.forEach(attrId => {
+  //           dataSet.cases.forEach(aCase => {
+  //             const caseId = aCase.__id__;
+  //             pointIds.push(linkedPointId(caseId, attrId));
+  //           });
+  //           shouldUpdateAxisLabels = true;
+  //         });
+  //         pointIds && pointIds.length && self.removeObjects(undefined, pointIds, links);
+  //         break;
+  //       }
+  //     }
+  //     shouldUpdateAxisLabels && self.updateAxisLabels(undefined, tableId, links);
+  //   },
+  //   syncRowsChange(dataSet: IDataSet, change: ITableChange, links: ITableLinkProperties) {
+  //     switch (change.action) {
+  //       case "create": {
+  //         // new table row => new points for each attribute in row
+  //         const [pointIds, positions] = self.getPointPositionsForRowsChange(dataSet, change);
+  //         const props = pointIds.map(id => ({ id }));
+  //         pointIds && pointIds.length && self.addPoints(undefined, positions, props, links);
+  //         break;
+  //       }
+  //       case "update": {
+  //         // update table row => update points associated with row
+  //         const [pointIds, positions] = self.getPointPositionsForRowsChange(dataSet, change);
+  //         const props = positions.map(position => ({ position }));
+  //         pointIds && pointIds.length && self.updateObjects(undefined, pointIds, props, links);
+  //         break;
+  //       }
+  //       case "delete": {
+  //         // delete table row => remove points associated with row
+  //         const pointIds: string[] = [];
+  //         const caseIds = castArray(change.ids);
+  //         caseIds.forEach(caseId => {
+  //           for (let attrIndex = 1; attrIndex < dataSet.attributes.length; ++attrIndex) {
+  //             pointIds.push(linkedPointId(caseId, dataSet.attributes[attrIndex].id));
+  //           }
+  //         });
+  //         change.ids && self.removeObjects(undefined, pointIds, links);
+  //         break;
+  //       }
+  //     }
+  //   },
+  //   syncTableLinkChange(dataSet: IDataSet, change: ITableChange, links: ITableLinkProperties) {
+  //     const tableId = links.tileIds[0];
+  //     switch (change.action) {
+  //       case "create":
+  //         self.addTableLink(undefined, tableId, dataSet, links);
+  //         break;
+  //       case "delete":
+  //         self.removeTableLink(undefined, tableId, links);
+  //         break;
+  //     }
+  //   }
+  // }))
   .actions(self => ({
-    syncColumnsChange(dataSet: IDataSet, change: ITableChange, links: ITableLinkProperties) {
-      const tableId = links.tileIds[0];
-      let shouldUpdateAxisLabels = false;
-      switch (change.action) {
-        case "create": {
-          // new column => new point for each case
-          const attrIds = castArray(change.ids);
-          const [pointIds, positions] = self.getPointPositionsForColumns(dataSet, attrIds);
-          const props = pointIds.map(id => ({ id }));
-          pointIds && pointIds.length && self.addPoints(undefined, positions, props, links);
-          shouldUpdateAxisLabels = true;
-          break;
-        }
-        case "update": {
-          const ids = castArray(change.ids);
-          const attrIdsWithExpr: string[] = [];
-          const changeProps: IColumnProperties[] = castArray(change.props as any);
-          ids.forEach((attrId, index) => {
-            const props = changeProps[index] || changeProps[0];
-            // update column name => update axis labels
-            if (props.name != null) {
-              shouldUpdateAxisLabels = true;
-            }
-            // update column expression => update points associated with column
-            if (props.expression != null) {
-              attrIdsWithExpr.push(attrId);
-            }
-          });
-          if (attrIdsWithExpr.length) {
-            const [pointIds, positions] = self.getPointPositionsForColumns(dataSet, attrIdsWithExpr);
-            const props = positions.map(position => ({ position }));
-            pointIds && pointIds.length && self.updateObjects(undefined, pointIds, props, links);
-          }
-          break;
-        }
-        case "delete": {
-          // delete column => remove points associated with column
-          const pointIds: string[] = [];
-          const ids = castArray(change.ids);
-          ids.forEach(attrId => {
-            dataSet.cases.forEach(aCase => {
-              const caseId = aCase.__id__;
-              pointIds.push(linkedPointId(caseId, attrId));
-            });
-            shouldUpdateAxisLabels = true;
-          });
-          pointIds && pointIds.length && self.removeObjects(undefined, pointIds, links);
-          break;
-        }
-      }
-      shouldUpdateAxisLabels && self.updateAxisLabels(undefined, tableId, links);
-    },
-    syncRowsChange(dataSet: IDataSet, change: ITableChange, links: ITableLinkProperties) {
-      switch (change.action) {
-        case "create": {
-          // new table row => new points for each attribute in row
-          const [pointIds, positions] = self.getPointPositionsForRowsChange(dataSet, change);
-          const props = pointIds.map(id => ({ id }));
-          pointIds && pointIds.length && self.addPoints(undefined, positions, props, links);
-          break;
-        }
-        case "update": {
-          // update table row => update points associated with row
-          const [pointIds, positions] = self.getPointPositionsForRowsChange(dataSet, change);
-          const props = positions.map(position => ({ position }));
-          pointIds && pointIds.length && self.updateObjects(undefined, pointIds, props, links);
-          break;
-        }
-        case "delete": {
-          // delete table row => remove points associated with row
-          const pointIds: string[] = [];
-          const caseIds = castArray(change.ids);
-          caseIds.forEach(caseId => {
-            for (let attrIndex = 1; attrIndex < dataSet.attributes.length; ++attrIndex) {
-              pointIds.push(linkedPointId(caseId, dataSet.attributes[attrIndex].id));
-            }
-          });
-          change.ids && self.removeObjects(undefined, pointIds, links);
-          break;
-        }
-      }
-    },
-    syncTableLinkChange(dataSet: IDataSet, change: ITableChange, links: ITableLinkProperties) {
-      const tableId = links.tileIds[0];
-      switch (change.action) {
-        case "create":
-          self.addTableLink(undefined, tableId, dataSet, links);
-          break;
-        case "delete":
-          self.removeTableLink(undefined, tableId, links);
-          break;
-      }
-    }
-  }))
-  .actions(self => ({
-    syncLinkedChange(dataSet: IDataSet, change: ITableChange, links: ITableLinkProperties) {
-      switch (change.target) {
-        case "columns":
-          self.syncColumnsChange(dataSet, change, links);
-          break;
-        case "rows":
-          self.syncRowsChange(dataSet, change, links);
-          break;
-        case "geometryLink":
-          self.syncTableLinkChange(dataSet, change, links);
-          break;
-      }
+    syncLinkedChange(dataSet: IDataSet, links: ITableLinkProperties) {
+      // TODO: handle update
     }
   }));
 

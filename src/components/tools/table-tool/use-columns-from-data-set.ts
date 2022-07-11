@@ -2,11 +2,11 @@ import classNames from "classnames";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { IAttribute } from "../../../models/data/attribute";
 import { IDataSet } from "../../../models/data/data-set";
+import { prettifyExpression } from "../../../models/data/expression-utils";
 import { TableMetadataModelType } from "../../../models/tools/table/table-content";
 import { CellFormatter } from "./cell-formatter";
 import CellTextEditor from "./cell-text-editor";
 import { ColumnHeaderCell } from "./column-header-cell";
-import { prettifyExpression } from "./expression-utils";
 import {
   IGridContext, kControlsColumnKey, kControlsColumnWidth, kExpressionCellPadding, kHeaderCellPadding,
   kIndexColumnKey, kIndexColumnWidth, TColumn
@@ -61,7 +61,7 @@ export const useColumnsFromDataSet = ({
     const exprCellWidth = (expr ? measureText(`= ${expr}`) : 0) + kExpressionCellPadding;
     if ((nameCellWidth !== nameColumnWidths.current[attr.id]) ||
         (exprCellWidth !== exprColumnWidths.current[attr.id])) {
-      // autoWidth changes (e.g. name or formula changes), supercede user-set width
+      // autoWidth changes (e.g. name or formula changes), supersede user-set width
       delete userColumnWidths.current[attr.id];
       nameColumnWidths.current[attr.id] = nameCellWidth;
       exprColumnWidths.current[attr.id] = exprCellWidth;

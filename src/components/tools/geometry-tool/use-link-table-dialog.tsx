@@ -2,8 +2,8 @@ import React, { useRef, useState } from "react";
 import LinkGraphIcon from "../../../clue/assets/icons/table/link-graph-icon.svg";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { GeometryContentModelType } from "../../../models/tools/geometry/geometry-content";
+import { ITileLinkMetadata } from "../../../models/tools/table-link-types";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
-import { ITileLinkMetadata } from "../../../models/tools/table/table-model-types";
 
 import "./link-table-dialog.scss";
 

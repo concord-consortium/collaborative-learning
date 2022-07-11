@@ -1,5 +1,5 @@
 import { castArray } from "lodash";
-import { ILinkProperties, ITableLinkProperties } from "../table-links";
+import { ILinkProperties, ITableLinkProperties } from "../table-link-types";
 export { ILinkProperties, ITableLinkProperties };
 
 export type JXGOperation = "create" | "update" | "delete";

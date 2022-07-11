@@ -80,7 +80,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   const exportContentAsTileJson = useCallback(() => {
     return exportTableContentAsJson(getContent().metadata, dataSet.current);
   }, [dataSet, getContent]);
-  useToolApi({ metadata, getTitle, getContentHeight, exportContentAsTileJson,
+  useToolApi({ content: getContent(), getTitle, getContentHeight, exportContentAsTileJson,
                 onRegisterToolApi, onUnregisterToolApi });
 
   const rowLabelProps = useRowLabelColumn({
