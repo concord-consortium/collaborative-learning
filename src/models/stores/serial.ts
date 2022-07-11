@@ -58,7 +58,7 @@ export class SerialDevice {
               }
             } 
             catch (error) {
-              console.log(error);
+              console.error(error);
             } 
             finally {
               streamReader.releaseLock();
