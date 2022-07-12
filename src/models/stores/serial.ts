@@ -3,7 +3,7 @@ import { NodeChannelInfo } from "src/plugins/dataflow-tool/model/utilities/node"
 export class SerialDevice {
     value: string;
     localBuffer: string;
-    private port: any; // SERIAL TODO: types SerialPort | null 
+    private port: SerialPort | null 
 
     constructor() {
       this.value = '0';
@@ -26,18 +26,6 @@ export class SerialDevice {
         console.error('error requesting port: ', error);
       }
     }
-
-    /* in the future, this could discover what channels should exist
-      based on keys coming up from arduino
-      however, since immediate-term usecases are limited to specific sensors
-      on specific pins, for now we are going to hardcode them 
-      to match on the arduino and channel sides
-      then, it could be called from DataFlowProgram:updateChannels()
-    */
-    // public createSerialChannels(){
-          // if a key from the stream does not yet have a channel
-          // create one and add it to the channel store
-    // }
 
     public async handleStream(channels: Array<NodeChannelInfo>){
       await this.port?.open({ baudRate: 9600 }).catch((e: any) => console.log(e));
@@ -69,7 +57,7 @@ export class SerialDevice {
     public handleStreamObj(value: string, channels: Array<NodeChannelInfo>){
       this.localBuffer+= value;
 
-      /* any number of digits followed by a carriage return and a newline */
+      /* "emg" or "fsr" followed by any number of digits followed by  carriage return + newline */
       const pattern = /(emg|fsr)([0-9]+)[\r][\n]/g;
     
       /* an array that includes [{the whole match}, {emg|fsr}, {the numeric value}] */
