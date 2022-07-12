@@ -289,7 +289,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
   }
 
   private handleEditorRef = (editor?: Editor) => {
-    this.editor = editor;    
-    this.getContent()?.setEditor(editor);
+    this.editor = editor;
+    editor && this.getContent()?.setEditor(editor);
   };
 }
