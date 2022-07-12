@@ -3,7 +3,7 @@ import { NodeChannelInfo } from "src/plugins/dataflow-tool/model/utilities/node"
 export class SerialDevice {
     value: string;
     localBuffer: string;
-    private port: SerialPort | null 
+    private port: SerialPort | null;
 
     constructor() {
       this.value = '0';
@@ -13,11 +13,11 @@ export class SerialDevice {
     public hasPort(){
       return this.port !== undefined;
     }
-  
+
     public async requestAndSetPort(){
       try {
-          await (navigator as any).serial.requestPort()
-          .then((p: any) => {
+          await (navigator).serial.requestPort()
+          .then((p: SerialPort) => {
             this.port = p;
           });
       }
@@ -29,13 +29,13 @@ export class SerialDevice {
 
     public async handleStream(channels: Array<NodeChannelInfo>){
       await this.port?.open({ baudRate: 9600 }).catch((e: any) => console.log(e));
-        
+
         while (this.port?.readable) {
-       
+
           const textDecoder = new TextDecoderStream();
-          const promiseToBeClosed = this.port.readable.pipeTo(textDecoder.writable);
+          this.port.readable.pipeTo(textDecoder.writable);
           const streamReader = textDecoder.readable.getReader();
-       
+
           try {
               while (this.port.readable) {
                 const { value, done } = await streamReader.read();
@@ -44,10 +44,10 @@ export class SerialDevice {
                 }
                 this.handleStreamObj(value, channels);
               }
-            } 
+            }
             catch (error) {
               console.error(error);
-            } 
+            }
             finally {
               streamReader.releaseLock();
             }
@@ -59,17 +59,17 @@ export class SerialDevice {
 
       /* "emg" or "fsr" followed by any number of digits followed by  carriage return + newline */
       const pattern = /(emg|fsr)([0-9]+)[\r][\n]/g;
-    
+
       /* an array that includes [{the whole match}, {emg|fsr}, {the numeric value}] */
       const match = pattern.exec(this.localBuffer);
-      
-    
+
+
       if (match !== null){
 
         const takeAway = match[0].length + 3; // its either 'emg' or 'msr'
         this.localBuffer = this.localBuffer.substring(0, this.localBuffer.length - takeAway);
         const nice = match[1] + match[2];
-       
+
         const targetChannel = channels.find((c: NodeChannelInfo) => {
           return c.channelId === nice.substring(0,3);
         });
@@ -80,7 +80,7 @@ export class SerialDevice {
         if (foundDigits && targetChannel){
           targetChannel.value = parseInt(foundDigits[0], 10);
         }
-    
+
       }
     }
 }
