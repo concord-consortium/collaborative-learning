@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import { Instance, SnapshotIn, types } from "mobx-state-tree";
+import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
 import { computeStrokeDashArray, DrawingTool, FilledObject, IDrawingComponentProps, IDrawingLayer, 
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
@@ -52,6 +52,7 @@ export const RectangleObject = types.compose("RectangleObject", StrokedObject, F
   }));
 export interface RectangleObjectType extends Instance<typeof RectangleObject> {}
 export interface RectangleObjectSnapshot extends SnapshotIn<typeof RectangleObject> {}
+export interface RectangleObjectSnapshotForAdd extends SnapshotIn<typeof RectangleObject> {type: string}
 
 export const RectangleComponent = observer(function RectangleComponent({model, handleHover} : IDrawingComponentProps) {
   if (model.type !== "rectangle") return null;
@@ -100,7 +101,7 @@ export class RectangleDrawingTool extends DrawingTool {
     const handleMouseUp = (e2: MouseEvent) => {
       e2.preventDefault();
       if ((rectangle.width > 0) && (rectangle.height > 0)) {
-        this.drawingLayer.addNewDrawingObject(rectangle);
+        this.drawingLayer.addNewDrawingObject(getSnapshot(rectangle));
       }
       this.drawingLayer.setCurrentDrawingObject(null);
       window.removeEventListener("mousemove", handleMouseMove);

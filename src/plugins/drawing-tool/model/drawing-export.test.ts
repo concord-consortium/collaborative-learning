@@ -61,7 +61,7 @@ describe("exportDrawingTileSpec", () => {
     const drawing3 = createDrawingContent({ objects: [
       v1Data, v2Data
     ]});
-    drawing3.removeObject(drawing3.objects[0]);
+    drawing3.deleteObjects([drawing3.objects[0].id]);
     expect(exportDrawing2(drawing3)).toEqual({ type: "Drawing", objects: [v2Data] });
   });
 
@@ -94,7 +94,7 @@ describe("exportDrawingTileSpec", () => {
     const drawing3 = createDrawingContent({ objects: [
       l1Data, l2Data
     ]});
-    drawing3.removeObject(drawing3.objects[0]);
+    drawing3.deleteObjects([drawing3.objects[0].id]);
     expect(exportDrawing2(drawing3)).toEqual({ type: "Drawing", objects: [l2Data] });
   });
 
@@ -133,9 +133,7 @@ describe("exportDrawingTileSpec", () => {
     const drawing3 = createDrawingContent({ objects: [
       r1Data, r2Data, r3Data
     ]});
-    drawing3.removeObject(drawing3.objects[1]);
-    // Old objects[2] is now objects[1]
-    drawing3.removeObject(drawing3.objects[1]);
+    drawing3.deleteObjects([drawing3.objects[1].id, drawing3.objects[2].id]);
     expect(exportDrawing2(drawing3)).toEqual({ type: "Drawing", objects: [r1Data] });
   });
 
@@ -174,9 +172,7 @@ describe("exportDrawingTileSpec", () => {
     const drawing3 = createDrawingContent({ objects: [
       e1Data, e2Data, e3Data
     ]});
-    drawing3.removeObject(drawing3.objects[1]);
-    // Old objects[2] is now objects[1]
-    drawing3.removeObject(drawing3.objects[1]);
+    drawing3.deleteObjects([drawing3.objects[1].id, drawing3.objects[2].id]);
     expect(exportDrawing2(drawing3)).toEqual({ type: "Drawing", objects: [e1Data] });
   });
 
@@ -208,7 +204,7 @@ describe("exportDrawingTileSpec", () => {
     const drawing3 = createDrawingContent({ objects: [
       i1Data, i2Data, i3Data
     ]});
-    drawing3.removeObject(drawing3.objects[1]);
+    drawing3.deleteObjects([drawing3.objects[1].id]);
     expect(exportDrawing2(drawing3)).toEqual({ type: "Drawing", objects: [i1Data, i3Data] });
   });
 
@@ -259,7 +255,7 @@ describe("exportDrawingTileSpec", () => {
     const drawing3 = createDrawingContent({ objects: [
       i1Data, i2Data, i3Data
     ]});
-    drawing3.removeObject(drawing3.objects[1]);
+    drawing3.deleteObjects([drawing3.objects[1].id]);
     expect(exportDrawingWithTransform(drawing3))
             .toEqual({ type: "Drawing", objects: [i1OutData, i3OutData] });
   });

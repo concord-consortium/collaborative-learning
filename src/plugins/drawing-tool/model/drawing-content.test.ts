@@ -1,3 +1,4 @@
+import { addDisposer, onAction } from "mobx-state-tree";
 import {
   createDrawingContent, defaultDrawingContent, 
   DrawingContentModelSnapshot, DrawingToolMetadataModel
@@ -7,10 +8,11 @@ import { DefaultToolbarSettings } from "./drawing-basic-types";
 import { StampModel } from "./stamp";
 import { AppConfigModel } from "../../../models/stores/app-config-model";
 import { ImageObject } from "../objects/image";
-import { RectangleObject, RectangleObjectSnapshot, RectangleObjectType } from "../objects/rectangle";
+import { RectangleObject, RectangleObjectSnapshot, RectangleObjectSnapshotForAdd, 
+  RectangleObjectType } from "../objects/rectangle";
 import { computeStrokeDashArray } from "../objects/drawing-object";
+import { LogEventName, Logger } from "../../../lib/logger";
 
-// mock Logger calls
 jest.mock("../../../lib/logger", () => {
   return {
     ...(jest.requireActual("../../../lib/logger") as any),
@@ -19,6 +21,7 @@ jest.mock("../../../lib/logger", () => {
     }
   };
 });
+const logToolChange = Logger.logToolChange as jest.Mock;
 
 describe("computeStrokeDashArray", () => {
   it("should return expected results", () => {
@@ -67,7 +70,10 @@ describe("DrawingContentModel", () => {
   function createDrawingContentWithMetadata(options?: DrawingContentModelSnapshot) {
     const model = createDrawingContent(options);
     const metadata = DrawingToolMetadataModel.create({ id: "drawing-1" });
-    model.doPostCreate(metadata);
+    model.doPostCreate!(metadata);
+    addDisposer(model, onAction(model, (call) => {
+      model.onTileAction!(call);
+    }));
     return model;
   }
 
@@ -76,6 +82,14 @@ describe("DrawingContentModel", () => {
     stroke: "#888888",
     strokeDashArray: "3,3",
     strokeWidth: 5
+  };
+  const baseRectangleSnapshot: RectangleObjectSnapshotForAdd = {
+    type: "rectangle",
+    x: 0,
+    y: 0,
+    width: 10,
+    height: 10,
+    ...mockSettings,
   };
 
   it("accepts default arguments on creation", () => {
@@ -121,55 +135,88 @@ describe("DrawingContentModel", () => {
       strokeWidth: DefaultToolbarSettings.strokeWidth
     };
     expect(model.toolbarSettings).toEqual(defaultSettings);
-    model.setStroke(stroke);
+    model.setStroke(stroke, model.selectedIds);
     expect(model.toolbarSettings).toEqual({ ...defaultSettings, stroke });
-    model.setFill(fill);
+    model.setFill(fill, model.selectedIds);
     expect(model.toolbarSettings).toEqual({ ...defaultSettings, fill, stroke });
-    model.setStrokeDashArray(strokeDashArray);
+    model.setStrokeDashArray(strokeDashArray, model.selectedIds);
     expect(model.toolbarSettings).toEqual({ ...defaultSettings, fill, stroke, strokeDashArray });
-    model.setStrokeWidth(strokeWidth);
+    model.setStrokeWidth(strokeWidth, model.selectedIds);
     expect(model.toolbarSettings).toEqual({ ...defaultSettings, fill, stroke, strokeDashArray, strokeWidth });
   });
 
   it("can delete a set of selected drawing objects", () => {
     const model = createDrawingContentWithMetadata();
-    const {stroke, fill, strokeWidth, strokeDashArray} = mockSettings;
 
-    model.addObject(RectangleObject.create(
-      {id:"a", x:0, y:0, width:10, height:10,
-       stroke, fill, strokeWidth, strokeDashArray}));
+    logToolChange.mockReset();
 
-    model.addObject(RectangleObject.create(
-      {id:"b", x:20, y:20, width:10, height:10,
-       stroke, fill, strokeWidth, strokeDashArray}));
+    const rectSnapshot1: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"a", x:0, y:0};
+    model.addObject(rectSnapshot1);
+
+    const rectSnapshot2: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"b", x:20, y:20};
+    model.addObject(rectSnapshot2);
 
     // delete does nothing if nothing is selected
     expect(model.objects.length).toBe(2);
-    model.deleteSelectedObjects();
+    model.deleteObjects(model.selectedIds);
     expect(model.objects.length).toBe(2);
 
     model.setSelection(["a", "b"]);
     expect(model.hasSelectedObjects).toBe(true);
-    model.deleteSelectedObjects();
+
+    model.deleteObjects(model.selectedIds);
     expect(model.objects.length).toBe(0);
+    // Note: Normally the path will start at the root of the document, but for this test we
+    // are mocking the onTileAction so the path is just blank
+    expect(logToolChange).toHaveBeenNthCalledWith(1,
+      LogEventName.DRAWING_TOOL_CHANGE, "addObject", { args: [ {
+        fill: "#666666",
+        height: 10,
+        id: "a",
+        stroke: "#888888",
+        strokeDashArray: "3,3",
+        strokeWidth: 5,
+        type: "rectangle",
+        width: 10,
+        x: 0,
+        y: 0
+      } ], path: ""}, "drawing-1");
+    expect(logToolChange).toHaveBeenNthCalledWith(2,
+      LogEventName.DRAWING_TOOL_CHANGE, "addObject", { args: [ {
+        fill: "#666666",
+        height: 10,
+        id: "b",
+        stroke: "#888888",
+        strokeDashArray: "3,3",
+        strokeWidth: 5,
+        type: "rectangle",
+        width: 10,
+        x: 20,
+        y: 20
+      } ], path: ""}, "drawing-1");
+    expect(logToolChange).toHaveBeenNthCalledWith(3,
+      LogEventName.DRAWING_TOOL_CHANGE, "deleteObjects", { args: [ [] ], path: ""}, "drawing-1");
+    expect(logToolChange).toHaveBeenNthCalledWith(4,
+      LogEventName.DRAWING_TOOL_CHANGE, "setSelection", { args: [ ["a", "b"] ], path: ""}, "drawing-1");
+    expect(logToolChange).toHaveBeenNthCalledWith(5,
+      LogEventName.DRAWING_TOOL_CHANGE, "deleteObjects", { args: [ ["a", "b"] ], path: ""}, "drawing-1");
   });
 
   it("can update the properties of a set of selected drawing objects", () => {
     const model = createDrawingContentWithMetadata();
     expect(model.currentStamp).toBeNull();
 
-    const {stroke, fill, strokeWidth, strokeDashArray} = mockSettings;
-    model.addObject(RectangleObject.create(
-      {id:"a", x:0, y:0, width:10, height:10,
-       stroke, fill, strokeWidth, strokeDashArray}));
+    const rectSnapshot1: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"a", x:0, y:0};
+    model.addObject(rectSnapshot1);
 
-    model.addObject(RectangleObject.create(
-      {id:"b", x:20, y:20, width:10, height:10,
-       stroke, fill, strokeWidth, strokeDashArray}));
+    const rectSnapshot2: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"b", x:10, y:10};
+    model.addObject(rectSnapshot2);
 
+    logToolChange.mockReset();
     model.setSelection(["a", "b"]);
-    model.setStroke("#000000");
-    model.setStrokeWidth(2);
+    model.setStroke("#000000", model.selectedIds);
+    model.setStrokeWidth(2, model.selectedIds);
+    model.setStrokeDashArray("3,3", model.selectedIds);
 
     expect(model.objects[0].type).toBe("rectangle");
     const rect1 = model.objects[0] as RectangleObjectType;
@@ -181,6 +228,36 @@ describe("DrawingContentModel", () => {
     const rect2 = model.objects[0] as RectangleObjectType;
     expect(rect2.stroke).toBe("#000000");
     expect(rect2.strokeWidth).toBe(2);
+
+    expect(logToolChange).toHaveBeenNthCalledWith(1,
+      LogEventName.DRAWING_TOOL_CHANGE, "setSelection", { args: [["a", "b"]], path: "" }, "drawing-1");
+    expect(logToolChange).toHaveBeenNthCalledWith(2,
+      LogEventName.DRAWING_TOOL_CHANGE, "setStroke", { args: ["#000000", ["a", "b"]], path: "" }, "drawing-1");
+    expect(logToolChange).toHaveBeenNthCalledWith(3,
+      LogEventName.DRAWING_TOOL_CHANGE, "setStrokeWidth", { args: [2, ["a", "b"]], path: "" }, "drawing-1");
+    expect(logToolChange).toHaveBeenNthCalledWith(4,
+      LogEventName.DRAWING_TOOL_CHANGE, "setStrokeDashArray", { args: ["3,3", ["a", "b"]], path: "" }, "drawing-1");
+  });
+
+  it("can move objects", () => {
+    const model = createDrawingContentWithMetadata();
+
+    const rectSnapshot1: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"a", x:0, y:0};
+    model.addObject(rectSnapshot1);
+
+    const rectSnapshot2: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"b", x:10, y:10};
+    model.addObject(rectSnapshot2);
+
+    logToolChange.mockReset();
+    model.moveObjects([
+      {id: "a", destination: {x: 20, y: 20}},
+      {id: "b", destination: {x: 30, y: 30}} 
+    ]);
+    expect(logToolChange).toHaveBeenNthCalledWith(1,
+      LogEventName.DRAWING_TOOL_CHANGE, "moveObjects", { args: [[
+        {id: "a", destination: {x: 20, y: 20}},
+        {id: "b", destination: {x: 30, y: 30}} 
+      ]], path: "" }, "drawing-1");
   });
 
   it("can change the current stamp", () => {
@@ -227,5 +304,12 @@ describe("DrawingContentModel", () => {
 
     model.updateImageUrl("my/image/url", "my/image/newUrl");
     expect(image.url).toBe("my/image/newUrl");
+  });
+
+  test("addObject throws when an instance is passed to it", () => {
+    const model = createDrawingContentWithMetadata();
+    const rect = RectangleObject.create(baseRectangleSnapshot);
+    
+    expect(() => model.addObject(rect)).toThrow();
   });
 });

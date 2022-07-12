@@ -1,5 +1,6 @@
 import { cloneDeep } from "lodash";
-import { getParent, getSnapshot, getType, Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree";
+import { getParent, getSnapshot, getType, 
+  Instance, SnapshotIn, SnapshotOut, types, ISerializedActionCall } from "mobx-state-tree";
 import { isPlaceholderContent } from "./placeholder/placeholder-content";
 import { ITileExportOptions } from "./tool-content-info";
 import { findMetadata, ToolContentModelType, ToolContentUnion } from "./tool-types";
@@ -109,14 +110,16 @@ export const ToolTileModel = types
   .actions(self => ({
     afterCreate() {
       const metadata = findMetadata(self.content.type, self.id, self.title);
-      const content = self.content as any;
+      const content = self.content;
       if (metadata && content.doPostCreate) {
         content.doPostCreate(metadata);
       }
     },
+    onTileAction(call: ISerializedActionCall) {
+      self.content.onTileAction?.(call);
+    },
     willRemoveFromDocument() {
-      const willRemoveFromDocument = (self.content as any).willRemoveFromDocument;
-      return willRemoveFromDocument && willRemoveFromDocument();
+      return self.content.willRemoveFromDocument?.();
     },
     setDisabledFeatures(disabled: string[]) {
       const metadata: any = findMetadata(self.content.type, self.id);

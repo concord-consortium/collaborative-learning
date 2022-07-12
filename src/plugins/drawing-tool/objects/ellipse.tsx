@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import { Instance, SnapshotIn, types } from "mobx-state-tree";
+import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
 import { computeStrokeDashArray, DrawingObjectType, DrawingTool, FilledObject, IDrawingComponentProps, IDrawingLayer, 
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
@@ -83,7 +83,7 @@ export class EllipseDrawingTool extends DrawingTool {
     const handleMouseUp = (e2: MouseEvent) => {
       e2.preventDefault();
       if ((ellipse.rx > 0) && (ellipse.ry > 0)) {
-        this.drawingLayer.addNewDrawingObject(ellipse);
+        this.drawingLayer.addNewDrawingObject(getSnapshot(ellipse));
       }
       this.drawingLayer.setCurrentDrawingObject(null);
       window.removeEventListener("mousemove", handleMouseMove);

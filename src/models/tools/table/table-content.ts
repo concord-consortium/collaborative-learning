@@ -4,7 +4,7 @@ import { types, IAnyStateTreeNode, Instance, SnapshotIn, SnapshotOut } from "mob
 import { exportTableContentAsJson } from "./table-export";
 import { getRowLabel, kSerializedXKey, canonicalizeValue, isLinkableValue } from "./table-model-types";
 import { IDocumentExportOptions, IDefaultContentOptions } from "../tool-content-info";
-import { ToolMetadataModel, ToolContentModel } from "../tool-types";
+import { ToolMetadataModel, ToolContentModel, toolContentModelHooks } from "../tool-types";
 import { addLinkedTable, removeLinkedTable } from "../table-links";
 import { IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
 import { canonicalizeExpression } from "../../../components/tools/table-tool/expression-utils";
@@ -286,9 +286,9 @@ export const TableContentModel = ToolContentModel
       // return tableActionLinkId && geometryActionLinkId && (tableActionLinkId === geometryActionLinkId);
     }
   }))
-  .actions(self => ({
-    doPostCreate(metadata: TableMetadataModelType) {
-      self.metadata = metadata;
+  .actions(self => toolContentModelHooks({
+    doPostCreate(metadata) {
+      self.metadata = metadata as TableMetadataModelType;
     },
     willRemoveFromDocument() {
       self.metadata.linkedGeometries.forEach(geometryId => {
@@ -296,7 +296,9 @@ export const TableContentModel = ToolContentModel
         geometryContent?.removeTableLink(undefined, self.metadata.id);
       });
       self.metadata.clearLinkedGeometries();
-    },
+    }
+  }))
+  .actions(self => ({
     appendChange(change: ITableChange) {
       self.changes.push(JSON.stringify(change));
 
