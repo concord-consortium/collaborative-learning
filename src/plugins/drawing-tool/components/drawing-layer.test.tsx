@@ -52,7 +52,7 @@ describe("Drawing Layer Components", () => {
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("deletes a freehand line", () => {
-      content.removeObject(line);
+      content.deleteObjects([line.id]);
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
   });
@@ -78,7 +78,7 @@ describe("Drawing Layer Components", () => {
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("deletes a vector line", () => {
-      content.removeObject(vector);
+      content.deleteObjects([vector.id]);
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
   });
@@ -105,7 +105,7 @@ describe("Drawing Layer Components", () => {
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("deletes a rectangle", () => {
-      content.removeObject(rect);
+      content.deleteObjects([rect.id]);
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
   });
@@ -132,7 +132,7 @@ describe("Drawing Layer Components", () => {
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("deletes a ellipse", () => {
-      content.removeObject(ellipse);
+      content.deleteObjects([ellipse.id]);
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
   });
@@ -156,7 +156,7 @@ describe("Drawing Layer Components", () => {
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("deletes a image", () => {
-      content.removeObject(image);
+      content.deleteObjects([image.id]);
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
   });

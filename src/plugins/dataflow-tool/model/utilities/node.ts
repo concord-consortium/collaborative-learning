@@ -292,24 +292,28 @@ export interface ProgramDataRate {
 export const DEFAULT_DATA_RATE = 1000;
 export const ProgramDataRates: ProgramDataRate[] = [
   {
-    text: "1ms",
-    val: 1
-  },
-  {
-    text: "10ms",
-    val: 10
+    text: "50ms",
+    val: 50
   },
   {
     text: "100ms",
     val: 100
   },
   {
-    text: "1s",
+    text: "500ms",
+    val: 500
+  },
+  {
+    text: "1 sec",
     val: 1000
   },
   {
-    text: "10s",
+    text: "10 sec",
     val: 10000
+  },
+  {
+    text: "1 min",
+    val: 60000
   }
 ];
 

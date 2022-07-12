@@ -55,7 +55,7 @@ describe("GeometryContent", () => {
               { content: GeometryContentModelType, board: JXG.Board } {
     const content = defaultGeometryContent();
     const metadata = GeometryMetadataModel.create({ id: "geometry-1" });
-    content.doPostCreate(metadata);
+    content.doPostCreate!(metadata);
     if (configContent) configContent(content);
     const board = createDefaultBoard(content);
     return { content, board };

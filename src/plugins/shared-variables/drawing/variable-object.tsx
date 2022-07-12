@@ -34,6 +34,7 @@ export const VariableChipObject = DrawingObject.named("VariableObject")
   }));
 export interface VariableChipObjectType extends Instance<typeof VariableChipObject> {}
 export interface VariableChipObjectSnapshot extends SnapshotIn<typeof VariableChipObject> {}
+export interface VariableChipObjectSnapshotForAdd extends SnapshotIn<typeof VariableChipObject> {type: string}
 
 export const VariableChipComponent: React.FC<IDrawingComponentProps> = function ({model, handleHover}){
   const drawingContent = useContext(DrawingContentModelContext);
