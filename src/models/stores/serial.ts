@@ -67,7 +67,7 @@ export class SerialDevice {
       if (match !== null){ // match is e.g. [ "emg:44\r\n", "emg", ":", "44" ]
 
         // reduce the length of the buffer by the length of the match
-        this.localBuffer = this.localBuffer.substring(0, this.localBuffer.length - match[0].length);
+        this.localBuffer = this.localBuffer.substring(match.index + match[0].length);
 
         // find the channel with the id that matches this type of data, e.g. emg == emg
         const targetChannel = channels.find((c: NodeChannelInfo) => {
