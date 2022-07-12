@@ -1,5 +1,6 @@
 import Rete, { Node, Socket } from "rete";
 import { DataflowNode } from "../dataflow-node";
+import { defaultMinigraphOptions } from "../dataflow-node-plot";
 import { DeleteControl } from "../controls/delete-control";
 
 export const kEmptyValueString = "__";
@@ -19,7 +20,7 @@ export abstract class DataflowReteNodeFactory extends Rete.Component {
       node
         .addControl(new DeleteControl(this.editor, "delete", node));
     }
-    node.data.trackedValues = ["nodeValue"];
+    node.data.minigraphValues = {"nodeValue": defaultMinigraphOptions};
     return node;
   }
 }

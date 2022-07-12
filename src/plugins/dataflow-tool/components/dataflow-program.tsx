@@ -296,10 +296,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         forEach(program.nodes, (n: any) => {
           if (n.data.recentValues) {
             n.data.recentValues = {};
-            forEach(n.data.trackedValues, (v: string) => {
+            forEach(Object.keys(n.data.recentValues), (v: string) => {
               n.data.recentValues[v] = [];
             });
-            // n.data.recentValues = [];
           }
         });
         this.closeCompletedRunProgramNodePlots(program);
@@ -1033,7 +1032,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private updateNodeRecentValues = (n: Node) => {
-    (n as any).data.trackedValues.forEach((valueKey: string) => {
+    Object.keys((n as any).data.minigraphValues).forEach((valueKey: string) => {
       const value: any = n.data[valueKey];
       let recentValue: NodeValue = {};
 
@@ -1060,7 +1059,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         n.data.recentValues = {[valueKey]: [recentValue]};
       }
 
-      if ((n as any).data.trackedValues) {
+      if ((n as any).data.minigraphValues) {
         (n as any).update();
       }
     });

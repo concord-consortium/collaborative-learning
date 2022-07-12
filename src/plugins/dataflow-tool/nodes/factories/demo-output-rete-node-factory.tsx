@@ -4,7 +4,19 @@ import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
 import { DemoOutputControl } from "../controls/demo-output-control";
 import { DemoOutputValueControl } from "../controls/demo-output-value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
-import { NodeDemoOutputTypes, NodePlotBlue, NodePlotRed, NodePlotColor } from "../../model/utilities/node";
+import { MinigraphOptions } from "../dataflow-node-plot";
+import { NodeDemoOutputTypes, NodePlotBlue, NodePlotRed } from "../../model/utilities/node";
+
+const minigraphOptions: Record<string, MinigraphOptions> = {
+  "speed": {
+    backgroundColor: NodePlotBlue,
+    borderColor: NodePlotBlue
+  },
+  "tilt": {
+    backgroundColor: "#fff",
+    borderColor: NodePlotRed
+  }
+};
 
 export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
@@ -14,21 +26,6 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
   public builder(node: Node) {
     super.defaultBuilder(node);
     if (this.editor) {
-      node.data.minigraphSetup = {
-        "nodeValue": {
-          backgroundColor: NodePlotColor,
-          borderColor: NodePlotColor
-        },
-        "speed": {
-          backgroundColor: NodePlotBlue,
-          borderColor: NodePlotBlue
-        },
-        "tilt": {
-          backgroundColor: "#fff",
-          borderColor: NodePlotRed
-        }
-      };
-
       node
         .addControl(new DropdownListControl(this.editor, "outputType", node, NodeDemoOutputTypes, true))
         .addControl(new DemoOutputControl(this.editor, "demoOutput", node));
@@ -36,9 +33,7 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
       this.addInput(node, "nodeValue");
 
       if (node.data.outputType === "Grabber") {
-        node.data.trackedValues = ["nodeValue", "speed", "tilt"];
-        this.addInput(node, "speed", "speed: ");
-        this.addInput(node, "tilt", "tilt: ");
+        this.setupGrabberInputs(node);
       }
 
       return node as any;
@@ -71,9 +66,7 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
 
         // Update inputs based on output type
         if (outputType === "Grabber") {
-          _node.data.trackedValues = ["nodeValue", "speed", "tilt"];
-          this.addInput(_node, "speed", "speed: ");
-          this.addInput(_node, "tilt", "tilt: ");
+          this.setupGrabberInputs(_node);
 
           // Update grabber speed
           const speedInput = inputs.speed.length ? inputs.speed[0] : node.data.speed;
@@ -93,9 +86,14 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
           }
           tiltControl?.setConnected(inputs.tilt.length);
         } else {
-          _node.data.trackedValues = ["nodeValue"];
           this.removeInput(_node, "speed");
+          if ("speed" in (node as any).data.minigraphValues) {
+            delete (node as any).data.minigraphValues.speed;
+          }
           this.removeInput(_node, "tilt");
+          if ("tilt" in (node as any).data.minigraphValues) {
+            delete (node as any).data.minigraphValues.tilt;
+          }
         }
         node.data.outputType = outputType;
         demoOutput?.setOutputType(outputType);
@@ -105,6 +103,13 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
         _node.update();
       }
     }
+  }
+
+  private setupGrabberInputs(node: Node) {
+    (node as any).data.minigraphValues.speed = minigraphOptions.speed;
+    this.addInput(node, "speed", "speed: ");
+    (node as any).data.minigraphValues.tilt = minigraphOptions.tilt;
+    this.addInput(node, "tilt", "tilt: ");
   }
 
   private addInput(node: Node, inputKey: string, displayLabel = "") {
@@ -122,8 +127,8 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
           0, // Initial value
           `Display for ${inputKey}`,
           '', // Initial display message
-          (node as any).data.minigraphSetup[inputKey].backgroundColor,
-          (node as any).data.minigraphSetup[inputKey].borderColor
+          (node as any).data.minigraphValues[inputKey].backgroundColor,
+          (node as any).data.minigraphValues[inputKey].borderColor
         ));
       }
     }

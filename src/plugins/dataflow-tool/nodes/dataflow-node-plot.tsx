@@ -10,6 +10,16 @@ interface NodePlotProps {
   data: any;
 }
 
+export interface MinigraphOptions {
+  backgroundColor?: string;
+  borderColor?: string;
+}
+
+export const defaultMinigraphOptions: MinigraphOptions = {
+  backgroundColor: NodePlotColor,
+  borderColor: NodePlotColor
+};
+
 let stepY = 5;
 
 export const DataflowNodePlot = (props: NodePlotProps) => {
@@ -31,10 +41,10 @@ function lineData(node: any) {
 
   let dsMax = 0;
   let dsMin = 0;
-  node.data.trackedValues.forEach((valueKey: string) => {
+  Object.keys(node.data.minigraphValues).forEach((valueKey: string) => {
     const recentValues: any = node.data.recentValues[valueKey];
     if (recentValues !== undefined) {
-      const customOptions = node.data.minigraphSetup?.[valueKey] || {};
+      const customOptions = node.data.minigraphValues?.[valueKey] || {};
       const dataset: ChartDataSets = {
         backgroundColor: NodePlotColor,
         borderColor: NodePlotColor,
