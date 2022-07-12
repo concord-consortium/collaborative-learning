@@ -2314,7 +2314,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>I want to call this section <strong>Programming</strong></p>"
+                        "<h2>Programming</h2>"
                       ]
                     }
                   },
@@ -2324,7 +2324,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Place the code blocks to control the claw/gripper with the muscle sensors. </p>"
+                        "<p>Place the code blocks to control the claw/gripper with the muscle sensors. <em>IDO/TUGCE - do you want to change this to be documentation about Dataflow programming? Not sure you still want to be using the Backyard brains app at all.</em></p>"
                       ]
                     }
                   },
