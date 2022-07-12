@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import { Instance, SnapshotIn, types } from "mobx-state-tree";
+import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
 import { computeStrokeDashArray, DrawingTool, IDrawingComponentProps, IDrawingLayer, 
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
@@ -83,7 +83,7 @@ export class VectorDrawingTool extends DrawingTool {
     const handleMouseUp = (e2: MouseEvent) => {
       e2.preventDefault();
       if ((vector.dx !== 0) || (vector.dy !== 0)) {
-        this.drawingLayer.addNewDrawingObject(vector);
+        this.drawingLayer.addNewDrawingObject(getSnapshot(vector));
       }
       this.drawingLayer.setCurrentDrawingObject(null);
       window.removeEventListener("mousemove", handleMouseMove);

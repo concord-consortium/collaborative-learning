@@ -1,4 +1,4 @@
-import { applySnapshot, types, Instance, SnapshotIn, getEnv } from "mobx-state-tree";
+import { applySnapshot, types, Instance, SnapshotIn, getEnv, onAction, addDisposer } from "mobx-state-tree";
 import { forEach } from "lodash";
 import { QueryClient, UseQueryResult } from "react-query";
 import { DocumentContentModel, DocumentContentSnapshotType } from "./document-content";
@@ -16,6 +16,7 @@ import { IDocumentProperties } from "../../lib/db-types";
 import { getLocalTimeStamp } from "../../utilities/time";
 import { safeJsonParse } from "../../utilities/js-utils";
 import { createSharedModelDocumentManager, ISharedModelDocumentManager } from "../tools/shared-model-document-manager";
+import { ITileEnvironment } from "../tools/tool-types";
 
 interface IMatchPropertiesOptions {
   isTeacherDocument?: boolean;
@@ -175,8 +176,8 @@ export const DocumentModel = types
       }
       else {
         self.content = DocumentContentModel.create(snapshot);
-        const sharedModelManager = getEnv(self).sharedModelManager as ISharedModelDocumentManager;
-        sharedModelManager.setDocument(self.content);
+        const sharedModelManager = (getEnv(self) as ITileEnvironment).sharedModelManager;
+        (sharedModelManager as ISharedModelDocumentManager).setDocument(self.content);
       }
     },
 
@@ -296,8 +297,21 @@ export interface IDocumentEnvironment {
  */
 export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
   const sharedModelManager = createSharedModelDocumentManager();
-  const documentEnv: IDocumentEnvironment = {};
-  const document = DocumentModel.create(snapshot, {sharedModelManager, documentEnv});
+  const fullEnvironment: ITileEnvironment & {documentEnv: IDocumentEnvironment} = {
+    sharedModelManager,
+    documentEnv: {}
+  };
+  const document = DocumentModel.create(snapshot, fullEnvironment);
+  addDisposer(document, onAction(document, (call) => {
+    if (!document.content || !call.path?.match(/\/content\/tileMap\//)) {
+      return;
+    }
+    const toolTileId = call.path?.match(/\/content\/tileMap\/([^/]*)/)?.[1];
+    if (toolTileId) {
+      const toolTile = document.content.tileMap.get(toolTileId);
+      toolTile?.onTileAction(call);
+    }
+  }));
   if (document.content) {
     sharedModelManager.setDocument(document.content);
   }
