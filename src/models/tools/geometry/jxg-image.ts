@@ -12,7 +12,7 @@ export const imageChangeAgent: JXGChangeAgent = {
     const url = parents && parents[0] as string || "";
     const imageEntry = gImageMap.getCachedImage(url);
     const displayUrl = imageEntry?.status === EntryStatus.Ready && imageEntry?.displayUrl || "";
-    parents[0] = displayUrl;
+    if (displayUrl) parents[0] = displayUrl;
     const props = { id: uniqueId(), fixed: true, ...change.properties };
     return parents && parents.length >= 3
             ? _board.create("image", parents, props)

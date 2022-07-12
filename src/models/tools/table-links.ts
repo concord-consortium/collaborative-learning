@@ -1,6 +1,7 @@
 import { IObservableArray, observable } from "mobx";
 import { IAnyStateTreeNode } from "mobx-state-tree";
-import { GeometryContentModelType, kGeometryToolID } from "./geometry/geometry-content";
+import { GeometryContentModelType } from "./geometry/geometry-content";
+import { kGeometryToolID } from "./geometry/geometry-types";
 import { kTableToolID, TableContentModelType } from "./table/table-content";
 import { getRowLabel, ILinkProperties, IRowLabel, ITableLinkProperties } from "./table-link-types";
 import { IDataSet } from "../data/data-set";

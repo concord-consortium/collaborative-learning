@@ -194,6 +194,9 @@ export const polygonChangeAgent: JXGChangeAgent = {
     const props = {
       id: uniqueId(),
       hasInnerPoints: true,
+      // default color changed to yellow in JSXGraph 1.4.0
+      fillColor: "#00FF00",
+      selectedFillColor: "#00FF00",
       clientFillColor: "#00FF00",
       clientSelectedFillColor: "#00FF00",
       ...change.properties

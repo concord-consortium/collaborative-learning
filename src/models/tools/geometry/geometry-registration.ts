@@ -1,6 +1,7 @@
 import { registerToolContentInfo } from "../tool-content-info";
-import { kGeometryToolID, GeometryContentModel, GeometryMetadataModel,
+import { GeometryContentModel, GeometryMetadataModel,
   defaultGeometryContent, mapTileIdsInGeometrySnapshot } from "./geometry-content";
+import { kGeometryToolID } from "./geometry-types";
 import { kGeometryDefaultHeight } from "./jxg-types";
 import GeometryToolComponent from "../../../components/tools/geometry-tool/geometry-tool";
 import GeometryToolIcon from "../../../clue/assets/icons/graph-tool.svg";

@@ -1,6 +1,8 @@
-import { safeJsonParse } from "../../../utilities/js-utils";
-import { exportGeometryJson } from "./geometry-export";
+import { getSnapshot } from "mobx-state-tree";
+import { omitUndefined } from "../../../utilities/test-utils";
 import { preprocessImportFormat } from "./geometry-import";
+import { BoardModel } from "./geometry-model";
+import { kDefaultBoardModelInputProps, kDefaultBoardModelOutputProps, kGeometryToolID } from "./geometry-types";
 
 const getImageMock = jest.fn();
 jest.mock("../../image-map", () => ({
@@ -19,15 +21,26 @@ jest.mock("../../../utilities/js-utils", () => {
   };
 });
 
+const kDefaultTestGeometryModel = {
+  type: kGeometryToolID,
+  board: getSnapshot(BoardModel.create(kDefaultBoardModelInputProps)),
+  objects: {}
+};
+
+const testImport = (input: any) => {
+  return omitUndefined(preprocessImportFormat(input));
+};
+
 // verify that import => export => import => export results in two identical exports
 const testRoundTrip = (input: any) => {
-  const import1Result = preprocessImportFormat(input);
-  const export1Json = exportGeometryJson(import1Result.changes);
-  const export1Js = safeJsonParse(export1Json);
-  const import2Result = preprocessImportFormat(export1Js);
-  const export2Json = exportGeometryJson(import2Result.changes);
-  const export2Js = safeJsonParse(export2Json);
-  return [export1Js, export2Js];
+  return [{}, {}];
+  // const import1Result = preprocessImportFormat(input);
+  // const export1Json = exportGeometryJson(import1Result.changes);
+  // const export1Js = safeJsonParse(export1Json);
+  // const import2Result = preprocessImportFormat(export1Js);
+  // const export2Json = exportGeometryJson(import2Result.changes);
+  // const export2Js = safeJsonParse(export2Json);
+  // return [export1Js, export2Js];
 };
 
 describe("Geometry import", () => {
@@ -37,11 +50,12 @@ describe("Geometry import", () => {
   });
 
   it("ignores non-importable content", () => {
-    expect(preprocessImportFormat(null)).toBeNull();
-    expect(preprocessImportFormat([])).toEqual([]);
-    expect(preprocessImportFormat({})).toEqual({});
-    expect(preprocessImportFormat({ foo: "bar" })).toEqual({ foo: "bar" });
-    expect(preprocessImportFormat({ type: "Geometry", changes: [] })).toEqual({ type: "Geometry", changes: [] });
+    expect(testImport(null)).toBeNull();
+    expect(testImport([])).toEqual([]);
+    expect(testImport({})).toEqual({});
+    expect(testImport({ foo: "bar" })).toEqual({ foo: "bar" });
+    expect(testImport({ type: "Geometry", objects: 0 })).toEqual({ type: "Geometry", objects: 0 });
+    expect(testImport({ type: "Geometry", changes: [] })).toEqual({ type: "Geometry", objects: {} });
   });
 
   it("imports titles", () => {
@@ -51,17 +65,13 @@ describe("Geometry import", () => {
       board: {},
       objects: []
     };
-    const result = preprocessImportFormat(input);
-
-    expect(result.changes.length).toBe(2);
-    expect(JSON.parse(result.changes[0]))
-      .toEqual({ operation: "update", target: "metadata", properties: { title: input.title }});
+    expect(testImport(input)).toEqual({ ...kDefaultTestGeometryModel, extras: { title: "MyTitle" } });
 
     const [expected, received] = testRoundTrip(input);
     expect(received).toEqual(expected);
   });
 
-  it("imports boards with single range value", () => {
+  it("imports boards with single (y) range value", () => {
     const input = {
       type: "Geometry",
       board: {
@@ -69,21 +79,19 @@ describe("Geometry import", () => {
           axisNames: ["xName", "yName"],
           axisLabels: ["xLabel", "yLabel"],
           axisMin: [0, 0],
-          axisRange: [10]
+          axisRange: [16]
         }
       },
       objects: []
     };
-    const result = preprocessImportFormat(input);
-    expect(result.changes.length).toBe(1);
-    const change = JSON.parse(result.changes[0]);
-    const props = change.properties;
-
-    expect(result.changes.length).toBe(1);
-    expect(props.xName).toBe("xName");
-    expect(props.yName).toBe("yName");
-    expect(props.xAnnotation).toBe("xLabel");
-    expect(props.yAnnotation).toBe("yLabel");
+    expect(testImport(input)).toEqual({
+      type: kGeometryToolID,
+      board: {
+        xAxis: { name: "xName", label: "xLabel", min: 0, range: 24, unit: 20 },
+        yAxis: { name: "yName", label: "yLabel", min: 0, range: 16, unit: 20 }
+      },
+      objects: {}
+    });
 
     const [expected, received] = testRoundTrip(input);
     expect(received).toEqual(expected);
@@ -97,21 +105,19 @@ describe("Geometry import", () => {
           axisNames: ["xName", "yName"],
           axisLabels: ["xLabel", "yLabel"],
           axisMin: [0, 0],
-          axisRange: [10, 10]
+          axisRange: [24, 32]
         }
       },
       objects: []
     };
-    const result = preprocessImportFormat(input);
-    expect(result.changes.length).toBe(1);
-    const change = JSON.parse(result.changes[0]);
-    const props = change.properties;
-
-    expect(result.changes.length).toBe(1);
-    expect(props.xName).toBe("xName");
-    expect(props.yName).toBe("yName");
-    expect(props.xAnnotation).toBe("xLabel");
-    expect(props.yAnnotation).toBe("yLabel");
+    expect(testImport(input)).toEqual({
+      type: kGeometryToolID,
+      board: {
+        xAxis: { name: "xName", label: "xLabel", min: 0, range: 24, unit: 20 },
+        yAxis: { name: "yName", label: "yLabel", min: 0, range: 32, unit: 10 }
+      },
+      objects: {}
+    });
 
     const [expected, received] = testRoundTrip(input);
     expect(received).toEqual(expected);
@@ -126,10 +132,19 @@ describe("Geometry import", () => {
         { type: "point", parents: [5, 5], properties: { foo: "bar" }}
       ]
     };
-    const result = preprocessImportFormat(input);
-    expect(result.changes.length).toBe(4);
-    expect(JSON.parse(result.changes[2]).properties.id).toBe("p1");
-    expect(JSON.parse(result.changes[3]).properties.foo).toBe("bar");
+    jestSpyConsole("warn", spy => {
+      expect(testImport(input)).toEqual({
+        type: kGeometryToolID,
+        board: kDefaultBoardModelOutputProps,
+        objects: {
+          "testid-1": { type: "point", id: "testid-1", x: 0, y: 0 },
+          "p1": { type: "point", id: "p1", x: 2, y: 2 },
+          "testid-2": { type: "point", id: "testid-2", x: 5, y: 5 }
+        }
+      });
+      // warns about unrecognized property "foo"
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
 
     const [expected, received] = testRoundTrip(input);
     expect(received).toEqual(expected);
@@ -142,9 +157,14 @@ describe("Geometry import", () => {
         { type: "point", parents: [0, 0], comment: { text: "Point Comment" } }
       ]
     };
-    const result = preprocessImportFormat(input);
-    expect(result.changes.length).toBe(3);
-    expect(JSON.parse(result.changes[2]).properties.text).toBe("Point Comment");
+    expect(testImport(input)).toEqual({
+      type: kGeometryToolID,
+      board: kDefaultBoardModelOutputProps,
+      objects: {
+        "testid-1": { type: "point", id: "testid-1", x: 0, y: 0 },
+        "testid-2": { type: "comment", id: "testid-2", anchors: ["testid-1"], text: "Point Comment" }
+      }
+    });
 
     const [expected, received] = testRoundTrip(input);
     expect(received).toEqual(expected);
@@ -157,13 +177,13 @@ describe("Geometry import", () => {
         { type: "point", parents: [0, 0], comment: { text: "Point Comment", parents: [5, 5] } }
       ]
     };
-    const result = preprocessImportFormat(input);
-    expect(result.changes.length).toBe(3);
-    expect(JSON.parse(result.changes[2])).toEqual({
-      operation: "create",
-      target: "comment",
-      parents: [5, 5],
-      properties: { id: "testid-2", anchor: "testid-1", text: "Point Comment" }
+    expect(testImport(input)).toEqual({
+      type: kGeometryToolID,
+      board: kDefaultBoardModelOutputProps,
+      objects: {
+        "testid-1": { type: "point", id: "testid-1", x: 0, y: 0 },
+        "testid-2": { type: "comment", id: "testid-2", anchors: ["testid-1"], x: 5, y: 5, text: "Point Comment" }
+      }
     });
 
     const [expected, received] = testRoundTrip(input);
@@ -193,20 +213,26 @@ describe("Geometry import", () => {
         }
       ]
     };
-    const result = preprocessImportFormat(input);
-    expect(result.changes.length).toBe(9);
-    expect(JSON.parse(result.changes[1]).parents).toEqual([0, 0]);
-    expect(JSON.parse(result.changes[2]).parents).toEqual([5, 0]);
-    expect(JSON.parse(result.changes[3]).parents).toEqual([5, 5]);
-    expect(JSON.parse(result.changes[4]).target).toBe("polygon");
-    expect(JSON.parse(result.changes[8]).target).toBe("polygon");
-    expect(JSON.parse(result.changes[8]).properties.id).toBe("poly1");
+    expect(testImport(input)).toEqual({
+      type: kGeometryToolID,
+      board: kDefaultBoardModelOutputProps,
+      objects: {
+        "testid-1": { type: "polygon", id: "testid-1", points: ["testid-2", "testid-3", "testid-4"] },
+        "testid-2": { type: "point", id: "testid-2", x: 0, y: 0 },
+        "testid-3": { type: "point", id: "testid-3", x: 5, y: 0 },
+        "testid-4": { type: "point", id: "testid-4", x: 5, y: 5 },
+        "testid-5": { type: "point", id: "testid-5", x: 10, y: 10 },
+        "testid-6": { type: "point", id: "testid-6", x: 15, y: 10 },
+        "testid-7": { type: "point", id: "testid-7", x: 15, y: 15 },
+        "poly1": { type: "polygon", id: "poly1", points: ["testid-5", "testid-6", "testid-7"] },
+      }
+    });
 
     const [expected, received] = testRoundTrip(input);
     expect(received).toEqual(expected);
   });
 
-  it("imports polygons with angle labels", () => {
+  it("imports polygons with angle labels (nested)", () => {
     const input = {
       type: "Geometry",
       objects: [
@@ -219,11 +245,50 @@ describe("Geometry import", () => {
         }
       ]
     };
-    const result = preprocessImportFormat(input);
-    expect(result.changes.length).toBe(8);
-    expect(JSON.parse(result.changes[5]).target).toBe("vertexAngle");
-    expect(JSON.parse(result.changes[6]).target).toBe("vertexAngle");
-    expect(JSON.parse(result.changes[7]).target).toBe("vertexAngle");
+    expect(testImport(input)).toEqual({
+      type: kGeometryToolID,
+      board: kDefaultBoardModelOutputProps,
+      objects: {
+        "testid-1": { type: "polygon", id: "testid-1", points: ["testid-2", "testid-3", "testid-4"] },
+        "testid-2": { type: "point", id: "testid-2", x: 0, y: 0 },
+        "testid-3": { type: "point", id: "testid-3", x: 5, y: 0 },
+        "testid-4": { type: "point", id: "testid-4", x: 5, y: 5 },
+        "testid-5": { type: "vertexAngle", id: "testid-5", points: ["testid-4", "testid-2", "testid-3"] },
+        "testid-6": { type: "vertexAngle", id: "testid-6", points: ["testid-2", "testid-3", "testid-4"] },
+        "testid-7": { type: "vertexAngle", id: "testid-7", points: ["testid-3", "testid-4", "testid-2"] }
+      }
+    });
+
+    const [expected, received] = testRoundTrip(input);
+    expect(received).toEqual(expected);
+  });
+
+  it("imports polygons with angle labels (flat)", () => {
+    const input = {
+      type: "Geometry",
+      objects: [
+        { type: "point", parents: [0, 0], properties: { id: "v1" } },
+        { type: "point", parents: [5, 0], properties: { id: "v2" } },
+        { type: "point", parents: [5, 5], properties: { id: "v3" } },
+        { type: "polygon", parents: ["v1", "v2", "v3"], properties: { id: "p1" } },
+        { type: "vertexAngle", parents: ["v3", "v1", "v2"], properties: { id: "a1" } },
+        { type: "vertexAngle", parents: ["v1", "v2", "v3"], properties: { id: "a2" } },
+        { type: "vertexAngle", parents: ["v2", "v3", "v1"], properties: { id: "a3" } }
+      ]
+    };
+    expect(testImport(input)).toEqual({
+      type: kGeometryToolID,
+      board: kDefaultBoardModelOutputProps,
+      objects: {
+        "v1": { type: "point", id: "v1", x: 0, y: 0 },
+        "v2": { type: "point", id: "v2", x: 5, y: 0 },
+        "v3": { type: "point", id: "v3", x: 5, y: 5 },
+        "p1": { type: "polygon", id: "p1", points: ["v1", "v2", "v3"] },
+        "a1": { type: "vertexAngle", id: "a1", points: ["v3", "v1", "v2"] },
+        "a2": { type: "vertexAngle", id: "a2", points: ["v1", "v2", "v3"] },
+        "a3": { type: "vertexAngle", id: "a3", points: ["v2", "v3", "v1"] }
+      }
+    });
 
     const [expected, received] = testRoundTrip(input);
     expect(received).toEqual(expected);
@@ -243,12 +308,17 @@ describe("Geometry import", () => {
         }
       ]
     };
-    const result = preprocessImportFormat(input);
-    expect(result.changes.length).toBe(6);
-    expect(JSON.parse(result.changes[1]).parents).toEqual([0, 0]);
-    expect(JSON.parse(result.changes[2]).parents).toEqual([5, 0]);
-    expect(JSON.parse(result.changes[3]).parents).toEqual([5, 5]);
-    expect(JSON.parse(result.changes[5]).properties.text).toBe("Polygon Comment");
+    expect(testImport(input)).toEqual({
+      type: kGeometryToolID,
+      board: kDefaultBoardModelOutputProps,
+      objects: {
+        "testid-1": { type: "polygon", id: "testid-1", points: ["testid-2", "testid-3", "testid-4"] },
+        "testid-2": { type: "point", id: "testid-2", x: 0, y: 0 },
+        "testid-3": { type: "point", id: "testid-3", x: 5, y: 0 },
+        "testid-4": { type: "point", id: "testid-4", x: 5, y: 5 },
+        "testid-5": { type: "comment", id: "testid-5", anchors: ["testid-1"], text: "Polygon Comment" }
+      }
+    });
 
     const [expected, received] = testRoundTrip(input);
     expect(received).toEqual(expected);
@@ -262,39 +332,62 @@ describe("Geometry import", () => {
           parents: {
             url: "image/url",
             coords: [0, 0],
-            size: [100, 100]
+            size: [183, 183]
           }
         }
       ]
     };
-    const result = preprocessImportFormat(input);
-    expect(result.changes.length).toBe(2);
-    expect(JSON.parse(result.changes[1]).parents[0]).toBe("image/url");
-    expect(JSON.parse(result.changes[1]).parents[1]).toEqual([0, 0]);
+    expect(testImport(input)).toEqual({
+      type: kGeometryToolID,
+      board: kDefaultBoardModelOutputProps,
+      bgImage: { type: "image", id: "testid-1", x: 0, y: 0, url: "image/url", width: 10, height: 10 },
+      objects: {}
+    });
 
     const [expected, received] = testRoundTrip(input);
     expect(received).toEqual(expected);
   });
 
-  it("imports images with comments", () => {
+  it("imports images with comments (nested)", () => {
     const input = {
       type: "Geometry",
       objects: [
         { type: "image",
-          parents: {
-            url: "image/url",
-            coords: [0, 0],
-            size: [100, 100]
-          },
-          comment: { text: "Image Comment" }
-        }
+          parents: { url: "image/url", coords: [0, 0], size: [183, 183] },
+          comment: { text: "Image Comment" } }
       ]
     };
-    const result = preprocessImportFormat(input);
-    expect(result.changes.length).toBe(3);
-    expect(JSON.parse(result.changes[1]).parents[0]).toBe("image/url");
-    expect(JSON.parse(result.changes[1]).parents[1]).toEqual([0, 0]);
-    expect(JSON.parse(result.changes[2]).properties.text).toBe("Image Comment");
+    expect(testImport(input)).toEqual({
+      type: kGeometryToolID,
+      board: kDefaultBoardModelOutputProps,
+      bgImage: { type: "image", id: "testid-1", x: 0, y: 0, url: "image/url", width: 10, height: 10 },
+      objects: {
+        "testid-2": { type: "comment", id: "testid-2", anchors: ["testid-1"], text: "Image Comment" }
+      }
+    });
+
+    const [expected, received] = testRoundTrip(input);
+    expect(received).toEqual(expected);
+  });
+
+  it("imports images with comments (flat)", () => {
+    const input = {
+      type: "Geometry",
+      objects: [
+        { type: "image",
+          parents: { url: "image/url", coords: [0, 0], size: [183, 183] },
+          properties: { id: "i1" } },
+        { type: "comment", properties: { id: "c1", anchor: "i1", text: "Image Comment" } }
+      ]
+    };
+    expect(testImport(input)).toEqual({
+      type: kGeometryToolID,
+      board: kDefaultBoardModelOutputProps,
+      bgImage: { type: "image", id: "i1", x: 0, y: 0, url: "image/url", width: 10, height: 10 },
+      objects: {
+        "c1": { type: "comment", id: "c1", anchors: ["i1"], text: "Image Comment" }
+      }
+    });
 
     const [expected, received] = testRoundTrip(input);
     expect(received).toEqual(expected);
@@ -309,12 +402,28 @@ describe("Geometry import", () => {
             { type: "point", parents: [0, 0] },
             { type: "point", parents: [5, 5] }
           ]
+        },
+        { type: "movableLine",
+          parents: [
+            { type: "point", parents: [10, 10] },
+            { type: "point", parents: [15, 15] }
+          ],
+          properties: { id: "l1" }
         }
       ]
     };
-    const result = preprocessImportFormat(input);
-    expect(result.changes.length).toBe(2);
-    expect(JSON.parse(result.changes[1]).target).toBe("movableLine");
+    expect(testImport(input)).toEqual({
+      type: kGeometryToolID,
+      board: kDefaultBoardModelOutputProps,
+      objects: {
+        "testid-1": { type: "movableLine", id: "testid-1",
+                      p1: { type: "point", id: "testid-1-point1", x: 0, y: 0 },
+                      p2: { type: "point", id: "testid-1-point2", x: 5, y: 5 } },
+        "l1": { type: "movableLine", id: "l1",
+                p1: { type: "point", id: "l1-point1", x: 10, y: 10 },
+                p2: { type: "point", id: "l1-point2", x: 15, y: 15 } }
+      }
+    });
 
     const [expected, received] = testRoundTrip(input);
     expect(received).toEqual(expected);
@@ -333,11 +442,16 @@ describe("Geometry import", () => {
         }
       ]
     };
-    const result = preprocessImportFormat(input);
-    expect(result.changes.length).toBe(3);
-    expect(JSON.parse(result.changes[1]).target).toBe("movableLine");
-    expect(JSON.parse(result.changes[2]).target).toBe("comment");
-    expect(JSON.parse(result.changes[2]).properties.text).toBe("Line Comment");
+    expect(testImport(input)).toEqual({
+      type: kGeometryToolID,
+      board: kDefaultBoardModelOutputProps,
+      objects: {
+        "testid-1": { type: "movableLine", id: "testid-1",
+                      p1: { type: "point", id: "testid-1-point1", x: 0, y: 0 },
+                      p2: { type: "point", id: "testid-1-point2", x: 5, y: 5 } },
+        "testid-2": { type: "comment", id: "testid-2", anchors: ["testid-1"], text: "Line Comment" }
+      }
+    });
 
     const [expected, received] = testRoundTrip(input);
     expect(received).toEqual(expected);

@@ -2,8 +2,8 @@ import { assign, each, find } from "lodash";
 import "./jxg";
 import { ITableLinkProperties, JXGChange, JXGChangeAgent, JXGProperties } from "./jxg-changes";
 import {
-  isAxis, isBoard, isLinkedPoint, isPoint,
-  kGeometryDefaultAxisMin, kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj
+  isAxis, isBoard, isLinkedPoint, isPoint, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin,
+  kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj
 } from "./jxg-types";
 import { goodTickValue } from "../../../utilities/graph-utils";
 
@@ -176,7 +176,7 @@ function scaleBoundingBoxToElement(domElementID: string, changeProps: any) {
   const { boundingBox }: { boundingBox: JXG.BoundingBox } = changeProps;
   const [unitX, unitY] = getAxisUnitsFromProps(changeProps, getCanvasScale(elt));
   // eslint-disable-next-line no-sparse-arrays
-  const [xMin, , , yMin] = boundingBox || [kGeometryDefaultAxisMin, , , kGeometryDefaultAxisMin];
+  const [xMin, , , yMin] = boundingBox || [kGeometryDefaultXAxisMin, , , kGeometryDefaultYAxisMin];
   const xMax = xMin + eltWidth / unitX;
   const yMax = yMin + eltHeight / unitY;
   return [xMin, yMax, xMax, yMin] as JXG.BoundingBox;

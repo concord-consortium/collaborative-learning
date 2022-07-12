@@ -14,7 +14,7 @@ export type JXGStringPair = [string?, string?];
 
 export type JXGImageParents = [string, JXGCoordPair, JXGCoordPair];
 
-export type JXGParentType = string | number | JXGCoordPair | JXGUnsafeCoordPair;
+export type JXGParentType = string | number | undefined | JXGCoordPair | JXGUnsafeCoordPair;
 
 export enum ESegmentLabelOption {
   kNone = "none",

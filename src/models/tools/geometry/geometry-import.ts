@@ -1,10 +1,21 @@
 import { castArray } from "lodash";
+import { getChildType, IAnyStateTreeNode } from "mobx-state-tree";
 import { uniqueId } from "../../../utilities/js-utils";
 import { gImageMap } from "../../image-map";
+import { convertChangesToModel, isGeometryChangesContent } from "./geometry-migrate";
+import {
+  AxisModelSnapshot,
+  AxisModelType,
+  BoardModel, CommentModel, GeometryExtrasContentSnapshotType, GeometryObjectModelType, ImageModel,
+  ImageModelType,
+  MovableLineModel, PointModel, PolygonModel, VertexAngleModel
+} from "./geometry-model";
+import { kDefaultBoardModelInputProps } from "./geometry-types";
 import { kAxisBuffer, kXAxisMinBuffer } from "./jxg-board";
 import { JXGChange, JXGCoordPair, JXGProperties, JXGStringPair } from "./jxg-changes";
 import {
-  kGeometryDefaultAxisMin, kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj
+  kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin, kGeometryDefaultHeight,
+  kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth
 } from "./jxg-types";
 
 /****
@@ -22,8 +33,8 @@ import {
 
   Internally, the import code converts this to code that creates three points with unique ids and
   then creates a polygon that references those three points as dependencies by their unique ids,
-  and then creates a vertex angle that references those same three points in the same manner.
-  An advantage of this format is that by eliminating the need for ids, authors are not required
+  and then creates a vertex angle that references those same three points in the same manner. An
+  advantage of this import format is that by eliminating the need for ids, authors are not required
   to (1) generate unique ids for every element in the geometry and (2) correctly reference those
   unique ids in the creation of new elements, remembering to update any references when an id is
   changed, etc. This would clearly be an error-prone process.
@@ -60,7 +71,7 @@ interface IBoardImportSpec {
   properties?: IBoardImportProps;
 }
 
-interface ICommentProps {
+interface ICommentImportProps {
   text?: string;
   parents?: JXGCoordPair;
   [prop: string]: any;
@@ -80,7 +91,7 @@ interface IPointImportSpec {
   type: "point";
   parents: JXGCoordPair;
   properties?: Record<string, unknown>;
-  comment?: ICommentProps;
+  comment?: ICommentImportProps;
 }
 
 interface IVertexImportSpec extends IPointImportSpec {
@@ -91,7 +102,7 @@ interface IPolygonImportSpec {
   type: "polygon";
   parents: Array<IVertexImportSpec | string>;
   properties?: Record<string, unknown>;
-  comment?: ICommentProps;
+  comment?: ICommentImportProps;
 }
 
 interface IVertexAngleImportSpec {
@@ -108,14 +119,14 @@ interface IImageImportSpec {
     size: JXGCoordPair;
   };
   properties?: Record<string, unknown>;
-  comment?: ICommentProps;
+  comment?: ICommentImportProps;
 }
 
 interface IMovableLineImportSpec {
   type: "movableLine";
   parents: [IPointImportSpec, IPointImportSpec];
   properties?: Record<string, unknown>;
-  comment?: ICommentProps;
+  comment?: ICommentImportProps;
 }
 
 type IObjectImportSpec = IPointImportSpec | IPolygonImportSpec | IVertexAngleImportSpec |
@@ -127,34 +138,54 @@ interface IImportSpec {
   objects: IObjectImportSpec[];
 }
 
-export const isGeometryImportSpec = (obj: any): obj is IImportSpec =>
-              (obj?.type === "Geometry") && (obj.changes == null) && (obj.objects != null);
+export const isGeometryImportSpec = (snap: any): snap is IImportSpec => {
+  if ((snap?.type !== "Geometry") || (snap.changes != null) || (snap.objects == null)) return false;
+  // does it have a legacy title?
+  if (snap.title) return true;
+  // does it have a legacy/import board spec?
+  const board = snap.board || {};
+  if ("properties" in board) return true;
+  // are there legacy/import object specs?
+  const objects = Array.isArray(snap.objects) ? snap.objects : [];
+  return objects.some((obj: any) => "parents" in obj);
+};
 
-function getAxisUnits(protoRange: JXGCoordPair | undefined) {
-  const pRange = protoRange && castArray(protoRange);
-  if (!pRange?.length) return [kGeometryDefaultPixelsPerUnit, kGeometryDefaultPixelsPerUnit];
-  // a single value is treated as the y-range
-  if (pRange.length === 1) {
-    const [yProtoRange] = pRange;
-    const yUnit = kGeometryDefaultHeight / yProtoRange;
-    return [yUnit, yUnit];
-  }
-  else {
-    const [xProtoRange, yProtoRange] = pRange as JXGCoordPair;
-    return [kGeometryDefaultWidth / xProtoRange, kGeometryDefaultHeight / yProtoRange];
+type AxisTuple = [AxisModelSnapshot, AxisModelSnapshot];
+function getBaseAxes(protoMin?: JXGCoordPair, protoRange?: JXGCoordPair): AxisTuple {
+  const [xMin, yMin] = protoMin || [kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin];
+  const pRange = protoRange ? castArray(protoRange) : [];
+
+  switch (pRange.length) {
+    case 0:
+      return [{ min: xMin }, { min: yMin }];
+    case 1: {
+      // a single value is treated as the y-range
+      const [yRange] = pRange;
+      const yUnit = kGeometryDefaultHeight / yRange;
+      const xRange = kGeometryDefaultWidth / yUnit;
+      return [{ min: xMin, unit: yUnit, range: xRange }, { min: yMin, unit: yUnit, range: yRange }];
+    }
+    default: {
+      const [xRange, yRange] = pRange as JXGCoordPair;
+      const xUnit = kGeometryDefaultWidth / xRange;
+      const yUnit = kGeometryDefaultHeight / yRange;
+      return [{ min: xMin, unit: xUnit, range: xRange }, { min: yMin, unit: yUnit, range: yRange }];
+    }
   }
 }
 
 function getBoardBounds(axisMin?: JXGCoordPair, protoRange?: JXGCoordPair) {
-  const [xAxisMin, yAxisMin] = axisMin || [kGeometryDefaultAxisMin, kGeometryDefaultAxisMin];
-  const [xPixelsPerUnit, yPixelsPerUnit] = getAxisUnits(protoRange);
-  const xAxisMax = xAxisMin + kGeometryDefaultWidth / xPixelsPerUnit;
-  const yAxisMax = yAxisMin + kGeometryDefaultHeight / yPixelsPerUnit;
-  return [xAxisMin, yAxisMax, xAxisMax, yAxisMin];
+  const [xAxis, yAxis] = getBaseAxes(axisMin, protoRange);
+  const xAxisMax = xAxis.min + kGeometryDefaultWidth / (xAxis.unit ?? kGeometryDefaultPixelsPerUnit);
+  const yAxisMax = yAxis.min + kGeometryDefaultHeight / (yAxis.unit ?? kGeometryDefaultPixelsPerUnit);
+  return [xAxis.min, yAxisMax, xAxisMax, yAxis.min];
 }
 
-export function defaultGeometryBoardChange(overrides?: JXGProperties) {
-  const [xMin, yMax, xMax, yMin] = getBoardBounds();
+export function defaultGeometryBoardChange(xAxis: AxisModelType, yAxis: AxisModelType, overrides?: JXGProperties) {
+  const axisMin: JXGCoordPair = [xAxis.min, yAxis.min];
+  const axisRange: JXGCoordPair = [xAxis.range ?? kGeometryDefaultWidth / xAxis.unit,
+                                   yAxis.range ?? kGeometryDefaultHeight / yAxis.unit];
+  const [xMin, yMax, xMax, yMin] = getBoardBounds(axisMin, axisRange);
   const unitX = kGeometryDefaultPixelsPerUnit;
   const unitY = kGeometryDefaultPixelsPerUnit;
   const xMinBufferRange = kXAxisMinBuffer / unitX;
@@ -175,35 +206,58 @@ export function defaultGeometryBoardChange(overrides?: JXGProperties) {
   return change;
 }
 
-export function preprocessImportFormat(snapshot: any) {
+export function preprocessImportFormat(snapshot: any): GeometryExtrasContentSnapshotType {
+  if (isGeometryChangesContent(snapshot)) return convertChangesToModel(snapshot.changes);
   if (!isGeometryImportSpec(snapshot)) return snapshot;
 
   const { title, board: boardSpecs, objects: objectSpecs } = snapshot;
-  const changes: JXGChange[] = [];
+  let board = BoardModel.create(kDefaultBoardModelInputProps);
+  let bgImage: ImageModelType | undefined;
+  const objects = new Map<string, GeometryObjectModelType>();
+  const extras = title ? { title } : undefined;
 
-  if (title) {
-    changes.push({ operation: "update", target: "metadata", properties: { title } });
+  const addObject = (obj: GeometryObjectModelType) => {
+    objects.set(obj.id, obj);
+    return obj;
+  };
+
+  function warnExtraProps(label: string, object: IAnyStateTreeNode, ...others: Array<Record<string, any>>) {
+    const extraProps: Record<string, string> = {};
+    others.forEach(props => {
+      Object.keys(props).forEach(prop => {
+        if (prop !== prop.trim()) console.error("warnExtraProps:", `"${prop}" !== "${prop.trim()}"`);
+        if (!getChildType(object, prop.trim())) {
+          extraProps[prop.trim()] = JSON.stringify(props[prop]);
+        }
+      });
+    });
+    Object.keys(extraProps).length &&
+      console.warn(`preprocessImportFormat.${label}`, "extraProps:", JSON.stringify(extraProps));
   }
 
   function addBoard(boardSpec: IBoardImportSpec) {
     const { properties } = boardSpec || {} as IBoardImportSpec;
     const { axisNames, axisLabels, axisMin, axisRange, ...others } = properties || {} as IBoardImportProps;
-    const boundingBox = getBoardBounds(axisMin, axisRange);
-    const [unitX, unitY] = getAxisUnits(axisRange);
-    changes.push(defaultGeometryBoardChange({
-                  unitX, unitY,
-                  ...toObj("xName", axisNames?.[0]), ...toObj("yName", axisNames?.[1]),
-                  ...toObj("xAnnotation", axisLabels?.[0]), ...toObj("yAnnotation", axisLabels?.[1]),
-                  boundingBox, ...others }));
+    const [xAxisBase, yAxisBase] = getBaseAxes(axisMin, axisRange);
+    board = BoardModel.create({
+      xAxis: { ...xAxisBase, name: axisNames?.[0], label: axisLabels?.[0] },
+      yAxis: { ...yAxisBase, name: axisNames?.[1], label: axisLabels?.[1] },
+      //   name: axisNames?.[0], label: axisLabels?.[0], range: axisRange?.[0],
+      //   min: axisMin?.[0] ?? kGeometryDefaultXAxisMin, unit: axisUnits[0] },
+      // yAxis: {
+      //   name: axisNames?.[1], label: axisLabels?.[1], range: axisRange?.[1],
+      //   min: axisMin?.[1] ?? kGeometryDefaultYAxisMin, unit: axisUnits[1] },
+        ...others
+    });
   }
 
   addBoard(boardSpecs);
 
-  function addCommentFromProps(props: ICommentProps) {
-    const { parents, ...others } = props;
-    const id = uniqueId();
-    changes.push({ operation: "create", target: "comment", parents, properties: { id, ...others } });
-    return id;
+  function addCommentFromProps(props: ICommentImportProps) {
+    const { parents, id = uniqueId(), anchor, text, ...others } = props;
+    const o = addObject(CommentModel.create({ id, x: parents?.[0], y: parents?.[1], anchors: [anchor], text }));
+    warnExtraProps("addCommentFromProps", o, others);
+    return id as string;
   }
 
   function addCommentFromSpec(spec: ICommentImportSpec) {
@@ -211,29 +265,35 @@ export function preprocessImportFormat(snapshot: any) {
     return addCommentFromProps({ ...properties, parents });
   }
 
-  function addPoint(pointSpec: IPointImportSpec) {
-    const { type, properties: _properties, comment, ...others } = pointSpec;
-    const id = uniqueId();
-    const properties = { id, ..._properties };
-    changes.push({ operation: "create", target: "point", properties, ...others });
+  function addPoint(spec: IPointImportSpec) {
+    const { type, parents, properties: { id = uniqueId(), ...otherProps } = {}, comment, ...others } = spec;
+    const [x, y] = parents;
+    const o = addObject(PointModel.create({ id: id as string, x, y, ...otherProps, ...others }));
+    warnExtraProps("addPoint", o, otherProps, others);
     if (comment) {
       addCommentFromProps({ anchor: id, ...comment });
     }
-    return id;
+    return id as string;
   }
 
-  function addPolygon(polygonSpec: IPolygonImportSpec) {
-    const { parents: parentSpecs, properties: _properties, comment } = polygonSpec;
-    const id = uniqueId();
+  function addVertex(spec: IVertexImportSpec) {
+    const { angleLabel, ...others } = spec;
+    return addPoint(others);
+  }
+
+  function addPolygon(polySpec: IPolygonImportSpec) {
+    const { type, parents, properties: { id = uniqueId(), ...otherProps } = {}, comment, ...others } = polySpec;
     const vertices: Array<{ id: string, angleLabel?: boolean }> = [];
-    const parents = parentSpecs.map(spec => {
-                      const ptId = typeof spec === "string" ? spec : addPoint(spec);
-                      const angleLabel = (typeof spec === "object") && !!spec.angleLabel;
-                      vertices.push({ id: ptId, angleLabel });
-                      return ptId;
-                    });
-    const properties = { id, ..._properties };
-    changes.push({ operation: "create", target: "polygon", parents, properties });
+    const points = parents.map(ptSpec => {
+      const ptId = typeof ptSpec === "string" ? ptSpec : addVertex(ptSpec);
+      const angleLabel = (typeof ptSpec === "object") && !!ptSpec.angleLabel;
+      vertices.push({ id: ptId, angleLabel });
+      return ptId;
+    });
+    const o = addObject(PolygonModel.create({ id: id as string, points, ...otherProps, ...others }));
+    warnExtraProps("addPolygon", o, otherProps, others);
+
+    // add any embedded vertex angles
     const lastIndex = vertices.length - 1;
     vertices.forEach((pt, i) => {
       let angleParents: [string, string, string];
@@ -252,38 +312,39 @@ export function preprocessImportFormat(snapshot: any) {
   }
 
   function addVertexAngle(angleSpec: IVertexAngleImportSpec) {
-    const { type, parents, properties: _properties, ...others } = angleSpec;
-    const id = uniqueId();
-    const properties = { id, ..._properties };
-    changes.push({ operation: "create", target: "vertexAngle", parents, properties, ...others });
+    const { type, parents, properties: { id = uniqueId(), ...otherProps } = {}, ...others } = angleSpec;
+    const o = addObject(VertexAngleModel.create({ id: id as string, points: parents, ...otherProps, ...others }));
+    warnExtraProps("addVertexAngle", o, otherProps, others);
+    return id as string;
   }
 
-  function addImage(imageSpec: IImageImportSpec) {
-    const { type, parents: _parents, properties: _properties, comment, ...others } = imageSpec;
-    const { url, coords, size: pxSize } = _parents;
-    const size = pxSize.map(s => s / kGeometryDefaultPixelsPerUnit) as JXGCoordPair;
-    const parents = [url, coords, size];
-    const id = uniqueId();
-    const properties = { id, ..._properties };
+  function addImage(spec: IImageImportSpec) {
+    const { type, parents, properties: { id = uniqueId(), ...otherProps } = {}, comment, ...others } = spec;
+    const { url, coords: [x, y], size: pxSize } = parents;
+    const [width, height] = pxSize.map(s => s / kGeometryDefaultPixelsPerUnit);
     gImageMap.getImage(url);  // register with image map
-    changes.push({ operation: "create", target: "image", parents, properties, ...others });
+    // for now, only a single image can be used as a background image
+    bgImage = ImageModel.create({ id: id as string, x, y, width, height, url, ...otherProps, ...others });
+    warnExtraProps("addImage", bgImage, otherProps, others);
     if (comment) {
-      addCommentFromProps({ anchor: id, ...comment });
+      addCommentFromProps({ anchor: id as string, ...comment });
     }
-    return id;
+    return id as string;
   }
 
-  function addMovableLine(movableLineSpec: IMovableLineImportSpec) {
-    const { type, parents: _parents, properties: _properties, comment, ...others } = movableLineSpec;
-    const id = uniqueId();
-    const [pt1Spec, pt2Spec] = _parents;
-    const parents = _parents.map(ptSpec => ptSpec.parents);
-    const properties = { id, pt1: pt1Spec.properties, pt2: pt2Spec.properties, ..._properties };
-    changes.push({ operation: "create", target: "movableLine", parents, properties, ...others });
+  function addMovableLine(spec: IMovableLineImportSpec) {
+    const { type, parents, properties: { id = uniqueId(), pt1, pt2, ...otherProps } = {}, comment, ...others } = spec;
+    const [pt1Spec, pt2Spec] = parents;
+    const [p1x, p1y] = pt1Spec.parents;
+    const [p2x, p2y] = pt2Spec.parents;
+    const p1 = { x: p1x, y: p1y, ...pt1 as object, id: `${id}-point1` };
+    const p2 = { x: p2x, y: p2y, ...pt2 as object, id: `${id}-point2` };
+    const o = addObject(MovableLineModel.create({ id: id as string, p1, p2, ...otherProps, ...others }));
+    warnExtraProps("addMovableLine", o, otherProps, others);
     if (comment) {
       addCommentFromProps({ anchor: id, ...comment });
     }
-    return id;
+    return id as string;
   }
 
   objectSpecs.forEach(spec => {
@@ -309,8 +370,5 @@ export function preprocessImportFormat(snapshot: any) {
     }
   });
 
-  return {
-    type: "Geometry",
-    changes: changes.map(change => JSON.stringify(change))
-  };
+  return { type: "Geometry", board, bgImage, objects: Object.fromEntries(objects), extras };
 }

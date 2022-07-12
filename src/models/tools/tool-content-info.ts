@@ -71,6 +71,7 @@ export function getToolIds() {
 }
 
 export interface ITileExportOptions {
+  json?: boolean; // default true, but some tiles (e.g. geometry) use their export code to produce other formats
   rowHeight?: number;
   transformImageUrl?: (url: string, filename?: string) => string;
 }

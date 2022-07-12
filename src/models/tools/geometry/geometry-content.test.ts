@@ -1,11 +1,21 @@
-import { clone } from "lodash";
-import { destroy } from "mobx-state-tree";
-import { GeometryContentModel, GeometryContentModelType,
-          kGeometryToolID, defaultGeometryContent, GeometryMetadataModel } from "./geometry-content";
-import { JXGChange } from "./jxg-changes";
-import { isPointInPolygon, getPointsForVertexAngle } from "./jxg-polygon";
+import { clone, isEqualWith } from "lodash";
+import { destroy, getSnapshot } from "mobx-state-tree";
+import {
+  GeometryContentModel, GeometryContentModelType, defaultGeometryContent, GeometryMetadataModel
+} from "./geometry-content";
+import {
+  CommentModel, ImageModel, MovableLineModel, PointModel, PolygonModel,
+  segmentIdFromPointIds, VertexAngleModel
+} from "./geometry-model";
+import { kGeometryToolID } from "./geometry-types";
+import { ESegmentLabelOption, JXGChange } from "./jxg-changes";
+import { isPointInPolygon, getPointsForVertexAngle, getPolygonEdge } from "./jxg-polygon";
 import { canSupportVertexAngle, getVertexAngle, updateVertexAnglesFromObjects } from "./jxg-vertex-angle";
-import { isBoard, isFreePoint, isPoint, isPolygon } from "./jxg-types";
+import {
+  isBoard, isComment, isFreePoint, isImage, isLine, isMovableLine, isPoint, isPolygon,
+  isText,
+  kGeometryDefaultPixelsPerUnit, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin
+} from "./jxg-types";
 
 // Need to mock this so the placeholder that is added to the cache
 // has dimensions
@@ -33,6 +43,66 @@ jest.mock("../../../utilities/js-utils", () => ({
   castArrayCopy: (itemOrArray: any) => castArrayCopy(itemOrArray),
   safeJsonParse: (json: string) => safeJsonParse(json)
 }));
+
+let message = () => "";
+
+// for use with lodash's isEqualWith function to implement toEqualWithUniqueIds custom jest matcher
+const customizer = (rec: any, exp: any) => {
+  if (Array.isArray(rec) && Array.isArray(exp) && (rec?.length !== exp?.length)) {
+    message = () =>
+      `array lengths must be equal\n` +
+      `  Expected: ${exp.length}\n` +
+      `  Received: ${rec.length}`;
+    return false;
+  }
+  if ((typeof rec === "object") && (typeof rec.id === "string") &&
+      (typeof exp === "object") && (typeof exp.id === "string")) {
+    const { id: recId, points: recPoints, anchors: recAnchors, ...recOthers } = rec;
+    const { id: expId, points: expPoints, anchors: expAnchors, ...expOthers } = exp;
+    const idsPass = recId !== expId;
+    const pointsPass = !!(recPoints?.length === expPoints?.length) &&
+            !!(expPoints?.every((ptId: string, i: number) => ptId !== recPoints[i]) ?? true);
+    const anchorsPass = !!(recAnchors?.length === expAnchors?.length) &&
+            !!(expAnchors?.every((_id: string, i: number) => _id !== recAnchors[i]) ?? true);
+    const dependentsPass = pointsPass && anchorsPass;
+    const propsPass = isEqualWith(recOthers, expOthers, customizer);
+    if (!idsPass) message = () => "ids must be unique";
+    if (!dependentsPass) {
+      message = () =>
+        `dependent point and anchor ids must be different:\n` +
+        `  Expected: ${JSON.stringify(exp?.points)}\n` +
+        `  Received: ${JSON.stringify(rec?.points)}`;
+    }
+    if (!propsPass) {
+      message = () =>
+        `object values must match:\n` +
+        `  Expected: ${JSON.stringify(expOthers)}\n` +
+        `  Received: ${JSON.stringify(recOthers)}`;
+    }
+    return idsPass && pointsPass && propsPass;
+  }
+};
+
+// custom jest matcher for testing that copied objects are identical to the originals
+// except for the object ids which should all be different.
+expect.extend({
+  toEqualWithUniqueIds(received: any, expected: any) {
+    message = () => "";
+    const pass = isEqualWith(received, expected, customizer);
+    if (!pass && !message()) {
+      message = () => "values differed outside of geometry objects";
+    }
+    return { pass, message };
+  }
+});
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace jest {
+    interface Matchers<R> {
+      toEqualWithUniqueIds(expected: any): R
+    }
+  }
+}
 
 describe("GeometryContent", () => {
 
@@ -68,15 +138,14 @@ describe("GeometryContent", () => {
 
   it("can create with default properties", () => {
     const content = GeometryContentModel.create();
-    expect(content.type).toBe(kGeometryToolID);
-    expect(content.changes).toEqual([]);
+    expect(getSnapshot(content)).toEqual({ type: kGeometryToolID, objects: {} });
 
     destroy(content);
   });
 
   it("can create with authored properties", () => {
     const authored = {
-            type: "Geometry" as const,
+            type: kGeometryToolID,
             board: {
               properties: {
                 axisNames: ["authorX", "authorY"]
@@ -84,19 +153,22 @@ describe("GeometryContent", () => {
             },
             objects: []
           };
-    const content = GeometryContentModel.create(authored);
-    expect(content.type).toBe(kGeometryToolID);
-    expect(content.changes.length).toEqual(1);
-    const change = JSON.parse(content.changes[0]);
-    expect(change.properties.xName).toBe("authorX");
-    expect(change.properties.yName).toBe("authorY");
+    const content = GeometryContentModel.create(authored as any);
+    expect(getSnapshot(content)).toEqual({
+      type: kGeometryToolID,
+      board: {
+        xAxis: { name: "authorX", min: kGeometryDefaultXAxisMin, unit: kGeometryDefaultPixelsPerUnit },
+        yAxis: { name: "authorY", min: kGeometryDefaultYAxisMin, unit: kGeometryDefaultPixelsPerUnit }
+      },
+      objects: {}
+    });
 
     destroy(content);
   });
 
   it("can create/destroy a JSXGraph board", () => {
     const { content, board } = createContentAndBoard(_content => {
-      _content.addChange({ operation: "create", target: "point", parents: [1, 1] });
+      _content.addObjectModel(PointModel.create({ x: 1, y: 1 }));
     });
     expect(isBoard(board)).toBe(true);
 
@@ -113,6 +185,10 @@ describe("GeometryContent", () => {
             properties: { boundingBox }
           };
     content.applyChange(board, change);
+
+    expect(content.title).toBeUndefined();
+    content.updateTitle(board, "New Title");
+    expect(content.title).toBe("New Title");
 
     const badChange: JXGChange = { operation: "update", target: "board", targetID: "foo" };
     content.applyChange(board, badChange);
@@ -135,11 +211,12 @@ describe("GeometryContent", () => {
 
   it("can add/remove/update points", () => {
     const { content, board } = createContentAndBoard();
-    expect(isPoint(board)).toBe(false);
+    expect(isBoard(board)).toBe(true);
     const p1Id = "point-1";
     let p1: JXG.Point = board.objects[p1Id] as JXG.Point;
     expect(p1).toBeUndefined();
     p1 = content.addPoint(board, [1, 1], { id: p1Id }) as JXG.Point;
+    expect(content.lastObject).toEqual({ id: p1Id, type: "point", x: 1, y: 1 });
     expect(isPoint(p1)).toBe(true);
     expect(isFreePoint(p1)).toBe(true);
     // won't create generic objects
@@ -175,14 +252,46 @@ describe("GeometryContent", () => {
   });
 
   it("can add/remove/update polygons", () => {
-    const { content, board } = createContentAndBoard((_content) => {
-      _content.addChange({ operation: "create", target: "point", parents: [1, 1], properties: { id: "p1" } });
-      _content.addChange({ operation: "create", target: "point", parents: [3, 3], properties: { id: "p2" } });
-      _content.addChange({ operation: "create", target: "point", parents: [5, 1], properties: { id: "p3" } });
-    });
+    const { content, board } = createContentAndBoard();
+    content.addPoints(board, [[1, 1], [3, 3], [5, 1]], [{ id: "p1" }, { id: "p2" }, { id: "p3" }]);
+    expect(content.lastObject).toEqual({ id: "p3", type: "point", x: 5, y: 1 });
     let polygon: JXG.Polygon | undefined = content.createPolygonFromFreePoints(board) as JXG.Polygon;
+    expect(content.lastObject).toEqual({ id: polygon.id, type: "polygon", points: ["p1", "p2", "p3"] });
     expect(isPolygon(polygon)).toBe(true);
     const polygonId = polygon.id;
+    expect(polygonId.startsWith("testid-")).toBe(true);
+    expect(content.getDependents(["p1"])).toEqual(["p1", polygonId]);
+    expect(content.getDependents(["p1"], { required: true })).toEqual(["p1"]);
+    expect(content.getDependents(["p3"])).toEqual(["p3", polygonId]);
+    expect(content.getDependents(["p3"], { required: true })).toEqual(["p3"]);
+
+    const ptInPolyCoords = new JXG.Coords(JXG.COORDS_BY_USER, [3, 2], board);
+    const [, ptInScrX, ptInScrY] = ptInPolyCoords.scrCoords;
+    expect(isPointInPolygon(ptInScrX, ptInScrY, polygon)).toBe(true);
+    const ptOutPolyCoords = new JXG.Coords(JXG.COORDS_BY_USER, [4, 4], board);
+    const [, ptOutScrX, ptOutScrY] = ptOutPolyCoords.scrCoords;
+    expect(isPointInPolygon(ptOutScrX, ptOutScrY, polygon)).toBe(false);
+
+    content.removeObjects(board, polygonId);
+    expect(content.getObject(polygonId)).toBeUndefined();
+    expect(board.objects[polygonId]).toBeUndefined();
+    // can't create polygon without vertices
+    polygon = content.applyChange(board, { operation: "create", target: "polygon" }) as any as JXG.Polygon;
+    expect(polygon).toBeUndefined();
+
+    destroyContentAndBoard(content, board);
+  });
+
+  it("can add/remove/update polygons from model", () => {
+    let polygonId = "";
+    const { content, board } = createContentAndBoard((_content) => {
+      _content.addObjectModel(PointModel.create({ id: "p1", x: 1, y: 1 }));
+      _content.addObjectModel(PointModel.create({ id: "p2", x: 3, y: 3 }));
+      _content.addObjectModel(PointModel.create({ id: "p3", x: 5, y: 1 }));
+      polygonId = _content.addObjectModel(PolygonModel.create({ points: ["p1", "p2", "p3"] }));
+    });
+    let polygon: JXG.Polygon | undefined = board.objects[polygonId] as JXG.Polygon;
+    expect(isPolygon(polygon)).toBe(true);
     expect(polygonId.startsWith("testid-")).toBe(true);
 
     const ptInPolyCoords = new JXG.Coords(JXG.COORDS_BY_USER, [3, 2], board);
@@ -201,9 +310,68 @@ describe("GeometryContent", () => {
     destroyContentAndBoard(content, board);
   });
 
+  it("can add/remove polygons from model with segment labels", () => {
+    let polygonId = "";
+    const { content, board } = createContentAndBoard((_content) => {
+      _content.addObjectModel(PointModel.create({ id: "p1", x: 1, y: 1 }));
+      _content.addObjectModel(PointModel.create({ id: "p2", x: 3, y: 3 }));
+      _content.addObjectModel(PointModel.create({ id: "p3", x: 5, y: 1 }));
+      polygonId = _content.addObjectModel(PolygonModel.create({
+        points: ["p1", "p2", "p3"],
+        labels: [{ id: segmentIdFromPointIds(["p1", "p2"]), option: ESegmentLabelOption.kLength }]
+      }));
+    });
+    const polygon: JXG.Polygon | undefined = board.objects[polygonId] as JXG.Polygon;
+    expect(isPolygon(polygon)).toBe(true);
+    expect(polygonId.startsWith("testid-")).toBe(true);
+
+    const segment = getPolygonEdge(board, polygonId, ["p1", "p2"]);
+    expect(isLine(segment)).toBe(true);
+    expect(isText(segment?.label)).toBe(true);
+    expect(typeof segment?.name).toBe("function");
+
+    const segment2 = getPolygonEdge(board, polygonId, ["p2", "p3"]);
+    expect(isLine(segment2)).toBe(true);
+    expect(isText(segment2?.label)).toBe(false);
+    expect(typeof segment2?.name).not.toBe("function");
+
+    const p1 = board.objects.p1 as JXG.Point;
+    const p2 = board.objects.p2 as JXG.Point;
+    const p3 = board.objects.p3 as JXG.Point;
+    content.updatePolygonSegmentLabel(board, polygon, [p1, p2], ESegmentLabelOption.kLabel);
+    expect(content.getObject(polygon.id)).toEqual({
+      id: polygonId,
+      type: "polygon",
+      points: ["p1", "p2", "p3"],
+      labels: [{ id: segmentIdFromPointIds(["p1", "p2"]), option: ESegmentLabelOption.kLabel }]
+    });
+    content.updatePolygonSegmentLabel(board, polygon, [p2, p3], ESegmentLabelOption.kLength);
+    expect(content.getObject(polygon.id)).toEqual({
+      id: polygonId,
+      type: "polygon",
+      points: ["p1", "p2", "p3"],
+      labels: [{ id: segmentIdFromPointIds(["p1", "p2"]), option: ESegmentLabelOption.kLabel },
+               { id: segmentIdFromPointIds(["p2", "p3"]), option: ESegmentLabelOption.kLength }]
+    });
+    content.updatePolygonSegmentLabel(board, polygon, [p1, p2], ESegmentLabelOption.kNone);
+    expect(content.getObject(polygon.id)).toEqual({
+      id: polygonId,
+      type: "polygon",
+      points: ["p1", "p2", "p3"],
+      labels: [{ id: segmentIdFromPointIds(["p2", "p3"]), option: ESegmentLabelOption.kLength }]
+    });
+
+    content.removeObjects(board, polygonId);
+    expect(board.objects[polygonId]).toBeUndefined();
+
+    destroyContentAndBoard(content, board);
+  });
+
   it("can add an image", () => {
     const { content, board } = createContentAndBoard();
     const image = content.addImage(board, placeholderImage, [0, 0], [5, 5]);
+    expect(content.bgImage).toEqual({
+      id: image!.id, type: "image", url: placeholderImage, x: 0, y: 0, width: 5, height: 5 });
     expect(image!.elType).toBe("image");
     content.updateObjects(board, image!.id, { url: placeholderImage });
     expect(image!.url).toBe(placeholderImage);
@@ -222,12 +390,39 @@ describe("GeometryContent", () => {
     destroyContentAndBoard(content, board);
   });
 
+  it("can add an image from model object", () => {
+    const { content, board } = createContentAndBoard((_content) => {
+      _content.setBackgroundImage(
+        ImageModel.create({ id: "img", url: placeholderImage, x: 0, y: 0, width: 5, height: 5 }));
+    });
+    // const image = content.addImage(board, placeholderImage, [0, 0], [5, 5]);
+    const image = board.objects.img as JXG.Image;
+    expect(isImage(image)).toBe(true);
+    expect(image.elType).toBe("image");
+    content.updateObjects(board, image.id, { url: placeholderImage });
+    expect(image.url).toBe(placeholderImage);
+    content.updateObjects(board, image.id, { size: [10, 10] });
+    content.updateObjects(board, image.id, { url: placeholderImage, size: [10, 10] });
+    expect(image.url).toBe(placeholderImage);
+
+    const change: JXGChange = {
+      operation: "create",
+      target: "image",
+      parents: [placeholderImage],
+      properties: { id: "image-fail" }
+    };
+    const failedImage = content.applyChange(board, change);
+    expect(failedImage).toBeUndefined();
+    destroyContentAndBoard(content, board);
+  });
+
   it("can select points, etc.", () => {
     const { content, board } = createContentAndBoard();
     const p1 = content.addPoint(board, [0, 0]);
     const p2 = content.addPoint(board, [1, 1]);
     const p3 = content.addPoint(board, [1, 0]);
     const poly = content.createPolygonFromFreePoints(board);
+    expect(content.lastObject).toEqual({ id: poly?.id, type: "polygon", points: [p1!.id, p2!.id, p3!.id] });
     content.selectObjects(board, p1!.id);
     expect(content.isSelected(p1!.id)).toBe(true);
     expect(content.isSelected(p2!.id)).toBe(false);
@@ -235,9 +430,7 @@ describe("GeometryContent", () => {
     content.selectObjects(board, poly!.id);
     expect(content.isSelected(poly!.id)).toBe(true);
     expect(content.hasSelection()).toBe(true);
-    let found = content.findObjects(board, (obj: JXG.GeometryElement) => {
-                  return obj.id === p1!.id;
-                });
+    let found = content.findObjects(board, (obj: JXG.GeometryElement) => obj.id === p1!.id);
     expect(found.length).toBe(1);
     content.deselectObjects(board, p1!.id);
     expect(content.isSelected(p1!.id)).toBe(false);
@@ -246,9 +439,7 @@ describe("GeometryContent", () => {
     content.selectObjects(board, p1!.id);
     content.deleteSelection(board);
     expect(content.hasSelection()).toBe(false);
-    found = content.findObjects(board, (obj: JXG.GeometryElement) => {
-              return obj.id === p1!.id;
-            });
+    found = content.findObjects(board, (obj: JXG.GeometryElement) => obj.id === p1!.id);
     expect(found.length).toBe(0);
     content.deleteSelection(board);
     expect(found.length).toBe(0);
@@ -260,16 +451,71 @@ describe("GeometryContent", () => {
     const px: JXG.Point = content.addPoint(board, [1, 0])!;
     const py: JXG.Point = content.addPoint(board, [0, 1])!;
     const poly: JXG.Polygon = content.createPolygonFromFreePoints(board)!;
+    expect(content.lastObject).toEqual({ id: poly?.id, type: "polygon", points: [p0!.id, px!.id, py!.id] });
     const pSolo: JXG.Point = content.addPoint(board, [9, 9])!;
     expect(canSupportVertexAngle(p0)).toBe(true);
     expect(canSupportVertexAngle(pSolo)).toBe(false);
     expect(getVertexAngle(p0)).toBeUndefined();
     const va0 = content.addVertexAngle(board, [px.id, p0.id, py.id]);
+    expect(content.lastObject).toEqual({ type: "vertexAngle", id: va0!.id, points: [px.id, p0.id, py.id] });
     const vax = content.addVertexAngle(board, [py.id, px.id, p0.id]);
+    expect(content.lastObject).toEqual({ type: "vertexAngle", id: vax!.id, points: [py.id, px.id, p0.id] });
     const vay = content.addVertexAngle(board, [p0.id, py.id, px.id]);
+    expect(content.lastObject).toEqual({ type: "vertexAngle", id: vay!.id, points: [p0.id, py.id, px.id] });
     expect(getVertexAngle(p0)!.id).toBe(va0!.id);
     expect(getVertexAngle(px)!.id).toBe(vax!.id);
     expect(getVertexAngle(py)!.id).toBe(vay!.id);
+    expect(content.getDependents([p0!.id])).toEqual([p0!.id, poly!.id, va0!.id, vax!.id, vay!.id]);
+    expect(content.getDependents([p0!.id], { required: true })).toEqual([p0!.id, va0!.id, vax!.id, vay!.id]);
+    expect(getPointsForVertexAngle(pSolo)).toBeUndefined();
+    expect(getPointsForVertexAngle(p0)!.map(p => p.id)).toEqual([px.id, p0.id, py.id]);
+    expect(getPointsForVertexAngle(px)!.map(p => p.id)).toEqual([py.id, px.id, p0.id]);
+    expect(getPointsForVertexAngle(py)!.map(p => p.id)).toEqual([p0.id, py.id, px.id]);
+    p0.setPosition(JXG.COORDS_BY_USER, [1, 1]);
+    updateVertexAnglesFromObjects([p0, px, py, poly]);
+    expect(getPointsForVertexAngle(p0)!.map(p => p.id)).toEqual([py.id, p0.id, px.id]);
+
+    content.removeObjects(board, [p0!.id]);
+    expect(content.getObject(p0!.id)).toBeUndefined();
+    // first point can be removed from polygon without deleting polygon
+    expect(content.getObject(poly!.id)).toEqual({ id: poly?.id, type: "polygon", points: [px!.id, py!.id] });
+    // vertex angles are deleted when any dependent point is deleted
+    expect(content.getObject(va0!.id)).toBeUndefined();
+    expect(content.getObject(vax!.id)).toBeUndefined();
+    expect(content.getObject(vay!.id)).toBeUndefined();
+
+    // removing second point results in removal of polygon
+    content.removeObjects(board, [px!.id]);
+    expect(content.getObject(px!.id)).toBeUndefined();
+    expect(content.getObject(poly!.id)).toBeUndefined();
+
+    expect(content.applyChange(board, { operation: "create", target: "vertexAngle" })).toBeUndefined();
+  });
+
+  it("can add a vertex angle to a polygon from model objects", () => {
+    let polygonId = "";
+    let vAngle0Id = "";
+    let vAngleXId = "";
+    let vAngleYId = "";
+    const { content, board } = createContentAndBoard((_content) => {
+      _content.addObjectModel(PointModel.create({ id: "p0", x: 0, y: 0 }));
+      _content.addObjectModel(PointModel.create({ id: "px", x: 1, y: 0 }));
+      _content.addObjectModel(PointModel.create({ id: "py", x: 0, y: 1 }));
+      polygonId = _content.addObjectModel(PolygonModel.create({ points: ["p0", "px", "py"] }));
+      vAngle0Id = _content.addObjectModel(VertexAngleModel.create({ points: ["px", "p0", "py"] }));
+      vAngleXId = _content.addObjectModel(VertexAngleModel.create({ points: ["py", "px", "p0"] }));
+      vAngleYId = _content.addObjectModel(VertexAngleModel.create({ points: ["p0", "py", "px"] }));
+    });
+    const p0: JXG.Point = board.objects.p0 as JXG.Point;
+    const px: JXG.Point = board.objects.px as JXG.Point;
+    const py: JXG.Point = board.objects.py as JXG.Point;
+    const poly: JXG.Polygon = board.objects[polygonId] as JXG.Polygon;
+    const pSolo: JXG.Point = content.addPoint(board, [9, 9])!;
+    expect(canSupportVertexAngle(p0)).toBe(true);
+    expect(canSupportVertexAngle(pSolo)).toBe(false);
+    expect(getVertexAngle(p0)!.id).toBe(vAngle0Id);
+    expect(getVertexAngle(px)!.id).toBe(vAngleXId);
+    expect(getVertexAngle(py)!.id).toBe(vAngleYId);
     expect(getPointsForVertexAngle(pSolo)).toBeUndefined();
     expect(getPointsForVertexAngle(p0)!.map(p => p.id)).toEqual([px.id, p0.id, py.id]);
     expect(getPointsForVertexAngle(px)!.map(p => p.id)).toEqual([py.id, px.id, p0.id]);
@@ -279,6 +525,145 @@ describe("GeometryContent", () => {
     expect(getPointsForVertexAngle(p0)!.map(p => p.id)).toEqual([py.id, p0.id, px.id]);
 
     expect(content.applyChange(board, { operation: "create", target: "vertexAngle" })).toBeUndefined();
+  });
+
+  it ("can add/remove movable line with comment", () => {
+    const { content, board } = createContentAndBoard();
+    content.addMovableLine(board, [[1, 1], [5, 5]], { id: "ml" });
+    expect(content.lastObject).toEqual({
+      id: "ml", type: "movableLine",
+      p1: { id: "ml-point1", type: "point", x: 1, y: 1 },
+      p2: { id: "ml-point2", type: "point", x: 5, y: 5 } });
+    const line = board.objects.ml as JXG.Line;
+    expect(isMovableLine(line)).toBe(true);
+    const [comment] = content.addComment(board, "ml")!;
+    expect(content.lastObject).toEqual({ id: comment.id, type: "comment", anchors: ["ml"] });
+    expect(isComment(comment)).toBe(true);
+
+    // update comment text
+    content.updateObjects(board, comment.id, { position: [5, 5], text: "new" });
+    expect(content.lastObject).toEqual({ id: comment.id, type: "comment", anchors: ["ml"], x: 5, y: 5, text: "new" });
+
+    // removing the line removes the line and its comment from the model and the board
+    content.removeObjects(board, "ml");
+    expect(board.objects.ml).toBeUndefined();
+    expect(board.objects[comment.id]).toBeUndefined();
+  });
+
+  it ("can add/remove movable line with comment from model", () => {
+    const { content, board } = createContentAndBoard((_content) => {
+      _content.addObjectModel(MovableLineModel.create({ id: "ml", p1: { x: 1, y: 1 }, p2: { x: 5, y: 5 } }));
+      _content.addObjectModel(CommentModel.create({ id: "c1", anchors: ["ml"] }));
+    });
+    const line = board.objects.ml as JXG.Line;
+    const comment = board.objects.c1 as JXG.Text;
+    expect(isMovableLine(line)).toBe(true);
+    expect(isComment(comment)).toBe(true);
+    content.removeObjects(board, "ml");
+    expect(content.getObject("ml")).toBeUndefined();
+    expect(content.getObject("c1")).toBeUndefined();
+    expect(board.objects.ml).toBeUndefined();
+    expect(board.objects.c1).toBeUndefined();
+  });
+
+  it("can copy selected objects", () => {
+    const { content, board } = createContentAndBoard();
+    const p0: JXG.Point = content.addPoint(board, [0, 0])!;
+    const px: JXG.Point = content.addPoint(board, [1, 0])!;
+    const py: JXG.Point = content.addPoint(board, [0, 1])!;
+    const poly: JXG.Polygon = content.createPolygonFromFreePoints(board)!;
+
+    // copies selected points
+    content.selectObjects(board, p0.id);
+    expect(content.getSelectedIds(board)).toEqual([p0.id]);
+    expect(content.copySelection(board))
+      .toEqualWithUniqueIds([PointModel.create({ id: p0.id, x: 0, y: 0 })]);
+
+    // copies comments along with selected points
+    const [comment] = content.addComment(board, p0.id, "p0 comment") || [];
+    expect(content.copySelection(board)).toEqualWithUniqueIds([
+      PointModel.create({ id: p0.id, x: 0, y: 0 }),
+      CommentModel.create({ id: comment.id, anchors: [p0.id], text: "p0 comment"})
+    ]);
+    content.removeObjects(board, [comment.id]);
+
+    // doesn't copy selected polygons if all vertices aren't selected
+    // content.selectObjects(board, poly.id);
+    expect(content.getSelectedIds(board)).toEqual([p0.id]);
+    expect(content.copySelection(board))
+      .toEqualWithUniqueIds([PointModel.create({ id: p0.id, x: 0, y: 0 })]);
+
+    // copies polygons if all vertices are selected
+    content.selectObjects(board, [px.id, py.id]);
+    expect(content.getSelectedIds(board)).toEqual([p0.id, px.id, py.id]);
+    expect(content.copySelection(board))
+      .toEqualWithUniqueIds(Array.from(content.objects.values()));
+
+    content.removeObjects(board, poly.id);
+    content.addVertexAngle(board, [py.id, p0.id, px.id]);
+
+    // copies vertex angles if all vertices are selected
+    content.selectObjects(board, [p0.id, px.id, py.id]);
+    expect(content.getSelectedIds(board)).toEqual([p0.id, px.id, py.id]);
+    expect(content.copySelection(board))
+      .toEqualWithUniqueIds(Array.from(content.objects.values()));
+
+    // copies movable lines
+    content.deselectAll(board);
+    content.addMovableLine(board, [[0, 0], [5, 5]], { id: "ml" });
+    content.selectObjects(board, ["ml-point1", "ml-point2"]);
+    expect(content.copySelection(board))
+      .toEqualWithUniqueIds([content.lastObject]);
+  });
+
+  it("can duplicate selected objects", () => {
+    const { content, board } = createContentAndBoard();
+    const p0: JXG.Point = content.addPoint(board, [0, 0])!;
+    const px: JXG.Point = content.addPoint(board, [1, 0])!;
+    const py: JXG.Point = content.addPoint(board, [0, 1])!;
+    const poly: JXG.Polygon = content.createPolygonFromFreePoints(board)!;
+
+    // copies selected points
+    content.selectObjects(board, p0.id);
+    expect(content.getSelectedIds(board)).toEqual([p0.id]);
+    expect(content.copySelection(board))
+      .toEqualWithUniqueIds([PointModel.create({ id: p0.id, x: 0, y: 0 })]);
+
+    // copies comments along with selected points
+    const [comment] = content.addComment(board, p0.id, "p0 comment") || [];
+    expect(content.copySelection(board)).toEqualWithUniqueIds([
+      PointModel.create({ id: p0.id, x: 0, y: 0 }),
+      CommentModel.create({ id: comment.id, anchors: [p0.id], text: "p0 comment"})
+    ]);
+    content.removeObjects(board, [comment.id]);
+
+    // doesn't copy selected polygons if all vertices aren't selected
+    // content.selectObjects(board, poly.id);
+    expect(content.getSelectedIds(board)).toEqual([p0.id]);
+    expect(content.copySelection(board))
+      .toEqualWithUniqueIds([PointModel.create({ id: p0.id, x: 0, y: 0 })]);
+
+    // copies polygons if all vertices are selected
+    content.selectObjects(board, [px.id, py.id]);
+    expect(content.getSelectedIds(board)).toEqual([p0.id, px.id, py.id]);
+    expect(content.copySelection(board))
+      .toEqualWithUniqueIds(Array.from(content.objects.values()));
+
+    content.removeObjects(board, poly.id);
+    content.addVertexAngle(board, [py.id, p0.id, px.id]);
+
+    // copies vertex angles if all vertices are selected
+    content.selectObjects(board, [p0.id, px.id, py.id]);
+    expect(content.getSelectedIds(board)).toEqual([p0.id, px.id, py.id]);
+    expect(content.copySelection(board))
+      .toEqualWithUniqueIds(Array.from(content.objects.values()));
+
+    // copies movable lines
+    content.deselectAll(board);
+    content.addMovableLine(board, [[0, 0], [5, 5]], { id: "ml" });
+    content.selectObjects(board, ["ml-point1", "ml-point2"]);
+    expect(content.copySelection(board))
+      .toEqualWithUniqueIds([content.lastObject]);
   });
 
   it("can suspend/resume syncChanges", () => {
@@ -297,35 +682,35 @@ describe("GeometryContent", () => {
     expect(content.isUserResizable).toBe(true);
   });
 
-  it("can pop a single change", () => {
-    const change1 = { operation: "create", target: "foo" } as any as JXGChange;
-    const change2 = { operation: "create", target: "bar" } as any as JXGChange;
+  // it("can pop a single change", () => {
+  //   const change1 = { operation: "create", target: "foo" } as any as JXGChange;
+  //   const change2 = { operation: "create", target: "bar" } as any as JXGChange;
 
-    const { content, board } = createContentAndBoard();
-    content.applyChange(board, change1);
-    content.applyChange(board, change2);
-    expect(content.changes.length).toBe(3);
-    const change = content.popChangeset();
-    expect(change && change.map((changeStr: any) => JSON.parse(changeStr))).toEqual([change2]);
-    expect(content.changes.length).toBe(2);
-    expect(JSON.parse(content.changes[1])).toEqual(change1);
-  });
+  //   const { content, board } = createContentAndBoard();
+  //   content.applyChange(board, change1);
+  //   content.applyChange(board, change2);
+  //   expect(content.changes.length).toBe(3);
+  //   const change = content.popChangeset();
+  //   expect(change && change.map((changeStr: any) => JSON.parse(changeStr))).toEqual([change2]);
+  //   expect(content.changes.length).toBe(2);
+  //   expect(JSON.parse(content.changes[1])).toEqual(change1);
+  // });
 
-  it("can pop a batch of changes", () => {
-    const change1 = { operation: "create", target: "foo" } as any as JXGChange;
-    const change2 = { operation: "create", target: "bar", startBatch: true } as any as JXGChange;
-    const change3 = { operation: "create", target: "baz" } as any as JXGChange;
-    const change4 = { operation: "create", target: "qux", endBatch: true } as any as JXGChange;
+  // it("can pop a batch of changes", () => {
+  //   const change1 = { operation: "create", target: "foo" } as any as JXGChange;
+  //   const change2 = { operation: "create", target: "bar", startBatch: true } as any as JXGChange;
+  //   const change3 = { operation: "create", target: "baz" } as any as JXGChange;
+  //   const change4 = { operation: "create", target: "qux", endBatch: true } as any as JXGChange;
 
-    const { content, board } = createContentAndBoard();
-    content.applyChange(board, change1);
-    content.applyChange(board, change2);
-    content.applyChange(board, change3);
-    content.applyChange(board, change4);
-    expect(content.changes.length).toBe(5);
-    const change = content.popChangeset();
-    expect(change && change.map((changeStr: any) => JSON.parse(changeStr))).toEqual([change2, change3, change4]);
-    expect(content.changes.length).toBe(2);
-    expect(JSON.parse(content.changes[1])).toEqual(change1);
-  });
+  //   const { content, board } = createContentAndBoard();
+  //   content.applyChange(board, change1);
+  //   content.applyChange(board, change2);
+  //   content.applyChange(board, change3);
+  //   content.applyChange(board, change4);
+  //   expect(content.changes.length).toBe(5);
+  //   const change = content.popChangeset();
+  //   expect(change && change.map((changeStr: any) => JSON.parse(changeStr))).toEqual([change2, change3, change4]);
+  //   expect(content.changes.length).toBe(2);
+  //   expect(JSON.parse(content.changes[1])).toEqual(change1);
+  // });
 });

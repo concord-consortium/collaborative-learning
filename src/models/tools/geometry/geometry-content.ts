@@ -1,5 +1,5 @@
-import { assign, castArray, each, keys, omit, size as _size } from "lodash";
-import { types, Instance, SnapshotOut } from "mobx-state-tree";
+import { castArray, difference, each, size as _size, union } from "lodash";
+import { Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree";
 import { Lambda } from "mobx";
 import { Optional } from "utility-types";
 import { SelectionStoreModelType } from "../../stores/selection";
@@ -9,31 +9,35 @@ import {
   kLabelAttrName, removeLinkedTable
 } from "../table-links";
 import { ITileExportOptions, IDefaultContentOptions } from "../tool-content-info";
-import { toolContentModelHooks, ToolContentModel, ToolMetadataModel } from "../tool-types";
+import { toolContentModelHooks, ToolMetadataModel } from "../tool-types";
 import { ICreateRowsProperties, IRowProperties, ITableChange } from "../table/table-change";
-import { getAxisLabelsFromDataSet, getTableContent, kLabelAttrName } from "../table/table-content";
-import { canonicalizeValue, linkedPointId } from "../table/table-model-types";
-import { exportGeometryJson } from "./geometry-export";
-import { defaultGeometryBoardChange, preprocessImportFormat } from "./geometry-import";
+import { canonicalizeValue } from "../table/table-model-types";
+import { convertModelToChanges, exportGeometryJson } from "./geometry-migrate";
+import { preprocessImportFormat } from "./geometry-import";
+import {
+  cloneGeometryObject, CommentModel, GeometryBaseContentModel, GeometryObjectModelType, GeometryObjectModelUnion,
+  ImageModel, ImageModelType, isPolygonModel, MovableLineModel, PointModel, PolygonModel, VertexAngleModel
+} from "./geometry-model";
 import {
   getAxisAnnotations, getBaseAxisLabels, getObjectById, guessUserDesiredBoundingBox, kAxisBuffer,
   kXAxisMinBuffer, kXAxisTotalBuffer, kYAxisTotalBuffer, resumeBoardUpdates, suspendBoardUpdates, syncAxisLabels
 } from "./jxg-board";
-import { ESegmentLabelOption, forEachNormalizedChange, ILinkProperties, JXGChange, JXGCoordPair,
-          JXGProperties, JXGParentType, JXGUnsafeCoordPair } from "./jxg-changes";
+import {
+  ESegmentLabelOption, ILinkProperties, JXGChange, JXGCoordPair, JXGProperties, JXGUnsafeCoordPair
+} from "./jxg-changes";
 import { applyChange, applyChanges, IDispatcherChangeContext } from "./jxg-dispatcher";
-import {  kPointDefaults, kSnapUnit } from "./jxg-point";
+import {  kPointDefaults } from "./jxg-point";
 import { prepareToDeleteObjects } from "./jxg-polygon";
 import { getTableIdFromLinkChange } from "./jxg-table-link";
 import {
-  isAxisArray, isBoard, isComment, isFreePoint, isImage, isLinkedPoint, isMovableLine, isPoint, isPointArray,
-  isPolygon, isVertexAngle, isVisibleEdge, kGeometryDefaultPixelsPerUnit, toObj
+  isAxisArray, isBoard, isComment, isFreePoint, isImage, isMovableLine, isPoint, isPointArray, isPolygon,
+  isVertexAngle, isVisibleEdge, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin,
+  kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj
 } from "./jxg-types";
 import { IDataSet } from "../../data/data-set";
-import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
+import { uniqueId } from "../../../utilities/js-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
-
-export const kGeometryToolID = "Geometry";
+import { gImageMap } from "../../image-map";
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
 
@@ -48,17 +52,23 @@ export interface IAxesParams {
   yMax: number;
 }
 
-// This is only used directly by tests
 export function defaultGeometryContent(options?: IDefaultContentOptions): GeometryContentModelType {
-  const { title } = options || {};
-  const changes: string[] = [];
-  if (title) {
-    const titleChange: JXGChange = { operation: "update", target: "metadata", properties: { title } };
-    changes.push(JSON.stringify(titleChange));
-  }
-  const boardChange = defaultGeometryBoardChange();
-  changes.push(JSON.stringify(boardChange));
-  return GeometryContentModel.create({ changes });
+  // const { title } = options || {};
+  // const changes: string[] = [];
+  // if (title) {
+  //   const titleChange: JXGChange = { operation: "update", target: "metadata", properties: { title } };
+  //   changes.push(JSON.stringify(titleChange));
+  // }
+  // const boardChange = defaultGeometryBoardChange();
+  // changes.push(JSON.stringify(boardChange));
+  const xRange = kGeometryDefaultWidth / kGeometryDefaultPixelsPerUnit;
+  const yRange = kGeometryDefaultHeight / kGeometryDefaultPixelsPerUnit;
+  return GeometryContentModel.create({
+    board: {
+      xAxis: { name: "x", label: "x", min: kGeometryDefaultXAxisMin, range: xRange },
+      yAxis: { name: "y", label: "y", min: kGeometryDefaultYAxisMin, range: yRange }
+    }
+   });
 }
 
 export interface IAxisLabels {
@@ -206,36 +216,59 @@ export function setElementColor(board: JXG.Board, id: string, selected: boolean)
   }
 }
 
-function isUndoableChange(change: JXGChange) {
-  if ((change.operation === "delete") && (change.target === "tableLink")) return false;
-  return true;
-}
+// function isUndoableChange(change: JXGChange) {
+//   if ((change.operation === "delete") && (change.target === "tableLink")) return false;
+//   return true;
+// }
 
-export const GeometryContentModel = ToolContentModel
+export const isGeometryContentReady = async (model: GeometryContentModelType): Promise<boolean> => {
+  return !model.bgImage || !!await gImageMap.getImage(model.bgImage.url);
+};
+
+export const GeometryContentModel = GeometryBaseContentModel
   .named("GeometryContent")
-  .props({
-    type: types.optional(types.literal(kGeometryToolID), kGeometryToolID),
-    changes: types.array(types.string)
-  })
   .volatile(self => ({
     metadata: undefined as any as GeometryMetadataModelType
   }))
-  .preProcessSnapshot(snapshot => preprocessImportFormat(snapshot))
+  .preProcessSnapshot(snapshot => {
+    const imported = preprocessImportFormat(snapshot);
+    // TODO: handle imported title
+    // const { extras } = imported;
+    // do something with title
+    return imported;
+  })
   .views(self => ({
     get title() {
-      return self.metadata.title;
+      return self.metadata?.title;
+    },
+    getObject(id: string) {
+      return self.objects.get(id);
+    },
+    getDependents(ids: string[], options?: { required: boolean }) {
+      const { required = false } = options || {};
+      let dependents = [...ids];
+      self.objects.forEach(obj => {
+        const result = obj.dependsUpon(dependents);
+        if (result.depends && (result.required || !required)) {
+          dependents = union(dependents, [obj.id]);
+        }
+      });
+      return dependents;
+    },
+    get lastObject() {
+      return self.objects.size ? Array.from(self.objects.values())[self.objects.size - 1] : undefined;
     },
     isSelected(id: string) {
-      return self.metadata.isSelected(id);
+      return !!self.metadata?.isSelected(id);
     },
     hasSelection() {
-      return self.metadata.hasSelection();
+      return !!self.metadata?.hasSelection();
     },
     get isLinked() {
-      return self.metadata.linkedTables.length > 0;
+      return (self.metadata?.linkedTables.length || 0) > 0;
     },
     isLinkedToTable(tableId: string) {
-      return self.metadata.isLinkedToTable(tableId);
+      return !!self.metadata?.isLinkedToTable(tableId);
     }
   }))
   .views(self => ({
@@ -253,15 +286,15 @@ export const GeometryContentModel = ToolContentModel
                   .map(obj => obj.id);
     },
     canUndo() {
-      const hasUndoableChanges = self.changes.length > 1;
-      if (!hasUndoableChanges) return false;
-      const lastChange = hasUndoableChanges ? self.changes[self.changes.length - 1] : undefined;
-      const lastChangeParsed = safeJsonParse<JXGChange>(lastChange);
-      if (!lastChangeParsed || !isUndoableChange(lastChangeParsed)) return false;
-      const lastChangeLinks = lastChangeParsed.links;
-      if (!lastChangeLinks) return true;
-      // we don't support undoing changes linked to tables in this transition period
-      // between undo/redo implementations
+      // const hasUndoableChanges = self.changes.length > 1;
+      // if (!hasUndoableChanges) return false;
+      // const lastChange = hasUndoableChanges ? self.changes[self.changes.length - 1] : undefined;
+      // const lastChangeParsed = safeJsonParse<JXGChange>(lastChange);
+      // if (!lastChangeParsed || !isUndoableChange(lastChangeParsed)) return false;
+      // const lastChangeLinks = lastChangeParsed.links;
+      // if (!lastChangeLinks) return true;
+      // // we don't support undoing changes linked to tables in this transition period
+      // // between undo/redo implementations
       return false;
     }
   }))
@@ -273,7 +306,9 @@ export const GeometryContentModel = ToolContentModel
       return board.objectsList.filter(obj => self.isSelected(obj.id));
     },
     exportJson(options?: ITileExportOptions) {
-      return exportGeometryJson(self.changes, options);
+      const changes = convertModelToChanges(self);
+      const jsonChanges = changes.map(change => JSON.stringify(change));
+      return exportGeometryJson(jsonChanges, options);
     }
   }))
   .actions(self => ({
@@ -311,6 +346,27 @@ export const GeometryContentModel = ToolContentModel
     }
   }))
   .actions(self => ({
+    setBackgroundImage(image: ImageModelType) {
+      self.bgImage = image;
+    },
+    addObjectModel(object: GeometryObjectModelUnion) {
+      self.objects.set(object.id, object);
+      return object.id;
+    },
+    addObjectModels(objects: GeometryObjectModelType[]) {
+      objects.forEach(obj => self.objects.set(obj.id, obj));
+    },
+    deleteObjects(ids: string[]) {
+      // delete the specified objects and their dependents
+      const dependents = self.getDependents(ids);
+      const requiredDependents = self.getDependents(ids, { required: true });
+      // remove non-required dependencies, e.g. individual points from polygons
+      difference(dependents, requiredDependents).forEach(dep => {
+        self.getObject(dep)?.removeDependencies(dependents);
+      });
+      // delete required dependents
+      requiredDependents.forEach(id => self.objects.delete(id));
+    },
     selectObjects(board: JXG.Board, ids: string | string[]) {
       const _ids = Array.isArray(ids) ? ids : [ids];
       _ids.forEach(id => {
@@ -403,8 +459,8 @@ export const GeometryContentModel = ToolContentModel
 
     // actions
     function initializeBoard(domElementID: string, onCreate?: onCreateCallback): JXG.Board | undefined {
-      const changes = self.changes.map(change => JSON.parse(change));
       let board: JXG.Board | undefined;
+      const changes = convertModelToChanges(self);
       applyChanges(domElementID, changes, getDispatcherContext())
         .filter(result => result != null)
         .forEach(changeResult => {
@@ -426,7 +482,7 @@ export const GeometryContentModel = ToolContentModel
     }
 
     function destroyBoard(board: JXG.Board) {
-      JXG.JSXGraph.freeBoard(board);
+      board && JXG.JSXGraph.freeBoard(board);
     }
 
     function resizeBoard(board: JXG.Board, width: number, height: number, scale?: number) {
@@ -473,7 +529,7 @@ export const GeometryContentModel = ToolContentModel
                         canvasWidth: width, canvasHeight: height
                       } }
       };
-      const axes = _applyChange(undefined, change);
+      const axes = applyAndLogChange(undefined, change);
       return isAxisArray(axes) ? axes : undefined;
     }
 
@@ -493,113 +549,156 @@ export const GeometryContentModel = ToolContentModel
       }
     }
 
-    function addChange(change: JXGChange) {
-      self.changes.push(JSON.stringify(change));
-    }
+    // function addChange(change: JXGChange) {
+    //   self.changes.push(JSON.stringify(change));
+    // }
 
-    function popChangeset() {
-      // The first change is board creation and should not be popped
-      if (self.changes.length > 1) {
-        const changes: string[] = [];
-        let changeStr = self.changes.pop();
-        if (changeStr) {
-          // earlier changes go earlier in the array to maintain order
-          changes.unshift(changeStr);
+    // function popChangeset() {
+    //   // The first change is board creation and should not be popped
+    //   if (self.changes.length > 1) {
+    //     const changes: string[] = [];
+    //     let changeStr = self.changes.pop();
+    //     if (changeStr) {
+    //       // earlier changes go earlier in the array to maintain order
+    //       changes.unshift(changeStr);
 
-          let change = safeJsonParse<JXGChange>(changeStr);
-          if (change?.endBatch) {
-            while (change && !change.startBatch) {
-              changeStr = self.changes.pop();
-              if (changeStr) {
-                changes.unshift(changeStr);
-              }
-              change = safeJsonParse<JXGChange>(changeStr);
-            }
-          }
-        }
-        return changes;
-      } else {
-        return null;
-      }
-    }
+    //       let change = safeJsonParse<JXGChange>(changeStr);
+    //       if (change?.endBatch) {
+    //         while (change && !change.startBatch) {
+    //           changeStr = self.changes.pop();
+    //           if (changeStr) {
+    //             changes.unshift(changeStr);
+    //           }
+    //           change = safeJsonParse<JXGChange>(changeStr);
+    //         }
+    //       }
+    //     }
+    //     return changes;
+    //   } else {
+    //     return null;
+    //   }
+    // }
 
-    function pushChangeset(changes: string[]) {
-      self.changes.push(...changes);
-    }
+    // function pushChangeset(changes: string[]) {
+    //   self.changes.push(...changes);
+    // }
 
     function addImage(board: JXG.Board,
                       url: string,
                       coords: JXGCoordPair,
                       size: JXGCoordPair,
                       properties?: JXGProperties): JXG.Image | undefined {
-      const change: JXGChange = {
-        operation: "create",
-        target: "image",
-        parents: [url, coords, size],
-        properties: assign({ id: uniqueId() }, properties)
-      };
-      const image = _applyChange(board, change);
-      return isImage(image) ? image : undefined;
+      // update the model
+      const [x, y] = coords;
+      const [width, height] = size;
+      const { id = uniqueId(), ...props } = properties || {};
+      const imageModel = ImageModel.create({ id, url, x, y, width, height, ...props });
+      self.setBackgroundImage(imageModel);
+
+      // update JSXGraph
+      const imageIds = findObjects(board, (obj: JXG.GeometryElement) => obj.elType === "image")
+                        .map((obj: JXG.GeometryElement) => obj.id);
+      if (imageIds.length) {
+        // change URL if there's already an image present
+        const imageId = imageIds[imageIds.length - 1];
+        updateObjects(board, imageId, { url, size: [width, height] });
+      }
+      else {
+        const change: JXGChange = {
+          operation: "create",
+          target: "image",
+          parents: [url, coords, size],
+          properties: { id, ...props }
+        };
+        const image = applyAndLogChange(board, change);
+        return isImage(image) ? image : undefined;
+      }
     }
 
     function addPoint(board: JXG.Board | undefined,
                       parents: JXGCoordPair,
                       properties?: JXGProperties): JXG.Point | undefined {
+      const { id = uniqueId(), ...props } = properties || {};
+      const pointModel = PointModel.create({ id, x: parents[0], y: parents[1], ...props });
+      self.addObjectModel(pointModel);
+
       const change: JXGChange = {
         operation: "create",
         target: "point",
         parents,
-        properties: assign({ id: uniqueId() }, properties)
+        properties: { id, ...props }
       };
-      const point = _applyChange(board, change);
+      const point = applyAndLogChange(board, change);
       return isPoint(point) ? point : undefined;
     }
 
     function addPoints(board: JXG.Board | undefined,
                        parents: JXGUnsafeCoordPair[],
-                       properties?: JXGProperties | JXGProperties[],
+                       _properties?: JXGProperties | JXGProperties[],
                        links?: ILinkProperties): JXG.Point[] {
-      const props = castArray(properties);
+      const props = castArray(_properties);
+      const properties = parents.map((p, i) => ({ id: uniqueId(), ...(props && props[i] || props[0]) }));
+
+      properties.forEach((_props, i) => {
+        const [x, y] = parents[i];
+        const { id, ...others } = _props;
+        self.addObjectModel(PointModel.create({ id, x, y, ...others }));
+      });
+
       const change: JXGChange = {
         operation: "create",
         target: links ? "linkedPoint" : "point",
         parents,
-        properties: parents.map((p, i) => ({ id: uniqueId(), ...(props && props[i] || props[0]) })),
+        properties,
         links
       };
-      const points = _applyChange(board, change);
+      const points = applyAndLogChange(board, change);
       return isPointArray(points) ? points : [];
     }
 
-    function addMovableLine(board: JXG.Board, parents: any, properties?: JXGProperties) {
+    function addMovableLine(board: JXG.Board, parents: JXGCoordPair[], properties?: JXGProperties) {
+      const [[p1x, p1y], [p2x, p2y]] = parents;
+      const { id = uniqueId(), ...props } = properties || {};
+      const lineModel = MovableLineModel.create({
+        id, p1: { id: `${id}-point1`, x: p1x, y: p1y }, p2: { id: `${id}-point2`, x: p2x, y: p2y }, ...props
+      });
+      self.addObjectModel(lineModel);
+
       const change: JXGChange = {
         operation: "create",
         target: "movableLine",
         parents,
-        properties: {id: uniqueId(), ...properties}
+        properties: {id, ...props}
       };
-      const elems = _applyChange(board, change);
+      const elems = applyAndLogChange(board, change);
       return elems ? elems as JXG.GeometryElement[] : undefined;
     }
 
-    function addComment(board: JXG.Board, anchorId: string) {
+    function addComment(board: JXG.Board, anchorId: string, text?: string) {
+      const id = uniqueId();
+      self.addObjectModel(CommentModel.create({ id, anchors: [anchorId], text }));
+
+      const textProp = text != null ? { text } : undefined;
       const change: JXGChange = {
         operation: "create",
         target: "comment",
-        properties: {id: uniqueId(), anchor: anchorId }
+        properties: {id, anchor: anchorId, ...textProp }
       };
-      const elems = _applyChange(board, change);
+      const elems = applyAndLogChange(board, change);
       return elems ? elems as JXG.GeometryElement[] : undefined;
     }
 
     function removeObjects(board: JXG.Board | undefined, ids: string | string[], links?: ILinkProperties) {
+      board && self.deselectObjects(board, ids);
+      self.deleteObjects(castArray(ids));
+
       const change: JXGChange = {
         operation: "delete",
         target: "object",
         targetID: ids,
         links
       };
-      return _applyChange(board, change);
+      return applyAndLogChange(board, change);
     }
 
     function updateTitle(board: JXG.Board | undefined, title: string) {
@@ -608,13 +707,26 @@ export const GeometryContentModel = ToolContentModel
               target: "metadata",
               properties: { title }
             };
-      return _applyChange(board, change);
+      return applyAndLogChange(board, change);
     }
 
     function updateObjects(board: JXG.Board | undefined,
                            ids: string | string[],
                            properties: JXGProperties | JXGProperties[],
                            links?: ILinkProperties) {
+      const propsArray = castArray(properties);
+      castArray(ids).forEach((id, i) => {
+        const obj = self.objects.get(id);
+        if (obj) {
+          const { position, text } = propsArray[i] || propsArray[0];
+          if (position != null) {
+            obj.setPosition(position);
+          }
+          if (text != null) {
+            obj.setText(text);
+          }
+        }
+      });
       const change: JXGChange = {
               operation: "update",
               target: "object",
@@ -622,7 +734,7 @@ export const GeometryContentModel = ToolContentModel
               properties,
               links
             };
-      return _applyChange(board, change);
+      return applyAndLogChange(board, change);
     }
 
     function createPolygonFromFreePoints(
@@ -634,27 +746,34 @@ export const GeometryContentModel = ToolContentModel
                                           (linkedColumnId === elt.getAttribute("linkedColId")))
                           .map(pt => pt.id);
       if (freePtIds && freePtIds.length > 1) {
+        const { id = uniqueId(), ...props } = properties || {};
+        const polygonModel = PolygonModel.create({ id, points: freePtIds, ...props });
+        self.addObjectModel(polygonModel);
+
         const change: JXGChange = {
                 operation: "create",
                 target: "polygon",
                 parents: freePtIds,
-                properties: assign({ id: uniqueId() }, properties)
+                properties: { id, ...props }
               };
-        const polygon = _applyChange(board, change);
+        const polygon = applyAndLogChange(board, change);
         return isPolygon(polygon) ? polygon : undefined;
       }
     }
 
     function addVertexAngle(board: JXG.Board,
-                            parents: JXGParentType[],
+                            parents: string[],
                             properties?: JXGProperties): JXG.Angle | undefined {
+      const { id = uniqueId(), ...props } = properties || {};
+      self.addObjectModel(VertexAngleModel.create({ id, points: parents, ...props }));
+
       const change: JXGChange = {
               operation: "create",
               target: "vertexAngle",
               parents,
-              properties: assign({ id: uniqueId(), radius: 1 }, properties)
+              properties: { id, ...props }
             };
-      const angle = _applyChange(board, change);
+      const angle = applyAndLogChange(board, change);
       return isVertexAngle(angle) ? angle : undefined;
     }
 
@@ -699,7 +818,7 @@ export const GeometryContentModel = ToolContentModel
               properties: { ids, points },
               links
             };
-      const pts = _applyChange(board, change);
+      const pts = applyAndLogChange(board, change);
       return (pts || []) as JXG.Point[];
     }
 
@@ -711,7 +830,7 @@ export const GeometryContentModel = ToolContentModel
               targetID: tableId,
               links
             };
-      return _applyChange(board, change);
+      return applyAndLogChange(board, change);
     }
 
     function updateAxisLabels(board: JXG.Board | undefined, tableId: string, links?: ILinkProperties) {
@@ -722,11 +841,16 @@ export const GeometryContentModel = ToolContentModel
               properties: { axisLabels: true },
               links
             };
-      return _applyChange(board, change);
+      return applyAndLogChange(board, change);
     }
 
     function updatePolygonSegmentLabel(board: JXG.Board | undefined, polygon: JXG.Polygon,
                                        points: [JXG.Point, JXG.Point], labelOption: ESegmentLabelOption) {
+      const polygonModel = self.getObject(polygon.id);
+      if (isPolygonModel(polygonModel)) {
+        polygonModel.setSegmentLabel([points[0].id, points[1].id], labelOption);
+      }
+
       const parentIds = points.map(obj => obj.id);
       const change: JXGChange = {
               operation: "update",
@@ -735,7 +859,7 @@ export const GeometryContentModel = ToolContentModel
               parents: parentIds,
               properties: { labelOption }
             };
-      return _applyChange(board, change);
+      return applyAndLogChange(board, change);
     }
 
     function findObjects(board: JXG.Board, test: (obj: JXG.GeometryElement) => boolean): JXG.GeometryElement[] {
@@ -746,8 +870,12 @@ export const GeometryContentModel = ToolContentModel
       switch (child && child.elType) {
         case "angle":
           return isVertexAngle(child);
+        case "line":
+          return isMovableLine(child);
         case "polygon":
           return true;
+        case "text":
+          return isComment(child);
       }
       return false;
     }
@@ -834,23 +962,23 @@ export const GeometryContentModel = ToolContentModel
       }
     }
 
-    function gatherObjectProperties(selectedIds: string[]) {
-      const properties: { [id: string]: any } = {};
-      selectedIds.forEach(id => { properties[id] = {}; });
+    // function gatherObjectProperties(selectedIds: string[]) {
+    //   const properties: { [id: string]: any } = {};
+    //   selectedIds.forEach(id => { properties[id] = {}; });
 
-      self.changes.forEach(chg => {
-        const parsedChange = safeJsonParse<JXGChange>(chg);
-        if (parsedChange) {
-          forEachNormalizedChange(parsedChange, change => {
-            const id = change.targetID;
-            if (id && properties[id]) {
-              assign(properties[id], omit(change.properties, ["position"]));
-            }
-          });
-        }
-      });
-      return properties;
-    }
+    //   self.changes.forEach(chg => {
+    //     const parsedChange = safeJsonParse<JXGChange>(chg);
+    //     if (parsedChange) {
+    //       forEachNormalizedChange(parsedChange, change => {
+    //         const id = change.targetID;
+    //         if (id && properties[id]) {
+    //           assign(properties[id], omit(change.properties, ["position"]));
+    //         }
+    //       });
+    //     }
+    //   });
+    //   return properties;
+    // }
 
     function getOneSelectedSegment(board: JXG.Board) {
       const selectedObjects = self.selectedObjects(board);
@@ -890,7 +1018,7 @@ export const GeometryContentModel = ToolContentModel
     function copySelection(board: JXG.Board) {
       // identify selected objects and children (e.g. polygons)
       const selectedIds = getSelectedIdsAndChildren(board);
-      const properties = gatherObjectProperties(selectedIds);
+      // const properties = gatherObjectProperties(selectedIds);
 
       // sort into creation order
       const idToIndexMap: { [id: string]: number } = {};
@@ -900,73 +1028,22 @@ export const GeometryContentModel = ToolContentModel
       selectedIds.sort((a, b) => idToIndexMap[a] - idToIndexMap[b]);
 
       // map old ids to new ones
-      const newIds: { [oldId: string]: string } = {};
+      const idMap: Record<string, string> = {};
       selectedIds.forEach(id => {
-        newIds[id] = uniqueId();
+        idMap[id] = uniqueId();
       });
 
       // create change objects for each object to be copied
-      const changes: string[] = [];
-      selectedIds.forEach(id => {
-        const obj = board.objects[id];
-        const props = properties[id];
-        if (obj) {
-          // make any final adjustments to properties
-          if (isLinkedPoint(obj)) {
-            // copies of linked points should snap
-            assign(props, { snapToGrid: true, snapSizeX: kSnapUnit, snapSizeY: kSnapUnit });
-          }
-          const change: JXGChange = {
-                  operation: "create",
-                  properties: { ...props, id: newIds[id], name: obj.name }
-                } as any;
-          switch (obj.elType) {
-            case "angle":
-              if (isVertexAngle(obj)) {
-                const va = obj;
-                // parents must be in correct order
-                const parents = [va.point2, va.point1, va.point3];
-                assign(change, {
-                  target: "vertexAngle",
-                  parents: parents.map(parent => newIds[parent.id])
-                });
-              }
-              break;
-            case "line":
-              if (isMovableLine(obj)) {
-                const movableLine = obj;
-                const [ , x1, y1] = movableLine.point1.coords.usrCoords;
-                const [ , x2, y2] = movableLine.point2.coords.usrCoords;
-                assign(change, {
-                  target: "movableLine",
-                  parents: [[x1, y1], [x2, y2]]
-                });
-              }
-              break;
-            case "point": {
-              // don't copy movable line points independently
-              if (obj.getAttribute("clientType") === "movableLine") return;
-              const [ , x, y] = (obj as JXG.Point).coords.usrCoords;
-              assign(change, {
-                target: "point",
-                parents: [x, y]
-              });
-              break;
-            }
-            case "polygon":
-              assign(change, {
-                target: "polygon",
-                parents: Array.from(keys(obj.ancestors))
-                          .map(parentId => newIds[parentId])
-              });
-              break;
-          }
-          if (change.target) {
-            changes.push(JSON.stringify(change));
-          }
-        }
-      });
-      return changes;
+      const copies: GeometryObjectModelType[] = [];
+      for (let i = 0; i < selectedIds.length; ++i) {
+        const oldId = selectedIds[i];
+        const obj = self.getObject(oldId);
+        if (!obj) continue;
+
+        const newObj = cloneGeometryObject(obj, { idMap });
+        if (newObj) copies.push(newObj);
+      }
+      return copies;
     }
 
     function deleteSelection(board: JXG.Board) {
@@ -982,14 +1059,14 @@ export const GeometryContentModel = ToolContentModel
       }
     }
 
-    function _applyChange(board: JXG.Board | undefined, change: JXGChange) {
+    function applyAndLogChange(board: JXG.Board | undefined, change: JXGChange) {
       const result = board && syncChange(board, change);
-      const jsonChange = JSON.stringify(change);
+      // const jsonChange = JSON.stringify(change);
       if (suspendCount <= 0) {
-        self.changes.push(jsonChange);
+        // self.changes.push(jsonChange);
       }
       else {
-        batchChanges.push(jsonChange);
+        // batchChanges.push(jsonChange);
       }
 
       let loggedChangeProps: Optional<JXGChange, "operation"> = {...change};
@@ -1009,6 +1086,19 @@ export const GeometryContentModel = ToolContentModel
         loggedChangeProps, self.metadata ? self.metadata.id : "");
 
       return result;
+    }
+
+    function applyBatchChanges(board: JXG.Board, changes: JXGChange[], onCreate?: onCreateCallback) {
+      applyChanges(board, changes, getDispatcherContext())
+        .filter(result => result != null)
+        .forEach(changeResult => {
+          const changeElems = castArray(changeResult);
+          changeElems.forEach(changeElem => {
+            if (!isBoard(changeElem)) {
+              onCreate?.(changeElem);
+            }
+          });
+        });
     }
 
     function syncChange(board: JXG.Board, change: JXGChange) {
@@ -1036,16 +1126,15 @@ export const GeometryContentModel = ToolContentModel
         getOneSelectedSegment,
         getOneSelectedComment,
         getCommentAnchor,
-        getLastImageUrl(): string[] | undefined {
-          for (let i = self.changes.length - 1; i >= 0; --i) {
-            const jsonChange = self.changes[i];
-            const change = safeJsonParse<JXGChange>(jsonChange);
-            const [imageUrl, filename] = getImageUrl(change) || [];
-            if (imageUrl) {
-              return [imageUrl, filename];
-            }
-          }
-        }
+        // getLastImageUrl(): [string, string | undefined] | undefined {
+        //   const objects = Array.from(self.objects.values());
+        //   for (let i = objects.length - 1; i >= 0; --i) {
+        //     const obj = objects[i];
+        //     if (isImageModel(obj)) {
+        //       return [obj.url, obj.filename];
+        //     }
+        //   }
+        // }
       },
       actions: {
         initializeBoard,
@@ -1053,9 +1142,9 @@ export const GeometryContentModel = ToolContentModel
         rescaleBoard,
         resizeBoard,
         updateScale,
-        addChange,
-        popChangeset,
-        pushChangeset,
+        // addChange,
+        // popChangeset,
+        // pushChangeset,
         addImage,
         addPoint,
         addPoints,
@@ -1070,7 +1159,8 @@ export const GeometryContentModel = ToolContentModel
         updateAxisLabels,
         updatePolygonSegmentLabel,
         deleteSelection,
-        applyChange: _applyChange,
+        applyChange: applyAndLogChange,
+        applyBatchChanges,
         syncChange,
         addComment,
 
@@ -1079,42 +1169,42 @@ export const GeometryContentModel = ToolContentModel
         },
         resumeSync() {
           if (--suspendCount <= 0) {
-            self.changes.push(...batchChanges);
+            // self.changes.push(...batchChanges);
             batchChanges = [];
           }
         },
         updateImageUrl(oldUrl: string, newUrl: string) {
-          if (!oldUrl || !newUrl || (oldUrl === newUrl)) return;
-          // identify change entries to be modified
-          const updates: Array<{ index: number, change: string }> = [];
-          self.changes.forEach((changeJson, index) => {
-            const change = safeJsonParse<JXGChange>(changeJson);
-            switch (change?.operation) {
-              case "create":
-                if (change.parents) {
-                  const createUrl = change.parents[0];
-                  if ((change.target === "image") && (createUrl === oldUrl)) {
-                    change.parents[0] = newUrl;
-                    updates.push({ index, change: JSON.stringify(change) });
-                  }
-                }
-                break;
-              case "update": {
-                const updateUrl = change.properties &&
-                                    !Array.isArray(change.properties) &&
-                                    change.properties.url;
-                if (updateUrl && (updateUrl === oldUrl)) {
-                  (change.properties as JXGProperties).url = newUrl;
-                  updates.push({ index, change: JSON.stringify(change) });
-                }
-                break;
-              }
-            }
-          });
-          // make the corresponding changes
-          updates.forEach(update => {
-            self.changes[update.index] = update.change;
-          });
+          // if (!oldUrl || !newUrl || (oldUrl === newUrl)) return;
+          // // identify change entries to be modified
+          // const updates: Array<{ index: number, change: string }> = [];
+          // self.changes.forEach((changeJson, index) => {
+          //   const change = safeJsonParse<JXGChange>(changeJson);
+          //   switch (change?.operation) {
+          //     case "create":
+          //       if (change.parents) {
+          //         const createUrl = change.parents[0];
+          //         if ((change.target === "image") && (createUrl === oldUrl)) {
+          //           change.parents[0] = newUrl;
+          //           updates.push({ index, change: JSON.stringify(change) });
+          //         }
+          //       }
+          //       break;
+          //     case "update": {
+          //       const updateUrl = change.properties &&
+          //                           !Array.isArray(change.properties) &&
+          //                           change.properties.url;
+          //       if (updateUrl && (updateUrl === oldUrl)) {
+          //         (change.properties as JXGProperties).url = newUrl;
+          //         updates.push({ index, change: JSON.stringify(change) });
+          //       }
+          //       break;
+          //     }
+          //   }
+          // });
+          // // make the corresponding changes
+          // updates.forEach(update => {
+          //   self.changes[update.index] = update.change;
+          // });
         }
       }
     };
@@ -1281,31 +1371,23 @@ export const GeometryContentModel = ToolContentModel
   }));
 
 export type GeometryContentModelType = Instance<typeof GeometryContentModel>;
+export type GeometryContentSnapshotType = SnapshotIn<typeof GeometryContentModel>;
+
+export type GeometryMigratedContent = [GeometryContentModelType, { title: string }];
 
 export function mapTileIdsInGeometrySnapshot(snapshot: SnapshotOut<GeometryContentModelType>,
                                              idMap: { [id: string]: string }) {
-  snapshot.changes = snapshot.changes.map((changeJson: any) => {
-    const change = safeJsonParse<JXGChange>(changeJson);
-    if ((change?.target === "tableLink") && change.targetID) {
-      change.targetID = Array.isArray(change.targetID)
-                          ? change.targetID.map(id => idMap[id])
-                          : idMap[change.targetID];
-    }
-    if (change?.links) {
-      change.links.tileIds = change.links.tileIds.map(id => idMap[id]);
-    }
-    return JSON.stringify(change);
-  });
+  // snapshot.changes = snapshot.changes.map((changeJson: any) => {
+  //   const change = safeJsonParse<JXGChange>(changeJson);
+  //   if ((change?.target === "tableLink") && change.targetID) {
+  //     change.targetID = Array.isArray(change.targetID)
+  //                         ? change.targetID.map(id => idMap[id])
+  //                         : idMap[change.targetID];
+  //   }
+  //   if (change?.links) {
+  //     change.links.tileIds = change.links.tileIds.map(id => idMap[id]);
+  //   }
+  //   return JSON.stringify(change);
+  // });
   return snapshot;
-}
-
-export function getImageUrl(change?: JXGChange): string[] | undefined {
-  if (!change) return;
-
-  if (change.operation === "create" && change.target === "image" && change.parents) {
-    return [change.parents[0] as string, (change.properties as JXGProperties)?.filename];
-  } else if (change.operation === "update" && change.properties &&
-              !Array.isArray(change.properties) && change.properties.url) {
-    return [change.properties.url, change.properties.filename];
-  }
 }
