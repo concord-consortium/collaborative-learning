@@ -32,7 +32,7 @@ export class SerialDevice {
           const textDecoder = new TextDecoderStream();
           this.port.readable.pipeTo(textDecoder.writable);
           const streamReader = textDecoder.readable.getReader();
-          console.log(streamReader)
+
           try {
               while (this.port.readable) {
                 const { value, done } = await streamReader.read();
@@ -55,7 +55,7 @@ export class SerialDevice {
 
       // keep buffer from growing too large
       if (this.localBuffer.length < 1000 ){
-        this.localBuffer += value
+        this.localBuffer += value;
       } else {
         this.localBuffer = "";
       }
