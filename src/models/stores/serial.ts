@@ -6,8 +6,8 @@ export class SerialDevice {
     private port: SerialPort | null;
 
     constructor() {
-      this.value = '0';
-      this.localBuffer = '';
+      this.value = "0";
+      this.localBuffer = "";
     }
 
     public hasPort(){
@@ -23,7 +23,7 @@ export class SerialDevice {
       }
 
       catch (error) {
-        console.error('error requesting port: ', error);
+        console.error("error requesting port: ", error);
       }
     }
 
@@ -35,7 +35,7 @@ export class SerialDevice {
           const textDecoder = new TextDecoderStream();
           this.port.readable.pipeTo(textDecoder.writable);
           const streamReader = textDecoder.readable.getReader();
-
+          console.log(streamReader)
           try {
               while (this.port.readable) {
                 const { value, done } = await streamReader.read();
@@ -55,30 +55,31 @@ export class SerialDevice {
     }
 
     public handleStreamObj(value: string, channels: Array<NodeChannelInfo>){
-      this.localBuffer+= value;
 
-      /* "emg" or "fsr" followed by any number of digits followed by  carriage return + newline */
-      const pattern = /(emg|fsr)([0-9]+)[\r][\n]/g;
+      // keep buffer from growing too large
+      if (this.localBuffer.length < 1000 ){
+        this.localBuffer += value
+      } else {
+        this.localBuffer = "";
+      }
 
-      /* an array that includes [{the whole match}, {emg|fsr}, {the numeric value}] */
+      // "emg" or "fsr" + : + some digits + return + newline */
+      const pattern = /(emg|fsr)(:)([0-9]+)[\r][\n]/g;
       const match = pattern.exec(this.localBuffer);
 
+      if (match !== null){ // match is e.g. [ "emg:44\r\n", "emg", ":", "44" ]
 
-      if (match !== null){
+        // reduce the length of the buffer by the length of the match
+        this.localBuffer = this.localBuffer.substring(0, this.localBuffer.length - match[0].length);
 
-        const takeAway = match[0].length + 3; // its either 'emg' or 'msr'
-        this.localBuffer = this.localBuffer.substring(0, this.localBuffer.length - takeAway);
-        const nice = match[1] + match[2];
-
+        // find the channel with the id that matches this type of data, e.g. emg == emg
         const targetChannel = channels.find((c: NodeChannelInfo) => {
-          return c.channelId === nice.substring(0,3);
+          return c.channelId === match[1];
         });
 
-        const justDigits = /[0-9]+/;
-        const foundDigits = justDigits.exec(nice);
-
-        if (foundDigits && targetChannel){
-          targetChannel.value = parseInt(foundDigits[0], 10);
+        // put the value in the channels value
+        if (targetChannel){
+          targetChannel.value = parseInt(match[3], 10);
         }
 
       }

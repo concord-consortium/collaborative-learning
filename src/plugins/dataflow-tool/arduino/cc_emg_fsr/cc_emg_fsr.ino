@@ -47,11 +47,11 @@
 
   int currentFunctionality = OPEN_MODE;       //current default position of claw
 
-  String emgId = "emg";
-  String fsrId = "fsr";
-  String valueSeparator = ":";
-  String emgStringOut = "";
-  String fsrStringOut = "";
+  String emgId = "emg";                       //key for Dataflow to know what sensor this came from
+  String fsrId = "fsr";                       //key for Dataflow to know what sensor this came from
+  String kvSeparator = ":";                   //separator for key and value
+  String emgStringOut = "";              // init empty string for default output
+  String fsrStringOut = "";              // init empty string for default output
 
 
   //-----------------------------------------------------------------------------------
@@ -160,7 +160,7 @@
         //-----------------------------  Measure EMG -----------------------------------------------
 
         emgReading = analogRead(A0);                //read EMG value from analog input A0
-        fsrReading = analogRead(A1);                //read Pressure value from analog input A1
+        fsrReading = analogRead(A1);                //read FSR value from analog input A1
 
         //---------------------- Show EMG strength on LED ------------------------------------------
 
@@ -231,8 +231,8 @@
               oldDegrees = newDegree;
 
 
-              emgStringOut = String(emgId + valueSeparator + emgReading);
-              fsrStringOut = String(fsrId + valueSeparator + fsrReading);
+              emgStringOut = String(emgId + kvSeparator + emgReading);
+              fsrStringOut = String(fsrId + kvSeparator + fsrReading);
 
               // emgStringOut = String(emgReading);
               // fsrStringOut = String(fsrReading);
