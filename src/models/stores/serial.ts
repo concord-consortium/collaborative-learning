@@ -16,10 +16,7 @@ export class SerialDevice {
 
     public async requestAndSetPort(){
       try {
-          await (navigator).serial.requestPort()
-          .then((p: SerialPort) => {
-            this.port = p;
-          });
+          this.port = await navigator.serial.requestPort();
       }
 
       catch (error) {
