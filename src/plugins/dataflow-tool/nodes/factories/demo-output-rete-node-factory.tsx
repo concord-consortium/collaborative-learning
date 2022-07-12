@@ -69,22 +69,22 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
           this.setupGrabberInputs(_node);
 
           // Update grabber speed
-          const speedInput = inputs.speed.length ? inputs.speed[0] : node.data.speed;
+          const speedInput = inputs.speed?.length ? inputs.speed[0] : node.data.speed;
           const speedValue = speedInput < 0 ? 0 : speedInput > 1 ? 1 : speedInput;
           const speedControl = _node.inputs.get("speed")?.control as DemoOutputValueControl;
           if (speedValue !== undefined) {
             speedControl?.setValue(speedValue);
           }
-          speedControl?.setConnected(inputs.speed.length);
+          speedControl?.setConnected(inputs.speed?.length);
 
           // Update grabber tilt
-          const tiltInput = inputs.tilt.length ? inputs.tilt[0] : node.data.tilt;
+          const tiltInput = inputs.tilt?.length ? inputs.tilt[0] : node.data.tilt;
           const tiltValue = tiltInput;
           const tiltControl = _node.inputs.get("tilt")?.control as DemoOutputValueControl;
           if (tiltValue !== undefined) {
             tiltControl?.setValue(tiltValue);
           }
-          tiltControl?.setConnected(inputs.tilt.length);
+          tiltControl?.setConnected(inputs.tilt?.length);
         } else {
           this.removeInput(_node, "speed");
           if ("speed" in (node as any).data.minigraphValues) {
@@ -122,7 +122,10 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
           this.editor,
           inputKey,
           node,
-          () => { node.data.plot = !node.data.plot; },
+          () => {
+            node.data.plot = !node.data.plot;
+            this.editor?.trigger("process");
+          },
           displayLabel,
           0, // Initial value
           `Display for ${inputKey}`,

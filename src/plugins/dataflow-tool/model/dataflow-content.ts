@@ -1,5 +1,7 @@
-import { types, Instance } from "mobx-state-tree";
+import { types, Instance, applySnapshot, getSnapshot } from "mobx-state-tree";
+import { cloneDeep } from "lodash";
 import { ToolContentModel } from "../../../models/tools/tool-types";
+import { DataflowProgramModel } from "./dataflow-program-model";
 import { DEFAULT_DATA_RATE } from "./utilities/node";
 
 export const kDataflowToolID = "Dataflow";
@@ -16,13 +18,13 @@ const ProgramZoom = types.model({
   scale: types.number,
 });
 export type ProgramZoomType = typeof ProgramZoom.Type;
-const DEFAULT_PROGRAM_ZOOM = { dx: 0, dy: 0, scale: 1 };
+export const DEFAULT_PROGRAM_ZOOM = { dx: 0, dy: 0, scale: 1 };
 
 export const DataflowContentModel = ToolContentModel
   .named("DataflowTool")
   .props({
     type: types.optional(types.literal(kDataflowToolID), kDataflowToolID),
-    program: "",
+    program: types.optional(DataflowProgramModel, getSnapshot(DataflowProgramModel.create())),
     programRunId: "",
     programStartTime: 0,
     programEndTime: 0,
@@ -31,13 +33,15 @@ export const DataflowContentModel = ToolContentModel
     programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
   })
   .views(self => ({
-    isUserResizable() {
+    get isUserResizable() {
       return true;
     }
   }))
   .actions(self => ({
     setProgram(program: any) {
-      self.program = JSON.stringify(program);
+      if (program) {
+        applySnapshot(self.program, cloneDeep(program));
+      }
     },
     setProgramDataRate(dataRate: number) {
       self.programDataRate = dataRate;

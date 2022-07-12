@@ -36,8 +36,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
     const { model, readOnly, height } = this.props;
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
-    const { program, programRunId, programIsRunning, programStartTime, programEndTime, programDataRate, programZoom }
-      = this.getContent();
+    const { program, programRunId, programIsRunning, programStartTime,
+      programEndTime, programDataRate, programZoom } = this.getContent();
     const showOriginalProgramButton = !!this.getOriginalProgramDocument();
     return (
       <div className={classes}>

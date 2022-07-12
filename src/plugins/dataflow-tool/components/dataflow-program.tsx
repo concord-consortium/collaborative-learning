@@ -2,15 +2,18 @@ import "regenerator-runtime/runtime";
 import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../../../components/base";
 import React from "react";
-import Rete, { NodeEditor, Node, Input } from "rete";
+import Rete, { NodeEditor, Engine, Node, Input } from "rete";
 import ConnectionPlugin from "rete-connection-plugin";
 import ReactRenderPlugin from "rete-react-render-plugin";
 import { autorun } from "mobx";
+import { IDisposer, onSnapshot } from "mobx-state-tree";
 import { SizeMeProps } from "react-sizeme";
-import { forEach } from "lodash";
+import { forEach, keys } from "lodash";
 import { ProgramZoomType } from "../model/dataflow-content";
+import { DataflowProgramModelType } from "../model/dataflow-program-model";
 import { SensorSelectControl } from "../nodes/controls/sensor-select-control";
 import { RelaySelectControl } from "../nodes/controls/relay-select-control";
+import { DataflowReteNodeFactory } from "../nodes/factories/dataflow-rete-node-factory";
 import { NumberReteNodeFactory } from "../nodes/factories/number-rete-node-factory";
 import { MathReteNodeFactory } from "../nodes/factories/math-rete-node-factory";
 import { TransformReteNodeFactory } from "../nodes/factories/transform-rete-node-factory";
@@ -23,7 +26,6 @@ import { TimerReteNodeFactory } from "../nodes/factories/timer-rete-node-factory
 import { DataStorageReteNodeFactory } from "../nodes/factories/data-storage-rete-node-factory";
 import { PlotButtonControl } from "../nodes/controls/plot-button-control";
 import { NumControl } from "../nodes/controls/num-control";
-import { DropdownListControl, ListOption } from "../nodes/controls/dropdown-list-control";
 import { DataflowOpenProgramButton } from "./ui/dataflow-open-program-button";
 import { DataflowProgramToolbar } from "./ui/dataflow-program-toolbar";
 import { DataflowProgramTopbar } from "./ui/dataflow-program-topbar";
@@ -32,8 +34,7 @@ import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
 import { DataflowProgramGraph,DataSet, ProgramDisplayStates } from "./ui/dataflow-program-graph";
 // import { uploadProgram, fetchProgramData, fetchActiveRelays, deleteProgram } from "../utilities/aws";
 import { NodeChannelInfo, NodeSensorTypes, NodeGeneratorTypes, ProgramDataRates, NodeTimerInfo,
-         IntervalTimes, virtualSensorChannels } from "../model/utilities/node";
-import { safeJsonParse } from "../../../utilities/js-utils";
+         virtualSensorChannels } from "../model/utilities/node";
 import { Rect, scaleRect, unionRect } from "../utilities/rect";
 import { DocumentContextReact } from "../../../components/document/document-context";
 
@@ -79,7 +80,7 @@ interface IProps extends SizeMeProps {
   modelId: string;
   readOnly?: boolean;
   documentProperties?: { [key: string]: string };
-  program?: string;
+  program?: DataflowProgramModelType;
   onProgramChange: (program: any) => void;
   onShowOriginalProgram?: () => void;
   onStartProgram: (params: IStartProgramParams) => void;
@@ -104,7 +105,6 @@ interface IState {
   programDisplayState: ProgramDisplayStates;
   graphDataSet: DataSet;
   editorContainerWidth: number;
-  dataRate: number;
   remainingTimeInSeconds: number;
   lastIntervalDuration: number;
 }
@@ -120,16 +120,20 @@ const MIN_ZOOM = .1;
 export class DataflowProgram extends BaseComponent<IProps, IState> {
   public static contextType = DocumentContextReact;
 
+  private components: DataflowReteNodeFactory[];
   private toolDiv: HTMLElement | null;
   private channels: NodeChannelInfo[] = [];
   private sequenceNames: NodeSequenceNameMap;
   private sequenceUnits: NodeSequenceUnitsMap;
-  private intervalHandle: any;
+  private intervalHandle: ReturnType<typeof setTimeout>;
   private lastIntervalTime: number;
   private programEditor: NodeEditor;
-  private programEngine: any;
+  private programEngine: Engine;
   private editorDomElement: HTMLElement | null;
   private _isMounted: boolean;
+  private disposers: IDisposer[] = [];
+  private onSnapshotSetup = false;
+  private processing = false;
 
   constructor(props: IProps) {
     super(props);
@@ -139,7 +143,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       graphDataSet: { sequences: [], startTime: 0, endTime: 0 },
       editorContainerWidth: 0,
       programDisplayState: ProgramDisplayStates.Program,
-      dataRate: props.programDataRate,
       remainingTimeInSeconds: 0,
       lastIntervalDuration: 0,
     };
@@ -164,8 +167,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           onStopProgramClick={this.stopProgram}
           onRefreshDevices={this.deviceRefresh}
           programDataRates={ProgramDataRates}
-          dataRate={this.state.dataRate}
-          onRateSelectClick={this.onProgramDataRateChange}
+          dataRate={this.props.programDataRate}
+          onRateSelectClick={this.props.onProgramDataRateChange}
           isRunEnabled={this.isReady()}
           runningProgram={this.isRunning() && !readOnly}
           remainingTimeInSeconds={this.state.remainingTimeInSeconds}
@@ -216,15 +219,20 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   public componentDidMount() {
     this._isMounted = true;
     if (!this.programEditor && this.toolDiv) {
-      this.initProgramEditor();
+      this.initProgram();
     }
     if (this.isComplete()) {
       this.props.onCheckProgramRunState(this.props.programEndTime);
     }
+    
+    this.setupOnSnapshot();
   }
 
   public componentWillUnmount() {
     clearInterval(this.intervalHandle);
+
+    this.disposers.forEach(disposer => disposer());
+
     this._isMounted = false;
   }
 
@@ -247,8 +255,14 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
 
     if (!this.programEditor && this.toolDiv) {
-      this.initProgramEditor();
+      this.initProgram();
     }
+
+    if (this.props.programDataRate !== prevProps.programDataRate) {
+      this.setDataRate(this.props.programDataRate);
+    }
+
+    this.setupOnSnapshot();
   }
 
   private getEditorStyle = () => {
@@ -266,43 +280,63 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     return style;
   };
 
-  private initProgramEditor = () => {
+  private initProgram = () => {
+    this.initComponents();
+    this.initProgramEngine();
+    this.initProgramEditor(true);
+
+    if (!this.isComplete() || this.props.programIsRunning === "true") {
+      this.setDataRate(this.props.programDataRate);
+    }
+  };
+
+  private initComponents = () => {
+    this.components = [new NumberReteNodeFactory(numSocket),
+      new MathReteNodeFactory(numSocket),
+      new TransformReteNodeFactory(numSocket),
+      new LogicReteNodeFactory(numSocket),
+      new SensorReteNodeFactory(numSocket),
+      new RelayReteNodeFactory(numSocket),
+      new DemoOutputReteNodeFactory(numSocket),
+      new GeneratorReteNodeFactory(numSocket),
+      new TimerReteNodeFactory(numSocket),
+      new DataStorageReteNodeFactory(numSocket)];
+  };
+
+  private initProgramEngine = () => {
+    this.programEngine = new Rete.Engine(RETE_APP_IDENTIFIER);
+
+    this.components.map(c => {
+      this.programEngine.register(c);
+    });
+  };
+
+  private initProgramEditor = (clearHistory = false) => {
     (async () => {
-      const components = [new NumberReteNodeFactory(numSocket),
-        new MathReteNodeFactory(numSocket),
-        new TransformReteNodeFactory(numSocket),
-        new LogicReteNodeFactory(numSocket),
-        new SensorReteNodeFactory(numSocket),
-        new RelayReteNodeFactory(numSocket),
-        new DemoOutputReteNodeFactory(numSocket),
-        new GeneratorReteNodeFactory(numSocket),
-        new TimerReteNodeFactory(numSocket),
-        new DataStorageReteNodeFactory(numSocket)];
       if (!this.toolDiv) return;
 
       this.programEditor = new Rete.NodeEditor(RETE_APP_IDENTIFIER, this.toolDiv);
       this.programEditor.use(ConnectionPlugin);
       this.programEditor.use(ReactRenderPlugin);
 
-      this.programEngine = new Rete.Engine(RETE_APP_IDENTIFIER);
-
-      components.map(c => {
+      this.components.map(c => {
         this.programEditor.register(c);
-        this.programEngine.register(c);
       });
 
-      const program = this.props.program && safeJsonParse(this.props.program);
-      if (program) {
-        forEach(program.nodes, (n: any) => {
-          if (n.data.recentValues) {
-            n.data.recentValues = {};
-            forEach(Object.keys(n.data.recentValues), (v: string) => {
-              n.data.recentValues[v] = [];
-            });
-          }
-        });
-        this.closeCompletedRunProgramNodePlots(program);
-        await this.programEditor.fromJSON(program);
+      const program = this.props.program?.snapshotForRete;
+      if (program?.id) {
+        if (!this.props.readOnly && clearHistory) {
+          forEach(program.nodes, (n: Node) => {
+            if (n.data.recentValues) {
+              n.data.recentValues = {};
+              forEach(Object.keys((n as any).data.recentValues), (v:string) => {
+                (n as any).data.recentValues[v] = [];
+              });
+            }
+          });
+        }
+        
+        await this.programEditor.fromJSON(program as any);
         if (this.hasDataStorage()) {
           this.setState({disableDataStorage: true});
         }
@@ -362,12 +396,28 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.programEditor.trigger("process");
 
       this.updateRunAndGraphStates();
-
-      if (!this.isComplete() || this.props.programIsRunning === "true") {
-        this.setDataRate(this.state.dataRate);
-      }
-
     })();
+  };
+
+  private setupOnSnapshot() {
+    if (!this.onSnapshotSetup) {
+      if (this.props.program) {
+        this.disposers.push(onSnapshot(this.props.program.nodes, snapshot => {
+          if (this.props.readOnly) {
+            this.updateProgramEditor();
+          }
+        }));
+        this.onSnapshotSetup = true;
+      }
+    }
+  }
+
+  private updateProgramEditor = () => {
+    // TODO: allow updates to write tiles for undo/redo
+    if (this.toolDiv && this.props.readOnly) {
+      this.toolDiv.innerHTML = "";
+      this.initProgramEditor();
+    }
   };
 
   private setDataRate = (rate: number) => {
@@ -377,20 +427,25 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.intervalHandle = setInterval(this.tick, rate);
   };
 
-  private onProgramDataRateChange = (rate: number) => {
-    this.setDataRate(rate);
-    this.setState({ dataRate: rate });
-    this.props.onProgramDataRateChange(rate);
-  };
-
   private processAndSave = async () => {
-    await this.programEngine.abort();
-    const programJSON = this.programEditor.toJSON();
-    await this.programEngine.process(programJSON);
-    if (!this.hasDataStorage()) {
-      this.setState({disableDataStorage: false});
+    if (this.processing) {
+      // If we're already processing, wait a few milliseconds and try again
+      setTimeout(this.processAndSave, 5);
+      return;
     }
-    this.props.onProgramChange(programJSON);
+
+    this.processing = true;
+    try {
+      await this.programEngine.abort();
+      const programJSON = this.programEditor.toJSON();
+      await this.programEngine.process(programJSON);
+      if (!this.hasDataStorage()) {
+        this.setState({disableDataStorage: false});
+      }
+      this.props.onProgramChange(programJSON);
+    } finally {
+      this.processing = false;
+    }
   };
 
   private updateChannels = () => {
@@ -746,7 +801,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     let interval =  1;
     let datasetName = "";
     const programStartTime = Date.now();
-    // Nonsensical change just to avoid an error. This will probably be purged from the code soon.
+    // TODO: Nonsensical change just to avoid an error. This will probably be purged from the code soon.
     // const programEndTime = programStartTime + (1000 * this.props.programRunTime);
     const programEndTime = programStartTime + 1000;
 
@@ -843,7 +898,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private addNode = async (nodeType: string) => {
-    const nodeFactory = this.programEditor.components.get(nodeType) as any;
+    const nodeFactory = this.programEditor.components.get(nodeType) as DataflowReteNodeFactory;
     const n1 = await nodeFactory!.createNode();
     n1.position = this.getNewNodePosition();
     this.programEditor.addNode(n1);
@@ -861,13 +916,14 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const kTopMargin = 5;
     const kColumnOffset = 15;
     const { k } = this.programEditor.view.area.transform;
-    const nodePos = [kLeftMargin * (1 / k) + Math.floor((numNodes % (kNodesPerColumn * kNodesPerRow)) / kNodesPerColumn)
-                     * kColumnWidth + Math.floor(numNodes / (kNodesPerColumn * kNodesPerRow)) * kColumnOffset,
-                     kTopMargin + numNodes % kNodesPerColumn * kRowHeight];
+    const nodePos: [number, number] =
+      [kLeftMargin * (1 / k) + Math.floor((numNodes % (kNodesPerColumn * kNodesPerRow)) / kNodesPerColumn)
+        * kColumnWidth + Math.floor(numNodes / (kNodesPerColumn * kNodesPerRow)) * kColumnOffset,
+      kTopMargin + numNodes % kNodesPerColumn * kRowHeight];
     return nodePos;
   };
 
-  private moveNodeToFront = (node: any, newNode: boolean) => {
+  private moveNodeToFront = (node: Node, newNode: boolean) => {
     const totalNodes = this.programEditor.nodes.length;
     const selectedNodeView = this.programEditor.view.nodes.get(node);
     let selectedNodeZ = 0;

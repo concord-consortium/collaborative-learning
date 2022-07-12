@@ -33,10 +33,6 @@ export class DemoOutputValueControl extends Rete.Control {
 
     this.props = {
       value: initial,
-      onChange: (v: any) => {
-        this.setValue(v);
-        this.emitter.trigger("process");
-      },
       label,
       tooltip,
       displayMessage: initDisplayMessage, // A message to display instead of the value
@@ -48,7 +44,6 @@ export class DemoOutputValueControl extends Rete.Control {
 
     this.component = (compProps: {
       value: any,
-      onChange: any,
       label: any,
       tooltip: string,
       displayMessage: string,
@@ -82,20 +77,26 @@ export class DemoOutputValueControl extends Rete.Control {
     };
   }
 
+  private tryUpdate = () => {
+    if (Object.hasOwn(this, "update")) {
+      (this as any).update();
+    }
+  }
+
   public setValue = (val: number) => {
     this.props.value = val;
     this.putData(this.key, val);
-    (this as any).update();
+    this.tryUpdate();
   };
 
   public setDisplayMessage = (message: string) => {
     this.props.displayMessage = message;
-    (this as any).update();
+    this.tryUpdate();
   };
 
   public setConnected = (connected: boolean) => {
     this.props.connected = connected;
-    (this as any).update();
+    this.tryUpdate();
   };
 
   public getValue = () => {
