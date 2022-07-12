@@ -128,7 +128,10 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
           `Display for ${inputKey}`,
           '', // Initial display message
           (node as any).data.minigraphValues[inputKey].backgroundColor,
-          (node as any).data.minigraphValues[inputKey].borderColor
+          (node as any).data.minigraphValues[inputKey].borderColor,
+          (val: any) => {
+            return typeof val === "number" ? val.toFixed(1) : val;
+          }
         ));
       }
     }

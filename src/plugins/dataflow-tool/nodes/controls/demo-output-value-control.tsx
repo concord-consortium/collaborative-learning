@@ -22,6 +22,7 @@ export class DemoOutputValueControl extends Rete.Control {
     initDisplayMessage = "",
     backgroundColor = NodePlotColor,
     borderColor = NodePlotColor,
+    valueDisplayFunction = (val: any) => val,
   ) {
     super(key);
     this.emitter = emitter;
@@ -41,7 +42,8 @@ export class DemoOutputValueControl extends Rete.Control {
       displayMessage: initDisplayMessage, // A message to display instead of the value
       backgroundColor,
       borderColor,
-      connected: false
+      connected: false,
+      valueDisplayFunction
     };
 
     this.component = (compProps: {
@@ -52,7 +54,8 @@ export class DemoOutputValueControl extends Rete.Control {
       displayMessage: string,
       backgroundColor: string,
       borderColor: string,
-      connected: boolean
+      connected: boolean,
+      valueDisplayFunction: (val: any) => any
     }) => {
       return (
         <div className="demo-output-value-container" title={compProps.tooltip}>
@@ -72,7 +75,7 @@ export class DemoOutputValueControl extends Rete.Control {
           <div className="display-text">
             {compProps.value === undefined
               ? "Undefined"
-              : compProps.label + (compProps.displayMessage || compProps.value)}
+              : compProps.label + (compProps.displayMessage || compProps.valueDisplayFunction(compProps.value))}
           </div>
         </div>
       );
