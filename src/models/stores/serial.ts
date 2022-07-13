@@ -58,25 +58,24 @@ export class SerialDevice {
 
       this.localBuffer+= value;
 
-      // "emg" or "fsr" + : + some digits + return + newline */
-      const pattern = /(emg|fsr)(:)([0-9]+)[\r][\n]/g;
-      const match = pattern.exec(this.localBuffer);
+      const pattern = /(emg|fsr):([0-9]+)[\r][\n]/g;
 
-      if (match !== null){ // match is e.g. [ "emg:44\r\n", "emg", ":", "44" ]
+      let match: RegExpExecArray | null;
+      do {
+        match = pattern.exec(this.localBuffer);
+        if (!match) break;
 
-        // reduce the length of the buffer by the length of the match
-        this.localBuffer = this.localBuffer.substring(match.index + match[0].length);
+        const [fullMatch, channel, numValue] = match;
 
-        // find the channel with the id that matches this type of data, e.g. emg == emg
+        this.localBuffer = this.localBuffer.substring(match.index + fullMatch.length);
+
         const targetChannel = channels.find((c: NodeChannelInfo) => {
-          return c.channelId === match[1];
+          return c.channelId === channel;
         });
 
-        // put the value in the channels value
         if (targetChannel){
-          targetChannel.value = parseInt(match[3], 10);
+          targetChannel.value = parseInt(numValue, 10);
         }
-
-      }
+      } while (match);
     }
 }
