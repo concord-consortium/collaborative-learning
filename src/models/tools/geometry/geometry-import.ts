@@ -4,11 +4,8 @@ import { uniqueId } from "../../../utilities/js-utils";
 import { gImageMap } from "../../image-map";
 import { convertChangesToModel, isGeometryChangesContent } from "./geometry-migrate";
 import {
-  AxisModelSnapshot,
-  AxisModelType,
-  BoardModel, CommentModel, GeometryExtrasContentSnapshotType, GeometryObjectModelType, ImageModel,
-  ImageModelType,
-  MovableLineModel, PointModel, PolygonModel, VertexAngleModel
+  AxisModelSnapshot, AxisModelType, BoardModel, CommentModel, GeometryExtrasContentSnapshotType,
+  GeometryObjectModelType, ImageModel, ImageModelType, MovableLineModel, PointModel, PolygonModel, VertexAngleModel
 } from "./geometry-model";
 import { kDefaultBoardModelInputProps } from "./geometry-types";
 import { kAxisBuffer, kXAxisMinBuffer } from "./jxg-board";
@@ -221,6 +218,8 @@ export function preprocessImportFormat(snapshot: any): GeometryExtrasContentSnap
     return obj;
   };
 
+  // This function is used to identify imported properties that are not handled by the import process.
+  // They could be authoring errors (e.g. typos) or bugs that indicate properties that should be handled.
   function warnExtraProps(label: string, object: IAnyStateTreeNode, ...others: Array<Record<string, any>>) {
     const extraProps: Record<string, string> = {};
     others.forEach(props => {
@@ -242,12 +241,7 @@ export function preprocessImportFormat(snapshot: any): GeometryExtrasContentSnap
     board = BoardModel.create({
       xAxis: { ...xAxisBase, name: axisNames?.[0], label: axisLabels?.[0] },
       yAxis: { ...yAxisBase, name: axisNames?.[1], label: axisLabels?.[1] },
-      //   name: axisNames?.[0], label: axisLabels?.[0], range: axisRange?.[0],
-      //   min: axisMin?.[0] ?? kGeometryDefaultXAxisMin, unit: axisUnits[0] },
-      // yAxis: {
-      //   name: axisNames?.[1], label: axisLabels?.[1], range: axisRange?.[1],
-      //   min: axisMin?.[1] ?? kGeometryDefaultYAxisMin, unit: axisUnits[1] },
-        ...others
+      ...others
     });
   }
 

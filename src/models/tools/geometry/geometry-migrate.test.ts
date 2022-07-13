@@ -32,6 +32,7 @@ const convertChangesToModelSnapshot = (changes: JXGChange[]) => {
   return omitUndefined(model);
 };
 
+// TODO: decide if there's a version of this round-trip test that makes sense any more
 // verify that export => import => export results in two identical exports
 export const testRoundTrip = (changes: JXGChange[]) => {
   // const exportJs = convertChangesToJson(changes);

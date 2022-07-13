@@ -31,6 +31,7 @@ const testImport = (input: any) => {
   return omitUndefined(preprocessImportFormat(input));
 };
 
+// TODO: decide if there's a version of this round-trip test that makes sense any more
 // verify that import => export => import => export results in two identical exports
 const testRoundTrip = (input: any) => {
   return [{}, {}];

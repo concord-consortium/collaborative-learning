@@ -1,13 +1,12 @@
 import { Expression, Parser } from "expr-eval";
-import { types, Instance, SnapshotOut, SnapshotIn } from "mobx-state-tree";
+import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import { ITableChange } from "./table-change";
 import { exportTableContentAsJson } from "./table-export";
 import { convertChangesToSnapshot, convertImportToSnapshot, isTableImportSnapshot } from "./table-import";
 import { isLinkableValue, canonicalizeValue } from "./table-model-types";
-import { addLinkedTable, clearTableLinksFromGeometries, kLabelAttrName, removeLinkedTable } from "../table-links";
+import { clearTableLinksFromGeometries, kLabelAttrName } from "../table-links";
 import { IDocumentExportOptions, IDefaultContentOptions } from "../tool-content-info";
 import { ToolMetadataModel, ToolContentModel, toolContentModelHooks } from "../tool-types";
-import { Attribute } from "../../data/attribute";
 import { addCanonicalCasesToDataSet, IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
 import { canonicalizeExpression, kSerializedXKey } from "../../data/expression-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
@@ -231,9 +230,7 @@ export const TableContentModel = ToolContentModel
     },
   }))
   .actions(self => ({
-    appendChange(change: ITableChange) {
-      // self.changes.push(JSON.stringify(change));
-
+    logChange(change: ITableChange) {
       const toolId = self.metadata?.id || "";
       Logger.logToolChange(LogEventName.TABLE_TOOL_CHANGE, change.action, change, toolId);
     }
@@ -242,7 +239,7 @@ export const TableContentModel = ToolContentModel
     setTableName(name: string) {
       self.dataSet.name = name;
 
-      self.appendChange({
+      self.logChange({
               action: "update",
               target: "table",
               props: { name }
@@ -252,7 +249,7 @@ export const TableContentModel = ToolContentModel
       self.dataSet.addAttributeWithID({ id, name });
       self.metadata.updateDatasetByExpressions(self.dataSet);
 
-      self.appendChange({
+      self.logChange({
             action: "create",
             target: "columns",
             ids: [id],
@@ -270,7 +267,7 @@ export const TableContentModel = ToolContentModel
         }
       }
 
-      self.appendChange({
+      self.logChange({
               action: "update",
               target: "columns",
               ids: id,
@@ -282,7 +279,7 @@ export const TableContentModel = ToolContentModel
       ids.forEach(id => self.dataSet.removeAttribute(id));
       self.metadata.updateDatasetByExpressions(self.dataSet);
 
-      self.appendChange({
+      self.logChange({
               action: "delete",
               target: "columns",
               ids,
@@ -293,7 +290,7 @@ export const TableContentModel = ToolContentModel
       self.dataSet.attrFromID(id)?.setFormula(rawExpression, expression);
       self.metadata.updateExpressions(id, rawExpression, expression, self.dataSet);
 
-      self.appendChange({
+      self.logChange({
         action: "update",
         target: "columns",
         ids: id,
@@ -312,7 +309,7 @@ export const TableContentModel = ToolContentModel
         }
       });
 
-      self.appendChange({
+      self.logChange({
         action: "update",
         target: "columns",
         ids: Array.from(rawExpressions.keys()),
@@ -328,7 +325,7 @@ export const TableContentModel = ToolContentModel
       addCanonicalCasesToDataSet(self.dataSet, cases, beforeID);
       self.metadata.updateDatasetByExpressions(self.dataSet);
 
-      self.appendChange({
+      self.logChange({
             action: "create",
             target: "rows",
             ids: cases.map(aCase => aCase.__id__ || uniqueId()),
@@ -352,7 +349,7 @@ export const TableContentModel = ToolContentModel
                       ids.push(__id__);
                       return others;
                     });
-      self.appendChange({
+      self.logChange({
             action: "update",
             target: "rows",
             ids,
@@ -363,7 +360,7 @@ export const TableContentModel = ToolContentModel
     removeCases(ids: string[], links?: ILinkProperties) {
       self.dataSet.removeCases(ids);
 
-      self.appendChange({
+      self.logChange({
             action: "delete",
             target: "rows",
             ids,
@@ -372,11 +369,11 @@ export const TableContentModel = ToolContentModel
     },
     addGeometryLink(geometryId: string) {
       self.linkedGeometries.push(geometryId);
-      self.appendChange({ action: "create", target: "geometryLink", ids: geometryId });
+      self.logChange({ action: "create", target: "geometryLink", ids: geometryId });
     },
     removeGeometryLink(geometryId: string) {
       self.linkedGeometries.remove(geometryId);
-      self.appendChange({
+      self.logChange({
             action: "delete",
             target: "geometryLink",
             ids: geometryId
@@ -441,20 +438,3 @@ export const TableContentModel = ToolContentModel
   }));
 
 export type TableContentModelType = Instance<typeof TableContentModel>;
-
-export function mapTileIdsInTableSnapshot(snapshot: SnapshotOut<TableContentModelType>,
-                                          idMap: { [id: string]: string }) {
-  // snapshot.changes = snapshot.changes.map(changeJson => {
-  //   const change = safeJsonParse<ITableChange>(changeJson);
-  //   if ((change?.target === "geometryLink") && change.ids) {
-  //     change.ids = Array.isArray(change.ids)
-  //                   ? change.ids.map(id => idMap[id])
-  //                   : idMap[change.ids];
-  //   }
-  //   if (change?.links) {
-  //     change.links.tileIds = change.links.tileIds.map(id => idMap[id]);
-  //   }
-  //   return JSON.stringify(change);
-  // });
-  return snapshot;
-}

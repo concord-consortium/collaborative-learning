@@ -53,14 +53,8 @@ export interface IAxesParams {
 }
 
 export function defaultGeometryContent(options?: IDefaultContentOptions): GeometryContentModelType {
+  // TODO: title
   // const { title } = options || {};
-  // const changes: string[] = [];
-  // if (title) {
-  //   const titleChange: JXGChange = { operation: "update", target: "metadata", properties: { title } };
-  //   changes.push(JSON.stringify(titleChange));
-  // }
-  // const boardChange = defaultGeometryBoardChange();
-  // changes.push(JSON.stringify(boardChange));
   const xRange = kGeometryDefaultWidth / kGeometryDefaultPixelsPerUnit;
   const yRange = kGeometryDefaultHeight / kGeometryDefaultPixelsPerUnit;
   return GeometryContentModel.create({
@@ -215,11 +209,6 @@ export function setElementColor(board: JXG.Board, id: string, selected: boolean)
             });
   }
 }
-
-// function isUndoableChange(change: JXGChange) {
-//   if ((change.operation === "delete") && (change.target === "tableLink")) return false;
-//   return true;
-// }
 
 export const isGeometryContentReady = async (model: GeometryContentModelType): Promise<boolean> => {
   return !model.bgImage || !!await gImageMap.getImage(model.bgImage.url);
@@ -426,14 +415,6 @@ export const GeometryContentModel = GeometryBaseContentModel
       }
     }
 
-    // function getLinkedTableChange(change: JXGChange) {
-    //   const links = change.links as ITableLinkProperties | undefined;
-    //   // const linkId = links?.id;
-    //   const tableId = links?.tileIds[0];
-    //   const tableContent = tableId ? getTableContent(self, tableId) : undefined;
-    //   return tableContent?.getLinkedChange(self.metadata.id) || undefined;
-    // }
-
     function handleDidApplyChange(board: JXG.Board | undefined, change: JXGChange) {
       const { operation } = change;
       const target = change.target.toLowerCase();
@@ -548,40 +529,6 @@ export const GeometryContentModel = GeometryBaseContentModel
         board.cssTransMat = cssTransMat;
       }
     }
-
-    // function addChange(change: JXGChange) {
-    //   self.changes.push(JSON.stringify(change));
-    // }
-
-    // function popChangeset() {
-    //   // The first change is board creation and should not be popped
-    //   if (self.changes.length > 1) {
-    //     const changes: string[] = [];
-    //     let changeStr = self.changes.pop();
-    //     if (changeStr) {
-    //       // earlier changes go earlier in the array to maintain order
-    //       changes.unshift(changeStr);
-
-    //       let change = safeJsonParse<JXGChange>(changeStr);
-    //       if (change?.endBatch) {
-    //         while (change && !change.startBatch) {
-    //           changeStr = self.changes.pop();
-    //           if (changeStr) {
-    //             changes.unshift(changeStr);
-    //           }
-    //           change = safeJsonParse<JXGChange>(changeStr);
-    //         }
-    //       }
-    //     }
-    //     return changes;
-    //   } else {
-    //     return null;
-    //   }
-    // }
-
-    // function pushChangeset(changes: string[]) {
-    //   self.changes.push(...changes);
-    // }
 
     function addImage(board: JXG.Board,
                       url: string,
@@ -962,24 +909,6 @@ export const GeometryContentModel = GeometryBaseContentModel
       }
     }
 
-    // function gatherObjectProperties(selectedIds: string[]) {
-    //   const properties: { [id: string]: any } = {};
-    //   selectedIds.forEach(id => { properties[id] = {}; });
-
-    //   self.changes.forEach(chg => {
-    //     const parsedChange = safeJsonParse<JXGChange>(chg);
-    //     if (parsedChange) {
-    //       forEachNormalizedChange(parsedChange, change => {
-    //         const id = change.targetID;
-    //         if (id && properties[id]) {
-    //           assign(properties[id], omit(change.properties, ["position"]));
-    //         }
-    //       });
-    //     }
-    //   });
-    //   return properties;
-    // }
-
     function getOneSelectedSegment(board: JXG.Board) {
       const selectedObjects = self.selectedObjects(board);
       const selectedSegments = selectedObjects.filter(isVisibleEdge);
@@ -1018,7 +947,6 @@ export const GeometryContentModel = GeometryBaseContentModel
     function copySelection(board: JXG.Board) {
       // identify selected objects and children (e.g. polygons)
       const selectedIds = getSelectedIdsAndChildren(board);
-      // const properties = gatherObjectProperties(selectedIds);
 
       // sort into creation order
       const idToIndexMap: { [id: string]: number } = {};
@@ -1061,13 +989,6 @@ export const GeometryContentModel = GeometryBaseContentModel
 
     function applyAndLogChange(board: JXG.Board | undefined, change: JXGChange) {
       const result = board && syncChange(board, change);
-      // const jsonChange = JSON.stringify(change);
-      if (suspendCount <= 0) {
-        // self.changes.push(jsonChange);
-      }
-      else {
-        // batchChanges.push(jsonChange);
-      }
 
       let loggedChangeProps: Optional<JXGChange, "operation"> = {...change};
       if (!Array.isArray(change.properties)) {
@@ -1118,7 +1039,6 @@ export const GeometryContentModel = GeometryBaseContentModel
         get batchChangeCount() {
           return batchChanges.length;
         },
-        // getLinkedTableChange,
         copySelection,
         findObjects,
         getOneSelectedPoint,
@@ -1126,15 +1046,6 @@ export const GeometryContentModel = GeometryBaseContentModel
         getOneSelectedSegment,
         getOneSelectedComment,
         getCommentAnchor,
-        // getLastImageUrl(): [string, string | undefined] | undefined {
-        //   const objects = Array.from(self.objects.values());
-        //   for (let i = objects.length - 1; i >= 0; --i) {
-        //     const obj = objects[i];
-        //     if (isImageModel(obj)) {
-        //       return [obj.url, obj.filename];
-        //     }
-        //   }
-        // }
       },
       actions: {
         initializeBoard,
@@ -1142,9 +1053,6 @@ export const GeometryContentModel = GeometryBaseContentModel
         rescaleBoard,
         resizeBoard,
         updateScale,
-        // addChange,
-        // popChangeset,
-        // pushChangeset,
         addImage,
         addPoint,
         addPoints,
@@ -1174,37 +1082,11 @@ export const GeometryContentModel = GeometryBaseContentModel
           }
         },
         updateImageUrl(oldUrl: string, newUrl: string) {
-          // if (!oldUrl || !newUrl || (oldUrl === newUrl)) return;
-          // // identify change entries to be modified
-          // const updates: Array<{ index: number, change: string }> = [];
-          // self.changes.forEach((changeJson, index) => {
-          //   const change = safeJsonParse<JXGChange>(changeJson);
-          //   switch (change?.operation) {
-          //     case "create":
-          //       if (change.parents) {
-          //         const createUrl = change.parents[0];
-          //         if ((change.target === "image") && (createUrl === oldUrl)) {
-          //           change.parents[0] = newUrl;
-          //           updates.push({ index, change: JSON.stringify(change) });
-          //         }
-          //       }
-          //       break;
-          //     case "update": {
-          //       const updateUrl = change.properties &&
-          //                           !Array.isArray(change.properties) &&
-          //                           change.properties.url;
-          //       if (updateUrl && (updateUrl === oldUrl)) {
-          //         (change.properties as JXGProperties).url = newUrl;
-          //         updates.push({ index, change: JSON.stringify(change) });
-          //       }
-          //       break;
-          //     }
-          //   }
-          // });
-          // // make the corresponding changes
-          // updates.forEach(update => {
-          //   self.changes[update.index] = update.change;
-          // });
+          if (!oldUrl || !newUrl || (oldUrl === newUrl)) return;
+
+          if (self.bgImage?.url === oldUrl) {
+            self.bgImage.setUrl(newUrl);
+          }
         }
       }
     };
@@ -1269,101 +1151,6 @@ export const GeometryContentModel = GeometryBaseContentModel
       return [pointIds, positions];
     }
   }))
-  // .actions(self => ({
-  //   syncColumnsChange(dataSet: IDataSet, change: ITableChange, links: ITableLinkProperties) {
-  //     const tableId = links.tileIds[0];
-  //     let shouldUpdateAxisLabels = false;
-  //     switch (change.action) {
-  //       case "create": {
-  //         // new column => new point for each case
-  //         const attrIds = castArray(change.ids);
-  //         const [pointIds, positions] = self.getPointPositionsForColumns(dataSet, attrIds);
-  //         const props = pointIds.map(id => ({ id }));
-  //         pointIds && pointIds.length && self.addPoints(undefined, positions, props, links);
-  //         shouldUpdateAxisLabels = true;
-  //         break;
-  //       }
-  //       case "update": {
-  //         const ids = castArray(change.ids);
-  //         const attrIdsWithExpr: string[] = [];
-  //         const changeProps: IColumnProperties[] = castArray(change.props as any);
-  //         ids.forEach((attrId, index) => {
-  //           const props = changeProps[index] || changeProps[0];
-  //           // update column name => update axis labels
-  //           if (props.name != null) {
-  //             shouldUpdateAxisLabels = true;
-  //           }
-  //           // update column expression => update points associated with column
-  //           if (props.expression != null) {
-  //             attrIdsWithExpr.push(attrId);
-  //           }
-  //         });
-  //         if (attrIdsWithExpr.length) {
-  //           const [pointIds, positions] = self.getPointPositionsForColumns(dataSet, attrIdsWithExpr);
-  //           const props = positions.map(position => ({ position }));
-  //           pointIds && pointIds.length && self.updateObjects(undefined, pointIds, props, links);
-  //         }
-  //         break;
-  //       }
-  //       case "delete": {
-  //         // delete column => remove points associated with column
-  //         const pointIds: string[] = [];
-  //         const ids = castArray(change.ids);
-  //         ids.forEach(attrId => {
-  //           dataSet.cases.forEach(aCase => {
-  //             const caseId = aCase.__id__;
-  //             pointIds.push(linkedPointId(caseId, attrId));
-  //           });
-  //           shouldUpdateAxisLabels = true;
-  //         });
-  //         pointIds && pointIds.length && self.removeObjects(undefined, pointIds, links);
-  //         break;
-  //       }
-  //     }
-  //     shouldUpdateAxisLabels && self.updateAxisLabels(undefined, tableId, links);
-  //   },
-  //   syncRowsChange(dataSet: IDataSet, change: ITableChange, links: ITableLinkProperties) {
-  //     switch (change.action) {
-  //       case "create": {
-  //         // new table row => new points for each attribute in row
-  //         const [pointIds, positions] = self.getPointPositionsForRowsChange(dataSet, change);
-  //         const props = pointIds.map(id => ({ id }));
-  //         pointIds && pointIds.length && self.addPoints(undefined, positions, props, links);
-  //         break;
-  //       }
-  //       case "update": {
-  //         // update table row => update points associated with row
-  //         const [pointIds, positions] = self.getPointPositionsForRowsChange(dataSet, change);
-  //         const props = positions.map(position => ({ position }));
-  //         pointIds && pointIds.length && self.updateObjects(undefined, pointIds, props, links);
-  //         break;
-  //       }
-  //       case "delete": {
-  //         // delete table row => remove points associated with row
-  //         const pointIds: string[] = [];
-  //         const caseIds = castArray(change.ids);
-  //         caseIds.forEach(caseId => {
-  //           for (let attrIndex = 1; attrIndex < dataSet.attributes.length; ++attrIndex) {
-  //             pointIds.push(linkedPointId(caseId, dataSet.attributes[attrIndex].id));
-  //           }
-  //         });
-  //         change.ids && self.removeObjects(undefined, pointIds, links);
-  //         break;
-  //       }
-  //     }
-  //   },
-  //   syncTableLinkChange(dataSet: IDataSet, change: ITableChange, links: ITableLinkProperties) {
-  //     const tableId = links.tileIds[0];
-  //     switch (change.action) {
-  //       case "create":
-  //         self.addTableLink(undefined, tableId, dataSet, links);
-  //         break;
-  //       case "delete":
-  //         self.removeTableLink(undefined, tableId, links);
-  //         break;
-  //     }
-  //   }
-  // }))
   .actions(self => ({
     syncLinkedChange(dataSet: IDataSet, links: ITableLinkProperties) {
       // TODO: handle update
@@ -1374,20 +1161,3 @@ export type GeometryContentModelType = Instance<typeof GeometryContentModel>;
 export type GeometryContentSnapshotType = SnapshotIn<typeof GeometryContentModel>;
 
 export type GeometryMigratedContent = [GeometryContentModelType, { title: string }];
-
-export function mapTileIdsInGeometrySnapshot(snapshot: SnapshotOut<GeometryContentModelType>,
-                                             idMap: { [id: string]: string }) {
-  // snapshot.changes = snapshot.changes.map((changeJson: any) => {
-  //   const change = safeJsonParse<JXGChange>(changeJson);
-  //   if ((change?.target === "tableLink") && change.targetID) {
-  //     change.targetID = Array.isArray(change.targetID)
-  //                         ? change.targetID.map(id => idMap[id])
-  //                         : idMap[change.targetID];
-  //   }
-  //   if (change?.links) {
-  //     change.links.tileIds = change.links.tileIds.map(id => idMap[id]);
-  //   }
-  //   return JSON.stringify(change);
-  // });
-  return snapshot;
-}

@@ -1,6 +1,5 @@
 import { registerToolContentInfo } from "../tool-content-info";
-import { GeometryContentModel, GeometryMetadataModel,
-  defaultGeometryContent, mapTileIdsInGeometrySnapshot } from "./geometry-content";
+import { GeometryContentModel, GeometryMetadataModel, defaultGeometryContent } from "./geometry-content";
 import { kGeometryToolID } from "./geometry-types";
 import { kGeometryDefaultHeight } from "./jxg-types";
 import GeometryToolComponent from "../../../components/tools/geometry-tool/geometry-tool";
@@ -15,7 +14,6 @@ registerToolContentInfo({
   defaultHeight: kGeometryDefaultHeight,
   exportNonDefaultHeight: true,
   defaultContent: defaultGeometryContent,
-  snapshotPostProcessor: mapTileIdsInGeometrySnapshot,
   Component: GeometryToolComponent,
   toolTileClass: "geometry-tool-tile",
   tileHandlesOwnSelection: true,

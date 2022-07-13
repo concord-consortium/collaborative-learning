@@ -233,7 +233,12 @@ export const ImageModel = PositionedObjectModel
     filename: types.maybe(types.string),
     width: types.number,  // coordinate system size (not pixels)
     height: types.number  // coordinate system size (not pixels)
-  });
+  })
+  .actions(self => ({
+    setUrl(url: string) {
+      self.url = url;
+    }
+  }));
 export interface ImageModelType extends Instance<typeof ImageModel> {}
 export const isImageModel = (o: GeometryObjectModelType): o is ImageModelType => o.type === "image";
 
