@@ -61,13 +61,18 @@ export class SerialDevice {
       const pattern = /(emg|fsr):([0-9]+)[\r][\n]/g;
 
       let match: RegExpExecArray | null;
+
       do {
         match = pattern.exec(this.localBuffer);
         if (!match) break;
 
+        console.log("match: ", match)
+
         const [fullMatch, channel, numValue] = match;
 
         this.localBuffer = this.localBuffer.substring(match.index + fullMatch.length);
+
+        console.log("length of pared down local buffer: ", this.localBuffer.length)
 
         const targetChannel = channels.find((c: NodeChannelInfo) => {
           return c.channelId === channel;
