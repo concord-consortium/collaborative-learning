@@ -147,8 +147,6 @@ const postProcessProgramSnapshotForRete = (snapshot: DataflowProgramSnapshotOut)
       Object.keys(recentValues).forEach((recentValuesKey: string) => {
         data.recentValues[recentValuesKey] = JSON.parse(recentValues[recentValuesKey]);
       });
-    } else {
-      data.nodeValue = null;
     }
   });
   return { nodes: newNodes, ...rest };
@@ -177,15 +175,15 @@ export const DataflowProgramModel = types.
         const processedRecentValues: Record<string, string> = {};
         const currentValues: Record<string, number | undefined> = {};
         if (watchedValues && recentValues) {
-          Object.keys(watchedValues).forEach((minigraphKey: string) => {
-            if (recentValues[minigraphKey]) {
-              processedRecentValues[minigraphKey] = JSON.stringify(recentValues[minigraphKey]);
+          Object.keys(watchedValues).forEach((watchedKey: string) => {
+            if (recentValues[watchedKey]) {
+              processedRecentValues[watchedKey] = JSON.stringify(recentValues[watchedKey]);
             } else {
-              processedRecentValues[minigraphKey] = "[]";
+              processedRecentValues[watchedKey] = "[]";
             }
-            const currentValue = restData[minigraphKey];
+            const currentValue = restData[watchedKey];
             // Make null and NaN become undefined when going into MST
-            currentValues[minigraphKey] = currentValue === null || !isFinite(currentValue) ? undefined : currentValue;
+            currentValues[watchedKey] = currentValue === null || !isFinite(currentValue) ? undefined : currentValue;
           });
         }
         values[key] = {
