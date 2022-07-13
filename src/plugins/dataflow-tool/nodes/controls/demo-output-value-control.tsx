@@ -81,7 +81,7 @@ export class DemoOutputValueControl extends Rete.Control {
     if (Object.hasOwn(this, "update")) {
       (this as any).update();
     }
-  }
+  };
 
   public setValue = (val: number) => {
     this.props.value = val;
