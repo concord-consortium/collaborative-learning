@@ -173,11 +173,11 @@ export const DataflowProgramModel = types.
     if (nodes) {
       const keys = Object.keys(nodes);
       keys.forEach((key: string) => {
-        const { recentValues, minigraphValues, ...restData } = nodes[key].data;
+        const { recentValues, watchedValues, ...restData } = nodes[key].data;
         const processedRecentValues: Record<string, string> = {};
         const currentValues: Record<string, number | undefined> = {};
-        if (minigraphValues && recentValues) {
-          Object.keys(minigraphValues).forEach((minigraphKey: string) => {
+        if (watchedValues && recentValues) {
+          Object.keys(watchedValues).forEach((minigraphKey: string) => {
             if (recentValues[minigraphKey]) {
               processedRecentValues[minigraphKey] = JSON.stringify(recentValues[minigraphKey]);
             } else {

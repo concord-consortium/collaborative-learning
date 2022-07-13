@@ -41,10 +41,10 @@ function lineData(node: any) {
 
   let dsMax = 0;
   let dsMin = 0;
-  Object.keys(node.data.minigraphValues).forEach((valueKey: string) => {
+  Object.keys(node.data.watchedValues).forEach((valueKey: string) => {
     const recentValues: any = node.data.recentValues[valueKey];
     if (recentValues !== undefined) {
-      const customOptions = node.data.minigraphValues?.[valueKey] || {};
+      const customOptions = node.data.watchedValues?.[valueKey] || {};
       const dataset: ChartDataSets = {
         backgroundColor: NodePlotColor,
         borderColor: NodePlotColor,

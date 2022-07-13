@@ -87,12 +87,12 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
           tiltControl?.setConnected(inputs.tilt?.length);
         } else {
           this.removeInput(_node, "speed");
-          if ("speed" in (node as any).data.minigraphValues) {
-            delete (node as any).data.minigraphValues.speed;
+          if ("speed" in (node as any).data.watchedValues) {
+            delete (node as any).data.watchedValues.speed;
           }
           this.removeInput(_node, "tilt");
-          if ("tilt" in (node as any).data.minigraphValues) {
-            delete (node as any).data.minigraphValues.tilt;
+          if ("tilt" in (node as any).data.watchedValues) {
+            delete (node as any).data.watchedValues.tilt;
           }
         }
         node.data.outputType = outputType;
@@ -106,9 +106,9 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   private setupGrabberInputs(node: Node) {
-    (node as any).data.minigraphValues.speed = minigraphOptions.speed;
+    (node as any).data.watchedValues.speed = minigraphOptions.speed;
     this.addInput(node, "speed", "speed: ");
-    (node as any).data.minigraphValues.tilt = minigraphOptions.tilt;
+    (node as any).data.watchedValues.tilt = minigraphOptions.tilt;
     this.addInput(node, "tilt", "tilt: ");
   }
 
@@ -130,8 +130,8 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
           0, // Initial value
           `Display for ${inputKey}`,
           '', // Initial display message
-          (node as any).data.minigraphValues[inputKey].backgroundColor,
-          (node as any).data.minigraphValues[inputKey].borderColor,
+          (node as any).data.watchedValues[inputKey].backgroundColor,
+          (node as any).data.watchedValues[inputKey].borderColor,
           (val: any) => {
             return typeof val === "number" ? val.toFixed(1) : val;
           }

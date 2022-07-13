@@ -1088,7 +1088,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private updateNodeRecentValues = (n: Node) => {
-    Object.keys((n as any).data.minigraphValues).forEach((valueKey: string) => {
+    Object.keys((n as any).data.watchedValues).forEach((valueKey: string) => {
       const value: any = n.data[valueKey];
       let recentValue: NodeValue = {};
 
@@ -1115,7 +1115,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         n.data.recentValues = {[valueKey]: [recentValue]};
       }
 
-      if ((n as any).data.minigraphValues) {
+      if ((n as any).data.watchedValues) {
         (n as any).update();
       }
     });
