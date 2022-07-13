@@ -52,13 +52,11 @@ export class SerialDevice {
     }
 
     public handleStreamObj(value: string, channels: Array<NodeChannelInfo>){
-
-      // keep buffer from growing too large
-      if (this.localBuffer.length < 1000 ){
-        this.localBuffer += value;
-      } else {
-        this.localBuffer = "";
+      if (this.localBuffer.length > 7 ){
+        this.localBuffer = this.localBuffer.substring(this.localBuffer.length - 7);
       }
+
+      this.localBuffer+= value;
 
       // "emg" or "fsr" + : + some digits + return + newline */
       const pattern = /(emg|fsr)(:)([0-9]+)[\r][\n]/g;
