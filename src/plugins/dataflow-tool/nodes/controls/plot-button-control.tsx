@@ -1,5 +1,6 @@
 import React from "react";
 import Rete, { NodeEditor, Node } from "rete";
+import PreviewPlotIcon from "../../assets/icons/preview-plot.svg";
 import "./plot-button-control.scss";
 
 const handleChange = (onChange: any) => {
@@ -13,7 +14,7 @@ export const PlotButtonControlComponent = (compProps: {showgraph: any; onGraphBu
       className={`graph-button main-color ${compProps.showgraph ? "active" : ""}`}
       onClick={handleChange(compProps.onGraphButtonClick)}>
       <svg className="icon">
-        <use xlinkHref="#icon-preview-plot" />
+        <PreviewPlotIcon />
       </svg>
     </div>
   </div>

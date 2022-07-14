@@ -5,6 +5,7 @@ import Rete, { NodeEditor, Node } from "rete";
 import { NodeChannelInfo, kRelaySelectMessage,
   kRelayMissingMessage } from "../../model/utilities/node";
 import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
+import DropdownCaretIcon from "../../assets/icons/dropdown-caret.svg";
 import "./sensor-select-control.sass";
 
 export class RelaySelectControl extends Rete.Control {
@@ -82,7 +83,7 @@ export class RelaySelectControl extends Rete.Control {
           <div className={topItemClass} onMouseDown={handleChange(onDropdownClick)}>
             <div className={titleClass}>{channelString}</div>
             <svg className="icon dropdown-caret">
-              <use xlinkHref="#icon-dropdown-caret"/>
+              <DropdownCaretIcon />
             </svg>
           </div>
           {showList ?
