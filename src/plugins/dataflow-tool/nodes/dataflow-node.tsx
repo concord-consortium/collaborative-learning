@@ -2,7 +2,7 @@ import React from "react";
 import { Node, Socket, Control } from "rete-react-render-plugin";
 import { DataflowNodePlot } from "./dataflow-node-plot";
 import { NodeType, NodeTypes } from "../model/utilities/node";
-import "./dataflow-node.sass";
+import "./dataflow-node.scss";
 
 export class DataflowNode extends Node {
 
@@ -18,7 +18,7 @@ export class DataflowNode extends Node {
     const undecoratedInputs = inputs.filter(isDecoratedInput(false));
     const decoratedInputs = inputs.filter(isDecoratedInput(true));
     const plotButton = controls.find((c: any) => c.key === "plot");
-    const showPlot = plotButton ? plotButton.props.showgraph : false;
+    const showPlot = plotButton?.props.showgraph ?? node.data.plot ?? false;
     const nodeType = NodeTypes.find( (n: NodeType) => n.name === node.name);
     const displayName = nodeType ? nodeType.displayName : node.name;
 
@@ -51,7 +51,7 @@ export class DataflowNode extends Node {
         }
         <div className="inputs-outputs">
           <div className="inputs">
-            {this.props.node.name !== "Data Storage" && undecoratedInputs.map((input: any) => (
+            {!["Data Storage", "Demo Output"].includes(this.props.node.name) && undecoratedInputs.map((input: any) => (
               <div className="input" key={input.key}>
                 <Socket
                   type="input"

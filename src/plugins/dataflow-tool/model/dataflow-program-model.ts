@@ -80,8 +80,9 @@ const DataflowNodeDataModel = types.
     // Relay
     relayList: types.maybe(types.string),
 
-    // Light Bulb
-    lightbulb: types.maybe(types.number),
+    // Demo Output
+    outputType: types.maybe(types.string),
+    demoOutput: types.maybe(types.number),
 
     // Data Storage
     datasetName: types.maybe(types.string),
@@ -124,9 +125,10 @@ export interface DataflowNodeSnapshotOut extends SnapshotOut<typeof DataflowNode
 // A model for keeping the values separate from the structure of a node.
 const DataflowValueModel = types.
   model("DataflowValue", {
-    nodeValue: types.maybe(types.number),
-    // JSON.stringified array of recent node values
-    recentValues: types.optional(types.string, "[]")
+    // Stores values the node watches for minigraphs
+    currentValues: types.map(types.maybe(types.number)),
+    // Map of JSON.stringified arrays of recent node values
+    recentValues: types.map(types.string)
   });
 
 const postProcessProgramSnapshotForRete = (snapshot: DataflowProgramSnapshotOut) => {
@@ -136,13 +138,15 @@ const postProcessProgramSnapshotForRete = (snapshot: DataflowProgramSnapshotOut)
   keys.forEach((key: string) => {
     newNodes[key] = postProcessNodeSnapshotForRete(newNodes[key]);
     const data = newNodes[key].data;
+    data.recentValues = {};
     if ((values as any)?.[key]) {
-      const { nodeValue, recentValues } = (values as any)[key];
-      data.nodeValue = nodeValue;
-      data.recentValues = JSON.parse(recentValues);
-    } else {
-      data.nodeValue = null;
-      data.recentValues = [];
+      const { currentValues, recentValues } = (values as any)[key];
+      Object.keys(currentValues).forEach((valueKey: string) => {
+        data[valueKey] = currentValues[valueKey];
+      });
+      Object.keys(recentValues).forEach((recentValuesKey: string) => {
+        data.recentValues[recentValuesKey] = JSON.parse(recentValues[recentValuesKey]);
+      });
     }
   });
   return { nodes: newNodes, ...rest };
@@ -167,12 +171,26 @@ export const DataflowProgramModel = types.
     if (nodes) {
       const keys = Object.keys(nodes);
       keys.forEach((key: string) => {
-        const { nodeValue, recentValues, ...restData } = nodes[key].data;
+        const { recentValues, watchedValues, ...restData } = nodes[key].data;
+        const processedRecentValues: Record<string, string> = {};
+        const currentValues: Record<string, number | undefined> = {};
+        if (watchedValues && recentValues) {
+          Object.keys(watchedValues).forEach((watchedKey: string) => {
+            if (recentValues[watchedKey]) {
+              processedRecentValues[watchedKey] = JSON.stringify(recentValues[watchedKey]);
+            } else {
+              processedRecentValues[watchedKey] = "[]";
+            }
+            const currentValue = restData[watchedKey];
+            // Make null and NaN become undefined when going into MST
+            currentValues[watchedKey] = currentValue === null || !isFinite(currentValue) ? undefined : currentValue;
+          });
+        }
         values[key] = {
-          // Make null and NaN become undefined when going into MST
-          nodeValue: ((nodeValue == null) || !isFinite(nodeValue)) ? undefined : nodeValue,
+          // Store all watched values in the currentValues map
+          currentValues,
           // Store recentValues as a string instead of an array so there's only one patch per update
-          recentValues: JSON.stringify(recentValues)
+          recentValues: processedRecentValues
         };
         nodes[key].data = { ...restData };
       });
