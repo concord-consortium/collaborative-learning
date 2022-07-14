@@ -49,7 +49,6 @@ export const DataflowContentModel = ToolContentModel
         `    "scale": ${zoom.scale}`,
         `  },`,
         `  "program": ${JSON.stringify(self.program)}`,
-        // `  "program": ${JSON.stringify({id: self.program.id, nodes: self.program.nodes})}`,
         `}`
       ].join("\n");
     }
