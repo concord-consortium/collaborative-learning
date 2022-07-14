@@ -4,10 +4,25 @@ export class SerialDevice {
     value: string;
     localBuffer: string;
     private port: SerialPort | null;
+    connectedStamp: Number | null;
+    lastConnectMessage: string | null;
 
     constructor() {
       this.value = "0";
       this.localBuffer = "";
+
+      navigator.serial.addEventListener('connect', (e) => {
+        this.updateConnectionInfo(e.timeStamp, e.type);
+      });
+
+      navigator.serial.addEventListener('disconnect', (e) => {
+        this.updateConnectionInfo(e.timeStamp, e.type);
+      });
+    }
+
+    public updateConnectionInfo(timeStamp: Number | null, status: string ){
+      this.connectedStamp = timeStamp;
+      this.lastConnectMessage = status;
     }
 
     public hasPort(){

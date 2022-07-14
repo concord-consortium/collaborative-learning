@@ -392,22 +392,20 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.props.onProgramChange(programJSON);
   };
 
-  private alertIfNeedSerial(){
-    if (!this.stores.serialDevice.hasPort()){
-      const wouldNeedSerial = this.programEditor.nodes.find( n => n.data.virtual === false );
-      if ( wouldNeedSerial !== undefined ){
-        // TODO - UX:  modal? something else?
-        // alert('Please connect your device to serial to use external sensors.')
-        console.log('user should be notified that they need to connect device');
-      }
-    }
+  private evaluateSerialStatus(){
+    const deviceHereSince = this.stores.serialDevice.connectedStamp;
+    const portOpen = this.stores.serialDevice.hasPort();
+    const nodesNeedingSerial = this.programEditor.nodes.find( (n) => {
+      n.data.virtual != false &&
+      n.data.sensor == "fsr" || n.data.sensor == "emg"
+    } );
   }
 
   private updateChannels = () => {
 
     this.channels = [];
     this.channels = [...virtualSensorChannels, ...serialSensorChannels];
-    this.alertIfNeedSerial();
+    this.evaluateSerialStatus();
 
     // const { hubStore } = this.stores; FIXME
 
