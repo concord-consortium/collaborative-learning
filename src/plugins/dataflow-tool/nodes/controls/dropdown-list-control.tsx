@@ -75,8 +75,8 @@ export class DropdownListControl extends Rete.Control {
                                       (this as any).update();
                                     });
       const option = options.find((opt) => optionValue(opt) === val);
-      const name = option ? option.name : val;
-      const icon = option && option.icon ? option.icon({}) : null;
+      const name = option?.name ?? val;
+      const icon = option?.icon?.({}) || null;
 
       return (
         <div className={`node-select ${listClass}`} ref={divRef}>
