@@ -11,8 +11,8 @@
   },
   "sections": {
     "sources": {
-      "initials": "SRC",
-      "title": "Sources",
+      "initials": "EVD",
+      "title": "Evidence",
       "placeholder": "Add Sources for publication to class"
     },
     "teach": {
@@ -27,7 +27,7 @@
     {
       "description": "Investigation 1",
       "ordinal": 1,
-      "title": "Resources for Rakesh: Chapter 1",
+      "title": "Resources for Rakesh",
       "problems": [
         {
           "description": "Problem 1.1",
@@ -48,13 +48,74 @@
                             "<h2>CHAPTER 1 SOURCES</h2>"
                           ]
                         }
+                    },
+                    {
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Here are resources you can choose to distribute to your students as they work their way through chapters. To make these available in the Sources tab, drag the information (link, image, text, etc.) into your own Workspace and press the Publish button (rectangle with the up arrow).</p>"
+                        ]
+                      }
+                    },
+                    {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Read the blog <a href='https://docs.google.com/document/d/1sJeQJTULItNaogZdQiD7ezeHK6_nBxPI/edit'>All the Fuss About Cholesterol<a>.</p><p>Discuss the blog with your group and together, answer these questions:</p><p>Write what you learned from this evidence in your document on the right.</p>"
+                      ]
+                    }
+                  }
+                  ],
+                  "supports": []
+              }
+            },
+            {
+              "type": "teach",
+              "content": {
+                "tiles": [
+                    {
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p>As you work through the Chapters, you should make evidence available to your students in small increments. This allows them to build up an understanding of the biology in an incremental fashion. </p>",
+                            "<p>You can, if you wish, republish the same document multiple times, or you can make new documents with specific titles associated with each chapter or lesson.</p>"
+                          ]
+                        }
+                      }                      
+                   ]
+              }
+            }
+          ]
+        },
+        {
+          "description": "Problem 1.2",
+          "ordinal": 2,
+          "title": "Rakesh: Chapter 2",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "sources",
+              "content":
+              {
+                "tiles": [
+                    {
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<h2>CHAPTER 2 SOURCES</h2>"
+                          ]
+                        }
                       },
                     {
                         "content": {
                           "type": "Text",
                           "format": "html",
                           "text": [
-                            "<p>Here are resources you can choose to distribute to your students as they work their way through chapters. To make these available in the Sources tab, drag the information (link, image, text, etc.) into your own Workspace and press the Publish button (rectangle with the up arrow).</p>"
+                            "<p>Here are resources you can choose to distribute to your students as they work their way through chapters. To make these available in the Resource Library tab, drag the information (link, image, text, etc.) into your own Workspace and press the Publish button (rectangle with the up arrow).</p>"
                           ]
                         }
                       },
@@ -87,6 +148,131 @@
                             "<p>Read the Report <a href='https://docs.google.com/document/d/1mKJKJq6DUwajNF7lCk9rUcLLu05SKQo9/edit?usp=sharing&ouid=108257735699509877213&rtpof=true&sd=true'>He clicked on the report: “The Missing Link: Cholesterol, Cortisol, and Clogged Arteries</a> </p>"
                           ]
                         }
+                      }
+                  ],
+                  "supports": []
+              }
+            },
+            {
+              "type": "teach",
+              "content": {
+                "tiles": [
+                    {
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p>As you work through the Chapters, you should make evidence available to your students in small increments. This allows them to build up an understanding of the biology in an incremental fashion. </p>",
+                            "<p>You can, if you wish, republish the same document multiple times, or you can make new documents with specific titles associated with each chapter or lesson.</p>"
+                          ]
+                        }
+                      }                      
+                   ]
+              }
+            }
+          ]
+        },
+        {
+          "description": "Problem 1.3",
+          "ordinal": 3,
+          "title": "Rakesh: Chapter 3",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "sources",
+              "content":
+              {
+                "tiles": [
+                    {
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<h2>CHAPTER 3 SOURCES</h2>"
+                          ]
+                        }
+                      },
+                    {
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Here are resources you can choose to distribute to your students as they work their way through chapters. To make these available in the Resource Library tab, drag the information (link, image, text, etc.) into your own Workspace and press the Publish button (rectangle with the up arrow).</p>"
+                        ]
+                      }
+                    },
+                    {
+                        "content": {
+                          "type": "Image",
+                          "url": "curriculum/bio4community/images/MetabolicPanel.jpg"
+                        }
+                    }
+                  ],
+                  "supports": []
+              }
+            },
+            {
+              "type": "teach",
+              "content": {
+                "tiles": [
+                    {
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p>As you work through the Chapters, you should make evidence available to your students in small increments. This allows them to build up an understanding of the biology in an incremental fashion. </p>",
+                            "<p>You can, if you wish, republish the same document multiple times, or you can make new documents with specific titles associated with each chapter or lesson.</p>"
+                          ]
+                        }
+                      }                      
+                   ]
+              }
+            }
+          ]
+        },
+        {
+          "description": "Problem 1.4",
+          "ordinal": 4,
+          "title": "Rakesh: Chapter 4",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "sources",
+              "content":
+              {
+                "tiles": [
+                    {
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<h2>CHAPTER 4 SOURCES</h2>"
+                          ]
+                        }
+                      },
+                    {
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p>Here are resources you can choose to distribute to your students as they work their way through chapters. To make these available in the Resource Library tab, drag the information (link, image, text, etc.) into your own Workspace and press the Publish button (rectangle with the up arrow).</p>"
+                          ]
+                        }
+                      },
+                      {
+                          "content": {
+                            "type": "Image",
+                            "url": "curriculum/bio4community/images/SalivaTest.jpg"
+                          }
+                      },
+                      {
+                          "content": {
+                            "type": "Text",
+                            "format": "html",
+                            "text": [
+                              "<p>Read the Report <a href='https://docs.google.com/document/d/1mKJKJq6DUwajNF7lCk9rUcLLu05SKQo9/edit?usp=sharing&ouid=108257735699509877213&rtpof=true&sd=true'>He clicked on the report: “The Missing Link: Cholesterol, Cortisol, and Clogged Arteries</a> </p>"
+                            ]
+                          }
                       }
                   ],
                   "supports": []

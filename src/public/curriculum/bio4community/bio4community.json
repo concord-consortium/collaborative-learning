@@ -15,9 +15,20 @@
     "defaultDocumentTemplate": {
       "tiles": [
         [
-          { "content": { "type": "Image" } },
-          { "content": { "type": "Text", "text": "Provide your evidence here" } }
-        ]
+          { "layout": { "height": 260 }, "content": { "type": "Image", "url": "curriculum/bio4community/images/thing.png" } },
+          { "content": { "type": "Text", "text": "Describe your evidence here" } }
+        ],
+        {
+          "content": {
+            "type": "Table",
+            "name": "Evidence Table",
+            "columns": [
+              {"name":"Rationale","values":["Because I saw","That made me think"]},
+              {"name":"Evidence","values":["",""]}
+            ]
+          }
+        }
+        
       ]
     },
     "toolbar": [
@@ -63,40 +74,20 @@
           "tab": "problems",
           "label": "Story",
           "sections": [
-            {
-              "initials": "CH1",
-              "title": "Chapter 1",
-              "type": "problem-documents"
-            },
-            { 
-              "initials": "CH2",
-              "title": "Chapter 2",
-              "type": "problem-documents"
-            },
-            { 
-              "initials": "CH3",
-              "title": "Chapter 3",
-              "type": "problem-documents"
-            },
-            { 
-              "initials": "CH4",
-              "title": "Chapter 4",
-              "type": "problem-documents"
-            }
           ]
         },
         {
           "tab": "teacher-guide",
-          "label": "Teacher Sources",
+          "label": "Curriculum",
           "teacherOnly": true,
           "sections": []
         },
         {
           "tab": "class-work",
-          "label": "Sources",
+          "label": "Resource Library",
           "sections": [
             {
-              "title": "Experts",
+              "title": "Evidence",
               "type": "teacher-supports",
               "dataTestHeader": "supports-section-teacher-supports",
               "dataTestItem": "supports-list-items",
@@ -119,39 +110,6 @@
               "dataTestItem": "class-work-list-items",
               "documentTypes": ["personalPublication"],
               "properties": ["!isTeacherDocument"]
-            }
-          ]
-        },
-        {
-          "tab": "my-work",
-          "label": "My Work",
-          "sections": [
-            {
-              "title": "Evidence Notes",
-              "type": "problem-documents",
-              "dataTestHeader": "my-work-section-investigations",
-              "dataTestItem": "my-work-list-items",
-              "documentTypes": ["problem", "planning"],
-              "order": "original",
-              "showStars": []
-            },
-            {
-              "title": "Evidence Notes",
-              "type": "personal-documents",
-              "dataTestHeader": "my-work-section-workspaces",
-              "dataTestItem": "my-work-list-items",
-              "documentTypes": ["personal"],
-              "properties": ["!isDeleted"],
-              "showStars": [],
-              "addDocument": true
-            },
-            {
-              "title": "Journal",
-              "type": "learning-logs",
-              "dataTestHeader": "learning-log-section",
-              "documentTypes": ["learningLog"],
-              "properties": ["!isDeleted"],
-              "addDocument": true
             }
           ]
         }
@@ -180,13 +138,13 @@
     "default": true,
     "sectionInfo": {
       "sources": {
-        "initials": "SC",
-        "title": "Sources",
-        "placeholder": "Work area for Sources"
+        "initials": "EVD",
+        "title": "Evidence",
+        "placeholder": "Work area for Evidence"
       }
     },
     "sections": [
-      { "type": "Sources" },
+      { "type": "Evidence" },
       { "type": "Teaching" }
     ]
   },
@@ -196,13 +154,13 @@
     {
       "description": "Investigation 1",
       "ordinal": 1,
-      "title": "The Biology of Stress",
+      "title": "Bio4Community: The Biology of Stress",
       "problems": [
         {
-          "description": "Story 1",
+          "description": "Story Ch1",
           "ordinal": 1,
-          "title": "Stress and Heart Attacks",
-          "subtitle": "Rakesh's Story",
+          "title": "Rakesh: Stress and Heart Attacks",
+          "subtitle": "Chapter 1",
           "disabled": [],
           "sections": [
                         {
@@ -348,7 +306,17 @@
                           ]
                         },
                         "supports": []
-                        },
+                        }
+                      ],
+          "supports": []
+        },
+        {
+          "description": "Story Ch2",
+          "ordinal": 2,
+          "title": "Rakesh: Stress and Heart Attacks",
+          "subtitle": "Chapter 2",
+          "disabled": [],
+          "sections": [
                         {
                           "type": "chapter2",
                           "content": {
@@ -430,7 +398,17 @@
                             ]
                           },
                           "supports": []
-                        },
+                        }
+                      ],
+          "supports": []
+        },
+        {
+          "description": "Story Ch3",
+          "ordinal": 3,
+          "title": "Rakesh: Stress and Heart Attacks",
+          "subtitle": "Chapter 3",
+          "disabled": [],
+          "sections": [
                         {
                           "type": "chapter3",
                           "content": {
@@ -446,7 +424,34 @@
                                     "<p>That day at lunch, he felt like his taste buds could almost sense the cholesterol in his rice and beans. It was all feeling too stressful, so he decided to just get his blood checked and confirm whether he had high cholesterol or not. He called the doctor’s office and they ordered some tests and told him to go to the blood lab near his house. The next day he went to the lab right after work, did the blood test. Two days later he received an email from the lab, the results were attached. He clicked on the attachment: “Rakesh Sharma Blood Test Report”</p>",
                                     "<p>Review the test results- EVIDENCE 3-Rakesh Sharma Blood Test Report - in your folder. </p>",
                                     "<p>Discuss the results with your group and together, answer the questions on the slides. Write what you learned from this evidence in your table.</p>",
-                                    "<p>Continue reading to find out what happened next:</p>",
+                                    "<p>Continue reading to find out what happened next:</p>"
+                                  ]
+                                }
+                              }
+                              
+                            ],
+                            "supports": []
+                          }
+                        }
+                      ],
+          "supports": []
+        },
+        {
+          "description": "Story Ch4",
+          "ordinal": 4,
+          "title": "Rakesh: Stress and Heart Attacks",
+          "subtitle": "Chapter 4",
+          "disabled": [],
+          "sections": [
+                        {
+                          "type": "chapter3",
+                          "content": {
+                            "tiles": [
+                              {
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
                                     "<h2>CHAPTER 4: WHAT’S IN YOUR SALIVA</h2>",
                                     "<p>A few days after doing his blood test, Rakesh got a call from his doctor to come in and discuss the results. Rakesh was not a fan of the doctor’s office. It always seemed so cold, and the waiting room was usually very crowded. Luckily today he didn’t have to wait too long after he got there. The nurse took him to the exam room inside and he waited for a few minutes for the doctor to see him.</p>",
                                     "<p>Dr. Lee: “Nice to see you Mr. Sharma. I have the results of your test here (waves the lap report) they look fine to me. I know you were concerned about your cholesterol levels, but they are well within range. I don’t think you need to change your diet at all. </p>",
@@ -467,33 +472,6 @@
                                 }
                               }
                               
-                            ],
-                            "supports": []
-                          }
-                        }
-                      ],
-          "supports": []
-        },
-        {
-          "description": "Maria: Stress and Concentration",
-          "ordinal": 2,
-          "title": "Stress and Focus",
-          "subtitle": "Maria's Story",
-          "sections": [
-                        {
-                        "type": "narrative",
-                        "content": 
-                          {
-                            "tiles": [
-                              
-                            ]
-                          },
-                        "supports": []
-                        },
-                        {
-                          "type": "chapter2",
-                          "content": {
-                            "tiles": [
                             ],
                             "supports": []
                           }
