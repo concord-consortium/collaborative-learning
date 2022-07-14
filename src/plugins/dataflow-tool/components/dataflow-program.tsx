@@ -20,7 +20,7 @@ import { TransformReteNodeFactory } from "../nodes/factories/transform-rete-node
 import { LogicReteNodeFactory } from "../nodes/factories/logic-rete-node-factory";
 import { SensorReteNodeFactory } from "../nodes/factories/sensor-rete-node-factory";
 import { RelayReteNodeFactory } from "../nodes/factories/relay-rete-node-factory";
-import { LightBulbReteNodeFactory } from "../nodes/factories/light-bulb-rete-node-factory";
+import { DemoOutputReteNodeFactory } from "../nodes/factories/demo-output-rete-node-factory";
 import { GeneratorReteNodeFactory } from "../nodes/factories/generator-rete-node-factory";
 import { TimerReteNodeFactory } from "../nodes/factories/timer-rete-node-factory";
 import { DataStorageReteNodeFactory } from "../nodes/factories/data-storage-rete-node-factory";
@@ -297,7 +297,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       new LogicReteNodeFactory(numSocket),
       new SensorReteNodeFactory(numSocket),
       new RelayReteNodeFactory(numSocket),
-      new LightBulbReteNodeFactory(numSocket),
+      new DemoOutputReteNodeFactory(numSocket),
       new GeneratorReteNodeFactory(numSocket),
       new TimerReteNodeFactory(numSocket),
       new DataStorageReteNodeFactory(numSocket)];
@@ -327,8 +327,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       if (program?.id) {
         if (!this.props.readOnly && clearHistory) {
           forEach(program.nodes, (n: Node) => {
-            if (n.data.recentValues) {
-              n.data.recentValues = [];
+            const recentValues = n.data.recentValues as Record<string, any>;
+            if (recentValues) {
+              forEach(Object.keys(recentValues), (v:string) => {
+                recentValues[v] = [];
+              });
             }
           });
         }
@@ -630,7 +633,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const { ui } = this.stores;
     const hasRelay = this.hasRelay();
     const hasDataStorage = this.hasDataStorage();
-    const hasLightbulb = this.hasLightbulb();
+    const hasDemoOutput = this.hasDemoOutput();
     let hasValidRelay = false;
     let hasValidDataStorage = false;
     if (hasRelay || hasDataStorage) {
@@ -655,12 +658,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         }
       });
     }
-    if (!hasRelay && !hasDataStorage && !hasLightbulb) {
+    if (!hasRelay && !hasDataStorage && !hasDemoOutput) {
       ui.alert(
-        "Program must contain a Relay, Light Bulb, or Data Storage block before it can be run.", "No Program Output"
+        "Program must contain a Relay, Demo Output, or Data Storage block before it can be run.", "No Program Output"
       );
       return false;
-    } else if (!hasValidRelay && !hasValidDataStorage && !hasLightbulb) {
+    } else if (!hasValidRelay && !hasValidDataStorage && !hasDemoOutput) {
       const relayMessage = hasRelay && !hasValidRelay
                             ? "Relay blocks need a valid selected relay and valid input before the program can be run. "
                             : "";
@@ -807,7 +810,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const relays: string[] = [];
     let hasValidData = false;
     let hasValidRelay = false;
-    let hasLightbulb = false;
+    let hasDemoOutput = false;
     this.programEditor.nodes.forEach((n: Node) => {
       if (n.name === "Sensor" && n.data.sensor && !n.data.virtual) {
         const chInfo = this.channels.find(ci => ci.channelId === n.data.sensor);
@@ -840,8 +843,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         interval = n.data.interval as number;
         hasValidData = true;
         datasetName = programTitle;
-      } else if (n.name === "Light Bulb") {
-        hasLightbulb = true;
+      } else if (n.name === "Demo Output") {
+        hasDemoOutput = true;
         datasetName = programTitle;
       }
     });
@@ -884,7 +887,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                 startTime: programStartTime,
                 endTime: programEndTime,
                 hasData: hasValidData,
-                hasRelay: hasValidRelay || hasLightbulb
+                hasRelay: hasValidRelay || hasDemoOutput
               });
 
     return programData;
@@ -996,8 +999,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     return this.getNodeCount("Relay") > 0;
   }
 
-  private hasLightbulb() {
-    return this.getNodeCount("Light Bulb") > 0;
+  private hasDemoOutput() {
+    return this.getNodeCount("Demo Output") > 0;
   }
 
   private isValidRelay(id: string) {
@@ -1032,6 +1035,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         processNeeded = true;
         nodeProcess(n);
       }
+      // TODO: We probably need a better way to determine if recentValues should be updated
       if (Object.prototype.hasOwnProperty.call(n.data, "nodeValue")) {
         this.updateNodeRecentValues(n);
       }
@@ -1084,31 +1088,39 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private updateNodeRecentValues = (n: Node) => {
-    const nodeValue: any = n.data.nodeValue;
-    let recentValue: NodeValue = {};
-    const nodeValueKey = "nodeValue";
-    // Store recentValue as object with unique keys for each value stored in node
-    // Needed for node types such as data storage that require more than a single value
-    if (nodeValue === "number") {
-      recentValue[nodeValueKey] = { name: n.name, val: nodeValue };
-    } else {
-      recentValue = nodeValue;
-    }
-    if (n.data.recentValues) {
-      const recentValues: any = n.data.recentValues;
-      if (recentValues.length > MAX_NODE_VALUES) {
-        recentValues.shift();
+    const watchedValues = n.data.watchedValues as Record<string, any>;
+    Object.keys(watchedValues).forEach((valueKey: string) => {
+      const value: any = n.data[valueKey];
+      let recentValue: NodeValue = {};
+
+      // Store recentValue as object with unique keys for each value stored in node
+      // Needed for node types such as data storage that require more than a single value
+      if (value === "number") {
+        recentValue[valueKey] = { name: n.name, val: value };
+      } else {
+        recentValue = value;
       }
-      recentValues.push(recentValue);
-      n.data.recentValues = recentValues;
-    } else {
-      const recentValues: NodeValue[] = [recentValue];
-      n.data.recentValues = recentValues;
-    }
-    const plotControl = n.controls.get("plot") as PlotButtonControl;
-    if (plotControl) {
-      n.update();
-    }
+
+      const recentValues = n.data.recentValues as Record<string, any>;
+      if (recentValues) {
+        if (recentValues[valueKey]) {
+          const newRecentValues: any = recentValues[valueKey];
+          if (newRecentValues.length > MAX_NODE_VALUES) {
+            newRecentValues.shift();
+          }
+          newRecentValues.push(recentValue);
+          recentValues[valueKey] = newRecentValues;
+        } else {
+          recentValues[valueKey] = [recentValue];
+        }
+      } else {
+        n.data.recentValues = {[valueKey]: [recentValue]};
+      }
+
+      if (n.data.watchedValues) {
+        n.update();
+      }
+    });
   };
 
   private getNodeSequenceNamesAndUnits = () => {

@@ -1,6 +1,24 @@
 import React from "react";
 import Rete, { NodeEditor, Node } from "rete";
-import "./plot-button-control.sass";
+import PreviewPlotIcon from "../../assets/icons/preview-plot.svg";
+import "./plot-button-control.scss";
+
+const handleChange = (onChange: any) => {
+  return (e: any) => { onChange(e.target.value); };
+};
+
+export const PlotButtonControlComponent = (compProps: {showgraph: any; onGraphButtonClick: any; }) => (
+  <div className="node-graph-container"
+       title={compProps.showgraph ? "Hide Block Value Graph" : "Show Block Value Graph"}>
+    <div
+      className={`graph-button main-color ${compProps.showgraph ? "active" : ""}`}
+      onClick={handleChange(compProps.onGraphButtonClick)}>
+      <svg className="icon">
+        <PreviewPlotIcon />
+      </svg>
+    </div>
+  </div>
+);
 
 export class PlotButtonControl extends Rete.Control {
   private emitter: NodeEditor;
@@ -18,29 +36,14 @@ export class PlotButtonControl extends Rete.Control {
     const initial = node.data[key] || false;
     node.data[key] = initial;
 
-    const handleChange = (onChange: any) => {
-      return (e: any) => { onChange(e.target.value); };
-    };
-
-    this.component = (compProps: {showgraph: any; onGraphButtonClick: any; }) => (
-      <div className="node-graph-container"
-           title={compProps.showgraph ? "Hide Block Value Graph" : "Show Block Value Graph"}>
-        <div
-          className={`graph-button main-color ${compProps.showgraph ? "active" : ""}`}
-          onClick={handleChange(compProps.onGraphButtonClick)}>
-          <svg className="icon">
-            <use xlinkHref="#icon-preview-plot" />
-          </svg>
-        </div>
-      </div>
-    );
-
     this.props = {
       showgraph: initial,
       onGraphButtonClick: () => {
         this.setGraph(!this.props.showgraph);
       }
     };
+
+    this.component = PlotButtonControlComponent;
   }
 
   public setGraph = (show: boolean) => {
