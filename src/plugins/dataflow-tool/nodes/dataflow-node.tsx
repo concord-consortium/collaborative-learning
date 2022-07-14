@@ -18,8 +18,7 @@ export class DataflowNode extends Node {
     const undecoratedInputs = inputs.filter(isDecoratedInput(false));
     const decoratedInputs = inputs.filter(isDecoratedInput(true));
     const plotButton = controls.find((c: any) => c.key === "plot");
-    const showPlot = plotButton ? plotButton.props.showgraph : 
-      node.data.plot ? node.data.plot : false;
+    const showPlot = plotButton?.props.showgraph ?? node.data.plot ?? false;
     const nodeType = NodeTypes.find( (n: NodeType) => n.name === node.name);
     const displayName = nodeType ? nodeType.displayName : node.name;
 

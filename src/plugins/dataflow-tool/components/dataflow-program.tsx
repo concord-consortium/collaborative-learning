@@ -8,7 +8,7 @@ import ReactRenderPlugin from "rete-react-render-plugin";
 import { autorun } from "mobx";
 import { IDisposer, onSnapshot } from "mobx-state-tree";
 import { SizeMeProps } from "react-sizeme";
-import { forEach, keys } from "lodash";
+import { forEach } from "lodash";
 import { ProgramZoomType } from "../model/dataflow-content";
 import { DataflowProgramModelType } from "../model/dataflow-program-model";
 import { SensorSelectControl } from "../nodes/controls/sensor-select-control";
@@ -327,10 +327,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       if (program?.id) {
         if (!this.props.readOnly && clearHistory) {
           forEach(program.nodes, (n: Node) => {
-            if (n.data.recentValues) {
-              n.data.recentValues = {};
-              forEach(Object.keys((n as any).data.recentValues), (v:string) => {
-                (n as any).data.recentValues[v] = [];
+            const recentValues = n.data.recentValues as Record<string, any>;
+            if (recentValues) {
+              forEach(Object.keys(recentValues), (v:string) => {
+                recentValues[v] = [];
               });
             }
           });
@@ -1088,7 +1088,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private updateNodeRecentValues = (n: Node) => {
-    Object.keys((n as any).data.watchedValues).forEach((valueKey: string) => {
+    const watchedValues = n.data.watchedValues as Record<string, any>;
+    Object.keys(watchedValues).forEach((valueKey: string) => {
       const value: any = n.data[valueKey];
       let recentValue: NodeValue = {};
 
@@ -1100,23 +1101,24 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         recentValue = value;
       }
 
-      if (n.data.recentValues) {
-        if ((n.data.recentValues as any)[valueKey]) {
-          const recentValues: any = (n.data.recentValues as any)[valueKey];
-          if (recentValues.length > MAX_NODE_VALUES) {
-            recentValues.shift();
+      const recentValues = n.data.recentValues as Record<string, any>;
+      if (recentValues) {
+        if (recentValues[valueKey]) {
+          const newRecentValues: any = recentValues[valueKey];
+          if (newRecentValues.length > MAX_NODE_VALUES) {
+            newRecentValues.shift();
           }
-          recentValues.push(recentValue);
-          (n.data.recentValues as any)[valueKey] = recentValues;
+          newRecentValues.push(recentValue);
+          recentValues[valueKey] = newRecentValues;
         } else {
-          (n.data.recentValues as any)[valueKey] = [recentValue];
+          recentValues[valueKey] = [recentValue];
         }
       } else {
         n.data.recentValues = {[valueKey]: [recentValue]};
       }
 
-      if ((n as any).data.watchedValues) {
-        (n as any).update();
+      if (n.data.watchedValues) {
+        n.update();
       }
     });
   };
