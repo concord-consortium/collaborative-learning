@@ -17,7 +17,7 @@ import {
 
 jest.mock("@concord-consortium/slate-editor", () => ({}));
 
-var mockUseContext = jest.fn();
+const mockUseContext = jest.fn();
 jest.mock("react", () => ({
   ...jest.requireActual("react"),
   useContext: () => mockUseContext(),

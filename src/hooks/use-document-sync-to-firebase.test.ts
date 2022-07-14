@@ -13,7 +13,7 @@ const libDebug = require("../lib/debug");
 
 import "../models/tools/text/text-registration";
 
-var mockUseMutation = jest.fn((callback: (vars: any) => Promise<any>, options?: UseMutationOptions) => {
+const mockUseMutation = jest.fn((callback: (vars: any) => Promise<any>, options?: UseMutationOptions) => {
   return {
     mutate: (vars: any) => {
       callback(vars)
@@ -42,8 +42,8 @@ jest.mock("react-query", () => ({
   useMutation: (callback: (vars: any) => Promise<any>, options?: any) => mockUseMutation(callback, options)
 }));
 
-var mockUpdate = jest.fn();
-var mockRef = jest.fn();
+const mockUpdate = jest.fn();
+const mockRef = jest.fn();
 
 const specUser = (overrides?: Partial<SnapshotIn<typeof UserModel>>) => {
   return UserModel.create({ id: "1", ...overrides });
