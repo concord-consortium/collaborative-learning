@@ -3,6 +3,7 @@
 import React, { useRef } from "react";
 import Rete, { NodeEditor, Node } from "rete";
 import { useStopEventPropagation } from "./custom-hooks";
+import DeleteNodeIcon from "../../assets/icons/delete-node.svg";
 import "./num-control.sass";
 
 // cf. https://codesandbox.io/s/retejs-react-render-t899c
@@ -31,7 +32,7 @@ export class DeleteControl extends Rete.Control {
         <div className="close-node-button control-color control-color-hoverable"
           onClick={handleClick(compProps.onClick)} title={"Delete Block"}>
           <svg className="icon">
-            <use xlinkHref="#icon-delete-node" />
+            <DeleteNodeIcon />
           </svg>
         </div>
       );

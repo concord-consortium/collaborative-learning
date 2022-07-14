@@ -3,12 +3,22 @@ import { Line } from "react-chartjs-2";
 import { ChartOptions, ChartData, ChartDataSets } from "chart.js";
 import { MAX_NODE_VALUES } from "../components/dataflow-program";
 import { NodePlotColor } from "../model/utilities/node";
-import "./dataflow-node.sass";
+import "./dataflow-node.scss";
 
 interface NodePlotProps {
   display: boolean;
   data: any;
 }
+
+export interface MinigraphOptions {
+  backgroundColor?: string;
+  borderColor?: string;
+}
+
+export const defaultMinigraphOptions: MinigraphOptions = {
+  backgroundColor: NodePlotColor,
+  borderColor: NodePlotColor
+};
 
 let stepY = 5;
 
@@ -27,30 +37,36 @@ export const DataflowNodePlot = (props: NodePlotProps) => {
 };
 
 function lineData(node: any) {
-  const data = node.data.recentValues;
   const chartDataSets: ChartDataSets[] = [];
 
   let dsMax = 0;
   let dsMin = 0;
-  const dataset: ChartDataSets = {
-    backgroundColor: NodePlotColor,
-    borderColor: NodePlotColor,
-    borderWidth: 2,
-    pointRadius: 2,
-    data: [0],
-    fill: false,
-  };
-  chartDataSets.push(dataset);
+  Object.keys(node.data.watchedValues).forEach((valueKey: string) => {
+    const recentValues: any = node.data.recentValues[valueKey];
+    if (recentValues !== undefined) {
+      const customOptions = node.data.watchedValues?.[valueKey] || {};
+      const dataset: ChartDataSets = {
+        backgroundColor: NodePlotColor,
+        borderColor: NodePlotColor,
+        borderWidth: 2,
+        pointRadius: 2,
+        data: [0],
+        fill: false,
+        ...customOptions
+      };
 
-  const chData: any[] = [];
-  data.forEach((val: any) => {
-    if (isFinite(val)) {
-      chData.push(val);
-      dsMax = Math.max(dsMax, val);
-      dsMin = Math.min(dsMin, val);
+      const chData: any[] = [];
+      recentValues.forEach((val: any) => {
+        if (isFinite(val)) {
+          chData.push(val);
+          dsMax = Math.max(dsMax, val);
+          dsMin = Math.min(dsMin, val);
+        }
+      });
+      dataset.data = chData;
+      chartDataSets.push(dataset);
     }
   });
-  chartDataSets[0].data = chData;
   stepY = (dsMax - dsMin) / 2;
 
   const chartData: ChartData = {

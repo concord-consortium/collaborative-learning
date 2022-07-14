@@ -1,13 +1,14 @@
 // FIXME: ESLint is unhappy with these control components
 /* eslint-disable react-hooks/rules-of-hooks */
-import React, { useRef } from "react";
+import React, { FunctionComponent, SVGProps, useRef } from "react";
 import Rete, { NodeEditor, Node } from "rete";
 import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
-import "./dropdown-list-control.sass";
+import DropdownCaretIcon from "../../assets/icons/dropdown-caret.svg";
+import "./dropdown-list-control.scss";
 
 export interface ListOption {
   name: string;
-  icon?: string;
+  icon?: FunctionComponent<SVGProps<SVGSVGElement>>;
   val?: string | number; // if an option includes `val`, it will be used as the value, otherwise `name` will
 }
 
@@ -74,20 +75,20 @@ export class DropdownListControl extends Rete.Control {
                                       (this as any).update();
                                     });
       const option = options.find((opt) => optionValue(opt) === val);
-      const name = option ? option.name : val;
-      const icon = option && option.icon ? `#${option.icon}` : null;
+      const name = option?.name ?? val;
+      const icon = option?.icon?.({}) || null;
 
       return (
         <div className={`node-select ${listClass}`} ref={divRef}>
           <div className="item top" onMouseDown={handleChange(onItemClick)}>
             { icon &&
             <svg className="icon top">
-              <use xlinkHref={icon}/>
+              {icon}
             </svg>
             }
             <div className="label">{name}</div>
             <svg className="icon dropdown-caret">
-              <use xlinkHref="#icon-dropdown-caret"/>
+              <DropdownCaretIcon />
             </svg>
           </div>
           {showList ?
@@ -110,7 +111,7 @@ export class DropdownListControl extends Rete.Control {
                 >
                   { ops.icon &&
                   <svg className="icon">
-                    <use xlinkHref={`#${ops.icon}`}/>
+                    {ops.icon()}
                   </svg>
                   }
                   <div className="label">{ops.name}</div>
