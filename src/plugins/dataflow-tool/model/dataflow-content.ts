@@ -1,5 +1,6 @@
 import { types, Instance, applySnapshot, getSnapshot } from "mobx-state-tree";
 import { cloneDeep } from "lodash";
+import stringify from "json-stringify-pretty-compact";
 import { ToolContentModel } from "../../../models/tools/tool-types";
 import { DataflowProgramModel } from "./dataflow-program-model";
 import { ITileExportOptions } from "../../../models/tools/tool-content-info";
@@ -62,7 +63,7 @@ export const DataflowContentModel = ToolContentModel
         `    "dy": ${zoom.dy},`,
         `    "scale": ${zoom.scale}`,
         `  },`,
-        `  "program": ${JSON.stringify(self.programWithoutRecentValues())}`,
+        `  "program": ${stringify(self.programWithoutRecentValues())}`,
         `}`
       ].join("\n");
     }
