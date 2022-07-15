@@ -27,14 +27,14 @@ export class DemoOutputControl extends Rete.Control {
             : compProps.type === "Backyard Claw"
             ? <img src={ backyardClawFrames[clawFrame] } className="demo-output-image backyard-claw-image" />
             : <>
-              <img src={ grabberPaddle } className="demo-output-image grabber-paddle-image" />
-              <img src={ grabberChordFrames[chordFrame] } className="demo-output-image grabber-chord-image" />
-              <img
-                src={ grabberClawFrames[clawFrame] }
-                className="demo-output-image grabber-claw-image"
-                style={this.getClawRotateStyle(compProps.percentTilt)}
-              />
-            </>
+                <img src={ grabberPaddle } className="demo-output-image grabber-paddle-image" />
+                <img src={ grabberChordFrames[chordFrame] } className="demo-output-image grabber-chord-image" />
+                <img
+                  src={ grabberClawFrames[clawFrame] }
+                  className="demo-output-image grabber-claw-image"
+                  style={this.getClawRotateStyle(compProps.percentTilt)}
+                />
+              </>
           }
         </div>
       );
@@ -59,7 +59,7 @@ export class DemoOutputControl extends Rete.Control {
   private getPercentOpen = (val: number) => {
     let percentOpen = Math.min(1, val);
     percentOpen = Math.max(0, percentOpen);
-    return percentOpen
+    return percentOpen;
   };
 
   public setValue = (val: number) => {
