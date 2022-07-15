@@ -8,10 +8,6 @@ import { MinigraphOptions } from "../dataflow-node-plot";
 import { NodeDemoOutputTypes, NodePlotBlue, NodePlotRed } from "../../model/utilities/node";
 
 const minigraphOptions: Record<string, MinigraphOptions> = {
-  "speed": {
-    backgroundColor: NodePlotBlue,
-    borderColor: NodePlotBlue
-  },
   "tilt": {
     backgroundColor: "#fff",
     borderColor: NodePlotRed
@@ -69,15 +65,6 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
         if (outputType === "Grabber") {
           this.setupGrabberInputs(_node);
 
-          // Update grabber speed
-          const speedInput = inputs.speed?.length ? inputs.speed[0] : node.data.speed;
-          const speedValue = speedInput < 0 ? 0 : speedInput > 1 ? 1 : speedInput;
-          const speedControl = _node.inputs.get("speed")?.control as DemoOutputValueControl;
-          if (speedValue !== undefined) {
-            speedControl?.setValue(speedValue);
-          }
-          speedControl?.setConnected(inputs.speed?.length);
-
           // Update grabber tilt
           const tiltInput = inputs.tilt?.length ? inputs.tilt[0] : node.data.tilt;
           const tiltValue = tiltInput;
@@ -88,10 +75,6 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
           }
           tiltControl?.setConnected(inputs.tilt?.length);
         } else {
-          this.removeInput(_node, "speed");
-          if ("speed" in (node as any).data.watchedValues) {
-            delete (node as any).data.watchedValues.speed;
-          }
           this.removeInput(_node, "tilt");
           if ("tilt" in (node as any).data.watchedValues) {
             delete (node as any).data.watchedValues.tilt;
@@ -108,8 +91,6 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   private setupGrabberInputs(node: Node) {
-    (node as any).data.watchedValues.speed = minigraphOptions.speed;
-    this.addInput(node, "speed", "speed: ");
     (node as any).data.watchedValues.tilt = minigraphOptions.tilt;
     this.addInput(node, "tilt", "tilt: ");
   }
