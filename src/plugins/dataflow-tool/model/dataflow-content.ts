@@ -34,6 +34,20 @@ export const DataflowContentModel = ToolContentModel
     programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
   })
   .views(self => ({
+    programWithoutRecentValues() {
+      const { values, ...rest } = getSnapshot(self.program);
+      const castedValues = values as Record<string, any>;
+      const newValues: Record<string, any> = {};
+      if (values) {
+        Object.keys(castedValues).forEach((key: string) => {
+          const { recentValues, ...other } = castedValues[key];
+          newValues[key] = { ...other };
+        });
+      }
+      return { values: newValues, ...rest };
+    }
+  }))
+  .views(self => ({
     get isUserResizable() {
       return true;
     },
@@ -48,7 +62,7 @@ export const DataflowContentModel = ToolContentModel
         `    "dy": ${zoom.dy},`,
         `    "scale": ${zoom.scale}`,
         `  },`,
-        `  "program": ${JSON.stringify(self.program)}`,
+        `  "program": ${JSON.stringify(self.programWithoutRecentValues())}`,
         `}`
       ].join("\n");
     }
