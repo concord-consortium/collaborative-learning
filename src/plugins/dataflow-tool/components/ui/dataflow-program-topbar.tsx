@@ -105,7 +105,7 @@ const RecordButton = (props: RecordButtonProps) => {
 export const DataflowProgramTopbar = (props: TopbarProps) => {
   function refreshButtonClasses(){
     const status = props.serialDevice.hasPort() ? 'serial-on' : 'serial-off';
-    return `${status} icon-serial`;
+    return `${status} icon-refresh`;
   }
 
   return (
@@ -132,7 +132,8 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
       <div className="topbar-right">
         {props.showRateUI && <span className={"rate-ui"}>{`${props.lastIntervalDuration}ms`}</span>}
         <IconButton
-          icon="refresh" key="serial"
+          icon="serial"
+          key="serial"
           onClickButton={props.onSerialRefreshDevices}
           title="Refresh Serial Connection"
           disabled={props.readOnly}

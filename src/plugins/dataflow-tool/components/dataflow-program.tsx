@@ -963,7 +963,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private serialDeviceRefresh = () => {
-
     if (!this.stores.serialDevice.hasPort()){
       this.stores.serialDevice.requestAndSetPort()
         .then(() => {

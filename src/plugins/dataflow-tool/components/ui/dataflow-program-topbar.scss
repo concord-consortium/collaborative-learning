@@ -202,7 +202,7 @@ $duration-label-back: $gray-mid;
       border: 2px solid #bcbcbc;
     }
 
-    .icon-refresh {
+    .icon-refresh, .icon-serial {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -233,6 +233,18 @@ $duration-label-back: $gray-mid;
         }
         &:active {
           background-image: url("../../assets/icons/refresh/refresh-active.svg");
+        }
+      }
+      .serial {
+        width: 16px;
+        height: 16px;
+        background-repeat: no-repeat;
+        background-image: url("../../assets/icons/serialconnection/serial.svg");
+        &:hover {
+          background-image: url("../../assets/icons/serialconnection/serial.svg");
+        }
+        &:active {
+          background-image: url("../../assets/icons/serialconnection/serial.svg");
         }
       }
     }
