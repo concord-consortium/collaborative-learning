@@ -137,7 +137,7 @@ export class SensorSelectControl extends Rete.Control {
       const selectedChannel = channelsForType.find((ch: any) => ch.channelId === id);
 
       const getChannelString = (ch?: NodeChannelInfo | "none") => {
-        // console.log('SERIAL 2 use channel info to conditionally display any need for sensors: ', ch)
+        // SERIAL 2 use channel info to conditionally display any need for sensors
         if (!ch && (!id || id === "none")) return kSensorSelectMessage;
         if (ch === "none") return "None Available";
         if (!ch) return `${kSensorMissingMessage} ${id}`;

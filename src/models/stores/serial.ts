@@ -1,12 +1,13 @@
 import { NodeChannelInfo } from "src/plugins/dataflow-tool/model/utilities/node";
 
+
 export class SerialDevice {
     value: string;
     localBuffer: string;
     private port: SerialPort | null;
-    connectedStamp: Number | null;
+    connectChangeStamp: Number | null;
     lastConnectMessage: string | null;
-    deviceInfo: string | null
+    deviceInfo: SerialPortInfo | null
 
     constructor() {
       this.value = "0";
@@ -22,8 +23,9 @@ export class SerialDevice {
     }
 
     public updateConnectionInfo(timeStamp: Number | null, status: string ){
-      this.connectedStamp = timeStamp;
+      this.connectChangeStamp = timeStamp;
       this.lastConnectMessage = status;
+      console.log("last connect message: ", this.lastConnectMessage)
     }
 
     public hasPort(){
@@ -33,7 +35,7 @@ export class SerialDevice {
     public async requestAndSetPort(){
       try {
           this.port = await navigator.serial.requestPort();
-          // https://developer.mozilla.org/en-US/docs/Web/API/Serial populate the device type info
+          this.deviceInfo = await this.port.getInfo();
       }
 
       catch (error) {

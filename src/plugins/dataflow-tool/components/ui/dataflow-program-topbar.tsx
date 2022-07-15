@@ -19,7 +19,7 @@ interface TopbarProps {
   readOnly: boolean;
   showRateUI: boolean;
   lastIntervalDuration: number;
-  serialDeviceInfo: SerialDevice;
+  serialDevice: SerialDevice;
 }
 
 // const kProgressWidth = 76;
@@ -104,7 +104,7 @@ const RecordButton = (props: RecordButtonProps) => {
 
 export const DataflowProgramTopbar = (props: TopbarProps) => {
   function refreshButtonClasses(){
-    const status = props.serialDeviceInfo.hasPort() ? 'serial-on' : 'serial-off';
+    const status = props.serialDevice.hasPort() ? 'serial-on' : 'serial-off';
     return `${status} icon-serial`;
   }
 

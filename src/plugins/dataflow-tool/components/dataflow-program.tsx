@@ -172,7 +172,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           readOnly={readOnly || !this.isReady()}
           showRateUI={showRateUI}
           lastIntervalDuration={this.state.lastIntervalDuration}
-          serialDeviceInfo={this.stores.serialDevice}
+          serialDevice={this.stores.serialDevice}
         />}
         <div className={toolbarEditorContainerClass}>
           { showProgramToolbar && <DataflowProgramToolbar
@@ -394,14 +394,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private evaluateSerialStatus(){
     console.log('1 populate this.channels with evaluated serial state: ', this.channels)
-    const deviceHereSince = this.stores.serialDevice.connectedStamp;
+    const stamp = this.stores.serialDevice.connectChangeStamp;
     const portOpen = this.stores.serialDevice.hasPort();
     const serialCandidates = this.programEditor.nodes.filter((n) => {
       return n.data.sensor === "fsr" || n.data.sensor === "emg"
     });
 
     if (serialCandidates.length > 0 && !portOpen){
-      //serialCandidates.forEach((node) => { node.meta.needsSerial = true});
       console.log("serialCandidates: ", serialCandidates)
       console.log("this.channels: ", this.channels)
     }
