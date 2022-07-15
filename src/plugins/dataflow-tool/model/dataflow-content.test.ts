@@ -67,7 +67,7 @@ describe("DataflowContentModel", () => {
     expect(Object.values(nodes).length).toBe(4);
     expect(nodes["114"].data.generatorType).toBe("Sine");
     expect(nodes["114"].x).toBe(40);
-    expect(JSON.parse(values["121"].recentValues.nodeValue).length).toBe(17);
+    expect(values["121"].recentValues).toBeUndefined();
     expect(Object.values(nodes["135"].inputs).filter(
       (socket: any) => Object.keys(socket.connections).length > 0).length).toBe(3);
   });
