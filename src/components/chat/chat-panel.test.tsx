@@ -41,7 +41,7 @@ jest.mock("../../hooks/document-comment-hooks", () => ({
   })
 }));
 
-var mockUseMutation = jest.fn((callback: (...args: any[]) => void) => {
+const mockUseMutation = jest.fn((callback: (...args: any[]) => void) => {
   return { mutate: (...args: any[]) => callback(...args) };
 });
 jest.mock("react-query", () => ({
