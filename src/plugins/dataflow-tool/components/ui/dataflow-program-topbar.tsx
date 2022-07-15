@@ -135,7 +135,7 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
           icon="serial" key="serial"
           onClickButton={props.onSerialRefreshDevices}
           title="Refresh Serial Connection"
-          // disabled={props.readOnly}
+          disabled={props.readOnly}
           className={refreshButtonClasses()}
         />
       </div>
