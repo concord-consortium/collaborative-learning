@@ -272,11 +272,17 @@ $duration-label-back: $gray-mid;
       }
       &.serial-off {
         background-color: lightgoldenrodyellow;
+        animation: slowpulse 2s linear infinite;
+
+        @keyframes slowpulse {
+          50% {
+            opacity: .2;
+          }
+        }
       }
       &.serial-on {
         background-color: lightgreen;
       }
-
 
       .icon-serial.serial-on {
         background-color: $learninglog-green-light-7;
