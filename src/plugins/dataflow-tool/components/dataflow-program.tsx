@@ -34,7 +34,8 @@ import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
 import { DataflowProgramGraph,DataSet, ProgramDisplayStates } from "./ui/dataflow-program-graph";
 // import { uploadProgram, fetchProgramData, fetchActiveRelays, deleteProgram } from "../utilities/aws";
 import { NodeChannelInfo, NodeSensorTypes, NodeGeneratorTypes, ProgramDataRates, NodeTimerInfo,
-         virtualSensorChannels } from "../model/utilities/node";
+         virtualSensorChannels,
+         serialSensorChannels} from "../model/utilities/node";
 import { Rect, scaleRect, unionRect } from "../utilities/rect";
 import { DocumentContextReact } from "../../../components/document/document-context";
 
@@ -175,6 +176,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           readOnly={readOnly || !this.isReady()}
           showRateUI={showRateUI}
           lastIntervalDuration={this.state.lastIntervalDuration}
+          serialDevice={this.stores.serialDevice}
         />}
         <div className={toolbarEditorContainerClass}>
           { showProgramToolbar && <DataflowProgramToolbar
@@ -224,7 +226,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (this.isComplete()) {
       this.props.onCheckProgramRunState(this.props.programEndTime);
     }
-    
+
     this.setupOnSnapshot();
   }
 
@@ -335,7 +337,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             }
           });
         }
-        
+
         await this.programEditor.fromJSON(program as any);
         if (this.hasDataStorage()) {
           this.setState({disableDataStorage: true});
@@ -457,8 +459,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     //   return Number.isFinite(chValue) ? chValue : NaN;
     // }
 
-    // add virtual channels that always appear
-    this.channels = [...virtualSensorChannels];
+    // add virtual channels and live sensor channels
+    this.channels = [...virtualSensorChannels, ...serialSensorChannels];
 
     // hubStore.hubs.forEach(hub => {
     //   hub.hubChannels.forEach(ch => {
