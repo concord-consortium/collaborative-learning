@@ -30,6 +30,8 @@ import LightIcon from "../../assets/icons/sensor/light.svg";
 import O2Icon from "../../assets/icons/sensor/o2.svg";
 import ParticulatesIcon from "../../assets/icons/sensor/particulates.svg";
 import MoistureIcon from "../../assets/icons/sensor/moisture.svg";
+import EmgIcon from "../../assets/icons/sensor/emg.svg"
+import PressureIcon from "../../assets/icons/sensor/pressure.svg"
 
 import AbsoluteValueIcon from "../../assets/icons/transform/absolute-value.svg";
 import NegationIcon from "../../assets/icons/transform/negation.svg";
@@ -250,6 +252,18 @@ export const NodeSensorTypes = [
     units: "PM2.5",
     icon: ParticulatesIcon
   },
+  {
+    name: "EMG",
+    type: "emg",
+    units: "f(mv)",
+    icon: EmgIcon
+  },
+  {
+    name: "Pressure",
+    type: "pressure",
+    units: "f(n)",
+    icon: PressureIcon
+  }
 ];
 
 export const NodeDemoOutputTypes = [
