@@ -1,21 +1,21 @@
 import { DB } from "./db";
 import { Firestore } from "./firestore";
 
-var mockStores = {
+const mockStores = {
   appMode: "authed",
   demo: { name: "demo" },
   user: { portal: "test-portal" }
 };
-var mockDB = {
+const mockDB = {
   stores: mockStores
 } as DB;
-var mockDocGet = jest.fn();
-var mockDocSet = jest.fn();
-var mockDoc = jest.fn((path: string) => ({
+const mockDocGet = jest.fn();
+const mockDocSet = jest.fn();
+const mockDoc = jest.fn((path: string) => ({
       get: mockDocGet,
       set: (obj: any) => mockDocSet(obj)
     }));
-var mockCollection = jest.fn(() => ({ doc: mockDoc }));
+const mockCollection = jest.fn(() => ({ doc: mockDoc }));
 jest.mock("firebase/app", () => ({
   firestore: () => ({
     collection: mockCollection,

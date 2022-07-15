@@ -1,7 +1,9 @@
 import { types, Instance, applySnapshot, getSnapshot } from "mobx-state-tree";
 import { cloneDeep } from "lodash";
+import stringify from "json-stringify-pretty-compact";
 import { ToolContentModel } from "../../../models/tools/tool-types";
 import { DataflowProgramModel } from "./dataflow-program-model";
+import { ITileExportOptions } from "../../../models/tools/tool-content-info";
 import { DEFAULT_DATA_RATE } from "./utilities/node";
 
 export const kDataflowToolID = "Dataflow";
@@ -33,8 +35,37 @@ export const DataflowContentModel = ToolContentModel
     programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
   })
   .views(self => ({
+    programWithoutRecentValues() {
+      const { values, ...rest } = getSnapshot(self.program);
+      const castedValues = values as Record<string, any>;
+      const newValues: Record<string, any> = {};
+      if (values) {
+        Object.keys(castedValues).forEach((key: string) => {
+          const { recentValues, ...other } = castedValues[key];
+          newValues[key] = { ...other };
+        });
+      }
+      return { values: newValues, ...rest };
+    }
+  }))
+  .views(self => ({
     get isUserResizable() {
       return true;
+    },
+    exportJson(options?: ITileExportOptions) {
+      const zoom = getSnapshot(self.programZoom);
+      return [
+        `{`,
+        `  "type": "Dataflow",`,
+        `  "programDataRate": ${self.programDataRate},`,
+        `  "programZoom": {`,
+        `    "dx": ${zoom.dx},`,
+        `    "dy": ${zoom.dy},`,
+        `    "scale": ${zoom.scale}`,
+        `  },`,
+        `  "program": ${stringify(self.programWithoutRecentValues())}`,
+        `}`
+      ].join("\n");
     }
   }))
   .actions(self => ({

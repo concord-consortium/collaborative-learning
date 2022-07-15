@@ -16,10 +16,10 @@ import * as UrlParams from "../utilities/url-params";
 import { registerTools } from "../register-tools";
 registerTools(["Text"]);
 
-var mockDatabase = jest.fn();
-var mockFirestore = jest.fn();
-var mockFunctions = jest.fn();
-var mockAuthStateUnsubscribe = jest.fn();
+const mockDatabase = jest.fn();
+const mockFirestore = jest.fn();
+const mockFunctions = jest.fn();
+const mockAuthStateUnsubscribe = jest.fn();
 
 jest.mock("firebase/app", () => {
   return {
