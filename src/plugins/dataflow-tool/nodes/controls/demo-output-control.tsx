@@ -18,17 +18,23 @@ export class DemoOutputControl extends Rete.Control {
 
     this.component = (compProps: {value: number, percentOpen: number, percentTilt: number, type: string}) => {
       const controlClassName = compProps.type === "Light Bulb" ? "lightbulb-control" : compProps.type === "Backyard Claw" ? "backyard-claw-control" : "grabber-control";
-      const frame = compProps.percentOpen < 1 ? Math.floor(grabberClawFrames.length * compProps.percentOpen) :  grabberClawFrames.length - 1;
+      const clawFrame = this.getClawFrame(compProps.percentOpen);
+      const chordFrame = this.getChordFrame(compProps.percentTilt);
       return (
         <div className={`demo-output-control ${controlClassName}`}>
           {compProps.type === "Light Bulb"
             ? <img src={ compProps.value ? lightBulbOn : lightBulbOff } className="demo-output-image lightbulb-image" />
             : compProps.type === "Backyard Claw"
-            ? <img src={ backyardClawFrames[frame] } className="demo-output-image backyard-claw-image" />
+            ? <img src={ backyardClawFrames[clawFrame] } className="demo-output-image backyard-claw-image" />
             : <>
               <img src={ grabberPaddle } className="demo-output-image grabber-paddle-image" />
-              <img src={ grabberClawFrames[frame] } className="demo-output-image grabber-claw-image" />
-              </>
+              <img src={ grabberChordFrames[chordFrame] } className="demo-output-image grabber-chord-image" />
+              <img
+                src={ grabberClawFrames[clawFrame] }
+                className="demo-output-image grabber-claw-image"
+                style={this.getClawRotateStyle(compProps.percentTilt)}
+              />
+            </>
           }
         </div>
       );
@@ -73,11 +79,25 @@ export class DemoOutputControl extends Rete.Control {
 
   public setTilt = (tilt: number) => {
     this.props.tilt = tilt;
+    this.props.percentTilt = this.getPercentTilt(tilt);
     (this as any).update();
   };
 
   public setOutputType = (type: string) => {
     this.props.type = type;
     (this as any).update();
+  };
+
+  private getClawFrame = (percentOpen: number) => {
+    return percentOpen < 1 ? Math.floor(grabberClawFrames.length * percentOpen) :  grabberClawFrames.length - 1;
+  };
+
+  private getChordFrame = (percentTilt: number) => {
+    return percentTilt < 1 ? Math.floor(grabberChordFrames.length * percentTilt) : grabberChordFrames.length - 1;
+  };
+
+  private getClawRotateStyle = (percentTilt: number) => {
+    const degrees = (percentTilt - .5) * -50;
+    return { transform: `rotate(${degrees}deg)` };
   };
 }

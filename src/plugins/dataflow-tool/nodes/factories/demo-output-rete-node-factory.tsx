@@ -84,6 +84,7 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
           const tiltControl = _node.inputs.get("tilt")?.control as DemoOutputValueControl;
           if (tiltValue !== undefined) {
             tiltControl?.setValue(tiltValue);
+            demoOutput?.setTilt(tiltValue);
           }
           tiltControl?.setConnected(inputs.tilt?.length);
         } else {

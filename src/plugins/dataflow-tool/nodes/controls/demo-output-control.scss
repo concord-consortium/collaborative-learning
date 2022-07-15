@@ -33,7 +33,7 @@
 }
 
 .grabber-control {
-  height: 200px;
+  height: 190px;
   width: 113px;
 
   .grabber-paddle-image {
@@ -43,10 +43,18 @@
     top: 84px;
   }
 
+  .grabber-chord-image {
+    width: 55px;
+    height: 110px;
+    left: 12px;
+    top: 101px;
+  }
+
   .grabber-claw-image {
     width: 126px;
     height: 126px;
     left: 4px;
     top: 37px;
+    transform-origin: 9px 50%;
   }
 }
