@@ -62,7 +62,8 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
         nodeValue?.setConnected(inputs.nodeValue.length);
 
         const demoOutput = _node.controls.get("demoOutput") as DemoOutputControl;
-        demoOutput?.setValue(result);
+        demoOutput?.setValue(isNaN(n1) ? 0 : n1);
+        // demoOutput?.setValue(result);
 
         // Update inputs based on output type
         if (outputType === "Grabber") {
