@@ -254,13 +254,13 @@ export const NodeSensorTypes = [
   },
   {
     name: "EMG",
-    type: "emg",
+    type: "emg-reading",
     units: "f(mv)",
     icon: EmgIcon
   },
   {
-    name: "Pressure",
-    type: "pressure",
+    name: "Surface Pressure",
+    type: "fsr-reading",
     units: "f(n)",
     icon: PressureIcon
   }
@@ -338,6 +338,8 @@ export interface NodeChannelInfo {
   name: string;
   virtual?: boolean;
   virtualValueMethod?: (t: number) => number;
+  usesSerial?:boolean;
+  serialConnected?:boolean | null;
 }
 
 export const roundNodeValue = (n: number) => {
@@ -486,7 +488,14 @@ const virtualPartChannel: NodeChannelInfo = {
     const vals = [10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11];
     return vals[t % vals.length];
   } };
+const virtualEmgChannel: NodeChannelInfo = {
+  hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "EMG", channelId: "00007VIR",
+  missing: false, type: "emg-reading", units: "f(mv)", plug: 8, value: 0, virtual: true,
+  virtualValueMethod: (t: number) => {
+    const vals = [70, 72, 74, 103, 106, 120, 121, 122, 124, 140, 144, 143, 120, 145, 151, 167, 130, 118, 71, 70, 70];
+    return vals[t % vals.length];
+} };
 
 export const virtualSensorChannels: NodeChannelInfo[] = [
   virtualTempChannel, virtualHumidChannel, virtualCO2Channel, virtualO2Channel,
-  virtualLightChannel, virtualPartChannel ];
+  virtualLightChannel, virtualPartChannel, virtualEmgChannel ];
