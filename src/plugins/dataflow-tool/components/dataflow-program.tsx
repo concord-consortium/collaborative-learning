@@ -34,8 +34,7 @@ import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
 import { DataflowProgramGraph,DataSet, ProgramDisplayStates } from "./ui/dataflow-program-graph";
 // import { uploadProgram, fetchProgramData, fetchActiveRelays, deleteProgram } from "../utilities/aws";
 import { NodeChannelInfo, NodeSensorTypes, NodeGeneratorTypes, ProgramDataRates, NodeTimerInfo,
-         virtualSensorChannels,
-         serialSensorChannels} from "../model/utilities/node";
+         virtualSensorChannels, serialSensorChannels} from "../model/utilities/node";
 import { Rect, scaleRect, unionRect } from "../utilities/rect";
 import { DocumentContextReact } from "../../../components/document/document-context";
 
@@ -167,6 +166,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           onRunProgramClick={this.prepareToRunProgram}
           onStopProgramClick={this.stopProgram}
           onRefreshDevices={this.deviceRefresh}
+          onSerialRefreshDevices={this.serialDeviceRefresh}
           programDataRates={ProgramDataRates}
           dataRate={this.props.programDataRate}
           onRateSelectClick={this.props.onProgramDataRateChange}
@@ -960,6 +960,16 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     //     iot.refreshAllHubsChannelInfo();
     //   }
     // });
+  };
+
+  private serialDeviceRefresh = () => {
+
+    if (!this.stores.serialDevice.hasPort()){
+      this.stores.serialDevice.requestAndSetPort()
+        .then(() => {
+          this.stores.serialDevice.handleStream(this.channels);
+        });
+    }
   };
 
   private clearProgram = () => {

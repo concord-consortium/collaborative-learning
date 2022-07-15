@@ -12,6 +12,7 @@ interface TopbarProps {
   dataRate: number;
   onRateSelectClick: (rate: number) => void;
   onRefreshDevices: () => void;
+  onSerialRefreshDevices: () => void;
   isRunEnabled: boolean;
   runningProgram: boolean;
   remainingTimeInSeconds: number;
@@ -102,6 +103,11 @@ const RecordButton = (props: RecordButtonProps) => {
 };
 
 export const DataflowProgramTopbar = (props: TopbarProps) => {
+  function refreshButtonClasses(){
+    const status = props.serialDevice.hasPort() ? 'serial-on' : 'serial-off';
+    return `${status} icon-serial`;
+  }
+
   return (
     <div className="program-editor-topbar">
       <div className="topbar-left"></div>
@@ -125,8 +131,13 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
       </div>
       <div className="topbar-right">
         {props.showRateUI && <span className={"rate-ui"}>{`${props.lastIntervalDuration}ms`}</span>}
-        <IconButton icon="refresh" key="refresh" className={"icon-refresh"}
-          onClickButton={props.onRefreshDevices} title="Refresh Devices" disabled={props.readOnly} />
+        <IconButton
+          icon="refresh" key="serial"
+          onClickButton={props.onSerialRefreshDevices}
+          title="Refresh Serial Connection"
+          disabled={props.readOnly}
+          className={refreshButtonClasses()}
+        />
       </div>
     </div>
   );
