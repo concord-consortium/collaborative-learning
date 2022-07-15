@@ -31,3 +31,22 @@
     top: 0;
   }
 }
+
+.grabber-control {
+  height: 200px;
+  width: 113px;
+
+  .grabber-paddle-image {
+    width: 59px;
+    height: 32px;
+    left: -29px;
+    top: 84px;
+  }
+
+  .grabber-claw-image {
+    width: 126px;
+    height: 126px;
+    left: 4px;
+    top: 37px;
+  }
+}
