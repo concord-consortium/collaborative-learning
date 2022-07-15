@@ -499,3 +499,37 @@ const virtualEmgChannel: NodeChannelInfo = {
 export const virtualSensorChannels: NodeChannelInfo[] = [
   virtualTempChannel, virtualHumidChannel, virtualCO2Channel, virtualO2Channel,
   virtualLightChannel, virtualPartChannel, virtualEmgChannel ];
+
+  const emgSensorChannel: NodeChannelInfo = {
+    hubId: "SERIAL-ARDUINO",
+    hubName: "MuscleSpikerShield",
+    name: "emg",
+    channelId: "emg",
+    missing: false,
+    type: "emg-reading",
+    units: "f(mv)",
+    plug: 9,
+    value: 0,
+    virtual: false,
+    usesSerial: true,
+    serialConnected: null
+  };
+
+  const fsrSensorChannel: NodeChannelInfo = {
+    hubId: "SERIAL-ARDUINO",
+    hubName: "MuscleSpikerShield",
+    name: "fsr",
+    channelId: "fsr",
+    missing: false,
+    type: "fsr-reading",
+    units: "n",
+    plug: 10,
+    value: 0,
+    virtual: false,
+    usesSerial: true,
+    serialConnected: null
+  };
+
+  export const serialSensorChannels: NodeChannelInfo[] = [
+    emgSensorChannel, fsrSensorChannel
+  ];
