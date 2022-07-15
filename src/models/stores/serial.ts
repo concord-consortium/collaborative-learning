@@ -24,7 +24,8 @@ export class SerialDevice {
     public updateConnectionInfo(timeStamp: Number | null, status: string ){
       this.connectChangeStamp = timeStamp;
       this.lastConnectMessage = status;
-      console.log("last connect message: ", this.lastConnectMessage)
+      localStorage.setItem('last-connect-message', status)
+      //console.log(localStorage.getItem('last-connect-message'))
     }
 
     public hasPort(){

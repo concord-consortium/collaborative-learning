@@ -4,6 +4,7 @@ import { IconButton } from "../../../../components/utilities/icon-button";
 import { SerialDevice } from "src/models/stores/serial";
 
 import "./dataflow-program-topbar.scss";
+import { computeStrokeDashArray } from "src/plugins/drawing-tool/objects/drawing-object";
 
 interface TopbarProps {
   onRunProgramClick: () => void;
@@ -103,9 +104,25 @@ const RecordButton = (props: RecordButtonProps) => {
 };
 
 export const DataflowProgramTopbar = (props: TopbarProps) => {
-  function refreshButtonClasses(){
-    const status = props.serialDevice.hasPort() ? 'serial-on' : 'serial-off';
-    return `${status} icon-refresh`;
+
+  function serialButtonClasses(){
+    let status;
+
+    const isPhysicallyConnected = localStorage.getItem('last-connect-message') == 'connect';
+
+    if (!isPhysicallyConnected){
+      status = 'no-physical'
+    }
+
+    if (isPhysicallyConnected && props.serialDevice.hasPort()){
+      status = 'serial-on'
+    }
+
+    if (isPhysicallyConnected && !props.serialDevice.hasPort()){
+      status = 'serial-off'
+    }
+
+    return `${status} icon-serial`;
   }
 
   return (
@@ -131,14 +148,14 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
       </div>
       <div className="topbar-right">
         {props.showRateUI && <span className={"rate-ui"}>{`${props.lastIntervalDuration}ms`}</span>}
-        <IconButton
+        {<IconButton
           icon="serial"
           key="serial"
           onClickButton={props.onSerialRefreshDevices}
           title="Refresh Serial Connection"
           disabled={props.readOnly}
-          className={refreshButtonClasses()}
-        />
+          className={serialButtonClasses()}
+        />}
       </div>
     </div>
   );

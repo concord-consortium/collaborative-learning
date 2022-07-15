@@ -203,7 +203,7 @@ $duration-label-back: $gray-mid;
       width:80px;
     }
 
-    .icon-refresh, .icon-serial {
+    .icon-refresh {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -236,6 +236,52 @@ $duration-label-back: $gray-mid;
           background-image: url("../../assets/icons/refresh/refresh-active.svg");
         }
       }
+      .serial {
+        width: 16px;
+        height: 16px;
+        background-repeat: no-repeat;
+        background-image: url("../../assets/icons/serialconnection/serial.svg");
+        &:hover {
+          background-image: url("../../assets/icons/serialconnection/serial.svg");
+        }
+        &:active {
+          background-image: url("../../assets/icons/serialconnection/serial.svg");
+        }
+      }
+    }
+
+    .icon-serial {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      margin: 0;
+      margin-right: 5px;
+      padding: 0;
+      border: 2px solid #bcbcbc;
+      &:hover:not([disabled]) {
+        background-color: $gray-light-hover;
+        cursor: pointer;
+      }
+      &:active:not([disabled]) {
+        background-color: $gray-light-click;
+      }
+      &:disabled {
+        opacity: 0.6;
+      }
+      &.serial-off {
+        background-color: lightgoldenrodyellow;
+      }
+      &.serial-on {
+        background-color: lightgreen;
+      }
+
+
+      .icon-serial.serial-on {
+        background-color: $learninglog-green-light-7;
+      }
+
       .serial {
         width: 16px;
         height: 16px;
