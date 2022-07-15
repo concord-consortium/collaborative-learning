@@ -393,12 +393,18 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private evaluateSerialStatus(){
+    console.log('1 populate this.channels with evaluated serial state: ', this.channels)
     const deviceHereSince = this.stores.serialDevice.connectedStamp;
     const portOpen = this.stores.serialDevice.hasPort();
-    const nodesNeedingSerial = this.programEditor.nodes.find( (n) => {
-      n.data.virtual != false &&
-      n.data.sensor == "fsr" || n.data.sensor == "emg"
-    } );
+    const serialCandidates = this.programEditor.nodes.filter((n) => {
+      return n.data.sensor === "fsr" || n.data.sensor === "emg"
+    });
+
+    if (serialCandidates.length > 0 && !portOpen){
+      //serialCandidates.forEach((node) => { node.meta.needsSerial = true});
+      console.log("serialCandidates: ", serialCandidates)
+      console.log("this.channels: ", this.channels)
+    }
   }
 
   private updateChannels = () => {

@@ -137,15 +137,13 @@ export class SensorSelectControl extends Rete.Control {
       const selectedChannel = channelsForType.find((ch: any) => ch.channelId === id);
 
       const getChannelString = (ch?: NodeChannelInfo | "none") => {
+        // console.log('SERIAL 2 use channel info to conditionally display any need for sensors: ', ch)
         if (!ch && (!id || id === "none")) return kSensorSelectMessage;
         if (ch === "none") return "None Available";
         if (!ch) return `${kSensorMissingMessage} ${id}`;
         if (ch.missing) return `${kSensorMissingMessage} ${ch.channelId}`;
         let count = 0;
         channelsForType.forEach( c => { if (c.type === ch.type && ch.hubId === c.hubId) count++; } );
-
-        // SERIAL TODO - will need to either access store 
-        // or add props so this control can reflect that it needs serial to be connected        
 
         const chStr = ch.virtual
           ? `${ch.name} Demo Data`

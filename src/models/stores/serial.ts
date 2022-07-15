@@ -6,6 +6,7 @@ export class SerialDevice {
     private port: SerialPort | null;
     connectedStamp: Number | null;
     lastConnectMessage: string | null;
+    deviceInfo: string | null
 
     constructor() {
       this.value = "0";
@@ -32,6 +33,7 @@ export class SerialDevice {
     public async requestAndSetPort(){
       try {
           this.port = await navigator.serial.requestPort();
+          // https://developer.mozilla.org/en-US/docs/Web/API/Serial populate the device type info
       }
 
       catch (error) {

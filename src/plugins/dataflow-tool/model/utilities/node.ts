@@ -214,13 +214,13 @@ export const NodeSensorTypes = [
   {
     name: "EMG Reading",
     type: "emg-reading",
-    units: "f(mv)", 
+    units: "f(mv)",
     icon: "icon-emg-reading"
   },
   {
     name: "FSR Reading",
     type: "fsr-reading",
-    units: "n", 
+    units: "n",
     icon: "icon-emg-reading"
   }
 ];
@@ -282,6 +282,8 @@ export interface NodeChannelInfo {
   name: string;
   virtual?: boolean;
   virtualValueMethod?: (t: number) => number;
+  usesSerial?:boolean;
+  serialConnected?:boolean | null;
 }
 
 export const roundNodeValue = (n: number) => {
@@ -446,31 +448,35 @@ export const virtualSensorChannels: NodeChannelInfo[] = [
 // could be more dynamic, but for now we are ready for one of each type of sensor
 
 const emgSensorChannel: NodeChannelInfo = {
-  hubId: "SERIAL-ARDUINO", 
+  hubId: "SERIAL-ARDUINO",
   hubName: "Arduino w/ MuscleSpikerShield",
-  name: "emg", 
+  name: "emg",
   channelId: "emg",
-  missing: false, 
-  type: "emg-reading", 
-  units: "f(mv)", 
-  plug: 9, 
-  value: 0, 
+  missing: false,
+  type: "emg-reading",
+  units: "f(mv)",
+  plug: 9,
+  value: 0,
   virtual: false,
-};       
+  usesSerial: true,
+  serialConnected: null
+};
 
 const fsrSensorChannel: NodeChannelInfo = {
-  hubId: "SERIAL-ARDUINO", 
+  hubId: "SERIAL-ARDUINO",
   hubName: "Arduino w/ MuscleSpikerShield",
-  name: "fsr", 
+  name: "fsr",
   channelId: "fsr",
-  missing: false, 
-  type: "fsr-reading", 
-  units: "n", 
-  plug: 10, 
-  value: 0, 
+  missing: false,
+  type: "fsr-reading",
+  units: "n",
+  plug: 10,
+  value: 0,
   virtual: false,
-}; 
-  
+  usesSerial: true,
+  serialConnected: null
+};
+
 export const serialSensorChannels: NodeChannelInfo[] = [
   emgSensorChannel, fsrSensorChannel
 ];
