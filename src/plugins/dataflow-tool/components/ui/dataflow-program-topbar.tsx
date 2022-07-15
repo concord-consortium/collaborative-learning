@@ -1,6 +1,7 @@
 import React from "react";
 import { ProgramDataRate } from "../../model/utilities/node";
 import { IconButton } from "../../../../components/utilities/icon-button";
+import { SerialDevice } from "src/models/stores/serial";
 
 import "./dataflow-program-topbar.scss";
 
@@ -17,6 +18,7 @@ interface TopbarProps {
   readOnly: boolean;
   showRateUI: boolean;
   lastIntervalDuration: number;
+  serialDevice: SerialDevice;
 }
 
 // const kProgressWidth = 76;
