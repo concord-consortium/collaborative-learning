@@ -14,21 +14,31 @@
     "autoSectionProblemDocuments": false,
     "defaultDocumentTemplate": {
       "tiles": [
-        [
-          { "layout": { "height": 260 }, "content": { "type": "Image", "url": "curriculum/bio4community/images/thing.png" } },
-          { "content": { "type": "Text", "text": "Describe your evidence here" } }
-        ],
         {
           "content": {
             "type": "Table",
             "name": "Evidence Table",
             "columns": [
-              {"name":"Rationale","values":["Because I saw","That made me think"]},
-              {"name":"Evidence","values":["",""]}
+              {"name":"Evidence","values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
+              {"name":"What did you learn from it?","values":["","","","",""]},
+              {"name":"Your questions now","values":["","","","",""]}
+            ]
+          }
+        },
+        {
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p><strong>Can you help the main character in the story figure out how stress could cause physical problems?</strong></p>",
+              "<p>Discuss with your group--What do you think is the connection between stress and the phyiscal issue discussed? </p>",
+              "<p>Your answer:</p>",
+              "<p></p>",
+              "<p></p>",
+              "<p><em>After answering, continue reading to find out what happened next.</em></p>"
             ]
           }
         }
-        
       ]
     },
     "toolbar": [
@@ -93,23 +103,6 @@
               "dataTestItem": "supports-list-items",
               "documentTypes": ["publication", "personalPublication"],
               "properties": ["isTeacherDocument", "!isDeleted"]
-            },
-            {
-              "title": "Class",
-              "type": "published-problem-documents",
-              "dataTestHeader": "class-work-section-published",
-              "dataTestItem": "class-work-list-items",
-              "documentTypes": ["publication"],
-              "showStars": ["teacher"],
-              "properties": ["!isTeacherDocument"]
-            },
-            {
-              "title": "Class",
-              "type": "published-personal-documents",
-              "dataTestHeader": "class-work-section-personal",
-              "dataTestItem": "class-work-list-items",
-              "documentTypes": ["personalPublication"],
-              "properties": ["!isTeacherDocument"]
             }
           ]
         }
@@ -167,6 +160,18 @@
                         "type": "chapter1",
                         "content": {
                           "tiles": [
+                            {
+                              "display": "teacher",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p>Tell the students that we are trying something a bit different. Instead of just giving them evidence in a packet like we did for short term stress, we are giving them a story, different groups have different stories. The stories follow a main character as they try to figure out a health issue that is making them concerned.  The characters encounter evidence along the way and use it to figure out the issue.</p>",
+                                  "<p>They should work as a team and assign the cast. The narrator has  a lot to read. Other roles have much less.</p>",
+                                  "<p>They should answer the questions and fill in the table in their Workspace.</p>"
+                                ]
+                              }
+                            },
                             {
                               "id": "d3tBK1qdpQEqwI6U",
                               "content": {
