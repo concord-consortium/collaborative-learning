@@ -444,7 +444,7 @@ export const IntervalTimes: IntervalTime[] = [
 export const kRelaySelectMessage = "Select a relay";
 export const kSensorSelectMessage = "Select a sensor";
 export const kRelayMissingMessage = "Finding";
-export const kSensorMissingMessage = "Finding";
+export const kSensorMissingMessage = "⚠️";
 
 const virtualTempChannel: NodeChannelInfo = {
   hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "Temperature", channelId: "00001-VIR",
@@ -505,7 +505,7 @@ export const virtualSensorChannels: NodeChannelInfo[] = [
     hubName: "MuscleSpikerShield",
     name: "emg",
     channelId: "emg",
-    missing: false,
+    missing: true,
     type: "emg-reading",
     units: "f(mv)",
     plug: 9,
@@ -520,7 +520,7 @@ export const virtualSensorChannels: NodeChannelInfo[] = [
     hubName: "MuscleSpikerShield",
     name: "fsr",
     channelId: "fsr",
-    missing: false,
+    missing: true,
     type: "fsr-reading",
     units: "n",
     plug: 10,

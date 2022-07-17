@@ -37,6 +37,7 @@ import { NodeChannelInfo, NodeSensorTypes, NodeGeneratorTypes, ProgramDataRates,
          virtualSensorChannels, serialSensorChannels} from "../model/utilities/node";
 import { Rect, scaleRect, unionRect } from "../utilities/rect";
 import { DocumentContextReact } from "../../../components/document/document-context";
+import { SerialDevice } from "src/models/stores/serial";
 
 import "./dataflow-program.sass";
 
@@ -1066,7 +1067,47 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.updateRunState();
   };
 
+  private passSerialStateToChannel(sd: SerialDevice, channel: NodeChannelInfo){
+    if (sd.hasPort()){
+      channel.serialConnected = true;
+      channel.missing = false;
+    } else {
+      channel.serialConnected = false;
+      channel.missing = true;
+    }
+  };
+
   private updateNodeChannelInfo = (n: Node) => {
+
+    // 1 if not hasPort -> control option should show need for connection
+    // 2 the rest is button?
+
+    /* pass serial state to channels where relevant */
+
+    // check for channels length as autorun also catches times when channels is emptied
+    if (this.channels.length > 0 ){
+      this.channels.filter(c => c.usesSerial).forEach((ch) => {
+        this.passSerialStateToChannel(this.stores.serialDevice, ch)
+      })
+    }
+
+    // console.log("INPUT A A node that is here: ", n)
+    console.log("GIVEN: serialDevice: ", this.stores.serialDevice)
+    // if (this.channels.length > 0){
+    //   console.log("INPUT C relevant channels: ", this.channels.filter(c => c.usesSerial))
+    // }
+    // console.log("INPUT D localStorage: ", localStorage.getItem('last-connect-message'))
+    // @NEXT SERIAL we can do this here, I just know it
+    // update the channel if it is connected
+    // drop down through to node
+
+    // serialSensorChannels.forEach((ch) => {
+    //   console.log(this.stores.serialDevice)
+    //   console.log(this.stores.serialDevice.hasPort())
+    //   ch.serialConnected = this.stores.serialDevice.hasPort();
+    //   console.log("channel after connect: ", ch);
+    // })
+
     const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
     const relayList = n.controls.get("relayList") as RelaySelectControl;
     if (sensorSelect) {

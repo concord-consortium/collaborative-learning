@@ -132,15 +132,18 @@ export class SensorSelectControl extends Rete.Control {
                                     });
 
       const channelsForType = channels.filter((ch: NodeChannelInfo) => {
+        console.log("ID: ", id)
         return (ch.type === type) || (type === "none" && ch.type !== "relay");
       });
       const selectedChannel = channelsForType.find((ch: any) => ch.channelId === id);
 
       const getChannelString = (ch?: NodeChannelInfo | "none") => {
+        console.log("DO THE WORK HERE: ", ch, node)
+
         if (!ch && (!id || id === "none")) return kSensorSelectMessage;
         if (ch === "none") return "None Available";
         if (!ch) return `${kSensorMissingMessage} ${id}`;
-        if (ch.missing) return `${kSensorMissingMessage} ${ch.channelId}`;
+        if (ch.missing) return `${kSensorMissingMessage} connect to ${id}`;
         let count = 0;
         channelsForType.forEach( c => { if (c.type === ch.type && ch.hubId === c.hubId) count++; } );
         const chStr = ch.virtual

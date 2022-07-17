@@ -25,7 +25,10 @@ export class SerialDevice {
       this.connectChangeStamp = timeStamp;
       this.lastConnectMessage = status;
       localStorage.setItem('last-connect-message', status)
-      //console.log(localStorage.getItem('last-connect-message'))
+      //console.log("last connect message: ", localStorage.getItem('last-connect-message'))
+      if (this.lastConnectMessage == "disconnect" && this.connectChangeStamp !== undefined){
+        alert('Device has been physically disconnected.')
+      }
     }
 
     public hasPort(){
