@@ -163,26 +163,7 @@
                         "type": "Image",
                         "url": "curriculum/bio4community/images/SalivaTest.jpg"
                       }
-                    },
-                    {
-                        "content": {
-                          "type": "Text",
-                          "format": "html",
-                          "text": [
-                            "<p>Evidence 1: <a href='https://drive.google.com/file/d/1oNeWrCX6O7-u568L52az1E2dsafbVYIa/view'>The Effects of Stress on the Heart</a> (video)</p>",
-                            "<p>Evidence 2: <a href='https://docs.google.com/document/d/1sJeQJTULItNaogZdQiD7ezeHK6_nBxPI/edit'>All the Fuss About Cholesterol</a> (blog post)</p>",
-                            "<p>Evidence 3: <a href='https://drive.google.com/file/d/1BlPiPMFNdnd7iM0opd8cT_X7RF7-mdDQ/view'>Rakesh Sharma Blood Test Report</a></p>",
-                            "<p>Evidence 4: <a href='https://docs.google.com/document/d/1pTopb7NpJXDOiqp2L59HU9ta3lFP_aW_/edit'>Saliva Stress Test Results</a></p>",
-                            "<p>Evidence 5: <a href='https://docs.google.com/document/d/16wwZ9pktVZmzgufJS-hlUevWF1BQlB2B/edit'>(5-1) Conversation with Dr. Zeiders</a> </p>",
-                            "<p>Evidence 5: <a href='https://docs.google.com/document/d/1mKJKJq6DUwajNF7lCk9rUcLLu05SKQo9/edit'>(5-2) The Missing Link: Cholesterol, Cortisol, and Clogged Arteries</a> </p>",
-                            "<p>Evidence 6: TBD</p>",
-                            "<p>Evidence 7: TBD</p>",
-                            "<p>Animation 1: healthy med cholesterol full torso</p>",
-                            "<p>Animation 2: chronic stress med cholesterol full torso</p>",
-                            "<p>Model: 4-5 controls on stress and biological components + low (heart) and high magnification</p>"
-                          ]
-                        }
-                      }
+                    }
                   ],
                   "supports": []
               }

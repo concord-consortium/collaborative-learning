@@ -427,7 +427,7 @@
                                     "<p>Rakesh read the blog and realized he really did need to start paying more attention to the family group text. Meera was amazing at explaining stuff and her blog was really interesting! Based on her post he believed that his diet was mostly fine. He really did try to eat well balanced meals for dinner (at least on most nights) and his older son – Kabir – made sure that what he packed them for lunch was home-made food that even Naani would approve. There was almost always a piece of fruit or a vegetable curry in his lunch. </p>",
                                     "<p>Yet, he was still nervous about those blockages. If even babies have cholesterol, then was there was a chance that despite his healthy life habits he could still have too much cholesterol in his blood? The fear of his arteries getting clogged up was still not leaving him. He just couldn’t stop worrying about it no matter how hard he tried. </p>",
                                     "<p>That day at lunch, he felt like his taste buds could almost sense the cholesterol in his rice and beans. It was all feeling too stressful, so he decided to just get his blood checked and confirm whether he had high cholesterol or not. He called the doctor’s office and they ordered some tests and told him to go to the blood lab near his house. The next day he went to the lab right after work, did the blood test. Two days later he received an email from the lab, the results were attached. He clicked on the attachment: “Rakesh Sharma Blood Test Report”</p>",
-                                    "<p>Review the test results- EVIDENCE 3-Rakesh Sharma Blood Test Report - in your folder. </p>",
+                                    "<p>Review the test results- EVIDENCE 3-Rakesh Sharma Blood Test Report - in the Resource Library. </p>",
                                     "<p>Discuss the results with your group and together, answer the questions on the slides. Write what you learned from this evidence in your table.</p>",
                                     "<p>Continue reading to find out what happened next:</p>"
                                   ]
@@ -465,14 +465,395 @@
                                     "<p>Rakesh: “Well doctor what happened was that a close friend of mine had a minor heart attack last week. His doctor said that his blood vessels were clogged, and I read that cholesterol can cause clogged arteries. So, I just wanted to make sure that my cholesterol levels are not something I need to worry about. </p>",
                                     "<p>Dr. Lee: “Ah yes, that is true Mr. Sharma. High cholesterol can cause issues in your blood vessels, but stress has also been linked to heart attacks.”</p>",
                                     "<p>Rakesh: “Right. I remember finding a video online that showed that stress can cause blocked blood vessels too. My friend and I have the same job and similar responsibilities and I am stressed a lot too….” </p>",
-                                    "<p> Rakesh didn’t finish his sentence and Dr. Lee could tell that Rakesh seemed to be getting worried again. </p>",
-                                    "<p> Dr. Lee: “Listen Mr. Sharma, why don’t we order a test to measure your stress hormone levels? I can ask the nurse to administer the blood test before you leave today, and you will get the results in a week.”</p>",
+                                    "<p>Rakesh didn’t finish his sentence and Dr. Lee could tell that Rakesh seemed to be getting worried again. </p>",
+                                    "<p>Dr. Lee: “Listen Mr. Sharma, why don’t we order a test to measure your stress hormone levels? I can ask the nurse to administer the blood test before you leave today, and you will get the results in a week.”</p>",
                                     "<p>Rakesh still looked a bit worried but agreed and went to see the nurse. </p>",
                                     "<p>Once he got home, Rakesh was still feeling curious about stress tests and decided to research it more after dinner. He googled ‘how to test for stress’ and found that there were many ways to measure cortisol levels. He found a video explaining how saliva (spit) can be used to measure cortisol levels easily and quickly. The website also had a link to order the test and get results within 24 hours. Out of restlessness, and not wanting to wait a whole week for his results from Dr. Lee, Rakesh decided to order a saliva stress test as well. </p>",
                                     "<p>The test arrived the next day, he followed the directions and then mailed it back to the lab. As promised, within 24 hours, Rakesh got an email back from the lab with his results from the saliva test. His stomach tight with nervousness as he opened the email: “Saliva Stress Test”</p>",
-                                    "<p>Watch the video- Saliva Stress Test - in your slides. Then review the test results-  EVIDENCE 4-Saliva Stress Test Results - in your folder.</p>",
-                                    "<p> Discuss the video and test results with your group and together, answer the questions on the slides. </p>",
+                                    "<p>Watch the video- Saliva Stress Test - in the Resource Library. Then review the test results -  EVIDENCE 4-Saliva Stress Test Results - in the Resource Library.</p>",
+                                    "<p>Discuss the video and test results with your group and together, answer the questions on the slides. </p>",
                                     "<p>Write what you learned from this evidence in your table.</p>"
+                                  ]
+                                }
+                              }
+                              
+                            ],
+                            "supports": []
+                          }
+                        }
+                      ],
+          "supports": []
+        },
+        {
+          "description": "Story Ch5",
+          "ordinal": 5,
+          "title": "Rakesh: Stress and Heart Attacks",
+          "subtitle": "Chapter 5",
+          "disabled": [],
+          "sections": [
+                        {
+                          "type": "chapter3",
+                          "content": {
+                            "tiles": [
+                              {
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<h2>CHAPTER 5: DR. ZEIDERS</h2>",
+                                    "<p>Readings the test results and finding that his cortisol levels were too high, Rakesh could feel his chest tightening and hands sweating. He knew this was not good news, but he had no idea what to do about it. His thoughts raced and he started to feel dizzy. He closed his eyes and took several deep breaths to calm his body down. He decided that tomorrow he would call Dr. Lee and request a follow-up appointment. However, he knew the doctor was very busy and would not have any available appointments for the next two weeks. He thought about what he could do right now, and decided to also email the scientist in that video about saliva cortisol tests. Her name was Dr. Zeiders and her email was on the website. </p>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "123324sdljfasdghhkq34",
+                                "title": "Email from Dr. Zeiders",
+                                "content": {
+                                  "type": "Image",
+                                  "url": "curriculum/bio4community/images/drZeiders.jpg"
+                                }
+                              },
+                              {
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p>Surprisingly, Dr. Zeiders responded to Rakesh’s email by the next day. She said that she would be happy to meet with Rakesh online to chat about the test results and what her lab has discovered about the link between stress, cortisol, and clogged arteries. They set a time to meet over zoom. He was looking forward to his conversation with Dr. Zeiders.</p>",
+                                    "<p>Read - EVIDENCE 5-Conversation with Dr. Zeiders. </p>",
+                                    "<p>Discuss the conversation with your group and together, answer the questions on the slides. </p>",
+                                    "<p>Write what you learned from this evidence in your table.</p>"
+                                  ]
+                                }
+                              }                             
+                            ],
+                            "supports": []
+                          }
+                        }
+                      ],
+          "supports": []
+        },
+        {
+          "description": "Story Ch6",
+          "ordinal": 6,
+          "title": "Rakesh: Stress and Heart Attacks",
+          "subtitle": "Chapter 6",
+          "disabled": [],
+          "sections": [
+                        {
+                          "type": "chapter3",
+                          "content": {
+                            "tiles": [
+                              {
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p><strong>Chapter 6: CHILDREN ARE THE FUTURE</strong></p>",
+                                    "<p>A few minutes after finishing the zoom conversation with the scientist, Rakesh heard the front door opening. He could hear Ajay and Kabir throwing their backpacks onto the ground, taking off their shoes and running into the kitchen to make a snack for themselves. Rakesh went downstairs and joined them in the kitchen. </p>",
+                                    "<p>Rakesh: “So, what’d you boys do at school today? </p>",
+                                    "<p>Kabir: Nothing really. Senior year is kinda boring. </p>",
+                                    "<p>Rakesh: I’m sure there was at least one thing fun that happened at school today, no?  </p>",
+                                    "<p>Ajay: I learned something really cool in my science class!</p>",
+                                    "<p>Kabir: Of course you did Ajay. 7th grade is way more fun than senior year. You’re so lucky….I miss those good old days…</p>",
+                                    "<p>Ajay: Ugh why do you have to talk like some old uncle. You know you’re only 5 years older than me right? Jeez… </p>",
+                                    "<p>Rakesh: Okay now boys, be nice to each other! Ajay, what’d you learn in science today that was so cool?</p>",
+                                    "<p></p>",
+                                    "<p>Ajay looked at Kabir with a proud smile as though he had won the fight and then said</p>",
+                                    "<p>Ajay: Okay. So. We were talking about exercise and why it’s good for you and we found out it can make you happier and actually, dad, it like lowers your stress and stuff too! </p>",
+                                    "<p>Rakesh: Wait. Really? Exercise can decrease stress? </p>",
+                                    "<p>Ajay: Yeah! I’m not kidding! The school counselor also came into science class today too. And she told our teacher about how recess is really important for us. Because like all day we’re sitting and stuff. And so in recess we get a chance to exercise and lower our stress. </p>",
+                                    "<p>Rakesh: Beta (son in Hindi), this is amazing! I had no idea! </p>",
+                                    "<p>Kabir: Really, dad? You’re not just making Ajay feel good right?</p>",
+                                    "<p>Rakesh: No, I’m being serious! You kids teach me things all the time! </p>",
+                                    "<p>Rakesh really did learn a lot from his kids. He decided to give what his son said a try and started to incorporate exercise into his daily routine. He may not have been lifting heavy weights, but even going for a jog in the morning before making the kids breakfast felt really good. After his jogs, he always felt a little lighter, like the weight on his shoulders had lifted a bit. The more he exercised, the better he started to feel. However, he was often still stressed by the end of the day.</p>",
+                                    "<p></p>",
+                                    "<p>Use your evidence table to develop a model that shows how long-term stress can result in clogged blood vessels.</p>"
+                                  ]
+                                }
+                              }                              
+                            ],
+                            "supports": []
+                          }
+                        }
+                      ],
+          "supports": []
+        }
+      ]
+    },
+    {
+      "description": "Investigation 2",
+      "ordinal": 2,
+      "title": "Bio4Community: The Biology of Stress",
+      "problems": [
+        {
+          "description": "Story Ch1",
+          "ordinal": 1,
+          "title": "Maria: Stress and Focus",
+          "subtitle": "Chapter 1",
+          "disabled": [],
+          "sections": [
+                        {
+                        "type": "chapter1",
+                        "content": {
+                          "tiles": [
+                            {
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p>CHAPTER I: MATH TEST</p>",
+                                  "<p>María loved her family to bits and pieces. She would go to the ends of the earth for them. Her mom and step-dad worked hard every day to put a roof over their head. This often meant that they were at work for long hours and so María’s abuela stayed home and watched over her and her 3 younger siblings. Abuela did a lot for them but sometimes it got hard to take care of so many things, so María took it upon herself to help out around the house. She loved doing it because on top of getting to help her Abuela, it also meant that sometimes she got to be in charge of her siblings. </p>",
+                                  "<p>Her younger brothers and sister could be so annoying sometimes and yet so cute at the same time. She often picked them up from their elementary school and they would tell her everything that happened during their day with bright eyes and wide smiles which warmed María’s heart. Once they got home she walked their family dog, and then spent the afternoon making sure her siblings did their homework and daily chores before dinner. Their family tried to eat together every evening and Abuela’s cooking was the best. By the time María finished eating dinner and doing the dishes, it was usually already 7pm. She would then often chat or play video games with her friends for a while. She loved hanging out with her two best friends. Needless to say, this meant María stayed up until midnight most days to get her work done. Sometimes she was so tired she wished she could just go to sleep but her grades were important to her and she was doing well in school. </p>",
+                                  "<p>However, when she was in school she often had trouble focusing. She really did want to focus in class, but sometimes the teacher’s voice became nothing but white noise and María would zone out. She tried to make up for it by working hard on her homework, but homework alone does not prepare someone for tests. She needed to be able to pay attention in class if she wanted to keep her grades up. </p>",
+                                  "<p>One day after school, María felt like she was dragging her body home because she was so upset. That day she had taken a particularly hard math test and she had the sinking feeling that she didn’t do well on it. She tried, but just couldn’t focus.  She found herself staring at the paper and the numbers were glaring back at her making no sense. She couldn’t answer several of the questions at all. On top of that, her siblings just would not listen to her on their walk home. They were almost to the front of the house when they started fooling around.</p>",
+                                  "<p>Paco: Tito, watch me do a handstand.  </p>",
+                                  "<p>Tito: Lame. I bet you can’t run as fast as me</p>",
+                                  "<p>Paco: Bet I can!</p>",
+                                  "<p>Sandra: Hermana, I wanna run too!</p>",
+                                  "<p>Maria: No running, it’s the street. Come on chicos, we have to go home. </p>",
+                                  "<p>Tito: Catch me if you can!</p>",
+                                  "<p>Sandra: Me too! Me too!</p>",
+                                  "<p>Paco: Oh no you don’t!</p>",
+                                  "<p>Maria: Hey! Stop running! What are you doing?</p>",
+                                  "<p>Maria grabs her siblings by the back of their shirts to slow them down</p>",
+                                  "<p>Maria: Why do you never listen to me? Stop fooling around!</p>",
+                                  "<p>Her siblings were shocked by the snap in her tone. Sandra begins to cry at being yelled at, running into the house and straight to abuela. </p>",
+                                  "<p>Abuela: Nena, why are you crying?</p>",
+                                  "<p>Sandra: Mana screamed at me!</p>",
+                                  "<p>Maria: I did not! You weren’t listening to me cause all of you were screaming. </p>",
+                                  "<p>Tito: We were not! </p>",
+                                  "<p>Abuela: Maria, you have to go easy on them. They’re little. You’re older, you need to be patient with them.</p>",
+                                  "<p>Maria: You’re never on my side! You always choose them over me. </p>",
+                                  "<p>Abuela: Maria, Mija, that’s not true. I am on your side. What’s going on with you, Nena?</p>",
+                                  "<p>María: Es nada, Abuela. </p>",
+                                  "<p>Abuela: Ay. I know you too well for that. You can tell me if something is bothering you.</p>",
+                                  "<p>María: Well… I didn’t do well on my math test today. </p>",
+                                  "<p>Abuela: But you normally do so well. What happened?</p>",
+                                  "<p>María: I don’t know. Sometimes I can’t focus in class. I’m just so tired and I think of everything else in the world. I try to focus, I really do. But, I just can’t. </p>",
+                                  "<p>María choked back tears, trying to hide how upset she was. She felt as though no matter how hard she tried, her efforts were useless. </p>",
+                                  "<p>Abuela: Mi corazón, you’re tired. Of course you can’t focus. You’re stressed and sleep deprived. I’ve been telling you it’s not good to stay up till midnight so often. Why don’t you talk to your school counselor or one of your school teachers about how you feel? Aren’t you close with your science teacher? Talk to her. I’m sure they’ll understand and try to help you. You have to make this a priority and take care of yourself. </p>",
+                                  "<p>Maria: I just feel like I don’t even belong in these classes.</p>",
+                                  "<p>Abuela: Why would you say that? Of course you do.</p>",
+                                  "<p>Maria: It’s just… I remember Ms. Parker telling me that I don’t.</p>",
+                                  "<p>Abuela: What? When?</p>",
+                                  "<p></p>",
+                                  "<p>~flashback~ </p>",
+                                  "<p>Ms. Parker was handing back the math tests they had just taken. It was an AP math class and therefore the tests tend to be harder. This one was particularly hard and Maria knew she didn’t do as well as she would have liked. </p>",
+                                  "<p>Ms. Parker: Maria, can I talk to you for a second?</p>",
+                                  "<p>Maria: Y-yes, of course. </p>",
+                                  "<p>Ms. Parker: I noticed that you haven’t been doing well on your tests lately. I think it might be best if you dropped down from this class. </p>",
+                                  "<p>Maria: What?</p>",
+                                  "<p>Ms. Parker: I’m just saying it might be better for you if you take a step back. AP classes are difficult as it is and you don’t really need it if you don’t plan on going to college. I know your people normally don’t go to college so it may be best for you to just lighten the load.</p>",
+                                  "<p>Maria: O-oh.</p>",
+                                  "<p>~end flashback~ </p>",
+                                  "<p></p>",
+                                  "<p>Abuela: Maria. Do not listen to her.</p>",
+                                  "<p>Maria: What if she’s right, Abuela?</p>",
+                                  "<p>Abuela: She is not and you know it. You know you are going towards college. It is not that you are not meant for these classes. You are just stressed. </p>",
+                                  "<p>María knew her grandma was usually right about these things. She had never considered that maybe what she was feeling inside, the tense muscles and racing heartbeat, could be stress. Or that stress could be the reason she couldn’t focus. María decided to talk to her science teacher after school tomorrow. That decision made her feel a bit better.</p>",
+                                  "<p></p>",
+                                  "<p><strong>Do you think Abuela is right?</strong></p>",
+                                  "<p><strong>Discuss with your group--What do you think is the connection between stress and focus?</strong></p>"
+                                ]
+                              }
+                            }                            
+                          ]
+                        },
+                        "supports": []
+                        }
+                      ],
+          "supports": []
+        },
+        {
+          "description": "Story Ch2",
+          "ordinal": 2,
+          "title": "Maria: Stress and Focus",
+          "subtitle": "Chapter 2",
+          "disabled": [],
+          "sections": [
+                        {
+                          "type": "chapter2",
+                          "content": {
+                            "tiles": [
+                              {
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p>CHAPTER 2: LEARNING FROM MS. GUERRA</p>",
+                                    "<p>The next day after science class, María stayed behind and spoke with Ms. Guerra. She told her openly and honestly about how much she had been struggling to focus and how she wanted to be able to do better. In response, Ms. Guerra told María that high school could be tough and that she was glad that María was asking for help. She also had an interesting suggestion:</p>",
+                                    "<p>Ms. Guerra: If your issue is being able to focus, you need to work on growing more connections between the neurons in your brain! </p>",
+                                    "<p>María didn’t really understand what that meant. Ms. Guerra could sense her confusion based on the blank stare María gave her. Figuring María needed more of an explanation, Ms. Guerra pulled out slide show that she had used when she taught college courses a few years ago. Crowding around the computer, the two of them clicked on the link for the: “How our Brains Think” </p>",
+                                    "<p></p>",
+                                    "<p><strong>Watch the slide show- EVIDENCE 1-How our Brains Think - in your slides. </strong></p>",
+                                    "<p><strong>Discuss the animation in your group and together, answer the questions on the slides. </strong></p>",
+                                    "<p><strong>Write what you learned from this evidence in your table.</strong></p>",
+                                    "<p><strong></strong></p>"
+                                  ]
+                                }
+                              }                              
+                            ]
+                          },
+                          "supports": []
+                        }
+                      ],
+          "supports": []
+        },
+        {
+          "description": "Story Ch3",
+          "ordinal": 3,
+          "title": "Maria: Stress and Focus",
+          "subtitle": "Chapter 3",
+          "disabled": [],
+          "sections": [
+                        {
+                          "type": "chapter3",
+                          "content": {
+                            "tiles": [
+                              {
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<h2>CHAPTER 3: MAKING CONNECTIONS</h2>",
+                                    "<p>After watching the animation, María understood that in order to focus better, the signaling between neurons needed to get stronger. Her neurons simply needed to make more connections! It seemed stress had nothing to do with it after all. </p>",
+                                    "<p>The next week in school, María tried to practice focusing harder. Every time she was in class and caught herself feeling distracted she just thought about her neurons and concentrated as hard as she could to encourage them to make new connections. But despite her best efforts, it didn’t work. In fact, María felt like she was about to pop a blood vessel in her brain if she tried to focus any harder. No matter how hard she tried, she still caught herself daydreaming and texting even more. Resistance was futile. She also had so many things to do. </p>",
+                                    "<p>Mama: Mija, como estan sus hermanos? Ellos comiste?</p>",
+                                    "<p>Maria: Si, nosotros comimos.</p>",
+                                    "<p>Mama: Bien, ayudarles con sus tareas, ok?</p>",
+                                    "<p>Maria: Ok, Mama.</p>",
+                                    "<p>Papa: Paco y Tito tienen una conferencia con la maestra en una semana, verdad?</p>",
+                                    "<p>Maria: Si</p>",
+                                    "<p>Mama: Tú necesitas ir con nosotros para hablar con la maestra en inglés.</p>",
+                                    "<p>Maria: Pero, yo tengo una examen y necesito estudiar.</p>",
+                                    "<p>Papa: No podemos comprender sin ti. Es muy importante para ellos. </p>",
+                                    "<p>Maria: Okay…</p>",
+                                    "<p>Maria felt like she had so many things piling up on her plate, her shoulders felt heavier and heavier with each task. All this made focusing feel even more impossible. Feeling frustrated, María decided to look up “brain, stress, and neuron signaling” on Google. A few links down from the top, she came across a blog post: “Stress and the Brain”. </p>",
+                                    "<p></p>",
+                                    "<p><strong>Read the blog - EVIDENCE 2 - Stress and the Brain  - in the Resource Library. </strong></p>",
+                                    "<p><strong>Discuss the blog with your group and together, answer the questions on the slides. </strong></p>",
+                                    "<p><strong>Write what you learned from this evidence in your table.</strong></p>"
+                                  ]
+                                }
+                              }
+                            ],
+                            "supports": []
+                          }
+                        }
+                      ],
+          "supports": []
+        },
+        {
+          "description": "Story Ch4",
+          "ordinal": 4,
+          "title": "Maria: Stress and Focus",
+          "subtitle": "Chapter 4",
+          "disabled": [],
+          "sections": [
+                        {
+                          "type": "chapter3",
+                          "content": {
+                            "tiles": [
+                              {
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<h2>CHAPTER 4: IT’S ALL ABOUT THE NETWORKS</h2>",
+                                    "<p>After going through the blog, María began to understand that stress hormones were blocking her ability to focus. Who knew something in your brain could stop you from focusing? If stress hormones were stopping her from focusing, what else could they do? What was happening to her neurons? Her mind seemed fixated on these scary thoughts and she had a hard time stopping them. She was feeling anxious and unsettled. She decided to visit Ms. Guerra again tomorrow.</p>",
+                                    "<p>María didn’t have science the next day, so she waited till the end of the day to walk over to Ms. Guerra’s room. When she got there, Ms. Guerra was cleaning the classroom so María helped with the cleaning while telling her everything she learned in the blog last night. Ms. Guerra listened carefully to María and was curious herself. She suggested that María do a project about stress and focus. It would count towards her overall science grade in the class, and both of them would learn more about the topic. She even offered to email the scientist who wrote the blog post and ask for more resources that might help them both understand why stress hormones were affecting María’s ability to focus. María thought that was super cool… kind of like talking to a celebrity. </p>",
+                                    "<p>A few days later Ms. Guerra told María to stay after school because the scientist, Dr. Mackey, had responded! María was excited as she walked into Ms. Guerra’s room. The email Dr. Mackey sent had a report attached to it. So, Ms. Guerra clicked on the attachment and they both read Dr. Mackey’s Report</p>",
+                                    "<p></p>",
+                                    "<p><strong>Review the report- EVIDENCE 3- Dr. Mackey’s Report - in the Resource Library. </strong></p>",
+                                    "<p><strong>Discuss the report with your group and together, answer the questions on the slides. </strong></p>",
+                                    "<p><strong>Write what you learned from this evidence in your table.</strong></p>"
+                                  ]
+                                }
+                              }
+                            ],
+                            "supports": []
+                          }
+                        }
+                      ],
+          "supports": []
+        },
+        {
+          "description": "Story Ch5",
+          "ordinal": 5,
+          "title": "Maria: Stress and Focus",
+          "subtitle": "Chapter 5",
+          "disabled": [],
+          "sections": [
+                        {
+                          "type": "chapter3",
+                          "content": {
+                            "tiles": [
+                              {
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<h2>CHAPTER 5: SLEEP AND MOTIVATION </h2>",
+                                    "<p>The project and research helped María understand that the stress hormones caused her brain to think differently, with her fear neuron networks having stronger connections than the neuron networks that help her pay attention and focus. While interesting to learn, María was trying to figure out how to deal with these hormones so that she could build stronger attention networks. As she thought about all this, María had a realization. Her lack of focus seemed to happen only in the morning at school! She had no trouble focusing when she was talking to her siblings, helping them with their homework, playing video games with her friends, or even doing her homework at night! Why would the stress hormones only affect her at school and then stop affecting her when she got home? María decided these questions were worth one more trip to Ms. Guerra after school. She needed to solve this puzzle once and for all! </p>",
+                                    "<p>Ms. Guerra thought María’s question was a really good one. She herself did not have an answer so they decided to email Dr. Mackey again and ask. The following day Ms. Guerra found María as soon as school was over. She excitedly showed María the email and video that Dr. Mackey had sent. </p>",
+                                    "<p></p>",
+                                    "<p><strong>Read the email and watch the video- EVIDENCE 4- Dr. Mackey Email - in the Resource Library. </strong></p>",
+                                    "<p><strong>Discuss the email and video with your group and together, answer the questions on the slides. </strong></p>",
+                                    "<p><strong>Write what you learned from this evidence in your table.</strong></p>",
+                                    "<p><strong></strong></p>"
+                                  ]
+                                }
+                              }
+                              
+                            ],
+                            "supports": []
+                          }
+                        }
+                      ],
+          "supports": []
+        },
+        {
+          "description": "Story Ch6",
+          "ordinal": 6,
+          "title": "Maria: Stress and Focus",
+          "subtitle": "Chapter 6",
+          "disabled": [],
+          "sections": [
+                        {
+                          "type": "chapter3",
+                          "content": {
+                            "tiles": [
+                              {
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<h2>CHAPTER 6: FINDING SOLUTIONS TOGETHER </h2>",
+                                    "<p>After reading the email, María smiled to herself. Abuela was right - she always was. María was so excited she had to share the news with Abuela. She thanked Ms. Guerra and rushed home. María didn’t have to pick up her siblings from school that day and got home quickly. She swung the front door open and called out to Abuela. </p>",
+                                    "<p>María: ¡Abuela! ¡Abuela! ¡Abuela! </p>",
+                                    "<p>Abuela: ¡Sí! ¡Sí! ¡Sí! </p>",
+                                    "<p>María: I have to tell you something. I learned some stuff about my focus problem.</p>",
+                                    "<p>María energetically filled her grandmother in on her breakthrough. She barely took breaths between sentences, her words running into each other. Her grandmother listened intently and when María was done she told her that this was important information that the whole family should hear and talk about at dinner. </p>",
+                                    "<p>That night, as María, Abuela, Papá, Mamá, and María’s younger siblings - Tito, Paco and Sandra - were sitting around the table, María carefully explained to them everything she learned about the way stress hormones reduce connections and make it hard to focus. She also explained that getting enough sleep and motivating work can help when the brain is trying to make new connections. They all listened and were amazed by what she figured out.</p>",
+                                    "<p>María: So that’s why I’m not focused during school. I’m not motivated by it even though I want to do well. </p>",
+                                    "<p>Mamá: Wow, you learned all that and you worked so hard to learn it. Good job, mija. </p>",
+                                    "<p>Tito: Wh-what’s motiwasion? </p>",
+                                    "<p>María giggled at her youngest brother’s pronunciation. </p>",
+                                    "<p>Papá: It’s like when you manage to somehow climb onto the cabinet when you want a cookie but can’t climb into bed when it’s bedtime. The cookie is your motivation. </p>",
+                                    "<p>Paco: So hermana just needs a cookie?</p>",
+                                    "<p>Mamá: A cookie helps, but maybe you should also talk to your teachers about making school more motivating to learn. </p>",
+                                    "<p>María: I like that idea Mamá. I’ll talk to them tomorrow. </p>",
+                                    "<p>Abuela: I think we all need to get to sleep earlier too. Pobrecitos are always dragging their heads in the morning going to school. </p>",
+                                    "<p>Papá: I wouldn’t mind a few extra minutes of shut eye. </p>",
+                                    "<p>Sandra: Papá, you fall asleep the fastest. </p>",
+                                    "<p>The whole family burst into laughter. </p>",
+                                    "<p>That night María went to bed an hour earlier. She did feel more rested the next day. She was also looking forward to talking with Ms. Guerra about stress, motivation, and school work. Ms. Guerra was a great teacher, she would probably have some good ideas to make science more interesting, relevant, and motivating to learn. </p>",
+                                    "<p></p>",
+                                    "<p><strong>The End!</strong></p>",
+                                    "<p><strong></strong></p>",
+                                    "<p><strong>Use your evidence table to develop a model that shows how long-term stress can result in difficulty in focusing.</strong></p>",
+                                    "<p> </p>",
+                                    "<p></p>"
                                   ]
                                 }
                               }
