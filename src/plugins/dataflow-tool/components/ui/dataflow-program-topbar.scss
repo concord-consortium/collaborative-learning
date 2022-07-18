@@ -285,11 +285,11 @@ $duration-label-back: $gray-mid;
       }
       &.nodes-in-need.no-physical-connection {
         background-color: #FFC0CB;
-        animation: slowpulse 2s linear infinite;
+        //animation: slowpulse 2s linear infinite;
       }
       &.has-port.no-physical-connection { //occurs if wire yanked out
         background-color: #FFC0CB;
-        animation: slowpulse 2s linear infinite;
+        //animation: slowpulse 2s linear infinite;
       }
 
       .serial {
