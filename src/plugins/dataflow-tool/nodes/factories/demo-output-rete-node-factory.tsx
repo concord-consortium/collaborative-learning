@@ -80,19 +80,25 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
         if (outputType === "Grabber") {
           this.setupGrabberInputs(_node);
 
-          // Update grabber tilt
+          // Update grabber target tilt
           const tiltValue = inputs.tilt?.length ? inputs.tilt[0] : node.data.tilt;
           const tiltControl = _node.inputs.get("tilt")?.control as InputValueControl;
           if (tiltValue !== undefined && (tiltValue === 1 || tiltValue === 0 || tiltValue === -1)) {
             node.data.targetTilt = tiltValue;
           }
+          tiltControl?.setValue(node.data.targetTilt as number);
+          const tiltWord = node.data.targetTilt === 1 ? "up"
+            : node.data.targetTilt === -1 ? "down" : "center";
+          tiltControl?.setDisplayMessage(tiltWord);
+
+          // Move grabber tilt towards the target
           const tiltDirection = (node.data.targetTilt as number) > (node.data.currentTilt as number) ? 1
             : (node.data.targetTilt as number) < (node.data.currentTilt as number) ? -1 : 0;
           const nextTilt = (node.data.currentTilt as number) + tiltSpeed * tickTime * tiltDirection;
-          node.data.currentTilt = tiltDirection === 1 ? Math.min(nextTilt, (node.data.targetTilt as number))
+          node.data.currentTilt = tiltDirection > 0 ? Math.min(nextTilt, (node.data.targetTilt as number))
             : Math.max(nextTilt, (node.data.targetTilt as number));
-          tiltControl?.setValue(node.data.currentTilt as number);
           demoOutput?.setTilt(node.data.currentTilt as number);
+
           tiltControl?.setConnected(inputs.tilt?.length);
         } else {
           this.removeInput(_node, "tilt");
