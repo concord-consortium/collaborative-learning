@@ -10,7 +10,7 @@ import backyardClaw02 from "../../assets/backyard-claw/Claw_close_03.png";
 import backyardClaw01 from "../../assets/backyard-claw/Claw_close_02.png";
 import backyardClaw00 from "../../assets/backyard-claw/Claw_close_01.png";
 
-import paddle from "../../assets/grabber/paddle.png";
+import paddle from "../../assets/grabber/Paddle.png";
 import grabber07 from "../../assets/grabber/claw/Claw_close_08.png";
 import grabber06 from "../../assets/grabber/claw/Claw_close_07.png";
 import grabber05 from "../../assets/grabber/claw/Claw_close_06.png";
