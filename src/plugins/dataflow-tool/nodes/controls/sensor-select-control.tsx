@@ -136,7 +136,6 @@ export class SensorSelectControl extends Rete.Control {
       });
       const selectedChannel = channelsForType.find((ch: any) => ch.channelId === id);
 
-      // This is not ideal
       const getChannelString = (ch?: NodeChannelInfo | "none") => {
         if (!ch && (!id || id === "none")) return kSensorSelectMessage;
         if (ch === "none") return "None Available";

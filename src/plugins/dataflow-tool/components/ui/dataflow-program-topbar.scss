@@ -287,6 +287,10 @@ $duration-label-back: $gray-mid;
         background-color: #FFC0CB;
         animation: slowpulse 2s linear infinite;
       }
+      &.has-port.no-physical-connection { //occurs if wire yanked out
+        background-color: #FFC0CB;
+        animation: slowpulse 2s linear infinite;
+      }
 
       .serial {
         width: 16px;
