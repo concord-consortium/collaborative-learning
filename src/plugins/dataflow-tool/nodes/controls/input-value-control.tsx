@@ -2,9 +2,11 @@ import React from "react";
 import Rete, { NodeEditor, Node } from "rete";
 import { PlotButtonControlComponent } from "./plot-button-control";
 import { NodePlotColor } from "../../model/utilities/node";
-import "./demo-output-value-control.scss";
+import "./input-value-control.scss";
 
-export class DemoOutputValueControl extends Rete.Control {
+// A control closely tied to and displayed next to an input.
+// Includes a minigraph button as well as a display string.
+export class InputValueControl extends Rete.Control {
   private emitter: NodeEditor;
   private component: any;
   private props: any;

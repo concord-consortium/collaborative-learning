@@ -2,7 +2,7 @@ import Rete, { Node, Socket } from "rete";
 import { NodeData } from "rete/types/core/data";
 import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
 import { DemoOutputControl } from "../controls/demo-output-control";
-import { DemoOutputValueControl } from "../controls/demo-output-value-control";
+import { InputValueControl } from "../controls/input-value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
 import { MinigraphOptions } from "../dataflow-node-plot";
 import { NodeDemoOutputTypes, NodePlotBlue, NodePlotRed } from "../../model/utilities/node";
@@ -48,7 +48,7 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
         const outputType = outputTypeControl.getValue();
 
         // Update main display
-        const nodeValue = _node.inputs.get("nodeValue")?.control as DemoOutputValueControl;
+        const nodeValue = _node.inputs.get("nodeValue")?.control as InputValueControl;
         nodeValue?.setValue(result);
         if (outputType === "Light Bulb") {
           nodeValue?.setDisplayMessage(result === 0 ? "off" : "on");
@@ -68,7 +68,7 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
           // Update grabber tilt
           const tiltInput = inputs.tilt?.length ? inputs.tilt[0] : node.data.tilt;
           const tiltValue = tiltInput;
-          const tiltControl = _node.inputs.get("tilt")?.control as DemoOutputValueControl;
+          const tiltControl = _node.inputs.get("tilt")?.control as InputValueControl;
           if (tiltValue !== undefined) {
             tiltControl?.setValue(tiltValue);
             demoOutput?.setTilt(tiltValue);
@@ -101,7 +101,7 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
       if (!oldInput) {
         const input = new Rete.Input(inputKey, "Number", this.numSocket);
         node.addInput(input);
-        input.addControl(new DemoOutputValueControl(
+        input.addControl(new InputValueControl(
           this.editor,
           inputKey,
           node,
