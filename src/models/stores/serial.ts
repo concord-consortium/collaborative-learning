@@ -6,7 +6,8 @@ export class SerialDevice {
     private port: SerialPort | null;
     connectChangeStamp: Number | null;
     lastConnectMessage: string | null;
-    deviceInfo: SerialPortInfo | null
+    deviceInfo: SerialPortInfo | null;
+    serialNodesCount: number;
 
     constructor() {
       this.value = "0";
@@ -21,13 +22,21 @@ export class SerialDevice {
       });
     }
 
+    public setSerialNodesCount(n: number){
+      this.serialNodesCount = n;
+    }
+
     public updateConnectionInfo(timeStamp: Number | null, status: string ){
       this.connectChangeStamp = timeStamp;
       this.lastConnectMessage = status;
       localStorage.setItem('last-connect-message', status)
-      //console.log("last connect message: ", localStorage.getItem('last-connect-message'))
-      if (this.lastConnectMessage == "disconnect" && this.connectChangeStamp !== undefined){
-        alert('Device has been physically disconnected.')
+      if (this.connectChangeStamp !== undefined){
+        if (this.lastConnectMessage == "disconnect"){
+          alert('Device has been physically disconnected.')
+        }
+        if (this.lastConnectMessage == "connect"){
+          alert("Device has been plugged in.  Click the yellow button to establish connection.")
+        }
       }
     }
 

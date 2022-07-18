@@ -270,7 +270,7 @@ $duration-label-back: $gray-mid;
       &:disabled {
         opacity: 0.6;
       }
-      &.serial-off {
+      &.physical-connection.no-port {
         background-color: lightgoldenrodyellow;
         animation: slowpulse 2s linear infinite;
 
@@ -280,12 +280,8 @@ $duration-label-back: $gray-mid;
           }
         }
       }
-      &.serial-on {
+      &.has-port {
         background-color: lightgreen;
-      }
-
-      .icon-serial.serial-on {
-        background-color: $learninglog-green-light-7;
       }
 
       .serial {

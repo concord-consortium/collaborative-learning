@@ -452,35 +452,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private updateChannels = () => {
-    // const { hubStore } = this.stores; FIXME
     this.channels = [];
-
-    // function parseValue(value: string) {
-    //   const chValue = Number.parseFloat(value);
-    //   return Number.isFinite(chValue) ? chValue : NaN;
-    // }
-
-    // add virtual channels and live sensor channels
     this.channels = [...virtualSensorChannels, ...serialSensorChannels];
-
-    // hubStore.hubs.forEach(hub => {
-    //   hub.hubChannels.forEach(ch => {
-    //     // add channel if it is new
-    //     let chInfo = this.channels.find(ci => ci.channelId === ch.id);
-    //     if (!chInfo || (chInfo.hubId !== hub.hubId)) {
-    //       chInfo = {hubId: hub.hubId,
-    //                 hubName: hub.hubName,
-    //                 channelId: ch.id,
-    //                 missing: ch.missing,
-    //                 type: ch.type,
-    //                 units: ch.units,
-    //                 plug: ch.plug,
-    //                 name: ch.type,
-    //                 value: parseValue(ch.value)};
-    //       this.channels.push(chInfo);
-    //     }
-    //   });
-    // });
   };
 
   private updateRunAndGraphStates() {
@@ -970,6 +943,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           this.stores.serialDevice.handleStream(this.channels);
         });
     }
+
+    if (this.stores.serialDevice.hasPort()){
+      console.log('close port')
+      // this.stores.serialDevice.reader.cancel();
+      // await readableStreamClosed.catch(() => { /* Ignore the error */ });
+      // writer.close();
+      // await writableStreamClosed;
+      // await port.close();
+    }
   };
 
   private clearProgram = () => {
@@ -1041,6 +1023,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           };
 
     let processNeeded = false;
+
     this.programEditor.nodes.forEach((n: Node) => {
       const nodeProcess = nodeProcessMap[n.name];
       if (nodeProcess) {
@@ -1077,36 +1060,32 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
   };
 
-  private updateNodeChannelInfo = (n: Node) => {
-
-    // 1 if not hasPort -> control option should show need for connection
-    // 2 the rest is button?
-
-    /* pass serial state to channels where relevant */
-
-    // check for channels length as autorun also catches times when channels is emptied
+  // HERE 2
+  private exchangeSerialNeeds(nodes: Node[]){
+    // implementing with a count in case we want to count serial nodes later
+    let serialNodesCt = 0;
+    nodes.forEach((n) => {
+      if(n.data.sensor === 'emg' || n.data.sensor === 'fsr'){
+        serialNodesCt++
+      }
+    })
+    if (serialNodesCt > 0){
+      this.stores.serialDevice.setSerialNodesCount(1);
+    } else {
+      this.stores.serialDevice.setSerialNodesCount(0);
+    }
+    // channels need serial state so nodes can reflect it
     if (this.channels.length > 0 ){
       this.channels.filter(c => c.usesSerial).forEach((ch) => {
         this.passSerialStateToChannel(this.stores.serialDevice, ch)
       })
     }
+  }
 
-    // console.log("INPUT A A node that is here: ", n)
-    console.log("GIVEN: serialDevice: ", this.stores.serialDevice)
-    // if (this.channels.length > 0){
-    //   console.log("INPUT C relevant channels: ", this.channels.filter(c => c.usesSerial))
-    // }
-    // console.log("INPUT D localStorage: ", localStorage.getItem('last-connect-message'))
-    // @NEXT SERIAL we can do this here, I just know it
-    // update the channel if it is connected
-    // drop down through to node
+  private updateNodeChannelInfo = (n: Node) => {
 
-    // serialSensorChannels.forEach((ch) => {
-    //   console.log(this.stores.serialDevice)
-    //   console.log(this.stores.serialDevice.hasPort())
-    //   ch.serialConnected = this.stores.serialDevice.hasPort();
-    //   console.log("channel after connect: ", ch);
-    // })
+    // HERE 1
+    this.exchangeSerialNeeds(this.programEditor.nodes);
 
     const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
     const relayList = n.controls.get("relayList") as RelaySelectControl;

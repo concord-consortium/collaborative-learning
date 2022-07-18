@@ -132,18 +132,16 @@ export class SensorSelectControl extends Rete.Control {
                                     });
 
       const channelsForType = channels.filter((ch: NodeChannelInfo) => {
-        console.log("ID: ", id)
         return (ch.type === type) || (type === "none" && ch.type !== "relay");
       });
       const selectedChannel = channelsForType.find((ch: any) => ch.channelId === id);
 
+      // This is not ideal
       const getChannelString = (ch?: NodeChannelInfo | "none") => {
-        console.log("DO THE WORK HERE: ", ch, node)
-
         if (!ch && (!id || id === "none")) return kSensorSelectMessage;
         if (ch === "none") return "None Available";
         if (!ch) return `${kSensorMissingMessage} ${id}`;
-        if (ch.missing) return `${kSensorMissingMessage} connect to ${id}`;
+        if (ch.missing) return `${kSensorMissingMessage} connect to arduino`;
         let count = 0;
         channelsForType.forEach( c => { if (c.type === ch.type && ch.hubId === c.hubId) count++; } );
         const chStr = ch.virtual
@@ -271,7 +269,6 @@ export class SensorSelectControl extends Rete.Control {
       this.props.type = nch.type;
       this.putData("type", nch.type);
     }
-
     this.props.sensor = val;
     this.putData("sensor", val);
     (this as any).update();

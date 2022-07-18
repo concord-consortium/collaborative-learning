@@ -502,7 +502,7 @@ export const virtualSensorChannels: NodeChannelInfo[] = [
 
   const emgSensorChannel: NodeChannelInfo = {
     hubId: "SERIAL-ARDUINO",
-    hubName: "MuscleSpikerShield",
+    hubName: "Arduino",
     name: "emg",
     channelId: "emg",
     missing: true,
@@ -517,7 +517,7 @@ export const virtualSensorChannels: NodeChannelInfo[] = [
 
   const fsrSensorChannel: NodeChannelInfo = {
     hubId: "SERIAL-ARDUINO",
-    hubName: "MuscleSpikerShield",
+    hubName: "Arduino",
     name: "fsr",
     channelId: "fsr",
     missing: true,
