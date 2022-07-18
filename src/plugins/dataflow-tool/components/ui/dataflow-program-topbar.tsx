@@ -107,8 +107,8 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
   function serialButtonClasses(){
     let status;
     const { serialDevice } = props;
-    const physicalConnect = localStorage.getItem('last-connect-message') == "connect";
-    const physicalDisconnect = localStorage.getItem('last-connect-message') == "disconnect"
+    const physicalConnect = localStorage.getItem("last-connect-message") === "connect";
+    const physicalDisconnect = localStorage.getItem("last-connect-message") === "disconnect";
     const nodesInNeed = serialDevice.serialNodesCount > 0;
     const hasPort = serialDevice.hasPort();
 

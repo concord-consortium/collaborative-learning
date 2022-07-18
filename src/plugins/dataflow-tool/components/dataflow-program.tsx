@@ -945,7 +945,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
 
     if (this.stores.serialDevice.hasPort()){
-      console.log('close port')
+      // TODO
       // this.stores.serialDevice.reader.cancel();
       // etc to gracefully close connection
     }
@@ -1048,7 +1048,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private passSerialStateToChannel(sd: SerialDevice, channel: NodeChannelInfo){
-    console.log('passing')
     if (sd.hasPort()){
       channel.serialConnected = true;
       channel.missing = false;
@@ -1056,17 +1055,17 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       channel.serialConnected = false;
       channel.missing = true;
     }
-  };
+  }
 
-  // HERE 2
   private exchangeSerialNeeds(nodes: Node[]){
-    // implementing with a count in case we want to count serial nodes later
+    // implementing with a "count" of 1 or 0 in case we need to count nodes in future
     let serialNodesCt = 0;
     nodes.forEach((n) => {
-      if(n.data.sensor === 'emg' || n.data.sensor === 'fsr'){
-        serialNodesCt++
+      if(n.data.sensor === "emg" || n.data.sensor === "fsr"){
+        serialNodesCt++;
       }
-    })
+    });
+    // constraining all counts to 1 or 0 for now
     if (serialNodesCt > 0){
       this.stores.serialDevice.setSerialNodesCount(1);
     } else {
@@ -1075,8 +1074,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     // channels need serial state so nodes can reflect it
     if (this.channels.length > 0 ){
       this.channels.filter(c => c.usesSerial).forEach((ch) => {
-        this.passSerialStateToChannel(this.stores.serialDevice, ch)
-      })
+        this.passSerialStateToChannel(this.stores.serialDevice, ch);
+      });
     }
   }
 

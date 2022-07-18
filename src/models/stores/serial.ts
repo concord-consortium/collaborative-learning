@@ -4,7 +4,7 @@ export class SerialDevice {
     value: string;
     localBuffer: string;
     private port: SerialPort | null;
-    connectChangeStamp: Number | null;
+    connectChangeStamp: number | null;
     lastConnectMessage: string | null;
     deviceInfo: SerialPortInfo | null;
     serialNodesCount: number;
@@ -14,11 +14,11 @@ export class SerialDevice {
       this.value = "0";
       this.localBuffer = "";
 
-      navigator.serial.addEventListener('connect', (e) => {
+      (navigator as Navigator).serial?.addEventListener("connect", (e) => {
         this.updateConnectionInfo(e.timeStamp, e.type);
       });
 
-      navigator.serial.addEventListener('disconnect', (e) => {
+      (navigator as Navigator).serial?.addEventListener("disconnect", (e) => {
         this.updateConnectionInfo(e.timeStamp, e.type);
       });
     }
@@ -27,13 +27,13 @@ export class SerialDevice {
       this.serialNodesCount = n;
     }
 
-    public updateConnectionInfo(timeStamp: Number | null, status: string ){
+    public updateConnectionInfo(timeStamp: number | null, status: string ){
       this.connectChangeStamp = timeStamp;
       this.lastConnectMessage = status;
       localStorage.setItem("last-connect-message", status);
       // if (this.connectChangeStamp !== undefined){
       //   if (this.lastConnectMessage == "disconnect"){
-      //     alert('Device has been physically disconnected.')
+      //     alert("Device has been physically disconnected."")
       //   }
       //   if (this.lastConnectMessage == "connect"){
       //     alert("Device has been plugged in.  Click the yellow button to establish connection.")
