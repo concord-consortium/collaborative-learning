@@ -116,8 +116,6 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
     status += physicalConnect ? " physical-connection" : " no-physical-connection";
     status += physicalDisconnect ? " disconnected" : " not-interrupted";
     status += nodesInNeed ? " nodes-in-need" : " no-serial-needed";
-
-    console.log("OBJ: ", serialDevice, "STORED: ", localStorage.getItem("last-connect-message"));
     return `${status} icon-serial`;
   }
 

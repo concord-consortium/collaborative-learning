@@ -63,7 +63,7 @@ export class SerialDevice {
     }
 
     public async handleStream(channels: Array<NodeChannelInfo>){
-      await this.port?.open({ baudRate: 9600 }).catch((e: any) => console.log(e));
+      await this.port?.open({ baudRate: 9600 }).catch((e: any) => console.error(e));
 
         while (this.port?.readable) {
 
