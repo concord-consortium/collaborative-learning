@@ -14,6 +14,9 @@ const minigraphOptions: Record<string, MinigraphOptions> = {
   }
 };
 
+const clawSpeed = .003;
+const tiltSpeed = .002;
+
 export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
     super("Demo Output", numSocket);
@@ -32,11 +35,20 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
         this.setupGrabberInputs(node);
       }
 
+      node.data.targetClosed = 0;
+      node.data.currentClosed = node.data.targetClosed;
+      node.data.clawSpeed = .005;
+      node.data.targetTilt = 0;
+      node.data.currentTilt = node.data.targetTilt;
+      node.data.lastTick = Date.now();
+
       return node as any;
     }
   }
 
   public worker(node: NodeData, inputs: any, outputs: any) {
+    const now = Date.now();
+    const tickTime = now - (node.data.lastTick as number);
     const n1 = inputs.nodeValue.length ? inputs.nodeValue[0] : node.data.nodeValue;
     // if there is not a valid input, use 0
     // otherwise convert all non-zero to 1
@@ -55,7 +67,6 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
         } else {
           let percentClosed = Math.min(1, n1);
           percentClosed = Math.max(0, percentClosed);
-          // percentClosed = Math.round(percentClosed * 100);
           percentClosed = Math.round(percentClosed * 10) * 10;
           nodeValue?.setDisplayMessage(`${percentClosed}% Closed`);
         }
@@ -70,13 +81,18 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
           this.setupGrabberInputs(_node);
 
           // Update grabber tilt
-          const tiltInput = inputs.tilt?.length ? inputs.tilt[0] : node.data.tilt;
-          const tiltValue = tiltInput;
+          const tiltValue = inputs.tilt?.length ? inputs.tilt[0] : node.data.tilt;
           const tiltControl = _node.inputs.get("tilt")?.control as InputValueControl;
-          if (tiltValue !== undefined) {
-            tiltControl?.setValue(tiltValue);
-            demoOutput?.setTilt(tiltValue);
+          if (tiltValue !== undefined && (tiltValue === 1 || tiltValue === 0 || tiltValue === -1)) {
+            node.data.targetTilt = tiltValue;
           }
+          const tiltDirection = (node.data.targetTilt as number) > (node.data.currentTilt as number) ? 1
+            : (node.data.targetTilt as number) < (node.data.currentTilt as number) ? -1 : 0;
+          const nextTilt = (node.data.currentTilt as number) + tiltSpeed * tickTime * tiltDirection;
+          node.data.currentTilt = tiltDirection === 1 ? Math.min(nextTilt, (node.data.targetTilt as number))
+            : Math.max(nextTilt, (node.data.targetTilt as number));
+          tiltControl?.setValue(node.data.currentTilt as number);
+          demoOutput?.setTilt(node.data.currentTilt as number);
           tiltControl?.setConnected(inputs.tilt?.length);
         } else {
           this.removeInput(_node, "tilt");
@@ -92,6 +108,7 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
         _node.update();
       }
     }
+    node.data.lastTick = now;
   }
 
   private setupGrabberInputs(node: Node) {
