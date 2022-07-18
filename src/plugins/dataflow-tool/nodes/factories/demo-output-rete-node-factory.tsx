@@ -14,7 +14,7 @@ const minigraphOptions: Record<string, MinigraphOptions> = {
   }
 };
 
-const clawSpeed = .003;
+const clawSpeed = .002;
 const tiltSpeed = .002;
 
 export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
@@ -62,21 +62,35 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
         // Update main display
         const nodeValue = _node.inputs.get("nodeValue")?.control as InputValueControl;
         nodeValue?.setValue(result);
+        let newValue = isNaN(n1) ? 0 : n1;
         if (outputType === "Light Bulb") {
           nodeValue?.setDisplayMessage(result === 0 ? "off" : "on");
         } else {
-          let percentClosed = Math.min(1, n1);
+          // Update target percent closed
+          let percentClosed = Math.min(1, newValue);
           percentClosed = Math.max(0, percentClosed);
-          percentClosed = Math.round(percentClosed * 10) * 10;
-          nodeValue?.setDisplayMessage(`${percentClosed}% Closed`);
+          node.data.targetClosed = percentClosed;
+
+          // Close or open the claw towards the target
+          const closedDirection = percentClosed > (node.data.currentClosed as number) ? 1
+            : percentClosed < (node.data.currentClosed as number) ? -1 : 0;
+          const nextClosed = (node.data.currentClosed as number) + clawSpeed * tickTime * closedDirection;
+          node.data.currentClosed = closedDirection > 0 ? Math.min(nextClosed, (node.data.targetClosed as number))
+            : Math.max(nextClosed, (node.data.targetClosed as number));
+          newValue = node.data.currentClosed;
+
+          // Update the display message
+          const hundredPercentClosed = Math.round(newValue * 10) * 10;
+          nodeValue?.setDisplayMessage(`${hundredPercentClosed}% closed`);
         }
         nodeValue?.setConnected(inputs.nodeValue.length);
 
+        // Set the demo output's main value (lightbulb on/off, claw % closed)
         const demoOutput = _node.controls.get("demoOutput") as DemoOutputControl;
-        demoOutput?.setValue(isNaN(n1) ? 0 : n1);
+        demoOutput?.setValue(newValue);
         // demoOutput?.setValue(result);
 
-        // Update inputs based on output type
+        // Grabber specific updates
         if (outputType === "Grabber") {
           this.setupGrabberInputs(_node);
 
@@ -101,6 +115,7 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
 
           tiltControl?.setConnected(inputs.tilt?.length);
         } else {
+          // Remove tilt when grabber isn't selected
           this.removeInput(_node, "tilt");
           if ("tilt" in (node as any).data.watchedValues) {
             delete (node as any).data.watchedValues.tilt;
