@@ -22,7 +22,7 @@ $duration-label-back: $gray-mid;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 80%;
+    width: 70%;
 
     .running-container {
       &.countdown {
@@ -189,7 +189,7 @@ $duration-label-back: $gray-mid;
   .topbar-right {
     display: flex;
     justify-content: right;
-    width: 10%;
+    width: 20%;
 
     .rate-ui {
       display: flex;
@@ -212,7 +212,7 @@ $duration-label-back: $gray-mid;
       height: 28px;
       margin: 0;
       margin-right: 5px;
-      padding: 0;
+      padding: 0px 15px;
       border: 2px solid #bcbcbc;
       &:hover:not([disabled]) {
         background-color: $gray-light-hover;
@@ -293,7 +293,7 @@ $duration-label-back: $gray-mid;
       }
 
       .serial {
-        width: 16px;
+        width: 10px;
         height: 16px;
         background-repeat: no-repeat;
         background-image: url("../../assets/icons/serialconnection/serial.svg");

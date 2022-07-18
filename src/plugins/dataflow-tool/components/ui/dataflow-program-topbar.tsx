@@ -4,7 +4,6 @@ import { IconButton } from "../../../../components/utilities/icon-button";
 import { SerialDevice } from "src/models/stores/serial";
 
 import "./dataflow-program-topbar.scss";
-import { computeStrokeDashArray } from "src/plugins/drawing-tool/objects/drawing-object";
 
 interface TopbarProps {
   onRunProgramClick: () => void;
@@ -121,7 +120,8 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
 
   return (
     <div className="program-editor-topbar">
-      <div className="topbar-left"></div>
+      <div className="topbar-left">
+      </div>
       <div className="topbar-center">
         <RateSelectorComponent
           rateOptions={props.programDataRates}
@@ -141,8 +141,7 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
         </button>
       </div>
       <div className="topbar-right">
-        {props.showRateUI && <span className={"rate-ui"}>{`${props.lastIntervalDuration}ms`}</span>}
-        {<IconButton
+      {<IconButton
           icon="serial"
           key="serial"
           onClickButton={props.onSerialRefreshDevices}
@@ -150,6 +149,7 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
           disabled={props.readOnly}
           className={serialButtonClasses()}
         />}
+        {props.showRateUI && <span className={"rate-ui"}>{`${props.lastIntervalDuration}ms`}</span>}
       </div>
     </div>
   );
