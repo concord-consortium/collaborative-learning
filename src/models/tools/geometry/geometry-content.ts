@@ -5,7 +5,7 @@ import { Optional } from "utility-types";
 import { SelectionStoreModelType } from "../../stores/selection";
 import { addLinkedTable, removeLinkedTable } from "../table-links";
 import { ITileExportOptions, IDefaultContentOptions } from "../tool-content-info";
-import { ToolContentModel, ToolMetadataModel } from "../tool-types";
+import { toolContentModelHooks, ToolContentModel, ToolMetadataModel } from "../tool-types";
 import {
   getRowLabelFromLinkProps, IColumnProperties, ICreateRowsProperties, IRowProperties,
   ITableChange, ITableLinkProperties
@@ -318,9 +318,9 @@ export const GeometryContentModel = ToolContentModel
       }
     }
   }))
-  .actions(self => ({
-    doPostCreate(metadata: GeometryMetadataModelType) {
-      self.metadata = metadata;
+  .actions(self => toolContentModelHooks({
+    doPostCreate(metadata) {
+      self.metadata = metadata as GeometryMetadataModelType;
     },
     willRemoveFromDocument() {
       self.metadata.linkedTables.forEach(({ id: tableId }) => {
@@ -328,7 +328,9 @@ export const GeometryContentModel = ToolContentModel
         tableContent && tableContent.removeGeometryLink(self.metadata.id);
       });
       self.metadata.clearLinkedTables();
-    },
+    }
+  }))
+  .actions(self => ({
     selectObjects(board: JXG.Board, ids: string | string[]) {
       const _ids = Array.isArray(ids) ? ids : [ids];
       _ids.forEach(id => {

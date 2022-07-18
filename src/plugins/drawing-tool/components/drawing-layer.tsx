@@ -1,36 +1,26 @@
 import React from "react";
-import { extractDragTileType, kDragTileContent } from "../../../components/tools/tool-tile";
-import { DrawingContentModelType } from "../model/drawing-content";
-import { ToolTileModelType } from "../../../models/tools/tool-tile";
-import { DrawingToolChange, DrawingToolDeletion, DrawingToolMove,
-  DrawingToolUpdate } from "../model/drawing-types";
-import { safeJsonParse } from "../../../utilities/js-utils";
-import { reaction, IReactionDisposer, autorun } from "mobx";
+import { reaction, IReactionDisposer } from "mobx";
+import { clone, isAlive } from "mobx-state-tree";
 import { observer } from "mobx-react";
+import { extractDragTileType, kDragTileContent } from "../../../components/tools/tool-tile";
+import { DrawingContentModelType, DrawingObjectMove } from "../model/drawing-content";
+import { ToolTileModelType } from "../../../models/tools/tool-tile";
+import { safeJsonParse } from "../../../utilities/js-utils";
 import { ImageContentSnapshotOutType } from "../../../models/tools/image/image-content";
 import { gImageMap } from "../../../models/image-map";
 import { SelectionBox } from "./selection-box";
-import { DrawingObjectSnapshot, DrawingObjectType, DrawingTool, 
-  HandleObjectHover } from "../objects/drawing-object";
+import { DrawingObjectSnapshotForAdd, DrawingObjectType, DrawingTool, 
+  HandleObjectHover, 
+  IDrawingLayer} from "../objects/drawing-object";
 import { Point, ToolbarSettings } from "../model/drawing-basic-types";
-import { applyAction, getMembers, getSnapshot, SnapshotOut } from "mobx-state-tree";
-import { DrawingObjectMSTUnion,
-  getDrawingToolInfos, renderDrawingObject } from "./drawing-object-manager";
+import { getDrawingToolInfos, renderDrawingObject } from "./drawing-object-manager";
 import { ImageObject } from "../objects/image";
 
 const SELECTION_COLOR = "#777";
 const HOVER_COLOR = "#bbdd00";
 const SELECTION_BOX_PADDING = 10;
 
-function makeSetter(prop: string) {
-  return "set" + prop.charAt(0).toUpperCase() + prop.slice(1);
-}
-
 /**  ======= Drawing Layer ======= */
-
-interface ObjectMap {
-  [key: string]: DrawingObjectType|null;
-}
 
 interface DrawingToolMap {
   [key: string]: DrawingTool | undefined;
@@ -49,19 +39,18 @@ interface DrawingLayerViewState {
   selectedObjects: DrawingObjectType[];
   selectionBox: SelectionBox|null;
   hoverObject: DrawingObjectType|null;
+  objectsBeingDragged: DrawingObjectType[];
 }
 
 @observer
-export class DrawingLayerView extends React.Component<DrawingLayerViewProps, DrawingLayerViewState> {
+export class DrawingLayerView extends React.Component<DrawingLayerViewProps, DrawingLayerViewState> 
+    implements IDrawingLayer {
   public currentTool: DrawingTool|null;
   public tools: DrawingToolMap;
-  private objects: ObjectMap;
   private svgRef: React.RefObject<any>|null;
   private setSvgRef: (element: any) => void;
   private _isMounted: boolean;
   private disposers: IReactionDisposer[];
-  private fetchingImages: string[] = [];
-  private actionsCount: number;
 
   constructor(props: DrawingLayerViewProps) {
     super(props);
@@ -71,6 +60,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       selectionBox: null,
       selectedObjects: [],
       hoverObject: null,
+      objectsBeingDragged: [],
     };
 
     this.tools = {};
@@ -83,8 +73,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
     this.currentTool = this.tools.select!;
 
-    this.objects = {};
-
     this.svgRef = null;
     this.setSvgRef = (element) => {
       this.svgRef = element;
@@ -95,18 +83,22 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
   public componentDidMount() {
     this._isMounted = true;
-    this.actionsCount  = 0;
     this.disposers = [];
 
     this.disposers.push(reaction(
-      () => this.getContent().metadata.selectedButton,
+      () => this.getContent().selectedButton,
       selectedButton => this.syncCurrentTool(selectedButton)
     ));
 
+    // TODO: the list of selected objects is operated on directly by the model for example:
+    // deleteSelectedObjects. So it is redundant to have the selection stored here in the state
+    // too. There are still a few places working with this list of selected objects from the
+    // state instead of the model. 
     this.disposers.push(reaction(
-      () => this.getContent().metadata.selection.toJSON(),
+      () => this.getContent().selectedIds,
       selectedIds => {
-        const selectedObjects = selectedIds.map(id => this.objects[id]).filter(obj => !!obj) as DrawingObjectType[];
+        const selectedObjects = selectedIds.map(
+          id => this.getContent().objectMap[id]).filter(obj => !!obj) as DrawingObjectType[];
         this.setState({ selectedObjects });
       }
     ));
@@ -115,10 +107,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       () => this.getContent().toolbarSettings,
       settings => this.setCurrentToolSettings(settings)
     ));
-
-    this.disposers.push(autorun(() => {
-      this.syncChanges();
-    }));
   }
 
   public componentWillUnmount() {
@@ -154,10 +142,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     });
   }
 
-  public addNewDrawingObject(drawingObject: DrawingObjectType) {
-    // FIXME: for now we just get a snapshot to minimize the code changes
-    // in the future we'll want to just store the object directly
-    this.sendChange({action: "create", data: getSnapshot(drawingObject)});
+  public addNewDrawingObject(drawingObject: DrawingObjectSnapshotForAdd) {
+    this.getContent().addObject(drawingObject);
   }
 
   public setSelectedObjects(selectedObjects: DrawingObjectType[]) {
@@ -166,6 +152,10 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     const drawingContent = this.props.model.content as DrawingContentModelType;
     const selectedObjectIds = selectedObjects.map(object => object.id || "");
     drawingContent.setSelection(selectedObjectIds);
+  }
+
+  public getSelectedObjects(): DrawingObjectType [] {
+    return this.state.selectedObjects;
   }
 
   public setCurrentTool(tool: DrawingTool|null) {
@@ -182,12 +172,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   }
 
   public handleDelete() {
-    const {selectedObjects} = this.state;
-    if (selectedObjects.length > 0) {
-      const deletedObjects = selectedObjects.map(object => object.id);
-      this.sendChange({action: "delete", data: deletedObjects as DrawingToolDeletion});
-      this.setSelectedObjects([]);
-    }
+    this.getContent().deleteObjects(this.getContent().selectedIds);
   }
 
   public handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -209,10 +194,13 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   };
 
   // handles dragging of selected/hovered objects
+  // TODO: it seems this could be cleaned up. Keeping the state variable objectsBeingDragged
+  // locally in this function and modifying the local variable is not safe.
   public handleSelectedObjectMouseDown = (e: React.MouseEvent<any>, obj: DrawingObjectType) => {
     if (this.props.readOnly) return;
     let moved = false;
-    const {selectedObjects, hoverObject} = this.state;
+    const {selectedObjects, hoverObject } = this.state;
+    let { objectsBeingDragged } = this.state;
     let objectsToInteract: DrawingObjectType[];
     let needToAddHoverToSelection = false;
     if (hoverObject && !selectedObjects.some(object => object.id === hoverObject.id)) {
@@ -223,7 +211,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     }
     const starting = this.getWorkspacePoint(e);
     if (!starting) return;
-    const start = objectsToInteract.map(object => ({x: object.x, y: object.y}));
 
     e.stopPropagation();
 
@@ -235,19 +222,28 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       if (!current) return;
       const dx = current.x - starting.x;
       const dy = current.y - starting.y;
-      moved = moved || ((dx !== 0) && (dy !== 0));
+      moved = moved || ((dx !== 0) || (dy !== 0));
 
-      objectsToInteract.forEach((object, index) => {
-        object.setPosition(start[index].x + dx, start[index].y + dy);
+      if (objectsBeingDragged.length === 0) {
+        objectsBeingDragged = objectsToInteract.map(object => clone(object));
+        this.setState( {objectsBeingDragged});
+      }
+
+      objectsBeingDragged.forEach((object, index) => {
+        object.setPosition(objectsToInteract[index].x + dx, objectsToInteract[index].y + dy);
       });
 
       if (needToAddHoverToSelection) {
         // we delay until we confirm that the user is dragging the objects before adding the hover object
         // to the selection, to avoid messing with the click to select/deselect logic
         this.setSelectedObjects(objectsToInteract);
+        // Note: the hoverObject could be kind of in a weird state here. It might
+        // be both selected and hovered at the same time. However it is more
+        // simple to keep the hoverObject independent of the selection. It just
+        // represents the current object the mouse is over regardless of whether
+        // it is selected or not.
         needToAddHoverToSelection = false;
       }
-      this.forceUpdate();
     };
     const handleMouseUp = (e2: MouseEvent) => {
       e2.preventDefault();
@@ -255,17 +251,19 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
       if (moved) {
-        if (objectsToInteract.length > 0) {
-          const moves: DrawingToolMove = objectsToInteract.map((object) => ({
-            id: object.id || "",
-            destination: {x: object.x, y: object.y}
-          }));
-          this.sendChange({action: "move", data: moves});
-        }
+        const moves: DrawingObjectMove[] = objectsToInteract.map((object, index) => {
+          const draggedObject = objectsBeingDragged[index];
+          return {
+            id: object.id,
+            destination: {x: draggedObject.x, y: draggedObject.y}
+          };
+        });
+        this.getContent().moveObjects(moves);
       }
       else {
         this.handleObjectClick(e2, obj);
       }
+      this.setState({ objectsBeingDragged: []});
     };
 
     window.addEventListener("mousemove", handleMouseMove);
@@ -302,12 +300,11 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
   // when we add text, this filter can be used with this.renderObjects((object) => object.type !== "text")
   public renderObjects(_filter: (object: DrawingObjectType) => boolean) {
-    return Object.keys(this.objects).map((id) => {
-      const object = this.objects[id];
+    return this.getContent().objects.map((object) => {
       if (!object || !_filter(object)) {
         return null;
       }
-      return renderDrawingObject(object, this.getContent(), this.handleObjectHover);
+      return renderDrawingObject(object, this.handleObjectHover);
     });
   }
 
@@ -359,6 +356,10 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         ? this.state.selectedObjects.indexOf(this.state.hoverObject) !== -1
         : false;
 
+    const idsBeingDragged = this.state.objectsBeingDragged.map(object => object.id);
+    const objectsToRenderSelected = this.state.objectsBeingDragged.length > 0 ? 
+      this.state.objectsBeingDragged : this.state.selectedObjects;
+
     return (
       <div className="drawing-layer"
           data-testid="drawing-layer"
@@ -368,50 +369,21 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
           onDrop={this.handleDrop} >
 
         <svg xmlnsXlink="http://www.w3.org/1999/xlink" width={1500} height={1500} ref={this.setSvgRef}>
-          {this.renderObjects(object => object.type === "image")}
-          {this.renderObjects(object => object.type !== "image")}
-          {this.renderSelectedObjects(this.state.selectedObjects, SELECTION_COLOR)}
-          {this.state.hoverObject
-            ? this.renderSelectedObjects([this.state.hoverObject], hoveringOverAlreadySelectedObject
-              ? SELECTION_COLOR : HOVER_COLOR)
+          {this.renderObjects(object => object.type === "image" && !idsBeingDragged.includes(object.id))}
+          {this.renderObjects(object => object.type !== "image" && !idsBeingDragged.includes(object.id))}
+          {this.state.objectsBeingDragged.map((object) => renderDrawingObject(object))}
+          {this.renderSelectedObjects(objectsToRenderSelected, SELECTION_COLOR)}
+          {(this.state.hoverObject && !hoveringOverAlreadySelectedObject && isAlive(this.state.hoverObject))
+            ? this.renderSelectedObjects([this.state.hoverObject], HOVER_COLOR)
             : null}
           {this.state.currentDrawingObject
-            ? renderDrawingObject(this.state.currentDrawingObject, this.getContent())
+            ? renderDrawingObject(this.state.currentDrawingObject)
             : null}
           {this.state.selectionBox ? this.state.selectionBox.render() : null}
         </svg>
       </div>
     );
   }
-
-  // The filename is passed here so it gets added to the imageEntry in the ImageMap
-  // This imageEntry is used as the transport object during drag and drop operations
-  // so it needs this filename so places the image is dropped on can have the file
-  // name too.
-  // Currently it is probably not possible to drag an image out of a drawing tile,
-  // however the same image might be used in an image tile.  These two tiles will
-  // share the same imageEntry so when either creates the imageEntry they need to
-  // include the filename.
-  private updateLoadingImages = (url: string, filename?: string) => {
-    if (this.fetchingImages.indexOf(url) > -1) return;
-    this.fetchingImages.push(url);
-
-    gImageMap.getImage(url, { filename })
-      .then(image => {
-        if (!this._isMounted) return;
-
-        // Additional code was removed here because now the image components
-        // should be watching the gImageMap for changes themselves
-
-        // update mst content if conversion occurred
-        if (image.contentUrl && (url !== image.contentUrl)) {
-          this.getContent().updateImageUrl(url, image.contentUrl);
-        }
-      })
-      .catch(() => {
-        console.warn("error loading image. url", url, "filename", filename);
-      });
-  };
 
   private getContent() {
     return this.props.model.content as DrawingContentModelType;
@@ -487,139 +459,12 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       });
   }
 
-  private sendChange(change: DrawingToolChange): any {
-    const drawingContent = this.props.model.content as DrawingContentModelType;
-    drawingContent.applyChange(change);
-  }
-
-  private executeChange(change: DrawingToolChange) {
-    switch (change.action) {
-      case "create":
-        this.createDrawingObject(change.data);
-        break;
-      case "move":
-        this.moveDrawingObjects(change.data);
-        break;
-      case "update":
-        this.updateDrawingObjects(change.data);
-        break;
-      case "delete":
-        this.deleteDrawingObjects(change.data);
-        break;
-    }
-  }
-
-  private createDrawingObject(data: DrawingObjectSnapshot) {
-    const drawingObjectMST = DrawingObjectMSTUnion.create(data);
-    switch (data.type) {
-      case "image": {
-        const imageData = data as SnapshotOut<typeof ImageObject>;
-        const imageEntry = gImageMap.getCachedImage(imageData.url);
-        if (!imageEntry) {
-          // If this image hasn't been loaded to gImageMap, trigger that loading.
-          // The ImageObject will automatically be watching for changes to this
-          // imageEntry and update itself when the load is done.
-          //
-          // The filename is passed so that it gets added to the imageEntry in the
-          // ImageMap. See updateLoadingImages for more details.
-          this.updateImageUrl(imageData.url, imageData.filename);
-        }
-        break;
-      }
-      default:
-        // We don't need to do anything in this case
-        break;
-    }
-    if (drawingObjectMST?.id) {
-      const objectId = drawingObjectMST.id;
-      if (this.objects[objectId]) {
-        console.warn(`DrawingLayer.createDrawingObject detectected duplicate ${data.type} with id ${objectId}`);
-      }
-      this.objects[objectId] = drawingObjectMST;
-      this.forceUpdate();
-    }
-  }
-
-  private moveDrawingObjects(moves: DrawingToolMove) {
-    for (const move of moves) {
-      const drawingObject = this.objects[move.id];
-      if (drawingObject) {
-        drawingObject.setPosition(move.destination.x, move.destination.y);
-      }
-    }
-  }
-
-  private updateImageUrl(url: string, filename?: string) {
-    this.updateLoadingImages(url, filename);
-  }
-
-  private updateDrawingObjects(update: DrawingToolUpdate) {
-    const {ids, update: {prop, newValue}} = update;
-    const action = makeSetter(prop);
-    for (const id of ids) {
-      const drawingObject = this.objects[id];
-
-      // TODO: this approach is temporary to support the legacy approach of saving
-      // property changes. If we have migration of the old state, then this can
-      // probably go away
-      const objActions = getMembers(drawingObject).actions;
-      if (objActions.includes(action)) {
-        applyAction(drawingObject, {name: action, args: [newValue]});
-      } else {
-        console.warn("Trying to update unsupported drawing object", drawingObject?.type, "property", prop);
-      }
-
-      // Note: I don't see any place where something records an url update event
-      // However this case has been handled in the past, so it is still handled here.
-      // If the url changes, the url in the drawingObject will be updated by
-      // the code above.
-      // Then updateImageUrl is called which will trigger a loading of this url into
-      // the ImageMap. The ImageComponent is watching this url through the displayUrl
-      // property and will show the placeholder image until the new url is loaded.
-      if ((drawingObject?.type === "image") && (prop === "url")) {
-        const url = newValue as string;
-        this.updateImageUrl(url);
-      }
-    }
-  }
-
-  private deleteDrawingObjects(idsToDelete: string[]) {
-    for (const id of idsToDelete) {
-      const drawingObject = this.objects[id];
-      if (drawingObject) {
-        const {selectedObjects} = this.state;
-        const index = selectedObjects.indexOf(drawingObject);
-        if (index !== -1) {
-          selectedObjects.splice(index, 1);
-        }
-        delete this.objects[id];
-        this.setState({selectedObjects, hoverObject: null});
-      }
-    }
-  }
-
   private forEachObject(callback: (object: DrawingObjectType, key?: string) => void) {
-    const {objects} = this;
-    Object.keys(objects).forEach((id) => {
-      const object = objects[id];
+    const {objects} = this.getContent();
+    objects.forEach((object) => {
       if (object) {
-        callback(object, id);
+        callback(object, object.id);
       }
     });
-  }
-
-  private syncChanges() {
-    const drawingContent = this.props.model.content as DrawingContentModelType;
-    const currentChangesLength = drawingContent.changes ? drawingContent.changes.length : 0;
-    const prevChanges = this.actionsCount;
-
-    if (currentChangesLength > prevChanges) {
-      for (let i = prevChanges; i < currentChangesLength; i++) {
-        const change = JSON.parse(drawingContent.changes[i]) as DrawingToolChange;
-        this.executeChange(change);
-      }
-      this.actionsCount = currentChangesLength;
-      this.forceUpdate();
-    }
   }
 }

@@ -5,7 +5,7 @@ import { ToolTileModel } from "../../../models/tools/tool-tile";
 import { Provider } from "mobx-react";
 import { specStores } from "../../../models/stores/spec-stores";
 import { ModalProvider } from "react-modal-hook";
-import { DrawingContentModel } from "../model/drawing-content";
+import { createDrawingContent } from "../model/drawing-content";
 import DrawingToolComponent from "./drawing-tool";
 
 // The starter tile needs to be registered so the ToolTileModel.create
@@ -17,7 +17,7 @@ describe("DrawingToolComponent", () => {
 
   const stores = specStores();
 
-  const content = DrawingContentModel.create();
+  const content = createDrawingContent();
   const model = ToolTileModel.create({content});
 
   render(<div className="document-content" data-testid="document-content"/>);

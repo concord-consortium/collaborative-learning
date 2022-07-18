@@ -1,10 +1,10 @@
-import { Instance, SnapshotIn, types } from "mobx-state-tree";
+import { observer } from "mobx-react";
+import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
-import { computeStrokeDashArray } from "../model/drawing-content";
-import { DrawingTool, FilledObject, IDrawingComponentProps, IDrawingLayer, 
+import { computeStrokeDashArray, DrawingTool, FilledObject, IDrawingComponentProps, IDrawingLayer, 
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
 import { Point } from "../model/drawing-basic-types";
-import RectToolIcon from "../../../clue/assets/icons/drawing/rectangle-icon.svg";
+import RectToolIcon from "../assets/rectangle-icon.svg";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 
 export const RectangleObject = types.compose("RectangleObject", StrokedObject, FilledObject)
@@ -52,8 +52,9 @@ export const RectangleObject = types.compose("RectangleObject", StrokedObject, F
   }));
 export interface RectangleObjectType extends Instance<typeof RectangleObject> {}
 export interface RectangleObjectSnapshot extends SnapshotIn<typeof RectangleObject> {}
+export interface RectangleObjectSnapshotForAdd extends SnapshotIn<typeof RectangleObject> {type: string}
 
-export function RectangleComponent({model, handleHover} : IDrawingComponentProps) {
+export const RectangleComponent = observer(function RectangleComponent({model, handleHover} : IDrawingComponentProps) {
   if (model.type !== "rectangle") return null;
   const { id, x, y, width, height, stroke, strokeWidth, strokeDashArray, fill } = model as RectangleObjectType;
   return <rect
@@ -69,7 +70,7 @@ export function RectangleComponent({model, handleHover} : IDrawingComponentProps
     onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
     onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null} />;
 
-}
+});
 
 export class RectangleDrawingTool extends DrawingTool {
 
@@ -100,7 +101,7 @@ export class RectangleDrawingTool extends DrawingTool {
     const handleMouseUp = (e2: MouseEvent) => {
       e2.preventDefault();
       if ((rectangle.width > 0) && (rectangle.height > 0)) {
-        this.drawingLayer.addNewDrawingObject(rectangle);
+        this.drawingLayer.addNewDrawingObject(getSnapshot(rectangle));
       }
       this.drawingLayer.setCurrentDrawingObject(null);
       window.removeEventListener("mousemove", handleMouseMove);
@@ -113,7 +114,7 @@ export class RectangleDrawingTool extends DrawingTool {
   }
 }
 
-export function RectangleToolbarButton({drawingContent}: IToolbarButtonProps) {
+export function RectangleToolbarButton({toolbarManager}: IToolbarButtonProps) {
   return <SvgToolModeButton modalButton="rectangle" title="Rectangle" 
-    drawingContent={drawingContent} SvgIcon={RectToolIcon}  />;
+    toolbarManager={toolbarManager} SvgIcon={RectToolIcon}  />;
 }

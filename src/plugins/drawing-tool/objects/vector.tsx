@@ -1,11 +1,11 @@
-import { Instance, SnapshotIn, types } from "mobx-state-tree";
+import { observer } from "mobx-react";
+import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
-import { computeStrokeDashArray } from "../model/drawing-content";
-import { DrawingTool, IDrawingComponentProps, IDrawingLayer, 
+import { computeStrokeDashArray, DrawingTool, IDrawingComponentProps, IDrawingLayer, 
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
 import { Point } from "../model/drawing-basic-types";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
-import LineToolIcon from "../../../clue/assets/icons/drawing/line-icon.svg";
+import LineToolIcon from "../assets/line-icon.svg";
 
 // simple line
 export const VectorObject = StrokedObject.named("VectorObject")
@@ -31,7 +31,7 @@ export const VectorObject = StrokedObject.named("VectorObject")
 export interface VectorObjectType extends Instance<typeof VectorObject> {}
 export interface VectorObjectSnapshot extends SnapshotIn<typeof VectorObject> {}
 
-export function VectorComponent({model, handleHover} : IDrawingComponentProps) {
+export const VectorComponent = observer(function VectorComponent({model, handleHover} : IDrawingComponentProps) {
   if (model.type !== "vector") return null;
   const { id, x, y, dx, dy, stroke, strokeWidth, strokeDashArray } = model as VectorObjectType;
   return <line
@@ -45,7 +45,7 @@ export function VectorComponent({model, handleHover} : IDrawingComponentProps) {
     strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
     onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
     onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null} />;
-}
+});
 
 export class VectorDrawingTool extends DrawingTool {
 
@@ -83,7 +83,7 @@ export class VectorDrawingTool extends DrawingTool {
     const handleMouseUp = (e2: MouseEvent) => {
       e2.preventDefault();
       if ((vector.dx !== 0) || (vector.dy !== 0)) {
-        this.drawingLayer.addNewDrawingObject(vector);
+        this.drawingLayer.addNewDrawingObject(getSnapshot(vector));
       }
       this.drawingLayer.setCurrentDrawingObject(null);
       window.removeEventListener("mousemove", handleMouseMove);
@@ -96,7 +96,7 @@ export class VectorDrawingTool extends DrawingTool {
   }
 }
 
-export function VectorToolbarButton({drawingContent}: IToolbarButtonProps) {
+export function VectorToolbarButton({toolbarManager}: IToolbarButtonProps) {
   return <SvgToolModeButton modalButton="vector" title="Line"
-    drawingContent={drawingContent} SvgIcon={LineToolIcon} />;
+    toolbarManager={toolbarManager} SvgIcon={LineToolIcon} />;
 }

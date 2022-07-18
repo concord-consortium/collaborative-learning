@@ -1,3 +1,40 @@
+// import NoiseIcon from "../../assets/icons/generator/noise.svg";
+import SineIcon from "../../assets/icons/generator/sine.svg";
+import SquareIcon from "../../assets/icons/generator/square.svg";
+import TriangleIcon from "../../assets/icons/generator/triangle.svg";
+
+import AndIcon from "../../assets/icons/logic/and.svg";
+import EqualIcon from "../../assets/icons/logic/equal.svg";
+import GreaterThanOrEqualToIcon from "../../assets/icons/logic/greater-than-or-equal-to.svg";
+import GreaterThanIcon from "../../assets/icons/logic/greater-than.svg";
+import LessThanOrEqualToIcon from "../../assets/icons/logic/less-than-or-equal-to.svg";
+import LessThanIcon from "../../assets/icons/logic/less-than.svg";
+import NandIcon from "../../assets/icons/logic/nand.svg";
+import NotEqualIcon from "../../assets/icons/logic/not-equal.svg";
+import OrIcon from "../../assets/icons/logic/or.svg";
+import XorIcon from "../../assets/icons/logic/xor.svg";
+
+import AddIcon from "../../assets/icons/math/add.svg";
+import SubtractIcon from "../../assets/icons/math/subtract.svg";
+import MultiplyIcon from "../../assets/icons/math/multiply.svg";
+import DivideIcon from "../../assets/icons/math/divide.svg";
+
+import LightBulbIcon from "../../assets/icons/output/light-bulb.svg";
+import BackyardClawIcon from "../../assets/icons/output/backyard-claw.svg";
+import GrabberIcon from "../../assets/icons/output/grabber.svg";
+
+import TemperatureIcon from "../../assets/icons/sensor/temperature.svg";
+import CO2Icon from "../../assets/icons/sensor/co2.svg";
+import HumidityIcon from "../../assets/icons/sensor/humidity.svg";
+import LightIcon from "../../assets/icons/sensor/light.svg";
+import O2Icon from "../../assets/icons/sensor/o2.svg";
+import ParticulatesIcon from "../../assets/icons/sensor/particulates.svg";
+import MoistureIcon from "../../assets/icons/sensor/moisture.svg";
+
+import AbsoluteValueIcon from "../../assets/icons/transform/absolute-value.svg";
+import NegationIcon from "../../assets/icons/transform/negation.svg";
+import NotIcon from "../../assets/icons/transform/not.svg";
+
 export interface NodeType {
   name: string;
   displayName: string;
@@ -37,8 +74,8 @@ export const NodeTypes: NodeType[] = [
     displayName: "Relay",
   },
   {
-    name: "Light Bulb",
-    displayName: "Light Bulb",
+    name: "Demo Output",
+    displayName: "Demo Output",
   },
   {
     name: "Data Storage",
@@ -52,119 +89,121 @@ export const NodeOperationTypes = [
     type: "math",
     method: (n1: number, n2: number) => n1 + n2,
     numberSentence: (n1: string, n2: string) => `${n1} + ${n2} = `,
-    icon: "icon-add"
+    icon: AddIcon
   },
   {
     name: "Subtract",
     type: "math",
     method: (n1: number, n2: number) => n1 - n2,
     numberSentence: (n1: string, n2: string) => `${n1} - ${n2} = `,
-    icon: "icon-subtract"
+    icon: SubtractIcon
   },
   {
     name: "Multiply",
     type: "math",
     method: (n1: number, n2: number) => n1 * n2,
     numberSentence: (n1: string, n2: string) => `${n1} * ${n2} = `,
-    icon: "icon-multiply"
+    icon: MultiplyIcon
   },
   {
     name: "Divide",
     type: "math",
     method: (n1: number, n2: number) => n1 / n2,
     numberSentence: (n1: string, n2: string) => `${n1} / ${n2} = `,
-    icon: "icon-divide"
+    icon: DivideIcon
   },
+
   {
     name: "Absolute Value",
     type: "transform",
     method: (n1: number, n2: number) => Math.abs(n1),
     numberSentence: (n1: string, n2: string) => `|${n1}| = `,
-    icon: "icon-absolute-value"
+    icon: AbsoluteValueIcon
   },
   {
     name: "Negation",
     type: "transform",
     method: (n1: number, n2: number) => 0 - n1,
     numberSentence: (n1: string, n2: string) => `-(${n1}) = `,
-    icon: "icon-negation"
+    icon: NegationIcon
   },
   {
     name: "Not",
     type: "transform",
     method: (n1: number, n2: number) => n1 ? 0 : 1,
     numberSentence: (n1: string, n2: string) => `!${n1} ⇒ `,
-    icon: "icon-not"
+    icon: NotIcon
   },
+
   {
     name: "Greater Than",
     type: "logic",
     method: (n1: number, n2: number) => +(n1 > n2),
     numberSentence: (n1: string, n2: string) => `${n1} > ${n2} ⇒ `,
-    icon: "icon-greater-than"
+    icon: GreaterThanIcon
   },
   {
     name: "Less Than",
     type: "logic",
     method: (n1: number, n2: number) => +(n1 < n2),
     numberSentence: (n1: string, n2: string) => `${n1} < ${n2} ⇒ `,
-    icon: "icon-less-than"
+    icon: LessThanIcon
   },
   {
     name: "Greater Than Or Equal To",
     type: "logic",
     method: (n1: number, n2: number) => +(n1 >= n2),
     numberSentence: (n1: string, n2: string) => `${n1} >= ${n2} ⇒ `,
-    icon: "icon-greater-than-or-equal-to"
+    icon: GreaterThanOrEqualToIcon
   },
   {
     name: "Less Than Or Equal To",
     type: "logic",
     method: (n1: number, n2: number) => +(n1 <= n2),
     numberSentence: (n1: string, n2: string) => `${n1} <= ${n2} ⇒ `,
-    icon: "icon-less-than-or-equal-to"
+    icon: LessThanOrEqualToIcon
   },
   {
     name: "Equal",
     type: "logic",
     method: (n1: number, n2: number) => +(n1 === n2),
     numberSentence: (n1: string, n2: string) => `${n1} == ${n2} ⇒ `,
-    icon: "icon-equal"
+    icon: EqualIcon
   },
   {
     name: "Not Equal",
     type: "logic",
     method: (n1: number, n2: number) => +(n1 !== n2),
     numberSentence: (n1: string, n2: string) => `${n1} != ${n2} ⇒ `,
-    icon: "icon-not-equal"
+    icon: NotEqualIcon
   },
   {
     name: "And",
     type: "logic",
     method: (n1: number, n2: number) => n1 && n2 ? 1 : 0,
     numberSentence: (n1: string, n2: string) => `${n1} && ${n2} ⇒ `,
-    icon: "icon-and"
+    icon: AndIcon
   },
   {
     name: "Or",
     type: "logic",
     method: (n1: number, n2: number) => n1 || n2 ? 1 : 0,
     numberSentence: (n1: string, n2: string) => `${n1} || ${n2} ⇒ `,
-    icon: "icon-or"
+    icon: OrIcon
   },
   {
     name: "Nand",
     type: "logic",
     method: (n1: number, n2: number) => +(!(n1 && n2 ? 1 : 0)),
     numberSentence: (n1: string, n2: string) => `${n1} nand ${n2} ⇒ `,
-    icon: "icon-nand"
+    icon: NandIcon
   },
   {
     name: "Xor",
     type: "logic",
     method: (n1: number, n2: number) => +((n1 ? 1 : 0) !== (n2 ? 1 : 0)),
     numberSentence: (n1: string, n2: string) => `${n1} xor ${n2} ⇒ `,
-    icon: "icon-xor"
+    icon: XorIcon
   }
 ];
 
@@ -173,67 +212,82 @@ export const NodeSensorTypes = [
     name: "Temperature",
     type: "temperature",
     units: "°C",
-    icon: "icon-temperature"
+    icon: TemperatureIcon
   },
   {
     name: "Humidity",
     type: "humidity",
     units: "%",
-    icon: "icon-humidity"
+    icon: HumidityIcon
   },
   {
     name: "CO₂",
     type: "CO2",
     units: "PPM",
-    icon: "icon-co2"
+    icon: CO2Icon
   },
   {
     name: "O₂",
     type: "O2",
     units: "%",
-    icon: "icon-o2"
+    icon: O2Icon
   },
   {
     name: "Light",
     type: "light",
     units: "lux",
-    icon: "icon-light"
+    icon: LightIcon
   },
   {
     name: "Soil Moisture",
     type: "soil-moisture",
     units: "",
-    icon: "icon-soil-moisture"
+    icon: MoistureIcon
   },
   {
     name: "Particulates",
     type: "particulates",
     units: "PM2.5",
-    icon: "icon-particulates"
+    icon: ParticulatesIcon
   },
+];
+
+export const NodeDemoOutputTypes = [
+  {
+    name: "Light Bulb",
+    icon: LightBulbIcon
+  },
+  {
+    name: "Backyard Claw",
+    icon: BackyardClawIcon
+  },
+  {
+    name: "Grabber",
+    icon: GrabberIcon
+  }
 ];
 
 export const NodeGeneratorTypes = [
   {
     name: "Sine",
     method: (t: number, p: number, a: number) => Math.round(Math.sin(t * Math.PI / (p / 2)) * a * 100) / 100,
-    icon: "icon-sine-generator"
+    icon: SineIcon
   },
   {
     name: "Square",
     method: (t: number, p: number, a: number) => t % p < p / 2 ? 1 * a : 0,
-    icon: "icon-square-generator"
+    icon: SquareIcon
   },
   {
     name: "Triangle",
     method: (t: number, p: number, a: number) => (2 * a / p) * Math.abs(t % p - p / 2),
-    icon: "icon-triangle-generator"
+    icon: TriangleIcon
   },
   /*
   {
     name: "Noise",
     method: (t: number, p: number, a: number) => Math.random() * a,
-    icon: "icon-noise-generator"
+    icon: NoiseIcon
   },
   */
 ];
@@ -283,6 +337,41 @@ export const ChartPlotColors = ["#d51eff", "#17ddd7", "#d3d114", "#3974ff", "#ff
                                "#5dd581", "#3cc8f5", "#aeb9bf", "#92e3aa", "#7ad9f8",
                                "#5d6e77", "#31bc5a", "#0caadd"];
 export const NodePlotColor = "#969696";
+export const NodePlotBlue = ChartPlotColors[3];
+export const NodePlotRed = ChartPlotColors[4];
+
+export interface ProgramDataRate {
+  text: string;
+  val: number;
+  disabled?: boolean;
+}
+export const DEFAULT_DATA_RATE = 1000;
+export const ProgramDataRates: ProgramDataRate[] = [
+  {
+    text: "50ms",
+    val: 50
+  },
+  {
+    text: "100ms",
+    val: 100
+  },
+  {
+    text: "500ms",
+    val: 500
+  },
+  {
+    text: "1 sec",
+    val: 1000
+  },
+  {
+    text: "10 sec",
+    val: 10000
+  },
+  {
+    text: "1 min",
+    val: 60000
+  }
+];
 
 export interface ProgramRunTime {
   text: string;
@@ -292,50 +381,6 @@ export interface ProgramRunTime {
 export interface IntervalTime extends ProgramRunTime {
   maxProgramRunTime: number;
 }
-export const DEFAULT_PROGRAM_TIME = 300;
-export const ProgramRunTimes: ProgramRunTime[] = [
-  {
-    text: "1 min",
-    val: 60
-  },
-  {
-    text: "5 mins",
-    val: 300
-  },
-  {
-    text: "10 mins",
-    val: 600
-  },
-  {
-    text: "30 mins",
-    val: 1800
-  },
-  {
-    text: "1 hour",
-    val: 3600,
-    disabled: true
-  },
-  {
-    text: "6 hours",
-    val: 21600,
-    disabled: true
-  },
-  {
-    text: "1 day",
-    val: 86400,
-    disabled: true
-  },
-  {
-    text: "5 days",
-    val: 432000,
-    disabled: true
-  },
-  {
-    text: "30 days",
-    val: 2592000,
-    disabled: true
-  }
-];
 
 export const IntervalTimes: IntervalTime[] = [
   {

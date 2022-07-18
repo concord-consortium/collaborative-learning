@@ -245,7 +245,7 @@
       "content": "curriculum/comparing-and-scaling/comparing-and-scaling.json",
       "guide": "curriculum/comparing-and-scaling/cas-teacher-guide.json"
     },
-    "dataflow-example": {
+    "dfe": {
       "content": "curriculum/dataflow/dataflow-example.json"
     },
     "example": {

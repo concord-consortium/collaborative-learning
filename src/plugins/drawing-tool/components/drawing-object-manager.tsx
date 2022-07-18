@@ -1,6 +1,5 @@
 import { types } from "mobx-state-tree";
 import React from "react";
-import { DrawingContentModelType } from "../model/drawing-content";
 import { DrawingComponentType, DrawingObject, DrawingObjectType, 
   DrawingTool, HandleObjectHover, IDrawingLayer, IToolbarButtonProps } from "../objects/drawing-object";
 import { EllipseComponent, EllipseDrawingTool, EllipseObject, EllipseToolbarButton } from "../objects/ellipse";
@@ -116,12 +115,12 @@ export function registerDrawingToolInfo(drawingToolInfo: IDrawingToolInfo) {
   gDrawingToolInfos[drawingToolInfo.name] = drawingToolInfo;
 }
 
-export function renderDrawingObject(drawingObject: DrawingObjectType, drawingContent: DrawingContentModelType, 
+export function renderDrawingObject(drawingObject: DrawingObjectType, 
                                     handleHover?: HandleObjectHover) {
   const DrawingObjectComponent = getDrawingObjectComponent(drawingObject);
   return DrawingObjectComponent ? 
     <DrawingObjectComponent key={drawingObject.id} model={drawingObject} 
-      drawingContent={drawingContent} handleHover={handleHover}/> 
+      handleHover={handleHover}/> 
     : null;
 }
 

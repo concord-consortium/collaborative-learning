@@ -10,6 +10,7 @@ import { IDocumentProperties } from "../../../lib/db-types";
 import { DocumentModelType } from "../../../models/document/document";
 import { DocumentContentModel } from "../../../models/document/document-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
+import { ITileExportOptions } from "../../../models/tools/tool-content-info";
 import { IToolTileProps } from "../../../components/tools/tool-tile";
 
 import "./dataflow-tool.sass";
@@ -36,8 +37,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
     const { model, readOnly, height } = this.props;
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
-    const { program, programRunId, programIsRunning, programStartTime, programEndTime, programRunTime, programZoom }
-      = this.getContent();
+    const { program, programRunId, programIsRunning, programStartTime,
+      programEndTime, programDataRate, programZoom } = this.getContent();
     const showOriginalProgramButton = !!this.getOriginalProgramDocument();
     return (
       <div className={classes}>
@@ -60,8 +61,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
                 onSetProgramEndTime={this.handleSetProgramEndTime}
                 programEndTime={programEndTime}
                 onSetProgramStartEndTime={this.handleSetProgramStartEndTime}
-                programRunTime={programRunTime}
-                onProgramRunTimeChange={this.handleProgramRunTimeChange}
+                programDataRate={programDataRate}
+                onProgramDataRateChange={this.handleProgramDataRateChange}
                 programZoom={programZoom}
                 onZoomChange={this.handleProgramZoomChange}
                 size={size}
@@ -72,6 +73,14 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
         </SizeMe>
       </div>
     );
+  }
+
+  public componentDidMount() {
+    this.props.onRegisterToolApi({
+      exportContentAsTileJson: (options?: ITileExportOptions) => {
+        return this.getContent().exportJson(options);
+      }
+    });
   }
 
   private getDocument() {
@@ -160,8 +169,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
     this.getContent().setRunningStatus(endTime);
   };
 
-  private handleProgramRunTimeChange = (program: any) => {
-    this.getContent().setProgramRunTime(program);
+  private handleProgramDataRateChange = (program: any) => {
+    this.getContent().setProgramDataRate(program);
   };
 
   private handleProgramZoomChange = (dx: number, dy: number, scale: number) => {

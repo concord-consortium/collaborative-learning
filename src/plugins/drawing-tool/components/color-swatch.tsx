@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import React from "react";
-import SwatchCheckIcon from "../../../clue/assets/icons/drawing/check-icon.svg";
-import NoColorIcon from "../../../clue/assets/icons/drawing/no-color-icon.svg";
+import SwatchCheckIcon from "../assets/check-icon.svg";
+import NoColorIcon from "../assets/no-color-icon.svg";
 import { isLightColorRequiringContrastOffset } from "../../../utilities/color-utils";
 
 export enum SwatchColor {

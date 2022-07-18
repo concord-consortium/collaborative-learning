@@ -1,11 +1,19 @@
+import { clone } from "lodash";
+import { destroy } from "mobx-state-tree";
 import { GeometryContentModel, GeometryContentModelType,
           kGeometryToolID, defaultGeometryContent, GeometryMetadataModel } from "./geometry-content";
 import { JXGChange } from "./jxg-changes";
 import { isPointInPolygon, getPointsForVertexAngle } from "./jxg-polygon";
 import { canSupportVertexAngle, getVertexAngle, updateVertexAnglesFromObjects } from "./jxg-vertex-angle";
 import { isBoard, isFreePoint, isPoint, isPolygon } from "./jxg-types";
-import { clone } from "lodash";
-import { destroy } from "mobx-state-tree";
+
+// Need to mock this so the placeholder that is added to the cache
+// has dimensions
+jest.mock( "../../../utilities/image-utils", () => ({
+  ...(jest.requireActual("../../../utilities/image-utils") as any),
+  getImageDimensions: jest.fn(() =>
+    Promise.resolve({ src: "test-file-stub", width: 200, height: 150 }))
+}));
 
 import placeholderImage from "../../../assets/image_placeholder.png";
 
@@ -47,7 +55,7 @@ describe("GeometryContent", () => {
               { content: GeometryContentModelType, board: JXG.Board } {
     const content = defaultGeometryContent();
     const metadata = GeometryMetadataModel.create({ id: "geometry-1" });
-    content.doPostCreate(metadata);
+    content.doPostCreate!(metadata);
     if (configContent) configContent(content);
     const board = createDefaultBoard(content);
     return { content, board };

@@ -6,7 +6,7 @@ import { GeometryContentModel, GeometryMetadataModel } from "../../../models/too
 describe("GeometryToolbar", () => {
   const content = GeometryContentModel.create();
   const metadata = GeometryMetadataModel.create({ id: "test-metadata" });
-  content.doPostCreate(metadata);
+  content.doPostCreate!(metadata);
 
   it("renders successfully", () => {
     render(<div className="document-content" data-testid="document-content"/>);

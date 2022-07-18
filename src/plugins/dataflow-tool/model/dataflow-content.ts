@@ -1,6 +1,10 @@
-import { types, Instance } from "mobx-state-tree";
+import { types, Instance, applySnapshot, getSnapshot } from "mobx-state-tree";
+import { cloneDeep } from "lodash";
+import stringify from "json-stringify-pretty-compact";
 import { ToolContentModel } from "../../../models/tools/tool-types";
-import { DEFAULT_PROGRAM_TIME } from "./utilities/node";
+import { DataflowProgramModel } from "./dataflow-program-model";
+import { ITileExportOptions } from "../../../models/tools/tool-content-info";
+import { DEFAULT_DATA_RATE } from "./utilities/node";
 
 export const kDataflowToolID = "Dataflow";
 
@@ -16,31 +20,62 @@ const ProgramZoom = types.model({
   scale: types.number,
 });
 export type ProgramZoomType = typeof ProgramZoom.Type;
-const DEFAULT_PROGRAM_ZOOM = { dx: 0, dy: 0, scale: 1 };
+export const DEFAULT_PROGRAM_ZOOM = { dx: 0, dy: 0, scale: 1 };
 
 export const DataflowContentModel = ToolContentModel
   .named("DataflowTool")
   .props({
     type: types.optional(types.literal(kDataflowToolID), kDataflowToolID),
-    program: "",
+    program: types.optional(DataflowProgramModel, getSnapshot(DataflowProgramModel.create())),
     programRunId: "",
     programStartTime: 0,
     programEndTime: 0,
-    programRunTime: DEFAULT_PROGRAM_TIME,
+    programDataRate: DEFAULT_DATA_RATE,
     programIsRunning: "",
     programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
   })
   .views(self => ({
-    isUserResizable() {
+    programWithoutRecentValues() {
+      const { values, ...rest } = getSnapshot(self.program);
+      const castedValues = values as Record<string, any>;
+      const newValues: Record<string, any> = {};
+      if (values) {
+        Object.keys(castedValues).forEach((key: string) => {
+          const { recentValues, ...other } = castedValues[key];
+          newValues[key] = { ...other };
+        });
+      }
+      return { values: newValues, ...rest };
+    }
+  }))
+  .views(self => ({
+    get isUserResizable() {
       return true;
+    },
+    exportJson(options?: ITileExportOptions) {
+      const zoom = getSnapshot(self.programZoom);
+      return [
+        `{`,
+        `  "type": "Dataflow",`,
+        `  "programDataRate": ${self.programDataRate},`,
+        `  "programZoom": {`,
+        `    "dx": ${zoom.dx},`,
+        `    "dy": ${zoom.dy},`,
+        `    "scale": ${zoom.scale}`,
+        `  },`,
+        `  "program": ${stringify(self.programWithoutRecentValues())}`,
+        `}`
+      ].join("\n");
     }
   }))
   .actions(self => ({
     setProgram(program: any) {
-      self.program = JSON.stringify(program);
+      if (program) {
+        applySnapshot(self.program, cloneDeep(program));
+      }
     },
-    setProgramRunTime(runTime: number) {
-      self.programRunTime = runTime;
+    setProgramDataRate(dataRate: number) {
+      self.programDataRate = dataRate;
     },
     setProgramRunId(id: string) {
       self.programRunId = id;

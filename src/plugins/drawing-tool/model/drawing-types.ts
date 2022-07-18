@@ -3,10 +3,18 @@ import { Point } from "./drawing-basic-types";
 
 export const kDrawingToolID = "Drawing";
 
+// This version string is stored in the state of the tile.
+// Without this version, the model will try to convert the state.
+export const kDrawingStateVersion = "1.0.0";
 export const kDrawingDefaultHeight = 180;
 
-export type ToolbarModalButton = "select" | "line" | "vector" | "rectangle" | "ellipse" | "stamp" | "variable";
+// This is the form the log events take  
+export interface DrawingToolLogEvent {
+  path?: string;
+  args?: Array<any>;
+}
 
+// These types are used by legacy import code in drawing-change-playback.ts
 export type DrawingToolMove = Array<{id: string, destination: Point}>;
 export interface DrawingToolUpdate {
   ids: string[];
