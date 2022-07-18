@@ -597,15 +597,36 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private keepNodesInView = () => {
     const margin = 5;
-    const { k } = this.programEditor.view.area.transform;
+    let { k } = this.programEditor.view.area.transform;
+    const { container: { clientWidth, clientHeight }, area: { transform }} = this.programEditor.view;
+
+    // If we're at zero scale but have any window to fill,
+    // give a little scale so we can tell the program's proportions with a valid rect
+    if (k === 0 && clientWidth > 0 && clientHeight > 0) {
+      this.programEditor.view.area.transform = {k: .01, x: transform.x, y: transform.y};
+      this.programEditor.view.area.update();
+      k = this.programEditor.view.area.transform.k;
+    }
+
     const rect = this.getBoundingRectOfNodes();
     if (rect?.isValid) {
-      const newZoom = Math.min(k * this.programEditor.view.container.clientWidth / ( rect.right + margin),
-                               k * this.programEditor.view.container.clientHeight / ( rect.bottom + margin));
+      // Handle program too large for client
+      const newZoom = Math.min(k * clientWidth / (rect.right + margin),
+                               k * clientHeight / (rect.bottom + margin));
       if (newZoom < k && rect.right > 0 && newZoom > 0) {
-        const currentTransform = this.programEditor.view.area.transform;
-        this.programEditor.view.area.transform = {k: newZoom, x: currentTransform.x, y: currentTransform.y};
+        this.programEditor.view.area.transform = {k: newZoom, x: transform.x, y: transform.y};
         this.programEditor.view.area.update();
+        return;
+      }
+
+      // Handle program too small for client
+      const targetPercentage = .9;
+      if (rect.width < clientWidth * targetPercentage
+        || rect.height < clientHeight * targetPercentage) {
+          const newerZoom = Math.min(k * clientWidth * targetPercentage / rect.width,
+            k * clientHeight * targetPercentage / rect.height);
+          this.programEditor.view.area.transform = {k: newerZoom, x: transform.x, y: transform.y};
+          this.programEditor.view.area.update();
       }
     }
   };
