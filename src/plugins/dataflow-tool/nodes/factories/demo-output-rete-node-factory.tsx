@@ -53,7 +53,11 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
         if (outputType === "Light Bulb") {
           nodeValue?.setDisplayMessage(result === 0 ? "off" : "on");
         } else {
-          nodeValue?.setDisplayMessage(result === 0 ? "closed" : "open");
+          let percentClosed = Math.min(1, n1);
+          percentClosed = Math.max(0, percentClosed);
+          // percentClosed = Math.round(percentClosed * 100);
+          percentClosed = Math.round(percentClosed * 10) * 10;
+          nodeValue?.setDisplayMessage(`${percentClosed}% Closed`);
         }
         nodeValue?.setConnected(inputs.nodeValue.length);
 

@@ -1,6 +1,7 @@
 import React from "react";
 import Rete, { NodeEditor, Node } from "rete";
-import { lightBulbOn, lightBulbOff, backyardClawFrames, grabberPaddle, grabberClawFrames, grabberChordFrames } from "./demo-output-control-assets";
+import { lightBulbOn, lightBulbOff, backyardClawFrames, grabberPaddle,
+  grabberClawFrames, grabberChordFrames } from "./demo-output-control-assets";
 
 import "./demo-output-control.scss";
 
@@ -16,9 +17,10 @@ export class DemoOutputControl extends Rete.Control {
     this.key = key;
     this.node = node;
 
-    this.component = (compProps: {value: number, percentOpen: number, percentTilt: number, type: string}) => {
-      const controlClassName = compProps.type === "Light Bulb" ? "lightbulb-control" : compProps.type === "Backyard Claw" ? "backyard-claw-control" : "grabber-control";
-      const clawFrame = this.getClawFrame(compProps.percentOpen);
+    this.component = (compProps: {value: number, percentClosed: number, percentTilt: number, type: string}) => {
+      const controlClassName = compProps.type === "Light Bulb" ? "lightbulb-control"
+        : compProps.type === "Backyard Claw" ? "backyard-claw-control" : "grabber-control";
+      const clawFrame = this.getClawFrame(compProps.percentClosed);
       const chordFrame = this.getChordFrame(compProps.percentTilt);
       return (
         <div className={`demo-output-control ${controlClassName}`}>
@@ -48,7 +50,7 @@ export class DemoOutputControl extends Rete.Control {
 
     this.props = {
       value: initial,
-      percentOpen: this.getPercentOpen(initial),
+      percentClosed: this.getPercentClosed(initial),
       tilt: initialTilt,
       percentTilt: this.getPercentTilt(initialTilt),
       type: initialType
@@ -56,15 +58,15 @@ export class DemoOutputControl extends Rete.Control {
   }
 
   // Converts a number to [0,1]
-  private getPercentOpen = (val: number) => {
-    let percentOpen = Math.min(1, val);
-    percentOpen = Math.max(0, percentOpen);
-    return percentOpen;
+  private getPercentClosed = (val: number) => {
+    let percentClosed = Math.min(1, val);
+    percentClosed = Math.max(0, percentClosed);
+    return percentClosed;
   };
 
   public setValue = (val: number) => {
     this.props.value = val;
-    this.props.percentOpen = this.getPercentOpen(val);
+    this.props.percentClosed = this.getPercentClosed(val);
     this.putData(this.key, val);
     (this as any).update();
   };
@@ -88,8 +90,8 @@ export class DemoOutputControl extends Rete.Control {
     (this as any).update();
   };
 
-  private getClawFrame = (percentOpen: number) => {
-    return percentOpen < 1 ? Math.floor(grabberClawFrames.length * percentOpen) :  grabberClawFrames.length - 1;
+  private getClawFrame = (percentClosed: number) => {
+    return percentClosed < 1 ? Math.floor(grabberClawFrames.length * percentClosed) :  grabberClawFrames.length - 1;
   };
 
   private getChordFrame = (percentTilt: number) => {
