@@ -352,6 +352,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       (this.programEditor as any).on("process noderemoved connectioncreated connectionremoved", () => {
         this.processAndSave();
+        this.countSerialDataNodes(this.programEditor.nodes);
       });
 
       this.programEditor.on("nodecreated", node => {
@@ -1057,7 +1058,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
   }
 
-  private exchangeSerialNeeds(nodes: Node[]){
+  private countSerialDataNodes(nodes: Node[]){
     // implementing with a "count" of 1 or 0 in case we need to count nodes in future
     let serialNodesCt = 0;
     nodes.forEach((n) => {
@@ -1071,17 +1072,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     } else {
       this.stores.serialDevice.setSerialNodesCount(0);
     }
-    // channels need serial state so nodes can reflect it
+  }
+
+  private updateNodeChannelInfo = (n: Node) => {
+
     if (this.channels.length > 0 ){
       this.channels.filter(c => c.usesSerial).forEach((ch) => {
         this.passSerialStateToChannel(this.stores.serialDevice, ch);
       });
     }
-  }
-
-  private updateNodeChannelInfo = (n: Node) => {
-
-    this.exchangeSerialNeeds(this.programEditor.nodes);
 
     const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
     const relayList = n.controls.get("relayList") as RelaySelectControl;
