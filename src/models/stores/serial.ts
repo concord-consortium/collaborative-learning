@@ -30,7 +30,7 @@ export class SerialDevice {
     public updateConnectionInfo(timeStamp: Number | null, status: string ){
       this.connectChangeStamp = timeStamp;
       this.lastConnectMessage = status;
-      localStorage.setItem('last-connect-message', status);
+      localStorage.setItem("last-connect-message", status);
       // if (this.connectChangeStamp !== undefined){
       //   if (this.lastConnectMessage == "disconnect"){
       //     alert('Device has been physically disconnected.')
@@ -46,7 +46,9 @@ export class SerialDevice {
     // }
 
     public hasPort(){
-      return this.port !== undefined;
+      const portHere = this.port !== undefined;
+      const readablePort = this.port?.readable;
+      return portHere && readablePort;
     }
 
     public async requestAndSetPort(){

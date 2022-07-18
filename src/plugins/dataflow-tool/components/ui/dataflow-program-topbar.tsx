@@ -104,17 +104,20 @@ const RecordButton = (props: RecordButtonProps) => {
 };
 
 export const DataflowProgramTopbar = (props: TopbarProps) => {
-  // HERE 3
   function serialButtonClasses(){
     let status;
     const { serialDevice } = props;
-    const physicalConnect = localStorage.getItem('last-connect-message') == 'connect';
+    const physicalConnect = localStorage.getItem('last-connect-message') == "connect";
+    const physicalDisconnect = localStorage.getItem('last-connect-message') == "disconnect"
     const nodesInNeed = serialDevice.serialNodesCount > 0;
     const hasPort = serialDevice.hasPort();
 
     status = hasPort ? "has-port" : "no-port";
-    status += physicalConnect ? " physical-connection" : " no-physical-connection"
-    status += nodesInNeed ? " nodes-in-need" : " no-serial-needed"
+    status += physicalConnect ? " physical-connection" : " no-physical-connection";
+    status += physicalDisconnect ? " disconnected" : " not-interrupted";
+    status += nodesInNeed ? " nodes-in-need" : " no-serial-needed";
+
+    console.log("OBJ: ", serialDevice, "STORED: ", localStorage.getItem("last-connect-message"));
     return `${status} icon-serial`;
   }
 
