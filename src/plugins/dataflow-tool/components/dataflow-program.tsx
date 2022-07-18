@@ -947,10 +947,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (this.stores.serialDevice.hasPort()){
       console.log('close port')
       // this.stores.serialDevice.reader.cancel();
-      // await readableStreamClosed.catch(() => { /* Ignore the error */ });
-      // writer.close();
-      // await writableStreamClosed;
-      // await port.close();
+      // etc to gracefully close connection
     }
   };
 
@@ -1084,7 +1081,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private updateNodeChannelInfo = (n: Node) => {
 
-    // HERE 1
     this.exchangeSerialNeeds(this.programEditor.nodes);
 
     const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
