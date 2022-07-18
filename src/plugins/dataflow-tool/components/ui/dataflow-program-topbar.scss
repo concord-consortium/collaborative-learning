@@ -272,7 +272,7 @@ $duration-label-back: $gray-mid;
       }
       &.physical-connection.no-port {
         background-color: lightgoldenrodyellow;
-        animation: slowpulse 2s linear infinite;
+        //animation: slowpulse 2s linear infinite;
 
         @keyframes slowpulse {
           50% {
@@ -282,6 +282,10 @@ $duration-label-back: $gray-mid;
       }
       &.has-port {
         background-color: lightgreen;
+      }
+      &.nodes-in-need.no-physical-connection {
+        background-color: #FFC0CB;
+        animation: slowpulse 2s linear infinite;
       }
 
       .serial {

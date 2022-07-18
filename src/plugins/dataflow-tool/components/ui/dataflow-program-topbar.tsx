@@ -115,7 +115,6 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
     status = hasPort ? "has-port" : "no-port";
     status += physicalConnect ? " physical-connection" : " no-physical-connection"
     status += nodesInNeed ? " nodes-in-need" : " no-serial-needed"
-    console.log("STATUS: ", status)
     return `${status} icon-serial`;
   }
 

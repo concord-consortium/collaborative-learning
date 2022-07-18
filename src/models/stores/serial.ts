@@ -8,6 +8,7 @@ export class SerialDevice {
     lastConnectMessage: string | null;
     deviceInfo: SerialPortInfo | null;
     serialNodesCount: number;
+    localPorts: any;
 
     constructor() {
       this.value = "0";
@@ -30,14 +31,19 @@ export class SerialDevice {
       this.connectChangeStamp = timeStamp;
       this.lastConnectMessage = status;
       localStorage.setItem('last-connect-message', status)
-      if (this.connectChangeStamp !== undefined){
-        if (this.lastConnectMessage == "disconnect"){
-          alert('Device has been physically disconnected.')
-        }
-        if (this.lastConnectMessage == "connect"){
-          alert("Device has been plugged in.  Click the yellow button to establish connection.")
-        }
-      }
+      // if (this.connectChangeStamp !== undefined){
+      //   if (this.lastConnectMessage == "disconnect"){
+      //     console.log('Device has been physically disconnected.')
+      //   }
+      //   if (this.lastConnectMessage == "connect"){
+      //     console.log("Device has been plugged in.  Click the yellow button to establish connection.")
+      //   }
+      // }
+    }
+
+    public async discover(){
+      this.localPorts = await navigator.serial.getPorts();
+      console.log(this.localPorts);
     }
 
     public hasPort(){
