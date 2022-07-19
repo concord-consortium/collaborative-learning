@@ -117,6 +117,14 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
   return (
     <div className="program-editor-topbar">
       <div className="topbar-left">
+        {<IconButton
+          icon="serial"
+          key="serial"
+          onClickButton={props.onSerialRefreshDevices}
+          title="Refresh Serial Connection"
+          disabled={props.readOnly}
+          className={classes}
+        />}
       </div>
       <div className="topbar-center">
         <RateSelectorComponent
@@ -137,14 +145,6 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
         </button>
       </div>
       <div className="topbar-right">
-      {<IconButton
-          icon="serial"
-          key="serial"
-          onClickButton={props.onSerialRefreshDevices}
-          title="Refresh Serial Connection"
-          disabled={props.readOnly}
-          className={classes}
-        />}
         {props.showRateUI && <span className={"rate-ui"}>{`${props.lastIntervalDuration}ms`}</span>}
       </div>
     </div>
