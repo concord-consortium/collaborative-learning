@@ -152,7 +152,7 @@
         {
           "description": "Story Ch1",
           "ordinal": 1,
-          "title": "Rakesh: Stress and Heart Attacks",
+          "title": "Rakesh",
           "subtitle": "Chapter 1",
           "disabled": [],
           "sections": [
@@ -302,8 +302,8 @@
                                 "format": "html",
                                 "text": [
                                   "<p></p>",
-                                  "<p>Watch the video- EVIDENCE 1-The Effects of Stress on the Heart - in your slides. </p>",
-                                  "<p>Discuss the video with your group and together, answer the questions on the slides. </p>",
+                                  "<p>Watch the video- EVIDENCE 1-The Effects of Stress on the Heart in your Resource Library. </p>",
+                                  "<p>Discuss the video with your group and together, answer the questions in your Resource Library. </p>",
                                   "<p>Write what you learned from this evidence in your table.</p>"
                                 ]
                               }
@@ -318,7 +318,7 @@
         {
           "description": "Story Ch2",
           "ordinal": 2,
-          "title": "Rakesh: Stress and Heart Attacks",
+          "title": "Rakesh",
           "subtitle": "Chapter 2",
           "disabled": [],
           "sections": [
@@ -392,8 +392,8 @@
                                   "type": "Text",
                                   "format": "html",
                                   "text": [
-                                    "<p><strong>Read the blog- EVIDENCE 2- All the Fuss About Cholesterol - in the Sources. </strong></p>",
-                                    "<p>Discuss the blog with your group and together, answer the questions on the slides. </p>",
+                                    "<p><strong>Read the blog- EVIDENCE 2- All the Fuss About Cholesterol - in the Resource Library. </strong></p>",
+                                    "<p>Discuss the blog with your group and together, answer the questions in the  Resource Library. </p>",
                                     "<p>Write what you learned from this evidence in your table.</p>",
                                     "<p></p>",
                                     "<p><em>Continue reading to find out what happened next:</em></p>"
@@ -410,7 +410,7 @@
         {
           "description": "Story Ch3",
           "ordinal": 3,
-          "title": "Rakesh: Stress and Heart Attacks",
+          "title": "Rakesh",
           "subtitle": "Chapter 3",
           "disabled": [],
           "sections": [
@@ -428,7 +428,7 @@
                                     "<p>Yet, he was still nervous about those blockages. If even babies have cholesterol, then was there was a chance that despite his healthy life habits he could still have too much cholesterol in his blood? The fear of his arteries getting clogged up was still not leaving him. He just couldn’t stop worrying about it no matter how hard he tried. </p>",
                                     "<p>That day at lunch, he felt like his taste buds could almost sense the cholesterol in his rice and beans. It was all feeling too stressful, so he decided to just get his blood checked and confirm whether he had high cholesterol or not. He called the doctor’s office and they ordered some tests and told him to go to the blood lab near his house. The next day he went to the lab right after work, did the blood test. Two days later he received an email from the lab, the results were attached. He clicked on the attachment: “Rakesh Sharma Blood Test Report”</p>",
                                     "<p>Review the test results- EVIDENCE 3-Rakesh Sharma Blood Test Report - in the Resource Library. </p>",
-                                    "<p>Discuss the results with your group and together, answer the questions on the slides. Write what you learned from this evidence in your table.</p>",
+                                    "<p>Discuss the results with your group and together, answer the questions in the Resource Library. Write what you learned from this evidence in your table.</p>",
                                     "<p>Continue reading to find out what happened next:</p>"
                                   ]
                                 }
@@ -444,7 +444,7 @@
         {
           "description": "Story Ch4",
           "ordinal": 4,
-          "title": "Rakesh: Stress and Heart Attacks",
+          "title": "Rakesh",
           "subtitle": "Chapter 4",
           "disabled": [],
           "sections": [
@@ -471,7 +471,7 @@
                                     "<p>Once he got home, Rakesh was still feeling curious about stress tests and decided to research it more after dinner. He googled ‘how to test for stress’ and found that there were many ways to measure cortisol levels. He found a video explaining how saliva (spit) can be used to measure cortisol levels easily and quickly. The website also had a link to order the test and get results within 24 hours. Out of restlessness, and not wanting to wait a whole week for his results from Dr. Lee, Rakesh decided to order a saliva stress test as well. </p>",
                                     "<p>The test arrived the next day, he followed the directions and then mailed it back to the lab. As promised, within 24 hours, Rakesh got an email back from the lab with his results from the saliva test. His stomach tight with nervousness as he opened the email: “Saliva Stress Test”</p>",
                                     "<p>Watch the video- Saliva Stress Test - in the Resource Library. Then review the test results -  EVIDENCE 4-Saliva Stress Test Results - in the Resource Library.</p>",
-                                    "<p>Discuss the video and test results with your group and together, answer the questions on the slides. </p>",
+                                    "<p>Discuss the video and test results with your group and together, answer the questions in the Resource Librarys. </p>",
                                     "<p>Write what you learned from this evidence in your table.</p>"
                                   ]
                                 }
@@ -487,7 +487,7 @@
         {
           "description": "Story Ch5",
           "ordinal": 5,
-          "title": "Rakesh: Stress and Heart Attacks",
+          "title": "Rakesh",
           "subtitle": "Chapter 5",
           "disabled": [],
           "sections": [
@@ -520,7 +520,7 @@
                                   "text": [
                                     "<p>Surprisingly, Dr. Zeiders responded to Rakesh’s email by the next day. She said that she would be happy to meet with Rakesh online to chat about the test results and what her lab has discovered about the link between stress, cortisol, and clogged arteries. They set a time to meet over zoom. He was looking forward to his conversation with Dr. Zeiders.</p>",
                                     "<p>Read - EVIDENCE 5-Conversation with Dr. Zeiders. </p>",
-                                    "<p>Discuss the conversation with your group and together, answer the questions on the slides. </p>",
+                                    "<p>Discuss the conversation with your group and together, answer the questions on the Resource Library. </p>",
                                     "<p>Write what you learned from this evidence in your table.</p>"
                                   ]
                                 }
@@ -535,7 +535,7 @@
         {
           "description": "Story Ch6",
           "ordinal": 6,
-          "title": "Rakesh: Stress and Heart Attacks",
+          "title": "Rakesh",
           "subtitle": "Chapter 6",
           "disabled": [],
           "sections": [
@@ -588,7 +588,7 @@
         {
           "description": "Story Ch1",
           "ordinal": 1,
-          "title": "Maria: Stress and Focus",
+          "title": "Maria",
           "subtitle": "Chapter 1",
           "disabled": [],
           "sections": [
@@ -667,7 +667,7 @@
         {
           "description": "Story Ch2",
           "ordinal": 2,
-          "title": "Maria: Stress and Focus",
+          "title": "Maria",
           "subtitle": "Chapter 2",
           "disabled": [],
           "sections": [
@@ -685,8 +685,8 @@
                                     "<p>Ms. Guerra: If your issue is being able to focus, you need to work on growing more connections between the neurons in your brain! </p>",
                                     "<p>María didn’t really understand what that meant. Ms. Guerra could sense her confusion based on the blank stare María gave her. Figuring María needed more of an explanation, Ms. Guerra pulled out slide show that she had used when she taught college courses a few years ago. Crowding around the computer, the two of them clicked on the link for the: “How our Brains Think” </p>",
                                     "<p></p>",
-                                    "<p><strong>Watch the slide show- EVIDENCE 1-How our Brains Think - in your slides. </strong></p>",
-                                    "<p><strong>Discuss the animation in your group and together, answer the questions on the slides. </strong></p>",
+                                    "<p><strong>Watch the slide show- EVIDENCE 1-How our Brains Think - in your Resource Library. </strong></p>",
+                                    "<p><strong>Discuss the animation in your group and together, answer the questions in the Resource Library. </strong></p>",
                                     "<p><strong>Write what you learned from this evidence in your table.</strong></p>",
                                     "<p><strong></strong></p>"
                                   ]
@@ -702,7 +702,7 @@
         {
           "description": "Story Ch3",
           "ordinal": 3,
-          "title": "Maria: Stress and Focus",
+          "title": "Maria",
           "subtitle": "Chapter 3",
           "disabled": [],
           "sections": [
@@ -731,7 +731,7 @@
                                     "<p>Maria felt like she had so many things piling up on her plate, her shoulders felt heavier and heavier with each task. All this made focusing feel even more impossible. Feeling frustrated, María decided to look up “brain, stress, and neuron signaling” on Google. A few links down from the top, she came across a blog post: “Stress and the Brain”. </p>",
                                     "<p></p>",
                                     "<p><strong>Read the blog - EVIDENCE 2 - Stress and the Brain  - in the Resource Library. </strong></p>",
-                                    "<p><strong>Discuss the blog with your group and together, answer the questions on the slides. </strong></p>",
+                                    "<p><strong>Discuss the blog with your group and together, answer the questions in the  Resource Library. </strong></p>",
                                     "<p><strong>Write what you learned from this evidence in your table.</strong></p>"
                                   ]
                                 }
@@ -746,7 +746,7 @@
         {
           "description": "Story Ch4",
           "ordinal": 4,
-          "title": "Maria: Stress and Focus",
+          "title": "Maria",
           "subtitle": "Chapter 4",
           "disabled": [],
           "sections": [
@@ -765,7 +765,7 @@
                                     "<p>A few days later Ms. Guerra told María to stay after school because the scientist, Dr. Mackey, had responded! María was excited as she walked into Ms. Guerra’s room. The email Dr. Mackey sent had a report attached to it. So, Ms. Guerra clicked on the attachment and they both read Dr. Mackey’s Report</p>",
                                     "<p></p>",
                                     "<p><strong>Review the report- EVIDENCE 3- Dr. Mackey’s Report - in the Resource Library. </strong></p>",
-                                    "<p><strong>Discuss the report with your group and together, answer the questions on the slides. </strong></p>",
+                                    "<p><strong>Discuss the report with your group and together, answer the questions in the Resource Library. </strong></p>",
                                     "<p><strong>Write what you learned from this evidence in your table.</strong></p>"
                                   ]
                                 }
@@ -780,7 +780,7 @@
         {
           "description": "Story Ch5",
           "ordinal": 5,
-          "title": "Maria: Stress and Focus",
+          "title": "Maria",
           "subtitle": "Chapter 5",
           "disabled": [],
           "sections": [
@@ -798,7 +798,7 @@
                                     "<p>Ms. Guerra thought María’s question was a really good one. She herself did not have an answer so they decided to email Dr. Mackey again and ask. The following day Ms. Guerra found María as soon as school was over. She excitedly showed María the email and video that Dr. Mackey had sent. </p>",
                                     "<p></p>",
                                     "<p><strong>Read the email and watch the video- EVIDENCE 4- Dr. Mackey Email - in the Resource Library. </strong></p>",
-                                    "<p><strong>Discuss the email and video with your group and together, answer the questions on the slides. </strong></p>",
+                                    "<p><strong>Discuss the email and video with your group and together, answer the questions in the  Resource Library. </strong></p>",
                                     "<p><strong>Write what you learned from this evidence in your table.</strong></p>",
                                     "<p><strong></strong></p>"
                                   ]
@@ -815,7 +815,7 @@
         {
           "description": "Story Ch6",
           "ordinal": 6,
-          "title": "Maria: Stress and Focus",
+          "title": "Maria",
           "subtitle": "Chapter 6",
           "disabled": [],
           "sections": [
