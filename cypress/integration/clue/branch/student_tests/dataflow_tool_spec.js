@@ -29,6 +29,10 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getShowGraphButton(nodeType).click();
         dataflowToolTile.getMinigraph(nodeType).should("not.exist");
       });
+      it("can change the number", () => {
+        dataflowToolTile.getNumberField().type("3{enter}");
+        dataflowToolTile.getNumberField().its("value").should("eq", "3");
+      });
       it("can delete number node", () => {
         dataflowToolTile.getDeleteNodeButton(nodeType).click();
         dataflowToolTile.getNode(nodeType).should("not.exist");
@@ -99,9 +103,13 @@ context('Dataflow Tool Tile', function () {
         const dropdown = "outputType";
         dataflowToolTile.getDropdown(nodeType, dropdown).click();
         const dropdownOptions = dataflowToolTile.getDropdownOptions(nodeType, dropdown);
-        dropdownOptions.should("exist");
-        console.log(dropdownOptions);
-        // console.log(`options ${dropdownOptions}`);
+        dropdownOptions.should("have.length", 3);
+        dropdownOptions.each((item, index, list) => {
+          if (index === 2) {
+            item.click();
+          }
+        });
+        dataflowToolTile.getDropdownOptions(nodeType, dropdown).should("have.length", 0);
       });
       it("can delete demo output node", () => {
         dataflowToolTile.getDeleteNodeButton(nodeType).click();

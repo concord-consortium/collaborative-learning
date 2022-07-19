@@ -21,7 +21,7 @@ class DataflowToolTile {
     return cy.get(`.primary-workspace .node.${nodeType} .node-select.${dropdown}`);
   }
   getDropdownOptions(nodeType, dropdown) {
-    return cy.get(`.primary-workspace .node.${nodeType} .option-list.${dropdown}`);
+    return cy.get(`.primary-workspace .node.${nodeType} .option-list.${dropdown} .item`);
   }
   getNumberField() {
     return cy.get(`.primary-workspace .node.number .number-input`);
