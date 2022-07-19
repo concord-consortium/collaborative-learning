@@ -118,14 +118,14 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
 
     // nodes that use serial, but no device physucally connected
     if (lastMsg !== "connect" && serialDevice.serialNodesCount > 0){
-      return "connect a device"
+      return "connect a device";
     }
     // physical connection has been made but user action needed
     if (lastMsg === "connect"
         && !serialDevice.hasPort()
         && serialDevice.serialNodesCount > 0
     ){
-      return "click to finish connecting"
+      return "click to finish connecting";
     }
   }
 
