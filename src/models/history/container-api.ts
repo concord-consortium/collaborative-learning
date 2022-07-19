@@ -118,11 +118,11 @@ export interface ContainerAPI {
      * wants to start some async code outside of one of these existing calls. It
      * should call startHistoryEntryCall while it is handling an existing
      * "call". And it should wait for the promise of startHistoryEntryCall to
-     * resolve before it closes out the existing "call" (by call
-     * addTreePatchRecord). This way the not be a time when all the calls of
+     * resolve before it closes out the existing "call" (by calling
+     * addTreePatchRecord). This way there will not be a time when all the calls of
      * this history entry are closed, so container will keep the history entry.
      *
-     * In the prototype of this system this is needed the tree's tiles are
+     * In the prototype of this system this is needed when the tree's tiles are
      * updating themselves after the shared model has changed. It is also used
      * by the undo and document store when they are replaying events. In this
      * current subset imported into CLUE it is not yet used yet.

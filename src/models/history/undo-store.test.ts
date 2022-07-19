@@ -7,7 +7,10 @@ import { DocumentContentModel } from "../document/document-content";
 import { createDocumentModel, DocumentModelType } from "../document/document";
 import { ProblemDocument } from "../document/document-types";
 import { when } from "mobx";
-import { CDocument } from "./document-store";
+import { CDocument, DocumentStore } from "./document-store";
+import { HistoryEntrySnapshot } from "./history";
+import { nanoid } from "nanoid";
+import { cloneDeep } from "lodash";
 
 const TestSharedModel = SharedModel
   .named("TestSharedModel")
@@ -185,6 +188,26 @@ it("can undo a tile change", async () => {
   ]);
 });  
 
+const redoEntry = {
+  action: "redo", 
+  created: expect.any(Number), 
+  id: expect.any(String),
+  records: [
+    { action: "/applyContainerPatches",
+      inversePatches: [
+        { op: "replace", path: "/content/tileMap/t1/content/flag", value: undefined}
+      ], 
+      patches: [
+        { op: "replace", path: "/content/tileMap/t1/content/flag", value: true}
+      ], 
+      tree: "test"
+    }, 
+  ], 
+  state: "complete", 
+  tree: "container", 
+  undoable: false
+};
+
 it("can redo a tile change", async () => {
   const {docModel, tileContent} = setupDocument();
   // This should record a history entry with this change and any changes to tiles
@@ -210,27 +233,44 @@ it("can redo a tile change", async () => {
   expect(getSnapshot(changeDocument.history)).toEqual([ 
     initialUpdateEntry,
     undoEntry,
-    {
-      action: "redo", 
-      created: expect.any(Number), 
-      id: expect.any(String),
-      records: [
-        { action: "/applyContainerPatches",
-          inversePatches: [
-            { op: "replace", path: "/content/tileMap/t1/content/flag", value: undefined}
-          ], 
-          patches: [
-            { op: "replace", path: "/content/tileMap/t1/content/flag", value: true}
-          ], 
-          tree: "test"
-        }, 
-      ], 
-      state: "complete", 
-      tree: "container", 
-      undoable: false
-    }
+    redoEntry
   ]);
 });  
+
+/**
+ * Remove the Jest `expect.any(Number)` on created, and provide a real id.
+ * @param entry 
+ * @returns 
+ */
+function makeRealHistoryEntry(entry: any): HistoryEntrySnapshot {
+  const realEntry = cloneDeep(entry);
+  delete realEntry.created;
+  realEntry.id = nanoid();
+  return realEntry;
+}
+
+it("can replay the history entries", async () => {
+    // TODO: this isn't the best test because we are starting out with some initial
+    // document state. We should create a history entry that setups up this initial
+    // document state so we can test creating a document's content complete from
+    // scratch.
+    const {docModel, tileContent} = setupDocument();
+    
+    const docStore = docModel.container.documentStore as Instance<typeof DocumentStore>;
+    
+    // Add the history entries used in the tests above so we can replay them all at 
+    // the same time.
+    docStore.setChangeDocument(CDocument.create({
+      history: [
+        makeRealHistoryEntry(initialUpdateEntry),
+        makeRealHistoryEntry(undoEntry),
+        makeRealHistoryEntry(redoEntry)
+      ]
+    }));
+    await docStore.replayHistoryToTrees({test: docModel});
+
+    expect(tileContent.flag).toBe(true);
+});
 
 const initialSharedModelUpdateEntry = { 
   action: "/content/sharedModelMap/sm1/sharedModel/setValue", 
@@ -334,6 +374,35 @@ it("can undo a shared model change", async () => {
   ]);
 });
 
+const redoSharedModelEntry = {
+  action: "redo", 
+  created: expect.any(Number), 
+  id: expect.any(String),
+  records: [
+    { action: "/applyContainerPatches",
+      inversePatches: [
+        { op: "replace", path: "/content/tileMap/t1/content/text", value: undefined}
+      ], 
+      patches: [
+        { op: "replace", path: "/content/tileMap/t1/content/text", value: "something-tile"}
+      ], 
+      tree: "test"
+    }, 
+    { action: "/applyContainerPatches", 
+      inversePatches: [
+        { op: "replace", path: "/content/sharedModelMap/sm1/sharedModel/value", value: undefined}
+      ], 
+      patches: [
+        { op: "replace", path: "/content/sharedModelMap/sm1/sharedModel/value", value: "something"}
+      ], 
+      tree: "test"
+    }
+  ], 
+  state: "complete", 
+  tree: "container", 
+  undoable: false
+};
+
 it("can redo a shared model change", async () => {
   const {docModel, sharedModel, tileContent} = setupDocument();
   // This should record a history entry with this change and any changes to tiles
@@ -367,35 +436,32 @@ it("can redo a shared model change", async () => {
   expect(getSnapshot(changeDocument.history)).toEqual([ 
     initialSharedModelUpdateEntry,
     undoSharedModelEntry,
-    {
-      action: "redo", 
-      created: expect.any(Number), 
-      id: expect.any(String),
-      records: [
-        { action: "/applyContainerPatches",
-          inversePatches: [
-            { op: "replace", path: "/content/tileMap/t1/content/text", value: undefined}
-          ], 
-          patches: [
-            { op: "replace", path: "/content/tileMap/t1/content/text", value: "something-tile"}
-          ], 
-          tree: "test"
-        }, 
-        { action: "/applyContainerPatches", 
-          inversePatches: [
-            { op: "replace", path: "/content/sharedModelMap/sm1/sharedModel/value", value: undefined}
-          ], 
-          patches: [
-            { op: "replace", path: "/content/sharedModelMap/sm1/sharedModel/value", value: "something"}
-          ], 
-          tree: "test"
-        }
-      ], 
-      state: "complete", 
-      tree: "container", 
-      undoable: false
-    }
+    redoSharedModelEntry
   ]);
+});
+
+it("can replay history entries that include shared model changes", async () => {
+  // TODO: this isn't the best test because we are starting out with some initial
+  // document state. We should create a history entry that setups up this initial
+  // document state so we can test creating a document's content complete from
+  // scratch.
+  const {docModel, tileContent, sharedModel} = setupDocument();
+  
+  const docStore = docModel.container.documentStore as Instance<typeof DocumentStore>;
+  
+  // Add the history entries used in the tests above so we can replay them all at 
+  // the same time.
+  docStore.setChangeDocument(CDocument.create({
+    history: [
+      makeRealHistoryEntry(initialSharedModelUpdateEntry),
+      makeRealHistoryEntry(undoSharedModelEntry),
+      makeRealHistoryEntry(redoSharedModelEntry)
+    ]
+  }));
+  await docStore.replayHistoryToTrees({test: docModel});
+
+  expect(sharedModel.value).toBe("something");
+  expect(tileContent.text).toBe("something-tile");
 });
 
 async function expectUpdateToBeCalledTimes(testTile: TestTileType, times: number) {

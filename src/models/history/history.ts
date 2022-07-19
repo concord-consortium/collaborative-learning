@@ -38,6 +38,7 @@ export const HistoryEntry = types.model("HistoryEntry", {
     // record how many times an openCall is referenced
     openCalls: observable.map<string, number>({}, {name: "openCalls"})
 }));
+export interface HistoryEntrySnapshot extends SnapshotIn<typeof HistoryEntry> {}
 
 export enum HistoryOperation {
     Undo = "undo",

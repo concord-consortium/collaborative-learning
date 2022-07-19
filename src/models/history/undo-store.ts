@@ -38,7 +38,7 @@ export const UndoStore = types
         // create separate actions for each of the parts of this single action
         const applyPatchesToTrees = 
           flow(function* applyPatchesToTrees(entryToUndo: Instance<typeof HistoryEntry>, 
-                                             opType: HistoryOperation, document: any ) {
+                                             opType: HistoryOperation) {
             const getTreeFromId = (getEnv(self) as Environment).getTreeFromId;
             const treeEntries = entryToUndo.records;
 
@@ -93,7 +93,7 @@ export const UndoStore = types
                 docStore.startHistoryEntryCall(historyEntryId, finishCallId);
 
                 return getTreeFromId(treeEntry.tree)
-                  .finishApplyingContainerPatches(historyEntryId, finishCallId, document);
+                  .finishApplyingContainerPatches(historyEntryId, finishCallId);
             });
             yield Promise.all(finishPromises);
 
@@ -151,10 +151,7 @@ export const UndoStore = types
                 //
                 // FIXME: we aren't actually calling this as an action and we
                 // aren't waiting for it finish before returning
-                //
-                // FIXME: we nee replace the last parameter with the document
-                // that is being modified
-                applyPatchesToTrees(entryToUndo, HistoryOperation.Undo, {});
+                applyPatchesToTrees(entryToUndo, HistoryOperation.Undo);
 
                 self.undoIdx--;
             },
@@ -170,9 +167,7 @@ export const UndoStore = types
                 // FIXME: we aren't actually calling this as an action and we
                 // aren't waiting for it finish before returning
                 //
-                // FIXME: we nee replace the last parameter with the document
-                // that is being modified
-                applyPatchesToTrees(entryToRedo, HistoryOperation.Redo, {});
+                applyPatchesToTrees(entryToRedo, HistoryOperation.Redo);
     
                 self.undoIdx++;
             },        

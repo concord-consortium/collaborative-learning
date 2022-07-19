@@ -73,7 +73,7 @@ export interface TreeAPI {
      * has handled this call. 
      * 
      */
-    finishApplyingContainerPatches(historyEntryId: string, callId: string, document: any): Promise<void>;
+    finishApplyingContainerPatches(historyEntryId: string, callId: string): Promise<void>;
 
     /**
      * TODO: need to bring over updated documentation from prototype 

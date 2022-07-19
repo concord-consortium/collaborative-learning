@@ -27,6 +27,8 @@ export const CDocument = types
         // objects. 
         history: types.array(HistoryEntry)
     });
+export interface CDocumentType extends Instance<typeof CDocument> {}
+
 
 export const DocumentStore = types
     .model("DocumentStore", {
@@ -58,6 +60,12 @@ export const DocumentStore = types
                 throw new Error("trying to create or update a history entry that has an existing open call");
             }
             entry.openCalls.set(callId, 1);
+        }
+    }))
+    .actions((self) => ({
+        // This is only currently used for tests
+        setChangeDocument(cDoc: CDocumentType) {
+            self.document = cDoc;
         }
     }))
     .actions((self) => {
@@ -189,8 +197,10 @@ export const DocumentStore = types
 
         // This is asynchronous. We might as well use a flow so we don't have to 
         // create separate actions for each of the parts of this single action
-        const replayHistoryToTrees = flow(function* replayHistoryToTrees(treeMap: Record<string, TreeAPI>, 
-                document: any ) {
+        // TODO: the treeMap and getTreeFromId duplicate functionality,
+        // the treeMap is needed so we can get a list of all of the trees. getTreeFromId
+        // is 
+        const replayHistoryToTrees = flow(function* replayHistoryToTrees(treeMap: Record<string, TreeAPI>) {
             const getTreeFromId = (getEnv(self) as Environment).getTreeFromId;
             const trees = Object.values(treeMap);
 
@@ -265,7 +275,7 @@ export const DocumentStore = types
                 const finishCallId = nanoid();
                 self.startHistoryEntryCall(historyEntryId, finishCallId);
 
-                return tree.finishApplyingContainerPatches(historyEntryId, finishCallId, document);
+                return tree.finishApplyingContainerPatches(historyEntryId, finishCallId);
             });
             // I'm using a yield because it isn't clear from the docs if an flow MST action
             // can return a promise or not.

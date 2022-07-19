@@ -39,7 +39,7 @@ export const Tree = types.model("Tree", {
   // This "finding" should be done in a view so it is cached and doesn't
   // require the lookup on every shared model change.
 
-  updateTreeAfterSharedModelChanges(options: {sharedModel: SharedModelType} | {document: DocumentContentModelType}) {
+  updateTreeAfterSharedModelChanges(options?: {sharedModel: SharedModelType}) {
     // If there is no sharedModel run the update function on all tiles which
     // have shared model references
     // If there is a sharedModel only run the update function on tiles which
@@ -53,7 +53,7 @@ export const Tree = types.model("Tree", {
     // here. But I don't remember how it handles parameter values
     const tiles: Array<ToolTileModelType> = [];
     let sharedModel: SharedModelType | undefined;
-    if ("sharedModel" in options) {
+    if (options) {
       sharedModel = options.sharedModel;
       const document = getParentOfType(options.sharedModel, DocumentContentModel);
       const sharedModelEntry = document.sharedModelMap.get(options.sharedModel.id);
@@ -64,7 +64,6 @@ export const Tree = types.model("Tree", {
         sharedModelEntry.tiles.forEach(tile => tiles.push(tile));
       }
     } else {
-      // Ignore the options for now and just assume this tree is a DocumentModel
       const document = (self as any).content as DocumentContentModelType ;
 
       // If we still don't have a document just let the exception happen so we
@@ -152,7 +151,7 @@ export const Tree = types.model("Tree", {
 
     // The container calls this after all patches have been applied
     // FIXME: we should type the document
-    finishApplyingContainerPatches(historyEntryId: string, callId: string, document: any) {
+    finishApplyingContainerPatches(historyEntryId: string, callId: string) {
       self.applyingContainerPatches = false;
 
       // TODO: Need to deal with possible effects on the undo stack
@@ -191,7 +190,7 @@ export const Tree = types.model("Tree", {
       // down what happened. One likely reason is a broken implementation of the 
       // updateTreeAfterSharedModelChanges. And that will be likely to happen 
       // during development.
-      self.updateTreeAfterSharedModelChanges({document});
+      self.updateTreeAfterSharedModelChanges();
 
       // We return a promise because the API is async
       // The action itself doesn't do anything asynchronous though
