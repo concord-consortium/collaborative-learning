@@ -114,6 +114,21 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
     serialDevice.hasPort() ? "has-port" : "no-port"
   );
 
+  function serialMessage(){
+
+    // nodes that use serial, but no device physucally connected
+    if (lastMsg !== "connect" && serialDevice.serialNodesCount > 0){
+      return "connect a device"
+    }
+    // physical connection has been made but user action needed
+    if (lastMsg === "connect"
+        && !serialDevice.hasPort()
+        && serialDevice.serialNodesCount > 0
+    ){
+      return "click to finish connecting"
+    }
+  }
+
   return (
     <div className="program-editor-topbar">
       <div className="topbar-left">
@@ -125,6 +140,9 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
           disabled={props.readOnly}
           className={classes}
         />}
+        <div className="serial-message">
+          { serialMessage() }
+        </div>
       </div>
       <div className="topbar-center">
         <RateSelectorComponent

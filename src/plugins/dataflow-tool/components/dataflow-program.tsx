@@ -455,6 +455,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private updateChannels = () => {
     this.channels = [];
     this.channels = [...virtualSensorChannels, ...serialSensorChannels];
+    this.countSerialDataNodes(this.programEditor.nodes);
   };
 
   private updateRunAndGraphStates() {

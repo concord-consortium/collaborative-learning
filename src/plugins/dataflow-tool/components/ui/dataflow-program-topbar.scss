@@ -15,7 +15,8 @@ $duration-label-back: $gray-mid;
   border: solid 2px #ffffff;
 
   .topbar-left {
-    width: 10%;
+    width: 20%;
+    display: flex;
 
     .icon-refresh {
       display: flex;
@@ -84,13 +85,13 @@ $duration-label-back: $gray-mid;
       &:disabled {
         opacity: 0.6;
       }
-      &.physical-connection.no-port {
+      &.physical-connection.no-port.nodes-in-need {
         background-color: lightgoldenrodyellow;
         //animation: slowpulse 2s linear infinite;
 
         @keyframes slowpulse {
           50% {
-            opacity: .2;
+            opacity: .4;
           }
         }
       }
@@ -119,13 +120,20 @@ $duration-label-back: $gray-mid;
         }
       }
     }
+
+    .serial-message {
+      position: absolute;
+      left: 42px;
+      margin-top: 4px;
+      color:#444343;
+    }
   }
 
   .topbar-center {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 70%;
+    width: 60%;
 
     .running-container {
       &.countdown {
