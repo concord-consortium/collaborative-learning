@@ -40,7 +40,12 @@ export const DocumentStore = types
             return self.document.history.find(entry => entry.id === historyEntryId);
         },
     }))
-    .views((self) => ({
+    .actions((self) => ({
+        // This is only currently used for tests
+        setChangeDocument(cDoc: CDocumentType) {
+            self.document = cDoc;
+        },
+
         startHistoryEntryCall(historyEntryId: string, callId: string) {
             // Find if there is already an entry with this historyEntryId
             const entry = self.findHistoryEntry(historyEntryId);
@@ -60,12 +65,6 @@ export const DocumentStore = types
                 throw new Error("trying to create or update a history entry that has an existing open call");
             }
             entry.openCalls.set(callId, 1);
-        }
-    }))
-    .actions((self) => ({
-        // This is only currently used for tests
-        setChangeDocument(cDoc: CDocumentType) {
-            self.document = cDoc;
         }
     }))
     .actions((self) => {
@@ -99,16 +98,6 @@ export const DocumentStore = types
             }
         };
 
-        // FIXME: I was thinking of just using the historyEntryId as a call id,
-        // to tie together different calls during a user action or in response
-        // to a applySharedModelSnapshotFromContainer call.
-        // But earlier we needed this method to also handle updating, so the
-        // separate 
-        // callId was added.  It is probably no longer needed and the
-        // historyEntryId could be renamed to be something that is a mix of
-        // both. This would make debugging a bit harder though because there
-        // would no longer be a consistent id passed around to all of these calls.
-        //
         const createHistoryEntry = (historyEntryId: string, callId: string, name: string, 
             treeId: string, undoable: boolean) => {
             let entry = self.findHistoryEntry(historyEntryId);
@@ -127,27 +116,6 @@ export const DocumentStore = types
             entry.openCalls.set(callId, 1);
 
             return entry;
-        };
-
-        const startHistoryEntryCall = (historyEntryId: string, callId: string) => {
-            // Find if there is already an entry with this historyEntryId
-            const entry = self.findHistoryEntry(historyEntryId);
-            if (!entry) {
-                throw new Error(`History Entry doesn't exist ${ json({historyEntryId})} `);
-            }
-
-            // Make sure this entry wasn't marked complete before
-            if (entry.state === "complete") {
-                throw new Error(`The entry was already marked complete ${ json({historyEntryId, callId})}`);
-            }            
-            
-            // start a new open call with this callId
-            // Check if there is a open call already with this id:
-            const openCallValue = entry.openCalls.get(callId);
-            if (openCallValue) {
-                throw new Error("trying to create or update a history entry that has an existing open call");
-            }
-            entry.openCalls.set(callId, 1);
         };
 
         const addPatchesToHistoryEntry = (historyEntryId: string, callId: string, 
@@ -295,13 +263,10 @@ export const DocumentStore = types
 
         });
 
-
-
         return {
             replayHistoryToTrees,
             createHistoryEntry,
             addPatchesToHistoryEntry,
-            startHistoryEntryCall,
             closeHistoryEntryCall
         };
       
