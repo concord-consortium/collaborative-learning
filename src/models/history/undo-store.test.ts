@@ -7,7 +7,6 @@ import { DocumentContentModel } from "../document/document-content";
 import { createDocumentModel, DocumentModelType } from "../document/document";
 import { ProblemDocument } from "../document/document-types";
 import { when } from "mobx";
-import { type } from "@testing-library/user-event/dist/type";
 import { CDocument } from "./document-store";
 
 const TestSharedModel = SharedModel
@@ -51,7 +50,7 @@ const TestTile = ToolContentModel
   .actions(self => ({
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {      
       self.updateCount++;
-      const sharedModelValue = self.sharedModel?.value
+      const sharedModelValue = self.sharedModel?.value;
       self.text = sharedModelValue ? sharedModelValue + "-tile" : undefined;
     },
     setFlag(_flag: boolean) {
