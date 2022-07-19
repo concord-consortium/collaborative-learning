@@ -18,7 +18,7 @@ export class DemoOutputControl extends Rete.Control {
     this.node = node;
 
     this.component = (compProps: {value: number, percentClosed: number, percentTilt: number, type: string}) => {
-      const controlClassName = compProps.type === "Light Bulb" ? "lightbulb-control"
+          const controlClassName = compProps.type === "Light Bulb" ? "lightbulb-control"
         : compProps.type === "Backyard Claw" ? "backyard-claw-control" : "grabber-control";
       const clawFrame = this.getClawFrame(compProps.percentClosed);
       const chordFrame = this.getChordFrame(compProps.percentTilt);
@@ -91,15 +91,30 @@ export class DemoOutputControl extends Rete.Control {
   };
 
   private getClawFrame = (percentClosed: number) => {
-    return percentClosed < 1 ? Math.floor(grabberClawFrames.length * percentClosed) :  grabberClawFrames.length - 1;
+    return this.getFrame(percentClosed, grabberClawFrames.length);
   };
 
   private getChordFrame = (percentTilt: number) => {
-    return percentTilt < 1 ? Math.floor(grabberChordFrames.length * percentTilt) : grabberChordFrames.length - 1;
+    return this.getFrame(percentTilt, grabberChordFrames.length);
+  };
+
+  private getFrame = (percent: number, numFrames: number) => {
+    let frame = Math.floor(numFrames * this.easePercent(percent));
+    frame = Math.max(frame, 0);
+    frame = Math.min(frame, numFrames - 1);
+    return frame;
   };
 
   private getClawRotateStyle = (percentTilt: number) => {
-    const degrees = (percentTilt - .5) * -50;
-    return { transform: `rotate(${degrees}deg)` };
+    const degrees = (this.easePercent(percentTilt) - .5) * -50;
+    const transform = `rotate(${degrees}deg)`;
+    return { transform };
+  };
+
+  // Uses a sin function to ease transitions
+  private easePercent = (percent: number) => {
+    const trigVal = Math.sin(percent * Math.PI - Math.PI / 2);
+    const easedPercent = trigVal / 2 + .5;
+    return easedPercent;
   };
 }
