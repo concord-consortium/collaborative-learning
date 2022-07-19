@@ -1,4 +1,5 @@
 import React from "react";
+import classNames from "classnames";
 import { ProgramDataRate } from "../../model/utilities/node";
 import { IconButton } from "../../../../components/utilities/icon-button";
 import { SerialDevice } from "../../../../models/stores/serial";
@@ -103,20 +104,15 @@ const RecordButton = (props: RecordButtonProps) => {
 };
 
 export const DataflowProgramTopbar = (props: TopbarProps) => {
-  function serialButtonClasses(){
-    let status;
-    const { serialDevice } = props;
-    const physicalConnect = localStorage.getItem("last-connect-message") === "connect";
-    const physicalDisconnect = localStorage.getItem("last-connect-message") === "disconnect";
-    const nodesInNeed = serialDevice.serialNodesCount > 0;
-    const hasPort = serialDevice.hasPort();
-
-    status = hasPort ? "has-port" : "no-port";
-    status += physicalConnect ? " physical-connection" : " no-physical-connection";
-    status += physicalDisconnect ? " disconnected" : " not-interrupted";
-    status += nodesInNeed ? " nodes-in-need" : " no-serial-needed";
-    return `${status} icon-serial`;
-  }
+  const { serialDevice } = props;
+  const lastMsg = localStorage.getItem("last-connect-message");
+  const classes = classNames(
+    "icon-serial",
+    { "physical-connection": lastMsg === "connect"},
+    { "no-physical-connection": lastMsg === "disconnect"},
+    serialDevice.serialNodesCount > 0 ? "nodes-in-need" : "no-serial-needed",
+    serialDevice.hasPort() ? "has-port" : "no-port"
+  );
 
   return (
     <div className="program-editor-topbar">
@@ -147,7 +143,7 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
           onClickButton={props.onSerialRefreshDevices}
           title="Refresh Serial Connection"
           disabled={props.readOnly}
-          className={serialButtonClasses()}
+          className={classes}
         />}
         {props.showRateUI && <span className={"rate-ui"}>{`${props.lastIntervalDuration}ms`}</span>}
       </div>
