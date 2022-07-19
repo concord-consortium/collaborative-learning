@@ -95,7 +95,7 @@ export class DemoOutputControl extends Rete.Control {
   };
 
   private getChordFrame = (percentTilt: number) => {
-    return this.getFrame(percentTilt, grabberChordFrames.length);
+    return this.getFrame(this.easePercent(percentTilt), grabberChordFrames.length);
   };
 
   private getFrame = (percent: number, numFrames: number) => {
