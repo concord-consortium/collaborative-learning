@@ -17,6 +17,9 @@ class DataflowToolTile {
   getDeleteNodeButton(nodeType) {
     return cy.get(`.primary-workspace .node.${nodeType} .close-node-button`);
   }
+  getNumberField() {
+    return cy.get(`.primary-workspace .node.number .number-input`);
+  }
 }
 
 export default DataflowToolTile;
