@@ -99,7 +99,7 @@ export class DemoOutputControl extends Rete.Control {
   };
 
   private getFrame = (percent: number, numFrames: number) => {
-    let frame = Math.floor(numFrames * this.easePercent(percent));
+    let frame = Math.floor(numFrames * percent);
     frame = Math.max(frame, 0);
     frame = Math.min(frame, numFrames - 1);
     return frame;
