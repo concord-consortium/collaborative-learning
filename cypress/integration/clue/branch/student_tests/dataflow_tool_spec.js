@@ -31,7 +31,7 @@ context('Dataflow Tool Tile', function () {
       });
       it("can change the number", () => {
         dataflowToolTile.getNumberField().type("3{enter}");
-        dataflowToolTile.getNumberField().its("value").should("eq", "3");
+        dataflowToolTile.getNumberField().should("have.value", "3");
       });
       it("can delete number node", () => {
         dataflowToolTile.getDeleteNodeButton(nodeType).click();
@@ -102,14 +102,10 @@ context('Dataflow Tool Tile', function () {
       it("can change output type", () => {
         const dropdown = "outputType";
         dataflowToolTile.getDropdown(nodeType, dropdown).click();
-        const dropdownOptions = dataflowToolTile.getDropdownOptions(nodeType, dropdown);
-        dropdownOptions.should("have.length", 3);
-        dropdownOptions.each((item, index, list) => {
-          if (index === 2) {
-            item.click();
-          }
-        });
+        dataflowToolTile.getDropdownOptions(nodeType, dropdown).should("have.length", 3);
+        dataflowToolTile.getDropdownOptions(nodeType, dropdown).last().click();
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).should("have.length", 0);
+        dataflowToolTile.getDropdown(nodeType, dropdown).contains("Grabber").should("exist");
       });
       it("can delete demo output node", () => {
         dataflowToolTile.getDeleteNodeButton(nodeType).click();
