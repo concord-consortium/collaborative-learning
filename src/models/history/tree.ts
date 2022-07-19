@@ -22,23 +22,6 @@ export const Tree = types.model("Tree", {
   }
 }))
 .actions(self => ({
-  // tiles.  In the prototype there was just one tile per tree. And in that
-  // FIXME: this is where the tree should call a similar method in all of its
-  // case the Tiles extended the Tree. Now in CLUE we want to support multiple
-  // tiles in one tree. 
-
-  // FIXME: right now this Tree model is applied to the whole list of
-  // documents this is because the middleware needs to be applied to the root
-  // of the tree. But when we are updating things after a shared model change
-  // we need to just update the tiles that are part of the document owning the
-  // shared model. 
-
-  // So this should know which shared model changed, and then it can find the
-  // document of this shared model and then find all of the tiles that are
-  // referencing the shared model. And then finally call the update function.
-  // This "finding" should be done in a view so it is cached and doesn't
-  // require the lookup on every shared model change.
-
   updateTreeAfterSharedModelChanges(options?: {sharedModel: SharedModelType}) {
     // If there is no sharedModel run the update function on all tiles which
     // have shared model references
@@ -60,8 +43,7 @@ export const Tree = types.model("Tree", {
       if (!sharedModelEntry) {
         console.warn(`no shared model entry for shared model: ${options.sharedModel.id}`);
       } else {
-        // FIXME: this can probably be simplified now
-        sharedModelEntry.tiles.forEach(tile => tiles.push(tile));
+        tiles.push(...sharedModelEntry.tiles);
       }
     } else {
       const document = (self as any).content as DocumentContentModelType ;
@@ -87,8 +69,8 @@ export const Tree = types.model("Tree", {
   }
 }))
 .actions(self => {
-    // FIXME: should type the model
-    const updateTreeAfterSharedModelChangesInternal = (historyEntryId: string, callId: string, sharedModel: any) => {
+    const updateTreeAfterSharedModelChangesInternal = (historyEntryId: string, callId: string, 
+      sharedModel: SharedModelType) => {
         // If we are applying container patches, then we ignore any sync actions
         // otherwise the user might make a change such as changing the name of a
         // node while the patches are applied. When they do this the patch for 
@@ -150,7 +132,6 @@ export const Tree = types.model("Tree", {
     },
 
     // The container calls this after all patches have been applied
-    // FIXME: we should type the document
     finishApplyingContainerPatches(historyEntryId: string, callId: string) {
       self.applyingContainerPatches = false;
 
