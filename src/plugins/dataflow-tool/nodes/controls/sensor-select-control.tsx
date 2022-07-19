@@ -140,7 +140,7 @@ export class SensorSelectControl extends Rete.Control {
         if (!ch && (!id || id === "none")) return kSensorSelectMessage;
         if (ch === "none") return "None Available";
         if (!ch) return `${kSensorMissingMessage} ${id}`;
-        if (ch.missing) return `${kSensorMissingMessage} ${ch.channelId}`;
+        if (ch.missing) return `${kSensorMissingMessage} connect for live ${ch.name}`;
         let count = 0;
         channelsForType.forEach( c => { if (c.type === ch.type && ch.hubId === c.hubId) count++; } );
         const chStr = ch.virtual
@@ -268,7 +268,6 @@ export class SensorSelectControl extends Rete.Control {
       this.props.type = nch.type;
       this.putData("type", nch.type);
     }
-
     this.props.sensor = val;
     this.putData("sensor", val);
     (this as any).update();

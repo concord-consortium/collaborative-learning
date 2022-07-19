@@ -34,9 +34,10 @@ import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
 import { DataflowProgramGraph,DataSet, ProgramDisplayStates } from "./ui/dataflow-program-graph";
 // import { uploadProgram, fetchProgramData, fetchActiveRelays, deleteProgram } from "../utilities/aws";
 import { NodeChannelInfo, NodeSensorTypes, NodeGeneratorTypes, ProgramDataRates, NodeTimerInfo,
-         virtualSensorChannels } from "../model/utilities/node";
+         virtualSensorChannels, serialSensorChannels} from "../model/utilities/node";
 import { Rect, scaleRect, unionRect } from "../utilities/rect";
 import { DocumentContextReact } from "../../../components/document/document-context";
+import { SerialDevice } from "../../../models/stores/serial";
 
 import "./dataflow-program.sass";
 
@@ -166,6 +167,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           onRunProgramClick={this.prepareToRunProgram}
           onStopProgramClick={this.stopProgram}
           onRefreshDevices={this.deviceRefresh}
+          onSerialRefreshDevices={this.serialDeviceRefresh}
           programDataRates={ProgramDataRates}
           dataRate={this.props.programDataRate}
           onRateSelectClick={this.props.onProgramDataRateChange}
@@ -175,6 +177,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           readOnly={readOnly || !this.isReady()}
           showRateUI={showRateUI}
           lastIntervalDuration={this.state.lastIntervalDuration}
+          serialDevice={this.stores.serialDevice}
         />}
         <div className={toolbarEditorContainerClass}>
           { showProgramToolbar && <DataflowProgramToolbar
@@ -224,7 +227,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (this.isComplete()) {
       this.props.onCheckProgramRunState(this.props.programEndTime);
     }
-    
+
     this.setupOnSnapshot();
   }
 
@@ -335,7 +338,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             }
           });
         }
-        
+
         await this.programEditor.fromJSON(program as any);
         if (this.hasDataStorage()) {
           this.setState({disableDataStorage: true});
@@ -349,6 +352,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       (this.programEditor as any).on("process noderemoved connectioncreated connectionremoved", () => {
         this.processAndSave();
+        this.countSerialDataNodes(this.programEditor.nodes);
       });
 
       this.programEditor.on("nodecreated", node => {
@@ -449,35 +453,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private updateChannels = () => {
-    // const { hubStore } = this.stores; FIXME
     this.channels = [];
-
-    // function parseValue(value: string) {
-    //   const chValue = Number.parseFloat(value);
-    //   return Number.isFinite(chValue) ? chValue : NaN;
-    // }
-
-    // add virtual channels that always appear
-    this.channels = [...virtualSensorChannels];
-
-    // hubStore.hubs.forEach(hub => {
-    //   hub.hubChannels.forEach(ch => {
-    //     // add channel if it is new
-    //     let chInfo = this.channels.find(ci => ci.channelId === ch.id);
-    //     if (!chInfo || (chInfo.hubId !== hub.hubId)) {
-    //       chInfo = {hubId: hub.hubId,
-    //                 hubName: hub.hubName,
-    //                 channelId: ch.id,
-    //                 missing: ch.missing,
-    //                 type: ch.type,
-    //                 units: ch.units,
-    //                 plug: ch.plug,
-    //                 name: ch.type,
-    //                 value: parseValue(ch.value)};
-    //       this.channels.push(chInfo);
-    //     }
-    //   });
-    // });
+    this.channels = [...virtualSensorChannels, ...serialSensorChannels];
+    this.countSerialDataNodes(this.programEditor.nodes);
   };
 
   private updateRunAndGraphStates() {
@@ -981,6 +959,21 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     // });
   };
 
+  private serialDeviceRefresh = () => {
+    if (!this.stores.serialDevice.hasPort()){
+      this.stores.serialDevice.requestAndSetPort()
+        .then(() => {
+          this.stores.serialDevice.handleStream(this.channels);
+        });
+    }
+
+    if (this.stores.serialDevice.hasPort()){
+      // TODO
+      // this.stores.serialDevice.reader.cancel();
+      // etc to gracefully close connection
+    }
+  };
+
   private clearProgram = () => {
     this.programEditor.clear();
     this.setState({disableDataStorage: false});
@@ -1050,6 +1043,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           };
 
     let processNeeded = false;
+
     this.programEditor.nodes.forEach((n: Node) => {
       const nodeProcess = nodeProcessMap[n.name];
       if (nodeProcess) {
@@ -1076,7 +1070,40 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.updateRunState();
   };
 
+  private passSerialStateToChannel(sd: SerialDevice, channel: NodeChannelInfo){
+    if (sd.hasPort()){
+      channel.serialConnected = true;
+      channel.missing = false;
+    } else {
+      channel.serialConnected = false;
+      channel.missing = true;
+    }
+  }
+
+  private countSerialDataNodes(nodes: Node[]){
+    // implementing with a "count" of 1 or 0 in case we need to count nodes in future
+    let serialNodesCt = 0;
+    nodes.forEach((n) => {
+      if(n.data.sensor === "emg" || n.data.sensor === "fsr"){
+        serialNodesCt++;
+      }
+    });
+    // constraining all counts to 1 or 0 for now
+    if (serialNodesCt > 0){
+      this.stores.serialDevice.setSerialNodesCount(1);
+    } else {
+      this.stores.serialDevice.setSerialNodesCount(0);
+    }
+  }
+
   private updateNodeChannelInfo = (n: Node) => {
+
+    if (this.channels.length > 0 ){
+      this.channels.filter(c => c.usesSerial).forEach((ch) => {
+        this.passSerialStateToChannel(this.stores.serialDevice, ch);
+      });
+    }
+
     const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
     const relayList = n.controls.get("relayList") as RelaySelectControl;
     if (sensorSelect) {
@@ -1096,7 +1123,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       // update virtual sensors
       if (chInfo?.virtualValueMethod) {
-        const time = Math.floor(Date.now() / 1000);
+        const timeFactor = chInfo?.name === "EMG" ? 100 : 1000;
+        const time = Math.floor(Date.now() / timeFactor);
         chInfo.value = chInfo.virtualValueMethod(time);
       }
 
