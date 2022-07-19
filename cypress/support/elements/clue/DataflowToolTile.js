@@ -17,6 +17,12 @@ class DataflowToolTile {
   getDeleteNodeButton(nodeType) {
     return cy.get(`.primary-workspace .node.${nodeType} .close-node-button`);
   }
+  getDropdown(nodeType, dropdown) {
+    return cy.get(`.primary-workspace .node.${nodeType} .node-select.${dropdown}`);
+  }
+  getDropdownOptions(nodeType, dropdown) {
+    return cy.get(`.primary-workspace .node.${nodeType} .option-list.${dropdown}`);
+  }
   getNumberField() {
     return cy.get(`.primary-workspace .node.number .number-input`);
   }

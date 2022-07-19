@@ -95,6 +95,14 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getCreateNodeButton(nodeType).click();
         dataflowToolTile.getNode(nodeType).should("exist");
       });
+      it("can change output type", () => {
+        const dropdown = "outputType";
+        dataflowToolTile.getDropdown(nodeType, dropdown).click();
+        const dropdownOptions = dataflowToolTile.getDropdownOptions(nodeType, dropdown);
+        dropdownOptions.should("exist");
+        console.log(dropdownOptions);
+        // console.log(`options ${dropdownOptions}`);
+      });
       it("can delete demo output node", () => {
         dataflowToolTile.getDeleteNodeButton(nodeType).click();
         dataflowToolTile.getNode(nodeType).should("not.exist");
