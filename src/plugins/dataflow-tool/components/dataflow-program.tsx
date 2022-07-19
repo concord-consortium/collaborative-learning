@@ -37,7 +37,7 @@ import { NodeChannelInfo, NodeSensorTypes, NodeGeneratorTypes, ProgramDataRates,
          virtualSensorChannels, serialSensorChannels} from "../model/utilities/node";
 import { Rect, scaleRect, unionRect } from "../utilities/rect";
 import { DocumentContextReact } from "../../../components/document/document-context";
-import { SerialDevice } from "src/models/stores/serial";
+import { SerialDevice } from "../../../models/stores/serial";
 
 import "./dataflow-program.sass";
 

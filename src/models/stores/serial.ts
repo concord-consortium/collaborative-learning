@@ -86,7 +86,7 @@ export class SerialDevice {
   }
 
   public handleStreamObj(value: string, channels: Array<NodeChannelInfo>){
-    this.localBuffer+= value;
+    this.localBuffer += value;
 
     const pattern = /(emg|fsr):([0-9]+)[\r][\n]/g;
     let match: RegExpExecArray | null;

@@ -4,7 +4,7 @@ This directory contains arduino files for testing, development, and use with Bac
 
 The only file meant for use in the classroom is `universal.ino`
 
-Each `.ino` file is in it's own directory.  This is a requirement of the Visual Studio Code arduino plugin, which allows us to manage our development hardware and arduino sketches within vsc, and track changes in the same version control context.
+Each `.ino` file is in its own directory.  This is a requirement of the Visual Studio Code arduino plugin, which allows us to manage our development hardware and arduino sketches within vsc, and track changes in the same version control context.
 
 ## files
 
