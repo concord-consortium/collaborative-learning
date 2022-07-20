@@ -188,6 +188,7 @@
                                   "height": 300
                                 },
                                 "id": "JnxX0qRc7w60JXMO",
+                                "title": "Rakesh: Chapter 1 Cover Image",
                                 "content": {
                                   "type": "Image",
                                   "url": "curriculum/bio4community/images/thing.png"
@@ -303,11 +304,42 @@
                                 "text": [
                                   "<p></p>",
                                   "<p>Watch the video- EVIDENCE 1-The Effects of Stress on the Heart in your Resource Library. </p>",
-                                  "<p>Discuss the video with your group and together, answer the questions in your Resource Library. </p>",
+                                  "<p>Discuss the video with your group and together, answer the questions below by dragging them into your workspace. </p>",
                                   "<p>Write what you learned from this evidence in your table.</p>"
                                 ]
                               }
-                            }
+                            },
+                            {
+                              "content": {
+                                "type": "Table",
+                                "name": "Cast of Characters",
+                                "columns": [
+                                  {"name":"Character name","values":["Narrator","Rakesh (main character)","Nicole (co-worker)","Deaundre (co-worker) ","Meera (cousin)","Dr. Lee (physician)","Dr. Zeiders (scientist)","Ajay (son)","Zainab (daughter)"]},
+                                  {"name":"Actor name","values":["","","","","","","","",""]}
+                                ]
+                              }
+                            },           
+                            {
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p><strong>Questions About Evidence 1: </strong></p>",
+                                  "<p></p>",
+                                  "<p>1. The subordinate monkey has: </p>",
+                                  "<p><strong>Less control </strong>  OR    <strong>More control</strong></p>",
+                                  "<p>(underline your choice)</p>",
+                                  "<p></p>",
+                                  "<p>2. The subordinate monkey artery is:</p>",
+                                  "<p><strong>Less clogged</strong>   OR    <strong>More clogged</strong></p>",
+                                  "<p>(underline your choice)</p>",
+                                  "<p></p>",
+                                  "<p>3. Both monkeys had the same diet and health care, the difference in their blood vessels is only due to the stress from social subordination.  </p>",
+                                  "<p><strong>True</strong>   OR   <strong>False</strong> ?</p>",
+                                  "<p>(underline your choice)</p>"
+                                ]
+                              }
+                            }                    
                           ]
                         },
                         "supports": []
@@ -393,13 +425,29 @@
                                   "format": "html",
                                   "text": [
                                     "<p><strong>Read the blog- EVIDENCE 2- All the Fuss About Cholesterol - in the Resource Library. </strong></p>",
-                                    "<p>Discuss the blog with your group and together, answer the questions in the  Resource Library. </p>",
+                                    "<p>Discuss the blog with your group and together, answer the questions below by dragging them into your workspace. </p>",
                                     "<p>Write what you learned from this evidence in your table.</p>",
                                     "<p></p>",
                                     "<p><em>Continue reading to find out what happened next:</em></p>"
                                   ]
                                 }
-                              }               
+                              },
+                              {
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p><strong>Questions About Evidence 2:</strong></p>",
+                                    "<p></p>",
+                                    "<p>1. Our body can make all the cholesterol we need.  <strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</p>",
+                                    "<p></p>",
+                                    "<p>2. Cholesterol is needed to build cells, make vitamins, and make hormones.  <strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</p>",
+                                    "<p></p>",
+                                    "<p>3. A cholesterol plaque can form in: (underline your choice)</p>",
+                                    "<p><strong>A.  The liver           B. Inside the blood vessel wall         C. The stomach</strong></p>"
+                                  ]
+                                }
+                              }                
                             ]
                           },
                           "supports": []
@@ -428,12 +476,31 @@
                                     "<p>Yet, he was still nervous about those blockages. If even babies have cholesterol, then was there was a chance that despite his healthy life habits he could still have too much cholesterol in his blood? The fear of his arteries getting clogged up was still not leaving him. He just couldn’t stop worrying about it no matter how hard he tried. </p>",
                                     "<p>That day at lunch, he felt like his taste buds could almost sense the cholesterol in his rice and beans. It was all feeling too stressful, so he decided to just get his blood checked and confirm whether he had high cholesterol or not. He called the doctor’s office and they ordered some tests and told him to go to the blood lab near his house. The next day he went to the lab right after work, did the blood test. Two days later he received an email from the lab, the results were attached. He clicked on the attachment: “Rakesh Sharma Blood Test Report”</p>",
                                     "<p>Review the test results- EVIDENCE 3-Rakesh Sharma Blood Test Report - in the Resource Library. </p>",
-                                    "<p>Discuss the results with your group and together, answer the questions in the Resource Library. Write what you learned from this evidence in your table.</p>",
+                                    "<p>Discuss the results with your group and together, answer the questions below by dragging them into your workspace. Write what you learned from this evidence in your table.</p>",
                                     "<p>Continue reading to find out what happened next:</p>"
                                   ]
                                 }
-                              }
-                              
+                              },
+                              {
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p><strong>Question About Evidence 3:</strong></p>",
+                                    "<p></p>",
+                                    "<p>1. Rakesh’s cholesterol levels are? (underline your choice)</p>",
+                                    "<p><strong>A.  Low       B. Normal      C. High</strong></p>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "bio4TG01",
+                                "title": "R. Sharma Metabolic Panel",
+                                "content": {
+                                  "type": "Image",
+                                  "url": "curriculum/bio4community/images/MetabolicPanel.jpg"
+                                }
+                              }           
                             ],
                             "supports": []
                           }
@@ -510,7 +577,7 @@
                                 "title": "Email from Dr. Zeiders",
                                 "content": {
                                   "type": "Image",
-                                  "url": "curriculum/bio4community/images/drZeiders.jpg"
+                                  "url": "curriculum/bio4community/images/drZeiders.png"
                                 }
                               },
                               {
@@ -662,22 +729,23 @@
                                 "type": "Text",
                                 "format": "html",
                                 "text": [
-                                  "<p><strong>Questions About Evidence 1: </strong></p>",
-                                  "<p></p>",
-                                  "<p>1. The subordinate monkey has: </p>",
-                                  "<p><strong>Less control </strong>  OR    <strong>More control</strong></p>",
+                                  "<p><strong>Questions About Evidence 1</strong></p>",
+                                  "<p><strong></strong></p>",
+                                  "<p>1. Neuron signaling results in:</p>",
+                                  "<p><strong>Less connections</strong>    OR    <strong>More connections</strong></p>",
                                   "<p>(underline your choice)</p>",
                                   "<p></p>",
-                                  "<p>2. The subordinate monkey artery is:</p>",
-                                  "<p><strong>Less clogged</strong>   OR    <strong>More clogged</strong></p>",
+                                  "<p>2. Neurons can connect to each other and send signals to one another.  <strong>True</strong>    OR    <strong>False</strong>?</p>",
                                   "<p>(underline your choice)</p>",
                                   "<p></p>",
-                                  "<p>3. Both monkeys had the same diet and health care, the difference in their blood vessels is only due to the stress from social subordination.  </p>",
-                                  "<p><strong>True</strong>   OR   <strong>False</strong> ?</p>",
-                                  "<p>(underline your choice)</p>"
+                                  "<p></p>",
+                                  "<p>3. Connections that are not used:</p>",
+                                  "<p><strong>A. Get stronger    B. Fade away    C. Do not change </strong></p>",
+                                  "<p>(underline your choice)</p>",
+                                  "<p></p>"
                                 ]
                               }
-                            }                                               
+                            }                                           
                           ]
                         },
                         "supports": []
@@ -718,17 +786,17 @@
                                   "type": "Text",
                                   "format": "html",
                                   "text": [
-                                    "<p><strong>Questions About Evidence 2:</strong></p>",
+                                    "<p><strong>Questions About Evidence 2</strong></p>",
+                                    "<p><strong></strong></p>",
+                                    "<p>1. Increased attention shifts means the person is getting distracted.  <strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</p>",
                                     "<p></p>",
-                                    "<p>1. Our body can make all the cholesterol we need.  <strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</p>",
+                                    "<p>2. Going for walks, exercising, and mediating can reduce stress.  <strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</p>",
                                     "<p></p>",
-                                    "<p>2. Cholesterol is needed to build cells, make vitamins, and make hormones.  <strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</p>",
-                                    "<p></p>",
-                                    "<p>3. A cholesterol plaque can form in: (underline your choice)</p>",
-                                    "<p><strong>A.  The liver           B. Inside the blood vessel wall         C. The stomach</strong></p>"
+                                    "<p>3. Stress hormones in the brain: (underline your choice)</p>",
+                                    "<p><strong>A.Increase focus     B. Reduce focus     C. Reduce distractions</strong></p>"
                                   ]
                                 }
-                              }                                           
+                              }                              
                             ]
                           },
                           "supports": []
@@ -768,31 +836,11 @@
                                     "<p>Maria felt like she had so many things piling up on her plate, her shoulders felt heavier and heavier with each task. All this made focusing feel even more impossible. Feeling frustrated, María decided to look up “brain, stress, and neuron signaling” on Google. A few links down from the top, she came across a blog post: “Stress and the Brain”. </p>",
                                     "<p></p>",
                                     "<p><strong>Read the blog - EVIDENCE 2 - Stress and the Brain  - in the Resource Library. </strong></p>",
-                                    "<p><strong>Discuss the blog with your group and together, answer the questions in the  Resource Library. </strong></p>",
+                                    "<p><strong>Discuss the blog with your group and together, answer the questions below by dragging them into your workspace. </strong></p>",
                                     "<p><strong>Write what you learned from this evidence in your table.</strong></p>"
                                   ]
                                 }
-                              },
-                              {
-                                "content": {
-                                  "type": "Text",
-                                  "format": "html",
-                                  "text": [
-                                    "<p><strong>Question About Evidence 3:</strong></p>",
-                                    "<p></p>",
-                                    "<p>1. Rakesh’s cholesterol levels are? (underline your choice)</p>",
-                                    "<p><strong>A.  Low       B. Normal      C. High</strong></p>"
-                                  ]
-                                }
-                              },
-                              {
-                                "id": "bio4TG01",
-                                "title": "R. Sharma Metabolic Panel",
-                                "content": {
-                                  "type": "Image",
-                                  "url": "curriculum/bio4community/images/MetabolicPanel.jpg"
-                                }
-                              }                  
+                              }       
                             ],
                             "supports": []
                           }
