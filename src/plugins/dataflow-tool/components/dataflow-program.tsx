@@ -1122,9 +1122,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const chInfo = this.channels.find(ci => ci.channelId === n.data.sensor);
 
       // update virtual sensors
-      if (chInfo?.virtualValueMethod) {
-        const timeFactor = chInfo?.name.match(/[EMG]|[FSR]/) ? 100 : 1000;
-        const time = Math.floor(Date.now() / timeFactor);
+      if (chInfo?.virtualValueMethod && chInfo.timeFactor) {
+        const time = Math.floor(Date.now() / chInfo.timeFactor);
         chInfo.value = chInfo.virtualValueMethod(time);
       }
 
