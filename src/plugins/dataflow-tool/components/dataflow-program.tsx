@@ -1123,7 +1123,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       // update virtual sensors
       if (chInfo?.virtualValueMethod) {
-        const timeFactor = ["EMG", "FSR"].includes(chInfo?.name) ? 100 : 1000;
+        const timeFactor = chInfo?.name.includes("EMG") || chInfo?.name.includes("FSR") ? 100 : 1000;
         const time = Math.floor(Date.now() / timeFactor);
         chInfo.value = chInfo.virtualValueMethod(time);
       }
