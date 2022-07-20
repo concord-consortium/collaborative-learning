@@ -81,7 +81,7 @@ export const PositionedObjectModel = GeometryObjectModel
 export interface PositionedObjectModelType extends Instance<typeof PositionedObjectModel> {}
 
 export const isPositionedObjectModel = (o: GeometryObjectModelType): o is PositionedObjectModelType =>
-  getChildType(o, "x") != null;
+  Object.hasOwn(o, "x") && Object.hasOwn(o, "y");
 
 export const CommentModel = PositionedObjectModel
   .named("CommentModel")

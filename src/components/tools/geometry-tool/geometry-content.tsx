@@ -868,7 +868,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   };
 
   private getPasteContent(pasteContent?: IPasteContent): IPasteContent {
-    if (pasteContent) return pasteContent;
+    // We're getting some weird object as pasteContent, so make sure we have the content we actually need
+    if (pasteContent && Object.hasOwn(pasteContent, "objects")
+      && Object.hasOwn(pasteContent, "pasteId") && Object.hasOwn(pasteContent, "isSameTile")) {
+      return pasteContent;
+    }
 
     const content = this.getContent();
     const { clipboard } = this.stores;
