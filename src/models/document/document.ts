@@ -15,11 +15,11 @@ import { getFirebaseFunction } from "../../hooks/use-firebase-function";
 import { IDocumentProperties } from "../../lib/db-types";
 import { getLocalTimeStamp } from "../../utilities/time";
 import { safeJsonParse } from "../../utilities/js-utils";
-import { Container } from "../history/container";
 import { Tree } from "../history/tree";
 import { addTreeMonitor } from "../history/tree-monitor";
 import { createSharedModelDocumentManager, ISharedModelDocumentManager } from "../tools/shared-model-document-manager";
 import { ITileEnvironment } from "../tools/tool-types";
+import { DocumentStore } from "../history/document-store";
 
 interface IMatchPropertiesOptions {
   isTeacherDocument?: boolean;
@@ -45,9 +45,6 @@ export const DocumentModel = Tree.named("Document")
   })
   .volatile(self => ({
     queryPromise: undefined as Promise<UseQueryResult<IGetNetworkDocumentResponse>> | undefined,
-    // This is not really needed for functionality but it is helpful for
-    // debugging
-    container: undefined as any      
   }))
   .views(self => ({
     // This is needed for the tree monitor and container
@@ -277,11 +274,10 @@ export const DocumentModel = Tree.named("Document")
   .actions(self => ({
     afterCreate() {
       // FIXME: it would be nice to unify this with the code in createDocumentModel
-      const container = Container({});
-      self.container = container;
-      self.containerAPI = container.containerAPI;
-      addTreeMonitor(self, container.containerAPI, false);
-      container.trees[self.treeId] = self;
+      const docStore = DocumentStore.create({document: {}, undoStore: {}});
+      self.containerAPI = docStore;
+      addTreeMonitor(self, docStore, false);
+      docStore.putTree(self.treeId, self);
     },
     undoLastAction() {
       alert("This is the undo action");

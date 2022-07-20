@@ -1,14 +1,10 @@
 import {
-  types, Instance, flow, getEnv, IJsonPatch, isAlive
+  types, Instance, flow, IJsonPatch, isAlive
 } from "mobx-state-tree";
 import { TreeAPI } from "./tree-api";
 import { UndoStore } from "./undo-store";
-import { TreePatchRecord, HistoryEntry } from "./history";
+import { TreePatchRecord, HistoryEntry, TreePatchRecordSnapshot } from "./history";
 import { nanoid } from "nanoid";
-
-interface Environment {
-  getTreeFromId: (treeId: string) => TreeAPI | undefined;
-}
 
 /**
  * Helper method to print objects in template strings
@@ -35,6 +31,9 @@ export const DocumentStore = types
   document: CDocument,
   undoStore: UndoStore,
 })
+.volatile(self => ({
+  trees: {} as Record<string, TreeAPI>
+}))
 .views((self) => ({
   findHistoryEntry(historyEntryId: string) {
     return self.document.history.find(entry => entry.id === historyEntryId);
@@ -44,6 +43,10 @@ export const DocumentStore = types
   // This is only currently used for tests
   setChangeDocument(cDoc: CDocumentType) {
     self.document = cDoc;
+  },
+
+  putTree(treeId: string, tree: TreeAPI) {
+    self.trees[treeId] = tree;
   },
 
   startExchange(historyEntryId: string, exchangeId: string) {
@@ -65,6 +68,7 @@ export const DocumentStore = types
       throw new Error("trying to create or update a history entry that has an existing open call");
     }
     entry.activeExchanges.set(exchangeId, 1);
+    return Promise.resolve();
   },
 
   endExchange(entry: Instance<typeof HistoryEntry>, exchangeId: string) {
@@ -117,9 +121,49 @@ export const DocumentStore = types
   }
 }))
 .actions((self) => ({
+  updateSharedModel(historyEntryId: string, exchangeId: string, sourceTreeId: string, snapshot: any) {
+    // Right now this is can be called in 2 cases:
+    // 1. when a user changes something in a tree which then updates the
+    //    tree's view of the shared model, so the tree wants all copies of
+    //    this shared model to be updated.
+    // 2. when a user undoes or redoes an action that affects the shared model.
+    //    In this case the tree owning the shared model calls updateSharedModel to send
+    //    these changes to all of the other trees.
+    //
+    // If we support trees/tiles having customized views of shared models then this
+    // will need to become more complex.
+    const applyPromises = Object.entries(self.trees).map(([treeId, tree]) => {
+      if (treeId === sourceTreeId) {
+        return;
+      }
 
-  addPatchesToHistoryEntry(historyEntryId: string, exchangeId: string, 
-    treePatchRecord: Instance<typeof TreePatchRecord>) {
+      // In case #1 the passed in exchangeId comes from the action that updated
+      // the shared model view in the tree. This exchangeId will be closed by the
+      // tree after updateSharedModel is called. updateSharedModel will be
+      // waited for, so it should not be possible for the historyEntry to be
+      // closed before this new exchangeId is setup. So really we don't need the
+      // exchangeId to be passed, but it can be useful for debugging. 
+      // 
+      // FIXME: how is exchangeId handled in case #2?
+      const applyExchangeId = nanoid();
+      self.startExchange(historyEntryId, applyExchangeId);
+      return tree.applySharedModelSnapshotFromContainer(historyEntryId, applyExchangeId, snapshot);
+    });
+    // The contract for this method is to return a Promise<void> so we cast the result here.
+    return Promise.all(applyPromises).then() as Promise<void>;
+  },
+
+  addHistoryEntry(historyEntryId: string, exchangeId: string, treeId: string, actionName: string, 
+    undoable: boolean) {
+    self.createHistoryEntry(historyEntryId, exchangeId, actionName, treeId, undoable);
+    return Promise.resolve();
+  },
+
+  addTreePatchRecord(historyEntryId: string, exchangeId: string, 
+    record: TreePatchRecordSnapshot) {
+
+    const treePatchRecord = TreePatchRecord.create(record);
+
     // Find if there is already an entry with this historyEntryId
     let entry = self.findHistoryEntry(historyEntryId);
     if (!entry) {
@@ -165,12 +209,9 @@ export const DocumentStore = types
 
   // This is asynchronous. We might as well use a flow so we don't have to 
   // create separate actions for each of the parts of this single action
-  // TODO: the treeMap and getTreeFromId duplicate functionality,
-  // the treeMap is needed so we can get a list of all of the trees. getTreeFromId
-  // is 
+  // FIXME: remove treeMap param it isn't needed anymore
   replayHistoryToTrees: flow(function* replayHistoryToTrees(treeMap: Record<string, TreeAPI>) {
-    const getTreeFromId = (getEnv(self) as Environment).getTreeFromId;
-    const trees = Object.values(treeMap);
+    const trees = Object.values(self.trees);
 
     const historyEntryId = nanoid();
 
@@ -227,7 +268,7 @@ export const DocumentStore = types
       if (patches && patches.length > 0) {
         const applyExchangeId = nanoid();
         self.startExchange(historyEntryId, applyExchangeId);
-        const tree = getTreeFromId(treeId);
+        const tree = self.trees[treeId];
         return tree?.applyContainerPatches(historyEntryId, applyExchangeId, patches);
       } 
     });

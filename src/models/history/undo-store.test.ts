@@ -4,7 +4,7 @@ import { SharedModel, SharedModelType } from "../tools/shared-model";
 import { ToolContentModel } from "../tools/tool-types";
 import { registerSharedModelInfo, registerToolContentInfo } from "../tools/tool-content-info";
 import { DocumentContentModel } from "../document/document-content";
-import { createDocumentModel, DocumentModelType } from "../document/document";
+import { createDocumentModel } from "../document/document";
 import { ProblemDocument } from "../document/document-types";
 import { when } from "mobx";
 import { CDocument, DocumentStore } from "./document-store";
@@ -107,8 +107,10 @@ function setupDocument() {
 
   const sharedModel = doc.sharedModelMap.get("sm1")?.sharedModel as TestSharedModelType;
   const tileContent = doc.tileMap.get("t1")?.content as TestTileType;
+  const documentStore = docModel.containerAPI as Instance<typeof DocumentStore>;
+  const undoStore = documentStore.undoStore;
 
-  return {docModel, sharedModel, tileContent};
+  return {docModel, sharedModel, tileContent, documentStore, undoStore};
 }
 
 const initialUpdateEntry = {
@@ -132,13 +134,13 @@ const initialUpdateEntry = {
 };
 
 it("records a tile change as one history event with one TreeRecordEntry", async () => {
-  const {docModel, tileContent} = setupDocument();
+  const {tileContent, documentStore} = setupDocument();
   // This should record a history entry with this change and any changes to tiles
   // triggered by this change
   tileContent.setFlag(true);
 
-  await expectEntryToBeComplete(docModel, 1);
-  const changeDocument = docModel.container.documentStore.document as Instance<typeof CDocument>;
+  await expectEntryToBeComplete(documentStore, 1);
+  const changeDocument = documentStore.document as Instance<typeof CDocument>;
 
   expect(getSnapshot(changeDocument.history)).toEqual([ 
     initialUpdateEntry 
@@ -166,22 +168,20 @@ const undoEntry = {
 };
 
 it("can undo a tile change", async () => {
-  const {docModel, tileContent} = setupDocument();
+  const {tileContent, documentStore, undoStore} = setupDocument();
   // This should record a history entry with this change and any changes to tiles
   // triggered by this change
   tileContent.setFlag(true);
 
   // Make sure this entry is recorded before undoing it
-  await expectEntryToBeComplete(docModel, 1);
+  await expectEntryToBeComplete(documentStore, 1);
 
-  const container = docModel.container;
-  const undoStore = container.undoStore;
   undoStore.undo();
-  await expectEntryToBeComplete(docModel, 2);
+  await expectEntryToBeComplete(documentStore, 2);
 
   expect(tileContent.flag).toBeUndefined();
 
-  const changeDocument = container.documentStore.document as Instance<typeof CDocument>;
+  const changeDocument = documentStore.document as Instance<typeof CDocument>;
   expect(getSnapshot(changeDocument.history)).toEqual([ 
     initialUpdateEntry,
     undoEntry
@@ -209,27 +209,25 @@ const redoEntry = {
 };
 
 it("can redo a tile change", async () => {
-  const {docModel, tileContent} = setupDocument();
+  const {tileContent, documentStore, undoStore} = setupDocument();
   // This should record a history entry with this change and any changes to tiles
   // triggered by this change
   tileContent.setFlag(true);
 
   // Make sure this entry is recorded before undoing it
-  await expectEntryToBeComplete(docModel, 1);
+  await expectEntryToBeComplete(documentStore, 1);
 
-  const container = docModel.container;
-  const undoStore = container.undoStore;
   undoStore.undo();
-  await expectEntryToBeComplete(docModel, 2);
+  await expectEntryToBeComplete(documentStore, 2);
 
   expect(tileContent.flag).toBeUndefined();
 
   undoStore.redo();
-  await expectEntryToBeComplete(docModel, 3);
+  await expectEntryToBeComplete(documentStore, 3);
 
   expect(tileContent.flag).toBe(true);
 
-  const changeDocument = container.documentStore.document as Instance<typeof CDocument>;
+  const changeDocument = documentStore.document as Instance<typeof CDocument>;
   expect(getSnapshot(changeDocument.history)).toEqual([ 
     initialUpdateEntry,
     undoEntry,
@@ -254,20 +252,18 @@ it("can replay the history entries", async () => {
     // document state. We should create a history entry that setups up this initial
     // document state so we can test creating a document's content complete from
     // scratch.
-    const {docModel, tileContent} = setupDocument();
-    
-    const docStore = docModel.container.documentStore as Instance<typeof DocumentStore>;
-    
+    const {docModel, tileContent, documentStore} = setupDocument();
+        
     // Add the history entries used in the tests above so we can replay them all at 
     // the same time.
-    docStore.setChangeDocument(CDocument.create({
+    documentStore.setChangeDocument(CDocument.create({
       history: [
         makeRealHistoryEntry(initialUpdateEntry),
         makeRealHistoryEntry(undoEntry),
         makeRealHistoryEntry(redoEntry)
       ]
     }));
-    await docStore.replayHistoryToTrees({test: docModel});
+    await documentStore.replayHistoryToTrees({test: docModel});
 
     expect(tileContent.flag).toBe(true);
 });
@@ -302,7 +298,7 @@ const initialSharedModelUpdateEntry = {
 };
 
 it("records a shared model change as one history event with two TreeRecordEntries", async () => {
-  const {docModel, sharedModel, tileContent} = setupDocument();
+  const {sharedModel, tileContent, documentStore} = setupDocument();
   // This should record a history entry with this change and any changes to tiles
   // triggered by this change
   sharedModel.setValue("something");
@@ -311,7 +307,7 @@ it("records a shared model change as one history event with two TreeRecordEntrie
   // calls to propagate before making assertions
   await expectUpdateToBeCalledTimes(tileContent, 1);
 
-  const changeDocument = docModel.container.documentStore.document;
+  const changeDocument = documentStore.document;
   expect(getSnapshot(changeDocument.history)).toEqual([ 
     initialSharedModelUpdateEntry 
   ]);
@@ -347,7 +343,7 @@ const undoSharedModelEntry = {
 };
 
 it("can undo a shared model change", async () => {
-  const {docModel, sharedModel, tileContent} = setupDocument();
+  const {sharedModel, tileContent, documentStore, undoStore} = setupDocument();
   // This should record a history entry with this change and any changes to tiles
   // triggered by this change
   sharedModel.setValue("something");
@@ -357,9 +353,6 @@ it("can undo a shared model change", async () => {
   await expectUpdateToBeCalledTimes(tileContent, 1);
   expect(sharedModel.value).toBe("something");
 
-  const container = docModel.container;
-  const undoStore = container.undoStore;
-
   undoStore.undo();
 
   // TODO: document why the update is called 2 more times here
@@ -367,7 +360,7 @@ it("can undo a shared model change", async () => {
 
   expect(sharedModel.value).toBeUndefined();
 
-  const changeDocument = docModel.container.documentStore.document;
+  const changeDocument = documentStore.document;
   expect(getSnapshot(changeDocument.history)).toEqual([ 
     initialSharedModelUpdateEntry,
     undoSharedModelEntry
@@ -404,7 +397,7 @@ const redoSharedModelEntry = {
 };
 
 it("can redo a shared model change", async () => {
-  const {docModel, sharedModel, tileContent} = setupDocument();
+  const {sharedModel, tileContent, documentStore, undoStore} = setupDocument();
   // This should record a history entry with this change and any changes to tiles
   // triggered by this change
   sharedModel.setValue("something");
@@ -414,9 +407,6 @@ it("can redo a shared model change", async () => {
   await expectUpdateToBeCalledTimes(tileContent, 1);
   expect(sharedModel.value).toBe("something");
   expect(tileContent.text).toBe("something-tile");
-
-  const container = docModel.container;
-  const undoStore = container.undoStore;
 
   undoStore.undo();
 
@@ -432,7 +422,7 @@ it("can redo a shared model change", async () => {
   expect(sharedModel.value).toBe("something");
   expect(tileContent.text).toBe("something-tile");
 
-  const changeDocument = docModel.container.documentStore.document;
+  const changeDocument = documentStore.document;
   expect(getSnapshot(changeDocument.history)).toEqual([ 
     initialSharedModelUpdateEntry,
     undoSharedModelEntry,
@@ -445,20 +435,18 @@ it("can replay history entries that include shared model changes", async () => {
   // document state. We should create a history entry that setups up this initial
   // document state so we can test creating a document's content complete from
   // scratch.
-  const {docModel, tileContent, sharedModel} = setupDocument();
-  
-  const docStore = docModel.container.documentStore as Instance<typeof DocumentStore>;
+  const {docModel, tileContent, sharedModel, documentStore} = setupDocument();
   
   // Add the history entries used in the tests above so we can replay them all at 
   // the same time.
-  docStore.setChangeDocument(CDocument.create({
+  documentStore.setChangeDocument(CDocument.create({
     history: [
       makeRealHistoryEntry(initialSharedModelUpdateEntry),
       makeRealHistoryEntry(undoSharedModelEntry),
       makeRealHistoryEntry(redoSharedModelEntry)
     ]
   }));
-  await docStore.replayHistoryToTrees({test: docModel});
+  await documentStore.replayHistoryToTrees({test: docModel});
 
   expect(sharedModel.value).toBe("something");
   expect(tileContent.text).toBe("something-tile");
@@ -469,8 +457,8 @@ async function expectUpdateToBeCalledTimes(testTile: TestTileType, times: number
   return expect(updateCalledTimes).resolves.toBeUndefined();
 }
 
-async function expectEntryToBeComplete(docModel: DocumentModelType, length: number) {
-  const changeDocument = docModel.container.documentStore.document as Instance<typeof CDocument>;
+async function expectEntryToBeComplete(documentStore: Instance<typeof DocumentStore>, length: number) {
+  const changeDocument = documentStore.document as Instance<typeof CDocument>;
   const changeEntryComplete = when(
     () => changeDocument.history.length === length && changeDocument.history.at(length-1)?.state === "complete", 
     {timeout: 100});

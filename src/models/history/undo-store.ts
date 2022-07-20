@@ -1,15 +1,10 @@
 import {
-    types, Instance, getEnv, flow, getParent
+    types, Instance, flow, getParent
 } from "mobx-state-tree";
 import { DocumentStore } from "./document-store";
 
-import { TreeAPI } from "./tree-api";
 import { HistoryEntry, HistoryOperation } from "./history";
 import { nanoid } from "nanoid";
-
-interface Environment {
-    getTreeFromId: (treeId: string) => TreeAPI;
-}
 
 export const UndoStore = types
     .model("UndoStore", {
@@ -39,7 +34,6 @@ export const UndoStore = types
         const applyPatchesToTrees = 
           flow(function* applyPatchesToTrees(entryToUndo: Instance<typeof HistoryEntry>, 
                                              opType: HistoryOperation) {
-            const getTreeFromId = (getEnv(self) as Environment).getTreeFromId;
             const treeEntries = entryToUndo.records;
 
             const historyEntryId = nanoid();
@@ -55,7 +49,7 @@ export const UndoStore = types
                 const startExchangeId = nanoid();
                 docStore.startExchange(historyEntryId, startExchangeId);
 
-                return getTreeFromId(treeEntry.tree).startApplyingContainerPatches(historyEntryId, startExchangeId);
+                return docStore.trees[treeEntry.tree].startApplyingContainerPatches(historyEntryId, startExchangeId);
             });
             yield Promise.all(startPromises);
 
@@ -77,7 +71,7 @@ export const UndoStore = types
                 const applyExchangeId = nanoid();
                 docStore.startExchange(historyEntryId, applyExchangeId);
 
-                const tree = getTreeFromId(treeEntry.tree);
+                const tree = docStore.trees[treeEntry.tree];
                 return tree.applyContainerPatches(historyEntryId,  applyExchangeId, treeEntry.getPatches(opType));
             });
             yield Promise.all(applyPromises);
@@ -92,7 +86,7 @@ export const UndoStore = types
                 const finishExchangeId = nanoid();
                 docStore.startExchange(historyEntryId, finishExchangeId);
 
-                return getTreeFromId(treeEntry.tree)
+                return docStore.trees[treeEntry.tree]
                   .finishApplyingContainerPatches(historyEntryId, finishExchangeId);
             });
             yield Promise.all(finishPromises);
