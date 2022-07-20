@@ -116,7 +116,7 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
 
   function serialMessage(){
 
-    // nodes that use serial, but no device physucally connected
+    // nodes that use serial, but no device physically connected
     if (lastMsg !== "connect" && serialDevice.serialNodesCount > 0){
       return "connect a device";
     }

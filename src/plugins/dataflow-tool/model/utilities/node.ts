@@ -37,6 +37,8 @@ import AbsoluteValueIcon from "../../assets/icons/transform/absolute-value.svg";
 import NegationIcon from "../../assets/icons/transform/negation.svg";
 import NotIcon from "../../assets/icons/transform/not.svg";
 
+import { demoStreams } from "./demo-data";
+
 export interface NodeType {
   name: string;
   displayName: string;
@@ -488,17 +490,41 @@ const virtualPartChannel: NodeChannelInfo = {
     const vals = [10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11];
     return vals[t % vals.length];
   } };
-const virtualEmgChannel: NodeChannelInfo = {
-  hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "EMG", channelId: "00007VIR",
+const virtualEmgChannelVaried: NodeChannelInfo = {
+  hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "EMG - Varied Clenches", channelId: "00007VIR",
   missing: false, type: "emg-reading", units: "f(mv)", plug: 8, value: 0, virtual: true,
   virtualValueMethod: (t: number) => {
-    const vals = [14,40,34,53,54,152,151,98,223,213,225,222,126,121,74,70,43,42,40,22,40,13,40,28,40,35,91,88,87,152,149,412,248,302,173,103,99,61,60,40,32,40,18,40,18,41,43,118,89,87,84,224,199,212,209,135,81,78,47,46,40,23,40,18,40,24,40,35,84,83,99,97,104,100,102,257,267,261,244,239,138,135,81,80,48,43,40,26,40,16,40,28,40,37,47,49,54,56,78,77,165,159,139,264,143,137,97,91,56,53,40,35,40,24,40,27,40,36,40,34,40,42,40,38,40,35,40,36,42,39,44,43,40,29,40,31,64,59,46,45,44,45,40,43];
+    const vals = demoStreams.emgVariedPulses;
+    return vals[t % vals.length];
+} };
+const virtualEmgChannelLongHold: NodeChannelInfo = {
+  hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "EMG - Long Clench and Hold", channelId: "00008VIR",
+  missing: false, type: "emg-reading", units: "f(mv)", plug: 9, value: 0, virtual: true,
+  virtualValueMethod: (t: number) => {
+    const vals = demoStreams.emgLongHold;
+    return vals[t % vals.length];
+} };
+const virtualEmgChannelShortHold: NodeChannelInfo = {
+  hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "EMG - Short Clench and Hold", channelId: "00009VIR",
+  missing: false, type: "emg-reading", units: "f(mv)", plug: 10, value: 0, virtual: true,
+  virtualValueMethod: (t: number) => {
+    const vals = demoStreams.emgShortHold;
+    return vals[t % vals.length];
+} };
+const virtualFsrChannel: NodeChannelInfo = {
+  hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "FSR", channelId: "00010VIR",
+  missing: false, type: "fsr-reading", units: "f(n)", plug: 11, value: 0, virtual: true,
+  virtualValueMethod: (t: number) => {
+    const vals = demoStreams.fsrSqueeze;
     return vals[t % vals.length];
 } };
 
 export const virtualSensorChannels: NodeChannelInfo[] = [
   virtualTempChannel, virtualHumidChannel, virtualCO2Channel, virtualO2Channel,
-  virtualLightChannel, virtualPartChannel, virtualEmgChannel ];
+  virtualLightChannel, virtualPartChannel,
+  virtualEmgChannelVaried, virtualEmgChannelLongHold, virtualEmgChannelShortHold,
+  virtualFsrChannel
+];
 
   const emgSensorChannel: NodeChannelInfo = {
     hubId: "SERIAL-ARDUINO",
