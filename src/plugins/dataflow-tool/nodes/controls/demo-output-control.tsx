@@ -95,7 +95,7 @@ export class DemoOutputControl extends Rete.Control {
   };
 
   private getChordFrame = (percentTilt: number) => {
-    return this.getFrame(this.easePercent(percentTilt), grabberChordFrames.length);
+    return this.getFrame(percentTilt, grabberChordFrames.length);
   };
 
   private getFrame = (percent: number, numFrames: number) => {
@@ -106,15 +106,8 @@ export class DemoOutputControl extends Rete.Control {
   };
 
   private getClawRotateStyle = (percentTilt: number) => {
-    const degrees = (this.easePercent(percentTilt) - .5) * -50;
+    const degrees = (percentTilt - .5) * -50;
     const transform = `rotate(${degrees}deg)`;
     return { transform };
-  };
-
-  // Uses a sin function to ease transitions
-  private easePercent = (percent: number) => {
-    const trigVal = Math.sin(percent * Math.PI - Math.PI / 2);
-    const easedPercent = trigVal / 2 + .5;
-    return easedPercent;
   };
 }
