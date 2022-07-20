@@ -41,6 +41,16 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
   const valueRef = useRef(origValueRef.current);
   const [value, setValue] = useState(origValueRef.current);
 
+  const updateValue = (val: string) => {
+    valueRef.current = val;
+    setValue(val);
+  };
+
+  const saveChange = (newValue: string) => {
+    onClose(true);
+    _column.appData?.onEndBodyCellEdit?.(newValue);
+  };
+
   useEffect(() => {
     _column.appData?.onBeginBodyCellEdit?.();
     return () => {
@@ -48,8 +58,7 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
       if (endValue !== origValueRef.current) {  // eslint-disable-line react-hooks/exhaustive-deps
         onRowChange({ ...row, [column.key]: endValue }, true);
       }
-      onClose(true);
-      _column.appData?.onEndBodyCellEdit?.(endValue);
+      saveChange(endValue);
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -59,8 +68,10 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
       ref={autoFocusAndSelect}
       value={value}
       onChange={event => {
-        valueRef.current = event.target.value;
-        setValue(event.target.value);
+        updateValue(event.target.value);
+      }}
+      onBlur={event => {
+        saveChange(event.target.value);
       }}
     />
   );
