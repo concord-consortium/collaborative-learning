@@ -53,24 +53,18 @@ CDocument --* HistoryEntry
 UndoStore --o HistoryEntry
 DocumentStore --* "1" CDocument
 DocumentStore --* "1" UndoStore
+DocumentStore --|> ContainerAPI : implements
 ```
 
 ## Connection of History to CLUE Document
 ```mermaid
 classDiagram
 direction LR
-class UndoStore {  
-  <<MST>>
-}
 class DocumentStore {
   <<MST>>
+  trees
 }
-class Container {
-  trees  
-}
-DocumentStore --* "1" UndoStore
-Container --> DocumentStore
-Container --> UndoStore
+Document --> DocumentStore : volatile
 
 class Document {
   <<MST>>
@@ -79,9 +73,9 @@ class Document {
 class Tree {
   <<MST>>
 }
-Document --|> Tree : "instance of"
-Container --o "*" Tree
-Document --> Container
+Document --|> Tree : extends
+DocumentStore --o "*" Tree
+Tree --|> TreeAPI : implements
 
 ```
 

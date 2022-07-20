@@ -207,10 +207,7 @@ export const DocumentStore = types
     }
   },
 
-  // This is asynchronous. We might as well use a flow so we don't have to 
-  // create separate actions for each of the parts of this single action
-  // FIXME: remove treeMap param it isn't needed anymore
-  replayHistoryToTrees: flow(function* replayHistoryToTrees(treeMap: Record<string, TreeAPI>) {
+  replayHistoryToTrees: flow(function* replayHistoryToTrees() {
     const trees = Object.values(self.trees);
 
     const historyEntryId = nanoid();
@@ -253,7 +250,7 @@ export const DocumentStore = types
     // order.
     //
     const treePatches: Record<string, IJsonPatch[] | undefined> = {};
-    Object.keys(treeMap).forEach(treeId => treePatches[treeId] = []);
+    Object.keys(self.trees).forEach(treeId => treePatches[treeId] = []);
 
     self.document.history.forEach(entry => {
       entry.records.forEach(treeEntry => {

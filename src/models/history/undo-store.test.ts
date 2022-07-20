@@ -110,7 +110,7 @@ function setupDocument() {
   const documentStore = docModel.containerAPI as Instance<typeof DocumentStore>;
   const undoStore = documentStore.undoStore;
 
-  return {docModel, sharedModel, tileContent, documentStore, undoStore};
+  return {sharedModel, tileContent, documentStore, undoStore};
 }
 
 const initialUpdateEntry = {
@@ -252,7 +252,7 @@ it("can replay the history entries", async () => {
     // document state. We should create a history entry that setups up this initial
     // document state so we can test creating a document's content complete from
     // scratch.
-    const {docModel, tileContent, documentStore} = setupDocument();
+    const {tileContent, documentStore} = setupDocument();
         
     // Add the history entries used in the tests above so we can replay them all at 
     // the same time.
@@ -263,7 +263,7 @@ it("can replay the history entries", async () => {
         makeRealHistoryEntry(redoEntry)
       ]
     }));
-    await documentStore.replayHistoryToTrees({test: docModel});
+    await documentStore.replayHistoryToTrees();
 
     expect(tileContent.flag).toBe(true);
 });
@@ -435,7 +435,7 @@ it("can replay history entries that include shared model changes", async () => {
   // document state. We should create a history entry that setups up this initial
   // document state so we can test creating a document's content complete from
   // scratch.
-  const {docModel, tileContent, sharedModel, documentStore} = setupDocument();
+  const {tileContent, sharedModel, documentStore} = setupDocument();
   
   // Add the history entries used in the tests above so we can replay them all at 
   // the same time.
@@ -446,7 +446,7 @@ it("can replay history entries that include shared model changes", async () => {
       makeRealHistoryEntry(redoSharedModelEntry)
     ]
   }));
-  await documentStore.replayHistoryToTrees({test: docModel});
+  await documentStore.replayHistoryToTrees();
 
   expect(sharedModel.value).toBe("something");
   expect(tileContent.text).toBe("something-tile");
