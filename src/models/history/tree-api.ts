@@ -20,12 +20,26 @@ export interface TreeAPI {
      *
      * @param historyEntryId the id of the history entry that will record all of
      * these changes to the tree. This is *not* the historyEntryId that is the
-     * source of the patches. 
+     * source of the patches. It is is passed back to the container when this
+     * action is complete. In the CLUE implementation, this is done by the 
+     * tree-monitor not by the action itself.
      *
+     * @param callId the id of this XXXX. It is is passed back to the container when this
+     * action is complete. In the CLUE implementation, this is done by the 
+     * tree-monitor not by the action itself.
+     * 
      * @returns a promise that should resolve when the tree is ready to receive
      * patches from the container and changes in the shared models.
      *
      * The `Tree` model implements this for you.
+     * 
+     * FIXME: The historyEntryId and callId are not currently used by the DocumentStore 
+     * or UndoStore when they call startApplyContainerPatches. They use promises 
+     * to wait for the tree to finish with this. However, to support trees in other 
+     * iframes it will be necessary to identify the call to startApplyContainerPatches
+     * so the container can wait for the response. I wanted to change the name of 
+     * callId to patchRecordId, but that doesn't make sense in this case. We aren't 
+     * starting a patch, we just need to identify the response to this request.
      */
     startApplyingContainerPatches(historyEntryId: string, callId: string): Promise<void>;
 

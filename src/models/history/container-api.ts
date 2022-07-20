@@ -54,7 +54,7 @@ export interface ContainerAPI {
      *
      * The tree calling this should wait for the returned promise to resolve
      * and then call a `addTreePatchRecord`. If the tree is also calling
-     * `updateSharedModel` it should wait both the updateSharedModel and the
+     * `updateSharedModel` it should wait for both the updateSharedModel and the
      * `addHistoryEntry` to resolve before calling `addTreePatchRecord`. Calling
      * `addTreePatchRecord` is necessary so the container knows the tree is done
      * sending information about this historyEntryId. Because other trees might
@@ -66,7 +66,7 @@ export interface ContainerAPI {
      * The reason why we don't just use addTreePatchRecord to start the history
      * entry is because some actions don't have any patches in their own tree
      * but they change a shared model owned by another tree. In that case we
-     * wan't to record the initiating tree and action so there is more info for
+     * want to record the initiating tree and action so there is more info for
      * the researcher.
      * 
      * @param historyEntryId should be a unique id created by the tree. 
@@ -119,13 +119,13 @@ export interface ContainerAPI {
      * should call startHistoryEntryCall while it is handling an existing
      * "call". And it should wait for the promise of startHistoryEntryCall to
      * resolve before it closes out the existing "call" (by calling
-     * addTreePatchRecord). This way there will not be a time when all the calls of
-     * this history entry are closed, so container will keep the history entry.
+     * addTreePatchRecord). This way there will not be a time when all the calls
+     * of this history entry are closed, so container will keep the history
+     * entry.
      *
-     * In the prototype of this system this is needed when the tree's tiles are
-     * updating themselves after the shared model has changed. It is also used
-     * by the undo and document store when they are replaying events. In this
-     * current subset imported into CLUE it is not yet used yet.
+     * This is currently needed when the tree's tiles are updating themselves
+     * after the shared model has changed. It is also used by the undo and
+     * document store when they are replaying events.
      *
      * FIXME: need a new name for "call". It is used as verb too often. And it
      * also represents the object used by MST to store information about an

@@ -266,7 +266,7 @@ export const addTreeMonitor = (tree: Instance<typeof Tree> ,  container: Contain
 function isActionFromContainer(call: IActionTrackingMiddleware2Call<CallEnv>) {
     return call.name === "applySharedModelSnapshotFromContainer" ||
         // updateTreeAfterSharedModelChangesInternal is not always an action
-        // from the container. It can happen when a tree modifies it local
+        // from the container. It can happen when a tree modifies its local
         // shared model view and that triggers an update of the rest of the
         // state of the tree.
         call.name === "updateTreeAfterSharedModelChangesInternal" ||
