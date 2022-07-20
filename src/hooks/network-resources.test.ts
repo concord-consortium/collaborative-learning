@@ -2,10 +2,10 @@ import { renderHook } from "@testing-library/react-hooks";
 import { INetworkResourceClassResponse } from "../../functions/src/shared";
 import { useNetworkResources } from "./network-resources";
 
-var mockGetNetworkResources = jest.fn(() => Promise.resolve({
+const mockGetNetworkResources = jest.fn(() => Promise.resolve({
   data: { version: "1.0", response: [] as any }
 }));
-var mockHttpsCallable = jest.fn((fn: string) => {
+const mockHttpsCallable = jest.fn((fn: string) => {
   switch(fn) {
     case "getNetworkResources_v1":
       return mockGetNetworkResources;
@@ -17,8 +17,8 @@ jest.mock("firebase/app", () => ({
   })
 }));
 
-var mockData: INetworkResourceClassResponse[] = [];
-var mockUseQuery = jest.fn(async (key: string, fn: () => Promise<INetworkResourceClassResponse[]>) => {
+const mockData: INetworkResourceClassResponse[] = [];
+const mockUseQuery = jest.fn(async (key: string, fn: () => Promise<INetworkResourceClassResponse[]>) => {
   await fn();
   return {
     isLoading: false,
@@ -33,7 +33,7 @@ jest.mock("react-query", () => ({
   }
 }));
 
-var mockAddDocument = jest.fn();
+const mockAddDocument = jest.fn();
 jest.mock("./use-stores", () => ({
   useNetworkDocuments: () => ({ add: mockAddDocument }),
   useProblemPath: () => "abc/1/2"

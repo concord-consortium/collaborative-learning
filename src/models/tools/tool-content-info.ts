@@ -72,6 +72,8 @@ export function getToolIds() {
 
 export interface ITileExportOptions {
   json?: boolean; // default true, but some tiles (e.g. geometry) use their export code to produce other formats
+  includeId?: boolean;
+  excludeTitle?: boolean;
   rowHeight?: number;
   transformImageUrl?: (url: string, filename?: string) => string;
 }
@@ -79,6 +81,7 @@ export interface ITileExportOptions {
 export interface IDocumentExportOptions extends ITileExportOptions {
   includeTileIds?: boolean;
   appendComma?: boolean;
+  transformImageUrl?: (url: string, filename?: string) => string;
 }
 
 export interface ISharedModelInfo {

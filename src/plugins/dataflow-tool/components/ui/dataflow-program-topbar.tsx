@@ -1,6 +1,8 @@
 import React from "react";
+import classNames from "classnames";
 import { ProgramDataRate } from "../../model/utilities/node";
 import { IconButton } from "../../../../components/utilities/icon-button";
+import { SerialDevice } from "../../../../models/stores/serial";
 
 import "./dataflow-program-topbar.scss";
 
@@ -11,12 +13,14 @@ interface TopbarProps {
   dataRate: number;
   onRateSelectClick: (rate: number) => void;
   onRefreshDevices: () => void;
+  onSerialRefreshDevices: () => void;
   isRunEnabled: boolean;
   runningProgram: boolean;
   remainingTimeInSeconds: number;
   readOnly: boolean;
   showRateUI: boolean;
   lastIntervalDuration: number;
+  serialDevice: SerialDevice;
 }
 
 // const kProgressWidth = 76;
@@ -100,9 +104,46 @@ const RecordButton = (props: RecordButtonProps) => {
 };
 
 export const DataflowProgramTopbar = (props: TopbarProps) => {
+  const { serialDevice } = props;
+  const lastMsg = localStorage.getItem("last-connect-message");
+  const classes = classNames(
+    "icon-serial",
+    { "physical-connection": lastMsg === "connect"},
+    { "no-physical-connection": lastMsg === "disconnect"},
+    serialDevice.serialNodesCount > 0 ? "nodes-in-need" : "no-serial-needed",
+    serialDevice.hasPort() ? "has-port" : "no-port"
+  );
+
+  function serialMessage(){
+
+    // nodes that use serial, but no device physucally connected
+    if (lastMsg !== "connect" && serialDevice.serialNodesCount > 0){
+      return "connect a device";
+    }
+    // physical connection has been made but user action needed
+    if (lastMsg === "connect"
+        && !serialDevice.hasPort()
+        && serialDevice.serialNodesCount > 0
+    ){
+      return "click to finish connecting";
+    }
+  }
+
   return (
     <div className="program-editor-topbar">
-      <div className="topbar-left"></div>
+      <div className="topbar-left">
+        {<IconButton
+          icon="serial"
+          key="serial"
+          onClickButton={props.onSerialRefreshDevices}
+          title="Refresh Serial Connection"
+          disabled={props.readOnly}
+          className={classes}
+        />}
+        <div className="serial-message">
+          { serialMessage() }
+        </div>
+      </div>
       <div className="topbar-center">
         <RateSelectorComponent
           rateOptions={props.programDataRates}
@@ -123,8 +164,6 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
       </div>
       <div className="topbar-right">
         {props.showRateUI && <span className={"rate-ui"}>{`${props.lastIntervalDuration}ms`}</span>}
-        <IconButton icon="refresh" key="refresh" className={"icon-refresh"}
-          onClickButton={props.onRefreshDevices} title="Refresh Devices" disabled={props.readOnly} />
       </div>
     </div>
   );
