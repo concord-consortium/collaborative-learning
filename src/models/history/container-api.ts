@@ -5,7 +5,7 @@ export interface ContainerAPI {
      * Propagate shared model state to other trees. This is called by either by
      * the top level container tree or by iframe trees.
      *
-     * The shared model is identified by an id inside of the snapshot The
+     * The shared model is identified by an id inside of the snapshot. The
      * sourceTreeId indicates which tree is sending this update. The new shared
      * model snapshot will not be sent back to this source.
      *
@@ -33,110 +33,114 @@ export interface ContainerAPI {
      * trees have received the message. That could be the responsibility of the
      * container. Perhaps we can simplify this so this call doesn't need to
      * block until all of the trees using the shared model have been notified.
-     * That blocking could be the responsiblity of the container after this call
+     * That blocking could be the responsibility of the container after this call
      * is done.
      */
-    updateSharedModel: (historyEntryId: string, callId: string, sourceTreeId: string, snapshot: any) => Promise<void>;
+    updateSharedModel: (historyEntryId: string, exchangeId: string, 
+        sourceTreeId: string, snapshot: any) => Promise<void>;
     
     /**
      * Trees should call this to start a new history entry. These history
      * entries are used for 2 things:
-     * - the state of the document that is saved and later loaded
      * - the undo stack
-     *
-     * When the state is loaded the container will combine all of the patches of
-     * all of the recorded tree patch records and send that to the tree with
-     * with `applyContainerPatches`.
+     * - time traveling the document back to a previous state
      *
      * When the user does an undo the container will send the inversePatches of
      * the the recorded tree patch records that are grouped by the
      * historyEntryId to the tree with `applyContainerPatches`.
      *
-     * The tree calling this should wait for the returned promise to resolve
-     * and then call a `addTreePatchRecord`. If the tree is also calling
-     * `updateSharedModel` it should wait for both the updateSharedModel and the
-     * `addHistoryEntry` to resolve before calling `addTreePatchRecord`. Calling
-     * `addTreePatchRecord` is necessary so the container knows the tree is done
-     * sending information about this historyEntryId. Because other trees might
-     * respond to a sharedModel update with further changes to other
+     * When time traveling is done, the container will collect all the history
+     * events from the current time to the desired time. It will then combine
+     * group all of the patches in these events by tree and send them all to the
+     * tree at the same time. This is done with `applyContainerPatches`.
+     *
+     * The tree calling `addHistoryEntry` should wait for the returned promise
+     * to resolve and then call a `addTreePatchRecord`. If the tree is also
+     * calling `updateSharedModel` it should wait for both the updateSharedModel
+     * and the `addHistoryEntry` to resolve before calling `addTreePatchRecord`.
+     * Calling `addTreePatchRecord` is necessary so the container knows the tree
+     * is done sending information about this historyEntryId. Because other
+     * trees might respond to a sharedModel update with further changes to other
      * sharedModels this might trigger another change back in the original tree.
      * In order to differentiate between the initiating call and the second call
-     * the callId parameter is used. 
+     * the exchangeId parameter is used. 
      *
-     * The reason why we don't just use addTreePatchRecord to start the history
+     * One reason why we don't just use addTreePatchRecord to start the history
      * entry is because some actions don't have any patches in their own tree
      * but they change a shared model owned by another tree. In that case we
-     * want to record the initiating tree and action so there is more info for
-     * the researcher.
-     * 
+     * want to record the initiating tree action so there is more info for the
+     * researcher.
+     *
      * @param historyEntryId should be a unique id created by the tree. 
-     * 
-     * @param callId should be another unique id. The container uses this to
-     * differentiate between multiple flows of messages being sent to the
-     * container. For every addHistoryEntry message there should be a
-     * addTreePatchRecord message with the same callId.
+     *
+     * @param exchangeId should be another unique id created by the tree. The
+     * container uses this to differentiate between multiple flows of messages
+     * being sent to the container. For every addHistoryEntry message there
+     * should be a addTreePatchRecord message with the same exchangeId.
      *
      * @param treeId id of the tree that is adding this history entry.
-     * 
-     * @param actionName name of the action that caused this history entry to be added.
      *
-     * @param undoable true if this action should be saved to the undo
-     * stack. Changes that result from `applyContainerPatches` should not be
-     * undo-able.
+     * @param actionName name of the action that caused this history entry to be
+     * added.
+     *
+     * @param undoable true if this action should be saved to the undo stack.
+     * Changes that result from `applyContainerPatches` should not be undo-able.
      */    
-    addHistoryEntry: (historyEntryId: string, callId: string, treeId: string, 
+    addHistoryEntry: (historyEntryId: string, exchangeId: string, treeId: string, 
         actionName: string, undoable: boolean) => Promise<void>;
     
     /**
      * Trees should call this to record the actual patches of a history event.
      * They should always call this even if there are no patches. This message
      * is how the container knows the tree is done sending messages with this
-     * particular callId.
+     * particular exchangeId.
      *
-     * @param historyEntryId should be a unique id. If this tree initiated this
-     * history entry with `addHistoryEntry` this id should match the
-     * historyEntryId sent in that call. If the changes in this entry were
+     * @param historyEntryId the id of the entry these patches are for. If this
+     * tree initiated this history entry with `addHistoryEntry`, this id should
+     * be the historyEntryId sent in that call. If the patches being sent were
      * triggered by the container this id should be the `historyEntryId` that
-     * was passed in with the message from the container.
-     * 
-     * @param callId the callId that started this flow of events. It could be
-     * created by the tree when it called addHistoryEvent, or it could come from
-     * the container. 
-     * 
+     * was passed in with the message from the container. TODO: list the tree
+     * methods the container can call that might result in changes.
+     *
+     * @param exchangeId the exchangeId that started this flow of events. If
+     * this tree initiated this history entry with `addHistoryEntry`, this id
+     * should be the exchangeId sent in that call.  If the patches being sent were
+     * triggered by the container this id should be the `exchangeId` that was 
+     * passed in with the message from the container. TODO: list the tree
+     * methods the container can call that might result in changes.
+     *
      * @param record the actual changes. If there are no changes this should
      * still be sent with empty patches.
      */
-    addTreePatchRecord: (historyEntryId: string, callId: string, record: TreePatchRecordSnapshot) => void;
+    addTreePatchRecord: (historyEntryId: string, exchangeId: string, record: TreePatchRecordSnapshot) => void;
 
     /**
-     * This starts a new "call" in the history entry. These calls are used by
-     * the container to know when the history entry is complete. If there are
-     * any open "calls", then the history entry is still recording.
-     * `addHistoryEntry` automatically starts a "call".  And when the container
-     * calls into the tree with applyContainerPatches, the container starts a
-     * "call". This explicit startHistoryEntryCall should be used when the tree
-     * wants to start some async code outside of one of these existing calls. It
-     * should call startHistoryEntryCall while it is handling an existing
-     * "call". And it should wait for the promise of startHistoryEntryCall to
-     * resolve before it closes out the existing "call" (by calling
-     * addTreePatchRecord). This way there will not be a time when all the calls
-     * of this history entry are closed, so container will keep the history
-     * entry.
+     * This starts a new "exchange" in the history entry. These exchanges are
+     * used by the container to know when the history entry is complete. If
+     * there are any open exchanges, then the history entry is still recording.
+     * `addHistoryEntry` automatically starts a exchange, so it isn't necessary
+     * to call `startExchange` before `addHistoryEntry`.  
+     * When the container calls the tree with `applyContainerPatches`, the
+     * container starts a exchange. This explicit startExchange should be used
+     * when the tree wants to start some async code outside of one of these
+     * existing exchanges. It should call `startExchange` while it is handling
+     * an existing exchange. And it should wait for the promise of
+     * `startExchange` to resolve before it closes out the existing exchange (by
+     * calling addTreePatchRecord). This way there will not be a time when all
+     * the exchanges of this history entry are closed, so container will keep the
+     * history entry "recording".
      *
-     * This is currently needed when the tree's tiles are updating themselves
+     * This is currently used when the tree's tiles are updating themselves
      * after the shared model has changed. It is also used by the undo and
      * document store when they are replaying events.
      *
-     * FIXME: need a new name for "call". It is used as verb too often. And it
-     * also represents the object used by MST to store information about an
-     * action. 
-     *
-     * @param historyEntryId the history entry id that this call is being added
-     * to this could be the one that was created with addHistoryEntry or it
+     * @param historyEntryId the history entry id that this exchange is being added
+     * to. This could be the one that was created with addHistoryEntry or it
      * could be one that was initialized by the container. 
      *
-     * @param callId a unique id created by the tree to identify this call. This
-     * same callId needs to be passed to addTreePatchRecord to end this call.
+     * @param exchangeId a unique id created by the tree to identify this exchange.
+     * This same exchangeId needs to be passed to addTreePatchRecord to end this
+     * call.
      */
-    startHistoryEntryCall: (historyEntryId: string, callId: string) => Promise<void>;
+    startExchange: (historyEntryId: string, exchangeId: string) => Promise<void>;
 }

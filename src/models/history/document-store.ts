@@ -46,7 +46,7 @@ export const DocumentStore = types
             self.document = cDoc;
         },
 
-        startHistoryEntryCall(historyEntryId: string, callId: string) {
+        startExchange(historyEntryId: string, exchangeId: string) {
             // Find if there is already an entry with this historyEntryId
             const entry = self.findHistoryEntry(historyEntryId);
             if (!entry) {
@@ -55,31 +55,31 @@ export const DocumentStore = types
 
             // Make sure this entry wasn't marked complete before
             if (entry.state === "complete") {
-                throw new Error(`The entry was already marked complete ${ json({historyEntryId, callId})}`);
+                throw new Error(`The entry was already marked complete ${ json({historyEntryId, exchangeId})}`);
             }            
             
-            // start a new open call with this callId
-            // Check if there is a open call already with this id:
-            const openCallValue = entry.openCalls.get(callId);
-            if (openCallValue) {
+            // start a new open exchange with this exchangeId
+            // Check if there is a open exchange already with this id:
+            const activeExchangeValue = entry.activeExchanges.get(exchangeId);
+            if (activeExchangeValue) {
                 throw new Error("trying to create or update a history entry that has an existing open call");
             }
-            entry.openCalls.set(callId, 1);
+            entry.activeExchanges.set(exchangeId, 1);
         }
     }))
     .actions((self) => {
 
-        const closeHistoryEntryCall = (entry: Instance<typeof HistoryEntry>, callId: string) => {
-            const openCallValue = entry.openCalls.get(callId);
+        const endExchange = (entry: Instance<typeof HistoryEntry>, exchangeId: string) => {
+            const openCallValue = entry.activeExchanges.get(exchangeId);
             if (!openCallValue) {
-                throw new Error(`The open call, doesn't exist for ${ json({historyEntryId: entry.id, callId}) }`);
+                throw new Error(`The open call, doesn't exist for ${ json({historyEntryId: entry.id, exchangeId}) }`);
             }
 
-            entry.openCalls.delete(callId);    
+            entry.activeExchanges.delete(exchangeId);    
             
             // TODO: We could use autorun for watching this observable map instead of
             // changing the entry state here. 
-            if (entry.openCalls.size === 0) {
+            if (entry.activeExchanges.size === 0) {
                 entry.state = "complete";
 
                 // If the history entry resulted in no changes delete it.
@@ -87,7 +87,7 @@ export const DocumentStore = types
                 // researchers to see actions the student took even if they
                 // didn't change state. For example if a button was clicked even
                 // if it didn't change the state we might want to show that to
-                // the researcher some how. There are lots of entries that are
+                // the researcher somehow. There are lots of entries that are
                 // empty though so they are removed for the time being.
                 // TODO: we probably should store the entry in volatile until it
                 // is complete and then add it to the document.history when it
@@ -98,7 +98,7 @@ export const DocumentStore = types
             }
         };
 
-        const createHistoryEntry = (historyEntryId: string, callId: string, name: string, 
+        const createHistoryEntry = (historyEntryId: string, exchangeId: string, name: string, 
             treeId: string, undoable: boolean) => {
             let entry = self.findHistoryEntry(historyEntryId);
             if (entry) {
@@ -113,12 +113,12 @@ export const DocumentStore = types
             entry.tree = treeId;
             entry.undoable = undoable;
 
-            entry.openCalls.set(callId, 1);
+            entry.activeExchanges.set(exchangeId, 1);
 
             return entry;
         };
 
-        const addPatchesToHistoryEntry = (historyEntryId: string, callId: string, 
+        const addPatchesToHistoryEntry = (historyEntryId: string, exchangeId: string, 
             treePatchRecord: Instance<typeof TreePatchRecord>) => {
             // Find if there is already an entry with this historyEntryId
             let entry = self.findHistoryEntry(historyEntryId);
@@ -136,16 +136,16 @@ export const DocumentStore = types
 
             // Make sure this entry wasn't marked complete before
             if (entry.state === "complete") {
-                throw new Error(`The entry was already marked complete ${ json({historyEntryId, callId})}`);
+                throw new Error(`The entry was already marked complete ${ json({historyEntryId, exchangeId})}`);
             }
 
             // The tree patch record will be sent even if there all no patches.
-            // This is how the tree tells the container that this callId is closed.
+            // This is how the tree tells the container that this exchangeId is closed.
             if (treePatchRecord.patches.length > 0) {
                 entry.records.push(treePatchRecord);
             }
 
-            closeHistoryEntryCall(entry, callId);
+            endExchange(entry, exchangeId);
 
             // Add the entry to the undo stack if it is undoable. The entry is
             // shared with the document store, so when new records are added
@@ -174,7 +174,7 @@ export const DocumentStore = types
 
             const historyEntryId = nanoid();
 
-            const topLevelCallId = nanoid();
+            const topLevelExchangeId = nanoid();
 
             // Start a non-undoable action with this id. Currently the trees do
             // not have their treeMonitors setup when replayHistoryToTrees is
@@ -182,17 +182,17 @@ export const DocumentStore = types
             // historyEntryId. However, it seems good to go ahead and record
             // this anyway.
             const historyEntry = 
-              createHistoryEntry(historyEntryId, topLevelCallId, "replayHistoryToTrees", "container", false);
+              createHistoryEntry(historyEntryId, topLevelExchangeId, "replayHistoryToTrees", "container", false);
 
             // Disable shared model syncing on all of the trees. This is
             // different than when the undo store applies patches because in
             // this case we are going to apply lots of history entries all at
             // once. 
             const startPromises = trees.map(tree => {
-                const startCallId = nanoid();
-                self.startHistoryEntryCall(historyEntryId, startCallId);
+                const startExchangeId = nanoid();
+                self.startExchange(historyEntryId, startExchangeId);
 
-                return tree.startApplyingContainerPatches(historyEntryId, startCallId);
+                return tree.startApplyingContainerPatches(historyEntryId, startExchangeId);
             });
             yield Promise.all(startPromises);
 
@@ -225,10 +225,10 @@ export const DocumentStore = types
 
             const applyPromises = Object.entries(treePatches).map(([treeId, patches]) => {
                 if (patches && patches.length > 0) {
-                    const callId = nanoid();
-                    self.startHistoryEntryCall(historyEntryId, callId);
+                    const applyExchangeId = nanoid();
+                    self.startExchange(historyEntryId, applyExchangeId);
                     const tree = getTreeFromId(treeId);
-                    return tree?.applyContainerPatches(historyEntryId, callId, patches);
+                    return tree?.applyContainerPatches(historyEntryId, applyExchangeId, patches);
                 } 
             });
             yield Promise.all(applyPromises);
@@ -240,34 +240,34 @@ export const DocumentStore = types
             // This can be used in the future to make sure multiple applyPatchesToTrees are not 
             // running at the same time.
             const finishPromises = trees.map(tree => {
-                const finishCallId = nanoid();
-                self.startHistoryEntryCall(historyEntryId, finishCallId);
+                const finishExchangeId = nanoid();
+                self.startExchange(historyEntryId, finishExchangeId);
 
-                return tree.finishApplyingContainerPatches(historyEntryId, finishCallId);
+                return tree.finishApplyingContainerPatches(historyEntryId, finishExchangeId);
             });
-            // I'm using a yield because it isn't clear from the docs if an flow MST action
-            // can return a promise or not.
             yield Promise.all(finishPromises);
 
-            // TODO: we are closing this top level call after the finish
+            // TODO: we are closing this top level exchange after the finish
             // applying container patches is called. This way if some of those
             // finish calls result in additional changes to the tree those
             // changes should delay the completion of this history event. It
             // isn't clear if that is really necessary in this case.
 
-            // FIXME: the history entry being generated here doesn't ever change
-            // its state from "recording", but the TreeMonitor middleware hasn't
-            // been installed before this function is called. So the container
-            // doesn't get any updates on the callIds. 
-            closeHistoryEntryCall(historyEntry, topLevelCallId);
-
+            // FIXME: We don't actually want to record this as a history entry.
+            // This `replayHistoryToTrees` will not actually be called by the
+            // current system. A variation of it will be needed when a user moves 
+            // a scrubber to scroll around in the history of the document. 
+            // So `replayHistoryToTrees` is kept as a model for that new function.
+            // In the current implementation a history entry is added when `replayHistoryToTrees`
+            // but from what I saw before it never leaves the "recording" state.
+            endExchange(historyEntry, topLevelExchangeId);
         });
 
         return {
             replayHistoryToTrees,
             createHistoryEntry,
             addPatchesToHistoryEntry,
-            closeHistoryEntryCall
+            endExchange
         };
       
     });

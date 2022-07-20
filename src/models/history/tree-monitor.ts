@@ -11,7 +11,7 @@ interface CallEnv {
     recorder: IPatchRecorder;
     sharedModelModifications: SharedModelModifications;
     historyEntryId: string;
-    callId: string;
+    exchangeId: string;
 }
 
 type SharedModelModifications = Record<string, number>;
@@ -31,29 +31,31 @@ export const addTreeMonitor = (tree: Instance<typeof Tree> ,  container: Contain
             const sharedModelModifications: SharedModelModifications = {};
 
             let historyEntryId;
-            let callId;
+            let exchangeId;
 
-            // TODO: this seems like a bit of a hack. We are looking for specific actions
-            // which we know include a historyEntryId as their first argument
-            // this is so we can link all of the changes with this same historyEntryId
+            // TODO: this seems like a bit of a hack. We are looking for
+            // specific actions which we know include a historyEntryId and
+            // exchangeId as their first two arguments. This is so we can link
+            // all of the changes with this same historyEntryId and exchangeId.
             // These actions are all defined on the common `Tree` model which is
-            // composed into the actual root of the MST tree. So at least
-            // the specific trees are not defining these actions themselves.
+            // composed into the actual root of the MST tree. So at least the
+            // specific trees are not defining these actions themselves.
             //
-            // I can't think of a better way so far. 
-            // If a function in this middleware could apply the snapshots and run the 
-            // syncing that would let us directly pass in the historyEntryId. However
-            // we still need to record the changes in the undo history. So we still need
-            // this to pass through as an action so the middleware can record it.
+            // I can't think of a better way so far. If a function in this
+            // middleware could apply the snapshots and run the syncing that
+            // would let us directly pass in the historyEntryId. However we
+            // still need to record the changes in the undo history. So we still
+            // need this to pass through as an action so the middleware can
+            // record it.
             //
-            // We could use the `decorate` feature of MST to at least make it more clear
-            // in the Tile model that these actions are special. 
+            // We could use the `decorate` feature of MST to at least make it
+            // more clear in the Tile model that these actions are special. 
             if (isActionFromContainer(call)) {
                 historyEntryId = call.args[0];
-                callId = call.args[1];
+                exchangeId = call.args[1];
             } else {
                 historyEntryId = nanoid();
-                callId = nanoid();
+                exchangeId = nanoid();
             }
 
             const recorder = recordPatches(
@@ -121,29 +123,30 @@ export const addTreeMonitor = (tree: Instance<typeof Tree> ,  container: Contain
                 recorder,
                 sharedModelModifications,
                 historyEntryId,
-                callId
+                exchangeId
             };
         },
         onFinish(call, error) {
-            const { recorder, sharedModelModifications, historyEntryId, callId } = call.env || {};
-            if (!recorder || !sharedModelModifications || !historyEntryId || !callId) {
+            const { recorder, sharedModelModifications, historyEntryId, exchangeId } = call.env || {};
+            if (!recorder || !sharedModelModifications || !historyEntryId || !exchangeId) {
                 throw new Error(`The call.env is corrupted: ${ JSON.stringify(call.env)}`);
             }
             call.env = undefined;
             recorder.stop();
 
             if (error === undefined) {
+                // FIXME: review this comment, it doesn't make sense
                 // TODO: we are going to make this async because it needs to
                 // wait for the container to respond, to the start call before
                 // finishing the action.  But we should check that this delayed
                 // function doesn't access something from the tree that might
                 // have changed in the meantime.
-                recordAction(call, historyEntryId, callId, recorder, sharedModelModifications);
+                recordAction(call, historyEntryId, exchangeId, recorder, sharedModelModifications);
             } else {
-                // TODO: This is kind of a new feature that is being added to the tree by the undo manager
+                // TODO: This is a new feature that is being added to the tree:
                 // any errors that happen during an action will cause the tree to revert back to 
                 // how it was before. 
-                // This might be a good thing to do, but it needs to be analysed to see what happens
+                // This might be a good thing to do, but it needs to be analyzed to see what happens
                 // with the shared models when the patches are undone.
                 recorder.undo();
             }
@@ -186,7 +189,8 @@ export const addTreeMonitor = (tree: Instance<typeof Tree> ,  container: Contain
         return `${getPath(call.context)}/${call.name}`;
     };
 
-    const recordAction = async (call: IActionTrackingMiddleware2Call<CallEnv>, historyEntryId: string, callId: string,
+    const recordAction = async (call: IActionTrackingMiddleware2Call<CallEnv>, 
+        historyEntryId: string, exchangeId: string,
         recorder: IPatchRecorder, sharedModelModifications: SharedModelModifications) => {    
             if (!isActionFromContainer(call)) {
                 // We record the start of the action even if it doesn't have any
@@ -196,7 +200,7 @@ export const addTreeMonitor = (tree: Instance<typeof Tree> ,  container: Contain
                 // We only record this when the action is not triggered by the
                 // container. If the container triggered the action then it is up to
                 // the container to setup this information first.
-                await container.addHistoryEntry(historyEntryId, callId, tree.treeId, getActionName(call), true);
+                await container.addHistoryEntry(historyEntryId, exchangeId, tree.treeId, getActionName(call), true);
             }
     
             // Call the shared model notification function if there are changes. 
@@ -209,7 +213,7 @@ export const addTreeMonitor = (tree: Instance<typeof Tree> ,  container: Contain
             for (const [sharedModelPath, numModifications] of Object.entries(sharedModelModifications)) {
                 if (numModifications > 0) {
                     // Run the callback tracking changes to the shared model
-                    // We need to wait for these complete because the container
+                    // We need to wait for these to complete because the container
                     // needs to know when this history entry is complete. If it gets
                     // the addTreePatchRecord before any changes from the shared
                     // models it will mark the entry complete too soon.
@@ -217,7 +221,7 @@ export const addTreeMonitor = (tree: Instance<typeof Tree> ,  container: Contain
                     // TODO: If there are multiple shared model changes, we might want
                     // to send them all to the tree at the same time, that way
                     // it can inform the tiles of all changes at the same time.
-                    await tree.handleSharedModelChanges(historyEntryId, callId, call, sharedModelPath);
+                    await tree.handleSharedModelChanges(historyEntryId, exchangeId, call, sharedModelPath);
                 }
             }
 
@@ -234,14 +238,14 @@ export const addTreeMonitor = (tree: Instance<typeof Tree> ,  container: Contain
             const inversePatches = recorder.inversePatches.filter(filterChangeCount);
 
             // Always send the record to the container even if there are no
-            // patches. This API is how the container knows the callId is finished. 
+            // patches. This API is how the container knows the exchangeId is finished. 
             const record: TreePatchRecordSnapshot = {
                 tree: tree.treeId,
                 action: getActionName(call),
                 patches,
                 inversePatches,
             };
-            container.addTreePatchRecord(historyEntryId, callId, record);
+            container.addTreePatchRecord(historyEntryId, exchangeId, record);
         };
 
     return {

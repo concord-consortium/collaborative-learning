@@ -48,9 +48,8 @@ export const Tree = types.model("Tree", {
     } else {
       const document = (self as any).content as DocumentContentModelType ;
 
-      // If we still don't have a document just let the exception happen so we
+      // If we don't have a document let the exception happen so we
       // can track this down
-      // TODO: this whole code path needs a lot of cleanup
 
       // Only include tiles that have at least one shared model
       document.sharedModelMap.forEach(sharedModelEntry => {
@@ -69,7 +68,7 @@ export const Tree = types.model("Tree", {
   }
 }))
 .actions(self => {
-    const updateTreeAfterSharedModelChangesInternal = (historyEntryId: string, callId: string, 
+    const updateTreeAfterSharedModelChangesInternal = (historyEntryId: string, exchangeId: string, 
       sharedModel: SharedModelType) => {
         // If we are applying container patches, then we ignore any sync actions
         // otherwise the user might make a change such as changing the name of a
@@ -87,7 +86,7 @@ export const Tree = types.model("Tree", {
         }
 
         // The TreeMonitor middleware should pickup the historyEntryId and
-        // callId parameters automatically. And then when it sends any
+        // exchangeId parameters automatically. And then when it sends any
         // changes captured during the update, it should include these ids
         self.updateTreeAfterSharedModelChanges({sharedModel});
     };
@@ -105,12 +104,12 @@ export const Tree = types.model("Tree", {
 
     // This will be called by the container when a shared model tree changes
     // That would normally happen when a tile changed the shared model.
-    applySharedModelSnapshotFromContainer(historyEntryId: string, callId: string, snapshot: any) {
+    applySharedModelSnapshotFromContainer(historyEntryId: string, exchangeId: string, snapshot: any) {
       throw new Error("not implemented yet");
     },
 
     // The container calls this before it calls applyContainerPatches
-    startApplyingContainerPatches(historyEntryId: string, callId: string) {
+    startApplyingContainerPatches(historyEntryId: string, exchangeId: string) {
       self.applyingContainerPatches = true;
 
       // We return a promise because the API is async
@@ -123,7 +122,7 @@ export const Tree = types.model("Tree", {
     // also by giving it an action name the undo recorder can identify that
     // this action by its name and not record the undo as an undo
     // It might be called multiple times after startApplyingContainerPatches
-    applyContainerPatches(historyEntryId: string, callId: string, patchesToApply: readonly IJsonPatch[]) {
+    applyContainerPatches(historyEntryId: string, exchangeId: string, patchesToApply: readonly IJsonPatch[]) {
       applyPatch(self, patchesToApply);
       // We return a promise because the API is async
       // The action itself doesn't do anything asynchronous though
@@ -132,45 +131,44 @@ export const Tree = types.model("Tree", {
     },
 
     // The container calls this after all patches have been applied
-    finishApplyingContainerPatches(historyEntryId: string, callId: string) {
+    finishApplyingContainerPatches(historyEntryId: string, exchangeId: string) {
       self.applyingContainerPatches = false;
 
       // TODO: Need to deal with possible effects on the undo stack
-      // 
-      // If all of the patches applied correctly and the user didn't inject
-      // any changes while the patches were applying, then everything should
-      // be fine. There should be nothing updated by with no intermediate changes
-      // there should be nothing to updated by updateTreeAfterSharedModelChanges
-      // 
-      // However, if the user made a change in the shared model like deleting
-      // a node while the patches were being applied this would make the 
-      // shared model be out of sync with the tree. The tree would not be updated
-      // before now because applyingContainerPatches is true. 
-      // So that deleted node change would get applied here. 
-      // When it is applied it would generate a new undoable action that is not
-      // grouped with the action that deleted the node from the shared model.
-      // So now if the user undoes, the actions will not get undone together. 
-      // This will probably result in a broken UI for the user. 
-      // 
-      // We could record the action id of any actions that happen
-      // while the patches are being applied. It is possible that multiple actions
-      // could happen. Because we aren't running the updateTreeAfterSharedModelChanges
-      // after each of these actions, we wouldn't be able to tell what tree updates
-      // are associated with which if the multiple actions. 
+      //
+      // If all of the patches applied correctly and the user didn't inject any
+      // changes while the patches were applying, then everything should be
+      // fine. There should be nothing to updated by
+      // updateTreeAfterSharedModelChanges
+      //
+      // However, if the user made a change in the shared model like deleting a
+      // node while the patches were being applied this would make the shared
+      // model be out of sync with the tree. The tree would not be updated
+      // before now because applyingContainerPatches is true. So that deleted
+      // node change would get applied here. When it is applied it would
+      // generate a new undoable action that is not grouped with the action that
+      // deleted the node from the shared model. So now if the user undoes, the
+      // actions will not get undone together. This will probably result in a
+      // broken UI for the user. 
+      //
+      // We could record the action id of any actions that happen while the
+      // patches are being applied. It is possible that multiple actions could
+      // happen. Because we aren't running the updateTreeAfterSharedModelChanges
+      // after each of these actions, we wouldn't be able to tell what tree
+      // updates are associated with which of the multiple actions. 
       //
       // I think the best thing to do is:
-      // - merge any actions that happened during the patch application into
-      //   a single action. So basically combine their patches.
-      // - use the id of that combined action for any changes the 
+      // - merge any actions that happened during the patch application into a
+      //   single action. So basically combine their patches.
+      // - use the id of that combined action for any changes the
       //   updateTreeAfterSharedModelChanges causes here.
       //
-      // If there were no injected or intermediate actions, but for some reason 
-      // this update function does make changes in the tree, 
-      // what should we do?  
-      // We should at least log this issue to the console, so we can try to track
-      // down what happened. One likely reason is a broken implementation of the 
-      // updateTreeAfterSharedModelChanges. And that will be likely to happen 
-      // during development.
+      // If there were no injected or intermediate actions, but for some reason
+      // this update function does make changes in the tree, what should we do?  
+      // We should at least log this issue to the console, so we can try to
+      // track down what happened. One likely reason is a broken implementation
+      // of the updateTreeAfterSharedModelChanges. And that will be likely to
+      // happen during development.
       self.updateTreeAfterSharedModelChanges();
 
       // We return a promise because the API is async
@@ -189,13 +187,14 @@ export const Tree = types.model("Tree", {
   // monitor middleware. Or perhaps we can simplify some of the logic now that
   // this is actually an action.
   return {
-    async handleSharedModelChanges(historyEntryId: string, callId: string, 
+    async handleSharedModelChanges(historyEntryId: string, exchangeId: string, 
       call: any, sharedModelPath: string) {
         
       const model = resolvePath(self, sharedModelPath);
 
       // Note: the environment of the call will be undefined because the undoRecorder cleared 
       // it out before it calling this function
+      // FIXME: add a DEBUG_ flag here to only log this when that is enabled
       console.log(`observed changes in sharedModel: ${model.id} of tree: ${self.treeId}`, 
         {historyEntryId, action: call});
 
@@ -210,42 +209,39 @@ export const Tree = types.model("Tree", {
         // stack
         const snapshot = getSnapshot(model); 
         
-        // TODO: we use the callId from the original call here
-        // so we need to wait for the container to confirm this
-        // updateSharedModel call before we can continue.
-        // Otherwise the container might receive the final
-        // addTreePatchRecord before it gets any shared model
-        // updates. Currently updateSharedModel waits for all of
-        // the dependent trees to update their shared models
-        // before returning, so this might cause a long delay.  
+        // TODO: we use the exchangeId from the original exchange here so we need to
+        // wait for the container to confirm this updateSharedModel call before
+        // we can continue. Otherwise the container might receive the final
+        // addTreePatchRecord before it gets any shared model updates. Currently
+        // updateSharedModel waits for all of the dependent trees to update
+        // their shared models before returning, so this might cause a long
+        // delay.  
         //
-        // We could start a new "call" with the container and
-        // just wait for that, and then call updateSharedModel
-        // with the callId for this new "call".
+        // We could start a new exchange with the container and just wait for
+        // that, and then call updateSharedModel with the exchangeId for this
+        // new exchange.
         //
-        // Or we could add a new option to updateSharedModel so
-        // in some cases it waits for all of the dependent trees
-        // to be updated and in other cases it just waits for
-        // the container to confirm it received the request.
+        // Or we could add a new option to updateSharedModel so in some cases it
+        // waits for all of the dependent trees to be updated and in other cases
+        // it just waits for the container to confirm it received the request.
         //
-        // It might also be possible we can change the async
-        // flow of applying history events so it isn't necessary
-        // for the trees to wait for the shared model to be
-        // fully updated. So then this updateSharedModel call
+        // It might also be possible we can change the async flow of applying
+        // history events so it isn't necessary for the trees to wait for the
+        // shared model to be fully updated. So then this updateSharedModel call
         // can just wait for a confirmation in all cases.
         //
-        // - Q: Why is the callId passed to updateSharedModel
-        // - A: It isn't really needed but it is useful for
-        //   debugging. updateSharedModel makes a new callId for
-        //   each tree that it sends the shared model to. It
-        //   doesn't do anything with the passed in callId.
+        // - Q: Why is the exchangeId passed to updateSharedModel
+        // - A: It isn't really needed but it is useful for debugging.
+        //   updateSharedModel makes a new exchangeId for each tree that it
+        //   sends the shared model to. It doesn't do anything with the passed
+        //   in exchangeId.
         //
-        // Note that the TreeMonitor takes care of closing the
-        // callId used here. This same callId is passed to all
-        // the shared model callbacks and then they are all
-        // waited for, and finally the callId is closed. 
+        // Note that the TreeMonitor takes care of closing the exchangeId used
+        // here. This same exchangeId is passed to all the shared model
+        // callbacks and then they are all waited for, and finally the
+        // exchange is closed. 
         //
-        await self.containerAPI?.updateSharedModel(historyEntryId, callId, self.treeId, snapshot);
+        await self.containerAPI?.updateSharedModel(historyEntryId, exchangeId, self.treeId, snapshot);
       }
 
       // let the tile update its model based on the updates that
@@ -288,28 +284,28 @@ export const Tree = types.model("Tree", {
       // complete. Since this update call can be async the
       // container needs to know to wait for it to finish. Before
       // callback is called we should not have called
-      // addTreePatches for the passed in callId. But
+      // addTreePatches for the passed in exchangeId. But
       // addTreePatches will be called immediately after this
       // callback is resolved. So we start a new history entry
-      // call and make sure that start request has been seen by
+      // exchange and make sure that start request has been seen by
       // the container before returning/resolving from this shared
       // model callback. 
       //
-      // - Q: Do we really want to make a new callId here? 
+      // - Q: Do we really want to make a new exchangeId here? 
       // - A: When this callback is triggered by the container
-      //   when it calls applySharedModelSnapshot, a callId is
+      //   when it calls applySharedModelSnapshot, a exchangeId is
       //   passed in which we need to close out anyway so we could
       //   just use that here. So in that case we don't really
-      //   need to make a new callId. But it is also possible this
+      //   need to make a new exchangeId. But it is also possible this
       //   callback will be triggered by a user action. In that
       //   case multiple shared models might be modified by the
       //   same action which would then result in multiple
       //   updateTreeAfterSharedModelChangesInternal calls which
       //   would probably result in multiple addTreePatchRecord
-      //   calls for the same callId. Also because
+      //   calls for the same exchangeId. Also because
       //   updateTreeAfterSharedModelChangesInternal is
       //   asynchronous it is better if we don't wait for it, if
-      //   we can avoid it, so the new callId allows us to wrap up
+      //   we can avoid it, so the new exchangeId allows us to wrap up
       //   the recordAction of TreeMonitor sooner.
       // - Q: This is happening in a middleware will all of this
       //   await stuff work?
@@ -318,7 +314,7 @@ export const Tree = types.model("Tree", {
       //   will store a reference to all of the objects it needs
       //   so it can run after the middleware has continued on
       //   handling other actions. 
-      // - Q: What is the passed in callId for?
+      // - Q: What is the passed in exchangeId for?
       // - A: It isn't necessary, but it can be a useful
       //   piece of information to help with debugging.
       // - Q: Will there be more than one addTreePatchRecord call
@@ -328,8 +324,8 @@ export const Tree = types.model("Tree", {
       //   updateTreeAfterSharedModelChangesInternal is called. It
       //   would be better if we could streamline this.
       //
-      const updateTreeCallId = nanoid();
-      await self.containerAPI?.startHistoryEntryCall(historyEntryId, updateTreeCallId);
+      const updateTreeExchangeId = nanoid();
+      await self.containerAPI?.startExchange(historyEntryId, updateTreeExchangeId);
 
       // This should always result in a addTreePatchRecord being
       // called even if there are no changes.
@@ -339,11 +335,11 @@ export const Tree = types.model("Tree", {
       // finished the TreeMonitor's recordAction function will
       // call addTreePatchRecord even if there are no changes. 
       //
-      // FIXME: now that we are in an action already of the tree, this
+      // FIXME: if this action is changed to a flow then this 
       // updateTreeAfterSharedModelChangesInternal will not be the top
       // level action itself. Instead handleSharedModelChanges will be the
       // top level action.
-      self.updateTreeAfterSharedModelChangesInternal(historyEntryId, updateTreeCallId, model);
+      self.updateTreeAfterSharedModelChangesInternal(historyEntryId, updateTreeExchangeId, model);
     }
   };
 });

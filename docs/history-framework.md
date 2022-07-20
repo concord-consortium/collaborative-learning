@@ -95,7 +95,7 @@ sequenceDiagram
   participant TreeMonitor
   Container->>Tree: startApplyingContainerPatches
   activate Container
-  Note right of Container: same callId
+  Note right of Container: same exchangeId
   Tree->>TreeMonitor: onStart
   activate Tree
   Note right of Tree: shared model<br/>update disabled 
@@ -104,13 +104,13 @@ sequenceDiagram
   deactivate Container
   Container->>Tree: applyContainerPatches
   activate Container
-  Note right of Container: same callId
+  Note right of Container: same exchangeId
   Tree->>TreeMonitor: onStart, onFinish
   TreeMonitor->>Container: addTreePatchRecord
   deactivate Container
   Container->>Tree: finishApplyingContainerPatches
   activate Container
-  Note right of Container: same callId
+  Note right of Container: same exchangeId
   Tree->>TreeMonitor: onStart
   Note right of Tree: shared model<br/>update enabled 
   deactivate Tree
@@ -131,7 +131,7 @@ sequenceDiagram
   UndoStore->> DocStore: createHistoryEntry
   activate DocStore
   loop each tree
-    UndoStore->>DocStore: startHistoryEntryCall
+    UndoStore->>DocStore: startExchange
     activate DocStore
     UndoStore->>Tree: startApplyingContainerPatches
     activate Tree
@@ -141,7 +141,7 @@ sequenceDiagram
     deactivate DocStore
   end
   loop each tree
-    UndoStore->>DocStore: startHistoryEntryCall
+    UndoStore->>DocStore: startExchange
     activate DocStore
     UndoStore->>Tree: applyContainerPatches
     Tree->>Container: addTreePatchRecord
@@ -149,7 +149,7 @@ sequenceDiagram
     deactivate DocStore
   end
   loop each tree
-    UndoStore->>DocStore: startHistoryEntryCall
+    UndoStore->>DocStore: startExchange
     activate DocStore
     UndoStore->>Tree: finishApplyingContainerPatches
     Note left of Tree: shared model<br/>update enabled 
@@ -158,7 +158,7 @@ sequenceDiagram
     Container->>DocStore: addPatchesToHistoryEntry
     deactivate DocStore
   end
-  UndoStore->> DocStore: closeHistoryEntryCall
+  UndoStore->> DocStore: endExchange
   deactivate DocStore
 ```
 
@@ -173,7 +173,7 @@ sequenceDiagram
   participant Container
   TreeMonitor->>Container: addHistoryEntry
   activate Container
-  Note right of Container: same callId 
+  Note right of Container: same exchangeId 
   TreeMonitor->>Tree: handleSharedModelChanges
   Tree->>Container: updateSharedModel
   TreeMonitor->>Container: addTreePatchRecord
@@ -188,12 +188,12 @@ sequenceDiagram
   SourceTree->>Container: addHistoryEntry  
   activate Container
   Container->>DocStore: createHistoryEntry
-  Note right of Container: same callId 
+  Note right of Container: same exchangeId 
   SourceTree->>Container: updateSharedModel
   loop other trees
-    Container->>DocStore: startHistoryEntryCall
+    Container->>DocStore: startExchange
     activate Container
-    Note right of Container: same callId
+    Note right of Container: same exchangeId
     Container->>OtherTree: applySharedModelSnapshotFromContainer
     OtherTree->>Container: addTreePatchRecord (not implemented)
     Container->>DocStore: addPatchesToHistoryEntry
@@ -208,14 +208,15 @@ sequenceDiagram
 ## TODO:
 - [x] document history models
 - [x] find or make tests of the existing code so we can address the FIXMEs without manually testing each one. These tests can be based on the shared-model-document-manager tests. We can start with testing undo and redo. We don't have time to test that it works with multiple trees through, so we'll start with the single tree. That should be enough to do the refactoring.
-- [x] can the historyEntryId be used as the callId? I think not, but it should be reviewed and documented.  I think the best way to evaluate this is with a sequence diagram or some other diagram that shows the calls between the different components. To identify for what things the callId is being used. Because we are short on time, I just going to keep the call id. I'm still going to make the diagram because it is a key part of the system.
-- [ ] figure out if the same callId is used in 2 responses. This is described in container-api in addHistoryEntry, so we should track that down and if so make a sequence diagram of that case.
-- [ ] rename callId and methods describing call: probably should be patchRecordId and startPatchRecord and endPatchRecord. Review the use of startHistoryEntryCall in undo-store. I don't know if startPatchRecord works for this. The weird thing with applyPatchesToTrees is that a callId is created for startApplyingContainerPatches and this is different than the callId when applyContainerPatches is called. A more generic name could be exchangeId, or requestId. A confusing thing with requestId is that the response to the request is technically a request it is just coming from the tree going back to the container. The other naming confusion is the use of addTreePatchRecord to close out this exchangeId
+- [x] can the historyEntryId be used as the exchangeId? I think not, but it should be reviewed and documented.  I think the best way to evaluate this is with a sequence diagram or some other diagram that shows the calls between the different components. To identify for what things the exchangeId is being used. Because we are short on time, I just going to keep the call id. I'm still going to make the diagram because it is a key part of the system.
+- [x] figure out if the same exchangeId is used in 2 responses. This is described in container-api in addHistoryEntry, so we should track that down and if so make a sequence diagram of that case.
+- [x] rename callId and methods describing call: probably should be patchRecordId and startPatchRecord and endPatchRecord. Review the use of startExchange in undo-store. I don't know if startPatchRecord works for this. The weird thing with applyPatchesToTrees is that a exchangeId is created for startApplyingContainerPatches and this is different than the exchangeId when applyContainerPatches is called. A more generic name could be exchangeId, or requestId. A confusing thing with requestId is that the response to the request is technically a request it is just coming from the tree going back to the container. The other naming confusion is the use of addTreePatchRecord to close out this exchangeId
+- [ ] try to combine Container and DocumentStore
 - [ ] make a diagram of how call ids are used for tracking the status of the historyEntry. Doing this after the renaming seems best.
 - [ ] try to unify Document.afterCreate with createDocument
-- [ ] review how callId is handled when an undo tiggers a call to updateSharedModel, should a new callId be generated here or should it be re-using an existing callId?
+- [ ] review how exchangeId is handled when an undo triggers a call to updateSharedModel, should a new exchangeId be generated here or should it be re-using an existing exchangeId?
 - [ ] see if we can remove the code which creates a history entry when addPatchesToHistoryEntry is called
-- [ ] look at the history entry generated when the history is replayed. The fixme is in the closeHistoryEntryCall. In the case of time travel we don't want to generate new history entries when they time travel. And we aren't currently planning to replay the history from scratch. So if it is easy we should get rid of any history entry generation when replaying. The test for replaying does have the tree monitor installed when the history is replayed so it is a way to test whether we can skip this.
+- [ ] look at the history entry generated when the history is replayed. The fixme is in the endExchange. In the case of time travel we don't want to generate new history entries when they time travel. And we aren't currently planning to replay the history from scratch. So if it is easy we should get rid of any history entry generation when replaying. The test for replaying does have the tree monitor installed when the history is replayed so it is a way to test whether we can skip this.
 - [ ] add a test where a new shared model is added to the document and see what history entries are generated and whether the updateSharedModel methods are called correctly. I haven't really thought about what should happen here. fixmes are in tree-monitor recordPatches
 - [ ] Tree.handleSharedModelChanges is an async action that ins't a flow. There might also be a way to simplify it now that it is an action.
 - [ ] Tree.handleSharedModelChanges calls updateTreeAfterSharedModelChangesInternal but since it is async and not a flow this call becomes a new top level action. If we switch it to a flow then we'll probably have to ignore the handleSharedModelChanges in the tree-monitor

@@ -33,10 +33,9 @@ export const HistoryEntry = types.model("HistoryEntry", {
     state: types.optional(types.enumeration("HistoryEntryState", ["recording", "complete"]), "recording")
 })
 .volatile(self => ({
-    // TODO: is this the right usage of the observable map?
     // I'm using number here just because we need a value, so we might as well
-    // record how many times an openCall is referenced
-    openCalls: observable.map<string, number>({}, {name: "openCalls"})
+    // record how many times an exchange is referenced
+    activeExchanges: observable.map<string, number>({}, {name: "activeExchanges"})
 }));
 export interface HistoryEntrySnapshot extends SnapshotIn<typeof HistoryEntry> {}
 

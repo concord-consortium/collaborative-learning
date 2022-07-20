@@ -43,19 +43,19 @@ export const UndoStore = types
             const treeEntries = entryToUndo.records;
 
             const historyEntryId = nanoid();
-            const callId = nanoid();
+            const exchangeId = nanoid();
 
             // Start a non-undoable action with this id
             const docStore = getParent(self) as Instance<typeof DocumentStore>;
             const historyEntry = 
-              docStore.createHistoryEntry(historyEntryId, callId, opType, "container", false);
+              docStore.createHistoryEntry(historyEntryId, exchangeId, opType, "container", false);
 
             // first disable shared model syncing in the tree
             const startPromises = treeEntries.map(treeEntry => {
-                const startCallId = nanoid();
-                docStore.startHistoryEntryCall(historyEntryId, startCallId);
+                const startExchangeId = nanoid();
+                docStore.startExchange(historyEntryId, startExchangeId);
 
-                return getTreeFromId(treeEntry.tree).startApplyingContainerPatches(historyEntryId, startCallId);
+                return getTreeFromId(treeEntry.tree).startApplyingContainerPatches(historyEntryId, startExchangeId);
             });
             yield Promise.all(startPromises);
 
@@ -68,17 +68,17 @@ export const UndoStore = types
                 // the shared model's applyContainerPatches will not resolve until all tiles
                 // using it have updated their view of the shared model.
 
-                // We need a new callId for each apply call here, so each
-                // tree can finish the call when it calls addTreeRecordPatches.
-                // This new callId is added to the history entries volatile
-                // storage using startHistoryEntryCall. So now the history entry
-                // knows it needs to wait for this call to complete before
+                // We need a new exchangeId for each apply call here, so each
+                // tree can finish the exchange when it calls addTreeRecordPatches.
+                // This new exchangeId is added to the history entries volatile
+                // storage using startExchange. So now the history entry
+                // knows it needs to wait for this exchange to complete before
                 // marking the full entry as complete.
-                const applyCallId = nanoid();
-                docStore.startHistoryEntryCall(historyEntryId, applyCallId);
+                const applyExchangeId = nanoid();
+                docStore.startExchange(historyEntryId, applyExchangeId);
 
                 const tree = getTreeFromId(treeEntry.tree);
-                return tree.applyContainerPatches(historyEntryId,  applyCallId, treeEntry.getPatches(opType));
+                return tree.applyContainerPatches(historyEntryId,  applyExchangeId, treeEntry.getPatches(opType));
             });
             yield Promise.all(applyPromises);
 
@@ -89,20 +89,20 @@ export const UndoStore = types
             // This can be used in the future to make sure multiple applyPatchesToTrees are not 
             // running at the same time.
             const finishPromises = treeEntries.map(treeEntry => {
-                const finishCallId = nanoid();
-                docStore.startHistoryEntryCall(historyEntryId, finishCallId);
+                const finishExchangeId = nanoid();
+                docStore.startExchange(historyEntryId, finishExchangeId);
 
                 return getTreeFromId(treeEntry.tree)
-                  .finishApplyingContainerPatches(historyEntryId, finishCallId);
+                  .finishApplyingContainerPatches(historyEntryId, finishExchangeId);
             });
             yield Promise.all(finishPromises);
 
-            // TODO I'm closing the top level call after the finish Promises is
-            // called. This way the tree has a chance to add a new call to the
-            // history entry which will keep it being marked complete until that
-            // new call is also finished. It isn't clear if this is really
+            // TODO I'm closing the top level exchange after the finish Promises
+            // is called. This way the tree has a chance to add a new exchange
+            // to the history entry which will keep it "recording" until that
+            // new exchange is also finished. It isn't clear if this is really
             // needed though.
-            docStore.closeHistoryEntryCall(historyEntry, callId);
+            docStore.endExchange(historyEntry, exchangeId);
         });
 
         return {
