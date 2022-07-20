@@ -656,7 +656,28 @@
                                   "<p><strong>Discuss with your group--What do you think is the connection between stress and focus?</strong></p>"
                                 ]
                               }
-                            }                            
+                            },
+                            {
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p><strong>Questions About Evidence 1: </strong></p>",
+                                  "<p></p>",
+                                  "<p>1. The subordinate monkey has: </p>",
+                                  "<p><strong>Less control </strong>  OR    <strong>More control</strong></p>",
+                                  "<p>(underline your choice)</p>",
+                                  "<p></p>",
+                                  "<p>2. The subordinate monkey artery is:</p>",
+                                  "<p><strong>Less clogged</strong>   OR    <strong>More clogged</strong></p>",
+                                  "<p>(underline your choice)</p>",
+                                  "<p></p>",
+                                  "<p>3. Both monkeys had the same diet and health care, the difference in their blood vessels is only due to the stress from social subordination.  </p>",
+                                  "<p><strong>True</strong>   OR   <strong>False</strong> ?</p>",
+                                  "<p>(underline your choice)</p>"
+                                ]
+                              }
+                            }                                               
                           ]
                         },
                         "supports": []
@@ -691,7 +712,23 @@
                                     "<p><strong></strong></p>"
                                   ]
                                 }
-                              }                              
+                              },
+                              {
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p><strong>Questions About Evidence 2:</strong></p>",
+                                    "<p></p>",
+                                    "<p>1. Our body can make all the cholesterol we need.  <strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</p>",
+                                    "<p></p>",
+                                    "<p>2. Cholesterol is needed to build cells, make vitamins, and make hormones.  <strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</p>",
+                                    "<p></p>",
+                                    "<p>3. A cholesterol plaque can form in: (underline your choice)</p>",
+                                    "<p><strong>A.  The liver           B. Inside the blood vessel wall         C. The stomach</strong></p>"
+                                  ]
+                                }
+                              }                                           
                             ]
                           },
                           "supports": []
@@ -735,7 +772,27 @@
                                     "<p><strong>Write what you learned from this evidence in your table.</strong></p>"
                                   ]
                                 }
-                              }
+                              },
+                              {
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p><strong>Question About Evidence 3:</strong></p>",
+                                    "<p></p>",
+                                    "<p>1. Rakesh’s cholesterol levels are? (underline your choice)</p>",
+                                    "<p><strong>A.  Low       B. Normal      C. High</strong></p>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "bio4TG01",
+                                "title": "R. Sharma Metabolic Panel",
+                                "content": {
+                                  "type": "Image",
+                                  "url": "curriculum/bio4community/images/MetabolicPanel.jpg"
+                                }
+                              }                  
                             ],
                             "supports": []
                           }
