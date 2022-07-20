@@ -9,25 +9,52 @@
 }
 
 .lightbulb-control {
-  height: 94px;
+  height: 78px;
   width: 113px;
 
   .lightbulb-image {
     width: 113px;
     height: 112px;
     left: 0;
-    top: 0;
+    top: -13px;
   }
 }
 
 .backyard-claw-control {
-  height: 147px;
+  height: 145px;
   width: 113px;
 
   .backyard-claw-image {
     width: 172px;
     height: 165px;
     left: -29px;
-    top: 0;
+    top: 1px;
+  }
+}
+
+.grabber-control {
+  height: 190px;
+  width: 113px;
+
+  .grabber-paddle-image {
+    width: 59px;
+    height: 32px;
+    left: -29px;
+    top: 84px;
+  }
+
+  .grabber-chord-image {
+    width: 55px;
+    height: 110px;
+    left: 12px;
+    top: 101px;
+  }
+
+  .grabber-claw-image {
+    width: 126px;
+    height: 126px;
+    left: 4px;
+    top: 37px;
+    transform-origin: 9px 50%;
   }
 }

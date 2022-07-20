@@ -2,21 +2,20 @@ import Rete, { Node, Socket } from "rete";
 import { NodeData } from "rete/types/core/data";
 import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
 import { DemoOutputControl } from "../controls/demo-output-control";
-import { DemoOutputValueControl } from "../controls/demo-output-value-control";
+import { InputValueControl } from "../controls/input-value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
 import { MinigraphOptions } from "../dataflow-node-plot";
-import { NodeDemoOutputTypes, NodePlotBlue, NodePlotRed } from "../../model/utilities/node";
+import { NodeDemoOutputTypes, NodePlotRed } from "../../model/utilities/node";
 
 const minigraphOptions: Record<string, MinigraphOptions> = {
-  "speed": {
-    backgroundColor: NodePlotBlue,
-    borderColor: NodePlotBlue
-  },
   "tilt": {
     backgroundColor: "#fff",
     borderColor: NodePlotRed
   }
 };
+
+const clawSpeed = .002;
+const tiltSpeed = .002;
 
 export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
@@ -36,66 +35,55 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
         this.setupGrabberInputs(node);
       }
 
+      node.data.targetClosed = 0;
+      node.data.currentClosed = node.data.targetClosed;
+      node.data.targetTilt = 0;
+      node.data.currentTilt = node.data.targetTilt;
+      node.data.lastTick = Date.now();
+
       return node as any;
     }
   }
 
   public worker(node: NodeData, inputs: any, outputs: any) {
+    const now = Date.now();
+    const tickTime = now - (node.data.lastTick as number);
+
     const n1 = inputs.nodeValue.length ? inputs.nodeValue[0] : node.data.nodeValue;
-    // if there is not a valid input, use 0
-    // otherwise convert all non-zero to 1
-    const result = isNaN(n1) ? 0 : +(n1 !== 0);
     if (this.editor) {
       const _node = this.editor.nodes.find((n: { id: any; }) => n.id === node.id);
       if (_node) {
         const outputTypeControl = _node.controls.get("outputType") as DropdownListControl;
         const outputType = outputTypeControl.getValue();
 
-        // Update main display
-        const nodeValue = _node.inputs.get("nodeValue")?.control as DemoOutputValueControl;
-        nodeValue?.setValue(result);
+        // Update the lightbulb or claw
+        const nodeValue = _node.inputs.get("nodeValue")?.control as InputValueControl;
+        let newValue = isNaN(n1) ? 0 : n1;
         if (outputType === "Light Bulb") {
-          nodeValue?.setDisplayMessage(result === 0 ? "off" : "on");
+          // if there is not a valid input, use 0
+          // otherwise convert all non-zero to 1
+          newValue = isNaN(n1) ? 0 : +(n1 !== 0);
+          nodeValue?.setDisplayMessage(newValue === 0 ? "off" : "on");
         } else {
-          nodeValue?.setDisplayMessage(result === 0 ? "closed" : "open");
+          newValue = this.updateClaw(_node, newValue, tickTime, nodeValue);
         }
+        nodeValue?.setValue(newValue);
         nodeValue?.setConnected(inputs.nodeValue.length);
 
+        // Set the demo output's main value (lightbulb on/off, claw % closed)
         const demoOutput = _node.controls.get("demoOutput") as DemoOutputControl;
-        demoOutput?.setValue(result);
+        demoOutput?.setValue(newValue);
 
-        // Update inputs based on output type
+        // Grabber specific updates
         if (outputType === "Grabber") {
           this.setupGrabberInputs(_node);
-
-          // Update grabber speed
-          const speedInput = inputs.speed?.length ? inputs.speed[0] : node.data.speed;
-          const speedValue = speedInput < 0 ? 0 : speedInput > 1 ? 1 : speedInput;
-          const speedControl = _node.inputs.get("speed")?.control as DemoOutputValueControl;
-          if (speedValue !== undefined) {
-            speedControl?.setValue(speedValue);
-          }
-          speedControl?.setConnected(inputs.speed?.length);
-
-          // Update grabber tilt
-          const tiltInput = inputs.tilt?.length ? inputs.tilt[0] : node.data.tilt;
-          const tiltValue = tiltInput;
-          const tiltControl = _node.inputs.get("tilt")?.control as DemoOutputValueControl;
-          if (tiltValue !== undefined) {
-            tiltControl?.setValue(tiltValue);
-          }
-          tiltControl?.setConnected(inputs.tilt?.length);
+          this.updateTilt(_node, inputs, tickTime, demoOutput);
         } else {
-          this.removeInput(_node, "speed");
-          if ("speed" in (node as any).data.watchedValues) {
-            delete (node as any).data.watchedValues.speed;
-          }
+          // Remove tilt when grabber isn't selected
           this.removeInput(_node, "tilt");
-          if ("tilt" in (node as any).data.watchedValues) {
-            delete (node as any).data.watchedValues.tilt;
-          }
+          delete (_node as any).data.watchedValues.tilt;
         }
-        node.data.outputType = outputType;
+        _node.data.outputType = outputType;
         demoOutput?.setOutputType(outputType);
 
         this.editor.view.updateConnections( {node: _node} );
@@ -103,11 +91,11 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
         _node.update();
       }
     }
+
+    node.data.lastTick = now;
   }
 
   private setupGrabberInputs(node: Node) {
-    (node as any).data.watchedValues.speed = minigraphOptions.speed;
-    this.addInput(node, "speed", "speed: ");
     (node as any).data.watchedValues.tilt = minigraphOptions.tilt;
     this.addInput(node, "tilt", "tilt: ");
   }
@@ -118,7 +106,7 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
       if (!oldInput) {
         const input = new Rete.Input(inputKey, "Number", this.numSocket);
         node.addInput(input);
-        input.addControl(new DemoOutputValueControl(
+        input.addControl(new InputValueControl(
           this.editor,
           inputKey,
           node,
@@ -146,5 +134,51 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
       input.connections.slice().map(this.editor.removeConnection.bind(this.editor));
       node.removeInput(input);
     }
+  }
+
+  private updateClaw(node: Node, inputValue: number, tickTime: number, valueControl: InputValueControl) {
+    // Update target percent closed, capped between 0 and 1.
+    let percentClosed = Math.min(1, inputValue);
+    percentClosed = Math.max(0, percentClosed);
+    node.data.targetClosed = percentClosed;
+
+    // Close or open the claw towards the target
+    let currentClosed = node.data.currentClosed as number;
+    const closedDirection = percentClosed > currentClosed ? 1 : percentClosed < currentClosed ? -1 : 0;
+    const nextClosed = currentClosed + clawSpeed * tickTime * closedDirection;
+    const targetClosed = node.data.targetClosed as number;
+    currentClosed = closedDirection > 0 ? Math.min(nextClosed, targetClosed)
+      : Math.max(nextClosed, targetClosed);
+    node.data.currentClosed = currentClosed;
+
+    // Update the display message
+    const hundredPercentClosed = Math.round(currentClosed * 10) * 10;
+    valueControl?.setDisplayMessage(`${hundredPercentClosed}% closed`);
+
+    return currentClosed;
+  }
+
+  private updateTilt(node: Node, inputs: any, tickTime: number, demoOutput: DemoOutputControl) {
+    // Update the target tilt
+    const tiltValue = inputs.tilt?.length ? inputs.tilt[0] : node.data.tilt;
+    const tiltControl = node.inputs.get("tilt")?.control as InputValueControl;
+    if (tiltValue !== undefined && (tiltValue === 1 || tiltValue === 0 || tiltValue === -1)) {
+      // Only update the target if the input is a legal value: 1, 0, -1
+      node.data.targetTilt = tiltValue;
+    }
+    const targetTilt = node.data.targetTilt as number;
+    tiltControl?.setValue(targetTilt);
+    const tiltWord = targetTilt === 1 ? "up" : targetTilt === -1 ? "down" : "center";
+    tiltControl?.setDisplayMessage(tiltWord);
+
+    // Move grabber tilt towards the target
+    let currentTilt = node.data.currentTilt as number;
+    const tiltDirection = targetTilt > currentTilt ? 1 : targetTilt < currentTilt ? -1 : 0;
+    const nextTilt = currentTilt + tiltSpeed * tickTime * tiltDirection;
+    currentTilt = tiltDirection > 0 ? Math.min(nextTilt, targetTilt) : Math.max(nextTilt, targetTilt);
+    node.data.currentTilt = currentTilt;
+    demoOutput?.setTilt(currentTilt);
+
+    tiltControl?.setConnected(inputs.tilt?.length);
   }
 }
