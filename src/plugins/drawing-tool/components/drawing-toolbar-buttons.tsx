@@ -103,7 +103,7 @@ export const DeleteButton: React.FC<IDeleteToolButtonProps> = observer(function 
   toolbarManager
 }) {
   const onClick = () => {
-    toolbarManager.deleteSelectedObjects();
+    toolbarManager.deleteObjects(toolbarManager.selectedIds);
   };
   const disabled = !toolbarManager.hasSelectedObjects;
 

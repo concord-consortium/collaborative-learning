@@ -11,7 +11,7 @@ import { UserModel } from "../models/stores/user";
 
 configure({testIdAttribute: "data-test"});
 
-var mockGetQueryState = jest.fn();
+const mockGetQueryState = jest.fn();
 jest.mock("react-query", () => ({
   useQueryClient: () => ({
     getQueryState: mockGetQueryState

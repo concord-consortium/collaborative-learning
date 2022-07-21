@@ -13,7 +13,7 @@ import { registerTools } from "../../register-tools";
 import { ModalProvider } from "react-modal-hook";
 registerTools(["Text"]);
 
-var mockGetQueryState = jest.fn();
+const mockGetQueryState = jest.fn();
 jest.mock("react-query", () => ({
   useQueryClient: () => ({
     getQueryState: mockGetQueryState

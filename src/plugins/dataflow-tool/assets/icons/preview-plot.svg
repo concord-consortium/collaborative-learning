@@ -1,0 +1,5 @@
+<svg id="icon-preview-plot" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
+  <title>preview plot</title>
+  <polygon id="axes" points="1.5 12.5 1.5 0 0 0 0 14 14 14 14 12.5 1.5 12.5"/>
+  <path id="plot" d="M14,10.25c-3.49,0-4.81-1.92-6-3.62C7,5.09,6,3.75,3.5,3.75V2.25c3.33,0,4.62,1.88,5.76,3.53s2,3,4.74,3Z"/>
+</svg>

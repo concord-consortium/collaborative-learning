@@ -88,8 +88,6 @@ module.exports = {
           // require() can be useful in mocking
           "@typescript-eslint/no-require-imports": "off",
           "@typescript-eslint/no-var-requires": "off",
-          // var is useful in mocking due to its hoisting semantics
-          "no-var": "off"
         }
       },
       { // eslint configs
