@@ -4,7 +4,7 @@ import { DEBUG_DOCUMENT } from "../../lib/debug";
 import { DocumentContentModel, DocumentContentModelType } from "../document/document-content";
 import { SharedModelType } from "../tools/shared-model";
 import { ToolTileModelType } from "../tools/tool-tile";
-import { ContainerAPI } from "./container-api";
+import { TreeManagerAPI } from "./tree-manager-api";
 
 if (DEBUG_DOCUMENT) {
   (window as any).getSnapshot = getSnapshot;
@@ -13,8 +13,8 @@ if (DEBUG_DOCUMENT) {
 export const Tree = types.model("Tree", {
 })
 .volatile(self => ({
-  applyingContainerPatches: false,
-  containerAPI: undefined as ContainerAPI | undefined
+  applyingManagerPatches: false,
+  treeManagerAPI: undefined as TreeManagerAPI | undefined
 }))
 .views(self => ({
   get treeId(): string {
@@ -70,7 +70,7 @@ export const Tree = types.model("Tree", {
 .actions(self => {
     const updateTreeAfterSharedModelChangesInternal = (historyEntryId: string, exchangeId: string, 
       sharedModel: SharedModelType) => {
-        // If we are applying container patches, then we ignore any sync actions
+        // If we are applying manager patches, then we ignore any sync actions
         // otherwise the user might make a change such as changing the name of a
         // node while the patches are applied. When they do this the patch for 
         // the shared model might have been applied first, and which if sync is
@@ -81,7 +81,7 @@ export const Tree = types.model("Tree", {
         // action would would trigger the sync. So if the user made this change
         // at just the right time it would could result in duplicate nodes in the 
         // diagram.
-        if (self.applyingContainerPatches) {
+        if (self.applyingManagerPatches) {
             return;
         }
 
@@ -102,15 +102,15 @@ export const Tree = types.model("Tree", {
     // which are shared by tiles and and shared models
     //
 
-    // This will be called by the container when a shared model tree changes
+    // This will be called by the manager when a shared model tree changes
     // That would normally happen when a tile changed the shared model.
-    applySharedModelSnapshotFromContainer(historyEntryId: string, exchangeId: string, snapshot: any) {
+    applySharedModelSnapshotFromManager(historyEntryId: string, exchangeId: string, snapshot: any) {
       throw new Error("not implemented yet");
     },
 
-    // The container calls this before it calls applyContainerPatches
-    startApplyingContainerPatches(historyEntryId: string, exchangeId: string) {
-      self.applyingContainerPatches = true;
+    // The manager calls this before it calls applyPatchesFromManager
+    startApplyingPatchesFromManager(historyEntryId: string, exchangeId: string) {
+      self.applyingManagerPatches = true;
 
       // We return a promise because the API is async
       // The action itself doesn't do anything asynchronous though
@@ -121,8 +121,8 @@ export const Tree = types.model("Tree", {
     // This is defined as an action so it is clear that is part of the API
     // also by giving it an action name the undo recorder can identify that
     // this action by its name and not record the undo as an undo
-    // It might be called multiple times after startApplyingContainerPatches
-    applyContainerPatches(historyEntryId: string, exchangeId: string, patchesToApply: readonly IJsonPatch[]) {
+    // It might be called multiple times after startApplyingPatchesFromManager
+    applyPatchesFromManager(historyEntryId: string, exchangeId: string, patchesToApply: readonly IJsonPatch[]) {
       applyPatch(self, patchesToApply);
       // We return a promise because the API is async
       // The action itself doesn't do anything asynchronous though
@@ -130,9 +130,9 @@ export const Tree = types.model("Tree", {
       return Promise.resolve();
     },
 
-    // The container calls this after all patches have been applied
-    finishApplyingContainerPatches(historyEntryId: string, exchangeId: string) {
-      self.applyingContainerPatches = false;
+    // The manager calls this after all patches have been applied
+    finishApplyingPatchesFromManager(historyEntryId: string, exchangeId: string) {
+      self.applyingManagerPatches = false;
 
       // TODO: Need to deal with possible effects on the undo stack
       //
@@ -144,7 +144,7 @@ export const Tree = types.model("Tree", {
       // However, if the user made a change in the shared model like deleting a
       // node while the patches were being applied this would make the shared
       // model be out of sync with the tree. The tree would not be updated
-      // before now because applyingContainerPatches is true. So that deleted
+      // before now because applyingManagerPatches is true. So that deleted
       // node change would get applied here. When it is applied it would
       // generate a new undoable action that is not grouped with the action that
       // deleted the node from the shared model. So now if the user undoes, the
@@ -203,27 +203,27 @@ export const Tree = types.model("Tree", {
       // the internal shared model sync, but we don't want to resend the snapshot to the 
       // shared model. So the current approach is to look for the specific action that
       // is applying this snapshot to the tile tree. 
-      if (call.name !== "applySharedModelSnapshotFromContainer") {
+      if (call.name !== "applySharedModelSnapshotFromManager") {
 
         // TODO: figure out if we should be recording this special action in the undo
         // stack
         const snapshot = getSnapshot(model); 
         
         // TODO: we use the exchangeId from the original exchange here so we need to
-        // wait for the container to confirm this updateSharedModel call before
-        // we can continue. Otherwise the container might receive the final
+        // wait for the manager to confirm this updateSharedModel call before
+        // we can continue. Otherwise the manager might receive the final
         // addTreePatchRecord before it gets any shared model updates. Currently
         // updateSharedModel waits for all of the dependent trees to update
         // their shared models before returning, so this might cause a long
         // delay.  
         //
-        // We could start a new exchange with the container and just wait for
+        // We could start a new exchange with the manager and just wait for
         // that, and then call updateSharedModel with the exchangeId for this
         // new exchange.
         //
         // Or we could add a new option to updateSharedModel so in some cases it
         // waits for all of the dependent trees to be updated and in other cases
-        // it just waits for the container to confirm it received the request.
+        // it just waits for the manager to confirm it received the request.
         //
         // It might also be possible we can change the async flow of applying
         // history events so it isn't necessary for the trees to wait for the
@@ -241,7 +241,7 @@ export const Tree = types.model("Tree", {
         // callbacks and then they are all waited for, and finally the
         // exchange is closed. 
         //
-        await self.containerAPI?.updateSharedModel(historyEntryId, exchangeId, self.treeId, snapshot);
+        await self.treeManagerAPI?.updateSharedModel(historyEntryId, exchangeId, self.treeId, snapshot);
       }
 
       // let the tile update its model based on the updates that
@@ -257,7 +257,7 @@ export const Tree = types.model("Tree", {
       // would only run when the needed parts of the tree changed.
       //
       // We do need to send the shared model snapshot to the
-      // container whenever there are any changes to the tree so
+      // manager whenever there are any changes to the tree so
       // the code above is fine. 
       //
       // There might be a way to use the mobx internals so we can
@@ -280,19 +280,19 @@ export const Tree = types.model("Tree", {
       // it would be useful if we could identify the looping and
       // notify them.
       //
-      // The container needs to track when a history entry is
+      // The manager needs to track when a history entry is
       // complete. Since this update call can be async the
-      // container needs to know to wait for it to finish. Before
+      // manager needs to know to wait for it to finish. Before
       // callback is called we should not have called
       // addTreePatches for the passed in exchangeId. But
       // addTreePatches will be called immediately after this
       // callback is resolved. So we start a new history entry
       // exchange and make sure that start request has been seen by
-      // the container before returning/resolving from this shared
+      // the manager before returning/resolving from this shared
       // model callback. 
       //
       // - Q: Do we really want to make a new exchangeId here? 
-      // - A: When this callback is triggered by the container
+      // - A: When this callback is triggered by the manager
       //   when it calls applySharedModelSnapshot, a exchangeId is
       //   passed in which we need to close out anyway so we could
       //   just use that here. So in that case we don't really
@@ -325,7 +325,7 @@ export const Tree = types.model("Tree", {
       //   would be better if we could streamline this.
       //
       const updateTreeExchangeId = nanoid();
-      await self.containerAPI?.startExchange(historyEntryId, updateTreeExchangeId);
+      await self.treeManagerAPI?.startExchange(historyEntryId, updateTreeExchangeId);
 
       // This should always result in a addTreePatchRecord being
       // called even if there are no changes.

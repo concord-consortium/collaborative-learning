@@ -19,7 +19,7 @@ import { Tree } from "../history/tree";
 import { addTreeMonitor } from "../history/tree-monitor";
 import { createSharedModelDocumentManager, ISharedModelDocumentManager } from "../tools/shared-model-document-manager";
 import { ITileEnvironment } from "../tools/tool-types";
-import { DocumentStore } from "../history/document-store";
+import { TreeManager } from "../history/tree-manager";
 
 interface IMatchPropertiesOptions {
   isTeacherDocument?: boolean;
@@ -47,7 +47,7 @@ export const DocumentModel = Tree.named("Document")
     queryPromise: undefined as Promise<UseQueryResult<IGetNetworkDocumentResponse>> | undefined,
   }))
   .views(self => ({
-    // This is needed for the tree monitor and container
+    // This is needed for the tree monitor and manager
     get treeId() {
       return self.key;
     },
@@ -274,10 +274,10 @@ export const DocumentModel = Tree.named("Document")
   .actions(self => ({
     afterCreate() {
       // FIXME: it would be nice to unify this with the code in createDocumentModel
-      const docStore = DocumentStore.create({document: {}, undoStore: {}});
-      self.containerAPI = docStore;
-      addTreeMonitor(self, docStore, false);
-      docStore.putTree(self.treeId, self);
+      const manager = TreeManager.create({document: {}, undoStore: {}});
+      self.treeManagerAPI = manager;
+      addTreeMonitor(self, manager, false);
+      manager.putTree(self.treeId, self);
     },
     undoLastAction() {
       alert("This is the undo action");

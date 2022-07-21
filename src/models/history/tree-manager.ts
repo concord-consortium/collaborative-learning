@@ -26,8 +26,8 @@ export const CDocument = types
 export interface CDocumentType extends Instance<typeof CDocument> {}
 
 
-export const DocumentStore = types
-.model("DocumentStore", {
+export const TreeManager = types
+.model("TreeManager", {
   document: CDocument,
   undoStore: UndoStore,
 })
@@ -147,7 +147,7 @@ export const DocumentStore = types
       // FIXME: how is exchangeId handled in case #2?
       const applyExchangeId = nanoid();
       self.startExchange(historyEntryId, applyExchangeId);
-      return tree.applySharedModelSnapshotFromContainer(historyEntryId, applyExchangeId, snapshot);
+      return tree.applySharedModelSnapshotFromManager(historyEntryId, applyExchangeId, snapshot);
     });
     // The contract for this method is to return a Promise<void> so we cast the result here.
     return Promise.all(applyPromises).then() as Promise<void>;
@@ -184,7 +184,7 @@ export const DocumentStore = types
     }
 
     // The tree patch record will be sent even if there all no patches.
-    // This is how the tree tells the container that this exchangeId is closed.
+    // This is how the tree tells the manager that this exchangeId is closed.
     if (treePatchRecord.patches.length > 0) {
       entry.records.push(treePatchRecord);
     }
@@ -216,11 +216,11 @@ export const DocumentStore = types
 
     // Start a non-undoable action with this id. Currently the trees do
     // not have their treeMonitors setup when replayHistoryToTrees is
-    // called, so the container should not receive any patches with this
+    // called, so the manager should not receive any patches with this
     // historyEntryId. However, it seems good to go ahead and record
     // this anyway.
     const historyEntry = 
-      self.createHistoryEntry(historyEntryId, topLevelExchangeId, "replayHistoryToTrees", "container", false);
+      self.createHistoryEntry(historyEntryId, topLevelExchangeId, "replayHistoryToTrees", "manager", false);
 
     // Disable shared model syncing on all of the trees. This is
     // different than when the undo store applies patches because in
@@ -230,7 +230,7 @@ export const DocumentStore = types
       const startExchangeId = nanoid();
       self.startExchange(historyEntryId, startExchangeId);
 
-      return tree.startApplyingContainerPatches(historyEntryId, startExchangeId);
+      return tree.startApplyingPatchesFromManager(historyEntryId, startExchangeId);
     });
     yield Promise.all(startPromises);
 
@@ -266,7 +266,7 @@ export const DocumentStore = types
         const applyExchangeId = nanoid();
         self.startExchange(historyEntryId, applyExchangeId);
         const tree = self.trees[treeId];
-        return tree?.applyContainerPatches(historyEntryId, applyExchangeId, patches);
+        return tree?.applyPatchesFromManager(historyEntryId, applyExchangeId, patches);
       } 
     });
     yield Promise.all(applyPromises);
@@ -281,12 +281,12 @@ export const DocumentStore = types
       const finishExchangeId = nanoid();
       self.startExchange(historyEntryId, finishExchangeId);
 
-      return tree.finishApplyingContainerPatches(historyEntryId, finishExchangeId);
+      return tree.finishApplyingPatchesFromManager(historyEntryId, finishExchangeId);
     });
     yield Promise.all(finishPromises);
 
     // TODO: we are closing this top level exchange after the finish
-    // applying container patches is called. This way if some of those
+    // applying manager patches is called. This way if some of those
     // finish calls result in additional changes to the tree those
     // changes should delay the completion of this history event. It
     // isn't clear if that is really necessary in this case.

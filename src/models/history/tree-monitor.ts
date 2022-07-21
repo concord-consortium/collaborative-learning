@@ -3,7 +3,7 @@ import { addDisposer, addMiddleware, createActionTrackingMiddleware2, flow,
     IActionTrackingMiddleware2Call, IJsonPatch, Instance, IPatchRecorder, isActionContextThisOrChildOf, 
     isAlive, recordPatches } from "mobx-state-tree";
 import { nanoid } from "nanoid";
-import { ContainerAPI } from "./container-api";
+import { TreeManagerAPI } from "./tree-manager-api";
 import { TreePatchRecordSnapshot } from "./history";
 import { Tree } from "./tree";
 
@@ -16,7 +16,7 @@ interface CallEnv {
 
 type SharedModelModifications = Record<string, number>;
 
-export const addTreeMonitor = (tree: Instance<typeof Tree> ,  container: ContainerAPI, includeHooks: boolean) => {
+export const addTreeMonitor = (tree: Instance<typeof Tree>,  manager: TreeManagerAPI, includeHooks: boolean) => {
     let recordingDisabled = 0;
 
     const treeMonitorMiddleware = createActionTrackingMiddleware2<CallEnv>({
@@ -50,7 +50,7 @@ export const addTreeMonitor = (tree: Instance<typeof Tree> ,  container: Contain
             //
             // We could use the `decorate` feature of MST to at least make it
             // more clear in the Tile model that these actions are special. 
-            if (isActionFromContainer(call)) {
+            if (isActionFromManager(call)) {
                 historyEntryId = call.args[0];
                 exchangeId = call.args[1];
             } else {
@@ -75,7 +75,7 @@ export const addTreeMonitor = (tree: Instance<typeof Tree> ,  container: Contain
                     // when the action is done. The tree needs to know about
                     // these modifications so it tell the tiles to update
                     // themselves based on the changes in the shared model or
-                    // shared model view. And the container needs to know about
+                    // shared model view. And the manager needs to know about
                     // the shared model changes so it can send them any other
                     // trees.
                     //
@@ -137,7 +137,7 @@ export const addTreeMonitor = (tree: Instance<typeof Tree> ,  container: Contain
             if (error === undefined) {
                 // FIXME: review this comment, it doesn't make sense
                 // TODO: we are going to make this async because it needs to
-                // wait for the container to respond, to the start call before
+                // wait for the manager to respond, to the start call before
                 // finishing the action.  But we should check that this delayed
                 // function doesn't access something from the tree that might
                 // have changed in the meantime.
@@ -192,19 +192,19 @@ export const addTreeMonitor = (tree: Instance<typeof Tree> ,  container: Contain
     const recordAction = async (call: IActionTrackingMiddleware2Call<CallEnv>, 
         historyEntryId: string, exchangeId: string,
         recorder: IPatchRecorder, sharedModelModifications: SharedModelModifications) => {    
-            if (!isActionFromContainer(call)) {
+            if (!isActionFromManager(call)) {
                 // We record the start of the action even if it doesn't have any
                 // patches. This is useful when an action only modifies the shared
                 // tree
                 //
                 // We only record this when the action is not triggered by the
-                // container. If the container triggered the action then it is up to
-                // the container to setup this information first.
-                await container.addHistoryEntry(historyEntryId, exchangeId, tree.treeId, getActionName(call), true);
+                // manager. If the manager triggered the action then it is up to
+                // the manager to setup this information first.
+                await manager.addHistoryEntry(historyEntryId, exchangeId, tree.treeId, getActionName(call), true);
             }
     
             // Call the shared model notification function if there are changes. 
-            // This is needed so the changes can be sent to the container,
+            // This is needed so the changes can be sent to the manager,
             // and so the changes can trigger a update/sync of the tile model
             // Previously this internal updating or sync'ing was done using an autorun to monitor the models. 
             // But that doesn't have access to the action id that triggered the sync, and that action id is
@@ -213,7 +213,7 @@ export const addTreeMonitor = (tree: Instance<typeof Tree> ,  container: Contain
             for (const [sharedModelPath, numModifications] of Object.entries(sharedModelModifications)) {
                 if (numModifications > 0) {
                     // Run the callback tracking changes to the shared model
-                    // We need to wait for these to complete because the container
+                    // We need to wait for these to complete because the manager
                     // needs to know when this history entry is complete. If it gets
                     // the addTreePatchRecord before any changes from the shared
                     // models it will mark the entry complete too soon.
@@ -237,15 +237,15 @@ export const addTreeMonitor = (tree: Instance<typeof Tree> ,  container: Contain
             const patches = recorder.patches.filter(filterChangeCount);
             const inversePatches = recorder.inversePatches.filter(filterChangeCount);
 
-            // Always send the record to the container even if there are no
-            // patches. This API is how the container knows the exchangeId is finished. 
+            // Always send the record to the manager even if there are no
+            // patches. This API is how the manager knows the exchangeId is finished. 
             const record: TreePatchRecordSnapshot = {
                 tree: tree.treeId,
                 action: getActionName(call),
                 patches,
                 inversePatches,
             };
-            container.addTreePatchRecord(historyEntryId, exchangeId, record);
+            manager.addTreePatchRecord(historyEntryId, exchangeId, record);
         };
 
     return {
@@ -267,14 +267,14 @@ export const addTreeMonitor = (tree: Instance<typeof Tree> ,  container: Contain
     };
 };
 
-function isActionFromContainer(call: IActionTrackingMiddleware2Call<CallEnv>) {
-    return call.name === "applySharedModelSnapshotFromContainer" ||
+function isActionFromManager(call: IActionTrackingMiddleware2Call<CallEnv>) {
+    return call.name === "applySharedModelSnapshotFromManager" ||
         // updateTreeAfterSharedModelChangesInternal is not always an action
-        // from the container. It can happen when a tree modifies its local
+        // from the manager. It can happen when a tree modifies its local
         // shared model view and that triggers an update of the rest of the
         // state of the tree.
         call.name === "updateTreeAfterSharedModelChangesInternal" ||
-        call.name === "applyContainerPatches" ||
-        call.name === "startApplyingContainerPatches" ||
-        call.name === "finishApplyingContainerPatches";
+        call.name === "applyPatchesFromManager" ||
+        call.name === "startApplyingPatchesFromManager" ||
+        call.name === "finishApplyingPatchesFromManager";
 }

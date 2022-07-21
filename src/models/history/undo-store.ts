@@ -1,7 +1,7 @@
 import {
     types, Instance, flow, getParent
 } from "mobx-state-tree";
-import { DocumentStore } from "./document-store";
+import { TreeManager } from "./tree-manager";
 
 import { HistoryEntry, HistoryOperation } from "./history";
 import { nanoid } from "nanoid";
@@ -40,16 +40,16 @@ export const UndoStore = types
             const exchangeId = nanoid();
 
             // Start a non-undoable action with this id
-            const docStore = getParent(self) as Instance<typeof DocumentStore>;
+            const manager = getParent(self) as Instance<typeof TreeManager>;
             const historyEntry = 
-              docStore.createHistoryEntry(historyEntryId, exchangeId, opType, "container", false);
+              manager.createHistoryEntry(historyEntryId, exchangeId, opType, "manager", false);
 
             // first disable shared model syncing in the tree
             const startPromises = treeEntries.map(treeEntry => {
                 const startExchangeId = nanoid();
-                docStore.startExchange(historyEntryId, startExchangeId);
+                manager.startExchange(historyEntryId, startExchangeId);
 
-                return docStore.trees[treeEntry.tree].startApplyingContainerPatches(historyEntryId, startExchangeId);
+                return manager.trees[treeEntry.tree].startApplyingPatchesFromManager(historyEntryId, startExchangeId);
             });
             yield Promise.all(startPromises);
 
@@ -59,7 +59,7 @@ export const UndoStore = types
 
                 // When a patch is applied to shared model, it will send its updated
                 // state to all tiles. If this is working properly the promise returned by
-                // the shared model's applyContainerPatches will not resolve until all tiles
+                // the shared model's applyPatchesFromManager will not resolve until all tiles
                 // using it have updated their view of the shared model.
 
                 // We need a new exchangeId for each apply call here, so each
@@ -69,10 +69,10 @@ export const UndoStore = types
                 // knows it needs to wait for this exchange to complete before
                 // marking the full entry as complete.
                 const applyExchangeId = nanoid();
-                docStore.startExchange(historyEntryId, applyExchangeId);
+                manager.startExchange(historyEntryId, applyExchangeId);
 
-                const tree = docStore.trees[treeEntry.tree];
-                return tree.applyContainerPatches(historyEntryId,  applyExchangeId, treeEntry.getPatches(opType));
+                const tree = manager.trees[treeEntry.tree];
+                return tree.applyPatchesFromManager(historyEntryId,  applyExchangeId, treeEntry.getPatches(opType));
             });
             yield Promise.all(applyPromises);
 
@@ -84,10 +84,10 @@ export const UndoStore = types
             // running at the same time.
             const finishPromises = treeEntries.map(treeEntry => {
                 const finishExchangeId = nanoid();
-                docStore.startExchange(historyEntryId, finishExchangeId);
+                manager.startExchange(historyEntryId, finishExchangeId);
 
-                return docStore.trees[treeEntry.tree]
-                  .finishApplyingContainerPatches(historyEntryId, finishExchangeId);
+                return manager.trees[treeEntry.tree]
+                  .finishApplyingPatchesFromManager(historyEntryId, finishExchangeId);
             });
             yield Promise.all(finishPromises);
 
@@ -96,7 +96,7 @@ export const UndoStore = types
             // to the history entry which will keep it "recording" until that
             // new exchange is also finished. It isn't clear if this is really
             // needed though.
-            docStore.endExchange(historyEntry, exchangeId);
+            manager.endExchange(historyEntry, exchangeId);
         });
 
         return {
@@ -131,8 +131,8 @@ export const UndoStore = types
             // that way if the was an error applying the patch then the whole set of 
             // changes would be aborted.
             // If we want this behavior we'd need to have each tile function that way
-            // and notify the container when it succeeded or failed. And then 
-            // if it failed the container would have to tell any tiles that successfully
+            // and notify the tree manager when it succeeded or failed. And then 
+            // if it failed the tree manager would have to tell any tiles that successfully
             // applied the patches to revert them. 
             undo() {
                 if (!self.canUndo) {
