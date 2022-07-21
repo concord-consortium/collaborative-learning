@@ -1,10 +1,8 @@
-import { autorun } from "mobx";
+import { action, autorun, makeObservable } from "mobx";
 import { addDisposer, applySnapshot, getType, isAlive, types, getRoot, 
   isStateTreeNode, SnapshotOut, Instance, getParent, destroy, hasParent,
   getSnapshot, addMiddleware,
   createActionTrackingMiddleware2} from "mobx-state-tree";
-import { nanoid } from "nanoid";
-import { listenerCount } from "superagent";
 
 describe("mst", () => {
   it("snapshotProcessor unexpectedly modifies the base type", () => {
@@ -317,7 +315,7 @@ describe("mst", () => {
   });
 
   test("createActionTrackingMiddleware2 loses track of the parent action " + 
-       "when there is an intermediate action in a different tree", () => {
+       "when there is an intermediate MST action in a different tree", () => {
     const Todo = types.model({
       name: types.string
     })
@@ -339,7 +337,7 @@ describe("mst", () => {
       }
     }));
 
-    const TodoManager = types.model({
+    const MSTTodoManager = types.model({
     })
     .actions(self => ({
       managerUpdateAllTodos(list: Instance<typeof TodoList>) {
@@ -349,7 +347,21 @@ describe("mst", () => {
       }
     }));
 
-    // Main Tree
+    class MobXTodoManager {
+      constructor() {
+        makeObservable(this, {
+          managerUpdateAllTodos: action
+        });
+      }
+      
+      managerUpdateAllTodos(list: Instance<typeof TodoList>) {
+        list.todos.forEach(todo => {
+          todo.setName("new manager name");
+        });
+      }
+    }
+
+    // Main MST Tree
     const todoList = TodoList.create({
       todos: [
         { name: "todo 1" },
@@ -357,8 +369,8 @@ describe("mst", () => {
       ]
     });
 
-    // Secondary Tree
-    const mstManager = TodoManager.create();
+    // Secondary MST Tree
+    const mstManager = MSTTodoManager.create();    
 
     // Manager that is not using MST and actions
     const plainManager = {
@@ -368,6 +380,10 @@ describe("mst", () => {
         });
       }
     };
+
+    // MobX Manager, so it could still use observability, but because
+    // it isn't MST it doesn't mess up the middleware
+    const mobxManager = new MobXTodoManager();
 
     const started : string[] = [];
     const finished : string[] = [];
@@ -420,6 +436,20 @@ describe("mst", () => {
 
     // Run an action in the Main Tree that passes through the secondary tree.
     todoList.updateAllTodosWithManager(plainManager);
+
+    expect(started).toEqual([
+      "updateAllTodosWithManager:0",
+      "setName:0",
+      "setName:0"
+    ]);
+
+    // reset the tracking props
+    started.length = 0;
+    finished.length = 0;
+    topLevelCallId = 0;
+
+    // Run an action in the Main Tree that passes through the secondary tree.
+    todoList.updateAllTodosWithManager(mobxManager);
 
     expect(started).toEqual([
       "updateAllTodosWithManager:0",
