@@ -104,7 +104,7 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
         <FourUpComponent userId={user.id}
                          groupId={selectedGroupId}
                          isGhostUser={true}
-                         toggleable={true}
+                         viaStudentGroupView={true}
                          groupViewContext={groupViewContext}
                          setFocusedGroupUser={handleFocusedGroupUserChange}
                          onToggleContext={handleToggleContext}

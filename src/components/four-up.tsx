@@ -2,7 +2,7 @@ import { clone, debounce } from "lodash";
 import { observer, inject } from "mobx-react";
 import React from "react";
 import ResizeObserver from "resize-observer-polyfill";
-
+import classNames from "classnames";
 import { BaseComponent, IBaseProps } from "./base";
 import { CanvasComponent } from "./document/canvas";
 import { DocumentViewMode } from "./document/document";
@@ -23,6 +23,7 @@ interface IProps extends IBaseProps {
   documentViewMode?: DocumentViewMode;
   selectedSectionId?: string | null;
   viaTeacherDashboard?: boolean;
+  viaStudentGroupView?: boolean
   groupViewContext?: string | null;
   setFocusedGroupUser?: (focusedGroupUser?: GroupUserModelType) => void;
   onToggleContext?: (context: string | null, selectedGroupUser: GroupUserModelType | undefined) => void;
@@ -78,21 +79,21 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     this.container && this.resizeObserver.observe(this.container);
   }
 
-  public componentDidUpdate() {
-    const {groupId, groupViewContext} = this.props;
-    const {toggledContextMap} = this.state;
-    const currentState = groupId && toggledContextMap[groupId];
+  // public componentDidUpdate() {
+  //   const {groupId, groupViewContext} = this.props;
+  //   const {toggledContextMap} = this.state;
+  //   const currentState = groupId && toggledContextMap[groupId];
 
-    if (groupViewContext !== undefined && (groupViewContext !== currentState)) {
-      this.setState(state => {
-        if (groupId) {
-          const current = state.toggledContextMap[groupId] ?? null;
-          state.toggledContextMap[groupId] = current ? null : groupViewContext;
-        }
-        return { toggledContextMap: clone(state.toggledContextMap) };
-      });
-    }
-  }
+  //   if (groupViewContext !== undefined && (groupViewContext !== currentState)) {
+  //     this.setState(state => {
+  //       if (groupId) {
+  //         const current = state.toggledContextMap[groupId] ?? null;
+  //         state.toggledContextMap[groupId] = current ? null : groupViewContext;
+  //       }
+  //       return { toggledContextMap: clone(state.toggledContextMap) };
+  //     });
+  //   }
+  // }
 
   public componentWillUnmount() {
     this.resizeObserver.disconnect();
@@ -104,7 +105,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const {documentViewMode} = this.props;
+    const {documentViewMode, viaStudentGroupView} = this.props;
     const toggledContext = this.getToggledContext();
     const {width, height} = this.grid;
     const nwCell = this.grid.cells[CellPositions.NorthWest];
@@ -198,9 +199,9 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       const isToggled = context === toggledContext;
       if (groupUser) {
         const { name: fullName, initials } = groupUser.user;
-        const className = `member${isToggled ? " member-centered" : ""}`;
+        const className = classNames("member", {"member-centered": isToggled && !viaStudentGroupView});
         const name = isToggled ? fullName : initials;
-        return <div className={className} title={fullName}>
+        return <div className={className} title={fullName} onClick={()=>this.handleOverlayClicked(context)}>
                   {name}
                </div>;
       }
