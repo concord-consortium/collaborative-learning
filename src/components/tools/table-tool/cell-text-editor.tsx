@@ -47,18 +47,22 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
   };
 
   const saveChange = (newValue: string) => {
-    onClose(true);
     _column.appData?.onEndBodyCellEdit?.(newValue);
+    onClose(true);
+  };
+
+  const finishAndSave = () => {
+    const endValue = valueRef.current;
+    if (endValue !== origValueRef.current) {
+      onRowChange({ ...row, [column.key]: endValue }, true);
+    }
+    saveChange(endValue);
   };
 
   useEffect(() => {
     _column.appData?.onBeginBodyCellEdit?.();
     return () => {
-      const endValue = valueRef.current;
-      if (endValue !== origValueRef.current) {  // eslint-disable-line react-hooks/exhaustive-deps
-        onRowChange({ ...row, [column.key]: endValue }, true);
-      }
-      saveChange(endValue);
+      finishAndSave();
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -72,6 +76,11 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
       }}
       onBlur={event => {
         saveChange(event.target.value);
+      }}
+      onKeyDown={(event: any) => {
+        if (event.key === 'Tab') {
+          finishAndSave();
+        }
       }}
     />
   );
