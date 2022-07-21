@@ -1,7 +1,10 @@
 import { autorun } from "mobx";
 import { addDisposer, applySnapshot, getType, isAlive, types, getRoot, 
   isStateTreeNode, SnapshotOut, Instance, getParent, destroy, hasParent,
-  getSnapshot } from "mobx-state-tree";
+  getSnapshot, addMiddleware,
+  createActionTrackingMiddleware2} from "mobx-state-tree";
+import { nanoid } from "nanoid";
+import { listenerCount } from "superagent";
 
 describe("mst", () => {
   it("snapshotProcessor unexpectedly modifies the base type", () => {
@@ -311,5 +314,119 @@ describe("mst", () => {
     const todo = Todo.create({name: "todo1"});
     const todoList = TodoList.create({todos: [todo]});
     expect(todoList.todos.at(0)).toBe(todo);
+  });
+
+  test("createActionTrackingMiddleware2 loses track of the parent action " + 
+       "when there is an intermediate action in a different tree", () => {
+    const Todo = types.model({
+      name: types.string
+    })
+    .actions(self => ({
+      setName(name: string) { self.name = name; }
+    }));
+
+    const TodoList = types.model({
+      todos: types.array(Todo)
+    })
+    .actions(self => ({
+      updateAllTodosWithManager(_manager: any) {
+        _manager.managerUpdateAllTodos(self);
+      },
+      updateAllTodos() {
+        self.todos.forEach(todo => {
+          todo.setName("new list name");
+        });
+      }
+    }));
+
+    const TodoManager = types.model({
+    })
+    .actions(self => ({
+      managerUpdateAllTodos(list: Instance<typeof TodoList>) {
+        list.todos.forEach(todo => {
+          todo.setName("new manager name");
+        });
+      }
+    }));
+
+    // Main Tree
+    const todoList = TodoList.create({
+      todos: [
+        { name: "todo 1" },
+        { name: "todo 2" }
+      ]
+    });
+
+    // Secondary Tree
+    const mstManager = TodoManager.create();
+
+    // Manager that is not using MST and actions
+    const plainManager = {
+      managerUpdateAllTodos(list: Instance<typeof TodoList>) {
+        list.todos.forEach(todo => {
+          todo.setName("new manager name");
+        });
+      }
+    };
+
+    const started : string[] = [];
+    const finished : string[] = [];
+    let topLevelCallId = 0;
+    const middleware = createActionTrackingMiddleware2({
+      filter(call) {
+        // record all calls even if they already have an environment
+        return true;
+      },
+      onStart(call) {
+        if (!call.env) {
+          call.env = { id: topLevelCallId };
+          topLevelCallId++;
+        }
+        started.push(`${call.name}:${call.env.id}`);
+      },
+      onFinish(call) {   
+        finished.push(`${call.name}:${call.env.id}`);     
+      }
+    });
+    const disposer = addMiddleware(todoList, middleware, true);
+
+    // Run an action in the Main Tree that does not pass through the secondary tree.
+    todoList.updateAllTodos();
+
+    expect(started).toEqual([
+      "updateAllTodos:0",
+      "setName:0",
+      "setName:0"
+    ]);
+
+    // reset the tracking props
+    started.length = 0;
+    finished.length = 0;
+    topLevelCallId = 0;
+
+    // Run an action in the Main Tree that passes through the secondary tree.
+    todoList.updateAllTodosWithManager(mstManager);
+
+    expect(started).toEqual([
+      "updateAllTodosWithManager:0",
+      "setName:1",
+      "setName:2"
+    ]);
+
+    // reset the tracking props
+    started.length = 0;
+    finished.length = 0;
+    topLevelCallId = 0;
+
+    // Run an action in the Main Tree that passes through the secondary tree.
+    todoList.updateAllTodosWithManager(plainManager);
+
+    expect(started).toEqual([
+      "updateAllTodosWithManager:0",
+      "setName:0",
+      "setName:0"
+    ]);
+
+    disposer();
   });
 });
