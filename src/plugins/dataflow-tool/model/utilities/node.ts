@@ -82,6 +82,10 @@ export const NodeTypes: NodeType[] = [
     displayName: "Demo Output",
   },
   {
+    name: "Live Output",
+    displayName: "Live Output",
+  },
+  {
     name: "Data Storage",
     displayName: "Data Storage",
   },
@@ -280,6 +284,17 @@ export const NodeDemoOutputTypes = [
   {
     name: "Grabber",
     icon: GrabberIcon
+  }
+];
+
+export const NodeLiveOutputTypes = [
+  {
+    name: "Light Bulb",
+    icon: LightBulbIcon
+  },
+  {
+    name: "Backyard Claw",
+    icon: BackyardClawIcon
   }
 ];
 
@@ -527,36 +542,37 @@ export const virtualSensorChannels: NodeChannelInfo[] = [
   virtualFsrChannel
 ];
 
-  const emgSensorChannel: NodeChannelInfo = {
-    hubId: "SERIAL-ARDUINO",
-    hubName: "Arduino",
-    name: "emg",
-    channelId: "emg",
-    missing: true,
-    type: "emg-reading",
-    units: "f(mv)",
-    plug: 9,
-    value: 0,
-    virtual: false,
-    usesSerial: true,
-    serialConnected: null
-  };
+const emgSensorChannel: NodeChannelInfo = {
+  hubId: "SERIAL-ARDUINO",
+  hubName: "Arduino",
+  name: "emg",
+  channelId: "emg",
+  missing: true,
+  type: "emg-reading",
+  units: "f(mv)",
+  plug: 9,
+  value: 0,
+  virtual: false,
+  usesSerial: true,
+  serialConnected: null
+};
 
-  const fsrSensorChannel: NodeChannelInfo = {
-    hubId: "SERIAL-ARDUINO",
-    hubName: "Arduino",
-    name: "fsr",
-    channelId: "fsr",
-    missing: true,
-    type: "fsr-reading",
-    units: "n",
-    plug: 10,
-    value: 0,
-    virtual: false,
-    usesSerial: true,
-    serialConnected: null
-  };
+const fsrSensorChannel: NodeChannelInfo = {
+  hubId: "SERIAL-ARDUINO",
+  hubName: "Arduino",
+  name: "fsr",
+  channelId: "fsr",
+  missing: true,
+  type: "fsr-reading",
+  units: "n",
+  plug: 10,
+  value: 0,
+  virtual: false,
+  usesSerial: true,
+  serialConnected: null
+};
 
-  export const serialSensorChannels: NodeChannelInfo[] = [
-    emgSensorChannel, fsrSensorChannel
-  ];
+export const serialSensorChannels: NodeChannelInfo[] = [
+  emgSensorChannel, fsrSensorChannel
+];
+

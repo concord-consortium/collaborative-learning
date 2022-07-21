@@ -21,6 +21,7 @@ import { LogicReteNodeFactory } from "../nodes/factories/logic-rete-node-factory
 import { SensorReteNodeFactory } from "../nodes/factories/sensor-rete-node-factory";
 import { RelayReteNodeFactory } from "../nodes/factories/relay-rete-node-factory";
 import { DemoOutputReteNodeFactory } from "../nodes/factories/demo-output-rete-node-factory";
+import { LiveOutputReteNodeFactory } from "../nodes/factories/live-output-rete-node-factory";
 import { GeneratorReteNodeFactory } from "../nodes/factories/generator-rete-node-factory";
 import { TimerReteNodeFactory } from "../nodes/factories/timer-rete-node-factory";
 import { DataStorageReteNodeFactory } from "../nodes/factories/data-storage-rete-node-factory";
@@ -301,6 +302,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       new SensorReteNodeFactory(numSocket),
       new RelayReteNodeFactory(numSocket),
       new DemoOutputReteNodeFactory(numSocket),
+      new LiveOutputReteNodeFactory(numSocket),
       new GeneratorReteNodeFactory(numSocket),
       new TimerReteNodeFactory(numSocket),
       new DataStorageReteNodeFactory(numSocket)];
@@ -633,6 +635,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const hasRelay = this.hasRelay();
     const hasDataStorage = this.hasDataStorage();
     const hasDemoOutput = this.hasDemoOutput();
+    const hasLiveOutput = this.hasLiveOutput();
     let hasValidRelay = false;
     let hasValidDataStorage = false;
     if (hasRelay || hasDataStorage) {
@@ -657,12 +660,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         }
       });
     }
-    if (!hasRelay && !hasDataStorage && !hasDemoOutput) {
+    if (!hasRelay && !hasDataStorage && !hasDemoOutput &&!hasLiveOutput) {
       ui.alert(
-        "Program must contain a Relay, Demo Output, or Data Storage block before it can be run.", "No Program Output"
+        "Program must contain a Relay, Demo Output, Live Output, or Data Storage block before it can be run.", "No Program Output"
       );
       return false;
-    } else if (!hasValidRelay && !hasValidDataStorage && !hasDemoOutput) {
+    } else if (!hasValidRelay && !hasValidDataStorage && !hasDemoOutput && !hasLiveOutput ) {
       const relayMessage = hasRelay && !hasValidRelay
                             ? "Relay blocks need a valid selected relay and valid input before the program can be run. "
                             : "";
@@ -810,6 +813,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     let hasValidData = false;
     let hasValidRelay = false;
     let hasDemoOutput = false;
+    let hasLiveOutput = false;
     this.programEditor.nodes.forEach((n: Node) => {
       if (n.name === "Sensor" && n.data.sensor && !n.data.virtual) {
         const chInfo = this.channels.find(ci => ci.channelId === n.data.sensor);
@@ -844,6 +848,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         datasetName = programTitle;
       } else if (n.name === "Demo Output") {
         hasDemoOutput = true;
+        datasetName = programTitle;
+      } else if (n.name === "Live Output") {
+        hasLiveOutput = true;
         datasetName = programTitle;
       }
     });
@@ -886,7 +893,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                 startTime: programStartTime,
                 endTime: programEndTime,
                 hasData: hasValidData,
-                hasRelay: hasValidRelay || hasDemoOutput
+                hasRelay: hasValidRelay || hasDemoOutput || hasLiveOutput //TODO - ? - some condition true for relays that works for Demo?
               });
 
     return programData;
@@ -1015,6 +1022,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private hasDemoOutput() {
     return this.getNodeCount("Demo Output") > 0;
+  }
+
+  private hasLiveOutput(){
+    return this.getNodeCount("Live Output") > 0;
   }
 
   private isValidRelay(id: string) {
