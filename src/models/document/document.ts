@@ -17,7 +17,7 @@ import { getLocalTimeStamp } from "../../utilities/time";
 import { safeJsonParse } from "../../utilities/js-utils";
 import { Tree } from "../history/tree";
 import { addTreeMonitor } from "../history/tree-monitor";
-import { createSharedModelDocumentManager, ISharedModelDocumentManager } from "../tools/shared-model-document-manager";
+import { ISharedModelDocumentManager, SharedModelDocumentManager } from "../tools/shared-model-document-manager";
 import { ITileEnvironment } from "../tools/tool-types";
 import { TreeManager } from "../history/tree-manager";
 
@@ -310,7 +310,7 @@ export interface IDocumentEnvironment {
  * @returns
  */
 export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
-  const sharedModelManager = createSharedModelDocumentManager();
+  const sharedModelManager = new SharedModelDocumentManager();
   const fullEnvironment: ITileEnvironment & {documentEnv: IDocumentEnvironment} = {
     sharedModelManager,
     documentEnv: {}

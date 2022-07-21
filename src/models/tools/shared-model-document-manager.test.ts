@@ -2,7 +2,7 @@ import { destroy, Instance, types, getEnv } from "mobx-state-tree";
 import { when } from "mobx";
 import { IToolTileProps } from "../../components/tools/tool-tile";
 import { SharedModel, SharedModelType } from "./shared-model";
-import { createSharedModelDocumentManager } from "./shared-model-document-manager";
+import { SharedModelDocumentManager } from "./shared-model-document-manager";
 import { registerSharedModelInfo, registerToolContentInfo } from "./tool-content-info";
 import { ITileEnvironment, ToolContentModel } from "./tool-types";
 import { DocumentContentModel } from "../document/document-content";
@@ -86,13 +86,13 @@ registerToolContentInfo({
 describe("SharedModelDocumentManager", () => {
   it("handles setDocument with an empty doc", () => {
     const doc = DocumentContentModel.create();
-    const manager = createSharedModelDocumentManager();
+    const manager = new SharedModelDocumentManager();
     manager.setDocument(doc);    
   });
 
   it("is ready when there is a document", () => {
     const doc = DocumentContentModel.create();
-    const manager = createSharedModelDocumentManager();
+    const manager = new SharedModelDocumentManager();
     expect(manager.isReady).toBe(false);
     manager.setDocument(doc);
     expect(manager.isReady).toBe(true);
@@ -235,7 +235,7 @@ describe("SharedModelDocumentManager", () => {
         }
       },
     });
-    const manager = createSharedModelDocumentManager();
+    const manager = new SharedModelDocumentManager();
     manager.setDocument(doc);
     const sharedModel = manager.findFirstSharedModelByType(TestSharedModel);
     expect(sharedModel?.id).toBe("sm1");
@@ -256,7 +256,7 @@ describe("SharedModelDocumentManager", () => {
         }
       },
     });
-    const manager = createSharedModelDocumentManager();
+    const manager = new SharedModelDocumentManager();
     manager.setDocument(doc);
     const sharedModel = manager.findFirstSharedModelByType(_TestSharedModel3);
     expect(sharedModel?.id).toBe("sm1");
@@ -279,7 +279,7 @@ describe("SharedModelDocumentManager", () => {
         }
       },
     });
-    const manager = createSharedModelDocumentManager();
+    const manager = new SharedModelDocumentManager();
 
     jestSpyConsole("warn", spy => {
       const result1 = manager.findFirstSharedModelByType(TestSharedModel);
@@ -326,7 +326,7 @@ describe("SharedModelDocumentManager", () => {
     assertIsDefined(toolTile);
     const tileContent = toolTile.content;
     assertIsDefined(tileContent);
-    const manager = createSharedModelDocumentManager();
+    const manager = new SharedModelDocumentManager();
     manager.setDocument(doc);
     const tileSharedModels = manager.getTileSharedModels(tileContent);
     expect(tileSharedModels).toBeDefined();
@@ -365,7 +365,7 @@ describe("SharedModelDocumentManager", () => {
 
     const tileContent = doc.tileMap.get("t1")?.content;
     assertIsDefined(tileContent);
-    const manager = createSharedModelDocumentManager();
+    const manager = new SharedModelDocumentManager();
 
     jestSpyConsole("warn", spy => {
       const result1 = manager.getTileSharedModels(tileContent);
@@ -404,7 +404,7 @@ describe("SharedModelDocumentManager", () => {
     assertIsDefined(toolTile);
     const tileContent = toolTile.content;
     assertIsDefined(tileContent);
-    const manager = createSharedModelDocumentManager();
+    const manager = new SharedModelDocumentManager();
     manager.setDocument(doc);
 
     const spyUpdate = jest.spyOn(tileContent, 'updateAfterSharedModelChanges');
@@ -507,7 +507,7 @@ describe("SharedModelDocumentManager", () => {
 
     const tileContent = doc.tileMap.get("t1")?.content;
     assertIsDefined(tileContent);
-    const manager = createSharedModelDocumentManager();
+    const manager = new SharedModelDocumentManager();
     manager.setDocument(doc);
 
     const spyUpdate = jest.spyOn(tileContent, 'updateAfterSharedModelChanges');
@@ -602,7 +602,7 @@ describe("SharedModelDocumentManager", () => {
     const tileContent = doc.tileMap.get("t1")?.content;
     assertIsDefined(tileContent);
 
-    const manager = createSharedModelDocumentManager();
+    const manager = new SharedModelDocumentManager();
     const sharedModel = TestSharedModel.create({});
 
     jestSpyConsole("warn", spy => {
@@ -652,7 +652,7 @@ describe("SharedModelDocumentManager", () => {
 
     const tileContent = doc.tileMap.get("t1")?.content;
     assertIsDefined(tileContent);
-    const manager = createSharedModelDocumentManager();
+    const manager = new SharedModelDocumentManager();
     manager.setDocument(doc);
 
     const tileSharedModels = manager.getTileSharedModels(tileContent);
@@ -690,7 +690,7 @@ describe("SharedModelDocumentManager", () => {
 
     const tileContent = doc.tileMap.get("t1")?.content;
     assertIsDefined(tileContent);
-    const manager = createSharedModelDocumentManager();
+    const manager = new SharedModelDocumentManager();
     const sharedModel = doc.sharedModelMap.get("sm1")?.sharedModel;
     assertIsDefined(sharedModel);
 
