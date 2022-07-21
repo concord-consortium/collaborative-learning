@@ -78,13 +78,8 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
       <div className="group-title" data-test="group-title">
         <div className="group-title-center">
           <div className="group-name">
-            {selectedId ? `Student Group ${selectedId}` : "No groups"}{groupUser && ":"}
+            {selectedId ? `Student Group ${selectedId}` : "No groups"}
           </div>
-          {groupUser &&
-            <div className={`fourup-selected-user ${context ? context : ""}`}>
-              {groupUser.name}
-            </div>
-          }
         </div>
       </div>
     );
