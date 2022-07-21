@@ -12,6 +12,7 @@ import { CellPositions, FourUpGridCellModelType, FourUpGridModel, FourUpGridMode
       } from "../models/view/four-up-grid";
 import { FourUpOverlayComponent } from "./four-up-overlay";
 import { Logger, LogEventName } from "../lib/logger";
+import FourUpIcon from "../clue/assets/icons/4-up-icon.svg";
 
 import "./four-up.sass";
 
@@ -202,9 +203,15 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
         const className = classNames("member", {"member-centered": isToggled && !viaStudentGroupView},
                                      {"in-student-group-view": isToggled && viaStudentGroupView});
         const name = isToggled ? fullName : initials;
-        return <div className={className} title={fullName} onClick={()=>this.handleOverlayClicked(context)}>
+        return (
+          isToggled && viaStudentGroupView
+            ? <button className="restore-fourup-button" onClick={()=>this.handleOverlayClicked(context)}>
+                <FourUpIcon /> 4-Up
+              </button>
+            : <div className={className} title={fullName} onClick={()=>this.handleOverlayClicked(context)}>
                   {name}
-               </div>;
+              </div>
+        );
       }
     };
 

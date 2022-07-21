@@ -3,7 +3,6 @@ import { GroupUserModelType } from "src/models/stores/groups";
 import { useGroupsStore, useUserStore } from "../../hooks/use-stores";
 import { LogEventName, Logger } from "../../lib/logger";
 import { FourUpComponent } from "../four-up";
-import FourUpIcon from "../../clue/assets/icons/4-up-icon.svg";
 import "./student-group-view.scss";
 
 interface IGroupButtonProps {
@@ -81,18 +80,12 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
           <div className="group-name">
             {selectedId ? `Student Group ${selectedId}` : "No groups"}{groupUser && ":"}
           </div>
-          {/* {groupUser &&
+          {groupUser &&
             <div className={`fourup-selected-user ${context ? context : ""}`}>
               {groupUser.name}
             </div>
-          } */}
+          }
         </div>
-        {/* {groupUser &&
-          <button className="restore-fourup-button" onClick={()=>handleToggleContext(null, undefined)}>
-            <FourUpIcon />
-            4-Up
-          </button>
-        } */}
       </div>
     );
   };
