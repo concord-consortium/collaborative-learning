@@ -1,49 +1,16 @@
-import { types, Instance } from "mobx-state-tree";
-import { exportDrawingTileSpec } from "./drawing-export";
-import { importDrawingTileSpec, isDrawingTileImportSpec } from "./drawing-import";
+import { types, Instance, SnapshotIn, getSnapshot, onAction, isStateTreeNode} from "mobx-state-tree";
+import { clone } from "lodash";
+import stringify from "json-stringify-pretty-compact";
 import { StampModel, StampModelType } from "./stamp";
 import { ITileExportOptions, IDefaultContentOptions } from "../../../models/tools/tool-content-info";
-import { ToolMetadataModel, ToolContentModel } from "../../../models/tools/tool-types";
-import { safeJsonParse } from "../../../utilities/js-utils";
-import { Logger, LogEventName } from "../../../lib/logger";
-import {
-  DrawingToolChange, DrawingToolCreateChange, DrawingToolDeleteChange, DrawingToolMoveChange,
-  DrawingToolUpdate, DrawingToolUpdateChange, kDrawingToolID, ToolbarModalButton
-} from "./drawing-types";
-import { ImageObjectSnapshot } from "../objects/image";
+import { ToolMetadataModel, ToolContentModel, toolContentModelHooks } from "../../../models/tools/tool-types";
+import { kDrawingStateVersion, kDrawingToolID } from "./drawing-types";
+import { ImageObjectType, isImageObjectSnapshot } from "../objects/image";
 import { DefaultToolbarSettings, ToolbarSettings } from "./drawing-basic-types";
-
-
-export const computeStrokeDashArray = (type?: string, strokeWidth?: string|number) => {
-  const dotted = isFinite(Number(strokeWidth)) ? Number(strokeWidth) : 0;
-  const dashed = dotted * 3;
-  switch (type) {
-    case "dotted":
-      return `${dotted},${dotted}`;
-    case "dashed":
-      return `${dashed},${dashed}`;
-    default:
-      return "";
-  }
-};
-
-function isImageObjectSnapshot(snapshot: any): snapshot is ImageObjectSnapshot {
-  return snapshot.type === "image";
-}
-
-interface LoggedEventProperties {
-  properties?: string[];
-}
-interface DrawingToolLoggedCreateEvent extends Partial<DrawingToolCreateChange>, LoggedEventProperties {
-}
-interface DrawingToolLoggedMoveEvent extends Partial<DrawingToolMoveChange>, LoggedEventProperties {
-}
-interface DrawingToolLoggedUpdateEvent extends Partial<DrawingToolUpdateChange>, LoggedEventProperties {
-}
-interface DrawingToolLoggedDeleteEvent extends Partial<DrawingToolDeleteChange>, LoggedEventProperties {
-}
-type DrawingToolChangeLoggedEvent = DrawingToolLoggedCreateEvent | DrawingToolLoggedMoveEvent |
-                                      DrawingToolLoggedUpdateEvent | DrawingToolLoggedDeleteEvent;
+import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
+import { DrawingObjectSnapshotForAdd, DrawingObjectType, isFilledObject, 
+  isStrokedObject, ToolbarModalButton } from "../objects/drawing-object";
+import { LogEventName, Logger } from "../../../lib/logger";
 
 // track selection in metadata object so it is not saved to firebase but
 // also is preserved across document/content reloads
@@ -63,23 +30,28 @@ export const DrawingToolMetadataModel = ToolMetadataModel
     },
     setSelection(selection: string[]) {
       self.selection.replace(selection);
+    },
+    unselectId(id: string) {
+      self.selection.remove(id);
     }
   }));
 export type DrawingToolMetadataModelType = Instance<typeof DrawingToolMetadataModel>;
 
-export function defaultDrawingContent(options?: IDefaultContentOptions) {
-  let stamps: StampModelType[] = [];
-  if (options?.appConfig?.stamps) {
-    stamps = options.appConfig.stamps;
-  }
-  return DrawingContentModel.create({ stamps, changes: [] });
+interface ObjectMap {
+  [key: string]: DrawingObjectType|null;
+}
+
+export interface DrawingObjectMove {
+  id: string, 
+  destination: {x: number, y: number}
 }
 
 export const DrawingContentModel = ToolContentModel
   .named("DrawingTool")
   .props({
     type: types.optional(types.literal(kDrawingToolID), kDrawingToolID),
-    changes: types.array(types.string),
+    version: types.optional(types.literal(kDrawingStateVersion), kDrawingStateVersion),
+    objects: types.array(DrawingObjectMSTUnion),
     stroke: DefaultToolbarSettings.stroke,
     fill: DefaultToolbarSettings.fill,
     strokeDashArray: DefaultToolbarSettings.strokeDashArray,
@@ -89,25 +61,31 @@ export const DrawingContentModel = ToolContentModel
     currentStampIndex: types.maybe(types.number)
   })
   .volatile(self => ({
-    metadata: undefined as any as DrawingToolMetadataModelType
+    metadata: undefined as DrawingToolMetadataModelType | undefined
   }))
-  .preProcessSnapshot(snapshot => {
-    return isDrawingTileImportSpec(snapshot)
-            ? importDrawingTileSpec(snapshot)
-            : snapshot;
-  })
   .views(self => ({
+    get objectMap() {
+      // TODO this will rebuild the map when any of the objects change
+      // We could handle this more efficiently
+      return self.objects.reduce((map, obj) => {
+        map[obj.id] = obj;
+        return map;
+      }, {} as ObjectMap);
+    },
     get isUserResizable() {
       return true;
     },
     isSelectedButton(button: ToolbarModalButton) {
-      return button === self.metadata.selectedButton;
+      return button === self.metadata?.selectedButton;
     },
     get selectedButton() {
-      return self.metadata.selectedButton;
+      return self.metadata?.selectedButton || "select";
     },
     get hasSelectedObjects() {
-      return self.metadata.selection.length > 0;
+      return self.metadata ? self.metadata.selection.length > 0 : false;
+    },
+    get selectedIds() {
+      return self.metadata ? getSnapshot(self.metadata.selection) : [];
     },
     get currentStamp() {
       const currentStampIndex = self.currentStampIndex || 0;
@@ -120,130 +98,142 @@ export const DrawingContentModel = ToolContentModel
       return { stroke, fill, strokeDashArray, strokeWidth };
     },
     exportJson(options?: ITileExportOptions) {
-      return exportDrawingTileSpec(self.changes, options);
+      // Translate image urls if necessary
+      const {type, objects: originalObjects} = getSnapshot(self);
+      const objects = originalObjects.map(object => {
+        if (isImageObjectSnapshot(object) && options?.transformImageUrl) {
+          if (object.filename) {
+            const newImage = clone(object);
+            newImage.url = options.transformImageUrl(object.url, object.filename);
+            newImage.filename = undefined;
+            return newImage;
+          }
+        }
+        return object;
+      });
+
+      // json-stringify-pretty-compact is used, so the exported content is more
+      // compact. It results in something close to what we used to get when the 
+      // export was created using a string builder.
+      return stringify({type, objects}, {maxLength: 200});
+    }
+  }))
+  .actions(self => toolContentModelHooks({
+    doPostCreate(metadata) {
+      self.metadata = metadata as DrawingToolMetadataModelType;
+    },
+    onTileAction(call) {
+      const {name, ...loggedChangeProps} = call;
+      // TODO: logToolChange includes an explicit DrawingToolLogEvent
+      // this isn't a good pattern to support generic plugins logging events
+      Logger.logToolChange(LogEventName.DRAWING_TOOL_CHANGE, name, 
+        loggedChangeProps, self.metadata?.id ?? "");
     }
   }))
   .extend(self => {
 
-    function applyChange(change: DrawingToolChange) {
-      self.changes.push(JSON.stringify(change));
-
-      let loggedChangeProps = {...change} as DrawingToolChangeLoggedEvent;
-      delete loggedChangeProps.data;
-      if (!Array.isArray(change.data)) {
-        // flatten change.properties
-        loggedChangeProps = {
-          ...loggedChangeProps,
-          ...change.data
-        };
-      } else {
-        // or clean up MST array
-        loggedChangeProps.properties = Array.from(change.data as string[]);
-      }
-      delete loggedChangeProps.action;
-      Logger.logToolChange(LogEventName.DRAWING_TOOL_CHANGE, change.action,
-        loggedChangeProps, self.metadata?.id ?? "");
-    }
-
-    function deleteSelectedObjects() {
-      if (self.metadata.selection.length > 0) {
-        const deletionChange: DrawingToolChange = {
-          action: "delete",
-          data: self.metadata.selection
-        };
-        applyChange(deletionChange);
-        self.metadata.setSelection([]);
-      }
-    }
-
-    function updateSelectedObjects(prop: string, newValue: string|number) {
-      if (self.metadata.selection.length > 0) {
-        const updateChange: DrawingToolChange = {
-          action: "update",
-          data: {
-            ids: self.metadata.selection,
-            update: {
-              prop,
-              newValue
-            }
-          }
-        };
-        applyChange(updateChange);
-      }
+    function forEachObjectId(ids: string[], func: (object: DrawingObjectType, id: string) => void) {
+      if (ids.length === 0) return;
+      
+      const { objectMap } = self;
+      ids.forEach(id => {
+        const object = objectMap[id];
+        if (object) {
+          func(object, id);
+        }
+      });
     }
 
     return {
       actions: {
-        doPostCreate(metadata: DrawingToolMetadataModelType) {
-          self.metadata = metadata;
+        addObject(object: DrawingObjectSnapshotForAdd) {
+          // The reason only snapshots are allowed is so the logged action
+          // includes the snapshot in the `call` that is passed to `onAction`. 
+          // If an instance is passed instead of a snapshot, then MST will just 
+          // log something like:
+          // `{ $MST_UNSERIALIZABLE: true, type: "someType" }`. 
+          // More details can be found here: https://mobx-state-tree.js.org/API/#onaction
+          if (isStateTreeNode(object as any)) {
+            throw new Error("addObject requires a snapshot");
+          }
+  
+          self.objects.push(object);
         },
 
-        setStroke(stroke: string) {
+        setStroke(stroke: string, ids: string[]) {
           self.stroke = stroke;
-          updateSelectedObjects("stroke", stroke);
+          forEachObjectId(ids, object => {
+            if(isStrokedObject(object)) {
+              object.setStroke(stroke);
+            }
+          });
         },
-        setFill(fill: string) {
+        setFill(fill: string, ids: string[]) {
           self.fill = fill;
-          updateSelectedObjects("fill", fill);
+          forEachObjectId(ids, object => {
+            if (isFilledObject(object)) {
+              object.setFill(fill);
+            }
+          });
         },
-        setStrokeDashArray(strokeDashArray: string) {
+        setStrokeDashArray(strokeDashArray: string, ids: string[]) {
           self.strokeDashArray = strokeDashArray;
-          updateSelectedObjects("strokeDashArray", strokeDashArray);
+          forEachObjectId(ids, object => {
+            if(isStrokedObject(object)) {
+              object.setStrokeDashArray(strokeDashArray);
+            }
+          });
         },
-        setStrokeWidth(strokeWidth: number) {
+        setStrokeWidth(strokeWidth: number, ids: string[]) {
           self.strokeWidth = strokeWidth;
-          updateSelectedObjects("strokeWidth", strokeWidth);
+          forEachObjectId(ids, object => {
+            if(isStrokedObject(object)) {
+              object.setStrokeWidth(strokeWidth);
+            }
+          });
         },
 
         setSelectedButton(button: ToolbarModalButton) {
-          self.metadata.setSelectedButton(button);
+          self.metadata?.setSelectedButton(button);
         },
 
         setSelection(ids: string[]) {
-          self.metadata.setSelection(ids);
+          self.metadata?.setSelection(ids);
         },
 
         setSelectedStamp(stampIndex: number) {
           self.currentStampIndex = stampIndex;
         },
 
-        applyChange,
-        deleteSelectedObjects,
+        deleteObjects(ids: string[]) {
+          forEachObjectId(ids, (object, id) => {
+            if (object) {
+              self.objects.remove(object);
+              self.metadata?.unselectId(id);
+            }
+          });
+        },
+
+        moveObjects(moves: DrawingObjectMove[]) {
+          moves.forEach(move => {
+            const object = self.objectMap[move.id];
+            object?.setPosition(move.destination.x, move.destination.y);
+          });
+        },
 
         // sets the model to how we want it to appear when a user first opens a document
         reset() {
-          self.metadata.setSelectedButton("select");
+          self.metadata?.setSelectedButton("select");
         },
         updateImageUrl(oldUrl: string, newUrl: string) {
           if (!oldUrl || !newUrl || (oldUrl === newUrl)) return;
-          // identify change entries to be modified
-          const updates: Array<{ index: number, change: string }> = [];
-          self.changes.forEach((changeJson, index) => {
-            const change = safeJsonParse<DrawingToolChange>(changeJson);
-            switch (change?.action) {
-              case "create": {
-                const createData = change.data;
-                if (isImageObjectSnapshot(createData)) {
-                  if(createData.url === oldUrl) {
-                    createData.url = newUrl;
-                    updates.push({ index, change: JSON.stringify(change) });
-                  }
-                }
-                break;
-              }
-              case "update": {
-                const updateData = change.data as DrawingToolUpdate;
-                if ((updateData.update.prop === "url") && (updateData.update.newValue === oldUrl)) {
-                  updateData.update.newValue = newUrl;
-                  updates.push({ index, change: JSON.stringify(change) });
-                }
-                break;
-              }
+          // Modify all images with this url
+          self.objects.forEach(object => {
+            if (object.type !== "image") return;
+            const image = object as ImageObjectType;
+            if (image.url === oldUrl) {
+              image.setUrl(newUrl);
             }
-          });
-          // make the corresponding changes
-          updates.forEach(update => {
-            self.changes[update.index] = update.change;
           });
         }
       }
@@ -256,3 +246,28 @@ export const DrawingContentModel = ToolContentModel
   }));
 
 export type DrawingContentModelType = Instance<typeof DrawingContentModel>;
+export type DrawingContentModelSnapshot = SnapshotIn<typeof DrawingContentModel>;
+
+// The migrator sometimes modifies the content model it is trying to migrate.
+// This weird migrator behavior is demonstrated here: src/models/mst.test.ts
+// 
+// The create of the content model goes through the migrator when this happens.
+// In that case if the snapshot passed to create doesn't have a version 
+// the migrator might mess up the snapshot. 
+// Because of behavior, this createDrawingContent method should be used instead 
+// of directly calling DrawingContentModel.create
+export function createDrawingContent(snapshot?: SnapshotIn<typeof DrawingContentModel>) {
+  return DrawingContentModel.create({
+    version: kDrawingStateVersion,
+    ...snapshot
+  });
+}
+
+export function defaultDrawingContent(options?: IDefaultContentOptions) {
+  let stamps: StampModelType[] = [];
+  if (options?.appConfig?.stamps) {
+    stamps = options.appConfig.stamps;
+  }
+  return createDrawingContent({ stamps });
+}
+

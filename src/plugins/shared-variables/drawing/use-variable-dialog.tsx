@@ -1,22 +1,18 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import Select from "react-select";
 import { Variable } from "@concord-consortium/diagram-view";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
-import { DrawingContentModelType } from "../../drawing-tool/model/drawing-content";
-import { VariableChipObjectSnapshot } from "./variable-object";
+import { VariableChipObjectSnapshotForAdd } from "./variable-object";
 import { findVariable, getVariables, getOrFindSharedModel } from "./drawing-utils";
+import { DrawingContentModelContext } from "../../drawing-tool/components/drawing-content-context";
 
 import './variable-dialog.scss';
 
-interface IProps {
-  drawingContent: DrawingContentModelType;
-}
-
-export const useVariableDialog = ({drawingContent}: IProps) => {
+export const useVariableDialog = () => {
+  const drawingContent = useContext(DrawingContentModelContext);
   let selectedVariableId: string | undefined = undefined;
   let _variableName: string | undefined = undefined;
   let _variableValue = "";
-  let variableChip: VariableChipObjectSnapshot;
 
   const ModalContent = () => {
     const variables = getVariables(drawingContent);
@@ -136,13 +132,14 @@ export const useVariableDialog = ({drawingContent}: IProps) => {
       dialogVarId = selectedVariable.id;
     }
     if (dialogVarId) {
-      variableChip = ({
+
+      const variableChipSnapshot: VariableChipObjectSnapshotForAdd = {
         type: "variable",
         x: 250,
         y: 50,
         variableId: dialogVarId
-      });
-      drawingContent.applyChange({action: "create", data: variableChip});
+      };
+      drawingContent.addObject(variableChipSnapshot);
     }
     selectedVariableId = undefined;
   };

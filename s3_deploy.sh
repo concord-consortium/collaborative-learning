@@ -4,8 +4,6 @@
 # The trailing slash is important
 # Can be set to an empty string for working at the top level of the bucket
 S3_BUCKET_PREFIX='collaborative-learning/'
-# AWS CloudFront distribution ID
-DISTRIBUTION_ID='E1YPVV3YLYS4J7'
 # AWS CloudFront distribution domain
 DISTRIBUTION_DOMAIN='collaborative-learning.concord.org'
 # name of branch to deploy to root of site
@@ -53,7 +51,6 @@ if [ "$BRANCH_OR_TAG" = "$CURRENT_TAG" ]; then
   mkdir -p _site/version
   S3_DEPLOY_DIR="version/$BRANCH_OR_TAG"
   DEPLOY_DEST="_site/$S3_DEPLOY_DIR"
-  INVAL_PATH="/version/$BRANCH_OR_TAG/index.html"
   # in this case we are going to deploy this code to a subfolder of version
   # So ignore everything except this folder.
   # Currently this only escapes `.`
@@ -63,7 +60,6 @@ if [ "$BRANCH_OR_TAG" = "$CURRENT_TAG" ]; then
 # root branch builds deploy to root of site
 elif [ "$BRANCH_OR_TAG" = "$ROOT_BRANCH" ]; then
   DEPLOY_DEST="_site"
-  INVAL_PATH="/index.html"
   # in this case we are going to deploy this branch to the top level
   # so we need to ignore the version and branch folders
   IGNORE_ON_SERVER="^$S3_BUCKET_PREFIX(version/|branch/)"
@@ -73,7 +69,6 @@ else
   mkdir -p _site/branch
   S3_DEPLOY_DIR="branch/$DEPLOY_DIR_NAME"
   DEPLOY_DEST="_site/$S3_DEPLOY_DIR"
-  INVAL_PATH="/branch/$DEPLOY_DIR_NAME/index.html"
   # in this case we are going to deploy this code to a subfolder of branch
   # So ignore everything except this folder.
   # Currently this only escapes `.`
@@ -94,7 +89,3 @@ mv $SRC_DIR $DEPLOY_DEST
 # deploy the site contents
 echo Deploying "$BRANCH_OR_TAG" to "$S3_BUCKET:$S3_BUCKET_PREFIX$S3_DEPLOY_DIR"...
 JAVA_TOOL_OPTIONS="-Xms4g -Xmx6g" s3_website push --site _site
-
-# explicit CloudFront invalidation to workaround s3_website gem invalidation bug
-# with origin path (https://github.com/laurilehmijoki/s3_website/issues/207).
-# aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths $INVAL_PATH

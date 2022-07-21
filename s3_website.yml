@@ -8,18 +8,9 @@ s3_key_prefix: <%= ENV['S3_BUCKET_PREFIX'].sub(/\\/$/, '') %>
 s3_endpoint: us-east-1
 gzip: true
 
-cloudfront_distribution_id: <%= ENV['DISTRIBUTION_ID'] %>
-cloudfront_invalidate_root: true
-cloudfront_wildcard_invalidation: true
-
 ignore_on_server: <%= ENV['IGNORE_ON_SERVER'] %>
 max_age:
   "<%= ENV['S3_BUCKET_PREFIX'] %>*": 600 # 10 minutes
+  "<%= ENV['S3_BUCKET_PREFIX'] %>index.html": 0 # don't cache the top level index file
   "<%= ENV['S3_BUCKET_PREFIX'] %>version/*": 31536000 # 1 year
   "<%= ENV['S3_BUCKET_PREFIX'] %>branch/*": 0
-
-cloudfront_distribution_config:
-  aliases:
-    quantity: 1
-    items:
-      - <%= ENV['DISTRIBUTION_DOMAIN'] %>

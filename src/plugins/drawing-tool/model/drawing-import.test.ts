@@ -1,9 +1,11 @@
+import { getSnapshot } from "mobx-state-tree";
 import { EllipseObjectSnapshot } from "../objects/ellipse";
 import { ImageObjectSnapshot } from "../objects/image";
 import { LineObjectSnapshot } from "../objects/line";
 import { RectangleObjectSnapshot } from "../objects/rectangle";
 import { VectorObjectSnapshot } from "../objects/vector";
-import { IDrawingTileImportSpec, importDrawingTileSpec, isDrawingTileImportSpec } from "./drawing-import";
+import { DrawingContentModelSnapshot } from "./drawing-content";
+import { DrawingMigrator } from "./drawing-migrator";
 
 // mock uniqueId so we can recognize auto-generated IDs
 let idCount = 0;
@@ -15,25 +17,15 @@ jest.mock("../../../utilities/js-utils", () => {
   };
 });
 
-describe("isDrawingTileImportSpec", () => {
-  it("should work", () => {
-    expect(isDrawingTileImportSpec(null)).toBe(false);
-    expect(isDrawingTileImportSpec({ type: "Drawing", objects: [] })).toBe(true);
-    expect(isDrawingTileImportSpec({ type: "Drawing" })).toBe(false);
-    expect(isDrawingTileImportSpec({ objects: [] })).toBe(false);
-    expect(isDrawingTileImportSpec({ type: "Drawing", objects: [], changes: [] })).toBe(false);
-  });
-});
-
-describe("importDrawingTileSpec", () => {
+describe("import drawing", () => {
 
   beforeEach(() => {
     idCount = 0;
   });
 
-  function importToChanges(input: IDrawingTileImportSpec) {
-    const imported = importDrawingTileSpec(input);
-    return imported.changes.map(change => JSON.parse(change));
+  function importToObjects(input: DrawingContentModelSnapshot) {
+    const imported = DrawingMigrator.create(input);
+    return getSnapshot(imported).objects;
   }
 
   it("should import vectors (simple lines)", () => {
@@ -47,12 +39,12 @@ describe("importDrawingTileSpec", () => {
     };
     const input = { type: "Drawing" as const, objects: [vectorData] };
     // assigns a unique id if none is provided
-    expect(importToChanges(input)[0]).toEqual({ action: "create", data: { ...vectorData, id: "testid-1" } });
+    expect(importToObjects(input)[0]).toEqual({ ...vectorData, id: "testid-1" });
 
     const vectorDataWithId = { ...vectorData, id: "vector-id" };
     const inputWithId = { type: "Drawing" as const, objects: [vectorDataWithId] };
     // preserves id if one is provided
-    expect(importToChanges(inputWithId)[0]).toEqual({ action: "create", data: vectorDataWithId });
+    expect(importToObjects(inputWithId)[0]).toEqual(vectorDataWithId);
   });
 
   it("should import lines (polylines)", () => {
@@ -66,12 +58,12 @@ describe("importDrawingTileSpec", () => {
     };
     const input = { type: "Drawing" as const, objects: [lineData] };
     // assigns a unique id if none is provided
-    expect(importToChanges(input)[0]).toEqual({ action: "create", data: { ...lineData, id: "testid-1" } });
+    expect(importToObjects(input)[0]).toEqual({ ...lineData, id: "testid-1" });
 
     const lineDataWithId = { ...lineData, id: "line-id" };
     const inputWithId = { type: "Drawing" as const, objects: [lineDataWithId] };
     // preserves id if one is provided
-    expect(importToChanges(inputWithId)[0]).toEqual({ action: "create", data: lineDataWithId });
+    expect(importToObjects(inputWithId)[0]).toEqual(lineDataWithId);
   });
 
   it("should import rectangles", () => {
@@ -86,12 +78,12 @@ describe("importDrawingTileSpec", () => {
     };
     const input = { type: "Drawing" as const, objects: [rectData] };
     // assigns a unique id if none is provided
-    expect(importToChanges(input)[0]).toEqual({ action: "create", data: { ...rectData, id: "testid-1" } });
+    expect(importToObjects(input)[0]).toEqual({ ...rectData, id: "testid-1" });
 
     const rectDataWithId = { ...rectData, id: "rect-id" };
     const inputWithId = { type: "Drawing" as const, objects: [rectDataWithId] };
     // preserves id if one is provided
-    expect(importToChanges(inputWithId)[0]).toEqual({ action: "create", data: rectDataWithId });
+    expect(importToObjects(inputWithId)[0]).toEqual(rectDataWithId);
   });
 
   it("should import ellipses", () => {
@@ -106,12 +98,12 @@ describe("importDrawingTileSpec", () => {
     };
     const input = { type: "Drawing" as const, objects: [ellipseData] };
     // assigns a unique id if none is provided
-    expect(importToChanges(input)[0]).toEqual({ action: "create", data: { ...ellipseData, id: "testid-1" } });
+    expect(importToObjects(input)[0]).toEqual({ ...ellipseData, id: "testid-1" });
 
     const ellipseDataWithId = { ...ellipseData, id: "ellipse-id" };
     const inputWithId = { type: "Drawing" as const, objects: [ellipseDataWithId] };
     // preserves id if one is provided
-    expect(importToChanges(inputWithId)[0]).toEqual({ action: "create", data: ellipseDataWithId });
+    expect(importToObjects(inputWithId)[0]).toEqual(ellipseDataWithId);
   });
 
   it("should import images", () => {
@@ -123,11 +115,11 @@ describe("importDrawingTileSpec", () => {
     };
     const input = { type: "Drawing" as const, objects: [imageData] };
     // assigns a unique id if none is provided
-    expect(importToChanges(input)[0]).toEqual({ action: "create", data: { ...imageData, id: "testid-1" } });
+    expect(importToObjects(input)[0]).toEqual({ ...imageData, id: "testid-1" });
 
     const imageDataWithId = { ...imageData, id: "image-id" };
     const inputWithId = { type: "Drawing" as const, objects: [imageDataWithId] };
     // preserves id if one is provided
-    expect(importToChanges(inputWithId)[0]).toEqual({ action: "create", data: imageDataWithId });
+    expect(importToObjects(inputWithId)[0]).toEqual(imageDataWithId);
   });
 });

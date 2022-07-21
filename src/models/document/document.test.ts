@@ -8,13 +8,13 @@ import { TextContentModelType } from "../tools/text/text-content";
 import { registerTools } from "../../register-tools";
 registerTools(["Geometry", "Text"]);
 
-var mockUserContext = { appMode: "authed", classHash: "class-1" };
-var mockQueryData = { content: {}, metadata: { createdAt: 10 } };
+const mockUserContext = { appMode: "authed", classHash: "class-1" };
+const mockQueryData = { content: {}, metadata: { createdAt: 10 } };
 
-var mockGetNetworkDocument = jest.fn(() => {
+const mockGetNetworkDocument = jest.fn(() => {
   return Promise.resolve({ data: { version: "1.0", ...mockQueryData } });
 });
-var mockHttpsCallable = jest.fn((fn: string) => {
+const mockHttpsCallable = jest.fn((fn: string) => {
   switch(fn) {
     case "getNetworkDocument_v1":
       return mockGetNetworkDocument;
@@ -26,12 +26,12 @@ jest.mock("firebase/app", () => ({
   })
 }));
 
-var mockFetchQuery = jest.fn((queryKey: any, queryFn: () => Promise<any>) => {
+const mockFetchQuery = jest.fn((queryKey: any, queryFn: () => Promise<any>) => {
   queryFn();
   return Promise.resolve({ isLoading: false, isError: false, data: mockQueryData });
 });
-var mockInvalidateQueries = jest.fn();
-var mockQueryClient = {
+const mockInvalidateQueries = jest.fn();
+const mockQueryClient = {
   fetchQuery: mockFetchQuery,
   invalidateQueries: mockInvalidateQueries
 } as any;

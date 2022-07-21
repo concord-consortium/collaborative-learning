@@ -19,8 +19,7 @@ import { setLivelinessChecking } from "mobx-state-tree";
 // set to true to enable MST liveliness checking
 const kEnableLivelinessChecking = false;
 
-import "./components/utilities/blueprint";
-import "./index.sass";
+import "./index.scss";
 import { QAClear } from "./components/qa-clear";
 
 const appConfig = AppConfigModel.create(appConfigSnapshot);

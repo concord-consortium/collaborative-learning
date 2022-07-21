@@ -4,9 +4,9 @@ import {
   DocumentQueryType, useDocumentComments, usePostDocumentComment, useUnreadDocumentComments
 } from "./document-comment-hooks";
 
-var mockValidateCommentableDocument_v1 = jest.fn();
-var mockPostDocumentComment_v1 = jest.fn();
-var mockHttpsCallable = jest.fn((fn: string) => {
+const mockValidateCommentableDocument_v1 = jest.fn();
+const mockPostDocumentComment_v1 = jest.fn();
+const mockHttpsCallable = jest.fn((fn: string) => {
   switch(fn) {
     case "validateCommentableDocument_v1":
       return mockValidateCommentableDocument_v1;
@@ -28,11 +28,11 @@ jest.mock("firebase/app", () => ({
 }));
 
 // mock QueryClient methods
-var mockGetQueryData = jest.fn();
-var mockSetQueryData = jest.fn();
+const mockGetQueryData = jest.fn();
+const mockSetQueryData = jest.fn();
 // tests may override implementation to simulate mutation succeeding (default) or failing
-var mockMutateSuccessOrError = jest.fn();
-var mockUseMutation = jest.fn((mutateFn: (params: any) => void, options: any) => {
+const mockMutateSuccessOrError = jest.fn();
+const mockUseMutation = jest.fn((mutateFn: (params: any) => void, options: any) => {
   return {
     mutate: async (params: any) => {
       mutateFn(params);
@@ -41,8 +41,8 @@ var mockUseMutation = jest.fn((mutateFn: (params: any) => void, options: any) =>
     }
   };
 });
-var mockCurriculumDocument = { unit: "unit", problem: "1.1", section: "intro", path: "unit/1/1/intro" };
-var mockUseQuery = jest.fn((key: string, fn: () => Promise<DocumentQueryType>, options: any) => ({
+const mockCurriculumDocument = { unit: "unit", problem: "1.1", section: "intro", path: "unit/1/1/intro" };
+const mockUseQuery = jest.fn((key: string, fn: () => Promise<DocumentQueryType>, options: any) => ({
   isLoading: false,
   isError: false,
   isSuccess: true,
@@ -57,7 +57,7 @@ jest.mock("react-query", () => ({
   })
 }));
 
-var mockUseDocumentOrCurriculumMetadata = jest.fn((docKeyOrSectionPath: string) => {
+const mockUseDocumentOrCurriculumMetadata = jest.fn((docKeyOrSectionPath: string) => {
   return mockCurriculumDocument;
 });
 jest.mock("./use-stores", () => ({
@@ -70,7 +70,7 @@ jest.mock("./use-user-context", () => ({
   useUserContext: () => ({ appMode: "test", classHash: "class-hash" })
 }));
 
-var mockUseCollectionOrderedRealTimeQuery = jest.fn((path: string, options?: any) => {
+const mockUseCollectionOrderedRealTimeQuery = jest.fn((path: string, options?: any) => {
   if (options?.converter) {
     let jsComment: CommentDocument = {
       uid: "1", name: "T", network: "foo", content: "bar"

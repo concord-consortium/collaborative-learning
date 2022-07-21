@@ -1,10 +1,12 @@
 import { cloneDeep } from "lodash";
-import { getSnapshot, Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree";
+import { getParent, getSnapshot, getType, 
+  Instance, SnapshotIn, SnapshotOut, types, ISerializedActionCall } from "mobx-state-tree";
 import { isPlaceholderContent } from "./placeholder/placeholder-content";
 import { ITileExportOptions } from "./tool-content-info";
-import { findMetadata, ToolContentUnion } from "./tool-types";
+import { findMetadata, ToolContentModelType, ToolContentUnion } from "./tool-types";
 import { DisplayUserTypeEnum } from "../stores/user-types";
 import { uniqueId } from "../../utilities/js-utils";
+import { StringBuilder } from "../../utilities/string-builder";
 
 // generally negotiated with app, e.g. single column width for table
 export const kDefaultMinWidth = 60;
@@ -33,14 +35,32 @@ export function cloneTileSnapshotWithNewId(tile: ToolTileModelType, newId?: stri
   return { id: newId || uniqueId(), ...copy };
 }
 
+export function getToolTileModel(toolContentModel: ToolContentModelType) {
+  const parent = getParent(toolContentModel);
+  return getType(parent).name === "ToolTile" ? parent as ToolTileModelType : undefined;
+}
+
+export function getTileTitleFromContent(toolContentModel: ToolContentModelType) {
+  return getToolTileModel(toolContentModel)?.title;
+}
+
+export function setTileTitleFromContent(toolContentModel: ToolContentModelType, title: string) {
+  const toolTile = getToolTileModel(toolContentModel);
+  const metadata = toolTile?.id ? findMetadata(toolContentModel.type, toolTile?.id) : undefined;
+  toolTile?.setTitle(title);
+  metadata?.setTitle(title);
+}
+
 export const ToolTileModel = types
   .model("ToolTile", {
     // if not provided, will be generated
     id: types.optional(types.identifier, () => uniqueId()),
+    // all tiles can have a title
+    title: types.maybe(types.string),
     // whether to restrict display to certain users
     display: DisplayUserTypeEnum,
     // e.g. "GeometryContentModel", "ImageContentModel", "TableContentModel", "TextContentModel", ...
-    content: ToolContentUnion,
+    content: ToolContentUnion
   })
   .views(self => ({
     // generally negotiated with tool, e.g. single column width for table
@@ -63,25 +83,51 @@ export const ToolTileModel = types
       return isPlaceholderContent(self.content) ? (self.content).sectionId : undefined;
     },
     exportJson(options?: ITileExportOptions): string | undefined {
-      return (self.content as any).exportJson?.(options);
+      const { includeId, excludeTitle, ...otherOptions } = options || {};
+      let contentJson = (self.content as any).exportJson(otherOptions);
+      if (!contentJson) return;
+      if (options?.rowHeight) {
+        // add comma before layout/height entry
+        contentJson = contentJson[contentJson.length - 1] === "\n"
+                ? `${contentJson.slice(0, contentJson.length - 1)},\n`
+                : `${contentJson},`;
+      }
+
+      const builder = new StringBuilder();
+      builder.pushLine("{");
+      if (includeId) {
+        builder.pushLine(`"id": "${self.id}",`, 2);
+      }
+      if (!excludeTitle && self.title) {
+        builder.pushLine(`"title": "${self.title}",`, 2);
+      }
+      builder.pushBlock(`"content": ${contentJson}`, 2);
+      options?.rowHeight && builder.pushLine(`"layout": { "height": ${options.rowHeight} }`, 2);
+      builder.pushLine(`}`);
+      return builder.build();
     }
   }))
   .actions(self => ({
     afterCreate() {
-      const metadata = findMetadata(self.content.type, self.id);
-      const content = self.content as any;
+      const metadata = findMetadata(self.content.type, self.id, self.title);
+      const content = self.content;
       if (metadata && content.doPostCreate) {
         content.doPostCreate(metadata);
       }
     },
+    onTileAction(call: ISerializedActionCall) {
+      self.content.onTileAction?.(call);
+    },
     willRemoveFromDocument() {
-      const willRemoveFromDocument = (self.content as any).willRemoveFromDocument;
-      return willRemoveFromDocument && willRemoveFromDocument();
+      return self.content.willRemoveFromDocument?.();
     },
     setDisabledFeatures(disabled: string[]) {
       const metadata: any = findMetadata(self.content.type, self.id);
       metadata && metadata.setDisabledFeatures && metadata.setDisabledFeatures(disabled);
-    }    
+    },
+    setTitle(title: string) {
+      self.title = title;
+    }
   }));
 
 export type ToolTileModelType = Instance<typeof ToolTileModel>;

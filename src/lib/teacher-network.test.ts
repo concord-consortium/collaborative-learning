@@ -10,23 +10,23 @@ import {
 } from "./teacher-network";
 import { DB } from "./db";
 
-var mockStores = {
+const mockStores = {
   appMode: "authed",
   demo: { name: "demo" },
   user: { portal: "test-portal" }
 };
-var mockDB = {
+const mockDB = {
   stores: mockStores
 } as DB;
-var mockDocGet = jest.fn();
-var mockDocSet = jest.fn();
-var mockDoc = jest.fn((path: string) => ({
+const mockDocGet = jest.fn();
+const mockDocSet = jest.fn();
+const mockDoc = jest.fn((path: string) => ({
       get: mockDocGet,
       set: (obj: any) => mockDocSet(obj)
     }));
-var mockCollectionGet = jest.fn();
-var mockCollectionWhere = jest.fn();
-var mockCollection = jest.fn((path: string) => {
+const mockCollectionGet = jest.fn();
+const mockCollectionWhere = jest.fn();
+const mockCollection = jest.fn((path: string) => {
   const mockObject = { doc: mockDoc, get: mockCollectionGet, where: mockCollectionWhere };
   mockObject.where.mockImplementation(() => mockObject);
   return mockObject;

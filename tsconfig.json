@@ -21,7 +21,7 @@
     "paths": {
       "react-modal-hook": ["node_modules/@concord-consortium/react-modal-hook/dist"]
     },
-    "types": []
+    "types": ["w3c-web-serial"]
   },
   "include": ["src/**/*"],
   "exclude": ["**/node_modules", "**/.*/"]

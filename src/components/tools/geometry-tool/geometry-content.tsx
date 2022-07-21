@@ -37,7 +37,7 @@ import { assign, castArray, debounce, each, filter, find, keys as _keys, throttl
 import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
 import { getDataSetBounds, IDataSet } from "../../../models/data/data-set";
 import AxisSettingsDialog from "./axis-settings-dialog";
-import { EditableGeometryTitle } from "./editable-geometry-title";
+import { EditableTileTitle } from "../editable-tile-title";
 import LabelSegmentDialog from "./label-segment-dialog";
 import MovableLineDialog from "./movable-line-dialog";
 import placeholderImage from "../../../assets/image_placeholder.png";
@@ -546,7 +546,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const getTitle = () => this.getContent().title || "";
     const { measureText, readOnly, size, scale } = this.props;
     return (
-      <EditableGeometryTitle key="geometry-title" size={size} scale={scale} getTitle={getTitle}
+      <EditableTileTitle key="geometry-title" size={size} scale={scale} getTitle={getTitle}
                               readOnly={readOnly} measureText={measureText}
                               onBeginEdit={this.handleBeginEditTitle} onEndEdit={this.handleTitleChange} />
     );
