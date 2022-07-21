@@ -81,18 +81,18 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
           <div className="group-name">
             {selectedId ? `Student Group ${selectedId}` : "No groups"}{groupUser && ":"}
           </div>
-          {groupUser &&
+          {/* {groupUser &&
             <div className={`fourup-selected-user ${context ? context : ""}`}>
               {groupUser.name}
             </div>
-          }
+          } */}
         </div>
-        {groupUser &&
+        {/* {groupUser &&
           <button className="restore-fourup-button" onClick={()=>handleToggleContext(null, undefined)}>
             <FourUpIcon />
             4-Up
           </button>
-        }
+        } */}
       </div>
     );
   };

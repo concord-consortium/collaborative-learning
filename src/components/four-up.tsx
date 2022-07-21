@@ -199,7 +199,8 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       const isToggled = context === toggledContext;
       if (groupUser) {
         const { name: fullName, initials } = groupUser.user;
-        const className = classNames("member", {"member-centered": isToggled && !viaStudentGroupView});
+        const className = classNames("member", {"member-centered": isToggled && !viaStudentGroupView},
+                                     {"in-student-group-view": isToggled && viaStudentGroupView});
         const name = isToggled ? fullName : initials;
         return <div className={className} title={fullName} onClick={()=>this.handleOverlayClicked(context)}>
                   {name}
