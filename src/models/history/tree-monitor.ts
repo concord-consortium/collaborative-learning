@@ -28,6 +28,8 @@ export const addTreeMonitor = (tree: Instance<typeof Tree>,  manager: TreeManage
             return true;
         },
         onStart(call) {
+            // DEBUG:
+            // console.log("onStart", getActionName(call));
             const sharedModelModifications: SharedModelModifications = {};
 
             let historyEntryId;
@@ -85,15 +87,18 @@ export const addTreeMonitor = (tree: Instance<typeof Tree>,  manager: TreeManage
                     // look for shared models in the sharedModelMap of the
                     // document. 
                     //
-                    // FIXME: I think we should only match changes in the shared models
-                    // themselves not the map. The match pattern below only
-                    // matches paths that have a slash after the shared model
-                    // id. But I'm not sure this approach will work properly.
-                    // I've also not thought through what we should do with
-                    // changes to the map. This would be the case when a shared
-                    // model is added to a document.
+                    // This should only match changes to the shared models themselves
+                    // not the map and not when a new tile is referencing a shared model.
+                    // 
+                    // When a new shared model is added to the document the path will be
+                    //   /content/sharedModelMap/${sharedModelId}]
+                    // We a new tile is referencing a shared model the path will be:
+                    //   /content/sharedModelMap/${sharedModelId}/tiles/[index]
                     //
-                    // FIXME: need to make tests for this
+                    // When a new shared model is added via addTileSharedModel the
+                    // shared model manager will call updateAfterSharedModelChanges after it
+                    // adds model to the document and tile to the entry. So there currently
+                    // isn't a need for the tree monitor to handle that case.
                     const match = _patch.path.match(/(.*\/content\/sharedModelMap\/[^/]+\/sharedModel)\//);
                     if(match) {
                         const sharedModelPath = match[1];

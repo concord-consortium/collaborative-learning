@@ -196,13 +196,13 @@ sequenceDiagram
 - [x] figure out if the same exchangeId is used in 2 responses. This is described in TreeManager-api in addHistoryEntry, so we should track that down and if so make a sequence diagram of that case.
 - [x] rename callId and methods describing call: probably should be patchRecordId and startPatchRecord and endPatchRecord. Review the use of startExchange in undo-store. I don't know if startPatchRecord works for this. The weird thing with applyPatchesToTrees is that a exchangeId is created for startApplyingPatchesFromManager and this is different than the exchangeId when applyPatchesFromManager is called. A more generic name could be exchangeId, or requestId. A confusing thing with requestId is that the response to the request is technically a request it is just coming from the tree going back to the TreeManager. The other naming confusion is the use of addTreePatchRecord to close out this exchangeId
 - [x] try to combine TreeManager and TreeManager
-- [ ] make a diagram of how call ids are used for tracking the status of the historyEntry. Doing this after the renaming seems best.
-- [ ] try to unify Document.afterCreate with createDocument
-- [ ] review how exchangeId is handled when an undo triggers a call to updateSharedModel, should a new exchangeId be generated here or should it be re-using an existing exchangeId?
+- [x] make a diagram of how call ids are used for tracking the status of the historyEntry. Doing this after the renaming seems best.
+- [x] add a test where a new shared model is added to the document and see what history entries are generated and whether the updateSharedModel methods are called correctly. I haven't really thought about what should happen here. fixmes are in tree-monitor recordPatches
 - [ ] see if we can remove the code which creates a history entry when addPatchesToHistoryEntry is called
 - [ ] look at the history entry generated when the history is replayed. The fixme is in the endExchange. In the case of time travel we don't want to generate new history entries when they time travel. And we aren't currently planning to replay the history from scratch. So if it is easy we should get rid of any history entry generation when replaying. The test for replaying does have the tree monitor installed when the history is replayed so it is a way to test whether we can skip this.
-- [ ] add a test where a new shared model is added to the document and see what history entries are generated and whether the updateSharedModel methods are called correctly. I haven't really thought about what should happen here. fixmes are in tree-monitor recordPatches
 - [ ] Tree.handleSharedModelChanges is an async action that ins't a flow. There might also be a way to simplify it now that it is an action.
 - [ ] Tree.handleSharedModelChanges calls updateTreeAfterSharedModelChangesInternal but since it is async and not a flow this call becomes a new top level action. If we switch it to a flow then we'll probably have to ignore the handleSharedModelChanges in the tree-monitor
 - [ ] UndoStore.redo and UndoStore.undo do not handle async well, they are changing the undo index before all of the patches have been applied to the trees.
 - [ ] review call to updateAfterSharedModelChanges in shared-model-document-manager.addTileSharedModel. Is it necessary?
+- [ ] review how exchangeId is handled when an undo triggers a call to updateSharedModel, should a new exchangeId be generated here or should it be re-using an existing exchangeId?
+- [ ] try to unify Document.afterCreate with createDocument

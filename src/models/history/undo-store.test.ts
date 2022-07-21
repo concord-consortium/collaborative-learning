@@ -3,7 +3,7 @@ import { IToolTileProps } from "src/components/tools/tool-tile";
 import { SharedModel, SharedModelType } from "../tools/shared-model";
 import { ToolContentModel } from "../tools/tool-types";
 import { registerSharedModelInfo, registerToolContentInfo } from "../tools/tool-content-info";
-import { DocumentContentModel } from "../document/document-content";
+import { DocumentContentModel, DocumentContentSnapshotType } from "../document/document-content";
 import { createDocumentModel } from "../document/document";
 import { ProblemDocument } from "../document/document-types";
 import { when } from "mobx";
@@ -51,7 +51,7 @@ const TestTile = ToolContentModel
     },
   }))
   .actions(self => ({
-    updateAfterSharedModelChanges(sharedModel?: SharedModelType) {      
+    updateAfterSharedModelChanges(sharedModel?: SharedModelType) {    
       self.updateCount++;
       const sharedModelValue = self.sharedModel?.value;
       self.text = sharedModelValue ? sharedModelValue + "-tile" : undefined;
@@ -70,14 +70,14 @@ registerToolContentInfo({
   id: "TestTile",
   modelClass: TestTile,
   defaultContent(options) {
-    throw new Error("Function not implemented.");
+    return TestTile.create();
   },
   Component: TestTileComponent,
   toolTileClass: "test-tile"
 });
 
-function setupDocument() {
-  const doc = DocumentContentModel.create({
+function setupDocument(initialContent? : DocumentContentSnapshotType) {
+  const docContentSnapshot = initialContent ||  {
     sharedModelMap: {
       "sm1": {
         sharedModel: {
@@ -95,22 +95,23 @@ function setupDocument() {
         },
       }
     }
-  });
+  };
+  const docContent = DocumentContentModel.create(docContentSnapshot);
   
   // This is needed to setup the tree monitor and shared model manager
   const docModel = createDocumentModel({
     uid: "1",
     type: ProblemDocument,
     key: "test",
-    content: doc as any
+    content: docContent as any
   });
 
-  const sharedModel = doc.sharedModelMap.get("sm1")?.sharedModel as TestSharedModelType;
-  const tileContent = doc.tileMap.get("t1")?.content as TestTileType;
+  const sharedModel = docContent.sharedModelMap.get("sm1")?.sharedModel as TestSharedModelType;
+  const tileContent = docContent.tileMap.get("t1")?.content as TestTileType;
   const manager = docModel.treeManagerAPI as Instance<typeof TreeManager>;
   const undoStore = manager.undoStore;
 
-  return {sharedModel, tileContent, manager, undoStore};
+  return {docContent, sharedModel, tileContent, manager, undoStore};
 }
 
 const initialUpdateEntry = {
@@ -452,6 +453,112 @@ it("can replay history entries that include shared model changes", async () => {
   expect(tileContent.text).toBe("something-tile");
 });
 
+// This is recording 3 events for something that should probably be 1
+// However we don't have a good solution for that yet.
+it("can track the addition of a new shared model", async () => {
+  // Start with just a tile and no shared model
+  const {tileContent, manager} = setupDocument({
+    tileMap: {
+      "t1": {
+        id: "t1",
+        content: {
+          type: "TestTile"
+        },
+      }
+    }
+  });
+  
+  const sharedModelManager = tileContent.tileEnv?.sharedModelManager;
+  const newSharedModel = TestSharedModel.create({value: "new model"});
+  const sharedModelId = newSharedModel.id;
+  sharedModelManager?.addTileSharedModel(tileContent, newSharedModel);
+
+  await expectEntryToBeComplete(manager, 3);
+
+  const changeDocument = manager.document;
+  expect(getSnapshot(changeDocument.history)).toEqual([ 
+    {
+      action: "/content/addSharedModel",
+      created: expect.any(Number),
+      id: expect.any(String),
+      records: [
+        {
+          action: "/content/addSharedModel",
+          inversePatches: [
+            { op: "remove", path: `/content/sharedModelMap/${sharedModelId}` } 
+          ],
+          patches: [
+            {
+              op: "add", path: `/content/sharedModelMap/${sharedModelId}`,
+              value: {
+                sharedModel: {
+                  id: sharedModelId,
+                  type: "TestSharedModel",
+                  value: "new model"
+                },
+                tiles: []
+              }
+            }
+          ],
+          tree: "test"
+        }
+      ],
+      state: "complete",
+      tree: "test",
+      undoable: true
+    },
+    {
+      action: `/content/sharedModelMap/${sharedModelId}/addTile`,
+      created: expect.any(Number),
+      id: expect.any(String),
+      records: [
+        {
+          action: `/content/sharedModelMap/${sharedModelId}/addTile`,
+          inversePatches: [
+            { op: "remove", path: `/content/sharedModelMap/${sharedModelId}/tiles/0`}
+          ],
+          patches: [
+            {
+              op: "add", path: `/content/sharedModelMap/${sharedModelId}/tiles/0`,
+              value: "t1"
+            }
+          ],
+          tree: "test"
+        }
+      ],
+      state: "complete",
+      tree: "test",
+      undoable: true
+    },
+    {
+      action: "/content/tileMap/t1/content/updateAfterSharedModelChanges",
+      created: expect.any(Number),
+      id: expect.any(String),
+      records: [
+        {
+          action: "/content/tileMap/t1/content/updateAfterSharedModelChanges",
+          inversePatches: [
+            { 
+              op: "replace", path: "/content/tileMap/t1/content/text",
+              value: undefined
+            }
+          ],
+          patches: [
+            {
+              op: "replace", path: "/content/tileMap/t1/content/text",
+              value: "new model-tile"
+            }
+          ],
+          tree: "test"
+        }
+      ],
+      state: "complete",
+      tree: "test",
+      undoable: true
+    }
+  ]);
+});
+
 async function expectUpdateToBeCalledTimes(testTile: TestTileType, times: number) {
   const updateCalledTimes = when(() => testTile.updateCount === times, {timeout: 100});
   return expect(updateCalledTimes).resolves.toBeUndefined();
@@ -460,7 +567,8 @@ async function expectUpdateToBeCalledTimes(testTile: TestTileType, times: number
 async function expectEntryToBeComplete(manager: Instance<typeof TreeManager>, length: number) {
   const changeDocument = manager.document as Instance<typeof CDocument>;
   const changeEntryComplete = when(
-    () => changeDocument.history.length === length && changeDocument.history.at(length-1)?.state === "complete", 
+    () => changeDocument.history.length >= length && changeDocument.history.at(length-1)?.state === "complete", 
     {timeout: 100});
   await expect(changeEntryComplete).resolves.toBeUndefined();
+  expect(changeDocument.history.length).toBe(length);
 }
