@@ -1050,6 +1050,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                       this.updateNodeChannelInfo(n);
                       this.updateNodeSensorValue(n);
                     },
+            "Live Output": (n: Node) => {
+              this.sendDataToSerialDevice(n);
+            },
             Relay: this.updateNodeChannelInfo
           };
 
@@ -1105,6 +1108,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     } else {
       this.stores.serialDevice.setSerialNodesCount(0);
     }
+  }
+
+  private sendDataToSerialDevice(n: Node){
+    console.log("REALLY SEND DATA TO SERIAL DEVICE: ", n.data.nodeValue);
   }
 
   private updateNodeChannelInfo = (n: Node) => {
