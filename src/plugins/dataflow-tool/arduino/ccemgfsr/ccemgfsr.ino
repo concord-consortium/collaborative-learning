@@ -209,10 +209,10 @@
 
       // assemble keyed strings so Dataflow knows what is what
       emgStringOut = String(emgId + kvSeparator + emgReading);
-      //fsrStringOut = String(fsrId + kvSeparator + fsrReading);
+      fsrStringOut = String(fsrId + kvSeparator + fsrReading);
 
       // send data to serial where Dataflow will find it
       Serial.println(emgStringOut);
-      // Serial.println(fsrStringOut);
+      Serial.println(fsrStringOut);
     }
 }

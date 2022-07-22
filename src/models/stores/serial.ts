@@ -124,10 +124,11 @@ export class SerialDevice {
     // so we need to map x percent to an angle in range where
     // 100% closed is 120deg, and 0% open is 180deg
     const percent = n / 100;
-    let openTo = Math.round(180 - (percent * 60));
+    const openTo = Math.round(180 - (percent * 60));
 
     // set fully open/closed near extremes to reduce quiver
     // ended up not using but keeping for future reference
+    // let openTo = Math.round(180 - (percent * 60));
     // if (openTo > 160 ){
     //   openTo = 180;
     // }

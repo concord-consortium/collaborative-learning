@@ -13,10 +13,10 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
   public builder(node: Node) {
     super.defaultBuilder(node);
     if (this.editor) {
-      this.addInput(node, "nodeValue")
+      this.addInput(node, "nodeValue");
       // TODO (CLAW)- add "hold" input
       node
-        .addControl(new DropdownListControl(this.editor, "liveOutputType", node, NodeLiveOutputTypes, true))
+        .addControl(new DropdownListControl(this.editor, "liveOutputType", node, NodeLiveOutputTypes, true));
 
       node.data.lastTick = Date.now();
       return node as any;
@@ -37,7 +37,7 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
         const nodeValue = _node.inputs.get("nodeValue")?.control as InputValueControl;
         const quasiPercent = n1 * 100;
 
-        nodeValue?.setValue(parseInt(quasiPercent.toFixed(2)));
+        nodeValue?.setValue(parseInt(quasiPercent.toFixed(2), 10));
         nodeValue?.setConnected(inputs.nodeValue.length);
 
         _node.data.outputType = outputType;

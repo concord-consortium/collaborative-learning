@@ -1111,9 +1111,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private sendDataToSerialDevice(n: Node){
-    if (isNaN(n.data.nodeValue as number)){
-      return;
-    } else {
+    if (!isNaN(n.data.nodeValue as number)){
       this.stores.serialDevice.writeToOut(n.data.nodeValue as number);
     }
   }
