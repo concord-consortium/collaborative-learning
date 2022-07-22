@@ -1,14 +1,10 @@
 import { types, IJsonPatch, applyPatch, resolvePath, getSnapshot, getParentOfType } from "mobx-state-tree";
 import { nanoid } from "nanoid";
-import { DEBUG_DOCUMENT } from "../../lib/debug";
+import { DEBUG_HISTORY } from "../../lib/debug";
 import { DocumentContentModel, DocumentContentModelType } from "../document/document-content";
 import { SharedModelType } from "../tools/shared-model";
 import { ToolTileModelType } from "../tools/tool-tile";
 import { TreeManagerAPI } from "./tree-manager-api";
-
-if (DEBUG_DOCUMENT) {
-  (window as any).getSnapshot = getSnapshot;
-}
 
 export const Tree = types.model("Tree", {
 })
@@ -194,9 +190,10 @@ export const Tree = types.model("Tree", {
 
       // Note: the environment of the call will be undefined because the undoRecorder cleared 
       // it out before it calling this function
-      // FIXME: add a DEBUG_ flag here to only log this when that is enabled
-      console.log(`observed changes in sharedModel: ${model.id} of tree: ${self.treeId}`, 
-        {historyEntryId, action: call});
+      if (DEBUG_HISTORY) {
+        console.log(`observed changes in sharedModel: ${model.id} of tree: ${self.treeId}`, 
+          {historyEntryId, action: call});
+      }
 
       // What is tricky is that this is being called when the snapshot is applied by the
       // sharedModel syncing code "sendSnapshotToSharedModel". In that case we want to do
