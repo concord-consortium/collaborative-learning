@@ -140,12 +140,17 @@ export const addTreeMonitor = (tree: Instance<typeof Tree>,  manager: TreeManage
             recorder.stop();
 
             if (error === undefined) {
-                // FIXME: review this comment, it doesn't make sense
-                // TODO: we are going to make this async because it needs to
-                // wait for the manager to respond, to the start call before
-                // finishing the action.  But we should check that this delayed
-                // function doesn't access something from the tree that might
-                // have changed in the meantime.
+                // Note: This function is async because it needs to wait for the
+                // manager to respond, to the start call before finishing the
+                // action. The changes are stored in the recorder so even if the
+                // tree has changed again before those changes are sent they
+                // will be untouched. However if a shared model has been
+                // modified the state of the shared model is captured just
+                // before it is sent so the shared model might change again.
+                // This is actually OK because this shared model state sending
+                // is just to synchronize other views of the shared model in
+                // other trees, so it shouldn't matter if it has changed since
+                // this action finished.
                 recordAction(call, historyEntryId, exchangeId, recorder, sharedModelModifications);
             } else {
                 // TODO: This is a new feature that is being added to the tree:
