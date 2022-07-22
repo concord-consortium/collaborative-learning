@@ -9,8 +9,8 @@ export class SerialDevice {
   lastConnectMessage: string | null;
   deviceInfo: SerialPortInfo | null;
   serialNodesCount: number;
-  writer: any;
-  //localPorts: any;
+  writer: any; // TODO - this should be WritableStream I beleive, but need to make it work
+
 
   constructor() {
     this.value = "0";
@@ -34,7 +34,7 @@ export class SerialDevice {
     this.connectChangeStamp = timeStamp;
     this.lastConnectMessage = status;
     localStorage.setItem("last-connect-message", status);
-    //  TODO - may need this information for a modal
+    //  TODO (CLAW) - may need this information for a modal
     //  if connectChangeStamp is defined, then
     //  lastConnectMessage represents physical state
   }
@@ -48,7 +48,7 @@ export class SerialDevice {
 
   public async requestAndSetPort(){
 
-    // arduino uno
+    // Filter any local devices so we only see arduino uno and compatible in choices
     const filters = [
       { usbVendorId: 0x2341, usbProductId: 0x0043 },
       { usbVendorId: 0x2341, usbProductId: 0x0001 }
@@ -67,7 +67,7 @@ export class SerialDevice {
     // open port
     await this.port?.open({ baudRate: 9600 }).catch((e: any) => console.error(e));
 
-    // get set up to send data down to Arduino when called for
+    // set up writer
     const textEncoder = new TextEncoderStream();
     textEncoder.readable.pipeTo(this.port?.writable as any);
     this.writer = textEncoder.writable.getWriter();
@@ -119,14 +119,14 @@ export class SerialDevice {
   }
 
   public writeToOut(n:number){
-
-    console.log(this.writer);
-    // console.log("got an int, 0 - 100: ", n);
-
-    // need an inverse, since this is "percent closed"
+    // number visible to user represents "percent closed"
+    // so we need to map x percent to an angle in range where
+    // 100% closed is 120deg, and 0% open is 180deg
     const percent = n / 100;
     let openTo = Math.round(180 - (percent * 60));
-    // at current senitivity "no flex" hovers in the 160s
+
+    // set fully open/closed near extremes
+    // to reduce quiver
     if (openTo > 160 ){
       openTo = 180;
     }
@@ -135,10 +135,8 @@ export class SerialDevice {
       openTo = 120;
     }
 
+    // Arduino readBytesUnitl() expects newline as delimiter
     if(this.hasPort()){
-      console.log("SERIAL-WRITE: ", openTo);
-      // this.writer.write(openTo);
-      console.log("ATTEMPT TO WRITE: ", `${openTo.toString()}Z`)
       this.writer.write(`${openTo.toString()}\n`);
     }
   }

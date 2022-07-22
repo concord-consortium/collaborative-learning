@@ -1,4 +1,12 @@
 /*
+  TODO (CLAW): considering making this simpler version operational,
+  right now still using updated version of ccemgfsr
+
+  Possible Simplifications:
+  1. No choice for sensitivity - this would allow a statc Y axis on the minigraph
+  2. No "open" or "close" modes - just percentage closed and hold
+
+
   This is a Sketch meant to be run on an Arduino UNO,
   using the BackYard Brains Muscle Spiker Shield,
   and interfacing with Concord Consortium Dataflow Tile
@@ -77,8 +85,9 @@ void loop(){
 
   // use the value to drive the claw
   if (millis() - oldTime > MINIMUM_SERVO_UPDATE_TIME){
-    newDegree = map(readingFromDataflow * 100, 0, 100, 105, 190);
-    newDegree = constrain(newDegree, 105, 190);
+    // newDegree = map(readingFromDataflow * 100, 0, 100, 105, 190);
+    // newDegree = constrain(newDegree, 105, 190);
+    // newDegree would now be directly fromComputer
     if(abs(newDegree-oldDegrees) > GRIPPER_MINIMUM_STEP){
       Gripper.write(newDegree);
     }

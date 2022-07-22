@@ -1,11 +1,9 @@
 import Rete, { Node, Socket } from "rete";
 import { NodeData } from "rete/types/core/data";
 import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
-// import { LiveOutputControl } from "../controls/live-output-control";
 import { InputValueControl } from "../controls/input-value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
 import { NodeLiveOutputTypes, NodePlotRed } from "../../model/utilities/node";
-import { inject } from "mobx-react";
 
 export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
@@ -16,6 +14,7 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
     super.defaultBuilder(node);
     if (this.editor) {
       this.addInput(node, "nodeValue")
+      // TODO (CLAW)- add "hold" input
       node
         .addControl(new DropdownListControl(this.editor, "liveOutputType", node, NodeLiveOutputTypes, true))
 
@@ -25,16 +24,22 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   public worker(node: NodeData, inputs: any, outputs: any) {
+    // TODO & NOTE (CLAW) At the moment we take the input as soon as we can and send it to serial
+    // this updates the value of the node and then the default NodeProcess takes the data
+    // and sends it out via Serial.  It does not pass through any rete "output"
     const n1 = inputs.nodeValue.length ? inputs.nodeValue[0] : node.data.nodeValue;
     if (this.editor) {
       const _node = this.editor.nodes.find((n: { id: any; }) => n.id === node.id);
       if (_node) {
         const outputTypeControl = _node.controls.get("liveOutputType") as DropdownListControl;
         const outputType = outputTypeControl.getValue();
+
         const nodeValue = _node.inputs.get("nodeValue")?.control as InputValueControl;
         const quasiPercent = n1 * 100;
+
         nodeValue?.setValue(parseInt(quasiPercent.toFixed(2)));
         nodeValue?.setConnected(inputs.nodeValue.length);
+
         _node.data.outputType = outputType;
         this.editor.view.updateConnections( {node: _node} );
         _node.update();
@@ -42,6 +47,7 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
     }
   }
 
+  // TODO - duplicate method - if this remains unchanged, import from original or abstract entirely from all factories
   private addInput(node: Node, inputKey: string, displayLabel = "") {
     if (this.editor) {
       const oldInput = node.inputs.get(inputKey);
