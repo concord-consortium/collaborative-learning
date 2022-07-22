@@ -88,7 +88,23 @@
   // ----------------------------------------------------------------------------------
   void loop()
   {
-        fromComputer = Serial.read();
+//              char iceTray[3];
+//              int slot = 0;
+//
+//              char inByte = Serial.read();
+//
+//              if ( slot < 3 ){
+//                iceTray[slot] = inByte;
+//                slot++;
+//              }
+//
+//              else {
+//                Serial.println(iceTray);
+//                slot = 0;
+//              }
+
+
+
         //Serial.println(fromComputer);
         //-----------------------  Switch sensitivity ------------------------------------
 
@@ -253,8 +269,23 @@
               emgStringOut = String(emgId + kvSeparator + emgReading);
               fsrStringOut = String(fsrId + kvSeparator + fsrReading);
 
+//              char buff[3];
+//              if (Serial.readBytes(buff, 3) == 3){
+//                char input1 = buff[0];
+//                char input2 = buff[1];
+//                char input3 = buff[2];
+//                Serial.println(buff);
+//              }
+              // Serial.println("hi");
+
+
+              
+              
               // seems like the right shape at this point
               Serial.println(emgStringOut);
               Serial.println(fsrStringOut);
+//              int wha = Serial.read();
+//              Serial.println(wha);
+              
         }
 }

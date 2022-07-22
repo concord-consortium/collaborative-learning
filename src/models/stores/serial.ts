@@ -136,8 +136,8 @@ export class SerialDevice {
     }
 
     if(this.hasPort()){
-      console.log("ATTEMPT TO WRITE: ", openTo)
-      this.writer.write(openTo);
+      console.log("ATTEMPT TO WRITE: ", `A${openTo.toString()}Z`)
+      this.writer.write(`A${openTo.toString()}Z`);
     }
   }
 }
