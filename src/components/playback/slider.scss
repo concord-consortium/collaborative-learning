@@ -19,7 +19,7 @@ $border-radius-base: 6px;
     &.class-work {
       background-color: $classwork-purple-light-5;
     }
-    &.student-groups {
+    &.student-work {
       background-color: $charcoal-light-5;
     }
     &.learning-log {
@@ -77,7 +77,7 @@ $border-radius-base: 6px;
         }
       }
     }
-    &.student-groups {
+    &.student-work {
       path:first-of-type {
         fill: $charcoal-dark-1;
       }
@@ -231,7 +231,7 @@ $border-radius-base: 6px;
     }
   }
 
-  .rc-slider.student-works {
+  .rc-slider.student-work {
     .rc-slider-handle {
       border-color: $charcoal-dark-1;
       &:hover {

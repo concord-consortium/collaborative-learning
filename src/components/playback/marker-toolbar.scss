@@ -14,16 +14,16 @@
   z-index: $toolbar-z-index;
   background-color: white;
   &.my-work {
-    border-color: $workspace-teal-dark-1;
+    border-color: $workspace-teal;
   }
   &.class-work {
-    border-color: $classwork-purple-dark-1;
+    border-color: $classwork-purple;
   }
-  &.student-groups {
-    border-color: $charcoal-dark-1;
+  &.student-work {
+    border-color: $charcoal;
   }
   &.learning-log {
-    border-color: $learninglog-green-dark-1;
+    border-color: $learninglog-green;
   }
 
   .add-marker-button, .delete-marker-button {
@@ -66,7 +66,7 @@
         fill: $classwork-purple-dark-1;
       }
     }
-    &.student-groups {
+    &.student-work {
       background-color: $charcoal-light-9;
       &:hover {
         background-color: $charcoal-light-6;
@@ -136,7 +136,7 @@
         fill: $classwork-purple-dark-1;
       }
     }
-    &.student-groups {
+    &.student-work {
       background-color: $charcoal-light-9;
       &:hover {
         background-color: $charcoal-light-6;
