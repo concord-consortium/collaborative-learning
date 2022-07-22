@@ -846,6 +846,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     return true;
   };
 
+  // handleCopy is being called with toClipboard as an event when cmd+c is pressed
   private handleCopy = (toClipboard = true) => {
     const content = this.getContent();
     const { board } = this.state;
@@ -882,6 +883,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     return { pasteId, isSameTile, objects };
   }
 
+  // pasteContent seems to be getting an event object, not IPasteContent
   private handlePaste = (pasteContent?: IPasteContent) => {
     const content = this.getContent();
     const { readOnly } = this.props;
@@ -1523,8 +1525,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           this.endDragSelectedPoints(evt, line, usrDiff);
         }
       }
-      // remove this polygon's vertices from the dragPts map
-      vertices.forEach(vertex => delete this.dragPts[vertex.id]);
       this.isVertexDrag = false;
     };
 
@@ -1626,8 +1626,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           this.endDragSelectedPoints(evt, polygon, usrDiff);
         }
       }
-      // remove this polygon's vertices from the dragPts map
-      polygon.vertices.forEach(vertex => delete this.dragPts[vertex.id]);
       this.isVertexDrag = false;
     };
 
