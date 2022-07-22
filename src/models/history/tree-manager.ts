@@ -3,7 +3,7 @@ import {
 } from "mobx-state-tree";
 import { nanoid } from "nanoid";
 import { TreeAPI } from "./tree-api";
-import { UndoStore } from "./undo-store";
+import { IUndoManager, UndoStore } from "./undo-store";
 import { TreePatchRecord, HistoryEntry, TreePatchRecordSnapshot } from "./history";
 import { DEBUG_HISTORY } from "../../lib/debug";
 
@@ -39,6 +39,10 @@ export const TreeManager = types
   trees: {} as Record<string, TreeAPI>
 }))
 .views((self) => ({
+  get undoManager() : IUndoManager {
+    return self.undoStore;
+  },
+
   findHistoryEntry(historyEntryId: string) {
     return self.document.history.find(entry => entry.id === historyEntryId);
   },
@@ -154,7 +158,7 @@ export const TreeManager = types
       // closed before this new exchangeId is setup. So really we don't need the
       // exchangeId to be passed, but it can be useful for debugging. 
       // 
-      // FIXME: how is exchangeId handled in case #2?
+      // TODO: how is exchangeId handled in case #2?
       const applyExchangeId = nanoid();
       self.startExchange(historyEntryId, applyExchangeId, "updateSharedModel.apply");
       return tree.applySharedModelSnapshotFromManager(historyEntryId, applyExchangeId, snapshot);
@@ -181,17 +185,9 @@ export const TreeManager = types
     const treePatchRecord = TreePatchRecord.create(record);
 
     // Find if there is already an entry with this historyEntryId
-    let entry = self.findHistoryEntry(historyEntryId);
+    const entry = self.findHistoryEntry(historyEntryId);
     if (!entry) {
-      // FIXME: now that is synchronous, there shouldn't be the case
-      // where the entry doesn't exist yet.
-      //
-      // This is a new user action, normally
-      // createOrUpdateHistoryEntry would have been called first
-      // but it is better to handle the out of order case here so
-      // we don't have to deal with synchronizing the two calls.
-      entry = HistoryEntry.create({id: historyEntryId});
-      self.document.history.push(entry);
+      throw new Error(`There isn't an entry for ${ json({historyEntryId, exchangeId})}`);
     }
 
     // Make sure this entry wasn't marked complete before

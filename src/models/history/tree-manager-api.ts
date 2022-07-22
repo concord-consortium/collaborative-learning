@@ -1,4 +1,6 @@
+import { Instance } from "mobx-state-tree";
 import { TreePatchRecordSnapshot } from "./history";
+import { IUndoManager, UndoStore } from "./undo-store";
 
 export interface TreeManagerAPI {
     /**
@@ -147,4 +149,9 @@ export interface TreeManagerAPI {
      * active exchanges can be viewed to see which one hasn't ended yet.
      */
     startExchange: (historyEntryId: string, exchangeId: string, name: string) => Promise<void>;
+
+    /**
+     * This provides an interface for Trees to undo and redo history events
+     */
+    undoManager: IUndoManager;
 }

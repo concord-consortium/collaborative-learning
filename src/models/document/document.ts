@@ -280,10 +280,10 @@ export const DocumentModel = Tree.named("Document")
       manager.putTree(self.treeId, self);
     },
     undoLastAction() {
-      alert("This is the undo action");
+      self.treeManagerAPI?.undoManager.undo();
     },
     redoLastAction() {
-      alert("This is the redo action");
+      self.treeManagerAPI?.undoManager.redo();
     },
   }));
 
