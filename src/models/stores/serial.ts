@@ -120,9 +120,13 @@ export class SerialDevice {
 
   public writeToOut(n:number){
     console.log(this.writer);
-    console.log("SERIAL ATTEMPT AT WRITING: ", n);
+    console.log("got an int, 0 - 100: ", n);
+    //min angle: 105 max angle: 190, range of 85
+    const percent = n / 100;
+    const openTo = 105 + (percent * 85)
     if(this.hasPort()){
-      this.writer.write(n);
+      console.log("ATTEMPT TO WRITE: ", openTo)
+      this.writer.write(openTo);
     }
   }
 }

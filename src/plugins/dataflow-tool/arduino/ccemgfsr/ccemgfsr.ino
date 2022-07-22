@@ -87,8 +87,8 @@
   // ----------------------------------------------------------------------------------
   void loop()
   {
-        fromComputer = Serial.readStringUntil('\n');
-        Serial.println(fromComputer);
+        //fromComputer = Serial.readStringUntil('\n');
+        //Serial.println(fromComputer);
         //-----------------------  Switch sensitivity ------------------------------------
 
         //check if button is pressed (HIGH)
@@ -238,6 +238,8 @@
 //                }
 //
 //              }
+
+              //Gripper.write(fromComputer.toInt());
               oldTime = millis();
 
               oldDegrees = newDegree;
