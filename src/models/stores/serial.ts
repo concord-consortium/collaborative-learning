@@ -121,7 +121,7 @@ export class SerialDevice {
   public writeToOut(n:number){
 
     console.log(this.writer);
-    console.log("got an int, 0 - 100: ", n);
+    // console.log("got an int, 0 - 100: ", n);
 
     // need an inverse, since this is "percent closed"
     const percent = n / 100;
@@ -130,6 +130,11 @@ export class SerialDevice {
     if (openTo > 160 ){
       openTo = 180;
     }
+
+    if(openTo < 130 ){
+      openTo = 120;
+    }
+
     if(this.hasPort()){
       console.log("ATTEMPT TO WRITE: ", openTo)
       this.writer.write(openTo);
