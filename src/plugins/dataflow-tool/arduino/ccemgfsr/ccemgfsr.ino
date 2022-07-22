@@ -241,7 +241,11 @@
 //              }
 
               //Gripper.write(fromComputer.toInt());
-              //Gripper.write(180);
+
+              Gripper.write(random(130, 180));
+
+
+
               oldTime = millis();
 
               oldDegrees = newDegree;

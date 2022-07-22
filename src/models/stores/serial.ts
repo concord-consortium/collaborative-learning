@@ -119,14 +119,16 @@ export class SerialDevice {
   }
 
   public writeToOut(n:number){
+
     console.log(this.writer);
     console.log("got an int, 0 - 100: ", n);
-    //min angle: 120 (closed) max angle: 180 (open) range of 60
+
+    // need an inverse, since this is "percent closed"
     const percent = n / 100;
-    let openTo = 120 + (percent * 60);
-    // at current senitivity "no flex" hovers in the 130s
-    if (openTo < 140 ){
-      openTo = 120;
+    let openTo = 180 - (percent * 60);
+    // at current senitivity "no flex" hovers in the 160s
+    if (openTo > 160 ){
+      openTo = 180;
     }
     if(this.hasPort()){
       console.log("ATTEMPT TO WRITE: ", openTo)
