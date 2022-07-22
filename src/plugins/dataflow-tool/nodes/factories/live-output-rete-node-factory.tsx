@@ -32,7 +32,8 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
         const outputTypeControl = _node.controls.get("liveOutputType") as DropdownListControl;
         const outputType = outputTypeControl.getValue();
         const nodeValue = _node.inputs.get("nodeValue")?.control as InputValueControl;
-        nodeValue?.setValue(n1);
+        const quasiPercent = n1 * 100;
+        nodeValue?.setValue(parseInt(quasiPercent.toFixed(2)));
         nodeValue?.setConnected(inputs.nodeValue.length);
         _node.data.outputType = outputType;
         this.editor.view.updateConnections( {node: _node} );

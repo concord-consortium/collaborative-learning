@@ -2,16 +2,19 @@ import { NodeChannelInfo } from "src/plugins/dataflow-tool/model/utilities/node"
 
 export class SerialDevice {
   value: string;
+  outValue: number;
   localBuffer: string;
   private port: SerialPort | null;
   connectChangeStamp: number | null;
   lastConnectMessage: string | null;
   deviceInfo: SerialPortInfo | null;
   serialNodesCount: number;
+  writer: any;
   //localPorts: any;
 
   constructor() {
     this.value = "0";
+    this.outValue = 0;
     this.localBuffer = "";
 
     navigator.serial?.addEventListener("connect", (e) => {
@@ -31,19 +34,11 @@ export class SerialDevice {
     this.connectChangeStamp = timeStamp;
     this.lastConnectMessage = status;
     localStorage.setItem("last-connect-message", status);
-    // if (this.connectChangeStamp !== undefined){
-    //   if (this.lastConnectMessage == "disconnect"){
-    //     alert("Device has been physically disconnected."")
-    //   }
-    //   if (this.lastConnectMessage == "connect"){
-    //     alert("Device has been plugged in.  Click the yellow button to establish connection.")
-    //   }
-    // }
+    //  TODO - may need this information for a modal
+    //  if connectChangeStamp is defined, then
+    //  lastConnectMessage represents physical state
   }
 
-  // public async discover(){
-  //   this.localPorts = await navigator.serial.getPorts();
-  // }
 
   public hasPort(){
     const portHere = this.port !== undefined;
@@ -52,8 +47,15 @@ export class SerialDevice {
   }
 
   public async requestAndSetPort(){
+
+    // arduino uno
+    const filters = [
+      { usbVendorId: 0x2341, usbProductId: 0x0043 },
+      { usbVendorId: 0x2341, usbProductId: 0x0001 }
+    ];
+
     try {
-        this.port = await navigator.serial.requestPort();
+        this.port = await navigator.serial.requestPort({ filters });
         this.deviceInfo = await this.port.getInfo();
     }
     catch (error) {
@@ -62,7 +64,15 @@ export class SerialDevice {
   }
 
   public async handleStream(channels: Array<NodeChannelInfo>){
+    // open port
     await this.port?.open({ baudRate: 9600 }).catch((e: any) => console.error(e));
+
+    // get set up to send data down to Arduino when called for
+    const textEncoder = new TextEncoderStream();
+    textEncoder.readable.pipeTo(this.port?.writable as any);
+    this.writer = textEncoder.writable.getWriter();
+
+    // listen for serial data coming up from Arduino
     while (this.port?.readable) {
       const textDecoder = new TextDecoderStream();
       this.port.readable.pipeTo(textDecoder.writable);
@@ -106,5 +116,13 @@ export class SerialDevice {
         targetChannel.value = parseInt(numValue, 10);
       }
     } while (match);
+  }
+
+  public writeToOut(n:number){
+    console.log(this.writer);
+    console.log("SERIAL ATTEMPT AT WRITING: ", n);
+    if(this.hasPort()){
+      this.writer.write(n);
+    }
   }
 }

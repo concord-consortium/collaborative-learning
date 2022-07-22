@@ -72,6 +72,7 @@ void loop(){
   if (Serial.available() > 0) {
     fromComputer = Serial.readStringUntil('\n');
     readingFromDataflow = fromComputer.toInt();
+    Serial.println("fromComputer: " + fromComputer);
   }
 
   // use the value to drive the claw

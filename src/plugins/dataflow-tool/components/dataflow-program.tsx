@@ -893,7 +893,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                 startTime: programStartTime,
                 endTime: programEndTime,
                 hasData: hasValidData,
-                hasRelay: hasValidRelay || hasDemoOutput || hasLiveOutput //TODO - ? - some condition true for relays that works for Demo?
+                hasRelay: hasValidRelay || hasDemoOutput || hasLiveOutput
               });
 
     return programData;
@@ -1111,11 +1111,14 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private sendDataToSerialDevice(n: Node){
-    console.log("REALLY SEND DATA TO SERIAL DEVICE: ", n.data.nodeValue);
+    if (isNaN(n.data.nodeValue as number)){
+      return;
+    } else {
+      this.stores.serialDevice.writeToOut(n.data.nodeValue as number);
+    }
   }
 
   private updateNodeChannelInfo = (n: Node) => {
-
     if (this.channels.length > 0 ){
       this.channels.filter(c => c.usesSerial).forEach((ch) => {
         this.passSerialStateToChannel(this.stores.serialDevice, ch);

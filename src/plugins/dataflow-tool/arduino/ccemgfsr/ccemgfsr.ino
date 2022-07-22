@@ -49,6 +49,8 @@
   String emgStringOut = "";              // init empty string for default output
   String fsrStringOut = "";              // init empty string for default output
 
+  String fromComputer;
+  int readingFromDataflow;
 
   //-----------------------------------------------------------------------------------
   //   Setup servo, inputs and outputs
@@ -85,6 +87,8 @@
   // ----------------------------------------------------------------------------------
   void loop()
   {
+        fromComputer = Serial.readStringUntil('\n');
+        Serial.println(fromComputer);
         //-----------------------  Switch sensitivity ------------------------------------
 
         //check if button is pressed (HIGH)
@@ -176,6 +180,18 @@
           digitalWrite(ledPins[k], HIGH);
         }
 
+
+//        if (millis() - oldTime > MINIMUM_SERVO_UPDATE_TIME){
+//          fromComputer = Serial.readStringUntil('\n');
+//        }
+        //fromComputer = Serial.readStringUntil('\n');
+        //readingFromDataflow = fromComputer.toInt();
+          // Take value sent from Dataflow
+//        if (Serial.available() > 0) {
+//           fromComputer = Serial.readStringUntil('\n');
+//           readingFromDataflow = fromComputer.toInt();
+//           //Serial.println("fromComputer: " + fromComputer);
+//        }
         //-------------------- Drive Claw according to EMG strength -----------------------------
 
         // Note on constrain()
@@ -202,26 +218,26 @@
         if (millis() - oldTime > MINIMUM_SERVO_UPDATE_TIME)
         {
               //calculate new angle for servo
-              if(currentFunctionality == OPEN_MODE)
-              {
-                emgReading = constrain(emgReading, 40, emgSaturationValue);
-                newDegree = map(emgReading, 40 ,emgSaturationValue, 190, 105);
-              }
-              else
-              {
-                emgReading = constrain(emgReading, 120, emgSaturationValue);
-                newDegree = map(emgReading, 120 ,emgSaturationValue, 105, 190);
-              }
-
-              //check if we are in servo dead zone
-              if(abs(newDegree-oldDegrees) > GRIPPER_MINIMUM_STEP)
-              {
-                 //set new servo angle if we are not past force threshold
-                if (fsrReading < threshold) {
-                  Gripper.write(newDegree);
-                }
-
-              }
+//              if(currentFunctionality == OPEN_MODE)
+//              {
+//                emgReading = constrain(emgReading, 40, emgSaturationValue);
+//                newDegree = map(emgReading, 40 ,emgSaturationValue, 190, 105);
+//              }
+//              else
+//              {
+//                emgReading = constrain(emgReading, 120, emgSaturationValue);
+//                newDegree = map(emgReading, 120 ,emgSaturationValue, 105, 190);
+//              }
+//
+//              //check if we are in servo dead zone
+//              if(abs(newDegree-oldDegrees) > GRIPPER_MINIMUM_STEP)
+//              {
+//                 //set new servo angle if we are not past force threshold
+//                if (fsrReading < threshold) {
+//                  Gripper.write(newDegree);
+//                }
+//
+//              }
               oldTime = millis();
 
               oldDegrees = newDegree;
