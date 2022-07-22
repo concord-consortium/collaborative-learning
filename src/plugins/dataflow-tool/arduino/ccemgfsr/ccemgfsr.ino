@@ -52,6 +52,16 @@
   String fromComputer;
   int readingFromDataflow;
 
+  int inB = 0;
+
+  char buffer[13];
+
+  const int BUFFER_SIZE = 4;
+  char buf[BUFFER_SIZE];
+
+  String myChar;
+
+  const unsigned int MAX_MESSAGE_LENGTH = 4;
   //-----------------------------------------------------------------------------------
   //   Setup servo, inputs and outputs
   // ----------------------------------------------------------------------------------
@@ -60,7 +70,7 @@
     Serial.begin(9600);
     //init servo
     Gripper.attach(SERVO_PIN);
-    Gripper.write(180); //
+    //Gripper.write(180); //
 
     //init button pins to input
     pinMode(GRIPPER_STATE_BUTTON_PIN, INPUT);
@@ -73,6 +83,9 @@
 
     //get current sensitivity
     emgSaturationValue = sensitivities[lastSensitivitiesIndex];
+
+
+
   }
 
 
@@ -88,24 +101,43 @@
   // ----------------------------------------------------------------------------------
   void loop()
   {
-//              char iceTray[3];
-//              int slot = 0;
-//
-//              char inByte = Serial.read();
-//
-//              if ( slot < 3 ){
-//                iceTray[slot] = inByte;
-//                slot++;
-//              }
-//
-//              else {
-//                Serial.println(iceTray);
-//                slot = 0;
-//              }
+
+    // mite also try this: https://docs.arduino.cc/built-in-examples/strings/StringToInt
+
+    //Check to see if anything is available in the serial receive buffer
+ while (Serial.available() > 0)
+ {
+   //Create a place to hold the incoming message
+   static char message[MAX_MESSAGE_LENGTH];
+   static unsigned int message_pos = 0;
+
+   //Read the next available byte in the serial receive buffer
+   char inByte = Serial.read();
+
+   //Message coming in (check not terminating character) and guard for over message size
+   if ( inByte != '\n' && (message_pos < MAX_MESSAGE_LENGTH - 1) )
+   {
+     //Add the incoming byte to our message
+     message[message_pos] = inByte;
+     message_pos++;
+   }
+   //Full message received...
+   else
+   {
+     //Add null character to string
+     message[message_pos] = '\0';
+
+     //Print the message (or do other things)
+     Serial.println(message);
+     String myStuff = String(message);
+     Gripper.write(myStuff.toInt());
+
+     //Reset for the next message
+     message_pos = 0;
+   }
+ }
 
 
-
-        //Serial.println(fromComputer);
         //-----------------------  Switch sensitivity ------------------------------------
 
         //check if button is pressed (HIGH)
@@ -198,94 +230,29 @@
         }
 
 
-//        if (millis() - oldTime > MINIMUM_SERVO_UPDATE_TIME){
-//          fromComputer = Serial.readStringUntil('\n');
-//        }
-        //fromComputer = Serial.readStringUntil('\n');
-        //readingFromDataflow = fromComputer.toInt();
-          // Take value sent from Dataflow
-//        if (Serial.available() > 0) {
-//           fromComputer = Serial.readStringUntil('\n');
-//           readingFromDataflow = fromComputer.toInt();
-//           //Serial.println("fromComputer: " + fromComputer);
-//        }
-        //-------------------- Drive Claw according to EMG strength -----------------------------
-
-        // Note on constrain()
-        //
-        //    It keeps a number in bounds: https://www.arduino.cc/reference/en/language/functions/math/constrain/
-        //
-        //    constrain(someReading, Min, Max)
-        //
-        //    constrain(1, 2, 8) -> 2
-        //    constrain(9, 2, 8) -> 8
-        //
-
-        // Note on map()
-        //
-        //    It returns a proportional value: https://www.arduino.cc/reference/en/language/functions/math/map/
-        //
-        //    map(someReading, originalMin, orginialMax, newMin, newMax)
-        //
-        //    map(5, 0, 10, 0, 100) -> 50
 
 
 
         //set new angle if enough time passed
         if (millis() - oldTime > MINIMUM_SERVO_UPDATE_TIME)
         {
-              //calculate new angle for servo
-//              if(currentFunctionality == OPEN_MODE)
-//              {
-//                emgReading = constrain(emgReading, 40, emgSaturationValue);
-//                newDegree = map(emgReading, 40 ,emgSaturationValue, 190, 105);
-//              }
-//              else
-//              {
-//                emgReading = constrain(emgReading, 120, emgSaturationValue);
-//                newDegree = map(emgReading, 120 ,emgSaturationValue, 105, 190);
-//              }
-//
-//              //check if we are in servo dead zone
-//              if(abs(newDegree-oldDegrees) > GRIPPER_MINIMUM_STEP)
-//              {
-//                 //set new servo angle if we are not past force threshold
-//                if (fsrReading < threshold) {
-//                  Gripper.write(newDegree);
-//                }
-//
-//              }
-
-              //Gripper.write(fromComputer.toInt());
-
-              Gripper.write(random(130, 180));
 
 
+              //Gripper.write(inB);
 
               oldTime = millis();
 
               oldDegrees = newDegree;
 
               emgStringOut = String(emgId + kvSeparator + emgReading);
-              fsrStringOut = String(fsrId + kvSeparator + fsrReading);
-
-//              char buff[3];
-//              if (Serial.readBytes(buff, 3) == 3){
-//                char input1 = buff[0];
-//                char input2 = buff[1];
-//                char input3 = buff[2];
-//                Serial.println(buff);
-//              }
-              // Serial.println("hi");
+              //fsrStringOut = String(fsrId + kvSeparator + fsrReading);
 
 
-              
-              
+
+
+
               // seems like the right shape at this point
-              Serial.println(emgStringOut);
-              Serial.println(fsrStringOut);
-//              int wha = Serial.read();
-//              Serial.println(wha);
-              
+             Serial.println(emgStringOut);
+              // Serial.println(fsrStringOut);
         }
 }
