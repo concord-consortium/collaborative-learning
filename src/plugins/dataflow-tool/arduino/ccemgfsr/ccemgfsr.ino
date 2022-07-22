@@ -60,6 +60,7 @@
     Serial.begin(9600);
     //init servo
     Gripper.attach(SERVO_PIN);
+    Gripper.write(180); //
 
     //init button pins to input
     pinMode(GRIPPER_STATE_BUTTON_PIN, INPUT);
@@ -87,7 +88,7 @@
   // ----------------------------------------------------------------------------------
   void loop()
   {
-        //fromComputer = Serial.readStringUntil('\n');
+        fromComputer = Serial.read();
         //Serial.println(fromComputer);
         //-----------------------  Switch sensitivity ------------------------------------
 
@@ -240,6 +241,7 @@
 //              }
 
               //Gripper.write(fromComputer.toInt());
+              //Gripper.write(180);
               oldTime = millis();
 
               oldDegrees = newDegree;
