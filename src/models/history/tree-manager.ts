@@ -16,6 +16,9 @@ import { nanoid } from "nanoid";
  */
 const json = (value: any) => JSON.stringify(value);
 
+const FAKE_HISTORY_ENTRY_ID = "FAKE_HISTORY_ENTRY_ID";
+const FAKE_EXCHANGE_ID = "FAKE_EXCHANGE_ID";
+
 export const CDocument = types
 .model("CDocument", {
   // TODO: switch to a map, so we get faster lookups in the map and MST can
@@ -50,6 +53,12 @@ export const TreeManager = types
   },
 
   startExchange(historyEntryId: string, exchangeId: string) {
+    // Ignore fake history entries these are used when replaying history
+    // to the tree
+    if (historyEntryId === FAKE_HISTORY_ENTRY_ID) {
+      return Promise.resolve();
+    }
+
     // Find if there is already an entry with this historyEntryId
     const entry = self.findHistoryEntry(historyEntryId);
     if (!entry) {
@@ -162,6 +171,12 @@ export const TreeManager = types
   addTreePatchRecord(historyEntryId: string, exchangeId: string, 
     record: TreePatchRecordSnapshot) {
 
+    if (historyEntryId === FAKE_HISTORY_ENTRY_ID) {
+      // In this case we don't want to save anything. This is currently used when
+      // replaying the history to the tree
+      return;
+    }
+
     const treePatchRecord = TreePatchRecord.create(record);
 
     // Find if there is already an entry with this historyEntryId
@@ -207,30 +222,21 @@ export const TreeManager = types
     }
   },
 
+  /**
+   * Replay the whole history to the trees.
+   * 
+   * This should not record this "replay" into the history again
+   */
   replayHistoryToTrees: flow(function* replayHistoryToTrees() {
     const trees = Object.values(self.trees);
-
-    const historyEntryId = nanoid();
-
-    const topLevelExchangeId = nanoid();
-
-    // Start a non-undoable action with this id. Currently the trees do
-    // not have their treeMonitors setup when replayHistoryToTrees is
-    // called, so the manager should not receive any patches with this
-    // historyEntryId. However, it seems good to go ahead and record
-    // this anyway.
-    const historyEntry = 
-      self.createHistoryEntry(historyEntryId, topLevelExchangeId, "replayHistoryToTrees", "manager", false);
 
     // Disable shared model syncing on all of the trees. This is
     // different than when the undo store applies patches because in
     // this case we are going to apply lots of history entries all at
-    // once. 
+    // once. We use FAKE ids here so any responses from tree are
+    // not recorded in the history.
     const startPromises = trees.map(tree => {
-      const startExchangeId = nanoid();
-      self.startExchange(historyEntryId, startExchangeId);
-
-      return tree.startApplyingPatchesFromManager(historyEntryId, startExchangeId);
+      return tree.startApplyingPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID);
     });
     yield Promise.all(startPromises);
 
@@ -259,14 +265,10 @@ export const TreeManager = types
       });
     });
 
-    // console.log(treePatches);
-
     const applyPromises = Object.entries(treePatches).map(([treeId, patches]) => {
       if (patches && patches.length > 0) {
-        const applyExchangeId = nanoid();
-        self.startExchange(historyEntryId, applyExchangeId);
         const tree = self.trees[treeId];
-        return tree?.applyPatchesFromManager(historyEntryId, applyExchangeId, patches);
+        return tree?.applyPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID, patches);
       } 
     });
     yield Promise.all(applyPromises);
@@ -278,26 +280,16 @@ export const TreeManager = types
     // This can be used in the future to make sure multiple applyPatchesToTrees are not 
     // running at the same time.
     const finishPromises = trees.map(tree => {
-      const finishExchangeId = nanoid();
-      self.startExchange(historyEntryId, finishExchangeId);
-
-      return tree.finishApplyingPatchesFromManager(historyEntryId, finishExchangeId);
+      return tree.finishApplyingPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID);
     });
     yield Promise.all(finishPromises);
 
-    // TODO: we are closing this top level exchange after the finish
-    // applying manager patches is called. This way if some of those
-    // finish calls result in additional changes to the tree those
-    // changes should delay the completion of this history event. It
-    // isn't clear if that is really necessary in this case.
-
-    // FIXME: We don't actually want to record this as a history entry.
-    // This `replayHistoryToTrees` will not actually be called by the
-    // current system. A variation of it will be needed when a user moves 
-    // a scrubber to scroll around in the history of the document. 
-    // So `replayHistoryToTrees` is kept as a model for that new function.
-    // In the current implementation a history entry is added when `replayHistoryToTrees`
-    // but from what I saw before it never leaves the "recording" state.
-    self.endExchange(historyEntry, topLevelExchangeId);
+    // TODO: if the tree/tile is written wrong, there might be some changes 
+    // that come in with a fake entry after finishApplyingPatchesFromManager.
+    // This is because the changes might trigger updateTreeAfterSharedModelChanges 
+    // and that will happen async. With some work we should be able to identify this
+    // and print a warning to the console.
+    // One way might be using unique history_entry_ids that we mark as closed 
+    // after the finish call.
   })
 }));

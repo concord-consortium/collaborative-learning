@@ -243,7 +243,7 @@ it("can redo a tile change", async () => {
  */
 function makeRealHistoryEntry(entry: any): HistoryEntrySnapshot {
   const realEntry = cloneDeep(entry);
-  delete realEntry.created;
+  realEntry.created = Date.now();
   realEntry.id = nanoid();
   return realEntry;
 }
@@ -257,16 +257,20 @@ it("can replay the history entries", async () => {
         
     // Add the history entries used in the tests above so we can replay them all at 
     // the same time.
-    manager.setChangeDocument(CDocument.create({
-      history: [
-        makeRealHistoryEntry(initialUpdateEntry),
-        makeRealHistoryEntry(undoEntry),
-        makeRealHistoryEntry(redoEntry)
-      ]
-    }));
+    const history = [
+      makeRealHistoryEntry(initialUpdateEntry),
+      makeRealHistoryEntry(undoEntry),
+      makeRealHistoryEntry(redoEntry)
+    ];
+    manager.setChangeDocument(CDocument.create({history}));
     await manager.replayHistoryToTrees();
 
     expect(tileContent.flag).toBe(true);
+
+    // The history should not change after it is replayed
+    const changeDocument = manager.document as Instance<typeof CDocument>;
+    expect(getSnapshot(changeDocument.history)).toEqual(history);
+  
 });
 
 const initialSharedModelUpdateEntry = { 
@@ -440,17 +444,21 @@ it("can replay history entries that include shared model changes", async () => {
   
   // Add the history entries used in the tests above so we can replay them all at 
   // the same time.
-  manager.setChangeDocument(CDocument.create({
-    history: [
-      makeRealHistoryEntry(initialSharedModelUpdateEntry),
-      makeRealHistoryEntry(undoSharedModelEntry),
-      makeRealHistoryEntry(redoSharedModelEntry)
-    ]
-  }));
+  const history = [
+    makeRealHistoryEntry(initialSharedModelUpdateEntry),
+    makeRealHistoryEntry(undoSharedModelEntry),
+    makeRealHistoryEntry(redoSharedModelEntry)
+  ];
+
+  manager.setChangeDocument(CDocument.create({history}));
   await manager.replayHistoryToTrees();
 
   expect(sharedModel.value).toBe("something");
   expect(tileContent.text).toBe("something-tile");
+
+  // The history should not change after it is replayed
+  const changeDocument = manager.document;
+  expect(getSnapshot(changeDocument.history)).toEqual(history);
 });
 
 // This is recording 3 events for something that should probably be 1
