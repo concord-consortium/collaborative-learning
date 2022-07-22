@@ -161,7 +161,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
 
   private renderDocument(className: string, side: WorkspaceSide, child?: JSX.Element) {
     const { appConfig: { navTabs: { showNavPanel } }, ui } = this.stores;
-    const workspaceLeft = !showNavPanel? 0 : ui.navTabContentShown ? "50%" : 42;
+    const workspaceLeft = !showNavPanel? 0 : ui.navTabContentShown ? "50%" : 38;
     const style = { left: workspaceLeft };
     const roleClassName = side === "primary" ? "primary-workspace" : "reference-workspace";
     return (
