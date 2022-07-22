@@ -37,6 +37,7 @@ export class SerialDevice {
     //  TODO (CLAW) - may need this information for a modal
     //  if connectChangeStamp is defined, then
     //  lastConnectMessage represents physical state
+    //  TODO this now needs debugging
   }
 
 
@@ -125,15 +126,15 @@ export class SerialDevice {
     const percent = n / 100;
     let openTo = Math.round(180 - (percent * 60));
 
-    // set fully open/closed near extremes
-    // to reduce quiver
-    if (openTo > 160 ){
-      openTo = 180;
-    }
+    // set fully open/closed near extremes to reduce quiver
+    // ended up not using but keeping for future reference
+    // if (openTo > 160 ){
+    //   openTo = 180;
+    // }
 
-    if(openTo < 130 ){
-      openTo = 120;
-    }
+    // if(openTo < 130 ){
+    //   openTo = 120;
+    // }
 
     // Arduino readBytesUnitl() expects newline as delimiter
     if(this.hasPort()){
