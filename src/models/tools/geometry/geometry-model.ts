@@ -225,6 +225,8 @@ export interface MovableLineModelType extends Instance<typeof MovableLineModel> 
 export const isMovableLineModel = (o?: GeometryObjectModelType): o is MovableLineModelType =>
   o?.type === "movableLine";
 
+export const isMovableLinePointId = (id: string) => /.*-point[12]/.test(id);
+
 export const ImageModel = PositionedObjectModel
   .named("ImageModel")
   .props({

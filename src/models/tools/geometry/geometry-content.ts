@@ -16,7 +16,8 @@ import { convertModelToChanges, exportGeometryJson } from "./geometry-migrate";
 import { preprocessImportFormat } from "./geometry-import";
 import {
   cloneGeometryObject, CommentModel, GeometryBaseContentModel, GeometryObjectModelType, GeometryObjectModelUnion,
-  ImageModel, ImageModelType, isPolygonModel, MovableLineModel, PointModel, PolygonModel, VertexAngleModel
+  ImageModel, ImageModelType, isMovableLineModel, isMovableLinePointId, isPolygonModel, MovableLineModel, PointModel,
+  PolygonModel, VertexAngleModel
 } from "./geometry-model";
 import {
   getAxisAnnotations, getBaseAxisLabels, getObjectById, guessUserDesiredBoundingBox, kAxisBuffer,
@@ -232,6 +233,21 @@ export const GeometryContentModel = GeometryBaseContentModel
     },
     getObject(id: string) {
       return self.objects.get(id);
+    },
+    // Returns a point defining a movableLine with the given id,
+    // or undefined if there isn't one.
+    getMovableLinePoint(id: string) {
+      let point;
+      self.objects.forEach(obj => {
+        if (isMovableLineModel(obj)) {
+          if (obj.p1.id === id) {
+            point = obj.p1;
+          } else if (obj.p2.id === id) {
+            point = obj.p2;
+          }
+        }
+      });
+      return point;
     },
     getDependents(ids: string[], options?: { required: boolean }) {
       const { required = false } = options || {};
@@ -663,7 +679,13 @@ export const GeometryContentModel = GeometryBaseContentModel
                            links?: ILinkProperties) {
       const propsArray = castArray(properties);
       castArray(ids).forEach((id, i) => {
-        const obj = self.objects.get(id);
+        let obj;
+        if (isMovableLinePointId(id)) {
+          // Special case for movableLine points, which aren't in self.objects
+          obj = self.getMovableLinePoint(id);
+        } else {
+          obj = self.objects.get(id);
+        }
         if (obj) {
           const { position, text } = propsArray[i] || propsArray[0];
           if (position != null) {
