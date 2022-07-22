@@ -15,14 +15,125 @@ $duration-label-back: $gray-mid;
   border: solid 2px #ffffff;
 
   .topbar-left {
-    width: 10%;
+    width: 20%;
+    display: flex;
+
+    .icon-refresh {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: white;
+      width: 28px;
+      height: 28px;
+      margin: 0;
+      margin-right: 5px;
+      padding: 0px 15px;
+      border: 2px solid #bcbcbc;
+      &:hover:not([disabled]) {
+        background-color: $gray-light-hover;
+        cursor: pointer;
+      }
+      &:active:not([disabled]) {
+        background-color: $gray-light-click;
+      }
+      &:disabled {
+        opacity: 0.6;
+      }
+      .refresh {
+        width: 16px;
+        height: 16px;
+        background-repeat: no-repeat;
+        background-image: url("../../assets/icons/refresh/refresh.svg");
+        &:hover {
+          background-image: url("../../assets/icons/refresh/refresh-hover.svg");
+        }
+        &:active {
+          background-image: url("../../assets/icons/refresh/refresh-active.svg");
+        }
+      }
+      .serial {
+        width: 16px;
+        height: 16px;
+        background-repeat: no-repeat;
+        background-image: url("../../assets/icons/serialconnection/serial.svg");
+        &:hover {
+          background-image: url("../../assets/icons/serialconnection/serial.svg");
+        }
+        &:active {
+          background-image: url("../../assets/icons/serialconnection/serial.svg");
+        }
+      }
+    }
+
+    .icon-serial {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      margin: 0;
+      margin-left: 5px;
+      padding: 0;
+      border: 2px solid #bcbcbc;
+      &:hover:not([disabled]) {
+        background-color: $gray-light-hover;
+        cursor: pointer;
+      }
+      &:active:not([disabled]) {
+        background-color: $gray-light-click;
+      }
+      &:disabled {
+        opacity: 0.6;
+      }
+      &.physical-connection.no-port.nodes-in-need {
+        background-color: lightgoldenrodyellow;
+        //animation: slowpulse 2s linear infinite;
+
+        @keyframes slowpulse {
+          50% {
+            opacity: .4;
+          }
+        }
+      }
+      &.has-port {
+        background-color: lightgreen;
+      }
+      &.nodes-in-need.no-physical-connection {
+        background-color: #FFC0CB;
+        //animation: slowpulse 2s linear infinite;
+      }
+      &.has-port.no-physical-connection { //occurs if wire yanked out
+        background-color: #FFC0CB;
+        //animation: slowpulse 2s linear infinite;
+      }
+
+      .serial {
+        width: 10px;
+        height: 16px;
+        background-repeat: no-repeat;
+        background-image: url("../../assets/icons/serialconnection/serial.svg");
+        &:hover {
+          background-image: url("../../assets/icons/serialconnection/serial.svg");
+        }
+        &:active {
+          background-image: url("../../assets/icons/serialconnection/serial.svg");
+        }
+      }
+    }
+
+    .serial-message {
+      position: absolute;
+      left: 42px;
+      margin-top: 4px;
+      color:#444343;
+    }
   }
 
   .topbar-center {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 80%;
+    width: 60%;
 
     .running-container {
       &.countdown {
@@ -189,7 +300,7 @@ $duration-label-back: $gray-mid;
   .topbar-right {
     display: flex;
     justify-content: right;
-    width: 10%;
+    width: 20%;
 
     .rate-ui {
       display: flex;
@@ -200,41 +311,7 @@ $duration-label-back: $gray-mid;
       margin-right: 5px;
       padding: 2px;
       border: 2px solid #bcbcbc;
-    }
-
-    .icon-refresh {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: white;
-      width: 28px;
-      height: 28px;
-      margin: 0;
-      margin-right: 5px;
-      padding: 0;
-      border: 2px solid #bcbcbc;
-      &:hover:not([disabled]) {
-        background-color: $gray-light-hover;
-        cursor: pointer;
-      }
-      &:active:not([disabled]) {
-        background-color: $gray-light-click;
-      }
-      &:disabled {
-        opacity: 0.6;
-      }
-      .refresh {
-        width: 16px;
-        height: 16px;
-        background-repeat: no-repeat;
-        background-image: url("../../assets/icons/refresh/refresh.svg");
-        &:hover {
-          background-image: url("../../assets/icons/refresh/refresh-hover.svg");
-        }
-        &:active {
-          background-image: url("../../assets/icons/refresh/refresh-active.svg");
-        }
-      }
+      width:80px;
     }
   }
 }

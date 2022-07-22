@@ -6,6 +6,7 @@ import { ITileExportOptions } from "./tool-content-info";
 import { findMetadata, ToolContentModelType, ToolContentUnion } from "./tool-types";
 import { DisplayUserTypeEnum } from "../stores/user-types";
 import { uniqueId } from "../../utilities/js-utils";
+import { StringBuilder } from "../../utilities/string-builder";
 
 // generally negotiated with app, e.g. single column width for table
 export const kDefaultMinWidth = 60;
@@ -82,7 +83,28 @@ export const ToolTileModel = types
       return isPlaceholderContent(self.content) ? (self.content).sectionId : undefined;
     },
     exportJson(options?: ITileExportOptions): string | undefined {
-      return (self.content as any).exportJson?.(options);
+      const { includeId, excludeTitle, ...otherOptions } = options || {};
+      let contentJson = (self.content as any).exportJson(otherOptions);
+      if (!contentJson) return;
+      if (options?.rowHeight) {
+        // add comma before layout/height entry
+        contentJson = contentJson[contentJson.length - 1] === "\n"
+                ? `${contentJson.slice(0, contentJson.length - 1)},\n`
+                : `${contentJson},`;
+      }
+
+      const builder = new StringBuilder();
+      builder.pushLine("{");
+      if (includeId) {
+        builder.pushLine(`"id": "${self.id}",`, 2);
+      }
+      if (!excludeTitle && self.title) {
+        builder.pushLine(`"title": "${self.title}",`, 2);
+      }
+      builder.pushBlock(`"content": ${contentJson}`, 2);
+      options?.rowHeight && builder.pushLine(`"layout": { "height": ${options.rowHeight} }`, 2);
+      builder.pushLine(`}`);
+      return builder.build();
     }
   }))
   .actions(self => ({

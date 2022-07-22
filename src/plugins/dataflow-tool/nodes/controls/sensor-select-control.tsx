@@ -5,6 +5,7 @@ import Rete, { NodeEditor, Node } from "rete";
 import { NodeSensorTypes, NodeChannelInfo,
          kSensorSelectMessage, kSensorMissingMessage } from "../../model/utilities/node";
 import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
+import DropdownCaretIcon from "../../assets/icons/dropdown-caret.svg";
 import "./sensor-select-control.sass";
 import "./value-control.sass";
 
@@ -66,11 +67,11 @@ export class SensorSelectControl extends Rete.Control {
                                       this.props.showTypeList = false;
                                       (this as any).update();
                                     });
-      let icon = "";
+      let icon: any = "";
       let name = "";
       const sensorType = NodeSensorTypes.find((s: any) => s.type === type);
       if (sensorType && sensorType.icon) {
-        icon = `#${sensorType.icon}`;
+        icon = sensorType.icon;
         name = sensorType.name;
       }
 
@@ -81,13 +82,13 @@ export class SensorSelectControl extends Rete.Control {
               ? <div className="label unselected">Select a sensor type</div>
               : <div className="top-item-holder">
                   <svg className="icon top">
-                    <use xlinkHref={icon}/>
+                    {typeof icon === "string" ? icon : icon()}
                   </svg>
                   <div className="label">{name}</div>
                 </div>
             }
             <svg className="icon dropdown-caret">
-              <use xlinkHref="#icon-dropdown-caret"/>
+              <DropdownCaretIcon />
             </svg>
           </div>
           {showList ?
@@ -103,7 +104,7 @@ export class SensorSelectControl extends Rete.Control {
                 onMouseDown={onListOptionClick(val.type)}
               >
                 <svg className="icon">
-                  <use xlinkHref={`#${val.icon}`}/>
+                  {typeof val.icon === "string" ? val.icon : val.icon()}
                 </svg>
                 <div className="label">{val.name}</div>
               </div>
@@ -139,7 +140,7 @@ export class SensorSelectControl extends Rete.Control {
         if (!ch && (!id || id === "none")) return kSensorSelectMessage;
         if (ch === "none") return "None Available";
         if (!ch) return `${kSensorMissingMessage} ${id}`;
-        if (ch.missing) return `${kSensorMissingMessage} ${ch.channelId}`;
+        if (ch.missing) return `${kSensorMissingMessage} connect for live ${ch.name}`;
         let count = 0;
         channelsForType.forEach( c => { if (c.type === ch.type && ch.hubId === c.hubId) count++; } );
         const chStr = ch.virtual
@@ -165,7 +166,7 @@ export class SensorSelectControl extends Rete.Control {
             <div className={titleClass}>{channelString}</div>
             <div className="dropdown-caret-holder">
               <svg className="icon dropdown-caret">
-                <use xlinkHref="#icon-dropdown-caret"/>
+                <DropdownCaretIcon />
               </svg>
             </div>
           </div>
@@ -267,7 +268,6 @@ export class SensorSelectControl extends Rete.Control {
       this.props.type = nch.type;
       this.putData("type", nch.type);
     }
-
     this.props.sensor = val;
     this.putData("sensor", val);
     (this as any).update();

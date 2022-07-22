@@ -1,0 +1,4 @@
+<svg id="icon-xor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
+  <title>xor</title>
+  <path id="xor" d="M7,2A5,5,0,1,1,2,7,5,5,0,0,1,7,2M7,.5A6.5,6.5,0,1,0,13.5,7,6.5,6.5,0,0,0,7,.5ZM3,6.3H6.3V2.7H7.7V6.3H11V7.68H7.7V11.3H6.3V7.68H3Z"/>
+</svg>
