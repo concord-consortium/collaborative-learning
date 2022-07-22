@@ -125,7 +125,7 @@ export class SerialDevice {
 
     // need an inverse, since this is "percent closed"
     const percent = n / 100;
-    let openTo = 180 - (percent * 60);
+    let openTo = Math.round(180 - (percent * 60));
     // at current senitivity "no flex" hovers in the 160s
     if (openTo > 160 ){
       openTo = 180;
