@@ -1,8 +1,8 @@
+import classNames from "classnames";
 import { clone, debounce } from "lodash";
 import { observer, inject } from "mobx-react";
 import React from "react";
 import ResizeObserver from "resize-observer-polyfill";
-import classNames from "classnames";
 import { BaseComponent, IBaseProps } from "./base";
 import { CanvasComponent } from "./document/canvas";
 import { DocumentViewMode } from "./document/document";
@@ -79,22 +79,6 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     });
     this.container && this.resizeObserver.observe(this.container);
   }
-
-  // public componentDidUpdate() {
-  //   const {groupId, groupViewContext} = this.props;
-  //   const {toggledContextMap} = this.state;
-  //   const currentState = groupId && toggledContextMap[groupId];
-
-  //   if (groupViewContext !== undefined && (groupViewContext !== currentState)) {
-  //     this.setState(state => {
-  //       if (groupId) {
-  //         const current = state.toggledContextMap[groupId] ?? null;
-  //         state.toggledContextMap[groupId] = current ? null : groupViewContext;
-  //       }
-  //       return { toggledContextMap: clone(state.toggledContextMap) };
-  //     });
-  //   }
-  // }
 
   public componentWillUnmount() {
     this.resizeObserver.disconnect();
