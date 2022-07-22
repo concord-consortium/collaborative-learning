@@ -141,6 +141,10 @@ export interface TreeManagerAPI {
      * @param exchangeId a unique id created by the tree to identify this exchange.
      * This same exchangeId needs to be passed to addTreePatchRecord to end this
      * call.
+     * 
+     * @param name this is an identifier that is useful for error messages if a
+     * history entry is not complete when it is expected to be complete the list of
+     * active exchanges can be viewed to see which one hasn't ended yet.
      */
-    startExchange: (historyEntryId: string, exchangeId: string) => Promise<void>;
+    startExchange: (historyEntryId: string, exchangeId: string, name: string) => Promise<void>;
 }

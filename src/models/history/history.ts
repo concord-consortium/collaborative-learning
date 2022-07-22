@@ -33,9 +33,11 @@ export const HistoryEntry = types.model("HistoryEntry", {
     state: types.optional(types.enumeration("HistoryEntryState", ["recording", "complete"]), "recording")
 })
 .volatile(self => ({
-    // I'm using number here just because we need a value, so we might as well
-    // record how many times an exchange is referenced
-    activeExchanges: observable.map<string, number>({}, {name: "activeExchanges"})
+    // The value of the map should be the name of the exchange. This is useful
+    // for debugging an activeExchange that hasn't been ended. 
+    // The last name param to observable.map is a feature of MobX that can also 
+    // help with debugging.
+    activeExchanges: observable.map<string, string>({}, {name: "activeExchanges"})
 }));
 export interface HistoryEntrySnapshot extends SnapshotIn<typeof HistoryEntry> {}
 

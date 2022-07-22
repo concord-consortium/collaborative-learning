@@ -1,10 +1,11 @@
 import {
   types, Instance, flow, IJsonPatch, isAlive
 } from "mobx-state-tree";
+import { nanoid } from "nanoid";
 import { TreeAPI } from "./tree-api";
 import { UndoStore } from "./undo-store";
 import { TreePatchRecord, HistoryEntry, TreePatchRecordSnapshot } from "./history";
-import { nanoid } from "nanoid";
+import { DEBUG_HISTORY } from "../../lib/debug";
 
 /**
  * Helper method to print objects in template strings
@@ -52,7 +53,7 @@ export const TreeManager = types
     self.trees[treeId] = tree;
   },
 
-  startExchange(historyEntryId: string, exchangeId: string) {
+  startExchange(historyEntryId: string, exchangeId: string, name: string) {
     // Ignore fake history entries these are used when replaying history
     // to the tree
     if (historyEntryId === FAKE_HISTORY_ENTRY_ID) {
@@ -76,14 +77,14 @@ export const TreeManager = types
     if (activeExchangeValue) {
       throw new Error("trying to create or update a history entry that has an existing open call");
     }
-    entry.activeExchanges.set(exchangeId, 1);
+    entry.activeExchanges.set(exchangeId, name);
     return Promise.resolve();
   },
 
   endExchange(entry: Instance<typeof HistoryEntry>, exchangeId: string) {
-    const openCallValue = entry.activeExchanges.get(exchangeId);
-    if (!openCallValue) {
-      throw new Error(`The open call, doesn't exist for ${ json({historyEntryId: entry.id, exchangeId}) }`);
+    const openExchangeValue = entry.activeExchanges.get(exchangeId);
+    if (!openExchangeValue) {
+      throw new Error(`There is no active exchange matching ${ json({historyEntryId: entry.id, exchangeId}) }`);
     }
 
     entry.activeExchanges.delete(exchangeId);    
@@ -124,7 +125,7 @@ export const TreeManager = types
     entry.tree = treeId;
     entry.undoable = undoable;
 
-    entry.activeExchanges.set(exchangeId, 1);
+    entry.activeExchanges.set(exchangeId, `TreeManager.createHistoryEntry ${name}`);
 
     return entry;
   }
@@ -155,7 +156,7 @@ export const TreeManager = types
       // 
       // FIXME: how is exchangeId handled in case #2?
       const applyExchangeId = nanoid();
-      self.startExchange(historyEntryId, applyExchangeId);
+      self.startExchange(historyEntryId, applyExchangeId, "updateSharedModel.apply");
       return tree.applySharedModelSnapshotFromManager(historyEntryId, applyExchangeId, snapshot);
     });
     // The contract for this method is to return a Promise<void> so we cast the result here.
@@ -202,6 +203,12 @@ export const TreeManager = types
     // This is how the tree tells the manager that this exchangeId is closed.
     if (treePatchRecord.patches.length > 0) {
       entry.records.push(treePatchRecord);
+    }
+
+    if (DEBUG_HISTORY) {
+      console.log("addTreePatchRecord", 
+        { action: record.action, historyEntryId, exchangeId, 
+          exchangeName: entry.activeExchanges.get(exchangeId)});
     }
 
     self.endExchange(entry, exchangeId);

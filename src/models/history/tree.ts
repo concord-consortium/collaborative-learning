@@ -1,4 +1,4 @@
-import { types, IJsonPatch, applyPatch, resolvePath, getSnapshot, getParentOfType } from "mobx-state-tree";
+import { types, IJsonPatch, applyPatch, resolvePath, getSnapshot, getParentOfType, flow } from "mobx-state-tree";
 import { nanoid } from "nanoid";
 import { DEBUG_HISTORY } from "../../lib/debug";
 import { DocumentContentModel, DocumentContentModelType } from "../document/document-content";
@@ -64,8 +64,7 @@ export const Tree = types.model("Tree", {
   }
 }))
 .actions(self => {
-    const updateTreeAfterSharedModelChangesInternal = (historyEntryId: string, exchangeId: string, 
-      sharedModel: SharedModelType) => {
+    const updateTreeAfterSharedModelChangesInternal = (sharedModel: SharedModelType) => {
         // If we are applying manager patches, then we ignore any sync actions
         // otherwise the user might make a change such as changing the name of a
         // node while the patches are applied. When they do this the patch for 
@@ -175,15 +174,8 @@ export const Tree = types.model("Tree", {
   };
   
 })
-.actions(self => {
-  // FIXME: need figure out how to handle the async part here
-  // Being an action we should use a flow
-  //
-  // FIXME: we probably need to make sure we ignore this action in the tree
-  // monitor middleware. Or perhaps we can simplify some of the logic now that
-  // this is actually an action.
-  return {
-    async handleSharedModelChanges(historyEntryId: string, exchangeId: string, 
+.actions(self => ({
+  handleSharedModelChanges: flow(function* handleSharedModelChanges(historyEntryId: string, exchangeId: string, 
       call: any, sharedModelPath: string) {
         
       const model = resolvePath(self, sharedModelPath);
@@ -193,6 +185,11 @@ export const Tree = types.model("Tree", {
       if (DEBUG_HISTORY) {
         console.log(`observed changes in sharedModel: ${model.id} of tree: ${self.treeId}`, 
           {historyEntryId, action: call});
+      }
+
+      if (!self.treeManagerAPI) {
+        console.warn("handleSharedModelChanges before a treeManagerAPI is set");
+        return;
       }
 
       // What is tricky is that this is being called when the snapshot is applied by the
@@ -238,7 +235,7 @@ export const Tree = types.model("Tree", {
         // callbacks and then they are all waited for, and finally the
         // exchange is closed. 
         //
-        await self.treeManagerAPI?.updateSharedModel(historyEntryId, exchangeId, self.treeId, snapshot);
+        yield self.treeManagerAPI.updateSharedModel(historyEntryId, exchangeId, self.treeId, snapshot);
       }
 
       // let the tile update its model based on the updates that
@@ -261,82 +258,12 @@ export const Tree = types.model("Tree", {
       // track what updateTreeAfterSharedModelChanges is using and
       // only run it when one of those things have changed. 
       //
-      // NOTE: We are calling an action from a middleware that
-      // just finished a different action. Doing this starts a new
-      // top level action: an action with no parent actions. This
-      // is what we want so we can record any changes made to the
-      // tree as part of the undo entry. I don't know if calling
-      // an action from a middleware is an officially supported or
-      // tested approach. It would probably be safer to run this
-      // in a setTimeout callback. 
-      //
-      // This should not cause a loop because the implementation
+      // TODO: This should not cause a loop because the implementation
       // of updateTreeAfterSharedModelChanges should not modify
-      // the shared model view that triggered this handler in the
-      // first place. However a developer might make a mistake. So
-      // it would be useful if we could identify the looping and
-      // notify them.
-      //
-      // The manager needs to track when a history entry is
-      // complete. Since this update call can be async the
-      // manager needs to know to wait for it to finish. Before
-      // callback is called we should not have called
-      // addTreePatches for the passed in exchangeId. But
-      // addTreePatches will be called immediately after this
-      // callback is resolved. So we start a new history entry
-      // exchange and make sure that start request has been seen by
-      // the manager before returning/resolving from this shared
-      // model callback. 
-      //
-      // - Q: Do we really want to make a new exchangeId here? 
-      // - A: When this callback is triggered by the manager
-      //   when it calls applySharedModelSnapshot, a exchangeId is
-      //   passed in which we need to close out anyway so we could
-      //   just use that here. So in that case we don't really
-      //   need to make a new exchangeId. But it is also possible this
-      //   callback will be triggered by a user action. In that
-      //   case multiple shared models might be modified by the
-      //   same action which would then result in multiple
-      //   updateTreeAfterSharedModelChangesInternal calls which
-      //   would probably result in multiple addTreePatchRecord
-      //   calls for the same exchangeId. Also because
-      //   updateTreeAfterSharedModelChangesInternal is
-      //   asynchronous it is better if we don't wait for it, if
-      //   we can avoid it, so the new exchangeId allows us to wrap up
-      //   the recordAction of TreeMonitor sooner.
-      // - Q: This is happening in a middleware will all of this
-      //   await stuff work?
-      // - A: Yes this callback is called from recordAction which
-      //   is asynchronous itself. The recordAction function
-      //   will store a reference to all of the objects it needs
-      //   so it can run after the middleware has continued on
-      //   handling other actions. 
-      // - Q: What is the passed in exchangeId for?
-      // - A: It isn't necessary, but it can be a useful
-      //   piece of information to help with debugging.
-      // - Q: Will there be more than one addTreePatchRecord call
-      //   if more than one shared model is updated a user action?
-      // - A: Yes each of these shared model updates will kick of
-      //   a new top level action when
-      //   updateTreeAfterSharedModelChangesInternal is called. It
-      //   would be better if we could streamline this.
-      //
-      const updateTreeExchangeId = nanoid();
-      await self.treeManagerAPI?.startExchange(historyEntryId, updateTreeExchangeId);
-
-      // This should always result in a addTreePatchRecord being
-      // called even if there are no changes.
-      //
-      // This is because it will be a top level action, so the
-      // TreeMonitor will record it, and when the action is
-      // finished the TreeMonitor's recordAction function will
-      // call addTreePatchRecord even if there are no changes. 
-      //
-      // FIXME: if this action is changed to a flow then this 
-      // updateTreeAfterSharedModelChangesInternal will not be the top
-      // level action itself. Instead handleSharedModelChanges will be the
-      // top level action.
-      self.updateTreeAfterSharedModelChangesInternal(historyEntryId, updateTreeExchangeId, model);
-    }
-  };
-});
+      // the shared model or shared model view that triggered this 
+      // handler in the first place. However a developer might make 
+      // a mistake. So it would be useful if we could identify the 
+      // looping and notify them.
+      self.updateTreeAfterSharedModelChangesInternal(model);
+  })
+}));

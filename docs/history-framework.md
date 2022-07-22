@@ -155,9 +155,14 @@ sequenceDiagram
 This is usually triggered when an action is called on a tile.
 ```mermaid
 sequenceDiagram
+  participant Tile
   participant TreeMonitor
   participant Tree
   participant TreeManager
+  Note over Tile: some action
+  Tile->>TreeMonitor: onStart
+  Note over TreeMonitor: record all changes 
+  Tile->>TreeMonitor: onFinish
   TreeMonitor->>TreeManager: addHistoryEntry
   activate TreeManager
   Note right of TreeManager: same exchangeId 
@@ -200,9 +205,9 @@ sequenceDiagram
 - [x] add a test where a new shared model is added to the document and see what history entries are generated and whether the updateSharedModel methods are called correctly. I haven't really thought about what should happen here. fixmes are in tree-monitor recordPatches
 - [x] see if we can remove the code which creates a history entry when addPatchesToHistoryEntry is called
 - [x] look at the history entry generated when the history is replayed. The fixme is in the endExchange. In the case of time travel we don't want to generate new history entries when they time travel. And we aren't currently planning to replay the history from scratch. So if it is easy we should get rid of any history entry generation when replaying. The test for replaying does have the tree monitor installed when the history is replayed so it is a way to test whether we can skip this.
-- [ ] Tree.handleSharedModelChanges is an async action that ins't a flow. There might also be a way to simplify it now that it is an action.
-- [ ] Tree.handleSharedModelChanges calls updateTreeAfterSharedModelChangesInternal but since it is async and not a flow this call becomes a new top level action. If we switch it to a flow then we'll probably have to ignore the handleSharedModelChanges in the tree-monitor
+- [x] Tree.handleSharedModelChanges is an async action that ins't a flow. There might also be a way to simplify it now that it is an action.
+- [x] Tree.handleSharedModelChanges calls updateTreeAfterSharedModelChangesInternal but since it is async and not a flow this call becomes a new top level action. If we switch it to a flow then we'll probably have to ignore the handleSharedModelChanges in the tree-monitor
 - [ ] UndoStore.redo and UndoStore.undo do not handle async well, they are changing the undo index before all of the patches have been applied to the trees.
-- [ ] review call to updateAfterSharedModelChanges in shared-model-document-manager.addTileSharedModel. Is it necessary?
+- [x] review call to updateAfterSharedModelChanges in shared-model-document-manager.addTileSharedModel. Is it necessary?
 - [ ] review how exchangeId is handled when an undo triggers a call to updateSharedModel, should a new exchangeId be generated here or should it be re-using an existing exchangeId?
 - [ ] try to unify Document.afterCreate with createDocument

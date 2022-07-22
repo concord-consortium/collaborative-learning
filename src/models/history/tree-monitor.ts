@@ -220,18 +220,57 @@ export const addTreeMonitor = (tree: Instance<typeof Tree>,  manager: TreeManage
             // But that doesn't have access to the action id that triggered the sync, and that action id is
             // needed so we can group the changes together so we can undo them
             // later.
+            //
+            // TODO: If there are multiple shared model changes, we might want
+            // to send them all to the tree at the same time, that way
+            // it can inform the tiles of all changes at the same time.
             for (const [sharedModelPath, numModifications] of Object.entries(sharedModelModifications)) {
                 if (numModifications > 0) {
-                    // Run the callback tracking changes to the shared model
-                    // We need to wait for these to complete because the manager
-                    // needs to know when this history entry is complete. If it gets
-                    // the addTreePatchRecord before any changes from the shared
-                    // models it will mark the entry complete too soon.
+                    // Run the callbacks tracking changes to the shared model We
+                    // need to wait for these to complete because the manager
+                    // needs to know when this history entry is complete. If it
+                    // gets the addTreePatchRecord before any changes from the
+                    // shared models it will mark the entry complete too soon.
                     //
-                    // TODO: If there are multiple shared model changes, we might want
-                    // to send them all to the tree at the same time, that way
-                    // it can inform the tiles of all changes at the same time.
-                    await tree.handleSharedModelChanges(historyEntryId, exchangeId, call, sharedModelPath);
+                    // handleSharedModelChanges is an action on the tree, that
+                    // we are calling from a middleware that is monitoring that
+                    // tree. And at this point we are finishing a different
+                    // action. Currently doing this starts a new top level
+                    // action: an action with no parent actions. This is what we
+                    // want so we can record any changes made to the tree as
+                    // part of the undo entry. I don't know if calling an action
+                    // from a middleware is an officially supported or tested
+                    // approach. It is working now. In the future it might be
+                    // necessary to delay this with a setTimeout. 
+                    //
+                    // Without the setTimeout this ends up being basically
+                    // recursive. We will end up back in this recordAction
+                    // function. Because we are awaiting
+                    // handleSharedModelChanges that second recursive
+                    // recordAction will get kicked off before this call to
+                    // handleSharedModelChanges returns. onFinish does not await
+                    // recordAction, so after the second recordAction is called,
+                    // this first call can continue. 
+                    //
+                    // A new exchangeId needs to be created here because this
+                    // handleSharedModelChanges is treated the same as a call
+                    // from the TreeManager in these cases the middleware
+                    // expects the exchange to have already been started.
+                    // handleSharedModelChanges needs to be treated this way so
+                    // the same historyEntryId is used by the middleware. This
+                    // way any changes triggered by the shared model update are
+                    // recorded in the same HistoryEntry
+                    //
+                    // This should always result in a addTreePatchRecord being
+                    // called even if there are no changes.
+                    // This is because it is a top level action, so just a few 
+                    // lines down, in the recursive call it will call 
+                    // addTreePatchRecord
+                    const sharedModelChangesExchangeId = nanoid();
+                    await manager.startExchange(historyEntryId, sharedModelChangesExchangeId, 
+                        "recordAction.sharedModelChanges");
+                    await tree.handleSharedModelChanges(historyEntryId, sharedModelChangesExchangeId, 
+                        call, sharedModelPath);
                 }
             }
 
@@ -278,13 +317,17 @@ export const addTreeMonitor = (tree: Instance<typeof Tree>,  manager: TreeManage
 };
 
 function isActionFromManager(call: IActionTrackingMiddleware2Call<CallEnv>) {
-    return call.name === "applySharedModelSnapshotFromManager" ||
-        // updateTreeAfterSharedModelChangesInternal is not always an action
-        // from the manager. It can happen when a tree modifies its local
-        // shared model view and that triggers an update of the rest of the
-        // state of the tree.
-        call.name === "updateTreeAfterSharedModelChangesInternal" ||
+    return (
+        // Because we haven't implemented applySharedModelSnapshotFromManager yet
+        // All calls to handleSharedModelChanges are actually internal calls
+        // However we treat it the same because we want any changes triggered
+        // by a shared model update added to the same history entry
+        call.name === "handleSharedModelChanges" ||
         call.name === "applyPatchesFromManager" ||
         call.name === "startApplyingPatchesFromManager" ||
-        call.name === "finishApplyingPatchesFromManager";
+        call.name === "finishApplyingPatchesFromManager" ||
+        // We haven't implemented this yet, it is needed to support two trees
+        // working with the same shared model
+        call.name === "applySharedModelSnapshotFromManager"
+    );
 }

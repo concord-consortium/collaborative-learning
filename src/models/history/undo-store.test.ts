@@ -278,7 +278,7 @@ const initialSharedModelUpdateEntry = {
   created: expect.any(Number), 
   id: expect.any(String),
   records: [
-    { action: "/updateTreeAfterSharedModelChangesInternal", 
+    { action: "/handleSharedModelChanges", 
       inversePatches: [
         { op: "replace", path: "/content/tileMap/t1/content/text", value: undefined}
       ], 
@@ -303,14 +303,12 @@ const initialSharedModelUpdateEntry = {
 };
 
 it("records a shared model change as one history event with two TreeRecordEntries", async () => {
-  const {sharedModel, tileContent, manager} = setupDocument();
+  const {sharedModel, manager} = setupDocument();
   // This should record a history entry with this change and any changes to tiles
   // triggered by this change
   sharedModel.setValue("something");
 
-  // This might not really be needed but it is a good way to wait for all of the async
-  // calls to propagate before making assertions
-  await expectUpdateToBeCalledTimes(tileContent, 1);
+  await expectEntryToBeComplete(manager, 1);
 
   const changeDocument = manager.document;
   expect(getSnapshot(changeDocument.history)).toEqual([ 
@@ -360,7 +358,8 @@ it("can undo a shared model change", async () => {
 
   undoStore.undo();
 
-  // TODO: document why the update is called 2 more times here
+  await expectEntryToBeComplete(manager, 2);
+  // TODO: document why update is called 1 more times here
   await expectUpdateToBeCalledTimes(tileContent, 3);
 
   expect(sharedModel.value).toBeUndefined();
@@ -415,15 +414,15 @@ it("can redo a shared model change", async () => {
 
   undoStore.undo();
 
-  // TODO: document why the update is called 2 more times here
+  // TODO: document why the update is called 1 more times here
   await expectUpdateToBeCalledTimes(tileContent, 3);
   expect(sharedModel.value).toBeUndefined();
   expect(tileContent.text).toBeUndefined();
 
   undoStore.redo();
 
-  // TODO: document why the update is called 3 more times here
-  await expectUpdateToBeCalledTimes(tileContent, 6);
+  // TODO: document why the update is called 1 more times here
+  await expectUpdateToBeCalledTimes(tileContent, 5);
   expect(sharedModel.value).toBe("something");
   expect(tileContent.text).toBe("something-tile");
 
@@ -572,11 +571,27 @@ async function expectUpdateToBeCalledTimes(testTile: TestTileType, times: number
   return expect(updateCalledTimes).resolves.toBeUndefined();
 }
 
+// TODO: it would nicer to use a custom Jest matcher here so we can
+// provide a better error message when it fails
 async function expectEntryToBeComplete(manager: Instance<typeof TreeManager>, length: number) {
   const changeDocument = manager.document as Instance<typeof CDocument>;
-  const changeEntryComplete = when(
-    () => changeDocument.history.length >= length && changeDocument.history.at(length-1)?.state === "complete", 
-    {timeout: 100});
-  await expect(changeEntryComplete).resolves.toBeUndefined();
-  expect(changeDocument.history.length).toBe(length);
+  let timedOut = false;
+  try {
+    await when(
+      () => changeDocument.history.length >= length && changeDocument.history.at(length-1)?.state === "complete", 
+      {timeout: 100});  
+  } catch (e) {
+    timedOut = true;
+  }
+  expect({
+    historyLength: changeDocument.history.length,
+    lastEntryState: changeDocument.history.at(-1)?.state,
+    activeExchanges: changeDocument.history.at(-1)?.activeExchanges.toJSON(),
+    timedOut
+  }).toEqual({
+    historyLength: length,
+    lastEntryState: "complete",
+    activeExchanges: [],
+    timedOut: false
+  });
 }

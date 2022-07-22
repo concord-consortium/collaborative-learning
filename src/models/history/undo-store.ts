@@ -34,68 +34,72 @@ export const UndoStore = types
         const applyPatchesToTrees = 
           flow(function* applyPatchesToTrees(entryToUndo: Instance<typeof HistoryEntry>, 
                                              opType: HistoryOperation) {
-            const treeEntries = entryToUndo.records;
+            const treePatchRecords = entryToUndo.records;
 
             const historyEntryId = nanoid();
             const exchangeId = nanoid();
 
-            // Start a non-undoable action with this id
             const manager = getParent(self) as Instance<typeof TreeManager>;
+
+            // Start a non-undoable action with this id
+            // TODO: we are using a fake tree id of "manager" here. This is currently
+            // working, but we probably want to review this approach.
             const historyEntry = 
               manager.createHistoryEntry(historyEntryId, exchangeId, opType, "manager", false);
 
-            // first disable shared model syncing in the tree
-            const startPromises = treeEntries.map(treeEntry => {
-                const startExchangeId = nanoid();
-                manager.startExchange(historyEntryId, startExchangeId);
+            // Collect the trees that we are going to work with
+            const treeIds = treePatchRecords.map(treePatchRecord => treePatchRecord.tree);
+            const uniqueTreeIds = [...new Set(treeIds)];
 
-                return manager.trees[treeEntry.tree].startApplyingPatchesFromManager(historyEntryId, startExchangeId);
+            // first disable shared model syncing in each tree
+            const startPromises = uniqueTreeIds.map(treeId => {
+                const startExchangeId = nanoid();
+                manager.startExchange(historyEntryId, startExchangeId, "UndoStore.applyPatchesToTrees.start");
+
+                return manager.trees[treeId].startApplyingPatchesFromManager(historyEntryId, startExchangeId);
             });
             yield Promise.all(startPromises);
 
             // apply the patches to all trees
-            const applyPromises = treeEntries.map(treeEntry => {
+            const applyPromises = treePatchRecords.map(treePatchRecord => {
                 // console.log(`send tile entry to ${opType} to the tree`, getSnapshot(treeEntry));
 
-                // When a patch is applied to shared model, it will send its updated
+                // When a patch is applied to a shared model, it will send its updated
                 // state to all tiles. If this is working properly the promise returned by
                 // the shared model's applyPatchesFromManager will not resolve until all tiles
                 // using it have updated their view of the shared model.
 
                 // We need a new exchangeId for each apply call here, so each
                 // tree can finish the exchange when it calls addTreeRecordPatches.
-                // This new exchangeId is added to the history entries volatile
-                // storage using startExchange. So now the history entry
-                // knows it needs to wait for this exchange to complete before
-                // marking the full entry as complete.
                 const applyExchangeId = nanoid();
-                manager.startExchange(historyEntryId, applyExchangeId);
+                manager.startExchange(historyEntryId, applyExchangeId, "UndoStore.applyPatchesToTrees.apply");
 
-                const tree = manager.trees[treeEntry.tree];
-                return tree.applyPatchesFromManager(historyEntryId,  applyExchangeId, treeEntry.getPatches(opType));
+                const tree = manager.trees[treePatchRecord.tree];
+                return tree.applyPatchesFromManager(historyEntryId,  applyExchangeId, 
+                    treePatchRecord.getPatches(opType));
             });
             yield Promise.all(applyPromises);
 
             // finish the patch application
+            //
             // Need to tell all of the tiles to re-enable the sync and run the sync
             // to resync their tile models with any changes applied to the shared models
             // For this final step, we still use promises so we can wait for everything to complete. 
             // This can be used in the future to make sure multiple applyPatchesToTrees are not 
             // running at the same time.
-            const finishPromises = treeEntries.map(treeEntry => {
+            const finishPromises = uniqueTreeIds.map(treeId => {
                 const finishExchangeId = nanoid();
-                manager.startExchange(historyEntryId, finishExchangeId);
+                manager.startExchange(historyEntryId, finishExchangeId, "UndoStore.applyPatchesToTrees.finish");
 
-                return manager.trees[treeEntry.tree]
+                return manager.trees[treeId]
                   .finishApplyingPatchesFromManager(historyEntryId, finishExchangeId);
             });
             yield Promise.all(finishPromises);
 
-            // TODO I'm closing the top level exchange after the finish Promises
-            // is called. This way the tree has a chance to add a new exchange
-            // to the history entry which will keep it "recording" until that
-            // new exchange is also finished. It isn't clear if this is really
-            // needed though.
+            // The top level exchange after the finish Promises is called. This
+            // way each tree has a chance to add a new exchange to the history
+            // entry which will keep it "recording" until that new exchange is
+            // also finished. 
             manager.endExchange(historyEntry, exchangeId);
         });
 
