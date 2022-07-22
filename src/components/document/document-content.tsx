@@ -203,7 +203,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderSpacer = () => {
-    const spacerClass = classNames({"spacer" : !this.props.readOnly}, {"playback-spacer": this.props.showPlayback});
+    const spacerClass = classNames({"spacer" : !this.props.readOnly, "playback-spacer": this.props.showPlayback});
     return <div className={spacerClass} onClick={this.handleClick} />;
   };
 
