@@ -14,6 +14,7 @@ import { ImageDragDrop } from "../utilities/image-drag-drop";
 import "./document-workspace.sass";
 
 interface IProps extends IBaseProps {
+  isExpanderShown: boolean;
 }
 
 @inject("stores")
@@ -128,7 +129,11 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
 
   private renderDocument(className: string, side: WorkspaceSide, child?: JSX.Element) {
     const { appConfig: { navTabs: { showNavPanel } }, ui } = this.stores;
-    const workspaceLeft = !showNavPanel? 0 : ui.navTabContentShown ? "50%" : 38;
+    const workspaceLeft = !showNavPanel
+                            ? 0
+                            : ui.navTabContentShown && !this.props.isExpanderShown
+                              ? "50%"
+                              : this.props.isExpanderShown ? "calc(50% + 35px)" : 38;
     const style = { left: workspaceLeft };
     const roleClassName = side === "primary" ? "primary-workspace" : "reference-workspace";
     return (

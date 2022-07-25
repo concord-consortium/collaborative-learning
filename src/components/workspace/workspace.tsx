@@ -1,7 +1,9 @@
 import { observer } from "mobx-react";
-import React from "react";
+import React, { useState } from "react";
 import { IBaseProps } from "../base";
+import { useStores } from "../../hooks/use-stores";
 import { kDividerHalf, kDividerMax, kDividerMin } from "../../models/stores/ui-types";
+import { DocumentWorkspaceComponent } from "../document/document-workspace";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { NavTabPanel } from "../navigation/nav-tab-panel";
 import { CollapsedResourcesTab } from "../navigation/collapsed-resources-tab";
@@ -9,19 +11,19 @@ import { CollapsedWorkspaceTab } from "../document/collapsed-document-workspace-
 import { ResizePanelDivider } from "./resize-panel-divider";
 
 import "./workspace.sass";
-import { useStores } from "../../hooks/use-stores";
-import { DocumentWorkspaceComponent } from "../document/document-workspace";
 
 interface IProps extends IBaseProps {
 }
 
 export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
-      const { appConfig: { navTabs: navTabSpecs },
-            teacherGuide,
-            user: { isTeacher },
-            ui: { activeNavTab, navTabContentShown, dividerPosition,
-                  workspaceShown, problemWorkspace, setDividerPosition }
-          } = useStores();
+  const { appConfig: { navTabs: navTabSpecs },
+          teacherGuide,
+          user: { isTeacher },
+          ui: { activeNavTab, navTabContentShown, dividerPosition,
+                workspaceShown, problemWorkspace, setDividerPosition }
+        } = useStores();
+   const [showExpanders, setShowExpanders] = useState(false);
+
   let imageDragDrop: ImageDragDrop;
 
   const handleDragOverWorkspace = (e: React.DragEvent<HTMLDivElement>) => {
@@ -44,6 +46,14 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
     }
   };
 
+  const handleDividerClick = () => {
+    setShowExpanders(!showExpanders);
+  };
+
+  const toggleShowExpanders = (show?:boolean) => {
+    setShowExpanders(show || !showExpanders);
+  };
+
   const renderNavTabPanel = () => {
     const studentTabs = navTabSpecs?.tabSpecs.filter(t => !t.teacherOnly);
     const teacherTabs = navTabSpecs?.tabSpecs.filter(t => (t.tab !== "teacher-guide") || teacherGuide);
@@ -55,6 +65,7 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
             tabs={tabsToDisplay}
             onDragOver={handleDragOverWorkspace}
             isResourceExpanded={navTabContentShown}
+            isExpanderShown={showExpanders}
           />
         : <CollapsedResourcesTab
             onExpandResources={toggleExpandResources}
@@ -74,10 +85,13 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
       <ResizePanelDivider
         isResourceExpanded={navTabContentShown}
         dividerPosition={dividerPosition}
+        showExpanders={showExpanders}
+        onDividerClick={handleDividerClick}
+        toggleShowExpanders={toggleShowExpanders}
         onExpandWorkspace={toggleExpandWorkspace}
         onExpandResources={toggleExpandResources}
       />
-      {workspaceShown ? <DocumentWorkspaceComponent />
+      {workspaceShown ? <DocumentWorkspaceComponent isExpanderShown={showExpanders} />
                       : <CollapsedWorkspaceTab
                           onExpandWorkspace={toggleExpandWorkspace}
                           workspaceType={problemWorkspace.type}
