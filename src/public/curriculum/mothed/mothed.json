@@ -15,7 +15,6 @@
             "type": "Text",
             "format": "html",
             "text": [
-              "<p><em>Content for opening view in CLUE (right-hand side):</em></p>",
               "<p><strong>Welcome to MothEd CLUE!</strong></p>",
               "<p>To get started, click the My Resources bar at extreme left, and then click the tab labeled <strong>Activity.</strong></p>"
             ]
@@ -385,9 +384,17 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Trap Tutorial Video</strong></p>",
-                        "<p>How to <a href='https://drive.google.com/file/d/1Vt-zeCGA7fy8prF19Jfm1m8Ror5uIXuN/view'>build a moth trap</a> using (mostly) stuff you&#x27;ve already got!</p>",
+                        "<p>Watch the video showing how to <a href='https://drive.google.com/file/d/1Vt-zeCGA7fy8prF19Jfm1m8Ror5uIXuN/view'>build a moth trap</a> trap using (mostly) stuff you've already got!</p>",
                         "<p>https://drive.google.com/file/d/1Vt-zeCGA7fy8prF19Jfm1m8Ror5uIXuN/view</p>"
                       ]
+                    }
+                  },
+                  {
+                    "id": "-i5DaNf-CUUJSvUO",
+                    "title": "Diagram of the Trap You'll Build!",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/mothed/images/mothTrapAssembly.png"
                     }
                   }
                 ]
@@ -404,7 +411,7 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Moth Pinning Video</strong></p>",
-                        "<p>Learn how to pin moths for studying, comparing, and identifying  them.</p>",
+                        "<p>Learn how to pin moths for studying, comparing, and identifying them.</p>",
                         "<p>Oregon State <a href='https://extension.oregonstate.edu/video/pinning-butterflies-moths'>Pinning Tutorial</a></p>",
                         "<p>https://extension.oregonstate.edu/video/pinning-butterflies-moths</p>"
                       ]
