@@ -231,9 +231,6 @@ export const GeometryContentModel = GeometryBaseContentModel
     get title() {
       return self.metadata?.title;
     },
-    getObject(id: string) {
-      return self.objects.get(id);
-    },
     // Returns a point defining a movableLine with the given id,
     // or undefined if there isn't one.
     getMovableLinePoint(id: string) {
@@ -248,6 +245,16 @@ export const GeometryContentModel = GeometryBaseContentModel
         }
       });
       return point;
+    }
+  }))
+  .views(self => ({
+    getObject(id: string) {
+      if (isMovableLinePointId(id)) {
+        // Special case for movableLine points, which aren't in self.objects
+        return self.getMovableLinePoint(id);
+      } else {
+        return self.objects.get(id);
+      }
     },
     getDependents(ids: string[], options?: { required: boolean }) {
       const { required = false } = options || {};
@@ -679,13 +686,7 @@ export const GeometryContentModel = GeometryBaseContentModel
                            links?: ILinkProperties) {
       const propsArray = castArray(properties);
       castArray(ids).forEach((id, i) => {
-        let obj;
-        if (isMovableLinePointId(id)) {
-          // Special case for movableLine points, which aren't in self.objects
-          obj = self.getMovableLinePoint(id);
-        } else {
-          obj = self.objects.get(id);
-        }
+        const obj = self.getObject(id);
         if (obj) {
           const { position, text } = propsArray[i] || propsArray[0];
           if (position != null) {
