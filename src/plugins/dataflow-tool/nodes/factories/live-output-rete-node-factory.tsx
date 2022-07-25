@@ -52,13 +52,14 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
             newValue = parseInt((n1 * 100).toFixed(2), 10);
           }
           const roundedDisplayValue = Math.round((newValue / 10) * 10);
-          // keeping consistent for now but we may not need to round for claw to drive well
+          // at the moment, physical claw is driven by a nearest 1%, not nearest 10%
+          // however, displaying the rounded to nearest 10% for consistency
+          // swap commented/uncommented below to change to display of nearest 1%
           // nodeValue?.setDisplayMessage(`${newValue}% closed`);
           nodeValue?.setDisplayMessage(`${roundedDisplayValue}% closed`);
 
         }
 
-        console.log(newValue);
         nodeValue?.setValue(newValue);
         nodeValue?.setConnected(inputs.nodeValue.length);
 

@@ -74,21 +74,21 @@ export const NodeTypes: NodeType[] = [
     displayName: "Transform",
   },
   {
-    name: "Relay",
-    displayName: "Relay",
-  },
-  {
     name: "Demo Output",
     displayName: "Demo Output",
+  },
+  {
+    name: "Data Storage",
+    displayName: "Data Storage",
   },
   {
     name: "Live Output",
     displayName: "Live Output",
   },
   {
-    name: "Data Storage",
-    displayName: "Data Storage",
-  },
+    name: "Relay",
+    displayName: "Relay"
+  }
 ];
 
 export const NodeOperationTypes = [
