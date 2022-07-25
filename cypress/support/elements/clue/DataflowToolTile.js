@@ -28,12 +28,6 @@ class DataflowToolTile {
   getNumberField() {
     return cy.get(`${getNodeText("number")} .number-input`);
   }
-  getSerialConnectionButton(){
-    return cy.get('.icon-serial');
-  }
-  getSerialMessage(){
-    return cy.get('.serial-message');
-  }
 }
 
 export default DataflowToolTile;

@@ -12,8 +12,6 @@ export class SerialDevice {
   writer: WritableStreamDefaultWriter;
   userSeenSerialModal: boolean | null;
 
-
-
   constructor() {
     this.value = "0";
     this.outValue = 0;
@@ -38,7 +36,6 @@ export class SerialDevice {
     localStorage.setItem("last-connect-message", status);
   }
 
-
   public hasPort(){
     const portHere = this.port !== undefined;
     const readablePort = this.port?.readable;
@@ -46,7 +43,6 @@ export class SerialDevice {
   }
 
   public async requestAndSetPort(){
-
     // Filter any local devices so we only see arduino uno and compatible in choices
     const filters = [
       { usbVendorId: 0x2341, usbProductId: 0x0043 },
@@ -123,17 +119,6 @@ export class SerialDevice {
     // 100% closed is 120deg, and 0% open is 180deg
     const percent = n / 100;
     const openTo = Math.round(180 - (percent * 60));
-
-    // set fully open/closed near extremes to reduce quiver
-    // ended up not using but keeping for future reference
-    // let openTo = Math.round(180 - (percent * 60));
-    // if (openTo > 160 ){
-    //   openTo = 180;
-    // }
-
-    // if(openTo < 130 ){
-    //   openTo = 120;
-    // }
 
     // Arduino readBytesUnitl() expects newline as delimiter
     if(this.hasPort()){

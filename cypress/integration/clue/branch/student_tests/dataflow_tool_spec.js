@@ -116,19 +116,8 @@ context('Dataflow Tool Tile', function () {
       const nodeType = "live-output";
       it("can create live output node", () => {
         dataflowToolTile.getCreateNodeButton(nodeType).click();
+        cy.get("#okButton").click(); // on first creation, modal notifies user of need to connect device
         dataflowToolTile.getNode(nodeType).should("exist");
-      });
-      it("can change output type", () => {
-        const dropdown = "outputType";
-        dataflowToolTile.getDropdown(nodeType, dropdown).click();
-        dataflowToolTile.getDropdownOptions(nodeType, dropdown).should("have.length", 2);
-        dataflowToolTile.getDropdownOptions(nodeType, dropdown).last().click();
-        dataflowToolTile.getDropdownOptions(nodeType, dropdown).should("have.length", 0);
-        dataflowToolTile.getDropdown(nodeType, dropdown).contains("Backyard Claw").should("exist");
-      });
-      it("can delete demo output node", () => {
-        dataflowToolTile.getDeleteNodeButton(nodeType).click();
-        dataflowToolTile.getNode(nodeType).should("not.exist");
       });
     });
   });
