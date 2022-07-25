@@ -1,0 +1,118 @@
+@import "../vars.sass";
+
+.resize-panel-divider {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  position: absolute;
+  top: $header-height;
+  height: calc(100vh - (#{$header-height} + #{$workspace-content-margin} * 2));
+  transition-duration: .5s;
+
+  &.divider-min {
+    align-items: flex-start;
+  }
+  &.divider-max {
+    align-items: flex-end;
+  }
+
+  .divider {
+    position: absolute;
+    width: 4px;
+    height: 100%;
+    margin: 4px 2px 0;
+    border-radius: 2px;
+    background-color: $charcoal-light-4;
+    z-index: 1;
+    cursor: col-resize;
+  }
+
+  .drag-thumbnail {
+    position: absolute;
+    z-index: 1;
+    margin-top: 9px;
+    top: 50%;
+  }
+
+  &.divider-min {
+    .drag-thumbnail {
+      margin-left: 2px;
+    }
+  }
+  &.divider-max {
+    .drag-thumbnail {
+      margin-right: 2px;
+    }
+  }
+
+  .drag-handles {
+    display: flex;
+    flex-direction: row;
+    position: relative;
+    left: 0;
+    width: 44px;
+    height: 44px;
+    z-index: 3;
+    top: 50%;
+    opacity: 0.01%;
+    &:hover {
+      opacity: 100%;
+    }
+  }
+
+  &.divider-min, &.divider-max {
+    .drag-handles {
+      width: 26px;
+    }
+  }
+}
+.expand-handles-container{
+  display: flex;
+  flex-direction: row;
+  position: absolute;
+  left: calc(50% - 38px);
+  top: $header-height;
+
+  .expand-handle {
+    position: relative;
+    height: calc(100vh - (#{$header-height} + #{$workspace-content-margin} * 2));
+    width: 38px;
+    margin: 4px 0 0 0;
+    padding: 2px;
+    box-sizing: border-box;
+    border-style: solid;
+    display: flex;
+    border: solid $charcoal;
+    background-color: $charcoal-light-6;
+    z-index: 2;
+    visibility: hidden;
+
+    &.shown {
+      visibility: visible;
+      transition-delay: 0.25s;
+      transition-property: height;
+      transition-property: visibility;
+    }
+    &.left {
+      border-radius: 8px 0 0 0;
+      border-width: 2px 1px 2px 2px;
+    }
+    &.right {
+      border-radius: 0 8px 0 0;
+      border-width: 2px 2px 2px 1px;
+    }
+    &:hover {
+      background-color: $charcoal-light-4;
+    }
+    &:active {
+      background-color: $charcoal-light-3;
+    }
+    .expand-indicator {
+      align-self: center;
+      justify-self: center;
+      &.left {
+        transform: rotate(180deg);
+      }
+    }
+  }
+}

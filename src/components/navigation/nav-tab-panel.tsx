@@ -21,7 +21,6 @@ interface IProps extends IBaseProps {
   tabs?: NavTabSpec[];
   isResourceExpanded: boolean;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
-  onDrop: (e: React.DragEvent<HTMLDivElement>) => void;
 }
 
 
@@ -45,7 +44,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
     const resourceWidth = dividerPosition === kDividerMin
                             ? kDividerMin
                             : dividerPosition === kDividerMax
-                              ? `calc(100% - ${collapseTabWidth}px - ${resizePanelWidth}px)`
+                              ? `calc(100% - ${collapseTabWidth}px)`
                               : `calc(${dividerPosition}% - ${resizePanelWidth}px)`;
     const resourceWidthStyle = {width: resourceWidth};
     const isChatEnabled = user.isNetworkedTeacher;
