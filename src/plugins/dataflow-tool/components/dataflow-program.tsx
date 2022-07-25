@@ -1098,7 +1098,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     // implementing with a "count" of 1 or 0 in case we need to count nodes in future
     let serialNodesCt = 0;
     nodes.forEach((n) => {
-      if(n.data.sensor === "emg" || n.data.sensor === "fsr"){
+      console.log(n)
+      if(n.data.sensor === "emg" || n.data.sensor === "fsr" || n.name === "Live Output"){
         serialNodesCt++;
       }
     });
@@ -1141,7 +1142,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         `Click the ⚡️ button on the upper left, then choose your device at the prompt.`;
     }
 
-    this.stores.ui.alert(alertMessage, 'Connect External Device',)
+    this.stores.ui.alert(alertMessage, 'Program Requires Connection to External Device',)
   }
 
   private updateNodeChannelInfo = (n: Node) => {
