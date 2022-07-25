@@ -9,7 +9,9 @@ export class SerialDevice {
   lastConnectMessage: string | null;
   deviceInfo: SerialPortInfo | null;
   serialNodesCount: number;
-  writer: any; // TODO - this should be WritableStream I beleive, but need to make it work
+  writer: WritableStreamDefaultWriter;
+  userSeenSerialModal: boolean | null;
+
 
 
   constructor() {
@@ -34,10 +36,6 @@ export class SerialDevice {
     this.connectChangeStamp = timeStamp;
     this.lastConnectMessage = status;
     localStorage.setItem("last-connect-message", status);
-    //  TODO (CLAW) - may need this information for a modal
-    //  if connectChangeStamp is defined, then
-    //  lastConnectMessage represents physical state
-    //  TODO this now needs debugging
   }
 
 

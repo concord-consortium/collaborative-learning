@@ -1128,9 +1128,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     // np physical connection made
     if (lastMsg !== "connect" && this.stores.serialDevice.serialNodesCount > 0){
-      alertMessage +=
-        `1. Connect the arduino to your computer.
-        2. Click the ⚡️ button on the upper left, then choose the device at the prompt.`;
+      alertMessage += "1. Connect the arduino to your computer. \
+        2. Click the ⚡️ button on the upper left, then choose the device at the prompt.";
     }
 
     // physical connection has been made but user action needed
@@ -1138,10 +1137,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         && !this.stores.serialDevice.hasPort()
         && this.stores.serialDevice.serialNodesCount > 0
     ){
-      alertMessage +=
-        `Click the ⚡️ button on the upper left, then choose your device at the prompt.`;
+      alertMessage += "Click the ⚡️ button on the upper left, then choose your device at the prompt.";
     }
-    this.stores.ui.alert(alertMessage, 'Program Requires Connection to External Device');
+
+    if (!this.stores.serialDevice.userSeenSerialModal){
+      this.stores.ui.alert(alertMessage, "Program Requires Connection to External Device");
+      this.stores.serialDevice.userSeenSerialModal = true;
+    }
   }
 
   private updateNodeChannelInfo = (n: Node) => {
