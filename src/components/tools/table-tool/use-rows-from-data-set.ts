@@ -24,6 +24,10 @@ const canonicalize = (dataSet: IDataSet, row: TRow) => {
 };
 
 export const useRowsFromDataSet = ({ dataSet, readOnly, inputRowId, rowChanges, context }: IUseRowsFromDataSet) => {
+
+  // This forces the memoized data to update when the table contents change.
+  const attrs = JSON.stringify(dataSet.attributes.toJSON());
+
   return useMemo(() => {
     const rowKeyGetter = (row: TRow) => row.__id__;
     const rowClass = (row: TRow) => row.__id__ === inputRowId ? "input-row" : undefined;
@@ -35,5 +39,6 @@ export const useRowsFromDataSet = ({ dataSet, readOnly, inputRowId, rowChanges, 
     !readOnly && rows.push(canonicalize(dataSet, { __id__: inputRowId, __context__: context }));
     rowChanges; // eslint-disable-line no-unused-expressions
     return { rows, rowKeyGetter, rowClass };
-  }, [context, dataSet, inputRowId, readOnly, rowChanges]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [attrs, context, dataSet, inputRowId, readOnly, rowChanges]);
 };
