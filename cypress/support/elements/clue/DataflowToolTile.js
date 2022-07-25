@@ -31,9 +31,6 @@ class DataflowToolTile {
   getSerialConnectionButton(){
     return cy.get('.icon-serial');
   }
-  getSerialConnectionButton(){
-    return cy.get('.icon-serial');
-  }
   getSerialMessage(){
     return cy.get('.serial-message');
   }

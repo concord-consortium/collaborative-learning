@@ -662,7 +662,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
     if (!hasRelay && !hasDataStorage && !hasDemoOutput &&!hasLiveOutput) {
       ui.alert(
-        "Program must contain a Relay, Demo Output, Live Output, or Data Storage block before it can be run.", "No Program Output"
+        "Program must contain a Relay, Demo Output, Live Output, \
+        or Data Storage block before it can be run.", "No Program Output"
       );
       return false;
     } else if (!hasValidRelay && !hasValidDataStorage && !hasDemoOutput && !hasLiveOutput ) {
@@ -1098,7 +1099,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     // implementing with a "count" of 1 or 0 in case we need to count nodes in future
     let serialNodesCt = 0;
     nodes.forEach((n) => {
-      console.log(n)
       if(n.data.sensor === "emg" || n.data.sensor === "fsr" || n.name === "Live Output"){
         serialNodesCt++;
       }
@@ -1141,8 +1141,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       alertMessage +=
         `Click the ⚡️ button on the upper left, then choose your device at the prompt.`;
     }
-
-    this.stores.ui.alert(alertMessage, 'Program Requires Connection to External Device',)
+    this.stores.ui.alert(alertMessage, 'Program Requires Connection to External Device');
   }
 
   private updateNodeChannelInfo = (n: Node) => {

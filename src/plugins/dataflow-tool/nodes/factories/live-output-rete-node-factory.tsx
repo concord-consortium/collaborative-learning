@@ -3,7 +3,7 @@ import { NodeData } from "rete/types/core/data";
 import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
 import { InputValueControl } from "../controls/input-value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
-import { NodeLiveOutputTypes, NodePlotRed } from "../../model/utilities/node";
+import { NodeLiveOutputTypes } from "../../model/utilities/node";
 
 export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
