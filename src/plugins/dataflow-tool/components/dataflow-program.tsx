@@ -660,7 +660,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         }
       });
     }
-    if (!hasRelay && !hasDataStorage && !hasDemoOutput &&!hasLiveOutput) {
+    if (!hasRelay && !hasDataStorage && !hasDemoOutput && !hasLiveOutput) {
       ui.alert(
         "Program must contain a Relay, Demo Output, Live Output, \
         or Data Storage block before it can be run.", "No Program Output"
@@ -1116,7 +1116,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private sendDataToSerialDevice(n: Node){
-    if (!isNaN(n.data.nodeValue as number)){
+    if (isFinite(n.data.nodeValue as number)){
       this.stores.serialDevice.writeToOut(n.data.nodeValue as number);
     }
   }
@@ -1140,9 +1140,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       alertMessage += "Click the ⚡️ button on the upper left, then choose your device at the prompt.";
     }
 
-    if (!this.stores.serialDevice.userSeenSerialModal){
+    if (!this.stores.serialDevice.serialModalShown){
       this.stores.ui.alert(alertMessage, "Program Requires Connection to External Device");
-      this.stores.serialDevice.userSeenSerialModal = true;
+      this.stores.serialDevice.serialModalShown = true;
     }
   }
 

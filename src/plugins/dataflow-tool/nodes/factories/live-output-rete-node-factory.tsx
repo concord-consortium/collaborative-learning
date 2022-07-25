@@ -14,7 +14,7 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
     super.defaultBuilder(node);
     if (this.editor) {
       this.addInput(node, "nodeValue");
-      // TODO (CLAW)- add "hold" input
+      // TODO (CLAW)- add "hold" input?
       node
         .addControl(new DropdownListControl(this.editor, "liveOutputType", node, NodeLiveOutputTypes, true));
 
@@ -53,8 +53,8 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
           }
           const roundedDisplayValue = Math.round((newValue / 10) * 10);
           // at the moment, physical claw is driven by a nearest 1%, not nearest 10%
-          // however, displaying the rounded to nearest 10% for consistency
-          // swap commented/uncommented below to change to display of nearest 1%
+          // However, now displaying the rounded to nearest 10% for consistency.
+          // Swap commented/uncommented below to change to display of nearest 1%
           // nodeValue?.setDisplayMessage(`${newValue}% closed`);
           nodeValue?.setDisplayMessage(`${roundedDisplayValue}% closed`);
 

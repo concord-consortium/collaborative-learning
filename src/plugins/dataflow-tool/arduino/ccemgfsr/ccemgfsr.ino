@@ -11,11 +11,11 @@
   */
 
   #include <Servo.h>
-  #define GRIPPER_STATE_BUTTON_PIN 4          //pin for button that switches defult state of the gripper (opened/closed)
+  #define GRIPPER_STATE_BUTTON_PIN 4          //pin for button that switches default state of the gripper (opened/closed)
   #define SERVO_PIN 2                         //pin for servo motor
-  #define SENSITIVITY_BUTTON_PIN 7            //pin for button that selects sesitivity
+  #define SENSITIVITY_BUTTON_PIN 7            //pin for button that selects sensitivity
   #define NUM_LED 6                           //number of LEDs in LED bar
-  #define GRIPPER_MINIMUM_STEP 5              //5 degree dead zone (used to avoid aiming oscilation)
+  #define GRIPPER_MINIMUM_STEP 5              //5 degree dead zone (used to avoid aiming oscillation)
   #define OPEN_MODE 1                         //default gripper state is opened
   #define CLOSED_MODE 2                       //default gripper state is closed
   #define MINIMUM_SERVO_UPDATE_TIME 100       //update servo position every 100ms
@@ -29,7 +29,7 @@
 
   int emgSaturationValue = 0;                 //selected sensitivity/EMG saturation value
   int emgReading;                             //measured value for EMG
-  int fsrReading;                             //measured value for sirface pressure sensor
+  int fsrReading;                             //measured value for surface pressure sensor
   int threshold = 100;                        //threshold voltage for touch detected (modify based on sensor placement)
   byte ledbarHeight = 0;                      //temporary variable for led bar height
 
@@ -49,7 +49,7 @@
   String emgStringOut = "";                   // init empty string for default output
   String fsrStringOut = "";                   // init empty string for default output
 
-  const int BUFFER_SIZE = 4;                  // Accomodate size of new angles coming in which will be 120 - 180, plus delimitter
+  const int BUFFER_SIZE = 4;                  // Accommodate size of new angles coming in which will be 120 - 180, plus delimiter
   char buf[BUFFER_SIZE];                      // a char array buffer
 
   const unsigned int MAX_ANGLE_BYTE_LENGTH = 4;
@@ -82,7 +82,7 @@
   //-----------------------------------------------------------------------------------
   //   Main loop
   //
-  //   - Checks state of sesitivity button
+  //   - Checks state of sensitivity button
   //   - Checks state of default-gripper-state button
   //   - Measure EMG
   //   - Shows EMG strength on LED bar
@@ -147,7 +147,7 @@
       while (digitalRead(SENSITIVITY_BUTTON_PIN)){
         delay(10);
       }
-      //whait a bit more so that LED feedback is visible
+      //wait a bit more so that LED feedback is visible
       delay(100);
     }
 

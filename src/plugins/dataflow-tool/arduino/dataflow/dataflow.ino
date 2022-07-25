@@ -3,7 +3,7 @@
   right now still using updated version of ccemgfsr
 
   Possible Simplifications:
-  1. No choice for sensitivity - this would allow a statc Y axis on the minigraph
+  1. No choice for sensitivity - this would allow a static Y axis on the minigraph
   2. No "open" or "close" modes - just percentage closed and hold
 
 
@@ -15,7 +15,7 @@
 
 #include <Servo.h>
 #define SERVO_PIN 2                         // pin for servo motor
-#define GRIPPER_MINIMUM_STEP 5              // 5 degree dead zone (used to avoid aiming oscilation)
+#define GRIPPER_MINIMUM_STEP 5              // 5 degree dead zone (used to avoid aiming oscillation)
 #define MINIMUM_SERVO_UPDATE_TIME 100       // update servo position every 100ms
 #define NUM_LED 6                           //number of LEDs in LED bar
 
@@ -32,7 +32,7 @@ int newDegree;                              // new value of angle for servo
 String fromComputer;                        // we use Serial.readStringUntil() to get our full chunk, so we need this
 Servo Gripper;                              // servo for gripper
 byte ledPins[] = {8, 9, 10, 11, 12, 13};    //pins for LEDs in LED bar
-byte ledbarHeight = 0;                      //temporary variable for led bar height
+byte ledBarHeight = 0;                      //temporary variable for led bar height
 String emgId = "emg";                       // key for Dataflow to know what sensor this came from
 String fsrId = "fsr";                       // key for Dataflow to know what sensor this came from
 String kvSeparator = ":";                   // separator for sensor key and value
@@ -61,10 +61,10 @@ void loop(){
 
   // calculate what LEDs should be turned ON on the LED bar
   emgReading = constrain(emgReading, 30, emgSaturationValue);
-  ledbarHeight = map(emgReading, 30, emgSaturationValue, 0, NUM_LED);
+  ledBarHeight = map(emgReading, 30, emgSaturationValue, 0, NUM_LED);
 
   // turn ON LEDs on the LED bar
-  for(int k = 0; k < ledbarHeight; k++){
+  for(int k = 0; k < ledBarHeight; k++){
     digitalWrite(ledPins[k], HIGH);
   }
 

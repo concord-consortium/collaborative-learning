@@ -10,7 +10,7 @@ export class SerialDevice {
   deviceInfo: SerialPortInfo | null;
   serialNodesCount: number;
   writer: WritableStreamDefaultWriter;
-  userSeenSerialModal: boolean | null;
+  serialModalShown: boolean | null;
 
   constructor() {
     this.value = "0";
@@ -50,8 +50,8 @@ export class SerialDevice {
     ];
 
     try {
-        this.port = await navigator.serial.requestPort({ filters });
-        this.deviceInfo = await this.port.getInfo();
+      this.port = await navigator.serial.requestPort({ filters });
+      this.deviceInfo = await this.port.getInfo();
     }
     catch (error) {
       console.error("error requesting port: ", error);
@@ -59,16 +59,19 @@ export class SerialDevice {
   }
 
   public async handleStream(channels: Array<NodeChannelInfo>){
-    // open port
-    await this.port?.open({ baudRate: 9600 }).catch((e: any) => console.error(e));
+    //our port cannot be null if we are to open streams
+    if (!this.port){
+      return;
+    }
+    await this.port.open({ baudRate: 9600 }).catch((e: any) => console.error(e));
 
     // set up writer
     const textEncoder = new TextEncoderStream();
-    textEncoder.readable.pipeTo(this.port?.writable as any);
+    textEncoder.readable.pipeTo(this.port.writable as any);
     this.writer = textEncoder.writable.getWriter();
 
     // listen for serial data coming up from Arduino
-    while (this.port?.readable) {
+    while (this.port.readable) {
       const textDecoder = new TextDecoderStream();
       this.port.readable.pipeTo(textDecoder.writable);
       const streamReader = textDecoder.readable.getReader();
@@ -116,11 +119,11 @@ export class SerialDevice {
   public writeToOut(n:number){
     // number visible to user represents "percent closed"
     // so we need to map x percent to an angle in range where
-    // 100% closed is 120deg, and 0% open is 180deg
+    // 100% (closed) is 120deg, and 0% (open) is 180deg
     const percent = n / 100;
     const openTo = Math.round(180 - (percent * 60));
 
-    // Arduino readBytesUnitl() expects newline as delimiter
+    // Arduino readBytesUntil() expects newline as delimiter
     if(this.hasPort()){
       this.writer.write(`${openTo.toString()}\n`);
     }
