@@ -730,6 +730,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
     this.checkActiveRelaysAndRunProgram();
   };
+
   private checkDevicesAndRunProgram = () => {
     const missingDevices = this.hasValidInputNodes();
     if (missingDevices.length) {
@@ -975,9 +976,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
 
     if (this.stores.serialDevice.hasPort()){
-      // TODO
-      // this.stores.serialDevice.reader.cancel();
-      // etc to gracefully close connection
+      // TODO - if necessary
+      // https://web.dev/serial/#close-port
     }
   };
 
@@ -1108,12 +1108,40 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     } else {
       this.stores.serialDevice.setSerialNodesCount(0);
     }
+
+    if (serialNodesCt > 0 && !this.stores.serialDevice.hasPort()){
+      this.postSerialModal();
+    }
   }
 
   private sendDataToSerialDevice(n: Node){
     if (!isNaN(n.data.nodeValue as number)){
       this.stores.serialDevice.writeToOut(n.data.nodeValue as number);
     }
+  }
+
+  private postSerialModal(){
+    const lastMsg = localStorage.getItem('last-connect-message');
+
+    let alertMessage = "";
+
+    // np physical connection made
+    if (lastMsg !== "connect" && this.stores.serialDevice.serialNodesCount > 0){
+      alertMessage +=
+        `1. Connect the arduino to your computer.
+        2. Click the ⚡️ button on the upper left, then choose the device at the prompt.`;
+    }
+
+    // physical connection has been made but user action needed
+    if (lastMsg === "connect"
+        && !this.stores.serialDevice.hasPort()
+        && this.stores.serialDevice.serialNodesCount > 0
+    ){
+      alertMessage +=
+        `Click the ⚡️ button on the upper left, then choose your device at the prompt.`;
+    }
+
+    this.stores.ui.alert(alertMessage, 'Connect External Device',)
   }
 
   private updateNodeChannelInfo = (n: Node) => {
