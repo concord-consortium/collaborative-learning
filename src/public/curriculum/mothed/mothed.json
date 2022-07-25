@@ -93,18 +93,20 @@
               "initials": "SUM",
               "title": "Summary",
               "type": "problem-documents"
-            },
-            {
-              "initials": "BD",
-              "title": "Biodiversity",
-              "type": "problem-documents"
-            },
-            {
-              "initials": "BD",
-              "title": "Biodiversity",
-              "type": "problem-documents"
             }
           ]
+        },
+        {
+          "tab": "teacher-guide",
+          "label": "Teacher Guide",
+          "teacherOnly": true,
+          "sections": []
+        },
+        {
+          "tab": "student-work",
+          "label": "Student Work",
+          "teacherOnly": true,
+          "sections": []
         },
         {
           "tab": "class-work",
@@ -192,17 +194,12 @@
     "sectionInfo": {
       "overview": {
         "initials": "GS",
-        "title": "Get Started",
+        "title": "Overview",
         "placeholder": "Add some tiles here"
       },
-      "launch": {
-        "initials": "FN",
-        "title": "Field Notes",
-        "placeholder": "Add some tiles here"
-      },
-      "explore": {
-        "initials": "SH",
-        "title": "Share",
+      "teach": {
+        "initials": "TC",
+        "title": "Teaching Tips",
         "placeholder": "Add some tiles here"
       }
     },

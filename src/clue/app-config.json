@@ -294,7 +294,8 @@
       "content": "curriculum/m2studio/m2studio-prototype.json"
     },
     "moth": {
-      "content": "curriculum/mothed/mothed.json"
+      "content": "curriculum/mothed/mothed.json",
+      "guide": "curriculum/mothed/mothed-teacher-guide.json"
     },
     "msa": {
       "content": "curriculum/moving-straight-ahead/moving-straight-ahead.json",
