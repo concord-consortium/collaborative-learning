@@ -417,6 +417,9 @@ $node-inner-width: 140px;
           &.demo-output {
             display: none;
           }
+          &.live-output {
+            display:none;
+          }
         }
       }
     }

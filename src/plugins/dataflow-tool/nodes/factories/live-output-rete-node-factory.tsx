@@ -35,9 +35,31 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
         const outputType = outputTypeControl.getValue();
 
         const nodeValue = _node.inputs.get("nodeValue")?.control as InputValueControl;
-        const quasiPercent = n1 * 100;
 
-        nodeValue?.setValue(parseInt(quasiPercent.toFixed(2), 10));
+        let newValue = isNaN(n1) ? 0 : n1;
+
+        if (outputType === "Light Bulb"){
+          newValue = isNaN(n1) ? 0 : +(n1 !== 0);
+          nodeValue?.setDisplayMessage(newValue === 0 ? "off" : "on");
+        }
+
+        if (outputType === "Backyard Claw"){
+          if (n1 > 1){
+            newValue = 1;
+          } else if (n1 < 0) {
+            newValue = 0;
+          } else {
+            newValue = parseInt((n1 * 100).toFixed(2), 10);
+          }
+          const roundedDisplayValue = Math.round((newValue / 10) * 10);
+          // keeping consistent for now but we may not need to round for claw to drive well
+          // nodeValue?.setDisplayMessage(`${newValue}% closed`);
+          nodeValue?.setDisplayMessage(`${roundedDisplayValue}% closed`);
+
+        }
+
+        console.log(newValue);
+        nodeValue?.setValue(newValue);
         nodeValue?.setConnected(inputs.nodeValue.length);
 
         _node.data.outputType = outputType;
@@ -47,7 +69,7 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
     }
   }
 
-  // TODO - duplicate method - if this remains unchanged, import from original or abstract entirely from all factories
+  // IMPROVEMENT - this is a duplicate method - abstract for all factories?
   private addInput(node: Node, inputKey: string, displayLabel = "") {
     if (this.editor) {
       const oldInput = node.inputs.get(inputKey);
