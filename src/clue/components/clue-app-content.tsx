@@ -37,7 +37,8 @@ export class ClueAppContentComponent extends BaseComponent<IProps> {
     }
     const teacherPanelKey = ui.teacherPanelKey
       ? ui.teacherPanelKey
-      : isTeacher ? EPanelId.dashboard : EPanelId.workspace;
+      : EPanelId.workspace;
+      // : isTeacher ? EPanelId.dashboard : EPanelId.workspace;
 
     const currentPanelSpec = panels.find(spec => spec.panelId === teacherPanelKey);
     const currentPanelContent = currentPanelSpec && currentPanelSpec.content;
