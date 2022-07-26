@@ -199,7 +199,8 @@ $node-inner-width: 140px;
         border-top-color: $transform-green;
       }
     }
-    &.relay {
+    &.relay,
+    &.live-output {
       background-color: $relay-orange;
       border-color: $relay-orange-outline;
       .main-color {
@@ -415,6 +416,9 @@ $node-inner-width: 140px;
           }
           &.demo-output {
             display: none;
+          }
+          &.live-output {
+            display:none;
           }
         }
       }
