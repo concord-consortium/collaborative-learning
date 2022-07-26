@@ -117,11 +117,20 @@ export class SerialDevice {
   }
 
   public writeToOut(n:number){
+    console.log('THIS NEEDS TO BE KOSHER VAL: ', n)
     // number visible to user represents "percent closed"
     // so we need to map x percent to an angle in range where
     // 100% (closed) is 120deg, and 0% (open) is 180deg
     const percent = n / 100;
-    const openTo = Math.round(180 - (percent * 60));
+    let openTo = Math.round(180 - (percent * 60));
+
+    if (openTo > 160){
+      openTo = 180;
+    }
+
+    if (openTo < 130){
+      openTo = 120;
+    }
 
     // Arduino readBytesUntil() expects newline as delimiter
     if(this.hasPort()){
