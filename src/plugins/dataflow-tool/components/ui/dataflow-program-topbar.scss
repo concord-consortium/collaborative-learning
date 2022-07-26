@@ -86,25 +86,25 @@ $duration-label-back: $gray-mid;
         opacity: 0.6;
       }
       &.physical-connection.no-port.nodes-in-need {
-        background-color: lightgoldenrodyellow;
-        animation: slowpulse 2s linear infinite;
+        background-color: $star-yellow;
+        animation: slowpulse 1.5s linear infinite;
 
         @keyframes slowpulse {
           50% {
-            opacity: .4;
+            background-color: #eee;
           }
         }
       }
       &.has-port {
-        background-color: lightgreen;
+        background-color: #82f982; //lightened "online button" green
       }
       &.nodes-in-need.no-physical-connection {
-        background-color: #FFC0CB;
-        animation: slowpulse 2s linear infinite;
+        background-color: $problem-orange-light-2;
+        animation: slowpulse 1.5s linear infinite;
       }
       &.has-port.no-physical-connection { //occurs if wire yanked out
-        background-color: #FFC0CB;
-        animation: slowpulse 2s linear infinite;
+        background-color: $problem-orange-light-2;
+        animation: slowpulse 1.5s linear infinite;
       }
 
       .serial {
