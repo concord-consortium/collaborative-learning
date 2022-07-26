@@ -12,12 +12,12 @@ context('Graph Table Integration', function () {
   before(function () {
     const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&problem=2.3&qaGroup=5"; //using different problem bec. 2.1 disables graph table integration
     cy.clearQAData('all');
-  
+
     cy.visit(queryParams);
     cy.waitForLoad();
     clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
   });
-  
+
   context('Tests for graph and table integration', function () {
     const x = ['3', '7', '6', '0'];
     const y = ['2.5', '5', '1', '0'];
@@ -99,7 +99,7 @@ context('Graph Table Integration', function () {
         graphToolTile.getGraphPoint().first().click({ force: true }).dblclick({ force: true });
         graphToolTile.showAngle();
         graphToolTile.getAngleAdornment().should('exist');
-  
+
       });
       it('will move a point by changing coordinates on the table', function () {
         let new_y = '8';
@@ -114,7 +114,7 @@ context('Graph Table Integration', function () {
         let point = 0; //the 4th point in the graph
         tableToolTile.getTableTile().click();
         tableToolTile.removeRow(point);
-  
+
         //verifies p1 no longer exist in table and graph
         tableToolTile.getTableRow().should('have.length', 4);
         tableToolTile.getTableIndexColumnCell().eq(2).should('contain', '3');
@@ -181,7 +181,7 @@ context('Graph Table Integration', function () {
         tableToolTile.getTableCell().eq(3).should('contain', x[1]);
       });
     });
-  
+
   });
   context('Save and restore keeps the connection between table and graph', function () {
     before(function () {
@@ -191,7 +191,7 @@ context('Graph Table Integration', function () {
       cy.openResourceTabs();
       cy.openTopTab('my-work');
       cy.openDocumentWithTitle('my-work', 'workspaces', title);
-      cy.closeTabs();
+      cy.closeResourceTabs();
     });
     it('verify connection of table and graph on restored canvas', function () {
       graphToolTile.getGraphPointLabel().contains('p1').should('exist');
