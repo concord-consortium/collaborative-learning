@@ -45,10 +45,10 @@ export class NavTabPanel extends BaseComponent<IProps> {
     const resourceWidth = dividerPosition === kDividerMin
                             ? kDividerMin
                             : dividerPosition === kDividerMax
-                              ? `calc(100% - ${collapseTabWidth}px)`
+                              ? `calc(100% - ${collapseTabWidth}px - 4px)`
                               : isExpanderShown
-                                ? `calc(${dividerPosition}% - ${collapseTabWidth}px + 4px)`
-                                : `calc(${dividerPosition}% - ${resizePanelWidth}px)`;
+                                ? `calc(${dividerPosition}% - ${collapseTabWidth}px + 1px)`
+                                : `calc(${dividerPosition}% - ${resizePanelWidth}px - 4px)`;
     const resourceWidthStyle = {width: resourceWidth};
     const isChatEnabled = user.isNetworkedTeacher;
     const openChatPanel = isChatEnabled && showChatPanel;
