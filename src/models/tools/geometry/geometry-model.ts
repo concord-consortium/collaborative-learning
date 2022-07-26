@@ -18,13 +18,48 @@ export interface IDependsUponResult {
   required: boolean;
 }
 
+export interface IAxisProperties {
+  name?: string;
+  label?: string;
+  min?: number;
+  unit?: number;
+  range?: number;
+}
+
 export const AxisModel = types.model("AxisModel", {
   name: types.maybe(types.string),
   label: types.maybe(types.string),
   min: types.number,
   unit: kGeometryDefaultPixelsPerUnit,
   range: types.maybe(types.number)
-});
+})
+.actions(self => ({
+  setName(name: string) {
+    self.name = name;
+  },
+  setLabel(label: string) {
+    self.label = label;
+  },
+  setMin(min: number) {
+    self.min = min;
+  },
+  setUnit(unit: number) {
+    self.unit = unit;
+  },
+  setRange(range: number) {
+    self.range = range;
+  }
+}))
+.actions(self => ({
+  setAll(properties: IAxisProperties) {
+    const { name, label, min, unit, range } = properties;
+    if (name) self.setName(name);
+    if (label) self.setLabel(label);
+    if (min) self.setMin(min);
+    if (unit) self.setUnit(unit);
+    if (range) self.setRange(range);
+  }
+}));
 export interface AxisModelType extends Instance<typeof AxisModel> {}
 export interface AxisModelSnapshot extends SnapshotIn<typeof AxisModel> {}
 

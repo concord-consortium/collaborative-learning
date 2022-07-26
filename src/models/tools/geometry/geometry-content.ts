@@ -526,6 +526,23 @@ export const GeometryContentModel = GeometryBaseContentModel
       const height = canvasHeight - kYAxisTotalBuffer;
       const unitX = width / (xMax - xMin);
       const unitY = height / (yMax - yMin);
+
+      const xAxisProperties = {
+        name: xName,
+        label: xAnnotation,
+        min: xMin,
+        unit: unitX
+      };
+      self.board?.xAxis.setAll(xAxisProperties);
+      const yAxisProperties = {
+        name: yName,
+        label: yAnnotation,
+        min: yMin,
+        unit: unitY
+        // range???
+      };
+      self.board?.yAxis.setAll(yAxisProperties);
+
       const change: JXGChange = {
         operation: "update",
         target: "board",
@@ -537,7 +554,7 @@ export const GeometryContentModel = GeometryBaseContentModel
                         canvasWidth: width, canvasHeight: height
                       } }
       };
-      const axes = applyAndLogChange(undefined, change);
+      const axes = applyAndLogChange(board, change);
       return isAxisArray(axes) ? axes : undefined;
     }
 
