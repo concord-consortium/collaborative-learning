@@ -92,7 +92,6 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
           (node as any).data.watchedValues[inputKey].backgroundColor,
           (node as any).data.watchedValues[inputKey].borderColor,
           (val: any) => {
-            //return typeof val === "number" ? val.toFixed(1) : val;
             return typeof val === "number" ? val : 1;
           }
         ));

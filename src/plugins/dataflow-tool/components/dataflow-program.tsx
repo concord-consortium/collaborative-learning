@@ -1136,11 +1136,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const lastMsg = localStorage.getItem('last-connect-message');
 
     let alertMessage = "";
+    const btnMsg = "Click the ⚡️ button on the upper left, then choose the device at the prompt."
 
-    // np physical connection made
+    // no physical connection
     if (lastMsg !== "connect" && this.stores.serialDevice.serialNodesCount > 0){
-      alertMessage += "1. Connect the arduino to your computer. \
-        2. Click the ⚡️ button on the upper left, then choose the device at the prompt.";
+      alertMessage += `1. Connect the arduino to your computer.  2.${btnMsg}`;
     }
 
     // physical connection has been made but user action needed
@@ -1148,7 +1148,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         && !this.stores.serialDevice.hasPort()
         && this.stores.serialDevice.serialNodesCount > 0
     ){
-      alertMessage += "Click the ⚡️ button on the upper left, then choose your device at the prompt.";
+      alertMessage += btnMsg;
     }
 
     if (!this.stores.serialDevice.serialModalShown){
