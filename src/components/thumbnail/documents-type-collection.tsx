@@ -49,24 +49,7 @@ function getSectionDocs(section: NavTabSectionModelType, documents: DocumentsMod
       sectDocs.push(...documents.byTypeForUser(type as any, user.id));
     }
     else if (isPublishedType(type)) {
-      const publishedDocs: { [source: string]: DocumentModelType } = {};
-      // only show the most recent publication of each document
-      documents
-        .byType(type as any)
-        .forEach(doc => {
-          // personal documents and learning logs have originDocs.
-          // problem documents only have the uids of their creator,
-          // but as long as we're scoped to a single problem, there
-          // shouldn't be published documents from other problems.
-          const source = doc.originDoc || doc.uid;
-          if (source) {
-            const entry = publishedDocs[source];
-            if (!entry || (entry.createdAt < doc.createdAt)) {
-              publishedDocs[source] = doc;
-            }
-          }
-        });
-        sectDocs.push(...Object.values(publishedDocs));
+        sectDocs.push(...documents.byType(type as any));
     }
   });
   // Reverse the order to approximate a most-recently-used ordering.

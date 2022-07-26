@@ -77,7 +77,7 @@ export const DecoratedDocumentThumbnailItem = observer(({
     const _handleDocumentStarClick = section.showStarsForUser(user) && !sectionDocument.isRemote
                                       ? handleDocumentStarClick
                                       : undefined;
-    const _handleDocumentDeleteClick = section.showDeleteForUser(user)
+    const _handleDocumentDeleteClick = section.showDeleteForUser(user, sectionDocument)
                                         ? handleDocumentDeleteClick
                                         : undefined;
 
