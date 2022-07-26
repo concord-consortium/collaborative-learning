@@ -117,7 +117,6 @@ export class SerialDevice {
   }
 
   public writeToOut(n:number){
-    console.log('THIS NEEDS TO BE KOSHER VAL: ', n)
     // number visible to user represents "percent closed"
     // so we need to map x percent to an angle in range where
     // 100% (closed) is 120deg, and 0% (open) is 180deg

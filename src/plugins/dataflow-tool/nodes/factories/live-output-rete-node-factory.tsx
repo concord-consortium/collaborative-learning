@@ -45,7 +45,7 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
 
         if (outputType === "Backyard Claw"){
           if (n1 > 1){
-            newValue = 1;
+            newValue = 100;
           } else if (n1 < 0) {
             newValue = 0;
           } else {
