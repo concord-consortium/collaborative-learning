@@ -212,6 +212,7 @@
     "mobx-state-tree": "^5.1.5",
     "nanoid": "^4.0.0",
     "query-string": "7.1.1",
+    "rc-slider": "^10.0.0",
     "react": "^17.0.2",
     "react-chartjs-2": "^2.11.2",
     "react-data-grid": "^7.0.0-canary.46",

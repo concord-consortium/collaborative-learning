@@ -198,6 +198,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
     );
   };
 
+  const showPlayback = user.isTeacher;
   const documentView = referenceDocument && !referenceDocument?.getProperty("isDeleted") &&
     <div>
       <div className={`document-header ${tabSpec.tab} ${sectionClass}`} onClick={() => ui.setSelectedTile()}>
@@ -211,6 +212,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
         isPrimary={false}
         document={referenceDocument}
         readOnly={true}
+        showPlayback={showPlayback}
       />
     </div>;
 
