@@ -116,8 +116,6 @@ context('Dataflow Tool Tile', function () {
       const nodeType = "live-output";
       it("can create live output node", () => {
         dataflowToolTile.getCreateNodeButton(nodeType).click();
-        // on first creation, modal notifies user of need to connect device
-        cy.get("#okButton").click();
         dataflowToolTile.getNode(nodeType).should("exist");
       });
     });

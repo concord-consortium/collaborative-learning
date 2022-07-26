@@ -1098,9 +1098,20 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private countSerialDataNodes(nodes: Node[]){
     // implementing with a "count" of 1 or 0 in case we need to count nodes in future
     let serialNodesCt = 0;
+
+    //sensor will need serial once these particular sensors are chosen
     nodes.forEach((n) => {
-      if(n.data.sensor === "emg" || n.data.sensor === "fsr" || n.name === "Live Output"){
+      if(n.data.sensor === "emg" || n.data.sensor === "fsr"){
         serialNodesCt++;
+      }
+
+      //live output block will alert need for serial
+      // only after connection to another node is made
+      // this allows user to drag a block out and work on program before connecting
+      if (n.name === "Live Output"){
+        if(n.inputs.entries().next().value[1].connections.length > 0){
+          serialNodesCt++;
+        }
       }
     });
     // constraining all counts to 1 or 0 for now
