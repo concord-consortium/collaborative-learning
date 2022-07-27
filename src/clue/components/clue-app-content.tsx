@@ -3,7 +3,7 @@ import React from "react";
 import { ClueAppHeaderComponent } from "./clue-app-header";
 import { EPanelId, IPanelGroupSpec } from "../../components/app-header";
 import { BaseComponent, IBaseProps } from "../../components/base";
-import { DocumentWorkspaceComponent } from "../../components/document/document-workspace";
+import { WorkspaceComponent } from "../../components/workspace/workspace";
 import { DialogComponent } from "../../components/utilities/dialog";
 import { TeacherDashboardComponent } from "./teacher/teacher-dashboard";
 import { Logger, LogEventName } from "../../lib/logger";
@@ -26,7 +26,7 @@ export class ClueAppContentComponent extends BaseComponent<IProps> {
     const panels: IPanelGroupSpec = [{
                     panelId: EPanelId.workspace,
                     label: "Workspace & Resources",
-                    content: <DocumentWorkspaceComponent />
+                    content: <WorkspaceComponent />
                   }];
     if (user && user.isTeacher) {
       panels.unshift({

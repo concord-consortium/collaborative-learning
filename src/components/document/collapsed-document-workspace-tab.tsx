@@ -1,6 +1,6 @@
 import React from "react";
 import ExpandIndicatorIcon from "../../assets/expand-indicator-icon.svg";
-import "./collapsed-workspace-tab.scss";
+import "./collapsed-document-workspace-tab.scss";
 
 interface IProps {
   workspaceType: string;

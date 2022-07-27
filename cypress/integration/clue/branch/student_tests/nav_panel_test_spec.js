@@ -87,7 +87,7 @@ context('Nav Panel', function () {
           canvas.getPersonalDocTitle().should('contain', copyDocumentTitle);
         });
         after(()=>{
-          cy.closeTabs();
+          cy.closeResourceTabs();
         });
       });
       describe('Starred section', function () {
@@ -133,7 +133,7 @@ context('Nav Panel', function () {
         });
       });
       after(function () {
-        cy.closeTabs(); // clean up
+        cy.closeResourceTabs(); // clean up
       });
     });
 

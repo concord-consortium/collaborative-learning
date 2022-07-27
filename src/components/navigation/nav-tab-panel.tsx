@@ -20,8 +20,8 @@ import "../themes.scss";
 interface IProps extends IBaseProps {
   tabs?: NavTabSpec[];
   isResourceExpanded: boolean;
+  isExpanderShown: boolean;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
-  onDrop: (e: React.DragEvent<HTMLDivElement>) => void;
 }
 
 
@@ -36,7 +36,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
   }
 
   public render() {
-    const { tabs, isResourceExpanded } = this.props;
+    const { tabs, isResourceExpanded, isExpanderShown } = this.props;
     const { ui: { activeNavTab, dividerPosition, focusDocument, showChatPanel, selectedTileIds },
             user } = this.stores;
     const selectedTabIndex = tabs?.findIndex(t => t.tab === activeNavTab);
@@ -45,8 +45,10 @@ export class NavTabPanel extends BaseComponent<IProps> {
     const resourceWidth = dividerPosition === kDividerMin
                             ? kDividerMin
                             : dividerPosition === kDividerMax
-                              ? `calc(100% - ${collapseTabWidth}px - ${resizePanelWidth}px)`
-                              : `calc(${dividerPosition}% - ${resizePanelWidth}px)`;
+                              ? `calc(100% - ${collapseTabWidth}px - 4px)`
+                              : isExpanderShown
+                                ? `calc(${dividerPosition}% - ${collapseTabWidth}px + 1px)`
+                                : `calc(${dividerPosition}% - ${resizePanelWidth}px - 4px)`;
     const resourceWidthStyle = {width: resourceWidth};
     const isChatEnabled = user.isNetworkedTeacher;
     const openChatPanel = isChatEnabled && showChatPanel;
