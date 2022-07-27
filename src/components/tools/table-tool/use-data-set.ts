@@ -79,7 +79,7 @@ export const useDataSet = ({
           }
           // otherwise move to previous selectable cell
           else if (--newPosition.idx < 1) {
-            newPosition.idx = columns.length - 2;
+            newPosition.idx = columns.length - (readOnly ? 1 : 2);
             --newPosition.rowIdx;
           }
         }

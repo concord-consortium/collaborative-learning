@@ -531,15 +531,16 @@ export const GeometryContentModel = GeometryBaseContentModel
         name: xName,
         label: xAnnotation,
         min: xMin,
-        unit: unitX
+        unit: unitX,
+        range: xMax - xMin
       };
       self.board?.xAxis.setAll(xAxisProperties);
       const yAxisProperties = {
         name: yName,
         label: yAnnotation,
         min: yMin,
-        unit: unitY
-        // range???
+        unit: unitY,
+        range: yMax - yMin
       };
       self.board?.yAxis.setAll(yAxisProperties);
 
