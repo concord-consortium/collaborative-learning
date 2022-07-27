@@ -4,18 +4,17 @@
   display: flex
   flex-direction: row
   justify-content: flex-start
-  width: 50%
   height: calc(100vh - (#{$header-height} + #{$workspace-content-margin} * 2))
   position: fixed
-  left: 0px
+  width: 0px
+  left: 3px
   top: $header-height
   transition-duration: .5s
   margin-top: $workspace-content-margin
   background-color: white
   border-radius: 0 6px 0 0
-  visibility: hidden
   &.shown
-    visibility: visible
+    width: 50%
   &.half
     width: calc(50% - 4px)
   &.full
@@ -124,6 +123,8 @@
         align-items: center
         justify-content: center
         cursor: pointer
+        &:first-of-type
+          border-width: 2px 0 0 2px
         &:last-of-type
           border-width: 2px 0 0 0
 

@@ -37,6 +37,8 @@ import AbsoluteValueIcon from "../../assets/icons/transform/absolute-value.svg";
 import NegationIcon from "../../assets/icons/transform/negation.svg";
 import NotIcon from "../../assets/icons/transform/not.svg";
 
+import { demoStreams } from "./demo-data";
+
 export interface NodeType {
   name: string;
   displayName: string;
@@ -72,10 +74,6 @@ export const NodeTypes: NodeType[] = [
     displayName: "Transform",
   },
   {
-    name: "Relay",
-    displayName: "Relay",
-  },
-  {
     name: "Demo Output",
     displayName: "Demo Output",
   },
@@ -83,6 +81,14 @@ export const NodeTypes: NodeType[] = [
     name: "Data Storage",
     displayName: "Data Storage",
   },
+  {
+    name: "Live Output",
+    displayName: "Live Output",
+  },
+  {
+    name: "Relay",
+    displayName: "Relay"
+  }
 ];
 
 export const NodeOperationTypes = [
@@ -281,6 +287,17 @@ export const NodeDemoOutputTypes = [
   }
 ];
 
+export const NodeLiveOutputTypes = [
+  {
+    name: "Light Bulb",
+    icon: LightBulbIcon
+  },
+  {
+    name: "Backyard Claw",
+    icon: BackyardClawIcon
+  }
+];
+
 export const NodeGeneratorTypes = [
   {
     name: "Sine",
@@ -340,6 +357,7 @@ export interface NodeChannelInfo {
   virtualValueMethod?: (t: number) => number;
   usesSerial?:boolean;
   serialConnected?:boolean | null;
+  timeFactor?: number;
 }
 
 export const roundNodeValue = (n: number) => {
@@ -448,88 +466,113 @@ export const kSensorMissingMessage = "⚠️";
 
 const virtualTempChannel: NodeChannelInfo = {
   hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "Temperature", channelId: "00001-VIR",
-  missing: false, type: "temperature", units: "°C", plug: 1, value: 0, virtual: true,
+  missing: false, type: "temperature", units: "°C", plug: 1, value: 0, virtual: true, timeFactor: 1000,
   virtualValueMethod: (t: number) => {
     const vals = [20, 20, 20, 21, 21, 21, 20, 20, 21, 21, 21, 21, 21, 21, 21];
     return vals[t % vals.length];
   } };
 const virtualHumidChannel: NodeChannelInfo = {
   hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "Humidity", channelId: "00002-VIR",
-  missing: false, type: "humidity", units: "%", plug: 2, value: 0, virtual: true,
+  missing: false, type: "humidity", units: "%", plug: 2, value: 0, virtual: true, timeFactor: 1000,
   virtualValueMethod: (t: number) => {
     const vals = [60, 60, 60, 61, 61, 61, 62, 62, 62, 61, 61, 61, 61, 61, 61, 61];
     return vals[t % vals.length];
   } };
 const virtualCO2Channel: NodeChannelInfo = {
   hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "CO2", channelId: "00003-VIR",
-  missing: false, type: "CO2", units: "PPM", plug: 3, value: 0, virtual: true,
+  missing: false, type: "CO2", units: "PPM", plug: 3, value: 0, virtual: true, timeFactor: 1000,
   virtualValueMethod: (t: number) => {
     const vals = [409, 409, 410, 410, 410, 410, 411, 411, 410, 410, 410, 409, 409, 411, 411];
     return vals[t % vals.length];
   } };
 const virtualO2Channel: NodeChannelInfo = {
   hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "O2", channelId: "00004-VIR",
-  missing: false, type: "O2", units: "PPM", plug: 4, value: 0, virtual: true,
+  missing: false, type: "O2", units: "PPM", plug: 4, value: 0, virtual: true, timeFactor: 1000,
   virtualValueMethod: (t: number) => {
     const vals = [21, 21, 21, 22, 22, 22, 21, 21, 21, 21, 22, 22, 22, 22, 22];
     return vals[t % vals.length];
   } };
 const virtualLightChannel: NodeChannelInfo = {
   hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "Light", channelId: "00005-VIR",
-  missing: false, type: "light", units: "lux", plug: 5, value: 0, virtual: true,
+  missing: false, type: "light", units: "lux", plug: 5, value: 0, virtual: true, timeFactor: 1000,
   virtualValueMethod: (t: number) => {
     const vals = [9000, 9000, 9001, 9001, 9002, 9002, 9002, 9001, 9001, 9001, 9000, 9001, 9001, 9002, 9002];
     return vals[t % vals.length];
   } };
 const virtualPartChannel: NodeChannelInfo = {
   hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "Particulates", channelId: "00006VIR",
-  missing: false, type: "particulates", units: "PM2.5", plug: 7, value: 0, virtual: true,
+  missing: false, type: "particulates", units: "PM2.5", plug: 7, value: 0, virtual: true, timeFactor: 1000,
   virtualValueMethod: (t: number) => {
     const vals = [10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11];
     return vals[t % vals.length];
   } };
-const virtualEmgChannel: NodeChannelInfo = {
-  hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "EMG", channelId: "00007VIR",
-  missing: false, type: "emg-reading", units: "f(mv)", plug: 8, value: 0, virtual: true,
+const virtualEmgChannelVaried: NodeChannelInfo = {
+  hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "EMG - Varied Clenches", channelId: "00007VIR",
+  missing: false, type: "emg-reading", units: "f(mv)", plug: 8, value: 0, virtual: true, timeFactor: 100,
   virtualValueMethod: (t: number) => {
-    const vals = [14,40,34,53,54,152,151,98,223,213,225,222,126,121,74,70,43,42,40,22,40,13,40,28,40,35,91,88,87,152,149,412,248,302,173,103,99,61,60,40,32,40,18,40,18,41,43,118,89,87,84,224,199,212,209,135,81,78,47,46,40,23,40,18,40,24,40,35,84,83,99,97,104,100,102,257,267,261,244,239,138,135,81,80,48,43,40,26,40,16,40,28,40,37,47,49,54,56,78,77,165,159,139,264,143,137,97,91,56,53,40,35,40,24,40,27,40,36,40,34,40,42,40,38,40,35,40,36,42,39,44,43,40,29,40,31,64,59,46,45,44,45,40,43];
+    const vals = demoStreams.emgVariedPulses;
+    return vals[t % vals.length];
+} };
+const virtualEmgChannelLongHold: NodeChannelInfo = {
+  hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "EMG - Long Clench and Hold", channelId: "00008VIR",
+  missing: false, type: "emg-reading", units: "f(mv)", plug: 9, value: 0, virtual: true, timeFactor: 100,
+  virtualValueMethod: (t: number) => {
+    const vals = demoStreams.emgLongHold;
+    return vals[t % vals.length];
+} };
+const virtualEmgChannelShortHold: NodeChannelInfo = {
+  hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "EMG - Short Clench and Hold", channelId: "00009VIR",
+  missing: false, type: "emg-reading", units: "f(mv)", plug: 10, value: 0, virtual: true, timeFactor: 100,
+  virtualValueMethod: (t: number) => {
+    const vals = demoStreams.emgShortHold;
+    return vals[t % vals.length];
+} };
+const virtualFsrChannel: NodeChannelInfo = {
+  hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "FSR", channelId: "00010VIR",
+  missing: false, type: "fsr-reading", units: "f(n)", plug: 11, value: 0, virtual: true, timeFactor: 100,
+  virtualValueMethod: (t: number) => {
+    const vals = demoStreams.fsrSqueeze;
     return vals[t % vals.length];
 } };
 
 export const virtualSensorChannels: NodeChannelInfo[] = [
   virtualTempChannel, virtualHumidChannel, virtualCO2Channel, virtualO2Channel,
-  virtualLightChannel, virtualPartChannel, virtualEmgChannel ];
+  virtualLightChannel, virtualPartChannel,
+  virtualEmgChannelVaried, virtualEmgChannelLongHold, virtualEmgChannelShortHold,
+  virtualFsrChannel
+];
 
-  const emgSensorChannel: NodeChannelInfo = {
-    hubId: "SERIAL-ARDUINO",
-    hubName: "Arduino",
-    name: "emg",
-    channelId: "emg",
-    missing: true,
-    type: "emg-reading",
-    units: "f(mv)",
-    plug: 9,
-    value: 0,
-    virtual: false,
-    usesSerial: true,
-    serialConnected: null
-  };
+const emgSensorChannel: NodeChannelInfo = {
+  hubId: "SERIAL-ARDUINO",
+  hubName: "Arduino",
+  name: "emg",
+  channelId: "emg",
+  missing: true,
+  type: "emg-reading",
+  units: "f(mv)",
+  plug: 9,
+  value: 0,
+  virtual: false,
+  usesSerial: true,
+  serialConnected: null
+};
 
-  const fsrSensorChannel: NodeChannelInfo = {
-    hubId: "SERIAL-ARDUINO",
-    hubName: "Arduino",
-    name: "fsr",
-    channelId: "fsr",
-    missing: true,
-    type: "fsr-reading",
-    units: "n",
-    plug: 10,
-    value: 0,
-    virtual: false,
-    usesSerial: true,
-    serialConnected: null
-  };
+const fsrSensorChannel: NodeChannelInfo = {
+  hubId: "SERIAL-ARDUINO",
+  hubName: "Arduino",
+  name: "fsr",
+  channelId: "fsr",
+  missing: true,
+  type: "fsr-reading",
+  units: "n",
+  plug: 10,
+  value: 0,
+  virtual: false,
+  usesSerial: true,
+  serialConnected: null
+};
 
-  export const serialSensorChannels: NodeChannelInfo[] = [
-    emgSensorChannel, fsrSensorChannel
-  ];
+export const serialSensorChannels: NodeChannelInfo[] = [
+  emgSensorChannel, fsrSensorChannel
+];
+

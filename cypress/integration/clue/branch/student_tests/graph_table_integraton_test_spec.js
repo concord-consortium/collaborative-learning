@@ -191,7 +191,7 @@ context.skip('Graph Table Integration', function () {
       cy.openResourceTabs();
       cy.openTopTab('my-work');
       cy.openDocumentWithTitle('my-work', 'workspaces', title);
-      cy.closeTabs();
+      cy.closeResourceTabs();
     });
     it('verify connection of table and graph on restored canvas', function () {
       graphToolTile.getGraphPointLabel().contains('p1').should('exist');

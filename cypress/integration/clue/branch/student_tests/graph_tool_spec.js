@@ -57,7 +57,7 @@ context('Graph Tool', function() {
 
         describe('restore points to canvas', function(){
             it('will verify restore of point at origin', function(){
-                primaryWorkspace.getResizePanelDivider().click();
+                primaryWorkspace.openResourceTab();
                 resourcePanel.openPrimaryWorkspaceTab("my-work");
                 cy.openDocumentWithTitle('my-work','workspaces', problemDoc);
                 graphToolTile.getGraphPointCoordinates().should('contain', '(0, 0)');
@@ -110,7 +110,7 @@ context('Graph Tool', function() {
                 });
                 it('will show and hide angles to a polygon', function(){
                     let numAngles=1;
-                    primaryWorkspace.getResizePanelDivider().click();
+                    primaryWorkspace.openResourceTab();
                     resourcePanel.openPrimaryWorkspaceTab("my-work");
                     // primaryWorkspace.openPrimaryWorkspaceTab("my-work");
                     cy.openDocumentWithTitle('my-work','workspaces', polyDoc);
@@ -184,7 +184,7 @@ context('Graph Tool', function() {
                     graphToolTile.getGraphPoint().should('have.length',6);
                 });
                 it('will restore changes to a graph', function(){
-                    primaryWorkspace.getResizePanelDivider().click();
+                    primaryWorkspace.openResourceTab();
                     resourcePanel.openPrimaryWorkspaceTab("my-work");
                     cy.openDocumentWithTitle('my-work','workspaces', polyDoc);
                     graphToolTile.getAngleAdornment().should('exist').and('have.length',6);
@@ -195,6 +195,7 @@ context('Graph Tool', function() {
                 it.skip('verify delete points with delete tool', function(){ //current behavior of text deletes the entire graph tool tile. Point selection has to be forced
                     let basePointCount = 3; // number of points already in doc2
                     cy.openDocumentWithTitle('my-work','workspaces', ptsDoc);
+                    primaryWorkspace.getResizePanelDivider().click();
                     primaryWorkspace.getResizeLeftPanelHandle().click();
                     graphToolTile.selectGraphPoint(15,2);
                     graphToolTile.deleteGraphElement();
@@ -207,6 +208,7 @@ context('Graph Tool', function() {
                     // graphToolTile.getGraphPoint().should('have.length', basePointCount-3)
                 });
                 it.skip('verify delete polygon',()=>{
+                    primaryWorkspace.getResizePanelDivider().click();
                     primaryWorkspace.getResizeRightPanelHandle().click();
                     cy.openDocumentWithTitle('my-work','workspaces', polyDoc);
                     graphToolTile.getGraphPolygon().last().click({force:true});

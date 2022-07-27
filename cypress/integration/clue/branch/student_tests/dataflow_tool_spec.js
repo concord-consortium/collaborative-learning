@@ -112,5 +112,12 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getNode(nodeType).should("not.exist");
       });
     });
+    describe("Live Output Node", () => {
+      const nodeType = "live-output";
+      it("can create live output node", () => {
+        dataflowToolTile.getCreateNodeButton(nodeType).click();
+        dataflowToolTile.getNode(nodeType).should("exist");
+      });
+    });
   });
 });

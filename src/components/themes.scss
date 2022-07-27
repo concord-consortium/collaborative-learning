@@ -57,6 +57,15 @@
       background-color: $learninglog-green-light-4;
     }
   }
+  &.learning-log {
+    fill: $learninglog-green-light-5;
+    &:hover {
+      background-color: $learninglog-green-light-4;
+    }
+    &:active {
+      background-color: $learninglog-green-light-2;
+    }
+  }
   &.no-action {
     cursor: none;
     &:hover {
