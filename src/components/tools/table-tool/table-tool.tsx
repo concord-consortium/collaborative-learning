@@ -1,4 +1,5 @@
 import { observer } from "mobx-react";
+import { onSnapshot } from "mobx-state-tree";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactDataGrid from "react-data-grid";
 import { getTableContentHeight, TableContentModelType } from "../../../models/tools/table/table-content";
@@ -125,6 +126,13 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
       dataGrid?.style.setProperty("--header-selected-background-color", lightenColor(linkColors.stroke));
       dataGrid?.style.setProperty("--row-selected-background-color", lightenColor(linkColors.fill));
     }
+  });
+
+  useEffect(() => {
+    const disposer = onSnapshot((model.content as any).dataSet.attributes, () => {
+      triggerRowChange();
+    });
+    return () => { disposer(); };
   });
 
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
