@@ -183,8 +183,8 @@ export function defaultGeometryBoardChange(xAxis: AxisModelType, yAxis: AxisMode
   const axisRange: JXGCoordPair = [xAxis.range ?? kGeometryDefaultWidth / xAxis.unit,
                                    yAxis.range ?? kGeometryDefaultHeight / yAxis.unit];
   const [xMin, yMax, xMax, yMin] = getBoardBounds(axisMin, axisRange);
-  const unitX = kGeometryDefaultPixelsPerUnit;
-  const unitY = kGeometryDefaultPixelsPerUnit;
+  const unitX = xAxis.unit || kGeometryDefaultPixelsPerUnit;
+  const unitY = yAxis.unit || kGeometryDefaultPixelsPerUnit;
   const xMinBufferRange = kXAxisMinBuffer / unitX;
   const xMaxBufferRange = kAxisBuffer / unitX;
   const yBufferRange = kAxisBuffer / unitY;
