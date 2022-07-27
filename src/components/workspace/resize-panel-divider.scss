@@ -2,7 +2,7 @@
 
 .divider-container {
   width: 4px;
-  height: calc(100vh - (#{$header-height} + #{$workspace-content-margin}));
+  height: calc(100% - (#{$header-height} + #{$workspace-content-margin}));
   z-index: 1;
   display: flex;
   flex-direction: row;

@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { debounce } from "lodash";
-import React, { useState } from "react";
+import React from "react";
 import DragThumbnailIcon from "../../assets/drag-thumb-icon.svg";
 import ExpandIndicatorIcon from "../../assets/expand-indicator-icon.svg";
 import { kDividerMax, kDividerMin } from "../../models/stores/ui-types";
@@ -35,7 +35,7 @@ const ExpandHandle: React.FC<IExpanderProps> = ({dividerPosition, direction, sho
   };
   return (
     <div className={expanderClass} onClick={handleExpandHandleClick}>
-        <ExpandIndicatorIcon className={`expand-indicator ${direction}`}/>
+      <ExpandIndicatorIcon className={`expand-indicator ${direction}`}/>
     </div>
   );
 };
@@ -43,7 +43,6 @@ const ExpandHandle: React.FC<IExpanderProps> = ({dividerPosition, direction, sho
 export const ResizePanelDivider: React.FC <IProps> =
   ({dividerPosition, showExpanders, onDividerClick, toggleShowExpanders, onExpandWorkspace, onExpandResources}) => {
     const dividerMinLeftOffset = 39.5;
-    // const dividerMidLeftOffset = 21;
     const dividerMaxLeftOffset = 22;
     const tabWidth = 45;
     const hideDivider = dividerPosition === kDividerMin || dividerPosition === kDividerMax;
@@ -52,7 +51,6 @@ export const ResizePanelDivider: React.FC <IProps> =
                                   : dividerPosition === kDividerMax
                                       ? {left: `calc(${dividerPosition}% - ${tabWidth}px - ${dividerMaxLeftOffset}px)`}
                                       : {left: `calc(${dividerPosition}%)`};
-    const classes = classNames("resize-panel-divider");
 
     const debouncedHandleDividerEnter = debounce(() => toggleShowExpanders(true), 500);
 
@@ -67,7 +65,7 @@ export const ResizePanelDivider: React.FC <IProps> =
                 <ExpandHandle dividerPosition={dividerPosition} direction={"right"} shown={showExpanders}
                               onExpand={onExpandResources} toggleShowExpanderHandle={toggleShowExpanders}/>
               </div>
-            : <div className={classes} style={dividerPositionStyle}>
+            : <div className="resize-panel-divider" style={dividerPositionStyle}>
                 <div className="divider" onMouseEnter={debouncedHandleDividerEnter} onClick={()=>onDividerClick()}/>
                 <DragThumbnailIcon className="drag-thumbnail" onClick={()=>onDividerClick()}
                     onMouseEnter={()=>toggleShowExpanders(true)} />
