@@ -1,5 +1,5 @@
 import { difference, intersection } from "lodash";
-import { applySnapshot, getChildType, getSnapshot, getType, Instance, SnapshotIn, types } from "mobx-state-tree";
+import { applySnapshot, getSnapshot, getType, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { kGeometryToolID } from "./geometry-types";
 import { uniqueId } from "../../../utilities/js-utils";
 import { typeField } from "../../../utilities/mst-utils";

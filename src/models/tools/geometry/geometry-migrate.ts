@@ -81,7 +81,7 @@ export const convertModelObjectToChanges = (obj: GeometryObjectModelType): JXGCh
       const { type, x, y, anchors, ...props } = obj as CommentModelType;
       const anchor = anchors?.length ? anchors[0] : undefined;
       const properties = omitNullish({ ...props, anchor });
-      changes.push({ operation: "create", target: "comment", properties });
+      changes.push({ operation: "create", target: "comment", parents: [x, y], properties });
       break;
     }
     case "image": {

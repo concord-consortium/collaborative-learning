@@ -15,16 +15,16 @@ import { canonicalizeValue } from "../table/table-model-types";
 import { convertModelToChanges, exportGeometryJson } from "./geometry-migrate";
 import { preprocessImportFormat } from "./geometry-import";
 import {
-  cloneGeometryObject, CommentModel, GeometryBaseContentModel, GeometryObjectModelType, GeometryObjectModelUnion,
-  ImageModel, ImageModelType, isMovableLineModel, isMovableLinePointId, isPolygonModel, MovableLineModel, PointModel,
-  PolygonModel, VertexAngleModel
+  cloneGeometryObject, CommentModel, CommentModelType, GeometryBaseContentModel, GeometryObjectModelType,
+  GeometryObjectModelUnion, ImageModel, ImageModelType, isCommentModel, isMovableLineModel, isMovableLinePointId,
+  isPointModel, isPolygonModel, MovableLineModel, PointModel, PolygonModel, VertexAngleModel
 } from "./geometry-model";
 import {
   getAxisAnnotations, getBaseAxisLabels, getObjectById, guessUserDesiredBoundingBox, kAxisBuffer,
   kXAxisMinBuffer, kXAxisTotalBuffer, kYAxisTotalBuffer, resumeBoardUpdates, suspendBoardUpdates, syncAxisLabels
 } from "./jxg-board";
 import {
-  ESegmentLabelOption, ILinkProperties, JXGChange, JXGCoordPair, JXGProperties, JXGUnsafeCoordPair
+  ESegmentLabelOption, ILinkProperties, JXGChange, JXGCoordPair, JXGPositionProperty, JXGProperties, JXGUnsafeCoordPair
 } from "./jxg-changes";
 import { applyChange, applyChanges, IDispatcherChangeContext } from "./jxg-dispatcher";
 import {  kPointDefaults } from "./jxg-point";
@@ -702,6 +702,31 @@ export const GeometryContentModel = GeometryBaseContentModel
       return applyAndLogChange(board, change);
     }
 
+    function getCentroid(obj: GeometryObjectModelUnion) {
+      const forceNumber = (num: number | undefined) => num || 0;
+
+      if (isPointModel(obj)) {
+        return [forceNumber(obj.x), forceNumber(obj.y)];
+      } else if (isMovableLineModel(obj)) {
+        return [(forceNumber(obj.p1.x) + forceNumber(obj.p2.x)) / 2,
+          (forceNumber(obj.p1.y) + forceNumber(obj.p2.y)) / 2];
+      } else if (isPolygonModel(obj)) {
+        const totals = [0, 0];
+        let count = 0;
+        obj.points.forEach(pointId => {
+          const point = self.getObject(pointId);
+          if (point && isPointModel(point)) {
+            totals[0] = totals[0] + forceNumber(point.x);
+            totals[1] = totals[1] + forceNumber(point.y);
+            count++;
+          }
+        });
+        return [totals[0] / count, totals[1] / count];
+      }
+      // TODO Can comments be added to any other objects?
+      return [0, 0];
+    }
+
     function updateObjects(board: JXG.Board | undefined,
                            ids: string | string[],
                            properties: JXGProperties | JXGProperties[],
@@ -712,7 +737,17 @@ export const GeometryContentModel = GeometryBaseContentModel
         if (obj) {
           const { position, text } = propsArray[i] || propsArray[0];
           if (position != null) {
-            obj.setPosition(position);
+            if (isCommentModel(obj)) {
+              const comment = obj as CommentModelType;
+              // TODO Handle multiple anchors
+              const anchor = self.getObject(comment.anchors[0]);
+              const anchorPosition = anchor ? getCentroid(anchor) : [0, 0];
+              const newPosition: JXGPositionProperty =
+                [position[0] - anchorPosition[0], position[1] - anchorPosition[1]];
+              obj.setPosition(newPosition);
+            } else {
+              obj.setPosition(position);
+            }
           }
           if (text != null) {
             obj.setText(text);

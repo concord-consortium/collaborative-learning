@@ -284,6 +284,7 @@ export function preprocessImportFormat(snapshot: any): GeometryExtrasContentSnap
       vertices.push({ id: ptId, angleLabel });
       return ptId;
     });
+    // TODO: handle labelOption
     const o = addObject(PolygonModel.create({ id: id as string, points, ...otherProps, ...others }));
     warnExtraProps("addPolygon", o, otherProps, others);
 

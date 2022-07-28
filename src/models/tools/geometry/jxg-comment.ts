@@ -53,7 +53,8 @@ function getCentroid(anchor: JXG.GeometryElement): JXGCoordPair | undefined{
 
 export const commentChangeAgent: JXGChangeAgent = {
   create: (board, change) => {
-    const { text, parents: inParents, ...changeProps } = (change.properties || {}) as any;
+    const inParents = change.parents || undefined;
+    const { text, ...changeProps } = (change.properties || {}) as any;
     const commentText = text || "";
     const commentProps = {
       id: uniqueId(),
