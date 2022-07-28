@@ -542,7 +542,7 @@ describe("GeometryContent", () => {
 
     // update comment text
     content.updateObjects(board, comment.id, { position: [5, 5], text: "new" });
-    expect(content.lastObject).toEqual({ id: comment.id, type: "comment", anchors: ["ml"], x: 5, y: 5, text: "new" });
+    expect(content.lastObject).toEqual({ id: comment.id, type: "comment", anchors: ["ml"], x: 2, y: 2, text: "new" });
 
     // removing the line removes the line and its comment from the model and the board
     content.removeObjects(board, "ml");
