@@ -94,7 +94,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
 
   public componentDidMount() {
     this.props.onRegisterToolApi({
-      getTitle: () => metadata.title,
+      // I think I can register the correct getTitle method here
+      //getTitle: () => metadata.title,
       exportContentAsTileJson: (options?: ITileExportOptions) => {
         return this.getContent().exportJson(options);
       }
