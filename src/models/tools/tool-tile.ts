@@ -1,6 +1,7 @@
 import { cloneDeep } from "lodash";
 import { getParent, getSnapshot, getType, 
   Instance, SnapshotIn, SnapshotOut, types, ISerializedActionCall } from "mobx-state-tree";
+import { GeometryContentModelType } from "./geometry/geometry-content";
 import { isPlaceholderContent } from "./placeholder/placeholder-content";
 import { ITileExportOptions } from "./tool-content-info";
 import { findMetadata, ToolContentModelType, ToolContentUnion } from "./tool-types";
@@ -70,6 +71,15 @@ export const ToolTileModel = types
     display: DisplayUserTypeEnum,
     // e.g. "GeometryContentModel", "ImageContentModel", "TableContentModel", "TextContentModel", ...
     content: ToolContentUnion
+  })
+  .preProcessSnapshot(snapshot => {
+    // Move the title up to handle legacy geometry tiles
+    if (snapshot.content.type === "Geometry" && !("title" in snapshot) && "title" in snapshot.content) {
+      const newSnapshot = cloneDeep(snapshot);
+      newSnapshot.title = (snapshot.content as GeometryContentModelType).title;
+      return newSnapshot;
+    }
+    return snapshot;
   })
   .views(self => ({
     // generally negotiated with tool, e.g. single column width for table
