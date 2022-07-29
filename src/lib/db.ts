@@ -557,7 +557,7 @@ export class DB {
             return createDocumentModel({
               type,
               title,
-              properties,
+              properties: { ...properties, ...metadata.properties },
               groupId,
               visibility,
               uid: userId,
@@ -686,7 +686,7 @@ export class DB {
       if (this.stores.appMode !== "qa") {
         return reject("db#clear is only available in qa mode");
       }
-      
+
       if (level === "all") {
         return reject("clearing 'all' is handled by clearFirebaseAnonQAUser");
       }
