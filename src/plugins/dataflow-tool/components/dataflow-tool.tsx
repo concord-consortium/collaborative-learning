@@ -94,6 +94,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
 
   public componentDidMount() {
     this.props.onRegisterToolApi({
+      getTitle: () => metadata.title,
       exportContentAsTileJson: (options?: ITileExportOptions) => {
         return this.getContent().exportJson(options);
       }
@@ -102,6 +103,10 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
 
     if (this.getTitle() === '') {
       const { model: { id }, onRequestUniqueTitle } = this.props;
+      // this, at this point, is document-content:handleRequestUniqueTile()
+      // which seems like it goes back to get the tool's particular getTitle method?
+      // regardless there is something that is deciphering the tool type
+      // and deciding it is a count of 1 then returning "Dataflow 1" into `title`
       const title = onRequestUniqueTitle(id);
       const hackedTitle = `${title?.slice(0, -1)}${this.dataflowProgramId}`
       title && this.getContent().setTitle(hackedTitle);
