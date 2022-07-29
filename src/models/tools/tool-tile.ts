@@ -36,8 +36,13 @@ export function cloneTileSnapshotWithNewId(tile: ToolTileModelType, newId?: stri
 }
 
 export function getToolTileModel(toolContentModel: ToolContentModelType) {
-  const parent = getParent(toolContentModel);
-  return getType(parent).name === "ToolTile" ? parent as ToolTileModelType : undefined;
+  try {
+    const parent = getParent(toolContentModel);
+    return getType(parent).name === "ToolTile" ? parent as ToolTileModelType : undefined;
+  } catch (e) {
+    console.warn(`Unable to find tool tile for content ${toolContentModel}`);
+    return undefined;
+  }
 }
 
 export function getTileTitleFromContent(toolContentModel: ToolContentModelType) {
@@ -46,7 +51,11 @@ export function getTileTitleFromContent(toolContentModel: ToolContentModelType) 
 
 export function setTileTitleFromContent(toolContentModel: ToolContentModelType, title: string) {
   const toolTile = getToolTileModel(toolContentModel);
-  const metadata = toolTile?.id ? findMetadata(toolContentModel.type, toolTile?.id) : undefined;
+  const metadata = toolTile?.id
+    ? findMetadata(toolContentModel.type, toolTile?.id)
+    : (toolContentModel as any).metadata
+    ? (toolContentModel as any).metadata
+    : undefined;
   toolTile?.setTitle(title);
   metadata?.setTitle(title);
 }
