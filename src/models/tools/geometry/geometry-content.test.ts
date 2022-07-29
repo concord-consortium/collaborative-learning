@@ -4,7 +4,7 @@ import {
   GeometryContentModel, GeometryContentModelType, defaultGeometryContent, GeometryMetadataModel
 } from "./geometry-content";
 import {
-  CommentModel, ImageModel, MovableLineModel, PointModel, PolygonModel,
+  CommentModel, defaultBoard, ImageModel, MovableLineModel, PointModel, PolygonModel,
   segmentIdFromPointIds, VertexAngleModel
 } from "./geometry-model";
 import { kGeometryToolID } from "./geometry-types";
@@ -138,7 +138,7 @@ describe("GeometryContent", () => {
 
   it("can create with default properties", () => {
     const content = GeometryContentModel.create();
-    expect(getSnapshot(content)).toEqual({ type: kGeometryToolID, objects: {} });
+    expect(getSnapshot(content)).toEqual({ type: kGeometryToolID, board: defaultBoard(), objects: {} });
 
     destroy(content);
   });

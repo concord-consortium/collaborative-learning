@@ -71,7 +71,7 @@ export const BoardModel = types.model("BoardModel", {
 });
 export interface BoardModelType extends Instance<typeof BoardModel> {}
 
-const defaultBoard = () => BoardModel.create({ xAxis: defaultAxis(), yAxis: defaultAxis() });
+export const defaultBoard = () => BoardModel.create({ xAxis: defaultAxis(), yAxis: defaultAxis() });
 
 export const GeometryObjectModel = types.model("GeometryObject", {
   type: types.optional(types.string, () => {throw "Type must be overridden";}),
