@@ -159,7 +159,8 @@
               "type": "published-learning-logs",
               "dataTestHeader": "class-work-section-learning-log",
               "dataTestItem": "class-work-list-items",
-              "documentTypes": ["learningLogPublication"]
+              "documentTypes": ["learningLogPublication"],
+              "properties": ["!isDeleted"]
             },
             {
               "className": "section problem starred",
@@ -167,7 +168,7 @@
               "type": "starred-problem-documents",
               "dataTestHeader": "class-work-section-starred",
               "documentTypes": ["publication"],
-              "properties": ["starred"],
+              "properties": ["starred", "!isDeleted"],
               "showStars": ["teacher"]
             }
           ]

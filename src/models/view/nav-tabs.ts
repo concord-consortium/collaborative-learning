@@ -57,7 +57,7 @@ export const NavTabSectionModel =
       return user.type && (self.showStars.indexOf(user.type) !== -1);
     },
     showDeleteForUser(user: UserModelType, userDocument?: any) { //DocumentModelType is a circular logic?
-      const userOwnsDocument = userDocument && user.id === userDocument.uid;
+      const userOwnsDocument = userDocument && (user.id === userDocument || user.id === userDocument.uid);
       // allow users to delete published document
       const deletableTypes = [ENavTabSectionType.kPublishedPersonalDocuments,
         ENavTabSectionType.kPublishedProblemDocuments,
