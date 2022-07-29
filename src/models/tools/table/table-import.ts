@@ -231,6 +231,8 @@ export function convertChangesToSnapshot(changes: string[]) {
       });
     }
   });
-  const linkedGeometries = Array.from(linksMap.values());
+  // const linkedGeometries = Array.from(linksMap.values());
+  // TODO LINKS
+  const linkedGeometries: string[] = [];
   return { dataSet, linkedGeometries };
 }

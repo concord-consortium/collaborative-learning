@@ -63,11 +63,15 @@ export const AxisModel = types.model("AxisModel", {
 export interface AxisModelType extends Instance<typeof AxisModel> {}
 export interface AxisModelSnapshot extends SnapshotIn<typeof AxisModel> {}
 
+const defaultAxis = () => AxisModel.create({ min: 0 });
+
 export const BoardModel = types.model("BoardModel", {
   xAxis: AxisModel,
   yAxis: AxisModel
 });
 export interface BoardModelType extends Instance<typeof BoardModel> {}
+
+const defaultBoard = () => BoardModel.create({ xAxis: defaultAxis(), yAxis: defaultAxis() });
 
 export const GeometryObjectModel = types.model("GeometryObject", {
   type: types.optional(types.string, () => {throw "Type must be overridden";}),
@@ -356,6 +360,12 @@ export const GeometryBaseContentModel = ToolContentModel
     board: types.maybe(BoardModel),
     bgImage: types.maybe(ImageModel),
     objects: types.map(types.union(CommentModel, MovableLineModel, PointModel, PolygonModel, VertexAngleModel))
+  })
+  .preProcessSnapshot(snapshot => {
+    if (!snapshot.board) {
+      return { ...snapshot, board: defaultBoard() };
+    }
+    return snapshot;
   });
 export interface GeometryBaseContentModelType extends Instance<typeof GeometryBaseContentModel> {}
 export interface GeometryBaseContentSnapshotType extends Instance<typeof GeometryBaseContentModel> {}
