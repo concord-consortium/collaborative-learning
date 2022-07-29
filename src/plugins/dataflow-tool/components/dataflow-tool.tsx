@@ -129,14 +129,19 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
   };
 
   private renderTitle() {
-    console.log(this.props)
-    console.log(this.state)
-    const size = {width: 200, height: 100};
+    const size = {width: null, height: null};
     const { readOnly, scale } = this.props;
     return (
-      <EditableTileTitle key="geometry-title" size={size} scale={scale} getTitle={this.getTitle.bind(this)}  //TODO refactor to abstract tool type so we don't need to use this key
-                              readOnly={readOnly} measureText={(text) => measureText(text, defaultTileTitleFont)}
-                              onBeginEdit={this.handleBeginEditTitle} onEndEdit={this.handleTitleChange} />
+      <EditableTileTitle
+        key="dataflow-title"
+        size={size}
+        scale={scale}
+        getTitle={this.getTitle.bind(this)}
+        readOnly={readOnly}
+        measureText={(text) => measureText(text, defaultTileTitleFont)}
+        onBeginEdit={this.handleBeginEditTitle}
+        onEndEdit={this.handleTitleChange}
+      />
     );
   }
 
