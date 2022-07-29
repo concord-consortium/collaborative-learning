@@ -35,6 +35,7 @@ import {
   isVertexAngle, isVisibleEdge, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin,
   kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj
 } from "./jxg-types";
+import { setTileTitleFromContent } from "../tool-tile";
 import { IDataSet } from "../../data/data-set";
 import { uniqueId } from "../../../utilities/js-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
@@ -338,6 +339,9 @@ export const GeometryContentModel = GeometryBaseContentModel
           self.metadata.sharedSelection.select(tableId, rowId, select);
         }
       }
+    },
+    setTitle(title: string) {
+      setTileTitleFromContent(self, title);
     }
   }))
   .actions(self => ({
@@ -413,7 +417,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       if ((op === "update") && (target === "metadata")) {
         const props = change?.properties as JXGProperties | undefined;
         if (props?.title) {
-          self.metadata.setTitle(props.title);
+          setTileTitleFromContent(self, props.title);
         }
       }
 
