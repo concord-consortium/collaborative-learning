@@ -98,6 +98,14 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
         return this.getContent().exportJson(options);
       }
     });
+
+
+    if (this.getTitle() === '') {
+      const { model: { id }, onRequestUniqueTitle } = this.props;
+      const title = onRequestUniqueTitle(id);
+      const hackedTitle = `${title?.slice(0, -1)}${this.dataflowProgramId}`
+      title && this.getContent().setTitle(hackedTitle);
+    }
   }
 
   private getDocument() {
