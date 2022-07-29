@@ -58,32 +58,30 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
           <SizeMe monitorHeight={true}>
             {({ size }: SizeMeProps) => {
               return (
-                <>
-                  <DataflowProgram
-                    programId={this.dataflowProgramId}
-                    modelId={model.id}
-                    readOnly={readOnly}
-                    documentProperties={this.getDocumentProperties()}
-                    program={program}
-                    onProgramChange={this.handleProgramChange}
-                    onShowOriginalProgram={showOriginalProgramButton ? this.handleShowOriginalProgram : undefined}
-                    onStartProgram={this.handleStartProgram}
-                    programRunId={programRunId}
-                    programIsRunning={programIsRunning}
-                    onCheckProgramRunState={this.handleCheckProgramRunState}
-                    onSetProgramStartTime={this.handleSetProgramStartTime}
-                    programStartTime={programStartTime}
-                    onSetProgramEndTime={this.handleSetProgramEndTime}
-                    programEndTime={programEndTime}
-                    onSetProgramStartEndTime={this.handleSetProgramStartEndTime}
-                    programDataRate={programDataRate}
-                    onProgramDataRateChange={this.handleProgramDataRateChange}
-                    programZoom={programZoom}
-                    onZoomChange={this.handleProgramZoomChange}
-                    size={size}
-                    tileHeight={height}
-                  />
-                </>
+                <DataflowProgram
+                  programId={this.dataflowProgramId}
+                  modelId={model.id}
+                  readOnly={readOnly}
+                  documentProperties={this.getDocumentProperties()}
+                  program={program}
+                  onProgramChange={this.handleProgramChange}
+                  onShowOriginalProgram={showOriginalProgramButton ? this.handleShowOriginalProgram : undefined}
+                  onStartProgram={this.handleStartProgram}
+                  programRunId={programRunId}
+                  programIsRunning={programIsRunning}
+                  onCheckProgramRunState={this.handleCheckProgramRunState}
+                  onSetProgramStartTime={this.handleSetProgramStartTime}
+                  programStartTime={programStartTime}
+                  onSetProgramEndTime={this.handleSetProgramEndTime}
+                  programEndTime={programEndTime}
+                  onSetProgramStartEndTime={this.handleSetProgramStartEndTime}
+                  programDataRate={programDataRate}
+                  onProgramDataRateChange={this.handleProgramDataRateChange}
+                  programZoom={programZoom}
+                  onZoomChange={this.handleProgramZoomChange}
+                  size={size}
+                  tileHeight={height}
+                />
               );
             }}
           </SizeMe>

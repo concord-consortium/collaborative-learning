@@ -1,8 +1,7 @@
 import { types, Instance, applySnapshot, getSnapshot } from "mobx-state-tree";
 import { cloneDeep } from "lodash";
 import stringify from "json-stringify-pretty-compact";
-import { toolContentModelHooks } from "../../../models/tools/tool-types";
-import { ToolContentModel, ToolMetadataModelType } from "../../../models/tools/tool-types";
+import { ToolContentModel, ToolMetadataModelType, toolContentModelHooks } from "../../../models/tools/tool-types";
 import { DataflowProgramModel } from "./dataflow-program-model";
 import { ITileExportOptions } from "../../../models/tools/tool-content-info";
 import { DEFAULT_DATA_RATE } from "./utilities/node";
@@ -88,7 +87,7 @@ export const DataflowContentModel = ToolContentModel
       }
     },
     setTitle(title: string) {
-      setTileTitleFromContent(self, title); //DATAFLOW-TITLE TODO - not using this yet
+      setTileTitleFromContent(self, title);
     },
     setProgramDataRate(dataRate: number) {
       self.programDataRate = dataRate;
