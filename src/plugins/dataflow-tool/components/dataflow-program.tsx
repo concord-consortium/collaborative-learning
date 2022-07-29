@@ -99,6 +99,7 @@ interface IProps extends SizeMeProps {
   programIsRunning?: string;
   onCheckProgramRunState: (endTime: number) => void;
   tileHeight?: number;
+  programId?: number;
 }
 
 interface IState {

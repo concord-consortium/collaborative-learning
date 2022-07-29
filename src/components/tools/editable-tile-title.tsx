@@ -20,7 +20,7 @@ export const EditableTileTitle: React.FC<IProps> = observer(({
 }) => {
   // getTitle() and observer() allow this component to re-render
   // when the title changes without re-rendering the entire Geometry
-  const title = getTitle() || "Graph"; //DATAFLOW-TITLE TODO this needs to know where it's being rendered and we can replace that geometry-key I think
+  const title = getTitle() || "Tile Title";
   const kTitlePadding = 30;
   // There can be one render before we know our container size, which will then be
   // immediately replaced by a subsequent render with a known container size.

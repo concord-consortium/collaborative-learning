@@ -88,7 +88,7 @@ export const DataflowContentModel = ToolContentModel
       }
     },
     setTitle(title: string) {
-      setTileTitleFromContent(self, title);
+      setTileTitleFromContent(self, title); //DATAFLOW-TITLE TODO - not using this yet
     },
     setProgramDataRate(dataRate: number) {
       self.programDataRate = dataRate;

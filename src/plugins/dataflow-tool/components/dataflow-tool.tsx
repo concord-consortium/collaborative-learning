@@ -60,6 +60,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
               return (
                 <>
                   <DataflowProgram
+                    programId={this.dataflowProgramId}
                     modelId={model.id}
                     readOnly={readOnly}
                     documentProperties={this.getDocumentProperties()}
