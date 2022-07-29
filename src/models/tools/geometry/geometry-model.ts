@@ -53,11 +53,11 @@ export const AxisModel = types.model("AxisModel", {
 .actions(self => ({
   setAll(properties: IAxisProperties) {
     const { name, label, min, unit, range } = properties;
-    if (name) self.setName(name);
-    if (label) self.setLabel(label);
-    if (min) self.setMin(min);
-    if (unit) self.setUnit(unit);
-    if (range) self.setRange(range);
+    if (name !== undefined) self.setName(name);
+    if (label !== undefined) self.setLabel(label);
+    if (min !== undefined) self.setMin(min);
+    if (unit !== undefined) self.setUnit(unit);
+    if (range !== undefined) self.setRange(range);
   }
 }));
 export interface AxisModelType extends Instance<typeof AxisModel> {}
