@@ -39,7 +39,7 @@ export const PlaybackMarkerToolbar: React.FC<IProps> = ({markerSelected, addMark
   };
   const DeleteMarkerButton: React.FC = () => {
     const handleDeleteMarker = () => {
-      console.log("Delete Marker");
+      //TODO handle deleting markers
     };
 
     return (
@@ -51,7 +51,7 @@ export const PlaybackMarkerToolbar: React.FC<IProps> = ({markerSelected, addMark
   };
   const CommentMarkerButton: React.FC = () => {
     const handleAddCommentToMarker = () => {
-      console.log("Add Comment to Marker");
+      //TODO handle commenting on markers
     };
 
     return (
