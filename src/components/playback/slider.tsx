@@ -24,7 +24,7 @@ export const SliderComponent: React.FC<IProps> = (props) => {
   const [markerSelected, setMarkerSelected] = useState(false);
   const [addMarkerButtonSelected, setAddMarkerButtonSelected] = useState(false);
   const [markers, setMarkers] = useState<IMarkerProps[]>([]);
-  const [selectedMarkers, setSelectedMarkers] = useState<IMarkerProps[]>([]);
+  const [selectedMarkers, ] = useState<IMarkerProps[]>([]);
 
   //TODO: need to add a modal that warns users about max number of markers. Currently, a generic alert is shown
   //TODO: Currently, if add marker is on and user moves the time handle, a marker is added where the user
