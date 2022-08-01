@@ -1,21 +1,14 @@
 {
   "code": "brain",
   "abbrevTitle": "BW",
-  "title": "Brainwaves",
+  "title": "Neural Engineering",
   "subtitle": "",
   "placeholderText": "Add your thoughts here.",
   "config": {
     "placeholderText": "Document your thoughts",
-    "autoSectionProblemDocuments": false,
+    "autoSectionProblemDocuments": true,
     "defaultDocumentTemplate": {
       "tiles": [
-        {
-          "content": {
-            "type": "Text",
-            "format": "html",
-            "text": "Welcome! To begin using the CLUE software, please click the My Resources bar at extreme left, and then click the tab labeled <strong>Lesson</strong>."
-          }
-        }
       ]
     },
     "defaultDocumentType": "problem",
@@ -160,6 +153,18 @@
               "addDocument": true
             }
           ]
+        },
+         {
+          "tab": "teacher-guide",
+          "label": "Teacher Guide",
+          "teacherOnly": true,
+          "sections": []
+        },
+        {
+          "tab": "student-work",
+          "label": "Student Work",
+          "teacherOnly": true,
+          "sections": []
         }
       ]
     },
@@ -221,14 +226,119 @@
   },
   "investigations": [
     {
+      "description": "Investigation 0",
+      "ordinal": 0,
+      "title": "Introduction to CLUE",
+      "problems": [
+        {
+          "description": "Lesson 0.1",
+          "ordinal": 1,
+          "title": "Lesson 0.1 Using CLUE and Dataflow Programming",
+          "subtitle": "",
+          "disabled": [],
+          "sections": 
+          [
+            {
+              "type": "intro",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "EBCpyeDU_FkLtXq8",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Welcome to CLUE</h3>",
+                        "<p>On the right is <strong>your</strong> workspace. To edit your workspace, you must first add a <strong>tile</strong>. You get a tile in your workspace by either</p>",
+                        "<ul><li><strong>Dragging a tile from the content (left side) in CLUE into your workspace</strong></li><li><strong>Dragging a new  tile from the menu on the left of your workspace</strong></li><li><strong>Click a button on the menu to add a new tile to the bottom of your workspace</strong></li></ul>",
+                        "<p>All tiles have a <strong>waffle</strong> (gray box with six dots) in the upper right corner if you hover over it. To drag the tile, click the waffle and hold it down as you drag it to your workspace. As you drag the tile into the workspace, a blue line shows where the tile will go when you let go.</p>",
+                        "<p>OK, get ready... Here we go!</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "_rU9plvleix0FlBS",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Group work - discussion</h3>",
+                        "<p><em>First, check that all the members of your group have the same group number at the top right of your screen. </em></p>",
+                        "<p>Talk about robots and bionic limbs with your group.  What do you know about bionics? </p>",
+                        "<p>Take some notes on your discussion in CLUE. Open a text tile on the right in your <strong>Workspace</strong> (click the menu button with the letter A on it). </p>",
+                        "<p>Take notes and make a list of what your group knows. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "uotBFbYpZfaMbTBf",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>5. Brainstorm some research questions</strong></p>",
+                        "<p>What do you want to know more about? Take time to think about it and write potential questions in a new tile.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "_aucv3h3VrZ_VNPK",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>6. When ready, share with the group</strong></p>",
+                        "<p>Use the group controls so that you can see and share each others&#x27; notes. See the image below for how to do that.  (Ignore the &quot;Publish&quot; feature for now).</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "lJEIgDWNRXk02nZi",
+                    "title": "CLUE Interfaces for Sharing",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/mothed/images/share.jpg"
+                    }
+                  },
+                  {
+                    "id": "eGVyLGBx1SzYZJYh",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>7. Discuss the research questions</strong></p>",
+                        "<p>Work with the members of your group to explore each other&#x27;s questions and ideas. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "sA84OvZZVt-8LVM3",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>8. Publish (see image above) your work to the class</strong></p>",
+                        "<p>You can choose one member of your group to publish a summary of the group&#x27;s work, or you may each publish.  When you publish, your workspace will appear under the pink &quot;Class Work&quot; tab (right-hand side of CLUE).</p>"
+                      ]
+                    }
+                  }
+
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
       "description": "Investigation 1",
       "ordinal": 1,
-      "title": "Biology and Motion",
+      "title": "Human and Robotic Motion",
       "problems": [
         {
           "description": "Lesson 1.1",
           "ordinal": 1,
-          "title": "Lesson 1.1 How do Bionic Arms Work?",
+          "title": "Lesson 1.1 - What is a bionic arm?",
           "subtitle": "",
           "disabled": [],
           "sections": 
@@ -404,8 +514,8 @@
         {
           "description": "Lesson 1.2",
           "ordinal": 2,
-          "title": "Lesson 1.2A What body systems contribute to limb movement",
-          "subtitle": "Part 1",
+          "title": "Lesson 1.2 - What controls our movement? (Part 1)",
+          "subtitle": "",
           "disabled": [],
           "sections": 
           [
@@ -642,8 +752,8 @@
         {
           "description": "Lesson 1.3",
           "ordinal": 3,
-          "title": "Lesson 1.2B What body systems contribute to limb movement",
-          "subtitle": "Part 2",
+          "title": "Lesson 1.2 - What controls our movement? (Part 2)",
+          "subtitle": "",
           "disabled": [],
           "sections": 
           [
@@ -1799,7 +1909,7 @@
         {
           "description": "Lesson 1.4",
           "ordinal": 4,
-          "title": "Lesson 1.4 Identify and Measure Muscle Activity",
+          "title": "Lesson 1.3 -  How do muscles work?",
           "subtitle": "Electromyography",
           "disabled": [],
           "sections": 
@@ -2150,7 +2260,7 @@
         {
           "description": "Lesson 1.5",
           "ordinal": 5,
-          "title": "Lesson 1.5 Control a Robot Claw with EMG Signals",
+          "title": "Lesson 1.4 - How to control a robotic claw",
           "subtitle": "",
           "disabled": [],
           "sections": 
@@ -2411,12 +2521,19 @@
               }
             }
           ]
-        },
+        }
+      ]
+    },
+    {
+      "description": "Investigation 2",
+      "ordinal": 0,
+      "title": "Human and Robotic Touch",
+      "problems": [
         {
-          "description": "Lesson 1.6 - Sample",
-          "ordinal": 6,
-          "title": "Technology Assistance for Paralysis",
-          "subtitle": "EMG Signals",
+          "description": "Lesson 2.1",
+          "ordinal": 1,
+          "title": "Lesson 2.1 - How does touch impact movement?",
+          "subtitle": "",
           "disabled": [],
           "sections": 
           [
@@ -2424,126 +2541,61 @@
               "type": "intro",
               "content": {
                 "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<h2>Objective</h2>",
-                        "<p>During this section, we will explore how EMG signals can be used to control a robotic claw.  For that, you will use electromyography (EMG) in coordination with a robotic claw to model the performance of a bionic arm.</p>" 
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<h2>Group Brainstorming Activity</h2>",
-                        "<p>Whenever you explore a scientific topic, it's a good idea to start by identifying what questions you want to answer. With your group, generate a list of questions about the biology of paralysis and the kinds of technology you think would be beneficial. You can work as a group by sharing your documents using the share button and turning on the group view. When you are ready, publish your questions to the class.</p>",
-                        "Make a new text box by clicking the 'A' tool in your workspace on the right. You can drag text blocks and images from the lesson into your page, and also from your group-mates' workspaces. You can drag images on your computer onto your workspace too."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/neural-engineering/images/headerHelp.jpg"
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>In their CLUE Workspace journals, students should reflect critically about their readings and the questions they have brainstormed. Have students share what they observed during each type of stimulation. Then, ask students what the spike readings mean. Have students develop a quick sketch or description of how our brain communicates with our body.  This will transition the class into the next section on neuron anatomy and action potentials.</p>"
-                      ]
-                    }
-                  }
+
                 ]
               }
-            },
+            }
+          ]
+        },
+        {
+          "description": "Lesson 2.2",
+          "ordinal": 1,
+          "title": "Lesson 2.2 - How do we perceive touch?",
+          "subtitle": "",
+          "disabled": [],
+          "sections": 
+          [
             {
-              "type": "labWork",
+              "type": "intro",
               "content": {
                 "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Work with your group to find the signal strength and duration of axon signals. You might wish to organize your data in a table like the one below.</p>"
 
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Table",
-                      "name": "Brain Axon Signals",
-                      "columns": [
-                        {"name":"Time (ns)","values":[0.1, 0.2, 0.3, 0.4]},
-                        {"name":"Signal","values":[0.1, 0.2, 1.6, 1.8]}
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<h2>Mimicing Axons</h2>",
-                        "<p>We can turn a signal on and off just like an axon does using a program. We will make programs using blocks that are connected from their outputs to their inputs.</p>",
-                        "Here is a very simple program. Recreate this program with the program tool in your workspace. Then add some logic to make the lightbulb only turn on when the signal amplitude is over 0.5."
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/neural-engineering/images/signalProgram.jpg"
-                    }
-                  }
                 ]
               }
-            },
+            }
+          ]
+        },
+        {
+          "description": "Lesson 2.3",
+          "ordinal": 1,
+          "title": "Lesson 2.3 - Can robots sense objects?",
+          "subtitle": "",
+          "disabled": [],
+          "sections": 
+          [
             {
-              "type": "reflection",
+              "type": "intro",
               "content": {
                 "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Discuss with your group to find the signal strength and duration of axon signals. You might wish to organize your data in a table like the one below. </p>"
 
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Drag the table below into your learning log, and fill it in for this experiment.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Table",
-                      "name": "Record what you know, wonder, and learn about the topic.",
-                      "columns": [
-                        {"name":"Date"},
-                        {"name":"Today's Topic"},
-                        {"name":"Know"},
-                        {"name":"Wonder"},
-                        {"name":"Learn"}
-                      ]
-                    }
-                  }                  
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "description": "Lesson 2.4",
+          "ordinal": 1,
+          "title": "Lesson 2.4 - Putting it all together",
+          "subtitle": "",
+          "disabled": [],
+          "sections": 
+          [
+            {
+              "type": "intro",
+              "content": {
+                "tiles": [
+
                 ]
               }
             }

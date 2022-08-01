@@ -1,0 +1,180 @@
+{
+  "code": "brain",
+  "abbrevTitle": "BRAIN",
+  "title": "Neural Engineering Teacher Guide",
+  "subtitle": "",
+  "placeholderText": "Enter notes here",
+  "settings": {
+    "table": {
+      "numFormat": ".2~f"
+    }
+  },
+  "sections": {
+    "overview": {
+      "initials": "OV",
+      "title": "Overview",
+      "placeholder": "Work area for\nOverview section"
+    },
+    "teach": {
+      "initials": "LC",
+      "title": "Teach",
+      "placeholder": "Work area for\nTeach section"
+    }
+  },
+  "investigations": [
+    {
+      "description": "Investigation 0",
+      "ordinal": 0,
+      "title": "Introduction to CLUE",
+      "overview": {
+        "tiles": [ ]
+      },
+      "problems": [
+        {
+          "description": "Problem 0.1",
+          "ordinal": 1,
+          "title": "Introduction to CLUE",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "overview",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem Overview</strong></p>",
+                        "<p>This section will discuss the educational goals of the curriculum.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "teach",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem Launch</strong></p>",
+                        "<p>This section will include classroom specific tips.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+        "description": "Investigation 1",
+        "ordinal": 0,
+        "title": "Introduction to Motion and Robotics",
+        "overview": {
+          "tiles": [ ]
+        },
+        "problems": [
+          {
+            "description": "Problem 1.1",
+            "ordinal": 1,
+            "title": "Introduction to Teaching Neural Engineering",
+            "subtitle": "",
+            "sections": [
+              {
+                "type": "overview",
+                "content": {
+                  "tiles": [
+                    {
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>Problem Overview</strong></p>",
+                          "<p>This section will discuss the educational goals of the curriculum.</p>"
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "supports": [ ]
+              },
+              {
+                "type": "teach",
+                "content": {
+                  "tiles": [
+                    {
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>Problem Launch</strong></p>",
+                          "<p>This section will include classroom specific tips.</p>"
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "supports": []
+              }
+            ]
+          }
+        ],
+                "problems": [
+          {
+            "description": "Problem 1.1",
+            "ordinal": 1,
+            "title": "Introduction to Teaching Neural Engineering",
+            "subtitle": "",
+            "sections": [
+              {
+                "type": "overview",
+                "content": {
+                  "tiles": [
+                    {
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>Problem Overview</strong></p>",
+                          "<p>This section will discuss the educational goals of the curriculum.</p>"
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "supports": [ ]
+              },
+              {
+                "type": "teach",
+                "content": {
+                  "tiles": [
+                    {
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>Problem Launch</strong></p>",
+                          "<p>This section will include classroom specific tips.</p>"
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "supports": []
+              }
+            ]
+          }
+        ]
+      }
+  ]
+}
