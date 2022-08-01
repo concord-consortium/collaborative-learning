@@ -1,6 +1,6 @@
 import React from "react";
 import { reaction, IReactionDisposer } from "mobx";
-import { clone, isAlive } from "mobx-state-tree";
+import { clone, getSnapshot, isAlive } from "mobx-state-tree";
 import { observer } from "mobx-react";
 import { extractDragTileType, kDragTileContent } from "../../../components/tools/tool-tile";
 import { DrawingContentModelType, DrawingObjectMove } from "../model/drawing-content";
@@ -455,7 +455,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
           width: imageEntry.width!,
           height: imageEntry.height!
         });
-        this.addNewDrawingObject(image);
+        this.addNewDrawingObject(getSnapshot(image));
       });
   }
 
