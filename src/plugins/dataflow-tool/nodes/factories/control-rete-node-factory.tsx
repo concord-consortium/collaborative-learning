@@ -11,6 +11,8 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
     super("Control", numSocket);
   }
 
+  public heldValue: number | null = null;
+
   public builder(node: Node) {
     super.defaultBuilder(node);
     if (this.editor) {
@@ -27,7 +29,7 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
       return node
         .addInput(inp1)
         .addInput(inp2)
-        .addControl(new DropdownListControl(this.editor, "controlType", node, dropdownOptions, true))
+        .addControl(new DropdownListControl(this.editor, "controlOperator", node, dropdownOptions, true))
         .addControl(new PlotButtonControl(this.editor, "plot", node))
         .addControl(new ValueControl(this.editor, "nodeValue", node))
         .addOutput(out) as any;
@@ -35,39 +37,49 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   public worker(node: NodeData, inputs: any, outputs: any) {
-    console.log(node, inputs, outputs);
-    // const controlOperator = node.data.controlOperator;
-    // let result = 0;
-    // let resultSentence = "";
-    // const n1 = inputs.num1.length ? inputs.num1[0] : node.data.num1;
-    // const n2 = inputs.num2 ? (inputs.num2.length ? inputs.num2[0] : node.data.num2) : 0;
 
-    // const nodeOperationTypes = NodeOperationTypes.find(op => op.name === controlOperator);
-    // if (nodeOperationTypes) {
-    //   if (isNaN(n1) || isNaN(n2)) {
-    //     result = NaN;
-    //   } else {
-    //     // NaNs are for propagating lack of values.
-    //     // Math errors like divide-by-zero should output 0.
-    //     result = nodeOperationTypes.method(n1, n2) || 0;
-    //   }
+    if (this.heldValue){
+      this.heldValue++;
+    }
 
-    //   const n1Str = isNaN(n1) ? kEmptyValueString : "" + n1;
-    //   const n2Str = isNaN(n2) ? kEmptyValueString : "" + n2;
-    //   const resultStr = isNaN(result) ? kEmptyValueString : roundNodeValue(result);
-    //   resultSentence = nodeOperationTypes.numberSentence(n1Str, n2Str) + resultStr;
-    // }
+    console.log(this.heldValue);
 
-    // if (this.editor) {
-    //   const _node = this.editor.nodes.find((n: { id: any; }) => n.id === node.id);
-    //   if (_node) {
-    //     const nodeValue = _node.controls.get("nodeValue") as ValueControl;
-    //     nodeValue && nodeValue.setValue(result);
-    //     nodeValue && nodeValue.setSentence(resultSentence);
-    //     this.editor.view.updateConnections( {node: _node} );
-    //   }
-    // }
+    const controlOperator = node.data.controlOperator;
+    let result = 0;
+    let resultSentence = "";
 
-    // outputs.num = result;
+    const recents: number[] = (node.data.recentValues as any).nodeValue;
+    const priorValue: number | undefined = recents[recents.length - 1];
+
+    const n1 = inputs.num1.length ? inputs.num1[0] : node.data.num1;
+    const n2 = inputs.num2 ? (inputs.num2.length ? inputs.num2[0] : node.data.num2) : 0;
+
+    const nodeOperationTypes = NodeOperationTypes.find(op => op.name === controlOperator);
+    if (nodeOperationTypes) {
+
+      if (isNaN(n1) || isNaN(n2)) {
+        result = NaN;
+      } else {
+        result = nodeOperationTypes.method(n1, n2) || 0;
+      }
+
+      // render the sentence version
+      const n1Str = isNaN(n1) ? kEmptyValueString : "" + n1;
+      const n2Str = isNaN(n2) ? kEmptyValueString : "" + n2;
+      const resultStr = isNaN(result) ? kEmptyValueString : roundNodeValue(result);
+      resultSentence = nodeOperationTypes.numberSentence(n1Str, n2Str); // + resultStr;
+    }
+
+    if (this.editor) {
+      const _node = this.editor.nodes.find((n: { id: any; }) => n.id === node.id);
+      if (_node) {
+        const nodeValue = _node.controls.get("nodeValue") as ValueControl;
+        nodeValue && nodeValue.setValue(result);
+        nodeValue && nodeValue.setSentence(resultSentence);
+        this.editor.view.updateConnections( {node: _node} );
+      }
+    }
+
+    outputs.num = result;
   }
 }

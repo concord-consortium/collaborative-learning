@@ -225,21 +225,21 @@ export const NodeOperationTypes = [
     name: "Hold Current",
     type: "control",
     method: (n1: number, n2: number) => 42,
-    numberSentence: (n1: string, n2: string) => `current else held`, //placeholder
+    numberSentence: (n1: string, n2: string) => `sentence`, //placeholder
     icon: CurrentValueIcon
   },
   {
     name: "Hold Prior",
     type: "control",
     method: (n1: number, n2: number) => 42,
-    numberSentence: (n1: string, n2: string) => `current else prior held`, //placeholder
+    numberSentence: (n1: string, n2: string) => `sentence`, //placeholder
     icon: PreviousValueIcon
   },
   {
     name: "Output Zero",
     type: "control",
-    method: (n1: number, n2: number) => 42,
-    numberSentence: (n1: string, n2: string) => `zero`, // placeholder
+    method: (n1: number, n2: number) => n1 === 0 ? n2 : 0,
+    numberSentence: (n1: string, n2: string) => `${n2}`,
     icon: ZeroValueIcon
   }
 ];
