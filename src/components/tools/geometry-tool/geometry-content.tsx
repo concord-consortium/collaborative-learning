@@ -7,9 +7,7 @@ import React from "react";
 import { SizeMeProps } from "react-sizeme";
 import { BaseComponent } from "../../base";
 import { DocumentContentModelType } from "../../../models/document/document-content";
-import {
-  getLinkedTableIndex, getTableLinkColors, linkTableAndGeometryTiles, unlinkTableAndGeometryTiles
-} from "../../../models/tools/table-links";
+import { getLinkedTableIndex, getTableLinkColors } from "../../../models/tools/table-links";
 import { IGeometryProps, IActionHandlers } from "./geometry-shared";
 import {
   GeometryContentModelType, IAxesParams, isGeometryContentReady, setElementColor
@@ -285,16 +283,16 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         }
       },
       isLinked: () => {
-        return metadata.linkedTableCount > 0;
+        return this.getContent().isLinked;
       },
-      getLinkIndex: (index?: number) => {
-        const tableLink = (index != null) && (index < metadata.linkedTableCount)
-                            ? metadata.linkedTables[index]
-                            : undefined;
-        return tableLink?.id ? getLinkedTableIndex(tableLink?.id) : -1;
-      },
+      // getLinkIndex: (index?: number) => {
+      //   const tableLink = (index != null) && (index < metadata.linkedTableCount)
+      //                       ? metadata.links[index]
+      //                       : undefined;
+      //   return tableLink?.id ? getLinkedTableIndex(tableLink?.id) : -1;
+      // },
       getLinkedTables: () => {
-        return metadata.linkedTableIds;
+        return this.getContent().linkedTableIds;
       },
       exportContentAsTileJson: (options?: ITileExportOptions) => {
         return this.getContent().exportJson(options);
@@ -342,8 +340,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   public render() {
     const editableClass = this.props.readOnly ? "read-only" : "editable";
-    const metadata = this.getContent().metadata;
-    const isLinkedClass = metadata.linkedTableCount ? "is-linked" : "";
+    const isLinkedClass = this.getContent().isLinked ? "is-linked" : "";
     const classes = `geometry-content ${editableClass} ${isLinkedClass}`;
     return ([
       this.renderCommentEditor(),
@@ -1038,14 +1035,12 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private handleTableTileLinkRequest = (tableTileId: string) => {
-    const content = this.getContent();
-    linkTableAndGeometryTiles(content, tableTileId, content.metadata.id);
+  private handleTableTileLinkRequest = (tableId: string) => {
+    this.getContent().addLinkedTable(tableId);
   };
 
-  private handleTableTileUnlinkRequest = (tableTileId: string) => {
-    const content = this.getContent();
-    unlinkTableAndGeometryTiles(content, tableTileId, content.metadata.id);
+  private handleTableTileUnlinkRequest = (tableId: string) => {
+    this.getContent().removeLinkedTable(tableId);
   };
 
   private handleCreateElements = (elts?: JXG.GeometryElement | JXG.GeometryElement[]) => {
@@ -1079,7 +1074,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     try {
       ++this.suspendSnapshotResponse;
       change();
-      this.setState({ redoStack: [] });
+      // this.setState({ redoStack: [] });
     }
     finally {
       --this.suspendSnapshotResponse;

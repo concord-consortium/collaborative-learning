@@ -359,7 +359,8 @@ export const GeometryBaseContentModel = ToolContentModel
     type: types.optional(types.literal(kGeometryToolID), kGeometryToolID),
     board: types.maybe(BoardModel),
     bgImage: types.maybe(ImageModel),
-    objects: types.map(types.union(CommentModel, MovableLineModel, PointModel, PolygonModel, VertexAngleModel))
+    objects: types.map(types.union(CommentModel, MovableLineModel, PointModel, PolygonModel, VertexAngleModel)),
+    links: types.array(types.string)  // table tile ids
   })
   .preProcessSnapshot(snapshot => {
     if (!snapshot.board) {

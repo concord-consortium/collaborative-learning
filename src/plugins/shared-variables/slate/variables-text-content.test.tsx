@@ -19,6 +19,9 @@ const makeSharedModelManager = (variables?: SharedVariablesType): ISharedModelMa
     findFirstSharedModelByType<IT extends IAnyType>(sharedModelType: IT): IT["Type"] | undefined {
       return variables;
     },
+    getSharedModelsByType<IT extends IAnyType>(type: string): IT["Type"][] {
+      return [variables];
+    },
     addTileSharedModel(tileContentModel: IAnyStateTreeNode): SharedModelType | undefined {
       return variables;
     },
@@ -32,7 +35,7 @@ const makeSharedModelManager = (variables?: SharedVariablesType): ISharedModelMa
 };
 
 // Note: in the diagram tests this method also sets up an onSnapshot listener to automatically
-// update the content when the variables change. In this case we are manually triggering 
+// update the content when the variables change. In this case we are manually triggering
 // the updates
 const setupContainer = (content: TextContentModelType, variables?: SharedVariablesType) => {
   const sharedModelManager = makeSharedModelManager(variables);
@@ -41,8 +44,8 @@ const setupContainer = (content: TextContentModelType, variables?: SharedVariabl
     {sharedModelManager}
   );
 
-  // So far it hasn't been necessary to wait for the MobX reaction to run inside of 
-  // DocumentContent#afterAttach. It seems to run immediately in the line above, so 
+  // So far it hasn't been necessary to wait for the MobX reaction to run inside of
+  // DocumentContent#afterAttach. It seems to run immediately in the line above, so
   // we can write expectations on this content without waiting.
   return {content, sharedModelManager};
 };
@@ -52,11 +55,11 @@ const createEditor = (textContent: TextContentModelType) => {
   // This creates an editor. It ignores any initial content from textContent.
   // It uses textContent to make a VariablesPlugin
   // This plugin is needed so Slate knows about the variables chips being added
-  // to the editor. 
+  // to the editor.
   const variablesPlugin = VariablesPlugin(textContent);
-  render(<SlateEditor 
-    onEditorRef={(ref?: Editor) => { editorRef = ref; }} 
-    plugins={[variablesPlugin]} 
+  render(<SlateEditor
+    onEditorRef={(ref?: Editor) => { editorRef = ref; }}
+    plugins={[variablesPlugin]}
   />);
   return editorRef as Editor;
 };
@@ -67,13 +70,13 @@ const getValueParagraphNodes = (editor: Editor) => {
 };
 
 describe("VariablesTextContent", () => {
-  test("updateAfterSharedModelChanges updates the text content", () => {    
+  test("updateAfterSharedModelChanges updates the text content", () => {
     const textContent = TextContentModel.create({});
     const variables = SharedVariables.create({
       variables: [
         {
           id: "variable1",
-          name: "test variable"          
+          name: "test variable"
         }
       ]
     });
@@ -148,13 +151,13 @@ describe("VariablesTextContent", () => {
     expect(getValueParagraphNodes(editor)).toMatchObject(afterRemoveNodes);
   });
 
-  test("updateAfterSharedModelChanges handles no editor", () => {    
+  test("updateAfterSharedModelChanges handles no editor", () => {
     const textContent = TextContentModel.create({});
     const variables = SharedVariables.create({
       variables: [
         {
           id: "variable1",
-          name: "test variable"          
+          name: "test variable"
         }
       ]
     });
@@ -175,7 +178,7 @@ describe("VariablesTextContent", () => {
 
     // setup the environment without a shared model
     setupContainer(textContent);
-    
+
     await jestSpyConsole("warn", mockConsole => {
       getOrFindSharedModel(textContent);
       expect(mockConsole).toBeCalled();
@@ -188,7 +191,7 @@ describe("VariablesTextContent", () => {
 
     // setup the environment without a shared model
     const {sharedModelManager} = setupContainer(textContent, variables);
-    
+
     // override getTileSharedModels so it always returns undefined
     sharedModelManager.getTileSharedModels = jest.fn();
     const addSharedModelSpy = jest.spyOn(sharedModelManager, "addTileSharedModel");

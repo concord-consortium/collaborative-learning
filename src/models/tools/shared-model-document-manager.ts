@@ -1,5 +1,5 @@
 import { autorun, IReactionDisposer } from "mobx";
-import { getParentOfType, hasParentOfType, 
+import { getParentOfType, hasParentOfType,
   IAnyStateTreeNode, IDisposer, onSnapshot, types } from "mobx-state-tree";
 import { DocumentContentModelType } from "../document/document-content";
 import { ISharedModelManager, SharedModelType, SharedModelUnion } from "./shared-model";
@@ -9,7 +9,7 @@ export interface ISharedModelDocumentManager extends ISharedModelManager {
   setDocument(document: DocumentContentModelType): void;
 }
 
-export const SharedModelDocumentManager = 
+export const SharedModelDocumentManager =
 types.model("SharedModelDocumentManager")
 .volatile(self => ({
   document: undefined as DocumentContentModelType | undefined,
@@ -54,7 +54,7 @@ types.model("SharedModelDocumentManager")
         for(const sharedModelEntry of document.sharedModelMap.values()) {
           const { sharedModel } = sharedModelEntry;
           if (sharedModelMonitorDisposers[sharedModel.id]) {
-            // We already have a snapshot listener for this sharedModel, we don't need to 
+            // We already have a snapshot listener for this sharedModel, we don't need to
             // replace it
             continue;
           }
@@ -67,13 +67,19 @@ types.model("SharedModelDocumentManager")
       });
     },
 
-    findFirstSharedModelByType<IT extends typeof SharedModelUnion>(sharedModelType: IT): IT["Type"] | undefined {
+    findFirstSharedModelByType<IT extends typeof SharedModelUnion>(
+      sharedModelType: IT, providerId?: string): IT["Type"] | undefined {
       if (!self.document) {
         console.warn("findFirstSharedModelByType has no document");
       }
-      return self.document?.getFirstSharedModelByType(sharedModelType);
+      return self.document?.getFirstSharedModelByType(sharedModelType, providerId);
     },
-    addTileSharedModel(tileContentModel: IAnyStateTreeNode, sharedModel: SharedModelType): void {
+
+    getSharedModelsByType<IT extends typeof SharedModelUnion>(type: string): IT["Type"][] {
+      return self.document?.getSharedModelsByType<IT>(type) || [];
+    },
+
+    addTileSharedModel(tileContentModel: IAnyStateTreeNode, sharedModel: SharedModelType, isProvider = false): void {
       if (!self.document) {
         console.warn("addTileSharedModel has no document. this will have no effect");
         return;
@@ -86,6 +92,23 @@ types.model("SharedModelDocumentManager")
         return;
       }
 
+      // assign an indexOfType if necessary
+      if (sharedModel.indexOfType < 0) {
+        const usedIndices = new Set<number>();
+        const sharedModels = self.document.getSharedModelsByType(sharedModel.type);
+        sharedModels.forEach(model => {
+          if (model.indexOfType >= 0) {
+            usedIndices.add(model.indexOfType);
+          }
+        });
+        for (let i = 1; sharedModel.indexOfType < 0; ++i) {
+          if (!usedIndices.has(i)) {
+            sharedModel.setIndexOfType(i);
+            break;
+          }
+        }
+      }
+
       // register it with the document if necessary.
       // This won't re-add it if it is already there
       const sharedModelEntry = self.document.addSharedModel(sharedModel);
@@ -95,7 +118,7 @@ types.model("SharedModelDocumentManager")
         return;
       }
 
-      sharedModelEntry.addTile(toolTile);
+      sharedModelEntry.addTile(toolTile, isProvider);
 
       // The update function in the 'autorun' will run when a new shared model
       // is added to the document, but if the sharedModel already exists on the

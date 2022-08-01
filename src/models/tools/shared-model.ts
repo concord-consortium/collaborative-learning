@@ -2,7 +2,7 @@ import { IAnyStateTreeNode, Instance, types } from "mobx-state-tree";
 import { uniqueId } from "../../utilities/js-utils";
 // TODO: This is a circular import, tool-content-info also imports SharedModel from here
 // This can be fixed by splitting shared-models into 2 files. One of those files will have
-// SharedModel, SharedModelType in it. Those objects don't need tool-content-info, and it is 
+// SharedModel, SharedModelType in it. Those objects don't need tool-content-info, and it is
 // those objects that are used by tool-content-info
 // This same refactoring can be applied to tool-types to eliminate a circular import there.
 import { getSharedModelClasses, getSharedModelInfoByType } from "./tool-content-info";
@@ -17,7 +17,7 @@ export const SharedModel = types.model("SharedModel", {
   // then typescript has errors because the intersection logic means the type field is
   // required when creating a shared model. And we don't want to require the
   // type when creating the shared model. This might be solvable by using the
-  // mst snapshot preprocessor to add the type. 
+  // mst snapshot preprocessor to add the type.
   //
   // It could be changed to
   //   type: types.maybe(types.string)
@@ -35,7 +35,15 @@ export const SharedModel = types.model("SharedModel", {
 
   // if not provided, will be generated
   id: types.optional(types.identifier, () => uniqueId()),
-});
+})
+.volatile(self => ({
+  indexOfType: -1
+}))
+.actions(self => ({
+  setIndexOfType(index: number) {
+    self.indexOfType = index;
+  }
+}));
 
 export interface SharedModelType extends Instance<typeof SharedModel> {}
 
@@ -55,7 +63,7 @@ export const SharedModelUnion = types.late<typeof SharedModel>(() => {
 // If UnknownSharedModel is moved to its own module this circular dependency causes an error.
 // If they are in the same module then this isn't a problem.
 // The UnknownSharedModel is not currently registered like other shared models. It is created
-// by the sharedModelFactory when no matching model type is found. 
+// by the sharedModelFactory when no matching model type is found.
 const _UnknownSharedModel = SharedModel
   .named("UnknownSharedModel")
   .props({
@@ -89,7 +97,7 @@ export interface ISharedModelManager {
    * The manager might be available, but is not ready to be used yet.
    */
   get isReady(): boolean;
-  
+
   /**
    * Find the shared model at the container level. If the tile wants to use this
    * shared model it should call `addTileSharedModel`. This is necessary so the
@@ -98,15 +106,23 @@ export interface ISharedModelManager {
    *
    * @param sharedModelType the MST model "class" of the shared model
    */
-  findFirstSharedModelByType<IT extends typeof SharedModelUnion>(sharedModelType: IT): IT["Type"] | undefined;
+  findFirstSharedModelByType<IT extends typeof SharedModelUnion>(
+    sharedModelType: IT, providerId?: string): IT["Type"] | undefined;
+
+  /**
+   * Return an array of all models of the specified type.
+   *
+   * @param sharedModelType the MST model "class" of the shared model
+   */
+  getSharedModelsByType<IT extends typeof SharedModelUnion>(type: string): IT["Type"][];
 
   /**
    * Add a shared model to the container if it doesn't exist and add a link to
-   * the tile from the shared model. 
+   * the tile from the shared model.
    *
    * If the shared model was already part of this container it won't be added to
    * the container twice. If the shared model already had a link to this tile it
-   * won't be added twice. 
+   * won't be added twice.
    *
    * Tiles need to call this method when they use a shared model. This is how
    * the container knows to call the tile's updateAfterSharedModelChanges when
@@ -116,30 +132,30 @@ export interface ISharedModelManager {
    * models will be returned by getTileSharedModels. If a tile is using multiple
    * shared models of the same type, it might want to additionally keep its own
    * references to these shared models. Without these extra references it would
-   * be hard to tell which shared model is which. 
+   * be hard to tell which shared model is which.
    *
    * @param tileContentModel the tile content model that should be notified when
-   * this shared model changes 
+   * this shared model changes
    *
    * @param sharedModel the new or existing shared model that is going to be
    * used by this tile.
    */
-  addTileSharedModel(tileContentModel: IAnyStateTreeNode, sharedModel: SharedModelType): void;
+  addTileSharedModel(tileContentModel: IAnyStateTreeNode, sharedModel: SharedModelType, isProvider?: boolean): void;
 
   /**
    * Remove the link from the shared model to the tile.
    *
    * @param tileContentModel the tile content model that doesn't want to be
    * notified anymore of shared model changes.
-   * 
+   *
    * @param sharedModel an existing shared model
    */
   removeTileSharedModel(tileContentModel: IAnyStateTreeNode, sharedModel: SharedModelType): void;
 
   /**
    * Get all of the shared models that link to this tile
-   * 
-   * @param tileContentModel 
+   *
+   * @param tileContentModel
    */
   getTileSharedModels(tileContentModel: IAnyStateTreeNode): SharedModelType[];
 }

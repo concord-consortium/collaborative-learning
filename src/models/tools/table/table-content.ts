@@ -1,16 +1,17 @@
 import { Expression, Parser } from "expr-eval";
-import { types, Instance, SnapshotIn } from "mobx-state-tree";
+import { reaction } from "mobx";
+import { addDisposer, Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree";
 import { ITableChange } from "./table-change";
 import { exportTableContentAsJson } from "./table-export";
 import { convertChangesToSnapshot, convertImportToSnapshot, isTableImportSnapshot } from "./table-import";
-import { isLinkableValue, canonicalizeValue } from "./table-model-types";
-import { clearTableLinksFromGeometries, kLabelAttrName } from "../table-links";
+// import { isLinkableValue, canonicalizeValue } from "./table-model-types";
 import { IDocumentExportOptions, IDefaultContentOptions } from "../tool-content-info";
 import { ToolMetadataModel, ToolContentModel, toolContentModelHooks } from "../tool-types";
 import { addCanonicalCasesToDataSet, IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
+import { SharedDataSet } from "../shared-data-set";
 import { canonicalizeExpression, kSerializedXKey } from "../../data/expression-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
-import { getRowLabel, ILinkProperties } from "../table-link-types";
+// import { getRowLabel, ILinkProperties } from "../table-link-types";
 import { uniqueId } from "../../../utilities/js-utils";
 
 export const kTableToolID = "Table";
@@ -223,11 +224,7 @@ export const TableContentModel = ToolContentModel
       if (self.metadata.hasExpressions) {
         self.metadata.updateDatasetByExpressions(self.dataSet);
       }
-    },
-    willRemoveFromDocument() {
-      clearTableLinksFromGeometries(self, self.metadata.id, self.linkedGeometries);
-      self.linkedGeometries.clear();
-    },
+    }
   }))
   .actions(self => ({
     logChange(change: ITableChange) {
@@ -236,28 +233,57 @@ export const TableContentModel = ToolContentModel
     }
   }))
   .actions(self => ({
+    afterAttach() {
+      // Monitor our parents and update our shared model when we have a document parent
+      addDisposer(self, reaction(() => {
+        const sharedModelManager = self.tileEnv?.sharedModelManager;
+
+        const sharedDataSet = sharedModelManager?.isReady
+          ? sharedModelManager?.findFirstSharedModelByType(SharedDataSet, self.metadata.id)
+          : undefined;
+
+        const tileSharedModels = sharedModelManager?.isReady
+          ? sharedModelManager?.getTileSharedModels(self)
+          : undefined;
+
+        return { sharedModelManager, sharedDataSet, tileSharedModels };
+      },
+      // reaction/effect
+      ({sharedModelManager, sharedDataSet, tileSharedModels}) => {
+        if (!sharedModelManager?.isReady) {
+          // We aren't added to a document yet so we can't do anything yet
+          return;
+        }
+
+        if (sharedDataSet && tileSharedModels?.includes(sharedDataSet)) {
+          // The shared model has already been registered by a client, but as the
+          // "owner" of the data, we synchronize it with our local content.
+          sharedDataSet.dataSet = self.dataSet;
+        }
+        else {
+          if (!sharedDataSet) {
+            // The document doesn't have a shared model yet
+            sharedDataSet = SharedDataSet.create({ tableId: self.metadata.id, dataSet: self.dataSet });
+          }
+
+          // Add the shared model to both the document and the tile
+          sharedModelManager.addTileSharedModel(self, sharedDataSet);
+        }
+      },
+      {name: "sharedModelSetup", fireImmediately: true}));
+    },
     setTableName(name: string) {
       self.dataSet.name = name;
 
-      self.logChange({
-              action: "update",
-              target: "table",
-              props: { name }
-            });
+      self.logChange({ action: "update", target: "table", props: { name } });
     },
-    addAttribute(id: string, name: string, links?: ILinkProperties) {
+    addAttribute(id: string, name: string) {
       self.dataSet.addAttributeWithID({ id, name });
       self.metadata.updateDatasetByExpressions(self.dataSet);
 
-      self.logChange({
-            action: "create",
-            target: "columns",
-            ids: [id],
-            props: { columns: [{ name }] },
-            links
-          });
+      self.logChange({ action: "create", target: "columns", ids: [id], props: { columns: [{ name }] } });
     },
-    setAttributeName(id: string, name: string, links?: ILinkProperties) {
+    setAttributeName(id: string, name: string) {
       const attr = self.dataSet.attrFromID(id);
       if (attr) {
         attr.name = name;
@@ -267,38 +293,21 @@ export const TableContentModel = ToolContentModel
         }
       }
 
-      self.logChange({
-              action: "update",
-              target: "columns",
-              ids: id,
-              props: { name },
-              links
-            });
+      self.logChange({ action: "update", target: "columns", ids: id, props: { name } });
     },
-    removeAttributes(ids: string[], links?: ILinkProperties) {
+    removeAttributes(ids: string[]) {
       ids.forEach(id => self.dataSet.removeAttribute(id));
       self.metadata.updateDatasetByExpressions(self.dataSet);
 
-      self.logChange({
-              action: "delete",
-              target: "columns",
-              ids,
-              links
-            });
+      self.logChange({ action: "delete", target: "columns", ids });
     },
-    setExpression(id: string, expression: string, rawExpression: string, links?: ILinkProperties) {
+    setExpression(id: string, expression: string, rawExpression: string) {
       self.dataSet.attrFromID(id)?.setFormula(rawExpression, expression);
       self.metadata.updateExpressions(id, rawExpression, expression, self.dataSet);
 
-      self.logChange({
-        action: "update",
-        target: "columns",
-        ids: id,
-        props: { expression, rawExpression },
-        links
-      });
+      self.logChange({ action: "update", target: "columns", ids: id, props: { expression, rawExpression } });
     },
-    setExpressions(rawExpressions: Map<string, string>, xName: string, links?: ILinkProperties) {
+    setExpressions(rawExpressions: Map<string, string>, xName: string) {
       rawExpressions.forEach((rawExpression, id) => {
         const attr = self.dataSet.attrFromID(id);
         if (attr) {
@@ -317,11 +326,10 @@ export const TableContentModel = ToolContentModel
                     .map(rawExpr => ({
                       expression: canonicalizeExpression(rawExpr, xName),
                       rawExpression: rawExpr
-                    })),
-        links
+                    }))
       });
     },
-    addCanonicalCases(cases: ICaseCreation[], beforeID?: string | string[], links?: ILinkProperties) {
+    addCanonicalCases(cases: ICaseCreation[], beforeID?: string | string[]) {
       addCanonicalCasesToDataSet(self.dataSet, cases, beforeID);
       self.metadata.updateDatasetByExpressions(self.dataSet);
 
@@ -335,11 +343,10 @@ export const TableContentModel = ToolContentModel
                       return { ...others };
                     }),
               beforeId: beforeID
-            },
-            links
+            }
           });
     },
-    setCanonicalCaseValues(caseValues: ICase[], links?: ILinkProperties) {
+    setCanonicalCaseValues(caseValues: ICase[]) {
       self.dataSet.setCanonicalCaseValues(caseValues);
       self.metadata.updateDatasetByExpressions(self.dataSet);
 
@@ -349,70 +356,59 @@ export const TableContentModel = ToolContentModel
                       ids.push(__id__);
                       return others;
                     });
-      self.logChange({
-            action: "update",
-            target: "rows",
-            ids,
-            props: values,
-            links
-      });
+      self.logChange({ action: "update", target: "rows", ids, props: values });
     },
-    removeCases(ids: string[], links?: ILinkProperties) {
+    removeCases(ids: string[]) {
       self.dataSet.removeCases(ids);
 
-      self.logChange({
-            action: "delete",
-            target: "rows",
-            ids,
-            links
-          });
+      self.logChange({ action: "delete", target: "rows", ids });
     },
-    addGeometryLink(geometryId: string) {
-      self.linkedGeometries.push(geometryId);
-      self.logChange({ action: "create", target: "geometryLink", ids: geometryId });
-    },
-    removeGeometryLink(geometryId: string) {
-      self.linkedGeometries.remove(geometryId);
-      self.logChange({
-            action: "delete",
-            target: "geometryLink",
-            ids: geometryId
-      });
-    }
+    // addGeometryLink(geometryId: string) {
+    //   self.linkedGeometries.push(geometryId);
+    //   self.logChange({ action: "create", target: "geometryLink", ids: geometryId });
+    // },
+    // removeGeometryLink(geometryId: string) {
+    //   self.linkedGeometries.remove(geometryId);
+    //   self.logChange({
+    //         action: "delete",
+    //         target: "geometryLink",
+    //         ids: geometryId
+    //   });
+    // }
   }))
   .views(self => ({
-    getSharedData(canonicalize = true) {
-      const dataSet = DataSet.create(self.dataSet);
+    // getSharedData(canonicalize = true) {
+    //   const dataSet = DataSet.create(self.dataSet);
 
-      // add a __label__ attribute to returned dataSet (used by GeometryContent.addTableLink)
-      const attrIds = dataSet.attributes.map(attr => attr.id);
-      const kLabelId = uniqueId();
-      dataSet.addAttributeWithID({ id: kLabelId, name: kLabelAttrName });
-      for (let i = 0; i < dataSet.cases.length; ++i) {
-        const caseId = dataSet.cases[i].__id__;
-        const label = getRowLabel(i);
-        const caseValues: ICase = { __id__: caseId, [kLabelId]: label };
-        if (canonicalize) {
-          attrIds.forEach(attrId => {
-            const value = dataSet.getValue(caseId, attrId);
-            caseValues[attrId] = canonicalizeValue(value);
-          });
-        }
-        dataSet.setCanonicalCaseValues([caseValues]);
-      }
-      return dataSet;
-    },
-    isValidDataSetForGeometryLink(dataSet: IDataSet) {
-      if ((dataSet.attributes.length < 2) || (dataSet.cases.length < 1)) return false;
+    //   // add a __label__ attribute to returned dataSet (used by GeometryContent.addTableLink)
+    //   const attrIds = dataSet.attributes.map(attr => attr.id);
+    //   const kLabelId = uniqueId();
+    //   dataSet.addAttributeWithID({ id: kLabelId, name: kLabelAttrName });
+    //   for (let i = 0; i < dataSet.cases.length; ++i) {
+    //     const caseId = dataSet.cases[i].__id__;
+    //     const label = getRowLabel(i);
+    //     const caseValues: ICase = { __id__: caseId, [kLabelId]: label };
+    //     if (canonicalize) {
+    //       attrIds.forEach(attrId => {
+    //         const value = dataSet.getValue(caseId, attrId);
+    //         caseValues[attrId] = canonicalizeValue(value);
+    //       });
+    //     }
+    //     dataSet.setCanonicalCaseValues([caseValues]);
+    //   }
+    //   return dataSet;
+    // },
+    // isValidDataSetForGeometryLink(dataSet: IDataSet) {
+    //   if ((dataSet.attributes.length < 2) || (dataSet.cases.length < 1)) return false;
 
-      const attrIds = dataSet.attributes.map(attr => attr.id);
-      for (const aCase of dataSet.cases) {
-        if (!attrIds.every(attrId => isLinkableValue(dataSet.getValue(aCase.__id__, attrId)))) {
-          return false;
-        }
-      }
-      return true;
-    },
+    //   const attrIds = dataSet.attributes.map(attr => attr.id);
+    //   for (const aCase of dataSet.cases) {
+    //     if (!attrIds.every(attrId => isLinkableValue(dataSet.getValue(aCase.__id__, attrId)))) {
+    //       return false;
+    //     }
+    //   }
+    //   return true;
+    // },
     hasLinkableCases(dataSet: IDataSet) {
       if ((dataSet.attributes.length < 2) || (dataSet.cases.length < 1)) return false;
 
@@ -429,9 +425,9 @@ export const TableContentModel = ToolContentModel
     }
   }))
   .views(self => ({
-    isValidForGeometryLink() {
-      return self.isValidDataSetForGeometryLink(self.dataSet);
-    },
+    // isValidForGeometryLink() {
+    //   return self.isValidDataSetForGeometryLink(self.dataSet);
+    // },
     exportJson(options?: IDocumentExportOptions) {
       return exportTableContentAsJson(self.metadata, self.dataSet);
     }
