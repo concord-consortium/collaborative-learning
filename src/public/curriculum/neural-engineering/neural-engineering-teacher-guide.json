@@ -128,52 +128,6 @@
               }
             ]
           }
-        ],
-                "problems": [
-          {
-            "description": "Problem 1.1",
-            "ordinal": 1,
-            "title": "Introduction to Teaching Neural Engineering",
-            "subtitle": "",
-            "sections": [
-              {
-                "type": "overview",
-                "content": {
-                  "tiles": [
-                    {
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<p><strong>Problem Overview</strong></p>",
-                          "<p>This section will discuss the educational goals of the curriculum.</p>"
-                        ]
-                      }
-                    }
-                  ]
-                },
-                "supports": [ ]
-              },
-              {
-                "type": "teach",
-                "content": {
-                  "tiles": [
-                    {
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<p><strong>Problem Launch</strong></p>",
-                          "<p>This section will include classroom specific tips.</p>"
-                        ]
-                      }
-                    }
-                  ]
-                },
-                "supports": []
-              }
-            ]
-          }
         ]
       }
   ]
