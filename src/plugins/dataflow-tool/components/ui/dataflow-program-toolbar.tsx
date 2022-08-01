@@ -44,6 +44,7 @@ export class DataflowProgramToolbar extends React.Component<IProps> {
         break;
       case "Math":
       case "Logic":
+      case "Control":
         nodeIcons.push(<div className="icon-node left top" key={"icon-node-l-t" + i}/>);
         nodeIcons.push(<div className="icon-node right mid" key={"icon-node-r-m" + i}/>);
         nodeIcons.push(<div className="icon-node left bottom" key={"icon-node-l-b" + i}/>);
