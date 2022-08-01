@@ -4,9 +4,9 @@ class DataflowToolTile {
   getDrawTile(workspaceClass) {
     return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .dataflow-tool-tile`);
   }
-  getTileTitle(workspaceClass){
-    return cy.get(`${workspaceClass || ".primary-workspace"} .editable-tile-title-text`);
-  }
+  // getTileTitle(workspaceClass){
+  //   return cy.get(`${workspaceClass || ".primary-workspace"} .editable-tile-title-text`);
+  // }
   getCreateNodeButton(nodeType) {
     return cy.get(`.primary-workspace .icon-block.${nodeType}`);
   }
