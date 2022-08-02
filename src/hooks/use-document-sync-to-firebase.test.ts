@@ -395,7 +395,7 @@ describe("useDocumentSyncToFirebase hook", () => {
     await jestSpyConsole("log", async spy => {
       document.setProperty("foo", "bar");
       await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
-      expect(mockRef).toHaveBeenCalledWith(`${user.id}/personal/${document.key}`);
+      expect(mockRef).toHaveBeenCalledWith(`${user.id}/metadata/${document.key}/properties`);
       await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
       await waitFor(() => expect(spy).toBeCalledTimes(1));
     });
@@ -526,13 +526,13 @@ describe("useDocumentSyncToFirebase hook", () => {
       document.setProperty("foo", "bar");
       // assert initial (failed) attempt
       await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
-      expect(mockRef).toHaveBeenCalledWith(`${user.id}/personal/${document.key}`);
+      expect(mockRef).toHaveBeenCalledWith(`${user.id}/metadata/${document.key}/properties`);
       await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
       await waitFor(() => expect(spy).toBeCalledTimes(1));
       // trigger retry (successful) attempt
       jest.runAllTimers();
       await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(2));
-      expect(mockRef).toHaveBeenCalledWith(`${user.id}/personal/${document.key}`);
+      expect(mockRef).toHaveBeenCalledWith(`${user.id}/metadata/${document.key}/properties`);
       await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(2));
     });
 
