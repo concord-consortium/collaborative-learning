@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { IToolTileProps } from "../../../components/tools/tool-tile";
 import { ToolbarView } from "./drawing-toolbar";
 import { DrawingLayerView } from "./drawing-layer";
@@ -16,6 +16,8 @@ type IProps = IToolTileProps;
 const DrawingToolComponent: React.FC<IProps> = (props) => {
   const { documentContent, toolTile, model, readOnly, scale, onRegisterToolApi, onUnregisterToolApi } = props;
   const contentRef = useCurrent(model.content as DrawingContentModelType);
+
+  const [imageUrl, setImageUrl] = useState("");
 
   useEffect(() => {
     if (!readOnly) {
@@ -39,8 +41,9 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
                     documentContent={documentContent}
                     toolTile={toolTile}
                     scale={scale}
+                    setImageUrl={setImageUrl}
                     {...toolbarProps} />
-        <DrawingLayerView {...props} />
+        <DrawingLayerView {...props} imageUrl={imageUrl} setImageUrl={setImageUrl} />
       </div>
     </DrawingContentModelContext.Provider>
   );
