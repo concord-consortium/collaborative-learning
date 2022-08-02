@@ -275,7 +275,7 @@
                   "type": "teach",
                   "content": {
                     "tiles": [
-                      {
+                        {
                           "id": "TZ5hC-GJDRC3-B1Y",
                           "content": {
                             "type": "Text",
@@ -295,23 +295,28 @@
                               "<p>Option 1: </p>",
                               "<p><a href='https://www.jigsaw.org'>Jigsaw</a>: Teams of students are responsible for investigating and teaching a subcategory of a topic – in this case nervous system disorders.</p>",
                               "<p>Option 2:</p>",
-                              "<p>Gallery walk [https://www.theteachertoolkit.com/index.php/tool/gallery-walk]: Students publish their workspaces to the class or put up their posters (large whiteboards or chart paper) that summarize the disorders  on or along the classroom wall. Classmates view each other’s work by walking around the room or by projecting or viewing the 'Class Models and Data' tab in Extensions in the CLUE Content sections.</p>",
+                              "<p><a href='https://www.theteachertoolkit.com/index.php/tool/gallery-walk'>Gallery walk</a>: Students publish their workspaces to the class or put up their posters (large whiteboards or chart paper) that summarize the disorders  on or along the classroom wall. Classmates view each other’s work by walking around the room or by projecting or viewing the 'Class Models and Data' tab in Extensions in the CLUE Content sections.</p>",
                               "<p>After teams have exchanged summaries of nervous system injuries, ask students which of the three nervous system injuries is most likely to be associated with Tilly’s condition.</p>",
                               "<p><em>10 minutes</em></p>",
                               "<p>Using their KWL journal, ask each student to revise what they know, wonder, and learned that may help explain how bionic arms work. Encourage students to apply what they noticed in the reaction time, neural injury activities, and any new knowledge or wonderings they may have. The KWL journal can be used as both formative assessment of students’ thinking, as well as a document in which students can record their knowledge and wonderings over time. </p>",
                               "<p>Inform students that the next activity will help them begin to learn how to identify and measure muscle activity. This will help them explain how bionic arms work and design a simple robotic arm. </p>"
                             ]
                           }
+                        },
+                        {
+                            "id": "VX0fplHGo5DQbZPK",
+                            "content": {
+                                "type": "Table",
+                                "name": "After each activity, please record what you know, wonder, and learn about the topic.",
+                                "columns": [
+                                {"name":"Date","values":["","",""]},
+                                {"name":"Today's Topic","values":["","",""]},
+                                {"name":"Know","values":["","",""]},
+                                {"name":"Wonder","values":["","",""]},
+                                {"name":"Learn","values":["","",""]}
+                                ]
+                            }
                         }
-                    ]
-                  },
-                  "supports": [ ]
-                },
-                {
-                  "type": "teach",
-                  "content": {
-                    "tiles": [
-  
                     ]
                   },
                   "supports": [ ]
@@ -325,104 +330,39 @@
               "subtitle": "",
               "sections": [
                 {
-                  "type": "overview",
-                  "content": {
-                    "tiles": [
-                      {
-                          "id": "BfEcsBHvG1mVwV4H",
-                          "content": {
-                            "type": "Text",
-                            "format": "html",
-                            "text": [
-                              "<p><strong>Lesson 1.3 : How can we identify and measure the activity of muscles? </strong></p>",
-                              "<p><strong>Lesson Overview</strong></p>",
-                              "<p>Students will use Electromyography (EMG) to investigate their own muscle activity. </p>",
-                              "<p>Materials:</p>",
-                              "<p>For each group of students:</p>",
-                              "<p>EMG shield, electrodes, 9V battery (all part of the claw kit)</p>",
-                              "<p>Smartphone data cable </p>",
-                              "<p>iPhone adapter</p>",
-                              "<p>Hand gripper</p>",
-                              "<p>A smartphone with the Spike Recorder App</p>",
-                              "<p>Whiteboard / chart paper and markers</p>",
-                              "<p>Formative assessment:</p>",
-                              "<p>KWL Journal [<strong>LINK</strong>:}</p>",
-                              "<p>EMG Journal [<strong>LINK</strong>: &lt;https://docs.google.com/document/d/1dyb9sKikVKKrSKFiQnkqRMGK7zcBTGt1qqTbex6Z4c4/copy&gt;}</p>",
-                              "<p><em><strong>Learning Objectives / NGSS alignment</strong></em></p>",
-                              "<p>Students will use computation to acquire, digitize, and analyze muscle electrical activity (EMG)</p>",
-                              "<p>Students will integrate the observed EMG patterns into their illustrated and annotated model</p>",
-                              "<p>Summary Table (Image 1)</p>",
-                              "<p><strong>Instructional Sequence</strong></p>",
-                              "<p><em>2 minutes</em></p>",
-                              "<p>Inform students that today’s lesson will help them begin to learn how the activity of muscles is identified and measured. This will help them explain how bionic arms work and work with a simple robotic arm.</p>",
-                              "<p>Consider noting students’ questions recorded in their KWL journals, specifically questions related to the interactions between the nervous and muscular systems.</p>",
-                              "<p><em>15 minutes</em></p>",
-                              "<p>Assign students to teams composed of 3-4 classmates. Ask teams to follow this step-by-step tutorial to record and display EMG signals from their muscles [<strong>LINK</strong>: ,https://docs.google.com/document/d/1pRFUK_wNgOSZEqxHKXHFzomQnq_QFvCEQxojGfLLAIo/edit&gt;]</p>",
-                              "<p><em>10 minutes</em></p>",
-                              "<p>Teacher-led discussion on muscle contraction and EMG </p>",
-                              "<p><em>30 minutes</em></p>",
-                              "<p>Ask students to work with another team on investigating the following questions (note: each larger team of 6-8 students will need two EMG devices):</p>",
-                              "<p>How does muscle activity vary between one’s dominant vs. non-dominant hand? </p>",
-                              "<p>How does muscle activity vary between different muscles (e.g., forearm vs. forehead muscles)?</p>",
-                              "<p>How does muscle activity vary between agonist and antagonist muscles (see here [<strong>LINK</strong>: ,https://www.bbc.co.uk/bitesize/guides/zct2hv4/revision/2#:~:text=In%20an%20antagonistic%20muscle%20pair,lengthening%20is%20called%20the%20antagonist.&gt;])?</p>",
-                              "<p>What happens when we activate our hand muscles for an extended period of time using a hand gripper (see here [<strong>LINK</strong>: &lt;https://backyardbrains.com/experiments/rateoffatigue&gt;])?</p>",
-                              "<p>Can you predict who’s going to win an arm-wrestling contest based on the contestants’ muscle activity?</p>",
-                              "<p>Encourage students to develop other questions and explore them. Students should document their observations in their EMG journal. </p>",
-                              "<p><em>15 minutes</em></p>",
-                              "<p>Facilitate a class discussion on questions such as:</p>",
-                              "<p>Why does gathering EMG signals matter to you, your family, or others in the community? </p>",
-                              "<p>Why does this matter to scientists, physicians, physical therapists, athletic trainers, and/or biomedical engineers?</p>",
-                              "<p>How may gathering EMG data inform the design of a device that can help people with neurological conditions or missing limbs?</p>",
-                              "<p><em>10 minutes</em></p>",
-                              "<p>Using their KWL journals [<strong>LINK</strong>} ask each student to revise what they know, wonder, and learned that may help explain how bionic arms work. Encourage students to apply what they noticed in the EMG activities, insights that were sparked by the discussion, and any new knowledge or wonderings they may have. </p>",
-                              "<p>Inform students that in the next activity they will apply and expand their knowledge of  EMG and begin to explore the use of a simple robotic arm. This will help them explain how bionic arms work.</p>",
-                              "<p></p>",
-                              "<p><strong>Lesson Resources</strong></p>",
-                              "<p>Arm muscle diagram [<strong>LINK</strong>: &lt;https://dmr.bsu.edu/digital/collection/AnatMod/id/211&gt;]</p>",
-                              "<p></p>",
-                              "<p><strong>Lesson 1.4: How can EMG signals be used to control a robotic claw?</strong></p>",
-                              "<p><strong>Lesson Overview</strong></p>",
-                              "<p>Students will use electromyography (EMG) in coordination with a robotic claw to model the performance of a bionic arm. </p>",
-                              "<p>Materials:</p>",
-                              "<p>For each group of students:</p>",
-                              "<p>The grabber kit</p>",
-                              "<p>Smartphone data cable + adapter</p>",
-                              "<p>A computer with the Arduino software</p>",
-                              "<p>Spike Recorder App</p>",
-                              "<p>Whiteboard / chart paper and markers</p>",
-                              "<p>Formative assessment:</p>",
-                              "<p>KWL journals</p>",
-                              "<p>Summative Assessment: Students demonstrate evidence of meeting the performance expectation for NGSS HS-LS1-2.</p>",
-                              "<p><strong>Learning Objectives / NGSS alignment</strong></p>",
-                              "<p>Students will explain how signals measured from the human body (e.g., EMG) can be incorporated into engineering design. </p>",
-                              "<p>Students will design and evaluate technology solutions for people with neurological conditions. </p>",
-                              "<p><strong>Summary Table (Image 2)</strong></p>",
-                              "<p><strong>Instructional Sequence</strong></p>",
-                              "<p><em>5 minutes</em></p>",
-                              "<p>Inform students that in today’s activity they will apply and expand their knowledge of EMG and begin to explore the use of a simple bionic arm. This will help them explain how bionic arms work, as well as inform their modification of the simple bionic arm.</p>",
-                              "<p>Consider noting specific students’ questions recorded in their KWL journals if the questions are related to wondering about the application of EMG in the design of bionic arms or biomedical devices.</p>",
-                              "<p><em>30 minutes</em></p>",
-                              "<p>Assign students to teams composed of 3-4 classmates. Ask teams to follow this step-by-step tutorial to set up an EMG-controlled claw. [<strong>LINK</strong>: &lt;https://docs.google.com/document/d/1_CTZ4GHfp-SWLUa0AiXYwCPshYrFp96bNMGYXhdLv7o/edit&gt;}</p>",
-                              "<p>Once students have set up the claw, ask them to explore how they can make it work better by:</p>",
-                              "<p>Changing the locations of the electrodes. For example, students may have more success controlling the claw by placing the EMG electrodes on the fleshy part below their pinky and the reference electrode by their thumb. </p>",
-                              "<p>Changing the sensitivity of the device by pressing the gray button the Muscle SpikerShield. </p>",
-                              "<p>Grasping objects of different sizes/weights. </p>",
-                              "<p><em>20 minutes</em></p>",
-                              "<p>In their team, ask students to evaluate the strengths and weaknesses of the EMG-controlled claw and summarize their ideas in a table format. Then, ask them to discuss how the design of the claw can be improved and sketch out their ideas. Remind students of the young woman who was portrayed in the video at the opening of the unit and think about how the claw can serve her in her day-to-day life.</p>",
-                              "<p><em>20 minutes</em></p>",
-                              "<p>Facilitate a class discussion as to how the gripper could be improved or modified (e.g., adding touch receptors, using a stronger servomotor, reshaping the tips of the grabber). </p>",
-                              "<p><em>5 minutes</em></p>",
-                              "<p>Using their KWL journals [<strong>LINK</strong>: &lt;https://docs.google.com/document/d/1QkXZ72Z5av1igfhYAhGynJdfBTQQUeqfNjEzwtCGYzw/copy&gt;] , ask each student to revise what they know, wonder, and learned about bionic arms. </p>",
-                              "<p><strong>Lesson Resources</strong></p>",
-                              "<p>Arm muscle diagram [<strong>LINK</strong>: &lt;https://dmr.bsu.edu/digital/collection/AnatMod/id/211&gt;]</p>",
-                              "<p>Engineering design process <strong>[LINK</strong>: &lt;https://www.twi-global.com/technical-knowledge/faqs/engineering-design-process&gt;]</p>"
-                            ]
-                          }
+                    "type": "overview",
+                    "content": {
+                      "tiles": [
+                        {
+                            "id": "BfEcsBHvG1mVwV4H",
+                            "content": {
+                              "type": "Text",
+                              "format": "html",
+                              "text": [
+                                  "<p><strong>Lesson 1.4 : How can we identify and measure the activity of muscles? </strong></p>",
+                                  "<p><strong>Lesson Overview</strong></p>",
+                                  "<p>Students will use Electromyography (EMG) to investigate their own muscle activity. </p>",
+                                  "<p>Materials:</p>",
+                                  "<p>For each group of students:</p>",
+                                  "<p>EMG shield, electrodes, 9V battery (all part of the claw kit)</p>",
+                                  "<p>Smartphone data cable </p>",
+                                  "<p>iPhone adapter</p>",
+                                  "<p>Hand gripper</p>",
+                                  "<p>A smartphone with the Spike Recorder App</p>",
+                                  "<p>Whiteboard / chart paper and markers</p>",
+                                  "<p>Formative assessment:</p>",
+                                  "<p>KWL Journal  (on the KWL Journal tab in My Work)</p>",
+                                  "<p><a href='https://docs.google.com/document/d/1dyb9sKikVKKrSKFiQnkqRMGK7zcBTGt1qqTbex6Z4c4/copy'>EMG Journal </a></p>",
+                                  "<p><em><strong>Learning Objectives / NGSS alignment</strong></em></p>",
+                                  "<p>Students will use computation to acquire, digitize, and analyze muscle electrical activity (EMG)</p>",
+                                  "<p>Students will integrate the observed EMG patterns into their illustrated and annotated model</p>",
+                                  "<p>Summary Table (Image 1)</p>"
+                              ]
+                            }
                         }
-                    
-                    ]
-                  },
-                  "supports": [ ]
+                      ]
+                    },
+                    "supports": [ ]
                 },
                 {
                   "type": "teach",
@@ -434,90 +374,53 @@
                             "type": "Text",
                             "format": "html",
                             "text": [
-                              "<p><strong>Lesson 1.3 : How can we identify and measure the activity of muscles? </strong></p>",
-                              "<p><strong>Lesson Overview</strong></p>",
-                              "<p>Students will use Electromyography (EMG) to investigate their own muscle activity. </p>",
-                              "<p>Materials:</p>",
-                              "<p>For each group of students:</p>",
-                              "<p>EMG shield, electrodes, 9V battery (all part of the claw kit)</p>",
-                              "<p>Smartphone data cable </p>",
-                              "<p>iPhone adapter</p>",
-                              "<p>Hand gripper</p>",
-                              "<p>A smartphone with the Spike Recorder App</p>",
-                              "<p>Whiteboard / chart paper and markers</p>",
-                              "<p>Formative assessment:</p>",
-                              "<p>KWL Journal [<strong>LINK</strong>:}</p>",
-                              "<p>EMG Journal [<strong>LINK</strong>: &lt;https://docs.google.com/document/d/1dyb9sKikVKKrSKFiQnkqRMGK7zcBTGt1qqTbex6Z4c4/copy&gt;}</p>",
-                              "<p><em><strong>Learning Objectives / NGSS alignment</strong></em></p>",
-                              "<p>Students will use computation to acquire, digitize, and analyze muscle electrical activity (EMG)</p>",
-                              "<p>Students will integrate the observed EMG patterns into their illustrated and annotated model</p>",
-                              "<p>Summary Table (Image 1)</p>",
-                              "<p><strong>Instructional Sequence</strong></p>",
-                              "<p><em>2 minutes</em></p>",
-                              "<p>Inform students that today’s lesson will help them begin to learn how the activity of muscles is identified and measured. This will help them explain how bionic arms work and work with a simple robotic arm.</p>",
-                              "<p>Consider noting students’ questions recorded in their KWL journals, specifically questions related to the interactions between the nervous and muscular systems.</p>",
-                              "<p><em>15 minutes</em></p>",
-                              "<p>Assign students to teams composed of 3-4 classmates. Ask teams to follow this step-by-step tutorial to record and display EMG signals from their muscles [<strong>LINK</strong>: ,https://docs.google.com/document/d/1pRFUK_wNgOSZEqxHKXHFzomQnq_QFvCEQxojGfLLAIo/edit&gt;]</p>",
-                              "<p><em>10 minutes</em></p>",
-                              "<p>Teacher-led discussion on muscle contraction and EMG </p>",
-                              "<p><em>30 minutes</em></p>",
-                              "<p>Ask students to work with another team on investigating the following questions (note: each larger team of 6-8 students will need two EMG devices):</p>",
-                              "<p>How does muscle activity vary between one’s dominant vs. non-dominant hand? </p>",
-                              "<p>How does muscle activity vary between different muscles (e.g., forearm vs. forehead muscles)?</p>",
-                              "<p>How does muscle activity vary between agonist and antagonist muscles (see here [<strong>LINK</strong>: ,https://www.bbc.co.uk/bitesize/guides/zct2hv4/revision/2#:~:text=In%20an%20antagonistic%20muscle%20pair,lengthening%20is%20called%20the%20antagonist.&gt;])?</p>",
-                              "<p>What happens when we activate our hand muscles for an extended period of time using a hand gripper (see here [<strong>LINK</strong>: &lt;https://backyardbrains.com/experiments/rateoffatigue&gt;])?</p>",
-                              "<p>Can you predict who’s going to win an arm-wrestling contest based on the contestants’ muscle activity?</p>",
-                              "<p>Encourage students to develop other questions and explore them. Students should document their observations in their EMG journal. </p>",
-                              "<p><em>15 minutes</em></p>",
-                              "<p>Facilitate a class discussion on questions such as:</p>",
-                              "<p>Why does gathering EMG signals matter to you, your family, or others in the community? </p>",
-                              "<p>Why does this matter to scientists, physicians, physical therapists, athletic trainers, and/or biomedical engineers?</p>",
-                              "<p>How may gathering EMG data inform the design of a device that can help people with neurological conditions or missing limbs?</p>",
-                              "<p><em>10 minutes</em></p>",
-                              "<p>Using their KWL journals [<strong>LINK</strong>} ask each student to revise what they know, wonder, and learned that may help explain how bionic arms work. Encourage students to apply what they noticed in the EMG activities, insights that were sparked by the discussion, and any new knowledge or wonderings they may have. </p>",
-                              "<p>Inform students that in the next activity they will apply and expand their knowledge of  EMG and begin to explore the use of a simple robotic arm. This will help them explain how bionic arms work.</p>",
-                              "<p></p>",
-                              "<p><strong>Lesson Resources</strong></p>",
-                              "<p>Arm muscle diagram [<strong>LINK</strong>: &lt;https://dmr.bsu.edu/digital/collection/AnatMod/id/211&gt;]</p>",
-                              "<p></p>",
-                              "<p><strong>Lesson 1.4: How can EMG signals be used to control a robotic claw?</strong></p>",
-                              "<p><strong>Lesson Overview</strong></p>",
-                              "<p>Students will use electromyography (EMG) in coordination with a robotic claw to model the performance of a bionic arm. </p>",
-                              "<p>Materials:</p>",
-                              "<p>For each group of students:</p>",
-                              "<p>The grabber kit</p>",
-                              "<p>Smartphone data cable + adapter</p>",
-                              "<p>A computer with the Arduino software</p>",
-                              "<p>Spike Recorder App</p>",
-                              "<p>Whiteboard / chart paper and markers</p>",
-                              "<p>Formative assessment:</p>",
-                              "<p>KWL journals</p>",
-                              "<p>Summative Assessment: Students demonstrate evidence of meeting the performance expectation for NGSS HS-LS1-2.</p>",
-                              "<p><strong>Learning Objectives / NGSS alignment</strong></p>",
-                              "<p>Students will explain how signals measured from the human body (e.g., EMG) can be incorporated into engineering design. </p>",
-                              "<p>Students will design and evaluate technology solutions for people with neurological conditions. </p>",
-                              "<p><strong>Summary Table (Image 2)</strong></p>",
-                              "<p><strong>Instructional Sequence</strong></p>",
-                              "<p><em>5 minutes</em></p>",
-                              "<p>Inform students that in today’s activity they will apply and expand their knowledge of EMG and begin to explore the use of a simple bionic arm. This will help them explain how bionic arms work, as well as inform their modification of the simple bionic arm.</p>",
-                              "<p>Consider noting specific students’ questions recorded in their KWL journals if the questions are related to wondering about the application of EMG in the design of bionic arms or biomedical devices.</p>",
-                              "<p><em>30 minutes</em></p>",
-                              "<p>Assign students to teams composed of 3-4 classmates. Ask teams to follow this step-by-step tutorial to set up an EMG-controlled claw. [<strong>LINK</strong>: &lt;https://docs.google.com/document/d/1_CTZ4GHfp-SWLUa0AiXYwCPshYrFp96bNMGYXhdLv7o/edit&gt;}</p>",
-                              "<p>Once students have set up the claw, ask them to explore how they can make it work better by:</p>",
-                              "<p>Changing the locations of the electrodes. For example, students may have more success controlling the claw by placing the EMG electrodes on the fleshy part below their pinky and the reference electrode by their thumb. </p>",
-                              "<p>Changing the sensitivity of the device by pressing the gray button the Muscle SpikerShield. </p>",
-                              "<p>Grasping objects of different sizes/weights. </p>",
-                              "<p><em>20 minutes</em></p>",
-                              "<p>In their team, ask students to evaluate the strengths and weaknesses of the EMG-controlled claw and summarize their ideas in a table format. Then, ask them to discuss how the design of the claw can be improved and sketch out their ideas. Remind students of the young woman who was portrayed in the video at the opening of the unit and think about how the claw can serve her in her day-to-day life.</p>",
-                              "<p><em>20 minutes</em></p>",
-                              "<p>Facilitate a class discussion as to how the gripper could be improved or modified (e.g., adding touch receptors, using a stronger servomotor, reshaping the tips of the grabber). </p>",
-                              "<p><em>5 minutes</em></p>",
-                              "<p>Using their KWL journals [<strong>LINK</strong>: &lt;https://docs.google.com/document/d/1QkXZ72Z5av1igfhYAhGynJdfBTQQUeqfNjEzwtCGYzw/copy&gt;] , ask each student to revise what they know, wonder, and learned about bionic arms. </p>",
-                              "<p><strong>Lesson Resources</strong></p>",
-                              "<p>Arm muscle diagram [<strong>LINK</strong>: &lt;https://dmr.bsu.edu/digital/collection/AnatMod/id/211&gt;]</p>",
-                              "<p>Engineering design process <strong>[LINK</strong>: &lt;https://www.twi-global.com/technical-knowledge/faqs/engineering-design-process&gt;]</p>"
+                                "<p><strong>Instructional Sequence</strong></p>",
+                                "<p><em>2 minutes</em></p>",
+                                "<p>Inform students that today’s lesson will help them begin to learn how the activity of muscles is identified and measured. This will help them explain how bionic arms work and work with a simple robotic arm.</p>",
+                                "<p>Consider noting students’ questions recorded in their KWL journals, specifically questions related to the interactions between the nervous and muscular systems.</p>",
+                                "<p><em>15 minutes</em></p>",
+                                "<p>Assign students to teams composed of 3-4 classmates. Ask teams to follow this <a href='https://docs.google.com/document/d/1pRFUK_wNgOSZEqxHKXHFzomQnq_QFvCEQxojGfLLAIo/edit'>step-by-step tutorial</a> to record and display EMG signals from their muscles</p>",
+                                "<p><em>10 minutes</em></p>",
+                                "<p>Teacher-led discussion on muscle contraction and EMG </p>",
+                                "<p><em>30 minutes</em></p>",
+                                "<p>Ask students to work with another team on investigating the following questions (note: each larger team of 6-8 students will need two EMG devices):</p>",
+                                "<p>How does muscle activity vary between one’s dominant vs. non-dominant hand? </p>",
+                                "<p>How does muscle activity vary between different muscles (e.g., forearm vs. forehead muscles)?</p>",
+                                "<p>How does muscle activity vary between <a href='https://www.bbc.co.uk/bitesize/guides/zct2hv4/revision/2#:~:text=In%20an%20antagonistic%20muscle%20pair,lengthening%20is%20called%20the%20antagonist'>agonist and antagonist</a> muscles?</p>",
+                                "<p>What happens when we <a href='https://backyardbrains.com/experiments/rateoffatigue'>activate our hand muscles</a> for an extended period of time using a hand gripper?</p>",
+                                "<p>Can you predict who’s going to win an arm-wrestling contest based on the contestants’ muscle activity?</p>",
+                                "<p>Encourage students to develop other questions and explore them. Students should document their observations in their EMG journal. </p>",
+                                "<p><em>15 minutes</em></p>",
+                                "<p>Facilitate a class discussion on questions such as:</p>",
+                                "<p>Why does gathering EMG signals matter to you, your family, or others in the community? </p>",
+                                "<p>Why does this matter to scientists, physicians, physical therapists, athletic trainers, and/or biomedical engineers?</p>",
+                                "<p>How may gathering EMG data inform the design of a device that can help people with neurological conditions or missing limbs?</p>",
+                                "<p><em>10 minutes</em></p>",
+                                "<p>Using their KWL journals ask each student to revise what they know, wonder, and learned that may help explain how bionic arms work. Encourage students to apply what they noticed in the EMG activities, insights that were sparked by the discussion, and any new knowledge or wonderings they may have. Note that Students should open up the KWL Journal in their My Work tab to make summary notes that will be accessible from Lesson to Lesson.</p>",
+                                "<p>Inform students that in the next activity they will apply and expand their knowledge of  EMG and begin to explore the use of a simple robotic arm. This will help them explain how bionic arms work.</p>",
+                                "<p></p>",
+                                "<p><strong>Lesson Resources</strong></p>"
                             ]
                           }
+                      },
+                      {
+                        "id": "kBJBbezdh9bxu6Dx",
+                        "title": "Arm Muscle Diagram",
+                        "content": {
+                          "type": "Image",
+                          "url": "curriculum/neural-engineering/images/armMuscles.png",
+                          "filename": "curriculum/neural-engineering/images/armMuscles.png"
+                        }
+                      },
+                      {
+                        "id": "3s1CMxSi6t3ADC8Z",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><a href='https://dmr.bsu.edu/digital/collection/AnatMod/id/211'>https://dmr.bsu.edu/digital/collection/AnatMod/id/211</a></p>"
+                          ]
+                        }
                       }
                     ]
                   },
@@ -532,57 +435,38 @@
               "subtitle": "",
               "sections": [
                 {
-                  "type": "overview",
-                  "content": {
-                    "tiles": [
-                      {
-                          "id": "BfEcsBHvG1mVwV4H",
-                          "content": {
-                            "type": "Text",
-                            "format": "html",
-                            "text": [
-                              "<p><strong>Lesson 1.4: How can EMG signals be used to control a robotic claw?</strong></p>",
-                              "<p><strong>Lesson Overview</strong></p>",
-                              "<p>Students will use electromyography (EMG) in coordination with a robotic claw to model the performance of a bionic arm. </p>",
-                              "<p>Materials:</p>",
-                              "<p>For each group of students:</p>",
-                              "<p>The grabber kit</p>",
-                              "<p>Smartphone data cable + adapter</p>",
-                              "<p>A computer with the Arduino software</p>",
-                              "<p>Spike Recorder App</p>",
-                              "<p>Whiteboard / chart paper and markers</p>",
-                              "<p>Formative assessment:</p>",
-                              "<p>KWL journals</p>",
-                              "<p>Summative Assessment: Students demonstrate evidence of meeting the performance expectation for NGSS HS-LS1-2.</p>",
-                              "<p><strong>Learning Objectives / NGSS alignment</strong></p>",
-                              "<p>Students will explain how signals measured from the human body (e.g., EMG) can be incorporated into engineering design. </p>",
-                              "<p>Students will design and evaluate technology solutions for people with neurological conditions. </p>",
-                              "<p><strong>Summary Table (Image 2)</strong></p>",
-                              "<p><strong>Instructional Sequence</strong></p>",
-                              "<p><em>5 minutes</em></p>",
-                              "<p>Inform students that in today’s activity they will apply and expand their knowledge of EMG and begin to explore the use of a simple bionic arm. This will help them explain how bionic arms work, as well as inform their modification of the simple bionic arm.</p>",
-                              "<p>Consider noting specific students’ questions recorded in their KWL journals if the questions are related to wondering about the application of EMG in the design of bionic arms or biomedical devices.</p>",
-                              "<p><em>30 minutes</em></p>",
-                              "<p>Assign students to teams composed of 3-4 classmates. Ask teams to follow this step-by-step tutorial to set up an EMG-controlled claw. [<strong>LINK</strong>: &lt;https://docs.google.com/document/d/1_CTZ4GHfp-SWLUa0AiXYwCPshYrFp96bNMGYXhdLv7o/edit&gt;}</p>",
-                              "<p>Once students have set up the claw, ask them to explore how they can make it work better by:</p>",
-                              "<p>Changing the locations of the electrodes. For example, students may have more success controlling the claw by placing the EMG electrodes on the fleshy part below their pinky and the reference electrode by their thumb. </p>",
-                              "<p>Changing the sensitivity of the device by pressing the gray button the Muscle SpikerShield. </p>",
-                              "<p>Grasping objects of different sizes/weights. </p>",
-                              "<p><em>20 minutes</em></p>",
-                              "<p>In their team, ask students to evaluate the strengths and weaknesses of the EMG-controlled claw and summarize their ideas in a table format. Then, ask them to discuss how the design of the claw can be improved and sketch out their ideas. Remind students of the young woman who was portrayed in the video at the opening of the unit and think about how the claw can serve her in her day-to-day life.</p>",
-                              "<p><em>20 minutes</em></p>",
-                              "<p>Facilitate a class discussion as to how the gripper could be improved or modified (e.g., adding touch receptors, using a stronger servomotor, reshaping the tips of the grabber). </p>",
-                              "<p><em>5 minutes</em></p>",
-                              "<p>Using their KWL journals [<strong>LINK</strong>: &lt;https://docs.google.com/document/d/1QkXZ72Z5av1igfhYAhGynJdfBTQQUeqfNjEzwtCGYzw/copy&gt;] , ask each student to revise what they know, wonder, and learned about bionic arms. </p>",
-                              "<p><strong>Lesson Resources</strong></p>",
-                              "<p>Arm muscle diagram [<strong>LINK</strong>: &lt;https://dmr.bsu.edu/digital/collection/AnatMod/id/211&gt;]</p>",
-                              "<p>Engineering design process <strong>[LINK</strong>: &lt;https://www.twi-global.com/technical-knowledge/faqs/engineering-design-process&gt;]</p>"
-                            ]
+                    "type": "overview",
+                    "content": {
+                      "tiles": [
+                        {
+                            "id": "BfEcsBHvG1mVwV4H",
+                            "content": {
+                              "type": "Text",
+                              "format": "html",
+                              "text": [
+                                "<p><strong>Lesson 1.5: How can EMG signals be used to control a robotic claw?</strong></p>",
+                                "<p><strong>Lesson Overview</strong></p>",
+                                "<p>Students will use electromyography (EMG) in coordination with a robotic claw to model the performance of a bionic arm. </p>",
+                                "<p>Materials:</p>",
+                                "<p>For each group of students:</p>",
+                                "<p>The grabber kit</p>",
+                                "<p>Smartphone data cable + adapter</p>",
+                                "<p>A computer with the Arduino software</p>",
+                                "<p>Spike Recorder App</p>",
+                                "<p>Whiteboard / chart paper and markers</p>",
+                                "<p>Formative assessment:</p>",
+                                "<p>KWL journals (use KWL Journal tab in My Work) </p>",
+                                "<p>Summative Assessment: Students demonstrate evidence of meeting the performance expectation for NGSS HS-LS1-2.</p>",
+                                "<p><strong>Learning Objectives / NGSS alignment</strong></p>",
+                                "<p>Students will explain how signals measured from the human body (e.g., EMG) can be incorporated into engineering design. </p>",
+                                "<p>Students will design and evaluate technology solutions for people with neurological conditions. </p>",
+                                "<p><strong>Summary Table (Image 2)</strong></p>"
+                              ]
+                            }
                           }
-                      }
-                    ]
-                  },
-                  "supports": [ ]
+                      ]
+                    },
+                    "supports": [ ]
                 },
                 {
                   "type": "teach",
@@ -599,7 +483,7 @@
                               "<p>Inform students that in today’s activity they will apply and expand their knowledge of EMG and begin to explore the use of a simple bionic arm. This will help them explain how bionic arms work, as well as inform their modification of the simple bionic arm.</p>",
                               "<p>Consider noting specific students’ questions recorded in their KWL journals if the questions are related to wondering about the application of EMG in the design of bionic arms or biomedical devices.</p>",
                               "<p><em>30 minutes</em></p>",
-                              "<p>Assign students to teams composed of 3-4 classmates. Ask teams to follow this step-by-step tutorial to set up an EMG-controlled claw. [<strong>LINK</strong>: &lt;https://docs.google.com/document/d/1_CTZ4GHfp-SWLUa0AiXYwCPshYrFp96bNMGYXhdLv7o/edit&gt;}</p>",
+                              "<p>Assign students to teams composed of 3-4 classmates. Ask teams to follow this <a href='https://docs.google.com/document/d/1_CTZ4GHfp-SWLUa0AiXYwCPshYrFp96bNMGYXhdLv7o/edit'>step-by-step tutorial</a> to set up an EMG-controlled claw.</p>",
                               "<p>Once students have set up the claw, ask them to explore how they can make it work better by:</p>",
                               "<p>Changing the locations of the electrodes. For example, students may have more success controlling the claw by placing the EMG electrodes on the fleshy part below their pinky and the reference electrode by their thumb. </p>",
                               "<p>Changing the sensitivity of the device by pressing the gray button the Muscle SpikerShield. </p>",
@@ -609,10 +493,9 @@
                               "<p><em>20 minutes</em></p>",
                               "<p>Facilitate a class discussion as to how the gripper could be improved or modified (e.g., adding touch receptors, using a stronger servomotor, reshaping the tips of the grabber). </p>",
                               "<p><em>5 minutes</em></p>",
-                              "<p>Using their KWL journals [<strong>LINK</strong>: &lt;https://docs.google.com/document/d/1QkXZ72Z5av1igfhYAhGynJdfBTQQUeqfNjEzwtCGYzw/copy&gt;] , ask each student to revise what they know, wonder, and learned about bionic arms. </p>",
+                              "<p>Using their KWL journals, ask each student to revise what they know, wonder, and learned about bionic arms. </p>",
                               "<p><strong>Lesson Resources</strong></p>",
-                              "<p>Arm muscle diagram [<strong>LINK</strong>: &lt;https://dmr.bsu.edu/digital/collection/AnatMod/id/211&gt;]</p>",
-                              "<p>Engineering design process <strong>[LINK</strong>: &lt;https://www.twi-global.com/technical-knowledge/faqs/engineering-design-process&gt;]</p>"
+                              "<p><a href='https://www.twi-global.com/technical-knowledge/faqs/engineering-design-process'>Engineering design process</a></p>"
                             ]
                           }
                       }

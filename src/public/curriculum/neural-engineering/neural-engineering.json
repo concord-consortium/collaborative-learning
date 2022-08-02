@@ -266,18 +266,7 @@
                         "<p><em>First, check that all the members of your group have the same group number at the top right of your screen. </em></p>",
                         "<p>Talk about robots and bionic limbs with your group.  What do you know about bionics? </p>",
                         "<p>Take some notes on your discussion in CLUE. Open a text tile on the right in your <strong>Workspace</strong> (click the menu button with the letter A on it). </p>",
-                        "<p>Take notes and make a list of what your group knows. </p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "uotBFbYpZfaMbTBf",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p><strong>5. Brainstorm some research questions</strong></p>",
-                        "<p>What do you want to know more about? Take time to think about it and write potential questions in a new tile.</p>"
+                        "<p>Take notes and make a list of what your group knows. Insert some images in your workspace relating to motion and robotics. </p>"
                       ]
                     }
                   },
@@ -287,8 +276,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>6. When ready, share with the group</strong></p>",
-                        "<p>Use the group controls so that you can see and share each others&#x27; notes. See the image below for how to do that.  (Ignore the &quot;Publish&quot; feature for now).</p>"
+                        "<p><strong>When ready, share with the group</strong></p>",
+                        "<p>Use the group controls in the upper right of your workspace so that you can see and share each others&#x27; notes. See the image below for how to do that. Take a look at the list of terms in your groupmates&#x27; windows. You can drag tiles from their windows into yours, or just get ideas from what they have done.</p>"
                       ]
                     }
                   },
@@ -306,7 +295,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>7. Discuss the research questions</strong></p>",
+                        "<p><strong>Discuss the research questions</strong></p>",
                         "<p>Work with the members of your group to explore each other&#x27;s questions and ideas. </p>"
                       ]
                     }
@@ -317,8 +306,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>8. Publish (see image above) your work to the class</strong></p>",
-                        "<p>You can choose one member of your group to publish a summary of the group&#x27;s work, or you may each publish.  When you publish, your workspace will appear under the pink &quot;Class Work&quot; tab (right-hand side of CLUE).</p>"
+                        "<p><strong>Publish (see image above) your work to the class</strong></p>",
+                        "<p>You can choose one member of your group to publish a summary of the group&#x27;s work, or you may each publish.  When you publish, your workspace will appear under the pink &quot;Extensionsk&quot; tab above. Student work will go under the Class Models and Data tab. Teacher work will go under the Custom Lessons tab.</p>"
                       ]
                     }
                   }
@@ -333,7 +322,7 @@
     {
       "description": "Investigation 1",
       "ordinal": 1,
-      "title": "Human and Robotic Motion",
+      "title": "Module 1: Motion",
       "problems": [
         {
           "description": "Lesson 1.1",
@@ -752,7 +741,7 @@
         {
           "description": "Lesson 1.3",
           "ordinal": 3,
-          "title": "Lesson 1.2 - What controls our movement? (Part 2)",
+          "title": "Lesson 1.3 - What controls our movement? (Part 2)",
           "subtitle": "",
           "disabled": [],
           "sections": 
@@ -1909,7 +1898,7 @@
         {
           "description": "Lesson 1.4",
           "ordinal": 4,
-          "title": "Lesson 1.3 -  How do muscles work?",
+          "title": "Lesson 1.4 -  How do muscles work?",
           "subtitle": "Electromyography",
           "disabled": [],
           "sections": 
@@ -2260,7 +2249,7 @@
         {
           "description": "Lesson 1.5",
           "ordinal": 5,
-          "title": "Lesson 1.4 - How to control a robotic claw",
+          "title": "Lesson 1.5 - How to control a robotic claw",
           "subtitle": "",
           "disabled": [],
           "sections": 
@@ -2526,8 +2515,8 @@
     },
     {
       "description": "Investigation 2",
-      "ordinal": 0,
-      "title": "Human and Robotic Touch",
+      "ordinal": 2,
+      "title": "Module 2: Touch",
       "problems": [
         {
           "description": "Lesson 2.1",
