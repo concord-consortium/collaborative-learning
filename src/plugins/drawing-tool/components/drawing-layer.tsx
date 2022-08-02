@@ -32,7 +32,7 @@ interface DrawingLayerViewProps {
   scale?: number;
   onSetCanAcceptDrop: (tileId?: string) => void;
   imageUrl?: string;
-  setImageUrl: (url: string) => void;
+  setImageUrl?: (url: string) => void;
 }
 
 interface DrawingLayerViewState {
@@ -447,7 +447,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   };
 
   private handleImageDrop(url: string) {
-    this.props.setImageUrl(url);
+    this.props.setImageUrl?.(url);
   }
 
   private addImage(url: string) {
