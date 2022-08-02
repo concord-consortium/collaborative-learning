@@ -19,7 +19,6 @@ import { defaultTileTitleFont } from "../../../components/constants";
 
 import "./dataflow-tool.sass";
 
-
 interface IProps extends IToolTileProps{
   model: ToolTileModelType;
   readOnly?: boolean;
@@ -30,8 +29,6 @@ interface IState {
   isEditingTitle?: boolean;
 }
 
-let nextDataflowProgramId = 0;
-
 @inject("stores")
 @observer
 export default class DataflowToolComponent extends BaseComponent<IProps, IState> {
@@ -41,8 +38,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
   public state: IState = {
     isEditingTitle: false
   };
-
-  private dataflowProgramId = ++nextDataflowProgramId;
 
   public render() {
     const { model, readOnly, height } = this.props;
@@ -59,7 +54,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
             {({ size }: SizeMeProps) => {
               return (
                 <DataflowProgram
-                  programId={this.dataflowProgramId}
                   modelId={model.id}
                   readOnly={readOnly}
                   documentProperties={this.getDocumentProperties()}
