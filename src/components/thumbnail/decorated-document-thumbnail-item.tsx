@@ -32,11 +32,14 @@ function useDocumentCaption(document: DocumentModelType) {
   const { type, uid } = document;
   const teacher = useFirestoreTeacher(uid, user.network || "");
   if (type === SupportPublication) return document.getProperty("caption") || "Support";
-  const userName = classStore.getUserById(uid)?.displayName ||
+  const userName = classStore.getUserById(uid)?.displayName || (teacher?.name) ||
                     (document.isRemote ? teacher?.name : "") || "Unknown User";
   const namePrefix = document.isRemote || isPublishedType(type) ? `${userName}: ` : "";
   const dateSuffix = document.isRemote && document.createdAt
-                      ? ` (${new Date(document.createdAt).toLocaleDateString()})` : "";
+                      ? ` (${new Date(document.createdAt).toLocaleDateString()})`
+                      : isPublishedType(type)
+                          ? ` v${document.pubVersion}`
+                          : "";
   const title = getDocumentDisplayTitle(document, appConfig, problem);
   return `${namePrefix}${title}${dateSuffix}`;
 }

@@ -38,7 +38,8 @@ export const DocumentModel = types
     visibility: types.maybe(types.enumeration("VisibilityType", ["public", "private"])),
     groupUserConnections: types.map(types.boolean),
     originDoc: types.maybe(types.string),
-    changeCount: types.optional(types.number, 0)
+    changeCount: types.optional(types.number, 0),
+    pubVersion: types.maybe(types.number)
   })
   .volatile(self => ({
     queryPromise: undefined as Promise<UseQueryResult<IGetNetworkDocumentResponse>> | undefined
@@ -82,6 +83,14 @@ export const DocumentModel = types
     },
     getProperty(key: string) {
       return self.properties.get(key);
+    },
+    getNumericProperty(key: string) {
+      const val = self.properties.get(key);
+      if (val !== undefined) {
+        return Number(self.properties.get(key));
+      } else {
+        return 0;
+      }
     },
     copyProperties(): IDocumentProperties {
       return self.properties.toJSON();
@@ -168,6 +177,9 @@ export const DocumentModel = types
       else if (self.getProperty(key) !== value) {
         self.properties.set(key, value);
       }
+    },
+    setNumericProperty(key: string, value?: number) {
+      this.setProperty(key, value == null ? value : `${value}`);
     },
 
     setContent(snapshot: DocumentContentSnapshotType) {

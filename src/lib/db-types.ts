@@ -139,6 +139,7 @@ export interface DBPublication {
   groupId?: string;
   userId: string;
   groupUserConnections?: DBGroupUserConnections;
+  pubVersion: number;
 }
 
 // metadata written to {classHash}/personalPublications for published personal documents
@@ -153,6 +154,7 @@ export interface DBOtherPublication {
   properties: IDocumentProperties;
   uid: string;
   originDoc: string;
+  pubVersion: number
 }
 
 export type DBUnpublishedTypedDocumentMetadata = DBOfferingUserProblemDocument | DBOtherDocument;
