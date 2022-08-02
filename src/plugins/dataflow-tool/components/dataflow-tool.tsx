@@ -47,40 +47,38 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
       programEndTime, programDataRate, programZoom } = this.getContent();
     const showOriginalProgramButton = !!this.getOriginalProgramDocument();
     return (
-      <>
+      <div className={classes}>
         {this.renderTitleArea()}
-        <div className={classes}>
-          <SizeMe monitorHeight={true}>
-            {({ size }: SizeMeProps) => {
-              return (
-                <DataflowProgram
-                  modelId={model.id}
-                  readOnly={readOnly}
-                  documentProperties={this.getDocumentProperties()}
-                  program={program}
-                  onProgramChange={this.handleProgramChange}
-                  onShowOriginalProgram={showOriginalProgramButton ? this.handleShowOriginalProgram : undefined}
-                  onStartProgram={this.handleStartProgram}
-                  programRunId={programRunId}
-                  programIsRunning={programIsRunning}
-                  onCheckProgramRunState={this.handleCheckProgramRunState}
-                  onSetProgramStartTime={this.handleSetProgramStartTime}
-                  programStartTime={programStartTime}
-                  onSetProgramEndTime={this.handleSetProgramEndTime}
-                  programEndTime={programEndTime}
-                  onSetProgramStartEndTime={this.handleSetProgramStartEndTime}
-                  programDataRate={programDataRate}
-                  onProgramDataRateChange={this.handleProgramDataRateChange}
-                  programZoom={programZoom}
-                  onZoomChange={this.handleProgramZoomChange}
-                  size={size}
-                  tileHeight={height}
-                />
-              );
-            }}
-          </SizeMe>
-        </div>
-      </>
+        <SizeMe monitorHeight={true}>
+          {({ size }: SizeMeProps) => {
+            return (
+              <DataflowProgram
+                modelId={model.id}
+                readOnly={readOnly}
+                documentProperties={this.getDocumentProperties()}
+                program={program}
+                onProgramChange={this.handleProgramChange}
+                onShowOriginalProgram={showOriginalProgramButton ? this.handleShowOriginalProgram : undefined}
+                onStartProgram={this.handleStartProgram}
+                programRunId={programRunId}
+                programIsRunning={programIsRunning}
+                onCheckProgramRunState={this.handleCheckProgramRunState}
+                onSetProgramStartTime={this.handleSetProgramStartTime}
+                programStartTime={programStartTime}
+                onSetProgramEndTime={this.handleSetProgramEndTime}
+                programEndTime={programEndTime}
+                onSetProgramStartEndTime={this.handleSetProgramStartEndTime}
+                programDataRate={programDataRate}
+                onProgramDataRateChange={this.handleProgramDataRateChange}
+                programZoom={programZoom}
+                onZoomChange={this.handleProgramZoomChange}
+                size={size}
+                tileHeight={height}
+              />
+            );
+          }}
+        </SizeMe>
+      </div>
     );
   }
 
