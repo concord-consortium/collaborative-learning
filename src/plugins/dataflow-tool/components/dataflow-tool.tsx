@@ -16,6 +16,7 @@ import { EditableTileTitle } from "../../../components/tools/editable-tile-title
 import { DataflowContentModelType } from "../model/dataflow-content";
 import { measureText } from "../../../components/tools/hooks/use-measure-text";
 import { defaultTileTitleFont } from "../../../components/constants";
+import { ToolTitleArea } from "../../../components/tools/tool-title-area";
 
 import "./dataflow-tool.sass";
 
@@ -48,7 +49,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
     const showOriginalProgramButton = !!this.getOriginalProgramDocument();
     return (
       <div className={classes}>
-        {this.renderTitleArea()}
+        <ToolTitleArea contents={this.renderTitle()} />
         <SizeMe monitorHeight={true}>
           {({ size }: SizeMeProps) => {
             return (
@@ -107,16 +108,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
   private getDocumentProperties() {
     const document = this.getDocument();
     return document && document.properties.toJSON();
-  }
-
-  private renderTitleArea() {
-    return (
-      <div className="title-area-wrapper" key="title-area">
-        <div className="title-area">
-          {this.renderTitle()}
-        </div>
-      </div>
-    );
   }
 
   private handleBeginEditTitle = () => {
