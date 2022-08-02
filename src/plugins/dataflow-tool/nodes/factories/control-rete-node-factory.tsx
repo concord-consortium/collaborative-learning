@@ -37,13 +37,6 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   public worker(node: NodeData, inputs: any, outputs: any) {
-
-    if (this.heldValue){
-      this.heldValue++;
-    }
-
-    console.log(this.heldValue);
-
     const controlOperator = node.data.controlOperator;
     let result = 0;
     let resultSentence = "";
@@ -53,6 +46,9 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
 
     const n1 = inputs.num1.length ? inputs.num1[0] : node.data.num1;
     const n2 = inputs.num2 ? (inputs.num2.length ? inputs.num2[0] : node.data.num2) : 0;
+
+    console.log('factory n1: ', n1)
+    console.log('factory n2: ', n2)
 
     const nodeOperationTypes = NodeOperationTypes.find(op => op.name === controlOperator);
     if (nodeOperationTypes) {
