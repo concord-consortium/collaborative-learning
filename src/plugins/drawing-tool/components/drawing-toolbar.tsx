@@ -107,6 +107,7 @@ export const ToolbarView: React.FC<IProps> = (
           onClick={() => handleToggleShowFillColorPalette()} />;
       case "image-upload":
         return <ImageUploadButton
+          key="upload-image"
           onUploadImageFile={file => uploadImage(file)}
           tooltipOffset={{x: 0, y: 0}}
           extraClasses="drawing-tool-button"
