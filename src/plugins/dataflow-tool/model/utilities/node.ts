@@ -43,6 +43,7 @@ import ZeroValueIcon from "../../assets/icons/control/control-zero-value.svg";
 import GateIcon from "../../assets/icons/control/gate.svg";
 
 import { demoStreams } from "./demo-data";
+import { zeroSentence } from "./control-node-functions";
 
 export interface NodeType {
   name: string;
@@ -239,7 +240,8 @@ export const NodeOperationTypes = [
     name: "Output Zero",
     type: "control",
     method: (n1: number, n2: number) => n1 === 0 ? n2 : 0,
-    numberSentence: (n1: string, n2: string) => `${n2}`,
+    // numberSentence: (n1: string, n2: string) => `${n1} ? ${n2} : 0`,
+    numberSentence: (n1: string, n2: string) => zeroSentence(n1, n2),
     icon: ZeroValueIcon
   }
 ];
