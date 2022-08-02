@@ -8,6 +8,7 @@ import { FillColorPalette } from "./fill-color-palette";
 import {
   IFloatingToolbarProps, useFloatingToolbarLocation
 } from "../../../components/tools/hooks/use-floating-toolbar-location";
+import { ImageUploadButton } from "../../../components/tools/image/image-toolbar";
 import { IRegisterToolApiProps } from "../../../components/tools/tool-tile";
 import { DrawingContentModelType } from "../model//drawing-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
@@ -106,6 +107,7 @@ export const ToolbarView: React.FC<IProps> = (
             {toolbarButtons.map(button => {
               return getToolbarButton(button);
             })}
+            <ImageUploadButton onUploadImageFile={file => console.log(file)} tooltipOffset={{x: 0, y: 0}} />
           </div>
           {paletteState.showStroke &&
             <StrokeColorPalette selectedColor={drawingContent.stroke} onSelectColor={handleStrokeColorChange} />}
