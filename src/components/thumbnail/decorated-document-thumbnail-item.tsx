@@ -31,7 +31,11 @@ function useDocumentCaption(document: DocumentModelType) {
   const user = useUserStore();
   const { type, uid } = document;
   const teacher = useFirestoreTeacher(uid, user.network || "");
-  if (type === SupportPublication) return document.getProperty("caption") || "Support";
+  if (type === SupportPublication) {
+    const caption = document.getProperty("caption") || "Support";
+    const pubVersion = document.pubVersion;
+    return pubVersion ? `${caption} v${pubVersion}` : `${caption}`;
+  }
   const userName = classStore.getUserById(uid)?.displayName || (teacher?.name) ||
                     (document.isRemote ? teacher?.name : "") || "Unknown User";
   const namePrefix = document.isRemote || isPublishedType(type) ? `${userName}: ` : "";

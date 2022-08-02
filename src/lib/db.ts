@@ -510,10 +510,8 @@ export class DB {
     const { problemPath, user } = this.stores;
     const { offeringId: resource_link_id, activityUrl: resource_url = "" } = user;
     const content = documentModel.content?.publish();
-    const pubCount = documentModel.getNumericProperty("pubCount");
-    const newPubCount = pubCount+1;
-    documentModel.setNumericProperty("pubCount", newPubCount);
-    const pubVersion = pubCount > 1 ? pubCount : 1;
+    let pubCount = documentModel.getNumericProperty("pubCount");
+    documentModel.setNumericProperty("pubCount", ++pubCount);
     if (!content) {
       throw new Error("Could not publish the specified document because its content is not available.");
     }
@@ -528,7 +526,7 @@ export class DB {
       content,
       resource_link_id,
       resource_url,
-      pubVersion,
+      pubVersion: pubCount,
     });
   }
 

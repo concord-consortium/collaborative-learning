@@ -313,10 +313,9 @@ function getTeacherSupportCaption(support: TeacherSupportModelType,
   const sectionPart = sectionId ? " " + getSectionInitials(sectionId) : "";
   const prefix = `${investigationPart}.${problemPart}${sectionPart}`;
   const caption = support.caption || "Untitled";
-  const version = support.pubVersion ? `v${support.pubVersion}` : "";
   return caption.includes(prefix)
-          ? `${caption} ${version}`
-          : `${prefix} ${caption} ${version}`;
+          ? `${caption}`
+          : `${prefix} ${caption}` ;
 }
 
 function getCurricularSupportCaption(support: CurricularSupportModelType, index: number,
@@ -357,6 +356,9 @@ export function addSupportDocumentsToStore(params: ICreateFromUnitParams) {
       index = 1;
       lastSection = sectionId;
     }
+    const supportUid = support.supportType === SupportType.teacher
+                        ? support.uid
+                        : "curriculum";
     const supportCaption = getSupportCaption(support, index, investigation, problem);
     const supportKey = support.supportType === SupportType.teacher
                         ? support.key || supportCaption
@@ -400,13 +402,14 @@ export function addSupportDocumentsToStore(params: ICreateFromUnitParams) {
       const content = await getDocumentContentForSupport(support.support, db);
       if (content) {
         document = createDocumentModel({
-                     uid: "curriculum",
+                     uid: supportUid,
                      type: SupportPublication,
                      key: supportKey,
                      originDoc,
                      properties,
                      createdAt: Date.now(),
-                     content: getSnapshot(content)
+                     content: getSnapshot(content),
+                     pubVersion: support.pubVersion
                    });
         documents.add(document);
         onDocumentCreated?.(support, document);
