@@ -9,6 +9,9 @@ import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-
 
 import "./image-toolbar.scss";
 
+
+// TODO The ImageUploadButton is now being used by three different tiles.
+// It would be good to move it into a more generic location.
 interface IImageUploadButtonProps {
   tooltipOffset?: { x?: number, y?: number };
   onUploadImageFile?: (file: File) => void;
