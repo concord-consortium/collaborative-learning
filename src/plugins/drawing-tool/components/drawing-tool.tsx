@@ -9,7 +9,7 @@ import { useCurrent } from "../../../hooks/use-current";
 import { ITileExportOptions } from "../../../models/tools/tool-content-info";
 import { DrawingContentModelContext } from "./drawing-content-context";
 
-import "./drawing-tool.sass";
+import "./drawing-tool.scss";
 
 type IProps = IToolTileProps;
 

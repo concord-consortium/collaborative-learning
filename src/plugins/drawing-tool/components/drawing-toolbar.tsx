@@ -21,7 +21,7 @@ interface IProps extends IFloatingToolbarProps, IRegisterToolApiProps {
 }
 
 const defaultButtons = ["select", "line", "vector", "rectangle", "ellipse", 
-  "stamp", "stroke-color", "fill-color", "delete"];
+  "stamp", "stroke-color", "fill-color", "image-upload", "delete"];
 
 export const ToolbarView: React.FC<IProps> = (
               { documentContent, model, onIsEnabled, ...others }: IProps) => {
@@ -96,6 +96,12 @@ export const ToolbarView: React.FC<IProps> = (
       case "fill-color":
         return <FillColorButton key="fill" settings={drawingContent.toolbarSettings}
           onClick={() => handleToggleShowFillColorPalette()} />;
+      case "image-upload":
+        return <ImageUploadButton
+          onUploadImageFile={file => console.log(file)}
+          tooltipOffset={{x: 0, y: 0}}
+          extraClasses="drawing-tool-button"
+        />;
     }
   };
 
@@ -107,7 +113,6 @@ export const ToolbarView: React.FC<IProps> = (
             {toolbarButtons.map(button => {
               return getToolbarButton(button);
             })}
-            <ImageUploadButton onUploadImageFile={file => console.log(file)} tooltipOffset={{x: 0, y: 0}} />
           </div>
           {paletteState.showStroke &&
             <StrokeColorPalette selectedColor={drawingContent.stroke} onSelectColor={handleStrokeColorChange} />}
