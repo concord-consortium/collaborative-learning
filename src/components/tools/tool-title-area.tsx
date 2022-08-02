@@ -1,14 +1,10 @@
-import React, { ReactElement } from "react";
+import React from "react";
 
-interface IProps {
-  contents: ReactElement
-}
-
-export const ToolTitleArea: React.FC<IProps> = ({ contents }: IProps) => {
+export const ToolTitleArea: React.FC = ({ children }) => {
   return (
     <div className="title-area-wrapper" key="title-area">
       <div className="title-area">
-        { contents }
+        { children }
       </div>
     </div>
   );

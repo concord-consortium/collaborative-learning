@@ -5,6 +5,11 @@ import { SizeMeProps } from "react-sizeme";
 import { TileLabelInput } from "./tile-label-input";
 
 import "./editable-tile-title.scss";
+// TODO: previously these CSS rules were in `editable-tile-title.scss` even though those classes
+// aren't used by this component. Clients that make use of these classes should be revised to
+// use the recently-introduced `<ToolTileArea/>` component or include the corresponding styles
+// directly rather than relying on their inclusion by this component.
+import "./tool-title-area.scss";
 
 interface IProps extends SizeMeProps {
   className?: string;
