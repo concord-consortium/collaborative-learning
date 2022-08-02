@@ -1,0 +1,24 @@
+@import "./dataflow-vars";
+
+.dataflow-tool-tile {
+
+  .title-area-wrapper {
+    display: flex;
+    justify-content: center;
+
+    .title-area {
+      height: 30px;
+      top: 50px;
+
+      .editable-tile-title {
+        height: 30px;
+      }
+    }
+  }
+
+  .dataflow-tool {
+    display: flex;
+    border: 1px solid #BBB;
+    height: 100%;
+  }
+}
