@@ -225,23 +225,27 @@ export const NodeOperationTypes = [
   {
     name: "Hold Current",
     type: "control",
-    method: (n1: number, n2: number) => 42,
-    numberSentence: (n1: string, n2: string) => `sentence`, //placeholder
+    method: (n1: number, n2: number, /*held: number*/) => n1 === 1 ? 42 : n2,
+    numberSentence: (n1: string, n2: string) => `${n1} ≡ ` + (n1 === "1" ? "on" : "off") + ` ⇒ `,
     icon: CurrentValueIcon
   },
   {
     name: "Hold Prior",
     type: "control",
-    method: (n1: number, n2: number) => 42,
-    numberSentence: (n1: string, n2: string) => `sentence`, //placeholder
+    method: (n1: number, n2: number, /*held: number*/) => n1 === 1 ? 42 : n2,
+    numberSentence: (n1: string, n2: string ) => `${n1} ≡ ` + (n1 === "1" ? "on" : "off") + ` ⇒ `,
     icon: PreviousValueIcon
   },
   {
     name: "Output Zero",
     type: "control",
-    method: (n1: number, n2: number) => n1 === 0 ? n2 : 0,
+    method: (n1: number, n2: number, /*held: number*/) => n1 === 1 ? 0 : n2,
     // numberSentence: (n1: string, n2: string) => `${n1} ? ${n2} : 0`,
-    numberSentence: (n1: string, n2: string) => zeroSentence(n1, n2),
+    // numberSentence: (n1: string, n2: string) => `on == ${n1} ⇒ `,
+    // numberSentence: (n1: string) => zeroSentence(n1),
+    // numberSentence: (n1: string, n2: string) => `${n1} ⇒ `,
+    // numberSentence: (n1: string, n2: string) => `${n1} ≡ ` + (n1 === "1" ? "■" : "□") + ` ⇒ `,
+    numberSentence: (n1: string, n2: string) => `${n1} ≡ ` + (n1 === "1" ? "on" : "off") + ` ⇒ `,
     icon: ZeroValueIcon
   }
 ];

@@ -47,12 +47,10 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
     const n1 = inputs.num1.length ? inputs.num1[0] : node.data.num1;
     const n2 = inputs.num2 ? (inputs.num2.length ? inputs.num2[0] : node.data.num2) : 0;
 
-    console.log('factory n1: ', n1)
-    console.log('factory n2: ', n2)
-
     const nodeOperationTypes = NodeOperationTypes.find(op => op.name === controlOperator);
     if (nodeOperationTypes) {
 
+      console.log("nodeOperationTypes: ", nodeOperationTypes);
       if (isNaN(n1) || isNaN(n2)) {
         result = NaN;
       } else {
@@ -63,7 +61,7 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
       const n1Str = isNaN(n1) ? kEmptyValueString : "" + n1;
       const n2Str = isNaN(n2) ? kEmptyValueString : "" + n2;
       const resultStr = isNaN(result) ? kEmptyValueString : roundNodeValue(result);
-      resultSentence = nodeOperationTypes.numberSentence(n1Str, n2Str); // + resultStr;
+      resultSentence = nodeOperationTypes.numberSentence(n1Str, n2Str) + resultStr;
     }
 
     if (this.editor) {
