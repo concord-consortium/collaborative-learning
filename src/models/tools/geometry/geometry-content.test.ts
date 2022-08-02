@@ -136,9 +136,24 @@ describe("GeometryContent", () => {
     destroy(content);
   }
 
+  const origConsoleLog = console.log;
+  let consoleSpy: jest.SpyInstance;
+  beforeAll(() => {
+    // ignore console.logs from JSXGraph about lack of IntersectionObserver
+    consoleSpy = jest.spyOn(console, "log").mockImplementation((...args: any[]) => {
+      if (!args.some(arg => typeof arg === "string" && arg.includes("IntersectionObserver not available"))) {
+        origConsoleLog(...args);
+      }
+    });
+  });
+
+  afterAll(() => {
+    consoleSpy.mockRestore();
+  });
+
   it("can create with default properties", () => {
     const content = GeometryContentModel.create();
-    expect(getSnapshot(content)).toEqual({ type: kGeometryToolID, board: defaultBoard(), objects: {} });
+    expect(getSnapshot(content)).toEqual({ type: kGeometryToolID, board: defaultBoard(), objects: {}, links: [] });
 
     destroy(content);
   });
@@ -160,7 +175,8 @@ describe("GeometryContent", () => {
         xAxis: { name: "authorX", min: kGeometryDefaultXAxisMin, unit: kGeometryDefaultPixelsPerUnit },
         yAxis: { name: "authorY", min: kGeometryDefaultYAxisMin, unit: kGeometryDefaultPixelsPerUnit }
       },
-      objects: {}
+      objects: {},
+      links: []
     });
 
     destroy(content);

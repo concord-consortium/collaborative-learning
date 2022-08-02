@@ -7,7 +7,7 @@ import React from "react";
 import { SizeMeProps } from "react-sizeme";
 import { BaseComponent } from "../../base";
 import { DocumentContentModelType } from "../../../models/document/document-content";
-import { getLinkedTableIndex, getTableLinkColors } from "../../../models/tools/table-links";
+import { getTableLinkColors } from "../../../models/tools/table-links";
 import { IGeometryProps, IActionHandlers } from "./geometry-shared";
 import {
   GeometryContentModelType, IAxesParams, isGeometryContentReady, setElementColor

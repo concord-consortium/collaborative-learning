@@ -223,10 +223,10 @@ export const GeometryContentModel = GeometryBaseContentModel
       return self.linkedDataSets.length > 0;
     },
     get linkedTableIds() {
-      return self.linkedDataSets.map(link => link.tableId);
+      return self.linkedDataSets.map(link => link.providerId);
     },
     isLinkedToTable(tableId: string) {
-      return self.linkedDataSets.some(link => link.tableId === tableId);
+      return self.linkedDataSets.some(link => link.providerId === tableId);
     }
   }))
   .views(self => ({
@@ -411,7 +411,7 @@ export const GeometryContentModel = GeometryBaseContentModel
           });
         });
       self.linkedDataSets.forEach(link => {
-        const links: ILinkProperties = { tileIds: [link.tableId] };
+        const links: ILinkProperties = { tileIds: [link.providerId] };
         const parents: JXGCoordPair[] = [];
         const properties: Array<{ id: string }> = [];
         for (let ci = 0; ci < link.dataSet.cases.length; ++ci) {

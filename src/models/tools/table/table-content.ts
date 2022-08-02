@@ -263,7 +263,7 @@ export const TableContentModel = ToolContentModel
         else {
           if (!sharedDataSet) {
             // The document doesn't have a shared model yet
-            sharedDataSet = SharedDataSet.create({ tableId: self.metadata.id, dataSet: self.dataSet });
+            sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet: self.dataSet });
           }
 
           // Add the shared model to both the document and the tile
