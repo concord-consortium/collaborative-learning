@@ -43,7 +43,7 @@ import ZeroValueIcon from "../../assets/icons/control/control-zero-value.svg";
 import GateIcon from "../../assets/icons/control/gate.svg";
 
 import { demoStreams } from "./demo-data";
-import { zeroSentence } from "./control-node-functions";
+//import { zeroSentence } from "./control-node-functions";
 
 export interface NodeType {
   name: string;
@@ -225,21 +225,22 @@ export const NodeOperationTypes = [
   {
     name: "Hold Current",
     type: "control",
-    method: (n1: number, n2: number, /*held: number*/) => n1 === 1 ? 42 : n2,
+    method: (n1: number, n2: number, held?: any ) => n1 === 1 ? held : n2,
     numberSentence: (n1: string, n2: string) => `${n1} ≡ ` + (n1 === "1" ? "on" : "off") + ` ⇒ `,
     icon: CurrentValueIcon
   },
   {
     name: "Hold Prior",
     type: "control",
-    method: (n1: number, n2: number, /*held: number*/) => n1 === 1 ? 42 : n2,
+    method: (n1: number, n2: number, held?: any ) => n1 === 1 ? held : n2,
     numberSentence: (n1: string, n2: string ) => `${n1} ≡ ` + (n1 === "1" ? "on" : "off") + ` ⇒ `,
     icon: PreviousValueIcon
   },
   {
     name: "Output Zero",
     type: "control",
-    method: (n1: number, n2: number, /*held: number*/) => n1 === 1 ? 0 : n2,
+    method: (n1: number, n2: number ) => n1 === 1 ? 0 : n2,
+    // some other potential expressions for the "sentence":
     // numberSentence: (n1: string, n2: string) => `${n1} ? ${n2} : 0`,
     // numberSentence: (n1: string, n2: string) => `on == ${n1} ⇒ `,
     // numberSentence: (n1: string) => zeroSentence(n1),

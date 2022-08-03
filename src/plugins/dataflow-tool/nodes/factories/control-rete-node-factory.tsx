@@ -11,7 +11,7 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
     super("Control", numSocket);
   }
 
-  public heldValue: number | null = null;
+  public heldValue: number | null;
 
   public builder(node: Node) {
     super.defaultBuilder(node);
@@ -37,31 +37,43 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   public worker(node: NodeData, inputs: any, outputs: any) {
-    const controlOperator = node.data.controlOperator;
+    const controlOperator = node.data.controlOperator; // "Output Zero" or "Hold Current" or "Hold Prior"
     let result = 0;
     let resultSentence = "";
-
     const recents: number[] = (node.data.recentValues as any).nodeValue;
     const priorValue: number | undefined = recents[recents.length - 1];
-
     const n1 = inputs.num1.length ? inputs.num1[0] : node.data.num1;
     const n2 = inputs.num2 ? (inputs.num2.length ? inputs.num2[0] : node.data.num2) : 0;
 
-    const nodeOperationTypes = NodeOperationTypes.find(op => op.name === controlOperator);
-    if (nodeOperationTypes) {
+    if (controlOperator === "Output Zero"){
+      this.heldValue = null;
+    }
 
-      console.log("nodeOperationTypes: ", nodeOperationTypes);
+    if (controlOperator === "Hold Current"){
+      this.heldValue = this.heldValue === null ? n2 : this.heldValue
+    }
+
+    if (controlOperator === "Hold Prior"){
+      this.heldValue = this.heldValue === null ? priorValue : this.heldValue
+    }
+
+    console.log("heldValue: ", this.heldValue);
+    const currentNodeOperationType = NodeOperationTypes.find(op => op.name === controlOperator);
+
+    if (currentNodeOperationType) {
+
       if (isNaN(n1) || isNaN(n2)) {
         result = NaN;
       } else {
-        result = nodeOperationTypes.method(n1, n2) || 0;
+        result = currentNodeOperationType.method(n1, n2, this.heldValue);
       }
 
       // render the sentence version
       const n1Str = isNaN(n1) ? kEmptyValueString : "" + n1;
       const n2Str = isNaN(n2) ? kEmptyValueString : "" + n2;
       const resultStr = isNaN(result) ? kEmptyValueString : roundNodeValue(result);
-      resultSentence = nodeOperationTypes.numberSentence(n1Str, n2Str) + resultStr;
+      console.log("RESULT: ", result)
+      resultSentence = currentNodeOperationType.numberSentence(n1Str, n2Str) + resultStr;
     }
 
     if (this.editor) {
@@ -73,7 +85,6 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
         this.editor.view.updateConnections( {node: _node} );
       }
     }
-
     outputs.num = result;
   }
 }
