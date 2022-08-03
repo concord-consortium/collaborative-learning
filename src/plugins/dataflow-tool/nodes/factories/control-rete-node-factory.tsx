@@ -11,7 +11,8 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
     super("Control", numSocket);
   }
 
-  public heldValue: number | null;
+  public heldValue: number | null = null;
+  public alternativeValue: number | null = null;
 
   public builder(node: Node) {
     super.defaultBuilder(node);
@@ -36,46 +37,63 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
     }
   }
 
+  private deriveValue(n1:number, n2: number, prior: number, funcName: string, held: number | null) {
+    return 42
+  }
+
   public worker(node: NodeData, inputs: any, outputs: any) {
-    const controlOperator = node.data.controlOperator; // "Output Zero" or "Hold Current" or "Hold Prior"
+    console.log('TICK!')
     let result = 0;
     let resultSentence = "";
     const recents: number[] = (node.data.recentValues as any).nodeValue;
+    console.log("RECENTS: ", recents)
     const priorValue: number | undefined = recents[recents.length - 1];
     const n1 = inputs.num1.length ? inputs.num1[0] : node.data.num1;
     const n2 = inputs.num2 ? (inputs.num2.length ? inputs.num2[0] : node.data.num2) : 0;
 
-    if (controlOperator === "Output Zero"){
-      this.heldValue = null;
+    console.log("n1: ", n1, "n2: ", n2)
+    console.log("priorValue: ", priorValue)
+    console.log("controlOperator: ", node.data.controlOperator)
+    console.log("this.heldValue: ", this.heldValue)
+    console.log("this.alternativeValue: ", this.alternativeValue)
+    console.log('----')
+
+    switch (node.data.controlOperator) {
+      case "Output Zero":
+        this.heldValue = null;
+        this.alternativeValue = 0;
+        break;
+
+      case "Hold Current":
+        if (this.heldValue === null){
+          this.heldValue = n2;
+        }
+        this.alternativeValue = this.heldValue;
+        break;
+
+      case "Hold Prior":
+        if (this.heldValue === null){
+          this.heldValue = priorValue;
+        }
+        this.alternativeValue = this.heldValue;
+        break;
+
+      default:
+        this.heldValue = null;
+        this.alternativeValue = 0;
+        break;
     }
 
-    if (controlOperator === "Hold Current"){
-      this.heldValue = this.heldValue === null ? n2 : this.heldValue
+    // set result and create sentence version
+    if (isNaN(n2)) {
+      result = NaN;
+    } else {
+      result = n1 === 0 ? n2 : this.alternativeValue;
     }
+    const resultStr = isNaN(result) ? kEmptyValueString : roundNodeValue(result);
+    resultSentence = `${n1} ≡ ${(n1 === 1 ? "on" : "off")} ⇒ ${resultStr}`;
 
-    if (controlOperator === "Hold Prior"){
-      this.heldValue = this.heldValue === null ? priorValue : this.heldValue
-    }
-
-    console.log("heldValue: ", this.heldValue);
-    const currentNodeOperationType = NodeOperationTypes.find(op => op.name === controlOperator);
-
-    if (currentNodeOperationType) {
-
-      if (isNaN(n1) || isNaN(n2)) {
-        result = NaN;
-      } else {
-        result = currentNodeOperationType.method(n1, n2, this.heldValue);
-      }
-
-      // render the sentence version
-      const n1Str = isNaN(n1) ? kEmptyValueString : "" + n1;
-      const n2Str = isNaN(n2) ? kEmptyValueString : "" + n2;
-      const resultStr = isNaN(result) ? kEmptyValueString : roundNodeValue(result);
-      console.log("RESULT: ", result)
-      resultSentence = currentNodeOperationType.numberSentence(n1Str, n2Str) + resultStr;
-    }
-
+    // operate rete
     if (this.editor) {
       const _node = this.editor.nodes.find((n: { id: any; }) => n.id === node.id);
       if (_node) {
