@@ -21,6 +21,7 @@ export const SliderComponent: React.FC<IProps> = (props) => {
   const { activeNavTab } = useUIStore();
   const sliderContainerRef = useRef<HTMLDivElement>(null);
   const railRef = useRef<HTMLDivElement>(null);
+  const [showMarkerToolset, setShowMarkerToolset] = useState(false);
   const [markerSelected, setMarkerSelected] = useState(false);
   const [addMarkerButtonSelected, setAddMarkerButtonSelected] = useState(false);
   const [markers, setMarkers] = useState<IMarkerProps[]>([]);
@@ -72,7 +73,7 @@ export const SliderComponent: React.FC<IProps> = (props) => {
 
     return (
       <>
-        <div className="slider-container" ref={sliderContainerRef}>
+        <div className="slider-container" ref={sliderContainerRef} onClick={() => setShowMarkerToolset(true) }>
           <Slider min={0} max={100} step={1} defaultValue={100} ref={railRef}
                   className={`${activeNavTab}`} onAfterChange={handleSliderValueChange} />
         </div>
@@ -96,8 +97,8 @@ export const SliderComponent: React.FC<IProps> = (props) => {
 
   return (
     <>
-      <PlaybackMarkerToolbar selectedMarkers={selectedMarkers} markerSelected={markerSelected}
-          addMarkerSelected={addMarkerButtonSelected} onAddMarkerSelected={handleAddMarkerButtonSelected}/>
+      {showMarkerToolset && <PlaybackMarkerToolbar selectedMarkers={selectedMarkers} markerSelected={markerSelected}
+          addMarkerSelected={addMarkerButtonSelected} onAddMarkerSelected={handleAddMarkerButtonSelected}/> }
       <div className={sliderComponentClass}>
         {renderMarkerComponent()}
         {renderSliderContainer()}
