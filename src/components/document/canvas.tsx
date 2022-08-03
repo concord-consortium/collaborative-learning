@@ -21,6 +21,7 @@ interface IProps {
   readOnly?: boolean;
   document?: DocumentModelType;
   content?: DocumentContentModelType;
+  showPlayback?: boolean;
   overlayMessage?: string;
   selectedSectionId?: string | null;
   viaTeacherDashboard?: boolean;
@@ -79,7 +80,7 @@ export class CanvasComponent extends BaseComponent<IProps> {
   }
 
   private renderContent() {
-    const {content, document, ...others} = this.props;
+    const {content, document, showPlayback, ...others} = this.props;
     const documentContent = document ? document.content : content;
     const documentId = document?.key;
     const typeClass = document?.type === "planning" ? "planning-doc" : "";
@@ -89,6 +90,7 @@ export class CanvasComponent extends BaseComponent<IProps> {
         <DocumentContentComponent content={documentContent}
                                   documentId={documentId}
                                   typeClass={typeClass}
+                                  showPlayback={showPlayback}
                                   {...others} />
       );
     }

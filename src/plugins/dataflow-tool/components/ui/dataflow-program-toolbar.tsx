@@ -54,6 +54,7 @@ export class DataflowProgramToolbar extends React.Component<IProps> {
         break;
       case "Relay":
       case "Demo Output":
+      case "Live Output":
       case "Data Storage":
         nodeIcons.push(<div className="icon-node left mid" key={"icon-node-l-m" + i}/>);
         break;

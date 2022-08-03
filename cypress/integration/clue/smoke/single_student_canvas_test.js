@@ -44,8 +44,8 @@ context('single student functional test',()=>{
         cy.get('.primary-workspace [data-test=learning-log-title]').should('contain', "Learning Log: My First Learning Log");
       });
       it('verify close of nav tabs', function () {
-        cy.closeTabs();
-        cy.get('.nav-tab-panel').should('not.be.visible');
+        cy.closeResourceTabs();
+        cy.get('.nav-tab-panel').should('not.exist');
       });
     });
 
