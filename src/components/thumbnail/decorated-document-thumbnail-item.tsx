@@ -36,7 +36,7 @@ function useDocumentCaption(document: DocumentModelType) {
     const pubVersion = document.pubVersion;
     return pubVersion ? `${caption} v${pubVersion}` : `${caption}`;
   }
-  const userName = classStore.getUserById(uid)?.displayName || (teacher?.name) ||
+  const userName = classStore.getUserById(uid)?.displayName || teacher?.name ||
                     (document.isRemote ? teacher?.name : "") || "Unknown User";
   const namePrefix = document.isRemote || isPublishedType(type) ? `${userName}: ` : "";
   const dateSuffix = document.isRemote && document.createdAt

@@ -63,7 +63,6 @@ export const NavTabSectionModel =
         ENavTabSectionType.kPublishedProblemDocuments,
         ENavTabSectionType.kPublishedLearningLogs,
         ENavTabSectionType.kTeacherSupports,
-        ENavTabSectionType.kCurricularSupports,
        ];
       return (deletableTypes.includes(self.type) && userOwnsDocument);
     },

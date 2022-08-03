@@ -5,7 +5,7 @@ import { DocumentModelType } from "../../models/document/document";
 import { DocumentCaption } from "./document-caption";
 import { ThumbnailPlaceHolderIcon } from "./thumbnail-placeholder-icon";
 import { ThumbnailPrivateIcon } from "./thumbnail-private-icon";
-import { useStores } from "../../hooks/use-stores";
+import { useAppMode } from "../../hooks/use-stores";
 
 interface IProps {
   dataTestName: string;
@@ -26,8 +26,7 @@ export const ThumbnailDocumentItem = observer((props: IProps) => {
           onDocumentClick, onDocumentDragStart, onDocumentStarClick,
           onDocumentDeleteClick } = props;
   const selectedClass = isSelected ? "selected" : "";
-  const stores = useStores();
-  const appMode = stores.appMode;
+  const appMode = useAppMode();
 
   const handleDocumentClick = (e: React.MouseEvent<HTMLDivElement>) => {
     onDocumentClick?.(document);

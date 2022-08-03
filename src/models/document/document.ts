@@ -86,11 +86,7 @@ export const DocumentModel = types
     },
     getNumericProperty(key: string) {
       const val = self.properties.get(key);
-      if (val !== undefined) {
-        return Number(self.properties.get(key));
-      } else {
-        return 0;
-      }
+      return val != null ? Number(val) : 0;
     },
     copyProperties(): IDocumentProperties {
       return self.properties.toJSON();
