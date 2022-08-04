@@ -62,10 +62,10 @@ export function useDocumentSyncToFirebase(
     }
   });
 
-  // sync properties for personal and learning log documents
+  // sync properties for problem, personal, and learning log documents
   useSyncMstNodeToFirebase({
     firebase, model: document.properties, path: `${metadata}/properties`,
-    enabled: !readOnly && [PersonalDocument, LearningLogDocument].includes(type),
+    enabled: !readOnly && [ProblemDocument, PersonalDocument, LearningLogDocument].includes(type),
     options: {
       onSuccess: (data, properties) => {
         debugLog(`DEBUG: Updated document properties for ${type} document ${key}:`, JSON.stringify(properties));
