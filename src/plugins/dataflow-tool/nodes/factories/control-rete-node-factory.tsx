@@ -5,6 +5,7 @@ import { ValueControl } from "../controls/value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
 import { NodeControlTypes, roundNodeValue } from "../../model/utilities/node";
 import { PlotButtonControl } from "../controls/plot-button-control";
+import { NonceProvider } from "react-select";
 
 export class ControlReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
@@ -21,6 +22,9 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
       const inp1 = new Rete.Input("num1", "Binary", this.numSocket);
       const inp2 = new Rete.Input("num2", "Number2", this.numSocket);
       const out = new Rete.Output("num", "Number", this.numSocket);
+
+      node.data.hasGate = true;
+      node.data.gateActive = false;
 
       const dropdownOptions = NodeControlTypes
         .map((nodeOp) => {
@@ -76,15 +80,18 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
     else {
       if (n1 === 0){
         // off signal at gate, null heldValue and let n2 through
+        node.data.gateActive = false;
         this.heldValue = null;
         this.result = n2;
       }
       else if (n1 === 1){
         // on signal at gate, set or maintain modified value
+        node.data.gateActive = true;
         this.result = this.setHoldModValue(n1, n2, priorValue, funcName);
       }
       else {
         // invalid signal at gate
+        node.data.gateActive = false;
         this.result = NaN;
       }
     }
