@@ -18,14 +18,12 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
   public builder(node: Node) {
     super.defaultBuilder(node);
     if (this.editor) {
-      const inp1 = new Rete.Input("num1", "Number", this.numSocket);
+      const inp1 = new Rete.Input("num1", "Binary", this.numSocket);
       const inp2 = new Rete.Input("num2", "Number2", this.numSocket);
       const out = new Rete.Output("num", "Number", this.numSocket);
 
       const dropdownOptions = NodeControlTypes
-        .filter((nodeOp) => {
-          return nodeOp.type === "control";
-        }).map((nodeOp) => {
+        .map((nodeOp) => {
           return { name: nodeOp.name, icon: nodeOp.icon };
         });
       return node
