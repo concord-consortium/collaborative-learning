@@ -12,8 +12,6 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   private heldValue: number | null = null;
-  private result = 0;
-  private resultSentence = "";
 
   public builder(node: Node) {
     super.defaultBuilder(node);
@@ -70,10 +68,12 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
     const priorValue: number | undefined = recents[recents.length - 1];
     const n1 = inputs.num1.length ? inputs.num1[0] : node.data.num1;
     const n2 = inputs.num2 ? (inputs.num2.length ? inputs.num2[0] : node.data.num2) : 0;
+    let result = 0;
+    let resultSentence = "";
 
     if (isNaN(n2)) {
       // invalid input to n2, no output
-      this.result = NaN;
+      result = NaN;
     }
 
     else {
@@ -81,34 +81,34 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
         // off signal at gate, null heldValue and let n2 through
         node.data.gateActive = false;
         this.heldValue = null;
-        this.result = n2;
+        result = n2;
       }
       else if (n1 === 1){
         // on signal at gate, set or maintain modified value
         node.data.gateActive = true;
-        this.result = this.setHoldModValue(n1, n2, priorValue, funcName);
+        result = this.setHoldModValue(n1, n2, priorValue, funcName);
       }
       else {
         // invalid signal at gate
         node.data.gateActive = false;
-        this.result = NaN;
+        result = NaN;
       }
     }
 
     // prepare string to display on node
-    const resultString = isNaN(this.result) ? kEmptyValueString : `${roundNodeValue(this.result)}`;
-    this.resultSentence = `ƒ(${n1}, ${roundNodeValue(n2)}) ⇒ ${resultString}`;
+    const resultString = isNaN(result) ? kEmptyValueString : `${roundNodeValue(result)}`;
+    resultSentence = `ƒ(${n1}, ${roundNodeValue(n2)}) ⇒ ${resultString}`;
 
     // operate rete
     if (this.editor) {
       const _node = this.editor.nodes.find((n: { id: any; }) => n.id === node.id);
       if (_node) {
         const nodeValue = _node.controls.get("nodeValue") as ValueControl;
-        nodeValue?.setValue(this.result);
-        nodeValue?.setSentence(this.resultSentence);
+        nodeValue?.setValue(result);
+        nodeValue?.setSentence(resultSentence);
         this.editor.view.updateConnections( {node: _node} );
       }
     }
-    outputs.num = this.result;
+    outputs.num = result;
   }
 }
