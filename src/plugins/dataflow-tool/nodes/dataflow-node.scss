@@ -278,6 +278,16 @@ $node-inner-width: 140px;
         border-top-color: $control-green;
       }
     }
+    &.has-gate.gate-active .inputs {
+      div:first-of-type .socket {
+        border:5px solid red;
+      }
+    }
+    &.has-gate .inputs {
+      div:first-of-type .socket {
+        border:5px solid green;
+      }
+    }
     &.data-storage {
       background-color: $data-storage-orange;
       border-color: $data-storage-orange-outline;
