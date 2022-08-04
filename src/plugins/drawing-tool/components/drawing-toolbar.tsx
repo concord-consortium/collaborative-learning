@@ -19,14 +19,14 @@ import { getDrawingToolButtonComponent } from "./drawing-object-manager";
 
 interface IProps extends IFloatingToolbarProps, IRegisterToolApiProps {
   model: ToolTileModelType;
-  setImageUrl: (url: string) => void;
+  setImageUrlToAdd: (url: string) => void;
 }
 
 const defaultButtons = ["select", "line", "vector", "rectangle", "ellipse", 
   "stamp", "stroke-color", "fill-color", "image-upload", "delete"];
 
 export const ToolbarView: React.FC<IProps> = (
-              { documentContent, model, onIsEnabled, setImageUrl, ...others }: IProps) => {
+              { documentContent, model, onIsEnabled, setImageUrlToAdd, ...others }: IProps) => {
   const drawingContent = model.content as DrawingContentModelType;
   const toolbarButtonSetting = useSettingFromStores("tools", "drawing") as unknown as string[] | undefined;
   const toolbarButtons = toolbarButtonSetting || defaultButtons;
@@ -88,7 +88,7 @@ export const ToolbarView: React.FC<IProps> = (
   const uploadImage = (file: File) => {
     gImageMap.addFileImage(file)
       .then(image => {
-        setImageUrl(image.contentUrl || '');
+        setImageUrlToAdd(image.contentUrl || '');
       });
   };
 

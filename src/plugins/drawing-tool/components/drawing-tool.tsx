@@ -17,7 +17,7 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
   const { documentContent, toolTile, model, readOnly, scale, onRegisterToolApi, onUnregisterToolApi } = props;
   const contentRef = useCurrent(model.content as DrawingContentModelType);
 
-  const [imageUrl, setImageUrl] = useState("");
+  const [imageUrlToAdd, setImageUrlToAdd] = useState("");
 
   useEffect(() => {
     if (!readOnly) {
@@ -41,9 +41,9 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
                     documentContent={documentContent}
                     toolTile={toolTile}
                     scale={scale}
-                    setImageUrl={setImageUrl}
+                    setImageUrlToAdd={setImageUrlToAdd}
                     {...toolbarProps} />
-        <DrawingLayerView {...props} imageUrl={imageUrl} setImageUrl={setImageUrl} />
+        <DrawingLayerView {...props} imageUrlToAdd={imageUrlToAdd} setImageUrlToAdd={setImageUrlToAdd} />
       </div>
     </DrawingContentModelContext.Provider>
   );
