@@ -42,7 +42,6 @@ import PreviousValueIcon from "../../assets/icons/control/control-previous-value
 import ZeroValueIcon from "../../assets/icons/control/control-zero-value.svg";
 
 import { demoStreams } from "./demo-data";
-//import { zeroSentence } from "./control-node-functions";
 
 export interface NodeType {
   name: string;
