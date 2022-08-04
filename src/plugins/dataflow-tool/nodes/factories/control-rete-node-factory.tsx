@@ -37,7 +37,7 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
     }
   }
 
-  private setHoldModValue(n1:number, n2: number, prior: number, funcName: string) :number {
+  private setHoldModValue(n2: number, prior: number, funcName: string) :number {
     if (funcName === "Output Zero"){
       this.heldValue = null;
       return 0;
