@@ -189,7 +189,19 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             isDataStorageDisabled={this.state.disableDataStorage}
             disabled={readOnly || !this.isReady()}
           /> }
-          <div className="editor-graph-container" style={this.getEditorStyle()}>
+          <div
+            className="editor-graph-container"
+            style={this.getEditorStyle()}
+            onDragOver={event => {
+              event.preventDefault();
+              event.dataTransfer.dropEffect = "copy";
+            }}
+            onDrop={event => {
+              event.preventDefault();
+              const nodeType = event.dataTransfer.getData("text/plain");
+              console.log(`Adding ${nodeType}`);
+            }}
+          >
             <div
               className={editorClass}
               ref={(elt) => this.editorDomElement = elt}
