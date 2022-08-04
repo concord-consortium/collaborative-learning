@@ -23,10 +23,10 @@ export class DataflowNode extends Node {
     const nodeType = NodeTypes.find( (n: NodeType) => n.name === node.name);
     const displayName = nodeType ? nodeType.displayName : node.name;
 
-    const dynamicClasses = classNames(
-      { "has-gate": node.data.hasGate },
-      { "gate-active": node.data.gateActive }
-    );
+    const dynamicClasses = classNames({
+      "has-gate": node.data.hasGate,
+      "gate-active": node.data.gateActive
+    });
 
     return (
       <div className={`node ${node.name.toLowerCase().replace(/ /g, "-")} ${dynamicClasses}`}>
