@@ -17,11 +17,11 @@ export class ValueControl extends Rete.Control {
 
     this.component = (compProps: { value: number; sentence: string, class: string }) => {
       const sentLen = compProps.sentence.length;
-      const dynamicClasses = classNames(
-        { "smallest": sentLen >= 15 },
-        { "small": sentLen > 13 && sentLen < 15 },
-        { "medium": sentLen > 11 && sentLen <= 13 }
-      );
+      const dynamicClasses = classNames({
+        "smallest": sentLen >= 15,
+        "small": sentLen > 13 && sentLen < 15,
+        "medium": sentLen > 11 && sentLen <= 13
+      });
 
       return (
         <div className={`value-container ${compProps.class.toLowerCase().replace(/ /g, "-")} ${dynamicClasses}`}
