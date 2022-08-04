@@ -35,6 +35,7 @@ import { IDataSet } from "../../data/data-set";
 import { uniqueId } from "../../../utilities/js-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
 import { gImageMap } from "../../image-map";
+import { SharedModelType } from "../shared-model";
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
 
@@ -1122,6 +1123,49 @@ export const GeometryContentModel = GeometryBaseContentModel
     }
   }))
   .actions(self => ({
+    // Do we need an after attach for geometry tiles, since they don't require a shared model?
+    // afterAttach() {
+    //   // Monitor our parents and update our shared model when we have a document parent
+    //   addDisposer(self, reaction(() => {
+    //     const sharedModelManager = self.tileEnv?.sharedModelManager;
+
+    //     const sharedDataSet = sharedModelManager?.isReady
+    //       ? sharedModelManager?.findFirstSharedModelByType(SharedDataSet, self.metadata.id)
+    //       : undefined;
+
+    //     const tileSharedModels = sharedModelManager?.isReady
+    //       ? sharedModelManager?.getTileSharedModels(self)
+    //       : undefined;
+
+    //     return { sharedModelManager, sharedDataSet, tileSharedModels };
+    //   },
+    //   // reaction/effect
+    //   ({sharedModelManager, sharedDataSet, tileSharedModels}) => {
+    //     if (!sharedModelManager?.isReady) {
+    //       // We aren't added to a document yet so we can't do anything yet
+    //       return;
+    //     }
+
+    //     if (sharedDataSet && tileSharedModels?.includes(sharedDataSet)) {
+    //       // The shared model has already been registered by a client, but as the
+    //       // "owner" of the data, we synchronize it with our local content.
+    //       sharedDataSet.dataSet = cloneDeep(self.dataSet);
+    //     }
+    //     else {
+    //       if (!sharedDataSet) {
+    //         // The document doesn't have a shared model yet
+    //         sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet: cloneDeep(self.dataSet) });
+    //       }
+
+    //       // Add the shared model to both the document and the tile
+    //       sharedModelManager.addTileSharedModel(self, sharedDataSet);
+    //     }
+    //   },
+    //   {name: "sharedModelSetup", fireImmediately: true}));
+    // },
+    updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
+      console.warn("updateAfterSharedModelChanges hasn't been implemented for geometry content.");
+    },
     syncLinkedChange(dataSet: IDataSet, links: ITableLinkProperties) {
       // TODO: handle update
     }

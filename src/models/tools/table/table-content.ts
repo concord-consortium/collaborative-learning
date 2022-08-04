@@ -1,4 +1,5 @@
 import { Expression, Parser } from "expr-eval";
+import { cloneDeep } from "lodash";
 import { reaction } from "mobx";
 import { addDisposer, Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree";
 import { ITableChange } from "./table-change";
@@ -13,6 +14,7 @@ import { canonicalizeExpression, kSerializedXKey } from "../../data/expression-u
 import { Logger, LogEventName } from "../../../lib/logger";
 // import { getRowLabel, ILinkProperties } from "../table-link-types";
 import { uniqueId } from "../../../utilities/js-utils";
+import { SharedModelType } from "../shared-model";
 
 export const kTableToolID = "Table";
 export const kCaseIdName = "__id__";
@@ -258,12 +260,12 @@ export const TableContentModel = ToolContentModel
         if (sharedDataSet && tileSharedModels?.includes(sharedDataSet)) {
           // The shared model has already been registered by a client, but as the
           // "owner" of the data, we synchronize it with our local content.
-          sharedDataSet.dataSet = self.dataSet;
+          sharedDataSet.dataSet = cloneDeep(self.dataSet);
         }
         else {
           if (!sharedDataSet) {
             // The document doesn't have a shared model yet
-            sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet: self.dataSet });
+            sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet: cloneDeep(self.dataSet) });
           }
 
           // Add the shared model to both the document and the tile
@@ -271,6 +273,9 @@ export const TableContentModel = ToolContentModel
         }
       },
       {name: "sharedModelSetup", fireImmediately: true}));
+    },
+    updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
+      console.warn("updateAfterSharedModelChanges hasn't been implemented for table content.");
     },
     setTableName(name: string) {
       self.dataSet.name = name;
