@@ -1,20 +1,21 @@
 import { Expression, Parser } from "expr-eval";
 import { cloneDeep } from "lodash";
 import { reaction } from "mobx";
-import { addDisposer, Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree";
+import { addDisposer, Instance, SnapshotIn, SnapshotOut, types, getType } from "mobx-state-tree";
 import { ITableChange } from "./table-change";
 import { exportTableContentAsJson } from "./table-export";
-import { convertChangesToSnapshot, convertImportToSnapshot, isTableImportSnapshot } from "./table-import";
+import { convertChangesToSnapshot, convertImportToSnapshot, isTableImportSnapshot,
+  convertLegacyDataSet } from "./table-import";
 // import { isLinkableValue, canonicalizeValue } from "./table-model-types";
 import { IDocumentExportOptions, IDefaultContentOptions } from "../tool-content-info";
 import { ToolMetadataModel, ToolContentModel, toolContentModelHooks } from "../tool-types";
 import { addCanonicalCasesToDataSet, IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
-import { SharedDataSet } from "../shared-data-set";
+import { SharedDataSet, SharedDataSetType } from "../shared-data-set";
+import { SharedModelType } from "../shared-model";
 import { canonicalizeExpression, kSerializedXKey } from "../../data/expression-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
 // import { getRowLabel, ILinkProperties } from "../table-link-types";
 import { uniqueId } from "../../../utilities/js-utils";
-import { SharedModelType } from "../shared-model";
 
 export const kTableToolID = "Table";
 export const kCaseIdName = "__id__";
@@ -165,7 +166,9 @@ export const TableContentModel = ToolContentModel
   .props({
     type: types.optional(types.literal(kTableToolID), kTableToolID),
     isImported: false,
-    dataSet: types.optional(DataSet, () => DataSet.create()),
+    // Used to store the dataset when importing legacy formats
+    importedDataSet: types.optional(DataSet, () => DataSet.create()),
+    // dataSet: types.optional(DataSet, () => DataSet.create()),
     linkedGeometries: types.array(types.string)
   })
   .volatile(self => ({
@@ -174,14 +177,39 @@ export const TableContentModel = ToolContentModel
   .preProcessSnapshot(snapshot => {
     const s = snapshot as any;
     if (isTableImportSnapshot(s)) {
-      return { isImported: true, ...convertImportToSnapshot(s) };
+      return convertLegacyDataSet({ isImported: true, ...convertImportToSnapshot(s) });
     }
     if (s?.changes) {
-      return convertChangesToSnapshot(s.changes);
+      return convertLegacyDataSet(convertChangesToSnapshot(s.changes));
     }
-    return snapshot;
+    return convertLegacyDataSet(snapshot);
+  })
+  .postProcessSnapshot(snapshot => {
+    const { importedDataSet, ...rest } = snapshot;
+    return { ...rest };
   })
   .views(self => ({
+    get sharedModel() {
+      const sharedModelManager = self.tileEnv?.sharedModelManager;
+      // Perhaps we should pass the type to getTileSharedModel, so it can return the right value
+      // just like findFirstSharedModelByType does
+      //
+      // For now we are checking the type ourselves, and we are assuming the shared model we want
+      // is the first one.
+      const firstSharedModel = sharedModelManager?.getTileSharedModels(self)?.[0];
+      if (!firstSharedModel || getType(firstSharedModel) !== SharedDataSet) {
+        return undefined;
+      }
+      return firstSharedModel as SharedDataSetType;
+    }
+  }))
+  .views(self => ({
+    get dataSet() {
+      if (self.sharedModel) {
+        return self.sharedModel.dataSet;
+      }
+      return self.importedDataSet;
+    },
     get isUserResizable() {
       return true;
     },
@@ -207,28 +235,32 @@ export const TableContentModel = ToolContentModel
     doPostCreate(metadata) {
       self.metadata = metadata as TableMetadataModelType;
 
-      if (self.dataSet.attributes.length >= 2) {
-        const xAttr = self.dataSet.attributes[0];
-        const xName = xAttr.name;
-        self.dataSet.attributes.forEach((attr, i) => {
-          if (i > 0) {
-            attr.formula.synchronize(xName);
-            if (attr.formula.display) {
-              self.metadata.setRawExpression(attr.id, attr.formula.display);
-            }
-            if (attr.formula.canonical) {
-              self.metadata.setExpression(attr.id, attr.formula.canonical);
-            }
-          }
-        });
-      }
+      // TODO Move this elsewhere, after the sharedModel has been created and connected
+      // if (self.dataSet.attributes.length >= 2) {
+      //   const xAttr = self.dataSet.attributes[0];
+      //   const xName = xAttr.name;
+      //   self.dataSet.attributes.forEach((attr, i) => {
+      //     if (i > 0) {
+      //       attr.formula.synchronize(xName);
+      //       if (attr.formula.display) {
+      //         self.metadata.setRawExpression(attr.id, attr.formula.display);
+      //       }
+      //       if (attr.formula.canonical) {
+      //         self.metadata.setExpression(attr.id, attr.formula.canonical);
+      //       }
+      //     }
+      //   });
+      // }
 
-      if (self.metadata.hasExpressions) {
-        self.metadata.updateDatasetByExpressions(self.dataSet);
-      }
+      // if (self.metadata.hasExpressions) {
+      //   self.metadata.updateDatasetByExpressions(self.dataSet);
+      // }
     }
   }))
   .actions(self => ({
+    clearImportedDataSet() {
+      self.importedDataSet = DataSet.create();
+    },
     logChange(change: ITableChange) {
       const toolId = self.metadata?.id || "";
       Logger.logToolChange(LogEventName.TABLE_TOOL_CHANGE, change.action, change, toolId);
@@ -260,12 +292,17 @@ export const TableContentModel = ToolContentModel
         if (sharedDataSet && tileSharedModels?.includes(sharedDataSet)) {
           // The shared model has already been registered by a client, but as the
           // "owner" of the data, we synchronize it with our local content.
-          sharedDataSet.dataSet = cloneDeep(self.dataSet);
+          if (!self.importedDataSet.isEmpty) {
+            sharedDataSet.dataSet = cloneDeep(self.importedDataSet) as unknown as IDataSet;
+            self.clearImportedDataSet();
+          }
         }
         else {
           if (!sharedDataSet) {
             // The document doesn't have a shared model yet
-            sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet: cloneDeep(self.dataSet) });
+            const dataSet = !self.importedDataSet.isEmpty ? cloneDeep(self.importedDataSet) : DataSet.create();
+            self.clearImportedDataSet();
+            sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet });
           }
 
           // Add the shared model to both the document and the tile

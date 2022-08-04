@@ -236,3 +236,11 @@ export function convertChangesToSnapshot(changes: string[]) {
   const linkedGeometries: string[] = [];
   return { dataSet, linkedGeometries };
 }
+
+export function convertLegacyDataSet(snapshot: any) {
+  const { dataSet, ...rest } = snapshot;
+  if (dataSet) {
+    return { importedDataSet: dataSet, ...rest };
+  }
+  return snapshot;
+}

@@ -44,6 +44,11 @@ export const DataSet = types.model("DataSet", {
 .volatile(self => ({
   transactionCount: 0
 }))
+.views(self => ({
+  get isEmpty() {
+    return self.attributes.length === 0 && self.cases.length === 0;
+  }
+}))
 .extend(self => {
   const attrIDMap: { [index: string]: IAttribute } = {},
         // map from attribute names to attribute IDs
