@@ -119,5 +119,12 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getNode(nodeType).should("exist");
       });
     });
+    describe("Control Node", () => {
+      const nodeType = "control";
+      it("can create control node", () => {
+        dataflowToolTile.getCreateNodeButton(nodeType).click();
+        dataflowToolTile.getNode(nodeType).should("exist");
+      });
+    });
   });
 });
