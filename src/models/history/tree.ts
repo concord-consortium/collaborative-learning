@@ -1,5 +1,4 @@
 import { types, IJsonPatch, applyPatch, resolvePath, getSnapshot, getParentOfType, flow } from "mobx-state-tree";
-import { nanoid } from "nanoid";
 import { DEBUG_HISTORY } from "../../lib/debug";
 import { DocumentContentModel, DocumentContentModelType } from "../document/document-content";
 import { SharedModelType } from "../tools/shared-model";
@@ -19,14 +18,14 @@ export const Tree = types.model("Tree", {
 }))
 .actions(self => ({
   updateTreeAfterSharedModelChanges(options?: {sharedModel: SharedModelType}) {
-    // If there is no sharedModel run the update function on all tiles which
-    // have shared model references
-    // If there is a sharedModel only run the update function on tiles which
+    // If there is no sharedModel param, run the update function on all tiles which
+    // have shared model references.
+    // If there is a sharedModel param, only run the update function on tiles which
     // have this shared model.
-    //
-    // Find the parent document of the model
-    // If there isn't a sharedModel we can't find the document so I think
-    // this has to be required or we need an optional document???
+
+    // If we don't have a document let the exception happen so we
+    // can track this down
+    const document = (self as any).content as DocumentContentModelType ;
 
     // We can probably optimize this by using a MSTView to cache the tiles
     // here. But I don't remember how it handles parameter values
@@ -34,18 +33,13 @@ export const Tree = types.model("Tree", {
     let sharedModel: SharedModelType | undefined;
     if (options) {
       sharedModel = options.sharedModel;
-      const document = getParentOfType(options.sharedModel, DocumentContentModel);
-      const sharedModelEntry = document.sharedModelMap.get(options.sharedModel.id);
+      const sharedModelEntry = document.sharedModelMap.get(sharedModel.id);
       if (!sharedModelEntry) {
-        console.warn(`no shared model entry for shared model: ${options.sharedModel.id}`);
+        console.warn(`no shared model entry for shared model: ${sharedModel.id}`);
       } else {
         tiles.push(...sharedModelEntry.tiles);
       }
     } else {
-      const document = (self as any).content as DocumentContentModelType ;
-
-      // If we don't have a document let the exception happen so we
-      // can track this down
 
       // Only include tiles that have at least one shared model
       document.sharedModelMap.forEach(sharedModelEntry => {
@@ -93,12 +87,10 @@ export const Tree = types.model("Tree", {
 .actions(self => {
   return {
     //
-    // Special actions called by the framework. These define the Tree API 
-    // which are shared by tiles and and shared models
+    // Special actions called by the framework. These define the Tree API.
     //
 
     // This will be called by the manager when a shared model tree changes
-    // That would normally happen when a tile changed the shared model.
     applySharedModelSnapshotFromManager(historyEntryId: string, exchangeId: string, snapshot: any) {
       throw new Error("not implemented yet");
     },
@@ -113,9 +105,7 @@ export const Tree = types.model("Tree", {
       return Promise.resolve();
     },
 
-    // This is defined as an action so it is clear that is part of the API
-    // also by giving it an action name the undo recorder can identify that
-    // this action by its name and not record the undo as an undo
+    // Actually apply the patches.
     // It might be called multiple times after startApplyingPatchesFromManager
     applyPatchesFromManager(historyEntryId: string, exchangeId: string, patchesToApply: readonly IJsonPatch[]) {
       applyPatch(self, patchesToApply);
@@ -192,20 +182,18 @@ export const Tree = types.model("Tree", {
         return;
       }
 
-      // What is tricky is that this is being called when the snapshot is applied by the
-      // sharedModel syncing code "sendSnapshotToSharedModel". In that case we want to do
-      // the internal shared model sync, but we don't want to resend the snapshot to the 
-      // shared model. So the current approach is to look for the specific action that
-      // is applying this snapshot to the tile tree. 
+      // When this is called by the TreeManager, we want to do the internal
+      // shared model sync, but we don't want to resend the snapshot back to the
+      // manager. 
       if (call.name !== "applySharedModelSnapshotFromManager") {
 
         // TODO: figure out if we should be recording this special action in the undo
         // stack
         const snapshot = getSnapshot(model); 
         
-        // TODO: we use the exchangeId from the original exchange here so we need to
-        // wait for the manager to confirm this updateSharedModel call before
-        // we can continue. Otherwise the manager might receive the final
+        // TODO: we use the exchangeId from the original exchange here so we
+        // need to wait for the manager to confirm this updateSharedModel call
+        // before we can continue. Otherwise the manager might receive the final
         // addTreePatchRecord before it gets any shared model updates. Currently
         // updateSharedModel waits for all of the dependent trees to update
         // their shared models before returning, so this might cause a long
@@ -219,10 +207,10 @@ export const Tree = types.model("Tree", {
         // waits for all of the dependent trees to be updated and in other cases
         // it just waits for the manager to confirm it received the request.
         //
-        // It might also be possible we can change the async flow of applying
-        // history events so it isn't necessary for the trees to wait for the
-        // shared model to be fully updated. So then this updateSharedModel call
-        // can just wait for a confirmation in all cases.
+        // It might also be possible that we can change the async flow of
+        // applying history events so it isn't necessary for the trees to wait
+        // for the shared model to be fully updated. So then this
+        // updateSharedModel call can just wait for a confirmation in all cases.
         //
         // - Q: Why is the exchangeId passed to updateSharedModel
         // - A: It isn't really needed but it is useful for debugging.
@@ -232,30 +220,21 @@ export const Tree = types.model("Tree", {
         //
         // Note that the TreeMonitor takes care of closing the exchangeId used
         // here. This same exchangeId is passed to all the shared model
-        // callbacks and then they are all waited for, and finally the
-        // exchange is closed. 
+        // callbacks and then they are all waited for, and finally the exchange
+        // is closed. 
         //
         yield self.treeManagerAPI.updateSharedModel(historyEntryId, exchangeId, self.treeId, snapshot);
       }
 
-      // let the tile update its model based on the updates that
-      // were just applied to the shared model
+      // Notify the tiles about the shared model update. 
       //
-      // TODO: an inefficiency  with this approach is that we
+      // TODO: an inefficiency  with this approach is that we are
       // treating all changes within the sharedModelPath the same.
-      // If the change is a simple property change in the shared
-      // model view that isn't used by
-      // updateTreeAfterSharedModelChanges, we do not need to
-      // re-run updateTreeAfterSharedModelChanges. When we used
-      // the autorun approach this was optimized so the function
-      // would only run when the needed parts of the tree changed.
+      // The change in the shared model might not require the tree's
+      // tiles to update any of their state.
       //
-      // We do need to send the shared model snapshot to the
-      // manager whenever there are any changes to the tree so
-      // the code above is fine. 
-      //
-      // There might be a way to use the mobx internals so we can
-      // track what updateTreeAfterSharedModelChanges is using and
+      // There is probably a way to use the mobx internals so we can
+      // track what updateTreeAfterSharedModelChanges references and
       // only run it when one of those things have changed. 
       //
       // TODO: This should not cause a loop because the implementation

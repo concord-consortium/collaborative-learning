@@ -120,14 +120,13 @@ export const TreeManager = types
     if (entry) {
       throw new Error(`The entry already exists ${ json({historyEntryId})}`);
     } 
-    entry = HistoryEntry.create({id: historyEntryId});
+    entry = HistoryEntry.create({
+      id: historyEntryId,
+      action: name,
+      tree: treeId,
+      undoable
+    });
     self.document.history.push(entry);
-
-    // update the entry: previously this code supported updating
-    // existing entries
-    entry.action = name;
-    entry.tree = treeId;
-    entry.undoable = undoable;
 
     entry.activeExchanges.set(exchangeId, `TreeManager.createHistoryEntry ${name}`);
 
@@ -209,9 +208,7 @@ export const TreeManager = types
 
     self.endExchange(entry, exchangeId);
 
-    // Add the entry to the undo stack if it is undoable. The entry is
-    // shared with the document store, so when new records are added
-    // they are added to the undo stack too.
+    // Add the entry to the undo stack if it is undoable. 
     //
     // TODO: should we wait to add it until the full entry is complete?
     // It might be better to add it earlier so it has the right position
@@ -219,7 +216,11 @@ export const TreeManager = types
     // behavior that takes a while, should its place in the stack be at
     // the beginning or end of these changes?
     //
-    // TODO: should we add it even if there are no patches?
+    // If this this is ending the last exchange and there are no patches, 
+    // endExchange will remove this entry from the document.history. 
+    // This should make the entry not alive, so it won't be added to the 
+    // undoStore.
+    // TODO: add a test to confirm this
     if (isAlive(entry) && entry.undoable && treePatchRecord.patches.length > 0) {
       self.undoStore.addHistoryEntry(entry);
     }
@@ -245,18 +246,14 @@ export const TreeManager = types
 
     // apply the patches to all trees
 
-    // iterate initialDocument.history This code groups all of the
-    // patches for a particular tree into one array. This is done
-    // instead of sending just the patches for each history entry one at
-    // a time. This approach is taken, because sending the patch records
-    // one at a time and waiting for confirmation that they have been
-    // applied is limited by the latency of the connection to the tree.
+    // iterate document.history This code groups all of the patches for a
+    // particular tree into one array. This is batching is done
+    // for performance.
     //
-    // This single array of changes might be a problem for large
-    // documents so we might have to split the array into pages, and
-    // send information about the order of the pages so the tree
-    // receiving them can make sure it is getting them in the right
-    // order.
+    // However, this single array of changes might be a problem for large
+    // documents so we might have to split the array into pages, and send
+    // information about the order of the pages so the tree receiving them can
+    // make sure it is getting them in the right order.
     //
     const treePatches: Record<string, IJsonPatch[] | undefined> = {};
     Object.keys(self.trees).forEach(treeId => treePatches[treeId] = []);

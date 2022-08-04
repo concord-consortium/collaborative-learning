@@ -35,7 +35,7 @@ export const HistoryEntry = types.model("HistoryEntry", {
 .volatile(self => ({
     // The value of the map should be the name of the exchange. This is useful
     // for debugging an activeExchange that hasn't been ended. 
-    // The last name param to observable.map is a feature of MobX that can also 
+    // The {name: "activeExchanges"} is a feature of MobX that can also 
     // help with debugging.
     activeExchanges: observable.map<string, string>({}, {name: "activeExchanges"})
 }));

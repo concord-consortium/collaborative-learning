@@ -273,7 +273,7 @@ export const DocumentModel = Tree.named("Document")
   }))
   .actions(self => ({
     afterCreate() {
-      // FIXME: it would be nice to unify this with the code in createDocumentModel
+      // TODO: it would be nice to unify this with the code in createDocumentModel
       const manager = TreeManager.create({document: {}, undoStore: {}});
       self.treeManagerAPI = manager;
       addTreeMonitor(self, manager, false);

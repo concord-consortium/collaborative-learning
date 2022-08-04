@@ -38,8 +38,8 @@ export const UndoStore = types
   }
 }))
 .actions((self) => {
-  // This is asynchronous. We might as well use a flow so we don't have to 
-  // create separate actions for each of the parts of this single action
+  // We use a flow here so we don't have to create separate actions for each of
+  // the parts of this action
   const applyPatchesToTrees = flow(function* applyPatchesToTrees(
     entryToUndo: Instance<typeof HistoryEntry>, opType: HistoryOperation) {
 
@@ -73,13 +73,16 @@ export const UndoStore = types
     const applyPromises = treePatchRecords.map(treePatchRecord => {
       // console.log(`send tile entry to ${opType} to the tree`, getSnapshot(treeEntry));
 
-      // When a patch is applied to a shared model, it will send its updated
-      // state to all tiles. If this is working properly the promise returned by
-      // the shared model's applyPatchesFromManager will not resolve until all tiles
-      // using it have updated their view of the shared model.
+      // If there are multiple trees, and a patch is applied to shared model 
+      // owned by a tree. The tree will send an updated snapshot of the 
+      // shared model to the tree manager. The tree manager will send this 
+      // snapshot to all of other trees that have a views of this shared
+      // model. If this is working properly the promise returned by
+      // the owning tree's applyPatchesFromManager will not resolve until all 
+      // trees with views of this shared model have updated their views.
 
-      // We need a new exchangeId for each apply call here, so each
-      // tree can finish the exchange when it calls addTreeRecordPatches.
+      // We use a new exchangeId for each tree's apply call, so the tree
+      // can finish its own exchange when it calls addTreeRecordPatches.
       const applyExchangeId = nanoid();
       manager.startExchange(historyEntryId, applyExchangeId, "UndoStore.applyPatchesToTrees.apply");
 
@@ -91,11 +94,11 @@ export const UndoStore = types
 
     // finish the patch application
     //
-    // Need to tell all of the tiles to re-enable the sync and run the sync
-    // to resync their tile models with any changes applied to the shared models
-    // For this final step, we still use promises so we can wait for everything to complete. 
-    // This can be used in the future to make sure multiple applyPatchesToTrees are not 
-    // running at the same time.
+    // Need to tell all of the tiles to re-enable the sync and run the sync to
+    // update their tile models with any changes in the shared models. For this
+    // final step, we still use promises so we can wait for everything to
+    // complete. This can be used in the future to make sure multiple
+    // applyPatchesToTrees are not running at the same time.
     const finishPromises = uniqueTreeIds.map(treeId => {
       const finishExchangeId = nanoid();
       manager.startExchange(historyEntryId, finishExchangeId, "UndoStore.applyPatchesToTrees.finish");
@@ -128,25 +131,24 @@ export const UndoStore = types
         self.history.push(entry);
       }
 
-      // Reset the undoIdx to the end of the history, this is because it is a 
-      // user action so if the user had been undoing things, once they
-      // start doing new things they can no longer 'redo' what was
-      // undone before.
-      // 
-      // The fact that the undoIdx is reset in all cases even
-      // with an existing entry is confusing. This currently happens
-      // because the system might add additional patches to a previous
-      // entry, and might mean that a redo won't work as expected.
+      // Reset the undoIdx to the end of the history, this is because it is a
+      // user action so if the user had been undoing things, once they start
+      // doing new things they can no longer 'redo' what was undone before.
+      //
+      // The fact that the undoIdx is reset in all cases even with an existing
+      // entry is kind of confusing. This happens because if additional patches 
+      // are being added to an existing entry these are still user triggered 
+      // patches. So this needs to prevent the ability to redo.
       self.undoIdx = self.history.length;
     },
 
-    // TODO: The MST undo manager used atomic operations for this
-    // that way if the was an error applying the patch then the whole set of 
-    // changes would be aborted.
-    // If we want this behavior we'd need to have each tile function that way
-    // and notify the tree manager when it succeeded or failed. And then 
-    // if it failed the tree manager would have to tell any tiles that successfully
-    // applied the patches to revert them. 
+    // TODO: The MST undo manager that this code is based on, used atomic
+    // operations for this. That way if the was an error applying the patch, then
+    // the whole set of changes would be aborted. We do not currently take this 
+    // approach because it is harder to support when we have multiple trees. 
+    // Each tree would have to have to tell the tree manager if it succeeded or
+    // failed to apply the patches. And then if one of them failed all of the trees 
+    // that succeeded would have to be reverted by the tree manager.
     undo() {
       if (!self.canUndo) {
         throw new Error("undo not possible, nothing to undo");
@@ -156,7 +158,7 @@ export const UndoStore = types
       // TODO: If there is an applyPatchesToTrees currently running we
       // should wait for it.
       //
-      // FIXME: we aren't actually calling this as an action and we
+      // TODO: we aren't actually calling this as an action and we
       // aren't waiting for it finish before returning
       applyPatchesToTrees(entryToUndo, HistoryOperation.Undo);
 
@@ -171,7 +173,7 @@ export const UndoStore = types
       // TODO: If there is an applyPatchesToTrees currently running we
       // should wait for it.
       //
-      // FIXME: we aren't actually calling this as an action and we
+      // TODO: we aren't actually calling this as an action and we
       // aren't waiting for it finish before returning
       //
       applyPatchesToTrees(entryToRedo, HistoryOperation.Redo);
