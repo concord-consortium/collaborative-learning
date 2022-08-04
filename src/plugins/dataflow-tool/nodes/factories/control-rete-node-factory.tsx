@@ -5,7 +5,6 @@ import { ValueControl } from "../controls/value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
 import { NodeControlTypes, roundNodeValue } from "../../model/utilities/node";
 import { PlotButtonControl } from "../controls/plot-button-control";
-import { NonceProvider } from "react-select";
 
 export class ControlReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {

@@ -40,7 +40,6 @@ import NotIcon from "../../assets/icons/transform/not.svg";
 import CurrentValueIcon from "../../assets/icons/control/control-current-value.svg";
 import PreviousValueIcon from "../../assets/icons/control/control-previous-value.svg";
 import ZeroValueIcon from "../../assets/icons/control/control-zero-value.svg";
-import GateIcon from "../../assets/icons/control/gate.svg";
 
 import { demoStreams } from "./demo-data";
 //import { zeroSentence } from "./control-node-functions";
