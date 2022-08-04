@@ -1,8 +1,8 @@
 import React from "react";
+import classNames from "classnames";
 import { Node, Socket, Control } from "rete-react-render-plugin";
 import { DataflowNodePlot } from "./dataflow-node-plot";
 import { NodeType, NodeTypes } from "../model/utilities/node";
-import classNames from "classnames";
 import "./dataflow-node.scss";
 
 export class DataflowNode extends Node {
