@@ -16,11 +16,11 @@ export class ValueControl extends Rete.Control {
     this.key = key;
 
     this.component = (compProps: { value: number; sentence: string, class: string }) => {
-
+      const sentLen = compProps.sentence.length;
       const dynamicClasses = classNames(
-        { "smallest": compProps.sentence.length > 15 },
-        { "small": compProps.sentence.length > 13 },
-        { "medium": compProps.sentence.length > 11 }
+        { "smallest": sentLen >= 15 },
+        { "small": sentLen > 13 && sentLen < 15 },
+        { "medium": sentLen > 11 && sentLen <= 13 }
       );
 
       return (
