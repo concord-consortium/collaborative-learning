@@ -1139,10 +1139,10 @@ export const GeometryContentModel = GeometryBaseContentModel
         //   ? sharedModelManager?.getTileSharedModels(self)
         //   : undefined;
 
-        return { sharedModelManager/*, sharedDataSet, tileSharedModels*/ };
+        return { sharedModelManager, links: self.links /*, sharedDataSet, tileSharedModels*/ };
       },
       // reaction/effect
-      ({sharedModelManager/*, sharedDataSet, tileSharedModels*/}) => {
+      ({sharedModelManager, links /*, sharedDataSet, tileSharedModels*/}) => {
         if (!sharedModelManager?.isReady) {
           // We aren't added to a document yet so we can't do anything yet
           return;
