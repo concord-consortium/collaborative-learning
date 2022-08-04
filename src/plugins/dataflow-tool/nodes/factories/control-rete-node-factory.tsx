@@ -86,7 +86,7 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
       else if (n1 === 1){
         // on signal at gate, set or maintain modified value
         node.data.gateActive = true;
-        result = this.setHoldModValue(n1, n2, priorValue, funcName);
+        result = this.setHoldModValue(n2, priorValue, funcName);
       }
       else {
         // invalid signal at gate
