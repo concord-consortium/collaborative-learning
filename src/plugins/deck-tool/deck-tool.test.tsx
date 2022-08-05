@@ -1,17 +1,16 @@
 import { render } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import React from "react";
 import { IToolApi } from "../../components/tools/tool-api";
 import { ToolTileModel } from "../../models/tools/tool-tile";
-import { defaultStarterContent } from "./starter-content";
-import { StarterToolComponent } from "./starter-tool";
+import { defaultDeckContent } from "./deck-content";
+import { DeckToolComponent } from "./deck-tool";
 
-// The starter tile needs to be registered so the ToolTileModel.create
+// The deck tile needs to be registered so the ToolTileModel.create
 // knows it is a supported tile type
-import "./starter-registration";
+import "./deck-registration";
 
-describe("StarterToolComponent", () => {
-  const content = defaultStarterContent();
+describe("DeckToolComponent", () => {
+  const content = defaultDeckContent();
   const model = ToolTileModel.create({content});
 
   const defaultProps = {
@@ -45,29 +44,7 @@ describe("StarterToolComponent", () => {
 
   it("renders successfully", () => {
     const {getByText} =
-      render(<StarterToolComponent  {...defaultProps} {...{model}}></StarterToolComponent>);
-    expect(getByText("Hello World")).toBeInTheDocument();
-  });
-
-  it("updates the text when the model changes", async () => {
-    const {getByText, findByText} =
-      render(<StarterToolComponent  {...defaultProps} {...{model}}></StarterToolComponent>);
-    expect(getByText("Hello World")).toBeInTheDocument();
-
-    content.setText("New Text");
-
-    expect(await findByText("New Text")).toBeInTheDocument();
-  });
-
-  it("updates the model when the user types", () => {
-    const {getByRole, getByText} =
-      render(<StarterToolComponent  {...defaultProps} {...{model}}></StarterToolComponent>);
-    expect(getByText("New Text")).toBeInTheDocument();
-
-    const textBox = getByRole("textbox");
-    userEvent.type(textBox, "{selectall}{del}Typed Text");
-
-    expect(textBox).toHaveValue("Typed Text");
-    expect(content.text).toBe("Typed Text");
+      render(<DeckToolComponent  {...defaultProps} {...{model}}></DeckToolComponent>);
+      expect(getByText("Data Card Collection 1")).toBeInTheDocument();
   });
 });

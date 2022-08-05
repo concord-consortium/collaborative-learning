@@ -45,6 +45,11 @@
         "isTileTool": true
       },
       {
+        "id": "Deck",
+        "title": "Deck",
+        "isTileTool": true
+      },
+      {
         "id": "Image",
         "title": "Image",
         "isTileTool": true
