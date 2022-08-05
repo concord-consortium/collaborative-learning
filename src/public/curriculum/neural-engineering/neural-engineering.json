@@ -154,7 +154,7 @@
             }
           ]
         },
-         {
+        {
           "tab": "teacher-guide",
           "label": "Teacher Guide",
           "teacherOnly": true,
@@ -189,7 +189,8 @@
     "reflection": {
       "initials": "RF",
       "title": "Reflection",
-      "type": "problem-documents"
+      "type": "problem-documents",
+      "placeholder": "Write up conclusions from your experiment. Fill out your KWL Journal on the My Work tab and capture the parts of your work you want to remember for next class there. "
     }
   },
   "planningDocument": {
@@ -262,10 +263,58 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
+                        "<h3>Introduction to tool types</h3>",
+                        "<p>Try to make a text tile in your <strong>Workspace</strong> on the right (press the menu button with the letter A on it). Write down some things you hope to learn in this Neural Engineering class.</p>",
+                        "<p>Now insert an image into your workspace. You can upload using the button or you can drag images from your desktop. Describe in your workspace how you might use images to document your work.</p>",
+                        "<p>Next, make a program. This is done with the button that has two connected boxes on it. Try to make a program that adds two numbers. What are the different ways that you see the result of the program?</p>",
+                        "<p>Finally, try to make a table. Fill the table in with some data, and change the column header names to something you might use for engineering design. Describe the meaning of your data in text.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "abc050820221728",
+                    "title": "CLUE Tile Menu",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/AllToolsToolBar-labeled.png"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "labWork",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "9plvleix0FlBS",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
                         "<h3>Group work - discussion</h3>",
+                        "<p>CLUE is designed to facilitate sharing of ideas, both in small lab groups and with the whole class. When you are ready to work in a group, you can split your workspace into 4 panes. The top right pane is yours, and your partners are in the others. You can borrow and update content from your partners' workspaces just as you can from any content you bring up from tabs on the left hand Resources.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "lJEIgDWNRXk02nZi",
+                    "title": "CLUE Interfaces for Sharing",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/mothed/images/share.jpg"
+                    }
+                  },
+                  {
+                    "id": "_rU9plvleix0FlBS",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Try Group Sharing</h3>",
                         "<p><em>First, check that all the members of your group have the same group number at the top right of your screen. </em></p>",
                         "<p>Talk about robots and bionic limbs with your group.  What do you know about bionics? </p>",
-                        "<p>Take some notes on your discussion in CLUE. Open a text tile on the right in your <strong>Workspace</strong> (click the menu button with the letter A on it). </p>",
+                        "<p>Take some notes on your discussion in your Workspace. </p>",
                         "<p>Take notes and make a list of what your group knows. Insert some images in your workspace relating to motion and robotics. </p>"
                       ]
                     }
@@ -282,13 +331,23 @@
                     }
                   },
                   {
-                    "id": "lJEIgDWNRXk02nZi",
-                    "title": "CLUE Interfaces for Sharing",
+                    "id": "_aucv3h3VrZ_VasfaNPK",
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/mothed/images/share.jpg"
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Making new workspaces</h3>",
+                        "<p>At the top of the Workspace window you will see a File menu. Using this menu you can make copies of your existing workspace to try different things, or you can start a whole new one. This is very useful if you are trying different versions of a program to solve a problem.</p>"
+                      ]
                     }
-                  },
+                  }
+                ]
+              }
+            },
+            {
+              "type": "reflection",
+              "content": {
+                "tiles": [
                   {
                     "id": "eGVyLGBx1SzYZJYh",
                     "content": {
@@ -306,12 +365,32 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Publish (see image above) your work to the class</strong></p>",
-                        "<p>You can choose one member of your group to publish a summary of the group&#x27;s work, or you may each publish.  When you publish, your workspace will appear under the pink &quot;Extensionsk&quot; tab above. Student work will go under the Class Models and Data tab. Teacher work will go under the Custom Lessons tab.</p>"
+                        "<p><strong>Publish your work to the class</strong></p>",
+                        "<p>You can choose one member of your group to publish a summary of the group&#x27;s work, or you may each publish.  When you publish, your workspace will appear under the pink &quot;Extensions&quot; tab above. Student work will go under the Class Models and Data tab. Teacher work will go under the Custom Lessons tab.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "lJEIgDWNRasdfasXk02nZi",
+                    "title": "CLUE Publishing to Extensions Tab",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/mothed/images/share.jpg"
+                    }
+                  },
+                  {
+                    "id": "sA84ZVt-8VM3",
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Teacher Features</h3>",
+                        "<p>If you are looking at this Lesson as a teacher, you are seeing this green box with a 'solution' in it. You can choose to switch the solutions on and off so you can see Lessons as students do. You will also see additional tabs in your Resources - one for Teacher Guide and one for Student Worksheets. </p>",
+                        "<p>The Teacher Guide will have a variety of resources in it - materials sheets, instructions for running class activities, links to outside web sites, videos, etc. As with all other content in the Resources tabs, you can drag tiles into your Workspace so they can be modified or published to distribute to the class. This is particularly handy if you want to add an additional lesson or page of solutions or instructions to any of the existing Lessons. You can use the same publishing tool available to your students. Teacher published work will appear in the Custom Lessons tab under 'Extensions'. </p>"
                       ]
                     }
                   }
-
                 ]
               }
             }
@@ -402,12 +481,14 @@
                       "text": [
                         "<h2>Programs to Express Closing a Circuit</h2>",
                         "<p>We can use a program to turn lights on and off in the same way you just did with the Energy Sticks.</p>",
-                        "Here is a very simple program. Recreate this program with the program tool in your workspace. Then add some logic to make the lightbulb only turn on when the signal amplitude is over 0.5.",
+                        "Here is a very simple program. Recreate this program with the Dataflow program tool in your workspace. Start by pressing the tile button with two blocks and a connector line. Then try adding some logic to make the lightbulb only turn on when the signal amplitude is over 0.5.",
                         "<p>Programs are one way to express models of actual circuits."
                       ]
                     }
                   },
                   {
+                    "id": "abc050820221151",
+                    "title": "A Dataflow program tile",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/neural-engineering/images/signalProgram.jpg"

@@ -45,8 +45,9 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p><strong>Problem Overview</strong></p>",
-                          "<p>This section will discuss the educational goals of the curriculum.</p>"
+                          "<h3>Problem Overview</strong></h3>",
+                          "<p>As a Teacher, you have extra tabs in your CLUE Resources. One of them is this tab, entitled Teacher Guide. It contains content your students will not see. You may choose to copy tiles from this section or any other into your workspace by dragging them to the right. You may edit them or use them as they are, and of course you may add new content of your own.</p>",
+                          "<p>Once your Workspace content is complete, you can publish it to the class. It will appear in the Extensions section on the Custom Lessons tab. Your students' published work will appear in the Class Models and Data Tab.</p>"
                         ]
                       }
                     }
