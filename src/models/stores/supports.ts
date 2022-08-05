@@ -405,6 +405,7 @@ export function addSupportDocumentsToStore(params: ICreateFromUnitParams) {
                      uid: supportUid,
                      type: SupportPublication,
                      key: supportKey,
+                     supportContentType: support.support.type,
                      originDoc,
                      properties,
                      createdAt: Date.now(),

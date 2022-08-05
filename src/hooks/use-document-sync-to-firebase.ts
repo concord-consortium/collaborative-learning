@@ -80,7 +80,7 @@ export function useDocumentSyncToFirebase(
     // sync properties for published documents
     useSyncMstNodeToFirebase({
       firebase, model: document.properties, path: `${metadata}/properties`,
-      enabled: readOnly && (user.id === uid) &&
+      enabled: readOnly && (user.id === uid) && document.supportContentType !== "multiclass" &&
         [ProblemPublication, PersonalPublication, LearningLogPublication, SupportPublication ].includes(type),
       options: {
         onSuccess: (data, properties) => {

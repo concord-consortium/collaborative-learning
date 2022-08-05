@@ -17,6 +17,7 @@ import { getLocalTimeStamp } from "../../utilities/time";
 import { safeJsonParse } from "../../utilities/js-utils";
 import { createSharedModelDocumentManager, ISharedModelDocumentManager } from "../tools/shared-model-document-manager";
 import { ITileEnvironment } from "../tools/tool-types";
+import { ESupportType } from "../curriculum/support";
 
 interface IMatchPropertiesOptions {
   isTeacherDocument?: boolean;
@@ -39,7 +40,8 @@ export const DocumentModel = types
     groupUserConnections: types.map(types.boolean),
     originDoc: types.maybe(types.string),
     changeCount: types.optional(types.number, 0),
-    pubVersion: types.maybe(types.number)
+    pubVersion: types.maybe(types.number),
+    supportContentType: types.maybe(types.enumeration<ESupportType>("SupportType", Object.values(ESupportType)))
   })
   .volatile(self => ({
     queryPromise: undefined as Promise<UseQueryResult<IGetNetworkDocumentResponse>> | undefined
