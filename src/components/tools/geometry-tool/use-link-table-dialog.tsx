@@ -61,9 +61,9 @@ export const useLinkTableDialog = ({ tableTiles, model, handleRequestTableLink, 
     const tileInfo = tableTiles.find(tile => tile.id === selectValue);
     if (tileInfo) {
       if (_content.isLinkedToTable(tileInfo.id)) {
-        handleRequestTableLink?.(tileInfo.id);
-      } else {
         handleRequestTableUnlink?.(tileInfo.id);
+      } else {
+        handleRequestTableLink?.(tileInfo.id);
       }
     }
   };

@@ -152,7 +152,13 @@ export const isGeometryContentReady = async (model: GeometryContentModelType): P
 export const GeometryContentModel = GeometryBaseContentModel
   .named("GeometryContent")
   .volatile(self => ({
-    metadata: undefined as any as GeometryMetadataModelType
+    metadata: undefined as any as GeometryMetadataModelType,
+    updateSharedModels: 0
+  }))
+  .actions(self => ({
+    forceSharedModelUpdate() {
+      self.updateSharedModels += 1;
+    }
   }))
   .preProcessSnapshot(snapshot => {
     const imported = preprocessImportFormat(snapshot);
@@ -163,9 +169,11 @@ export const GeometryContentModel = GeometryBaseContentModel
   })
   .views(self => ({
     get linkedDataSets(): SharedDataSetType[] {
+      // eslint-disable-next-line no-unused-expressions
+      self.updateSharedModels;
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       return sharedModelManager?.isReady
-              ? sharedModelManager?.getTileSharedModels(self) as SharedDataSetType[]
+              ? sharedModelManager.getTileSharedModels(self) as SharedDataSetType[]
               : [];
     }
   }))
@@ -289,6 +297,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       if (sharedModelManager?.isReady && !self.isLinkedToTable(tableId)) {
         const sharedTable = sharedModelManager.findFirstSharedModelByType(SharedDataSet, tableId);
         sharedTable && sharedModelManager.addTileSharedModel(self, sharedTable);
+        self.forceSharedModelUpdate();
       }
       else {
         console.warn("GeometryContent.addLinkedTable unable to link table");
@@ -299,6 +308,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       if (sharedModelManager?.isReady && self.isLinkedToTable(tableId)) {
         const sharedTable = sharedModelManager.findFirstSharedModelByType(SharedDataSet, tableId);
         sharedTable && sharedModelManager.removeTileSharedModel(self, sharedTable);
+        self.forceSharedModelUpdate();
       }
       else {
         console.warn("GeometryContent.addLinkedTable unable to unlink table");
@@ -422,7 +432,8 @@ export const GeometryContentModel = GeometryBaseContentModel
           for (let ai = 0; ai < link.dataSet.attributes.length; ++ai) {
             const attr = link.dataSet.attributes[ai];
             const id = linkedPointId(link.dataSet.cases[ci].__id__, attr.id);
-            const y = attr.numericValue(ai);
+            const y = attr.numericValue(0);
+            // const y = attr.numericValue(ai);
             if (isFinite(x) && isFinite(y)) {
               parents.push([x, y]);
               properties.push({ id });
