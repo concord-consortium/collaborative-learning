@@ -1,6 +1,6 @@
 import { castArray, difference, each, size as _size, union } from "lodash";
 import { reaction } from "mobx";
-import { addDisposer, Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree";
+import { addDisposer, getType, Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree";
 import { Optional } from "utility-types";
 import { SharedDataSet, SharedDataSetType } from "../shared-data-set";
 import { SelectionStoreModelType } from "../../stores/selection";
@@ -1142,6 +1142,9 @@ export const GeometryContentModel = GeometryBaseContentModel
       addDisposer(self, reaction(() => {
         const sharedModelManager: ISharedModelManager | undefined = self.tileEnv?.sharedModelManager;
 
+        const sharedDataSets = sharedModelManager?.isReady
+          ? sharedModelManager.getSharedModelsByType("SharedDataSet")
+          : [];
         // const sharedDataSet = sharedModelManager?.isReady
         //   ? sharedModelManager?.findFirstSharedModelByType(SharedDataSet, self.metadata.id)
         //   : undefined;
@@ -1150,24 +1153,27 @@ export const GeometryContentModel = GeometryBaseContentModel
         //   ? sharedModelManager?.getTileSharedModels(self)
         //   : undefined;
 
-        return { sharedModelManager, links: self.links /*, sharedDataSet, tileSharedModels*/ };
+        return { sharedModelManager, sharedDataSets, links: self.links /*, sharedDataSet, tileSharedModels*/ };
       },
       // reaction/effect
-      ({sharedModelManager, links /*, sharedDataSet, tileSharedModels*/}) => {
+      ({sharedModelManager, sharedDataSets, links /*, sharedDataSet, tileSharedModels*/}) => {
         if (!sharedModelManager?.isReady) {
           // We aren't added to a document yet so we can't do anything yet
           return;
         }
 
         // Link to shared models
+        const remainingLinks: string[] = [];
         self.links.forEach(tableId => {
           const sharedDataSet = sharedModelManager.findFirstSharedModelByType(SharedDataSet, tableId);
           if (sharedDataSet) {
             sharedModelManager.addTileSharedModel(self, sharedDataSet);
           } else {
-            // What do we do if the shared model isn't ready yet?
+            // If the table doesn't yet have a sharedDataSet, save the id to attach this later
+            remainingLinks.push(tableId);
           }
         });
+        self.links.replace(remainingLinks);// = getType(self.links).create(remainingLinks);
         // if (sharedDataSet && tileSharedModels?.includes(sharedDataSet)) {
         //   // The shared model has already been registered by a client, but as the
         //   // "owner" of the data, we synchronize it with our local content.
