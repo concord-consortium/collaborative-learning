@@ -231,6 +231,7 @@ export const exportGeometry = (changes: string[], options?: ITileExportOptions) 
   let boardModel: BoardModelType | undefined;
   let bgImage: ImageModelType | undefined;
   const objects = new Map<string, GeometryObjectModelType>();
+  const links = new Set<string>();
 
   const addObjectModel = (obj: GeometryObjectModelType) => {
     objects.set(obj.id, obj);
@@ -602,17 +603,32 @@ export const exportGeometry = (changes: string[], options?: ITileExportOptions) 
         objLine && castArray(objLine).forEach(line => builder.pushLine(line, 4));
       }
     });
-    builder.pushLine(`]`, 2);
+    builder.pushLine(`]${comma(links.size > 0)}`, 2);
+  };
+
+  const exportLinks = () => {
+    if (outputJson) {
+      links.size && builder.pushLine(`"links": [${Array.from(links).join(", ")}]`);
+    }
   };
 
   // loop through each change, adding it to the set of changes that affect each object
   changes.forEach(changeJson => {
     const change = safeJsonParse<JXGChange>(changeJson);
     if (change) {
-      // objects created by a tableLink are the linkedPoints
-      const target = change.target === "tableLink"
-                      ? "linkedPoint"
-                      : change.target;
+      // map tableLink changes to links array
+      if (change.target === "tableLink") {
+        change.links?.tileIds.forEach(tableId => {
+          if (change.operation === "create") {
+            links.add(tableId);
+          }
+          else if (change.operation === "delete") {
+            links.delete(tableId);
+          }
+        });
+        return;
+      }
+      const target = change.target;
       const ids = getTargetIdsFromChange(change);
       const dependencies = getDependenciesFromChange(change, objectInfoMap);
       ids.forEach(id => {
@@ -672,6 +688,7 @@ export const exportGeometry = (changes: string[], options?: ITileExportOptions) 
     exportTitle();
     exportBoard();
     exportObjects();
+    exportLinks();
     builder.pushLine("}");
     return builder.build();
   }
@@ -680,6 +697,8 @@ export const exportGeometry = (changes: string[], options?: ITileExportOptions) 
     exportBoard();
     exportObjects();
     const extras = title ? { extras: { title } } : undefined;
-    return { type: "Geometry", board: boardModel, bgImage, objects: Object.fromEntries(objects) as any, ...extras };
+    const _objects = Object.fromEntries(objects) as any;
+    const _links = links.size ? { links: Array.from(links) } : undefined;
+    return { type: "Geometry", board: boardModel, bgImage, objects: _objects, ..._links, ...extras };
   }
 };
