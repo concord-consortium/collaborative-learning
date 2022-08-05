@@ -37,67 +37,64 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
     }
   }
 
-  private setHoldModValue(n2: number, prior: number, funcName: string) :number {
-    if (funcName === "Output Zero"){
-      this.heldValue = null;
-      return 0;
-    }
-
-    else if (funcName === "Hold Current"){
-      if (this.heldValue === null){
-        this.heldValue = n2;
-      }
-      return this.heldValue;
-    }
-
-    else if (funcName === "Hold Prior"){
-      if (this.heldValue === null){
-        this.heldValue = prior;
-      }
-      return this.heldValue;
-    }
-
-    else {
-      return 0;
-    }
-  }
-
   public worker(node: NodeData, inputs: any, outputs: any) {
     const funcName = node.data.controlOperator as string;
     const recents: number[] = (node.data.recentValues as any).nodeValue;
     const priorValue: number | undefined = recents[recents.length - 1];
-    const n1 = inputs.num1.length ? inputs.num1[0] : node.data.num1;
-    const n2 = inputs.num2 ? (inputs.num2.length ? inputs.num2[0] : node.data.num2) : 0;
-    let result = 0;
-    let resultSentence = "";
+    const n1 :number = inputs.num1.length ? inputs.num1[0] : node.data.num1;
+    const n2 :number = inputs.num2 ? (inputs.num2.length ? inputs.num2[0] : node.data.num2) : 0;
 
+    let result = 0;
+    let cResult = 0;
+
+    // for setting classes on node
+    node.data.gateActive = n1 === 1;
+
+    // needs a real number in n2 if it is to output anything
     if (isNaN(n2)) {
-      // invalid input to n2, no output
+      this.heldValue = null;
       result = NaN;
+      cResult = NaN;
     }
 
-    else {
-      if (n1 === 0){
-        // off signal at gate, null heldValue and let n2 through
-        node.data.gateActive = false;
-        this.heldValue = null;
-        result = n2;
-      }
-      else if (n1 === 1){
-        // on signal at gate, set or maintain modified value
-        node.data.gateActive = true;
-        result = this.setHoldModValue(n2, priorValue, funcName);
+    // For each function, evaluate given inputs and node state
+    if (funcName === "Output Zero"){
+      this.heldValue = null;
+      result = n1 === 1 ? 0 : n2;
+      cResult = 0;
+    }
+
+    else if (funcName === "Hold Current"){
+      if (n1 === 1){
+        // Already a number here? Maintain. Otherwise set the new held value;
+        this.heldValue = typeof this.heldValue === "number" ? this.heldValue : n2;
+        result = this.heldValue;
+        cResult = this.heldValue;
       }
       else {
-        // invalid signal at gate
-        node.data.gateActive = false;
-        result = NaN;
+        this.heldValue = null;
+        result = n2;
+        cResult = n2; // still n2, since the value to be held would be the current
+      }
+    }
+
+    else if (funcName === "Hold Prior"){
+      if (n1 === 1){
+        // Already a number here? Maintain. Otherwise set the new held value;
+        this.heldValue = typeof this.heldValue === "number" ? this.heldValue : priorValue;
+        result = this.heldValue;
+        cResult = this.heldValue;
+      }
+      else {
+        this.heldValue = null;
+        result = n2;
+        cResult = priorValue;
       }
     }
 
     // prepare string to display on node
     const resultString = isNaN(result) ? kEmptyValueString : `${roundNodeValue(result)}`;
-    resultSentence = `ƒ(${n1}, ${roundNodeValue(n2)}) ⇒ ${resultString}`;
+    const resultSentence = `1 ? ${roundNodeValue(cResult)} : ${n2} ⇒ ${resultString}`;
 
     // operate rete
     if (this.editor) {
