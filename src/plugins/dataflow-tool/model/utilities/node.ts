@@ -37,6 +37,10 @@ import AbsoluteValueIcon from "../../assets/icons/transform/absolute-value.svg";
 import NegationIcon from "../../assets/icons/transform/negation.svg";
 import NotIcon from "../../assets/icons/transform/not.svg";
 
+import CurrentValueIcon from "../../assets/icons/control/control-current-value.svg";
+import PreviousValueIcon from "../../assets/icons/control/control-previous-value.svg";
+import ZeroValueIcon from "../../assets/icons/control/control-zero-value.svg";
+
 import { demoStreams } from "./demo-data";
 
 export interface NodeType {
@@ -72,6 +76,10 @@ export const NodeTypes: NodeType[] = [
   {
     name: "Transform",
     displayName: "Transform",
+  },
+  {
+    name: "Control",
+    displayName: "Control",
   },
   {
     name: "Demo Output",
@@ -143,7 +151,6 @@ export const NodeOperationTypes = [
     numberSentence: (n1: string, n2: string) => `!${n1} ⇒ `,
     icon: NotIcon
   },
-
   {
     name: "Greater Than",
     type: "logic",
@@ -213,6 +220,24 @@ export const NodeOperationTypes = [
     method: (n1: number, n2: number) => +((n1 ? 1 : 0) !== (n2 ? 1 : 0)),
     numberSentence: (n1: string, n2: string) => `${n1} xor ${n2} ⇒ `,
     icon: XorIcon
+  }
+];
+
+export const NodeControlTypes = [
+  {
+    name: "Hold Current",
+    type: "control",
+    icon: CurrentValueIcon
+  },
+  {
+    name: "Hold Prior",
+    type: "control",
+    icon: PreviousValueIcon
+  },
+  {
+    name: "Output Zero",
+    type: "control",
+    icon: ZeroValueIcon
   }
 ];
 

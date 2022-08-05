@@ -17,6 +17,7 @@ import { DataflowReteNodeFactory } from "../nodes/factories/dataflow-rete-node-f
 import { NumberReteNodeFactory } from "../nodes/factories/number-rete-node-factory";
 import { MathReteNodeFactory } from "../nodes/factories/math-rete-node-factory";
 import { TransformReteNodeFactory } from "../nodes/factories/transform-rete-node-factory";
+import { ControlReteNodeFactory } from "../nodes/factories/control-rete-node-factory";
 import { LogicReteNodeFactory } from "../nodes/factories/logic-rete-node-factory";
 import { SensorReteNodeFactory } from "../nodes/factories/sensor-rete-node-factory";
 import { RelayReteNodeFactory } from "../nodes/factories/relay-rete-node-factory";
@@ -310,6 +311,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.components = [new NumberReteNodeFactory(numSocket),
       new MathReteNodeFactory(numSocket),
       new TransformReteNodeFactory(numSocket),
+      new ControlReteNodeFactory(numSocket),
       new LogicReteNodeFactory(numSocket),
       new SensorReteNodeFactory(numSocket),
       new RelayReteNodeFactory(numSocket),
