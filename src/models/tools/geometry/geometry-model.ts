@@ -367,7 +367,12 @@ export const GeometryBaseContentModel = ToolContentModel
       return { ...snapshot, board: defaultBoard() };
     }
     return snapshot;
-  });
+  })
+  .actions(self => ({
+    replaceLinks(newLinks: string[]) {
+      self.links.replace(newLinks);
+    }
+  }));
 export interface GeometryBaseContentModelType extends Instance<typeof GeometryBaseContentModel> {}
 export interface GeometryBaseContentSnapshotType extends Instance<typeof GeometryBaseContentModel> {}
 

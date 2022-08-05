@@ -1168,12 +1168,13 @@ export const GeometryContentModel = GeometryBaseContentModel
           const sharedDataSet = sharedModelManager.findFirstSharedModelByType(SharedDataSet, tableId);
           if (sharedDataSet) {
             sharedModelManager.addTileSharedModel(self, sharedDataSet);
+            console.log(`Attached ${tableId}`);
           } else {
             // If the table doesn't yet have a sharedDataSet, save the id to attach this later
             remainingLinks.push(tableId);
           }
         });
-        self.links.replace(remainingLinks);// = getType(self.links).create(remainingLinks);
+        self.replaceLinks(remainingLinks);// = getType(self.links).create(remainingLinks);
         // if (sharedDataSet && tileSharedModels?.includes(sharedDataSet)) {
         //   // The shared model has already been registered by a client, but as the
         //   // "owner" of the data, we synchronize it with our local content.
