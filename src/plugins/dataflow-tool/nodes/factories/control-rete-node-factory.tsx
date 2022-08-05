@@ -50,7 +50,7 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
     // for setting classes on node
     node.data.gateActive = n1 === 1;
 
-    // needs a real number in n2 if it is to output anything
+    // requires value in n2 (except for case of Output Zero)
     if (isNaN(n2)) {
       this.heldValue = null;
       result = NaN;
@@ -94,7 +94,9 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
 
     // prepare string to display on node
     const resultString = isNaN(result) ? kEmptyValueString : `${roundNodeValue(result)}`;
-    const resultSentence = `1 ? ${roundNodeValue(cResult)} : ${n2} ⇒ ${resultString}`;
+    const cResultString = isNaN(cResult) ? kEmptyValueString : `${roundNodeValue(cResult)}`;
+    const n2String = isNaN(n2) ? kEmptyValueString : `${roundNodeValue(n2)}`;
+    const resultSentence = `1 ? ${cResultString} : ${n2String} ⇒ ${resultString}`;
 
     // operate rete
     if (this.editor) {

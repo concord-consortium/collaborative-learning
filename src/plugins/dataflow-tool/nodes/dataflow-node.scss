@@ -287,16 +287,6 @@ $node-inner-width: 140px;
     &.has-gate.gate-active .inputs {
       div:first-of-type .socket {
         background-color: $control-green;
-        animation: slowpulse 2.5s linear infinite;
-        @keyframes slowpulse {
-          0% {
-            background-color: $control-green-node;
-          }
-
-          50% {
-            background-color: $control-green;
-          }
-        }
       }
     }
     &.data-storage {
