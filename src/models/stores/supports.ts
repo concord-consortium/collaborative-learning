@@ -79,7 +79,8 @@ export const TeacherSupportModel = types
     authoredTime: types.number,
     originDoc: types.maybe(types.string),
     caption: types.maybe(types.string),
-    deleted: false
+    deleted: false,
+    pubVersion: types.maybe(types.number)
   })
   .views(self => ({
     // excludes sticky notes
@@ -136,7 +137,8 @@ export const CurricularSupportModel = types
     support: SupportModel,
     type: types.enumeration<SupportTarget>("SupportTarget", Object.values(SupportTarget)),
     visible: false,
-    sectionId: types.maybe(types.string)
+    sectionId: types.maybe(types.string),
+    pubVersion: types.maybe(types.number)
   })
   .actions((self) => {
     return {
@@ -312,8 +314,8 @@ function getTeacherSupportCaption(support: TeacherSupportModelType,
   const prefix = `${investigationPart}.${problemPart}${sectionPart}`;
   const caption = support.caption || "Untitled";
   return caption.includes(prefix)
-          ? caption
-          : `${prefix} ${caption}`;
+          ? `${caption}`
+          : `${prefix} ${caption}` ;
 }
 
 function getCurricularSupportCaption(support: CurricularSupportModelType, index: number,
@@ -322,7 +324,8 @@ function getCurricularSupportCaption(support: CurricularSupportModelType, index:
   const problemPart = problem ? `${problem.ordinal}` : "*";
   const { sectionId } = support;
   const sectionPart = sectionId ? " " + getSectionTitle(sectionId) : "";
-  return `${investigationPart}.${problemPart}${sectionPart} Support ${index}`;
+  const version = support.pubVersion ? `v${support.pubVersion}` : "";
+  return `${investigationPart}.${problemPart}${sectionPart} Support ${index} ${version}`;
 }
 
 function getSupportCaption(support: UnionSupportModelType, index: number,
@@ -353,6 +356,9 @@ export function addSupportDocumentsToStore(params: ICreateFromUnitParams) {
       index = 1;
       lastSection = sectionId;
     }
+    const supportUid = support.supportType === SupportType.teacher
+                        ? support.uid
+                        : "curriculum";
     const supportCaption = getSupportCaption(support, index, investigation, problem);
     const supportKey = support.supportType === SupportType.teacher
                         ? support.key || supportCaption
@@ -396,13 +402,15 @@ export function addSupportDocumentsToStore(params: ICreateFromUnitParams) {
       const content = await getDocumentContentForSupport(support.support, db);
       if (content) {
         document = createDocumentModel({
-                     uid: "curriculum",
+                     uid: supportUid,
                      type: SupportPublication,
                      key: supportKey,
+                     supportContentType: support.support.type,
                      originDoc,
                      properties,
                      createdAt: Date.now(),
-                     content: getSnapshot(content)
+                     content: getSnapshot(content),
+                     pubVersion: support.pubVersion
                    });
         documents.add(document);
         onDocumentCreated?.(support, document);
