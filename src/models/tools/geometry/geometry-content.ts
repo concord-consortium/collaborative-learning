@@ -1157,6 +1157,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       },
       // reaction/effect
       ({sharedModelManager, sharedDataSets, links /*, sharedDataSet, tileSharedModels*/}) => {
+        console.log('Trying to rehydrate links');
         if (!sharedModelManager?.isReady) {
           // We aren't added to a document yet so we can't do anything yet
           return;
