@@ -209,6 +209,11 @@
         "isTileTool": true
       },
       {
+        "id": "Starter",
+        "title": "Starter",
+        "isTileTool": true
+      },
+      {
         "id": "undo",
         "title": "Undo",
         "iconId": "icon-undo-tool",
