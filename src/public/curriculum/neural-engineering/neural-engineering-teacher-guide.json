@@ -47,7 +47,7 @@
                         "text": [
                           "<h3>Problem Overview</strong></h3>",
                           "<p>As a Teacher, you have extra tabs in your CLUE Resources. One of them is this tab, entitled Teacher Guide. It contains content your students will not see. You may choose to copy tiles from this section or any other into your workspace by dragging them to the right. You may edit them or use them as they are, and of course you may add new content of your own.</p>",
-                          "<p>Once your Workspace content is complete, you can publish it to the class. It will appear in the Extensions section on the Custom Lessons tab. Your students' published work will appear in the Class Models and Data Tab.</p>"
+                          "<p>Once your Workspace content is complete, you can publish it to the class. It will appear in the <strong>Extensions</strong> tab on the <strong>Custom Lessons</strong> section. Your students' published work will appear in the <strong>Class Models and Data</strong> section.</p>"
                         ]
                       }
                     }
@@ -511,13 +511,13 @@
       {
           "description": "Investigation 2",
           "ordinal": 2,
-          "title": "Module 1",
+          "title": "Module 2",
           "overview": {
             "tiles": [ ]
           },
           "problems": [
             {
-              "description": "Problem 1.1",
+              "description": "Problem 2.1",
               "ordinal": 1,
               "title": "Introduction to Teaching Neural Engineering",
               "subtitle": "",
@@ -526,7 +526,20 @@
                   "type": "overview",
                   "content": {
                     "tiles": [
-     
+                      {
+                        "id": "zy34543woT6wp_c7IxjDmS",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<h3>Lesson 2.1 Overview</h3>",
+                            "<p>Students will begin Module 2 by examining how sensory input impacts our ability to move and interact with objects.</p>",
+                            "<p>Materials:  \nFor every two students:<ul><li>A 30 cm ruler</li><li>Winter gloves</li></ul></p>",
+                            "<h3>Lesson Resources</strong></h3>",
+                            "<p><a href='https://www.pbs.org/newshour/show/how-sensors-rewiring-nerves-could-help-prosthetics-feel-and-function-like-real-limbs'>PBS News Hour story</a></p>"
+                          ]
+                        }
+                      } 
                     ]
                   },
                   "supports": [ ]
@@ -535,7 +548,27 @@
                   "type": "teach",
                   "content": {
                     "tiles": [
-                     
+                      {
+                        "id": "BfEcsBHvG1mVwV4H",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><strong>Instructional Sequence</strong></p>",
+                            "<p><em>5 minutes</em></p>",
+                            "<p>Warm-up: Ask students to think about the EMG-controlled claw and discuss some challenges they may encounter when trying to hold an egg with the claw (e.g., the egg might crack). Ask students how they would improve the design of the claw to overcome these challenges. </p><p> Inform students that in Module 2 we will explore how sensory information impacts movement.</p>",
+                            "<p></p>",
+                            "<p><em>20 minutes</em></p>",
+                            "<p>Remind students that in Lesson 1.2 they measured their reaction  time using a ruler, comparing their dominant and non-dominant hand.  Inform students that today we will conduct a similar experiment to  investigate how tactile information impacts reaction time (in other  words, how being able to feel the ruler with our fingertips impacts how fast we are at catching it?). </p><p> Ask students to discuss how they would modify the reaction time experiment to answer this new research question. In this process, students should create a table similar to the results sheet used in Lesson 1.2 to record their reaction time with and without a winter glove.</p><p>After students have collected their data, ask them to discuss their findings. As an extension activity, ask students to enter their average reaction time into a Google spreadsheet to compute the class average.</p>",
+                            "<p><em>5 minutes</em></p>",
+                            "<p>Present the first 3 minutes of this <a href='https://www.pbs.org/newshour/show/how-sensors-rewiring-nerves-could-help-prosthetics-feel-and-function-like-real-limbs'>PBS News Hour story</a> (until the moment the reporter cracks an egg with his prosthetic arm). While watching the video, ask students to list 3 things that stand out to them. Collect these ideas at the end of the video. </p>",
+                            "<p><em>10 minutes</em></p>",
+                            "<p>In small groups, ask students to discuss how prosthetic arms can be improved by incorporating sensory information (similar to the prosthetic leg example from the video). Encourage students to sketch their ideas and consider how the motor command from the brain interacts with tactile information from objects.</p>",
+                            "<p><em>5 minutes</em></p>",
+                            "<p>Using their KWL journals, ask each student to revise what they know, wonder, and learned the role of tactile information in movement. </p>"
+                          ]
+                        }
+                      }
                     ]
                   },
                   "supports": [ ]
@@ -552,18 +585,49 @@
                   "type": "overview",
                   "content": {
                     "tiles": [
-  
-                    ]
-                  },
+                            {
+                              "id": "zy34543woT6wp_c7IxjDmS",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<h3>Lesson 2.1 Overview</h3>",
+                                  "<p>Students will explore the variance in touch sensitivity of different body parts and different people, and examine how the nervous system is responsible for this variance. </p>",
+                                  "<p>Materials:  \nFor every two students:<ul><li>1 <a href='https://www.amazon.com/dp/B0739GGS46/ref=pe_386300_440135490_TE_item'>caliper</a> for each team of 3 students</li><li>Chart paper and markers</li></ul></p>"
+                                ]
+                              }
+                            } 
+                          ]
+                        },
                   "supports": [ ]
                 },
                 {
                   "type": "teach",
                   "content": {
                     "tiles": [
-                 
-                    ]
-                  },
+                            {
+                              "id": "BfEcsBHvG1mVwV4H",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p><strong>Instructional Sequence</strong></p>",
+                                  "<p><em>5 minutes</em></p>",
+                                  "<p>Begin with a brief overview of the previous lesson (How does sensory information impact movement?). Then, inform students that today’s lesson will help them explore how the nervous system processes sensory (and more specifically <em>tactile</em>) information and what problems could arise in this process.  </p>",
+                                  "<p></p>",
+                                  "<p><em>15 minutes</em></p>",
+                                  "<p>Inform students that in today’s activity they will measure their touch sensitivity across different parts of the body and enter the information to a webpage to map how the brain represents their body (“homunculus”). </p><p>Students should follow the instructions in the Lab Work tab in the lesson, and enter their measurements into <a href='https://brainmapper.org/'>https://brainmapper.org/</a>(Experiment tab → Enter the Results).</p>",
+                                  "<p><em>10 minutes</em></p>",
+                                  "<p>Ask students to discuss the following questions in their groups and record their answers and then collect students’ answers:<ol><li> What is the most/least sensitive body part?</li><li> Why do different parts of the body have different sensitivity to touch?</li><li> Were there differences between students in their touch sensitivity? What can explain these differences? </li></ol></p><p>Extension activity: Ask students to enter their measurements into a shared Google Spreadsheet and create the averaged homunculus of all students in the class.</p>",
+                                  "<p><em>15 minutes</em></p>",
+                                  "<p>Back in their groups, ask students to read this brief text on the neuroscience of touch.</p><p>Students should identify which body parts are involved in processing touch information and make an annotated model that shows how they are connected to each other. To do so, students will need to read online about:<ul><li>Touch receptors</li><li>Sensory nerves</li><li>Spinal cord</li><li>Thalamus</li><li>Somatosensory cortex.</li></ul></p><p><a href='https://https://www.brainfacts.org/'>Brainfacts.org</a> is a good source of information and has a <a href='https://www.brainfacts.org/3d-brain#intro=true'>3D model of the brain</a>.</p><p>Extension activity: Ask students to compare their model to the one created in the first module (control of movement).</p>",
+                                  "<p><em>5 minutes</em></p>",
+                                  "<p>Using their KWL journals, ask each student to revise what they know, wonder, and learned the role of tactile information in movement. </p>"
+                                ]
+                              }
+                            }
+                          ]
+                        },
                   "supports": [ ]
                 }
               ]
@@ -578,8 +642,19 @@
                   "type": "overview",
                   "content": {
                     "tiles": [
-                  
-                    
+                      {
+                        "id": "aJWvt4HE4URJ3xVH",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<h3>Introduction</h3>",
+                            "<p>Students will apply knowledge and skills developed in prior activities to design an EMG-controlled device that can grab an egg without cracking it. Students will then consider the experiences and perspectives of the device users.</p>",
+                            "<p>Materials for each group:</p>",
+                            "<ul><li>The Claw Kit</li><li>Two Claw “Mittens” (with a pressure sensor on one of them)</li><li>10 kΩ ohm resistor</li><li>1 breadboard</li><li>2 segments of wire</li><li>A plastic egg or a hollow egg </li></ul>"
+                          ]
+                        }
+                      }
                     ]
                   },
                   "supports": [ ]
@@ -588,7 +663,28 @@
                   "type": "teach",
                   "content": {
                     "tiles": [
-  
+                      {
+                        "id": "tDSrW0ugqjgdt3pO",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><em>10 min</em></p>",
+                            "<p>In small groups, ask students to discuss how what they learned in lesson 2.1  (the impact of sensory information on movement) and lesson 2.2 (how the nervous system processes sensory information) can be incorporated in the design of the claw. Inform students that the goal of the next few lessons is to design and test a device that can replicate these natural processes.</p>",
+                            "<p><em>40 min</em></p>",
+                            "<p>Design challenge: Can you grab an egg (with the claw) without cracking it?</p>",
+                            "<p>Students will work in groups to incorporate touch sensors in the design of the claw (see student handout). </p>",
+                            "<p><em>10 min</em></p>",
+                            "<p>Ask each group of students to showcase their design by crossing the room while holding a plastic egg or a drained egg with their claw.</p>",
+                            "<p><em>15 min</em></p>",
+                            "<p>In their team, ask students to evaluate the design and discuss what can be improved. Remind students of the young woman who was portrayed in the video at the opening of the unit and think about how the touch sensors can serve her in her day-to-day life (for example, when putting on makeup).</p>",
+                            "<p><em>10 min</em></p>",
+                            "<p>Facilitate a class discussion as to how the device could be further improved or modified (e.g., using a stronger servomotor, reshaping the tips of the claw, making the touch sensors more reliable/sensitive). </p>",
+                            "<p><em>5 min</em></p>",
+                            "<p>Using their KWL journals, ask each student to revise what they know, wonder, and learned about the design of bionic arms. Introduce students to temperature sensors and ask them to start thinking about how these sensors may help people with impaired senses (e.g. due to nerve damage). Students will develop these ideas in the next lesson (2.4). </p>"
+                          ]
+                        }
+                      }
                     ]
                   },
                   "supports": [ ]
