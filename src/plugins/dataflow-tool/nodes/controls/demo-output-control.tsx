@@ -1,7 +1,7 @@
 import React from "react";
 import Rete, { NodeEditor, Node } from "rete";
-import { lightBulbOn, lightBulbOff, backyardClawFrames, grabberPaddle,
-  grabberClawFrames, grabberChordFrames } from "./demo-output-control-assets";
+import { lightBulbOn, lightBulbOff, grabberFrames, grabberPaddle,
+  advancedGrabberFrames, grabberChordFrames } from "./demo-output-control-assets";
 
 import "./demo-output-control.scss";
 
@@ -19,22 +19,22 @@ export class DemoOutputControl extends Rete.Control {
 
     this.component = (compProps: {value: number, percentClosed: number, percentTilt: number, type: string}) => {
           const controlClassName = compProps.type === "Light Bulb" ? "lightbulb-control"
-        : compProps.type === "Backyard Claw" ? "backyard-claw-control" : "grabber-control";
-      const clawFrame = this.getClawFrame(compProps.percentClosed);
+        : compProps.type === "Grabber" ? "grabber-control" : "advanced-grabber-control";
+      const grabberFrame = this.getGrabberFrame(compProps.percentClosed);
       const chordFrame = this.getChordFrame(compProps.percentTilt);
       return (
         <div className={`demo-output-control ${controlClassName}`}>
           {compProps.type === "Light Bulb"
             ? <img src={ compProps.value ? lightBulbOn : lightBulbOff } className="demo-output-image lightbulb-image" />
-            : compProps.type === "Backyard Claw"
-            ? <img src={ backyardClawFrames[clawFrame] } className="demo-output-image backyard-claw-image" />
+            : compProps.type === "Grabber"
+            ? <img src={ grabberFrames[grabberFrame] } className="demo-output-image grabber-image" />
             : <>
                 <img src={ grabberPaddle } className="demo-output-image grabber-paddle-image" />
                 <img src={ grabberChordFrames[chordFrame] } className="demo-output-image grabber-chord-image" />
                 <img
-                  src={ grabberClawFrames[clawFrame] }
-                  className="demo-output-image grabber-claw-image"
-                  style={this.getClawRotateStyle(compProps.percentTilt)}
+                  src={ advancedGrabberFrames[grabberFrame] }
+                  className="demo-output-image advanced-grabber-image"
+                  style={this.getGrabberRotateStyle(compProps.percentTilt)}
                 />
               </>
           }
@@ -90,8 +90,8 @@ export class DemoOutputControl extends Rete.Control {
     (this as any).update();
   };
 
-  private getClawFrame = (percentClosed: number) => {
-    return this.getFrame(percentClosed, grabberClawFrames.length);
+  private getGrabberFrame = (percentClosed: number) => {
+    return this.getFrame(percentClosed, advancedGrabberFrames.length);
   };
 
   private getChordFrame = (percentTilt: number) => {
@@ -105,7 +105,7 @@ export class DemoOutputControl extends Rete.Control {
     return frame;
   };
 
-  private getClawRotateStyle = (percentTilt: number) => {
+  private getGrabberRotateStyle = (percentTilt: number) => {
     const degrees = (percentTilt - .5) * -50;
     const transform = `rotate(${degrees}deg)`;
     return { transform };

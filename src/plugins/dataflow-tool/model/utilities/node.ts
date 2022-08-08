@@ -20,8 +20,8 @@ import MultiplyIcon from "../../assets/icons/math/multiply.svg";
 import DivideIcon from "../../assets/icons/math/divide.svg";
 
 import LightBulbIcon from "../../assets/icons/output/light-bulb.svg";
-import BackyardClawIcon from "../../assets/icons/output/backyard-claw.svg";
 import GrabberIcon from "../../assets/icons/output/grabber.svg";
+import AdvancedGrabberIcon from "../../assets/icons/output/advanced-grabber.svg";
 
 import TemperatureIcon from "../../assets/icons/sensor/temperature.svg";
 import CO2Icon from "../../assets/icons/sensor/co2.svg";
@@ -304,12 +304,12 @@ export const NodeDemoOutputTypes = [
     icon: LightBulbIcon
   },
   {
-    name: "Backyard Claw",
-    icon: BackyardClawIcon
-  },
-  {
     name: "Grabber",
     icon: GrabberIcon
+  },
+  {
+    name: "Advanced Grabber",
+    icon: AdvancedGrabberIcon
   }
 ];
 
@@ -319,8 +319,8 @@ export const NodeLiveOutputTypes = [
     icon: LightBulbIcon
   },
   {
-    name: "Backyard Claw",
-    icon: BackyardClawIcon
+    name: "Grabber",
+    icon: GrabberIcon
   }
 ];
 

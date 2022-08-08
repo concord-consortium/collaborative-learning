@@ -14,7 +14,7 @@ const minigraphOptions: Record<string, MinigraphOptions> = {
   }
 };
 
-const clawSpeed = .002;
+const grabberSpeed = .002;
 const tiltSpeed = .002;
 
 export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
@@ -56,7 +56,7 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
         const outputTypeControl = _node.controls.get("outputType") as DropdownListControl;
         const outputType = outputTypeControl.getValue();
 
-        // Update the lightbulb or claw
+        // Update the lightbulb or grabber
         const nodeValue = _node.inputs.get("nodeValue")?.control as InputValueControl;
         let newValue = isNaN(n1) ? 0 : n1;
         if (outputType === "Light Bulb") {
@@ -65,17 +65,17 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
           newValue = isNaN(n1) ? 0 : +(n1 !== 0);
           nodeValue?.setDisplayMessage(newValue === 0 ? "off" : "on");
         } else {
-          newValue = this.updateClaw(_node, newValue, tickTime, nodeValue);
+          newValue = this.updateGrabber(_node, newValue, tickTime, nodeValue);
         }
         nodeValue?.setValue(newValue);
         nodeValue?.setConnected(inputs.nodeValue.length);
 
-        // Set the demo output's main value (lightbulb on/off, claw % closed)
+        // Set the demo output's main value (lightbulb on/off, grabber % closed)
         const demoOutput = _node.controls.get("demoOutput") as DemoOutputControl;
         demoOutput?.setValue(newValue);
 
         // Grabber specific updates
-        if (outputType === "Grabber") {
+        if (outputType === "Advanced Grabber") {
           this.setupGrabberInputs(_node);
           this.updateTilt(_node, inputs, tickTime, demoOutput);
         } else {
@@ -136,16 +136,16 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
     }
   }
 
-  private updateClaw(node: Node, inputValue: number, tickTime: number, valueControl: InputValueControl) {
+  private updateGrabber(node: Node, inputValue: number, tickTime: number, valueControl: InputValueControl) {
     // Update target percent closed, capped between 0 and 1.
     let percentClosed = Math.min(1, inputValue);
     percentClosed = Math.max(0, percentClosed);
     node.data.targetClosed = percentClosed;
 
-    // Close or open the claw towards the target
+    // Close or open the grabber towards the target
     let currentClosed = node.data.currentClosed as number;
     const closedDirection = percentClosed > currentClosed ? 1 : percentClosed < currentClosed ? -1 : 0;
-    const nextClosed = currentClosed + clawSpeed * tickTime * closedDirection;
+    const nextClosed = currentClosed + grabberSpeed * tickTime * closedDirection;
     const targetClosed = node.data.targetClosed as number;
     currentClosed = closedDirection > 0 ? Math.min(nextClosed, targetClosed)
       : Math.max(nextClosed, targetClosed);
