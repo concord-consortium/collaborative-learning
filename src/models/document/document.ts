@@ -15,16 +15,19 @@ import { getFirebaseFunction } from "../../hooks/use-firebase-function";
 import { IDocumentProperties } from "../../lib/db-types";
 import { getLocalTimeStamp } from "../../utilities/time";
 import { safeJsonParse } from "../../utilities/js-utils";
-import { createSharedModelDocumentManager, ISharedModelDocumentManager } from "../tools/shared-model-document-manager";
+import { Tree } from "../history/tree";
+import { addTreeMonitor } from "../history/tree-monitor";
+import { ISharedModelDocumentManager, SharedModelDocumentManager } from "../tools/shared-model-document-manager";
 import { ITileEnvironment } from "../tools/tool-types";
+import { TreeManager } from "../history/tree-manager";
 import { ESupportType } from "../curriculum/support";
 
 interface IMatchPropertiesOptions {
   isTeacherDocument?: boolean;
 }
 
-export const DocumentModel = types
-  .model("Document", {
+export const DocumentModel = Tree.named("Document")
+  .props({
     uid: types.string,
     type: DocumentTypeEnum,
     key: types.string,
@@ -44,9 +47,13 @@ export const DocumentModel = types
     supportContentType: types.maybe(types.enumeration<ESupportType>("SupportType", Object.values(ESupportType)))
   })
   .volatile(self => ({
-    queryPromise: undefined as Promise<UseQueryResult<IGetNetworkDocumentResponse>> | undefined
+    queryPromise: undefined as Promise<UseQueryResult<IGetNetworkDocumentResponse>> | undefined,
   }))
   .views(self => ({
+    // This is needed for the tree monitor and manager
+    get treeId() {
+      return self.key;
+    },
     get isProblem() {
       return (self.type === ProblemDocument) || (self.type === ProblemPublication);
     },
@@ -275,11 +282,18 @@ export const DocumentModel = types
     }
   }))
   .actions(self => ({
+    afterCreate() {
+      // TODO: it would be nice to unify this with the code in createDocumentModel
+      const manager = TreeManager.create({document: {}, undoStore: {}});
+      self.treeManagerAPI = manager;
+      addTreeMonitor(self, manager, false);
+      manager.putTree(self.treeId, self);
+    },
     undoLastAction() {
-      alert("This is the undo action");
+      self.treeManagerAPI?.undoManager.undo();
     },
     redoLastAction() {
-      alert("This is the redo action");
+      self.treeManagerAPI?.undoManager.redo();
     },
   }));
 
@@ -306,7 +320,7 @@ export interface IDocumentEnvironment {
  * @returns
  */
 export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
-  const sharedModelManager = createSharedModelDocumentManager();
+  const sharedModelManager = new SharedModelDocumentManager();
   const fullEnvironment: ITileEnvironment & {documentEnv: IDocumentEnvironment} = {
     sharedModelManager,
     documentEnv: {}

@@ -1,7 +1,8 @@
-import { autorun } from "mobx";
+import { action, autorun, makeObservable } from "mobx";
 import { addDisposer, applySnapshot, getType, isAlive, types, getRoot, 
   isStateTreeNode, SnapshotOut, Instance, getParent, destroy, hasParent,
-  getSnapshot } from "mobx-state-tree";
+  getSnapshot, addMiddleware,
+  createActionTrackingMiddleware2} from "mobx-state-tree";
 
 describe("mst", () => {
   it("snapshotProcessor unexpectedly modifies the base type", () => {
@@ -298,5 +299,183 @@ describe("mst", () => {
     expect(() => {
       todoList.addTodo(todo1);
     }).toThrow();
+  });
+
+  test("instance values in snapshots are not copied", () => {
+    const Todo = types.model({
+      name: types.string
+    });
+    const TodoList = types.model({
+      todos: types.array(Todo)
+    });
+
+    const todo = Todo.create({name: "todo1"});
+    const todoList = TodoList.create({todos: [todo]});
+    expect(todoList.todos.at(0)).toBe(todo);
+  });
+
+  /**
+   * This tests how createActionTrackingMiddleware2 handles cases of actions
+   * calling calling other actions. It tests 4 cases: 
+   *
+   * Case 0: an action directly calls another action on a child model
+   *
+   * The next 3 cases all use a manager object to call the action on the child
+   * model
+   * - Case 1: the manager is implemented as a MST object in another tree, and
+   *   the function called on the manager is a MST action.
+   * - Case 2: the manager is implemented as a MobX object, and the function
+   *   called on the manager is a MobX action.
+   * - Case 3: the manager is implemented as a plain JS object
+   *
+   * The goal of the test is to see if the child model action calls are grouped
+   * with the initial action.  This grouping is important for recording a single
+   * history entry. 
+   */
+  test("createActionTrackingMiddleware2 loses track of the parent action " + 
+       "when there is an intermediate MST action in a different tree", () => {
+    const Todo = types.model({
+      name: types.string
+    })
+    .actions(self => ({
+      setName(name: string) { self.name = name; }
+    }));
+
+    const TodoList = types.model({
+      todos: types.array(Todo)
+    })
+    .actions(self => ({
+      updateAllTodos(_manager?: any) {
+        if (!_manager) {
+          // Case: 0
+          self.todos.forEach(todo => {
+            todo.setName("new list name");
+          });  
+        } else {
+          // We'll pass 3 different managers here
+          // 1. a MSTTodoManager which is in a different MST tree
+          // 2. a MobxTodoManager which is MobX not MST
+          // 3. a plainManager which is just a JS object
+          _manager.managerUpdateAllTodos(self);
+        }
+      }
+    }));
+
+    // Main MST Tree
+    const todoList = TodoList.create({
+      todos: [
+        { name: "todo 1" },
+        { name: "todo 2" }
+      ]
+    });
+
+    interface ICallRecord {action: string, topLevelId: number}
+
+    const started : ICallRecord[] = [];
+    const finished : ICallRecord[] = [];
+    let topLevelCallId = 0;
+    const middleware = createActionTrackingMiddleware2({
+      filter(call) {
+        return true;
+      },
+      onStart(call) {
+        // This is the key feature we are testing. The middleware can add an
+        // `env` to the call object, and then when a nested action is called,
+        // the action tracking framework passes the nested action the `env` from
+        // the parent action. I'm not sure if it is the same object or a copy.
+        // However, what I've found is that when there is an intermediate action
+        // in a different tree between the parent and the nested action, then
+        // the parent `env` is not passed. This is "Case 1".
+        if (!call.env) {
+          call.env = { id: topLevelCallId };
+          topLevelCallId++;
+        }
+        started.push({action: call.name, topLevelId: call.env.id});
+      },
+      onFinish(call) {   
+        finished.push({action: call.name, topLevelId: call.env.id});     
+      }
+    });
+    const disposer = addMiddleware(todoList, middleware, true);
+
+    function resetTrackingProperties() {
+      started.length = 0;
+      finished.length = 0;
+      topLevelCallId = 0;
+    }
+
+    // This is what we generally want: 3 calls all with the same topLevelId
+    const singleTopLevelOnStartedCalls: ICallRecord[] = [
+      {action: "updateAllTodos", topLevelId: 0},
+      {action: "setName", topLevelId: 0},
+      {action: "setName", topLevelId: 0}
+    ];
+
+    // This is what we generally don't want: 3 calls all with different
+    // topLevelIds
+    const multipleTopLevelOnStartedCalls: ICallRecord[] = [
+      {action: "updateAllTodos", topLevelId: 0},
+      {action: "setName", topLevelId: 1},
+      {action: "setName", topLevelId: 2}
+    ];
+
+    // Case 0: Run an action in the Main Tree that does not pass through a
+    // manager.
+    todoList.updateAllTodos();
+    expect(started).toEqual(singleTopLevelOnStartedCalls);
+    resetTrackingProperties();
+
+    // Case 1: Run an action in the Main Tree that passes through the secondary tree.
+    // This is the case that does what we don't want. The action tracking middleware
+    // creates 3 separate environment objects which so it is recording this as 3 
+    // different top level action calls
+    const MSTTodoManager = types.model({
+    })
+    .actions(self => ({
+      managerUpdateAllTodos(list: Instance<typeof TodoList>) {
+        list.todos.forEach(todo => {
+          todo.setName("new manager name");
+        });
+      }
+    }));
+    const mstManager = MSTTodoManager.create();    
+    todoList.updateAllTodos(mstManager);
+    expect(started).toEqual(multipleTopLevelOnStartedCalls);
+    resetTrackingProperties();
+
+    // Case 2: Run an action in the Main Tree that uses a MobX manager It could
+    // still use observability, but because it isn't MST it doesn't mess up the
+    // middleware
+    class MobXTodoManager {
+      constructor() {
+        makeObservable(this, {
+          managerUpdateAllTodos: action
+        });
+      }
+      
+      managerUpdateAllTodos(list: Instance<typeof TodoList>) {
+        list.todos.forEach(todo => {
+          todo.setName("new manager name");
+        });
+      }
+    }
+    const mobxManager = new MobXTodoManager();
+    todoList.updateAllTodos(mobxManager);
+    expect(started).toEqual(singleTopLevelOnStartedCalls);
+    resetTrackingProperties();
+
+    // Case 3: Run an action in the Main Tree that use a plain JS Manager
+    const plainManager = {
+      managerUpdateAllTodos(list: Instance<typeof TodoList>) {
+        list.todos.forEach(todo => {
+          todo.setName("new manager name");
+        });
+      }
+    };    
+    todoList.updateAllTodos(plainManager);
+    expect(started).toEqual(singleTopLevelOnStartedCalls);
+    resetTrackingProperties();
+
+    disposer();
   });
 });
