@@ -283,6 +283,7 @@ $node-inner-width: 140px;
         transform:rotate(0deg);
         background-image: url("../assets/icons/control/gate.svg");
         transition: all .4s;
+        border-radius: 10px 4px 4px 10px;
       }
     }
     &.has-gate.gate-active .inputs {
@@ -290,6 +291,7 @@ $node-inner-width: 140px;
         transform:rotate(180deg);
         background-color: $control-green;
         transition: all .4s;
+        border-radius: 4px 10px 10px 4px;
       }
     }
     &.data-storage {
