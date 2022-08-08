@@ -201,6 +201,7 @@ export const TreeManager = types
     }
 
     if (DEBUG_HISTORY) {
+      // eslint-disable-next-line no-console
       console.log("addTreePatchRecord", 
         { action: record.action, historyEntryId, exchangeId, 
           exchangeName: entry.activeExchanges.get(exchangeId)});

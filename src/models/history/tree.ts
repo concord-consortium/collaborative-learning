@@ -1,6 +1,6 @@
-import { types, IJsonPatch, applyPatch, resolvePath, getSnapshot, getParentOfType, flow } from "mobx-state-tree";
+import { types, IJsonPatch, applyPatch, resolvePath, getSnapshot, flow } from "mobx-state-tree";
 import { DEBUG_HISTORY } from "../../lib/debug";
-import { DocumentContentModel, DocumentContentModelType } from "../document/document-content";
+import { DocumentContentModelType } from "../document/document-content";
 import { SharedModelType } from "../tools/shared-model";
 import { ToolTileModelType } from "../tools/tool-tile";
 import { TreeManagerAPI } from "./tree-manager-api";
@@ -173,6 +173,7 @@ export const Tree = types.model("Tree", {
       // Note: the environment of the call will be undefined because the undoRecorder cleared 
       // it out before calling this function
       if (DEBUG_HISTORY) {
+        // eslint-disable-next-line no-console
         console.log(`observed changes in sharedModel: ${model.id} of tree: ${self.treeId}`, 
           {historyEntryId, action: call});
       }
