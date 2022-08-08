@@ -360,6 +360,7 @@ export const GeometryBaseContentModel = ToolContentModel
     board: types.maybe(BoardModel),
     bgImage: types.maybe(ImageModel),
     objects: types.map(types.union(CommentModel, MovableLineModel, PointModel, PolygonModel, VertexAngleModel)),
+    // Used for importing table links from legacy documents
     links: types.array(types.string)  // table tile ids
   })
   .preProcessSnapshot(snapshot => {
@@ -367,6 +368,11 @@ export const GeometryBaseContentModel = ToolContentModel
       return { ...snapshot, board: defaultBoard() };
     }
     return snapshot;
+  })
+  .postProcessSnapshot(snapshot => {
+    // Remove links from snapshot
+    const { links, ...rest } = snapshot;
+    return { ...rest };
   })
   .actions(self => ({
     replaceLinks(newLinks: string[]) {

@@ -1150,7 +1150,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       },
       // reaction/effect
       ({sharedModelManager, sharedDataSets, links /*, sharedDataSet, tileSharedModels*/}) => {
-        console.log('Trying to rehydrate links');
+        // console.log('Trying to rehydrate links');
         if (!sharedModelManager?.isReady) {
           // We aren't added to a document yet so we can't do anything yet
           return;
@@ -1162,7 +1162,7 @@ export const GeometryContentModel = GeometryBaseContentModel
           const sharedDataSet = sharedModelManager.findFirstSharedModelByType(SharedDataSet, tableId);
           if (sharedDataSet) {
             sharedModelManager.addTileSharedModel(self, sharedDataSet);
-            console.log(`Attached ${tableId}`);
+            // console.log(`Attached ${tableId}`);
           } else {
             // If the table doesn't yet have a sharedDataSet, save the id to attach this later
             remainingLinks.push(tableId);
