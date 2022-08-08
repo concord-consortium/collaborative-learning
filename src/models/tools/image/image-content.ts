@@ -1,7 +1,7 @@
 import { types, Instance, SnapshotOut } from "mobx-state-tree";
 import { exportImageTileSpec, isLegacyImageTileImport, convertLegacyImageTile } from "./image-import-export";
 import { ITileExportOptions, IDefaultContentOptions } from "../tool-content-info";
-import { setTileTitleFromContent } from "../tool-tile";
+import { getToolTileModel, setTileTitleFromContent } from "../tool-tile";
 import { toolContentModelHooks, ToolContentModel, ToolMetadataModelType } from "../tool-types";
 import { isPlaceholderImage } from "../../../utilities/image-utils";
 import placeholderImage from "../../../assets/image_placeholder.png";
@@ -30,7 +30,7 @@ export const ImageContentModel = ToolContentModel
   })
   .views(self => ({
     get title() {
-      return self.metadata.title;
+      return getToolTileModel(self)?.title;
     },
     get isUserResizable() {
       return true;
@@ -47,19 +47,23 @@ export const ImageContentModel = ToolContentModel
   }))
   .actions(self => toolContentModelHooks({
       doPostCreate(metadata: ToolMetadataModelType) {
+        // console.log(`doPostCreate`);
         self.metadata = metadata;
       },
   }))
   .actions(self => ({
     setUrl(url: string, filename?: string) {
+      // console.log(`setUrl`);
       self.url = url;
       self.filename = filename;
     },
     updateImageUrl(oldUrl: string, newUrl: string) {
+      // console.log(`updateImageUrl`);
       if (!oldUrl || !newUrl || (oldUrl === newUrl)) return;
       if (self.url === oldUrl) self.url = newUrl;
     },
     setTitle(title: string) {
+      // console.log(`setTitle`);
       setTileTitleFromContent(self, title);
     }
   }));
