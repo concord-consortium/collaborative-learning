@@ -1145,13 +1145,6 @@ export const GeometryContentModel = GeometryBaseContentModel
         const sharedDataSets = sharedModelManager?.isReady
           ? sharedModelManager.getSharedModelsByType("SharedDataSet")
           : [];
-        // const sharedDataSet = sharedModelManager?.isReady
-        //   ? sharedModelManager?.findFirstSharedModelByType(SharedDataSet, self.metadata.id)
-        //   : undefined;
-
-        // const tileSharedModels = sharedModelManager?.isReady
-        //   ? sharedModelManager?.getTileSharedModels(self)
-        //   : undefined;
 
         return { sharedModelManager, sharedDataSets, links: self.links /*, sharedDataSet, tileSharedModels*/ };
       },
@@ -1175,21 +1168,7 @@ export const GeometryContentModel = GeometryBaseContentModel
             remainingLinks.push(tableId);
           }
         });
-        self.replaceLinks(remainingLinks);// = getType(self.links).create(remainingLinks);
-        // if (sharedDataSet && tileSharedModels?.includes(sharedDataSet)) {
-        //   // The shared model has already been registered by a client, but as the
-        //   // "owner" of the data, we synchronize it with our local content.
-        //   sharedDataSet.dataSet = cloneDeep(self.dataSet);
-        // }
-        // else {
-        //   if (!sharedDataSet) {
-        //     // The document doesn't have a shared model yet
-        //     sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet: cloneDeep(self.dataSet) });
-        //   }
-
-        //   // Add the shared model to both the document and the tile
-        //   sharedModelManager.addTileSharedModel(self, sharedDataSet);
-        // }
+        self.replaceLinks(remainingLinks);
       },
       {name: "sharedModelSetup", fireImmediately: true}));
     },
