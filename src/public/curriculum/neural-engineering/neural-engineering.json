@@ -266,7 +266,6 @@
                         "<h3>Introduction to tool types</h3>",
                         "<p>Try to make a text tile in your <strong>Workspace</strong> on the right (press the menu button with the letter A on it). Write down some things you hope to learn in this Neural Engineering class.</p>",
                         "<p>Now insert an image into your workspace. You can upload using the button or you can drag images from your desktop. Describe in your workspace how you might use images to document your work.</p>",
-                        "<p>Next, make a program. This is done with the button that has two connected boxes on it. Try to make a program that adds two numbers. What are the different ways that you see the result of the program?</p>",
                         "<p>Finally, try to make a table. Fill the table in with some data, and change the column header names to something you might use for engineering design. Describe the meaning of your data in text.</p>"
                       ]
                     }
@@ -277,6 +276,135 @@
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/AllToolsToolBar-labeled.png"
+                    }
+                  },
+                  {
+                    "id": "07mebz-dv9AqiZDD",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Because these lessons are about engineering and robotics, you will also need a programming tool that can read sensor data and control outputs. In this course, the programming tool is called Dataflow, and it can be launched from the button with two connected boxes. Programs can be simple, adding or comparing two numbers, or sophisticated, with many nodes that control outputs based on inputs.</p>",
+                        "<p>Below is a sample program. Try to make one of your own that adds two numbers. What are the different ways that you see the result of the program?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "dTVQIgkPCYu1K0uR",
+                    "title": "Dataflow 1",
+                    "content": {
+                      "type": "Dataflow",
+                      "programDataRate": 100,
+                      "programZoom": {
+                        "dx": -0.62109375,
+                        "dy": -0.00390625,
+                        "scale": 1.1022920561734122
+                      },
+                      "program": {
+                      "values": {
+                        "3180": {"currentValues": {"nodeValue": -0.31}},
+                        "3183": {"currentValues": {"nodeValue": 0}},
+                        "3216": {"currentValues": {"nodeValue": -0.31}},
+                        "3218": {"currentValues": {"nodeValue": 0}}
+                      },
+                      "id": "dataflow@0.1.0",
+                      "nodes": {
+                        "3180": {
+                          "id": 3180,
+                          "name": "Generator",
+                          "x": 58.33014984178641,
+                          "y": 190.49210993319966,
+                          "inputs": {},
+                          "outputs": {
+                            "num": {
+                              "connections": {
+                                "3216-undefined-num2": {"node": 3216, "input": "num2", "data": {}}
+                              }
+                            }
+                          },
+                          "data": {
+                            "plot": false,
+                            "generatorType": "Sine",
+                            "amplitudeUnits": "",
+                            "amplitude": 1,
+                            "periodUnits": "sec",
+                            "period": 10,
+                            "inputKeys": []
+                          }
+                        },
+                        "3183": {
+                          "id": 3183,
+                          "name": "Demo Output",
+                          "x": 600.2348068059828,
+                          "y": 14.22744072778999,
+                          "inputs": {
+                            "nodeValue": {
+                              "connections": {
+                                "3216-num-undefined": {"node": 3216, "output": "num", "data": {}}
+                              }
+                            }
+                          },
+                          "outputs": {},
+                          "data": {"outputType": "Grabber", "demoOutput": 0, "inputKeys": []}
+                        },
+                        "3216": {
+                          "id": 3216,
+                          "name": "Control",
+                          "x": 354.1874913500653,
+                          "y": 95.55925193874609,
+                          "inputs": {
+                            "num1": {
+                              "connections": {
+                                "3218-num-undefined": {"node": 3218, "output": "num", "data": {}}
+                              }
+                            },
+                            "num2": {
+                              "connections": {
+                                "3180-num-undefined": {"node": 3180, "output": "num", "data": {}}
+                              }
+                            }
+                          },
+                          "outputs": {
+                            "num": {
+                              "connections": {
+                                "3183-undefined-nodeValue": {
+                                  "node": 3183,
+                                  "input": "nodeValue",
+                                  "data": {}
+                                }
+                              }
+                            }
+                          },
+                          "data": {
+                            "plot": false,
+                            "controlOperator": "Hold Current",
+                            "inputKeys": []
+                          }
+                        },
+                        "3218": {
+                          "id": 3218,
+                          "name": "Timer",
+                          "x": 54.48164622179425,
+                          "y": 22.330482559354067,
+                          "inputs": {},
+                          "outputs": {
+                            "num": {
+                              "connections": {
+                                "3216-undefined-num1": {"node": 3216, "input": "num1", "data": {}}
+                              }
+                            }
+                          },
+                          "data": {
+                            "plot": false,
+                            "timeOnUnits": "sec",
+                            "timeOn": 2,
+                            "timeOffUnits": "sec",
+                            "timeOff": 4,
+                            "inputKeys": []
+                          }
+                        }
+                      }
+                    }
                     }
                   }
                 ]
@@ -2138,146 +2266,145 @@
               "type": "labWork",
               "content": {
                 "tiles": [
-
-      {
-        "id": "vKWBej7rDSOc90FV",
-        "content": {
-          "type": "Text",
-          "format": "html",
-          "text": [
-            "<p><strong>Procedure</strong></p>",
-            "<p>1. Connect the 9V battery to the Arduino board (blue board)</p>"
-          ]
-        }
-      },
-      {
-        "id": "UycXde31wVAn6h4h",
-        "content": {
-          "type": "Image",
-          "url": "curriculum/neural-engineering/images/7.jpg",
-          "filename": "curriculum/neural-engineering/images/7.jpg"
-        }
-      },
-      {
-        "id": "hRL2PzfJH5u7ohJD",
-        "content": {
-          "type": "Text",
-          "format": "html",
-          "text": [
-            "<p>2. Connect the smartphone data cable (the green cable) to the Muscle SpikerShield green connector. Make sure you connect the end of the green cable labeled as “SpikerBox” to the Muscle SpikerShield. The other end (labeled as “Smartphone”) should be connected to your smartphone (via the provided adapter).</p>"
-          ]
-        }
-      },
-      {
-        "id": "qa3UEw13ZY0pNRWJ",
-        "content": {
-          "type": "Image",
-          "url": "curriculum/neural-engineering/images/8.jpg",
-          "filename": "curriculum/neural-engineering/images/8.jpg"
-        }
-      },
-      {
-        "id": "AIaXlh5Jt6mO1ko4",
-        "content": {
-          "type": "Text",
-          "format": "html",
-          "text": [
-            "<p>3. Decide who is going to be the study participant (you can take turns). Place two electrode stickers on the participant’s forearm close to each other and another one on the participant’s elbow (this is the reference electrode)</p>"
-          ]
-        }
-      },
-      {
-        "id": "2hcaL4NZmS-uOSsY",
-        "content": {
-          "type": "Image",
-          "url": "curriculum/neural-engineering/images/9.jpg",
-          "filename": "curriculum/neural-engineering/images/9.jpg"
-        }
-      },
-      {
-        "id": "Xf1VSQp7lP4Hckuo",
-        "content": {
-          "type": "Text",
-          "format": "html",
-          "text": [
-            "<p>4. Connect the orange muscle electrode cable (the one with the three alligators) to the Muscle SpikerShield orange connector:</p>"
-          ]
-        }
-      },
-      {
-        "id": "hGLe_2Xa-uVW069o",
-        "content": {
-          "type": "Image",
-          "url": "curriculum/neural-engineering/images/10.jpg",
-          "filename": "curriculum/neural-engineering/images/10.jpg"
-        }
-      },
-      {
-        "id": "ubWseUhinUcs1rwC",
-        "content": {
-          "type": "Text",
-          "format": "html",
-          "text": [
-            "<p>5. Connect the two red alligators to the electrodes on your arm. The black cable should be connected to the reference electrode:</p>"
-          ]
-        }
-      },
-      {
-        "id": "2r6t0lkN0WkyPi2i",
-        "content": {
-          "type": "Image",
-          "url": "curriculum/neural-engineering/images/11.jpg",
-          "filename": "curriculum/neural-engineering/images/11.jpg"
-        }
-      },
-      [
-        {
-          "id": "Mo17A3If3LtSFuUG",
-          "content": {
-            "type": "Text",
-            "format": "html",
-            "text": [
-              "<p>6. Open the Backyard Brains Spike Recorder App on your phone. Your screen should look similar to this:</p>",
-              "<p> </p>",
-              "<p>Pinch to change the time scale (horizontal axis) to 1.5 - 2 seconds. You can also change the y-axis scale if needed.  </p>",
-              "<p> </p>",
-              "<p>Hold the hand grip and squeeze it (or just make a fist if you don’t have a hand grip). How does the display changes when you use your arm muscles?</p>"
-            ]
-          }
-        },
-        {
-          "id": "nHcjmx6S8pJ4HydI",
-          "content": {
-            "type": "Image",
-            "url": "curriculum/neural-engineering/images/12.jpg",
-            "filename": "curriculum/neural-engineering/images/12.jpg"
-          }
-        }
-      ],
-      {
-        "id": "7NWg1JOva6MjHeUC",
-        "content": {
-          "type": "Text",
-          "format": "html",
-          "text": [
-            "<p>Now, it is time to reflect on the activity as a group! Use this space to discuss: </p>",
-            "<ul><li>How does muscle activity vary between one’s dominant vs. non-dominant hand? </li><li>How does muscle activity vary between different muscles (e.g., forearm vs. forehead muscles)?</li><li>How does muscle activity vary between <a href='https://www.google.com/url?q=https://www.bbc.co.uk/bitesize/guides/zct2hv4/revision/2%23:~:text%3DIn%2520an%2520antagonistic%2520muscle%2520pair,lengthening%2520is%2520called%2520the%2520antagonist.&amp;sa=D&amp;source=docs&amp;ust=1656487065696941&amp;usg=AOvVaw3V0NsK35zz-BzcJKzU5B1m'>agonist and antagonist muscles</a>? </li><li>What happens when we activate our hand muscles for an extended period of time using a <a href='https://backyardbrains.com/experiments/rateoffatigue'>hand gripper</a>?</li><li>Can you predict who’s going to win an arm-wrestling contest based on the contestants’ muscle activity?</li></ul>",
-            "<p>Please document your observations in your team&#x27;s EMG journal."
-          ]
-        }
-      },
-      {
-        "id": "WuopQlrpwqmWttBz",
-        "content": {
-          "type": "Table",
-          "name": "EMG Journal",
-          "columns": [
-            {"name":"Question","values":["How does muscle activity vary between one’s dominant vs. non-dominant hand? ","How does muscle activity vary between different muscles (e.g., forearm vs. forehead muscles)?","How does muscle activity vary between agonist and antagonist muscles? (see here)","What happens when one activates their arm muscles for an extended period of time using a hand gripper (see here)?","Can you predict who would win an arm wrestling contest based on the contestants’ muscle activity?","Additional questions I have:"]},
-            {"name":"Claim (a statement in response to question, supported by evidence)","values":["Compared to the dominant hand, the non-dominant hand’s muscle activity….","","","","",""]},
-            {"name":"Evidence (may insert screen shots or images of illustrations)","values":["","","","","",""]}
-          ]
-        }
-      }
+                  {
+                    "id": "vKWBej7rDSOc90FV",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Procedure</strong></p>",
+                        "<p>1. Connect the 9V battery to the Arduino board (blue board)</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "UycXde31wVAn6h4h",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/7.jpg",
+                      "filename": "curriculum/neural-engineering/images/7.jpg"
+                    }
+                  },
+                  {
+                    "id": "hRL2PzfJH5u7ohJD",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>2. Connect the smartphone data cable (the green cable) to the Muscle SpikerShield green connector. Make sure you connect the end of the green cable labeled as “SpikerBox” to the Muscle SpikerShield. The other end (labeled as “Smartphone”) should be connected to your smartphone (via the provided adapter).</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "qa3UEw13ZY0pNRWJ",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/8.jpg",
+                      "filename": "curriculum/neural-engineering/images/8.jpg"
+                    }
+                  },
+                  {
+                    "id": "AIaXlh5Jt6mO1ko4",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>3. Decide who is going to be the study participant (you can take turns). Place two electrode stickers on the participant’s forearm close to each other and another one on the participant’s elbow (this is the reference electrode)</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "2hcaL4NZmS-uOSsY",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/9.jpg",
+                      "filename": "curriculum/neural-engineering/images/9.jpg"
+                    }
+                  },
+                  {
+                    "id": "Xf1VSQp7lP4Hckuo",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>4. Connect the orange muscle electrode cable (the one with the three alligators) to the Muscle SpikerShield orange connector:</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "hGLe_2Xa-uVW069o",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/10.jpg",
+                      "filename": "curriculum/neural-engineering/images/10.jpg"
+                    }
+                  },
+                  {
+                    "id": "ubWseUhinUcs1rwC",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>5. Connect the two red alligators to the electrodes on your arm. The black cable should be connected to the reference electrode:</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "2r6t0lkN0WkyPi2i",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/11.jpg",
+                      "filename": "curriculum/neural-engineering/images/11.jpg"
+                    }
+                  },
+                  [
+                    {
+                      "id": "Mo17A3If3LtSFuUG",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>6. Open the Backyard Brains Spike Recorder App on your phone. Your screen should look similar to this:</p>",
+                          "<p> </p>",
+                          "<p>Pinch to change the time scale (horizontal axis) to 1.5 - 2 seconds. You can also change the y-axis scale if needed.  </p>",
+                          "<p> </p>",
+                          "<p>Hold the hand grip and squeeze it (or just make a fist if you don’t have a hand grip). How does the display changes when you use your arm muscles?</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "nHcjmx6S8pJ4HydI",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/neural-engineering/images/12.jpg",
+                        "filename": "curriculum/neural-engineering/images/12.jpg"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "7NWg1JOva6MjHeUC",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Now, it is time to reflect on the activity as a group! Use this space to discuss: </p>",
+                        "<ul><li>How does muscle activity vary between one’s dominant vs. non-dominant hand? </li><li>How does muscle activity vary between different muscles (e.g., forearm vs. forehead muscles)?</li><li>How does muscle activity vary between <a href='https://www.google.com/url?q=https://www.bbc.co.uk/bitesize/guides/zct2hv4/revision/2%23:~:text%3DIn%2520an%2520antagonistic%2520muscle%2520pair,lengthening%2520is%2520called%2520the%2520antagonist.&amp;sa=D&amp;source=docs&amp;ust=1656487065696941&amp;usg=AOvVaw3V0NsK35zz-BzcJKzU5B1m'>agonist and antagonist muscles</a>? </li><li>What happens when we activate our hand muscles for an extended period of time using a <a href='https://backyardbrains.com/experiments/rateoffatigue'>hand gripper</a>?</li><li>Can you predict who’s going to win an arm-wrestling contest based on the contestants’ muscle activity?</li></ul>",
+                        "<p>Please document your observations in your team&#x27;s EMG journal."
+                      ]
+                    }
+                  },
+                  {
+                    "id": "WuopQlrpwqmWttBz",
+                    "content": {
+                      "type": "Table",
+                      "name": "EMG Journal",
+                      "columns": [
+                        {"name":"Question","values":["How does muscle activity vary between one’s dominant vs. non-dominant hand? ","How does muscle activity vary between different muscles (e.g., forearm vs. forehead muscles)?","How does muscle activity vary between agonist and antagonist muscles? (see here)","What happens when one activates their arm muscles for an extended period of time using a hand gripper (see here)?","Can you predict who would win an arm wrestling contest based on the contestants’ muscle activity?","Additional questions I have:"]},
+                        {"name":"Claim (a statement in response to question, supported by evidence)","values":["Compared to the dominant hand, the non-dominant hand’s muscle activity….","","","","",""]},
+                        {"name":"Evidence (may insert screen shots or images of illustrations)","values":["","","","","",""]}
+                      ]
+                    }
+                  }
                 ]
               }
             },
@@ -3062,7 +3189,7 @@
         {
           "description": "Lesson 2.4",
           "ordinal": 4,
-          "title": "Lesson 2.4 - Putting it all together",
+          "title": "Lesson 2.4 - Empowering Lives with Technology",
           "subtitle": "",
           "disabled": [],
           "sections": 
@@ -3071,7 +3198,38 @@
               "type": "intro",
               "content": {
                 "tiles": [
-
+                  {
+                    "id": "-qO6jxoPXchdg7Ai",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Prosthetics can help people live full productive lives. Robotically enhanced prosthetics can mimic organic limbs even more closely and sometimes can make prosthetics functional for people who could not benefit from non-interactive technology.</p>",
+                        "<p>In this lesson you will have the opportunity to design robotic solutions for one of several end users. Each case has different features to it. You should consider the specific issues to solve and brainstorm solutions with your group. </p>",
+                        "<p>Review the engineering design process document linked below. You will embark on the first step – empathize – by researching the experiences and challenges of someone who has a sensory or motor condition in the following lab section. Your group should select from among the case studies in the Lab. </p>",
+                        "<p>Resource:</p>",
+                        "<p>Design Thinking <a href='https://citl.illinois.edu/paradigms/design-thinking'>protocol</a></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "F9VOi053V8cis-la",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Design Journal Template</strong></p>",
+                        "<p>Who is your team helping?</p>",
+                        "<p></p>",
+                        "<p>What are the challenges experienced by this person?</p>",
+                        "<p></p>",
+                        "<p>Why is it important to help reduce these challenges?</p>",
+                        "<p></p>",
+                        "<p>How can we apply what we have learned throughout the unit to help this person?</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  }
                 ]
               }
             },
@@ -3079,7 +3237,70 @@
               "type": "labWork",
               "content": {
                 "tiles": [
-
+                  {
+                    "id": "RhyzEuq9rqtjPydo",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Mrs. Marcus</h3>",
+                        "<p>Maria Marcus is 84 years old. When she was younger she worked as a pharmacist. This required routine use of her hands as she measured and mixed medicines that were able to restore the health of community members. Mrs. Marcus is enjoying her retirement, with ample time to bake for her nine grandchildren and maintain her flower garden with her husband of 60 years. </p>",
+                        "<p>Recently Mrs. Marcus is unsettled to find that arthritis in her hands has resulted in something her primary care physician, Dr. Romero, has diagnosed as hypoesthesia. Hypoesthesia is reduced or complete loss of sensation. In Mrs. Marcus’s case, Dr. Romero believes that inflammation of joints in Mrs. Marcus’s hands are pressing against the surrounding nerves, resulting in numbness. This is unsafe, especially given Mrs. Marcus is unable to sense temperature and touch in her fingers when she bakes.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "ITUp8NUCpJG8zE9Y",
+                    "title": "Mrs. Marcus",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/mrsMarcus.jpg",
+                      "filename": "curriculum/neural-engineering/images/mrsMarcus.jpg"
+                    }
+                  },
+                  {
+                    "id": "rUXHJ7YT2UXPSg2i",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Tilly</h3>",
+                        "<p>Tilly Lockey lost her hands at fifteen months of age due to a bacterial infection. After eleven years without hands, Tilley received a pair of bionic hands. Now sixteen years old, she is now able to open doors and cupboards without the help of her parents or sister. Tilly feels empowered by this new-found independence. She also likes to design the plastic outer cases of her bionic arms, which has become an important part of expressing who she is.</p>",
+                        "<p>As you noticed in the video, Tilly is happy to be able to more easily apply makeup with her bionic hands. However, Tilly finds it difficult to do some of the eye makeup techniques she found on Instagram. Tilly would like to be able to apply false lashes on her own, but her current bionic hands are unable to pick up and hold delicate objects.  </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "V0DLxYNeA1KCSV2m",
+                    "title": "Tilly applies makeup with bionic hands",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/Tilly.jpg",
+                      "filename": "curriculum/neural-engineering/images/Tilly.jpg"
+                    }
+                  },
+                  {
+                    "id": "D38O0DQDL5zRxNQc",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Mr. Johnson</h3>",
+                        "<p>Isaiah Johnson is 72 years old. When he was younger he worked as a social worker at the local Veterans Administration Medical Center. Mr. Johnson found it very rewarding to help people navigate challenges. Now that he is retired, Mr. Johnson has been spending more time volunteering with his wife Janelle at the community food garden they had initiated just before the birth of their second child.</p>",
+                        "<p></p>",
+                        "<p>Shortly after he was drafted to serve in the Vietnam War, at nineteen years of age, Mr. Johnson lost his sense of sight during an explosion in which shrapnel struck his face. Mr. Johnson’s guide dog, a golden labrador named Rex, helps Mr. Johnson safely stroll across the city’s sidewalks and streets. Recently Mrs. Johnson had hip surgery, and Mr. Johnson came to realize he is not as independent as he thought. As Mrs. Johnson recuperated on a rented electric hospital bed in the living room, Mr. Johnson prepared stove top and microwave meals. As he began to prepare Mrs. Johnson’s favorite pot roast, he realized that it would be unsafe to use the oven because he would not sense where the hot cast iron skillet was located. This frustrated Mr. Johnson, who has taken pride in his ability to live life fully despite eye damage.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "mvYy_ChPbPzZ1sq0",
+                    "title": "Mr. Johnson and his seeing eye dog",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/mrJohnson.jpg",
+                      "filename": "curriculum/neural-engineering/images/mrJohnson.jpg"
+                    }
+                  }
                 ]
               }
             },
@@ -3087,7 +3308,27 @@
               "type": "reflection",
               "content": {
                 "tiles": [
-
+                  {
+                    "id": "UbyaMg3Omhhb5kV1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>After you have completed illustrated and annotated models of your proposed products, publish your workspace to the class to share the design, including the design considerations that ensure Mrs.Marcus/Tilly would find the product </p>",
+                        "<ul><li>easy to use, </li><li>safe, </li><li>useful, and </li><li>comfortable. </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "-stXSYhQihn8cigqsaffs",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Open your KWL Journal and add a row to the table to document your thoughts.</p>"
+                      ]
+                    }
+                  }
                 ]
               }
             }

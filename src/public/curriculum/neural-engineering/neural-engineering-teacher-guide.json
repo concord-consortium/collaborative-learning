@@ -701,8 +701,27 @@
                   "type": "overview",
                   "content": {
                     "tiles": [
-                  
-                    
+                      {
+                        "id": "M3FIWTuuCHr34gFp",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p>Using knowledge and skills gained in the module, students will co-design a new device to improve the lives of specific users. Each student team will prepare an illustration of the proposed device. </p>",
+                            "<p>Materials:</p>",
+                            "<p>Problem scenarios: </p>",
+                            "<ul><li>Help Mrs. Marcus</li><li>Help Tilly</li><li>Help Mr. Johnson</li></ul>",
+                            "<p></p>",
+                            "<p>Whiteboards </p>",
+                            "<p>Dry erase markers</p>",
+                            "<p>Journal Template (in the lesson)</p>",
+                            "<p>Informative design thinking process graphic</p>",
+                            "<p></p>",
+                            "<p><strong>Learning Objective</strong></p>",
+                            "<p>Students will design and evaluate engineering solutions that can help improve the lives of patients with sensory-motor impairments (i.e., a human-machine interface). </p>"
+                          ]
+                        }
+                      }
                     ]
                   },
                   "supports": [ ]
@@ -711,7 +730,40 @@
                   "type": "teach",
                   "content": {
                     "tiles": [
-  
+                      {
+                        "id": "g-FwP1kTr4AaQzHP",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><em>10 min</em></p>",
+                            "<p>Review the engineering design process, highlighting the value for use. Outline the design thinking process using an informative graphic as reference. Inform students that they will embark on the first step – empathize – by researching the experiences and challenges of someone who has a sensory or motor condition. </p>",
+                            "<p><em>5 min</em></p>",
+                            "<p>Option 1:</p>",
+                            "<p>Present the following two cases to students:</p>",
+                            "<p>Help Mrs. Marcus</p>",
+                            "<p>Help Tilly</p>",
+                            "<p>Survey students as to which person they would like to help and organize teams of three or four students based on their responses (try to have two teams per case)</p>",
+                            "<p>Option 2:</p>",
+                            "<p>Ask each pre-established group to review the two cases and decide if they would like to help Mrs. Marcus or Tilly. </p>",
+                            "<p><em>15 min</em></p>",
+                            "<p>Ask each team to prepare a response to the following questions (these questions should help orient students towards designing a solution) and record their responses in a journal template.</p>",
+                            "<ol><li>What are the challenges experienced by Mrs. Marcus’s/Tilly?</li><li>Why is it important to help reduce these challenges?</li><li>How can we apply what we have learned throughout the unit to help this individual?</li><p></p></ol>",
+                            "<p><em>10 min</em></p>",
+                            "<p>After each team has prepared a response, ask teams who are working on helping the same person (Tilly or Mrs. Marcus) to exchange their ideas and summarize common ideas on paper. Ask one representative working on helping Tilly to share the collective ideas with the entire class. Then ask one representative working on helping Mrs. Marcus to do the same.</p>",
+                            "<p><em>30-40 min</em></p>",
+                            "<p>Direct each team to use their knowledge of body systems and technology to propose a product that can help Mrs. Marcus/Tilly circumvent the challenge described in the case. Direct students to sketch the product on whiteboards/chart paper, with annotations.  </p>",
+                            "<p></p>",
+                            "<p>As students work on the proposed products, circulate between teams and prompt students’ empathic design thinking by asking the following questions:</p>",
+                            "<p>Will Mrs. Marcus/Tilly find the product safe?</p>",
+                            "<p>Will Mrs. Marcus/Tilly find the product easy to use?</p>",
+                            "<p>Will Mrs. Marcus/Tilly find the product comfortable?</p>",
+                            "<p>Will Mrs. Marcus/Tilly find the product useful?</p>",
+                            "<p>20 min</p>",
+                            "<p>After students have completed their illustrated and annotated models of the proposed products, ask each team to share their design, including the design considerations made to ensure that Mrs.Marcus/Tilly would find the product easy to use, safe, useful, and comfortable. This can be accomplished much like a professional science meeting poster session – one team member can represent the work to others, while the rest of the team visits other teams’ posters to gain insight and provide feedback (ask students to write down questions and comments on sticky notes and attach them to the poster).</p>"
+                          ]
+                        }
+                      }
                     ]
                   },
                   "supports": [ ]
