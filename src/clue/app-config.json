@@ -239,7 +239,8 @@
   },
   "units": {
     "brain": {
-      "content": "curriculum/neural-engineering/neural-engineering.json"
+      "content": "curriculum/neural-engineering/neural-engineering.json",
+      "guide": "curriculum/neural-engineering/neural-engineering-teacher-guide.json"
     },
     "bio": {
       "content": "curriculum/bio4community/bio4community.json",
