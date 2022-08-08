@@ -95,8 +95,15 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
     // prepare string to display on node
     const resultString = isNaN(result) ? kEmptyValueString : `${roundNodeValue(result)}`;
     const cResultString = isNaN(cResult) ? kEmptyValueString : `${roundNodeValue(cResult)}`;
+    const n1String = isNaN(n1) ? kEmptyValueString : `${roundNodeValue(n1)}`;
     const n2String = isNaN(n2) ? kEmptyValueString : `${roundNodeValue(n2)}`;
-    const resultSentence = `1 ? ${cResultString} : ${n2String} ⇒ ${resultString}`;
+
+    const resultSentence = n1 === 1 ?
+      `1 ? ${cResultString} : ${n2String} ⇒ ${resultString}` :
+      `0 ? ${n2String} : ${cResultString} ⇒ ${resultString}`;
+      // alternative ui: rather than make any !== 1 appear as 0, show actual input
+      // `${n1} ? ${cResultString} : ${n2String} ⇒ ${resultString}` :
+      // `${n1} ? ${n2String} : ${cResultString} ⇒ ${resultString}`;
 
     // operate rete
     if (this.editor) {

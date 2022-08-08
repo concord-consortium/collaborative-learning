@@ -280,13 +280,16 @@ $node-inner-width: 140px;
     }
     &.has-gate .inputs {
       div:first-of-type .socket {
-        transform:rotate(180deg);
+        transform:rotate(0deg);
         background-image: url("../assets/icons/control/gate.svg");
+        transition: all .4s;
       }
     }
     &.has-gate.gate-active .inputs {
       div:first-of-type .socket {
+        transform:rotate(180deg);
         background-color: $control-green;
+        transition: all .4s;
       }
     }
     &.data-storage {
