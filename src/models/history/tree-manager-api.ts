@@ -46,11 +46,11 @@ export interface TreeManagerAPI {
      * - time traveling the document back to a previous state
      *
      * When the user does an undo the manager will send the inversePatches of
-     * the the recorded tree patch records that are grouped by the
+     * the recorded tree patch records that are grouped by the
      * historyEntryId to the tree with `applyPatchesFromManager`.
      *
      * When time traveling is done, the manager will collect all the history
-     * events from the current time to the desired time. It will then combine
+     * events from the current time to the desired time. It will then
      * group all of the patches in these events by tree and send them all to the
      * tree at the same time. This is done with `applyPatchesFromManager`.
      *
@@ -118,7 +118,7 @@ export interface TreeManagerAPI {
      * This starts a new "exchange" in the history entry. These exchanges are
      * used by the manager to know when the history entry is complete. If there
      * are any open exchanges, then the history entry is still recording.
-     * `addHistoryEntry` automatically starts a exchange, so it isn't necessary
+     * `addHistoryEntry` automatically starts an exchange, so it isn't necessary
      * to call `startExchange` before `addHistoryEntry`.  
      * When the manager calls the tree with `applyPatchesFromManager`, the
      * manager starts an exchange. 

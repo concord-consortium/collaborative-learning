@@ -135,7 +135,7 @@ export const TreeManager = types
 }))
 .actions((self) => ({
   updateSharedModel(historyEntryId: string, exchangeId: string, sourceTreeId: string, snapshot: any) {
-    // Right now this is can be called in 2 cases:
+    // Right now this can be called in 2 cases:
     // 1. when a user changes something in a tree which then updates the
     //    tree's view of the shared model, so the tree wants all copies of
     //    this shared model to be updated.
@@ -194,7 +194,7 @@ export const TreeManager = types
       throw new Error(`The entry was already marked complete ${ json({historyEntryId, exchangeId})}`);
     }
 
-    // The tree patch record will be sent even if there all no patches.
+    // The tree patch record will be sent even if there are no patches.
     // This is how the tree tells the manager that this exchangeId is closed.
     if (treePatchRecord.patches.length > 0) {
       entry.records.push(treePatchRecord);
@@ -216,7 +216,7 @@ export const TreeManager = types
     // behavior that takes a while, should its place in the stack be at
     // the beginning or end of these changes?
     //
-    // If this this is ending the last exchange and there are no patches, 
+    // If this is ending the last exchange and there are no patches, 
     // endExchange will remove this entry from the document.history. 
     // This should make the entry not alive, so it won't be added to the 
     // undoStore.
@@ -247,7 +247,7 @@ export const TreeManager = types
     // apply the patches to all trees
 
     // iterate document.history This code groups all of the patches for a
-    // particular tree into one array. This is batching is done
+    // particular tree into one array. This batching is done
     // for performance.
     //
     // However, this single array of changes might be a problem for large

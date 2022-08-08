@@ -46,7 +46,7 @@ export interface TreeAPI {
 
     /**
      * This is called by the manager to do an undo or redo or replay history
-     * events. This is how the manager sends the tree the patches that is
+     * events. This is how the manager sends the tree the patches that it
      * should apply. These are patches that the tree previously sent to the
      * manager with `addTreePatchRecord`. If the tree did this right, it
      * should only include patches that are modifying the tree's state, it

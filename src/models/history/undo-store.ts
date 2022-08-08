@@ -146,7 +146,7 @@ export const UndoStore = types
     // operations for this. That way if the was an error applying the patch, then
     // the whole set of changes would be aborted. We do not currently take this 
     // approach because it is harder to support when we have multiple trees. 
-    // Each tree would have to have to tell the tree manager if it succeeded or
+    // Each tree would have to tell the tree manager if it succeeded or
     // failed to apply the patches. And then if one of them failed all of the trees 
     // that succeeded would have to be reverted by the tree manager.
     undo() {
@@ -159,7 +159,7 @@ export const UndoStore = types
       // should wait for it.
       //
       // TODO: we aren't actually calling this as an action and we
-      // aren't waiting for it finish before returning
+      // aren't waiting for it to finish before returning
       applyPatchesToTrees(entryToUndo, HistoryOperation.Undo);
 
       self.undoIdx--;
@@ -174,7 +174,7 @@ export const UndoStore = types
       // should wait for it.
       //
       // TODO: we aren't actually calling this as an action and we
-      // aren't waiting for it finish before returning
+      // aren't waiting for it to finish before returning
       //
       applyPatchesToTrees(entryToRedo, HistoryOperation.Redo);
 

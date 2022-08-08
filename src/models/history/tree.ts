@@ -171,7 +171,7 @@ export const Tree = types.model("Tree", {
       const model = resolvePath(self, sharedModelPath);
 
       // Note: the environment of the call will be undefined because the undoRecorder cleared 
-      // it out before it calling this function
+      // it out before calling this function
       if (DEBUG_HISTORY) {
         console.log(`observed changes in sharedModel: ${model.id} of tree: ${self.treeId}`, 
           {historyEntryId, action: call});
