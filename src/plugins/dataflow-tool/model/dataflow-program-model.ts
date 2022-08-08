@@ -24,7 +24,7 @@ const postProcessSocketsSnapshotForRete = (snapshot: Record<string, DataflowSock
   }
   return processedSockets;
 };
-  
+
 export const SocketModel = types
   .model("Socket", {
     connections: types.map(ConnectionModel)
@@ -77,12 +77,19 @@ const DataflowNodeDataModel = types.
     // Transform
     transformOperator: types.maybe(types.string),
 
+    // Control
+    controlOperator: types.maybe(types.string),
+
     // Relay
     relayList: types.maybe(types.string),
 
     // Demo Output
     outputType: types.maybe(types.string),
     demoOutput: types.maybe(types.number),
+
+    // Live Output
+    liveOutputType: types.maybe(types.string),
+    liveOutput: types.maybe(types.number),
 
     // Data Storage
     datasetName: types.maybe(types.string),

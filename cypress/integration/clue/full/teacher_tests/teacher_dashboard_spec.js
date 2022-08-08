@@ -30,6 +30,7 @@ context("Teacher Space", () => {
         cy.launchReport('https://learn.concord.org/portal/offerings/40557/external_report/25');
         cy.waitForLoad();
 
+        dashboard.switchView("Dashboard");
         dashboard.switchWorkView('Published');
         dashboard.clearAllStarsFromPublishedWork();
         dashboard.switchWorkView('Current');
@@ -125,12 +126,14 @@ context("Teacher Space", () => {
                     let className = tempClass.className;
                     let initClassName = initClass.className;
 
+                    dashboard.switchView("Dashboard");
                     dashboard.getClassDropdown().should('contain', initClassName);
                     dashboard.getGroups().should('have.length',6);
                     dashboard.getClassDropdown().click({ force: true }).then(() => {
                         dashboard.getClassList().contains(className).click({ force: true });
                         // cy.wait(1000)
                         cy.waitForLoad();
+                        dashboard.switchView("Dashboard");
                     });
                     dashboard.getClassDropdown().should('contain', className);
                     dashboard.getGroups().should('have.length', 1);

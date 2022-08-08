@@ -2,16 +2,19 @@ import { NodeChannelInfo } from "src/plugins/dataflow-tool/model/utilities/node"
 
 export class SerialDevice {
   value: string;
+  outValue: number;
   localBuffer: string;
   private port: SerialPort | null;
   connectChangeStamp: number | null;
   lastConnectMessage: string | null;
   deviceInfo: SerialPortInfo | null;
   serialNodesCount: number;
-  //localPorts: any;
+  writer: WritableStreamDefaultWriter;
+  serialModalShown: boolean | null;
 
   constructor() {
     this.value = "0";
+    this.outValue = 0;
     this.localBuffer = "";
 
     navigator.serial?.addEventListener("connect", (e) => {
@@ -31,19 +34,7 @@ export class SerialDevice {
     this.connectChangeStamp = timeStamp;
     this.lastConnectMessage = status;
     localStorage.setItem("last-connect-message", status);
-    // if (this.connectChangeStamp !== undefined){
-    //   if (this.lastConnectMessage == "disconnect"){
-    //     alert("Device has been physically disconnected."")
-    //   }
-    //   if (this.lastConnectMessage == "connect"){
-    //     alert("Device has been plugged in.  Click the yellow button to establish connection.")
-    //   }
-    // }
   }
-
-  // public async discover(){
-  //   this.localPorts = await navigator.serial.getPorts();
-  // }
 
   public hasPort(){
     const portHere = this.port !== undefined;
@@ -52,9 +43,15 @@ export class SerialDevice {
   }
 
   public async requestAndSetPort(){
+    // Filter any local devices so we only see arduino uno and compatible in choices
+    const filters = [
+      { usbVendorId: 0x2341, usbProductId: 0x0043 },
+      { usbVendorId: 0x2341, usbProductId: 0x0001 }
+    ];
+
     try {
-        this.port = await navigator.serial.requestPort();
-        this.deviceInfo = await this.port.getInfo();
+      this.port = await navigator.serial.requestPort({ filters });
+      this.deviceInfo = await this.port.getInfo();
     }
     catch (error) {
       console.error("error requesting port: ", error);
@@ -62,8 +59,19 @@ export class SerialDevice {
   }
 
   public async handleStream(channels: Array<NodeChannelInfo>){
-    await this.port?.open({ baudRate: 9600 }).catch((e: any) => console.error(e));
-    while (this.port?.readable) {
+    //our port cannot be null if we are to open streams
+    if (!this.port){
+      return;
+    }
+    await this.port.open({ baudRate: 9600 }).catch((e: any) => console.error(e));
+
+    // set up writer
+    const textEncoder = new TextEncoderStream();
+    textEncoder.readable.pipeTo(this.port.writable as any);
+    this.writer = textEncoder.writable.getWriter();
+
+    // listen for serial data coming up from Arduino
+    while (this.port.readable) {
       const textDecoder = new TextDecoderStream();
       this.port.readable.pipeTo(textDecoder.writable);
       const streamReader = textDecoder.readable.getReader();
@@ -106,5 +114,26 @@ export class SerialDevice {
         targetChannel.value = parseInt(numValue, 10);
       }
     } while (match);
+  }
+
+  public writeToOut(n:number){
+    // number visible to user represents "percent closed"
+    // so we need to map x percent to an angle in range where
+    // 100% (closed) is 120deg, and 0% (open) is 180deg
+    const percent = n / 100;
+    let openTo = Math.round(180 - (percent * 60));
+
+    if (openTo > 160){
+      openTo = 180;
+    }
+
+    if (openTo < 130){
+      openTo = 120;
+    }
+
+    // Arduino readBytesUntil() expects newline as delimiter
+    if(this.hasPort()){
+      this.writer.write(`${openTo.toString()}\n`);
+    }
   }
 }

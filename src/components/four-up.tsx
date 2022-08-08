@@ -1,8 +1,8 @@
-import { debounce } from "lodash";
+import classNames from "classnames";
+import { clone, debounce } from "lodash";
 import { observer, inject } from "mobx-react";
 import React from "react";
 import ResizeObserver from "resize-observer-polyfill";
-
 import { BaseComponent, IBaseProps } from "./base";
 import { CanvasComponent } from "./document/canvas";
 import { DocumentViewMode } from "./document/document";
@@ -12,6 +12,7 @@ import { CellPositions, FourUpGridCellModelType, FourUpGridModel, FourUpGridMode
       } from "../models/view/four-up-grid";
 import { FourUpOverlayComponent } from "./four-up-overlay";
 import { Logger, LogEventName } from "../lib/logger";
+import FourUpIcon from "../clue/assets/icons/4-up-icon.svg";
 
 import "./four-up.sass";
 
@@ -23,11 +24,14 @@ interface IProps extends IBaseProps {
   documentViewMode?: DocumentViewMode;
   selectedSectionId?: string | null;
   viaTeacherDashboard?: boolean;
+  viaStudentGroupView?: boolean
+  groupViewContext?: string | null;
   setFocusedGroupUser?: (focusedGroupUser?: GroupUserModelType) => void;
+  onToggleContext?: (context: string | null, selectedGroupUser: GroupUserModelType | undefined) => void;
 }
 
 interface IState {
-  toggledContext: string | null;
+  toggledContextMap: Record<string, string | null>
 }
 
 interface FourUpUser {
@@ -55,7 +59,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     super(props);
 
     this.state = {
-      toggledContext: null
+      toggledContextMap: {}
     };
 
     // use local grid model
@@ -80,9 +84,14 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     this.resizeObserver.disconnect();
   }
 
+  private getToggledContext () {
+    const {toggledContextMap} = this.state;
+   return (this.props.groupId && toggledContextMap[this.props.groupId]) ?? null;
+  }
+
   public render() {
-    const {documentViewMode} = this.props;
-    const {toggledContext} = this.state;
+    const {documentViewMode, viaStudentGroupView} = this.props;
+    const toggledContext = this.getToggledContext();
     const {width, height} = this.grid;
     const nwCell = this.grid.cells[CellPositions.NorthWest];
     const neCell = this.grid.cells[CellPositions.NorthEast];
@@ -175,9 +184,21 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       const isToggled = context === toggledContext;
       if (groupUser) {
         const { name: fullName, initials } = groupUser.user;
-        const className = `member${isToggled ? " member-centered" : ""}`;
+        const className = classNames("member", {"member-centered": isToggled && !viaStudentGroupView},
+                                     {"in-student-group-view": isToggled && viaStudentGroupView});
         const name = isToggled ? fullName : initials;
-        return <div className={className} title={fullName}>{name}</div>;
+        return (
+          isToggled && viaStudentGroupView
+            ? <>
+                <div className={className} title={fullName}>{name}</div>
+                <button className="restore-fourup-button" onClick={()=>this.handleOverlayClicked(context)}>
+                  <FourUpIcon /> 4-Up
+                </button>
+              </>
+            : <div className={className} title={fullName} onClick={()=>this.handleOverlayClicked(context)}>
+                  {name}
+              </div>
+        );
       }
     };
 
@@ -262,7 +283,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       return user && user.doc;
     };
 
-    const {toggledContext} = this.state;
+    const toggledContext = this.getToggledContext();
     if (toggledContext) {
       return (
         <FourUpOverlayComponent
@@ -381,18 +402,22 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleOverlayClicked = (context: string) => {
-    const { groupId, setFocusedGroupUser } = this.props;
+    const { groupId, setFocusedGroupUser, onToggleContext } = this.props;
     const groupUser = this.userByContext[context];
-    const toggleContext = (state: IState) => context === state.toggledContext ? null : context;
-    const toggledContext = toggleContext(this.state);
-    this.setState(state => ({ toggledContext: toggleContext(state) }));
+    const toggledContext = this.getToggledContext();
+    this.setState(state => {
+      if (groupId) {
+        const current = state.toggledContextMap[groupId] ?? null;
+        state.toggledContextMap[groupId] = current ? null : context;
+      }
+      return { toggledContextMap: clone(state.toggledContextMap) };
+     });
     if (groupUser) {
       const event = toggledContext ? LogEventName.DASHBOARD_SELECT_STUDENT : LogEventName.DASHBOARD_DESELECT_STUDENT;
       Logger.log(event, {groupId, studentId: groupUser.user.id});
     }
-    if (setFocusedGroupUser) {
-      const focusedGroupUser = toggledContext ? groupUser?.user : undefined;
-      setFocusedGroupUser(focusedGroupUser);
-    }
+    const focusedGroupUser = toggledContext ? groupUser?.user : undefined;
+    setFocusedGroupUser && setFocusedGroupUser(focusedGroupUser);
+    onToggleContext && onToggleContext(context, groupUser?.user);
   };
 }

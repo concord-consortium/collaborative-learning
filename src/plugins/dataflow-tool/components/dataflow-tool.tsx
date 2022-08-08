@@ -12,9 +12,13 @@ import { DocumentContentModel } from "../../../models/document/document-content"
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { ITileExportOptions } from "../../../models/tools/tool-content-info";
 import { IToolTileProps } from "../../../components/tools/tool-tile";
-
-import "./dataflow-tool.sass";
+import { EditableTileTitle } from "../../../components/tools/editable-tile-title";
 import { DataflowContentModelType } from "../model/dataflow-content";
+import { measureText } from "../../../components/tools/hooks/use-measure-text";
+import { defaultTileTitleFont } from "../../../components/constants";
+import { ToolTitleArea } from "../../../components/tools/tool-title-area";
+
+import "./dataflow-tool.scss";
 
 interface IProps extends IToolTileProps{
   model: ToolTileModelType;
@@ -22,16 +26,11 @@ interface IProps extends IToolTileProps{
   height?: number;
 }
 
-interface IState {
-}
-
 @inject("stores")
 @observer
-export default class DataflowToolComponent extends BaseComponent<IProps, IState> {
+export default class DataflowToolComponent extends BaseComponent<IProps> {
 
   public static tileHandlesSelection = true;
-
-  public state: IState = {};
 
   public render() {
     const { model, readOnly, height } = this.props;
@@ -41,46 +40,58 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
       programEndTime, programDataRate, programZoom } = this.getContent();
     const showOriginalProgramButton = !!this.getOriginalProgramDocument();
     return (
-      <div className={classes}>
-        <SizeMe monitorHeight={true}>
-          {({ size }: SizeMeProps) => {
-            return (
-              <DataflowProgram
-                modelId={model.id}
-                readOnly={readOnly}
-                documentProperties={this.getDocumentProperties()}
-                program={program}
-                onProgramChange={this.handleProgramChange}
-                onShowOriginalProgram={showOriginalProgramButton ? this.handleShowOriginalProgram : undefined}
-                onStartProgram={this.handleStartProgram}
-                programRunId={programRunId}
-                programIsRunning={programIsRunning}
-                onCheckProgramRunState={this.handleCheckProgramRunState}
-                onSetProgramStartTime={this.handleSetProgramStartTime}
-                programStartTime={programStartTime}
-                onSetProgramEndTime={this.handleSetProgramEndTime}
-                programEndTime={programEndTime}
-                onSetProgramStartEndTime={this.handleSetProgramStartEndTime}
-                programDataRate={programDataRate}
-                onProgramDataRateChange={this.handleProgramDataRateChange}
-                programZoom={programZoom}
-                onZoomChange={this.handleProgramZoomChange}
-                size={size}
-                tileHeight={height}
-              />
-            );
-          }}
-        </SizeMe>
-      </div>
+      <>
+        <ToolTitleArea>{this.renderTitle()}</ToolTitleArea>
+        <div className={classes}>
+          <SizeMe monitorHeight={true}>
+            {({ size }: SizeMeProps) => {
+              return (
+                <DataflowProgram
+                  modelId={model.id}
+                  readOnly={readOnly}
+                  documentProperties={this.getDocumentProperties()}
+                  program={program}
+                  onProgramChange={this.handleProgramChange}
+                  onShowOriginalProgram={showOriginalProgramButton ? this.handleShowOriginalProgram : undefined}
+                  onStartProgram={this.handleStartProgram}
+                  programRunId={programRunId}
+                  programIsRunning={programIsRunning}
+                  onCheckProgramRunState={this.handleCheckProgramRunState}
+                  onSetProgramStartTime={this.handleSetProgramStartTime}
+                  programStartTime={programStartTime}
+                  onSetProgramEndTime={this.handleSetProgramEndTime}
+                  programEndTime={programEndTime}
+                  onSetProgramStartEndTime={this.handleSetProgramStartEndTime}
+                  programDataRate={programDataRate}
+                  onProgramDataRateChange={this.handleProgramDataRateChange}
+                  programZoom={programZoom}
+                  onZoomChange={this.handleProgramZoomChange}
+                  size={size}
+                  tileHeight={height}
+                />
+              );
+            }}
+          </SizeMe>
+        </div>
+      </>
     );
   }
 
   public componentDidMount() {
     this.props.onRegisterToolApi({
+      getTitle: () => {
+        return this.getTitle();
+      },
       exportContentAsTileJson: (options?: ITileExportOptions) => {
         return this.getContent().exportJson(options);
       }
     });
+
+    if (this.getTitle() === '') {
+      const { model: { id }, onRequestUniqueTitle } = this.props;
+      const title = onRequestUniqueTitle(id);
+      title && this.getContent().setTitle(title);
+    }
   }
 
   private getDocument() {
@@ -91,6 +102,30 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IState>
   private getDocumentProperties() {
     const document = this.getDocument();
     return document && document.properties.toJSON();
+  }
+
+  private handleTitleChange = (title?: string) => {
+    title && this.getContent().setTitle(title);
+  };
+
+  private renderTitle() {
+    const size = {width: null, height: null};
+    const { readOnly, scale } = this.props;
+    return (
+      <EditableTileTitle
+        key="dataflow-title"
+        size={size}
+        scale={scale}
+        getTitle={this.getTitle.bind(this)}
+        readOnly={readOnly}
+        measureText={(text) => measureText(text, defaultTileTitleFont)}
+        onEndEdit={this.handleTitleChange}
+      />
+    );
+  }
+
+  private getTitle() {
+    return this.getContent().title || "";
   }
 
   private switchToDocument(document: DocumentModelType) {   // FIXME: This will be different in tile format

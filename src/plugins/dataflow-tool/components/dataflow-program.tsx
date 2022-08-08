@@ -17,10 +17,12 @@ import { DataflowReteNodeFactory } from "../nodes/factories/dataflow-rete-node-f
 import { NumberReteNodeFactory } from "../nodes/factories/number-rete-node-factory";
 import { MathReteNodeFactory } from "../nodes/factories/math-rete-node-factory";
 import { TransformReteNodeFactory } from "../nodes/factories/transform-rete-node-factory";
+import { ControlReteNodeFactory } from "../nodes/factories/control-rete-node-factory";
 import { LogicReteNodeFactory } from "../nodes/factories/logic-rete-node-factory";
 import { SensorReteNodeFactory } from "../nodes/factories/sensor-rete-node-factory";
 import { RelayReteNodeFactory } from "../nodes/factories/relay-rete-node-factory";
 import { DemoOutputReteNodeFactory } from "../nodes/factories/demo-output-rete-node-factory";
+import { LiveOutputReteNodeFactory } from "../nodes/factories/live-output-rete-node-factory";
 import { GeneratorReteNodeFactory } from "../nodes/factories/generator-rete-node-factory";
 import { TimerReteNodeFactory } from "../nodes/factories/timer-rete-node-factory";
 import { DataStorageReteNodeFactory } from "../nodes/factories/data-storage-rete-node-factory";
@@ -188,7 +190,19 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             isDataStorageDisabled={this.state.disableDataStorage}
             disabled={readOnly || !this.isReady()}
           /> }
-          <div className="editor-graph-container" style={this.getEditorStyle()}>
+          <div
+            className="editor-graph-container"
+            style={this.getEditorStyle()}
+            onDragOver={event => {
+              event.preventDefault();
+              event.dataTransfer.dropEffect = "copy";
+            }}
+            onDrop={event => {
+              event.preventDefault();
+              const nodeType = event.dataTransfer.getData("text/plain");
+              console.log(`Adding ${nodeType}`);
+            }}
+          >
             <div
               className={editorClass}
               ref={(elt) => this.editorDomElement = elt}
@@ -297,10 +311,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.components = [new NumberReteNodeFactory(numSocket),
       new MathReteNodeFactory(numSocket),
       new TransformReteNodeFactory(numSocket),
+      new ControlReteNodeFactory(numSocket),
       new LogicReteNodeFactory(numSocket),
       new SensorReteNodeFactory(numSocket),
       new RelayReteNodeFactory(numSocket),
       new DemoOutputReteNodeFactory(numSocket),
+      new LiveOutputReteNodeFactory(numSocket),
       new GeneratorReteNodeFactory(numSocket),
       new TimerReteNodeFactory(numSocket),
       new DataStorageReteNodeFactory(numSocket)];
@@ -633,6 +649,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const hasRelay = this.hasRelay();
     const hasDataStorage = this.hasDataStorage();
     const hasDemoOutput = this.hasDemoOutput();
+    const hasLiveOutput = this.hasLiveOutput();
     let hasValidRelay = false;
     let hasValidDataStorage = false;
     if (hasRelay || hasDataStorage) {
@@ -657,12 +674,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         }
       });
     }
-    if (!hasRelay && !hasDataStorage && !hasDemoOutput) {
+    if (!hasRelay && !hasDataStorage && !hasDemoOutput && !hasLiveOutput) {
       ui.alert(
-        "Program must contain a Relay, Demo Output, or Data Storage block before it can be run.", "No Program Output"
+        "Program must contain a Relay, Demo Output, Live Output, \
+        or Data Storage block before it can be run.", "No Program Output"
       );
       return false;
-    } else if (!hasValidRelay && !hasValidDataStorage && !hasDemoOutput) {
+    } else if (!hasValidRelay && !hasValidDataStorage && !hasDemoOutput && !hasLiveOutput ) {
       const relayMessage = hasRelay && !hasValidRelay
                             ? "Relay blocks need a valid selected relay and valid input before the program can be run. "
                             : "";
@@ -727,6 +745,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
     this.checkActiveRelaysAndRunProgram();
   };
+
   private checkDevicesAndRunProgram = () => {
     const missingDevices = this.hasValidInputNodes();
     if (missingDevices.length) {
@@ -810,6 +829,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     let hasValidData = false;
     let hasValidRelay = false;
     let hasDemoOutput = false;
+    let hasLiveOutput = false;
     this.programEditor.nodes.forEach((n: Node) => {
       if (n.name === "Sensor" && n.data.sensor && !n.data.virtual) {
         const chInfo = this.channels.find(ci => ci.channelId === n.data.sensor);
@@ -844,6 +864,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         datasetName = programTitle;
       } else if (n.name === "Demo Output") {
         hasDemoOutput = true;
+        datasetName = programTitle;
+      } else if (n.name === "Live Output") {
+        hasLiveOutput = true;
         datasetName = programTitle;
       }
     });
@@ -886,7 +909,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                 startTime: programStartTime,
                 endTime: programEndTime,
                 hasData: hasValidData,
-                hasRelay: hasValidRelay || hasDemoOutput
+                hasRelay: hasValidRelay || hasDemoOutput || hasLiveOutput
               });
 
     return programData;
@@ -968,9 +991,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
 
     if (this.stores.serialDevice.hasPort()){
-      // TODO
-      // this.stores.serialDevice.reader.cancel();
-      // etc to gracefully close connection
+      // TODO - if necessary
+      // https://web.dev/serial/#close-port
     }
   };
 
@@ -1017,6 +1039,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     return this.getNodeCount("Demo Output") > 0;
   }
 
+  private hasLiveOutput(){
+    return this.getNodeCount("Live Output") > 0;
+  }
+
   private isValidRelay(id: string) {
     // placeholder for more complete validation
     return true;
@@ -1039,6 +1065,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                       this.updateNodeChannelInfo(n);
                       this.updateNodeSensorValue(n);
                     },
+            "Live Output": (n: Node) => {
+              this.sendDataToSerialDevice(n);
+            },
             Relay: this.updateNodeChannelInfo
           };
 
@@ -1083,9 +1112,20 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private countSerialDataNodes(nodes: Node[]){
     // implementing with a "count" of 1 or 0 in case we need to count nodes in future
     let serialNodesCt = 0;
+
+    //sensor will need serial once these particular sensors are chosen
     nodes.forEach((n) => {
       if(n.data.sensor === "emg" || n.data.sensor === "fsr"){
         serialNodesCt++;
+      }
+
+      //live output block will alert need for serial
+      // only after connection to another node is made
+      // this allows user to drag a block out and work on program before connecting
+      if (n.name === "Live Output"){
+        if(n.inputs.entries().next().value[1].connections.length > 0){
+          serialNodesCt++;
+        }
       }
     });
     // constraining all counts to 1 or 0 for now
@@ -1094,10 +1134,44 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     } else {
       this.stores.serialDevice.setSerialNodesCount(0);
     }
+
+    if (serialNodesCt > 0 && !this.stores.serialDevice.hasPort()){
+      this.postSerialModal();
+    }
+  }
+
+  private sendDataToSerialDevice(n: Node){
+    if (isFinite(n.data.nodeValue as number)){
+      this.stores.serialDevice.writeToOut(n.data.nodeValue as number);
+    }
+  }
+
+  private postSerialModal(){
+    const lastMsg = localStorage.getItem('last-connect-message');
+
+    let alertMessage = "";
+    const btnMsg = "Click the ⚡️ button on the upper left, then choose the device at the prompt.";
+
+    // no physical connection
+    if (lastMsg !== "connect" && this.stores.serialDevice.serialNodesCount > 0){
+      alertMessage += `1. Connect the arduino to your computer.  2.${btnMsg}`;
+    }
+
+    // physical connection has been made but user action needed
+    if (lastMsg === "connect"
+        && !this.stores.serialDevice.hasPort()
+        && this.stores.serialDevice.serialNodesCount > 0
+    ){
+      alertMessage += btnMsg;
+    }
+
+    if (!this.stores.serialDevice.serialModalShown){
+      this.stores.ui.alert(alertMessage, "Program Requires Connection to External Device");
+      this.stores.serialDevice.serialModalShown = true;
+    }
   }
 
   private updateNodeChannelInfo = (n: Node) => {
-
     if (this.channels.length > 0 ){
       this.channels.filter(c => c.usesSerial).forEach((ch) => {
         this.passSerialStateToChannel(this.stores.serialDevice, ch);

@@ -39,10 +39,11 @@
 
     .member
       position: absolute
-      font-size: 10px
+      font-size: 12px
       color: $charcoal-dark-3
-      padding: $half-padding
+      padding: 8px
       opacity: .75
+      cursor: pointer
 
     .member-centered
       font-size: 14px
@@ -52,6 +53,37 @@
       right: 20% !important
       bottom: 0 !important
       left: 20% !important
+
+    .in-student-group-view
+      font-size: 14px
+      text-align: center
+      border-radius: 0 !important
+      top: -34px !important
+      height: 28px !important
+      left: auto !important
+      right: 80px !important
+      padding: 5px
+
+    .restore-fourup-button
+        position: absolute
+        top: -34px
+        right: 5px
+        width: 68px
+        height: 26px
+        padding: 0 5px 0 0
+        display: flex
+        align-items: center
+        justify-content: space-between
+        flex-direction: row
+        border-radius: 5px
+        border: solid 1.5px $charcoal-light-1
+        background-color: $charcoal-light-6
+        &:hover
+          background-color: $charcoal-light-1
+        &:active
+          background-color: $charcoal-dark-1
+          color: white
+          border-color: white
 
     .member:hover
       opacity: 1

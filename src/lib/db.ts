@@ -88,6 +88,7 @@ export interface OpenDocumentOptions {
   properties?: IDocumentProperties;
   groupUserConnections?: Record<string, unknown>;
   originDoc?: string;
+  pubVersion?: number;
 }
 
 export class DB {
@@ -432,6 +433,8 @@ export class DB {
     if (!content) {
       throw new Error("Could not publish the specified document because its content is not available.");
     }
+    let pubCount = documentModel.getNumericProperty("pubCount");
+    documentModel.setNumericProperty("pubCount", ++pubCount);
     return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
       this.createDocument({ type: ProblemPublication, content }).then(({document, metadata}) => {
         const publicationRef = this.firebase.ref(this.firebase.getProblemPublicationsPath(user)).push();
@@ -451,6 +454,7 @@ export class DB {
           },
           documentKey: document.self.documentKey,
           userId: user.id,
+          pubVersion: pubCount,
           ...groupProps
         };
 
@@ -471,6 +475,8 @@ export class DB {
       throw new Error("Could not publish the specified document because its content is not available.");
     }
     const publicationType = documentModel.type + "Publication" as DBDocumentType;
+    let pubCount = documentModel.getNumericProperty("pubCount");
+    documentModel.setNumericProperty("pubCount", ++pubCount);
     return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
       this.createDocument({ type: publicationType, content }).then(({document, metadata}) => {
         const publicationPath = publicationType === "personalPublication"
@@ -486,9 +492,9 @@ export class DB {
           uid: user.id,
           title: documentModel.title || "",
           properties: documentModel.copyProperties(),
-          originDoc: documentModel.key
+          originDoc: documentModel.key,
+          pubVersion: pubCount,
         };
-
         publicationRef.set(publication)
           .then(() => {
             Logger.logDocumentEvent(LogEventName.PUBLISH_DOCUMENT, documentModel);
@@ -504,6 +510,8 @@ export class DB {
     const { problemPath, user } = this.stores;
     const { offeringId: resource_link_id, activityUrl: resource_url = "" } = user;
     const content = documentModel.content?.publish();
+    let pubCount = documentModel.getNumericProperty("pubCount");
+    documentModel.setNumericProperty("pubCount", ++pubCount);
     if (!content) {
       throw new Error("Could not publish the specified document because its content is not available.");
     }
@@ -517,13 +525,14 @@ export class DB {
       originDocType: documentModel.type,
       content,
       resource_link_id,
-      resource_url
+      resource_url,
+      pubVersion: pubCount,
     });
   }
 
   public openDocument(options: OpenDocumentOptions) {
     const { documents } = this.stores;
-    const {documentKey, type, title, properties, userId, groupId, visibility, originDoc} = options;
+    const {documentKey, type, title, properties, userId, groupId, visibility, originDoc, pubVersion} = options;
     return new Promise<DocumentModelType>((resolve, reject) => {
       const {user} = this.stores;
       const documentPath = this.firebase.getUserDocumentPath(user, documentKey, userId);
@@ -548,7 +557,7 @@ export class DB {
                         `document '${documentKey}' of type '${type}' for user '${userId}'`;
             console.warn(msg);
             return createDocumentModel({
-                                  type, title, properties, groupId, visibility, uid: userId, originDoc,
+                                  type, title, properties, groupId, visibility, uid: userId, originDoc, pubVersion,
                                   key: documentKey, createdAt: metadata.createdAt, content: {}, changeCount: 0 });
           }
 
@@ -557,7 +566,7 @@ export class DB {
             return createDocumentModel({
               type,
               title,
-              properties,
+              properties: { ...properties, ...metadata.properties },
               groupId,
               visibility,
               uid: userId,
@@ -565,7 +574,8 @@ export class DB {
               key: document.self.documentKey,
               createdAt: metadata.createdAt,
               content: content ? content : {},
-              changeCount: document.changeCount
+              changeCount: document.changeCount,
+              pubVersion
             });
           } catch (e) {
             const msg = "Could not open " +
@@ -686,7 +696,7 @@ export class DB {
       if (this.stores.appMode !== "qa") {
         return reject("db#clear is only available in qa mode");
       }
-      
+
       if (level === "all") {
         return reject("clearing 'all' is handled by clearFirebaseAnonQAUser");
       }
@@ -744,15 +754,15 @@ export class DB {
 
   // handles published personal documents and published learning logs
   public createDocumentModelFromOtherPublication(publication: DBOtherPublication, type: OtherPublicationType) {
-    const {title, properties, uid, originDoc, self: {documentKey}} = publication;
+    const {title, properties, uid, originDoc, self: {documentKey}, pubVersion} = publication;
+
     const group = this.stores.groups.groupForUser(uid);
     const groupId = group && group.id;
-    return this.openDocument({type, userId: uid, documentKey, groupId, title, properties, originDoc});
+    return this.openDocument({type, userId: uid, documentKey, groupId, title, properties, originDoc, pubVersion});
   }
 
   public createDocumentFromPublication(publication: DBPublication) {
-    const {groupId, groupUserConnections, userId, documentKey} = publication;
-
+    const {groupId, groupUserConnections, userId, documentKey, pubVersion} = publication;
     // groupUserConnections returns as an array and must be converted back to a map
     const groupUserConnectionsMap = Object.keys(groupUserConnections || [])
       .reduce((allUsers, groupUserId) => {
@@ -769,6 +779,7 @@ export class DB {
       groupId,
       visibility: "public",
       groupUserConnections: groupUserConnectionsMap,
+      pubVersion
     });
   }
 

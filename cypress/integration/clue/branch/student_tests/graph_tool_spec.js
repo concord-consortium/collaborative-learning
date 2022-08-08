@@ -18,11 +18,11 @@ context('Graph Tool', function() {
     before(function(){
         const queryParams = `${Cypress.config("queryParams")}`;
         cy.clearQAData('all');
-    
+
         cy.visit(queryParams);
         cy.waitForLoad();
     });
-    
+
     context('Test graph tool functionalities', function(){
         describe('adding points and polygons to a graph', function(){
             it('will add a point to the origin', function(){
@@ -54,10 +54,10 @@ context('Graph Tool', function() {
                 graphToolTile.getGraphPolygon().should('exist');
             });
         });
-    
+
         describe('restore points to canvas', function(){
             it('will verify restore of point at origin', function(){
-                primaryWorkspace.getResizePanelDivider().click();
+                primaryWorkspace.openResourceTab();
                 resourcePanel.openPrimaryWorkspaceTab("my-work");
                 cy.openDocumentWithTitle('my-work','workspaces', problemDoc);
                 graphToolTile.getGraphPointCoordinates().should('contain', '(0, 0)');
@@ -71,7 +71,7 @@ context('Graph Tool', function() {
                 graphToolTile.getGraphPolygon().should('exist');
             });
         });
-    
+
         context('Graph Toolbar', function(){
             describe('interact with points and polygons', function(){
                 it('will select a point', function(){
@@ -97,7 +97,7 @@ context('Graph Tool', function() {
                     let x= 15, y=2;
                     let transX=(graphToolTile.transformFromCoordinate('x', x))+(8*graphUnit),
                         transY=(graphToolTile.transformFromCoordinate('y', y))+(5*graphUnit);
-    
+
                     graphToolTile.getGraphPoint().last()
                         .trigger('mousedown',{dataTransfer, force:true})
                         .trigger('mousemove',{clientX:transX, clientY:transY, dataTransfer, force:true})
@@ -106,11 +106,11 @@ context('Graph Tool', function() {
                     graphToolTile.getGraphPointCoordinates().should('contain', '(18, 2)');
                 });
                 it('will copy and paste a point', function(){ //cannot send keyboard commands to non-text fields
-    
+
                 });
                 it('will show and hide angles to a polygon', function(){
                     let numAngles=1;
-                    primaryWorkspace.getResizePanelDivider().click();
+                    primaryWorkspace.openResourceTab();
                     resourcePanel.openPrimaryWorkspaceTab("my-work");
                     // primaryWorkspace.openPrimaryWorkspaceTab("my-work");
                     cy.openDocumentWithTitle('my-work','workspaces', polyDoc);
@@ -134,7 +134,7 @@ context('Graph Tool', function() {
                     graphToolTile.selectGraphPoint(4.2,2);
                     graphToolTile.hideAngle();
                     graphToolTile.getAngleAdornment().should('not.exist');
-    
+
                     //Add the angles angle for the restore test later
                     graphToolTile.selectGraphPoint(13.2,2);
                     graphToolTile.showAngle();
@@ -143,13 +143,13 @@ context('Graph Tool', function() {
                     graphToolTile.selectGraphPoint(4.2,2);
                     graphToolTile.showAngle();
                     graphToolTile.selectGraphPoint(4.2,2);
-    
+
                 });
                 it('will drag a polygon to a new location', function(){
                     const dataTransfer = new DataTransfer;
                     const graphUnit = 18.33;
                     let x= 18, y=5;
-    
+
                     let transX=(graphToolTile.transformFromCoordinate('x', x))+(8*graphUnit),
                         transY=(graphToolTile.transformFromCoordinate('y', y))+(5*graphUnit);
                     graphToolTile.getGraphPolygon().click({force:true});
@@ -184,17 +184,18 @@ context('Graph Tool', function() {
                     graphToolTile.getGraphPoint().should('have.length',6);
                 });
                 it('will restore changes to a graph', function(){
-                    primaryWorkspace.getResizePanelDivider().click();
+                    primaryWorkspace.openResourceTab();
                     resourcePanel.openPrimaryWorkspaceTab("my-work");
                     cy.openDocumentWithTitle('my-work','workspaces', polyDoc);
                     graphToolTile.getAngleAdornment().should('exist').and('have.length',6);
                 });
             });
-    
+
             describe('delete points and polygons', function(){
                 it.skip('verify delete points with delete tool', function(){ //current behavior of text deletes the entire graph tool tile. Point selection has to be forced
                     let basePointCount = 3; // number of points already in doc2
                     cy.openDocumentWithTitle('my-work','workspaces', ptsDoc);
+                    primaryWorkspace.getResizePanelDivider().click();
                     primaryWorkspace.getResizeLeftPanelHandle().click();
                     graphToolTile.selectGraphPoint(15,2);
                     graphToolTile.deleteGraphElement();
@@ -207,6 +208,7 @@ context('Graph Tool', function() {
                     // graphToolTile.getGraphPoint().should('have.length', basePointCount-3)
                 });
                 it.skip('verify delete polygon',()=>{
+                    primaryWorkspace.getResizePanelDivider().click();
                     primaryWorkspace.getResizeRightPanelHandle().click();
                     cy.openDocumentWithTitle('my-work','workspaces', polyDoc);
                     graphToolTile.getGraphPolygon().last().click({force:true});
@@ -215,7 +217,7 @@ context('Graph Tool', function() {
                 });
                 it.skip('verify delete points alters polygon',()=>{
                     let basePointCount = 3, baseAngleCount=3; // number of points already in doc
-    
+
                     graphToolTile.getGraphPoint().should('have.length', basePointCount);
                     graphToolTile.selectGraphPoint(16, 3.5);
                     graphToolTile.getAngleAdornment().should('have.length',baseAngleCount);
@@ -230,25 +232,25 @@ context('Graph Tool', function() {
                     graphToolTile.getGraphPoint().should('have.length', basePointCount-3);
                 });
             });
-    
+
             describe.skip('movable line tests',()=>{
                 // it('verify add a movable line', function(){
                 //     canvas.createNewExtraDocumentFromFileMenu(lineDoc, "my-work");
                 //     clueCanvas.addTile('geometry');
                 //     graphToolTile.addMovableLine();
-    
+
                 // });
                 // it.skip('verify move the movable line', function () {
-    
+
                 // });
                 // it.skip('verify rotate the movable line', function () {
-    
+
                 // });
                 // it.skip('verify movable line equation edit', function () {
-    
+
                 // });
             });
         });
-    });    
+    });
 });
 

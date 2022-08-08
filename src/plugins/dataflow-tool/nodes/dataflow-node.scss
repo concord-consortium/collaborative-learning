@@ -199,7 +199,8 @@ $node-inner-width: 140px;
         border-top-color: $transform-green;
       }
     }
-    &.relay {
+    &.relay,
+    &.live-output {
       background-color: $relay-orange;
       border-color: $relay-orange-outline;
       .main-color {
@@ -249,6 +250,43 @@ $node-inner-width: 140px;
       }
       .type-options span {
         border-top-color: $light-bulb-orange;
+      }
+    }
+    &.control {
+      background-color: $control-green;
+      border-color: $control-green-outline;
+      .main-color {
+        color: $control-green;
+        border: 2px solid $control-green;
+        &:hover {
+          background-color: $control-green-outline;
+        }
+      }
+      .control-color {
+        color: $control-green-control;
+      }
+      .control-color-hoverable:hover {
+        color: $control-green-node;
+      }
+      .active {
+        background-color: $control-green-control;
+      }
+      .type-options select {
+        background-color: $control-green-outline;
+      }
+      .type-options span {
+        border-top-color: $control-green;
+      }
+    }
+    &.has-gate .inputs {
+      div:first-of-type .socket {
+        transform:rotate(180deg);
+        background-image: url("../assets/icons/control/gate.svg");
+      }
+    }
+    &.has-gate.gate-active .inputs {
+      div:first-of-type .socket {
+        background-color: $control-green;
       }
     }
     &.data-storage {
@@ -415,6 +453,9 @@ $node-inner-width: 140px;
           }
           &.demo-output {
             display: none;
+          }
+          &.live-output {
+            display:none;
           }
         }
       }
