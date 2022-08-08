@@ -618,7 +618,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         return;
       }
 
-      //If the program is way too small for the current work area, reset zoom to 1
+      // If the program is way too small for the current work area, reset zoom to 1
       // checking both to avoid flicker-inducing race condition
       if ( tooSmall && !tooBig ) {
         this.programEditor.view.area.transform = {k: 1, x: transform.x, y: transform.y};
