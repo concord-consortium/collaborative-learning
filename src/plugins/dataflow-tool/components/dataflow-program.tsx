@@ -610,17 +610,17 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const newZoom = Math.min(widthQ, heightQ);
 
       const tooSmall = rect.width < (clientWidth * .25) || rect.height < (clientHeight * .25);
-      const shouldShrink = newZoom < k && rect.right > 0 && newZoom > 0;
+      const tooBig = newZoom < k && rect.right > 0 && newZoom > 0;
 
-      if (shouldShrink) {
+      if (tooBig) {
         this.programEditor.view.area.transform = {k: newZoom, x: transform.x, y: transform.y};
         this.programEditor.view.area.update();
         return;
       }
 
       //If the program is way too small for the current work area, reset zoom to 1
-      // checking for !shouldShrink to avoid flicker-inducing race condition
-      if ( tooSmall && !shouldShrink ) {
+      // checking both to avoid flicker-inducing race condition
+      if ( tooSmall && !tooBig ) {
         this.programEditor.view.area.transform = {k: 1, x: transform.x, y: transform.y};
         this.programEditor.view.area.update();
       }
