@@ -93,10 +93,10 @@ export const NodeTypes: NodeType[] = [
   {
     name: "Live Output",
     displayName: "Live Output",
-  },
-  {
-    name: "Relay",
-    displayName: "Relay"
+  // },
+  // {
+  //   name: "Relay",
+  //   displayName: "Relay"
   }
 ];
 
