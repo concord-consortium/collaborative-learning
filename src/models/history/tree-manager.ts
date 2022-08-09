@@ -100,6 +100,7 @@ export const TreeManager = types
 
     // TODO: We could use autorun for watching this observable map instead of
     // changing the entry state here.
+
     if (entry.activeExchanges.size === 0) {
       entry.state = "complete";
 
@@ -368,5 +369,4 @@ export const TreeManager = types
   getHistoryEntry: (historyIndex: number) => {
     return self.document.history.at(historyIndex);
   }
-
 }));
