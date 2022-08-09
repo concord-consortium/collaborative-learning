@@ -8,8 +8,10 @@ import { FillColorPalette } from "./fill-color-palette";
 import {
   IFloatingToolbarProps, useFloatingToolbarLocation
 } from "../../../components/tools/hooks/use-floating-toolbar-location";
+import { ImageUploadButton } from "../../../components/tools/image/image-toolbar";
 import { IRegisterToolApiProps } from "../../../components/tools/tool-tile";
 import { DrawingContentModelType } from "../model//drawing-content";
+import { gImageMap } from "../../../models/image-map";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { useSettingFromStores } from "../../../hooks/use-stores";
 import { IPaletteState, IToolbarButtonProps, kClosedPalettesState, PaletteKey } from "../objects/drawing-object";
@@ -17,13 +19,14 @@ import { getDrawingToolButtonComponent } from "./drawing-object-manager";
 
 interface IProps extends IFloatingToolbarProps, IRegisterToolApiProps {
   model: ToolTileModelType;
+  setImageUrlToAdd: (url: string) => void;
 }
 
 const defaultButtons = ["select", "line", "vector", "rectangle", "ellipse", 
-  "stamp", "stroke-color", "fill-color", "delete"];
+  "stamp", "stroke-color", "fill-color", "image-upload", "delete"];
 
 export const ToolbarView: React.FC<IProps> = (
-              { documentContent, model, onIsEnabled, ...others }: IProps) => {
+              { documentContent, model, onIsEnabled, setImageUrlToAdd, ...others }: IProps) => {
   const drawingContent = model.content as DrawingContentModelType;
   const toolbarButtonSetting = useSettingFromStores("tools", "drawing") as unknown as string[] | undefined;
   const toolbarButtons = toolbarButtonSetting || defaultButtons;
@@ -82,6 +85,13 @@ export const ToolbarView: React.FC<IProps> = (
     clearPaletteState
   };
 
+  const uploadImage = (file: File) => {
+    gImageMap.addFileImage(file)
+      .then(image => {
+        setImageUrlToAdd(image.contentUrl || '');
+      });
+  };
+
   const getToolbarButton = (toolName: string) => {
     const ToolButton = getDrawingToolButtonComponent(toolName);
     if (ToolButton) {
@@ -95,6 +105,13 @@ export const ToolbarView: React.FC<IProps> = (
       case "fill-color":
         return <FillColorButton key="fill" settings={drawingContent.toolbarSettings}
           onClick={() => handleToggleShowFillColorPalette()} />;
+      case "image-upload":
+        return <ImageUploadButton
+          key="upload-image"
+          onUploadImageFile={file => uploadImage(file)}
+          tooltipOffset={{x: 0, y: 0}}
+          extraClasses="drawing-tool-button"
+        />;
     }
   };
 

@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { IToolTileProps } from "../../../components/tools/tool-tile";
 import { ToolbarView } from "./drawing-toolbar";
 import { DrawingLayerView } from "./drawing-layer";
@@ -9,13 +9,15 @@ import { useCurrent } from "../../../hooks/use-current";
 import { ITileExportOptions } from "../../../models/tools/tool-content-info";
 import { DrawingContentModelContext } from "./drawing-content-context";
 
-import "./drawing-tool.sass";
+import "./drawing-tool.scss";
 
 type IProps = IToolTileProps;
 
 const DrawingToolComponent: React.FC<IProps> = (props) => {
   const { documentContent, toolTile, model, readOnly, scale, onRegisterToolApi, onUnregisterToolApi } = props;
   const contentRef = useCurrent(model.content as DrawingContentModelType);
+
+  const [imageUrlToAdd, setImageUrlToAdd] = useState("");
 
   useEffect(() => {
     if (!readOnly) {
@@ -39,8 +41,9 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
                     documentContent={documentContent}
                     toolTile={toolTile}
                     scale={scale}
+                    setImageUrlToAdd={setImageUrlToAdd}
                     {...toolbarProps} />
-        <DrawingLayerView {...props} />
+        <DrawingLayerView {...props} imageUrlToAdd={imageUrlToAdd} setImageUrlToAdd={setImageUrlToAdd} />
       </div>
     </DrawingContentModelContext.Provider>
   );
