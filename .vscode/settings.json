@@ -15,13 +15,16 @@
     "democlass",
     "elems",
     "fbrtdb",
+    "iframes",
     "jsxgraph",
     "mcimage",
     "mcimages",
     "mcsupports",
     "tablelink",
+    "todos",
     "towle",
     "ulid",
+    "undoable",
     "wumps"
   ]
 }

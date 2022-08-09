@@ -190,8 +190,8 @@ describe("useDocumentSyncToFirebase hook", () => {
 
     // doesn't respond to properties change (problem documents don't have user-settable properties)
     document.setProperty("foo", "bar");
-    expect(mockRef).toHaveBeenCalledTimes(2);
-    expect(mockUpdate).toHaveBeenCalledTimes(2);
+    expect(mockRef).toHaveBeenCalledTimes(3);
+    expect(mockUpdate).toHaveBeenCalledTimes(3);
   });
 
   it("monitors planning documents", () => {
@@ -322,13 +322,13 @@ describe("useDocumentSyncToFirebase hook", () => {
       expect(spy).not.toBeCalled();
     });
 
-    // doesn't respond to properties change
+    // responds to properties change when we publish problem documents (pubCount)
     mockRef.mockClear();
     mockUpdate.mockClear();
     await jestSpyConsole("log", spy => {
       document.setProperty("foo", "bar");
-      expect(mockRef).toHaveBeenCalledTimes(0);
-      expect(mockUpdate).toHaveBeenCalledTimes(0);
+      expect(mockRef).toHaveBeenCalledTimes(1);
+      expect(mockUpdate).toHaveBeenCalledTimes(1);
       expect(spy).not.toBeCalled();
     });
 
@@ -395,7 +395,7 @@ describe("useDocumentSyncToFirebase hook", () => {
     await jestSpyConsole("log", async spy => {
       document.setProperty("foo", "bar");
       await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
-      expect(mockRef).toHaveBeenCalledWith(`${user.id}/personal/${document.key}`);
+      expect(mockRef).toHaveBeenCalledWith(`${user.id}/metadata/${document.key}/properties`);
       await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
       await waitFor(() => expect(spy).toBeCalledTimes(1));
     });
@@ -526,13 +526,13 @@ describe("useDocumentSyncToFirebase hook", () => {
       document.setProperty("foo", "bar");
       // assert initial (failed) attempt
       await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
-      expect(mockRef).toHaveBeenCalledWith(`${user.id}/personal/${document.key}`);
+      expect(mockRef).toHaveBeenCalledWith(`${user.id}/metadata/${document.key}/properties`);
       await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
       await waitFor(() => expect(spy).toBeCalledTimes(1));
       // trigger retry (successful) attempt
       jest.runAllTimers();
       await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(2));
-      expect(mockRef).toHaveBeenCalledWith(`${user.id}/personal/${document.key}`);
+      expect(mockRef).toHaveBeenCalledWith(`${user.id}/metadata/${document.key}/properties`);
       await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(2));
     });
 

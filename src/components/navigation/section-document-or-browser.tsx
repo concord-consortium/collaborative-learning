@@ -162,9 +162,6 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
             const _handleDocumentStarClick = section.showStarsForUser(user)
               ? handleDocumentStarClick
               : undefined;
-            const _handleDocumentDeleteClick = section.showDeleteForUser(user)
-              ? handleDocumentDeleteClick
-              : undefined;
             return (
               <DocumentCollectionByType
                 key={`${section.type}_${index}`}
@@ -179,7 +176,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
                 onSelectDocument={onSelectDocument || handleSelectDocument}
                 onDocumentDragStart={handleDocumentDragStart}
                 onDocumentStarClick={_handleDocumentStarClick}
-                onDocumentDeleteClick={_handleDocumentDeleteClick}
+                onDocumentDeleteClick={handleDocumentDeleteClick}
               />
             );
           })

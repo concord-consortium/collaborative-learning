@@ -1,12 +1,13 @@
 import { observer } from "mobx-react";
 import React from "react";
 import { ThumbnailDocumentItem } from "./thumbnail-document-item";
+import { useDocumentSyncToFirebase } from "../../hooks/use-document-sync-to-firebase";
 import { useFirestoreTeacher } from "../../hooks/firestore-hooks";
 import { useLastSupportViewTimestamp } from "../../hooks/use-last-support-view-timestamp";
 import { DocumentModelType } from "../../models/document/document";
 import { isPublishedType, SupportPublication } from "../../models/document/document-types";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
-import { useAppConfig, useClassStore, useProblemStore, useUserStore } from "../../hooks/use-stores";
+import { useAppConfig, useClassStore, useDBStore, useProblemStore, useUserStore } from "../../hooks/use-stores";
 import { NavTabSectionModelType } from "../../models/view/nav-tabs";
 
 import "./document-type-collection.sass";
@@ -30,12 +31,19 @@ function useDocumentCaption(document: DocumentModelType) {
   const user = useUserStore();
   const { type, uid } = document;
   const teacher = useFirestoreTeacher(uid, user.network || "");
-  if (type === SupportPublication) return document.getProperty("caption") || "Support";
-  const userName = classStore.getUserById(uid)?.displayName ||
+  if (type === SupportPublication) {
+    const caption = document.getProperty("caption") || "Support";
+    const pubVersion = document.pubVersion;
+    return pubVersion ? `${caption} v${pubVersion}` : `${caption}`;
+  }
+  const userName = classStore.getUserById(uid)?.displayName || teacher?.name ||
                     (document.isRemote ? teacher?.name : "") || "Unknown User";
   const namePrefix = document.isRemote || isPublishedType(type) ? `${userName}: ` : "";
   const dateSuffix = document.isRemote && document.createdAt
-                      ? ` (${new Date(document.createdAt).toLocaleDateString()})` : "";
+                      ? ` (${new Date(document.createdAt).toLocaleDateString()})`
+                      : isPublishedType(type)
+                          ? ` v${document.pubVersion}`
+                          : "";
   const title = getDocumentDisplayTitle(document, appConfig, problem);
   return `${namePrefix}${title}${dateSuffix}`;
 }
@@ -46,8 +54,12 @@ export const DecoratedDocumentThumbnailItem = observer(({
   onSelectDocument, onDocumentDragStart, onDocumentStarClick, onDocumentDeleteClick
 }: IProps) => {
     const user = useUserStore();
+    const dbStore = useDBStore();
     const tabName = tab.toLowerCase().replace(' ', '-');
     const caption = useDocumentCaption(sectionDocument);
+
+    // sync delete a publication to firebase
+    useDocumentSyncToFirebase(user, dbStore.firebase, sectionDocument, true);
 
     // sync user's last support view time stamp to firebase
     useLastSupportViewTimestamp(section.type === "teacher-supports");
@@ -77,7 +89,7 @@ export const DecoratedDocumentThumbnailItem = observer(({
     const _handleDocumentStarClick = section.showStarsForUser(user) && !sectionDocument.isRemote
                                       ? handleDocumentStarClick
                                       : undefined;
-    const _handleDocumentDeleteClick = section.showDeleteForUser(user)
+    const _handleDocumentDeleteClick = section.showDeleteForUser(user, sectionDocument)
                                         ? handleDocumentDeleteClick
                                         : undefined;
 

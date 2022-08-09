@@ -61,9 +61,9 @@ const RateSelectorComponent = (props: RateSelectorProps) => {
   };
   return (
     <div className="running-container">
-      <div className="datarate" title="Set Program Data Rate">
+      <div className="datarate" title="Set Program Sampling Rate">
         <div className="label-back">
-          <label className="label" htmlFor="rate-select">Data Rate</label>
+          <label className="label" htmlFor="rate-select">Sampling Rate</label>
         </div>
         <div className="datarate-options-back">
           <div className="datarate-options">

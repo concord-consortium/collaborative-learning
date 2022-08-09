@@ -39,13 +39,13 @@ import chord15 from "../../assets/grabber/chord/Cord_tilt_up_08.png";
 export const lightBulbOn = bulbOn;
 export const lightBulbOff = bulbOff;
 
-export const backyardClawFrames = [
+export const grabberFrames = [
   backyardClaw00, backyardClaw01, backyardClaw02, backyardClaw03,
   backyardClaw04, backyardClaw05, backyardClaw06, backyardClaw07
 ];
 
 export const grabberPaddle = paddle;
-export const grabberClawFrames = [
+export const advancedGrabberFrames = [
   grabber00, grabber01, grabber02, grabber03,
   grabber04, grabber05, grabber06, grabber07
 ];

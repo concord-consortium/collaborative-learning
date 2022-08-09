@@ -16,6 +16,7 @@ context('Dataflow Tool Tile', function () {
     it("renders dataflow tool tile", () => {
       clueCanvas.addTile("dataflow");
       dataflowToolTile.getDrawTile().should("exist");
+      dataflowToolTile.getTileTitle().should("exist");
     });
     describe("Number Node", () => {
       const nodeType = "number";
@@ -115,6 +116,13 @@ context('Dataflow Tool Tile', function () {
     describe("Live Output Node", () => {
       const nodeType = "live-output";
       it("can create live output node", () => {
+        dataflowToolTile.getCreateNodeButton(nodeType).click();
+        dataflowToolTile.getNode(nodeType).should("exist");
+      });
+    });
+    describe("Control Node", () => {
+      const nodeType = "control";
+      it("can create control node", () => {
         dataflowToolTile.getCreateNodeButton(nodeType).click();
         dataflowToolTile.getNode(nodeType).should("exist");
       });
